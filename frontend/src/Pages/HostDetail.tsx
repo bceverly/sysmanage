@@ -214,15 +214,19 @@ const HostDetail = () => { // NOSONAR
                platformRelease.includes('openSUSE');
     }, [host]);
 
-    // Check if host supports child hosts (virtualization)
+    // Check if host supports child hosts (virtualization).
+    // Child host management is a Professional+ feature, gated by the
+    // ``container_engine`` license module — without it the tab and its
+    // panel must not render in OSS builds.
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
+        if (!licenseModules.includes('container_engine')) return false;
         // Child hosts (VMs, containers, WSL instances) cannot have their own child hosts
         if (host.parent_host_id) return false;
         const platform = host.platform || '';
         // Windows hosts support WSL, Linux hosts support LXD/KVM, OpenBSD hosts support VMM, FreeBSD hosts support bhyve
         return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD') || platform.includes('FreeBSD');
-    }, [host]);
+    }, [host, licenseModules]);
 
     // Check if host is running Ubuntu (for Ubuntu Pro feature)
     const isUbuntu = useCallback(() => {
@@ -668,7 +672,10 @@ const HostDetail = () => { // NOSONAR
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
             { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
-            { id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') },
+            // Compliance is a Pro+ feature gated on the ``compliance_engine``
+            // module; the tab simply hides for OSS deployments rather than
+            // rendering an empty panel that 402s on every API call.
+            ...(licenseModules.includes('compliance_engine') ? [{ id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') }] : []),
             ...safePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
             { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
@@ -679,7 +686,7 @@ const HostDetail = () => { // NOSONAR
         ];
 
         return tabs;
-    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, t]);
+    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, t]);
 
     // Get tab ID for current numeric index
     const currentTabId = tabDefinitions[currentTab]?.id || 'info';
@@ -4355,7 +4362,8 @@ const HostDetail = () => { // NOSONAR
                     </Card>
                 </Grid>
 
-                {/* OpenTelemetry Status */}
+                {/* OpenTelemetry Status — Pro+ feature gated on observability_engine */}
+                {licenseModules.includes('observability_engine') && (
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
@@ -4490,8 +4498,10 @@ const HostDetail = () => { // NOSONAR
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
 
-                {/* Graylog Status */}
+                {/* Graylog Status — Pro+ feature gated on observability_engine */}
+                {licenseModules.includes('observability_engine') && (
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
@@ -4573,6 +4583,7 @@ const HostDetail = () => { // NOSONAR
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
 
                 {/* Tags */}
                 <Grid size={{ xs: 12, md: 6 }}>
@@ -4978,7 +4989,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('hostDetail.addPackage', 'Add Package')}
                                             </Button>
                                         )}
-                                        {canDeployOpenTelemetry && (
+                                        {canDeployOpenTelemetry && licenseModules.includes('observability_engine') && (
                                             <Button
                                                 variant="contained"
                                                 startIcon={openTelemetryDeploying ? <CircularProgress size={20} color="inherit" /> : <SystemUpdateAltIcon />}
@@ -4994,7 +5005,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                                             </Button>
                                         )}
-                                        {canAttachGraylog && (
+                                        {canAttachGraylog && licenseModules.includes('observability_engine') && (
                                             <Button
                                                 variant="contained"
                                                 startIcon={<SystemUpdateAltIcon />}
@@ -5229,7 +5240,7 @@ const HostDetail = () => { // NOSONAR
                                                                 {user.username}
                                                             </Typography>
                                                             <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                                {canDeploySshKey && (
+                                                                {canDeploySshKey && licenseModules.includes('secrets_engine') && (
                                                                     <Button
                                                                         size="small"
                                                                         variant="outlined"
@@ -5623,7 +5634,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('common.all', 'All')}
                                             </ToggleButton>
                                         </ToggleButtonGroup>
-                                        {canDeployCertificate && (
+                                        {canDeployCertificate && licenseModules.includes('secrets_engine') && (
                                             <Button
                                                 variant="outlined"
                                                 startIcon={<AddIcon />}
@@ -6022,8 +6033,10 @@ const HostDetail = () => { // NOSONAR
 
                             {virtualizationStatus && (
                                 <Grid container spacing={2}>
-                                    {/* WSL Card - Windows hosts */}
-                                    {host?.platform?.includes('Windows') && (
+                                    {/* WSL Card — Windows + ``container_engine``.  The Initialize / Create
+                                        buttons inside the card invoke Pro+ engine plans; without the
+                                        engine licensed, the card simply hides per Phase 10.7. */}
+                                    {host?.platform?.includes('Windows') && licenseModules.includes('container_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="wsl"
@@ -6040,8 +6053,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* LXD Card - Linux hosts */}
-                                    {host?.platform?.includes('Linux') && (
+                                    {/* LXD Card — Linux + ``container_engine``. */}
+                                    {host?.platform?.includes('Linux') && licenseModules.includes('container_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="lxd"
@@ -6057,8 +6070,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* KVM Card - Linux hosts */}
-                                    {host?.platform?.includes('Linux') && (
+                                    {/* KVM Card — Linux + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('Linux') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="kvm"
@@ -6077,8 +6090,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* VMM Card - OpenBSD hosts */}
-                                    {host?.platform?.includes('OpenBSD') && (
+                                    {/* VMM Card — OpenBSD + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('OpenBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="vmm"
@@ -6094,8 +6107,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* bhyve Card - FreeBSD hosts */}
-                                    {host?.platform?.includes('FreeBSD') && (
+                                    {/* bhyve Card — FreeBSD + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('FreeBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="bhyve"
@@ -6274,6 +6287,21 @@ const HostDetail = () => { // NOSONAR
                                                             </Box>
                                                         </TableCell>
                                                         <TableCell align="right">
+                                                            {/* Phase 10.7 fine-grained gating: per-row action buttons
+                                                                require the right Pro+ engine.  WSL/LXD lifecycles run
+                                                                through ``container_engine``; KVM/bhyve/VMM through
+                                                                ``virtualization_engine``.  The read-only row stays
+                                                                visible for OSS deployments — only the action column
+                                                                hides. */}
+                                                            {(() => {
+                                                                const requiredEngine =
+                                                                    child.child_type === 'wsl' || child.child_type === 'lxd'
+                                                                        ? 'container_engine'
+                                                                        : 'virtualization_engine';
+                                                                if (!licenseModules.includes(requiredEngine)) {
+                                                                    return null;
+                                                                }
+                                                                return (
                                                             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                                                                 {/* Start button - only show if stopped */}
                                                                 {child.status === 'stopped' && (
@@ -6336,6 +6364,8 @@ const HostDetail = () => { // NOSONAR
                                                                     {currentOperation === 'delete' ? <CircularProgress size={16} /> : <DeleteIcon fontSize="small" />}
                                                                 </IconButton>
                                                             </Box>
+                                                                );
+                                                            })()}
                                                         </TableCell>
                                                     </TableRow>
                                                     );

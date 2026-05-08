@@ -361,7 +361,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
 
     For Linux: engine emits standard cloud-init runcmd plan.
 
-    Returns True if plan was dispatched, False to fall through to legacy.
+    Returns True if plan was dispatched, False to surface a 502 to the user.
     """
     _vlog = logging.getLogger(__name__)
     virt_engine = module_loader.get_module("virtualization_engine")
@@ -374,7 +374,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
     if not vm_name or not cloud_image_url:
         _vlog.warning(
             "KVM plan path: missing vm_name=%r or cloud_image_url=%r — "
-            "falling back to legacy WS dispatch",
+            "engine path declined",
             vm_name,
             cloud_image_url,
         )
@@ -409,9 +409,9 @@ def _try_kvm_plan_based_creation(command_params, host_id):
         _enqueue_create_plan(host_id, merged_plan, command_params, 2400)
         return True
     except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
-        # Fall back to legacy WS command path on any failure
+        # Engine path declined; the caller raises 502 to surface the failure.
         _vlog.warning(
-            "KVM plan path failed for host %s: %s — falling back to legacy WS",
+            "KVM plan path failed for host %s: %s — engine path declined",
             host_id,
             exc,
         )
@@ -457,8 +457,7 @@ def _build_bhyve_create_request(virt_engine, command_params, raw_image_path, iso
 
 def _bhyve_synthesize_download_plan(virt_engine, vm_name, cloud_image_url):
     """Return ``(download_plan, raw_image_path)`` for a cloud-image bhyve
-    create, or ``(None, "")`` on synthesis failure (caller falls back to
-    legacy WS dispatch).  bhyve wants ``.raw``, not ``.qcow2``, so we
+    create, or ``(None, "")`` on synthesis failure (caller surfaces a 502 to the user).  bhyve wants ``.raw``, not ``.qcow2``, so we
     rewrite the suffix derived by ``_derive_kvm_base_image_path``."""
     try:
         base_image_path, decompress = _derive_kvm_base_image_path(
@@ -478,7 +477,7 @@ def _bhyve_synthesize_download_plan(virt_engine, vm_name, cloud_image_url):
     except Exception as exc:  # nosec B110
         logging.getLogger(__name__).warning(
             "bhyve plan path: image download synthesis failed (%s); "
-            "falling back to legacy WS dispatch",
+            "engine path declined",
             exc,
         )
         return None, ""
@@ -502,8 +501,7 @@ def _bhyve_resolve_install_inputs(virt_engine, vm_name, command_params):
     """Resolve the bhyve install-source inputs.
 
     Returns ``(raw_image_path, iso_path, cloud_image_url, download_plan, ok)``
-    where ``ok`` is False when the inputs are insufficient (caller falls
-    back to legacy WS dispatch).  ``download_plan`` is non-None only when
+    where ``ok`` is False when the inputs are insufficient (caller surfaces a 502 to the user).  ``download_plan`` is non-None only when
     the loaded engine doesn't accept ``cloud_image_url`` directly and we
     had to synthesize a separate download step on the OSS side.
     """
@@ -569,7 +567,7 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
         return True
     except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
-            "bhyve plan path failed for host %s; falling back to legacy WS: %s",
+            "bhyve plan path failed for host %s; engine path declined: %s",
             host_id,
             exc,
         )
@@ -614,7 +612,7 @@ def _build_vmm_create_request(virt_engine, command_params):
     map it to ``user_password_hash`` for the engine.  Autoinstall fires
     only when both user + root password hashes are present.
 
-    Audit PR-14: forward ``cloud_image_url`` so the engine's legacy
+    Forward ``cloud_image_url`` so the engine's legacy
     (non-autoinstall) path can download a Linux cloud image (Ubuntu /
     Debian / Alpine / etc.) and use it as the VM's disk.  Only forwarded
     when autoinstall is False — autoinstall builds its disk from the
@@ -806,19 +804,13 @@ def _try_lxd_plan_based_creation(command_params, host_id):
 # ---------------------------------------------------------------------------
 
 
-def try_plan_based_creation(request, command_params, host_id, session):
+def try_plan_based_creation(request, command_params, host_id, _session):
     """Attempt plan-based creation via the matching Pro+ engine.
 
-    For lxd:     routes through container_engine apply_deployment_plan
-                 (build_lxd_create_plan) with execute_command_sequence
-                 fallback for environments without the engine.
-    For wsl:     routes through container_engine apply_deployment_plan
-                 (build_wsl_create_plan) with execute_command_sequence fallback.
-    For kvm:     routes through virtualization_engine (Phase 10.1).
-    For bhyve:   routes through virtualization_engine (raw image path).
-    For vmm:     routes through virtualization_engine (autoinstall path).
-
-    Returns True if plan-based creation was used, False otherwise.
+    Each ``child_type`` routes to its engine-specific ``_try_*`` helper
+    which builds an apply_deployment_plan and enqueues it.  Returns True
+    when a plan was queued, False when the engine declined (caller
+    surfaces a 502 to the user).
     """
     if request.child_type == "kvm":
         return _try_kvm_plan_based_creation(command_params, host_id)
@@ -826,43 +818,8 @@ def try_plan_based_creation(request, command_params, host_id, session):
         return _try_bhyve_plan_based_creation(command_params, host_id)
     if request.child_type == "vmm":
         return _try_vmm_plan_based_creation(command_params, host_id)
-
-    # Try the new apply_deployment_plan path first for LXD/WSL; fall
-    # through to the legacy execute_command_sequence service method only
-    # if the new builder isn't available or raised.
-    if request.child_type == "lxd" and _try_lxd_plan_based_creation(
-        command_params, host_id
-    ):
-        return True
-    if request.child_type == "wsl" and _try_wsl_plan_based_creation(
-        command_params, host_id
-    ):
-        return True
-
-    if request.child_type not in ("lxd", "wsl"):
-        return False
-
-    try:
-        container_engine = module_loader.get_module("container_engine")
-        if container_engine is None:
-            return False
-
-        # LEGACY: execute_command_sequence shape with hardcoded per-step
-        # timeouts.  Kept as fallback + architectural reference until the
-        # apply_deployment_plan path is fully validated for both lxd and
-        # wsl (audit PR-05 / PR-07).
-        service_cls = getattr(container_engine, "ContainerEngineServiceImpl", None)
-        if not service_cls or not hasattr(service_cls, "create_container_with_plan"):
-            return False
-
-        ce_logger = logging.getLogger("container_engine")
-        service = service_cls(db=session, models=models, logger=ce_logger)
-        steps = service.create_container_with_plan(
-            child_type=request.child_type,
-            params=command_params,
-            host_id=host_id,
-            db_session=session,
-        )
-        return steps is not None
-    except Exception:  # nosec B110
-        return False
+    if request.child_type == "lxd":
+        return _try_lxd_plan_based_creation(command_params, host_id)
+    if request.child_type == "wsl":
+        return _try_wsl_plan_based_creation(command_params, host_id)
+    return False

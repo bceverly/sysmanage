@@ -55,9 +55,12 @@ import PackageProfilesSettings from '../Components/PackageProfilesSettings';
 import ReportBrandingSettings from '../Components/ReportBrandingSettings';
 import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
 import DynamicSecretsSettings from '../Components/DynamicSecretsSettings';
+import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
+import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { refreshLicenseCache } from '../Services/license';
 import { usePlugins } from '../plugins';
 
 interface Tag {
@@ -144,12 +147,114 @@ const Settings: React.FC = () => {
   // Plugin system for dynamic settings tabs
   const { settingsTabs: pluginSettingsTabs } = usePlugins();
 
-  // Tab names for URL hash (dynamic based on plugin tabs)
+  // Active license modules (for Pro+ tab gating).
+  const [licenseModules, setLicenseModules] = useState<string[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const info = await refreshLicenseCache();
+        setLicenseModules(info?.modules ?? []);
+      } catch {
+        setLicenseModules([]);
+      }
+    })();
+  }, []);
+
+  // Tab definitions — each entry declares its hash id, label key, and the
+  // module that must be licensed for the tab to be visible.  ``moduleRequired``
+  // is undefined for OSS-appropriate tabs.  The order here is the visible
+  // order in the UI.
+  const tabDefs = useMemo(() => {
+    const defs: Array<{
+      id: string;
+      labelKey: string;
+      labelDefault: string;
+      moduleRequired?: string;
+    }> = [
+      { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
+      { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
+      {
+        id: 'integrations',
+        labelKey: 'integrations.title',
+        labelDefault: 'Integrations',
+        moduleRequired: 'observability_engine',
+      },
+      { id: 'ubuntu-pro', labelKey: 'ubuntuPro.title', labelDefault: 'Ubuntu Pro' },
+      {
+        id: 'antivirus',
+        labelKey: 'antivirus.title',
+        labelDefault: 'Antivirus',
+        moduleRequired: 'av_management_engine',
+      },
+      {
+        id: 'available-packages',
+        labelKey: 'availablePackages.title',
+        labelDefault: 'Available Packages',
+      },
+      { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
+      {
+        id: 'firewall-roles',
+        labelKey: 'firewallRoles.title',
+        labelDefault: 'Firewall Roles',
+        moduleRequired: 'firewall_orchestration_engine',
+      },
+      { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
+      // Access Groups, Compliance Profiles, Dynamic Secrets: visibility
+      // deferred until their respective Pro+ folds-in land.  They remain
+      // visible (and OSS-functional) until then.
+      { id: 'access-groups', labelKey: 'accessGroups.tabLabel', labelDefault: 'Access Groups' },
+      {
+        id: 'update-profiles',
+        labelKey: 'upgradeProfiles.tabLabel',
+        labelDefault: 'Update Profiles',
+        // Phase 10.6: scheduled upgrade profiles moved to the Pro+
+        // ``automation_engine`` (cron + per-host dispatch live there).
+        // The OSS server returns 402 from every /api/upgrade-profiles
+        // route without it, so the tab simply hides.
+        moduleRequired: 'automation_engine',
+      },
+      { id: 'compliance-profiles', labelKey: 'packageProfiles.tabLabel', labelDefault: 'Compliance Profiles' },
+      {
+        id: 'report-branding',
+        labelKey: 'reportBranding.tabLabel',
+        labelDefault: 'Report Branding',
+        moduleRequired: 'reporting_engine',
+      },
+      {
+        id: 'report-templates',
+        labelKey: 'reportTemplates.tabLabel',
+        labelDefault: 'Report Templates',
+        moduleRequired: 'reporting_engine',
+      },
+      { id: 'dynamic-secrets', labelKey: 'dynamicSecrets.tabLabel', labelDefault: 'Dynamic Secrets' },
+      {
+        id: 'repository-mirroring',
+        labelKey: 'mirror.tabLabel',
+        labelDefault: 'Repository Mirroring',
+        // Phase 10.4: gated on the Pro+ engine that owns the plan
+        // builders.  Without it loaded every /api/mirror-repositories
+        // route returns 402, so the tab simply hides.
+        moduleRequired: 'repository_mirroring_engine',
+      },
+      {
+        id: 'authentication',
+        labelKey: 'idp.tabLabel',
+        labelDefault: 'Authentication',
+        // Phase 10.5: external IdP integration (LDAP/AD + OIDC).
+        // Routes 402 without ``external_idp_engine`` loaded.
+        moduleRequired: 'external_idp_engine',
+      },
+    ];
+    return defs.filter(d => !d.moduleRequired || licenseModules.includes(d.moduleRequired));
+  }, [licenseModules]);
+
+  // Tab IDs in display order (filtered by license + plugin tabs appended).
+  // Used for hash navigation (URL hash → activeTab index) and for ID-based
+  // dispatch in handleTabChange / tab content rendering.
   const tabNames = useMemo(() => {
-    const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions', 'access-groups', 'update-profiles', 'compliance-profiles', 'report-branding', 'report-templates', 'dynamic-secrets'];
     const pluginTabIds = pluginSettingsTabs.map(pt => pt.id);
-    return [...baseTabs, ...pluginTabIds];
-  }, [pluginSettingsTabs]);
+    return [...tabDefs.map(d => d.id), ...pluginTabIds];
+  }, [tabDefs, pluginSettingsTabs]);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -161,21 +266,25 @@ const Settings: React.FC = () => {
   // Tab state
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
-  // Handle tab change and update URL hash
+  // Handle tab change and update URL hash.  Dispatch is keyed off the tab
+  // ID rather than the index — the visible tab list is filtered by license
+  // so indices are not stable across users.
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
-    if (newValue >= 0 && newValue < tabNames.length) {
-      globalThis.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
+    const newTabId = (newValue >= 0 && newValue < tabNames.length)
+      ? tabNames[newValue]  // nosemgrep: detect-object-injection
+      : '';
+    if (newTabId) {
+      globalThis.location.hash = newTabId;
     }
 
     // Load queue messages when switching to queue tab
-    if (newValue === 1) {
+    if (newTabId === 'queues') {
       loadQueueMessages();
     }
-    // Note: Available Packages tab is now at index 5 (was 4)
     // Load package data when switching to Available Packages tab
-    if (newValue === 5) {
+    if (newTabId === 'available-packages') {
       loadPackageSummary();
       // Start 30-second auto-refresh timer for package cards
       if (packageRefreshInterval) {
@@ -1110,46 +1219,38 @@ const Settings: React.FC = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          <Tab label={t('tags.title', 'Tags')} />
-          <Tab label={t('queues.title', 'Queues')} />
-          <Tab label={t('integrations.title', 'Integrations')} />
-          <Tab label={t('ubuntuPro.title', 'Ubuntu Pro')} />
-          <Tab label={t('antivirus.title', 'Antivirus')} />
-          <Tab label={t('availablePackages.title', 'Available Packages')} />
-          <Tab label={t('hostDefaults.title', 'Host Defaults')} />
-          <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
-          <Tab label={t('distributions.title', 'Distributions')} />
-          <Tab label={t('accessGroups.tabLabel', 'Access Groups')} />
-          <Tab label={t('upgradeProfiles.tabLabel', 'Update Profiles')} />
-          <Tab label={t('packageProfiles.tabLabel', 'Compliance Profiles')} />
-          <Tab label={t('reportBranding.tabLabel', 'Report Branding')} />
-          <Tab label={t('reportTemplates.tabLabel', 'Report Templates')} />
-          <Tab label={t('dynamicSecrets.tabLabel', 'Dynamic Secrets')} />
+          {tabDefs.map(d => (
+            <Tab key={d.id} label={t(d.labelKey, d.labelDefault)} />
+          ))}
           {pluginSettingsTabs.map(pt => (
             <Tab key={pt.id} label={t(pt.labelKey)} />
           ))}
         </Tabs>
       </Box>
 
-      {/* Tab content - flexGrow to fill available space */}
+      {/* Tab content — keyed off the tab ID at the active index so the
+          mapping is stable when a Pro+-gated tab is filtered out for
+          unlicensed users. */}
       <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
-        {activeTab === 0 && renderTagsTab()}
-        {activeTab === 1 && renderQueuesTab()}
-        {activeTab === 2 && renderIntegrationsTab()}
-        {activeTab === 3 && renderUbuntuProTab()}
-        {activeTab === 4 && <AntivirusDefaultsSettings />}
-        {activeTab === 5 && renderAvailablePackagesTab()}
-        {activeTab === 6 && <HostDefaultsSettings />}
-        {activeTab === 7 && <FirewallRolesSettings />}
-        {activeTab === 8 && <DistributionsSettings />}
-        {activeTab === 9 && <AccessGroupsSettings />}
-        {activeTab === 10 && <UpgradeProfilesSettings />}
-        {activeTab === 11 && <PackageProfilesSettings />}
-        {activeTab === 12 && <ReportBrandingSettings />}
-        {activeTab === 13 && <ReportTemplatesSettings />}
-        {activeTab === 14 && <DynamicSecretsSettings />}
-        {pluginSettingsTabs.map((pt, index) => (
-          activeTab === 15 + index && (
+        {tabNames[activeTab] === 'tags' && renderTagsTab()}
+        {tabNames[activeTab] === 'queues' && renderQueuesTab()}
+        {tabNames[activeTab] === 'integrations' && renderIntegrationsTab()}
+        {tabNames[activeTab] === 'ubuntu-pro' && renderUbuntuProTab()}
+        {tabNames[activeTab] === 'antivirus' && <AntivirusDefaultsSettings />}
+        {tabNames[activeTab] === 'available-packages' && renderAvailablePackagesTab()}
+        {tabNames[activeTab] === 'host-defaults' && <HostDefaultsSettings />}
+        {tabNames[activeTab] === 'firewall-roles' && <FirewallRolesSettings />}
+        {tabNames[activeTab] === 'distributions' && <DistributionsSettings />}
+        {tabNames[activeTab] === 'access-groups' && <AccessGroupsSettings />}
+        {tabNames[activeTab] === 'update-profiles' && <UpgradeProfilesSettings />}
+        {tabNames[activeTab] === 'compliance-profiles' && <PackageProfilesSettings />}
+        {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}
+        {tabNames[activeTab] === 'report-templates' && <ReportTemplatesSettings />}
+        {tabNames[activeTab] === 'dynamic-secrets' && <DynamicSecretsSettings />}
+        {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
+        {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
+        {pluginSettingsTabs.map(pt => (
+          tabNames[activeTab] === pt.id && (
             <Box key={pt.id}>
               <pt.component />
             </Box>

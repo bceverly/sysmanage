@@ -148,7 +148,7 @@ def handle_agent_reconnect(db, host_id):
     # Enqueue start commands for each child that was running before reboot.
     # Audit gap (orchestrator preservation): mirror child_host_control.py's
     # ``_try_lifecycle_plan_dispatch`` pattern — try the Pro+ engine path
-    # first, fall back to the legacy WS command_type only if the engine
+    # first, use the engine path; without it the route surfaces a 502 since the
     # isn't loaded.  Without this, after the agent's legacy
     # ``child_host_operations.py`` is deleted, the orchestrated reboot's
     # child-restart phase fails because the agent's stub returns
@@ -164,7 +164,7 @@ def handle_agent_reconnect(db, host_id):
         )
         if used_plan_path:
             continue
-        # Fall back to legacy WS dispatch when the engine isn't loaded.
+        # Engine path is not available; the caller surfaces a 502 instead.
         command_message = create_command_message(
             command_type="start_child_host",
             parameters={

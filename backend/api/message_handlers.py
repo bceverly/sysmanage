@@ -59,7 +59,7 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
     # originating engine.  The dispatcher in proplus_dispatch.py registers
     # a correlation by the queue's message_id; the agent echoes that ID
     # back as command_id.  If we have a match, the engine handles it and
-    # we're done — otherwise fall through to legacy routing.
+    # we're done — otherwise let normal handler routing run.
     command_id = message_data.get("command_id")
     if command_id:
         try:

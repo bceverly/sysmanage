@@ -57,6 +57,41 @@ def sign_refresh_token(user_id: str):
     return the_token
 
 
+# MFA-pending tokens are short-lived (5 min default) so a stolen pending
+# token can't be sat on indefinitely.  They carry a ``mfa_pending: True``
+# claim that the JWTBearer dependency rejects — only the dedicated
+# ``/api/auth/mfa/verify`` endpoint accepts them.
+_MFA_PENDING_TTL_SECONDS = 5 * 60
+
+
+def sign_mfa_pending_token(user_id: str) -> str:
+    """Sign a short-lived token that authorises ``/api/auth/mfa/verify``
+    only — i.e. proof that the password check just succeeded but the
+    second factor still has to clear."""
+    payload = {
+        "user_id": user_id,
+        "expires": time.time() + _MFA_PENDING_TTL_SECONDS,
+        "mfa_pending": True,
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def decode_mfa_pending_token(token: str):
+    """Decode an MFA-pending token, returning its payload only when the
+    ``mfa_pending`` claim is set and the token hasn't expired.  Used by
+    the verify endpoint to re-authorise the second-factor exchange.
+    """
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+        return None
+    if decoded.get("expires", 0) < time.time():
+        return None
+    if not decoded.get("mfa_pending"):
+        return None
+    return decoded
+
+
 def decode_jwt(token: str) -> Optional[dict]:
     """
     This function decodes a JWT token

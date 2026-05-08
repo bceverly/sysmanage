@@ -23,6 +23,7 @@ from backend.api.child_host_utils import (
     audit_log,
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.api.child_host_virtualization_enable import (
@@ -39,13 +40,9 @@ from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
 from backend.security.roles import SecurityRoles
 from backend.utils.password_hash import hash_password_for_os
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 # Main router that includes sub-routers
 router = APIRouter()
-queue_ops = QueueOperations()
 
 # Include status endpoints router
 router.include_router(status_router)
@@ -113,7 +110,7 @@ def _get_cloud_image_url(distribution):
             )
         except Exception:  # pylint: disable=broad-exception-caught
             # Engine raised — fall through to inline fallback below.
-            pass
+            pass  # nosec B110 - engine optional; OSS fallback below
     if distribution.cloud_image_url:
         return distribution.cloud_image_url
     if distribution.install_identifier:
@@ -246,7 +243,7 @@ def _detect_autoinstall_mode(distribution):
                 or ""
             )
         except Exception:  # pylint: disable=broad-exception-caught
-            pass
+            pass  # nosec B110 - engine optional; OSS heuristic below
     if not distribution.install_identifier:
         return ""
     install_id = distribution.install_identifier.lower()
@@ -466,17 +463,7 @@ async def create_child_host_request(
         )
 
         if not try_plan_based_creation(request, command_params, host_id, session):
-            command_message = create_command_message(
-                command_type="create_child_host",
-                parameters=command_params,
-            )
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         audit_log(
             session,

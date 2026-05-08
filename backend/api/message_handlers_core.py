@@ -204,6 +204,28 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
                     matching_child.parent_host_id,
                 )
 
+                # Phase 10.4.4 — auto-apply default mirror assignments
+                # for the freshly auto-approved host.  The HTTP /register
+                # and admin-approval paths do this too; this path
+                # (auto-approval via child-host token) was missing it,
+                # so child hosts created through the manage-children
+                # flow weren't picking up their default mirror.  Best-
+                # effort: any failure is logged and swallowed.
+                try:
+                    from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+                        apply_default_mirrors_for_new_host,
+                    )
+
+                    apply_default_mirrors_for_new_host(str(host.id))
+                except (
+                    Exception
+                ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+                    logger.warning(
+                        "Default-mirror auto-apply failed for auto-approved host %s: %s",
+                        hostname,
+                        exc,
+                    )
+
                 # Log auto-approval in audit
                 AuditService.log(
                     db=db,

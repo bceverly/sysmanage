@@ -246,10 +246,10 @@ const AuditLogViewer: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.actionType', 'Action Type')}</InputLabel>
+                <InputLabel>{t('auditLog.actionTypeLabel', 'Action Type')}</InputLabel>
                 <Select
                   value={actionType}
-                  label={t('auditLog.actionType', 'Action Type')}
+                  label={t('auditLog.actionTypeLabel', 'Action Type')}
                   onChange={(e) => setActionType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
@@ -263,10 +263,10 @@ const AuditLogViewer: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.entityType', 'Entity Type')}</InputLabel>
+                <InputLabel>{t('auditLog.entityTypeLabel', 'Entity Type')}</InputLabel>
                 <Select
                   value={entityType}
-                  label={t('auditLog.entityType', 'Entity Type')}
+                  label={t('auditLog.entityTypeLabel', 'Entity Type')}
                   onChange={(e) => setEntityType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
@@ -283,10 +283,10 @@ const AuditLogViewer: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.category', 'Category')}</InputLabel>
+                <InputLabel>{t('auditLog.categoryLabel', 'Category')}</InputLabel>
                 <Select
                   value={category}
-                  label={t('auditLog.category', 'Category')}
+                  label={t('auditLog.categoryLabel', 'Category')}
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
@@ -299,10 +299,10 @@ const AuditLogViewer: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.entryType', 'Entry Type')}</InputLabel>
+                <InputLabel>{t('auditLog.entryTypeLabel', 'Entry Type')}</InputLabel>
                 <Select
                   value={entryType}
-                  label={t('auditLog.entryType', 'Entry Type')}
+                  label={t('auditLog.entryTypeLabel', 'Entry Type')}
                   onChange={(e) => setEntryType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
@@ -369,7 +369,7 @@ const AuditLogViewer: React.FC = () => {
                       <TableCell>{t('auditLog.action', 'Action')}</TableCell>
                       <TableCell>{t('auditLog.entity', 'Entity')}</TableCell>
                       <TableCell>{t('auditLog.description', 'Description')}</TableCell>
-                      <TableCell>{t('auditLog.result', 'Result')}</TableCell>
+                      <TableCell>{t('auditLog.resultLabel', 'Result')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

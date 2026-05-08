@@ -884,6 +884,229 @@ def test_db():
         )
         note = Column(Text, nullable=True)
 
+    # Phase 10.3: MFA tables.  The login flow queries
+    # ``user_mfa_enrollment`` on every successful password verify, so
+    # the table has to exist in the test fixture even for tests that
+    # don't exercise MFA themselves.
+    class UserMfaEnrollment(TestBase):
+        __tablename__ = "user_mfa_enrollment"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        user_id = Column(
+            GUID(),
+            ForeignKey("user.id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        )
+        totp_secret_encrypted = Column(Text, nullable=False)
+        backup_codes_hashed = Column(_JSON, nullable=False, default=list)
+        enrolled_at = Column(DateTime, nullable=False)
+        last_used_at = Column(DateTime, nullable=True)
+        last_used_method = Column(String(20), nullable=True)
+
+    class MfaSettings(TestBase):
+        __tablename__ = "mfa_settings"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        issuer_name = Column(String(120), nullable=False, default="SysManage")
+        totp_digits = Column(Integer, nullable=False, default=6)
+        totp_period_seconds = Column(Integer, nullable=False, default=30)
+        backup_code_count = Column(Integer, nullable=False, default=10)
+        admin_required = Column(Boolean, nullable=False, default=False)
+        grace_period_days = Column(Integer, nullable=False, default=14)
+        updated_at = Column(DateTime, nullable=True)
+        updated_by = Column(
+            GUID(),
+            ForeignKey("user.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+
+    # Phase 10.4 — repository-mirroring tables.
+    class MirrorRepository(TestBase):
+        __tablename__ = "mirror_repository"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), unique=True, nullable=False)
+        package_manager = Column(String(20), nullable=False)
+        upstream_url = Column(String(500), nullable=False)
+        suite = Column(String(80), nullable=True)
+        components = Column(String(200), nullable=True)
+        architectures = Column(String(120), nullable=True)
+        repoid = Column(String(120), nullable=True)
+        gpgkey_url = Column(String(500), nullable=True)
+        repo_alias = Column(String(120), nullable=True)
+        release = Column(String(80), nullable=True)
+        signing_key_url = Column(String(500), nullable=True)
+        bandwidth_cap_kbps = Column(Integer, nullable=False, default=0)
+        sync_cron = Column(String(120), nullable=False, default="0 4 * * *")
+        network_tier = Column(String(40), nullable=True)
+        enabled = Column(Boolean, nullable=False, default=True)
+        host_id = Column(
+            GUID(),
+            ForeignKey("host.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        platform_config_id = Column(
+            GUID(),
+            ForeignKey("mirror_platform_config.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        known_version_id = Column(
+            GUID(),
+            ForeignKey("mirror_known_version.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        last_sync_at = Column(DateTime, nullable=True)
+        last_sync_status = Column(String(40), nullable=True)
+        last_sync_error = Column(Text, nullable=True)
+        next_sync_at = Column(DateTime, nullable=True)
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    class MirrorKnownVersion(TestBase):
+        __tablename__ = "mirror_known_version"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        platform = Column(String(20), nullable=False)
+        version_key = Column(String(80), nullable=False)
+        label = Column(String(200), nullable=False)
+        os_family = Column(String(40), nullable=False)
+        match_regex = Column(String(400), nullable=False)
+        default_upstream_url = Column(String(500), nullable=False)
+        default_suite = Column(String(80), nullable=True)
+        default_repoid = Column(String(120), nullable=True)
+        default_repo_alias = Column(String(120), nullable=True)
+        default_release = Column(String(80), nullable=True)
+        is_active = Column(Boolean, nullable=False, default=True)
+        created_at = Column(DateTime, nullable=True)
+
+    class HostDefaultMirror(TestBase):
+        __tablename__ = "host_default_mirror"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        platform = Column(String(20), nullable=False)
+        version_key = Column(String(80), nullable=False)
+        os_family = Column(String(40), nullable=False)
+        mirror_id = Column(
+            GUID(),
+            ForeignKey("mirror_repository.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        updated_at = Column(DateTime, nullable=True)
+
+    class MirrorPlatformConfig(TestBase):
+        __tablename__ = "mirror_platform_config"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        platform = Column(String(20), nullable=False)
+        host_id = Column(
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), nullable=False
+        )
+        mirror_root_path = Column(String(500), nullable=False, default="/var/mirror")
+        integrity_check_cadence_hours = Column(Integer, nullable=False, default=24)
+        retention_window_days = Column(Integer, nullable=False, default=30)
+        default_bandwidth_cap_kbps = Column(Integer, nullable=False, default=0)
+        snapshot_count_to_keep = Column(Integer, nullable=False, default=10)
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    class MirrorSnapshot(TestBase):
+        __tablename__ = "mirror_snapshot"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        repository_id = Column(
+            GUID(),
+            ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        snapshot_id = Column(String(80), nullable=False)
+        taken_at = Column(DateTime, nullable=False)
+        size_bytes = Column(Integer, nullable=True)
+        file_count = Column(Integer, nullable=True)
+        manifest = Column(_JSON, nullable=True)
+        retention_until = Column(DateTime, nullable=True)
+        notes = Column(Text, nullable=True)
+
+    class MirrorSettings(TestBase):
+        __tablename__ = "mirror_settings"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        mirror_root_path = Column(String(500), nullable=False, default="/var/mirror")
+        integrity_check_cadence_hours = Column(Integer, nullable=False, default=24)
+        retention_window_days = Column(Integer, nullable=False, default=30)
+        default_bandwidth_cap_kbps = Column(Integer, nullable=False, default=0)
+        snapshot_count_to_keep = Column(Integer, nullable=False, default=10)
+        updated_at = Column(DateTime, nullable=True)
+        updated_by = Column(
+            GUID(),
+            ForeignKey("user.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+
+    # Phase 10.4.1 — mirror setup status (one row per host).
+    class MirrorSetupStatus(TestBase):
+        __tablename__ = "mirror_setup_status"
+        host_id = Column(
+            GUID(), ForeignKey("host.id", ondelete="CASCADE"), primary_key=True
+        )
+        tools = Column(_JSON, nullable=False, default=dict)
+        platform = Column(String(40), nullable=True)
+        distro = Column(String(40), nullable=True)
+        last_check_at = Column(DateTime, nullable=True)
+        last_check_message_id = Column(String(36), nullable=True)
+        last_check_error = Column(Text, nullable=True)
+        install_status = Column(String(20), nullable=False, default="idle")
+        last_install_at = Column(DateTime, nullable=True)
+        last_install_message_id = Column(String(36), nullable=True)
+        last_install_error = Column(Text, nullable=True)
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    # Phase 10.5 — external IdP tables.
+    class ExternalIdpProvider(TestBase):
+        __tablename__ = "external_idp_provider"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), unique=True, nullable=False)
+        type = Column(String(20), nullable=False)
+        enabled = Column(Boolean, nullable=False, default=True)
+        ldap_server_url = Column(String(500), nullable=True)
+        ldap_bind_dn = Column(String(500), nullable=True)
+        ldap_bind_password_secret_id = Column(String(255), nullable=True)
+        ldap_user_search_base = Column(String(500), nullable=True)
+        ldap_user_search_filter = Column(String(500), nullable=True)
+        ldap_group_search_base = Column(String(500), nullable=True)
+        ldap_group_search_filter = Column(String(500), nullable=True)
+        ldap_tls_ca_bundle_path = Column(String(500), nullable=True)
+        ldap_connection_timeout = Column(Integer, nullable=False, default=10)
+        oidc_issuer_url = Column(String(500), nullable=True)
+        oidc_client_id = Column(String(255), nullable=True)
+        oidc_client_secret_secret_id = Column(String(255), nullable=True)
+        oidc_redirect_uri = Column(String(500), nullable=True)
+        oidc_scopes = Column(
+            String(500), nullable=False, default="openid profile email"
+        )
+        oidc_discovery_url = Column(String(500), nullable=True)
+        oidc_group_claim = Column(String(120), nullable=False, default="groups")
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
+    class IdpRoleMapping(TestBase):
+        __tablename__ = "idp_role_mapping"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        provider_id = Column(
+            GUID(),
+            ForeignKey("external_idp_provider.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        external_group = Column(String(500), nullable=False)
+        role_name = Column(String(120), nullable=False)
+        default_for_unmapped = Column(Boolean, nullable=False, default=False)
+        created_at = Column(DateTime, nullable=True)
+
+    class ExternalIdpSettings(TestBase):
+        __tablename__ = "external_idp_settings"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        local_account_fallback = Column(Boolean, nullable=False, default=True)
+        max_failed_attempts = Column(Integer, nullable=False, default=5)
+        updated_at = Column(DateTime, nullable=True)
+        updated_by = Column(
+            GUID(),
+            ForeignKey("user.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+
     # Create all tables with test models
     TestBase.metadata.create_all(bind=test_engine)
 

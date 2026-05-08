@@ -9,6 +9,19 @@ from backend.persistence import models
 from backend.security.roles import SecurityRoles
 
 
+def raise_engine_declined() -> None:
+    """Surface a 502 to the client when the Pro+ engine declined the request.
+
+    Centralized so the user-facing message is defined once (and the
+    gettext extractor sees it once).  Each child-host route raises this
+    when its ``_try_*`` helper returns False.
+    """
+    raise HTTPException(
+        status_code=502,
+        detail=_("Child host engine could not dispatch this request."),
+    )
+
+
 def get_user_with_role_check(session, current_user: str, required_role: SecurityRoles):
     """Get user and verify they have the required role."""
     user = session.query(models.User).filter(models.User.userid == current_user).first()

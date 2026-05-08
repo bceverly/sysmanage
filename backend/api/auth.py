@@ -11,11 +11,17 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.auth.auth_handler import decode_jwt, sign_jwt, sign_refresh_token
+from backend.auth.auth_handler import (
+    decode_jwt,
+    sign_jwt,
+    sign_mfa_pending_token,
+    sign_refresh_token,
+)
 from backend.config import config
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
+from backend.services import mfa_service
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 argon2_hasher = PasswordHasher()
@@ -260,13 +266,99 @@ def _authenticate_db_user(  # NOSONAR
             detail=_("Account is locked due to too many failed login attempts"),
         )
 
-    # Verify password
-    try:
-        argon2_hasher.verify(user.hashed_password, login_data.password)
-    except Exception:  # catches argon2 verification failures
-        return _handle_failed_password(user, login_data, session, client_ip, user_agent)
+    # Phase 10.5 — external IdP path.  Users with a non-NULL
+    # ``external_idp_provider_id`` authenticate against the directory
+    # via the Pro+ ``external_idp_engine``.  Three outcomes:
+    #   * engine accepts → skip Argon2, proceed to the post-password
+    #     branch (MFA challenge / session token / etc.)
+    #   * engine declines AND ``local_account_fallback`` disabled →
+    #     reject with the usual lockout-counter increment.
+    #   * engine declines but fallback enabled, OR engine not loaded →
+    #     fall through to local Argon2 verify (break-glass).
+    idp_auth_passed = False
+    if getattr(user, "external_idp_provider_id", None):
+        idp_outcome = _try_external_idp_auth(user, login_data, session)
+        if idp_outcome is True:
+            idp_auth_passed = True
+        elif idp_outcome is False:
+            idp_settings = (
+                session.query(models.ExternalIdpSettings)
+                .filter(
+                    models.ExternalIdpSettings.id == models.SINGLETON_IDP_SETTINGS_ID
+                )
+                .first()
+            )
+            if not idp_settings or not idp_settings.local_account_fallback:
+                return _handle_failed_password(
+                    user, login_data, session, client_ip, user_agent
+                )
+        # else idp_outcome is None → engine not loaded; fall through.
 
-    # Successful login
+    # Verify password (skipped when external IdP already accepted).
+    if not idp_auth_passed:
+        try:
+            argon2_hasher.verify(user.hashed_password, login_data.password)
+        except Exception:  # catches argon2 verification failures
+            return _handle_failed_password(
+                user, login_data, session, client_ip, user_agent
+            )
+
+    # Password OK from here on — but a second factor may still gate
+    # the actual session token.  Three branches:
+    #
+    #   a) User has MFA enrolled → issue a short-lived ``mfa_pending``
+    #      token; the client follows up with /api/auth/mfa/verify.
+    #   b) Admin required MFA AND user is past the grace period →
+    #      refuse with a structured error so the UI can prompt enroll.
+    #   c) Otherwise (no MFA enrolled, no policy gate) → issue a real
+    #      session token, matching pre-Phase-10.3 behaviour.
+    enrollment = mfa_service.get_enrollment(session, user.id)
+    if enrollment is not None:
+        # Record the password-OK event before issuing the pending token
+        # so the audit log shows where the second factor came in.
+        _log_login_attempt(
+            session,
+            user.id,
+            str(login_data.userid),
+            True,
+            client_ip,
+            user_agent,
+            error_msg="MFA challenge issued",
+        )
+        login_security.record_successful_login(
+            str(login_data.userid), client_ip, user_agent
+        )
+        login_security.reset_failed_login_attempts(user, session)
+        session.commit()
+        return {
+            "mfa_required": True,
+            "pending_token": sign_mfa_pending_token(login_data.userid),
+        }
+
+    mfa_settings = mfa_service.get_settings(session)
+    if mfa_settings.admin_required:
+        grace_cutoff = user.created_at + timedelta(days=mfa_settings.grace_period_days)
+        if datetime.now(timezone.utc).replace(tzinfo=None) > grace_cutoff:
+            _log_login_attempt(
+                session,
+                user.id,
+                str(login_data.userid),
+                False,
+                client_ip,
+                user_agent,
+                error_msg="MFA enrollment required (grace period expired)",
+            )
+            session.commit()
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Multi-factor authentication is required for this account. "
+                    "Please enrol from your profile page before signing in."
+                ),
+            )
+
+    # Successful login (no MFA enrolled, or admin-required policy hasn't
+    # passed the grace cutoff yet).
     login_security.record_successful_login(
         str(login_data.userid), client_ip, user_agent
     )
@@ -282,6 +374,50 @@ def _authenticate_db_user(  # NOSONAR
     refresh_token = sign_refresh_token(login_data.userid)
     _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
     return {"Authorization": auth_token}
+
+
+def _try_external_idp_auth(user, login_data, session):
+    """Authenticate ``user`` against their configured external IdP.
+
+    Returns ``True`` when the engine accepts the password (LDAP bind
+    succeeded), ``False`` when it declines, ``None`` when the engine
+    isn't loaded (caller falls back to local Argon2).
+
+    Currently only handles LDAP — OIDC users go through the
+    /api/auth/oidc/{provider}/callback endpoint, not the password
+    login form.
+    """
+    # pylint: disable=import-outside-toplevel
+    from backend.licensing.module_loader import module_loader
+
+    engine = module_loader.get_module("external_idp_engine")
+    if engine is None:
+        return None
+    provider = (
+        session.query(models.ExternalIdpProvider)
+        .filter(models.ExternalIdpProvider.id == user.external_idp_provider_id)
+        .first()
+    )
+    if not provider or not provider.enabled or provider.type != "ldap":
+        return None
+    config = provider.to_dict()
+    # Resolve bind password from Vault before passing to the engine.
+    from backend.api.external_idp import (
+        _resolve_secret,
+    )  # pylint: disable=import-outside-toplevel
+
+    config["ldap_bind_password"] = _resolve_secret(
+        provider.ldap_bind_password_secret_id
+    )
+    try:
+        result = engine.authenticate_ldap(
+            config, str(login_data.userid), login_data.password
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Engine raised — treat as decline so the local fallback can
+        # kick in if the operator has it enabled.
+        return False
+    return bool(result.get("success"))
 
 
 def _handle_failed_password(user, login_data, session, client_ip, user_agent):

@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.api.child_host_utils import (
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
@@ -19,12 +20,20 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
-queue_ops = QueueOperations()
+
+
+def _check_container_module():
+    """Refuse the request when the Pro+ container_engine module isn't loaded."""
+    if module_loader.get_module("container_engine") is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Container/VM management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
 
 
 def _try_check_virtualization_support_plan(host_id: str) -> bool:
@@ -65,8 +74,9 @@ async def get_virtualization_support(
 ):
     """
     Get virtualization capabilities for a host.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -78,18 +88,7 @@ async def get_virtualization_support(
         verify_host_active(host)
 
         if not _try_check_virtualization_support_plan(host_id):
-            # LEGACY: superseded by container_engine.build_check_virtualization_support_plan.
-            command_message = create_command_message(
-                command_type="check_virtualization_support", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         session.commit()
 
@@ -113,8 +112,9 @@ async def get_virtualization_status(
     """
     Get the current virtualization status for a host.
     Returns cached virtualization info from the last agent report.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )

@@ -27,6 +27,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import DefaultPackageMirrorsCard from './DefaultPackageMirrorsCard';
 
 interface DefaultRepository {
   id: string;
@@ -996,6 +997,13 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
           </CardContent>
         </Card>
       )}
+
+      {/* Phase 10.4.4 — sits below the existing host-defaults cards
+          and runs full-width since the (platform, version, os_family)
+          assignment table needs the room. */}
+      <Box sx={{ flexBasis: '100%' }}>
+        <DefaultPackageMirrorsCard />
+      </Box>
 
       <Snackbar
         open={snackbarOpen}

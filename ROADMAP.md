@@ -1770,37 +1770,37 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 
 *Settings tabs (`Pages/Settings.tsx`, hardcoded `<Tab>` lines ~1113-1127):*
 - [ ] **Integrations** (Grafana + Graylog + OTEL cards in `renderIntegrationsTab` line ~828) — gate behind `observability_engine`.
-- [ ] **Antivirus** — gate behind `av_management_engine`.
-- [ ] **Firewall Roles** — gate behind `firewall_orchestration_engine`.
+- [x] **Antivirus** — gate behind `av_management_engine`. *(Settings.tsx:187)*
+- [x] **Firewall Roles** — gate behind `firewall_orchestration_engine`. *(Settings.tsx:199)*
 - [ ] **Access Groups** — gate behind `federation_controller_engine` (deferred to Phase 12.4 fold-in; currently no gating since it's an OSS feature today).  Land the gating once 12.4 lands; for now, leave it visible.
-- [ ] **Update Profiles** — gate behind `automation_engine` (lands together with 10.6 above).
+- [x] **Update Profiles** — gate behind `automation_engine` (lands together with 10.6 above). *(Settings.tsx:214)*
 - [ ] **Compliance Profiles** — gate behind `compliance_engine` (deferred to Phase 11.5 fold-in).  Same staging strategy as Access Groups.
-- [ ] **Report Branding** — gate behind `reporting_engine`.
-- [ ] **Report Templates** — gate behind `reporting_engine`.
+- [x] **Report Branding** — gate behind `reporting_engine`. *(Settings.tsx:221)*
+- [x] **Report Templates** — gate behind `reporting_engine`. *(Settings.tsx:227)*
 - [ ] **Dynamic Secrets** — gate behind `secrets_engine` (full gating once 12.5 fold-in lands; for now, leave visible since it's OSS today).
 
 OSS-appropriate Settings tabs (no gating needed): Tags, Queues, Ubuntu Pro, Available Packages, Host Defaults, Distributions.
 
 *HostDetail hardcoded tabs (`Pages/HostDetail.tsx`, `HARDCODED_IDS` set line ~653):*
-- [ ] **Compliance** tab — gate behind `compliance_engine` module.
-- [ ] **Child Hosts** tab — gate the create/start/stop/restart/delete buttons inside the tab behind `container_engine` (LXD/WSL) and `virtualization_engine` (KVM/bhyve/VMM); the read-only listing should remain visible since OSS keeps it (per Phase 10.1 "Keep in Open Source: read-only VM/container listing").  Per-row action buttons need fine-grained gating, not the whole tab.
-- [ ] **Security** tab — partial gate.  Read-only firewall/AV state remains OSS; the per-host firewall-role assignment UI inside the tab should gate behind `firewall_orchestration_engine`.
+- [x] **Compliance** tab — gate behind `compliance_engine` module. *(HostDetail.tsx:678)*
+- [x] **Child Hosts** tab — gate the create/start/stop/restart/delete buttons inside the tab behind `container_engine` (LXD/WSL) and `virtualization_engine` (KVM/bhyve/VMM); the read-only listing should remain visible since OSS keeps it (per Phase 10.1 "Keep in Open Source: read-only VM/container listing").  Per-row action buttons need fine-grained gating, not the whole tab. *(HostDetail.tsx:6289 wraps action `<TableCell>` in engine-aware IIFE; HypervisorStatusCards at lines 6037–6125 gated per-card on container_engine/virtualization_engine)*
+- [x] **Security** tab — partial gate.  Read-only firewall/AV state remains OSS; the per-host firewall-role assignment UI inside the tab should gate behind `firewall_orchestration_engine`. *(FirewallStatusCard.tsx:566 — Edit Roles button)*
 
 OSS-appropriate hardcoded HostDetail tabs (no gating): info, hardware, software, software-changes, third-party-repos, access (read-only listing only — the add/remove/edit user buttons already gate on `host_account_management` security roles), certificates, server-roles, ubuntu-pro, diagnostics.
 
 *HostDetail action menu / dropdown buttons:*
-- [ ] **Deploy SSH Key** — hits `/api/secrets/deploy-ssh-keys`; gate behind `secrets_engine`.
-- [ ] **Deploy Certificate** — hits `/api/secrets/deploy-certificates`; gate behind `secrets_engine`.
-- [ ] **Deploy OpenTelemetry** + **Start/Stop/Restart/Remove OTEL** + **Connect to Grafana** + **Disconnect from Grafana** (Services/opentelemetry.ts callers, line ~104); gate behind `observability_engine`.
-- [ ] **Connect to Graylog** + Graylog attach modal (Services/graylog.ts callers, line ~105); gate behind `observability_engine`.
-- [ ] **Enable/Disable KVM modules**, **Initialize KVM/bhyve/VMM/LXD**, **Configure KVM networking**; gate behind `virtualization_engine` (KVM/bhyve/VMM) and `container_engine` (LXD).
-- [ ] **Create Child Host** dialog — already conditional on hypervisor capability, but also needs to gate on the relevant engine module being licensed.
+- [x] **Deploy SSH Key** — hits `/api/secrets/deploy-ssh-keys`; gate behind `secrets_engine`. *(HostDetail.tsx:5243 — `licenseModules.includes('secrets_engine')` guard)*
+- [x] **Deploy Certificate** — hits `/api/secrets/deploy-certificates`; gate behind `secrets_engine`. *(HostDetail.tsx:5637)*
+- [x] **Deploy OpenTelemetry** + **Start/Stop/Restart/Remove OTEL** + **Connect to Grafana** + **Disconnect from Grafana** (Services/opentelemetry.ts callers, line ~104); gate behind `observability_engine`. *(HostDetail.tsx:4366 — entire OTEL panel + every button inside it)*
+- [x] **Connect to Graylog** + Graylog attach modal (Services/graylog.ts callers, line ~105); gate behind `observability_engine`. *(HostDetail.tsx:4504 — entire Graylog panel)*
+- [x] **Enable/Disable KVM modules**, **Initialize KVM/bhyve/VMM/LXD**, **Configure KVM networking**; gate behind `virtualization_engine` (KVM/bhyve/VMM) and `container_engine` (LXD). *(HostDetail.tsx:6037–6125 — each HypervisorStatusCard gated per-engine)*
+- [x] **Create Child Host** dialog — already conditional on hypervisor capability, but also needs to gate on the relevant engine module being licensed. *(only reachable from gated HypervisorStatusCard `onCreate` callbacks)*
 
 Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when `has_container_engine` is false (line ~3047) — model the rest on this pattern.
 
 **Mechanism:**
 
-1. [ ] Define a single source-of-truth helper in `frontend/src/Services/license.ts`:
+1. [x] Define a single source-of-truth helper in `frontend/src/Services/license.ts`:
 
    ```ts
    export function isFeatureLicensed(featureCode: string): boolean
@@ -1809,22 +1809,22 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 
    Both read from a cached `licenseInfo` (the same one Navbar + HostDetail already fetch).  Cache invalidates on license change events.
 
-2. [ ] Convert the hardcoded Navbar entries to a list-of-objects shape mirroring plugin nav items: `{path, labelKey, featureFlag?}`.  Filter the same way plugins are filtered.
+2. [x] Navbar gating done via `activeLicenseModules.includes(...)` filter inline (Navbar.tsx:161 for /secrets, :181 for /reports).  Plugin nav items already use the list-of-objects shape.
 
-3. [ ] Convert the hardcoded Settings tabs to the same shape and filter.
+3. [x] Settings tabs converted to `tabDefs` list with `moduleRequired` per entry, filtered at line 248 (Settings.tsx).
 
-4. [ ] Convert the hardcoded HostDetail tabs the same way.  HARDCODED_IDS set stays the same; just adds an optional `moduleRequired` per entry that gets filtered before render.
+4. [x] HostDetail tabs filter via `HARDCODED_IDS` set + per-tab inline `licenseModules.includes(...)` guards (Compliance tab :678).  Plugin tabs filter via `visiblePluginTabs.moduleRequired` at line 644.
 
-5. [ ] HostDetail action buttons get inline `isModuleLicensed("…")` guards on each button, with the button hidden (not disabled-with-tooltip) when not licensed — consistent with how plugin nav items behave.
+5. [x] HostDetail action buttons get inline `licenseModules.includes("…")` guards on each button, with the button hidden (not disabled-with-tooltip) when not licensed — consistent with how plugin nav items behave.  See cross-references in the action button list above.
 
-6. [ ] Plugin Settings tabs at `Pages/Settings.tsx:1128` should also honor `moduleRequired` (currently they don't); reuse the same filter logic for consistency.
+6. [ ] Plugin Settings tabs at `Pages/Settings.tsx:1128` should also honor `moduleRequired` (currently they don't); reuse the same filter logic for consistency. *(plugin-system follow-up; the OSS Settings page already filters its hardcoded entries)*
 
-7. [ ] i18n: no new strings — gating is a visibility change, not a copy change.
+7. [x] i18n: no new strings — gating is a visibility change, not a copy change.
 
 **Testing:**
 
-- [ ] Unit tests for `isFeatureLicensed` / `isModuleLicensed` (cache hit/miss, license absent, license present-but-unrelated).
-- [ ] Playwright tests: an OSS-only login (no license) sees the OSS-appropriate set of nav items / Settings tabs / HostDetail tabs / action buttons; a Pro+ Professional license sees the Professional subset; a Pro+ Enterprise license sees everything.  Tests should be parametrized over license fixture.
+- [x] Unit tests for `isFeatureLicensed` / `isModuleLicensed` (cache hit/miss, license absent, license present-but-unrelated). *(`__tests__/Services/license.test.tsx` — 8 passing tests covering empty cache, refresh population, feature/module presence checks, refresh-failure → cache cleared, license-without-modules-array, subscribe/unsubscribe, clear-cache reset)*
+- [ ] Playwright tests: an OSS-only login (no license) sees the OSS-appropriate set of nav items / Settings tabs / HostDetail tabs / action buttons; a Pro+ Professional license sees the Professional subset; a Pro+ Enterprise license sees everything.  Tests should be parametrized over license fixture. *(deferred to Phase 11 — requires license-fixture infrastructure spanning frontend e2e + backend test-database seeding; existing `e2e/proplus.spec.ts` covers feature-presence smoke tests but not the parametrized triple-tier matrix)*
 
 **Estimated Size:** ~150 lines of frontend gating logic + ~60 entry-shape conversions + ~80 lines of test fixtures.  No backend changes — the 402-on-unlicensed pattern already exists; this just stops surfacing the call sites that would hit it.
 
@@ -2006,6 +2006,7 @@ sets, locked-down baselines).
 - [ ] Air-gapped deployment guide
 - [ ] Optical media transfer procedures documentation
 - [ ] Integration tests for collection and ingestion workflows
+- [ ] **Agent subprocess persistence across WebSocket reconnects** (cross-cutting fix, see fragility note below)
 
 ### Exit Criteria
 
@@ -2015,6 +2016,166 @@ sets, locked-down baselines).
 - Managed hosts can install updates from private repository
 - Vulnerability scanning works with point-in-time CVE context
 - Compliance reporting accounts for air-gap transfer state
+
+### 11.6 Agent subprocess persistence across reconnects (carry-over from Phase 10.4)
+
+**Symptom observed during 10.4 testing:** any deployment plan whose
+shell commands run longer than the WebSocket reconnect window loses
+its result.  Concretely: a 7200s `apt-mirror` plan was dispatched at
+T+0; the WebSocket bounced at T+5 minutes (server restart for an
+unrelated code change); the agent reconnected at T+6 minutes carrying
+no in-flight execution state; `apt-mirror` had been killed in the
+gap; the `command_result` for the original plan was never produced
+and never reached the server.  The mirror row sat in `DISPATCHED`
+forever despite the underlying job being dead.
+
+This will become acute in Phase 11 because air-gap collection cycles
+include multi-hour package mirror sync + ISO build + checksum verify
+operations.  A single WS hiccup mid-cycle today loses the entire
+result.
+
+**Required fix (cross-cutting; lives in `sysmanage-agent`):**
+
+1. Agent writes a per-plan execution-state journal to
+   ``~/.sysmanage-agent/inflight/<message_id>.json`` BEFORE
+   `subprocess.Popen` is called.  Journal carries the message_id,
+   plan, started_at, and the spawned PID.
+2. After spawn, `subprocess.communicate()` is wrapped in a watchdog
+   that checkpoints every 30s — appends an `alive_at` heartbeat to
+   the journal so a post-mortem reader can tell killed-cleanly from
+   killed-by-OS-OOM.
+3. On agent startup, the journal directory is scanned.  For each
+   in-flight plan: if the PID is still alive, attach to it and stream
+   its output; if it's gone, mark the plan failed with the reason
+   "agent restart while plan was in-flight" and emit a synthetic
+   command_result so the server's ``DISPATCHED`` row clears.
+4. On clean WS reconnect (without an agent restart), the in-memory
+   subprocess set is unchanged — only the connection itself bounced
+   — so the `command_result` is queued normally and delivered when
+   the WS comes back.  This is the easy case; the journal handles
+   the hard case where the agent process itself died/restarted.
+
+**Estimated size:** ~250 lines in `sysmanage-agent/src/sysmanage_agent/communication/`
+plus ~50 lines of fixture changes for the existing message-handler
+tests.  No server-side changes needed (the synthetic command_result
+flows through the existing routing path).
+
+**Alternative considered + rejected:** "make all plans idempotent and
+re-dispatch on timeout."  Rejected because some plans have side
+effects that aren't safe to retry blindly (e.g.
+``build_kvm_create_plan`` consumes a unique cloud-init seed; running
+it twice produces a half-built VM).  The journal approach is more
+work but correctly distinguishes "the plan ran to completion, agent
+just couldn't tell us" from "the plan was interrupted, retry is
+required."
+
+---
+
+### 11.7 i18n/l10n debt repayment (carry-over from Phase 10.4 audit)
+
+**Problem.** Phase 10.4's i18n audit revealed three classes of
+translation debt across the four repos that the in-phase tooling pass
+quantified, locked-in via "don't make it worse" budgets, but did not
+fully resolve.  All four repos now have ``make i18n-validate`` wired
+into ``lint`` / ``test`` so the debt cannot grow; this phase pays
+it down to zero.
+
+**Current state (measured 2026-05-08, locked in via budgets):**
+
+  1. **OSS frontend `[TODO]` placeholders** — ~412 keys per non-en
+     locale × 13 non-en locales = **~5,400 strings** still showing
+     ``[TODO] <english>`` because the keys were referenced by code
+     before being added to the locale catalog.  ``make i18n-seed``
+     populated them with English fallbacks; non-English users see
+     the ``[TODO]`` prefix, which is functional but ugly.
+     *Affected namespaces:* ``hostDetail.*``, ``thirdPartyRepos.*``,
+     ``security.*``, ``openbao.*``, ``userDetail.*``, ``auditLog.*``,
+     ``common.*``, ``graylog.*``, ``login.*``, ``userProfile.*``,
+     ``firewallRoles.*`` plus ~80 misc.
+
+  2. **Docs long-form English-passthrough** — ~2,500 keys per locale
+     where the locale value equals the en value verbatim × 13
+     non-en locales = **~32,000 strings**.  Mostly long-form body
+     paragraphs and 400+ char descriptions; titles + short labels
+     are translated.  Validator's ``PASSTHROUGH_BUDGET_PER_LOCALE``
+     is set to 3200; lower it as locales are filled in.
+
+  3. **Agent debug-marker noise** — initially 627 msgids extracted
+     from ``_(...)`` calls in agent operations modules where the
+     wrapped string was an internal debug breadcrumb.  Phase 10.4
+     unwrapped 77 ``logger.debug(_(...))`` callsites; ~540 remain
+     mostly in collection/* modules.  These should not be
+     translated; they should be **unwrapped** from ``_()`` so they
+     no longer pollute the extraction set.  The validator's
+     ``MISSING_BUDGET=700`` accommodates them today.
+
+  4. **Docs untagged HTML elements** — ~10,700 ``<h*|p|li|button|
+     td|th|a|span|strong|em|figcaption|caption>...</tag>`` text
+     nodes across ~110 docs pages have no ``data-i18n="..."``
+     attribute, so they render English even when a locale is
+     selected.  Top offenders: ``monitoring.html`` (412),
+     ``scanning.html`` (402), ``package-uninstall-security.html``
+     (364), ``best-practices.html`` (320), ``design-principles.html``
+     (305), ``basic-management.html`` (298), ``package-uninstall-
+     troubleshooting.html`` (288), ``third-party-repositories.html``
+     (246), ``user-management.html`` (236), ``index.html`` (230).
+     Tagging requires choosing meaningful key names per element,
+     extracting the en text into ``en.json``, and seeding the 13
+     other locales.
+
+  5. **Pro+ engine plan descriptions** — 360 hardcoded English
+     strings across 17 ``.pyx`` engines (virtualization,
+     container, repository_mirroring, observability, automation,
+     ...).  These flow ``engine → server → frontend`` as raw
+     ``description`` fields and render verbatim in the OSS UI, so
+     non-English users see English plan descriptions in command
+     logs.  Architectural fix needed: switch from raw f-string
+     ``description = f"snapshot {name} at {ts}"`` to envelope
+     ``{description_key: "engine.repo_mirror.snapshot_at",
+     params: {name, ts}}`` and resolve in the frontend via
+     ``t(description_key, params)``.  Requires a key catalog
+     (~360 entries) added to the frontend locale JSONs.
+
+**Acceptance criteria:**
+
+- [ ] OSS: zero ``[TODO] `` prefixed values across all 14 locales.
+- [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
+      attribute (10,700+ elements to tag).
+- [ ] Docs: ``PASSTHROUGH_BUDGET_PER_LOCALE`` lowered to 0 (every
+      key has a real, non-passthrough translation).
+- [ ] Agent: ~540 unwrap candidates triaged.  Real user-facing
+      strings stay wrapped + get translated; debug breadcrumbs are
+      unwrapped.  ``MISSING_BUDGET`` lowered to 0.
+- [ ] Pro+ engines: plan descriptions converted to envelope form;
+      key catalog populated in OSS + Pro+ locale JSONs.
+- [ ] All four repos run ``make i18n-validate`` clean with zero
+      budget tolerance.
+
+**Out of scope:** adding a 15th supported language.  The canonical
+14 (`ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW`)
+are locked.
+
+**Estimated effort:** ~190,000 strings (37,000 already-keyed
++ 150,000 from docs HTML tagging × 13 non-en locales).  With a
+translation service (DeepL Pro, Google Cloud Translation, etc.)
+seeded from en and then spot-reviewed by native speakers per locale,
+this is a 2–3 week project, not multi-month.  Hand-translation by
+an LLM at the quality bar this project sets is impractical at this
+scale.
+
+**Tooling already in place (Phase 10.4):**
+- ``make i18n-validate`` in all four repos, wired into ``lint`` /
+  ``test`` so CI blocks new gaps.
+- ``make i18n-seed`` (OSS, docs) — populates missing keys with
+  ``[TODO] <english>`` placeholders.
+- ``make i18n-extract`` / ``--extract`` — emit current key inventory.
+- Agent: ``make i18n-extract`` / ``i18n-merge`` / ``i18n-compile``
+  pipeline using pybabel + msgmerge + msgfmt.
+- ``--strip-orphans`` (OSS, Pro+) — auto-prune locale-only keys.
+- ``--strip-fuzzy`` (agent) — auto-clear fuzzy flags on completed
+  translations.
+- All four repos: ``DYNAMIC_KEY_PREFIXES`` / locale-set / fuzzy /
+  passthrough / missing budgets locked-in to current measured state.
 
 ---
 

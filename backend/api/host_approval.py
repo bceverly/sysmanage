@@ -92,6 +92,25 @@ async def approve_host(  # NOSONAR
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
 
+        # Phase 10.4.4 — auto-apply default mirror assignments for the
+        # newly-approved host.  Best-effort; any failure is logged and
+        # swallowed so approval itself never breaks because of a
+        # mirror engine quirk.
+        try:
+            from backend.api.repository_mirroring import (
+                apply_default_mirrors_for_new_host,
+            )
+
+            apply_default_mirrors_for_new_host(str(host.id))
+        except (
+            Exception
+        ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+            logger.warning(
+                "Default-mirror auto-apply failed for approved host %s: %s",
+                host.fqdn,
+                exc,
+            )
+
         # Check if this host was created as a child host and link them
         try:
             # Look for HostChild records that match this host's hostname

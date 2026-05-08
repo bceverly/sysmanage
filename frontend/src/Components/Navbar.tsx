@@ -10,7 +10,7 @@ import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
 import NotificationBell from "./NotificationBell";
 import ScrollableNavList from "./ScrollableNavList";
-import { getLicenseInfo } from "../Services/license";
+import { refreshLicenseCache } from "../Services/license";
 import { usePlugins } from "../plugins";
 
 const Navbar = () => {
@@ -19,17 +19,25 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { navItems } = usePlugins();
   const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
+  const [activeLicenseModules, setActiveLicenseModules] = useState<string[]>([]);
 
-  // Check license features for plugin nav item visibility
+  // Refresh the license cache (shared with HostDetail / Hosts / Settings via
+  // ``getCachedLicense``) and mirror the result into local state so this
+  // component re-renders when it changes.
   useEffect(() => {
     const checkLicenseFeatures = async () => {
       try {
-        const licenseInfo = await getLicenseInfo();
-        if (licenseInfo.active && licenseInfo.features) {
-          setActiveLicenseFeatures(licenseInfo.features);
+        const licenseInfo = await refreshLicenseCache();
+        if (licenseInfo?.active) {
+          setActiveLicenseFeatures(licenseInfo.features ?? []);
+          setActiveLicenseModules(licenseInfo.modules ?? []);
+        } else {
+          setActiveLicenseFeatures([]);
+          setActiveLicenseModules([]);
         }
       } catch {
         setActiveLicenseFeatures([]);
+        setActiveLicenseModules([]);
       }
     };
 
@@ -150,15 +158,17 @@ const Navbar = () => {
                 </NavLink>
               </li>
             ))}
-            <li className="nav__item">
-              <NavLink
-                to="/secrets"
-                className="nav__link"
-                onClick={closeMenuOnMobile}
-              >
-                {t('nav.secrets')}
-              </NavLink>
-            </li>
+            {activeLicenseModules.includes('secrets_engine') && (
+              <li className="nav__item">
+                <NavLink
+                  to="/secrets"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.secrets')}
+                </NavLink>
+              </li>
+            )}
             <li className="nav__item">
               <NavLink
                 to="/scripts"
@@ -168,15 +178,17 @@ const Navbar = () => {
                 {t('nav.scripts')}
               </NavLink>
             </li>
-            <li className="nav__item">
-              <NavLink
-                to="/reports"
-                className="nav__link"
-                onClick={closeMenuOnMobile}
-              >
-                {t('nav.reports')}
-              </NavLink>
-            </li>
+            {activeLicenseModules.includes('reporting_engine') && (
+              <li className="nav__item">
+                <NavLink
+                  to="/reports"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.reports')}
+                </NavLink>
+              </li>
+            )}
           </ScrollableNavList>
           <button
               className="nav__close"

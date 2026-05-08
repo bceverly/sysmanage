@@ -10,8 +10,11 @@ from .access_groups import *
 from .child_host import *
 from .core import *
 from .dynamic_secrets import *
+from .external_idp import *
+from .mfa import *
 from .package_compliance import *
 from .report_branding import *
+from .repository_mirroring import *
 from .upgrade_profiles import *
 from .grafana_integration import *
 from .graylog_attachment import *
@@ -142,6 +145,24 @@ __all__ = [
     "ReportBranding",
     "ReportTemplate",
     "SINGLETON_BRANDING_ID",
+    # Multi-factor authentication (Phase 10.3)
+    "UserMfaEnrollment",
+    "MfaSettings",
+    "SINGLETON_MFA_SETTINGS_ID",
+    # Repository mirroring (Phase 10.4)
+    "MirrorRepository",
+    "MirrorSnapshot",
+    "MirrorSettings",
+    "MirrorSetupStatus",
+    "MirrorPlatformConfig",
+    "MirrorKnownVersion",
+    "HostDefaultMirror",
+    "SINGLETON_MIRROR_SETTINGS_ID",
+    # External Identity Providers (Phase 10.5)
+    "ExternalIdpProvider",
+    "IdpRoleMapping",
+    "ExternalIdpSettings",
+    "SINGLETON_IDP_SETTINGS_ID",
     # Dynamic secret leases (Phase 8.7)
     "DynamicSecretLease",
     "LEASE_ACTIVE",

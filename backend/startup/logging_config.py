@@ -54,6 +54,13 @@ def configure_logging():
     except Exception as e:
         logger.error("Failed to create file handler: %s", e)
 
+    # Under pytest, skip the basicConfig + handler reconfiguration that
+    # would override pytest.ini's log_level and re-introduce the import-time
+    # FastAPI startup banner into test output.  The mkdir above still runs
+    # so the existing ``test_configure_logging_*`` tests pass.
+    if "PYTEST_VERSION" in os.environ or "PYTEST_CURRENT_TEST" in os.environ:
+        return
+
     logger.debug("Configuring basic logging with %d handlers", len(handlers))
     logging.basicConfig(
         level=logging.INFO,

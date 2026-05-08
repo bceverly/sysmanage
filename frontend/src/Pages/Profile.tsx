@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { getProfile, updateProfile, changePassword, ProfileData, ProfileUpdateData, PasswordChangeData } from '../Services/profile';
 import axiosInstance from '../Services/api';
+import MfaEnrollmentCard from '../Components/MfaEnrollmentCard';
 
 const Profile: React.FC = () => {
     const { t } = useTranslation();
@@ -650,6 +651,9 @@ const Profile: React.FC = () => {
 
     const renderSecurityInfo = () => (
         <Box sx={{ p: 3 }}>
+            {/* Phase 10.3 — MFA enrollment / status / disable card */}
+            <MfaEnrollmentCard />
+
             {/* Password Change Section */}
             <Typography variant="h6" gutterBottom>
                 {t('userProfile.changePassword', 'Change Password')}

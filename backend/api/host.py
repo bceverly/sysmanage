@@ -686,6 +686,28 @@ async def register_host(registration_data: HostRegistration):
                 },
             )
 
+        # Phase 10.4.4 — auto-apply default mirror assignments for the
+        # newly-enrolled host's (platform, version, os_family).  Only
+        # for approved hosts; pending hosts get applied when an admin
+        # approves them (separate hook in approve_host).  Best-effort:
+        # any failure is logged and swallowed so registration itself
+        # never breaks because of a mirror engine quirk.
+        if host.approval_status == "approved":
+            try:
+                from backend.api.repository_mirroring import (
+                    apply_default_mirrors_for_new_host,
+                )
+
+                apply_default_mirrors_for_new_host(str(host.id))
+            except (
+                Exception
+            ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+                logger.warning(
+                    "Default-mirror auto-apply failed for host %s: %s",
+                    host.fqdn,
+                    exc,
+                )
+
         return host
 
 

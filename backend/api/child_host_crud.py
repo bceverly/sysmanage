@@ -24,6 +24,7 @@ from backend.api.child_host_utils import (
     audit_log,
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.api.error_constants import error_distribution_not_found
@@ -33,9 +34,6 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import ChildHostDistribution, Host, HostChild
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 
@@ -80,8 +78,9 @@ async def list_child_hosts(
 ):
     """
     List all child hosts on a parent host.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -162,8 +161,9 @@ async def get_child_host(
 ):
     """
     Get details of a specific child host.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -252,7 +252,7 @@ def _try_kvm_plan_based_deletion(vm_name: str, host_id: str, child_id: str) -> b
     """Dispatch a KVM destroy/undefine plan via the virtualization_engine.
 
     Returns True if the plan was dispatched, False if the engine isn't
-    loaded (caller falls back to legacy WS dispatch which routes to the
+    loaded (caller surfaces a 502 to the user — the agent stub does not honour the
     agent's native delete_child_host handler).
     """
     virt_engine = module_loader.get_module("virtualization_engine")
@@ -303,7 +303,7 @@ def _try_plan_based_deletion(child, host_id):
     """Dispatch ``child`` to the appropriate engine-path delete builder.
 
     Returns ``True`` if a plan was enqueued, ``False`` if the caller
-    should fall back to the legacy WS dispatch.  WSL with a recorded
+    should surface a 502 to the user.  WSL with a recorded
     ``wsl_guid`` stays on the legacy path: the engine plan schema
     doesn't yet have a ``verify_guid`` step, and the legacy path's
     GUID-verify safety net is meaningful for that case.
@@ -375,45 +375,22 @@ async def delete_child_host(
         used_plan_path = _try_plan_based_deletion(child, host_id)
 
         if not used_plan_path:
-            queue_ops = QueueOperations()
+            raise_engine_declined()
 
-            command_message = create_command_message(
-                command_type="delete_child_host",
-                parameters=parameters,
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
-
-        if used_plan_path:
-            # Plan-based path returns its result via the generic
-            # ``apply_deployment_plan`` channel, not the delete-specific
-            # handler that prunes the row.  Remove the HostChild
-            # immediately so the UI reflects the delete; the plan still
-            # runs async on the agent to destroy + undefine + purge
-            # storage.  Cascade to the linked Host record (when the
-            # agent inside the VM registered itself) so the deleted VM
-            # also drops out of the main Hosts list — mirrors the
-            # cascade that ``handle_child_host_delete_result`` does on
-            # the legacy WS path.
-            linked_host_id = child.child_host_id
-            session.delete(child)
-            if linked_host_id:
-                linked_host = (
-                    session.query(Host).filter(Host.id == linked_host_id).first()
-                )
-                if linked_host:
-                    session.delete(linked_host)
-        else:
-            # Legacy WS path: agent's delete_child_host handler will
-            # send back a delete_child_host command_result that triggers
-            # handle_child_host_delete_result to drop the row.
-            child.status = "deleting"
+        # Plan-based path returns its result via the generic
+        # ``apply_deployment_plan`` channel, not the delete-specific
+        # handler that prunes the row.  Remove the HostChild
+        # immediately so the UI reflects the delete; the plan still
+        # runs async on the agent to destroy + undefine + purge
+        # storage.  Cascade to the linked Host record (when the
+        # agent inside the VM registered itself) so the deleted VM
+        # also drops out of the main Hosts list.
+        linked_host_id = child.child_host_id
+        session.delete(child)
+        if linked_host_id:
+            linked_host = session.query(Host).filter(Host.id == linked_host_id).first()
+            if linked_host:
+                session.delete(linked_host)
 
         audit_log(
             session,
@@ -444,8 +421,9 @@ async def refresh_child_hosts(
     """
     Request fresh child host status from the agent.
     This triggers the agent to run list_child_hosts and report current status.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -456,9 +434,6 @@ async def refresh_child_hosts(
         host = get_host_or_404(session, host_id)
 
         from backend.api.child_host_utils import verify_host_active
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
 
         verify_host_active(host)
 
@@ -486,18 +461,7 @@ async def refresh_child_hosts(
                 pass
 
         if not used_plan_path:
-            # LEGACY: superseded by container_engine.build_list_child_hosts_plan.
-            queue_ops = QueueOperations()
-            command_message = create_command_message(
-                command_type="list_child_hosts", parameters={}
-            )
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         session.commit()
 

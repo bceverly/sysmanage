@@ -148,6 +148,8 @@ class ModuleCode(str, Enum):
     # Phase 10 Enterprise modules
     VIRTUALIZATION_ENGINE = "virtualization_engine"
     OBSERVABILITY_ENGINE = "observability_engine"
+    REPOSITORY_MIRRORING_ENGINE = "repository_mirroring_engine"
+    EXTERNAL_IDP_ENGINE = "external_idp_engine"
 
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
@@ -286,5 +288,7 @@ TIER_MODULES = {
         # Phase 10
         ModuleCode.VIRTUALIZATION_ENGINE,
         ModuleCode.OBSERVABILITY_ENGINE,
+        ModuleCode.REPOSITORY_MIRRORING_ENGINE,
+        ModuleCode.EXTERNAL_IDP_ENGINE,
     },
 }

@@ -250,3 +250,9 @@ node_modules/
 
 # Claude Code workspace
 .claude/
+
+# Stray sysmanage-agent local database — created if the agent is ever run
+# with this repo as its working directory.  Canonical location is the
+# sysmanage-agent repo, which has its own .gitignore for these.
+agent.db
+agent.db-journal

@@ -11,6 +11,11 @@ existing ``QueueOperations`` infrastructure so the agent's existing
 generic-deployment handler can run them.
 """
 
+# pylint: disable=too-many-lines
+# This module is the central correlation/result-routing hub for every
+# Pro+ engine — splitting it would just spread the result-router and
+# its helpers across files that always have to be read together.
+
 from __future__ import annotations
 
 import json
@@ -77,12 +82,20 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
     """
     Wrap a deploy plan in an APPLY_DEPLOYMENT_PLAN message and queue it.
 
-    Returns the message_id assigned by the queue, which the agent echoes
-    back in its command_result.command_id field — used for correlating
-    results to the dispatched execution / bulk op.
+    Returns the message_id assigned by the queue.  CRITICAL: this same
+    UUID is used for BOTH the queue row id AND the inner Message
+    payload's ``message_id`` field — that's the value the agent echoes
+    back in ``command_result.command_id``, and the value the correlation
+    map is keyed on.  Prior to this we let ``Message.__init__`` mint its
+    own UUID, which produced two different IDs and silently dropped
+    every Pro+ engine result on the floor.
     """
+    import uuid as _uuid
+
+    shared_id = str(_uuid.uuid4())
     message = Message(
         message_type=MessageType.COMMAND,
+        message_id=shared_id,
         data={
             "command_type": CommandType.APPLY_DEPLOYMENT_PLAN,
             "parameters": {"plan": plan},
@@ -96,6 +109,7 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
             message_data=message.to_dict(),
             direction=QueueDirection.OUTBOUND,
             host_id=str(host_id),
+            message_id=shared_id,
             db=session,
         )
         # When a session is provided to ``enqueue_message`` it only
@@ -138,6 +152,26 @@ def register_host_op_correlation(message_id: str, action: str, host_id: str) -> 
         message_id,
         "host_op",
         action,
+        host_id,
+    )
+
+
+def register_repo_mirror_correlation(
+    message_id: str, action: str, host_id: str, mirror_id: str = ""
+) -> None:
+    """Register a repository-mirroring engine plan for result-routing.
+
+    The ``primary_id`` encodes ``"<action>:<mirror_id>"`` so the result
+    handler knows whether this was a sync / snapshot / restore /
+    integrity_check / gc / setup_check / setup_install, and which row
+    to update.  ``mirror_id`` is empty for host-level setup_check /
+    setup_install operations (those update ``mirror_setup_status``
+    keyed by host_id alone).
+    """
+    _register_correlation(
+        message_id,
+        "repo_mirror_op",
+        f"{action}:{mirror_id}",
         host_id,
     )
 
@@ -894,31 +928,257 @@ def _apply_host_op_result(action: str, host_id: str, outcome: Dict[str, Any]) ->
             )
         return
 
-    # For init / enable / disable / modules — fire a follow-up probe.
-    if action.startswith("init_") or action in (
+    # For init / enable / disable / modules — fire a follow-up probe via
+    # the container_engine plan path.
+    _FOLLOWUP_PROBE_ACTIONS = (
         "enable_kvm_modules",
         "disable_kvm_modules",
         "disable_bhyve",
         "enable_wsl",
-    ):
-        # pylint: disable=import-outside-toplevel
-        from backend.api.handlers.child_host.virtualization_helpers import (
-            queue_virtualization_check,
-        )
-        from backend.persistence import db as _db
+    )
+    if action.startswith("init_") or action in _FOLLOWUP_PROBE_ACTIONS:
+        _queue_capability_followup_probe(action, host_id)
 
-        session_local = _db.get_session_local()
-        with session_local() as session:
-            try:
-                queue_virtualization_check(session, host_id)
-                session.commit()
-            except Exception as exc:
+
+def _queue_capability_followup_probe(action: str, host_id: str) -> None:
+    """Queue a check_virtualization_support plan after a state-changing
+    host op so the capability cache reflects the new state without a
+    manual probe."""
+    container_engine = module_loader.get_module("container_engine")
+    builder = (
+        getattr(container_engine, "build_check_virtualization_support_plan", None)
+        if container_engine
+        else None
+    )
+    if builder is None:
+        return
+    try:
+        msg_id = enqueue_apply_plan(host_id=str(host_id), plan=builder(), timeout=60)
+        register_host_op_correlation(
+            msg_id, "check_virtualization_support", str(host_id)
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "Failed to queue follow-up capability check after %s on %s: %s",
+            action,
+            host_id,
+            exc,
+        )
+
+
+def _apply_repo_mirror_op_result(
+    primary_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Handle completion of a repository_mirroring_engine plan.
+
+    ``primary_id`` is ``"<action>:<mirror_id>"``.  Action drives which
+    OSS row gets updated:
+
+      sync / snapshot / restore / integrity_check / gc
+          → update ``mirror_repository.last_sync_status`` /
+            ``last_sync_error`` for the named mirror_id.
+
+      setup_check
+          → parse the probe stdout (key=value lines) and upsert
+            ``mirror_setup_status`` for the host.
+
+      setup_install
+          → mark the install as ``succeeded`` / ``failed`` on the
+            ``mirror_setup_status`` row, then queue a follow-up
+            ``setup_check`` so the UI reflects post-install tool
+            presence without a manual refresh.
+    """
+    if ":" not in primary_id:
+        action, mirror_id = primary_id, ""
+    else:
+        action, mirror_id = primary_id.split(":", 1)
+
+    session_local = db.get_session_local()
+    with session_local() as session:
+        if action in ("sync", "snapshot", "restore", "integrity_check", "gc"):
+            _apply_mirror_sync_status(session, action, mirror_id, outcome)
+        elif action == "setup_check":
+            _apply_mirror_setup_check(session, host_id, outcome)
+        elif action == "setup_install":
+            _apply_mirror_setup_install(session, host_id, outcome)
+        elif action in ("default_apply", "default_revert"):
+            # Phase 10.4.4 — pointing a client host at (or away from)
+            # the locally-hosted mirror.  No row update needed on the
+            # OSS side since the assignment was committed BEFORE the
+            # plan was queued; the result here is informational only.
+            # We log success/failure so a future audit-log endpoint
+            # can surface it.
+            if outcome["status"] != "succeeded":
                 logger.warning(
-                    "Failed to queue follow-up capability check after %s on %s: %s",
+                    "Mirror default %s failed for host %s: %s",
                     action,
                     host_id,
-                    exc,
+                    outcome["stderr"] or outcome["error"],
                 )
+        else:
+            logger.warning(
+                "Unknown repo_mirror_op action %r (mirror_id=%s host_id=%s)",
+                action,
+                mirror_id,
+                host_id,
+            )
+            return
+        session.commit()
+
+    if action == "setup_install" and outcome["status"] == "succeeded":
+        _queue_followup_setup_check(host_id, session_local)
+
+
+def _queue_followup_setup_check(host_id: str, session_local) -> None:
+    """Auto-chain a setup_check after a successful install so the card
+    reflects the new tool presence.  The follow-up message rides the
+    same outbound queue + result-routing path.  Stamp
+    ``last_check_message_id`` on the row before returning, or the
+    frontend's polling loop (which keys off non-NULL message_id markers)
+    sees both flags clear and stops polling before the auto-probe result
+    lands."""
+    try:
+        mirror_engine = module_loader.get_module("repository_mirroring_engine")
+        if mirror_engine is None:
+            return
+        probe_plan = mirror_engine.build_mirror_setup_check_plan()
+        msg_id = enqueue_apply_plan(host_id=str(host_id), plan=probe_plan, timeout=60)
+        _register_correlation(msg_id, "repo_mirror_op", "setup_check:", str(host_id))
+        with session_local() as probe_session:
+            row = (
+                probe_session.query(models.MirrorSetupStatus)
+                .filter(models.MirrorSetupStatus.host_id == host_id)
+                .first()
+            )
+            if row is not None:
+                row.last_check_message_id = msg_id
+                probe_session.commit()
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "Failed to queue follow-up setup_check after install on host %s: %s",
+            host_id,
+            exc,
+        )
+
+
+def _apply_mirror_sync_status(
+    session, action: str, mirror_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Update ``mirror_repository.last_sync_*`` after a sync-family plan."""
+    if not mirror_id:
+        return
+    row = (
+        session.query(models.MirrorRepository)
+        .filter(models.MirrorRepository.id == mirror_id)
+        .first()
+    )
+    if row is None:
+        logger.info("Mirror %s no longer exists; dropping %s result", mirror_id, action)
+        return
+    if outcome["status"] == "succeeded":
+        row.last_sync_status = "SUCCESS"
+        row.last_sync_error = None
+    else:
+        row.last_sync_status = "FAILED"
+        row.last_sync_error = (
+            outcome["stderr"] or outcome["error"] or "no error message returned"
+        )[:8000]
+
+
+_PROBE_TOOL_KEYS = {
+    "apt-mirror",
+    "apt-mirror2",
+    "reposync",
+    "createrepo_c",
+    "trickle",
+    "rsync",
+    "curl",
+    "sha256sum",
+    "xz",
+    "gzip",
+    "bzip2",
+}
+
+
+def _parse_setup_check_stdout(stdout: str) -> Dict[str, Any]:
+    """Parse the probe's ``key=value`` lines into a structured dict.
+
+    Returns ``{"tools": {<tool>: "present"|"missing"}, "platform": str,
+    "distro": str}``.  Unknown keys are dropped so a malicious agent
+    can't inject arbitrary fields into the JSON column.
+    """
+    tools: Dict[str, str] = {}
+    platform = ""
+    distro = ""
+    for line in (stdout or "").splitlines():
+        line = line.strip()
+        if "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if key in _PROBE_TOOL_KEYS and value in ("present", "missing"):
+            tools[key] = value
+        elif key == "platform":
+            platform = value[:40]
+        elif key == "distro":
+            distro = value[:40]
+    return {"tools": tools, "platform": platform, "distro": distro}
+
+
+def _apply_mirror_setup_check(session, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Upsert ``mirror_setup_status`` from the probe's stdout."""
+    parsed = _parse_setup_check_stdout(outcome["stdout"])
+    now = _now_naive()
+    row = (
+        session.query(models.MirrorSetupStatus)
+        .filter(models.MirrorSetupStatus.host_id == host_id)
+        .first()
+    )
+    if row is None:
+        row = models.MirrorSetupStatus(host_id=host_id)
+        session.add(row)
+    row.tools = parsed["tools"]
+    row.platform = parsed["platform"] or row.platform
+    row.distro = parsed["distro"] or row.distro
+    row.last_check_at = now
+    row.last_check_message_id = None  # probe completed; clear in-flight marker
+    if outcome["status"] == "succeeded":
+        row.last_check_error = None
+    else:
+        row.last_check_error = (
+            outcome["stderr"] or outcome["error"] or "probe failed"
+        )[:8000]
+
+
+def _apply_mirror_setup_install(session, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Stamp install_status + clear the in-flight marker."""
+    now = _now_naive()
+    row = (
+        session.query(models.MirrorSetupStatus)
+        .filter(models.MirrorSetupStatus.host_id == host_id)
+        .first()
+    )
+    if row is None:
+        row = models.MirrorSetupStatus(host_id=host_id)
+        session.add(row)
+    row.last_install_at = now
+    row.last_install_message_id = None
+    if outcome["status"] == "succeeded":
+        row.install_status = "succeeded"
+        row.last_install_error = None
+    else:
+        row.install_status = "failed"
+        row.last_install_error = (
+            outcome["stderr"] or outcome["error"] or "install failed"
+        )[:8000]
+
+
+def _now_naive():
+    """Return a naive UTC datetime — matches the column type on every model."""
+    from datetime import datetime, timezone as _tz
+
+    return datetime.now(_tz.utc).replace(tzinfo=None)
 
 
 def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
@@ -963,6 +1223,22 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         except Exception as exc:
             logger.warning(
                 "Failed to apply host_op result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Repository-mirroring engine plans (sync / snapshot / restore /
+    # integrity_check / gc / setup_check / setup_install).  ``primary_id``
+    # is encoded as ``"<action>:<mirror_id>"`` (mirror_id is empty for
+    # host-level setup operations).
+    if engine_name == "repo_mirror_op":
+        try:
+            _apply_repo_mirror_op_result(primary_id, host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply repo_mirror_op result for %s on host %s: %s",
                 primary_id,
                 host_id,
                 exc,

@@ -26,6 +26,7 @@ import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { getLicenseInfo } from '../Services/license';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { broadcastService } from '../Services/broadcast';
@@ -102,6 +103,22 @@ const Hosts = () => {
 
     // Child host filter: 'all' = show all, 'parents' = hide child hosts, 'children' = child hosts only
     const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>(getFilterFromHash);
+
+    // Pro+ license module list — used to gate child-host UI (filter,
+    // badges).  Without ``container_engine`` loaded, the OSS server
+    // refuses child-host operations entirely; the UI follows suit.
+    const [licenseModules, setLicenseModules] = useState<string[]>([]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const licenseInfo = await getLicenseInfo();
+                setLicenseModules(licenseInfo.modules || []);
+            } catch {
+                setLicenseModules([]);
+            }
+        })();
+    }, []);
+    const childHostsLicensed = licenseModules.includes('container_engine');
     const [canApproveHosts, setCanApproveHosts] = useState<boolean>(false);
     const [canDeleteHost, setCanDeleteHost] = useState<boolean>(false);
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
@@ -1002,34 +1019,36 @@ const Hosts = () => {
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
 
-                {/* Child Host Filter */}
-                <ToggleButtonGroup
-                    value={childHostFilter}
-                    exclusive
-                    onChange={(_event, newValue) => {
-                        if (newValue !== null) {
-                            setChildHostFilter(newValue);
-                        }
-                    }}
-                    size="small"
-                    aria-label={t('hosts.childHostFilter', 'Child host filter')}
-                >
-                    <ToggleButton value="all" aria-label={t('hosts.showAllHosts', 'Show all hosts')}>
-                        <Tooltip title={t('hosts.showAllHosts', 'Show all hosts')}>
-                            <span>{t('hosts.allHosts', 'All')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                    <ToggleButton value="parents" aria-label={t('hosts.hideChildHosts', 'Hide child hosts')}>
-                        <Tooltip title={t('hosts.hideChildHosts', 'Hide child hosts')}>
-                            <span>{t('hosts.parentsOnly', 'Parents')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                    <ToggleButton value="children" aria-label={t('hosts.childHostsOnly', 'Child hosts only')}>
-                        <Tooltip title={t('hosts.childHostsOnly', 'Child hosts only')}>
-                            <span>{t('hosts.childrenOnly', 'Children')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                </ToggleButtonGroup>
+                {/* Child Host Filter — Pro+ feature, hidden in OSS builds */}
+                {childHostsLicensed && (
+                    <ToggleButtonGroup
+                        value={childHostFilter}
+                        exclusive
+                        onChange={(_event, newValue) => {
+                            if (newValue !== null) {
+                                setChildHostFilter(newValue);
+                            }
+                        }}
+                        size="small"
+                        aria-label={t('hosts.childHostFilter', 'Child host filter')}
+                    >
+                        <ToggleButton value="all" aria-label={t('hosts.showAllHosts', 'Show all hosts')}>
+                            <Tooltip title={t('hosts.showAllHosts', 'Show all hosts')}>
+                                <span>{t('hosts.allHosts', 'All')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                        <ToggleButton value="parents" aria-label={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                            <Tooltip title={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                                <span>{t('hosts.parentsOnly', 'Parents')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                        <ToggleButton value="children" aria-label={t('hosts.childHostsOnly', 'Child hosts only')}>
+                            <Tooltip title={t('hosts.childHostsOnly', 'Child hosts only')}>
+                                <span>{t('hosts.childrenOnly', 'Children')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                )}
             </Box>
 
             {/* Column Visibility Button */}

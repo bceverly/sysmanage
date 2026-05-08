@@ -15,6 +15,7 @@ from backend.api.child_host_utils import (
     audit_log,
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
@@ -23,9 +24,6 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import HostChild
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 
@@ -53,7 +51,7 @@ def _build_lifecycle_plan(child_type: str, action: str, name: str):
     """Pick the right engine + builder and return the plan, or None.
 
     Returns None when no engine plan-builder exists for ``child_type``,
-    which is the signal for callers to fall back to the legacy WS path.
+    which is the signal for the caller to surface a 502.
     """
     if action not in ("start", "stop", "restart"):
         return None
@@ -96,7 +94,7 @@ def _try_update_agent_plan_dispatch(
     KVM/bhyve/VMM child hosts have their own registered agent — operators
     should use the standard update-agent flow on the linked Host rather
     than this child-host shortcut.  Returns False for those types so the
-    caller falls through to the legacy WS dispatch.
+    caller surfaces a 502 to the user.
     """
     if child_type not in ("lxd", "wsl"):
         return False
@@ -168,9 +166,8 @@ def _try_lifecycle_plan_dispatch(
     """Dispatch a lifecycle action via a Pro+ engine plan path.
 
     Tries virtualization_engine for kvm/bhyve/vmm and container_engine for
-    lxd/wsl.  Returns True if a plan was queued, False to fall back to the
-    legacy multi-step WS dispatch (which routes to the agent's native
-    ``child_host_<type>_lifecycle`` handlers).
+    lxd/wsl.  Returns True if a plan was queued, False on engine declination
+    (caller surfaces a 502 to the user).
 
     When ``child_id`` is supplied the dispatch is registered with the Pro+
     correlation map so the result handler updates the HostChild row's
@@ -198,8 +195,7 @@ def _try_lifecycle_plan_dispatch(
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
-            "Lifecycle plan path failed for %s/%s on host %s; falling back to "
-            "legacy WS dispatch: %s",
+            "Lifecycle plan path failed for %s/%s on host %s; engine path declined: %s",
             child_type,
             action,
             host_id,
@@ -253,26 +249,7 @@ async def start_child_host(
         )
 
         if not used_plan_path:
-            # LEGACY: superseded by engine path for kvm/bhyve/vmm.  Still
-            # active for lxd/wsl until their lifecycle plan-builders land
-            # (audit PR-04, PR-06).
-            queue_ops = QueueOperations()
-
-            command_message = create_command_message(
-                command_type="start_child_host",
-                parameters={
-                    "child_name": child.child_name,
-                    "child_type": child.child_type,
-                },
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         audit_log(
             session,
@@ -337,26 +314,7 @@ async def stop_child_host(
         )
 
         if not used_plan_path:
-            # LEGACY: superseded by engine path for kvm/bhyve/vmm.  Still
-            # active for lxd/wsl until their lifecycle plan-builders land
-            # (audit PR-04, PR-06).
-            queue_ops = QueueOperations()
-
-            command_message = create_command_message(
-                command_type="stop_child_host",
-                parameters={
-                    "child_name": child.child_name,
-                    "child_type": child.child_type,
-                },
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         audit_log(
             session,
@@ -421,26 +379,7 @@ async def restart_child_host(
         )
 
         if not used_plan_path:
-            # LEGACY: superseded by engine path for kvm/bhyve/vmm.  Still
-            # active for lxd/wsl until their lifecycle plan-builders land
-            # (audit PR-04, PR-06).
-            queue_ops = QueueOperations()
-
-            command_message = create_command_message(
-                command_type="restart_child_host",
-                parameters={
-                    "child_name": child.child_name,
-                    "child_type": child.child_type,
-                },
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         audit_log(
             session,
@@ -471,10 +410,11 @@ async def update_child_agent(
 ):
     """
     Update the sysmanage-agent on a child host via its parent.
-    Requires UPDATE_AGENT permission.
-
-    No license check — agent update should work for community users too.
+    Requires UPDATE_AGENT permission and a Pro+ license (child hosts
+    are a Pro+ feature; the route would otherwise operate on records
+    that cannot exist in an OSS deployment).
     """
+    _check_container_module()
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -527,29 +467,7 @@ async def update_child_agent(
         )
 
         if not used_plan_path:
-            # LEGACY: superseded by container_engine.build_lxd_update_agent_plan /
-            # build_wsl_update_agent_plan for LXD/WSL.  KVM/bhyve/VMM child
-            # hosts route here intentionally — once their inner agent
-            # registers, operators should use the standard Host-level
-            # update-agent flow rather than this child-host shortcut.
-            queue_ops = QueueOperations()
-
-            command_message = create_command_message(
-                command_type="update_child_agent",
-                parameters={
-                    "child_name": child.child_name,
-                    "child_type": child.child_type,
-                    "distribution": child.distribution,
-                },
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         audit_log(
             session,

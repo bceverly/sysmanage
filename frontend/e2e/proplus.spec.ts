@@ -372,12 +372,21 @@ test.describe('Pro+ Navigation', () => {
  * true when the tab was found + clicked; false when it isn't present
  * (which can happen when the Pro+ engines aren't licensed / loaded in
  * this test environment, in which case the caller should soft-skip).
+ *
+ * The Settings page uses MUI ``<Tabs variant="scrollable">`` so tabs
+ * past the viewport width are present in the DOM but clipped behind
+ * an ``overflow: hidden`` container.  ``isVisible()`` returns false for
+ * those clipped tabs, which is why we gate on ``count()`` (existence
+ * in the DOM) rather than visibility, and call
+ * ``scrollIntoViewIfNeeded()`` before the click.  License-absent → the
+ * tab isn't rendered at all → ``count() === 0`` → soft-skip.
  */
 async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
   await page.goto('/settings');
   try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* ok */ }
   const tab = page.getByRole('tab', { name: tabName }).first();
-  if (!(await tab.isVisible().catch(() => false))) return false;
+  if ((await tab.count()) === 0) return false;
+  await tab.scrollIntoViewIfNeeded().catch(() => { /* ok */ });
   await tab.click();
   try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* ok */ }
   return true;

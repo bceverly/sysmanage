@@ -13,6 +13,7 @@ from backend.api.child_host_utils import (
     audit_log,
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.api.error_constants import error_kvm_linux_only
@@ -21,12 +22,8 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
-queue_ops = QueueOperations()
 
 
 def _check_container_module():
@@ -64,9 +61,9 @@ def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
       container_engine
         ``init_lxd``             → build_lxd_init_plan
 
-    Returns True when the plan is queued (caller skips legacy
-    fallback), False when the engine isn't loaded or the matching
-    builder isn't present (caller falls through).
+    Returns True when the plan is queued, False when the engine isn't
+    loaded or the matching builder isn't present (caller surfaces a 502
+    to the user).
     """
     # Action → (engine_name, builder_name) mapping
     routing = {
@@ -112,8 +109,7 @@ def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
-            "Init plan path failed for action=%s host=%s; falling back to "
-            "legacy WS dispatch: %s",
+            "Init plan path failed for action=%s host=%s; engine path declined: %s",
             action,
             host_id,
             exc,
@@ -162,18 +158,7 @@ async def enable_wsl(
             )
 
         if not _try_init_plan_dispatch("enable_wsl", host_id):
-            # LEGACY: superseded by container_engine.build_wsl_enable_plan.
-            command_message = create_command_message(
-                command_type="enable_wsl", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -239,18 +224,7 @@ async def initialize_lxd(
             )
 
         if not _try_init_plan_dispatch("init_lxd", host_id):
-            # LEGACY: superseded by container_engine.build_lxd_init_plan.
-            command_message = create_command_message(
-                command_type="initialize_lxd", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -316,18 +290,7 @@ async def initialize_vmm(
             )
 
         if not _try_init_plan_dispatch("init_vmm", host_id):
-            # LEGACY: superseded by virtualization_engine.build_vmm_init_plan.
-            command_message = create_command_message(
-                command_type="initialize_vmm", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -394,19 +357,7 @@ async def initialize_kvm(
             )
 
         if not _try_init_plan_dispatch("init_kvm", host_id):
-            # LEGACY: superseded by virtualization_engine.build_kvm_init_plan.
-            # Kept as fallback when the engine module isn't loaded.
-            command_message = create_command_message(
-                command_type="initialize_kvm", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -474,18 +425,7 @@ async def initialize_bhyve(
             )
 
         if not _try_init_plan_dispatch("init_bhyve", host_id):
-            # LEGACY: superseded by virtualization_engine.build_bhyve_init_plan.
-            command_message = create_command_message(
-                command_type="initialize_bhyve", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -552,18 +492,7 @@ async def disable_bhyve(
             )
 
         if not _try_init_plan_dispatch("disable_bhyve", host_id):
-            # LEGACY: superseded by virtualization_engine.build_bhyve_disable_plan.
-            command_message = create_command_message(
-                command_type="disable_bhyve", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -629,18 +558,7 @@ async def enable_kvm_modules(
             )
 
         if not _try_init_plan_dispatch("enable_kvm_modules", host_id):
-            # LEGACY: superseded by build_kvm_modules_enable_plan.
-            command_message = create_command_message(
-                command_type="enable_kvm_modules", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -707,18 +625,7 @@ async def disable_kvm_modules(
             )
 
         if not _try_init_plan_dispatch("disable_kvm_modules", host_id):
-            # LEGACY: superseded by build_kvm_modules_disable_plan.
-            command_message = create_command_message(
-                command_type="disable_kvm_modules", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -744,7 +651,7 @@ async def disable_kvm_modules(
 
 def _try_kvm_network_plan_path(host_id, request) -> bool:
     """Build + enqueue a KVM network apply_deployment_plan, or return False
-    so the caller falls back to the legacy WS dispatch.  Caller has already
+    so the caller surfaces a 502 to the user.  Caller has already
     validated request.mode is one of ('nat', 'bridged', 'bridge') and that
     bridged mode has request.bridge set."""
     virt_engine = module_loader.get_module("virtualization_engine")
@@ -776,7 +683,7 @@ def _try_kvm_network_plan_path(host_id, request) -> bool:
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
-            "KVM net plan path failed for host %s; legacy WS: %s",
+            "KVM net plan path failed for host %s; engine path declined: %s",
             host_id,
             exc,
         )
@@ -843,27 +750,7 @@ async def configure_kvm_networking(
         used_plan_path = _try_kvm_network_plan_path(host_id, request)
 
         if not used_plan_path:
-            # LEGACY: superseded by build_kvm_network_create_plan for NAT
-            # mode; bridged mode still routes here pending engine support.
-            parameters = {
-                "mode": request.mode,
-            }
-            if request.network_name:
-                parameters["network_name"] = request.network_name
-            if request.bridge:
-                parameters["bridge"] = request.bridge
-
-            command_message = create_command_message(
-                command_type="setup_kvm_networking", parameters=parameters
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         # Log the action
         audit_log(
@@ -937,24 +824,13 @@ async def list_kvm_networks(
                 used_plan_path = True
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 logging.getLogger(__name__).warning(
-                    "KVM net list plan path failed for host %s; legacy WS: %s",
+                    "KVM net list plan path failed for host %s; engine path declined: %s",
                     host_id,
                     exc,
                 )
 
         if not used_plan_path:
-            # LEGACY: superseded by build_kvm_network_list_plan.
-            command_message = create_command_message(
-                command_type="list_kvm_networks", parameters={}
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
+            raise_engine_declined()
 
         session.commit()
 

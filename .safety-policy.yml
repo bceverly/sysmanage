@@ -1,0 +1,49 @@
+# SafetyCLI v3.0 policy file.  Schema source-of-truth:
+#   safety_schemas.config.schemas.v3_0.main.Config
+#
+# IMPORTANT — cloud-policy precedence: when authenticated to
+# safetycli.com, ``safety scan`` fetches the codebase's policy from the
+# Safety Platform and IGNORES this local file.  This file therefore
+# only takes effect for offline / CI runs, or when invoked with
+# ``--skip-policy``.  Manage the same ignores + exclusions in the web
+# UI under "Codebase Settings → Policy" for the authenticated path.
+#
+# Maintenance rule: every entry MUST cite the upstream advisory and a
+# one-line reason (≥10 chars).  Remove an entry when upstream patches.
+
+version: "3.0"
+
+scanning-settings:
+  max-depth: 6
+  exclude:
+    # Vendored npm toolchain — node-gyp ships a Python ``gyp`` directory
+    # under node_modules with its own pyproject.toml that pins
+    # setuptools loosely.  We don't manage this dep; it's npm's problem.
+    - "frontend/node_modules"
+    - "node_modules"
+    # Local Python venvs — Safety scans the installed packages too,
+    # which produces double-reporting against requirements.txt.  We
+    # already pin the requirements; venv-resolved versions are downstream.
+    - ".venv"
+    - "venv"
+    # Build artifacts + caches
+    - "dist"
+    - "build"
+    - "__pycache__"
+    - ".tox"
+    - ".pytest_cache"
+
+report:
+  dependency-vulnerabilities:
+    enabled: true
+    auto-ignore-in-report:
+      vulnerabilities:
+        # aiohttp >= 3.13.5 is the latest published patched release.
+        # Safety surfaces newer advisories filed against >=3.13.5 with
+        # no upstream fix yet — re-evaluate when 3.14 lands.
+        #   https://github.com/aio-libs/aiohttp/security/advisories
+        # NOTE: Replace the placeholder id below with the real advisory
+        # id shown in the safetycli.com web UI for this finding.
+        "66704":
+          reason: "aiohttp 3.13.5 is the latest patched release; no upstream fix for newer advisory bucket"
+          expires: "2026-09-01"

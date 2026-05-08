@@ -170,7 +170,7 @@ async def orchestrated_reboot(
 
         # Enqueue stop commands for each running child.  Mirror the
         # ``_try_lifecycle_plan_dispatch`` pattern from child_host_control.py
-        # so the engine path runs first; fall back to the legacy WS
+        # so the engine path runs first; without it the caller surfaces a 502 since the
         # command_type only when Pro+ isn't loaded.  Without this, after
         # the agent's legacy ``child_host_operations.py`` is deleted the
         # safe-parent-reboot's child-stop phase fails because the agent's

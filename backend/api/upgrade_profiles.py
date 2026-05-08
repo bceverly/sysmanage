@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.services import upgrade_scheduler
@@ -50,6 +51,26 @@ router = APIRouter(
 # Reused 404 detail string — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_UPGRADE_PROFILE_NOT_FOUND = "Upgrade profile not found"
+
+
+def _check_automation_module():
+    """Refuse the request when the Pro+ automation_engine module isn't loaded.
+
+    Phase 10.6 moved upgrade-profile cron evaluation and per-host dispatch
+    into the engine; without it loaded, the OSS routes have no business
+    logic to execute, so they short-circuit with a 402.  Mirrors the
+    Phase 2.3 secrets_engine pattern (``backend/api/secrets/crud.py``).
+    """
+    engine = module_loader.get_module("automation_engine")
+    if engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Scheduled upgrade profiles require a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
+    return engine
 
 
 class UpgradeProfileCreateRequest(BaseModel):
@@ -110,10 +131,19 @@ def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
 
 
 def _validate_and_compute_next_run(cron: str) -> datetime:
+    """Validate ``cron`` and compute its next-run datetime via the
+    ``automation_engine`` Pro+ module (Phase 10.6 migration).
+
+    The OSS ``upgrade_scheduler`` module is kept as a no-op shell —
+    every route here is gated by ``_check_automation_module()`` first,
+    so the engine is guaranteed to be loaded by the time we reach this
+    helper.
+    """
+    engine = _check_automation_module()
     try:
-        upgrade_scheduler.validate_cron(cron)
-        return upgrade_scheduler.next_run_from_cron(cron, datetime.now(timezone.utc))
-    except upgrade_scheduler.CronParseError as exc:
+        engine.validate_cron_expression(cron)
+        return engine.next_run_from_cron(cron, datetime.now(timezone.utc))
+    except engine.CronParseError as exc:
         raise HTTPException(
             status_code=400, detail=_("Invalid cron expression: %s") % str(exc)
         ) from exc
@@ -121,6 +151,7 @@ def _validate_and_compute_next_run(cron: str) -> datetime:
 
 @router.get("", response_model=List[UpgradeProfileResponse])
 async def list_profiles(db: Session = Depends(get_db)):
+    _check_automation_module()
     rows = db.query(models.UpgradeProfile).order_by(models.UpgradeProfile.name).all()
     return [UpgradeProfileResponse(**r.to_dict()) for r in rows]
 
@@ -131,6 +162,7 @@ async def create_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_automation_module()
     user = _get_user(db, current_user)
     tag_uuid = _parse_uuid_or_400(request.tag_id, "tag_id")
 
@@ -169,6 +201,7 @@ async def create_profile(
 
 @router.get("/{profile_id}", response_model=UpgradeProfileResponse)
 async def get_profile(profile_id: str, db: Session = Depends(get_db)):
+    _check_automation_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
@@ -185,6 +218,7 @@ async def update_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_automation_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -237,6 +271,7 @@ async def delete_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_automation_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -264,56 +299,50 @@ async def delete_profile(
 def _dispatch_profile_to_hosts(profile, target_host_ids, db: Session) -> int:
     """Enqueue an ``apply_updates`` command for each target host.
 
-    Returns the count of messages queued.  Each host gets one message
-    carrying the profile's flags so the agent can do the right thing
-    (security-only filter, package-manager allowlist).  Staggered rollout
-    is encoded as a per-message ``delay_seconds`` hint computed by
-    spreading hosts evenly across the configured window.
+    Phase 10.6: the per-host message-building (staggered window math,
+    flag forwarding, command shape) lives in
+    ``automation_engine.build_upgrade_profile_dispatch``.  This OSS
+    helper is just a thin enqueue loop — caller is already
+    license-gated by ``_check_automation_module`` so the engine is
+    guaranteed to be loaded.
 
-    Failures on individual hosts are tolerated — we log + continue
-    rather than aborting the whole tick, so one offline host can't
-    block the rest of the fleet's update."""
+    Returns the count of messages queued.  Failures on individual hosts
+    are tolerated — log + continue, so one offline host can't block
+    the rest of the fleet's update.
+    """
     if not target_host_ids:
         return 0
 
-    window_min = profile.staggered_window_min or 0
-    n = len(target_host_ids)
+    engine = _check_automation_module()
+    profile_dict = {
+        "id": profile.id,
+        "name": profile.name,
+        "security_only": profile.security_only,
+        "package_managers": profile.package_managers,
+        "staggered_window_min": profile.staggered_window_min,
+    }
+    dispatches = engine.build_upgrade_profile_dispatch(
+        profile_dict, list(target_host_ids)
+    )
+
     enqueued = 0
-    for idx, host_id in enumerate(target_host_ids):
-        # Spread evenly across the window (in seconds).  With window=0,
-        # delay is 0 for all hosts → simultaneous launch.  Otherwise:
-        # host i gets delay = (i * window_seconds / n).
-        delay_seconds = (
-            int((idx * window_min * 60) / n) if n > 0 and window_min > 0 else 0
-        )
-
-        package_managers = (
-            profile.package_managers.split(",") if profile.package_managers else None
-        )
-
+    for entry in dispatches:
         try:
             command_message = create_command_message(
-                "apply_updates",
-                {
-                    "profile_id": str(profile.id),
-                    "profile_name": profile.name,
-                    "security_only": profile.security_only,
-                    "package_managers": package_managers,
-                    "delay_seconds": delay_seconds,
-                },
+                entry["command_type"], entry["parameters"]
             )
             queue_ops.enqueue_message(
                 message_type="command",
                 message_data=command_message,
                 direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
+                host_id=entry["host_id"],
                 db=db,
             )
             enqueued += 1
         except Exception as exc:  # pylint: disable=broad-exception-caught
             logger.warning(
                 "Failed to enqueue apply_updates for host %s (profile %s): %s",
-                host_id,
+                entry["host_id"],
                 profile.id,
                 exc,
             )
@@ -330,6 +359,7 @@ async def trigger_profile(
     ``apply_updates`` command for each (with the profile's flags +
     staggered-window delay), updates last_run / next_run, and returns
     the count of hosts actually dispatched to."""
+    _check_automation_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -378,9 +408,13 @@ async def tick(db: Session = Depends(get_db)):
     profile where ``next_run <= now``, fires it (updates last_run /
     next_run / status), and returns the list of fired profiles.
 
+    Phase 10.6: gated on the ``automation_engine`` Pro+ module — the
+    cron-recompute and per-host dispatch live there now.
+
     Idempotent within a single tick — running the same tick twice in
     quick succession will fire a profile only once because the FIRST
     invocation pushes ``next_run`` forward."""
+    _check_automation_module()
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     due = (
         db.query(models.UpgradeProfile)

@@ -14,6 +14,7 @@ from backend.api import (
     antivirus_status,
     audit_log,
     auth,
+    auth_mfa,
     broadcast,
     certificates,
     child_host,
@@ -25,6 +26,7 @@ from backend.api import (
     dynamic_secrets,
     email,
     enabled_package_managers,
+    external_idp,
     firewall_roles,
     firewall_status,
     fleet,
@@ -45,6 +47,7 @@ from backend.api import (
     report_branding,
     report_templates,
     reports,
+    repository_mirroring,
     scripts,
     secrets,
     security,
@@ -78,6 +81,24 @@ def register_routes(app: FastAPI):
     logger.debug("Adding auth router (no prefix)")
     app.include_router(auth.router)  # /login, /refresh
     logger.debug("Auth router added")
+
+    logger.debug(
+        "Adding MFA router (no prefix — endpoints carry their own /api/auth prefix)"
+    )
+    app.include_router(auth_mfa.router)  # /api/auth/mfa/* + /api/settings/mfa
+    logger.debug("MFA router added")
+
+    logger.debug(
+        "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"
+    )
+    app.include_router(repository_mirroring.router)
+    logger.debug("Repository mirroring router added")
+
+    logger.debug(
+        "Adding external IdP router (no prefix — endpoints carry their own /api prefix)"
+    )
+    app.include_router(external_idp.router)
+    logger.debug("External IdP router added")
 
     logger.debug("Adding agent public router (no prefix)")
     app.include_router(agent.public_router)  # /agent/auth (no auth required)

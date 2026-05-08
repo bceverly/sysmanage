@@ -24,6 +24,22 @@ for _noisy_logger in (
 ):
     logging.getLogger(_noisy_logger).setLevel(logging.WARNING)
 
+# Silence FlexibleLogger.debug/info during the import of backend.main below.
+# FlexibleLogger (backend/utils/verbosity_logger.py) has its own gate that
+# bypasses the standard ``logging`` level system — it always installs a
+# DEBUG-level handler and decides per-call from a parsed config.  Both
+# behaviours mean backend.main's ~50 import-time INFO lines reach stderr
+# regardless of pytest.ini ``log_level``.  We swap the methods to no-ops
+# only for the duration of the import; tests that exercise
+# FlexibleLogger.debug/info directly (test_verbosity_logger_comprehensive)
+# get the originals back afterwards.
+import backend.utils.verbosity_logger as _verbosity_logger  # noqa: E402
+
+_orig_debug = _verbosity_logger.FlexibleLogger.debug
+_orig_info = _verbosity_logger.FlexibleLogger.info
+_verbosity_logger.FlexibleLogger.debug = lambda *_a, **_k: None
+_verbosity_logger.FlexibleLogger.info = lambda *_a, **_k: None
+
 # Test database URL - using temporary SQLite file for tests
 import tempfile
 import time
@@ -42,9 +58,16 @@ from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
 
-# Register stub routes for Pro+ modules (no modules loaded in test environment)
-# This ensures /api/v1/* endpoints return {"licensed": false} instead of 404
+# Register stub routes for Pro+ modules (no modules loaded in test environment).
+# Done while FlexibleLogger.info is still no-op'd so the "Mounted 10 Pro+ stub
+# route group(s)" line doesn't trail the test summary.
 mount_proplus_stub_routes(app, {})
+
+# Restore FlexibleLogger.debug/info now that backend.main's import-time spam
+# has been suppressed.  Tests that exercise FlexibleLogger (e.g.
+# test_verbosity_logger_comprehensive) need the real methods.
+_verbosity_logger.FlexibleLogger.debug = _orig_debug
+_verbosity_logger.FlexibleLogger.info = _orig_info
 
 # Use secure temporary file for test database
 _test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")

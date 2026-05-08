@@ -726,8 +726,25 @@ lint-typescript:
 	@echo "[OK] TypeScript linting completed"
 
 # Combined linting
-lint: lint-python lint-typescript
+lint: lint-python lint-typescript i18n-validate
 	@echo "[OK] All linting completed successfully!"
+
+# i18n: extract user-visible t('key', 'fallback') calls and verify every
+# referenced key exists in every locale's translation.json.  Missing keys
+# fail the build.  Run ``make i18n-seed`` to populate gaps with [TODO]-
+# prefixed placeholders before translating.
+i18n-validate: $(VENV_ACTIVATE)
+	@echo "=== i18n validation ==="
+	@$(PYTHON) scripts/i18n_validate.py --validate
+	@echo "[OK] i18n validation completed"
+
+i18n-seed: $(VENV_ACTIVATE)
+	@echo "=== i18n seeding ==="
+	@$(PYTHON) scripts/i18n_validate.py --seed
+	@echo "[OK] i18n seed completed"
+
+i18n-extract: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_validate.py --extract
 
 # Comprehensive security analysis (default)
 security: security-full

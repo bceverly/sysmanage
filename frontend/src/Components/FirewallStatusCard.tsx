@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { FirewallStatus, PortWithProtocols, getFirewallStatus } from '../Services/firewallService';
 import { SecurityRoles, hasPermission } from '../Services/permissions';
 import { deployFirewall, enableFirewall, disableFirewall, restartFirewall } from '../Services/firewallOperationsService';
+import { isModuleLicensed } from '../Services/license';
 import axiosInstance from '../Services/api';
 
 interface FirewallStatusCardProps {
@@ -562,8 +563,11 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
               {/* Firewall Action Buttons - only show when firewall is detected */}
               {(canAssignFirewallRoles || canRemoveFirewall || canEnableFirewall || canDisableFirewall || canRestartFirewall) && (
                 <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap' }}>
-                  {/* Edit Roles Button - only show if firewall is installed and enabled */}
-                  {canAssignFirewallRoles && isFirewallInstalledAndEnabled && (
+                  {/* Edit Roles Button — Phase 10.7 partial gate: per-host
+                      role assignment is the Pro+ ``firewall_orchestration_engine``
+                      surface, while the read-only firewall status above remains
+                      OSS.  Hide the button when the engine isn't licensed. */}
+                  {canAssignFirewallRoles && isFirewallInstalledAndEnabled && isModuleLicensed('firewall_orchestration_engine') && (
                     <Button
                       variant="outlined"
                       color="primary"

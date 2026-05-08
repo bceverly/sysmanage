@@ -2,13 +2,18 @@
 Tests for the Phase 8.2 upgrade-profile API + cron parser.
 
 The cron parser tests live alongside the API tests because they're
-the same delivery slice — Pro+ gets to swap croniter in later under
-the same signature; both halves need to keep working together.
+the same delivery slice.  Phase 10.6 moved the cron parser and per-host
+dispatch into the Pro+ ``automation_engine`` Cython module; the OSS
+``upgrade_scheduler`` shims still re-export the helpers so these tests
+can keep importing from there, but the API routes now go through the
+engine.  CRUD/trigger/tick tests use ``_engine_loaded`` to satisfy the
+``_check_automation_module`` gate.
 """
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
 
 from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -116,7 +121,102 @@ class TestUpgradeProfilesAuth:
         assert r.status_code in [401, 403]
 
 
+class TestUpgradeProfilesProplusGate:
+    """When ``automation_engine`` isn't loaded, every route returns 402."""
+
+    @pytest.fixture
+    def _engine_absent(self):
+        with patch(
+            "backend.api.upgrade_profiles.module_loader.get_module",
+            return_value=None,
+        ):
+            yield
+
+    def test_list_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.get("/api/upgrade-profiles", headers=auth_headers)
+        assert r.status_code == 402
+
+    def test_create_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post(
+            "/api/upgrade-profiles",
+            json={"name": "x"},
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_trigger_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post(
+            "/api/upgrade-profiles/00000000-0000-0000-0000-000000000000/trigger",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_tick_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post("/api/upgrade-profiles/tick", headers=auth_headers)
+        assert r.status_code == 402
+
+
+# ----------------------------------------------------------------------
+# Engine-loaded fixture for route tests.
+#
+# Phase 10.6 gates every route on ``automation_engine`` being loaded.
+# These tests don't exercise the real Cython .so — they verify route
+# behaviour, so we hand the route a MagicMock whose methods delegate to
+# the OSS ``upgrade_scheduler`` (cron) and a small inline implementation
+# of ``build_upgrade_profile_dispatch`` (the engine version is itself a
+# port of the OSS logic).  The Pro+ engine's own tests cover the
+# Cython implementation under ``module-source/automation_engine/``.
+# ----------------------------------------------------------------------
+
+
+def _build_dispatch_oss(profile, host_ids):
+    """OSS-side mirror of automation_engine.build_upgrade_profile_dispatch."""
+    if not host_ids:
+        return []
+    window_min = profile.get("staggered_window_min") or 0
+    n = len(host_ids)
+    pkg_str = profile.get("package_managers")
+    package_managers = pkg_str.split(",") if pkg_str else None
+    out = []
+    for idx, host_id in enumerate(host_ids):
+        delay_seconds = int((idx * window_min * 60) / n) if window_min > 0 else 0
+        out.append(
+            {
+                "host_id": str(host_id),
+                "command_type": "apply_updates",
+                "parameters": {
+                    "profile_id": str(profile["id"]),
+                    "profile_name": profile.get("name", ""),
+                    "security_only": bool(profile.get("security_only")),
+                    "package_managers": package_managers,
+                    "delay_seconds": delay_seconds,
+                },
+            }
+        )
+    return out
+
+
+@pytest.fixture
+def _engine_loaded():
+    """Patch ``module_loader.get_module`` so the ``_check_automation_module``
+    gate inside upgrade_profiles routes finds an engine surface."""
+    mock_engine = MagicMock()
+    mock_engine.validate_cron_expression = upgrade_scheduler.validate_cron
+    mock_engine.next_run_from_cron = upgrade_scheduler.next_run_from_cron
+    mock_engine.CronParseError = upgrade_scheduler.CronParseError
+    mock_engine.build_upgrade_profile_dispatch = _build_dispatch_oss
+    with patch(
+        "backend.api.upgrade_profiles.module_loader.get_module",
+        return_value=mock_engine,
+    ):
+        yield mock_engine
+
+
 class TestUpgradeProfilesCrud:
+    @pytest.fixture(autouse=True)
+    def _gate(self, _engine_loaded):
+        yield
+
     def test_create_with_default_cron(self, client, auth_headers):
         r = client.post(
             "/api/upgrade-profiles",
@@ -197,6 +297,10 @@ class TestUpgradeProfilesCrud:
 
 
 class TestUpgradeProfileTrigger:
+    @pytest.fixture(autouse=True)
+    def _gate(self, _engine_loaded):
+        yield
+
     def test_trigger_updates_last_run_and_returns_targets(self, client, auth_headers):
         created = client.post(
             "/api/upgrade-profiles",
@@ -230,6 +334,10 @@ class TestUpgradeProfileTrigger:
 
 
 class TestUpgradeProfileTick:
+    @pytest.fixture(autouse=True)
+    def _gate(self, _engine_loaded):
+        yield
+
     def test_tick_endpoint_runs(self, client, auth_headers):
         # Create a profile with cron that's already due (every minute).
         client.post(
@@ -244,6 +352,10 @@ class TestUpgradeProfileTick:
 
 
 class TestUpgradeProfileDispatch:
+    @pytest.fixture(autouse=True)
+    def _gate(self, _engine_loaded):
+        yield
+
     """Phase 8.2 wire-up: trigger and tick must actually queue
     apply_updates command messages, not just update timestamps."""
 

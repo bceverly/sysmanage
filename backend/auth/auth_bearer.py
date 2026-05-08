@@ -41,18 +41,23 @@ class JWTBearer(HTTPBearer):
 
     def verify_jwt(self, jwtoken: str) -> bool:
         """
-        This function decodes and verifies the JWT token
-        """
-        is_token_valid: bool = False
+        This function decodes and verifies the JWT token.
 
+        MFA-pending tokens (carrying ``mfa_pending: True``) are
+        deliberately rejected here so they can't be used to access
+        regular endpoints — their only valid recipient is
+        ``/api/auth/mfa/verify``, which decodes them via
+        ``decode_mfa_pending_token`` directly.
+        """
         try:
             payload = decode_jwt(jwtoken)
         except (ValueError, TypeError, KeyError):
             payload = None
-        if payload:
-            is_token_valid = True
-
-        return is_token_valid
+        if not payload:
+            return False
+        if payload.get("mfa_pending"):
+            return False
+        return True
 
 
 async def get_current_user(  # NOSONAR
