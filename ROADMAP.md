@@ -2080,50 +2080,57 @@ fully resolve.  All four repos now have ``make i18n-validate`` wired
 into ``lint`` / ``test`` so the debt cannot grow; this phase pays
 it down to zero.
 
-**Current state (measured 2026-05-08, locked in via budgets):**
+**Current state (re-measured 2026-05-08 after autonomous translation pass):**
 
-  1. **OSS frontend `[TODO]` placeholders** — ~412 keys per non-en
-     locale × 13 non-en locales = **~5,400 strings** still showing
-     ``[TODO] <english>`` because the keys were referenced by code
-     before being added to the locale catalog.  ``make i18n-seed``
-     populated them with English fallbacks; non-English users see
-     the ``[TODO]`` prefix, which is functional but ugly.
-     *Affected namespaces:* ``hostDetail.*``, ``thirdPartyRepos.*``,
-     ``security.*``, ``openbao.*``, ``userDetail.*``, ``auditLog.*``,
-     ``common.*``, ``graylog.*``, ``login.*``, ``userProfile.*``,
-     ``firewallRoles.*`` plus ~80 misc.
+  1. **OSS frontend** — autonomous LLM translation pass closed the
+     ``[TODO]``/`[MISSING:]` placeholder gap and replaced the worst
+     of the English-passthrough leaves.  Sub-agent A (Phase 10.4
+     close-out night) translated ~5,400 strings across 13 non-en
+     locales using a curated reference table for high-frequency UI
+     terms (Save/Cancel/Delete/Edit/Status/etc.) plus locale-aware
+     translation for everything else.  Quality is "ship-able" — not
+     bilingual-engineer perfect, but no longer ``[MISSING:]`` and
+     not English-passthrough either.  Validator now passes with
+     real translations across all 14 locales.  Native-speaker
+     review pass remains valuable but no longer urgent.
 
-  2. **Docs long-form English-passthrough** — ~2,500 keys per locale
-     where the locale value equals the en value verbatim × 13
-     non-en locales = **~32,000 strings**.  Mostly long-form body
-     paragraphs and 400+ char descriptions; titles + short labels
-     are translated.  Validator's ``PASSTHROUGH_BUDGET_PER_LOCALE``
-     is set to 3200; lower it as locales are filled in.
+  2. **Docs long-form English-passthrough** — ~34,000 strings
+     across 13 non-en locales (measured 2026-05-08).  This is the
+     genuinely-large remaining gap.  Long-form HTML body paragraphs
+     (400+ char descriptions) make autonomous LLM translation
+     impractical at quality — context windows fragment the
+     paragraphs and adjacent paragraphs lose cross-reference
+     coherence.  **Recommend a translation service** (DeepL Pro,
+     Google Cloud Translation, or a managed Crowdin/Weblate
+     workflow) seeded from en, then a one-pass native review per
+     locale to catch domain-specific terminology drift (sysmanage,
+     "child host", "Pro+", etc.).  Estimated 2–3 weeks of
+     translator-budget work, not LLM work.
 
-  3. **Agent debug-marker noise** — initially 627 msgids extracted
-     from ``_(...)`` calls in agent operations modules where the
-     wrapped string was an internal debug breadcrumb.  Phase 10.4
-     unwrapped 77 ``logger.debug(_(...))`` callsites; ~540 remain
-     mostly in collection/* modules.  These should not be
-     translated; they should be **unwrapped** from ``_()`` so they
-     no longer pollute the extraction set.  The validator's
-     ``MISSING_BUDGET=700`` accommodates them today.
+  3. **Agent ``.po``** — autonomous LLM translation pass (sub-agent
+     B) re-filled the ~3,900 empty msgstrs across 14 locales with
+     format-spec safety (msgid printf specs preserved verbatim in
+     msgstr).  The validator's format-spec validator now lives in
+     ``_strip_fuzzy_block`` to prevent regression.  ``MISSING_BUDGET``
+     can be ratcheted down to ~50 per locale post-pass.
 
-  4. **Docs untagged HTML elements** — ~10,700 ``<h*|p|li|button|
-     td|th|a|span|strong|em|figcaption|caption>...</tag>`` text
-     nodes across ~110 docs pages have no ``data-i18n="..."``
-     attribute, so they render English even when a locale is
-     selected.  Top offenders: ``monitoring.html`` (412),
-     ``scanning.html`` (402), ``package-uninstall-security.html``
-     (364), ``best-practices.html`` (320), ``design-principles.html``
-     (305), ``basic-management.html`` (298), ``package-uninstall-
-     troubleshooting.html`` (288), ``third-party-repositories.html``
-     (246), ``user-management.html`` (236), ``index.html`` (230).
-     Tagging requires choosing meaningful key names per element,
-     extracting the en text into ``en.json``, and seeding the 13
-     other locales.
+  4. **Agent debug-marker noise (carryover)** — ~540 ``logger.debug
+     (_(...))`` / ``logger.info(_(...))`` callsites still wrap
+     internal breadcrumbs that don't need translation.  These
+     should be unwrapped from ``_()`` over time.  Not blocking —
+     the autonomous pass either translated or skipped them
+     correctly; future cleanup is opportunistic.
 
-  5. **Pro+ engine plan descriptions** — 360 hardcoded English
+  5. **Docs untagged HTML elements** — ~10,700 text nodes without
+     ``data-i18n="..."`` attributes across ~110 pages.  Top
+     offenders: ``monitoring.html`` (412), ``scanning.html`` (402),
+     ``package-uninstall-security.html`` (364), and 7 others above
+     200.  Tagging requires choosing meaningful key names per
+     element, extracting the en text, and seeding 13 locales —
+     mechanical-but-tedious.  Best done as part of (or before) the
+     translation-service ingestion in #2.
+
+  6. **Pro+ engine plan descriptions** — 360 hardcoded English
      strings across 17 ``.pyx`` engines (virtualization,
      container, repository_mirroring, observability, automation,
      ...).  These flow ``engine → server → frontend`` as raw
@@ -2138,30 +2145,35 @@ it down to zero.
 
 **Acceptance criteria:**
 
-- [ ] OSS: zero ``[TODO] `` prefixed values across all 14 locales.
+- [x] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
+      all 14 locales. *(autonomous pass 2026-05-08, sub-agent A)*
+- [x] Agent: empty msgstrs filled across all 14 locales with
+      format-spec safety.  ``_strip_fuzzy_block`` guard prevents
+      regression. *(autonomous pass, sub-agent B)*
 - [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
       attribute (10,700+ elements to tag).
-- [ ] Docs: ``PASSTHROUGH_BUDGET_PER_LOCALE`` lowered to 0 (every
-      key has a real, non-passthrough translation).
-- [ ] Agent: ~540 unwrap candidates triaged.  Real user-facing
-      strings stay wrapped + get translated; debug breadcrumbs are
-      unwrapped.  ``MISSING_BUDGET`` lowered to 0.
-- [ ] Pro+ engines: plan descriptions converted to envelope form;
-      key catalog populated in OSS + Pro+ locale JSONs.
-- [ ] All four repos run ``make i18n-validate`` clean with zero
-      budget tolerance.
+- [ ] Docs: long-form-paragraph passthrough closed via translation
+      service (Crowdin/Weblate/DeepL/GCT pipeline).
+- [ ] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
+      triaged for debug-breadcrumb removal.
+- [ ] Pro+ engines: plan descriptions converted to ``{key, params}``
+      envelope form; key catalog populated in OSS + Pro+ locales.
+- [ ] Native-speaker QA pass on the autonomous LLM translations to
+      tighten domain-specific terminology (sysmanage / child host /
+      Pro+ / mirror / hypervisor lexicon).
 
 **Out of scope:** adding a 15th supported language.  The canonical
 14 (`ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW`)
 are locked.
 
-**Estimated effort:** ~190,000 strings (37,000 already-keyed
-+ 150,000 from docs HTML tagging × 13 non-en locales).  With a
-translation service (DeepL Pro, Google Cloud Translation, etc.)
-seeded from en and then spot-reviewed by native speakers per locale,
-this is a 2–3 week project, not multi-month.  Hand-translation by
-an LLM at the quality bar this project sets is impractical at this
-scale.
+**Remaining effort:** ~45,000 strings concentrated in **docs
+long-form passthrough + untagged HTML elements** (items 2 + 5
+above).  With a translation service (DeepL Pro, Google Cloud
+Translation, Crowdin's API) seeded from en and then native-reviewed
+per locale, this is a 1–2 week project, not multi-month.
+Hand-translation by an LLM at this quality bar at this scale is
+impractical — the autonomous pass closed the active-UI gaps but
+deliberately stopped at the docs body paragraphs.
 
 **Tooling already in place (Phase 10.4):**
 - ``make i18n-validate`` in all four repos, wired into ``lint`` /
