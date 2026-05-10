@@ -136,7 +136,9 @@ def upgrade() -> None:
                         "platform_config_id",
                         GUID(),
                         sa.ForeignKey(
-                            "mirror_platform_config.id", ondelete="SET NULL"
+                            "mirror_platform_config.id",
+                            name="fk_mirror_repository_platform_config_id",
+                            ondelete="SET NULL",
                         ),
                         nullable=True,
                     )

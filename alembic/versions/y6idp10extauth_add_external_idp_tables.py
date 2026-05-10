@@ -155,22 +155,37 @@ def upgrade() -> None:
         )
 
     # Add external_idp linkage columns to user.  Skip if already there.
+    # SQLite can't ALTER a table to add a column that carries a constraint,
+    # so the FK column has to go through ``batch_alter_table(recreate="auto")``
+    # — same pattern as a8mirror30platform_add_platform_config.py.  The
+    # plain string column doesn't need batch mode but we pipe both through
+    # one ``with`` block so the table is only rewritten once.
     user_cols = {c["name"] for c in insp.get_columns("user")}
-    if "external_idp_provider_id" not in user_cols:
-        op.add_column(
-            "user",
-            sa.Column(
-                "external_idp_provider_id",
-                GUID(),
-                sa.ForeignKey("external_idp_provider.id", ondelete="SET NULL"),
-                nullable=True,
-            ),
-        )
-    if "external_subject" not in user_cols:
-        op.add_column(
-            "user",
-            sa.Column("external_subject", sa.String(length=500), nullable=True),
-        )
+    needs_fk = "external_idp_provider_id" not in user_cols
+    needs_subject = "external_subject" not in user_cols
+    if needs_fk or needs_subject:
+        with op.batch_alter_table("user", recreate="auto") as batch:
+            if needs_fk:
+                # Explicit constraint name is required by SQLite batch mode;
+                # PostgreSQL would otherwise auto-generate one.
+                batch.add_column(
+                    sa.Column(
+                        "external_idp_provider_id",
+                        GUID(),
+                        sa.ForeignKey(
+                            "external_idp_provider.id",
+                            name="fk_user_external_idp_provider_id",
+                            ondelete="SET NULL",
+                        ),
+                        nullable=True,
+                    )
+                )
+            if needs_subject:
+                batch.add_column(
+                    sa.Column(
+                        "external_subject", sa.String(length=500), nullable=True
+                    )
+                )
 
 
 def downgrade() -> None:
@@ -178,10 +193,14 @@ def downgrade() -> None:
     insp = inspect(bind)
 
     user_cols = {c["name"] for c in insp.get_columns("user")}
-    if "external_subject" in user_cols:
-        op.drop_column("user", "external_subject")
-    if "external_idp_provider_id" in user_cols:
-        op.drop_column("user", "external_idp_provider_id")
+    drop_subject = "external_subject" in user_cols
+    drop_fk = "external_idp_provider_id" in user_cols
+    if drop_subject or drop_fk:
+        with op.batch_alter_table("user", recreate="auto") as batch:
+            if drop_subject:
+                batch.drop_column("external_subject")
+            if drop_fk:
+                batch.drop_column("external_idp_provider_id")
     if insp.has_table("external_idp_settings"):
         op.drop_table("external_idp_settings")
     if insp.has_table("idp_role_mapping"):

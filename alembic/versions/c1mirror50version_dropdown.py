@@ -246,7 +246,11 @@ def upgrade() -> None:
                     sa.Column(
                         "known_version_id",
                         GUID(),
-                        sa.ForeignKey("mirror_known_version.id", ondelete="SET NULL"),
+                        sa.ForeignKey(
+                            "mirror_known_version.id",
+                            name="fk_mirror_repository_known_version_id",
+                            ondelete="SET NULL",
+                        ),
                         nullable=True,
                     )
                 )
