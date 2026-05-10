@@ -432,9 +432,11 @@ async def tick(db: Session = Depends(get_db)):
             enqueued = _dispatch_profile_to_hosts(profile, target_ids, db)
             profile.last_run = now
             profile.last_status = "SUCCESS"
-            profile.next_run = upgrade_scheduler.next_run_from_cron(
-                profile.cron, datetime.now(timezone.utc)
-            )
+            # Phase 10.6: cron re-compute goes through automation_engine
+            # (matches ``trigger_profile`` and the docstring above; the OSS
+            # ``upgrade_scheduler`` parser is preserved as a tested utility
+            # but is not on the runtime path once the engine is loaded).
+            profile.next_run = _validate_and_compute_next_run(profile.cron)
             fired.append(
                 {
                     "profile_id": str(profile.id),

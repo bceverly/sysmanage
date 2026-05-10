@@ -235,14 +235,23 @@ def cmd_validate(seed: bool) -> int:
                 print(f"  → seeded {len(missing)} keys", file=sys.stderr)
             else:
                 failures += 1
-        if orphan:
-            # Orphaned keys aren't a hard failure — they're cleanup debt.
+        if orphan and not seed:
+            # Phase 10 close-out (May 2026): orphans are a hard failure.
+            # Run ``scripts/i18n_validate.py --strip-orphans`` to clean up.
             print(
-                f"{lang}: {len(orphan)} orphan keys not referenced in code",
+                f"{lang} [FAIL]: {len(orphan)} orphan keys not referenced in code",
                 file=sys.stderr,
             )
+            for key in orphan[:10]:
+                print(f"  - {key}", file=sys.stderr)
+            if len(orphan) > 10:
+                print(f"  ... and {len(orphan) - 10} more", file=sys.stderr)
+            failures += 1
     if failures and not seed:
-        print(f"\nFAIL: {failures} locale(s) have missing keys", file=sys.stderr)
+        print(
+            f"\nFAIL: {failures} locale(s) have missing or orphan keys",
+            file=sys.stderr,
+        )
         return 1
     print("\nOK: every code-referenced key exists in every locale", file=sys.stderr)
     return 0

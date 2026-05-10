@@ -25,7 +25,15 @@ LOCALES = {
     ),
     "Docs": Path("/home/bceverly/dev/sysmanage-docs/assets/locales"),
 }
-PRINTF = re.compile(r"%[#0\-+ ]?\d*\.?\d*[diouxXeEfFgGcrsa%]|%\([^)]+\)[diouxXeEfFgGcrsa]")
+PRINTF = re.compile(
+    # Drop the SPACE modifier from the flag class so non-English number
+    # formatting like "100 %", "20 %", "70 %" doesn't match as " %d" /
+    # " %s" / " %fmt".  Real printf code in this repo never uses the
+    # ``% d`` (leading-space) flag.  Negative lookbehind on a digit also
+    # rejects ``20%`` (no flag, just a literal percent immediately after
+    # a digit) which the d-conversion path would otherwise flag.
+    r"(?<!\d)%[#0\-+]?\d*\.?\d*[diouxXeEfFgGcrsa%]|%\([^)]+\)[diouxXeEfFgGcrsa]"
+)
 
 
 def flatten(d, prefix=""):

@@ -465,10 +465,10 @@ msgid "PDF generation not available"
 msgstr "Generazione PDF non disponibile"
 
 msgid "PDF generation is not available. Please install reportlab package."
-msgstr "La generazione PDF non è disponibile. Installare il pacchetto reportlab."
+msgstr ""
+"La generazione PDF non è disponibile. Installare il pacchetto reportlab."
 
 # OS Version Upgrade related strings
-
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "Gestori di pacchetti non validi per aggiornamenti OS: {}"
 
@@ -538,8 +538,12 @@ msgstr "Riavvio Sistema Richiesto"
 msgid "Confirm OS Upgrade"
 msgstr "Conferma Aggiornamento OS"
 
-msgid "This action will upgrade the operating system and require a system reboot. Continue?"
-msgstr "Questa azione aggiornerà il sistema operativo e richiederà un riavvio sistema. Continuare?"
+msgid ""
+"This action will upgrade the operating system and require a system reboot. "
+"Continue?"
+msgstr ""
+"Questa azione aggiornerà il sistema operativo e richiederà un riavvio "
+"sistema. Continuare?"
 
 msgid "OS upgrades are always security updates"
 msgstr "Gli aggiornamenti OS sono sempre aggiornamenti di sicurezza"
@@ -594,18 +598,6 @@ msgstr "Impossibile elaborare i pacchetti disponibili: %s"
 
 msgid "Host not registered"
 msgstr "Host non registrato"
-
-
-
-
-
-
-
-
-
-
-
-
 
 msgid "Host Firewall Status"
 msgstr "Stato Firewall Host"
@@ -728,10 +720,14 @@ msgid "Graylog URL is not configured"
 msgstr "L'URL Graylog non è configurato"
 
 msgid "Connection timeout - Graylog server may be unreachable"
-msgstr "Timeout della connessione - Il server Graylog potrebbe essere irraggiungibile"
+msgstr ""
+"Timeout della connessione - Il server Graylog potrebbe essere "
+"irraggiungibile"
 
 msgid "Connection failed - Graylog server may be down or unreachable"
-msgstr "Connessione fallita - Il server Graylog potrebbe essere inattivo o irraggiungibile"
+msgstr ""
+"Connessione fallita - Il server Graylog potrebbe essere inattivo o "
+"irraggiungibile"
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Errore imprevisto durante il controllo dello stato di Graylog"
@@ -768,18 +764,23 @@ msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Impossibile contrassegnare il messaggio %s come confermato: %s"
 
 # LXD Container Management strings
-
 msgid "LXD is only supported on Linux hosts"
 msgstr "LXD è supportato solo su host Linux"
 
 msgid "Agent must be running with root privileges to initialize LXD"
-msgstr "L'agente deve essere in esecuzione con privilegi di root per inizializzare LXD"
+msgstr ""
+"L'agente deve essere in esecuzione con privilegi di root per inizializzare "
+"LXD"
 
 msgid "LXD initialization requested"
 msgstr "Inizializzazione LXD richiesta"
 
-msgid "LXD initialization requested. The agent will install and configure LXD automatically."
-msgstr "Inizializzazione LXD richiesta. L'agente installerà e configurerà LXD automaticamente."
+msgid ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
+msgstr ""
+"Inizializzazione LXD richiesta. L'agente installerà e configurerà LXD "
+"automaticamente."
 
 msgid "LXD initialized successfully"
 msgstr "LXD inizializzato con successo"
@@ -788,13 +789,18 @@ msgid "VMM is only supported on OpenBSD hosts"
 msgstr "VMM è supportato solo su host OpenBSD"
 
 msgid "Agent must be running with root privileges to initialize VMM"
-msgstr "L'agente deve essere in esecuzione con privilegi di root per inizializzare VMM"
+msgstr ""
+"L'agente deve essere in esecuzione con privilegi di root per inizializzare "
+"VMM"
 
 msgid "VMM initialization requested"
 msgstr "Inizializzazione VMM richiesta"
 
-msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
-msgstr "Inizializzazione VMM richiesta. L'agente abiliterà e avvierà il daemon vmd."
+msgid ""
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
+msgstr ""
+"Inizializzazione VMM richiesta. L'agente abiliterà e avvierà il daemon vmd."
 
 msgid "VM name is required for VMM virtual machines"
 msgstr "Il nome della VM è richiesto per le macchine virtuali VMM"
@@ -809,38 +815,47 @@ msgid "Child host creation requested: %s (%s)"
 msgstr "Creazione host figlio richiesta: %s (%s)"
 
 # KVM/libvirt Virtual Machine Management strings
-
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM è supportato solo su host Linux"
 
 msgid "Agent must be running with root privileges to initialize KVM"
-msgstr "L'agente deve essere eseguito con privilegi di root per inizializzare KVM"
+msgstr ""
+"L'agente deve essere eseguito con privilegi di root per inizializzare KVM"
 
 msgid "KVM initialization requested"
 msgstr "Inizializzazione KVM richiesta"
 
-msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
-msgstr "Inizializzazione KVM richiesta. L'agente installerà libvirt e configurerà KVM per la gestione delle macchine virtuali."
+msgid ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
+msgstr ""
+"Inizializzazione KVM richiesta. L'agente installerà libvirt e configurerà "
+"KVM per la gestione delle macchine virtuali."
 
 msgid "KVM/libvirt initialized successfully"
 msgstr "KVM/libvirt inizializzato con successo"
 
 # KVM Networking Configuration strings
-
 msgid "KVM networking is only supported on Linux hosts"
 msgstr "La rete KVM è supportata solo su host Linux"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "L'agente deve essere eseguito con privilegi di root per configurare la rete KVM"
+msgstr ""
+"L'agente deve essere eseguito con privilegi di root per configurare la rete "
+"KVM"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "Il nome dell'interfaccia bridge è richiesto per la modalità di rete bridge"
+msgstr ""
+"Il nome dell'interfaccia bridge è richiesto per la modalità di rete bridge"
 
 msgid "KVM networking configuration requested: %s mode"
 msgstr "Configurazione di rete KVM richiesta: modalità %s"
 
-msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
+msgid ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
+msgstr ""
+"Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
 
 msgid "KVM networks are only available on Linux hosts"
 msgstr "Le reti KVM sono disponibili solo su host Linux"
@@ -849,23 +864,48 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr "Elenco reti KVM richiesto. I risultati verranno visualizzati a breve."
 
 # Pro+ feature gate messages
-msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "La gestione dei container/VM richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
+msgid ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"La gestione dei container/VM richiede una licenza SysManage Professional+. "
+"Effettuare l'upgrade per accedere a questa funzionalità."
 
-msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "La gestione del ciclo di vita dei container richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
+msgid ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"La gestione del ciclo di vita dei container richiede una licenza SysManage "
+"Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
 
-msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "La gestione dei segreti richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
+msgid ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"La gestione dei segreti richiede una licenza SysManage Professional+. "
+"Effettuare l'upgrade per accedere a questa funzionalità."
 
-msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Il deployment dei segreti richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
+msgid ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Il deployment dei segreti richiede una licenza SysManage Professional+. "
+"Effettuare l'upgrade per accedere a questa funzionalità."
 
-msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "La generazione di report richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere a questa funzionalità."
+msgid ""
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
+msgstr ""
+"La generazione di report richiede una licenza SysManage Professional+. "
+"Effettuare l'upgrade per accedere a questa funzionalità."
 
-msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
-msgstr "L'esportazione del registro di audit richiede una licenza SysManage Professional+. Effettuare l'upgrade per accedere ai formati di esportazione CSV, JSON, CEF e LEEF."
+msgid ""
+"Audit log export requires a SysManage Professional+ license. Please upgrade "
+"to access CSV, JSON, CEF, and LEEF export formats."
+msgstr ""
+"L'esportazione del registro di audit richiede una licenza SysManage "
+"Professional+. Effettuare l'upgrade per accedere ai formati di esportazione "
+"CSV, JSON, CEF e LEEF."
 
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Utilizzare /api/v1/audit/export con licenza Pro+"
@@ -1124,11 +1164,18 @@ msgstr "Fonte %s non riuscita: %s"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
 #, python-format
-msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Il riavvio orchestrato richiede una licenza SysManage Professional+. Aggiorna per accedere a questa funzionalità."
+msgid ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Il riavvio orchestrato richiede una licenza SysManage Professional+. "
+"Aggiorna per accedere a questa funzionalità."
 
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr "Nessun host figlio in esecuzione trovato. Utilizzare l'endpoint di riavvio standard."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr ""
+"Nessun host figlio in esecuzione trovato. Utilizzare l'endpoint di riavvio "
+"standard."
 
 #, python-format
 msgid "Orchestrated reboot initiated with %d running child host(s)"
@@ -1142,7 +1189,6 @@ msgid "%d of %d child host(s) failed to restart"
 msgstr "%d di %d host figlio/i non sono riusciti a riavviarsi"
 
 # Phase 2: Agent Code Migration - Step descriptions
-
 msgid "Launching LXD container"
 msgstr "Avvio del contenitore LXD"
 
@@ -1188,7 +1234,6 @@ msgstr "Distribuzione dei file sull'host"
 msgid "Executing command sequence"
 msgstr "Esecuzione della sequenza di comandi"
 
-
 msgid "Agent update requested"
 msgstr "Aggiornamento agente richiesto"
 
@@ -1201,33 +1246,46 @@ msgstr "Aggiornamento agente figlio richiesto: %s"
 msgid "Child agent update requested"
 msgstr "Aggiornamento agente figlio richiesto"
 
-
 msgid "Failed to get email configuration"
 msgstr "Impossibile ottenere la configurazione email"
 
 msgid "Email service is disabled. Enable it in the configuration file."
-msgstr "Il servizio email è disabilitato. Abilitalo nel file di configurazione."
+msgstr ""
+"Il servizio email è disabilitato. Abilitalo nel file di configurazione."
 
 msgid "Test email sent successfully to {address}"
 msgstr "Email di test inviata con successo a {address}"
 
 msgid "Failed to send test email. Please check your SMTP configuration."
-msgstr "Impossibile inviare l'email di test. Controlla la tua configurazione SMTP."
+msgstr ""
+"Impossibile inviare l'email di test. Controlla la tua configurazione SMTP."
 
 msgid "Error sending test email: {error}"
 msgstr "Errore nell'invio dell'email di test: {error}"
 
 msgid "Email integration must be configured before creating new users"
-msgstr "L'integrazione email deve essere configurata prima di creare nuovi utenti"
+msgstr ""
+"L'integrazione email deve essere configurata prima di creare nuovi utenti"
 
-msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
-msgstr "Abilita le email nel file di configurazione YAML e configura le impostazioni SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le istruzioni per l'impostazione della password e non potranno accedere."
+msgid ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
+msgstr ""
+"Abilita le email nel file di configurazione YAML e configura le impostazioni"
+" SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le "
+"istruzioni per l'impostazione della password e non potranno accedere."
 
 msgid "Default admin credentials are configured in your YAML file"
-msgstr "Le credenziali amministratore predefinite sono configurate nel tuo file YAML"
+msgstr ""
+"Le credenziali amministratore predefinite sono configurate nel tuo file YAML"
 
-msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
-msgstr "Rimuovi admin_userid e admin_password dal tuo file di configurazione e riavvia il server"
+msgid ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
+msgstr ""
+"Rimuovi admin_userid e admin_password dal tuo file di configurazione e "
+"riavvia il server"
 
 msgid "Default JWT secret is being used"
 msgstr "Viene utilizzato il segreto JWT predefinito"
@@ -1244,11 +1302,19 @@ msgstr "Esegui: {command} ({count} utenti verranno migrati)"
 msgid "Inconsistent security configuration detected"
 msgstr "Rilevata configurazione di sicurezza incoerente"
 
-msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
-msgstr "Il segreto JWT utilizza il valore predefinito ma il salt della password è stato modificato. Esegui: {command}"
+msgid ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
+msgstr ""
+"Il segreto JWT utilizza il valore predefinito ma il salt della password è "
+"stato modificato. Esegui: {command}"
 
-msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
-msgstr "Il salt della password utilizza il valore predefinito ma il segreto JWT è stato modificato. Esegui: {command}"
+msgid ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
+msgstr ""
+"Il salt della password utilizza il valore predefinito ma il segreto JWT è "
+"stato modificato. Esegui: {command}"
 
 msgid "A group cannot be its own parent"
 msgstr "Un gruppo non può essere genitore di sé stesso"
@@ -1420,3 +1486,15 @@ msgstr "Profilo di aggiornamento eliminato"
 
 msgid "Uploaded report branding logo (%d bytes, %s)"
 msgstr "Logo branding report caricato (%d byte, %s)"
+
+#: backend/api/upgrade_profiles.py
+msgid ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+msgstr ""
+"I profili di aggiornamento pianificati richiedono una licenza SysManage "
+"Professional+. Esegui l'upgrade per accedere a questa funzionalità."
+
+#: backend/api/upgrade_profiles.py
+msgid "Upgrade profile not found"
+msgstr "Profilo di aggiornamento non trovato"

@@ -467,7 +467,6 @@ msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF產生不可用。請安裝reportlab套件。"
 
 # OS Version Upgrade related strings
-
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "作業系統升級的無效套件管理器：{}"
 
@@ -537,7 +536,9 @@ msgstr "需要系統重新啟動"
 msgid "Confirm OS Upgrade"
 msgstr "確認作業系統升級"
 
-msgid "This action will upgrade the operating system and require a system reboot. Continue?"
+msgid ""
+"This action will upgrade the operating system and require a system reboot. "
+"Continue?"
 msgstr "此動作將升級作業系統並需要系統重新啟動。繼續？"
 
 msgid "OS upgrades are always security updates"
@@ -593,18 +594,6 @@ msgstr "無法處理可用套件：%s"
 
 msgid "Host not registered"
 msgstr "主機未註冊"
-
-
-
-
-
-
-
-
-
-
-
-
 
 msgid "Host Firewall Status"
 msgstr "主機防火牆狀態"
@@ -767,7 +756,6 @@ msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "無法將訊息 %s 標記為已確認：%s"
 
 # LXD Container Management strings
-
 msgid "LXD is only supported on Linux hosts"
 msgstr "LXD僅支援Linux主機"
 
@@ -777,7 +765,9 @@ msgstr "代理必須以root權限執行才能初始化LXD"
 msgid "LXD initialization requested"
 msgstr "已請求LXD初始化"
 
-msgid "LXD initialization requested. The agent will install and configure LXD automatically."
+msgid ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
 msgstr "已請求LXD初始化。代理將自動安裝和配置LXD。"
 
 msgid "LXD initialized successfully"
@@ -792,7 +782,9 @@ msgstr "代理必須以root權限執行才能初始化VMM"
 msgid "VMM initialization requested"
 msgstr "已請求VMM初始化"
 
-msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgid ""
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr "已請求VMM初始化。代理將啟用並啟動vmd守護程序。"
 
 msgid "VM name is required for VMM virtual machines"
@@ -808,7 +800,6 @@ msgid "Child host creation requested: %s (%s)"
 msgstr "已請求建立子主機: %s (%s)"
 
 # KVM/libvirt Virtual Machine Management strings
-
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM僅在Linux主機上受支援"
 
@@ -818,14 +809,15 @@ msgstr "代理必須以root權限執行才能初始化KVM"
 msgid "KVM initialization requested"
 msgstr "已請求KVM初始化"
 
-msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgid ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
 msgstr "已請求KVM初始化。代理將安裝libvirt並配置KVM以進行虛擬機管理。"
 
 msgid "KVM/libvirt initialized successfully"
 msgstr "KVM/libvirt初始化成功"
 
 # KVM Networking Configuration strings
-
 msgid "KVM networking is only supported on Linux hosts"
 msgstr "KVM 網路僅在 Linux 主機上受支援"
 
@@ -838,7 +830,9 @@ msgstr "橋接網路模式需要橋接介面名稱"
 msgid "KVM networking configuration requested: %s mode"
 msgstr "已請求 KVM 網路設定：%s 模式"
 
-msgid "KVM networking configuration requested. The agent will configure the %s network."
+msgid ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
 msgstr "已請求 KVM 網路設定。代理程式將設定 %s 網路。"
 
 msgid "KVM networks are only available on Linux hosts"
@@ -848,22 +842,34 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已請求 KVM 網路清單。結果將很快顯示。"
 
 # Pro+ feature gate messages
-msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr "容器/虛擬機管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
 msgstr "容器生命週期管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr "密鑰管理需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr "密鑰部署需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr "報告產生需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgid ""
+"Audit log export requires a SysManage Professional+ license. Please upgrade "
+"to access CSV, JSON, CEF, and LEEF export formats."
 msgstr "稽核日誌匯出需要 SysManage Professional+ 授權。請升級以存取 CSV、JSON、CEF 和 LEEF 匯出格式。"
 
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -1123,11 +1129,14 @@ msgstr "來源 %s 失敗：%s"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
 #, python-format
-msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 msgstr "編排重新啟動需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
 #, python-format
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr "未找到正在執行的子主機。請改用標準重新啟動端點。"
 
 #, python-format
@@ -1142,7 +1151,6 @@ msgid "%d of %d child host(s) failed to restart"
 msgstr "%d/%d 個子主機重新啟動失敗"
 
 # Phase 2: Agent Code Migration - Step descriptions
-
 msgid "Launching LXD container"
 msgstr "正在啟動 LXD 容器"
 
@@ -1188,7 +1196,6 @@ msgstr "正在將檔案部署到主機"
 msgid "Executing command sequence"
 msgstr "正在執行命令序列"
 
-
 msgid "Agent update requested"
 msgstr "已請求代理更新"
 
@@ -1200,7 +1207,6 @@ msgstr "已請求子代理更新：%s"
 
 msgid "Child agent update requested"
 msgstr "已請求子代理更新"
-
 
 msgid "Failed to get email configuration"
 msgstr "無法取得電子郵件設定"
@@ -1220,13 +1226,18 @@ msgstr "傳送測試電子郵件時發生錯誤：{error}"
 msgid "Email integration must be configured before creating new users"
 msgstr "建立新使用者之前必須設定電子郵件整合"
 
-msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgid ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
 msgstr "在 YAML 設定檔中啟用電子郵件並設定 SMTP 設定。如果沒有電子郵件整合，新使用者將無法收到密碼設定說明，也無法登入。"
 
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "預設管理員憑證已在您的 YAML 檔案中設定"
 
-msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgid ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
 msgstr "從設定檔中移除 admin_userid 和 admin_password 並重新啟動伺服器"
 
 msgid "Default JWT secret is being used"
@@ -1244,10 +1255,14 @@ msgstr "執行：{command}（將遷移 {count} 位使用者）"
 msgid "Inconsistent security configuration detected"
 msgstr "偵測到不一致的安全設定"
 
-msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgid ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
 msgstr "JWT 密鑰使用預設值，但密碼鹽已變更。執行：{command}"
 
-msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgid ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
 msgstr "密碼鹽使用預設值，但 JWT 密鑰已變更。執行：{command}"
 
 msgid "A group cannot be its own parent"
@@ -1420,3 +1435,13 @@ msgstr "升級設定檔已刪除"
 
 msgid "Uploaded report branding logo (%d bytes, %s)"
 msgstr "已上傳報告品牌標誌 (%d 位元組, %s)"
+
+#: backend/api/upgrade_profiles.py
+msgid ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+msgstr "排程升級設定檔需要 SysManage Professional+ 授權。請升級以存取此功能。"
+
+#: backend/api/upgrade_profiles.py
+msgid "Upgrade profile not found"
+msgstr "找不到升級設定檔"

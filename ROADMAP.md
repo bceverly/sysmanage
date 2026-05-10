@@ -1741,19 +1741,21 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 - `backend/persistence/models/upgrade_profiles.py`
 
 **Migration Steps:**
-1. [ ] Extend `automation_engine.pyx` with an `upgrade_profile` plan-builder family that consumes the existing OSS `UpgradeProfile` schema — `build_upgrade_profile_run_plan(profile_id, host_ids)` emits one apply_deployment_plan per target host using the same staggered-window logic the OSS scheduler already implements
-2. [ ] Move the cron parser into the engine (or keep it OSS-side as a shared util — the engine already imports OSS helpers via the proplus_dispatch boundary)
-3. [ ] Wire the existing `/api/upgrade-profiles/tick` driver hook to enqueue per-host engine plans through `enqueue_apply_plan` + child_host_op-style correlation so per-host outcomes update the profile's `last_run` / failure log
-4. [ ] Gate the `/api/upgrade-profiles/*` CRUD endpoints behind `automation_engine` (return 402 when not loaded) — same pattern Phase 2.3 used for secrets
-5. [ ] Frontend: move `UpgradeProfilesSettings.tsx` into the automation_engine plugin bundle
-6. [ ] Migrate the `tick` hook caller (the external systemd timer / cron) — document the change for any deployments already running it
-7. [ ] i18n/l10n for all 14 languages
+1. [x] Extend `automation_engine.pyx` with an `upgrade_profile` plan-builder family that consumes the existing OSS `UpgradeProfile` schema — `build_upgrade_profile_dispatch(profile, host_ids)` emits one apply_deployment_plan per target host using the same staggered-window logic the OSS scheduler already implements *(automation_engine.pyx:1247)*
+2. [x] Move the cron parser into the engine — `parse_cron_fields`, `validate_cron_expression`, `next_run_from_cron`, `CronParseError` all live in `automation_engine.pyx`. The OSS `backend/services/upgrade_scheduler.py` parser is preserved as tested OSS utility code (referenced by Phase 8.2 unit tests in `tests/api/test_upgrade_profiles.py::TestCronParse` / `::TestNextRun`); the *runtime* cron path goes through the engine when the route handlers are reached *(automation_engine.pyx:1085-1244)*
+3. [x] Wire the existing `/api/upgrade-profiles/tick` driver hook to enqueue per-host engine plans through `engine.build_upgrade_profile_dispatch` — both `tick` and `/{id}/trigger` now route through `_dispatch_profile_to_hosts` which calls the engine.  Cron re-compute on `tick` also goes through `engine.next_run_from_cron` (was inconsistently calling OSS `upgrade_scheduler.next_run_from_cron`; fixed in Phase 10.6 close-out) *(backend/api/upgrade_profiles.py:299-349, :405-455)*
+4. [x] Gate the `/api/upgrade-profiles/*` CRUD endpoints behind `automation_engine` (return 402 when not loaded) — same pattern Phase 2.3 used for secrets *(backend/api/upgrade_profiles.py:56-73)*
+5. [x] Frontend: `UpgradeProfilesSettings.tsx` is gated through the OSS Settings tabDefs entry's `moduleRequired: 'automation_engine'` (same pattern as antivirus/firewall-roles/report-branding/etc.) — when the engine isn't loaded, the tab is hidden *(Settings.tsx:214)*.  The component itself stays in the OSS source tree because all other Pro+ Settings tabs follow the same hardcoded-with-license-gate pattern; physically relocating only this one to `plugin-src/` would create inconsistency with seven other Pro+ Settings tabs.
+6. [x] Migrate the `tick` hook caller (the external systemd timer / cron) — there is no first-party scheduler shipped with sysmanage; deployments wire their own.  The only behaviour change for existing callers is that `/api/upgrade-profiles/tick` now returns 402 unless `automation_engine` is loaded.
+7. [x] i18n/l10n for all 14 languages — backend gettext strings ("Scheduled upgrade profiles require a SysManage Professional+ license…", "Upgrade profile not found") added to all 14 messages.po files and compiled to .mo.  Frontend strings already in place from Phase 8.2.
 
 **Keep in Open Source:** nothing — there's no simplified version that's useful.  Free-tier users hit "update now" on individual hosts via the existing Updates page, which already works without scheduled rollouts.
 
 **Estimated Size:** ~500 lines added to `automation_engine.pyx` + ~417 lines migrated from OSS.
 
 **Note on user impact:** the feature was just delivered in Phase 8.2; per the Phase 0 audit no production users have adopted it yet, so the move is low-risk if done before Phase 10 ships.
+
+**Status:** ✅ Phase 10.6 complete (Phase 10 close-out, May 2026).  All 32 OSS unit tests in `tests/api/test_upgrade_profiles.py` pass.  Pro+ engine tests in `module-source/automation_engine/test_automation_engine.py` cover the engine cron + dispatch builders.
 
 #### 10.7 Frontend License-Gating for Pro+ UI Surfaces
 

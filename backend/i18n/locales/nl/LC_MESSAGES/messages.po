@@ -467,7 +467,6 @@ msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF-generatie is niet beschikbaar. Installeer het reportlab-pakket."
 
 # OS Version Upgrade related strings
-
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "Ongeldige pakketbeheerders voor OS-upgrades: {}"
 
@@ -537,8 +536,12 @@ msgstr "Systeemherstart Vereist"
 msgid "Confirm OS Upgrade"
 msgstr "OS-upgrade Bevestigen"
 
-msgid "This action will upgrade the operating system and require a system reboot. Continue?"
-msgstr "Deze actie zal het besturingssysteem upgraden en een systeemherstart vereisen. Doorgaan?"
+msgid ""
+"This action will upgrade the operating system and require a system reboot. "
+"Continue?"
+msgstr ""
+"Deze actie zal het besturingssysteem upgraden en een systeemherstart "
+"vereisen. Doorgaan?"
 
 msgid "OS upgrades are always security updates"
 msgstr "OS-upgrades zijn altijd beveiligingsupdates"
@@ -593,18 +596,6 @@ msgstr "Beschikbare pakketten verwerken mislukt: %s"
 
 msgid "Host not registered"
 msgstr "Host niet geregistreerd"
-
-
-
-
-
-
-
-
-
-
-
-
 
 msgid "Host Firewall Status"
 msgstr "Host Firewall Status"
@@ -730,7 +721,8 @@ msgid "Connection timeout - Graylog server may be unreachable"
 msgstr "Verbindingstime-out - Graylog server is mogelijk onbereikbaar"
 
 msgid "Connection failed - Graylog server may be down or unreachable"
-msgstr "Verbinding mislukt - Graylog server is mogelijk offline of onbereikbaar"
+msgstr ""
+"Verbinding mislukt - Graylog server is mogelijk offline of onbereikbaar"
 
 msgid "Unexpected error checking Graylog health"
 msgstr "Onverwachte fout bij controleren Graylog status"
@@ -767,7 +759,6 @@ msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Kan bericht %s niet markeren als bevestigd: %s"
 
 # LXD Container Management strings
-
 msgid "LXD is only supported on Linux hosts"
 msgstr "LXD wordt alleen ondersteund op Linux-hosts"
 
@@ -777,8 +768,12 @@ msgstr "De agent moet met root-rechten draaien om LXD te initialiseren"
 msgid "LXD initialization requested"
 msgstr "LXD-initialisatie aangevraagd"
 
-msgid "LXD initialization requested. The agent will install and configure LXD automatically."
-msgstr "LXD-initialisatie aangevraagd. De agent zal LXD automatisch installeren en configureren."
+msgid ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
+msgstr ""
+"LXD-initialisatie aangevraagd. De agent zal LXD automatisch installeren en "
+"configureren."
 
 msgid "LXD initialized successfully"
 msgstr "LXD succesvol geïnitialiseerd"
@@ -792,8 +787,12 @@ msgstr "De agent moet met root-rechten draaien om VMM te initialiseren"
 msgid "VMM initialization requested"
 msgstr "VMM-initialisatie aangevraagd"
 
-msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
-msgstr "VMM-initialisatie aangevraagd. De agent zal de vmd-daemon inschakelen en starten."
+msgid ""
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
+msgstr ""
+"VMM-initialisatie aangevraagd. De agent zal de vmd-daemon inschakelen en "
+"starten."
 
 msgid "VM name is required for VMM virtual machines"
 msgstr "VM-naam is vereist voor VMM virtuele machines"
@@ -808,63 +807,99 @@ msgid "Child host creation requested: %s (%s)"
 msgstr "Aanmaak onderliggende host aangevraagd: %s (%s)"
 
 # KVM/libvirt Virtual Machine Management strings
-
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM wordt alleen ondersteund op Linux-hosts"
 
 msgid "Agent must be running with root privileges to initialize KVM"
-msgstr "De agent moet met root-rechten worden uitgevoerd om KVM te initialiseren"
+msgstr ""
+"De agent moet met root-rechten worden uitgevoerd om KVM te initialiseren"
 
 msgid "KVM initialization requested"
 msgstr "KVM-initialisatie aangevraagd"
 
-msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
-msgstr "KVM-initialisatie aangevraagd. De agent zal libvirt installeren en KVM configureren voor beheer van virtuele machines."
+msgid ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
+msgstr ""
+"KVM-initialisatie aangevraagd. De agent zal libvirt installeren en KVM "
+"configureren voor beheer van virtuele machines."
 
 msgid "KVM/libvirt initialized successfully"
 msgstr "KVM/libvirt succesvol geïnitialiseerd"
 
 # KVM Networking Configuration strings
-
 msgid "KVM networking is only supported on Linux hosts"
 msgstr "KVM-netwerken worden alleen ondersteund op Linux-hosts"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "De agent moet met root-rechten worden uitgevoerd om KVM-netwerken te configureren"
+msgstr ""
+"De agent moet met root-rechten worden uitgevoerd om KVM-netwerken te "
+"configureren"
 
 msgid "Bridge interface name is required for bridged networking mode"
-msgstr "De naam van de bridge-interface is vereist voor de bridge-netwerkmodus"
+msgstr ""
+"De naam van de bridge-interface is vereist voor de bridge-netwerkmodus"
 
 msgid "KVM networking configuration requested: %s mode"
 msgstr "KVM-netwerkconfiguratie aangevraagd: %s-modus"
 
-msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM-netwerkconfiguratie aangevraagd. De agent zal het %s-netwerk configureren."
+msgid ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
+msgstr ""
+"KVM-netwerkconfiguratie aangevraagd. De agent zal het %s-netwerk "
+"configureren."
 
 msgid "KVM networks are only available on Linux hosts"
 msgstr "KVM-netwerken zijn alleen beschikbaar op Linux-hosts"
 
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr "KVM-netwerklijst aangevraagd. De resultaten worden binnenkort weergegeven."
+msgstr ""
+"KVM-netwerklijst aangevraagd. De resultaten worden binnenkort weergegeven."
 
 # Pro+ feature gate messages
-msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om"
+" toegang te krijgen tot deze functie."
 
-msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Container-levenscyclusbeheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"Container-levenscyclusbeheer vereist een SysManage Professional+-licentie. "
+"Upgrade om toegang te krijgen tot deze functie."
 
-msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Geheimenbeheer vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Geheimenbeheer vereist een SysManage Professional+-licentie. Upgrade om "
+"toegang te krijgen tot deze functie."
 
-msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Geheimenimplementatie vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Geheimenimplementatie vereist een SysManage Professional+-licentie. Upgrade "
+"om toegang te krijgen tot deze functie."
 
-msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Rapportgeneratie vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
+msgstr ""
+"Rapportgeneratie vereist een SysManage Professional+-licentie. Upgrade om "
+"toegang te krijgen tot deze functie."
 
-msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
-msgstr "Het exporteren van het auditlogboek vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot de exportformaten CSV, JSON, CEF en LEEF."
+msgid ""
+"Audit log export requires a SysManage Professional+ license. Please upgrade "
+"to access CSV, JSON, CEF, and LEEF export formats."
+msgstr ""
+"Het exporteren van het auditlogboek vereist een SysManage "
+"Professional+-licentie. Upgrade om toegang te krijgen tot de exportformaten "
+"CSV, JSON, CEF en LEEF."
 
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Gebruik /api/v1/audit/export met Pro+-licentie"
@@ -1124,11 +1159,18 @@ msgstr "Bron %s mislukt: %s"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
 #, python-format
-msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Georkestreerde herstart vereist een SysManage Professional+-licentie. Upgrade om toegang te krijgen tot deze functie."
+msgid ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Georkestreerde herstart vereist een SysManage Professional+-licentie. "
+"Upgrade om toegang te krijgen tot deze functie."
 
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr "Geen draaiende kind-hosts gevonden. Gebruik in plaats daarvan het standaard herstart-eindpunt."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr ""
+"Geen draaiende kind-hosts gevonden. Gebruik in plaats daarvan het standaard "
+"herstart-eindpunt."
 
 #, python-format
 msgid "Orchestrated reboot initiated with %d running child host(s)"
@@ -1142,7 +1184,6 @@ msgid "%d of %d child host(s) failed to restart"
 msgstr "%d van %d kind-host(s) konden niet opnieuw worden gestart"
 
 # Phase 2: Agent Code Migration - Step descriptions
-
 msgid "Launching LXD container"
 msgstr "LXD-container wordt gestart"
 
@@ -1188,7 +1229,6 @@ msgstr "Bestanden worden naar host overgebracht"
 msgid "Executing command sequence"
 msgstr "Opdrachtenreeks wordt uitgevoerd"
 
-
 msgid "Agent update requested"
 msgstr "Agent-update aangevraagd"
 
@@ -1201,12 +1241,12 @@ msgstr "Update kindagent aangevraagd: %s"
 msgid "Child agent update requested"
 msgstr "Update kindagent aangevraagd"
 
-
 msgid "Failed to get email configuration"
 msgstr "Kan e-mailconfiguratie niet ophalen"
 
 msgid "Email service is disabled. Enable it in the configuration file."
-msgstr "E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
+msgstr ""
+"E-mailservice is uitgeschakeld. Schakel deze in het configuratiebestand in."
 
 msgid "Test email sent successfully to {address}"
 msgstr "Test-e-mail succesvol verzonden naar {address}"
@@ -1218,16 +1258,29 @@ msgid "Error sending test email: {error}"
 msgstr "Fout bij het verzenden van test-e-mail: {error}"
 
 msgid "Email integration must be configured before creating new users"
-msgstr "E-mailintegratie moet worden geconfigureerd voordat u nieuwe gebruikers aanmaakt"
+msgstr ""
+"E-mailintegratie moet worden geconfigureerd voordat u nieuwe gebruikers "
+"aanmaakt"
 
-msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
-msgstr "Schakel e-mail in uw YAML-configuratiebestand in en configureer de SMTP-instellingen. Zonder e-mailintegratie kunnen nieuwe gebruikers geen wachtwoordinstellingsinstructies ontvangen en niet inloggen."
+msgid ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
+msgstr ""
+"Schakel e-mail in uw YAML-configuratiebestand in en configureer de SMTP-"
+"instellingen. Zonder e-mailintegratie kunnen nieuwe gebruikers geen "
+"wachtwoordinstellingsinstructies ontvangen en niet inloggen."
 
 msgid "Default admin credentials are configured in your YAML file"
-msgstr "Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
+msgstr ""
+"Standaard beheerdersreferenties zijn geconfigureerd in uw YAML-bestand"
 
-msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
-msgstr "Verwijder admin_userid en admin_password uit uw configuratiebestand en start de server opnieuw op"
+msgid ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
+msgstr ""
+"Verwijder admin_userid en admin_password uit uw configuratiebestand en start"
+" de server opnieuw op"
 
 msgid "Default JWT secret is being used"
 msgstr "Standaard JWT-geheim wordt gebruikt"
@@ -1244,11 +1297,19 @@ msgstr "Uitvoeren: {command} ({count} gebruikers worden gemigreerd)"
 msgid "Inconsistent security configuration detected"
 msgstr "Inconsistente beveiligingsconfiguratie gedetecteerd"
 
-msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
-msgstr "JWT-geheim gebruikt standaardwaarde maar wachtwoord-salt is gewijzigd. Uitvoeren: {command}"
+msgid ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
+msgstr ""
+"JWT-geheim gebruikt standaardwaarde maar wachtwoord-salt is gewijzigd. "
+"Uitvoeren: {command}"
 
-msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
-msgstr "Wachtwoord-salt gebruikt standaardwaarde maar JWT-geheim is gewijzigd. Uitvoeren: {command}"
+msgid ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
+msgstr ""
+"Wachtwoord-salt gebruikt standaardwaarde maar JWT-geheim is gewijzigd. "
+"Uitvoeren: {command}"
 
 msgid "A group cannot be its own parent"
 msgstr "Een groep kan niet zijn eigen bovenliggende zijn"
@@ -1420,3 +1481,15 @@ msgstr "Upgradeprofiel verwijderd"
 
 msgid "Uploaded report branding logo (%d bytes, %s)"
 msgstr "Rapport-brandinglogo geüpload (%d bytes, %s)"
+
+#: backend/api/upgrade_profiles.py
+msgid ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Geplande upgradeprofielen vereisen een SysManage Professional+ licentie. "
+"Voer een upgrade uit om toegang te krijgen tot deze functie."
+
+#: backend/api/upgrade_profiles.py
+msgid "Upgrade profile not found"
+msgstr "Upgradeprofiel niet gevonden"

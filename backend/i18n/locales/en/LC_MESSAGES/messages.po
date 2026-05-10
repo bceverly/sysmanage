@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
 "Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 
 msgid "OS version update requested"
 msgstr "OS version update requested"
@@ -217,7 +217,6 @@ msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF generation is not available. Please install reportlab package."
 
 # OS Version Upgrade related strings
-
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "Invalid package managers for OS upgrades: {}"
 
@@ -287,8 +286,12 @@ msgstr "System Reboot Required"
 msgid "Confirm OS Upgrade"
 msgstr "Confirm OS Upgrade"
 
-msgid "This action will upgrade the operating system and require a system reboot. Continue?"
-msgstr "This action will upgrade the operating system and require a system reboot. Continue?"
+msgid ""
+"This action will upgrade the operating system and require a system reboot. "
+"Continue?"
+msgstr ""
+"This action will upgrade the operating system and require a system reboot. "
+"Continue?"
 
 msgid "OS upgrades are always security updates"
 msgstr "OS upgrades are always security updates"
@@ -343,7 +346,6 @@ msgstr "Failed to process available packages: %s"
 
 msgid "Host not registered"
 msgstr "Host not registered"
-
 
 msgid "Host Firewall Status"
 msgstr "Host Firewall Status"
@@ -509,7 +511,6 @@ msgid "Failed to mark message %s as acknowledged: %s"
 msgstr "Failed to mark message %s as acknowledged: %s"
 
 # LXD Container Management strings
-
 msgid "LXD is only supported on Linux hosts"
 msgstr "LXD is only supported on Linux hosts"
 
@@ -519,8 +520,12 @@ msgstr "Agent must be running with root privileges to initialize LXD"
 msgid "LXD initialization requested"
 msgstr "LXD initialization requested"
 
-msgid "LXD initialization requested. The agent will install and configure LXD automatically."
-msgstr "LXD initialization requested. The agent will install and configure LXD automatically."
+msgid ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
+msgstr ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
 
 msgid "LXD initialized successfully"
 msgstr "LXD initialized successfully"
@@ -534,8 +539,12 @@ msgstr "Agent must be running with root privileges to initialize VMM"
 msgid "VMM initialization requested"
 msgstr "VMM initialization requested"
 
-msgid "VMM initialization requested. The agent will enable and start the vmd daemon."
-msgstr "VMM initialization requested. The agent will enable and start the vmd daemon."
+msgid ""
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
+msgstr ""
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 
 msgid "VMM initialization requires reboot"
 msgstr "VMM initialization requires reboot"
@@ -556,7 +565,6 @@ msgid "Child host creation requested: %s (%s)"
 msgstr "Child host creation requested: %s (%s)"
 
 # KVM/libvirt Virtual Machine Management strings
-
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM is only supported on Linux hosts"
 
@@ -566,19 +574,23 @@ msgstr "Agent must be running with root privileges to initialize KVM"
 msgid "KVM initialization requested"
 msgstr "KVM initialization requested"
 
-msgid "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
-msgstr "KVM initialization requested. The agent will install libvirt and configure KVM for virtual machine management."
+msgid ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
+msgstr ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
 
 msgid "KVM/libvirt initialized successfully"
 msgstr "KVM/libvirt initialized successfully"
 
 # KVM Networking Configuration strings
-
 msgid "KVM networking is only supported on Linux hosts"
 msgstr "KVM networking is only supported on Linux hosts"
 
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "Agent must be running with root privileges to configure KVM networking"
+msgstr ""
+"Agent must be running with root privileges to configure KVM networking"
 
 msgid "Bridge interface name is required for bridged networking mode"
 msgstr "Bridge interface name is required for bridged networking mode"
@@ -586,8 +598,12 @@ msgstr "Bridge interface name is required for bridged networking mode"
 msgid "KVM networking configuration requested: %s mode"
 msgstr "KVM networking configuration requested: %s mode"
 
-msgid "KVM networking configuration requested. The agent will configure the %s network."
-msgstr "KVM networking configuration requested. The agent will configure the %s network."
+msgid ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
+msgstr ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
 
 msgid "KVM networks are only available on Linux hosts"
 msgstr "KVM networks are only available on Linux hosts"
@@ -596,23 +612,47 @@ msgid "KVM network list requested. Results will be returned shortly."
 msgstr "KVM network list requested. Results will be returned shortly."
 
 # Pro+ feature gate messages
-msgid "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Container/VM management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
-msgid "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Container lifecycle management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
 
-msgid "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Secrets management requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
-msgid "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Secrets deployment requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
-msgid "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Report generation requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
+msgstr ""
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 
-msgid "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
-msgstr "Audit log export requires a SysManage Professional+ license. Please upgrade to access CSV, JSON, CEF, and LEEF export formats."
+msgid ""
+"Audit log export requires a SysManage Professional+ license. Please upgrade "
+"to access CSV, JSON, CEF, and LEEF export formats."
+msgstr ""
+"Audit log export requires a SysManage Professional+ license. Please upgrade "
+"to access CSV, JSON, CEF, and LEEF export formats."
 
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "Use /api/v1/audit/export with Pro+ license"
@@ -870,11 +910,17 @@ msgid "Source %s failed: %s"
 msgstr "Source %s failed: %s"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
-msgid "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
-msgstr "Orchestrated reboot requires a SysManage Professional+ license. Please upgrade to access this feature."
+msgid ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
 
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 
 msgid "Orchestrated reboot initiated with %d running child host(s)"
 msgstr "Orchestrated reboot initiated with %d running child host(s)"
@@ -886,7 +932,6 @@ msgid "%d of %d child host(s) failed to restart"
 msgstr "%d of %d child host(s) failed to restart"
 
 # Phase 2: Agent Code Migration - Step descriptions
-
 msgid "Launching LXD container"
 msgstr "Launching LXD container"
 
@@ -932,7 +977,6 @@ msgstr "Deploying files to host"
 msgid "Executing command sequence"
 msgstr "Executing command sequence"
 
-
 msgid "Agent update requested"
 msgstr "Agent update requested"
 
@@ -944,7 +988,6 @@ msgstr "Child agent update requested: %s"
 
 msgid "Child agent update requested"
 msgstr "Child agent update requested"
-
 
 msgid "Failed to get email configuration"
 msgstr "Failed to get email configuration"
@@ -964,14 +1007,24 @@ msgstr "Error sending test email: {error}"
 msgid "Email integration must be configured before creating new users"
 msgstr "Email integration must be configured before creating new users"
 
-msgid "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
-msgstr "Enable email in your YAML configuration file and configure SMTP settings. Without email integration, new users cannot receive password setup instructions and will be unable to log in."
+msgid ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
+msgstr ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
 
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "Default admin credentials are configured in your YAML file"
 
-msgid "Remove admin_userid and admin_password from your configuration file and restart the server"
-msgstr "Remove admin_userid and admin_password from your configuration file and restart the server"
+msgid ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
+msgstr ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
 
 msgid "Default JWT secret is being used"
 msgstr "Default JWT secret is being used"
@@ -988,11 +1041,19 @@ msgstr "Run: {command} ({count} users will be migrated)"
 msgid "Inconsistent security configuration detected"
 msgstr "Inconsistent security configuration detected"
 
-msgid "JWT secret uses default value but password salt has been changed. Run: {command}"
-msgstr "JWT secret uses default value but password salt has been changed. Run: {command}"
+msgid ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
+msgstr ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
 
-msgid "Password salt uses default value but JWT secret has been changed. Run: {command}"
-msgstr "Password salt uses default value but JWT secret has been changed. Run: {command}"
+msgid ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
+msgstr ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
 
 msgid "A group cannot be its own parent"
 msgstr "A group cannot be its own parent"
@@ -1164,3 +1225,15 @@ msgstr "Upgrade profile deleted"
 
 msgid "Uploaded report branding logo (%d bytes, %s)"
 msgstr "Uploaded report branding logo (%d bytes, %s)"
+
+#: backend/api/upgrade_profiles.py
+msgid ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+
+#: backend/api/upgrade_profiles.py
+msgid "Upgrade profile not found"
+msgstr "Upgrade profile not found"
