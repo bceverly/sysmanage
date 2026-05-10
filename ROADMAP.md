@@ -2191,6 +2191,122 @@ deliberately stopped at the docs body paragraphs.
 
 ---
 
+### 11.8 Agent install via official upstream package channels
+
+**Problem.** The build/release workflow already publishes the
+``sysmanage-agent`` package to every major upstream channel:
+
+| Channel | Distro family | Status |
+|---|---|---|
+| Launchpad PPA (``ppa:bceverly/sysmanage-agent``) | Ubuntu, Debian | ✅ published; ✅ consumed by engine (Phase 10.4 close-out) |
+| Fedora Copr (``bceverly/sysmanage-agent``) | Fedora, RHEL, Rocky, Alma, CentOS Stream | ✅ published; ❌ not consumed by engine |
+| Open Build Service (``home:bceverly/sysmanage-agent``) | openSUSE Leap, openSUSE Tumbleweed, SLES | ✅ published; ❌ not consumed by engine |
+| Snap Store (``sysmanage-agent``, strict) | Any snapd-capable Linux | ✅ published; ❌ not consumed by engine |
+| Flatpak (``sysmanage.org/sysmanage.flatpakrepo``) | Any flatpak-capable Linux | ✅ published; ❌ not consumed by engine |
+| OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
+| **winget / Microsoft Store** | Windows | ❌ not published, not consumed |
+| **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ❌ not published, not consumed |
+| **Mac App Store** | macOS (sandboxed) | ❌ not published, not consumed |
+| FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
+| NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
+| AUR (``sysmanage-agent``) | Arch | ❌ not published, not consumed |
+
+**Why this matters.** When the engine spawns a child host (or an
+operator runs the agent installer manually), every install path that
+goes through "curl GitHub releases | dpkg/rpm -i" leaves the host's
+package manager unaware of the upstream package — so future
+``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+``brew upgrade`` cycles never see new sysmanage-agent versions, and
+the in-app "Update Agent" button silently no-ops.  Channel-aware
+installs let the OS package manager track upgrades natively, which
+is also a hard requirement for Phase 11.1 air-gapped repository
+mirroring (a private PPA mirror can replace the upstream PPA URL;
+direct GitHub-release URLs cannot easily be mirrored).
+
+**Scope of work:**
+
+  1. **Add a per-distro install-source dispatch table** to the
+     virtualization_engine + container_engine:
+
+     ```python
+     _AGENT_INSTALL = {
+         "ubuntu": ["add-apt-repository -y ppa:bceverly/sysmanage-agent",
+                    "apt-get update",
+                    "apt-get install -y sysmanage-agent"],
+         "debian": [...same as ubuntu...],
+         "fedora": ["dnf copr enable -y bceverly/sysmanage-agent",
+                    "dnf install -y sysmanage-agent"],
+         "rhel":   [...same as fedora...],
+         "rocky":  [...same...],
+         "alma":   [...same...],
+         "opensuse-leap": ["zypper ar https://download.opensuse.org/repositories/home:/bceverly/openSUSE_Leap_$VERSION/home:bceverly.repo",
+                           "zypper --non-interactive --gpg-auto-import-keys refresh",
+                           "zypper --non-interactive install sysmanage-agent"],
+         "sles":   [...similar OBS path...],
+         "alpine": [...still direct download — no upstream apk repo published...],
+         "freebsd": [...still direct download until pkg / ports submission...],
+         "openbsd": [...still direct download until ports submission...],
+         "netbsd":  [...still direct download...],
+         "windows": ["winget install --id sysmanage.sysmanage-agent --silent"],
+         "macos":   ["brew install bceverly/tap/sysmanage-agent"],
+         "arch":    ["yay -S --noconfirm sysmanage-agent"],
+     }
+     ```
+
+  2. **Publish to remaining channels** that aren't yet automated:
+     * **winget** — needs a ``yaml`` manifest in
+       ``microsoft/winget-pkgs`` (PR per release) plus a Microsoft
+       Store submission for the "official" channel.
+     * **Homebrew tap** — create ``bceverly/homebrew-tap`` repo,
+       auto-update ``Formula/sysmanage-agent.rb`` per release tag.
+     * **Mac App Store** — sandboxing is incompatible with the
+       agent's privilege model (needs root for package management
+       /service control), so this is **out of scope** unless the
+       agent is split into a sandboxed UI shell + privileged
+       helper.  Likely permanent ❌.
+     * **Microsoft Store** — same sandboxing concern.  MSIX with
+       fully-trusted package identity might be feasible; defer
+       investigation.
+     * **AUR** — community-maintained typically.  Either submit
+       ourselves or accept community packaging.
+     * **FreeBSD ports / OpenBSD ports / NetBSD pkgsrc** — formal
+       upstream submission with maintainer signoff, multi-week
+       review per port tree.
+
+  3. **Wire the dispatch table into engine cloud-init / autoinstall /
+     firstboot generators** for every supported child-host distro.
+     Currently only Ubuntu/Debian (Phase 10.4 close-out) and the
+     legacy direct-download path for the rest.
+
+  4. **Audit container_engine.pyx** for the LXD/WSL paths — same
+     install-channel dispatch needed for those agent installs into
+     containers.
+
+**Acceptance criteria:**
+
+- [ ] Every supported child-host distro family installs sysmanage-
+      agent through its OS-native package manager, not via a
+      hard-coded GitHub-releases curl chain.
+- [ ] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+      ``brew upgrade`` natively pick up new agent releases without
+      operator action.
+- [ ] In-app "Update Agent" button works on every distro family
+      (currently silently no-ops on direct-.deb installs).
+- [ ] winget + Homebrew tap publishing automated in build-and-
+      release.yml.
+- [ ] Air-gapped Phase 11.1 can substitute private mirrors for any
+      of the upstream channels (per-channel mirror URL config in
+      agent registration).
+
+**Scope note.** This is essentially "Phase 10.4 close-out went
+deep on Ubuntu/Debian; finish the matrix for the other 8+ supported
+distro/OS combinations."  Estimated 1-2 weeks of focused work,
+mostly per-channel publish-pipeline plumbing rather than novel
+engineering.  Several entries (Mac App Store, Microsoft Store) may
+remain permanently ❌ due to sandboxing incompatibilities.
+
+---
+
 ## Phase 12: Multi-Site Federation (Enterprise)
 
 **Target Release:** v2.4.0.0
