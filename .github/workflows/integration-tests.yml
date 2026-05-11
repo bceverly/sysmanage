@@ -148,10 +148,12 @@ jobs:
 
       - name: Run integration tests
         env:
-          # Bound to env so the run: script can reference "$PYTEST_MARKER"
-          # instead of interpolating ${{ ... }} into shell — closes
-          # the run-shell-injection semgrep finding.
+          # Bound to env vars so the run: script can reference
+          # "$PYTEST_MARKER" instead of interpolating ${{ ... }} into
+          # shell — closes the run-shell-injection semgrep finding.
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
         run: |
           # Collect tests with the requested marker.  If none are tagged yet,
           # pytest exits 5 ("no tests collected") — we treat that as a soft
@@ -169,9 +171,6 @@ jobs:
             exit 0
           fi
           exit $rc
-        env:
-          PYTHONPATH: .
-          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
       - name: Upload junit report
         if: always()
