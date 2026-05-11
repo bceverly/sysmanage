@@ -2375,6 +2375,134 @@ Large enterprises operate data centers, branch offices, and cloud regions across
 - **Data flow downstream:** Coordinator pushes policy changes and dispatched commands to site servers
 - **Offline resilience:** Site servers cache pending upstream syncs and replay them when connectivity is restored
 
+### Data Architecture
+
+Two extreme approaches both fail at federation scale, and the
+coordinator/site partition has to land between them:
+
+  * **Full replication** — coordinator DB mirrors every row from every
+    site with a ``site_id`` column on each table.  Fails: at 1M-host
+    target, the coordinator DB grows linearly with hosts rather than
+    sites (contradicting the stated scalability target), and the
+    upstream sync bandwidth becomes brutal (every package install,
+    every CVE scan, every health tick replicating to the coordinator).
+  * **Pure aggregates** — coordinator stores only rolled-up metrics
+    (host counts, compliance %, CVE counts), all detail queries proxy
+    over the wire to the originating site.  Fails: breaks the
+    cross-site search the ROADMAP commits to — an operator can't ask
+    "show me every host running kernel < X" if every search fans out
+    to 100 sites; offline sites make any per-host query fail for
+    that site.
+
+The architecture splits data into **three tiers**:
+
+  1. **Aggregate tier** (coordinator) — one row per site per metric.
+     Host count, healthy/unhealthy ratio, compliance %, top CVEs by
+     severity, alert counts, last-sync timestamp.  Small, fixed
+     bound: 100 sites × handful of aggregate tables = thousands of
+     rows total.
+  2. **Host directory tier** (coordinator) — one row per host across
+     the entire fleet, but **only the columns operators filter and
+     search on**: ``id, hostname, ipv4, ipv6, os_family, os_version,
+     platform, status, last_seen, site_id, tags, public_ip,
+     geo_country_code, geo_subdivision_code, geo_city``.  Size bound:
+     ~1KB per host × 1M hosts ≈ 1GB.  Sized for PostgreSQL with room
+     to spare; enables cross-site list / search / filter without
+     proxying.
+  3. **Detail tier** (sites) — full ``software_package`` inventory,
+     ``host_certificates`` chains, ``audit_log`` entries, alert
+     bodies, OS-specific facts.  **Never replicated upstream.**  When
+     an operator drills into a specific host's full inventory, the
+     coordinator proxies the query to the originating site server
+     via the existing dispatch channel.
+
+**Site_id placement:** lives in the aggregate-tier rollup tables
+and in the host-directory tier (the only places where multiple
+sites' data is colocated).  Detail-tier tables at the sites
+themselves don't need ``site_id`` — they're inherently site-local
+and stay that way.
+
+**Sync protocol design effort** is the tradeoff here.  The host
+directory has to stay reasonably current: sites push delta updates
+upstream (host registered, deactivated, IP changed, OS upgraded,
+tags edited, geo recomputed) on top of the periodic rollup sync.
+Delta protocol needs debouncing (a fleet-wide patch run that
+upgrades 10k OSes at once shouldn't produce 10k sync messages),
+deduplication on replay (offline site reconnects and re-sends
+queued deltas — the coordinator dedup-keys by ``(host_id,
+field, mtime)``), and conflict resolution if two sites somehow
+both think they own a host (timestamp wins, audit-log the race).
+
+**Reference precedent:** this is the same partition SaaS
+observability platforms use at comparable scale — DataDog and New
+Relic both separate a "metadata index" tier (fast cross-account
+search, ~few KB per resource) from a high-volume telemetry tier
+(detail data stays in the originating shard).  Federation is
+structurally the same problem.
+
+### Frontend Architecture
+
+The coordinator UI follows two non-obvious design rules that the
+Phase 12 frontend deliverables (12.3 + 12.7's map) are scoped
+around:
+
+**Rule 1: Sites are first-class entities, not just labels on hosts.**
+A "tree view" that descends coordinator → site → host doesn't fit
+operator workflows (operators typically ask "all hosts with
+condition X across the fleet," not "drill into site-Cleveland's
+host list").  Instead:
+
+  * A new top-level **Sites** page lists/cards every subordinate
+    site server with its operational metadata (host count, last
+    sync, connectivity, compliance rollup, alert count).  Operations
+    that target a site directly — push a policy, dispatch a batch
+    command, suspend, view audit — happen on this page.
+  * The existing **Hosts / Updates / Compliance / Reports** pages
+    each gain a ``site`` filter facet alongside the existing tag
+    facets.  A site is one more filter dimension, not a separate
+    information architecture.
+  * Drill-down from a site card → filtered Hosts page for that
+    site.  Drill-down from a host → unchanged HostDetail page.
+
+This means **two visualization surfaces** to build and maintain
+(site-as-entity and host-as-entity-with-site-attribute), each
+serving a distinct workflow.  The two map onto the operator's
+actual mental model: "manage my sites" vs. "manage my fleet."
+
+**Rule 2: Never draw individual agents on a visualization.**
+Topology graphs collapse at 1M nodes; force-directed graphs become
+unusable past a few thousand; even WebGL rendering hits practical
+limits with that many markers.  Every map view in the coordinator
+UI **terminates at sites**: coordinator at the center / top, ~100
+site nodes around it, connection lines that animate sync activity
+and turn red when a site goes silent.  Per-site density (host
+count, % healthy, alert count) is surfaced as a marker badge or
+heatmap intensity — never as 10k individual dots.
+
+The federation frontend (12.3) ships two map flavors that share
+the same data feed:
+
+  * **Geographic map** — sites pinned to data-center coordinates.
+    Useful for executive dashboards, war-room overviews, and the
+    12.7 host-density visualization (where individual hosts ARE
+    plotted but always in cluster-marker form, never as individual
+    nodes).
+  * **Tile/dashboard view** — sites as a grid of status cards with
+    connection lines to the coordinator at the top.  No geography.
+    Better for ops teams who don't care where the sites are physically,
+    only that they're all green right now.
+
+Both feed off the same coordinator-side aggregate + host-directory
+tables; users pick the lens that matches their workflow.
+
+**Implication for 12.1 / 12.3 implementation:** the API surface
+should be designed around these two workflows — a ``GET /sites``
+that returns per-site rollups (drives the Sites page + both map
+flavors), and the existing per-host endpoints gain an optional
+``?site_id=`` filter (drives the augmented Hosts page).  Don't
+build a separate "tree" API that fetches the whole hierarchy in
+one go; the data volume doesn't allow it.
+
 ### Modules
 
 #### 12.1 federation_controller_engine (Enterprise)
@@ -2423,19 +2551,83 @@ Large enterprises operate data centers, branch offices, and cloud regions across
 
 #### 12.3 Federation Frontend
 
-**Features:**
-- [ ] Enterprise dashboard with site map/list view showing all subordinate sites
-- [ ] Per-site drill-down (click a site to see its hosts, compliance, alerts)
-- [ ] Cross-site host search and filtering
-- [ ] Enterprise-wide compliance and vulnerability rollup charts
-- [ ] Policy management UI (create/edit/push policies to sites)
-- [ ] Command dispatch UI (select hosts across sites, dispatch commands)
-- [ ] Site server management UI (add/remove/monitor sites)
-- [ ] Federation audit log viewer
-- [ ] Site connectivity status indicators
-- [ ] Sync status and history per site
+Implements both architectural rules from the "Frontend Architecture"
+section above: sites-as-first-class-entities, never-draw-individual-agents.
 
-**Estimated Size:** ~4,000 lines (frontend plugin bundle)
+**Sites surface (new top-level page):**
+- [ ] ``Sites`` page — one card per subordinate site server with host
+      count, last sync, connectivity status (green/yellow/red), aggregate
+      compliance %, open alert count, and a "manage" action menu
+- [ ] Site detail view (drill into a site card) — site-level metadata,
+      sync history, audit log, and a "see hosts" link that jumps to the
+      Hosts page pre-filtered to ``?site_id=<this>``
+- [ ] Site server lifecycle UI — add a site (enrollment flow), remove,
+      suspend (admin keeps the site enrolled but stops accepting upstream
+      sync), and resume
+- [ ] Connection-health detail — last successful sync timestamp, sync
+      latency histogram, current backlog size in the site's offline
+      queue (read from the site server's sync-status endpoint)
+- [ ] Per-site action surface — push a policy now, dispatch a batch
+      command to all hosts at this site, view this site's audit log,
+      compare configuration to fleet defaults
+
+**Augmented existing pages (filter facets):**
+- [ ] ``Hosts`` page — new ``site`` facet in the existing tag-filter
+      panel; URL-shareable as ``?site_id=...`` (or multi-select).
+      Cross-site search continues to work; the facet just narrows it.
+- [ ] ``Updates`` page — same ``site`` facet so an operator can target
+      "patch all hosts at site-A on the v2.4 update profile"
+- [ ] ``Compliance`` page — same facet for cross-site compliance drill-down
+- [ ] ``Reports`` page — site selector becomes a multi-select on report
+      definitions; existing report types unchanged
+
+**Enterprise map (two flavors, same data):**
+- [ ] **Geographic map** — Leaflet + OpenStreetMap tiles, sites pinned
+      at data-center coordinates, connection lines to the coordinator
+      animating sync activity.  Host markers (from 12.7) cluster within
+      each site's neighborhood.  Coloring: site nodes green/yellow/red
+      by connectivity + compliance; host clusters scaled by density.
+- [ ] **Tile dashboard view** — sites as a grid of status cards, lines
+      to the coordinator at top, no geography.  Same color coding.
+      Faster to scan, no cognitive load of geographic memory, better
+      for screen-of-glass / war-room displays.
+- [ ] View toggle in the same page — both feed off the same coordinator
+      aggregate + host-directory tables, just different layouts
+- [ ] **Never** draw individual agents as nodes — always cluster or
+      site-summarize.  At fleet scale (1M hosts) this is a hard constraint,
+      not a stylistic preference
+
+**Policy + dispatch UI:**
+- [ ] Policy management — create / edit / push update profiles, firewall
+      roles, compliance baselines.  Push targets a site-selector with
+      multi-select.
+- [ ] Command dispatch — select hosts across sites (via Hosts-page
+      multi-select or saved query), dispatch commands.  Progress view
+      tracks per-site queueing + per-agent acknowledgement.
+
+**Audit + observability:**
+- [ ] Federation audit log viewer — every cross-site operation
+      (enrollment, policy push, command dispatch, site suspend/resume)
+      with filter by site, user, action type
+- [ ] Sync status timeline per site — graph of upstream sync latency,
+      offline-queue depth, deduplication-on-replay events
+
+**Constraint on the API surface (informs 12.1 implementation):**
+
+The frontend never asks for "the whole tree" in one call — that
+doesn't scale, and the data model doesn't support it.  Endpoints
+are designed around the two workflows:
+- ``GET /api/federation/sites`` → aggregate row per site (drives
+  Sites page + both map flavors)
+- ``GET /api/hosts?site_id=<id>`` → existing endpoint, new optional
+  filter (drives the augmented Hosts page)
+- ``GET /api/hosts/{id}/detail`` → coordinator proxies the detail
+  query to the originating site (drives drill-down from a host
+  marker / row)
+
+**Estimated Size:** ~4,500 lines (frontend plugin bundle, +500 over
+the original estimate to account for the explicit two-map-flavor
+design and the audit/sync-status surfaces)
 
 #### 12.4 Access Groups + Registration Keys → federation_controller_engine
 
@@ -2513,6 +2705,124 @@ in `secrets_engine.pyx`.
 - [ ] `federation_received_commands` — commands received from coordinator
 
 **Estimated Size:** ~1,000 lines (Alembic migrations, idempotent, sqlite + postgresql compatible)
+
+#### 12.7 Host Geo-Location + Global Map
+
+Every connected agent contributes a rough geographic location to the
+fleet view.  The federation frontend's geographic map (see 12.3) plots
+hosts (clustered) on a world map so an operator can see at-a-glance
+where the fleet physically lives.  Useful at the federation tier
+because hosts are inherently distributed across data centers, branch
+offices, and cloud regions — and useful in single-server deployments
+too once the column set is in place (the backend portion below has no
+federation-specific code in it).
+
+**Detection flow:**
+
+1. Agent fetches its public-facing IP at startup and at heartbeat
+   intervals (configurable, default 24h — the public IP is stable on
+   most hosts).  Source: a small, hard-coded allowlist of public
+   echo endpoints with mutual fallback:
+   * ``https://api.ipify.org`` (primary)
+   * ``https://ifconfig.co/ip``
+   * ``https://icanhazip.com``
+   Agent picks the first that returns a syntactically-valid IPv4 or
+   IPv6 string; logs and skips silently if none reachable (air-gapped
+   sites stay air-gapped — no point retrying).
+2. Agent reports the public IP to its site server via the existing
+   heartbeat / system-info channel — no new transport.
+3. Site server performs the geo-IP lookup once per (host, IP) pair
+   and caches the result on the Host row; re-resolves only when the
+   IP changes.  Lookup is **offline-first** via a bundled MaxMind
+   GeoLite2 database refreshed weekly by a background task (free
+   tier, CC BY-SA 4.0 license, ships with the server).  Falls back
+   to ``https://ipapi.co/{ip}/json/`` (free up to 1k req/day per IP)
+   only when the GeoLite2 lookup misses — e.g. very new IP ranges
+   not yet in the bundled DB.
+4. Site server reports (host_id, country_code, region, city,
+   latitude, longitude, locale-aware display name) upstream to the
+   coordinator on the standard sync interval.  Coordinator stores
+   the same fields in its host-directory tier (per 12.6 schema).
+
+**i18n / l10n:**
+
+- ``country_code`` stored as ISO 3166-1 alpha-2 (``US``, ``DE``,
+  ``JP``); region as ISO 3166-2 subdivision (``US-CA``, ``DE-BY``);
+  city as the MaxMind canonical English name (lookup key).
+- A localized ``display_name`` column resolves the country + region +
+  city against the current user's locale at API-response time, using
+  MaxMind's localized-name tables which ship for the 14 supported
+  languages (covers the canonical sysmanage locale set: ``ar, de,
+  en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW``).
+- "City/state/country" is the US idiom; the schema uses the more
+  universal ISO terms (country / subdivision / locality).  The
+  frontend formatter respects locale-specific address ordering —
+  Asian locales prefer largest-to-smallest (Japan: 日本 → 東京都 →
+  渋谷区), Western locales smallest-to-largest (USA: San Francisco,
+  CA, USA).
+
+**Schema additions** (folded into the 12.6 migration set):
+
+- [ ] ``host.public_ip`` (INET / VARCHAR(45) for IPv6-safe storage)
+- [ ] ``host.public_ip_resolved_at`` (DateTime — last lookup time;
+      drives cache invalidation)
+- [ ] ``host.geo_country_code`` (CHAR(2), ISO 3166-1 alpha-2)
+- [ ] ``host.geo_subdivision_code`` (VARCHAR(10), ISO 3166-2)
+- [ ] ``host.geo_city`` (VARCHAR(200), MaxMind canonical English
+      name — used as the lookup key for localized display)
+- [ ] ``host.geo_latitude`` (NUMERIC(8,5))
+- [ ] ``host.geo_longitude`` (NUMERIC(8,5))
+- [ ] Index on ``(geo_country_code, geo_subdivision_code)`` for map
+      cluster queries
+
+**Frontend (extends 12.3 federation map):**
+
+- [ ] World map view using existing map library (likely Leaflet +
+      OpenStreetMap tiles; respects the project's no-third-party-tracker
+      stance) with marker clustering for dense regions
+- [ ] Click a cluster → drill into that geographic region's hosts
+- [ ] Click a marker → jump to the host detail page
+- [ ] Filter overlay: by country, by health, by OS, by tag — same
+      facets as the Hosts page so an operator can ask "show me all
+      Linux hosts in EMEA running an outdated agent" visually
+- [ ] Toggle between map view and the tiled site-card view (per
+      12.3) — same data, different lens
+
+**Privacy / opt-out:**
+
+- [ ] Per-deployment ``geo_lookup.enabled`` server config flag
+      (default true, false for air-gapped per Phase 11 deployments
+      where geo is meaningless anyway)
+- [ ] Per-host opt-out via tag (operator can tag a host
+      ``no_geo_track`` and it's excluded from lookup + map)
+- [ ] No reverse-geocoding of internal IPs (RFC 1918 / RFC 6598 /
+      link-local ranges) — those would just resolve to nonsense or
+      to the NAT egress point, which is the site server's public IP
+      and already known from the site row anyway
+- [ ] No third-party telemetry beyond the optional ipapi.co fallback
+      — the bundled GeoLite2 lookup happens locally on the site
+      server
+
+**Standalone-deployment value:**
+
+The backend half (public-IP detection + GeoLite2 lookup + Host
+columns) is genuinely useful outside federation — single-server
+fleets that span multiple offices benefit from the same visualization.
+The federation-specific piece is **only** the cross-site rollup +
+the map's per-site grouping overlay.  When implementing, write the
+GeoLite2 service as a standalone module that the federation engine
+consumes, not as part of ``federation_controller_engine`` — so
+single-server deployments get the map "for free."
+
+**Estimated Size:** ~1,500 lines (agent IP fetcher ~200, server-side
+GeoLite2 service + ipapi.co fallback ~400, map UI component ~600,
+schema migration ~50, tests + docs ~250).
+
+**Estimated weekly GeoLite2 refresh cost:** ~75 MB download per
+site, once per week.  No per-query cost (DB is local).  ipapi.co
+free tier covers up to 1k req/day which is plenty for fallback-only
+usage; if exhausted, lookups silently degrade to "country unknown"
+rather than blocking.
 
 ### Security Considerations
 
