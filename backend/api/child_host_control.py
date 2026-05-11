@@ -111,22 +111,49 @@ def _try_update_agent_plan_dispatch(
         return False
 
     # Look up the child's distribution to get the install commands.
+    # Engine-first / DB-fallback resolution: Phase 11.8 made the
+    # ``virtualization_engine._AGENT_INSTALL`` dispatch table the
+    # source of truth for per-distro install recipes; the DB row's
+    # ``agent_install_commands`` column is a back-compat fallback for
+    # OSS-only deployments that don't have the Pro+ engine loaded.
+    # Without this engine-first lookup, the "Update Agent" button on
+    # LXD/WSL hosts whose DB rows still carry stale legacy
+    # curl-and-dpkg recipes would re-install via direct download
+    # instead of routing through the PPA/Copr/OBS channel that the
+    # rest of the upgrade machinery (apt-get upgrade, dnf upgrade)
+    # expects, leaving future upgrades silently broken.
     # pylint: disable=import-outside-toplevel
     from backend.persistence.models import ChildHostDistribution
     import json as _json
 
     install_commands = []
+    dist = None
     if distribution_id:
         dist = (
             session.query(ChildHostDistribution)
             .filter(ChildHostDistribution.id == distribution_id)
             .first()
         )
-        if dist and dist.agent_install_commands:
-            try:
-                install_commands = _json.loads(dist.agent_install_commands) or []
-            except (TypeError, ValueError):
-                install_commands = []
+
+    # Preferred: engine-resolved commands.
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None and dist is not None:
+        try:
+            engine_cmds = virt_engine.get_agent_install_commands(
+                getattr(dist, "distribution_name", "") or "",
+                getattr(dist, "distribution_version", "") or "",
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            engine_cmds = []
+        if engine_cmds:
+            install_commands = list(engine_cmds)
+
+    # Fallback: DB-stored commands.
+    if not install_commands and dist and dist.agent_install_commands:
+        try:
+            install_commands = _json.loads(dist.agent_install_commands) or []
+        except (TypeError, ValueError):
+            install_commands = []
 
     if not install_commands:
         return False

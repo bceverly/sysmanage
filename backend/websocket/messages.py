@@ -84,6 +84,10 @@ class MessageType(str, Enum):
     # Phase 8.5 — fleet-wide broadcast.  Server fans out one message
     # to every connected agent (or every agent matching a tag).
     BROADCAST = "broadcast"
+    # Configuration push — operator-initiated agent-config update.
+    # Always enqueued (never sent directly via connection_manager) so
+    # offline agents receive it on reconnect.
+    CONFIG_UPDATE = "config_update"
 
 
 class CommandType(str, Enum):

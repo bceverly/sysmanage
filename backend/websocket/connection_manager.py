@@ -1,9 +1,24 @@
 """
 WebSocket connection manager for handling real-time bidirectional communication
 with SysManage agents across the fleet.
+
+Architectural invariant:
+  The direct ``send_*`` / ``broadcast_*`` methods on
+  ``ServerConnectionManager`` are queue-drain-only.  Every server-
+  originated message must first be persisted to ``message_queue`` via
+  ``QueueOperations.enqueue_message``; ``backend/websocket/outbound_processor.py``
+  is the single sanctioned consumer that calls these methods to
+  actually deliver.  The ``@_drain_only`` decorator below enforces
+  this at runtime — any caller outside the outbound processor (or
+  the connection manager itself, for internal recursion) raises
+  ``RuntimeError`` so the queue-first contract cannot be silently
+  bypassed.  Tests are allowlisted so unit tests of the manager
+  itself still pass.
 """
 
 import asyncio
+import functools
+import inspect
 import json
 import logging
 import uuid
@@ -14,6 +29,73 @@ from fastapi import WebSocket
 from websockets.exceptions import ConnectionClosed
 
 logger = logging.getLogger(__name__)
+
+
+# Module names from which direct send/broadcast is sanctioned.
+# Everything else must enqueue via QueueOperations.enqueue_message.
+_DRAIN_ALLOWLIST_PREFIXES = (
+    "backend.websocket.connection_manager",  # internal recursion (send_to_hostname → send_to_agent)
+    "backend.websocket.outbound_processor",  # the sanctioned drain
+)
+
+
+def _is_drain_allowed_caller(caller_module: str) -> bool:
+    """Allow the outbound processor, the manager itself (recursion),
+    and any test module (``test_*`` or ``tests.*``)."""
+    if any(caller_module.startswith(p) for p in _DRAIN_ALLOWLIST_PREFIXES):
+        return True
+    if caller_module.startswith("tests."):
+        return True
+    if ".tests." in caller_module:
+        return True
+    # pytest discovers ``test_foo.py`` modules with the same name as
+    # their top-level package; allow those too.
+    leaf = caller_module.rsplit(".", 1)[-1]
+    return leaf.startswith("test_")
+
+
+# Hot-path cache: every send/broadcast call lands in ``_drain_only``'s
+# wrapper, and the queue drain in particular calls ``send_to_host``
+# once per delivered message.  ``inspect.stack()`` walks the entire
+# frame stack AND reads source-context lines from disk for each frame,
+# which adds a 3-6x regression to median response time when the drain
+# is busy.  Cache the caller's bytecode object (``f_code``, identity-
+# comparable, unique per function definition) once it has been verified
+# as a legitimate drain caller, then skip the module-name lookup on
+# every subsequent call from the same site.  Negative results aren't
+# cached — a forbidden caller raises and never reaches the add().
+_DRAIN_ALLOWED_CODES: set = set()
+
+
+def _drain_only(method):
+    """Decorator: restrict the decorated coroutine method to
+    queue-drain callers.  See module docstring."""
+
+    @functools.wraps(method)
+    async def wrapper(*args, **kwargs):
+        # ``inspect.currentframe().f_back`` is O(1) and skips the
+        # source-reading that ``inspect.stack()`` does internally.
+        caller_frame = inspect.currentframe().f_back
+        if caller_frame is None:
+            # Defensive: ``currentframe()`` can return ``None`` on
+            # interpreters built without frame support.  Fall through
+            # without enforcement — better than crashing.
+            return await method(*args, **kwargs)
+        code_id = caller_frame.f_code
+        if code_id in _DRAIN_ALLOWED_CODES:
+            return await method(*args, **kwargs)
+        caller_module = caller_frame.f_globals.get("__name__", "")
+        if not _is_drain_allowed_caller(caller_module):
+            raise RuntimeError(
+                f"connection_manager.{method.__name__} is queue-drain-only; "
+                f"caller {caller_module!r} must enqueue via "
+                f"QueueOperations.enqueue_message instead. See "
+                f"backend/api/broadcast.py for the canonical pattern."
+            )
+        _DRAIN_ALLOWED_CODES.add(code_id)
+        return await method(*args, **kwargs)
+
+    return wrapper
 
 
 class AgentConnection:
@@ -170,15 +252,17 @@ class ConnectionManager:
         )
         return None
 
+    @_drain_only
     async def send_to_agent(self, agent_id: str, message: dict) -> bool:
-        """Send a message to a specific agent."""
+        """Send a message to a specific agent.  Queue-drain-only — see module docstring."""
         if agent_id in self.active_connections:
             connection = self.active_connections[agent_id]
             return await connection.send_message(message)
         return False
 
+    @_drain_only
     async def send_to_hostname(self, hostname: str, message: dict) -> bool:
-        """Send a message to an agent by hostname (case-insensitive)."""
+        """Send a message to an agent by hostname (case-insensitive).  Queue-drain-only."""
         logger.info("send_to_hostname called for hostname: %s", hostname)
         logger.info("Available hostnames: %s", list(self.hostname_to_agent.keys()))
 
@@ -205,8 +289,9 @@ class ConnectionManager:
         logger.warning("Hostname %s not found in hostname_to_agent mapping", hostname)
         return False
 
+    @_drain_only
     async def send_to_host(self, host_id: str, message: dict) -> bool:
-        """Send a message to an agent by database host ID."""
+        """Send a message to an agent by database host ID.  Queue-drain-only."""
         # Import here to avoid circular imports
         from sqlalchemy.orm import sessionmaker
 
@@ -223,8 +308,9 @@ class ConnectionManager:
                 return await self.send_to_hostname(host.fqdn, message)
         return False
 
+    @_drain_only
     async def broadcast_to_all(self, message: dict) -> int:
-        """Broadcast a message to all connected agents."""
+        """Broadcast a message to all connected agents.  Queue-drain-only."""
         successful_sends = 0
         failed_agents = []
 
@@ -240,8 +326,9 @@ class ConnectionManager:
 
         return successful_sends
 
+    @_drain_only
     async def broadcast_to_platform(self, platform: str, message: dict) -> int:
-        """Broadcast a message to all agents of a specific platform."""
+        """Broadcast a message to all agents of a specific platform.  Queue-drain-only."""
         successful_sends = 0
         failed_agents = []
 
@@ -258,8 +345,9 @@ class ConnectionManager:
 
         return successful_sends
 
+    @_drain_only
     async def broadcast_to_tagged(self, tag_id, message: dict) -> int:
-        """Phase 8.5: broadcast to every connected agent whose host
+        """Phase 8.5: broadcast to every connected agent whose host (queue-drain-only)
         carries the given tag.  Resolves the tag → host_ids set in ONE
         DB query, then iterates active connections in memory; never
         does per-host queries.

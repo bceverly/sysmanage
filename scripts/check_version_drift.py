@@ -116,13 +116,33 @@ def _read_apkbuild(p):    return _read_regex(p, _APK_VERSION_RE)
 def _write_apkbuild(p, v): _write_regex(p, _APK_VERSION_RE, v)
 
 
+def _npm_safe(version: str) -> str:
+    """Trim a 4-segment ``X.Y.Z.W`` tag to ``X.Y.Z`` for npm consumers.
+
+    npm's semver parser (and tools layered on it — cyclonedx-npm,
+    vite, every UI library that calls ``semver.parse(pkg.version)``)
+    rejects anything beyond three dot-separated numeric segments.  The
+    sysmanage release tag format uses four (e.g. ``2.3.0.1``); we keep
+    that verbatim in RPM .spec and APKBUILD (those accept it) but
+    strip the trailing segment(s) when writing ``package.json`` /
+    ``package-lock.json``.  Consecutive 4-segment tags within the same
+    ``X.Y.Z`` release will show the same UI version — acceptable for
+    display purposes; the precise build identifier still lives in
+    every other artifact.
+    """
+    parts = version.split(".")
+    if len(parts) <= 3:
+        return version
+    return ".".join(parts[:3])
+
+
 def _read_npm_root(p: Path) -> str | None:
     return json.loads(p.read_text()).get("version")
 
 
 def _write_npm_root(p: Path, v: str) -> None:
     data = json.loads(p.read_text())
-    data["version"] = v
+    data["version"] = _npm_safe(v)
     trailing_nl = p.read_text().endswith("\n")
     p.write_text(json.dumps(data, indent=2) + ("\n" if trailing_nl else ""))
 
@@ -133,11 +153,11 @@ def _read_npm_lock(p: Path) -> str | None:
 
 def _write_npm_lock(p: Path, v: str) -> None:
     data = json.loads(p.read_text())
-    data["version"] = v
+    data["version"] = _npm_safe(v)
     # package-lock.json mirrors root version inside ``packages[""]``.
     pkgs = data.get("packages", {})
     if "" in pkgs:
-        pkgs[""]["version"] = v
+        pkgs[""]["version"] = _npm_safe(v)
     trailing_nl = p.read_text().endswith("\n")
     p.write_text(json.dumps(data, indent=2) + ("\n" if trailing_nl else ""))
 
@@ -148,6 +168,21 @@ HANDLERS = {
     "npm-root": (_read_npm_root, _write_npm_root),
     "npm-lock": (_read_npm_lock, _write_npm_lock),
 }
+
+
+def _expected_for_kind(expected: str, kind: str) -> str:
+    """Return the comparison target for a given file kind.
+
+    Most kinds compare against the raw tag verbatim.  npm files store
+    a semver-stripped 3-segment form (see ``_npm_safe``), so the
+    comparison target for those kinds must be stripped the same way
+    — otherwise the drift check would always flag npm files as
+    out-of-sync after a fix (read side returns the stripped form,
+    raw expected has the 4th segment).
+    """
+    if kind in ("npm-root", "npm-lock"):
+        return _npm_safe(expected)
+    return expected
 
 
 def main() -> int:
@@ -175,9 +210,10 @@ def main() -> int:
         if actual is None:
             print(f"  ?  {rel}  (could not parse current version)")
             continue
-        if actual != expected:
-            print(f"  X  {rel}: {actual}  (expected {expected})")
-            drift.append((path, rel, actual, writer))
+        target = _expected_for_kind(expected, kind)
+        if actual != target:
+            print(f"  X  {rel}: {actual}  (expected {target})")
+            drift.append((path, rel, actual, writer, target))
         else:
             print(f"  OK {rel}: {actual}")
 
@@ -187,9 +223,13 @@ def main() -> int:
 
     if args.fix:
         print()
-        for path, rel, actual, writer in drift:
-            writer(path, expected)
-            print(f"  fixed: {rel}  {actual} -> {expected}")
+        for path, rel, actual, writer, target in drift:
+            # Writers for npm-* kinds apply ``_npm_safe`` internally,
+            # so passing the full 4-segment ``expected`` is also safe;
+            # we pass the kind-specific ``target`` for symmetry with
+            # the comparison and to make the printed delta accurate.
+            writer(path, target)
+            print(f"  fixed: {rel}  {actual} -> {target}")
         return 0
 
     print()

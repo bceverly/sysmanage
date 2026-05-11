@@ -1,34 +1,30 @@
 """
 Unit tests for configuration management API endpoints.
 Tests config push, logging config, WebSocket config, and server config endpoints.
+
+These endpoints route through ``config_push_manager``, which (post Phase
+11.9 queue-compliance refactor) enqueues OUTBOUND queue rows instead of
+calling ``connection_manager`` directly.  The tests below mock
+``config_push_manager`` at the API boundary, so the websocket layer is
+not exercised here — assertions verify that the endpoint dispatches the
+right manager method with the right arguments, including the SQLAlchemy
+session that the new queue-based methods require.
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
 
 @pytest.fixture(autouse=True)
-def mock_websocket_dependencies():
-    """Mock WebSocket and encryption dependencies for all tests."""
+def mock_encryption_dependency():
+    """Mock message encryption so the manager's envelope-build helpers
+    don't try to reach into a real key material store during tests."""
     with patch(
-        "backend.websocket.connection_manager.connection_manager"
-    ) as mock_conn_mgr, patch(
         "backend.security.communication_security.message_encryption"
     ) as mock_encryption:
-
-        # Mock connection manager methods
-        mock_conn_mgr.send_to_hostname = AsyncMock(return_value=True)
-        mock_conn_mgr.broadcast_to_platform = AsyncMock(return_value=2)
-        mock_conn_mgr.get_active_agents.return_value = [
-            {"hostname": "agent1.example.com"},
-            {"hostname": "agent2.example.com"},
-        ]
-
-        # Mock message encryption
         mock_encryption.encrypt_sensitive_data.return_value = "encrypted_config_data"
-
-        yield {"connection_manager": mock_conn_mgr, "encryption": mock_encryption}
+        yield mock_encryption
 
 
 class TestConfigPush:
@@ -39,8 +35,10 @@ class TestConfigPush:
         self, mock_config_manager, client, auth_headers
     ):
         """Test pushing config to a specific hostname."""
-        # Mock successful config push with AsyncMock
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=True)
+        # The push methods are sync now (queue enqueue is a DB write,
+        # not an awaitable network call).  Returning True signals
+        # successful enqueue.
+        mock_config_manager.push_config_to_agent.return_value = True
 
         config_data = {
             "config_data": {
@@ -55,31 +53,30 @@ class TestConfigPush:
             "/api/config/push", json=config_data, headers=auth_headers
         )
 
-        # Check response status
-
         assert response.status_code == 200
         data = response.json()
         assert "message" in data
         assert "Configuration pushed successfully" in data["message"]
         assert data["target"] == "target.example.com"
 
-        # Verify config push was called
-        mock_config_manager.push_config_to_agent.assert_called_once_with(
-            "target.example.com", config_data["config_data"]
-        )
+        # New signature: (session, hostname, config_data).  We don't
+        # assert on the session identity (it's the endpoint's own
+        # locally-opened session); we just verify the call landed with
+        # the right positional shape.
+        mock_config_manager.push_config_to_agent.assert_called_once()
+        call_args = mock_config_manager.push_config_to_agent.call_args
+        assert call_args.args[1] == "target.example.com"
+        assert call_args.args[2] == config_data["config_data"]
 
     @patch("backend.api.config_management.config_push_manager")
     def test_push_config_to_all_agents(self, mock_config_manager, client, auth_headers):
         """Test pushing config to all connected agents."""
-        # Mock successful push to all agents with AsyncMock
         mock_results = {
             "agent1.example.com": True,
             "agent2.example.com": True,
             "agent3.example.com": True,
         }
-        mock_config_manager.push_config_to_all_agents = AsyncMock(
-            return_value=mock_results
-        )
+        mock_config_manager.push_config_to_all_agents.return_value = mock_results
 
         config_data = {
             "config_data": {"server": {"hostname": "new-server.example.com"}},
@@ -97,16 +94,14 @@ class TestConfigPush:
         assert data["total_agents"] == 3
         assert data["successful"] == 3
 
-        # Verify push to all was called
-        mock_config_manager.push_config_to_all_agents.assert_called_once_with(
-            config_data["config_data"]
-        )
+        mock_config_manager.push_config_to_all_agents.assert_called_once()
+        call_args = mock_config_manager.push_config_to_all_agents.call_args
+        assert call_args.args[1] == config_data["config_data"]
 
     @patch("backend.api.config_management.config_push_manager")
     def test_push_config_by_platform(self, mock_config_manager, client, auth_headers):
         """Test pushing config to agents by platform."""
-        # Mock platform-specific config push with AsyncMock
-        mock_config_manager.push_config_by_platform = AsyncMock(return_value=2)
+        mock_config_manager.push_config_by_platform.return_value = 2
 
         config_data = {
             "config_data": {"client": {"registration_retry_interval": 60}},
@@ -125,10 +120,10 @@ class TestConfigPush:
         assert data["platform"] == "Linux"
         assert data["successful_sends"] == 2
 
-        # Verify platform push was called
-        mock_config_manager.push_config_by_platform.assert_called_once_with(
-            "Linux", config_data["config_data"]
-        )
+        mock_config_manager.push_config_by_platform.assert_called_once()
+        call_args = mock_config_manager.push_config_by_platform.call_args
+        assert call_args.args[1] == "Linux"
+        assert call_args.args[2] == config_data["config_data"]
 
     def test_push_config_invalid_request(self, client, auth_headers):
         """Test pushing config with invalid request data."""
@@ -174,8 +169,7 @@ class TestLoggingConfig:
         mock_config_manager.create_logging_config.return_value = {
             "logging": {"level": "DEBUG", "log_file": "/var/log/sysmanage-debug.log"}
         }
-        # Mock the config push to return success with AsyncMock
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=True)
+        mock_config_manager.push_config_to_agent.return_value = True
 
         logging_data = {
             "log_level": "DEBUG",
@@ -216,9 +210,7 @@ class TestLoggingConfig:
             "agent4.example.com": True,
             "agent5.example.com": True,
         }
-        mock_config_manager.push_config_to_all_agents = AsyncMock(
-            return_value=mock_results
-        )
+        mock_config_manager.push_config_to_all_agents.return_value = mock_results
 
         logging_data = {
             "log_level": "ERROR",
@@ -252,7 +244,7 @@ class TestLoggingConfig:
         mock_config_manager.create_logging_config.return_value = {
             "logging": {"level": "INVALID_LEVEL"}
         }
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=False)
+        mock_config_manager.push_config_to_agent.return_value = False
 
         logging_data = {
             "log_level": "INVALID_LEVEL",
@@ -309,7 +301,7 @@ class TestWebSocketConfig:
                 "auto_reconnect": True,
             }
         }
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=True)
+        mock_config_manager.push_config_to_agent.return_value = True
 
         ws_config_data = {
             "ping_interval": 45,
@@ -352,9 +344,7 @@ class TestWebSocketConfig:
             "agent2.example.com": True,
             "agent3.example.com": True,
         }
-        mock_config_manager.push_config_to_all_agents = AsyncMock(
-            return_value=mock_results
-        )
+        mock_config_manager.push_config_to_all_agents.return_value = mock_results
 
         ws_config_data = {
             "ping_interval": 120,
@@ -382,7 +372,7 @@ class TestWebSocketConfig:
         mock_config_manager.create_websocket_config.return_value = {
             "websocket": {"ping_interval": -1, "reconnect_interval": 5}
         }
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=False)
+        mock_config_manager.push_config_to_agent.return_value = False
 
         ws_config_data = {
             "ping_interval": -1,  # Invalid negative interval
@@ -420,7 +410,7 @@ class TestServerConfig:
                 "api_path": "/api",
             }
         }
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=True)
+        mock_config_manager.push_config_to_agent.return_value = True
 
         server_config_data = {
             "hostname": "new-server.example.com",
@@ -465,9 +455,7 @@ class TestServerConfig:
             "agent3.example.com": True,
             "agent4.example.com": True,
         }
-        mock_config_manager.push_config_to_all_agents = AsyncMock(
-            return_value=mock_results
-        )
+        mock_config_manager.push_config_to_all_agents.return_value = mock_results
 
         server_config_data = {
             "hostname": "updated-server.example.com",
@@ -496,7 +484,7 @@ class TestServerConfig:
         mock_config_manager.create_server_config.return_value = {
             "server": {"hostname": "test.example.com", "port": 99999}
         }
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=False)
+        mock_config_manager.push_config_to_agent.return_value = False
 
         server_config_data = {
             "hostname": "test.example.com",
@@ -667,7 +655,7 @@ class TestConfigManagementIntegration:
     def test_config_push_workflow(self, mock_config_manager, client, auth_headers):
         """Test complete config push workflow."""
         # 1. Push a configuration
-        mock_config_manager.push_config_to_agent = AsyncMock(return_value=True)
+        mock_config_manager.push_config_to_agent.return_value = True
 
         config_data = {
             "config_data": {"logging": {"level": "DEBUG"}},

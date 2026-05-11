@@ -1,19 +1,38 @@
 """
 Configuration push functionality for SysManage server.
-Allows server to push configuration updates to connected agents.
+Allows server to push configuration updates to agents via the durable
+DB-backed outbound queue.
+
+Architectural invariant (server-wide):
+  Every server -> agent message MUST be persisted to the
+  ``message_queue`` table via ``QueueOperations.enqueue_message``.
+  The outbound websocket processor is the only sanctioned consumer
+  of that table.  Direct ``connection_manager.send_*`` calls bypass
+  the queue, lose messages on transient disconnects, and never reach
+  offline agents.
+
+Earlier versions of this module called ``connection_manager.send_to_hostname``
+and ``connection_manager.broadcast_to_platform`` inline; both are
+removed and replaced with per-host queue enqueue.
 """
 
 import hashlib
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from sqlalchemy.orm import Session
+
+from backend.persistence import models
 from backend.security.communication_security import message_encryption
-from backend.websocket.connection_manager import connection_manager
-from backend.websocket.messages import Message
+from backend.websocket.messages import Message, MessageType
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
 
 logger = logging.getLogger(__name__)
+
+_queue_ops = QueueOperations()
 
 
 class ConfigPushManager:
@@ -51,117 +70,172 @@ class ConfigPushManager:
 
         return agent_config
 
-    async def push_config_to_agent(
-        self, hostname: str, config_data: Dict[str, Any]
-    ) -> bool:
-        """
-        Push configuration to a specific agent.
+    def _build_config_envelope(
+        self, label: str, config_data: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """Build the encrypted envelope for a single target.
 
-        Args:
-            hostname: Target agent hostname
-            config_data: Configuration data to push
-
-        Returns:
-            True if config was sent successfully
+        ``label`` is only used for version bookkeeping / pending-state
+        tracking (it can be a hostname for per-host pushes or a
+        platform tag for fan-out pushes).  Returns the message dict
+        ready to enqueue, or ``None`` if envelope construction fails.
         """
         try:
-            # Create agent config
-            agent_config = self.create_agent_config(hostname, config_data)
-
-            # Encrypt sensitive configuration data
+            agent_config = self.create_agent_config(label, config_data)
             encrypted_config = message_encryption.encrypt_sensitive_data(agent_config)
-
-            # Create config push message
             message = Message(
-                message_type="config_update",
+                message_type=MessageType.CONFIG_UPDATE.value,
                 data={
                     "encrypted_config": encrypted_config,
                     "version": agent_config["version"],
                     "requires_restart": config_data.get("requires_restart", False),
                 },
             )
-
-            # Send to specific agent
-            success = await connection_manager.send_to_hostname(
-                hostname, message.to_dict()
-            )
-
-            if success:
-                # Store as pending config
-                self.pending_configs[hostname] = agent_config
-                logger.info(
-                    "Configuration pushed to agent %s, version %s",
-                    hostname,
-                    agent_config["version"],
-                )
-            else:
-                logger.warning("Failed to send configuration to agent %s", hostname)
-
-            return success
-
+            self.pending_configs[label] = agent_config
+            return message.to_dict()
         except (ValueError, KeyError, OSError) as e:
-            logger.error("Error pushing config to agent %s: %s", hostname, e)
+            logger.error("Error building config envelope for %s: %s", label, e)
+            return None
+
+    def _enqueue_for_host(
+        self,
+        db: Session,
+        host_id: str,
+        envelope: Dict[str, Any],
+    ) -> bool:
+        """Persist one OUTBOUND queue row of ``envelope`` for ``host_id``.
+
+        Returns True on success, False if the enqueue raised.  Caller
+        is responsible for ``db.commit()`` once the batch is built —
+        ``QueueOperations.enqueue_message`` only flushes when given a
+        session.
+        """
+        try:
+            _queue_ops.enqueue_message(
+                message_type=MessageType.CONFIG_UPDATE.value,
+                message_data=envelope,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                db=db,
+            )
+            return True
+        except Exception as enqueue_error:  # pylint: disable=broad-exception-caught
+            logger.error(
+                "Failed to enqueue config push for host %s: %s",
+                host_id,
+                enqueue_error,
+            )
             return False
 
-    async def push_config_to_all_agents(
-        self, config_data: Dict[str, Any]
+    def push_config_to_agent(
+        self, db: Session, hostname: str, config_data: Dict[str, Any]
+    ) -> bool:
+        """Enqueue a configuration push for a specific agent.
+
+        Resolves ``hostname`` to a Host row by ``fqdn`` (only active
+        hosts are matched), builds the encrypted envelope, and writes
+        one OUTBOUND row to ``message_queue``.  The outbound websocket
+        processor picks it up and delivers when the agent is
+        connectable — offline agents receive it on reconnect.
+        """
+        host = (
+            db.query(models.Host)
+            .filter(models.Host.fqdn == hostname, models.Host.active.is_(True))
+            .first()
+        )
+        if host is None:
+            logger.warning("Cannot push config — no active host with fqdn=%s", hostname)
+            return False
+
+        envelope = self._build_config_envelope(hostname, config_data)
+        if envelope is None:
+            return False
+
+        if not self._enqueue_for_host(db, str(host.id), envelope):
+            return False
+
+        db.commit()
+        logger.info(
+            "Configuration enqueued for agent %s, version %s",
+            hostname,
+            self.pending_configs[hostname]["version"],
+        )
+        return True
+
+    def push_config_to_all_agents(
+        self, db: Session, config_data: Dict[str, Any]
     ) -> Dict[str, bool]:
+        """Enqueue a configuration push for every active host.
+
+        Unlike the legacy implementation which only addressed currently-
+        connected agents, this queries ``Host.active=True`` directly so
+        offline hosts also receive the update on reconnect.
         """
-        Push configuration to all connected agents.
+        hosts = (
+            db.query(models.Host.id, models.Host.fqdn)
+            .filter(models.Host.active.is_(True))
+            .all()
+        )
+        if not hosts:
+            return {}
 
-        Args:
-            config_data: Configuration data to push
+        results: Dict[str, bool] = {}
+        enqueued = 0
+        for host_id, fqdn in hosts:
+            envelope = self._build_config_envelope(fqdn, config_data)
+            if envelope is None:
+                results[fqdn] = False
+                continue
+            ok = self._enqueue_for_host(db, str(host_id), envelope)
+            results[fqdn] = ok
+            if ok:
+                enqueued += 1
 
-        Returns:
-            Dictionary mapping hostname to success status
-        """
-        results = {}
-
-        # Get all active agents
-        active_agents = connection_manager.get_active_agents()
-
-        for agent_info in active_agents:
-            hostname = agent_info.get("hostname")
-            if hostname:
-                success = await self.push_config_to_agent(hostname, config_data)
-                results[hostname] = success
-
-        logger.info("Configuration pushed to %s agents", len(results))
+        if enqueued:
+            db.commit()
+        logger.info("Configuration enqueued for %s agent(s)", enqueued)
         return results
 
-    async def push_config_by_platform(
-        self, platform: str, config_data: Dict[str, Any]
+    def push_config_by_platform(
+        self, db: Session, platform: str, config_data: Dict[str, Any]
     ) -> int:
+        """Enqueue a configuration push for every active host on a platform.
+
+        Same fan-out pattern as ``push_config_to_all_agents`` but
+        filtered by ``Host.platform``.  Returns the number of rows
+        successfully enqueued.
         """
-        Push configuration to all agents of a specific platform.
-
-        Args:
-            platform: Target platform (e.g., "Linux", "Windows")
-            config_data: Configuration data to push
-
-        Returns:
-            Number of agents that received the configuration
-        """
-        # Create encrypted config message
-        agent_config = self.create_agent_config(f"platform-{platform}", config_data)
-        encrypted_config = message_encryption.encrypt_sensitive_data(agent_config)
-
-        message = Message(
-            message_type="config_update",
-            data={
-                "encrypted_config": encrypted_config,
-                "version": agent_config["version"],
-                "requires_restart": config_data.get("requires_restart", False),
-            },
+        hosts = (
+            db.query(models.Host.id, models.Host.fqdn)
+            .filter(
+                models.Host.active.is_(True),
+                models.Host.platform == platform,
+            )
+            .all()
         )
+        if not hosts:
+            return 0
 
-        # Broadcast to platform
-        successful_sends = await connection_manager.broadcast_to_platform(
-            platform, message.to_dict()
+        # One envelope per host (each carries its own encrypted+versioned
+        # config); the platform label is folded into the per-host
+        # ``create_agent_config`` call so version bookkeeping stays
+        # per-host as before.
+        enqueued = 0
+        for host_id, fqdn in hosts:
+            envelope = self._build_config_envelope(fqdn, config_data)
+            if envelope is None:
+                continue
+            if self._enqueue_for_host(db, str(host_id), envelope):
+                enqueued += 1
+
+        if enqueued:
+            db.commit()
+        logger.info(
+            "Configuration enqueued for %s agent(s) on platform %s",
+            enqueued,
+            platform,
         )
-
-        logger.info("Configuration pushed to %s %s agents", successful_sends, platform)
-        return successful_sends
+        return enqueued
 
     def handle_config_acknowledgment(
         self, hostname: str, version: int, success: bool, error: str = None

@@ -2574,6 +2574,66 @@ in `secrets_engine.pyx`.
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
 
+### 12.X Docs translation pipeline (carry-over from Phase 11.7)
+
+Phase 11.7 closed the OSS UI + agent translation gaps with an
+autonomous LLM pass.  The docs side (`sysmanage-docs/`) got the
+structural side done — every text-bearing HTML tag carries a
+``data-i18n="..."`` attribute and every key exists in all 14 locale
+JSONs — but the non-English locale values are ``[TODO]``-prefixed
+English placeholders.  Real translations were explicitly deferred
+on the grounds that:
+
+  1. The docs surface is ~10,700 strings × 13 non-English locales =
+     ~140k translation calls; an LLM-only pass burns 20–40M tokens
+     of weekly Max-plan quota in one sitting.
+  2. Even the autonomous-LLM quality bar isn't appropriate for
+     long-form technical docs without a native-speaker review pass.
+  3. The professional-translation route (DeepL Pro / Crowdin /
+     Google Cloud Translation + native-speaker reviewers) is an
+     account-and-budget decision separate from engineering work.
+
+**Phase 12 scope:**
+
+- [ ] Pick a translation-service partner.  Options:
+      * **DeepL Pro API** — best machine-translation quality on
+        European languages; per-character billing.  Lower lift to
+        integrate.
+      * **Crowdin** — full TMS with translation memory, glossary
+        enforcement, community-translation support.  Higher up-front
+        config but better long-term workflow.
+      * **Google Cloud Translation** — cheapest at scale, weaker
+        on technical terminology than DeepL.
+- [ ] Wire the chosen service into a per-release ``make
+      translate-docs`` target that:
+      * Diffs the English source for changed/new ``data-i18n`` keys
+        since last release.
+      * Submits only the delta to the translation service.
+      * Writes results back into each locale's ``translation.json``,
+        replacing ``[TODO]``-prefixed values.
+      * Runs the existing ``i18n-validate`` strict check to confirm
+        format-spec preservation (``%s`` / ``{name}`` placeholders
+        must survive the round-trip).
+- [ ] Native-speaker QA pass on the published-locale subset
+      (typically es / de / fr / ja / zh_CN — the highest-traffic
+      languages).  Pay-per-string via professional reviewers, or
+      community contributors if an OSS contribution flow is set up.
+- [ ] Round-trip back-translation check as a CI gate — every locale
+      string back-translates to within N edit-distance of its
+      English source; flagged drift becomes a review item.
+- [ ] Footer disclosure: "Machine-translated, native-reviewed for
+      <list>.  Contributions welcome — see ``CONTRIBUTING.md``."
+
+**Not in Phase 12 scope:** adding a 15th supported language.  The
+canonical 14 (``ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru,
+zh_CN, zh_TW``) remain locked until / unless a contributor steps up
+to maintain a new one end-to-end.
+
+**Estimated effort:** 1–2 days engineering once the service is
+chosen + funded.  Ongoing cost is per-release character throughput
+to the translation service (cents-to-low-dollars per release at
+DeepL Pro's pricing for an OSS-scale docs corpus).
+
 ---
 
 ## Phase 13: Enterprise GA (v3.0.0.0)

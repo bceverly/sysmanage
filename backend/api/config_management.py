@@ -92,8 +92,8 @@ async def push_configuration(
             )
 
             if request.push_to_all:
-                results = await config_push_manager.push_config_to_all_agents(
-                    request.config_data
+                results = config_push_manager.push_config_to_all_agents(
+                    session, request.config_data
                 )
 
                 # Log audit entry for config push to all agents
@@ -122,8 +122,8 @@ async def push_configuration(
                 }
 
             if request.target_hostname:
-                success = await config_push_manager.push_config_to_agent(
-                    request.target_hostname, request.config_data
+                success = config_push_manager.push_config_to_agent(
+                    session, request.target_hostname, request.config_data
                 )
                 if success:
                     # Log audit entry for config push to specific agent
@@ -149,8 +149,8 @@ async def push_configuration(
                 )
 
             if request.target_platform:
-                successful_sends = await config_push_manager.push_config_by_platform(
-                    request.target_platform, request.config_data
+                successful_sends = config_push_manager.push_config_by_platform(
+                    session, request.target_platform, request.config_data
                 )
 
                 # Log audit entry for config push by platform

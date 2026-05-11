@@ -65,8 +65,48 @@ def _check_container_module():
 
 
 def _parse_agent_install_commands(distribution):
-    """Parse agent_install_commands from a distribution record."""
-    if not distribution or not distribution.agent_install_commands:
+    """Resolve the per-distro agent-install command list.
+
+    Phase 11.8 sets the architectural rule that ``virtualization_engine``
+    is the single source of truth for these commands — the engine's
+    ``_AGENT_INSTALL`` dispatch table emits the canonical PPA / Copr /
+    OBS / winget / brew recipes per distro, version-templated where
+    relevant.  This function calls into the engine first and falls
+    back to the ``ChildHostDistribution.agent_install_commands`` DB
+    column only when the engine is unavailable (OSS-only deployment)
+    or returns nothing (unknown distro).
+
+    Why bypass the DB row when the engine has an answer?  Because
+    seeded DB rows drift — they get populated once and then quietly
+    fall behind when the install recipe changes (Phase 11.8 PPA
+    migration is the example: the table seed still carried the
+    legacy direct-download path months after the engine was wired
+    for PPA install).  Routing reads through the engine first makes
+    the engine's dispatch table authoritative; the DB column becomes
+    a back-compat fallback that engine-aware deployments never touch.
+    """
+    if not distribution:
+        return []
+
+    # Preferred path: engine-resolved commands.  ``distribution_name``
+    # and ``distribution_version`` on the row hold the canonical strings
+    # (e.g. "Ubuntu" + "24.04" or "openSUSE Leap" + "15.6") that the
+    # engine's ``_normalize_distro_id`` helper consumes.
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            engine_cmds = virt_engine.get_agent_install_commands(
+                getattr(distribution, "distribution_name", "") or "",
+                getattr(distribution, "distribution_version", "") or "",
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            engine_cmds = []
+        if engine_cmds:
+            return list(engine_cmds)
+
+    # Fallback: DB-seeded commands.  Same parsing as before — string
+    # JSON or already-decoded list, anything else → empty.
+    if not distribution.agent_install_commands:
         return []
     if isinstance(distribution.agent_install_commands, str):
         try:
