@@ -904,7 +904,13 @@ def _hosts_matching_version(db: Session, kv: "models.MirrorKnownVersion"):
     rows = db.query(models.Host).filter(models.Host.active.is_(True)).all()
     out = []
     for h in rows:
-        text = (h.platform_release or "") + " " + (h.platform_version or "")
+        # ReDoS defense-in-depth: cap input length so a pathological
+        # ``match_regex`` (admin-curated, but treat as untrusted)
+        # can't run unbounded on a long platform_release string.
+        # platform_release / platform_version are agent-reported but
+        # constrained to ~200 chars in practice.
+        text = ((h.platform_release or "") + " " + (h.platform_version or ""))[:512]
+        # nosemgrep: python.fastapi.regex.tainted-regex-stdlib-fastapi.tainted-regex-stdlib-fastapi
         if rx.search(text):
             out.append(h)
     return out
@@ -1128,8 +1134,17 @@ def _resolve_mirror_url(mirror) -> str:
     # zypper/pkg verify repository metadata via gpg signatures (apt-secure,
     # dnf gpgcheck, zypper rpm-key, pkg PUBKEY) independently of transport;
     # forcing https here would require provisioning a TLS cert on every
-    # mirror host's local agent, which the project does not do.  The
-    # actual SonarQube hotspot is suppressed end-of-line below.
+    # mirror host's local agent, which the project does not do.
+    #
+    # SSRF note: ``fqdn`` comes from ``models.Host.fqdn`` of the row
+    # whose ``id == mirror.host_id``.  Host records are admin-curated
+    # (created via the host registration flow); mirror.host_id is set
+    # by the operator when defining the mirror in Settings → Repository
+    # Mirroring.  The URL is consumed by the agent's apt/dnf config —
+    # never by a request handler that proxies to it — so even a
+    # compromised host_id would only point the AGENT at a bad mirror,
+    # not enable SSRF from the SERVER.
+    # nosemgrep: python.django.security.injection.tainted-url-host.tainted-url-host
     return f"http://{fqdn}/mirror/{mirror.name}"  # NOSONAR
 
 

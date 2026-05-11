@@ -203,3 +203,35 @@
       column-gap: 2.5rem;
     }
   }
+/* Phase 11 — role chip rendered next to the logo when this server is
+   half of an air-gap pair (collector or repository).  Hidden on
+   ``standard`` deployments. */
+.nav__role-chip {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.nav__role-chip--collector {
+  background-color: #1e6091;
+  color: #ffffff;
+}
+
+.nav__role-chip--repository {
+  background-color: #2d5a3d;
+  color: #ffffff;
+}
+
+/* Degraded state — the role-specific Pro+ engine isn't loaded.  Rendered
+   in red so an operator notices at a glance.  Tooltip explains. */
+.nav__role-chip--degraded {
+  background-color: #b32d2d;
+  color: #ffffff;
+}

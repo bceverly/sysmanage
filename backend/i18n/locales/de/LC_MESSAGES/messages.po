@@ -1497,3 +1497,69 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "Upgrade-Profil nicht gefunden"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Die Verwaltung von CVE-Feeds erfordert eine SysManage Professional+ Lizenz. "
+"Bitte führen Sie ein Upgrade durch, um auf diese Funktion zuzugreifen."
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"Air-Gap-Erfassungspläne erfordern eine SysManage Professional+ Lizenz mit "
+"der Air-Gap-Collector-Engine. Bitte führen Sie ein Upgrade durch."
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "Ungültiger Cron-Ausdruck: 5 Felder erwartet (m h dom mon dow)"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "Ungültige target_request: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "Air-Gap-Erfassungsplan nicht gefunden"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "Ungültige UUID für schedule_id: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "Air-Gap-Erfassungsplan '%s' erstellt"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "Air-Gap-Erfassungsplan '%s' aktualisiert"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "Air-Gap-Erfassungsplan '%s' gelöscht"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "Air-Gap-Erfassungsplan gelöscht"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"automation_engine nicht geladen; next_run-Zeitstempel werden nicht "
+"aktualisiert. Pläne werden nur im aktuellen Tick-Fenster ausgeführt, bis die"
+" Pro+ Lizenz automation_engine enthält."

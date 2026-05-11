@@ -283,6 +283,9 @@ class TestTierFeatures:
             FeatureCode.VULNERABILITY_SCANNING,
             FeatureCode.ADVANCED_MONITORING,
             FeatureCode.CUSTOM_REPORTS,
+            # Phase 11.4 — paired with VULN_ENGINE module which is already
+            # in the Professional tier.
+            FeatureCode.CVE_FEED_MANAGEMENT,
         }
         assert pro_features == expected
 

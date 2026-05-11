@@ -1468,3 +1468,69 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "ملف تعريف الترقية غير موجود"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"تتطلب إدارة موجزات CVE ترخيص SysManage Professional+. يرجى الترقية للوصول "
+"إلى هذه الميزة."
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"تتطلب جداول جمع المعزولة ترخيص SysManage Professional+ مع محرك المُجَمِّع "
+"المعزول. يرجى الترقية للوصول إلى هذه الميزة."
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "تعبير cron غير صالح: متوقع 5 حقول (m h dom mon dow)"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "target_request غير صالحة: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "جدول جمع المعزولة غير موجود"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "UUID غير صالح لـ schedule_id: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "تم إنشاء جدول جمع المعزولة '%s'"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "تم تحديث جدول جمع المعزولة '%s'"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "تم حذف جدول جمع المعزولة '%s'"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "تم حذف جدول جمع المعزولة"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"لم يتم تحميل automation_engine؛ لم يتم تقديم طوابع next_run الزمنية. ستُشغل "
+"الجداول فقط في نافذة العلامة الحالية حتى يتضمن ترخيص Pro+ المحرك "
+"automation_engine."

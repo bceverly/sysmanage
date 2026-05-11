@@ -88,6 +88,9 @@ const MfaEnrollmentCard: React.FC = () => {
 
   useEffect(() => {
     refreshStatus();
+    // refreshStatus is stable for the component lifetime; including it
+    // would re-fetch on every render.  Mount-only is the intended
+    // behavior.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

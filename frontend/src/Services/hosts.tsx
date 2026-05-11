@@ -447,7 +447,6 @@ const doGetHostSoftware = async (
 ): Promise<PaginatedSoftwareResponse> => {
     let result = { items: [], pagination: { page: 1, page_size: 100, total_items: 0, total_pages: 0, has_next: false, has_prev: false } } as PaginatedSoftwareResponse;
 
-    // eslint-disable-next-line no-undef
     const params = new URLSearchParams({
         page: page.toString(),
         page_size: pageSize.toString()

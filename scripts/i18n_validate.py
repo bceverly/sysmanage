@@ -35,7 +35,10 @@ LOCALES_DIR = REPO_ROOT / "frontend" / "public" / "locales"
 # list in sync with grep:
 #   grep -ohE "t\(\`[a-zA-Z][a-zA-Z0-9._]*\.\\\${" frontend/src/**/*.tsx
 DYNAMIC_KEY_PREFIXES = (
+    "airgap.freshness.label.",  # Phase 11 B4 — t(`airgap.freshness.label.${label}`)
+    "engine.",  # Phase 11 B7 — engine plan-description envelope: t(cmd.description_key, params)
     "hostDetail.hypervisor.state.",
+    "nav.role.",  # Phase 11 — role chip uses t(`nav.role.${serverRole}`)
     "scripts.status.",
     "secrets.api_provider.",
     "secrets.certificate_type.",

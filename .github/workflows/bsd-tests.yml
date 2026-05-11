@@ -94,9 +94,16 @@ jobs:
         # pin every third-party action — see the `# v4` comments on
         # actions/checkout etc.
         uses: cross-platform-actions/action@v1.0.0
+        env:
+          # Pre-bind any github / inputs context value used inside the
+          # VM's run: script to env vars so the script can reference
+          # "$PYTEST_MARKER" instead of interpolating ${{ ... }} —
+          # closes the run-shell-injection semgrep finding.
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: freebsd
           version: ${{ inputs.release_freebsd || '14.1' }}
+          environment_variables: PYTEST_MARKER
           run: |
             # FreeBSD pkg aborts the WHOLE batch if any package name is
             # unresolvable in the repo (unlike NetBSD pkgin and OpenBSD
@@ -118,12 +125,12 @@ jobs:
             # are pure Python).  pytest/pytest-asyncio always via pip.
             python -m pip install pytest pytest-asyncio sqlalchemy aiofiles
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
+            python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-freebsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
               exit 0
             fi
             exit $rc
@@ -151,9 +158,12 @@ jobs:
 
       - name: Run agent integration tests in OpenBSD VM
         uses: cross-platform-actions/action@v1.0.0
+        env:
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: openbsd
           version: ${{ inputs.release_openbsd || '7.8' }}
+          environment_variables: PYTEST_MARKER
           run: |
             # OpenBSD packages use py3- prefix.  Python is pulled in
             # automatically as a dep of any py3-* package, so we don't
@@ -173,12 +183,12 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install pytest pytest-asyncio aiofiles
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
+            python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-openbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
               exit 0
             fi
             exit $rc
@@ -206,9 +216,12 @@ jobs:
 
       - name: Run agent integration tests in NetBSD VM
         uses: cross-platform-actions/action@v1.0.0
+        env:
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: netbsd
           version: ${{ inputs.release_netbsd || '10.0' }}
+          environment_variables: PYTEST_MARKER
           run: |
             # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip
             # them in below instead.  || true so missing pkg names don't
@@ -223,12 +236,12 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install pytest pytest-asyncio
             set +e
-            python -m pytest tests/ -m "${{ inputs.pytest_marker || 'integration' }}" \
+            python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-netbsd-junit.xml
             rc=$?
             set -e
             if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.${{ inputs.pytest_marker || 'integration' }} — exiting clean."
+              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
               exit 0
             fi
             exit $rc

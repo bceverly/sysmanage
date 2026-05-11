@@ -10,6 +10,8 @@ from fastapi import FastAPI
 from backend.api import (
     access_groups,
     agent,
+    airgap_collection_schedule,
+    airgap_repository_buckets,
     antivirus_defaults,
     antivirus_status,
     audit_log,
@@ -52,6 +54,7 @@ from backend.api import (
     secrets,
     security,
     security_roles,
+    server_info,
     tag,
     telemetry,
     third_party_repos,
@@ -87,6 +90,23 @@ def register_routes(app: FastAPI):
     )
     app.include_router(auth_mfa.router)  # /api/auth/mfa/* + /api/settings/mfa
     logger.debug("MFA router added")
+
+    # Phase 11 server-info — public, unauthenticated.  Lets the frontend
+    # render the role chip + monitoring identify the box without login.
+    app.include_router(server_info.router)
+    logger.debug("Server-info router added")
+
+    # Phase 11 B2 — air-gap collection schedules.  Routes are
+    # license-gated (collector engine) at the handler level, so it's
+    # safe to mount on every server (the gate returns 402 on standard
+    # / repository roles).
+    app.include_router(airgap_collection_schedule.router)
+    logger.debug("Air-gap collection schedule router added")
+
+    # Phase 11 B5 — host-scoped compliance bucket endpoint that feeds
+    # the AirgapComplianceBucketsCard frontend component.
+    app.include_router(airgap_repository_buckets.router)
+    logger.debug("Air-gap repository buckets router added")
 
     logger.debug(
         "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"

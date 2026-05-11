@@ -1453,3 +1453,66 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "업그레이드 프로필을 찾을 수 없음"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"CVE 피드 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하십시오."
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"에어갭 수집 스케줄에는 에어갭 수집기 엔진이 포함된 SysManage Professional+ 라이선스가 필요합니다. 업그레이드하세요."
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "잘못된 cron 표현식: 5개 필드 필요 (m h dom mon dow)"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "잘못된 target_request: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "에어갭 수집 스케줄을 찾을 수 없음"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "schedule_id의 UUID가 잘못됨: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "에어갭 수집 스케줄 '%s' 생성됨"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "에어갭 수집 스케줄 '%s' 업데이트됨"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "에어갭 수집 스케줄 '%s' 삭제됨"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "에어갭 수집 스케줄 삭제됨"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"automation_engine이 로드되지 않았습니다; next_run 타임스탬프가 진행되지 않습니다. Pro+ 라이선스에 "
+"automation_engine이 포함될 때까지 스케줄은 현재 틱 창에서만 실행됩니다."

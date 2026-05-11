@@ -1456,3 +1456,67 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "アップグレードプロファイルが見つかりません"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"CVEフィード管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"エアギャップ収集スケジュールには、エアギャップコレクターエンジン付きの SysManage Professional+ "
+"ライセンスが必要です。アップグレードしてください。"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "無効な cron 式: 5 つのフィールド (m h dom mon dow) が必要です"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "無効な target_request: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "エアギャップ収集スケジュールが見つかりません"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "schedule_id の UUID が無効です: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "エアギャップ収集スケジュール '%s' を作成しました"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "エアギャップ収集スケジュール '%s' を更新しました"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "エアギャップ収集スケジュール '%s' を削除しました"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "エアギャップ収集スケジュールを削除しました"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"automation_engine が読み込まれていないため、next_run タイムスタンプは進められません。Pro+ ライセンスに "
+"automation_engine が含まれるまで、スケジュールは現在のティックウィンドウでのみ実行されます。"

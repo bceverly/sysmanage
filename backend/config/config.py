@@ -122,6 +122,20 @@ try:
         if "subject_prefix" not in config["email"]["templates"]:
             config["email"]["templates"]["subject_prefix"] = "[SysManage]"
 
+        # Server role (Phase 11) — picks which air-gap engine loads.
+        # ``standard`` is the default for ordinary deployments and matches
+        # pre-Phase-11 behavior.  ``collector`` is the public-side
+        # half of an air-gap pair; ``repository`` is the private-side
+        # half.  See Phase 11 in ROADMAP.md for the architecture.
+        if "role" not in config:
+            config["role"] = "standard"
+        if config["role"] not in ("standard", "collector", "repository"):
+            print(
+                f"ERROR: invalid role '{config['role']}' in {CONFIG_PATH}; "
+                f"must be one of: standard | collector | repository"
+            )
+            sys.exit(1)
+
         # License (Pro+) settings
         if "license" not in config:
             config["license"] = {}
@@ -308,3 +322,23 @@ def get_license_modules_path():
     Get the path for storing downloaded Pro+ modules.
     """
     return config["license"]["modules_path"]
+
+
+def get_server_role():
+    """
+    Return the server role: ``standard``, ``collector``, or ``repository``.
+
+    Phase 11 air-gap topology — same binary runs as either half of an
+    air-gapped pair, or as a standalone (``standard``) deployment.
+    """
+    return config.get("role", "standard")
+
+
+def is_collector():
+    """True when this server is the public-side of an air-gap pair."""
+    return get_server_role() == "collector"
+
+
+def is_repository():
+    """True when this server is the private-side of an air-gap pair."""
+    return get_server_role() == "repository"

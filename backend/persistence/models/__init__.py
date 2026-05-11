@@ -7,6 +7,7 @@ All models are re-exported here for backward compatibility.
 
 # Re-export all models for backward compatibility
 from .access_groups import *
+from .airgap import *
 from .child_host import *
 from .core import *
 from .dynamic_secrets import *

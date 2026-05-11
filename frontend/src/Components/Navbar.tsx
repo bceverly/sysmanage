@@ -20,6 +20,10 @@ const Navbar = () => {
   const { navItems } = usePlugins();
   const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
   const [activeLicenseModules, setActiveLicenseModules] = useState<string[]>([]);
+  // Phase 11 — server role chip ("Collector" / "Repository").  Hidden on
+  // ``standard`` deployments so the OSS UI stays uncluttered.
+  const [serverRole, setServerRole] = useState<string>("standard");
+  const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
 
   // Refresh the license cache (shared with HostDetail / Hosts / Settings via
   // ``getCachedLicense``) and mirror the result into local state so this
@@ -44,6 +48,25 @@ const Navbar = () => {
     if (localStorage.getItem('bearer_token')) {
       checkLicenseFeatures();
     }
+  }, []);
+
+  // Phase 11 — fetch the server-info once on mount so we can render the
+  // role chip.  ``/api/v1/server-info`` is unauthenticated, so this works
+  // pre-login too (the chip is hidden anyway when role === "standard").
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/v1/server-info')
+      .then(r => (r.ok ? r.json() : null))
+      .then(info => {
+        if (cancelled || !info) return;
+        setServerRole(info.role || 'standard');
+        setRoleEngineLoaded(Boolean(info.role_engine_loaded));
+      })
+      .catch(() => {
+        // Endpoint may not be reachable yet during cold-start; default
+        // to standard so we don't render a stale chip.
+      });
+    return () => { cancelled = true; };
   }, []);
 
   const toggleMenu = () => {
@@ -88,11 +111,33 @@ const Navbar = () => {
     return activeLicenseFeatures.includes(item.featureFlag);
   });
 
+  // Phase 11 role chip — only renders when this is half of an air-gap
+  // pair.  Color reflects health: green when the role-specific Pro+ engine
+  // is loaded, red when it should be but isn't (license problem).
+  // Compute the role-label fallback up front so the JSX has no nested
+  // ternaries (SonarQube readability rule).
+  const roleLabelFallback =
+    serverRole === 'collector' ? 'Collector' : 'Repository';
+  const roleLabelText = t(`nav.role.${serverRole}`, roleLabelFallback);
+  const tooltipText = roleEngineLoaded
+    ? roleLabelText
+    : t('nav.role.engineMissing', 'Required Pro+ engine not loaded; check license.');
+  const roleChip = serverRole === 'standard' ? null : (
+    <span
+      className={`nav__role-chip nav__role-chip--${serverRole}` +
+        (roleEngineLoaded ? '' : ' nav__role-chip--degraded')}
+      title={tooltipText}
+    >
+      {roleLabelText}
+    </span>
+  );
+
   return (
     <header className="header">
       <nav className="nav container">
         <NavLink to="/" className="nav__logo">
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
+          {roleChip}
         </NavLink>
 
         <div

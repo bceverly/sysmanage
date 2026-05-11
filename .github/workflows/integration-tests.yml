@@ -147,6 +147,11 @@ jobs:
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
       - name: Run integration tests
+        env:
+          # Bound to env so the run: script can reference "$PYTEST_MARKER"
+          # instead of interpolating ${{ ... }} into shell — closes
+          # the run-shell-injection semgrep finding.
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         run: |
           # Collect tests with the requested marker.  If none are tagged yet,
           # pytest exits 5 ("no tests collected") — we treat that as a soft
@@ -154,13 +159,13 @@ jobs:
           set +e
           python -m pytest tests/ \
             --ignore=tests/ui/ \
-            -m "${{ inputs.pytest_marker || 'integration' }}" \
+            -m "$PYTEST_MARKER" \
             -v --tb=short \
             --junit-xml=integration-server-junit.xml
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No tests matched marker '${{ inputs.pytest_marker || 'integration' }}'. Tag tests with @pytest.mark.${{ inputs.pytest_marker || 'integration' }} to populate this run."
+            echo "::warning::No tests matched marker '$PYTEST_MARKER'. Tag tests with @pytest.mark.$PYTEST_MARKER to populate this run."
             exit 0
           fi
           exit $rc
@@ -291,6 +296,11 @@ jobs:
       - name: Run agent integration tests
         working-directory: sysmanage-agent
         shell: bash
+        env:
+          # Bound to env vars so the run: script never interpolates
+          # ${{ ... }} directly into shell — closes run-shell-injection.
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
+          MATRIX_OS: ${{ matrix.os }}
         run: |
           # Several agent test modules unconditionally import POSIX-only
           # stdlib modules (pty/termios/pwd) or call os.getuid().  On
@@ -311,7 +321,7 @@ jobs:
           # should be trimmed to just ``tests/test_generic_deployment.py``
           # in the same commit that does the legacy ``rm``.
           IGNORES=()
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          if [ "$MATRIX_OS" = "windows-latest" ]; then
             for f in \
               tests/test_child_host_alpine_console.py \
               tests/test_child_host_alpine_vm_creator.py \
@@ -331,13 +341,13 @@ jobs:
           set +e
           python -m pytest tests/ \
             "${IGNORES[@]}" \
-            -m "${{ inputs.pytest_marker || 'integration' }}" \
+            -m "$PYTEST_MARKER" \
             -v --tb=short \
             --junit-xml=integration-agent-junit.xml
           rc=$?
           set -e
           if [ $rc -eq 5 ]; then
-            echo "::warning::No agent tests matched marker '${{ inputs.pytest_marker || 'integration' }}' on ${{ matrix.os }}."
+            echo "::warning::No agent tests matched marker '$PYTEST_MARKER' on $MATRIX_OS."
             exit 0
           fi
           exit $rc

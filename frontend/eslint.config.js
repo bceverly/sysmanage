@@ -6,6 +6,23 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
 
 export default [
+  {
+    // Top-level ignores — applies to every block below.  Without this,
+    // ``js.configs.recommended`` falls back to scanning vendored
+    // ``dist/`` bundles where browser globals aren't declared, flooding
+    // the report with thousands of false-positive ``no-undef``s.
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'plugin-dist/**',
+      'public/locales/**',
+      '*.config.js',
+      'vite.config.ts',
+      'vitest.config.ts',
+      'playwright.config.ts',
+    ],
+  },
   js.configs.recommended,
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
@@ -34,15 +51,34 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        // DOM element types — needed by useRef<HTML*Element> generics
         HTMLElement: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLFormElement: 'readonly',
         HTMLImageElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLAnchorElement: 'readonly',
+        HTMLSpanElement: 'readonly',
+        HTMLLabelElement: 'readonly',
+        // DOM event types — ``Event`` deliberately omitted; HostDetail.tsx
+        // and a few other files declare their own ``Event`` interface for
+        // domain-specific payloads, and adding it here would cause
+        // ``no-redeclare`` errors.
+        MouseEvent: 'readonly',
+        KeyboardEvent: 'readonly',
+        FocusEvent: 'readonly',
+        Node: 'readonly',
+        EventTarget: 'readonly',
+        // Browser APIs used directly without import
         FormData: 'readonly',
         AbortController: 'readonly',
         Blob: 'readonly',
         URL: 'readonly',
-        console: 'readonly',
+        URLSearchParams: 'readonly',
+        ResizeObserver: 'readonly',
+        MutationObserver: 'readonly',
+        IntersectionObserver: 'readonly',
         fetch: 'readonly'
       }
     },

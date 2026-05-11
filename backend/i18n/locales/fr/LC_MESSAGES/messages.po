@@ -1496,3 +1496,70 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "Profil de mise à jour introuvable"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"La gestion des flux CVE nécessite une licence SysManage Professional+. "
+"Veuillez effectuer une mise à niveau pour accéder à cette fonctionnalité."
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"Les calendriers de collecte air-gap nécessitent une licence SysManage "
+"Professional+ avec le moteur collecteur air-gap. Veuillez effectuer une mise"
+" à niveau."
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "Expression cron invalide : 5 champs attendus (m h dom mon dow)"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "target_request invalide : %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "Calendrier de collecte air-gap introuvable"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "UUID invalide pour schedule_id : %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "Calendrier de collecte air-gap « %s » créé"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "Calendrier de collecte air-gap « %s » mis à jour"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "Calendrier de collecte air-gap « %s » supprimé"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "Calendrier de collecte air-gap supprimé"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"automation_engine non chargé ; les horodatages next_run ne sont pas avancés."
+" Les calendriers ne s'exécuteront que sur la fenêtre de tick actuelle "
+"jusqu'à ce que la licence Pro+ inclue automation_engine."

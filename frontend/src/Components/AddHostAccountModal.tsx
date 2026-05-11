@@ -95,7 +95,11 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
             setAccountDisabled(false);
             setError(null);
         }
-    }, [open, hostPlatform]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Intentionally omitting ``form`` setters from deps — the effect
+    // resets form state when the modal opens or platform changes; it
+    // doesn't depend on the form itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, hostPlatform]);
 
     // Auto-generate home directory based on username for Unix systems
     useEffect(() => {
@@ -132,7 +136,6 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                 setError(t('hostAccount.passwordRequired', 'Password is required for Windows accounts'));
                 return false;
             }
-            // eslint-disable-next-line security/detect-possible-timing-attacks -- client-side form validation, not authentication
             if (password !== confirmPassword) {
                 setError(t('hostAccount.passwordMismatch', 'Passwords do not match'));
                 return false;

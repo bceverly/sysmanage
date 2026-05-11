@@ -176,6 +176,13 @@ jobs:
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
 
       - name: Run load scenario(s)
+        env:
+          PYTHONPATH: .
+          # Bind inputs to env vars so the run: script never
+          # interpolates ${{ ... }} into shell — closes
+          # run-shell-injection.
+          DURATION_MINUTES: ${{ inputs.duration_minutes || '10' }}
+          SCENARIO_INPUT: ${{ inputs.scenario || 'agents-cascade' }}
         run: |
           if [ ! -f tests/load/run.py ]; then
             echo "::warning::tests/load/run.py does not exist yet."
@@ -185,7 +192,7 @@ jobs:
             exit 0
           fi
           mkdir -p .runtime-logs
-          DURATION_SECONDS=$(( ${{ inputs.duration_minutes || '10' }} * 60 ))
+          DURATION_SECONDS=$(( DURATION_MINUTES * 60 ))
 
           # Run a single (scenario, args, output-name) tuple through the
           # harness.  Returns 0 on success / SLA-pass, 2 on SLA violation,
@@ -210,7 +217,7 @@ jobs:
             return $rc
           }
 
-          SCENARIO="${{ inputs.scenario || 'agents-cascade' }}"
+          SCENARIO="$SCENARIO_INPUT"
           case "$SCENARIO" in
             agents-cascade)
               # 100 → 500 → 1000.  Each gates the next:  if 100 fails (SLA
@@ -240,8 +247,6 @@ jobs:
               exit 1
               ;;
           esac
-        env:
-          PYTHONPATH: .
 
       - name: Stop server
         if: always()

@@ -787,6 +787,44 @@ def test_db():
         created_at = Column(DateTime, nullable=True)
         updated_at = Column(DateTime, nullable=True)
 
+    # Phase 11 — air-gap tables (test-side mirrors).  These mirror the
+    # production models in ``backend/persistence/models/airgap.py`` —
+    # the api conftest uses its own TestBase metadata so we have to
+    # redeclare the schema for SQLite parity.
+    class AirgapCollectionRun(TestBase):
+        __tablename__ = "airgap_collection_run"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        iso_label = Column(String(80), nullable=False)
+        media_size_bytes = Column(BigInteger, nullable=False, default=4_700_000_000)
+        include_cve = Column(Boolean, nullable=False, default=True)
+        include_compliance = Column(Boolean, nullable=False, default=True)
+        status = Column(String(40), nullable=False, default="QUEUED")
+        started_at = Column(DateTime, nullable=True)
+        completed_at = Column(DateTime, nullable=True)
+        error_message = Column(Text, nullable=True)
+        created_at = Column(DateTime, nullable=True)
+        created_by = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+
+    class AirgapCollectionSchedule(TestBase):
+        __tablename__ = "airgap_collection_schedule"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(120), nullable=False, unique=True)
+        cron = Column(String(200), nullable=False)
+        enabled = Column(Boolean, nullable=False, default=True)
+        target_request_json = Column(Text, nullable=False)
+        last_run = Column(DateTime, nullable=True)
+        last_status = Column(String(40), nullable=True)
+        last_run_id = Column(
+            GUID(),
+            ForeignKey("airgap_collection_run.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        next_run = Column(DateTime, nullable=True)
+        created_at = Column(DateTime, nullable=True)
+        updated_at = Column(DateTime, nullable=True)
+
     # Phase 8.3 — package compliance (test-side mirrors).
     from sqlalchemy import JSON as _JSON  # local import — only needed here
 

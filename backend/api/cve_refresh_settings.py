@@ -1,5 +1,14 @@
 """
 API routes for CVE database refresh settings management in SysManage.
+
+Phase 11.4 — every route here is gated on the Pro+ ``vuln_engine`` module
+being loaded.  When it isn't, the route returns 402 with a license-upgrade
+message; when it is, the route delegates the cron / fetch-plan / apply-plan
+heavy lifting into the engine (mirrors the Phase 10.6 upgrade-profile →
+``automation_engine`` migration).  The OSS-side
+``backend.vulnerability.cve_refresh_service`` is preserved as a thin
+delegator that the existing ``test_cve_refresh_service`` suite still
+exercises, but at runtime every route lands in the engine.
 """
 
 import logging
@@ -13,6 +22,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence.db import get_db
 from backend.persistence import models
 from backend.services.audit_service import ActionType, AuditService, EntityType
@@ -25,6 +35,28 @@ from backend.vulnerability.cve_refresh_service import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _check_vuln_engine_module():
+    """Refuse the request when the Pro+ ``vuln_engine`` module isn't loaded.
+
+    Phase 11.4 moved CVE feed config (cron evaluation, refresh-plan and
+    apply-plan builders, source validation) into the engine.  Without it
+    loaded, the OSS routes have no business logic to execute, so they
+    short-circuit with a 402.  Mirrors the Phase 10.6
+    ``upgrade_profiles._check_automation_module`` pattern.
+    """
+    engine = module_loader.get_module("vuln_engine")
+    if engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "CVE feed management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
+    return engine
+
 
 # Error message constants
 ERROR_USER_NOT_FOUND = "User not found"
@@ -145,6 +177,7 @@ class RefreshResultResponse(BaseModel):
 @router.get("/sources", response_model=Dict[str, CveSourceInfo])
 async def get_available_sources(dependencies=Depends(JWTBearer())):
     """Get list of available CVE data sources."""
+    _check_vuln_engine_module()
     return {
         source_id: CveSourceInfo(
             name=source_info["name"],
@@ -160,6 +193,7 @@ async def get_cve_refresh_settings(
     db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get current CVE refresh settings."""
+    _check_vuln_engine_module()
     try:
         settings = cve_refresh_service.get_settings(db)
         return CveRefreshSettingsResponse(
@@ -189,6 +223,7 @@ async def update_cve_refresh_settings(
     current_user=Depends(get_current_user),
 ):
     """Update CVE refresh settings."""
+    _check_vuln_engine_module()
     # Check user permissions
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
@@ -252,6 +287,7 @@ async def get_database_stats(
     db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE database statistics."""
+    _check_vuln_engine_module()
     try:
         stats = cve_refresh_service.get_database_stats(db)
         return DatabaseStatsResponse(**stats)
@@ -268,6 +304,7 @@ async def get_ingestion_history(
     limit: int = 10, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE ingestion history."""
+    _check_vuln_engine_module()
     try:
         if limit < 1 or limit > 100:
             raise HTTPException(
@@ -312,6 +349,7 @@ async def trigger_cve_refresh(
     If source is specified, only refresh from that source.
     Otherwise, refresh from all enabled sources.
     """
+    _check_vuln_engine_module()
     # Check user permissions - require admin for CVE refresh
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
@@ -395,6 +433,7 @@ async def clear_nvd_api_key(
     current_user=Depends(get_current_user),
 ):
     """Clear the stored NVD API key."""
+    _check_vuln_engine_module()
     # Check user permissions - require admin
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:

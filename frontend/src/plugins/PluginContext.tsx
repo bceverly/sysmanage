@@ -120,7 +120,12 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             settingsTabs: pluginManager.getSettingsTabs(),
             pluginsLoaded,
         }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- revision is intentionally used to trigger re-computation when plugins change
+        // ``revision`` IS the dependency that should trigger
+        // re-computation here — pluginManager's getters are not pure
+        // (they read from internal registries that ``revision`` tracks
+        // changes to), so the linter's "unnecessary dependency"
+        // detection is wrong about this case.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [revision, pluginsLoaded]
     );
 

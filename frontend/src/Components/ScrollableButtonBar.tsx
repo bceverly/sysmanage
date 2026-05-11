@@ -25,7 +25,6 @@ const ScrollableButtonBar: React.FC<ScrollableButtonBarProps> = ({
   sx,
   scrollStep = 240,
 }) => {
-  // eslint-disable-next-line no-undef
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -43,7 +42,6 @@ const ScrollableButtonBar: React.FC<ScrollableButtonBarProps> = ({
     const el = scrollerRef.current;
     if (!el) return undefined;
     el.addEventListener('scroll', updateButtons, { passive: true });
-    // eslint-disable-next-line no-undef
     const ro = new ResizeObserver(updateButtons);
     ro.observe(el);
     globalThis.addEventListener('resize', updateButtons);

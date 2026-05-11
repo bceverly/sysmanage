@@ -1,9 +1,17 @@
 """
-Package compliance API (Phase 8.3).
+Package compliance API (Phase 8.3 → 11.5).
 
 CRUD on PackageProfile + per-profile constraints; per-host scan endpoint
 that evaluates the host's installed-package list against a profile and
 records the result in HostPackageComplianceStatus.
+
+Phase 11.5 moved the evaluator + remediation-plan builder into the Pro+
+``compliance_engine`` Cython module.  Every route in this file is gated
+on the engine being loaded (``_check_compliance_module``) — the OSS
+deployment without a Professional license sees 402 from each endpoint
+and the frontend tab disappears.  Schema (PackageProfile,
+PackageProfileConstraint, HostPackageComplianceStatus) lives OSS-side
+unchanged: those tables hold persisted state, not business logic.
 """
 
 import logging
@@ -17,6 +25,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models.package_compliance import (
@@ -44,6 +53,27 @@ router = APIRouter(
 # Reused 404 detail string — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
 _ERR_PACKAGE_PROFILE_NOT_FOUND = "Package profile not found"
+
+
+def _check_compliance_module():
+    """Refuse the request when the Pro+ compliance_engine isn't loaded.
+
+    Phase 11.5 moved package-profile evaluation and remediation-plan
+    building into the engine; without it loaded, the OSS routes have
+    no business logic to execute, so they short-circuit with a 402.
+    Mirrors the Phase 10.6 ``_check_automation_module()`` pattern in
+    ``backend/api/upgrade_profiles.py``.
+    """
+    engine = module_loader.get_module("compliance_engine")
+    if engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Package compliance profiles require a SysManage "
+                "Professional license. Please upgrade to access this feature."
+            ),
+        )
+    return engine
 
 
 # ----------------------------------------------------------------------
@@ -141,6 +171,7 @@ def _replace_constraints(db: Session, profile, specs: List[ConstraintSpec]):
 
 @router.get("")
 async def list_profiles(db: Session = Depends(get_db)):
+    _check_compliance_module()
     rows = db.query(models.PackageProfile).order_by(models.PackageProfile.name).all()
     return [r.to_dict() for r in rows]
 
@@ -151,6 +182,7 @@ async def create_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_compliance_module()
     user = _get_user(db, current_user)
     profile = models.PackageProfile(
         name=request.name,
@@ -180,6 +212,7 @@ async def create_profile(
 
 @router.get("/{profile_id}")
 async def get_profile(profile_id: str, db: Session = Depends(get_db)):
+    _check_compliance_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
@@ -196,6 +229,7 @@ async def update_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_compliance_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -235,6 +269,7 @@ async def delete_profile(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    _check_compliance_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -273,6 +308,7 @@ async def scan_host_against_profile(
     Pulls the host's installed packages from ``software_package`` rows
     so this endpoint works against the existing inventory pipeline; the
     agent does not need to do any extra work."""
+    engine = _check_compliance_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     hid = _parse_uuid_or_400(host_id, "host_id")
@@ -303,8 +339,19 @@ async def scan_host_against_profile(
         for p in pkg_rows
     ]
 
+    # Phase 11.5: route the evaluation through the Pro+ engine when it
+    # exposes the v2 surface (``evaluate_host_status``).  Older engine
+    # builds and unit-test stubs that only expose the OSS shim are still
+    # supported via the legacy fallback.
     constraints = list(profile.constraints)
-    status, violations = evaluate_host_against_profile(installed, constraints)
+    if hasattr(engine, "evaluate_host_status"):
+        constraint_dicts = [c.to_dict() for c in constraints]
+        status, violations = engine.evaluate_host_status(
+            {"constraints": constraint_dicts},
+            installed,
+        )
+    else:
+        status, violations = evaluate_host_against_profile(installed, constraints)
 
     # Upsert the per-(host, profile) status row.
     existing = (
@@ -349,6 +396,7 @@ async def scan_host_against_profile(
 @router.get("/status/host/{host_id}")
 async def list_host_statuses(host_id: str, db: Session = Depends(get_db)):
     """Latest compliance status for one host across all profiles."""
+    _check_compliance_module()
     hid = _parse_uuid_or_400(host_id, "host_id")
     rows = (
         db.query(models.HostPackageComplianceStatus)
@@ -379,6 +427,7 @@ async def dispatch_compliance_check_to_agent(
         to confirm a compliance fix without waiting for the next
         inventory cycle.
     """
+    _check_compliance_module()
     user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     hid = _parse_uuid_or_400(host_id, "host_id")

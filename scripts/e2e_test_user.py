@@ -8,6 +8,7 @@ Usage:
     python scripts/e2e_test_user.py delete
 """
 
+import re
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -197,16 +198,29 @@ def _delete_user_by_id(session, user_id, email):
         "user_data_grid_column_preference",
     ]
 
+    # Allowlist of acceptable identifier characters for table names.
+    # We validate every entry from ``related_tables`` against this
+    # regex before interpolating into the DELETE statement so even a
+    # future code change that adds an attacker-influenced table name
+    # cannot inject SQL.  Belt-and-suspenders on top of the
+    # hardcoded-list constraint above.
+    _TABLE_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
     for table in related_tables:
+        if not _TABLE_IDENT_RE.match(table):
+            # Should never happen given the hardcoded list, but
+            # defensive — keeps the validation visible to semgrep.
+            continue
         try:
             # Use a savepoint (context manager) so that a failure here
             # does not abort the outer transaction. PostgreSQL aborts
             # the whole transaction on error unless you use savepoints.
-            # Table names are from hardcoded list above, not user input
-            # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+            # Table names validated by ``_TABLE_IDENT_RE`` above;
+            # user_id is a bound parameter.  nosemgrep placed inline
+            # on the flagged line so Semgrep Pro's line-precision
+            # matcher picks it up.
             with session.begin_nested():
                 session.execute(
-                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
+                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                     {"user_id": user_id},
                 )
         except Exception:

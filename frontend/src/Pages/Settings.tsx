@@ -213,7 +213,17 @@ const Settings: React.FC = () => {
         // route without it, so the tab simply hides.
         moduleRequired: 'automation_engine',
       },
-      { id: 'compliance-profiles', labelKey: 'packageProfiles.tabLabel', labelDefault: 'Compliance Profiles' },
+      {
+        id: 'compliance-profiles',
+        labelKey: 'packageProfiles.tabLabel',
+        labelDefault: 'Compliance Profiles',
+        // Phase 11.5: package compliance profiles moved to the Pro+
+        // ``compliance_engine`` (evaluator + remediation-plan builder
+        // live there).  The OSS server returns 402 from every
+        // /api/package-profiles route without it, so the tab simply
+        // hides for unlicensed deployments.
+        moduleRequired: 'compliance_engine',
+      },
       {
         id: 'report-branding',
         labelKey: 'reportBranding.tabLabel',

@@ -93,6 +93,25 @@ class FeatureCode(str, Enum):
     OBSERVABILITY_GRAFANA_PROVISION = "observability_grafana_provision"
     OBSERVABILITY_TELEMETRY_ROUTING = "observability_telemetry_routing"
 
+    # Air-Gap Collector (Phase 11.1) — public-side server features
+    AIRGAP_COLLECT_PACKAGES = "airgap_collect_packages"
+    AIRGAP_COLLECT_CVE = "airgap_collect_cve"
+    AIRGAP_COLLECT_COMPLIANCE = "airgap_collect_compliance"
+    AIRGAP_BUILD_ISO = "airgap_build_iso"
+    AIRGAP_BURN_DISC = "airgap_burn_disc"
+    AIRGAP_SIGN_MANIFEST = "airgap_sign_manifest"
+
+    # Air-Gap Repository (Phase 11.2) — private-side server features
+    AIRGAP_INGEST_MEDIA = "airgap_ingest_media"
+    AIRGAP_HOST_REPOSITORY = "airgap_host_repository"
+    AIRGAP_REPOINT_AGENTS = "airgap_repoint_agents"
+    AIRGAP_VERIFY_FRESHNESS = "airgap_verify_freshness"
+
+    # CVE Feed Management (Phase 11.4) — paired with vuln_engine module.
+    # The single feature code covers source CRUD, manual refresh, and the
+    # tick driver hook; the engine itself owns cron/plan/apply logic.
+    CVE_FEED_MANAGEMENT = "cve_feed_management"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -151,6 +170,14 @@ class ModuleCode(str, Enum):
     REPOSITORY_MIRRORING_ENGINE = "repository_mirroring_engine"
     EXTERNAL_IDP_ENGINE = "external_idp_engine"
 
+    # Phase 11 Enterprise modules — Air-Gapped Environment Support.
+    # The two engines are paired but never co-loaded on a single server:
+    # ``role: collector`` loads AIRGAP_COLLECTOR_ENGINE (public-side),
+    # ``role: repository`` loads AIRGAP_REPOSITORY_ENGINE (private-side).
+    # One Enterprise license includes both — see Phase 11 in ROADMAP.md.
+    AIRGAP_COLLECTOR_ENGINE = "airgap_collector_engine"
+    AIRGAP_REPOSITORY_ENGINE = "airgap_repository_engine"
+
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
@@ -183,6 +210,8 @@ TIER_FEATURES = {
         FeatureCode.VULNERABILITY_SCANNING,
         FeatureCode.ADVANCED_MONITORING,
         FeatureCode.CUSTOM_REPORTS,
+        # Phase 11.4 — CVE feed management (paired with VULN_ENGINE module)
+        FeatureCode.CVE_FEED_MANAGEMENT,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -245,6 +274,20 @@ TIER_FEATURES = {
         FeatureCode.OBSERVABILITY_GRAYLOG_DEPLOY,
         FeatureCode.OBSERVABILITY_GRAFANA_PROVISION,
         FeatureCode.OBSERVABILITY_TELEMETRY_ROUTING,
+        # Phase 11.1 — air-gap collector (public-side)
+        FeatureCode.AIRGAP_COLLECT_PACKAGES,
+        FeatureCode.AIRGAP_COLLECT_CVE,
+        FeatureCode.AIRGAP_COLLECT_COMPLIANCE,
+        FeatureCode.AIRGAP_BUILD_ISO,
+        FeatureCode.AIRGAP_BURN_DISC,
+        FeatureCode.AIRGAP_SIGN_MANIFEST,
+        # Phase 11.2 — air-gap repository (private-side)
+        FeatureCode.AIRGAP_INGEST_MEDIA,
+        FeatureCode.AIRGAP_HOST_REPOSITORY,
+        FeatureCode.AIRGAP_REPOINT_AGENTS,
+        FeatureCode.AIRGAP_VERIFY_FRESHNESS,
+        # Phase 11.4 — CVE feed management
+        FeatureCode.CVE_FEED_MANAGEMENT,
     },
 }
 
@@ -290,5 +333,9 @@ TIER_MODULES = {
         ModuleCode.OBSERVABILITY_ENGINE,
         ModuleCode.REPOSITORY_MIRRORING_ENGINE,
         ModuleCode.EXTERNAL_IDP_ENGINE,
+        # Phase 11 — Air-Gap (one Enterprise SKU includes both engines;
+        # ``role:`` in sysmanage.yaml picks which one this server loads)
+        ModuleCode.AIRGAP_COLLECTOR_ENGINE,
+        ModuleCode.AIRGAP_REPOSITORY_ENGINE,
     },
 }

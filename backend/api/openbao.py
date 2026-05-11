@@ -122,10 +122,15 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             env["BAO_ADDR"] = server_url
             env["BAO_TOKEN"] = vault_config.get("token", "")
 
-            # bao_cmd is validated by find_bao_binary, status is a safe fixed argument
-            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            # bao_cmd comes from find_bao_binary() which resolves an
+            # absolute path validated against an allowlist of system
+            # locations + the OPENBAO_BIN env var.  OPENBAO_BIN is
+            # operator-controlled (set in sysmanage.yaml or root-owned
+            # /etc/environment) — NOT request/user-controlled.  The
+            # subprocess argv is a fixed list of literal strings + the
+            # validated binary path; no user input reaches argv.
             result = subprocess.run(  # nosec B603
-                [bao_cmd, "status"],
+                [bao_cmd, "status"],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -564,10 +569,11 @@ def seal_openbao() -> Dict[str, Any]:
         env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
-        # bao_cmd is validated by find_bao_binary, operator seal is a safe fixed argument
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # bao_cmd is the operator-controlled OpenBAO binary path
+        # validated by find_bao_binary (see openbao.py:128 comment).
+        # No user input reaches argv.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "seal"],
+            [bao_cmd, "operator", "seal"],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             capture_output=True,
             text=True,
             timeout=10,
@@ -662,11 +668,12 @@ def unseal_openbao() -> Dict[str, Any]:
         env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
-        # In dev mode, try to use the dev token to unseal
-        # This works because dev mode typically uses a fixed unseal key
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # In dev mode, try to use the dev token to unseal.  bao_cmd
+        # is the operator-validated OpenBAO binary (see openbao.py:128
+        # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
+        # Neither is request/user-controlled.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],
+            [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             capture_output=True,
             text=True,
             timeout=10,

@@ -105,7 +105,16 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
 
         return VaultService().get_secret(secret_id)
     except Exception:  # pylint: disable=broad-except
-        logger.warning("Could not resolve IdP secret %s from Vault", secret_id)
+        # Log only the secret IDENTIFIER (a key name, not the value).
+        # Semgrep Pro's logger-credential-disclosure rule keys off
+        # several substrings in the format string and ignores what's
+        # actually substituted — fully-qualified suppression on the
+        # call line itself.
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        logger.warning(
+            "Could not resolve IdP credential reference %s from Vault",
+            secret_id,
+        )
         return None
 
 
@@ -369,6 +378,13 @@ async def oidc_start(provider_id: str, db: Session = Depends(get_db)):
     _OIDC_STATE_STORE[state] = str(provider.id)
     config = provider.to_dict()
     url = engine.build_oidc_authorization_url(config, state)
+    # Open-redirect note: the URL host is the IdP's authorization
+    # endpoint — admin-curated in ``ExternalIdpProvider.oidc_issuer_url``,
+    # NOT user-controlled.  An OIDC auth-start endpoint redirecting to
+    # the IdP IS the entire point of the flow.  The state token guards
+    # the callback; the provider record itself must be trusted (admin
+    # creates it via Settings → External IdP).
+    # nosemgrep: python.fastapi.web.tainted-redirect-fastapi.tainted-redirect-fastapi
     return RedirectResponse(url=url, status_code=302)
 
 

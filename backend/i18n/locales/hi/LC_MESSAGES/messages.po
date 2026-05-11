@@ -1490,3 +1490,69 @@ msgstr ""
 #: backend/api/upgrade_profiles.py
 msgid "Upgrade profile not found"
 msgstr "अपग्रेड प्रोफ़ाइल नहीं मिली"
+
+#: backend/api/cve_refresh_settings.py
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"CVE फ़ीड प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। कृपया इस "
+"सुविधा तक पहुँचने के लिए अपग्रेड करें।"
+
+#: backend/api/package_compliance.py
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+msgstr ""
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+"एयर-गैप संग्रह अनुसूचियों के लिए एयर-गैप संग्राहक इंजन के साथ SysManage "
+"Professional+ लाइसेंस आवश्यक है। कृपया अपग्रेड करें।"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr "अमान्य cron अभिव्यक्ति: 5 फ़ील्ड अपेक्षित (m h dom mon dow)"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid target_request: %s"
+msgstr "अमान्य target_request: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule not found"
+msgstr "एयर-गैप संग्रह अनुसूची नहीं मिली"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "schedule_id के लिए अमान्य UUID: %s"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Created air-gap collection schedule '%s'"
+msgstr "एयर-गैप संग्रह अनुसूची '%s' बनाई गई"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Updated air-gap collection schedule '%s'"
+msgstr "एयर-गैप संग्रह अनुसूची '%s' अद्यतन की गई"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr "एयर-गैप संग्रह अनुसूची '%s' हटाई गई"
+
+#: backend/api/airgap_collection_schedule.py
+msgid "Air-gap collection schedule deleted"
+msgstr "एयर-गैप संग्रह अनुसूची हटाई गई"
+
+#: backend/api/airgap_collection_schedule.py
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+"automation_engine लोड नहीं है; next_run टाइमस्टैम्प आगे नहीं बढ़ाए गए हैं। "
+"Pro+ लाइसेंस में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक"
+" विंडो में सक्रिय होंगी।"

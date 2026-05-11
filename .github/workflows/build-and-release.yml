@@ -1131,9 +1131,16 @@ jobs:
         id: release_notes
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          # Bind github context to env vars so the run: script never
+          # interpolates ${{ ... }} directly into the shell — an
+          # attacker who could push a malicious tag name could
+          # otherwise inject commands.  See semgrep
+          # ``run-shell-injection``.
+          REF_NAME: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
           # Get tag annotation message if it exists
-          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }} | sed '/^$/d')
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' "$REF_NAME" | sed '/^$/d')
 
           cat > release_notes.md << EOF
           # SysManage Server v$VERSION
@@ -1147,7 +1154,7 @@ jobs:
           ### Ubuntu/Debian
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage_${VERSION}-1_all.deb
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage_${VERSION}-1_all.deb
           sudo apt install ./sysmanage_${VERSION}-1_all.deb
 
           # Install nginx if not already installed
@@ -1167,7 +1174,7 @@ jobs:
           ### OpenBSD
           \`\`\`bash
           # Download the port tarball
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-openbsd-port-${VERSION}.tar.gz
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-openbsd-port-${VERSION}.tar.gz
 
           # Extract to OpenBSD ports tree
           cd /usr/ports/mystuff
@@ -1208,7 +1215,7 @@ jobs:
           ### FreeBSD
           \`\`\`bash
           # Download and install
-          fetch https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}.pkg
+          fetch https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}.pkg
           sudo pkg add ./sysmanage-${VERSION}.pkg
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1240,7 +1247,7 @@ jobs:
           ### macOS
           \`\`\`bash
           # Download and install
-          curl -L -O https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-macos.pkg
+          curl -L -O https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-macos.pkg
           sudo installer -pkg sysmanage-${VERSION}-macos.pkg -target /
 
           # The installer automatically creates the virtual environment and copies files
@@ -1272,8 +1279,8 @@ jobs:
           ### NetBSD
           \`\`\`bash
           # Download and verify
-          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz
-          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz.sha256
+          ftp https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-netbsd.tgz
+          ftp https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-netbsd.tgz.sha256
           sha256 -c sysmanage-${VERSION}-netbsd.tgz.sha256 sysmanage-${VERSION}-netbsd.tgz
 
           # Install package
@@ -1316,7 +1323,7 @@ jobs:
           ### CentOS/RHEL/Fedora/Rocky Linux/AlmaLinux
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.*.rpm
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-1.*.rpm
           sudo dnf install ./sysmanage-${VERSION}-1.*.rpm
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1345,7 +1352,7 @@ jobs:
           ### OpenSUSE/SLES
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.noarch.rpm
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-1.noarch.rpm
           sudo zypper install ./sysmanage-${VERSION}-1.noarch.rpm
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1373,7 +1380,7 @@ jobs:
           ### Alpine Linux (3.19, 3.20, 3.21)
           \`\`\`bash
           # Download the APK package for your Alpine version (e.g., alpine319, alpine320, alpine321)
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-alpine320.apk
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-alpine320.apk
 
           # Allow installation of unsigned packages (required for GitHub releases)
           apk add --allow-untrusted ./sysmanage-${VERSION}-alpine320.apk
@@ -1409,10 +1416,10 @@ jobs:
           \`\`\`powershell
           # Download the MSI installer (choose your architecture)
           # For x64:
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-x64.msi" -OutFile "sysmanage-${VERSION}-windows-x64.msi"
+          Invoke-WebRequest -Uri "https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-windows-x64.msi" -OutFile "sysmanage-${VERSION}-windows-x64.msi"
 
           # For ARM64:
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-arm64.msi" -OutFile "sysmanage-${VERSION}-windows-arm64.msi"
+          Invoke-WebRequest -Uri "https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-windows-arm64.msi" -OutFile "sysmanage-${VERSION}-windows-arm64.msi"
 
           # Install the MSI package (run as Administrator)
           # The installer will:
@@ -1531,8 +1538,8 @@ jobs:
           **Download and inspect:**
           \`\`\`bash
           # Download SBOM files
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/backend-sbom.json
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/frontend-sbom.json
+          wget https://github.com/$REPO/releases/download/$REF_NAME/backend-sbom.json
+          wget https://github.com/$REPO/releases/download/$REF_NAME/frontend-sbom.json
 
           # View with jq (if installed)
           cat backend-sbom.json | jq .

@@ -12,6 +12,13 @@ Version comparison uses ``packaging.version.Version`` for SemVer-style
 strings; non-SemVer falls back to a lexicographic compare with a
 warning in the violation reason (so non-SemVer doesn't silently let
 a constraint pass).
+
+Phase 11.5: the runtime evaluation path now goes through the Pro+
+``compliance_engine`` Cython module (``evaluate_host_status`` /
+``build_package_remediation_plan``) when loaded.  This file is kept
+as tested utility code — it's used as the legacy fallback when the
+engine module isn't available (test stubs, dev environments) and it
+remains a useful reference for the engine's pure-Python equivalents.
 """
 
 from typing import Any, Dict, Iterable, List, Tuple

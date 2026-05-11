@@ -44,7 +44,6 @@ afterAll(() => {
 
 // Fix for React 19 compatibility in JSDOM environment
 declare global {
-  // eslint-disable-next-line no-var
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;

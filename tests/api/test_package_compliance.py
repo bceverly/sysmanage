@@ -1,10 +1,12 @@
 """
-Tests for the Phase 8.3 package-compliance evaluator + API.
+Tests for the Phase 8.3 package-compliance evaluator + Phase 11.5
+license-gated API.
 """
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -164,6 +166,109 @@ class TestEvaluatorMixedRules:
 # ----------------------------------------------------------------------
 # API tests
 # ----------------------------------------------------------------------
+#
+# Phase 11.5 gates every route on ``compliance_engine`` being loaded.
+# These tests don't exercise the real Cython .so — they verify route
+# behaviour, so we hand the route a MagicMock whose ``evaluate_host_status``
+# delegates to the OSS evaluator (the engine version is itself a port
+# of the OSS logic).  The Pro+ engine's own tests cover the Cython
+# implementation under
+# ``module-source/compliance_engine/test_compliance_engine_package_profiles.py``.
+
+
+def _oss_evaluate_host_status(profile_dict, installed):
+    """OSS-side mirror of compliance_engine.evaluate_host_status.
+
+    The route hands the engine a profile dict containing already-
+    serialized constraint dicts; rewrap them as duck-typed rows so the
+    OSS evaluator (which reads attributes) can consume them.
+    """
+    constraints = [SimpleNamespace(**c) for c in profile_dict["constraints"]]
+    return evaluate_host_against_profile(installed, constraints)
+
+
+@pytest.fixture
+def _engine_loaded():
+    """Patch ``module_loader.get_module`` so ``_check_compliance_module``
+    finds an engine surface."""
+    mock_engine = MagicMock()
+    mock_engine.evaluate_host_status = _oss_evaluate_host_status
+    with patch(
+        "backend.api.package_compliance.module_loader.get_module",
+        return_value=mock_engine,
+    ):
+        yield mock_engine
+
+
+class TestPackageProfileProplusGate:
+    """When ``compliance_engine`` isn't loaded, every route returns 402."""
+
+    @pytest.fixture
+    def _engine_absent(self):
+        with patch(
+            "backend.api.package_compliance.module_loader.get_module",
+            return_value=None,
+        ):
+            yield
+
+    def test_list_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.get("/api/package-profiles", headers=auth_headers)
+        assert r.status_code == 402
+
+    def test_create_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post(
+            "/api/package-profiles",
+            json={"name": "x"},
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_get_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.get(
+            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_update_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.put(
+            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            json={},
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_delete_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.delete(
+            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_scan_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post(
+            "/api/package-profiles/"
+            "00000000-0000-0000-0000-000000000000/scan/"
+            "00000000-0000-0000-0000-000000000000",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_dispatch_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.post(
+            "/api/package-profiles/"
+            "00000000-0000-0000-0000-000000000000/dispatch/"
+            "00000000-0000-0000-0000-000000000000",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
+
+    def test_status_for_host_returns_402(self, client, auth_headers, _engine_absent):
+        r = client.get(
+            "/api/package-profiles/status/host/" "00000000-0000-0000-0000-000000000000",
+            headers=auth_headers,
+        )
+        assert r.status_code == 402
 
 
 class TestPackageProfileAuth:
@@ -173,6 +278,10 @@ class TestPackageProfileAuth:
 
 
 class TestPackageProfileCrud:
+    @pytest.fixture(autouse=True)
+    def _gate(self, _engine_loaded):
+        yield
+
     def test_create_with_constraints(self, client, auth_headers):
         r = client.post(
             "/api/package-profiles",
