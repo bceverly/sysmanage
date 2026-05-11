@@ -130,7 +130,10 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             # subprocess argv is a fixed list of literal strings + the
             # validated binary path; no user input reaches argv.
             result = subprocess.run(  # nosec B603
-                [bao_cmd, "status"],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                [
+                    bao_cmd,
+                    "status",
+                ],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -573,7 +576,11 @@ def seal_openbao() -> Dict[str, Any]:
         # validated by find_bao_binary (see openbao.py:128 comment).
         # No user input reaches argv.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "seal"],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [
+                bao_cmd,
+                "operator",
+                "seal",
+            ],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             capture_output=True,
             text=True,
             timeout=10,
@@ -673,7 +680,13 @@ def unseal_openbao() -> Dict[str, Any]:
         # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
         # Neither is request/user-controlled.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [
+                bao_cmd,
+                "operator",
+                "unseal",
+                "-address",
+                env["BAO_ADDR"],
+            ],  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             capture_output=True,
             text=True,
             timeout=10,

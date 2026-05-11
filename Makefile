@@ -115,7 +115,7 @@ setup-venv: $(VENV_ACTIVATE)
 install-dev: setup-venv
 	@echo "Installing Python development dependencies..."
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
+	@$(PYTHON) -m pip install -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "[INFO] macOS detected - checking for packaging tools..."; \
@@ -128,11 +128,11 @@ else
 		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
 			echo "✓ All macOS packaging tools available"; \
 		fi; \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
 		export TMPDIR=$$HOME/tmp && \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
 		export TMPDIR=/var/tmp && \
@@ -146,9 +146,9 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	else \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	fi
 endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."

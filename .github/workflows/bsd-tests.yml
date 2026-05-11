@@ -120,10 +120,14 @@ jobs:
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
-            # SQLAlchemy + aiofiles are not consistently packaged for
-            # py311 on FreeBSD; install via pip (they have wheels or
-            # are pure Python).  pytest/pytest-asyncio always via pip.
-            python -m pip install pytest pytest-asyncio sqlalchemy aiofiles
+            # SQLAlchemy + aiofiles + defusedxml are not consistently
+            # packaged for py311 on FreeBSD; install via pip (they
+            # have wheels or are pure Python).  pytest/pytest-asyncio
+            # always via pip.  defusedxml is an unconditional runtime
+            # import in package_collector_windows.py — required for
+            # conftest collection even when the Windows collector
+            # path itself isn't exercised on FreeBSD.
+            python -m pip install pytest pytest-asyncio sqlalchemy aiofiles defusedxml
             set +e
             python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-freebsd-junit.xml
@@ -181,7 +185,10 @@ jobs:
             python3 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
-            python -m pip install pytest pytest-asyncio aiofiles
+            # defusedxml is an unconditional runtime import in
+            # package_collector_windows.py, so conftest collection
+            # needs it even on non-Windows BSDs.
+            python -m pip install pytest pytest-asyncio aiofiles defusedxml
             set +e
             python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-openbsd-junit.xml
@@ -234,7 +241,10 @@ jobs:
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate
             python -m pip install --upgrade pip
-            python -m pip install pytest pytest-asyncio
+            # defusedxml is an unconditional runtime import in
+            # package_collector_windows.py, so conftest collection
+            # needs it even on non-Windows BSDs.
+            python -m pip install pytest pytest-asyncio defusedxml
             set +e
             python -m pytest tests/ -m "$PYTEST_MARKER" \
               -v --tb=short --junit-xml=bsd-netbsd-junit.xml

@@ -326,8 +326,11 @@ def _ws_url(server_url: str) -> str:
     https_scheme = "https" + "://"
     wss_scheme = "wss" + "://"
     return (
-        server_url.rstrip("/").replace(http_scheme, ws_scheme).replace(
-            https_scheme, wss_scheme,
+        server_url.rstrip("/")
+        .replace(http_scheme, ws_scheme)
+        .replace(
+            https_scheme,
+            wss_scheme,
         )
         + "/api/agent/connect"
     )

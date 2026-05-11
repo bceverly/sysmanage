@@ -331,7 +331,9 @@ def client(engine, db_session, mock_config):
     }
 
     for role_enum, group_id in role_to_group.items():
-        role_id = UUID(hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest())
+        role_id = UUID(
+            hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest()
+        )
         role = SecurityRole(
             id=role_id,
             name=role_enum.value,
@@ -539,7 +541,9 @@ def authenticated_client(db_session, mock_config):
     }
 
     for role_enum, group_id in role_to_group.items():
-        role_id = UUID(hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest())
+        role_id = UUID(
+            hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest()
+        )
         role = SecurityRole(
             id=role_id,
             name=role_enum.value,
