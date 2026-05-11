@@ -36,6 +36,7 @@ import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
+import AirgapRepositories from './Pages/AirgapRepositories';
 import Logout from './Pages/Logout';
 import { PluginProvider, usePlugins } from './plugins';
 
@@ -60,6 +61,7 @@ function AppRoutes() {
       <Route path="/reports/:reportId" element={<ReportViewer />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/airgap/repositories" element={<AirgapRepositories />} />
       <Route path="/logout" element={<Logout />} />
       {routes.map(route => (
         <Route

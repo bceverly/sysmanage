@@ -36,6 +36,7 @@ import {
   packageProfilesService,
 } from '../Services/packageProfiles';
 import { formatUTCTimestamp } from '../utils/dateUtils';
+import AirgapComplianceBucketsCard from './AirgapComplianceBucketsCard';
 
 interface HostCompliancePanelProps {
   hostId: string;
@@ -288,21 +289,32 @@ const HostCompliancePanel: React.FC<HostCompliancePanelProps> = ({ hostId }) => 
 
   if (profiles.length === 0) {
     return (
-      <Card>
-        <CardContent>
-          <Typography color="text.secondary">
-            {t(
-              'compliance.noProfiles',
-              'No compliance profiles defined. Create one in Settings → Compliance Profiles.',
-            )}
-          </Typography>
-        </CardContent>
-      </Card>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Phase 11.3: surface the air-gap risk-assessment panel even
+            when no compliance profiles are defined — air-gap operators
+            often care about transfer-cadence risk before they ever set
+            up a profile.  Self-hides on non-repository deployments. */}
+        <AirgapComplianceBucketsCard hostId={hostId} />
+        <Card>
+          <CardContent>
+            <Typography color="text.secondary">
+              {t(
+                'compliance.noProfiles',
+                'No compliance profiles defined. Create one in Settings → Compliance Profiles.',
+              )}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* Phase 11.3 risk-assessment surface — only renders on
+          ``role: repository`` deployments (the card hides itself
+          otherwise). */}
+      <AirgapComplianceBucketsCard hostId={hostId} />
       <Box sx={{ height: 480 }}>
         <DataGrid
           rows={rows}

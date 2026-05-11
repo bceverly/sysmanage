@@ -384,8 +384,20 @@ test.describe('Pro+ Navigation', () => {
 async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
   await page.goto('/settings');
   try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* ok */ }
+  // Settings.tsx filters tabs against ``licenseModules`` which is
+  // populated by an async ``/api/license`` fetch in a useEffect.  That
+  // fetch can land just AFTER ``networkidle`` resolves, and React's
+  // batched setState defers the tab-list re-render by another frame.
+  // A plain ``count()`` snapshot here races with that re-render and
+  // returns 0 even when the tab is about to appear.  Wait deterministically
+  // for either the tab to attach (functional branch) or the timeout to
+  // elapse (gated-away branch) — no flaky instantaneous reads.
   const tab = page.getByRole('tab', { name: tabName }).first();
-  if ((await tab.count()) === 0) return false;
+  try {
+    await tab.waitFor({ state: 'attached', timeout: 3000 });
+  } catch {
+    return false;
+  }
   await tab.scrollIntoViewIfNeeded().catch(() => { /* ok */ });
   await tab.click();
   try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* ok */ }
@@ -444,8 +456,14 @@ test.describe('Pro+ Phase 8.7 — Report Branding settings', () => {
     // the server-side 1 MB cap.  We don't assert on the exact alert
     // wording — only that the UI surfaces an error path AND the page
     // stays interactive (i.e. doesn't crash).
+    //
+    // The file input is part of the tabpanel content, which renders
+    // AFTER the tab click triggers a React state transition.  Use
+    // ``waitFor`` instead of an instantaneous ``count()`` — the input
+    // is hidden via CSS so we wait for ``attached`` rather than
+    // ``visible``.  Throws on timeout (functions as the assertion).
     const fileInput = page.locator('input[type="file"]').first();
-    expect(await fileInput.count()).toBeGreaterThan(0);
+    await fileInput.waitFor({ state: 'attached', timeout: 5000 });
     const big = Buffer.alloc(2 * 1024 * 1024, 0xff);
     await fileInput.setInputFiles({
       name: 'big.png',

@@ -1,0 +1,4 @@
+@comment $NetBSD$
+libexec/sysmanage/alembic.ini
+share/examples/sysmanage/sysmanage.yaml
+share/examples/sysmanage/sysmanage-nginx.conf

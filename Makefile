@@ -725,8 +725,20 @@ lint-typescript:
 	@cd frontend && npm run lint
 	@echo "[OK] TypeScript linting completed"
 
+# Version-drift check: every on-disk version marker must equal the
+# highest GitHub release tag (queried via curl, never git).  Offline
+# runs soft-skip rather than fail so dev workflow isn't blocked.
+lint-version:
+	@echo "=== Version drift check ==="
+	@$(PYTHON) scripts/check_version_drift.py
+
+# Surgically update drifted version markers to the current GitHub
+# release tag.  Leaves changes unstaged.
+lint-version-fix:
+	@$(PYTHON) scripts/check_version_drift.py --fix
+
 # Combined linting
-lint: lint-python lint-typescript i18n-validate
+lint: lint-python lint-typescript i18n-validate lint-version
 	@echo "[OK] All linting completed successfully!"
 
 # i18n: extract user-visible t('key', 'fallback') calls and verify every

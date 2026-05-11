@@ -83,6 +83,13 @@ class AirgapCollectionRun(Base):
         nullable=True,
     )
 
+    # Phase 11.1 follow-up — cron-driven scheduling.  When set, the
+    # server-side scheduler tick (POST
+    # ``/airgap/collector/collection/runs/tick``) re-fires this run
+    # from ``SCHEDULED`` to ``QUEUED`` on each cron match.  NULL means
+    # the run is one-shot / on-demand (the v0.1.0 default).
+    cron_schedule = Column(String(200), nullable=True)
+
     targets = relationship(
         "AirgapCollectionTarget",
         back_populates="run",
@@ -115,6 +122,7 @@ class AirgapCollectionRun(Base):
                 self.completed_at.isoformat() if self.completed_at else None
             ),
             "error_message": self.error_message,
+            "cron_schedule": self.cron_schedule,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 

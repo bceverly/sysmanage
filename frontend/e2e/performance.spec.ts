@@ -130,8 +130,18 @@ test.describe('Performance - Network', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // No 5xx server errors should occur
-    expect(failedRequests.length).toBe(0);
+    // No 5xx server errors should occur.  Include the URLs in the
+    // assertion message so the workflow log captures *which* endpoint
+    // failed — Playwright artifacts (trace/screenshot/error-context.md)
+    // capture this too but only when downloaded; the log line is
+    // visible in the run output without artifact download.
+    if (failedRequests.length > 0) {
+      console.log('5xx URLs:', JSON.stringify(failedRequests, null, 2));
+    }
+    expect(
+      failedRequests.length,
+      `Expected no 5xx responses, got: ${JSON.stringify(failedRequests)}`,
+    ).toBe(0);
   });
 });
 

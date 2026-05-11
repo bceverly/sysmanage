@@ -7,6 +7,50 @@ on:
       - 'v*.*.*'
       - 'v*.*.*.*'
 
+  # Manual dispatch — used to flip the Phase 11.8 upstream-publish jobs
+  # (winget-pkgs / homebrew-tap / AUR) from dry_run to publish without
+  # re-cutting a tag.  The BSD ports trees always render artifacts on
+  # release; ``bsd_ports_artifacts=no`` skips that for ad-hoc test
+  # dispatches.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version override (without leading v). Leave blank to use tag.'
+        required: false
+        type: string
+      winget_mode:
+        description: 'winget-pkgs submission mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      homebrew_mode:
+        description: 'Homebrew tap publish mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      aur_mode:
+        description: 'AUR publish mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      bsd_ports_artifacts:
+        description: 'Render BSD port-tree artifacts on this run'
+        required: false
+        type: choice
+        default: 'yes'
+        options:
+          - 'yes'
+          - 'no'
+
 permissions:
   contents: write  # Needed for creating releases and pushing to repos
 
@@ -2371,4 +2415,695 @@ jobs:
           echo ""
           echo "Users can install with:"
           echo "  sudo snap install sysmanage"
+          echo "=========================================="
+
+  # ============================================================================
+  # PHASE 11.8 — upstream-package publish jobs
+  # ============================================================================
+  #
+  # The jobs below publish each release to channels that need a per-
+  # release manifest / formula / port-tree bump:
+  #
+  #   homebrew-tap   -> bceverly/homebrew-tap     (Casks/sysmanage.rb)
+  #   winget-manifest-> microsoft/winget-pkgs     (via komac)
+  #   aur            -> aur.archlinux.org         (ssh push)
+  #   freebsd-ports  -> rendered port-tree artifact attached to release
+  #   openbsd-ports  -> rendered port-tree artifact attached to release
+  #   netbsd-pkgsrc  -> rendered port-tree artifact attached to release
+  #
+  # All three "publish" jobs (Homebrew / winget / AUR) default to
+  # DRY-RUN.  Flip via workflow_dispatch inputs once the one-time setup
+  # (creating the tap repo, generating AUR / winget-pkgs tokens, etc.) is
+  # done.  Missing-secret runs warn-and-pass so a release never fails
+  # over an unconfigured downstream channel.
+
+  homebrew-tap:
+    name: Homebrew tap (Casks/sysmanage.rb)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render Homebrew cask
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          PKG_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-macos.pkg"
+
+          # Pull the .pkg to compute sha256.  Homebrew refuses to install
+          # a cask whose sha256 doesn't match the downloaded artifact, so
+          # this MUST be the exact bytes the release attached.
+          curl -sSfL -o /tmp/sysmanage.pkg "$PKG_URL" || {
+            echo "::warning::Could not download macOS .pkg from $PKG_URL"
+            SHA="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage.pkg ]; then
+            SHA=$(sha256sum /tmp/sysmanage.pkg | awk '{print $1}')
+          fi
+
+          # The cask stub uses Ruby ``#{version}`` interpolation in the
+          # URL, so we only need to bump version + sha256 per release.
+          mkdir -p /tmp/homebrew-out
+          sed \
+            -e "s|version \".*\"|version \"${VERSION}\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${SHA}\"|" \
+            packaging/homebrew/sysmanage.rb \
+            > /tmp/homebrew-out/sysmanage.rb
+
+          echo "=========================================="
+          echo "Rendered Homebrew cask (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/homebrew-out/sysmanage.rb
+
+      - name: Publish to bceverly/homebrew-tap
+        env:
+          MODE: ${{ github.event.inputs.homebrew_mode || 'dry_run' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered cask shown above; not pushing to bceverly/homebrew-tap."
+            echo "To go live: dispatch with homebrew_mode=publish AND ensure"
+            echo "HOMEBREW_TAP_DEPLOY_KEY is configured."
+            exit 0
+          fi
+
+          if [ -z "${DEPLOY_KEY:-}" ]; then
+            echo "::warning::homebrew_mode=publish requested but HOMEBREW_TAP_DEPLOY_KEY"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. gh repo create bceverly/homebrew-tap --public"
+            echo "::warning::  2. ssh-keygen -t ed25519 -f tap_deploy_key -N ''"
+            echo "::warning::  3. Add tap_deploy_key.pub to the tap repo as a"
+            echo "::warning::     deploy key WITH write access."
+            echo "::warning::  4. Paste tap_deploy_key into this repo's secrets"
+            echo "::warning::     as HOMEBREW_TAP_DEPLOY_KEY."
+            echo "::warning::Until then, manually copy /tmp/homebrew-out/sysmanage.rb"
+            echo "::warning::into the tap repo at Casks/sysmanage.rb."
+            exit 0
+          fi
+
+          # Write deploy key to a 0600 temp file and shred on cleanup.
+          KEYFILE=$(mktemp)
+          chmod 600 "$KEYFILE"
+          # nosec - deploy key is masked by Actions, written to 0600 file
+          printf '%s\n' "$DEPLOY_KEY" > "$KEYFILE"
+          trap 'shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"' EXIT
+
+          export GIT_SSH_COMMAND="ssh -i $KEYFILE -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null"
+
+          WORK=$(mktemp -d)
+          git clone git@github.com:bceverly/homebrew-tap.git "$WORK/tap"
+          mkdir -p "$WORK/tap/Casks"
+          cp /tmp/homebrew-out/sysmanage.rb "$WORK/tap/Casks/sysmanage.rb"
+
+          cd "$WORK/tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet Casks/sysmanage.rb; then
+            echo "No cask changes for v${VERSION}; nothing to push."
+            exit 0
+          fi
+
+          git add Casks/sysmanage.rb
+          git commit -m "sysmanage ${VERSION}"
+          git push origin HEAD
+
+          echo "=========================================="
+          echo "SUCCESS! Pushed cask v${VERSION} to bceverly/homebrew-tap"
+          echo "Install with: brew install --cask bceverly/tap/sysmanage"
+          echo "=========================================="
+
+  winget-manifest:
+    name: winget-pkgs manifest (komac)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render winget manifest (x64 + arm64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          MSI_X64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-x64.msi"
+          MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
+
+          # Compute sha256 for each MSI — winget-pkgs validates both.
+          curl -sSfL -o /tmp/sysmanage-x64.msi "$MSI_X64_URL" || {
+            echo "::warning::Could not download x64 MSI from $MSI_X64_URL"
+            SHA_X64="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage-x64.msi ]; then
+            SHA_X64=$(sha256sum /tmp/sysmanage-x64.msi | awk '{print toupper($1)}')
+          fi
+          curl -sSfL -o /tmp/sysmanage-arm64.msi "$MSI_ARM64_URL" || {
+            echo "::warning::Could not download arm64 MSI from $MSI_ARM64_URL"
+            SHA_ARM64="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage-arm64.msi ]; then
+            SHA_ARM64=$(sha256sum /tmp/sysmanage-arm64.msi | awk '{print toupper($1)}')
+          fi
+
+          # Render the singleton manifest for the dry-run preview.  In
+          # publish mode we hand the MSI URLs to ``komac``, which builds
+          # the v1.6 multi-file manifest on the fly — we only need this
+          # rendering for the dry-run echo.
+          mkdir -p /tmp/winget-out
+          export VERSION SHA_X64 SHA_ARM64
+          python3 <<'PY'
+          import re, os
+          path = "packaging/winget/sysmanage.sysmanage.yaml"
+          ver = os.environ["VERSION"]
+          sha_x64 = os.environ["SHA_X64"]
+          sha_arm64 = os.environ["SHA_ARM64"]
+          x64_url = f"https://github.com/bceverly/sysmanage/releases/download/v{ver}/sysmanage-{ver}-windows-x64.msi"
+          arm64_url = f"https://github.com/bceverly/sysmanage/releases/download/v{ver}/sysmanage-{ver}-windows-arm64.msi"
+          text = open(path).read()
+          text = re.sub(r"^PackageVersion: .*", f"PackageVersion: {ver}", text, count=1, flags=re.M)
+          # Walk the Installers: block; rewrite URL + sha256 per arch.
+          lines = text.splitlines()
+          out = []
+          arch = None
+          for ln in lines:
+              m = re.match(r"\s*- Architecture: (\S+)", ln)
+              if m:
+                  arch = m.group(1)
+              if "InstallerUrl:" in ln:
+                  url = x64_url if arch == "x64" else arm64_url
+                  ln = re.sub(r"InstallerUrl: .*", f"InstallerUrl: {url}", ln)
+              if "InstallerSha256:" in ln:
+                  sha = sha_x64 if arch == "x64" else sha_arm64
+                  ln = re.sub(r"InstallerSha256: .*", f"InstallerSha256: {sha}", ln)
+              out.append(ln)
+          open("/tmp/winget-out/sysmanage.sysmanage.yaml", "w").write("\n".join(out) + "\n")
+          PY
+
+          echo "=========================================="
+          echo "Rendered winget manifest (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/winget-out/sysmanage.sysmanage.yaml
+
+      - name: Submit to microsoft/winget-pkgs via komac
+        env:
+          MODE: ${{ github.event.inputs.winget_mode || 'dry_run' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          WINGET_PKGS_TOKEN: ${{ secrets.WINGET_PKGS_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered manifest shown above; not submitting."
+            echo "To go live: dispatch with winget_mode=publish AND ensure"
+            echo "WINGET_PKGS_TOKEN is configured."
+            exit 0
+          fi
+
+          if [ -z "${WINGET_PKGS_TOKEN:-}" ]; then
+            echo "::warning::winget_mode=publish requested but WINGET_PKGS_TOKEN"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. Fork https://github.com/microsoft/winget-pkgs"
+            echo "::warning::     (the fork must be on the same account whose"
+            echo "::warning::     PAT you create below)."
+            echo "::warning::  2. Create a classic GitHub PAT with 'public_repo'"
+            echo "::warning::     scope (or fine-grained PAT with PR write on"
+            echo "::warning::     the fork)."
+            echo "::warning::  3. Paste the PAT into this repo's secrets as"
+            echo "::warning::     WINGET_PKGS_TOKEN."
+            exit 0
+          fi
+
+          # Pull komac prebuilt linux-musl-x64 binary from the latest
+          # release.  The ``komac`` CLI auto-handles fork+PR creation.
+          KOMAC_URL=$(curl -sSfL https://api.github.com/repos/russellbanks/Komac/releases/latest \
+            | python3 -c "import sys, json; data=json.load(sys.stdin); print(next(a['browser_download_url'] for a in data['assets'] if 'linux-musl-x86_64' in a['name'] or 'linux-x86_64-musl' in a['name']))")
+          curl -sSfL -o /tmp/komac "$KOMAC_URL"
+          chmod +x /tmp/komac
+
+          MSI_X64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-x64.msi"
+          MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
+
+          /tmp/komac update \
+            --identifier sysmanage.sysmanage \
+            --version "${VERSION}" \
+            --urls "${MSI_X64_URL}" "${MSI_ARM64_URL}" \
+            --submit \
+            --token "${WINGET_PKGS_TOKEN}"
+
+          echo "=========================================="
+          echo "SUCCESS! Submitted sysmanage v${VERSION} to microsoft/winget-pkgs"
+          echo "wingetbot validates within minutes; human reviewer merges within 24h."
+          echo "=========================================="
+
+  aur:
+    name: AUR (sysmanage)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render PKGBUILD + .SRCINFO
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          # Compute sha256 against the GitHub source tarball.  AUR users'
+          # makepkg will refuse to build if this doesn't match.
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            SHA="SKIP"
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+          fi
+
+          mkdir -p /tmp/aur-out
+          cp packaging/aur/PKGBUILD /tmp/aur-out/PKGBUILD
+          sed -i \
+            -e "s/^pkgver=.*/pkgver=${VERSION}/" \
+            -e "s/^sha256sums=.*/sha256sums=('${SHA}')/" \
+            /tmp/aur-out/PKGBUILD
+
+          # Regenerate .SRCINFO via makepkg in an Arch container.  AUR
+          # rejects pushes whose .SRCINFO doesn't match the PKGBUILD,
+          # so this MUST be regenerated by makepkg itself (sed isn't
+          # enough — package() output formatting can drift).
+          docker run --rm -v /tmp/aur-out:/pkg archlinux:base-devel \
+            bash -c 'cd /pkg && useradd -m b && chown -R b:b /pkg && su b -c "makepkg --printsrcinfo" > /pkg/.SRCINFO'
+
+          echo "=========================================="
+          echo "Rendered PKGBUILD (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/aur-out/PKGBUILD
+          echo ""
+          echo "=========================================="
+          echo "Rendered .SRCINFO:"
+          echo "=========================================="
+          cat /tmp/aur-out/.SRCINFO
+
+      - name: Publish to AUR
+        env:
+          MODE: ${{ github.event.inputs.aur_mode || 'dry_run' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered PKGBUILD + .SRCINFO shown above; not pushing to AUR."
+            echo "To go live: dispatch with aur_mode=publish AND ensure"
+            echo "AUR_SSH_KEY is configured."
+            exit 0
+          fi
+
+          if [ -z "${AUR_SSH_KEY:-}" ]; then
+            echo "::warning::aur_mode=publish requested but AUR_SSH_KEY"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. Create an AUR account at https://aur.archlinux.org"
+            echo "::warning::  2. ssh-keygen -t ed25519 -f aur_key -N ''"
+            echo "::warning::  3. Paste aur_key.pub into AUR account settings."
+            echo "::warning::  4. aur-submit sysmanage  (or initial push from a clone"
+            echo "::warning::     of ssh://aur@aur.archlinux.org/sysmanage.git)."
+            echo "::warning::  5. Paste aur_key into this repo's secrets as AUR_SSH_KEY."
+            exit 0
+          fi
+
+          KEYFILE=$(mktemp)
+          chmod 600 "$KEYFILE"
+          # nosec - deploy key is masked by Actions, written to 0600 file
+          printf '%s\n' "$AUR_SSH_KEY" > "$KEYFILE"
+          trap 'shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"' EXIT
+
+          export GIT_SSH_COMMAND="ssh -i $KEYFILE -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null"
+
+          WORK=$(mktemp -d)
+          git clone ssh://aur@aur.archlinux.org/sysmanage.git "$WORK/aur"
+          cp /tmp/aur-out/PKGBUILD "$WORK/aur/PKGBUILD"
+          cp /tmp/aur-out/.SRCINFO "$WORK/aur/.SRCINFO"
+
+          cd "$WORK/aur"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet PKGBUILD .SRCINFO; then
+            echo "No PKGBUILD changes for v${VERSION}; nothing to push."
+            exit 0
+          fi
+
+          git add PKGBUILD .SRCINFO
+          git commit -m "sysmanage ${VERSION}"
+          git push origin HEAD:master
+
+          echo "=========================================="
+          echo "SUCCESS! Pushed sysmanage v${VERSION} to AUR"
+          echo "Install with: yay -S sysmanage  (or any AUR helper)"
+          echo "=========================================="
+
+  freebsd-ports:
+    name: FreeBSD ports tree (artifact)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render FreeBSD port tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          # FreeBSD distinfo expects SHA256 + SIZE.  TIMESTAMP is the
+          # epoch the port was last refreshed; we use ``date +%s``.
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            SHA="0000000000000000000000000000000000000000000000000000000000000000"
+            SIZE=0
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+          fi
+          TS=$(date +%s)
+
+          STAGE=/tmp/freebsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage/files"
+          cp -r packaging/freebsd-ports/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i "s/^DISTVERSION=.*/DISTVERSION=\t${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          TIMESTAMP = ${TS}
+          SHA256 (sysmanage/v${VERSION}.tar.gz) = ${SHA}
+          SIZE (sysmanage/v${VERSION}.tar.gz) = ${SIZE}
+          EOF
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered FreeBSD port tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz"
+
+      - name: Upload FreeBSD port-tree artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: sysmanage-freebsd-port
+          path: /tmp/sysmanage-v*-freebsd-port.tar.gz
+
+      - name: Attach FreeBSD port tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-freebsd-port.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "FreeBSD port tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-freebsd-port.tar.gz from the release."
+          echo "  2. Extract into a FreeBSD ports tree clone."
+          echo "  3. Run 'make makesum' to verify distinfo, 'make stage check-plist'."
+          echo "  4. Open a Bugzilla PR against ports/ with the diff."
+          echo "=========================================="
+
+  openbsd-ports:
+    name: OpenBSD ports tree (artifact)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render OpenBSD port tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          STAGE=/tmp/openbsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage/pkg"
+          cp -r packaging/openbsd-ports/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i "s/^GH_TAGNAME =.*/GH_TAGNAME =\t\tv${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          # OpenBSD checksums (distinfo) are computed by ``make makesum``
+          # inside a real OpenBSD ports tree — we can't reproduce that
+          # SHA256-and-RMD160 dance reliably from Linux.  Leave a
+          # placeholder distinfo with the SHA256 of the GitHub tarball;
+          # the maintainer regenerates it on the OpenBSD build host.
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || true
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | base64 -w0)
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+            cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          SHA256 (sysmanage-${VERSION}.tar.gz) = ${SHA}
+          SIZE (sysmanage-${VERSION}.tar.gz) = ${SIZE}
+          EOF
+          fi
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-openbsd-port.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered OpenBSD port tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-openbsd-port.tar.gz"
+
+      - name: Upload OpenBSD port-tree artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: sysmanage-openbsd-port-phase11.8
+          path: /tmp/sysmanage-v*-openbsd-port.tar.gz
+
+      - name: Attach OpenBSD port tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-openbsd-port.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "OpenBSD port tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-openbsd-port.tar.gz."
+          echo "  2. Extract into your OpenBSD /usr/ports clone."
+          echo "  3. cd sysutils/sysmanage && make makesum (regenerate distinfo"
+          echo "     with the canonical OpenBSD digest format)."
+          echo "  4. make package && make port-lib-depends-check."
+          echo "  5. Email diff to ports@openbsd.org."
+          echo "=========================================="
+
+  netbsd-pkgsrc:
+    name: NetBSD pkgsrc tree (artifact)
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install BLAKE2s helper
+        run: |
+          # Python's hashlib ships BLAKE2s on every supported version
+          # (3.6+).  No extra package needed.
+          python3 -c "import hashlib; hashlib.blake2s()"
+
+      - name: Render NetBSD pkgsrc tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            BLAKE2S="0000000000000000000000000000000000000000000000000000000000000000"
+            SHA512="00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+            SIZE=0
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            BLAKE2S=$(python3 -c "import hashlib,sys;h=hashlib.blake2s();h.update(open('/tmp/sysmanage-src.tar.gz','rb').read());print(h.hexdigest())")
+            SHA512=$(sha512sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+          fi
+
+          STAGE=/tmp/netbsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage"
+          cp -r packaging/netbsd-pkgsrc/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i \
+            -e "s/^DISTNAME=.*/DISTNAME=\tsysmanage-${VERSION}/" \
+            -e "s/^GITHUB_TAG=.*/GITHUB_TAG=\tv${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          # pkgsrc distinfo: BLAKE2s + SHA512 + Size (modern pkgsrc,
+          # ~2023+).  Older formats (RMD160) were removed when pkgsrc-
+          # 2022Q4 switched to BLAKE2s as the primary checksum.
+          cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          \$NetBSD\$
+
+          BLAKE2s (sysmanage-${VERSION}.tar.gz) = ${BLAKE2S}
+          SHA512 (sysmanage-${VERSION}.tar.gz) = ${SHA512}
+          Size (sysmanage-${VERSION}.tar.gz) = ${SIZE} bytes
+          EOF
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered NetBSD pkgsrc tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz"
+
+      - name: Upload NetBSD pkgsrc artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: sysmanage-netbsd-pkgsrc
+          path: /tmp/sysmanage-v*-netbsd-pkgsrc.tar.gz
+
+      - name: Attach NetBSD pkgsrc tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-netbsd-pkgsrc.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "NetBSD pkgsrc tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz."
+          echo "  2. Extract into a clone of github.com/NetBSD/pkgsrc-wip."
+          echo "  3. cd sysutils/sysmanage && make distinfo (verifies hashes)."
+          echo "  4. Open a PR against pkgsrc-wip; promote to main pkgsrc"
+          echo "     after maintainer review."
           echo "=========================================="

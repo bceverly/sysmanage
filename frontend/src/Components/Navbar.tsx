@@ -94,7 +94,7 @@ const Navbar = () => {
   };
 
   // Paths that are hardcoded in the navbar - plugins must not duplicate these
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports', '/airgap/repositories']);
 
   // Labels that are hardcoded in the navbar - plugins with matching labels are duplicates
   const hardcodedLabels = new Set([
@@ -231,6 +231,17 @@ const Navbar = () => {
                   onClick={closeMenuOnMobile}
                 >
                   {t('nav.reports')}
+                </NavLink>
+              </li>
+            )}
+            {serverRole === 'repository' && (
+              <li className="nav__item">
+                <NavLink
+                  to="/airgap/repositories"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.airgapRepositories', 'Air-Gap Repos')}
                 </NavLink>
               </li>
             )}

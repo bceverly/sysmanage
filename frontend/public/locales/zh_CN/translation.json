@@ -982,7 +982,8 @@
       "engineMissing": "未加载所需的Pro+引擎；请检查许可证。",
       "collector": "采集器",
       "repository": "存储库"
-    }
+    },
+    "airgapRepositories": "Air-Gap Repos"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -2225,6 +2226,40 @@
         "not_transferred": "未传输（需下一介质周期）",
         "not_transferred_count": "{{n}} 项未传输",
         "current_count": "{{n}} 项最新"
+      },
+      "tooltip": {
+        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
+        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
+        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+      }
+    },
+    "repositories": {
+      "title": "Air-Gap Repositories",
+      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
+      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
+      "loadError": "Failed to load repositories:",
+      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "aggregate": {
+        "title": "Aggregate",
+        "totalRepos": "Total repositories",
+        "totalPackages": "Total packages",
+        "oldestFreshness": "Oldest freshness",
+        "noIngest": "N/A",
+        "daysAgo": "{{days}} day(s) ago",
+        "staleRepos": "Stale repos (> {{days}}d)"
+      },
+      "table": {
+        "distro": "Distro",
+        "version": "Version",
+        "packageCount": "Packages",
+        "lastIngest": "Last successful ingest",
+        "freshness": "Freshness",
+        "signerFingerprint": "Signer fingerprint",
+        "empty": "No repositories ingested yet.",
+        "neverIngested": "Never",
+        "freshnessNever": "Never ingested",
+        "freshnessDays": "{{days}} day(s)",
+        "noFingerprint": "—"
       }
     }
   },
@@ -2245,7 +2280,9 @@
         "disc_stage_file": "将 {{rel}} 暂存到光盘 {{disc_index}}",
         "disc_embed_manifest": "为光盘 {{disc_index}} 嵌入清单",
         "disc_build_iso": "为光盘 {{disc_index}} 构建 ISO 镜像",
-        "disc_iso_sha256": "计算光盘 {{disc_index}} 的 SHA-256"
+        "disc_iso_sha256": "计算光盘 {{disc_index}} 的 SHA-256",
+        "cve_snapshot_feed": "Snapshotting CVE feed {{source}}",
+        "cve_snapshot_manifest": "Writing CVE snapshot source manifest"
       }
     },
     "airgap_repository": {

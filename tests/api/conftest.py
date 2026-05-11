@@ -802,6 +802,8 @@ def test_db():
         started_at = Column(DateTime, nullable=True)
         completed_at = Column(DateTime, nullable=True)
         error_message = Column(Text, nullable=True)
+        # Phase 11.1 follow-up — cron_schedule for re-firing runs via tick.
+        cron_schedule = Column(String(200), nullable=True)
         created_at = Column(DateTime, nullable=True)
         created_by = Column(
             GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True

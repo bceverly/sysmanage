@@ -982,7 +982,8 @@
       "engineMissing": "Moteur Pro+ requis non chargé ; vérifiez la licence.",
       "collector": "Collecteur",
       "repository": "Référentiel"
-    }
+    },
+    "airgapRepositories": "Air-Gap Repos"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -2225,6 +2226,40 @@
         "not_transferred": "Non transféré (cycle de média suivant requis)",
         "not_transferred_count": "{{n}} non transféré",
         "current_count": "{{n}} à jour"
+      },
+      "tooltip": {
+        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
+        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
+        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+      }
+    },
+    "repositories": {
+      "title": "Air-Gap Repositories",
+      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
+      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
+      "loadError": "Failed to load repositories:",
+      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "aggregate": {
+        "title": "Aggregate",
+        "totalRepos": "Total repositories",
+        "totalPackages": "Total packages",
+        "oldestFreshness": "Oldest freshness",
+        "noIngest": "N/A",
+        "daysAgo": "{{days}} day(s) ago",
+        "staleRepos": "Stale repos (> {{days}}d)"
+      },
+      "table": {
+        "distro": "Distro",
+        "version": "Version",
+        "packageCount": "Packages",
+        "lastIngest": "Last successful ingest",
+        "freshness": "Freshness",
+        "signerFingerprint": "Signer fingerprint",
+        "empty": "No repositories ingested yet.",
+        "neverIngested": "Never",
+        "freshnessNever": "Never ingested",
+        "freshnessDays": "{{days}} day(s)",
+        "noFingerprint": "—"
       }
     }
   },
@@ -2245,7 +2280,9 @@
         "disc_stage_file": "Préparation de {{rel}} sur le disque {{disc_index}}",
         "disc_embed_manifest": "Intégration du manifeste pour le disque {{disc_index}}",
         "disc_build_iso": "Construction de l'image ISO pour le disque {{disc_index}}",
-        "disc_iso_sha256": "Calcul du SHA-256 du disque {{disc_index}}"
+        "disc_iso_sha256": "Calcul du SHA-256 du disque {{disc_index}}",
+        "cve_snapshot_feed": "Snapshotting CVE feed {{source}}",
+        "cve_snapshot_manifest": "Writing CVE snapshot source manifest"
       }
     },
     "airgap_repository": {

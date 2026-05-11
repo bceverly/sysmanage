@@ -12,6 +12,7 @@ from backend.api import (
     agent,
     airgap_collection_schedule,
     airgap_repository_buckets,
+    airgap_repository_list,
     antivirus_defaults,
     antivirus_status,
     audit_log,
@@ -107,6 +108,11 @@ def register_routes(app: FastAPI):
     # the AirgapComplianceBucketsCard frontend component.
     app.include_router(airgap_repository_buckets.router)
     logger.debug("Air-gap repository buckets router added")
+
+    # Phase 11 B6 — list-all-repos + freshness endpoints feeding the
+    # AirgapRepositories dashboard and RepositoryFreshnessCard.
+    app.include_router(airgap_repository_list.router)
+    logger.debug("Air-gap repository list router added")
 
     logger.debug(
         "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"

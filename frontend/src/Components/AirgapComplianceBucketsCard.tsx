@@ -28,6 +28,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -112,6 +113,25 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
     return null;
   }
 
+  // Phase 11.3 risk-assessment surface: red badge for not_transferred
+  // (next media cycle required), yellow for not_applied (cheap to fix
+  // — package already on the local mirror).  Tooltips explain the
+  // air-gap-transfer-cadence implication so an operator unfamiliar
+  // with the dual-server model understands why one bucket is more
+  // costly than the other.
+  const notTransferredTooltip = t(
+    'airgap.compliance.tooltip.not_transferred',
+    'These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.',
+  );
+  const notAppliedTooltip = t(
+    'airgap.compliance.tooltip.not_applied',
+    'These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.',
+  );
+  const currentTooltip = t(
+    'airgap.compliance.tooltip.current',
+    'Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer.',
+  );
+
   return (
     <Card>
       <CardContent>
@@ -127,26 +147,35 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
         {data && (
           <Box>
             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-              <Chip
-                label={t('airgap.compliance.bucket.not_applied_count', '{{n}} not applied', {
-                  n: data.not_applied.length,
-                })}
-                sx={{ bgcolor: BUCKET_COLOR.not_applied, color: 'white' }}
-              />
-              <Chip
-                label={t(
-                  'airgap.compliance.bucket.not_transferred_count',
-                  '{{n}} not transferred',
-                  { n: data.not_transferred.length },
-                )}
-                sx={{ bgcolor: BUCKET_COLOR.not_transferred, color: 'white' }}
-              />
-              <Chip
-                label={t('airgap.compliance.bucket.current_count', '{{n}} current', {
-                  n: data.current.length,
-                })}
-                sx={{ bgcolor: BUCKET_COLOR.current, color: 'white' }}
-              />
+              <Tooltip title={notAppliedTooltip} arrow>
+                <Chip
+                  color="warning"
+                  label={t('airgap.compliance.bucket.not_applied_count', '{{n}} not applied', {
+                    n: data.not_applied.length,
+                  })}
+                  sx={{ bgcolor: BUCKET_COLOR.not_applied, color: 'white' }}
+                />
+              </Tooltip>
+              <Tooltip title={notTransferredTooltip} arrow>
+                <Chip
+                  color="error"
+                  label={t(
+                    'airgap.compliance.bucket.not_transferred_count',
+                    '{{n}} not transferred',
+                    { n: data.not_transferred.length },
+                  )}
+                  sx={{ bgcolor: BUCKET_COLOR.not_transferred, color: 'white' }}
+                />
+              </Tooltip>
+              <Tooltip title={currentTooltip} arrow>
+                <Chip
+                  color="success"
+                  label={t('airgap.compliance.bucket.current_count', '{{n}} current', {
+                    n: data.current.length,
+                  })}
+                  sx={{ bgcolor: BUCKET_COLOR.current, color: 'white' }}
+                />
+              </Tooltip>
             </Box>
 
             {data.not_applied.length > 0 && (

@@ -1,0 +1,9 @@
+@comment $OpenBSD$
+@rcscript ${RCDIR}/sysmanage
+libexec/sysmanage/
+libexec/sysmanage/alembic.ini
+libexec/sysmanage/backend/
+libexec/sysmanage/alembic/
+share/examples/sysmanage/
+share/examples/sysmanage/sysmanage.yaml
+share/examples/sysmanage/sysmanage-nginx.conf

@@ -982,7 +982,8 @@
       "engineMissing": "आवश्यक Pro+ इंजन लोड नहीं है; लाइसेंस जांचें।",
       "collector": "संग्राहक",
       "repository": "रिपॉजिटरी"
-    }
+    },
+    "airgapRepositories": "Air-Gap Repos"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -2225,6 +2226,40 @@
         "not_transferred": "स्थानांतरित नहीं (अगला मीडिया चक्र आवश्यक)",
         "not_transferred_count": "{{n}} स्थानांतरित नहीं",
         "current_count": "{{n}} वर्तमान"
+      },
+      "tooltip": {
+        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
+        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
+        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+      }
+    },
+    "repositories": {
+      "title": "Air-Gap Repositories",
+      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
+      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
+      "loadError": "Failed to load repositories:",
+      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "aggregate": {
+        "title": "Aggregate",
+        "totalRepos": "Total repositories",
+        "totalPackages": "Total packages",
+        "oldestFreshness": "Oldest freshness",
+        "noIngest": "N/A",
+        "daysAgo": "{{days}} day(s) ago",
+        "staleRepos": "Stale repos (> {{days}}d)"
+      },
+      "table": {
+        "distro": "Distro",
+        "version": "Version",
+        "packageCount": "Packages",
+        "lastIngest": "Last successful ingest",
+        "freshness": "Freshness",
+        "signerFingerprint": "Signer fingerprint",
+        "empty": "No repositories ingested yet.",
+        "neverIngested": "Never",
+        "freshnessNever": "Never ingested",
+        "freshnessDays": "{{days}} day(s)",
+        "noFingerprint": "—"
       }
     }
   },
@@ -2245,7 +2280,9 @@
         "disc_stage_file": "{{rel}} को डिस्क {{disc_index}} पर स्टेज कर रहे हैं",
         "disc_embed_manifest": "डिस्क {{disc_index}} के लिए मेनिफेस्ट एम्बेड कर रहे हैं",
         "disc_build_iso": "डिस्क {{disc_index}} के लिए ISO छवि बना रहे हैं",
-        "disc_iso_sha256": "डिस्क {{disc_index}} का SHA-256 गणना कर रहे हैं"
+        "disc_iso_sha256": "डिस्क {{disc_index}} का SHA-256 गणना कर रहे हैं",
+        "cve_snapshot_feed": "Snapshotting CVE feed {{source}}",
+        "cve_snapshot_manifest": "Writing CVE snapshot source manifest"
       }
     },
     "airgap_repository": {

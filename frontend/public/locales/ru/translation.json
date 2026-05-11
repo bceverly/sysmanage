@@ -982,7 +982,8 @@
       "engineMissing": "Требуемый движок Pro+ не загружен; проверьте лицензию.",
       "collector": "Сборщик",
       "repository": "Репозиторий"
-    }
+    },
+    "airgapRepositories": "Air-Gap Repos"
   },
   "notifications": {
     "applicationUpdates": "Обновления Приложений",
@@ -2225,6 +2226,40 @@
         "not_transferred": "Не передано (требуется следующий цикл носителей)",
         "not_transferred_count": "{{n}} не передано",
         "current_count": "{{n}} актуально"
+      },
+      "tooltip": {
+        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
+        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
+        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+      }
+    },
+    "repositories": {
+      "title": "Air-Gap Repositories",
+      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
+      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
+      "loadError": "Failed to load repositories:",
+      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "aggregate": {
+        "title": "Aggregate",
+        "totalRepos": "Total repositories",
+        "totalPackages": "Total packages",
+        "oldestFreshness": "Oldest freshness",
+        "noIngest": "N/A",
+        "daysAgo": "{{days}} day(s) ago",
+        "staleRepos": "Stale repos (> {{days}}d)"
+      },
+      "table": {
+        "distro": "Distro",
+        "version": "Version",
+        "packageCount": "Packages",
+        "lastIngest": "Last successful ingest",
+        "freshness": "Freshness",
+        "signerFingerprint": "Signer fingerprint",
+        "empty": "No repositories ingested yet.",
+        "neverIngested": "Never",
+        "freshnessNever": "Never ingested",
+        "freshnessDays": "{{days}} day(s)",
+        "noFingerprint": "—"
       }
     }
   },
@@ -2245,7 +2280,9 @@
         "disc_stage_file": "Подготовка {{rel}} на диск {{disc_index}}",
         "disc_embed_manifest": "Встраивание манифеста для диска {{disc_index}}",
         "disc_build_iso": "Сборка ISO-образа для диска {{disc_index}}",
-        "disc_iso_sha256": "Вычисление SHA-256 диска {{disc_index}}"
+        "disc_iso_sha256": "Вычисление SHA-256 диска {{disc_index}}",
+        "cve_snapshot_feed": "Snapshotting CVE feed {{source}}",
+        "cve_snapshot_manifest": "Writing CVE snapshot source manifest"
       }
     },
     "airgap_repository": {

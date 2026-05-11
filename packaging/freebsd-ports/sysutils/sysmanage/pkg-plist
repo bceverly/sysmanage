@@ -1,0 +1,3 @@
+libexec/sysmanage/alembic.ini
+@sample etc/sysmanage.yaml.sample
+@sample etc/nginx/sysmanage-nginx.conf.sample
