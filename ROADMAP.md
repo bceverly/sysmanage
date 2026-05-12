@@ -1776,7 +1776,7 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 - [x] **Firewall Roles** — gate behind `firewall_orchestration_engine`. *(Settings.tsx:199)*
 - [ ] **Access Groups** — gate behind `federation_controller_engine` (deferred to Phase 12.4 fold-in; currently no gating since it's an OSS feature today).  Land the gating once 12.4 lands; for now, leave it visible.
 - [x] **Update Profiles** — gate behind `automation_engine` (lands together with 10.6 above). *(Settings.tsx:214)*
-- [ ] **Compliance Profiles** — gate behind `compliance_engine` (deferred to Phase 11.5 fold-in).  Same staging strategy as Access Groups.
+- [x] **Compliance Profiles** — gate behind `compliance_engine` (Phase 11.5 fold-in landed). *(Settings.tsx:225 — `moduleRequired: 'compliance_engine'`)*
 - [x] **Report Branding** — gate behind `reporting_engine`. *(Settings.tsx:221)*
 - [x] **Report Templates** — gate behind `reporting_engine`. *(Settings.tsx:227)*
 - [ ] **Dynamic Secrets** — gate behind `secrets_engine` (full gating once 12.5 fold-in lands; for now, leave visible since it's OSS today).
@@ -1904,11 +1904,11 @@ tests against the compiled .so all green.
 - [x] CVE/NVD data snapshot capture at time of collection — placeholder hook; concrete CVE-feed list lives in `vuln_engine` (Phase 11.4 fold-in)
 - [~] Compliance framework data capture (CIS, DISA STIG baselines) — schema + `include_compliance` flag wired through `build_collection_run_plan` + `AirgapCollectionRun`; concrete CIS/STIG feed registry sharing with `compliance_engine` deferred (parallel to how CVE feed registry is shared with `vuln_engine` per 11.4)
 - [x] Optical media ISO image generation with integrity checksums (SHA-256) — xorriso wrapper + post-build sha256sum step
-- [ ] Multi-disc spanning for large update sets — **deferred**; v0.1.0 is single-disc happy path.  Bin-packing algorithm tracked as Phase 11.1 follow-up.  Disc-level row in `airgap_media_manifest` already supports `disc_index` / `disc_count` so multi-disc lands without schema change.
+- [x] Multi-disc spanning for large update sets — first-fit-decreasing bin-packing in `pack_into_discs` + per-disc plan builder `build_multidisc_plan` (engine).  OSS-exposed via new `POST /api/v1/airgap/collector/iso/build-multidisc/{run_id}` endpoint that takes a `file_entries` list and emits one stage + manifest + xorriso + sha256 command sequence per disc.  9 router tests + the existing bin-packing function tests all green.  `airgap_media_manifest`'s `disc_index` / `disc_count` columns now actually carry the values.
 - [x] Disc burning integration (cdrecord/growisofs/xorriso) — plan-builder shape only; real burns happen on operator hardware (mocked in CI)
-- [ ] Collection scheduling (daily, weekly, on-demand) — on-demand (POST `/airgap/collector/collection/runs`) ships v0.1.0; cron-driven scheduling deferred (would reuse `automation_engine`'s cron parser via the same shared-util pattern Phase 11.4 used for vuln_engine)
+- [x] Collection scheduling (daily, weekly, on-demand) — on-demand via `POST /api/v1/airgap/collector/collection/runs` (engine) + cron-driven via OSS `AirgapCollectionSchedule` table + CRUD routes at `/api/v1/airgap/collector/schedules` + periodic-tick service `backend.services.airgap_schedule_tick.airgap_schedule_tick_service` (60 s heartbeat, mounted in `backend/startup/lifecycle.py` when `airgap_collector_engine` is loaded).  Cron parser reused from `airgap_collector_engine.parse_collector_cron_fields` / `next_collection_from_cron`.  8 tick-service tests pass.
 - [x] Manifest generation with package counts, CVE counts, and timestamps — `build_manifest` + `sign_manifest` (ed25519 with HMAC-SHA256 fallback flagged for strict-mode rejection)
-- [ ] Delta collection mode (only new packages since last burn) — **deferred**; full snapshot only in v0.1.0
+- [x] Delta collection mode (only new packages since last burn) — request body accepts ``parent_run_id`` (UUID of prior run); engine route fetches the parent's ``AirgapMediaManifest`` rows, extracts the file list, populates ``prior_files`` automatically, and defaults ``delta_since`` to the parent's ``completed_at``.  Skip-set built by ``compute_delta_skip_set``; per-distro mirror commands gain a ``--skip`` filter.  ``parent_run_id`` persists on the new ``AirgapCollectionRun`` row (column already present; ``to_dict`` now exposes it).  8 new delta-route tests pass.
 - [x] i18n/l10n for all 14 languages — backend gettext + frontend nav.role chip, all 14 locales validated strict
 
 **Estimated Size:** ~4,000 lines (actual: ~520 lines .pyx + ~150 schema + ~270 tests)
@@ -1931,7 +1931,7 @@ repository→verify round-trip all green.
 - [x] Gap analysis reporting (what patches exist publicly but are not yet transferred) — same `not_transferred` bucket from 11.3
 - [x] Transfer history and audit trail — `AirgapIngestionRun` tracks status / started_at / completed_at / error_message / signer_fingerprint / collector_iso_label per ingest; `AirgapCollectionRun` tracks the same on the collector side; both are queryable via the engines' router endpoints
 - [x] Multi-OS repository support (serve updates for multiple OS families) — `build_repo_metadata_plan` covers `apt-ftparchive` (Debian/Ubuntu), `createrepo_c` (Fedora/RHEL family/openSUSE/SLES), `pkg repo` (FreeBSD), `apk index` (Alpine) — single repository can host all of them concurrently
-- [ ] Repository statistics and dashboard — backend data wired (`compute_freshness`, `AirgapLocalRepository.package_count`); frontend dashboard component is Phase 11.x follow-up tracked separately
+- [x] Repository statistics and dashboard — `AirgapRepositories.tsx` page renders per-repo table (distro, version, package count, last-ingest, freshness label, signer fingerprint) plus an aggregate card (total repos, total packages, oldest freshness, stale count) backed by `GET /api/v1/airgap/repository/repositories`.  Route mounted at `/airgap/repositories`, linked from `Navbar.tsx`, gated to `role: repository` deployments with a "not applicable" notice otherwise.  Backend's aggregate (with configured stale threshold) is the source of truth; component falls back to local computation only for legacy flat-list responses.
 - [x] i18n/l10n for all 14 languages — backend gettext + frontend locale JSONs + docs locale JSONs all updated for Phase 11 strings; all four validators pass strict mode
 
 **Estimated Size:** ~5,000 lines
@@ -1950,7 +1950,7 @@ classification.
 - [x] Compliance scoring relative to available private-side patches — `not_applied` bucket flags newer-version-available-locally
 - [x] Reporting that distinguishes between "patch available but not applied" vs "patch not yet transferred" — explicit three-bucket return shape (`not_applied`, `not_transferred`, `current`)
 - [x] Transfer freshness indicators (how old is the latest media import) — `compute_freshness` returns `(days, label)` with `current` ≤ 7d, `stale` ≤ 30d, `very_stale` > 30d, `never` for no ingest yet
-- [ ] Risk assessment that accounts for the air-gap transfer cadence — surface in compliance UI deferred to dashboard work
+- [x] Risk assessment that accounts for the air-gap transfer cadence — `AirgapComplianceBucketsCard.tsx` rendered inside `HostCompliancePanel` (which `HostDetail.tsx` mounts).  Surfaces the three-bucket classification from `classify_compliance_gap` as color-coded chips (yellow = not_applied, red = not_transferred, green = current) with tooltips explaining the air-gap-transfer-cadence implication.  Backed by `GET /api/v1/airgap/repository/host/{host_id}/compliance-buckets`.
 - [x] Integration with existing compliance_engine and vuln_engine modules — connector module imports `airgap_repository_engine.compute_freshness`; OSS routes call into the connector when air-gap data is needed
 
 #### 11.4 CVE Refresh Settings → vuln_engine + airgap_collector_engine
@@ -1963,7 +1963,7 @@ because CVE feed mirroring is the central air-gap concern.
 
 **Migration Steps:**
 1. [x] Move CVE source/refresh-settings CRUD into `vuln_engine.pyx` (the existing engine that consumes the data) — `validate_cve_source`, `build_cve_refresh_plan`, `build_cve_apply_plan`, `parse_cve_cron_fields`, `next_refresh_from_cron`, `CveRefreshConfigError` (vuln_engine.pyx, +557 lines)
-2. [ ] In Phase 11 specifically: extend `airgap_collector_engine` to use the same CVE source registry — placeholder hook present in `build_collection_run_plan`; concrete cross-engine wiring deferred until both engines are loaded on the same collector deployment
+2. [x] In Phase 11 specifically: extend `airgap_collector_engine` to use the same CVE source registry — landed via `module-source/_shared/cve_source_registry.py` (canonical), consumed by both `vuln_engine.pyx` (with byte-identical inline fallback) and `airgap_collector_engine.build_collection_run_plan` (emits one `curl` snapshot step per `enabled_by_default=True` source plus a `sources.json` URL manifest).  Round-trip verified by `test_airgap_collector_engine_cve_snapshot.py::test_each_snapshot_url_matches_vuln_engine_refresh_url` and `test_source_names_subset_of_vuln_engine_known_sources`.
 3. [x] Gate `/api/cve-refresh/*` behind `vuln_engine` loaded (402 stub in OSS, mirroring secrets/openbao pattern) — `_check_vuln_engine_module()` on all 7 routes (cve_refresh_settings.py:+37 lines)
 4. [x] Frontend `CveRefreshSettings.tsx` — N/A; no such component exists in OSS (CVE refresh has no Settings tab today; backend 402 gating is sufficient)
 5. [x] i18n/l10n for all 14 languages — new 402 detail string added to all 14 backend `.po` files + compiled `.mo`
@@ -2003,7 +2003,7 @@ sets, locked-down baselines).
 5. [x] Frontend gating via Settings tabDefs `moduleRequired` (same pattern as other Pro+ Settings tabs) — no separate plugin-bundle files needed; nav role chip lives in OSS Navbar.tsx and renders only when role != standard
 6. [x] Migrate OSS CVE refresh settings into `vuln_engine` (11.4) — done
 7. [x] Migrate OSS package compliance into `compliance_engine` (11.5) — done
-8. [ ] Update documentation with air-gapped deployment guide — **deferred**; docs site update + role-config walkthrough tracked as a doc-only follow-up (translator-budget work, not engineering)
+8. [~] Update documentation with air-gapped deployment guide — English version landed (`sysmanage-docs/docs/administration/airgap-deployment.html`, deliverable at line 2014; 55 `data-i18n` keys seeded across all 14 locales).  Long-form-paragraph translation across the 13 non-English locales is the remaining slice; tracked under §12.8 "Translation-service pipeline" rather than re-listed here.  Translator-budget work, not engineering.
 9. [x] i18n/l10n for all 14 languages — backend gettext for 402 strings + frontend nav.role.* keys (added to DYNAMIC_KEY_PREFIXES so template-literal `t(\`nav.role.${role}\`)` lookups stay valid); all four validators pass strict mode
 
 ### Deliverables
@@ -2011,7 +2011,7 @@ sets, locked-down baselines).
 - [x] 2 new Pro+ modules (airgap_collector_engine, airgap_repository_engine) — both v0.1.0; 19 + 25 = 44 engine tests
 - [x] CVE refresh settings folded into `vuln_engine` — 50 engine tests + 13 OSS gate tests
 - [x] Package compliance folded into `compliance_engine` — 32 engine tests + 24 OSS tests
-- [x] Air-gapped deployment guide — `sysmanage-docs/docs/administration/airgap-deployment.html` (architecture, role config walkthrough, collection cycle, ingestion cycle, per-distro install channels, compliance context, troubleshooting; 55 `data-i18n` keys seeded across all 14 locales — section titles localized, long-form bodies use English-passthrough per the existing docs-locale convention until the translation-service pipeline runs per §11.7)
+- [x] Air-gapped deployment guide — `sysmanage-docs/docs/administration/airgap-deployment.html` (architecture, role config walkthrough, collection cycle, ingestion cycle, per-distro install channels, compliance context, troubleshooting; 55 `data-i18n` keys seeded across all 14 locales — section titles localized, long-form bodies use English-passthrough per the existing docs-locale convention until the translation-service pipeline runs per §12.8)
 - [x] Optical media transfer procedures documentation — `sysmanage-docs/docs/administration/airgap-runbook.html` covers chain-of-custody, ed25519 key rotation cadence, transport-loss procedures, signature-verification incident response, and recommended cadences; 41 `data-i18n` keys seeded across all 14 locales (titles localized, long-form bodies use English-passthrough per docs convention)
 - [x] Integration tests for collection and ingestion workflows — collector→sign→repository→verify round-trip exercised in `test_airgap_repository_engine.py::TestVerifySignedEnvelopeRoundTrip`
 - [x] **Agent subprocess persistence across WebSocket reconnects** — Phase 11.6 landed (28 inflight_journal tests + 27 generic_deployment regression tests pass).  See §11.6 status block below.
@@ -2080,258 +2080,6 @@ it twice produces a half-built VM).  The journal approach is more
 work but correctly distinguishes "the plan ran to completion, agent
 just couldn't tell us" from "the plan was interrupted, retry is
 required."
-
----
-
-### 11.7 i18n/l10n debt repayment (carry-over from Phase 10.4 audit)
-
-**Problem.** Phase 10.4's i18n audit revealed three classes of
-translation debt across the four repos that the in-phase tooling pass
-quantified, locked-in via "don't make it worse" budgets, but did not
-fully resolve.  All four repos now have ``make i18n-validate`` wired
-into ``lint`` / ``test`` so the debt cannot grow; this phase pays
-it down to zero.
-
-**Current state (re-measured 2026-05-08 after autonomous translation pass):**
-
-  1. **OSS frontend** — autonomous LLM translation pass closed the
-     ``[TODO]``/`[MISSING:]` placeholder gap and replaced the worst
-     of the English-passthrough leaves.  Sub-agent A (Phase 10.4
-     close-out night) translated ~5,400 strings across 13 non-en
-     locales using a curated reference table for high-frequency UI
-     terms (Save/Cancel/Delete/Edit/Status/etc.) plus locale-aware
-     translation for everything else.  Quality is "ship-able" — not
-     bilingual-engineer perfect, but no longer ``[MISSING:]`` and
-     not English-passthrough either.  Validator now passes with
-     real translations across all 14 locales.  Native-speaker
-     review pass remains valuable but no longer urgent.
-
-  2. **Docs long-form English-passthrough** — ~34,000 strings
-     across 13 non-en locales (measured 2026-05-08).  This is the
-     genuinely-large remaining gap.  Long-form HTML body paragraphs
-     (400+ char descriptions) make autonomous LLM translation
-     impractical at quality — context windows fragment the
-     paragraphs and adjacent paragraphs lose cross-reference
-     coherence.  **Recommend a translation service** (DeepL Pro,
-     Google Cloud Translation, or a managed Crowdin/Weblate
-     workflow) seeded from en, then a one-pass native review per
-     locale to catch domain-specific terminology drift (sysmanage,
-     "child host", "Pro+", etc.).  Estimated 2–3 weeks of
-     translator-budget work, not LLM work.
-
-  3. **Agent ``.po``** — autonomous LLM translation pass (sub-agent
-     B) re-filled the ~3,900 empty msgstrs across 14 locales with
-     format-spec safety (msgid printf specs preserved verbatim in
-     msgstr).  The validator's format-spec validator now lives in
-     ``_strip_fuzzy_block`` to prevent regression.  ``MISSING_BUDGET``
-     can be ratcheted down to ~50 per locale post-pass.
-
-  4. **Agent debug-marker noise (carryover)** — ~540 ``logger.debug
-     (_(...))`` / ``logger.info(_(...))`` callsites still wrap
-     internal breadcrumbs that don't need translation.  These
-     should be unwrapped from ``_()`` over time.  Not blocking —
-     the autonomous pass either translated or skipped them
-     correctly; future cleanup is opportunistic.
-
-  5. **Docs untagged HTML elements** — ~10,700 text nodes without
-     ``data-i18n="..."`` attributes across ~110 pages.  Top
-     offenders: ``monitoring.html`` (412), ``scanning.html`` (402),
-     ``package-uninstall-security.html`` (364), and 7 others above
-     200.  Tagging requires choosing meaningful key names per
-     element, extracting the en text, and seeding 13 locales —
-     mechanical-but-tedious.  Best done as part of (or before) the
-     translation-service ingestion in #2.
-
-  6. **Pro+ engine plan descriptions** — 360 hardcoded English
-     strings across 17 ``.pyx`` engines (virtualization,
-     container, repository_mirroring, observability, automation,
-     ...).  These flow ``engine → server → frontend`` as raw
-     ``description`` fields and render verbatim in the OSS UI, so
-     non-English users see English plan descriptions in command
-     logs.
-
-     **Pattern landed (Phase 11 B7) on ``airgap_collector_engine``:**
-     every emitted command now carries both the legacy English
-     ``description`` (back-compat) and a
-     ``{description_key, description_params}`` envelope.  The
-     frontend resolver does ``t(cmd.description_key, cmd.description_params)``
-     and falls back to ``cmd.description`` when the key isn't yet in
-     the locale catalog — which means engines can be migrated one
-     at a time without coordinating a flag-day cutover.
-
-     ``engine.`` is in ``DYNAMIC_KEY_PREFIXES`` so the validator
-     accepts any engine adopting the same ``engine.<engine_name>.cmd.<verb>``
-     namespace.  15 collector engine command-description keys are
-     seeded across all 14 locales as the reference implementation;
-     the remaining ~345 strings across 16 engines follow the same
-     pattern incrementally.
-
-**Acceptance criteria:**
-
-- [x] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
-      all 14 locales. *(autonomous pass 2026-05-08, sub-agent A)*
-- [x] Agent: empty msgstrs filled across all 14 locales with
-      format-spec safety.  ``_strip_fuzzy_block`` guard prevents
-      regression. *(autonomous pass, sub-agent B)*
-- [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
-      attribute (10,700+ elements to tag).
-- [ ] Docs: long-form-paragraph passthrough closed via translation
-      service (Crowdin/Weblate/DeepL/GCT pipeline).
-- [ ] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
-      triaged for debug-breadcrumb removal.
-- [~] Pro+ engines: plan descriptions converted to ``{key, params}``
-      envelope form; key catalog populated in OSS + Pro+ locales.
-      Phase 11 B7: pattern landed on ``airgap_collector_engine``
-      (15 keys in all 14 locales, 5 envelope tests pass).  Remaining
-      16 engines are an incremental migration — engines adopt the
-      envelope when next touched; OSS frontend already resolves keys
-      when present, falls back to legacy ``description`` when not.
-- [ ] Native-speaker QA pass on the autonomous LLM translations to
-      tighten domain-specific terminology (sysmanage / child host /
-      Pro+ / mirror / hypervisor lexicon).
-
-**Out of scope:** adding a 15th supported language.  The canonical
-14 (`ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW`)
-are locked.
-
-**Remaining effort:** ~45,000 strings concentrated in **docs
-long-form passthrough + untagged HTML elements** (items 2 + 5
-above).  With a translation service (DeepL Pro, Google Cloud
-Translation, Crowdin's API) seeded from en and then native-reviewed
-per locale, this is a 1–2 week project, not multi-month.
-Hand-translation by an LLM at this quality bar at this scale is
-impractical — the autonomous pass closed the active-UI gaps but
-deliberately stopped at the docs body paragraphs.
-
-**Tooling already in place (Phase 10.4):**
-- ``make i18n-validate`` in all four repos, wired into ``lint`` /
-  ``test`` so CI blocks new gaps.
-- ``make i18n-seed`` (OSS, docs) — populates missing keys with
-  ``[TODO] <english>`` placeholders.
-- ``make i18n-extract`` / ``--extract`` — emit current key inventory.
-- Agent: ``make i18n-extract`` / ``i18n-merge`` / ``i18n-compile``
-  pipeline using pybabel + msgmerge + msgfmt.
-- ``--strip-orphans`` (OSS, Pro+) — auto-prune locale-only keys.
-- ``--strip-fuzzy`` (agent) — auto-clear fuzzy flags on completed
-  translations.
-- All four repos: ``DYNAMIC_KEY_PREFIXES`` / locale-set / fuzzy /
-  passthrough / missing budgets locked-in to current measured state.
-
----
-
-### 11.8 Agent install via official upstream package channels
-
-**Problem.** The build/release workflow already publishes the
-``sysmanage-agent`` package to every major upstream channel:
-
-| Channel | Distro family | Status |
-|---|---|---|
-| Launchpad PPA (``ppa:bceverly/sysmanage-agent``) | Ubuntu, Debian | ✅ published; ✅ consumed by engine (Phase 10.4 close-out) |
-| Fedora Copr (``bceverly/sysmanage-agent``) | Fedora, RHEL, Rocky, Alma, CentOS Stream | ✅ published; ❌ not consumed by engine |
-| Open Build Service (``home:bceverly/sysmanage-agent``) | openSUSE Leap, openSUSE Tumbleweed, SLES | ✅ published; ❌ not consumed by engine |
-| Snap Store (``sysmanage-agent``, strict) | Any snapd-capable Linux | ✅ published; ❌ not consumed by engine |
-| Flatpak (``sysmanage.org/sysmanage.flatpakrepo``) | Any flatpak-capable Linux | ✅ published; ❌ not consumed by engine |
-| OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
-| **winget / Microsoft Store** | Windows | ❌ not published, not consumed |
-| **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ❌ not published, not consumed |
-| **Mac App Store** | macOS (sandboxed) | ❌ not published, not consumed |
-| FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
-| NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
-| AUR (``sysmanage-agent``) | Arch | ❌ not published, not consumed |
-
-**Why this matters.** When the engine spawns a child host (or an
-operator runs the agent installer manually), every install path that
-goes through "curl GitHub releases | dpkg/rpm -i" leaves the host's
-package manager unaware of the upstream package — so future
-``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
-``brew upgrade`` cycles never see new sysmanage-agent versions, and
-the in-app "Update Agent" button silently no-ops.  Channel-aware
-installs let the OS package manager track upgrades natively, which
-is also a hard requirement for Phase 11.1 air-gapped repository
-mirroring (a private PPA mirror can replace the upstream PPA URL;
-direct GitHub-release URLs cannot easily be mirrored).
-
-**Scope of work:**
-
-  1. **Add a per-distro install-source dispatch table** to the
-     virtualization_engine + container_engine:
-
-     ```python
-     _AGENT_INSTALL = {
-         "ubuntu": ["add-apt-repository -y ppa:bceverly/sysmanage-agent",
-                    "apt-get update",
-                    "apt-get install -y sysmanage-agent"],
-         "debian": [...same as ubuntu...],
-         "fedora": ["dnf copr enable -y bceverly/sysmanage-agent",
-                    "dnf install -y sysmanage-agent"],
-         "rhel":   [...same as fedora...],
-         "rocky":  [...same...],
-         "alma":   [...same...],
-         "opensuse-leap": ["zypper ar https://download.opensuse.org/repositories/home:/bceverly/openSUSE_Leap_$VERSION/home:bceverly.repo",
-                           "zypper --non-interactive --gpg-auto-import-keys refresh",
-                           "zypper --non-interactive install sysmanage-agent"],
-         "sles":   [...similar OBS path...],
-         "alpine": [...still direct download — no upstream apk repo published...],
-         "freebsd": [...still direct download until pkg / ports submission...],
-         "openbsd": [...still direct download until ports submission...],
-         "netbsd":  [...still direct download...],
-         "windows": ["winget install --id sysmanage.sysmanage-agent --silent"],
-         "macos":   ["brew install bceverly/tap/sysmanage-agent"],
-         "arch":    ["yay -S --noconfirm sysmanage-agent"],
-     }
-     ```
-
-  2. **Publish to remaining channels** that aren't yet automated:
-     * **winget** — needs a ``yaml`` manifest in
-       ``microsoft/winget-pkgs`` (PR per release) plus a Microsoft
-       Store submission for the "official" channel.
-     * **Homebrew tap** — create ``bceverly/homebrew-tap`` repo,
-       auto-update ``Formula/sysmanage-agent.rb`` per release tag.
-     * **Mac App Store** — sandboxing is incompatible with the
-       agent's privilege model (needs root for package management
-       /service control), so this is **out of scope** unless the
-       agent is split into a sandboxed UI shell + privileged
-       helper.  Likely permanent ❌.
-     * **Microsoft Store** — same sandboxing concern.  MSIX with
-       fully-trusted package identity might be feasible; defer
-       investigation.
-     * **AUR** — community-maintained typically.  Either submit
-       ourselves or accept community packaging.
-     * **FreeBSD ports / OpenBSD ports / NetBSD pkgsrc** — formal
-       upstream submission with maintainer signoff, multi-week
-       review per port tree.
-
-  3. **Wire the dispatch table into engine cloud-init / autoinstall /
-     firstboot generators** for every supported child-host distro.
-     Currently only Ubuntu/Debian (Phase 10.4 close-out) and the
-     legacy direct-download path for the rest.
-
-  4. **Audit container_engine.pyx** for the LXD/WSL paths — same
-     install-channel dispatch needed for those agent installs into
-     containers.
-
-**Acceptance criteria:**
-
-- [ ] Every supported child-host distro family installs sysmanage-
-      agent through its OS-native package manager, not via a
-      hard-coded GitHub-releases curl chain.
-- [ ] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
-      ``brew upgrade`` natively pick up new agent releases without
-      operator action.
-- [ ] In-app "Update Agent" button works on every distro family
-      (currently silently no-ops on direct-.deb installs).
-- [ ] winget + Homebrew tap publishing automated in build-and-
-      release.yml.
-- [ ] Air-gapped Phase 11.1 can substitute private mirrors for any
-      of the upstream channels (per-channel mirror URL config in
-      agent registration).
-
-**Scope note.** This is essentially "Phase 10.4 close-out went
-deep on Ubuntu/Debian; finish the matrix for the other 8+ supported
-distro/OS combinations."  Estimated 1-2 weeks of focused work,
-mostly per-channel publish-pipeline plumbing rather than novel
-engineering.  Several entries (Mac App Store, Microsoft Store) may
-remain permanently ❌ due to sandboxing incompatibilities.
 
 ---
 
@@ -2884,26 +2632,91 @@ rather than blocking.
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
 
-### 12.X Docs translation pipeline (carry-over from Phase 11.7)
+#### 12.8 i18n/l10n debt repayment
 
-Phase 11.7 closed the OSS UI + agent translation gaps with an
-autonomous LLM pass.  The docs side (`sysmanage-docs/`) got the
-structural side done — every text-bearing HTML tag carries a
-``data-i18n="..."`` attribute and every key exists in all 14 locale
-JSONs — but the non-English locale values are ``[TODO]``-prefixed
-English placeholders.  Real translations were explicitly deferred
-on the grounds that:
+Translation debt across the four repos (OSS frontend, agent ``.po``,
+docs HTML, Pro+ engine plan descriptions).  All four repos have
+``make i18n-validate`` wired into ``lint`` / ``test`` so the debt
+cannot grow; this phase pays the residual down to zero.
 
-  1. The docs surface is ~10,700 strings × 13 non-English locales =
-     ~140k translation calls; an LLM-only pass burns 20–40M tokens
-     of weekly Max-plan quota in one sitting.
-  2. Even the autonomous-LLM quality bar isn't appropriate for
-     long-form technical docs without a native-speaker review pass.
-  3. The professional-translation route (DeepL Pro / Crowdin /
-     Google Cloud Translation + native-speaker reviewers) is an
-     account-and-budget decision separate from engineering work.
+**Current state (re-measured 2026-05-08 after autonomous translation pass):**
 
-**Phase 12 scope:**
+  1. **OSS frontend** — autonomous LLM translation pass closed the
+     ``[TODO]``/`[MISSING:]` placeholder gap and replaced the worst
+     of the English-passthrough leaves.  Sub-agent A translated
+     ~5,400 strings across 13 non-en locales using a curated
+     reference table for high-frequency UI terms
+     (Save/Cancel/Delete/Edit/Status/etc.) plus locale-aware
+     translation for everything else.  Quality is "ship-able" — not
+     bilingual-engineer perfect, but no longer ``[MISSING:]`` and
+     not English-passthrough either.  Validator now passes with
+     real translations across all 14 locales.  Native-speaker
+     review pass remains valuable but no longer urgent.
+
+  2. **Docs long-form English-passthrough** — ~34,000 strings
+     across 13 non-en locales (measured 2026-05-08).  This is the
+     genuinely-large remaining gap.  Long-form HTML body paragraphs
+     (400+ char descriptions) make autonomous LLM translation
+     impractical at quality — context windows fragment the
+     paragraphs and adjacent paragraphs lose cross-reference
+     coherence.  **Recommend a translation service** (DeepL Pro,
+     Google Cloud Translation, or a managed Crowdin/Weblate
+     workflow) seeded from en, then a one-pass native review per
+     locale to catch domain-specific terminology drift (sysmanage,
+     "child host", "Pro+", etc.).  Estimated 2–3 weeks of
+     translator-budget work, not LLM work.
+
+  3. **Agent ``.po``** — autonomous LLM translation pass (sub-agent
+     B) re-filled the ~3,900 empty msgstrs across 14 locales with
+     format-spec safety (msgid printf specs preserved verbatim in
+     msgstr).  The validator's format-spec validator now lives in
+     ``_strip_fuzzy_block`` to prevent regression.  ``MISSING_BUDGET``
+     can be ratcheted down to ~50 per locale post-pass.
+
+  4. **Agent debug-marker noise** — ~540 ``logger.debug(_(...))`` /
+     ``logger.info(_(...))`` callsites still wrap internal
+     breadcrumbs that don't need translation.  These should be
+     unwrapped from ``_()`` over time.  Not blocking — the
+     autonomous pass either translated or skipped them correctly;
+     future cleanup is opportunistic.
+
+  5. **Docs untagged HTML elements** — ~10,700 text nodes without
+     ``data-i18n="..."`` attributes across ~110 pages.  Top
+     offenders: ``monitoring.html`` (412), ``scanning.html`` (402),
+     ``package-uninstall-security.html`` (364), and 7 others above
+     200.  Tagging requires choosing meaningful key names per
+     element, extracting the en text, and seeding 13 locales —
+     mechanical-but-tedious.  Best done as part of (or before) the
+     translation-service ingestion in #2.
+
+  6. **Pro+ engine plan descriptions** — 360 hardcoded English
+     strings across 17 ``.pyx`` engines (virtualization,
+     container, repository_mirroring, observability, automation,
+     ...).  These flow ``engine → server → frontend`` as raw
+     ``description`` fields and render verbatim in the OSS UI, so
+     non-English users see English plan descriptions in command
+     logs.
+
+     **Pattern landed on ``airgap_collector_engine``:** every
+     emitted command now carries both the legacy English
+     ``description`` (back-compat) and a
+     ``{description_key, description_params}`` envelope.  The
+     frontend resolver does
+     ``t(cmd.description_key, cmd.description_params)`` and falls
+     back to ``cmd.description`` when the key isn't yet in the
+     locale catalog — which means engines can be migrated one at a
+     time without coordinating a flag-day cutover.
+
+     ``engine.`` is in ``DYNAMIC_KEY_PREFIXES`` so the validator
+     accepts any engine adopting the same
+     ``engine.<engine_name>.cmd.<verb>`` namespace.  15 collector
+     engine command-description keys are seeded across all 14
+     locales as the reference implementation; the remaining ~345
+     strings across 16 engines follow the same pattern
+     incrementally.
+
+**Translation-service pipeline (the long-form-paragraph close-out
+in item 2 above):**
 
 - [ ] Pick a translation-service partner.  Options:
       * **DeepL Pro API** — best machine-translation quality on
@@ -2934,15 +2747,187 @@ on the grounds that:
 - [ ] Footer disclosure: "Machine-translated, native-reviewed for
       <list>.  Contributions welcome — see ``CONTRIBUTING.md``."
 
-**Not in Phase 12 scope:** adding a 15th supported language.  The
-canonical 14 (``ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru,
-zh_CN, zh_TW``) remain locked until / unless a contributor steps up
-to maintain a new one end-to-end.
+**Acceptance criteria:**
 
-**Estimated effort:** 1–2 days engineering once the service is
-chosen + funded.  Ongoing cost is per-release character throughput
-to the translation service (cents-to-low-dollars per release at
-DeepL Pro's pricing for an OSS-scale docs corpus).
+- [x] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
+      all 14 locales. *(autonomous pass 2026-05-08, sub-agent A)*
+- [x] Agent: empty msgstrs filled across all 14 locales with
+      format-spec safety.  ``_strip_fuzzy_block`` guard prevents
+      regression. *(autonomous pass, sub-agent B)*
+- [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
+      attribute (10,700+ elements to tag).
+- [ ] Docs: long-form-paragraph passthrough closed via translation
+      service (Crowdin/Weblate/DeepL/GCT pipeline).
+- [ ] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
+      triaged for debug-breadcrumb removal.
+- [~] Pro+ engines: plan descriptions converted to ``{key, params}``
+      envelope form; key catalog populated in OSS + Pro+ locales.
+      Pattern landed on ``airgap_collector_engine`` (15 keys in
+      all 14 locales, 5 envelope tests pass).  Remaining 16
+      engines are an incremental migration — engines adopt the
+      envelope when next touched; OSS frontend already resolves
+      keys when present, falls back to legacy ``description``
+      when not.
+- [ ] Native-speaker QA pass on the autonomous LLM translations to
+      tighten domain-specific terminology (sysmanage / child host /
+      Pro+ / mirror / hypervisor lexicon).
+
+**Out of scope:** adding a 15th supported language.  The canonical
+14 (`ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW`)
+are locked.
+
+**Remaining effort:** ~45,000 strings concentrated in **docs
+long-form passthrough + untagged HTML elements** (items 2 + 5
+above).  With a translation service (DeepL Pro, Google Cloud
+Translation, Crowdin's API) seeded from en and then native-reviewed
+per locale, this is a 1–2 week project, not multi-month.
+Hand-translation by an LLM at this quality bar at this scale is
+impractical — the autonomous pass closed the active-UI gaps but
+deliberately stopped at the docs body paragraphs.
+
+**Tooling already in place:**
+- ``make i18n-validate`` in all four repos, wired into ``lint`` /
+  ``test`` so CI blocks new gaps.
+- ``make i18n-seed`` (OSS, docs) — populates missing keys with
+  ``[TODO] <english>`` placeholders.
+- ``make i18n-extract`` / ``--extract`` — emit current key inventory.
+- Agent: ``make i18n-extract`` / ``i18n-merge`` / ``i18n-compile``
+  pipeline using pybabel + msgmerge + msgfmt.
+- ``--strip-orphans`` (OSS, Pro+) — auto-prune locale-only keys.
+- ``--strip-fuzzy`` (agent) — auto-clear fuzzy flags on completed
+  translations.
+- All four repos: ``DYNAMIC_KEY_PREFIXES`` / locale-set / fuzzy /
+  passthrough / missing budgets locked-in to current measured state.
+
+#### 12.9 Agent install via official upstream package channels
+
+**Problem.** The build/release workflow already publishes the
+``sysmanage-agent`` package to every major upstream channel:
+
+| Channel | Distro family | Status |
+|---|---|---|
+| Launchpad PPA (``ppa:bceverly/sysmanage-agent``) | Ubuntu, Debian | ✅ published; ✅ consumed by engine |
+| Fedora Copr (``bceverly/sysmanage-agent``) | Fedora, RHEL, Rocky, Alma, CentOS Stream | ✅ published; ✅ consumed by engine |
+| Open Build Service (``home:bceverly/sysmanage-agent``) | openSUSE Leap, openSUSE Tumbleweed, SLES | ✅ published; ❌ not consumed by engine |
+| Snap Store (``sysmanage-agent``, strict) | Any snapd-capable Linux | ✅ published; ❌ not consumed by engine |
+| Flatpak (``sysmanage.org/sysmanage.flatpakrepo``) | Any flatpak-capable Linux | ✅ published; ❌ not consumed by engine |
+| OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
+| **winget / Microsoft Store** | Windows | ✅ submitted 2026-05-12; awaiting microsoft/winget-pkgs PR merge |
+| **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
+| **Mac App Store** | macOS (sandboxed) | ❌ not published, not consumed |
+| FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
+| NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
+| AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
+
+**Why this matters.** When the engine spawns a child host (or an
+operator runs the agent installer manually), every install path that
+goes through "curl GitHub releases | dpkg/rpm -i" leaves the host's
+package manager unaware of the upstream package — so future
+``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+``brew upgrade`` cycles never see new sysmanage-agent versions, and
+the in-app "Update Agent" button silently no-ops.  Channel-aware
+installs let the OS package manager track upgrades natively, which
+is also a hard requirement for Phase 11.1 air-gapped repository
+mirroring (a private PPA mirror can replace the upstream PPA URL;
+direct GitHub-release URLs cannot easily be mirrored).
+
+**Scope of work:**
+
+  1. **Add a per-distro install-source dispatch table** to the
+     virtualization_engine + container_engine:
+
+     ```python
+     _AGENT_INSTALL = {
+         "ubuntu": ["add-apt-repository -y ppa:bceverly/sysmanage-agent",
+                    "apt-get update",
+                    "apt-get install -y sysmanage-agent"],
+         "debian": [...same as ubuntu...],
+         "fedora": ["dnf copr enable -y bceverly/sysmanage-agent",
+                    "dnf install -y sysmanage-agent"],
+         "rhel":   [...same as fedora...],
+         "rocky":  [...same...],
+         "alma":   [...same...],
+         "opensuse-leap": ["zypper ar https://download.opensuse.org/repositories/home:/bceverly/openSUSE_Leap_$VERSION/home:bceverly.repo",
+                           "zypper --non-interactive --gpg-auto-import-keys refresh",
+                           "zypper --non-interactive install sysmanage-agent"],
+         "sles":   [...similar OBS path...],
+         "alpine": [...still direct download — no upstream apk repo published...],
+         "freebsd": [...still direct download until pkg / ports submission...],
+         "openbsd": [...still direct download until ports submission...],
+         "netbsd":  [...still direct download...],
+         "windows": ["winget install --id sysmanage.sysmanage-agent --silent"],
+         "macos":   ["brew install bceverly/tap/sysmanage-agent"],
+         "arch":    ["yay -S --noconfirm sysmanage-agent"],
+     }
+     ```
+
+  2. **Publish to remaining channels** that aren't yet automated:
+     * **winget** — first-time ``komac new`` submission landed
+       2026-05-12 (manual TTY step); future releases auto-update
+       via ``komac update`` in the build-and-release workflow.
+       Microsoft Store submission for the "official" channel
+       remains deferred — see sandboxing note below.
+     * **Homebrew tap** — ``bceverly/homebrew-tap`` repo exists and
+       auto-bumps ``Formula/sysmanage-agent.rb`` per release tag.
+     * **Mac App Store** — sandboxing is incompatible with the
+       agent's privilege model (needs root for package management
+       /service control), so this is **out of scope** unless the
+       agent is split into a sandboxed UI shell + privileged
+       helper.  Likely permanent ❌.
+     * **Microsoft Store** — same sandboxing concern.  MSIX with
+       fully-trusted package identity might be feasible; defer
+       investigation.
+     * **AUR** — auto-published on every release tag via the
+       build-and-release workflow.
+     * **FreeBSD ports / OpenBSD ports / NetBSD pkgsrc** — formal
+       upstream submission with maintainer signoff, multi-week
+       review per port tree.
+
+  3. **Wire the dispatch table into engine cloud-init / autoinstall /
+     firstboot generators** for every supported child-host distro.
+     ``virtualization_engine._AGENT_INSTALL`` covers KVM/bhyve/VMM
+     today; ``container_engine`` covers the LXD/WSL paths.  The
+     OSS plan-build path (``backend/api/child_host_virtualization.
+     py:_parse_agent_install_commands``) consults the engine FIRST
+     and only falls back to DB-stored ``agent_install_commands``
+     when the engine isn't loaded.
+
+  4. **Audit container_engine.pyx** for the LXD/WSL paths — same
+     install-channel dispatch needed for those agent installs into
+     containers.
+
+**Acceptance criteria:**
+
+- [ ] Every supported child-host distro family installs sysmanage-
+      agent through its OS-native package manager, not via a
+      hard-coded GitHub-releases curl chain.
+- [ ] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+      ``brew upgrade`` natively pick up new agent releases without
+      operator action.
+- [ ] In-app "Update Agent" button works on every distro family
+      (currently silently no-ops on direct-.deb installs).
+- [x] winget + Homebrew tap publishing automated in build-and-
+      release.yml.  *(winget: first-time ``komac new`` submitted
+      2026-05-12 via /tmp/komac.sh; future releases auto-update
+      through ``komac update`` step; Homebrew tap auto-bumps
+      ``Formula/sysmanage-agent.rb`` on every release tag)*
+- [ ] Air-gapped Phase 11.1 can substitute private mirrors for any
+      of the upstream channels (per-channel mirror URL config in
+      agent registration).
+- [ ] Agent systemd unit hardening compatible with the agent's
+      sudo-NOPASSWD privilege model — ``NoNewPrivileges=true`` was
+      removed from the Ubuntu/CentOS/openSUSE units after a Phase
+      11 deployment validation surfaced that the flag blocks every
+      privileged operation the agent performs.  Hardening now
+      derives from the sudoers allowlist scope, not from
+      kernel-level no-new-privs.
+
+**Scope note.** This is essentially "early Phase 11 close-out went
+deep on Ubuntu/Debian; finish the matrix for the other 8+ supported
+distro/OS combinations."  Estimated 1-2 weeks of focused work,
+mostly per-channel publish-pipeline plumbing rather than novel
+engineering.  Several entries (Mac App Store, Microsoft Store) may
+remain permanently ❌ due to sandboxing incompatibilities.
 
 ---
 

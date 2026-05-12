@@ -123,6 +123,7 @@ class AirgapCollectionRun(Base):
             ),
             "error_message": self.error_message,
             "cron_schedule": self.cron_schedule,
+            "parent_run_id": (str(self.parent_run_id) if self.parent_run_id else None),
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 

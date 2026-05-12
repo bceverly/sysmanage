@@ -615,6 +615,31 @@ async def register_host(registration_data: HostRegistration):
         if existing_host:
             return _refresh_existing_host(session, existing_host, registration_data)
 
+        # Race guard: if this fqdn+ipv4 was just cascade-deleted by a
+        # child-host delete, the doomed VM's agent is racing virsh
+        # destroy with a final /host/register.  Absorb it without
+        # recreating a ghost Host row — the agent is about to die so
+        # the response doesn't matter.  See
+        # backend.api.recent_host_deletions for the full rationale.
+        from backend.api.recent_host_deletions import (
+            is_recent_child_host_deletion,
+        )
+
+        if is_recent_child_host_deletion(
+            registration_data.fqdn, registration_data.ipv4
+        ):
+            logger.info(
+                "Absorbed last-gasp registration for recently-deleted "
+                "child host fqdn=%s ipv4=%s",
+                registration_data.fqdn,
+                registration_data.ipv4,
+            )
+            return {
+                "result": True,
+                "message": _("Registration absorbed: host was recently deleted"),
+                "absorbed": True,
+            }
+
         # Phase 8.1: validate optional registration_key BEFORE creating
         # the host row, so a bad key never even creates a pending host.
         validated_key = _validate_registration_key(

@@ -390,6 +390,17 @@ async def delete_child_host(
         if linked_host_id:
             linked_host = session.query(Host).filter(Host.id == linked_host_id).first()
             if linked_host:
+                # Record a tombstone so any last-gasp /host/register
+                # from the soon-to-be-destroyed VM (the agent inside
+                # may still be alive for seconds after this cascade)
+                # is absorbed instead of recreating a ghost row.  See
+                # backend.api.recent_host_deletions for the race
+                # this guards against.
+                from backend.api.recent_host_deletions import (
+                    record_recent_child_host_deletion,
+                )
+
+                record_recent_child_host_deletion(linked_host.fqdn, linked_host.ipv4)
                 session.delete(linked_host)
 
         audit_log(

@@ -239,6 +239,36 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 fleet_e,
                             )
 
+                # Start air-gap collection schedule tick service if the
+                # collector engine is loaded.  The /tick endpoint and
+                # DB model are always available (OSS-side), but the
+                # background tick driver only runs when the engine
+                # whose plans the tick produces is actually present —
+                # otherwise scheduled runs would queue forever with no
+                # consumer.
+                collector_engine_for_tick = module_loader.get_module(
+                    "airgap_collector_engine"
+                )
+                if collector_engine_for_tick is not None:
+                    logger.info("=== AIRGAP SCHEDULE TICK STARTUP ===")
+                    try:
+                        from backend.services.airgap_schedule_tick import (
+                            airgap_schedule_tick_service,
+                        )
+
+                        airgap_tick_task = asyncio.create_task(
+                            airgap_schedule_tick_service()
+                        )
+                        logger.info(
+                            "Air-gap schedule tick task started: %s",
+                            airgap_tick_task,
+                        )
+                    except Exception as tick_e:
+                        logger.warning(
+                            "Failed to start air-gap schedule tick task: %s",
+                            tick_e,
+                        )
+
                 # Start vuln_engine CVE refresh scheduler and staleness check
                 vuln_engine = module_loader.get_module("vuln_engine")
                 if vuln_engine:

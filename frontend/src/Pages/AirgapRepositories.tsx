@@ -8,13 +8,29 @@
  * Only renders meaningful content on ``role: repository`` deployments;
  * on standard / collector roles the page shows a "not applicable" notice.
  *
- * Backend endpoint contract (expected):
+ * Backend endpoint contract:
  *   GET /api/v1/airgap/repository/repositories
- *     → [{
- *         id, distro, version, repo_url,
- *         last_ingest_at, package_count,
- *         signer_fingerprint
- *       }, ...]
+ *     → {
+ *         repositories: [{
+ *           id, distro, version, repo_url,
+ *           last_ingest_at, package_count,
+ *           days_since_ingest, freshness_label,
+ *           signer_fingerprint
+ *         }, ...],
+ *         aggregate: {
+ *           total_repositories, total_packages,
+ *           oldest_days_since_ingest, stale_repository_count,
+ *           stale_threshold_days
+ *         }
+ *       }
+ *
+ * The backend's aggregate is the source of truth (it knows the
+ * configured stale threshold + does the signer_fingerprint join).
+ * The frontend computes a local aggregate as a fallback only when
+ * the backend's aggregate field is missing (older deployments that
+ * returned a flat list).  Backwards-compat handling:
+ *   - Array response → wrap as { repositories: [...], aggregate: null }
+ *   - Object response → use as-is.
  *
  * When the backend hasn't shipped the list endpoint yet, the page
  * renders an explanatory empty state rather than a hard error.
@@ -50,7 +66,22 @@ interface RepositoryRow {
   repo_url?: string | null;
   last_ingest_at: string | null;
   package_count: number | null;
+  days_since_ingest?: number | null;
+  freshness_label?: string | null;
   signer_fingerprint?: string | null;
+}
+
+interface AggregateBlock {
+  total_repositories: number;
+  total_packages: number;
+  oldest_days_since_ingest: number | null;
+  stale_repository_count: number;
+  stale_threshold_days: number;
+}
+
+interface RepositoriesResponse {
+  repositories: RepositoryRow[];
+  aggregate: AggregateBlock | null;
 }
 
 interface ServerInfo {
@@ -69,6 +100,7 @@ const AirgapRepositories: React.FC = () => {
   const [serverRole, setServerRole] = useState<string>('standard');
   const [roleLoaded, setRoleLoaded] = useState(false);
   const [repos, setRepos] = useState<RepositoryRow[] | null>(null);
+  const [serverAggregate, setServerAggregate] = useState<AggregateBlock | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [endpointMissing, setEndpointMissing] = useState(false);
@@ -112,9 +144,19 @@ const AirgapRepositories: React.FC = () => {
         }
         return r.json();
       })
-      .then((body: RepositoryRow[] | null) => {
+      .then((body: RepositoriesResponse | RepositoryRow[] | null) => {
         if (cancelled) return;
-        setRepos(body || []);
+        // Tolerate the legacy flat-array shape from older deployments.
+        if (Array.isArray(body)) {
+          setRepos(body);
+          setServerAggregate(null);
+        } else if (body && typeof body === 'object') {
+          setRepos(body.repositories || []);
+          setServerAggregate(body.aggregate || null);
+        } else {
+          setRepos([]);
+          setServerAggregate(null);
+        }
         setLoading(false);
       })
       .catch((err: Error) => {
@@ -128,17 +170,29 @@ const AirgapRepositories: React.FC = () => {
   }, [serverRole, roleLoaded]);
 
   const aggregate = useMemo(() => {
+    // Prefer the backend-supplied aggregate when available — it
+    // knows the configured stale threshold + already did the
+    // signer_fingerprint join.  Local computation is only the
+    // fallback for legacy deployments returning a flat list.
+    if (serverAggregate) {
+      return {
+        totalRepos: serverAggregate.total_repositories,
+        totalPackages: serverAggregate.total_packages,
+        oldestFreshnessDays: serverAggregate.oldest_days_since_ingest,
+        staleCount: serverAggregate.stale_repository_count,
+        staleThresholdDays: serverAggregate.stale_threshold_days,
+      };
+    }
     if (!repos || repos.length === 0) {
       return {
         totalRepos: 0,
         totalPackages: 0,
-        oldestFreshnessIso: null as string | null,
         oldestFreshnessDays: null as number | null,
         staleCount: 0,
+        staleThresholdDays: DEFAULT_STALE_DAYS,
       };
     }
     let totalPackages = 0;
-    let oldestIso: string | null = null;
     let oldestDays: number | null = null;
     let staleCount = 0;
     for (const repo of repos) {
@@ -150,7 +204,6 @@ const AirgapRepositories: React.FC = () => {
       } else {
         if (oldestDays === null || days > oldestDays) {
           oldestDays = days;
-          oldestIso = repo.last_ingest_at;
         }
         if (days > DEFAULT_STALE_DAYS) {
           staleCount += 1;
@@ -160,11 +213,11 @@ const AirgapRepositories: React.FC = () => {
     return {
       totalRepos: repos.length,
       totalPackages,
-      oldestFreshnessIso: oldestIso,
       oldestFreshnessDays: oldestDays,
       staleCount,
+      staleThresholdDays: DEFAULT_STALE_DAYS,
     };
-  }, [repos]);
+  }, [repos, serverAggregate]);
 
   if (!roleLoaded || loading) {
     return (
@@ -250,7 +303,7 @@ const AirgapRepositories: React.FC = () => {
             <Box>
               <Typography variant="caption" color="text.secondary">
                 {t('airgap.repositories.aggregate.staleRepos', 'Stale repos (> {{days}}d)', {
-                  days: DEFAULT_STALE_DAYS,
+                  days: aggregate.staleThresholdDays,
                 })}
               </Typography>
               <Typography
@@ -299,8 +352,13 @@ const AirgapRepositories: React.FC = () => {
               </TableRow>
             )}
             {(repos || []).map((repo) => {
-              const days = computeDaysAgo(repo.last_ingest_at);
-              const isStale = days === null || days > DEFAULT_STALE_DAYS;
+              // Prefer the backend-computed days; fall back to local
+              // calc only when the field is missing.  ``??`` handles
+              // both undefined and null in one operator.
+              const days =
+                repo.days_since_ingest ?? computeDaysAgo(repo.last_ingest_at);
+              const staleThreshold = aggregate.staleThresholdDays;
+              const isStale = days === null || days > staleThreshold;
               return (
                 <TableRow key={repo.id}>
                   <TableCell>{repo.distro}</TableCell>
