@@ -192,7 +192,7 @@ def upgrade() -> None:
         bind.execute(
             text(
                 "UPDATE child_host_distribution "
-                "SET agent_install_commands = :cmds, updated_at = NOW() "
+                "SET agent_install_commands = :cmds, updated_at = CURRENT_TIMESTAMP "
                 "WHERE child_type = :ct AND distribution_name = :dn "
                 "AND distribution_version = :dv"
             ),
@@ -203,7 +203,7 @@ def upgrade() -> None:
         bind.execute(
             text(
                 "UPDATE child_host_distribution "
-                "SET agent_install_commands = :cmds, updated_at = NOW() "
+                "SET agent_install_commands = :cmds, updated_at = CURRENT_TIMESTAMP "
                 "WHERE child_type = :ct AND distribution_name = :dn "
                 "AND distribution_version = :dv"
             ),
@@ -218,7 +218,7 @@ def upgrade() -> None:
         bind.execute(
             text(
                 "UPDATE child_host_distribution "
-                "SET agent_install_commands = :cmds, updated_at = NOW() "
+                "SET agent_install_commands = :cmds, updated_at = CURRENT_TIMESTAMP "
                 "WHERE child_type = :ct AND distribution_name = :dn "
                 "AND distribution_version = :dv"
             ),
@@ -250,7 +250,7 @@ def downgrade() -> None:
         bind.execute(
             text(
                 "UPDATE child_host_distribution "
-                "SET agent_install_commands = NULL, updated_at = NOW() "
+                "SET agent_install_commands = NULL, updated_at = CURRENT_TIMESTAMP "
                 "WHERE child_type = :ct AND distribution_name = :dn "
                 "AND distribution_version = :dv"
             ),
