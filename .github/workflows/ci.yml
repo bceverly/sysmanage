@@ -166,13 +166,25 @@ jobs:
           backend-color.txt
 
     - name: Checkout repository for backend badge update
-      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+      # Scope badge work to a single matrix cell (Python 3.12) so the
+      # five Python-version cells don't race on the same PR branch
+      # ``update-backend-coverage-badge-${{ github.run_number }}``.
+      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && matrix.python-version == '3.12'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
+        # Explicitly check out main rather than the trigger ref —
+        # this step only runs on tag pushes (per the surrounding
+        # ``if:`` guard), where the default checkout would land us
+        # on the tag's commit in detached-HEAD state.  peter-evans/
+        # create-pull-request needs a symbolic HEAD ref to derive
+        # the PR base from; with detached HEAD it errors out with
+        # "When the repository is checked out on a commit instead
+        # of a branch, the 'base' input must be supplied."
+        ref: main
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update backend coverage badge
-      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && matrix.python-version == '3.12'
       run: |
         # Update backend coverage badge
         sed -i "s/backend%20test%20coverage-[0-9]*%25-[a-z]*/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}/g" README.md
@@ -180,7 +192,7 @@ jobs:
         sed -i "s/backend%20test%20coverage-%25-\.svg/backend%20test%20coverage-${{ steps.coverage.outputs.percentage }}%25-${{ steps.coverage.outputs.color }}.svg/g" README.md
 
     - name: Create PR for backend coverage badge
-      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && matrix.python-version == '3.12'
       id: backend-pr
       uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
       with:
@@ -198,7 +210,7 @@ jobs:
         delete-branch: true
 
     - name: Enable auto-merge for backend coverage PR
-      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && steps.backend-pr.outputs.pull-request-number
+      if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push' && matrix.python-version == '3.12' && steps.backend-pr.outputs.pull-request-number
       run: |
         gh pr merge ${{ steps.backend-pr.outputs.pull-request-number }} --auto --squash
       env:
@@ -382,6 +394,15 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
+        # Explicitly check out main rather than the trigger ref —
+        # this step only runs on tag pushes (per the surrounding
+        # ``if:`` guard), where the default checkout would land us
+        # on the tag's commit in detached-HEAD state.  peter-evans/
+        # create-pull-request needs a symbolic HEAD ref to derive
+        # the PR base from; with detached HEAD it errors out with
+        # "When the repository is checked out on a commit instead
+        # of a branch, the 'base' input must be supplied."
+        ref: main
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update frontend coverage badge
@@ -826,6 +847,15 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
+        # Explicitly check out main rather than the trigger ref —
+        # this step only runs on tag pushes (per the surrounding
+        # ``if:`` guard), where the default checkout would land us
+        # on the tag's commit in detached-HEAD state.  peter-evans/
+        # create-pull-request needs a symbolic HEAD ref to derive
+        # the PR base from; with detached HEAD it errors out with
+        # "When the repository is checked out on a commit instead
+        # of a branch, the 'base' input must be supplied."
+        ref: main
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update UI tests badge
@@ -1190,6 +1220,15 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
+        # Explicitly check out main rather than the trigger ref —
+        # this step only runs on tag pushes (per the surrounding
+        # ``if:`` guard), where the default checkout would land us
+        # on the tag's commit in detached-HEAD state.  peter-evans/
+        # create-pull-request needs a symbolic HEAD ref to derive
+        # the PR base from; with detached HEAD it errors out with
+        # "When the repository is checked out on a commit instead
+        # of a branch, the 'base' input must be supplied."
+        ref: main
         token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
     - name: Update performance badges
