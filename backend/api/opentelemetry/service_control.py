@@ -17,6 +17,8 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.observability_shim import try_engine_otel_service_control
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
@@ -91,28 +93,53 @@ async def start_opentelemetry(
 
         validate_host_approval_status(host)
 
-        # Queue the start service message
-        command_message = create_command_message(
-            command_type="generic_command",
-            parameters={
-                "command_type": "start_opentelemetry_service",
-                "parameters": {},
-            },
-        )
+        # Engine-first dispatch (Phase 10.2 step 7 close-out, item A):
+        # try the engine path before queuing the legacy WS command.
+        # ``try_engine_otel_service_control`` returns the queued
+        # message_id on success or ``None`` if the engine isn't loaded
+        # / the platform isn't detectable / build fails — in which
+        # case we fall through to the legacy ``start_opentelemetry_service``
+        # WS command path below.
+        engine_msg_id = try_engine_otel_service_control(host, "start", db)
+        if engine_msg_id is None:
+            command_message = create_command_message(
+                command_type="generic_command",
+                parameters={
+                    "command_type": "start_opentelemetry_service",
+                    "parameters": {},
+                },
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
+            dispatch_path = "legacy_ws_command"
+        else:
+            dispatch_path = "engine_plan"
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested OpenTelemetry start for host {host.fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": dispatch_path, "service_action": "start"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry start for host %s (FQDN: %s)",
+            "Queued OpenTelemetry start for host %s (FQDN: %s) via %s",
             host_id,
             host.fqdn,
+            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(
@@ -187,28 +214,47 @@ async def stop_opentelemetry(
 
         validate_host_approval_status(host)
 
-        # Queue the stop service message
-        command_message = create_command_message(
-            command_type="generic_command",
-            parameters={
-                "command_type": "stop_opentelemetry_service",
-                "parameters": {},
-            },
-        )
+        # Engine-first dispatch — see start endpoint above for rationale.
+        engine_msg_id = try_engine_otel_service_control(host, "stop", db)
+        if engine_msg_id is None:
+            command_message = create_command_message(
+                command_type="generic_command",
+                parameters={
+                    "command_type": "stop_opentelemetry_service",
+                    "parameters": {},
+                },
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
+            dispatch_path = "legacy_ws_command"
+        else:
+            dispatch_path = "engine_plan"
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested OpenTelemetry stop for host {host.fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": dispatch_path, "service_action": "stop"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry stop for host %s (FQDN: %s)",
+            "Queued OpenTelemetry stop for host %s (FQDN: %s) via %s",
             host_id,
             host.fqdn,
+            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(
@@ -285,28 +331,47 @@ async def restart_opentelemetry(
 
         validate_host_approval_status(host)
 
-        # Queue the restart service message
-        command_message = create_command_message(
-            command_type="generic_command",
-            parameters={
-                "command_type": "restart_opentelemetry_service",
-                "parameters": {},
-            },
-        )
+        # Engine-first dispatch — see start endpoint above for rationale.
+        engine_msg_id = try_engine_otel_service_control(host, "restart", db)
+        if engine_msg_id is None:
+            command_message = create_command_message(
+                command_type="generic_command",
+                parameters={
+                    "command_type": "restart_opentelemetry_service",
+                    "parameters": {},
+                },
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
+            dispatch_path = "legacy_ws_command"
+        else:
+            dispatch_path = "engine_plan"
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host.fqdn,
+            description=f"Requested OpenTelemetry restart for host {host.fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": dispatch_path, "service_action": "restart"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry restart for host %s (FQDN: %s)",
+            "Queued OpenTelemetry restart for host %s (FQDN: %s) via %s",
             host_id,
             host.fqdn,
+            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(

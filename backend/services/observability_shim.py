@@ -57,10 +57,26 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
     be determined — caller falls back to the legacy WS command.
 
     Linux distinction (apt vs dnf) samples the host's recorded
-    installed packages.  If the host has no software inventory yet
-    (e.g. fresh registration before the first collection cycle), we
-    return ``None`` so the legacy path runs and the agent picks the
-    right package manager at runtime via its own detection.
+    installed packages.  Behaviour when the host has no software
+    inventory yet (e.g. fresh registration before the first
+    collection cycle):
+
+      * Phase 10.2 step 7 close-out (item C of the deletion audit):
+        return ``"linux_apt"`` as a sensible default rather than
+        ``None``.  apt/dpkg-family distros (Debian, Ubuntu and their
+        derivatives) dominate the Linux fleet, and the engine's
+        ``build_otel_multiplatform_deploy_plan`` for ``linux_apt``
+        uses ``apt-get install -y`` which dnf-family hosts will
+        cleanly reject (``apt: command not found``) — the operator
+        will see a clear platform-mismatch error rather than a
+        silent fallback to a now-deleted legacy code path.
+      * Once the host has reported its first inventory cycle, this
+        function picks the correct branch (linux_apt vs linux_dnf)
+        from the real signal.
+
+    The default-to-linux-apt behaviour is logged at WARNING so
+    operators can spot mismatches in production logs without
+    digging through audit records.
     """
     plat = (host.platform or "").strip().lower()
     if not plat:
@@ -73,9 +89,10 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
     if plat != "linux":
         return None
 
-    # Sample the host's known package managers from its installed
-    # software inventory.  ``distinct().limit(8)`` caps the query cost
-    # — we only need to see one apt or dnf entry to decide.
+    # Signal 1 (most reliable): sample the host's known package
+    # managers from its installed software inventory.  ``distinct().limit(8)``
+    # caps the query cost — we only need to see one apt or dnf entry
+    # to decide.
     managers = {
         row[0]
         for row in db.query(models.SoftwarePackage.package_manager)
@@ -89,7 +106,66 @@ def _detect_otel_platform(host: models.Host, db: Session) -> Optional[str]:
         return "linux_apt"
     if "dnf" in managers or "yum" in managers:
         return "linux_dnf"
-    return None
+
+    # Signal 2 (available before software inventory completes): the
+    # host's reported friendly distro string from the OS_INFO
+    # collection.  OS_INFO runs at first connect (~1s) versus the
+    # software inventory cycle which can take minutes — this closes
+    # most of the fresh-host race window for item C.  ``platform_release``
+    # is a concatenated string like "Ubuntu 22.04 (Jammy Jellyfish)"
+    # or "Rocky Linux 9.3 (Blue Onyx)".
+    release_str = (host.platform_release or "").lower()
+    for needle in _APT_FAMILY_DISTRO_KEYWORDS:
+        if needle in release_str:
+            return "linux_apt"
+    for needle in _DNF_FAMILY_DISTRO_KEYWORDS:
+        if needle in release_str:
+            return "linux_dnf"
+
+    # Signal 3 (last resort): default to linux_apt.  apt/dpkg-family
+    # distros (Debian, Ubuntu and derivatives) dominate so this is
+    # the safer default — a dnf-family host hitting the engine plan
+    # will see ``apt-get not found`` and surface a clear platform-
+    # mismatch error rather than a silent fallback to a (now-deleted)
+    # legacy WS command branch.
+    logger.warning(
+        "Host %s reports platform=linux but has no software-inventory "
+        "or OS_INFO distro signal yet; defaulting OTEL platform to "
+        "linux_apt.  Expected only for freshly-registered hosts before "
+        "their first OS_INFO collection cycle.",
+        host.id,
+    )
+    return "linux_apt"
+
+
+# Distro-name keyword matches used by ``_detect_otel_platform``'s
+# Signal 2 path.  Match is substring + case-insensitive on the host's
+# reported ``platform_release`` (a friendly string from OS_INFO
+# collection like "Ubuntu 22.04" or "Rocky Linux 9.3").
+_APT_FAMILY_DISTRO_KEYWORDS = (
+    "ubuntu",
+    "debian",
+    "linux mint",
+    "kali",
+    "raspbian",
+    "raspberry pi os",
+    "pop!_os",
+    "elementary",
+    "deepin",
+    "zorin",
+    "parrot",
+)
+_DNF_FAMILY_DISTRO_KEYWORDS = (
+    "rhel",
+    "red hat",
+    "centos",
+    "rocky",
+    "alma",
+    "fedora",
+    "oracle linux",
+    "amazon linux",
+    "scientific linux",
+)
 
 
 def _engine_or_none():
@@ -166,15 +242,21 @@ def try_engine_graylog_attach(
     apt-vs-dnf on Linux, Graylog's Linux plan auto-detects rsyslog
     vs syslog-ng at agent execute-time via ``systemctl is-active``):
 
-      * Linux + syslog/gelf  → ``build_graylog_linux_autodetect_plan``
+      * Linux + syslog/gelf            → ``build_graylog_linux_autodetect_plan``
         (stages rsyslog AND syslog-ng configs, executes only the one
         whose daemon is active)
-      * \\*BSD + syslog_*    → ``build_graylog_bsd_syslog_append_plan``
+      * \\*BSD + syslog_*              → ``build_graylog_bsd_syslog_append_plan``
         (sed-strips any prior block, appends fresh forward line,
         restarts variant's syslogd)
-      * anything else        → ``None`` (Windows sidecar needs api_token
-        / node_id which the OSS endpoint doesn't currently accept; fall
-        back to legacy ``ATTACH_TO_GRAYLOG`` WS command)
+      * Windows + windows_sidecar      → ``build_graylog_sidecar_no_token_plan``
+        (PowerShell-driven download + install of the Graylog Sidecar
+        binary if missing; writes sidecar.yml with empty api_token
+        — operator fills it in via the Sidecar admin UI afterwards.
+        Mirrors the legacy ``_configure_windows_sidecar`` behaviour
+        added in the B1 phase of the 10.2 step 7 deletion close-out.)
+      * anything else                  → ``None`` (no engine path; caller
+        falls back to legacy ``ATTACH_TO_GRAYLOG`` WS command until
+        that is deleted too)
 
     Returns the queued message_id on success, ``None`` on any failure
     so the caller's legacy fallback runs.  Never raises.
@@ -209,6 +291,17 @@ def try_engine_graylog_attach(
                 bsd_variant=_BSD_PLATFORM_TO_VARIANT[plat],
             )
             plan = engine.build_graylog_bsd_syslog_append_plan(req)
+        elif plat == "windows" and mechanism == "windows_sidecar":
+            if not hasattr(engine, "build_graylog_sidecar_no_token_plan"):
+                # Older engine .so loaded — no B1 builder.  Defer to
+                # legacy WS path so Windows attaches don't break on
+                # the in-between engine versions.
+                return None
+            req = engine.GraylogSidecarNoTokenRequest(
+                graylog_server=graylog_server,
+                port=port,
+            )
+            plan = engine.build_graylog_sidecar_no_token_plan(req)
         else:
             return None
 
@@ -246,6 +339,112 @@ def try_engine_otel_remove(host: models.Host, db: Session) -> Optional[str]:
             "falling back to legacy WS command: %s",
             host.id,
             platform_token,
+            exc,
+        )
+        return None
+
+
+_OTEL_SERVICE_ACTIONS = ("start", "stop", "restart")
+_OTEL_GRAFANA_ACTIONS = ("connect", "disconnect")
+
+
+def try_engine_otel_service_control(
+    host: models.Host,
+    action: str,
+    db: Session,
+) -> Optional[str]:
+    """Attempt the engine-driven OTEL service-control path.
+
+    ``action`` is one of ``"start"``, ``"stop"``, ``"restart"``.
+    Same engine-first / legacy-fallback contract as the deploy and
+    remove helpers above — returns the queued message_id on success
+    or ``None`` so the caller falls back to its legacy WS path.
+    Never raises.
+
+    Replaces the legacy ``start_opentelemetry_service`` /
+    ``stop_opentelemetry_service`` / ``restart_opentelemetry_service``
+    WS command targets in the agent's ``opentelemetry_operations.py``;
+    the engine plan emits the same per-platform service-manager
+    command (systemctl / service / rcctl / /etc/rc.d / brew services
+    / sc.exe) wrapped in a verified command sequence.
+    """
+    if action not in _OTEL_SERVICE_ACTIONS:
+        return None
+    engine = _engine_or_none()
+    if engine is None or not hasattr(engine, "build_otel_service_control_plan"):
+        return None
+
+    platform_token = _detect_otel_platform(host, db)
+    if platform_token is None:
+        return None
+
+    try:
+        from backend.services.proplus_dispatch import enqueue_apply_plan
+
+        req = engine.OtelServiceControlRequest(
+            platform=platform_token,
+            action=action,
+        )
+        plan = engine.build_otel_service_control_plan(req)
+        return enqueue_apply_plan(host_id=str(host.id), plan=plan, timeout=120)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "Engine OTEL service-control failed for host %s "
+            "(platform=%s, action=%s); falling back to legacy WS command: %s",
+            host.id,
+            platform_token,
+            action,
+            exc,
+        )
+        return None
+
+
+def try_engine_otel_grafana_connection(
+    host: models.Host,
+    action: str,
+    grafana_url: str,
+    db: Session,
+) -> Optional[str]:
+    """Attempt the engine-driven OTEL Grafana connect/disconnect path.
+
+    ``action`` is one of ``"connect"`` or ``"disconnect"``.  The
+    Grafana connect path requires a non-empty ``grafana_url``; the
+    disconnect path accepts an empty string (matching the legacy
+    agent's behaviour, which validated grafana_url on connect only).
+
+    The plan itself is restart-only — neither connect nor disconnect
+    rewrites the OTEL config.  The config was pinned to the target
+    Grafana endpoint at deploy time; this just triggers a restart so
+    any out-of-band config edits take effect and the audit log
+    records the operator's intent.
+    """
+    if action not in _OTEL_GRAFANA_ACTIONS:
+        return None
+    engine = _engine_or_none()
+    if engine is None or not hasattr(engine, "build_otel_grafana_connection_plan"):
+        return None
+
+    platform_token = _detect_otel_platform(host, db)
+    if platform_token is None:
+        return None
+
+    try:
+        from backend.services.proplus_dispatch import enqueue_apply_plan
+
+        req = engine.OtelGrafanaConnectionRequest(
+            platform=platform_token,
+            action=action,
+            grafana_url=grafana_url or "",
+        )
+        plan = engine.build_otel_grafana_connection_plan(req)
+        return enqueue_apply_plan(host_id=str(host.id), plan=plan, timeout=120)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "Engine OTEL grafana-connection failed for host %s "
+            "(platform=%s, action=%s); falling back to legacy WS command: %s",
+            host.id,
+            platform_token,
+            action,
             exc,
         )
         return None

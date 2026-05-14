@@ -31,6 +31,13 @@ Clone the repo and create a feature branch:
 git checkout -b feature/meaningful-name
 ```
 
+After cloning, run **`make install-dev`** to install Python/Node
+dependencies AND activate the in-repo git hooks (see
+`.githooks/README.md`).  The `pre-push` hook runs `make lint`
+before allowing pushes; this catches the same things CI catches
+without burning a cycle to find out.  Skip the hook in genuine
+emergencies with `git push --no-verify`.
+
 ### 3. Development Notes
 - **Alembic migrations**: For database schema changes, run:
   ```bash

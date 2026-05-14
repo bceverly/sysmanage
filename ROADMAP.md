@@ -1841,7 +1841,7 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 - [x] Repository mirroring — `repository_mirroring_engine.pyx`
 - [x] External IdP support — `external_idp_engine.pyx` (LDAP + OIDC + role mapping + local fallback)
 - [x] Upgrade profiles migrated from OSS to `automation_engine` — 10.6 close-out complete
-- [~] Hardcoded nav items, Settings tabs, HostDetail tabs, and action buttons gated by license to match the existing plugin-gating pattern — hardcoded surfaces (Navbar, Settings tabDefs, HostDetail tabs, action buttons) all gated; plugin Settings tabs honoring `moduleRequired` (line 1822) and the Playwright triple-tier matrix (line 1829) remain open
+- [x] Hardcoded nav items, Settings tabs, HostDetail tabs, and action buttons gated by license to match the existing plugin-gating pattern — hardcoded surfaces (Navbar, Settings tabDefs, HostDetail tabs, action buttons) gated via `licenseModules.includes(...)` / `moduleRequired` props; plugin Settings tabs now honor the same `moduleRequired` field (line 1822 — `PluginSettingsTab` interface + `visiblePluginSettingsTabs` memo in `Pages/Settings.tsx`); the triple-tier license matrix (line 1829 — `frontend/e2e/license-matrix.spec.ts`) injects fixtures per tier via `page.route('**/api/license', …)` and asserts which Settings tabs + nav links each tier sees
 
 ### Exit Criteria
 
