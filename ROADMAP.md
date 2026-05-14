@@ -1621,39 +1621,39 @@ will land incrementally on top of this skeleton.
 - `sysmanage_agent/operations/child_host_listing_*.py` — read-only VM/container listing
 
 **Features:**
-- [ ] KVM/QEMU VM management (Linux)
-  - [ ] VM creation with cloud-init
-  - [ ] VM lifecycle (start, stop, restart, delete)
-  - [ ] Network configuration (NAT, bridge)
-  - [ ] Multi-distro support (Ubuntu, Debian, Fedora, Alpine, FreeBSD)
-- [ ] bhyve VM management (FreeBSD)
-  - [ ] UEFI and bhyveload boot support
-  - [ ] ZFS zvol or file-based storage
-  - [ ] NAT networking with pf
-- [ ] VMM/vmd VM management (OpenBSD)
-  - [ ] vm.conf generation
-  - [ ] Autoinstall support
-- [ ] Cloud-init provisioning (all hypervisors)
-- [ ] Multi-hypervisor networking
-- [ ] Guest OS autoinstall (Ubuntu, Debian, Alpine, FreeBSD)
-- [ ] **Safe Parent Host Reboot (VM extension):** Extend the safe parent host reboot orchestration (introduced in Phase 2 for LXD/WSL) to KVM/QEMU, bhyve, and VMM/vmd virtual machines — cleanly shut down running VMs before parent reboot, track which VMs were running, and automatically restart them after the parent boots back up
+- [x] KVM/QEMU VM management (Linux) — `build_kvm_create_plan`/`build_kvm_lifecycle_plan`/`build_kvm_delete_plan`/`build_kvm_network_create_plan` in `virtualization_engine.pyx`
+  - [x] VM creation with cloud-init
+  - [x] VM lifecycle (start, stop, restart, delete)
+  - [x] Network configuration (NAT, bridge)
+  - [x] Multi-distro support (Ubuntu, Debian, Fedora, Alpine, FreeBSD) — `_normalize_distro_id`
+- [x] bhyve VM management (FreeBSD) — `build_bhyve_create_plan`/`build_bhyve_lifecycle_plan`/`build_bhyve_delete_plan`/`build_bhyve_zvol_create_plan`/`build_bhyve_pf_nat_plan`
+  - [x] UEFI and bhyveload boot support
+  - [x] ZFS zvol or file-based storage
+  - [x] NAT networking with pf
+- [x] VMM/vmd VM management (OpenBSD) — `build_vmm_create_plan`/`build_vmm_lifecycle_plan`/`build_vmm_delete_plan`
+  - [x] vm.conf generation
+  - [x] Autoinstall support
+- [x] Cloud-init provisioning (all hypervisors) — seed-ISO generation across KVM/bhyve/VMM; 21 dedicated tests in `test_virtualization_engine_cloudinit.py`
+- [x] Multi-hypervisor networking — KVM `build_kvm_network_create_plan`, bhyve `build_bhyve_pf_nat_plan`, VMM in-plan network config
+- [x] Guest OS autoinstall (Ubuntu, Debian, Alpine, FreeBSD) — Subiquity YAML / Debian preseed / Alpine apkovl in `generate_ubuntu_autoinstall_yaml` and peers
+- [x] **Safe Parent Host Reboot (VM extension):** `build_safe_parent_reboot_plan`/`build_safe_parent_restore_plan` with `/safe-reboot/{host_id}/prepare` and `/safe-reboot/{host_id}/{hypervisor}/restore` routes gated by `SAFE_REBOOT_FEATURE`
 
 **Keep in Open Source:**
 - Read-only VM/container listing and status
 
 **Migration Steps:**
-1. [ ] Create `module-source/virtualization_engine/` structure
-2. [ ] Create `virtualization_engine.pyx` Cython module
-3. [ ] Extract VM creation/provisioning logic from agent into server-side Cython module
-4. [ ] Implement platform-specific VM config builders on server (KVM XML, bhyve config, vm.conf)
-5. [ ] Extract cloud-init/autoinstall generation from agent to server
-6. [ ] Extract network configuration generation from agent to server
-7. [ ] Define message protocol for "deploy VM config" commands
-8. [ ] Remove VM management code from agent (~22,153 lines)
-9. [ ] Create frontend plugin bundle
-10. [ ] Update open source to read-only listing
-11. [ ] Update documentation
-12. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/virtualization_engine/` structure
+2. [x] Create `virtualization_engine.pyx` Cython module — 7,560 lines + 128 tests; compiled `.so` ships for py3.10–3.14
+3. [x] Extract VM creation/provisioning logic from agent into server-side Cython module
+4. [x] Implement platform-specific VM config builders on server (KVM XML, bhyve config, vm.conf) — 25 `build_*` functions
+5. [x] Extract cloud-init/autoinstall generation from agent to server
+6. [x] Extract network configuration generation from agent to server
+7. [x] Define message protocol for "deploy VM config" commands — feature-gated routes mounted via Pro+ router factory
+8. [x] Remove VM management code from agent (~22,153 lines) — legacy `child_host_operations` replaced with `child_host_ops_stub`; only read-only `virtualization_role_detector.py` remains in agent.  Verified 2026-05-13: zero references to `child_host_bhyve` / `child_host_vmm` / `child_host_kvm` / `create_bhyve_vm` / `create_vmm_vm` / `create_kvm_vm` survive in `sysmanage-agent/src/`.  "Audit PR-13" (bhyve no-raw/no-iso) and "audit PR-14" (vmm richer create flows) both shipped inside the engine via the `cloud_image_url` + `linux_autoinstall_distro` fields; head-comment in `virtualization_engine.pyx` updated to reflect that cutover is complete.
+9. [x] Create frontend plugin bundle — **decision (2026-05-13): no separate plugin bundle.**  Every UI surface virt needs already ships gated-in-OSS: HostDetail HypervisorStatusCards (KVM/bhyve/VMM/LXD) gate per-card on the relevant engine module, and the Create/Start/Stop/Restart/Delete Child Host action buttons gate per-button via `licenseModules.includes(...)`.  The plugin-bundle pattern other engines use (alerting/compliance/health/vuln/etc.) is justified when the engine ships a dedicated dashboard route, rules-editor page, or large Card component; virt's UI is exclusively per-host (HostDetail tabs + action buttons), which is already covered by the existing OSS gating.  Revisit if/when virt grows a fleet-level dashboard.
+10. [x] Update open source to read-only listing — OSS retains `virtualization_role_detector` + count-only listing
+11. [x] Update documentation — `sysmanage-docs/docs/professional-plus/virtualization-engine.html`
+12. [ ] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or frontend locale JSON entries for virtualization_engine yet
 
 **Estimated Size:** ~24,000 lines (server-side Cython: ~22,153 from agent + ~1,850 server API)
 
@@ -1675,28 +1675,28 @@ will land incrementally on top of this skeleton.
 - Prometheus metrics endpoint (if applicable)
 
 **Features:**
-- [ ] Graylog server configuration and health monitoring
-- [ ] GELF TCP/UDP input configuration
-- [ ] Syslog forwarding setup
-- [ ] Windows Sidecar deployment
-- [ ] Grafana server integration
-- [ ] Dashboard and panel provisioning
-- [ ] DataSource configuration
-- [ ] OTEL Collector deployment and management
-- [ ] Prometheus metrics export
-- [ ] Distributed tracing setup
+- [x] Graylog server configuration and health monitoring — `build_graylog_status_plan` + `GraylogSidecarRequest` in `observability_engine.pyx`
+- [x] GELF TCP/UDP input configuration — engine plan-builder
+- [x] Syslog forwarding setup — engine plan-builder
+- [x] Windows Sidecar deployment — engine plan-builder
+- [x] Grafana server integration — `GrafanaProvisionRequest` + `build_grafana_provision_plan`
+- [x] Dashboard and panel provisioning — `build_grafana_provision_plan`
+- [x] DataSource configuration — `GrafanaDatasource`
+- [x] OTEL Collector deployment and management — `OtelDeployRequest`, `build_otel_deploy_plan`/`build_otel_remove_plan`/`build_otel_status_plan`, `_render_otel_config`
+- [x] Prometheus metrics export — `OtelExporter`
+- [x] Distributed tracing setup — engine support via `OtelExporter`
 
 **Migration Steps:**
-1. [ ] Create `module-source/observability_engine/` structure
-2. [ ] Create `observability_engine.pyx` Cython module
-3. [ ] Extract Graylog deployment/config logic from agent (~662 lines) to server-side Cython
-4. [ ] Extract OpenTelemetry deployment/config logic from agent (~1,674 lines) to server-side Cython
-5. [ ] Implement server-side config generation for OTEL collector, Graylog sidecar, Grafana datasources
-6. [ ] Define message protocol for "deploy observability config" commands
-7. [ ] Remove deployment code from agent (~2,336 lines)
-8. [ ] Create frontend plugin bundle
-9. [ ] Update documentation
-10. [ ] i18n/l10n for all 14 languages
+1. [x] Create `module-source/observability_engine/` structure
+2. [x] Create `observability_engine.pyx` Cython module — 1,305 lines, 31 tests; v0.3.0
+3. [x] Extract Graylog deployment/config logic from agent (~662 lines) to server-side Cython — engine now has `build_graylog_sidecar_plan` (Linux+Windows sidecar), `build_graylog_rsyslog_plan` / `build_graylog_syslog_ng_plan`, `build_graylog_bsd_syslog_plan` (with `existing_config` pre-fetch), `build_graylog_linux_autodetect_plan` (runs `systemctl is-active --quiet` per-daemon and applies the active one) and `build_graylog_bsd_syslog_append_plan` (sed-strips prior block + appends fresh forward line at agent execute-time, no server-side file-fetch needed).  OSS endpoint `POST /host/{id}/attach_to_graylog` routes through `try_engine_graylog_attach` in `backend/services/observability_shim.py` for Linux + \*BSD; Windows sidecar still falls back to legacy `ATTACH_TO_GRAYLOG` WS command because the OSS payload lacks api_token/node_id.  Agent-side `graylog_attachment.py` deletion is tracked under step 7.
+4. [~] Extract OpenTelemetry deployment/config logic from agent (~1,674 lines) to server-side Cython — engine has full deploy/remove/status plan-builders; agent still ships `otel_base.py`/`otel_deployment_helper.py`/`otel_deploy_{linux,bsd,macos,windows}.py` (1,699 lines) doing direct package/service work (see step 7)
+5. [x] Implement server-side config generation for OTEL collector, Graylog sidecar, Grafana datasources
+6. [x] Define message protocol for "deploy observability config" commands — `ComponentStatusRequest`/`ComponentStatusDispatchResult` + `APPLY_DEPLOYMENT_PLAN` pattern
+7. [ ] Remove deployment code from agent (~2,336 lines) — **NOT DONE**: actual agent-side total is 2,770 lines across `graylog_attachment.py` (662) + `otel_base.py` (171) + `otel_deployment_helper.py` (491) + `otel_deploy_linux.py` (476) + `otel_deploy_bsd.py` (347) + `otel_deploy_macos.py` (103) + `otel_deploy_windows.py` (102) + `opentelemetry_operations.py` (418).  The engine and agent currently both implement the deploy path; the agent path is still authoritative at runtime.  Convert these to thin plan-executors or delete
+8. [x] Create frontend plugin bundle — **decision (2026-05-13): no separate plugin bundle.**  Observability's OSS-side UI surfaces are: (a) the Integrations Settings tab in OSS `Settings.tsx` gated via `moduleRequired: 'observability_engine'`, (b) HostDetail OTEL/Graylog action buttons (Deploy/Start/Stop/Restart/Remove OpenTelemetry, Connect to Grafana, Connect to Graylog) gated per-button via `licenseModules.includes('observability_engine')`.  Same rationale as virt (10.1 step 9): the plugin-bundle pattern is for engines with dedicated dashboard routes or rules-editor pages; observability's UI is exclusively Settings + per-host action buttons, both already covered by OSS gating.  Revisit if/when observability grows a fleet-level dashboard.
+9. [x] Update documentation — `sysmanage-docs/docs/professional-plus/observability-engine.html`
+10. [ ] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or locale JSONs for observability_engine yet
 
 **Estimated Size:** ~6,300 lines (server-side Cython: ~2,336 from agent + ~4,000 server API/services)
 
@@ -1705,29 +1705,29 @@ will land incrementally on top of this skeleton.
 **Priority:** High
 **Effort:** Medium
 
-- [ ] TOTP authenticator app support
-- [ ] Email code verification fallback
-- [ ] Backup codes
-- [ ] Per-user MFA enforcement
-- [ ] Admin MFA requirement option
-- [ ] pyotp integration
-- [ ] i18n/l10n for all 14 languages
+- [x] TOTP authenticator app support — `backend/services/mfa_service.py::generate_totp_secret`/`provisioning_uri`
+- [x] Email code verification fallback — `MfaEmailChallenge` model + alembic migration `k9mfaemail`; `request_email_otp` invalidates prior live challenges + issues a 6-digit Argon2-hashed code with 10-min lifetime; `_consume_email_challenge` is the third path in `verify_user_code` (TOTP → backup → email-OTP); `/api/auth/mfa/email/request` endpoint returns a user-enumeration-safe generic envelope.  9 new tests in `TestEmailOtpFlow`.
+- [x] Backup codes — Crockford 8-char codes, Argon2-hashed, one-time-use, constant-time check
+- [x] Per-user MFA enforcement — `UserMfaEnrollment` table (`backend/persistence/models/mfa.py`)
+- [x] Admin MFA requirement option — `MfaSettings.admin_required` singleton + grace period
+- [x] pyotp integration — `pyotp>=2.9.0` in `requirements.txt`; 20+ tests in `test_mfa_service.py`
+- [x] i18n/l10n for all 14 languages — all `auth_mfa.py` error strings wrapped with `_()`; 14 locale dirs populated
 
 ### Additional Enterprise Features
 
 #### 10.4 Repository Mirroring (Professional+)
 
-- [ ] APT/DNF repository mirroring
-- [ ] Tiered mirrors for multi-region
-- [ ] Repository snapshots
-- [ ] Air-gapped deployment support
+- [x] APT/DNF repository mirroring — `module-source/repository_mirroring_engine/repository_mirroring_engine.pyx` supports apt, dnf, zypper, pkg
+- [x] Tiered mirrors for multi-region — `mirror_root_path` prefix + per-repo subdir architecture
+- [x] Repository snapshots — rsync to sibling timestamp directories; restore via atomic symlink swap
+- [x] Air-gapped deployment support — Phase 11.2 `airgap_repository_engine` is the air-gap-specific variant (ingestion + per-distro repo metadata + agent repoint); this Phase 10.4 engine covers the WAN-cost/multi-region case
 
 #### 10.5 External Identity Providers (Professional+)
 
-- [ ] LDAP/Active Directory authentication
-- [ ] OIDC provider support (Okta, Azure AD, Keycloak)
-- [ ] External group to role mapping
-- [ ] Local account fallback
+- [x] LDAP/Active Directory authentication — schema at `backend/persistence/models/external_idp.py`; `external_idp_engine.pyx` wraps `ldap3` for bind+search
+- [x] OIDC provider support (Okta, Azure AD, Keycloak) — OIDC config schema + `authlib` integration for auth-code exchange
+- [x] External group to role mapping — `IdpRoleMapping` table + CRUD at `/api/idp-providers/{provider_id}/role-mappings`; supports catch-all via `default_for_unmapped`
+- [x] Local account fallback — `ExternalIdpSettings.local_account_fallback` boolean (default `True`); honored in `auth.py` for break-glass admin access
 
 #### 10.6 Upgrade Profiles → automation_engine (Enterprise migration)
 
@@ -1766,12 +1766,12 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 **Inventory — what to gate (verified surface):**
 
 *Navbar (`Components/Navbar.tsx`, hardcoded NavLinks lines ~153-179):*
-- [ ] `/secrets` — gate behind `secrets_engine` module.  All `/api/secrets/*` already 402 without it (Phase 2.3).
-- [ ] `/reports` — gate behind `reporting_engine` module.  OSS retains a 291-line stub but the rich workflow is Pro+.
-- [ ] `/scripts` — borderline; OSS retains ad-hoc one-shot run.  **Don't gate** — keep visible, but consider adding a "Pro+: scheduled / saved scripts" upsell row inside the page.
+- [x] `/secrets` — gate behind `secrets_engine` module.  All `/api/secrets/*` already 402 without it (Phase 2.3). *(Navbar.tsx:206 — `activeLicenseModules.includes('secrets_engine')`)*
+- [x] `/reports` — gate behind `reporting_engine` module.  OSS retains a 291-line stub but the rich workflow is Pro+. *(Navbar.tsx:226)*
+- [x] `/scripts` — borderline; OSS retains ad-hoc one-shot run.  **Don't gate** — keep visible, but consider adding a "Pro+: scheduled / saved scripts" upsell row inside the page. *(decision documented; no gating applied)*
 
 *Settings tabs (`Pages/Settings.tsx`, hardcoded `<Tab>` lines ~1113-1127):*
-- [ ] **Integrations** (Grafana + Graylog + OTEL cards in `renderIntegrationsTab` line ~828) — gate behind `observability_engine`.
+- [x] **Integrations** (Grafana + Graylog + OTEL cards in `renderIntegrationsTab` line ~947) — gate behind `observability_engine`. *(Settings.tsx:180 — `moduleRequired: 'observability_engine'`)*
 - [x] **Antivirus** — gate behind `av_management_engine`. *(Settings.tsx:187)*
 - [x] **Firewall Roles** — gate behind `firewall_orchestration_engine`. *(Settings.tsx:199)*
 - [ ] **Access Groups** — gate behind `federation_controller_engine` (deferred to Phase 12.4 fold-in; currently no gating since it's an OSS feature today).  Land the gating once 12.4 lands; for now, leave it visible.
@@ -1819,14 +1819,14 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 
 5. [x] HostDetail action buttons get inline `licenseModules.includes("…")` guards on each button, with the button hidden (not disabled-with-tooltip) when not licensed — consistent with how plugin nav items behave.  See cross-references in the action button list above.
 
-6. [ ] Plugin Settings tabs at `Pages/Settings.tsx:1128` should also honor `moduleRequired` (currently they don't); reuse the same filter logic for consistency. *(plugin-system follow-up; the OSS Settings page already filters its hardcoded entries)*
+6. [x] Plugin Settings tabs at `Pages/Settings.tsx` honor `moduleRequired` (`PluginSettingsTab` interface gains the optional field, `visiblePluginSettingsTabs` memo filters the same way the hardcoded `tabDefs` filter does, both the Tabs strip and the tab-content dispatch use the filtered list).  Tabs without `moduleRequired` stay always-visible (pre-Phase-10.7 behaviour).
 
 7. [x] i18n: no new strings — gating is a visibility change, not a copy change.
 
 **Testing:**
 
 - [x] Unit tests for `isFeatureLicensed` / `isModuleLicensed` (cache hit/miss, license absent, license present-but-unrelated). *(`__tests__/Services/license.test.tsx` — 8 passing tests covering empty cache, refresh population, feature/module presence checks, refresh-failure → cache cleared, license-without-modules-array, subscribe/unsubscribe, clear-cache reset)*
-- [ ] Playwright tests: an OSS-only login (no license) sees the OSS-appropriate set of nav items / Settings tabs / HostDetail tabs / action buttons; a Pro+ Professional license sees the Professional subset; a Pro+ Enterprise license sees everything.  Tests should be parametrized over license fixture. *(deferred to Phase 11 — requires license-fixture infrastructure spanning frontend e2e + backend test-database seeding; existing `e2e/proplus.spec.ts` covers feature-presence smoke tests but not the parametrized triple-tier matrix)*
+- [x] Playwright tests: triple-tier license-matrix smoke test landed at `frontend/e2e/license-matrix.spec.ts` (2026-05-13).  Parametrised over `community` / `professional` / `enterprise` fixtures; uses `page.route('**/api/license', …)` to inject a tier-specific response rather than seeding signed licenses on the backend (faster, deterministic, and exercises the same frontend gating logic as production).  Asserts 7 Settings tabs visible/hidden correctly per tier (Integrations, Antivirus, Firewall Roles, Update Profiles, Compliance Profiles, Report Branding, Report Templates) + the `/secrets` and `/reports` nav links toggle correctly between community ↔ enterprise.  HostDetail per-tab and per-action-button gating is a follow-up — those require a seeded host record and aren't covered by this spec yet.
 
 **Estimated Size:** ~150 lines of frontend gating logic + ~60 entry-shape conversions + ~80 lines of test fixtures.  No backend changes — the 402-on-unlicensed pattern already exists; this just stops surfacing the call sites that would hit it.
 
@@ -1834,14 +1834,14 @@ Already-correctly-gated: **Orchestrated Reboot** falls back to plain reboot when
 
 ### Deliverables
 
-- [ ] virtualization_engine module (~24,000 lines, largest single module)
-- [ ] observability_engine module (~6,300 lines)
-- [ ] ~24,489 lines of agent code migrated to server-side Cython
-- [ ] MFA implementation
-- [ ] Repository mirroring
-- [ ] External IdP support
-- [ ] Upgrade profiles migrated from OSS to `automation_engine`
-- [ ] Hardcoded nav items, Settings tabs, HostDetail tabs, and action buttons gated by license to match the existing plugin-gating pattern
+- [x] virtualization_engine module (~24,000 lines, largest single module) — `virtualization_engine.pyx` 7,560 lines + 128 tests
+- [x] observability_engine module (~6,300 lines) — `observability_engine.pyx` 1,305 lines + 31 tests
+- [~] ~24,489 lines of agent code migrated to server-side Cython — virtualization migration complete (legacy `child_host_operations` → stub); observability migration only half-done (engine has the plan-builders but agent still ships 2,770 lines of OTEL+Graylog deployment code that should have been deleted per 10.2 step 7)
+- [x] MFA implementation — TOTP + backup codes + per-user/admin enforcement; email-OTP fallback still open
+- [x] Repository mirroring — `repository_mirroring_engine.pyx`
+- [x] External IdP support — `external_idp_engine.pyx` (LDAP + OIDC + role mapping + local fallback)
+- [x] Upgrade profiles migrated from OSS to `automation_engine` — 10.6 close-out complete
+- [~] Hardcoded nav items, Settings tabs, HostDetail tabs, and action buttons gated by license to match the existing plugin-gating pattern — hardcoded surfaces (Navbar, Settings tabDefs, HostDetail tabs, action buttons) all gated; plugin Settings tabs honoring `moduleRequired` (line 1822) and the Playwright triple-tier matrix (line 1829) remain open
 
 ### Exit Criteria
 
@@ -1902,7 +1902,7 @@ tests against the compiled .so all green.
 - [x] Configurable OS/version tracking list (Ubuntu, Debian, RHEL, FreeBSD, etc.) — 13 distro families validated; shell-injection-safe regex
 - [x] Automated package mirror capture (APT, DNF/YUM, pkg, etc.) — per-family dispatch templates in `_MIRROR_COMMAND_TEMPLATES`
 - [x] CVE/NVD data snapshot capture at time of collection — placeholder hook; concrete CVE-feed list lives in `vuln_engine` (Phase 11.4 fold-in)
-- [~] Compliance framework data capture (CIS, DISA STIG baselines) — schema + `include_compliance` flag wired through `build_collection_run_plan` + `AirgapCollectionRun`; concrete CIS/STIG feed registry sharing with `compliance_engine` deferred (parallel to how CVE feed registry is shared with `vuln_engine` per 11.4)
+- [x] Compliance framework data capture (CIS, DISA STIG baselines) — schema + `include_compliance` flag wired through `build_collection_run_plan` + `AirgapCollectionRun`; shared CIS/STIG feed registry landed at `module-source/_shared/cis_stig_source_registry.py` (parallel to `cve_source_registry.py`); `airgap_collector_engine.build_collection_run_plan` now emits one `curl` snapshot step per `enabled_by_default=True` baseline source plus a `sources.json` URL manifest when `include_compliance=True`.  Default-on sources: ComplianceAsCode/SCAP Security Guide + DISA STIG compilation; opt-in: NIST NCP + Canonical USG.  23 new tests (14 registry shape + 9 cross-engine wiring) cover the contract.
 - [x] Optical media ISO image generation with integrity checksums (SHA-256) — xorriso wrapper + post-build sha256sum step
 - [x] Multi-disc spanning for large update sets — first-fit-decreasing bin-packing in `pack_into_discs` + per-disc plan builder `build_multidisc_plan` (engine).  OSS-exposed via new `POST /api/v1/airgap/collector/iso/build-multidisc/{run_id}` endpoint that takes a `file_entries` list and emits one stage + manifest + xorriso + sha256 command sequence per disc.  9 router tests + the existing bin-packing function tests all green.  `airgap_media_manifest`'s `disc_index` / `disc_count` columns now actually carry the values.
 - [x] Disc burning integration (cdrecord/growisofs/xorriso) — plan-builder shape only; real burns happen on operator hardware (mocked in CI)

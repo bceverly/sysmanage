@@ -13,6 +13,7 @@ from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.services.observability_shim import try_engine_graylog_attach
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import CommandMessage, CommandType
 from backend.websocket.queue_enums import QueueDirection
@@ -129,11 +130,50 @@ async def attach_host_to_graylog(
         # Validate host approval status
         validate_host_approval_status(host)
 
+        mechanism = request.get("mechanism")
+        graylog_server = request.get("graylog_server")
+        port = request.get("port")
+
+        # Engine-first path: when the Pro+ observability_engine is
+        # loaded, route Linux + *BSD syslog/gelf attaches through the
+        # engine's plan builders (rsyslog/syslog-ng autodetect on
+        # Linux; sed-merge on BSD).  On any miss — engine not loaded,
+        # unsupported platform/mechanism combo, or exception during
+        # build/enqueue — try_engine_graylog_attach returns None and
+        # we fall through to the legacy WS command path below.
+        if mechanism and graylog_server and port is not None:
+            try:
+                engine_message_id = try_engine_graylog_attach(
+                    host=host,
+                    mechanism=mechanism,
+                    graylog_server=graylog_server,
+                    port=int(port),
+                )
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                logger.warning(
+                    "Engine Graylog attach raised unexpectedly for host %s; "
+                    "falling back to legacy WS command: %s",
+                    host_id,
+                    exc,
+                )
+                engine_message_id = None
+            if engine_message_id is not None:
+                logger.info(
+                    "Graylog attach for host %s routed through engine; "
+                    "queued message_id=%s",
+                    host_id,
+                    engine_message_id,
+                )
+                return {
+                    "success": True,
+                    "message": _("Graylog attachment command queued successfully"),
+                }
+
         # Create command message
         command_data = {
-            "mechanism": request.get("mechanism"),
-            "graylog_server": request.get("graylog_server"),
-            "port": request.get("port"),
+            "mechanism": mechanism,
+            "graylog_server": graylog_server,
+            "port": port,
         }
 
         command_message = CommandMessage(

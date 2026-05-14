@@ -17,8 +17,10 @@ Storage rules:
   plaintext (returned exactly once at enrollment / regeneration time).
 """
 
+import logging
 import secrets
 import string
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple
 
 import pyotp
@@ -27,11 +29,14 @@ from argon2.exceptions import VerifyMismatchError
 from sqlalchemy.orm import Session
 
 from backend.persistence.models import (
+    MfaEmailChallenge,
     MfaSettings,
     SINGLETON_MFA_SETTINGS_ID,
     UserMfaEnrollment,
 )
 from backend.security import mfa_crypto
+
+logger = logging.getLogger(__name__)
 
 # Argon2 hasher for backup codes — separate instance from the password
 # hasher so the parameters can drift independently if the password
@@ -207,28 +212,197 @@ def decrypt_secret(ciphertext: str) -> str:
 def verify_user_code(db: Session, user_id, code: str) -> Tuple[bool, Optional[str]]:
     """End-to-end verify path used by the login challenge.
 
-    Tries TOTP first; falls back to backup-code consumption if the
-    TOTP miss looks like a backup-code shape.  Returns ``(ok, method)``
-    where ``method`` is ``"totp"`` / ``"backup_code"`` / None.
+    Tries in order:
+      1. TOTP (the primary authenticator-app factor)
+      2. Backup code (one of the 10 single-use codes from enrollment)
+      3. Email-OTP challenge (Phase 10.3 fallback path for users who
+         can't reach their authenticator app and have no backup codes
+         left)
+
+    Returns ``(ok, method)`` where ``method`` is
+    ``"totp"`` / ``"backup_code"`` / ``"email_otp"`` / None.
 
     On match the enrollment row's ``last_used_at`` + ``last_used_method``
     are updated and the session is left dirty for the caller to commit.
+    The email-OTP challenge row's ``consumed_at`` is set in the same
+    transaction so a successful code can't be replayed.
     """
     enrollment = get_enrollment(db, user_id)
     if enrollment is None:
         return False, None
     settings = get_settings(db)
     secret = decrypt_secret(enrollment.totp_secret_encrypted)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     if verify_totp(secret, code, settings):
-        from datetime import datetime, timezone
-
-        enrollment.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        enrollment.last_used_at = now
         enrollment.last_used_method = "totp"
         return True, "totp"
     if consume_backup_code(enrollment, code):
-        from datetime import datetime, timezone
-
-        enrollment.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        enrollment.last_used_at = now
         enrollment.last_used_method = "backup_code"
         return True, "backup_code"
+    if _consume_email_challenge(db, user_id, code):
+        enrollment.last_used_at = now
+        enrollment.last_used_method = "email_otp"
+        return True, "email_otp"
     return False, None
+
+
+# ---------------------------------------------------------------------
+# Email-OTP fallback (Phase 10.3 follow-up)
+# ---------------------------------------------------------------------
+
+# Numeric 6-digit code — same shape as the TOTP output so the user-
+# facing input field can stay a single 6-digit box regardless of
+# which method delivered the code.  ``secrets.randbelow`` is the
+# crypto-strong path; ``zfill`` keeps leading zeros so the rendered
+# code always has exactly 6 digits.
+_EMAIL_OTP_DIGITS = 6
+_EMAIL_OTP_LIFETIME_MINUTES = 10
+
+# Argon2 hasher reused from backup-code path — same cost parameters
+# are fine for short-lived codes since the value horizon is 10
+# minutes; a separate _EMAIL_CODE_HASHER would add a parameter knob
+# without a security argument behind it.
+_EMAIL_CODE_HASHER = _BACKUP_CODE_HASHER
+
+
+def generate_email_otp_code() -> str:
+    """Generate a fresh 6-digit OTP for the email-fallback flow.
+
+    Lives in a dedicated function (vs. an inline expression in the
+    request path) so tests can monkeypatch it to a known string
+    without poking ``secrets``.
+    """
+    return str(secrets.randbelow(10**_EMAIL_OTP_DIGITS)).zfill(_EMAIL_OTP_DIGITS)
+
+
+def request_email_otp(
+    db: Session,
+    user_id,
+    user_email: str,
+    *,
+    ip_address: Optional[str] = None,
+    email_send_fn=None,
+) -> bool:
+    """Issue an email-OTP challenge for ``user_id`` and dispatch it.
+
+    Lifecycle:
+      1. Invalidate any unconsumed challenges for this user (so a
+         spammed Request endpoint at most rotates the live code
+         rather than flooding the inbox).
+      2. Generate a 6-digit code, Argon2-hash it, and persist a new
+         row with ``expires_at = now + 10 minutes``.
+      3. Hand the plaintext code to ``email_send_fn(to, subject, body)``
+         for delivery.  Default injection is the OSS
+         ``EmailService.send_email`` bound method so tests can
+         substitute a recorder.
+
+    Returns True iff the email send succeeded (or the email service
+    is disabled — see below).  The challenge row is *always* written
+    on success of step 1+2, so a False return means a live challenge
+    exists in the DB but the user never received it; the verify path
+    will still accept the code if the user has it via another channel.
+
+    The caller is responsible for committing the session.
+    """
+    # 1. Tombstone any live challenge for this user.  ``mark all
+    # outstanding as consumed`` is simpler than DELETE because it
+    # preserves the audit row.
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    live_challenges = (
+        db.query(MfaEmailChallenge)
+        .filter(
+            MfaEmailChallenge.user_id == user_id,
+            MfaEmailChallenge.consumed_at.is_(None),
+            MfaEmailChallenge.expires_at > now,
+        )
+        .all()
+    )
+    for challenge in live_challenges:
+        challenge.consumed_at = now
+
+    # 2. Mint a new code + persist.
+    code = generate_email_otp_code()
+    challenge = MfaEmailChallenge(
+        user_id=user_id,
+        code_hash=_EMAIL_CODE_HASHER.hash(code),
+        created_at=now,
+        expires_at=now + timedelta(minutes=_EMAIL_OTP_LIFETIME_MINUTES),
+        consumed_at=None,
+        ip_address=ip_address,
+    )
+    db.add(challenge)
+    db.flush()  # surface unique/FK errors before we trigger an email
+
+    # 3. Hand off to the email service.  Late-binding the default
+    # send_fn avoids importing EmailService at module-load time
+    # (which transitively imports the smtp config; a test env without
+    # SMTP wired up shouldn't fail to import this module).
+    if email_send_fn is None:
+        from backend.services.email_service import EmailService  # noqa: WPS433
+
+        email_send_fn = EmailService().send_email
+
+    subject = "Your SysManage verification code"
+    body = (
+        f"Your SysManage verification code is: {code}\n\n"
+        f"This code expires in {_EMAIL_OTP_LIFETIME_MINUTES} minutes "
+        "and can only be used once.\n\n"
+        "If you did not request this code, you can ignore this email."
+    )
+    try:
+        sent = bool(
+            email_send_fn(to_addresses=[user_email], subject=subject, body=body)
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # Don't surface SMTP failure to the caller as an exception —
+        # the user-facing endpoint should always return a generic
+        # "if your account exists we sent a code" response to avoid
+        # user-enumeration leaks.  Log it for ops.
+        logger.warning("MFA email send failed for user %s: %s", user_id, exc)
+        sent = False
+    return sent
+
+
+def _consume_email_challenge(db: Session, user_id, code: str) -> bool:
+    """Internal: check a candidate ``code`` against this user's live
+    email-OTP challenges and consume on match.
+
+    Public verify_user_code chains this after TOTP + backup-code
+    misses.  Iterates each live challenge (there's usually only one
+    after ``request_email_otp`` invalidates older ones) and Argon2-
+    compares; the first match wins and the row's ``consumed_at`` is
+    set so the code can't be replayed.
+
+    Returns False on any of:
+      - no live challenge for this user
+      - code is empty / non-string
+      - hash mismatch on every live row
+    """
+    if not code or not isinstance(code, str):
+        return False
+    candidate = code.strip()
+    if not candidate:
+        return False
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    live = (
+        db.query(MfaEmailChallenge)
+        .filter(
+            MfaEmailChallenge.user_id == user_id,
+            MfaEmailChallenge.consumed_at.is_(None),
+            MfaEmailChallenge.expires_at > now,
+        )
+        .all()
+    )
+    for challenge in live:
+        try:
+            _EMAIL_CODE_HASHER.verify(challenge.code_hash, candidate)
+        except VerifyMismatchError:
+            continue
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning("MFA email-OTP hash verify raised unexpectedly: %s", exc)
+            continue
+        challenge.consumed_at = now
+        return True
+    return False

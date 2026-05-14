@@ -149,6 +149,7 @@ __all__ = [
     # Multi-factor authentication (Phase 10.3)
     "UserMfaEnrollment",
     "MfaSettings",
+    "MfaEmailChallenge",
     "SINGLETON_MFA_SETTINGS_ID",
     # Repository mirroring (Phase 10.4)
     "MirrorRepository",

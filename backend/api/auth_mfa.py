@@ -46,7 +46,7 @@ from typing import List, Optional
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -100,6 +100,19 @@ class EnrollCompleteResponse(BaseModel):
 class VerifyRequest(BaseModel):
     pending_token: str
     code: str = Field(..., min_length=4, max_length=20)
+
+
+class EmailRequestRequest(BaseModel):
+    """Request body for /api/auth/mfa/email/request.
+
+    Re-uses the same MFA-pending token the verify endpoint accepts —
+    the user has already passed the password step but not yet the
+    second factor.  No other fields: ``user_id`` and ``email`` are
+    decoded from the token + looked up in the DB to avoid an open
+    "send me a code to <arbitrary email>" vector.
+    """
+
+    pending_token: str
 
 
 class DisableRequest(BaseModel):
@@ -312,6 +325,82 @@ async def mfa_verify(
         details={"method": method},
     )
     return {"Authorization": sign_jwt(user.userid), "method": method}
+
+
+@router.post("/api/auth/mfa/email/request")
+async def mfa_email_request(
+    request: EmailRequestRequest,
+    fastapi_request: Request,
+    db: Session = Depends(get_db),
+):
+    """Issue an email-OTP code to the user's registered email address.
+
+    Phase 10.3 fallback for users who can't reach their authenticator
+    app and have no backup codes left.  Requires the same pending
+    token the verify endpoint accepts — the user must have already
+    passed the password step (so we know which user to send to and
+    that the request isn't a random spammer).
+
+    Always returns 200 with a generic envelope, *regardless of whether
+    the user is enrolled in MFA or whether the email send succeeded*.
+    Surfacing those signals would let an attacker probe which userids
+    have MFA enabled or whether a given email is registered.  Real
+    failures land in the audit log + server logs only.
+    """
+    pending = decode_mfa_pending_token(request.pending_token)
+    if not pending:
+        raise HTTPException(
+            status_code=401,
+            detail=_("MFA challenge expired — please log in again."),
+        )
+    userid = pending.get("user_id")
+    user = db.query(models.User).filter(models.User.userid == userid).first()
+
+    # Single exit point with the always-identical envelope.  Every
+    # branch below produces side effects (audit log + maybe OTP send)
+    # but the wire-level response NEVER differentiates — that's the
+    # anti-enumeration property described in the docstring.  Bad
+    # pending token resolves to a missing/inactive user → same as the
+    # not-enrolled case; probing the endpoint gives an attacker no
+    # information about which userids exist or are MFA-enrolled.
+    if user and user.active:
+        if mfa_service.is_enrolled(db, user.id):
+            # Source IP is best-effort — behind a reverse proxy the
+            # request will carry X-Forwarded-For; we trust whatever
+            # ``fastapi_request.client`` surfaces and log only.  Not
+            # used for any auth decision.
+            client = getattr(fastapi_request, "client", None)
+            source_ip = client.host if client is not None else None
+            sent = mfa_service.request_email_otp(
+                db,
+                user_id=user.id,
+                user_email=user.userid,
+                ip_address=source_ip,
+            )
+            _audit(
+                db,
+                user,
+                "MFA email-OTP requested",
+                success=True,
+                details={"sent": sent},
+            )
+        else:
+            _audit(
+                db,
+                user,
+                "MFA email-OTP request ignored (not enrolled)",
+                success=True,
+                details={"reason": "not_enrolled"},
+            )
+        db.commit()
+
+    return {
+        "sent": True,
+        "message": _(
+            "If your account has MFA configured, an email with a "
+            "verification code has been dispatched."
+        ),
+    }
 
 
 # ---------------------------------------------------------------------

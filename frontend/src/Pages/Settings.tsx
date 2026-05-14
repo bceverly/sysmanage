@@ -258,13 +258,23 @@ const Settings: React.FC = () => {
     return defs.filter(d => !d.moduleRequired || licenseModules.includes(d.moduleRequired));
   }, [licenseModules]);
 
+  // Plugin-contributed Settings tabs honour the same ``moduleRequired``
+  // gate the hardcoded ``tabDefs`` use above (Phase 10.7 line 1822).
+  // Plugins that omit the field stay always-visible — pre-Phase-10.7
+  // behaviour.
+  const visiblePluginSettingsTabs = useMemo(() => {
+    return pluginSettingsTabs.filter(
+      pt => !pt.moduleRequired || licenseModules.includes(pt.moduleRequired),
+    );
+  }, [pluginSettingsTabs, licenseModules]);
+
   // Tab IDs in display order (filtered by license + plugin tabs appended).
   // Used for hash navigation (URL hash → activeTab index) and for ID-based
   // dispatch in handleTabChange / tab content rendering.
   const tabNames = useMemo(() => {
-    const pluginTabIds = pluginSettingsTabs.map(pt => pt.id);
+    const pluginTabIds = visiblePluginSettingsTabs.map(pt => pt.id);
     return [...tabDefs.map(d => d.id), ...pluginTabIds];
-  }, [tabDefs, pluginSettingsTabs]);
+  }, [tabDefs, visiblePluginSettingsTabs]);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -1232,7 +1242,7 @@ const Settings: React.FC = () => {
           {tabDefs.map(d => (
             <Tab key={d.id} label={t(d.labelKey, d.labelDefault)} />
           ))}
-          {pluginSettingsTabs.map(pt => (
+          {visiblePluginSettingsTabs.map(pt => (
             <Tab key={pt.id} label={t(pt.labelKey)} />
           ))}
         </Tabs>
@@ -1259,7 +1269,7 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'dynamic-secrets' && <DynamicSecretsSettings />}
         {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
         {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
-        {pluginSettingsTabs.map(pt => (
+        {visiblePluginSettingsTabs.map(pt => (
           tabNames[activeTab] === pt.id && (
             <Box key={pt.id}>
               <pt.component />

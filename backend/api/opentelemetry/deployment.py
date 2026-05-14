@@ -14,6 +14,10 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.observability_shim import (
+    try_engine_otel_deploy,
+    try_engine_otel_remove,
+)
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,
@@ -122,29 +126,44 @@ async def deploy_opentelemetry(
                 detail=_("Grafana URL is not available"),
             )
 
-        # Prepare the deployment message
-        command_message = create_command_message(
-            command_type="generic_command",
-            parameters={
-                "command_type": "deploy_opentelemetry",
-                "parameters": {
-                    "grafana_url": grafana_url,
-                    "grafana_host": (
-                        grafana_settings.host.fqdn if grafana_settings.host else None
-                    ),
+        # Phase 10.2 step 7 Phase D — try the engine-driven plan path
+        # first.  When the Pro+ observability_engine is loaded and the
+        # host platform is detectable, this routes through the engine's
+        # multi-platform plan builder + apply_deployment_plan dispatch
+        # (i.e. the agent's generic deploy_files / commands / packages
+        # phases) instead of the legacy ``deploy_opentelemetry`` WS
+        # command.  On engine-path failure (no license, undetectable
+        # platform, etc.) the helper returns None and we fall through
+        # to the legacy code below.
+        dispatch_path = "legacy_ws_command"
+        engine_msg_id = try_engine_otel_deploy(host, grafana_url, db)
+        if engine_msg_id is None:
+            # Legacy WS-command path — agent's per-platform
+            # otel_deploy_*.py modules service this.
+            command_message = create_command_message(
+                command_type="generic_command",
+                parameters={
+                    "command_type": "deploy_opentelemetry",
+                    "parameters": {
+                        "grafana_url": grafana_url,
+                        "grafana_host": (
+                            grafana_settings.host.fqdn
+                            if grafana_settings.host
+                            else None
+                        ),
+                    },
                 },
-            },
-        )
-
-        # Queue the message using the server queue manager
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
-            db=db,
-        )
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
+        else:
+            dispatch_path = "engine_plan"
 
         # Audit log the OpenTelemetry deployment request
         AuditService.log(
@@ -157,16 +176,17 @@ async def deploy_opentelemetry(
             entity_name=host.fqdn,
             description=f"Requested OpenTelemetry deployment for host {host.fqdn}",
             result=Result.SUCCESS,
-            details={"grafana_url": grafana_url},
+            details={"grafana_url": grafana_url, "dispatch_path": dispatch_path},
         )
 
         # Commit the message and audit log to the database
         db.commit()
 
         logger.info(
-            "Queued OpenTelemetry deployment for host %s (FQDN: %s)",
+            "Queued OpenTelemetry deployment for host %s (FQDN: %s) via %s",
             host_id,
             host.fqdn,
+            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(
@@ -243,24 +263,29 @@ async def remove_opentelemetry(
         # Validate host approval status
         validate_host_approval_status(host)
 
-        # Prepare the removal message
-        command_message = create_command_message(
-            command_type="generic_command",
-            parameters={
-                "command_type": "remove_opentelemetry",
-                "parameters": {},
-            },
-        )
-
-        # Queue the message
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
-            db=db,
-        )
+        # Phase 10.2 step 7 Phase D — engine-first dispatch with
+        # legacy fallback.  See deploy_opentelemetry above for the
+        # full rationale.
+        dispatch_path = "legacy_ws_command"
+        engine_msg_id = try_engine_otel_remove(host, db)
+        if engine_msg_id is None:
+            command_message = create_command_message(
+                command_type="generic_command",
+                parameters={
+                    "command_type": "remove_opentelemetry",
+                    "parameters": {},
+                },
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=host_id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
+        else:
+            dispatch_path = "engine_plan"
 
         # Audit log the OpenTelemetry removal request
         AuditService.log(
@@ -273,14 +298,16 @@ async def remove_opentelemetry(
             entity_name=host.fqdn,
             description=f"Requested OpenTelemetry removal for host {host.fqdn}",
             result=Result.SUCCESS,
+            details={"dispatch_path": dispatch_path},
         )
 
         db.commit()
 
         logger.info(
-            "Queued OpenTelemetry removal for host %s (FQDN: %s)",
+            "Queued OpenTelemetry removal for host %s (FQDN: %s) via %s",
             host_id,
             host.fqdn,
+            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(

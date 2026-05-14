@@ -2369,6 +2369,14 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
+    env:
+      # snapcore/action-build@v1 and action-publish@v1 are pinned on
+      # Node.js 20, which GitHub removes from runners on 2026-09-16.
+      # This flag tells the runner to force-run JS actions on Node.js 24
+      # until snapcore ships a Node 24-native release.  Drop this env
+      # once we bump to a snapcore action SHA that targets Node 24.
+      # See: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
     steps:
       - name: Checkout code
@@ -2992,7 +3000,7 @@ jobs:
           tar -tzf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz"
 
       - name: Upload FreeBSD port-tree artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: sysmanage-freebsd-port
           path: /tmp/sysmanage-v*-freebsd-port.tar.gz
@@ -3083,7 +3091,7 @@ jobs:
           tar -tzf "/tmp/sysmanage-v${VERSION}-openbsd-port.tar.gz"
 
       - name: Upload OpenBSD port-tree artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: sysmanage-openbsd-port-phase11.8
           path: /tmp/sysmanage-v*-openbsd-port.tar.gz
@@ -3192,7 +3200,7 @@ jobs:
           tar -tzf "/tmp/sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz"
 
       - name: Upload NetBSD pkgsrc artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: sysmanage-netbsd-pkgsrc
           path: /tmp/sysmanage-v*-netbsd-pkgsrc.tar.gz

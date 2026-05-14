@@ -117,81 +117,96 @@ try {
         }
     }
 
-    if (-not $PythonExe) {
-        Write-Log "ERROR: Python 3.9+ not found. Please install Python from https://www.python.org/downloads/"
-        throw "Python 3.9+ not found"
-    }
+    if ($PythonExe) {
+        # Create virtual environment
+        Write-Log "Creating Python virtual environment..."
+        $VenvPath = Join-Path $InstallDir ".venv"
 
-    # Create virtual environment
-    Write-Log "Creating Python virtual environment..."
-    $VenvPath = Join-Path $InstallDir ".venv"
+        if (Test-Path $VenvPath) {
+            Write-Log "Removing existing virtual environment..."
 
-    if (Test-Path $VenvPath) {
-        Write-Log "Removing existing virtual environment..."
+            # Stop service if running
+            $ServiceName = "SysManageServer"
+            $service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+            if ($service -and $service.Status -eq 'Running') {
+                Write-Log "Stopping service..."
+                Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 3
+            }
 
-        # Stop service if running
-        $ServiceName = "SysManageServer"
-        $service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
-        if ($service -and $service.Status -eq 'Running') {
-            Write-Log "Stopping service..."
-            Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 3
-        }
+            # Stop any Python processes from venv
+            $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
+            if (Test-Path $VenvPython) {
+                Get-Process | Where-Object { $_.Path -eq $VenvPython } | Stop-Process -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 3
+            }
 
-        # Stop any Python processes from venv
-        $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-        if (Test-Path $VenvPython) {
-            Get-Process | Where-Object { $_.Path -eq $VenvPython } | Stop-Process -Force -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 3
-        }
-
-        # Remove venv
-        $retries = 3
-        $removed = $false
-        for ($i = 1; $i -le $retries; $i++) {
-            try {
-                Remove-Item -Path $VenvPath -Recurse -Force -ErrorAction Stop
-                $removed = $true
-                break
-            } catch {
-                Write-Log "Attempt $i failed to remove venv: $_"
-                if ($i -lt $retries) {
-                    Start-Sleep -Seconds 3
+            # Remove venv
+            $retries = 3
+            $removed = $false
+            for ($i = 1; $i -le $retries; $i++) {
+                try {
+                    Remove-Item -Path $VenvPath -Recurse -Force -ErrorAction Stop
+                    $removed = $true
+                    break
+                } catch {
+                    Write-Log "Attempt $i failed to remove venv: $_"
+                    if ($i -lt $retries) {
+                        Start-Sleep -Seconds 3
+                    }
                 }
+            }
+
+            if (-not $removed) {
+                Write-Log "ERROR: Could not remove existing virtual environment"
+                throw "Failed to remove existing virtual environment"
             }
         }
 
-        if (-not $removed) {
-            Write-Log "ERROR: Could not remove existing virtual environment"
-            throw "Failed to remove existing virtual environment"
+        & $PythonExe -m venv $VenvPath 2>&1 | Out-File -FilePath $LogFile -Append
+        if ($LASTEXITCODE -ne 0) {
+            Write-Log "ERROR: Failed to create virtual environment (exit code $LASTEXITCODE)"
+            throw "Failed to create virtual environment"
         }
-    }
+        Write-Log "Virtual environment created successfully"
 
-    & $PythonExe -m venv $VenvPath 2>&1 | Out-File -FilePath $LogFile -Append
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "ERROR: Failed to create virtual environment (exit code $LASTEXITCODE)"
-        throw "Failed to create virtual environment"
-    }
-    Write-Log "Virtual environment created successfully"
+        # Install dependencies
+        $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
+        $RequirementsFile = Join-Path $InstallDir "requirements.txt"
 
-    # Install dependencies
-    $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-    $RequirementsFile = Join-Path $InstallDir "requirements.txt"
+        if (-not (Test-Path $RequirementsFile)) {
+            Write-Log "ERROR: requirements.txt not found at $RequirementsFile"
+            throw "requirements.txt not found"
+        }
 
-    if (-not (Test-Path $RequirementsFile)) {
-        Write-Log "ERROR: requirements.txt not found at $RequirementsFile"
-        throw "requirements.txt not found"
-    }
+        Write-Log "Installing Python dependencies..."
+        Write-Log "Running: pip install -r requirements.txt"
+        & $VenvPython -m pip install -r $RequirementsFile --disable-pip-version-check 2>&1 | Tee-Object -FilePath $LogFile -Append
 
-    Write-Log "Installing Python dependencies..."
-    Write-Log "Running: pip install -r requirements.txt"
-    & $VenvPython -m pip install -r $RequirementsFile --disable-pip-version-check 2>&1 | Tee-Object -FilePath $LogFile -Append
-
-    if ($LASTEXITCODE -eq 0) {
-        Write-Log "Dependencies installed successfully"
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Dependencies installed successfully"
+        } else {
+            Write-Log "ERROR: Failed to install dependencies (exit code $LASTEXITCODE)"
+            throw "Failed to install dependencies"
+        }
     } else {
-        Write-Log "ERROR: Failed to install dependencies (exit code $LASTEXITCODE)"
-        throw "Failed to install dependencies"
+        # Soft-fail: same rationale as check-python.ps1's matching
+        # block.  Without Python on PATH we cannot build the venv
+        # or install Python dependencies, but the MSI install
+        # itself must still complete cleanly so:
+        #   * winget-pkgs sandboxed validation passes (sandbox has
+        #     no internet access to python.org for check-python.ps1
+        #     to install Python)
+        #   * offline / air-gapped installs proceed and the
+        #     operator installs Python afterwards
+        # After installing Python 3.9+, the operator re-runs the
+        # MSI; the MajorUpgrade element detects the existing
+        # install, the custom actions fire again, and Python is
+        # now on PATH so venv + pip install succeed.
+        Write-Log "WARNING: Python 3.9+ not found on PATH."
+        Write-Log "WARNING: Skipping virtual-env and dependency install."
+        Write-Log "WARNING: Install Python 3.9+ from https://www.python.org/downloads/"
+        Write-Log "WARNING: then re-run the SysManage Server MSI to finish setup."
     }
 
     # Create configuration file if it doesn't exist

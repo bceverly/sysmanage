@@ -213,6 +213,160 @@ class TestVerifyUserCode:
         assert ok is False
         assert method is None
 
+    def test_falls_back_to_email_otp_when_totp_and_backup_miss(self):
+        """Email-OTP is the third path: when TOTP doesn't validate
+        the code AND no backup code matches, the verifier checks live
+        email-OTP challenges as a last resort."""
+        secret = mfa_service.generate_totp_secret()
+        enrollment = UserMfaEnrollment(
+            user_id="00000000-0000-0000-0000-000000000000",
+            totp_secret_encrypted=mfa_service.encrypt_secret(secret),
+            backup_codes_hashed=[],
+            enrolled_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        # Build a live email challenge for the same user, with the
+        # plaintext code "123456".
+        live_challenge = MagicMock()
+        live_challenge.code_hash = mfa_service._EMAIL_CODE_HASHER.hash("123456")
+        live_challenge.consumed_at = None
+
+        session = MagicMock()
+        # Enrollment lookup → enrollment; settings lookup → None;
+        # live challenge query → [live_challenge].
+        session.query.return_value.filter.return_value.first.side_effect = [
+            enrollment,
+            None,
+        ]
+        session.query.return_value.filter.return_value.all.return_value = [
+            live_challenge
+        ]
+
+        ok, method = mfa_service.verify_user_code(
+            session, "00000000-0000-0000-0000-000000000000", "123456"
+        )
+        assert ok is True
+        assert method == "email_otp"
+        assert enrollment.last_used_method == "email_otp"
+        assert live_challenge.consumed_at is not None
+
+
+class TestEmailOtpFlow:
+    """Coverage for the email-OTP request/verify path used as the
+    third MFA factor (Phase 10.3 follow-up)."""
+
+    def test_generate_email_otp_returns_six_digits(self):
+        code = mfa_service.generate_email_otp_code()
+        assert len(code) == 6
+        assert code.isdigit()
+
+    def test_generate_email_otp_pads_leading_zeros(self):
+        """Re-roll a few hundred times and verify NONE come back
+        shorter than 6 chars — the zfill is the only thing keeping
+        small ``randbelow`` outputs at full width."""
+        for _ in range(200):
+            code = mfa_service.generate_email_otp_code()
+            assert len(code) == 6, f"got short code {code!r}; zfill regressed?"
+
+    def test_request_invalidates_existing_live_challenges(self):
+        """Issuing a new code must mark any prior unconsumed challenge
+        as consumed.  Without this, two open codes would coexist and
+        the second-issued one would be the user-facing "fresh" one
+        while the first stays valid — a confusing-and-exploitable
+        ambiguity."""
+        old_challenge = MagicMock()
+        old_challenge.consumed_at = None
+
+        captured = {}
+
+        def fake_send(to_addresses, subject, body):
+            captured["to"] = to_addresses
+            captured["subject"] = subject
+            captured["body"] = body
+            return True
+
+        session = MagicMock()
+        session.query.return_value.filter.return_value.all.return_value = [
+            old_challenge
+        ]
+        session.add = MagicMock()
+
+        sent = mfa_service.request_email_otp(
+            session,
+            user_id="user-1",
+            user_email="user@example.com",
+            email_send_fn=fake_send,
+        )
+        assert sent is True
+        assert (
+            old_challenge.consumed_at is not None
+        ), "prior live challenge was not invalidated"
+        assert captured["to"] == ["user@example.com"]
+        # The 6-digit code must appear in the email body (otherwise the
+        # user has no way to find it).
+        import re
+
+        assert re.search(r"\b\d{6}\b", captured["body"]), captured["body"]
+
+    def test_request_returns_false_when_email_send_raises(self):
+        """SMTP failures must NOT propagate — the user-facing endpoint
+        always returns "if your account exists we sent a code" to
+        avoid user-enumeration.  This locks in the "swallow and
+        report False" contract."""
+
+        def fake_send(to_addresses, subject, body):
+            raise RuntimeError("smtp connection refused")
+
+        session = MagicMock()
+        session.query.return_value.filter.return_value.all.return_value = []
+        session.add = MagicMock()
+
+        sent = mfa_service.request_email_otp(
+            session,
+            user_id="user-1",
+            user_email="user@example.com",
+            email_send_fn=fake_send,
+        )
+        assert sent is False
+
+    def test_consume_rejects_wrong_code(self):
+        challenge = MagicMock()
+        challenge.code_hash = mfa_service._EMAIL_CODE_HASHER.hash("123456")
+        challenge.consumed_at = None
+
+        session = MagicMock()
+        session.query.return_value.filter.return_value.all.return_value = [challenge]
+        ok = mfa_service._consume_email_challenge(session, "user-1", "000000")
+        assert ok is False
+        # The miss must NOT consume the challenge — a wrong-then-right
+        # retry within the lifetime window has to still work.
+        assert challenge.consumed_at is None
+
+    def test_consume_accepts_correct_code_and_marks_consumed(self):
+        challenge = MagicMock()
+        challenge.code_hash = mfa_service._EMAIL_CODE_HASHER.hash("424242")
+        challenge.consumed_at = None
+
+        session = MagicMock()
+        session.query.return_value.filter.return_value.all.return_value = [challenge]
+        ok = mfa_service._consume_email_challenge(session, "user-1", "424242")
+        assert ok is True
+        assert challenge.consumed_at is not None
+
+    def test_consume_with_no_live_challenges_returns_false(self):
+        session = MagicMock()
+        session.query.return_value.filter.return_value.all.return_value = []
+        ok = mfa_service._consume_email_challenge(session, "user-1", "424242")
+        assert ok is False
+
+    def test_consume_rejects_empty_or_whitespace_code(self):
+        session = MagicMock()
+        # No query should be made — the early-return on falsy code
+        # short-circuits before db.query is touched.
+        assert mfa_service._consume_email_challenge(session, "u", "") is False
+        assert mfa_service._consume_email_challenge(session, "u", "   ") is False
+        # Confirm we didn't bother the DB for the empty-code path.
+        session.query.assert_not_called()
+
     def test_rejects_invalid_code(self):
         secret = mfa_service.generate_totp_secret()
         enrollment = UserMfaEnrollment(
