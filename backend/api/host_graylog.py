@@ -15,13 +15,9 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.services.observability_shim import try_engine_graylog_attach
 from backend.utils.verbosity_logger import sanitize_log
-from backend.websocket.messages import CommandMessage, CommandType
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-queue_ops = QueueOperations()
 
 
 @router.get("/host/{host_id}/graylog_attachment")
@@ -134,86 +130,51 @@ async def attach_host_to_graylog(
         graylog_server = request.get("graylog_server")
         port = request.get("port")
 
-        # Engine-first path: when the Pro+ observability_engine is
-        # loaded, route Linux + *BSD syslog/gelf attaches through the
-        # engine's plan builders (rsyslog/syslog-ng autodetect on
-        # Linux; sed-merge on BSD).  On any miss — engine not loaded,
-        # unsupported platform/mechanism combo, or exception during
-        # build/enqueue — try_engine_graylog_attach returns None and
-        # we fall through to the legacy WS command path below.
-        if mechanism and graylog_server and port is not None:
-            try:
-                engine_message_id = try_engine_graylog_attach(
-                    host=host,
-                    mechanism=mechanism,
-                    graylog_server=graylog_server,
-                    port=int(port),
-                )
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                logger.warning(
-                    "Engine Graylog attach raised unexpectedly for host %s; "
-                    "falling back to legacy WS command: %s",
-                    host_id,
-                    exc,
-                )
-                engine_message_id = None
-            if engine_message_id is not None:
-                logger.info(
-                    "Graylog attach for host %s routed through engine; "
-                    "queued message_id=%s",
-                    host_id,
-                    engine_message_id,
-                )
-                return {
-                    "success": True,
-                    "message": _("Graylog attachment command queued successfully"),
-                }
+        # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
+        # Routes Linux + *BSD + Windows-sidecar through the engine's
+        # plan-builders (Linux autodetect rsyslog/syslog-ng, BSD
+        # execute-time sed merge, Windows no-token PowerShell
+        # install).  The legacy ``attach_to_graylog`` WS-command
+        # branch was removed alongside the agent's
+        # ``graylog_attachment.py`` module.
+        if not (mechanism and graylog_server and port is not None):
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Graylog attach requires mechanism, graylog_server, "
+                    "and port in the request body."
+                ),
+            )
 
-        # Create command message
-        command_data = {
-            "mechanism": mechanism,
-            "graylog_server": graylog_server,
-            "port": port,
-        }
-
-        command_message = CommandMessage(
-            command_type=CommandType.ATTACH_TO_GRAYLOG, parameters=command_data
-        )
-
-        # Queue the message for outbound delivery
         try:
-            logger.info(
-                "About to queue Graylog attachment command for host %s using mechanism %s",
+            engine_message_id = try_engine_graylog_attach(
+                host=host,
+                mechanism=mechanism,
+                graylog_server=graylog_server,
+                port=int(port),
+            )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(
+                "Engine Graylog attach raised unexpectedly for host %s: %s",
                 host_id,
-                request.get("mechanism"),
+                exc,
             )
-            logger.info("Command message dict: %s", command_message.to_dict())
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message.to_dict(),
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
+            engine_message_id = None
+
+        if engine_message_id is None:
+            raise HTTPException(
+                status_code=503,
+                detail=_(
+                    "Graylog attach requires the Pro+ observability_engine "
+                    "to be loaded on the server."
+                ),
             )
-            logger.info(
-                "Successfully queued Graylog attachment command for host %s using mechanism %s",
-                host_id,
-                request.get("mechanism"),
-            )
-            # Commit the session to persist the queued message
-            session.commit()
-            logger.info(
-                "Successfully committed Graylog attachment command for host %s",
-                host_id,
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to queue Graylog attachment command for host %s: %s",
-                host_id,
-                str(e),
-                exc_info=True,
-            )
-            raise
+
+        logger.info(
+            "Graylog attach for host %s routed through engine; queued message_id=%s",
+            host_id,
+            engine_message_id,
+        )
 
         return {
             "success": True,

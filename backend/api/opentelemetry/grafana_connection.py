@@ -17,20 +17,11 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.services.observability_shim import (
     try_engine_otel_grafana_connection,
 )
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_manager import (
-    Priority,
-    QueueDirection,
-    ServerMessageQueueManager,
-)
 
 from .models import OpenTelemetryDeployResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-
-# Initialize queue manager
-server_queue_manager = ServerMessageQueueManager()
 
 
 @router.post(
@@ -109,36 +100,21 @@ async def connect_opentelemetry_to_grafana(
                 detail=_("Grafana URL is not available"),
             )
 
-        # Engine-first dispatch (Phase 10.2 step 7 close-out, item A):
-        # try the engine path; on miss fall through to the legacy
-        # ``connect_opentelemetry_grafana`` WS command.  The engine
-        # plan is restart-only (matches the legacy semantics — config
+        # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
+        # Plan is restart-only (matches legacy semantics — config
         # was pinned at deploy time, connect just triggers a service
         # restart so any out-of-band edits take effect).
         engine_msg_id = try_engine_otel_grafana_connection(
             host, "connect", grafana_url, db
         )
         if engine_msg_id is None:
-            command_message = create_command_message(
-                command_type="generic_command",
-                parameters={
-                    "command_type": "connect_opentelemetry_grafana",
-                    "parameters": {
-                        "grafana_url": grafana_url,
-                    },
-                },
+            raise HTTPException(
+                status_code=503,
+                detail=_(
+                    "OpenTelemetry Grafana connection requires the Pro+ "
+                    "observability_engine to be loaded on the server."
+                ),
             )
-            server_queue_manager.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                priority=Priority.NORMAL,
-                db=db,
-            )
-            dispatch_path = "legacy_ws_command"
-        else:
-            dispatch_path = "engine_plan"
 
         AuditService.log(
             db=db,
@@ -149,11 +125,11 @@ async def connect_opentelemetry_to_grafana(
             entity_id=host_id,
             entity_name=host.fqdn,
             description=(
-                f"Requested OpenTelemetry → Grafana connection for host " f"{host.fqdn}"
+                f"Requested OpenTelemetry → Grafana connection for host {host.fqdn}"
             ),
             result=Result.SUCCESS,
             details={
-                "dispatch_path": dispatch_path,
+                "dispatch_path": "engine_plan",
                 "grafana_url": grafana_url,
                 "grafana_action": "connect",
             },
@@ -161,10 +137,9 @@ async def connect_opentelemetry_to_grafana(
         db.commit()
 
         logger.info(
-            "Queued OpenTelemetry Grafana connection for host %s (FQDN: %s) via %s",
+            "Queued OpenTelemetry Grafana connection for host %s (FQDN: %s) via engine_plan",
             host_id,
             host.fqdn,
-            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(
@@ -241,29 +216,16 @@ async def disconnect_opentelemetry_from_grafana(
 
         validate_host_approval_status(host)
 
-        # Engine-first dispatch — see connect endpoint above for rationale.
-        # ``grafana_url`` is unused on disconnect but the helper accepts an
-        # empty string so we don't need a separate plumbing path.
+        # Engine path only — see connect endpoint above for rationale.
         engine_msg_id = try_engine_otel_grafana_connection(host, "disconnect", "", db)
         if engine_msg_id is None:
-            command_message = create_command_message(
-                command_type="generic_command",
-                parameters={
-                    "command_type": "disconnect_opentelemetry_grafana",
-                    "parameters": {},
-                },
+            raise HTTPException(
+                status_code=503,
+                detail=_(
+                    "OpenTelemetry Grafana disconnection requires the Pro+ "
+                    "observability_engine to be loaded on the server."
+                ),
             )
-            server_queue_manager.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                priority=Priority.NORMAL,
-                db=db,
-            )
-            dispatch_path = "legacy_ws_command"
-        else:
-            dispatch_path = "engine_plan"
 
         AuditService.log(
             db=db,
@@ -274,20 +236,18 @@ async def disconnect_opentelemetry_from_grafana(
             entity_id=host_id,
             entity_name=host.fqdn,
             description=(
-                f"Requested OpenTelemetry → Grafana disconnection for host "
-                f"{host.fqdn}"
+                f"Requested OpenTelemetry → Grafana disconnection for host {host.fqdn}"
             ),
             result=Result.SUCCESS,
-            details={"dispatch_path": dispatch_path, "grafana_action": "disconnect"},
+            details={"dispatch_path": "engine_plan", "grafana_action": "disconnect"},
         )
         db.commit()
 
         logger.info(
             "Queued OpenTelemetry Grafana disconnection for host %s "
-            "(FQDN: %s) via %s",
+            "(FQDN: %s) via engine_plan",
             host_id,
             host.fqdn,
-            dispatch_path,
         )
 
         return OpenTelemetryDeployResponse(
