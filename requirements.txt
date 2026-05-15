@@ -63,7 +63,7 @@ SQLAlchemy==2.0.43
 starlette>=0.52.1,<1.0
 tomlkit==0.14.0
 typing_extensions>=4.12.2
-ujson==5.12.0  # CVE-2026-32874 (memory leak DoS), CVE-2026-32875 (integer overflow)
+ujson==5.12.1  # patch covers prior CVEs (memory-leak DoS / integer overflow) + Dependabot #115 (ujson.dump() write-failure memory leak)
 uvicorn==0.40.0
 watchfiles==1.1.0
 websockets==16.0
