@@ -138,30 +138,51 @@ preflight "$AGENT_MSI_ARM64"
 echo "  All four MSIs reachable."
 
 # ---------------------------------------------------------------
-# Pre-flight 2: close any prior open v${VERSION} PRs from this
-# author so we don't end up with two competing submissions at the
-# same version.  Set ``SKIP_STALE_CLOSE=1`` to bypass.
+# Pre-flight 2: close every open sysmanage* PR from this author on
+# microsoft/winget-pkgs.  We do this UNCONDITIONALLY by default —
+# every prior submission (for ANY version) is superseded by the
+# v${VERSION} submission we're about to make, so leaving them open
+# just accumulates bot-template comments and confuses reviewers.
+#
+# Filter: title contains "sysmanage" — matches the standard komac
+# titles ("Add version: sysmanage.X version Y.Z" / "New package:
+# sysmanage.X version Y.Z").  Safe for this submitter because we
+# only ever submit sysmanage packages.
+#
+# Set ``SKIP_STALE_CLOSE=1`` to bypass (rare — e.g. if you've
+# already closed prior PRs by hand and don't want the script
+# touching anything).
+# Set ``STALE_SCOPE=current`` to fall back to the prior behaviour
+# of closing only same-version PRs (e.g. when running parallel
+# submissions for multiple distinct versions).
 # ---------------------------------------------------------------
 if [ "${SKIP_STALE_CLOSE:-0}" != "1" ]; then
     echo
-    echo "Pre-flight: scanning for stale v${VERSION} PRs to close..."
+    SCOPE="${STALE_SCOPE:-all}"
+    if [ "${SCOPE}" = "current" ]; then
+        echo "Pre-flight: scanning for stale v${VERSION} PRs to close..."
+        FILTER_EXPR='.[] | select(.title | contains("'"${VERSION}"'")) | .number'
+    else
+        echo "Pre-flight: scanning for ALL open sysmanage PRs from this author..."
+        FILTER_EXPR='.[] | select(.title | test("sysmanage"; "i")) | .number'
+    fi
     STALE_PRS="$(gh search prs \
         --repo microsoft/winget-pkgs \
         --author bceverly \
         --state open \
         --json number,title \
-        --jq '.[] | select(.title | contains("'"${VERSION}"'")) | .number' \
+        --jq "${FILTER_EXPR}" \
         2>/dev/null || true)"
     if [ -z "${STALE_PRS}" ]; then
-        echo "  No prior v${VERSION} PRs found.  Proceeding to submission."
+        echo "  No prior PRs found.  Proceeding to submission."
     else
-        STALE_COMMENT="Superseded by a corrected submission for v${VERSION}.  Closing in favour of the fresh PR."
+        STALE_COMMENT="Superseded by the v${VERSION} submission.  The corresponding MSI on the GitHub release for v${VERSION} carries every fix this PR was bouncing on (install.ps1 / create-service.ps1 soft-fail when Python is absent, MSI metadata corrected, Python.Python.3.12 declared as a winget \`PackageDependencies\` entry).  Closing in favour of the fresh PR."
         for pr in ${STALE_PRS}; do
             echo "  - PR #${pr}: posting supersede comment + closing"
             gh pr comment "${pr}" --repo microsoft/winget-pkgs --body "${STALE_COMMENT}" \
                 || echo "    (gh pr comment failed for #${pr}; continuing)"
             gh pr close   "${pr}" --repo microsoft/winget-pkgs \
-                --comment "superseded by fresh v${VERSION} submission" \
+                --comment "superseded by v${VERSION} submission" \
                 || echo "    (gh pr close failed for #${pr}; close it manually)"
         done
         echo "  Stale PR cleanup complete."
