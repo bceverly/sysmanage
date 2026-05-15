@@ -14,7 +14,7 @@ been applied — without it, the module would load against a stale schema
 and fail in subtle ways (missing columns, missing tables, etc.).
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from threading import RLock
 from typing import Any, Dict, List, Optional, Set
 

@@ -7,6 +7,7 @@ and generates requirements-prod.txt, excluding development/testing dependencies.
 """
 
 import re
+import sys
 from pathlib import Path
 
 
@@ -143,4 +144,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

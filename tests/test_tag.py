@@ -15,7 +15,6 @@ from backend.api.tag import (
     TagCreate,
     TagResponse,
     TagUpdate,
-    TagWithHostsResponse,
     add_tag_to_host,
     create_tag,
     delete_tag,

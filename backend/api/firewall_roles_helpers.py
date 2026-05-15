@@ -78,7 +78,9 @@ class PortResponse(BaseModel):
     ipv6: bool
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -100,7 +102,9 @@ class FirewallRoleResponse(BaseModel):
     open_ports: List[PortResponse] = []
 
     @validator("id", "created_by", "updated_by", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -120,7 +124,9 @@ class PortCreate(BaseModel):
     ipv6: bool = True
 
     @validator("port_number")
-    def validate_port_number(cls, port_number):  # pylint: disable=no-self-argument
+    def validate_port_number(
+        cls, port_number
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate port number is in valid range. Port 0 means 'any port'."""
         if port_number < 0 or port_number > 65535:
             raise ValueError(
@@ -129,7 +135,9 @@ class PortCreate(BaseModel):
         return port_number
 
     @validator("udp")
-    def validate_protocol(cls, udp, values):  # pylint: disable=no-self-argument
+    def validate_protocol(
+        cls, udp, values
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate that at least one protocol is selected."""
         tcp = values.get("tcp", True)
         if not tcp and not udp:
@@ -137,7 +145,9 @@ class PortCreate(BaseModel):
         return udp
 
     @validator("ipv6")
-    def validate_ip_version(cls, ipv6, values):  # pylint: disable=no-self-argument
+    def validate_ip_version(
+        cls, ipv6, values
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate that at least one IP version is selected."""
         ipv4 = values.get("ipv4", True)
         if not ipv4 and not ipv6:
@@ -154,7 +164,9 @@ class FirewallRoleCreate(BaseModel):
     open_ports: List[PortCreate] = []
 
     @validator("name")
-    def validate_name(cls, name):  # pylint: disable=no-self-argument
+    def validate_name(
+        cls, name
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate role name."""
         if not name or name.strip() == "":
             raise ValueError(_("Firewall role name is required"))
@@ -170,7 +182,9 @@ class FirewallRoleUpdate(BaseModel):
     open_ports: Optional[List[PortCreate]] = None
 
     @validator("name")
-    def validate_name(cls, name):  # pylint: disable=no-self-argument
+    def validate_name(
+        cls, name
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate role name if provided."""
         if name is not None:
             if name.strip() == "":
@@ -196,7 +210,9 @@ class HostFirewallRoleResponse(BaseModel):
     created_at: datetime
 
     @validator("id", "firewall_role_id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)

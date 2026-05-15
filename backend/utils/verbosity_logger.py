@@ -30,12 +30,7 @@ def sanitize_log(value) -> str:
     # forge field boundaries in tab-delimited log formats.  Other
     # control chars (form-feed, vertical-tab, NUL) are rare in user
     # input and aren't part of the rule's sanitizer pattern.
-    return (
-        str(value)
-        .replace("\r", "")
-        .replace("\n", "")
-        .replace("\t", "")
-    )
+    return str(value).replace("\r", "").replace("\n", "").replace("\t", "")
 
 
 class FlexibleLogger:

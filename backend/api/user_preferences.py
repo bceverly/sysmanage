@@ -2,7 +2,6 @@
 This module houses the API routes for user preferences management in SysManage.
 """
 
-import json
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -17,7 +16,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ class DataGridColumnPreferenceRequest(BaseModel):
     @validator("grid_identifier")
     def validate_grid_identifier(
         cls, grid_identifier
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate grid identifier."""
         if not grid_identifier or grid_identifier.strip() == "":
             raise ValueError(_("Grid identifier is required"))
@@ -54,7 +53,9 @@ class DataGridColumnPreferenceResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", "user_id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)

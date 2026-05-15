@@ -75,8 +75,7 @@ def create_banner(output_path, width=1920, height=480):
         # Try to use a nice font
         font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 120)
         font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 48)
-    except:
-        # Fallback to default
+    except Exception:  # noqa: BLE001  # Fallback to default
         font_large = ImageFont.load_default()
         font_small = ImageFont.load_default()
 

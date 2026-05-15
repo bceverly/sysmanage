@@ -16,7 +16,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 
 router = APIRouter()
 

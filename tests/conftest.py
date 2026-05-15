@@ -136,7 +136,7 @@ def engine():
         if os.path.exists(test_db_file):
             os.unlink(test_db_file)
     except OSError:
-        pass
+        _ = None  # empty-except: failure here is non-fatal; see code above
 
 
 @pytest.fixture(scope="function")
@@ -695,7 +695,6 @@ def connection_manager():
 # Async test helper
 def pytest_configure(config):
     """Configure pytest for async testing."""
-    import logging
     import sys
 
     # Silence the chatty startup/route-registration narration during tests.

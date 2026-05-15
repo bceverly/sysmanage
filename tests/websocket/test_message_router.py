@@ -3,7 +3,7 @@ Comprehensive unit tests for WebSocket message routing.
 Tests message routing to appropriate handlers based on message type.
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

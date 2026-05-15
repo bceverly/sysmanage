@@ -3,7 +3,6 @@ Tests for backend/licensing/module_loader.py module.
 Tests Pro+ Cython module loader functionality.
 """
 
-import platform
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 

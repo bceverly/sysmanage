@@ -3,7 +3,7 @@ Test server-side data separation functionality.
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest

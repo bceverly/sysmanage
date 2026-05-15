@@ -7,12 +7,10 @@ API endpoints.
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
-import pytest
-from fastapi import HTTPException
 
-from backend.persistence.models import Host, User, HostChild
+from backend.persistence.models import Host
 
 
 class TestApproveHostEndpoint:

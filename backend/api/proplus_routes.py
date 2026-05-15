@@ -96,6 +96,7 @@ def _feature_dependency(feature):
             return _wrap(func)
         # Dependency mode (called by FastAPI Depends with no args)
         _check()
+        return None
 
     # Hide the func parameter from FastAPI's signature inspection
     gate.__signature__ = inspect.Signature(parameters=[])
@@ -168,6 +169,7 @@ def _module_dependency(module):
             return _wrap(func)
         # Dependency mode
         _check()
+        return None
 
     gate.__signature__ = inspect.Signature(parameters=[])
     return gate

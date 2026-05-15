@@ -5,7 +5,7 @@ handle_third_party_repository_update, and handle_antivirus_status_update.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

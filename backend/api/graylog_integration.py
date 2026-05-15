@@ -4,7 +4,7 @@ Graylog integration API endpoints for managing Graylog server connections.
 
 import logging
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Optional
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -21,7 +21,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.services.vault_service import VaultError, VaultService
 
 router = APIRouter()

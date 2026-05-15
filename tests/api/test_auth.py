@@ -3,7 +3,7 @@ Unit tests for authentication API endpoints.
 Tests /login and /refresh endpoints with various scenarios.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from argon2 import PasswordHasher
 

@@ -3,8 +3,6 @@ Tests for backend/api/error_constants.py module.
 Tests all error message functions and constants.
 """
 
-import pytest
-
 
 class TestAuthenticationErrors:
     """Tests for authentication and authorization errors."""

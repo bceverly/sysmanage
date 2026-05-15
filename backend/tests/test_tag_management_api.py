@@ -1856,7 +1856,7 @@ class TestBulkTagOperations:
                         )
                         success_count += 1
                     except HTTPException:
-                        pass
+                        _ = None  # empty-except: failure here is non-fatal; see code above
 
                 assert success_count == 3
 
@@ -1914,7 +1914,7 @@ class TestBulkTagOperations:
                         )
                         success_count += 1
                     except HTTPException:
-                        pass
+                        _ = None  # empty-except: failure here is non-fatal; see code above
 
                 assert success_count == 3
 

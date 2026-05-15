@@ -262,9 +262,8 @@ class TestPhase10FeatureCodesRegistered:
     def test_phase10_module_codes_registered(self):
         from backend.licensing.features import ModuleCode
 
-        FeatureCode_unused = ModuleCode.from_string("virtualization_engine")
+        ModuleCode.from_string("virtualization_engine")
         ModuleCode.from_string("observability_engine")
-        del FeatureCode_unused
 
     def test_enterprise_tier_includes_phase10_features(self):
         from backend.licensing.features import (

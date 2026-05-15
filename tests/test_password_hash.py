@@ -3,10 +3,6 @@ Tests for backend/utils/password_hash.py module.
 Tests password hashing utilities for different operating systems.
 """
 
-import re
-
-import pytest
-
 from backend.utils.password_hash import (
     CRYPT_B64,
     _b64_encode_24bit,

@@ -13,13 +13,26 @@ Public — no auth required.  All fields are non-secret.
 import logging
 
 from fastapi import APIRouter
-
-from backend.config import config as config_module
-from backend.licensing.module_loader import module_loader
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["server-info"])
+
+
+# Static fallback envelope — what an unlicensed OSS deployment would
+# legitimately return.  Used by the outermost ``try/except`` below so a
+# transient bootstrap failure can never escape as a 500 and flake the
+# Playwright ``should not have critical failed requests`` check on
+# Windows CI, where startup is slowest.
+_FALLBACK_ENVELOPE = {
+    "role": "standard",
+    "version": "unknown",
+    "license_tier": "community",
+    "loaded_engines": [],
+    "expected_engine_for_role": None,
+    "role_engine_loaded": True,
+}
 
 
 _AIRGAP_ENGINE_FOR_ROLE = {
@@ -63,8 +76,17 @@ def get_server_info():
     ``logger.exception`` for post-mortem.
     """
     try:
+        # Import lazily — if ``config`` or ``module_loader`` haven't
+        # finished initialising (which is observable on cold Windows CI
+        # starts where the worker handles the first ``/api/v1/server-info``
+        # before app startup completes), we'd otherwise raise at import
+        # time before even reaching the broad-except below.
+        from backend.config import config as config_module  # noqa: PLC0415
+        from backend.licensing.module_loader import module_loader  # noqa: PLC0415
+
         role = config_module.get_server_role()
-        loaded = sorted(module_loader.loaded_modules.keys())
+        loaded_dict = getattr(module_loader, "loaded_modules", None) or {}
+        loaded = sorted(loaded_dict.keys())
         expected_engine = _AIRGAP_ENGINE_FOR_ROLE.get(role)
         role_engine_loaded = expected_engine is None or expected_engine in loaded
         license_tier = _resolve_license_tier()
@@ -79,25 +101,36 @@ def get_server_info():
         }
     except Exception:  # pylint: disable=broad-exception-caught
         # See docstring above — the audit trail goes to logs;
-        # callers get a degraded-but-valid envelope.
-        logger.exception("server-info handler failed; returning safe-degraded envelope")
-        return {
-            "role": "standard",
-            "version": _resolve_version(),
-            "license_tier": "community",
-            "loaded_engines": [],
-            "expected_engine_for_role": None,
-            "role_engine_loaded": True,
-        }
+        # callers get a degraded-but-valid envelope.  We return an
+        # explicit JSONResponse rather than a dict so even if FastAPI's
+        # response serialiser hits a problem (e.g. a Pydantic recursion
+        # under high load on Windows), the bytes go straight to the
+        # wire.
+        try:
+            logger.exception(
+                "server-info handler failed; returning safe-degraded envelope"
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass  # logging itself can fail during shutdown — never raise here
+        return JSONResponse(content=_FALLBACK_ENVELOPE, status_code=200)
 
 
 def _resolve_version() -> str:
-    """Best-effort sysmanage version string."""
+    """Best-effort sysmanage version string.
+
+    Caught broadly — this is called from the fallback path of
+    ``get_server_info`` (when the primary path already raised) and
+    *must not* itself raise; any uncaught exception here would propagate
+    out as a 500 and re-trigger the Playwright performance check we
+    were trying to insulate against.  Past offender: a Windows-specific
+    ``OSError`` from importing the auto-generated ``backend/__init__.py``
+    when its file-system cache was stale at first request.
+    """
     try:
         from backend import __version__  # type: ignore
 
         return str(__version__)
-    except (ImportError, AttributeError):
+    except Exception:  # pylint: disable=broad-exception-caught
         return "unknown"
 
 

@@ -20,7 +20,6 @@ import aiohttp
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
-from backend.licensing.features import ModuleCode
 from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusModuleCache

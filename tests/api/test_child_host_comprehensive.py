@@ -14,7 +14,7 @@ This module tests:
 import json
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy import (
@@ -23,21 +23,16 @@ from sqlalchemy import (
     String,
     Boolean,
     DateTime,
-    Integer,
     Text,
-    ForeignKey,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_models import (
     ChildHostResponse,
     CreateChildHostRequest,
     CreateWslChildHostRequest,
     DistributionResponse,
-    DistributionDetailResponse,
-    CreateDistributionRequest,
-    UpdateDistributionRequest,
     VirtualizationSupportResponse,
     ConfigureKvmNetworkingRequest,
 )
@@ -142,7 +137,7 @@ class TestUser(TestBase):
     _role_cache = None
 
     def load_role_cache(self, session):
-        from backend.security.roles import load_user_roles
+        pass
 
         self._role_cache = MagicMock()
         self._role_cache.has_role.return_value = True

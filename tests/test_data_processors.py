@@ -3,10 +3,7 @@ Tests for backend/websocket/data_processors.py module.
 Tests data processing utilities for WebSocket agent communication.
 """
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, call, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 
 class TestProcessUserAccounts:

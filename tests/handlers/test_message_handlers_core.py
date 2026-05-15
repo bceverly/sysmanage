@@ -6,8 +6,7 @@ system info, and heartbeat messages from agents.
 """
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -308,7 +307,7 @@ class TestHandleHeartbeat:
             new_callable=AsyncMock,
             return_value=True,
         ):
-            result = await handle_heartbeat(session, mock_connection, message_data)
+            await handle_heartbeat(session, mock_connection, message_data)
 
             updated_host = session.query(Host).filter_by(id=host.id).first()
             assert updated_host.is_agent_privileged is True
@@ -343,7 +342,7 @@ class TestHandleHeartbeat:
             new_callable=AsyncMock,
             return_value=True,
         ):
-            result = await handle_heartbeat(session, mock_connection, message_data)
+            await handle_heartbeat(session, mock_connection, message_data)
 
             import json
 

@@ -6,8 +6,7 @@ Tests security roles API endpoints.
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-import pytest
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 

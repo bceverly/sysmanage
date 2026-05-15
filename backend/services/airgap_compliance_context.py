@@ -32,7 +32,6 @@ the compliance reports just don't show the air-gap context column.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from backend.licensing.module_loader import module_loader

@@ -3,12 +3,7 @@ Tests for backend/websocket/queue_maintenance.py module.
 Tests queue maintenance operations for cleanup, expiration, and deletion.
 """
 
-from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
-
-import pytest
-
-from backend.websocket.queue_enums import QueueStatus
 
 
 class TestQueueMaintenanceCleanupOldMessages:

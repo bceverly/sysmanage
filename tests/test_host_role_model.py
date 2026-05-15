@@ -6,8 +6,6 @@ Tests HostRole model structure and methods.
 import uuid
 from datetime import datetime, timezone
 
-import pytest
-
 
 class TestHostRoleModel:
     """Tests for HostRole model."""

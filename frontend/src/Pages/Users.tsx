@@ -155,7 +155,7 @@ const Users = () => {
         } catch (error) {
             console.error('Error deleting users:', error);
         }
-    }
+    };
 
     const updateUserInTable = (updatedUser: SysManageUser) => {
         setTableData(prevData =>
@@ -181,7 +181,7 @@ const Users = () => {
         // Wait for all operations to complete, then clear selection
         await Promise.all(promises);
         setSelection([]);
-    }
+    };
 
     const handleLock = async () => {
         // Call the API to lock the selected rows
@@ -201,7 +201,7 @@ const Users = () => {
         // Wait for all operations to complete, then clear selection
         await Promise.all(promises);
         setSelection([]);
-    }
+    };
 
     const getSelectedUsersLockStatus = () => {
         const selectedUsers = filteredData.filter(user =>

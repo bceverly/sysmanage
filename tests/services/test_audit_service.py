@@ -6,9 +6,7 @@ for logging user actions and system changes.
 """
 
 import uuid
-from datetime import datetime
 
-import pytest
 
 from backend.persistence.models import AuditLog
 from backend.services.audit_service import (

@@ -6,11 +6,11 @@ Handles user accounts and groups update messages with Windows SID support.
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import delete, update
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
 from backend.i18n import _
-from backend.persistence.models import Host, UserAccount, UserGroup
+from backend.persistence.models import UserAccount, UserGroup
 
 # Logger for debugging - use existing root logger configuration
 debug_logger = logging.getLogger("debug_logger")
@@ -118,7 +118,8 @@ def _create_user_account_with_security_id(connection, account, now):  # NOSONAR
                     if rid < 1000:
                         is_system_user = True
                 except (ValueError, IndexError):
-                    pass
+                    # Malformed SID — fall back to username-based heuristic below.
+                    is_system_user = is_system_user or False
 
     # Also check for common system usernames
     system_usernames = {

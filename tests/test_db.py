@@ -3,11 +3,10 @@ Tests for backend/persistence/db.py module.
 Tests database connection and session management.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 
 class TestBase:

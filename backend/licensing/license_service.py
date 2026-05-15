@@ -15,12 +15,12 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import aiohttp
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
 from backend.licensing.features import FeatureCode, ModuleCode
 from backend.licensing.module_loader import module_loader
-from backend.licensing.public_key import fetch_public_key, get_public_key_pem
+from backend.licensing.public_key import get_public_key_pem
 from backend.licensing.validator import (
     LicensePayload,
     ValidationResult,

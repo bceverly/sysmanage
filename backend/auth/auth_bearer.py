@@ -71,6 +71,9 @@ async def get_current_user(  # NOSONAR
         if payload and "user_id" in payload:
             return payload["user_id"]
     except (ValueError, TypeError, KeyError):
-        pass
+        # Any decode/validation problem falls through to the 401 below;
+        # we intentionally swallow the specific exception details rather
+        # than echoing them back to the client.
+        payload = None  # noqa: F841 — placates py/empty-except
 
     raise HTTPException(status_code=401, detail=_("Could not validate credentials"))

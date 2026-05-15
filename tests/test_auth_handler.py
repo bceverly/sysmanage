@@ -4,9 +4,6 @@ Tests JWT token signing and verification.
 """
 
 import time
-from unittest.mock import patch
-
-import pytest
 
 
 class TestTokenResponse:

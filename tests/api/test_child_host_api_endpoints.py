@@ -12,7 +12,7 @@ This module tests the FastAPI endpoints with proper mocking:
 import json
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 

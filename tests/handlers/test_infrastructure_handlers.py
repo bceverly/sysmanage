@@ -8,7 +8,6 @@ error, duplicate execution, success path, exception → rollback) without
 spinning up the real DB or the websocket layer.
 """
 
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -179,10 +178,10 @@ class TestScriptExecutionResult:
                 return _ChainResult()
 
             class _ChainResult:
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
-                def filter(self_inner, *a, **kw):
+                def filter(self, *a, **kw):
                     return _ChainResult()
 
             chain.filter.return_value = _ChainResult()
@@ -224,10 +223,10 @@ class TestScriptExecutionResult:
 
         def query_side_effect(model):
             class _Chain:
-                def filter(self_inner, *a, **kw):
-                    return self_inner
+                def filter(self, *a, **kw):
+                    return self
 
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
             return _Chain()

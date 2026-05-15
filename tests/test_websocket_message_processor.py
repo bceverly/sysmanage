@@ -4,15 +4,12 @@ Tests the MessageProcessor class and MockConnection class.
 """
 
 import asyncio
-from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from backend.websocket.message_processor import MessageProcessor
 from backend.websocket.mock_connection import MockConnection
-from backend.websocket.messages import MessageType
-from backend.websocket.queue_manager import QueueDirection, QueueStatus
 
 
 class TestMessageProcessor:

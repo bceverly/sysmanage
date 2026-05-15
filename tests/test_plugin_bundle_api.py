@@ -3,10 +3,8 @@ Tests for backend/api/plugin_bundle.py module.
 Tests plugin bundle serving endpoints.
 """
 
-import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

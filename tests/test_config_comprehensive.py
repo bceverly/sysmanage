@@ -3,7 +3,6 @@ Comprehensive unit tests for backend.config.config module.
 Tests configuration loading and accessor functions.
 """
 
-import os
 from unittest.mock import Mock, mock_open, patch
 
 import pytest

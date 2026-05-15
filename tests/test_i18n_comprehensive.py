@@ -4,15 +4,11 @@ Tests language selection, translation loading, and message translation.
 """
 
 import gettext
-import os
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, patch
 
-import pytest
 
 from backend.i18n import (
-    CURRENT_LANGUAGE,
     DEFAULT_LANGUAGE,
-    TRANSLATIONS,
     _,
     get_language,
     get_translation,
@@ -374,6 +370,7 @@ class TestI18nIntegration:
                     return mock_de_translation
                 elif "es" in languages:
                     return mock_es_translation
+                return None
 
             mock_gettext_translation.side_effect = mock_translation_side_effect
 

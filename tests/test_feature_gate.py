@@ -4,7 +4,7 @@ Tests feature and module gating decorators for Pro+ licensing.
 """
 
 import asyncio
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import HTTPException

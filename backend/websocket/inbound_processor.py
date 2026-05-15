@@ -396,7 +396,7 @@ async def process_system_info_message(message, db: Session) -> None:
         # Call the system_info handler
         from backend.api.message_handlers import handle_system_info
 
-        _response = await handle_system_info(db, mock_connection, message_data)
+        await handle_system_info(db, mock_connection, message_data)
 
         # Mark as completed
         server_queue_manager.mark_completed(message.message_id, db=db)

@@ -3,7 +3,7 @@ Unit tests for backend.utils.password_policy module.
 Tests password policy validation and requirements generation.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 

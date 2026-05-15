@@ -6,7 +6,6 @@ Tests license validation functionality.
 import base64
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
 
 import pytest
 

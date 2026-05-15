@@ -37,7 +37,6 @@ from backend.persistence.models.dynamic_secrets import (
     LEASE_FAILED,
     LEASE_KIND_DATABASE,
     LEASE_KIND_SSH,
-    LEASE_KIND_TOKEN,
     LEASE_KINDS,
     LEASE_REVOKED,
 )

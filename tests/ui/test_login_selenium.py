@@ -14,10 +14,9 @@ Sync checklist:
 """
 
 import time
+import contextlib
 import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
@@ -260,10 +259,8 @@ def test_invalid_login_selenium(selenium_page, ui_config, start_server):
     selenium_page.goto("/login")
 
     # Wait for form to load
-    try:
+    with contextlib.suppress(TimeoutException):
         selenium_page.wait_for_element_visible(By.CSS_SELECTOR, "form", timeout=10)
-    except TimeoutException:
-        pass
 
     time.sleep(3)  # Extra wait for MUI components
 

@@ -6,8 +6,6 @@ Tests all operations and management models.
 import uuid
 from datetime import datetime, timezone
 
-import pytest
-
 
 class TestUserAccountModel:
     """Tests for UserAccount model."""

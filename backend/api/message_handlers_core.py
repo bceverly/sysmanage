@@ -420,8 +420,6 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
     if hasattr(connection, "host_id") and connection.host_id:
         try:
             # Get the host object for tests compatibility and also update it
-            import logging
-
             logger = logging.getLogger("backend.message_handlers.heartbeat")
             logger.info("Heartbeat: Looking up host with ID: %s", connection.host_id)
             host = db.query(Host).filter(Host.id == connection.host_id).first()

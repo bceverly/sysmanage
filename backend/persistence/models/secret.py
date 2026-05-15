@@ -3,9 +3,8 @@ Database model for secrets management.
 """
 
 import uuid
-from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, Text, func, text
+from sqlalchemy import Column, DateTime, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 
 from backend.persistence.db import Base

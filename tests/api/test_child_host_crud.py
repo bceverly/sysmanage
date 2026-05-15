@@ -6,7 +6,6 @@ API endpoints with focus on authentication and basic endpoint behavior.
 """
 
 import uuid
-from unittest.mock import patch
 
 
 class TestListChildHostsEndpoint:

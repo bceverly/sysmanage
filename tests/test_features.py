@@ -388,5 +388,5 @@ class TestTierModules:
         """Test all license tiers are in TIER_MODULES."""
         from backend.licensing.features import TIER_MODULES, LicenseTier
 
-        for tier in LicenseTier:
+        for tier in LicenseTier:  # lgtm[py/non-iterable-in-for-loop]
             assert tier in TIER_MODULES

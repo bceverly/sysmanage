@@ -4,7 +4,7 @@ Tests WebSocket message handling functions for agent communication.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -381,7 +381,7 @@ class TestHandleCommandResult:
         mock_get_db.return_value = iter([mock_db_session])
         mock_script_handler.return_value = {"status": "completed"}
 
-        result = await handle_command_result(connection, message_data)
+        await handle_command_result(connection, message_data)
 
         mock_script_handler.assert_called_once_with(
             mock_db_session, connection, message_data
@@ -643,7 +643,6 @@ class TestMessageHandlersLogging:
     def test_logging_fallback_on_os_error(self, mock_makedirs, mock_open):
         """Test logging falls back to console when file logging fails."""
         # Force module reload to trigger the logging initialization with mocked open
-        import importlib
         import sys
 
         # Remove module to force re-import and re-initialization

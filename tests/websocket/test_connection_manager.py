@@ -5,7 +5,7 @@ Tests connection handling, message routing, and connection lifecycle.
 
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 
 import pytest

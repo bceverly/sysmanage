@@ -188,10 +188,8 @@ async def create_tag(
 
         # Audit log tag creation
         from backend.services.audit_service import (
-            ActionType,
             AuditService,
             EntityType,
-            Result,
         )
 
         with session_local() as audit_session:
@@ -287,10 +285,8 @@ async def update_tag(
 
         # Audit log tag update
         from backend.services.audit_service import (
-            ActionType,
             AuditService,
             EntityType,
-            Result,
         )
 
         with session_local() as audit_session:
@@ -382,10 +378,8 @@ async def delete_tag(
 
         # Audit log tag deletion
         from backend.services.audit_service import (
-            ActionType,
             AuditService,
             EntityType,
-            Result,
         )
 
         with session_local() as audit_session:

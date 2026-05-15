@@ -17,7 +17,7 @@ from backend.persistence import db, models
 from backend.persistence.models import HostChild
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,

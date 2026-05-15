@@ -3,11 +3,9 @@
 # pylint: disable=missing-class-docstring,missing-function-docstring
 
 
-import json
 from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from backend.api import airgap_collection_schedule as sched_module
 
@@ -35,7 +33,7 @@ def _engines(*, collector=True, automation=True):
 
             mock_auto.validate_cron_expression = _vc
 
-            from datetime import datetime, timedelta, timezone
+            from datetime import timedelta
 
             mock_auto.next_run_from_cron = lambda expr, anchor: anchor.replace(
                 tzinfo=None

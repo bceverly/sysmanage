@@ -18,7 +18,7 @@ hit the network and the assertions can stay deterministic.
 
 import asyncio
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -659,7 +659,6 @@ class TestBackgroundLoops:
     @pytest.mark.asyncio
     async def test_module_update_loop_invokes_check_and_update(self):
         from backend.licensing.license_service import LicenseService
-        import backend.licensing.license_service as lic_svc
 
         service = LicenseService()
         sleeps = {"count": 0}

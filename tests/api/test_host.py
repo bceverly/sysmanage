@@ -3,10 +3,6 @@ Unit tests for host management API endpoints.
 Tests all host CRUD operations and registration endpoints.
 """
 
-from datetime import datetime, timezone
-
-import pytest
-
 from backend.persistence import models
 
 

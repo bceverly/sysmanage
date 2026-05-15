@@ -3,7 +3,6 @@ Comprehensive unit tests for backend auth modules.
 Tests JWT authentication, authorization, and token handling.
 """
 
-import time
 from unittest.mock import Mock, patch
 
 import pytest
@@ -51,9 +50,9 @@ class TestAuthHandler:
             payload, secret = args[:2]
             # Check if algorithm is in args or kwargs
             if len(args) > 2:
-                algorithm = args[2]
+                args[2]
             else:
-                algorithm = kwargs.get("algorithm")
+                kwargs.get("algorithm")
 
             assert payload["user_id"] == user_id
             assert payload["expires"] == 1000000000 + 3600
@@ -78,9 +77,9 @@ class TestAuthHandler:
             payload, secret = args[:2]
             # Check if algorithm is in args or kwargs
             if len(args) > 2:
-                algorithm = args[2]
+                args[2]
             else:
-                algorithm = kwargs.get("algorithm")
+                kwargs.get("algorithm")
 
             assert payload["user_id"] == user_id
             assert payload["expires"] == 2000000000 + 86400

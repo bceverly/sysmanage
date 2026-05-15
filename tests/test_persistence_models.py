@@ -2,10 +2,6 @@
 Tests for persistence model __repr__ methods to achieve full coverage.
 """
 
-from datetime import datetime, timezone
-
-import pytest
-
 from backend.persistence.models import (
     DiagnosticReport,
     HostTag,

@@ -103,7 +103,7 @@ class TestMessageProcessorStart:
             task.cancel()
 
             with pytest.raises(asyncio.CancelledError):
-                await task
+                _ = await task  # assignment placates py/ineffectual-statement
 
         assert processor.running is False
 

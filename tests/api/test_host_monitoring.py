@@ -6,8 +6,6 @@ This module tests the host monitoring endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestHostMonitoringStatusEndpoint:
     """Test cases for the host monitoring status endpoint."""

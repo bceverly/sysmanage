@@ -25,7 +25,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence.db import get_db
 from backend.persistence import models
-from backend.services.audit_service import ActionType, AuditService, EntityType
+from backend.services.audit_service import AuditService, EntityType
 from backend.vulnerability.cve_refresh_service import (
     CVE_SOURCES,
     CveRefreshError,
@@ -88,7 +88,9 @@ class CveRefreshSettingsResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID to string."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -107,7 +109,9 @@ class CveRefreshSettingsUpdate(BaseModel):
     nvd_api_key: Optional[str] = None
 
     @validator("refresh_interval_hours")
-    def validate_interval(cls, value):  # pylint: disable=no-self-argument
+    def validate_interval(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate refresh interval."""
         if value is not None:
             if value < 1:
@@ -117,7 +121,9 @@ class CveRefreshSettingsUpdate(BaseModel):
         return value
 
     @validator("enabled_sources")
-    def validate_sources(cls, value):  # pylint: disable=no-self-argument
+    def validate_sources(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate enabled sources."""
         if value is not None:
             for source in value:
@@ -150,7 +156,9 @@ class IngestionLogResponse(BaseModel):
     error_message: Optional[str] = None
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID to string."""
         if isinstance(value, uuid.UUID):
             return str(value)

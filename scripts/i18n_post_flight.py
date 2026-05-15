@@ -13,7 +13,6 @@ Run from any cwd; uses absolute paths to all four repos.
 """
 import json
 import re
-import sys
 from pathlib import Path
 
 LOCALES = {

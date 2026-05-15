@@ -3,10 +3,9 @@ Comprehensive unit tests for backend.api.security module.
 Tests security configuration checks and platform command generation.
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
-from fastapi import HTTPException
 from pydantic import ValidationError
 
 from backend.api.security import (
@@ -17,7 +16,6 @@ from backend.api.security import (
     _check_security_configuration,
     _get_database_user_count,
     _get_platform_command,
-    get_default_credentials_status,
 )
 
 

@@ -5,8 +5,6 @@ Tests email service functionality.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class TestEmailServiceInit:
     """Tests for EmailService initialization."""

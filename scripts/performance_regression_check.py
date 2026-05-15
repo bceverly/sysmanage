@@ -9,8 +9,7 @@ import os
 import platform
 import statistics
 import sys
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 
 
 # For each metric we track, which direction is bad?

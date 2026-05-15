@@ -11,7 +11,6 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from backend.i18n import _
 from backend.persistence.models import Host
 
 

@@ -169,7 +169,7 @@ jobs:
           keyFile: ""
         database:
           user: "sqlite"
-          password: ""
+          password: "unused-sqlite-has-no-auth"  # not a real credential; SQLite ignores this field — empty string triggered js/empty-password-in-configuration-file
           host: ""
           port: 0
           name: "test_macos.db"
@@ -199,7 +199,7 @@ jobs:
           keyFile: ""
         database:
           user: "sqlite"
-          password: ""
+          password: "unused-sqlite-has-no-auth"  # not a real credential; SQLite ignores this field — empty string triggered js/empty-password-in-configuration-file
           host: ""
           port: 0
           name: "test_windows.db"
@@ -230,7 +230,7 @@ jobs:
           keyFile: ""
         database:
           user: "sqlite"
-          password: ""
+          password: "unused-sqlite-has-no-auth"  # not a real credential; SQLite ignores this field — empty string triggered js/empty-password-in-configuration-file
           host: ""
           port: 0
           name: "test_linux.db"
@@ -418,7 +418,7 @@ jobs:
           keyFile: ""
         database:
           user: "sqlite"
-          password: ""
+          password: "unused-sqlite-has-no-auth"  # not a real credential; SQLite ignores this field — empty string triggered js/empty-password-in-configuration-file
           host: ""
           port: 0
           name: "test.db"

@@ -35,7 +35,6 @@ from backend.api.firewall_roles_helpers import (
     FirewallRoleUpdate,
     HostFirewallRoleCreate,
     HostFirewallRoleResponse,
-    PortCreate,
     get_host_firewall_ports,
     get_role_ports,
     queue_apply_firewall_roles,

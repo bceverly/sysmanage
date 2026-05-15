@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 from backend.utils.verbosity_logger import sanitize_log
@@ -38,7 +38,9 @@ class UbuntuProSettingsResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -56,7 +58,9 @@ class UbuntuProSettingsUpdate(BaseModel):
     auto_attach_enabled: Optional[bool] = None
 
     @validator("master_key")
-    def validate_master_key(cls, master_key):  # pylint: disable=no-self-argument
+    def validate_master_key(
+        cls, master_key
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate the master key format if provided."""
         if master_key is not None and master_key.strip() == "":
             return None
@@ -74,7 +78,7 @@ class UbuntuProSettingsUpdate(BaseModel):
     @validator("organization_name")
     def validate_organization_name(
         cls, organization_name
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate organization name."""
         if organization_name is not None and organization_name.strip() == "":
             return None
@@ -295,7 +299,9 @@ class UbuntuProEnrollmentRequest(BaseModel):
     custom_key: Optional[str] = None
 
     @validator("host_ids")
-    def validate_host_ids(cls, host_ids):  # pylint: disable=no-self-argument
+    def validate_host_ids(
+        cls, host_ids
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate host IDs list."""
         if not host_ids:
             raise ValueError(_("At least one host must be specified"))
@@ -304,7 +310,7 @@ class UbuntuProEnrollmentRequest(BaseModel):
     @validator("custom_key")
     def validate_custom_key(
         cls, custom_key, values
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate custom key if not using master key."""
         if not values.get("use_master_key", True) and not custom_key:
             raise ValueError(_("Custom key must be provided when not using master key"))

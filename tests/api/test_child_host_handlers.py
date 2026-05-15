@@ -9,10 +9,9 @@ This module tests the handlers that process messages from agents:
 - Child host control results (start, stop, restart, delete)
 """
 
-import json
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 

@@ -142,9 +142,14 @@ class CertificateManager:
                 )
             )
 
-        # Set restrictive permissions
+        # Set restrictive permissions.  The CA *certificate* is a
+        # public artefact — agents need to read it to validate the
+        # server's TLS chain — so 0o644 (owner-rw, world-readable) is
+        # the correct mode.  CodeQL ``py/overly-permissive-file`` flags
+        # the world-readable bit but does not distinguish public certs
+        # from private keys; for the key (above) we set 0o600.
         os.chmod(self.ca_key_path, 0o600)  # NOSONAR
-        os.chmod(self.ca_cert_path, 0o644)  # NOSONAR
+        os.chmod(self.ca_cert_path, 0o644)  # lgtm[py/overly-permissive-file]  NOSONAR
 
     def ensure_server_certificate(self) -> None:
         """Ensure server certificate exists, create if not."""
@@ -238,9 +243,14 @@ class CertificateManager:
                 )
             )
 
-        # Set restrictive permissions
+        # Set restrictive permissions.  Server cert (below) is a public
+        # artefact and must be world-readable so client tooling that
+        # runs as non-root can validate the chain; key stays 0o600.
+        # See the CA chmod block for the CodeQL FP rationale.
         os.chmod(self.server_key_path, 0o600)  # NOSONAR
-        os.chmod(self.server_cert_path, 0o644)  # NOSONAR
+        os.chmod(
+            self.server_cert_path, 0o644
+        )  # lgtm[py/overly-permissive-file]  NOSONAR
 
     def generate_client_certificate(
         self, hostname: str, host_id: str

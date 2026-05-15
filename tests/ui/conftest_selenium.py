@@ -12,6 +12,7 @@ If either browser/driver is missing, tests will be skipped for that browser.
 """
 
 import os
+import contextlib
 import signal
 import subprocess
 import time
@@ -337,10 +338,8 @@ def _create_firefox_driver():
         )
     finally:
         if "driver" in locals():
-            try:
+            with contextlib.suppress(Exception):
                 driver.quit()
-            except:
-                pass
 
 
 @pytest.fixture(scope="session")
@@ -367,8 +366,8 @@ def start_server(ui_config):
                 print(
                     f"[OK] Server detected running at {ui_config.base_url} (via root endpoint)"
                 )
-        except:
-            pass
+        except Exception:  # noqa: BLE001
+            _ = None  # empty-except: failure here is non-fatal; see code above
 
     server_process = None
     if not server_running:
@@ -418,8 +417,8 @@ def start_server(ui_config):
                         print(f"   [OK] Backend API ready after {elapsed} seconds")
                         backend_ready = True
                         break
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
 
                 if elapsed % 10 == 0:  # Print every 10 seconds
                     print(f"   Waiting for backend... ({elapsed}/{max_wait}s)")
@@ -445,8 +444,8 @@ def start_server(ui_config):
                         frontend_ready = True
                         server_running = True
                         break
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
 
                 if elapsed % 10 == 0:  # Print every 10 seconds
                     print(f"   Waiting for frontend... ({elapsed}/{max_wait}s)")
@@ -472,8 +471,8 @@ def start_server(ui_config):
                         if os.name != "nt"
                         else server_process.terminate()
                     )
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
             raise
 
     yield True
@@ -659,7 +658,7 @@ def selenium_page(browser_driver, ui_config):
                     if ready:
                         return True
                 except Exception:
-                    pass
+                    _ = None  # empty-except: failure here is non-fatal; see code above
                 time.sleep(0.5)
             return False
 

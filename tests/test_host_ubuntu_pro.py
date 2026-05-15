@@ -3,8 +3,6 @@ Comprehensive tests for backend/api/host_ubuntu_pro.py module.
 Tests Ubuntu Pro management endpoints for SysManage server.
 """
 
-import importlib
-import sys
 from unittest.mock import Mock, patch
 
 import pytest

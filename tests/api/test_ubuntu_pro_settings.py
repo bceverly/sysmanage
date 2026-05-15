@@ -4,9 +4,8 @@ Tests the /api/ubuntu-pro/ endpoints with various scenarios.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import pytest
 
 from backend.persistence import models
 

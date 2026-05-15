@@ -97,10 +97,10 @@ class TestHandleOsVersionUpdate:
 
         def query_side(model):
             class _Chain:
-                def filter(self_inner, *a, **kw):
-                    return self_inner
+                def filter(self, *a, **kw):
+                    return self
 
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
             return _Chain()
@@ -141,10 +141,10 @@ class TestHandleOsVersionUpdate:
 
         def query_side(model):
             class _Chain:
-                def filter(self_inner, *a, **kw):
-                    return self_inner
+                def filter(self, *a, **kw):
+                    return self
 
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
             return _Chain()
@@ -184,10 +184,10 @@ class TestHandleOsVersionUpdate:
 
         def query_side(model):
             class _Chain:
-                def filter(self_inner, *a, **kw):
-                    return self_inner
+                def filter(self, *a, **kw):
+                    return self
 
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
             return _Chain()
@@ -229,10 +229,10 @@ class TestHandleOsVersionUpdate:
 
         def query_side(model):
             class _Chain:
-                def filter(self_inner, *a, **kw):
-                    return self_inner
+                def filter(self, *a, **kw):
+                    return self
 
-                def first(self_inner):
+                def first(self):
                     return responses.pop(0) if responses else None
 
             return _Chain()

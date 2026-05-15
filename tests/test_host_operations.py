@@ -3,7 +3,7 @@ Comprehensive tests for backend/api/host_operations.py module.
 Tests host system operations endpoints (reboot, shutdown, software refresh).
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -75,7 +75,6 @@ class MockSession:
 
     def refresh(self, obj):
         """Mock refresh method."""
-        pass
 
     def commit(self):
         """Mock commit method."""

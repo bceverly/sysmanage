@@ -4,8 +4,6 @@ Tests for the user preferences API module.
 This module tests the user preferences endpoints.
 """
 
-import pytest
-
 
 class TestGetUserPreferencesEndpoint:
     """Test cases for getting user preferences."""

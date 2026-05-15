@@ -4,9 +4,6 @@ Tests all Pro+ licensing and health analysis models.
 """
 
 import uuid
-from datetime import datetime, timezone
-
-import pytest
 
 
 class TestProPlusLicenseModel:

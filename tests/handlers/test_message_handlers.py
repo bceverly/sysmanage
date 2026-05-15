@@ -40,7 +40,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -63,7 +63,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -88,7 +88,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -109,7 +109,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -130,7 +130,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -151,7 +151,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -172,7 +172,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -193,7 +193,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                result = await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 

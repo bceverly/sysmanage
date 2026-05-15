@@ -42,13 +42,17 @@ class UpdateExecutionRequest(BaseModel):
     package_managers: Optional[List[str]] = None
 
     @validator("host_ids")
-    def validate_host_ids(cls, host_ids):  # pylint: disable=no-self-argument
+    def validate_host_ids(
+        cls, host_ids
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if not host_ids:
             raise ValueError("host_ids cannot be empty")
         return host_ids
 
     @validator("package_names")
-    def validate_package_names(cls, package_names):  # pylint: disable=no-self-argument
+    def validate_package_names(
+        cls, package_names
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if not package_names:
             raise ValueError("package_names cannot be empty")
         return package_names
@@ -56,7 +60,7 @@ class UpdateExecutionRequest(BaseModel):
     @validator("package_managers", pre=True)
     def validate_package_managers(
         cls, package_managers
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if package_managers == []:
             return None
         return package_managers

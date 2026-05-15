@@ -5,7 +5,6 @@ Downloads and caches the ECDSA P-521 public key from the license server.
 Falls back to a cached copy if the server is unavailable.
 """
 
-import os
 from pathlib import Path
 from typing import Optional
 

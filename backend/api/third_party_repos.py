@@ -22,7 +22,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models import Host
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
     Priority,

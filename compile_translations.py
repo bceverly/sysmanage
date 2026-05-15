@@ -4,7 +4,6 @@ Script to compile .po files to .mo files for backend translations
 """
 
 import os
-import sys
 
 def simple_po_to_mo(po_file, mo_file):
     """

@@ -30,7 +30,6 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models.package_compliance import (
     CONSTRAINT_TYPES,
-    STATUS_VALUES,
     VERSION_OPS,
 )
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result

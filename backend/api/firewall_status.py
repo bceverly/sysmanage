@@ -80,14 +80,18 @@ class FirewallStatusResponse(BaseModel):
     last_updated: datetime
 
     @validator("id", "host_id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
         return value
 
     @validator("last_updated", pre=True)
-    def add_utc_timezone(cls, value):  # pylint: disable=no-self-argument
+    def add_utc_timezone(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Add UTC timezone to naive datetime."""
         if isinstance(value, datetime) and value.tzinfo is None:
             return value.replace(tzinfo=timezone.utc)

@@ -9,6 +9,7 @@ Tests cover:
 """
 
 import asyncio
+import contextlib
 import socket
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, Mock, patch, PropertyMock
@@ -476,10 +477,8 @@ class TestGraylogHealthMonitorService:
             mock_sleep.side_effect = controlled_sleep
 
             # Run the service (will be cancelled after one iteration)
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await graylog_health_monitor_service()
-            except asyncio.CancelledError:
-                pass
 
             # Verify check was called
             mock_check.assert_called()
@@ -511,10 +510,8 @@ class TestGraylogHealthMonitorService:
             mock_sleep.side_effect = controlled_sleep
 
             # Should not raise, should continue to sleep
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await graylog_health_monitor_service()
-            except asyncio.CancelledError:
-                pass
 
             # Verify check was called
             mock_check.assert_called()
@@ -541,10 +538,8 @@ class TestGraylogHealthMonitorService:
 
             mock_sleep.side_effect = capture_sleep
 
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await graylog_health_monitor_service()
-            except asyncio.CancelledError:
-                pass
 
             # Verify sleep was called with 5 minute interval (300 seconds)
             assert 300 in sleep_durations

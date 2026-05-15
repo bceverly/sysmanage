@@ -266,7 +266,7 @@ class TestRegistrationKeyEnrollmentFlow:
             },
         )
         assert r.status_code == 200, r.text
-        body = r.json()
+        r.json()
         # The /host/register endpoint serializes the Host model, but the
         # exact key name varies by SQLAlchemy version (some include
         # ``approval_status``, others wrap fields).  Verify approval via

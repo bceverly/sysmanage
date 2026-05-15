@@ -5,10 +5,9 @@ Tests update result handling functionality for SysManage server.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import pytest
-from sqlalchemy import and_, text, update
 
 from backend.api.update_handlers import handle_update_apply_result, update_results_cache
 
@@ -636,7 +635,6 @@ class TestUpdateHandlersLogging:
     def test_logging_fallback_on_permission_error(self, mock_makedirs, mock_open):
         """Test logging falls back to console when file logging fails."""
         # Force module reload to trigger the logging initialization with mocked open
-        import importlib
         import sys
 
         # Remove module to force re-import and re-initialization
@@ -655,7 +653,6 @@ class TestUpdateHandlersLogging:
     def test_logging_fallback_on_os_error(self, mock_makedirs, mock_open):
         """Test logging falls back to console when file logging fails with OSError."""
         # Force module reload to trigger the logging initialization with mocked open
-        import importlib
         import sys
 
         # Remove module to force re-import and re-initialization

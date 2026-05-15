@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,9 @@ class AntivirusDefaultResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -51,7 +53,9 @@ class AntivirusDefaultUpdate(BaseModel):
     antivirus_package: Optional[str] = None
 
     @validator("os_name")
-    def validate_os_name(cls, os_name):  # pylint: disable=no-self-argument
+    def validate_os_name(
+        cls, os_name
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate OS name."""
         if not os_name or os_name.strip() == "":
             raise ValueError(_("OS name is required"))
@@ -62,7 +66,7 @@ class AntivirusDefaultUpdate(BaseModel):
     @validator("antivirus_package")
     def validate_antivirus_package(
         cls, antivirus_package
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate antivirus package."""
         if antivirus_package is not None:
             if antivirus_package.strip() == "":

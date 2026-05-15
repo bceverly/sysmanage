@@ -3,8 +3,6 @@ Tests for backend/licensing/plugin_bundle_loader.py module.
 Tests Pro+ plugin bundle loader functionality.
 """
 
-import os
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

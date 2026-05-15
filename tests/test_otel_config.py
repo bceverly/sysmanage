@@ -6,8 +6,6 @@ Tests OpenTelemetry configuration and setup.
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class TestIsTelemetryEnabled:
     """Tests for is_telemetry_enabled function."""

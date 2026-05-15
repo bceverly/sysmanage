@@ -6,7 +6,7 @@ and utilities for checking user permissions.
 """
 
 from enum import Enum
-from typing import List, Optional, Set
+from typing import List, Set
 from uuid import UUID
 
 from sqlalchemy.orm import Session

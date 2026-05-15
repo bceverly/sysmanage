@@ -4,7 +4,7 @@ Tests host data update endpoints for hardware, users, and software information.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException

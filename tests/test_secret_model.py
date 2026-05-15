@@ -6,8 +6,6 @@ Tests Secret model structure and methods.
 import uuid
 from datetime import datetime, timezone
 
-import pytest
-
 
 class TestSecretModel:
     """Tests for Secret model."""

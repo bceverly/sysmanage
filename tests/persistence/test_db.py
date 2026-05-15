@@ -6,7 +6,7 @@ functionality in backend/persistence/db.py.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from backend.persistence.db import (
     Base,
@@ -16,7 +16,6 @@ from backend.persistence.db import (
     get_engine,
     get_database_url,
     get_session_local,
-    IS_TEST_MODE,
 )
 
 
@@ -125,7 +124,7 @@ class TestGetDb:
     def test_get_db_closes_session_on_exit(self, engine):
         """Test that get_db closes the session when generator exits."""
         gen = get_db()
-        session = next(gen)
+        next(gen)
 
         # Trigger cleanup
         try:

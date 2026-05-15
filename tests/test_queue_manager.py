@@ -5,9 +5,8 @@ Tests server-side message queue manager.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
-from backend.websocket.queue_enums import Priority, QueueDirection, QueueStatus
+from backend.websocket.queue_enums import QueueDirection
 
 
 class TestServerMessageQueueManagerInit:
@@ -20,7 +19,7 @@ class TestServerMessageQueueManagerInit:
         """Test that initialization creates all components."""
         from backend.websocket.queue_manager import ServerMessageQueueManager
 
-        manager = ServerMessageQueueManager()
+        ServerMessageQueueManager()
 
         mock_ops.assert_called_once()
         mock_maintenance.assert_called_once()

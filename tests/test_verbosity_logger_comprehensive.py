@@ -6,7 +6,6 @@ Tests the FlexibleLogger class and logging configuration.
 import logging
 from unittest.mock import Mock, patch
 
-import pytest
 
 from backend.utils.verbosity_logger import FlexibleLogger, get_logger
 
@@ -298,7 +297,7 @@ class TestFlexibleLogger:
             mock_logger_instance.handlers = []
             mock_get_logger.return_value = mock_logger_instance
 
-            logger = FlexibleLogger("handler.test")
+            FlexibleLogger("handler.test")
 
             # Verify handler was added and configured
             mock_logger_instance.addHandler.assert_called_once()
@@ -317,7 +316,7 @@ class TestFlexibleLogger:
             mock_logger_instance.handlers = [Mock()]  # Existing handler
             mock_get_logger.return_value = mock_logger_instance
 
-            logger = FlexibleLogger("existing.handler")
+            FlexibleLogger("existing.handler")
 
             # Verify no additional handler was added
             mock_logger_instance.addHandler.assert_not_called()

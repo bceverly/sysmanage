@@ -3,7 +3,6 @@ Tests for backend/licensing/public_key.py module.
 Tests public key management for Pro+ license verification.
 """
 
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

@@ -9,8 +9,6 @@ When adding/modifying tests, ensure feature parity across platforms.
 import time
 import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
@@ -126,7 +124,7 @@ def login_helper(selenium_page, test_user):
                 if errors:
                     error_msg += f" Errors on page: {errors}"
         except Exception:
-            pass
+            _ = None  # empty-except: failure here is non-fatal
         raise AssertionError(error_msg)
 
     # Brief wait for page to stabilize after login
@@ -176,7 +174,7 @@ def test_updates_page_loads(selenium_page, test_user, ui_config, start_server):
 
         print(f"  [OK] Package Updates page loaded successfully ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_updates_load_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Updates page load test failed ({browser_name})")
@@ -298,7 +296,7 @@ def test_updates_grid_renders(selenium_page, test_user, ui_config, start_server)
 
         print(f"  [OK] Package Updates page rendered successfully ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_updates_grid_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Package Updates grid rendering test failed ({browser_name})")
@@ -393,7 +391,7 @@ def test_updates_data_displays(selenium_page, test_user, ui_config, start_server
 
         print(f"  [OK] Package Updates data display test passed ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_updates_data_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Package Updates data display test failed ({browser_name})")
@@ -449,7 +447,7 @@ def test_updates_host_selector(selenium_page, test_user, ui_config, start_server
 
         print(f"  [OK] Host selector test passed ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_updates_selector_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Host selector test failed ({browser_name})")
@@ -545,7 +543,7 @@ def test_updates_selection_and_actions(
 
         print(f"  [OK] Updates selection and actions test passed ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_updates_actions_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Updates selection/actions test failed ({browser_name})")

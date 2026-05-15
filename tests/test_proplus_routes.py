@@ -8,7 +8,6 @@ Covers:
 - The stub routes registered when modules aren't loaded — driven via TestClient
 """
 
-import asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest

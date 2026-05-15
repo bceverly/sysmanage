@@ -4,12 +4,10 @@ Handles processing and sending of messages from server to agents.
 """
 
 from datetime import datetime, timezone
-from typing import Dict
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.queue_manager import (
     QueueDirection,

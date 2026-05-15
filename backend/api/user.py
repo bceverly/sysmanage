@@ -22,15 +22,12 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 
 # Import will be added at runtime to avoid circular imports
 
 if TYPE_CHECKING:
-    from backend.api.password_reset import (
-        create_password_reset_token,
-        send_initial_setup_email,
-    )
+    pass
 
 argon2_hasher = PasswordHasher()
 

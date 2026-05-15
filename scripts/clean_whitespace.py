@@ -44,7 +44,6 @@ def clean_whitespace():
 
                 except Exception as e:
                     print(f"Warning: Could not clean {filepath}: {e}")
-                    pass
 
     if files_cleaned > 0:
         print(f"[OK] Cleaned trailing whitespace from {files_cleaned} Python files")

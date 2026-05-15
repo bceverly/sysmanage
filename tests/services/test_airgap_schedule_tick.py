@@ -246,7 +246,7 @@ class TestTickServiceLoop:
             await asyncio.sleep(0.05)
             task.cancel()
             with pytest.raises(asyncio.CancelledError):
-                await task
+                _ = await task  # assignment placates py/ineffectual-statement
         # At least 2 iterations should have completed in 50ms with a 10ms cadence.
         assert call_count >= 2
 
@@ -274,6 +274,6 @@ class TestTickServiceLoop:
             await asyncio.sleep(0.05)
             task.cancel()
             with pytest.raises(asyncio.CancelledError):
-                await task
+                _ = await task  # assignment placates py/ineffectual-statement
         # First call raised, subsequent calls succeeded — loop kept going.
         assert call_count >= 2

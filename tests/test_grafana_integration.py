@@ -10,18 +10,16 @@ or HostRole models in the test conftest:
 - check_grafana_health early-return branches via HTTPException
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.api import grafana_integration as gi
 from backend.api.grafana_integration import (
     GrafanaHealthStatus,
     GrafanaIntegrationRequest,
     GrafanaServerInfo,
     configure_prometheus_datasource,
 )
-from backend.services.vault_service import VaultError
 
 
 def _settings(grafana_url=None, api_key_vault_token=None):

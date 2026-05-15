@@ -4,10 +4,8 @@ Tests for tag management API endpoints
 
 from datetime import datetime, timezone
 
-import pytest
 from fastapi.testclient import TestClient
 
-from backend.main import app
 from backend.persistence import models
 
 

@@ -3,12 +3,9 @@ Unit tests for agent communication API endpoints.
 Tests agent authentication and WebSocket connection endpoints.
 """
 
-import json
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
-from backend.websocket.messages import MessageType
 
 
 class TestAgentAuth:
@@ -288,7 +285,7 @@ class TestAgentErrorHandling:
 
         # The security exception should cause the request to fail
         with pytest.raises(Exception, match="Security error"):
-            response = client.post("/agent/auth")
+            client.post("/agent/auth")
 
     @patch("backend.api.agent.websocket_security")
     def test_auth_token_generation_failure(self, mock_security, client):

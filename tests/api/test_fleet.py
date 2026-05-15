@@ -3,9 +3,7 @@ Unit tests for fleet management API endpoints.
 Tests fleet status, agent management, and command sending endpoints.
 """
 
-from unittest.mock import AsyncMock, Mock, patch
-
-from backend.websocket.messages import CommandType, MessageType
+from unittest.mock import Mock, patch
 
 
 class TestFleetStatus:

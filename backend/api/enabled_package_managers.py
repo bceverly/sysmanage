@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
@@ -83,7 +83,9 @@ class EnabledPackageManagerResponse(BaseModel):
     created_by: Optional[str] = None
 
     @validator("id", "created_by", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -100,7 +102,9 @@ class EnabledPackageManagerCreate(BaseModel):
     package_manager: str
 
     @validator("os_name")
-    def validate_os_name(cls, os_name):  # pylint: disable=no-self-argument
+    def validate_os_name(
+        cls, os_name
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate OS name."""
         if not os_name or os_name.strip() == "":
             raise ValueError(_("OS name is required"))
@@ -111,7 +115,7 @@ class EnabledPackageManagerCreate(BaseModel):
     @validator("package_manager")
     def validate_package_manager(
         cls, package_manager, values
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate package manager is an optional one for the selected OS."""
         if not package_manager or package_manager.strip() == "":
             raise ValueError(_("Package manager is required"))

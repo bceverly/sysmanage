@@ -4,7 +4,7 @@ Tests process_pending_messages and process_validated_message functions.
 """
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest

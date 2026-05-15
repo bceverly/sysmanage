@@ -82,8 +82,8 @@ class TestConfigPushManager:
         manager = ConfigPushManager()
         config_data = {"key": "value", "num": 123}
 
-        config1 = manager.create_agent_config("host", config_data)
-        config2 = manager.create_agent_config("host", config_data)
+        manager.create_agent_config("host", config_data)
+        manager.create_agent_config("host", config_data)
 
         # Same data should produce same checksum
         checksum1 = manager._calculate_checksum(config_data)

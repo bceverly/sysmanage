@@ -4,12 +4,10 @@ This module houses the API routes for the host object in SysManage.
 
 import asyncio
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from cryptography import x509
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
@@ -23,19 +21,12 @@ from backend.api import (
     host_operations,
     host_ubuntu_pro,
 )
-from backend.api.host_utils import validate_host_approval_status
 from backend.api.error_constants import error_host_not_found, error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
-from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.messages import (
-    create_command_message,
-    create_host_approved_message,
-)
-from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
 from backend.utils.verbosity_logger import sanitize_log
 

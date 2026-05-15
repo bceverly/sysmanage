@@ -44,7 +44,9 @@ class CommercialAntivirusStatusResponse(BaseModel):
     last_updated: datetime
 
     @validator("id", "host_id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)

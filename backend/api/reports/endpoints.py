@@ -150,9 +150,9 @@ async def view_report_html(
     # generator escapes interpolated values via Jinja2 autoescape.
     # Fully-qualified nosemgrep on the same line as the sink so the
     # Pro rule's line-precision match works.
-    return HTMLResponse(
+    return HTMLResponse(  # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
         content=html_content
-    )  # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
+    )
 
 
 @router.get("/generate/{report_type}")

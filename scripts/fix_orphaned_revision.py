@@ -13,7 +13,6 @@ Usage:
 import os
 import sys
 
-import sqlalchemy as sa
 import yaml
 from sqlalchemy import create_engine, text
 

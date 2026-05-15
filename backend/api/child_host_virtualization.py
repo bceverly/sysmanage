@@ -8,8 +8,6 @@ This module is the main router that includes sub-routers for:
 """
 
 import json
-import logging
-import secrets
 import uuid
 from datetime import datetime, timezone
 

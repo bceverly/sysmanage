@@ -4,9 +4,7 @@ Tests CORS origin generation for the SysManage server.
 """
 
 import os
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 class TestGetCorsOrigins:

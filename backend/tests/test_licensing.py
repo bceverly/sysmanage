@@ -518,7 +518,7 @@ class TestPayloadValidation:
 
     def test_validate_payload_all_tiers(self):
         """Test validation works for all license tiers."""
-        for tier in LicenseTier:
+        for tier in LicenseTier:  # lgtm[py/non-iterable-in-for-loop]
             payload = {
                 "lic": f"license-{tier.value}",
                 "tier": tier.value,

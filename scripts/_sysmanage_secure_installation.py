@@ -11,6 +11,7 @@ The wrapper script handles privilege elevation and virtual environment setup.
 """
 
 import getpass
+import contextlib
 import os
 import platform
 import re
@@ -20,7 +21,6 @@ import string
 import subprocess
 import sys
 import time
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -49,7 +49,6 @@ except ImportError as e:
 
 # Import backend modules for config loading
 try:
-    from backend.config.config import CONFIG_PATH, get_config
     from backend.persistence import models
     from backend.persistence.db import SessionLocal, get_engine
 except ImportError as e:
@@ -225,7 +224,6 @@ def fix_file_ownership(file_path):
         elevated_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
 
         if elevated_user and original_user:
-            import grp
             import pwd
 
             # Get user and group info
@@ -238,20 +236,14 @@ def fix_file_ownership(file_path):
             if os.path.isdir(file_path):
                 print(f"  Fixing ownership of {file_path} and contents to {original_user}")
                 for root, dirs, files in os.walk(file_path):
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(root, uid, gid)
-                    except Exception:
-                        pass
                     for d in dirs:
-                        try:
+                        with contextlib.suppress(Exception):
                             os.chown(os.path.join(root, d), uid, gid)
-                        except Exception:
-                            pass
                     for f in files:
-                        try:
+                        with contextlib.suppress(Exception):
                             os.chown(os.path.join(root, f), uid, gid)
-                        except Exception:
-                            pass
             else:
                 os.chown(file_path, uid, gid)
                 print(f"  Fixed ownership of {file_path} to {original_user}")
@@ -336,20 +328,14 @@ def fix_pip_cache_permissions():
             print(f"  Fixing pip cache permissions at {pip_cache_dir}...")
             # Recursively fix ownership
             for root, dirs, files in os.walk(pip_cache_dir):
-                try:
+                with contextlib.suppress(Exception):
                     os.chown(root, uid, gid)
-                except Exception:
-                    pass
                 for d in dirs:
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(os.path.join(root, d), uid, gid)
-                    except Exception:
-                        pass
                 for f in files:
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(os.path.join(root, f), uid, gid)
-                    except Exception:
-                        pass
             print("  Pip cache permissions fixed")
         else:
             # Create the directory with correct ownership so pip won't complain
@@ -662,7 +648,7 @@ def run_database_migrations():
                     row = rev_result.fetchone()
                     current_revision = row[0] if row else None
                 except Exception:
-                    pass
+                    _ = None  # empty-except: failure here is non-fatal
 
             print(f"  Found {len(existing_tables)} tables in database")
             if has_alembic_version and current_revision:
@@ -1042,10 +1028,8 @@ def update_config_file(salt, jwt_secret):
 
             finally:
                 # Clean up temporary file
-                try:
+                with contextlib.suppress(Exception):
                     os.unlink(tmp_path)
-                except:
-                    pass
 
     except Exception as e:
         print(f"Error updating configuration: {e}")
@@ -1100,8 +1084,8 @@ def find_vault_binary():
                         expanded_path = os.path.expanduser(binary_path)
                         if os.path.exists(expanded_path) and is_safe_vault_path(expanded_path):
                             return expanded_path
-            except:
-                pass
+            except Exception:  # noqa: BLE001
+                _ = None  # empty-except: failure here is non-fatal
 
     return None
 
@@ -1151,7 +1135,7 @@ def initialize_vault():
     if not vault_cmd:
         print("  OpenBAO/Vault not found, skipping vault initialization")
         print("  You can install OpenBAO later with: make install-dev")
-        return
+        return None
 
     print(f"  Using vault binary: {vault_cmd}")
 
@@ -1201,23 +1185,28 @@ ui = true
     # Use absolute path for config file
     vault_config_abs_path = str(vault_config_path.absolute())
 
-    # Start vault server with platform-specific handling
-    # vault_cmd is validated by is_safe_vault_path() in find_vault_binary()
-    if platform.system() == "Windows":
-        # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
-            vault_cmd, 'server', f'-config={vault_config_abs_path}'
-        ],
-        stdout=open(log_file, 'w'),
-        stderr=subprocess.STDOUT,
-        cwd=str(project_root),
-        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-    else:
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
-            vault_cmd, 'server', f'-config={vault_config_abs_path}'
-        ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
+    # Start vault server with platform-specific handling.
+    # vault_cmd is validated by is_safe_vault_path() in find_vault_binary().
+    # Open the log file via ``with`` and let Popen dup the descriptor;
+    # after Popen returns we can safely close the parent-side handle —
+    # the child already has its own copy.  Without the ``with``, CodeQL
+    # flags ``py/file-not-closed`` on the leaked fp.
+    with open(log_file, 'w') as log_fp:
+        if platform.system() == "Windows":
+            # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            vault_process = subprocess.Popen([
+                vault_cmd, 'server', f'-config={vault_config_abs_path}'
+            ],
+            stdout=log_fp,
+            stderr=subprocess.STDOUT,
+            cwd=str(project_root),
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+        else:
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            vault_process = subprocess.Popen([
+                vault_cmd, 'server', f'-config={vault_config_abs_path}'
+            ], stdout=log_fp, stderr=subprocess.STDOUT, cwd=str(project_root))
 
     # Fix ownership of the log file after it's created
     fix_file_ownership(log_file)
@@ -1283,7 +1272,7 @@ ui = true
             else:
                 print(f"  Vault initialization failed for another reason")
             vault_process.terminate()
-            return
+            return None
 
         import json
         init_data = json.loads(result.stdout)
@@ -1300,7 +1289,7 @@ ui = true
         if result.returncode != 0:
             print(f"  Error unsealing vault: {result.stderr}")
             vault_process.terminate()
-            return
+            return None
 
         # Set root token
         env['BAO_TOKEN'] = root_token
@@ -1517,7 +1506,6 @@ def main():
         importlib.reload(backend.config.config)
         importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
-        from backend.persistence.db import get_engine
 
         # Install development dependencies (includes migrations)
         run_make_install_dev()
@@ -1532,7 +1520,6 @@ def main():
         importlib.reload(backend.config.config)
         importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
-        from backend.persistence.db import get_engine
 
         # Load current configuration (after potential database config updates)
         config = get_config()
@@ -1574,7 +1561,7 @@ def main():
                 update_config_with_vault(config_path, unseal_key, root_token)
 
         # Install telemetry stack (optional)
-        telemetry_installed = install_telemetry_stack()
+        install_telemetry_stack()
 
         # Reload configuration to ensure we're using the updated salt
         config = get_config()

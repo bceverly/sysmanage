@@ -6,7 +6,7 @@ Handles update application results and status tracking.
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import and_, text, update
+from sqlalchemy import and_, update
 from sqlalchemy.orm import Session
 
 from backend.i18n import _

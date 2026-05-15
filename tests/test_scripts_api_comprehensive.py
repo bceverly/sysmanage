@@ -4,7 +4,6 @@ Tests Pydantic models, validators, and API endpoint logic.
 """
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError

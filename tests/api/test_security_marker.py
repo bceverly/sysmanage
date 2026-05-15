@@ -16,7 +16,6 @@ plug into the existing in-memory SQLite + TestClient harness.
 # pylint: disable=missing-function-docstring,missing-class-docstring,invalid-name,redefined-outer-name
 
 import time
-from datetime import datetime, timedelta, timezone
 
 import jwt as pyjwt
 import pytest

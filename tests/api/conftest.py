@@ -1630,7 +1630,7 @@ def test_db():
     # Cleanup
     try:
         os.close(db_fd)
-    except:
+    except Exception:  # noqa: BLE001
         pass  # File descriptor might already be closed
 
     # Try to delete the file, but don't fail the test if it can't be deleted

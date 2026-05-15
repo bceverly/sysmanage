@@ -6,7 +6,7 @@ IP blocking, user validation, and security monitoring.
 """
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 

@@ -5,9 +5,8 @@ This module tests the EmailService class which provides functionality
 for sending emails via SMTP.
 """
 
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
-import pytest
 
 from backend.services.email_service import EmailService, email_service
 

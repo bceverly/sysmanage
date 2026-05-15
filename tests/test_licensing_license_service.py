@@ -4,7 +4,7 @@ Tests Pro+ license service functionality.
 """
 
 import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch, AsyncMock
 
 

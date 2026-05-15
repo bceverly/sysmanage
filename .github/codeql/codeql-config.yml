@@ -1,0 +1,87 @@
+# CodeQL configuration for sysmanage.
+#
+# Wired in via the ``config-file`` parameter of the ``Initialize CodeQL``
+# step in ``.github/workflows/codeql.yml``.
+#
+# Two purposes:
+#
+#   1. Run the same ``security-and-quality`` query suite as before so we
+#      keep parity with the prior scan results.  (CodeQL falls back to
+#      ``security-extended`` when no ``queries`` block is present in this
+#      config — explicitly naming it here pins behaviour.)
+#
+#   2. Path-ignore directories whose contents trip CodeQL's structural
+#      heuristics with no path to a real-world fix:
+#
+#        * ``alembic/versions/``  — auto-generated migration files.
+#          Every migration declares module-level ``revision`` /
+#          ``down_revision`` / ``branch_labels`` / ``depends_on``
+#          constants which alembic reads via introspection.  Static
+#          analysis sees them as unused globals and emits
+#          ``py/unused-global-variable`` per migration — currently
+#          72 false positives across the migration history.  Removing
+#          these constants would break alembic.
+#
+#        * ``frontend/dist/`` + ``frontend/build/`` + ``frontend/coverage/``
+#          — bundler outputs, not source.  CodeQL shouldn't scan them.
+#
+#        * ``frontend/node_modules/`` — third-party JS.
+#
+#        * ``htmlcov/`` — coverage.py HTML output.
+#
+#        * ``__pycache__/`` — bytecode.
+
+name: sysmanage-codeql-config
+
+queries:
+  - uses: security-and-quality
+
+paths-ignore:
+  - alembic/versions
+  - frontend/dist
+  - frontend/build
+  - frontend/coverage
+  - frontend/node_modules
+  # Mock Service Worker (MSW) auto-generated service worker used for
+  # browser test mocks — it triggers js/missing-origin-check on its
+  # message handler, but the file is upstream-generated and ships only
+  # in dev/test builds, not production.
+  - frontend/public/mockServiceWorker.js
+  - htmlcov
+  - "**/__pycache__"
+  - "**/*.pyc"
+
+# Drop a handful of ``security-and-quality`` queries that, on this
+# codebase, only emit known false positives (or stylistic noise) with
+# no path to a real-world fix.
+#
+# Each ``- exclude:`` entry below is paired with a one-line rationale.
+query-filters:
+  # Fires on every ``from foo import SomeClass`` where ``SomeClass`` is
+  # also reassigned anywhere in the importing module's lineage — but
+  # for class imports this almost never reflects real behaviour, since
+  # classes are referenced by identity, not rebound.  This codebase
+  # imports SQLAlchemy/Pydantic model classes by name throughout; we
+  # cannot rewrite every call site to use ``module.Class`` without
+  # destroying readability.
+  - exclude:
+      id: py/import-of-mutable-attribute
+  # Fires on namespace conventions (re-exports through ``__init__`` and
+  # similar).  We deliberately re-export router groups + models that
+  # way for ergonomic imports in handlers.
+  - exclude:
+      id: py/polluting-import
+  # FastAPI + SQLAlchemy + Alembic apps almost always have circular
+  # type references (Pydantic ↔ ORM ↔ schema).  The runtime works
+  # because we defer the cycles via local imports; CodeQL doesn't
+  # model that pattern.
+  - exclude:
+      id: py/cyclic-import
+  # Style preference: this codebase mixes ``import x`` and
+  # ``from x import y`` intentionally.  Not a real defect.
+  - exclude:
+      id: py/import-and-import-from
+  # Diagnostic prints at module load (CLI scripts).  Not a security
+  # issue; rewriting to lazy log would obscure CLI bootstrap output.
+  - exclude:
+      id: py/print-during-import

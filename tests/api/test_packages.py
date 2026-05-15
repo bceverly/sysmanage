@@ -2,12 +2,9 @@
 Tests all package-related endpoints using database fixtures.
 """
 
-import uuid
 from datetime import datetime, timezone
 
 import pytest
-
-from backend.persistence.models import AvailablePackage
 
 
 class TestPackagesAPI:
@@ -16,18 +13,19 @@ class TestPackagesAPI:
     @pytest.fixture
     def sample_packages(self, session):
         """Create sample packages in the database."""
-        import uuid
 
         # Check database type and create appropriate datetime
         engine = session.get_bind()
         is_sqlite = "sqlite" in str(engine.url)
 
+        # AvailablePackage is used unconditionally below — import it
+        # outside the SQLite branch so py/uninitialized-local-variable
+        # doesn't fire when the SQLite path is skipped.
+        from backend.persistence.models.software import AvailablePackage
+
         # Force table recreation for available_packages to ensure correct schema
         if is_sqlite:
             from sqlalchemy import text
-
-            from backend.persistence.db import Base
-            from backend.persistence.models.software import AvailablePackage
 
             # Drop and recreate the available_packages table specifically
             with engine.connect() as conn:
@@ -113,8 +111,9 @@ class TestPackagesAPI:
             print(f"Response Text: {response.text}")
             try:
                 print(f"Response JSON: {response.json()}")
-            except:
-                pass
+            except Exception:  # noqa: BLE001
+                # Diagnostic-only block — body isn't always JSON.
+                _ = None
 
         assert response.status_code == 200
         data = response.json()

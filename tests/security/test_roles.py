@@ -6,9 +6,7 @@ which provide role-based access control functionality.
 """
 
 import uuid
-from unittest.mock import MagicMock, patch
 
-import pytest
 
 from backend.security.roles import (
     SecurityRoles,
@@ -236,7 +234,7 @@ class TestLoadUserRoles:
 
     def test_load_user_roles_returns_cache(self, session):
         """Test load_user_roles returns a UserRoleCache object."""
-        from backend.persistence.models import SecurityRole, User, UserSecurityRole
+        from backend.persistence.models import User
         from argon2 import PasswordHasher
 
         # Create a test user
