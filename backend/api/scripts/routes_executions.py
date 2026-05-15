@@ -379,7 +379,7 @@ async def delete_script_execution(
             logger.info(
                 "Deleted script execution %s by user %s",
                 sanitize_log(execution_id),
-                current_user,
+                sanitize_log(current_user),
             )
             return {"message": _("Script execution deleted successfully")}
     except HTTPException:

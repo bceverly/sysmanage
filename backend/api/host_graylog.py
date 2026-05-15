@@ -67,7 +67,8 @@ async def get_host_graylog_attachment(
 
             # Return default "not attached" status if no record exists
             logger.info(
-                "No Graylog attachment found for host %s, returning default", host_id
+                "No Graylog attachment found for host %s, returning default",
+                sanitize_log(host_id),
             )
             return {
                 "is_attached": False,

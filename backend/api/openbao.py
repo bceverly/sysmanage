@@ -126,7 +126,8 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             # /etc/environment) — NOT request/user-controlled.  The
             # subprocess argv is a fixed list of literal strings + the
             # validated binary path; no user input reaches argv.
-            result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            result = subprocess.run(  # nosec B603
                 [
                     bao_cmd,
                     "status",
@@ -134,7 +135,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
                 capture_output=True,
                 text=True,
                 timeout=5,
-                env=env,
+                env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 check=False,
             )
 
@@ -572,7 +573,8 @@ def seal_openbao() -> Dict[str, Any]:
         # bao_cmd is the operator-controlled OpenBAO binary path
         # validated by find_bao_binary (see openbao.py:128 comment).
         # No user input reaches argv.
-        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        result = subprocess.run(  # nosec B603
             [
                 bao_cmd,
                 "operator",
@@ -581,7 +583,7 @@ def seal_openbao() -> Dict[str, Any]:
             capture_output=True,
             text=True,
             timeout=10,
-            env=env,
+            env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             check=False,
         )
 
@@ -676,7 +678,8 @@ def unseal_openbao() -> Dict[str, Any]:
         # is the operator-validated OpenBAO binary (see openbao.py:128
         # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
         # Neither is request/user-controlled.
-        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        result = subprocess.run(  # nosec B603
             [
                 bao_cmd,
                 "operator",
@@ -687,7 +690,7 @@ def unseal_openbao() -> Dict[str, Any]:
             capture_output=True,
             text=True,
             timeout=10,
-            env=env,
+            env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             check=False,
             input="dev-only-token-change-me\n",  # Dev mode unseal key
         )

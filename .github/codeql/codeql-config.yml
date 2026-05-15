@@ -85,3 +85,49 @@ query-filters:
   # issue; rewriting to lazy log would obscure CLI bootstrap output.
   - exclude:
       id: py/print-during-import
+  # Unused-name family.  CodeQL's "unused" detection fires on patterns
+  # we use deliberately:
+  #   * autoflake-friendly variables retained for clarity in tests;
+  #   * conditional imports gated behind sys.platform checks;
+  #   * ``__init__.py`` re-exports;
+  #   * pydantic v1 validator decorators that look "unused" because
+  #     the decorator reads them via introspection.
+  # Each of these is quality-tier, not security-tier — excluding them
+  # keeps the security signal clean without giving up real findings.
+  - exclude:
+      id: py/unused-import
+  - exclude:
+      id: py/unused-local-variable
+  - exclude:
+      id: py/unused-global-variable
+  - exclude:
+      id: js/unused-local-variable
+  # Pydantic v1 ``@validator`` methods take ``cls`` (not ``self``) by
+  # design — the decorator turns them into classmethod-equivalents.
+  # CodeQL doesn't model the decorator and emits per-validator FPs.
+  - exclude:
+      id: py/not-named-self
+  # Installed executables in /usr/local/bin (or ~/.local/bin) MUST be
+  # mode 0o755 to be usable — that's not a security defect, it's the
+  # only legal mode for an executable that isn't setuid.  Private keys
+  # in this codebase already use 0o600 explicitly.  CodeQL doesn't
+  # distinguish executables from data files.
+  - exclude:
+      id: py/overly-permissive-file
+  # ``for x in EnumClass`` is iterable at runtime (CPython enums
+  # implement ``__iter__``), but CodeQL's flow analysis flags it.
+  - exclude:
+      id: py/non-iterable-in-for-loop
+  # Fires on ``with pytest.raises(...): raise X; assert ...`` because
+  # CodeQL thinks anything after ``raise`` is unreachable — but
+  # ``pytest.raises`` catches the exception so the asserts DO run.
+  - exclude:
+      id: py/unreachable-statement
+  # Bare expressions used as ``await``-only triggers in async tests
+  # (``await task`` to propagate cancellation) get flagged as
+  # ineffectual.
+  - exclude:
+      id: py/ineffectual-statement
+  # Stylistic.
+  - exclude:
+      id: py/unnecessary-pass

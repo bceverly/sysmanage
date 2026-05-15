@@ -105,25 +105,21 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
 
         return VaultService().get_secret(secret_id)
     except Exception:  # pylint: disable=broad-except
-        # Log only the reference IDENTIFIER (a Vault path or
-        # ``literal:`` prefix), never the resolved value.  Both
-        # CodeQL's ``py/clear-text-logging-sensitive-data`` and
-        # Semgrep Pro's logger-credential-disclosure rule key off
-        # the word ``secret`` in the local variable name and the
-        # word ``credential`` in the format string — neither looks
-        # at the actual value flowing in.  We:
-        #
-        #   * pass via ``ref_path`` (CodeQL's heuristic doesn't
-        #     flag this variable name)
-        #   * truncate to 60 chars (defence in depth: even if a
-        #     caller someday passed the resolved value here by
-        #     mistake, we'd leak at most a prefix)
+        # CodeQL's ``py/clear-text-logging-sensitive-data`` follows the
+        # value of ``secret_id`` through any local reassignment (slice,
+        # truncation, etc.) and keeps the "sensitive" taint label.  To
+        # truly break the data flow we log only a constant ``ref_kind``
+        # — either ``"literal"`` or ``"vault"`` — chosen by a boolean
+        # branch on the input.  CodeQL sees the branch's literal-string
+        # arms, not the input value, so the taint chain ends here.
+        # This also makes the log line strictly more useful in practice:
+        # operators care about "did we hit Vault or a literal stub?",
+        # not the specific path.
         #
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-        ref_path = (secret_id or "")[:60]
+        ref_kind = "literal" if (secret_id or "").startswith("literal:") else "vault"
         logger.warning(
-            "Could not resolve IdP reference %s from Vault",
-            ref_path,
+            "Could not resolve IdP reference (kind=%s) from Vault", ref_kind
         )
         return None
 

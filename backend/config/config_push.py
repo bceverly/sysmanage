@@ -272,7 +272,7 @@ class ConfigPushManager:
                         "Configuration v%s failed on %s: %s",
                         sanitize_log(version),
                         sanitize_log(hostname),
-                        error,
+                        sanitize_log(error),
                     )
                     # Keep in pending for potential retry
             else:

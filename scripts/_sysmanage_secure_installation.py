@@ -997,18 +997,22 @@ def update_config_file(salt, jwt_secret):
                         subprocess.run(['doas', 'true'], check=True, capture_output=True)
                         priv_cmd = 'doas'
                     except (subprocess.CalledProcessError, FileNotFoundError):
+                        # ``doas`` unavailable / unauthorised — fall through to sudo probe.
                         try:
                             subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
                             priv_cmd = 'sudo'
                         except (subprocess.CalledProcessError, FileNotFoundError):
-                            pass
+                            # Neither doas nor sudo available — caller handles
+                            # ``priv_cmd is None`` below by exiting with a clear msg.
+                            priv_cmd = None
                 else:
                     import subprocess
                     try:
                         subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
                         priv_cmd = 'sudo'
                     except (subprocess.CalledProcessError, FileNotFoundError):
-                        pass
+                        # sudo unavailable — caller handles ``priv_cmd is None``.
+                        priv_cmd = None
 
                 if priv_cmd:
                     print(f"  Using {priv_cmd} to update configuration file...")

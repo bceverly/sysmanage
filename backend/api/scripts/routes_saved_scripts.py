@@ -166,7 +166,9 @@ async def create_saved_script(
             )
 
             logger.info(
-                "Created saved script '%s' by user %s", script.name, current_user
+                "Created saved script '%s' by user %s",
+                sanitize_log(script.name),
+                sanitize_log(current_user),
             )
             return SavedScriptResponse(
                 id=str(script.id),

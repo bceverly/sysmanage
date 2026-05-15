@@ -42,18 +42,33 @@ def safe_extract_tar(tar, path):
 def safe_extract_zip(zip_file, path):
     """Safely extract zip file, preventing path traversal attacks.
 
-    CodeQL's ``py/tarslip`` covers zip-slip too and recognises the
-    ``abspath`` -> ``startswith`` sanitiser pattern below; the previous
-    ``os.path.commonpath``-based guard was equivalent but CodeQL's
-    static analysis didn't pick it up and emitted a false positive on
-    the ``zip_file.extract`` call.
+    CodeQL's ``py/tarslip`` covers zip-slip.  We don't call
+    ``zip_file.extract`` directly with the (potentially crafted)
+    member name — instead we read the bytes via ``zip_file.read`` and
+    write them under a path we construct ourselves after explicit
+    sanitisation:
+
+      * absolute-path members rejected (``os.path.isabs``)
+      * any ``..`` segment rejected
+      * resolved target must stay inside ``path``
+
+    This matches the pattern CodeQL's data-flow analysis recognises as
+    a sanitiser sink.
     """
     abs_path = os.path.abspath(path)
     for member in zip_file.namelist():
+        if os.path.isabs(member) or ".." in member.replace("\\", "/").split("/"):
+            raise ValueError(f"Unsafe zip member rejected: {member!r}")
         target = os.path.abspath(os.path.join(abs_path, member))
         if target != abs_path and not target.startswith(abs_path + os.sep):
             raise ValueError(f"Unsafe zip member rejected: {member!r}")
-        zip_file.extract(member, path)
+
+        if member.endswith("/"):
+            os.makedirs(target, exist_ok=True)
+            continue
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        with zip_file.open(member) as src, open(target, "wb") as dst:
+            shutil.copyfileobj(src, dst)
 
 
 def detect_platform():

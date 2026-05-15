@@ -103,7 +103,9 @@ class TestHealthAnalysisError:
         """Test that HealthAnalysisError can be raised and caught."""
         with pytest.raises(HealthAnalysisError) as exc_info:
             raise HealthAnalysisError("Pro+ license required")
-        assert "Pro+ license required" in str(exc_info.value)  # lgtm[py/unreachable-statement]
+        assert "Pro+ license required" in str(
+            exc_info.value
+        )  # lgtm[py/unreachable-statement]
 
     def test_exception_with_no_message(self):
         """Test creating a HealthAnalysisError with no message."""
