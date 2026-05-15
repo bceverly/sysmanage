@@ -12,10 +12,10 @@
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
 [![Security: bandit](https://img.shields.io/badge/bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit) [![Security: semgrep](https://img.shields.io/badge/semgrep-scan-brightgreen.svg)](https://semgrep.dev/) [![Security: safety](https://img.shields.io/badge/safety-passing-brightgreen.svg)](https://pypi.org/project/safety/) [![Security: snyk](https://img.shields.io/badge/snyk-monitored-brightgreen.svg)](https://snyk.io/) [![Security: trufflehog](https://img.shields.io/badge/trufflehog-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
-[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-75%25-yellowgreen.svg)]()
+[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-72%25-yellowgreen.svg)]()
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
 [![Performance Tests](https://img.shields.io/badge/performance%20tests-optimized-brightgreen.svg)]()
-[![Artillery Load Tests](https://img.shields.io/badge/artillery-0ms-brightgreen.svg)]()
+[![Artillery Load Tests](https://img.shields.io/badge/artillery-failed-red.svg)]()
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=bugs)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage)
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
