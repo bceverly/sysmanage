@@ -15,6 +15,7 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,9 @@ async def get_commercial_antivirus_status(
         raise
     except Exception as e:
         logger.error(
-            "Error getting commercial antivirus status for host %s: %s", host_id, e
+            "Error getting commercial antivirus status for host %s: %s",
+            sanitize_log(host_id),
+            e,
         )
         raise HTTPException(
             status_code=500,

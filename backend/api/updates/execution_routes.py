@@ -16,6 +16,7 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import UpdateExecutionRequest
 
@@ -54,9 +55,9 @@ async def execute_updates(  # NOSONAR
 
         logger.info(
             "Received update execution request: host_ids=%s, package_names=%s, package_managers=%s",
-            request.host_ids,
-            request.package_names,
-            request.package_managers,
+            sanitize_log(request.host_ids),
+            sanitize_log(request.package_names),
+            sanitize_log(request.package_managers),
         )
         with session_factory() as session:
             results = []

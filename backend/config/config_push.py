@@ -29,6 +29,7 @@ from backend.security.communication_security import message_encryption
 from backend.websocket.messages import Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,9 @@ class ConfigPushManager:
             self.pending_configs[label] = agent_config
             return message.to_dict()
         except (ValueError, KeyError, OSError) as e:
-            logger.error("Error building config envelope for %s: %s", label, e)
+            logger.error(
+                "Error building config envelope for %s: %s", sanitize_log(label), e
+            )
             return None
 
     def _enqueue_for_host(
@@ -144,7 +147,10 @@ class ConfigPushManager:
             .first()
         )
         if host is None:
-            logger.warning("Cannot push config — no active host with fqdn=%s", hostname)
+            logger.warning(
+                "Cannot push config — no active host with fqdn=%s",
+                sanitize_log(hostname),
+            )
             return False
 
         envelope = self._build_config_envelope(hostname, config_data)
@@ -157,7 +163,7 @@ class ConfigPushManager:
         db.commit()
         logger.info(
             "Configuration enqueued for agent %s, version %s",
-            hostname,
+            sanitize_log(hostname),
             self.pending_configs[hostname]["version"],
         )
         return True
@@ -233,7 +239,7 @@ class ConfigPushManager:
         logger.info(
             "Configuration enqueued for %s agent(s) on platform %s",
             enqueued,
-            platform,
+            sanitize_log(platform),
         )
         return enqueued
 
@@ -256,25 +262,30 @@ class ConfigPushManager:
                 if success:
                     logger.info(
                         "Configuration v%s successfully applied on %s",
-                        version,
-                        hostname,
+                        sanitize_log(version),
+                        sanitize_log(hostname),
                     )
                     # Remove from pending
                     del self.pending_configs[hostname]
                 else:
                     logger.error(
-                        "Configuration v%s failed on %s: %s", version, hostname, error
+                        "Configuration v%s failed on %s: %s",
+                        sanitize_log(version),
+                        sanitize_log(hostname),
+                        error,
                     )
                     # Keep in pending for potential retry
             else:
                 logger.warning(
                     "Version mismatch in ack from %s: expected %s, got %s",
-                    hostname,
+                    sanitize_log(hostname),
                     config["version"],
-                    version,
+                    sanitize_log(version),
                 )
         else:
-            logger.warning("Received ack for unknown config from %s", hostname)
+            logger.warning(
+                "Received ack for unknown config from %s", sanitize_log(hostname)
+            )
 
     def get_pending_configs(self) -> Dict[str, Dict[str, Any]]:
         """Get all pending configuration pushes."""

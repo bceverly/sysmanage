@@ -27,6 +27,7 @@ from typing import Dict, List, Optional
 
 from fastapi import WebSocket
 from websockets.exceptions import ConnectionClosed
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -232,13 +233,19 @@ class ConnectionManager:
         platform: str = None,
     ):
         """Register agent details for lookup."""
-        logger.info("Registering agent %s with hostname %s", agent_id, hostname)
+        logger.info(
+            "Registering agent %s with hostname %s", agent_id, sanitize_log(hostname)
+        )
 
         if agent_id in self.active_connections:
             connection = self.active_connections[agent_id]
             connection.update_info(hostname, ipv4, ipv6, platform)
             if hostname:
-                logger.info("Adding hostname mapping: %s -> %s", hostname, agent_id)
+                logger.info(
+                    "Adding hostname mapping: %s -> %s",
+                    sanitize_log(hostname),
+                    agent_id,
+                )
                 self.hostname_to_agent[hostname] = agent_id
                 logger.info(
                     "Agent %s registered. All hostnames: %s",

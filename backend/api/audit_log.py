@@ -212,8 +212,8 @@ async def list_audit_logs(
             "Audit log query by user %s: %d results (offset=%d, limit=%d)",
             sanitize_log(current_user),
             total,
-            offset,
-            limit,
+            sanitize_log(offset),
+            sanitize_log(limit),
         )
         return AuditLogListResponse(
             total=total, limit=limit, offset=offset, entries=entries
@@ -270,7 +270,9 @@ async def get_audit_log_entry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error retrieving audit log entry %s: %s", audit_id, e)
+        logger.error(
+            "Error retrieving audit log entry %s: %s", sanitize_log(audit_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve audit log entry: %s") % str(e),

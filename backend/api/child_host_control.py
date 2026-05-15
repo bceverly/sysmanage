@@ -24,6 +24,7 @@ from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import HostChild
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 
@@ -185,7 +186,7 @@ def _try_update_agent_plan_dispatch(
             "update_agent plan path failed for %s/%s on host %s: %s",
             child_type,
             child_name,
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -233,7 +234,7 @@ def _try_lifecycle_plan_dispatch(
             "Lifecycle plan path failed for %s/%s on host %s; engine path declined: %s",
             child_type,
             action,
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False

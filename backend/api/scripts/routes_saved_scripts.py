@@ -316,7 +316,11 @@ async def update_saved_script(
                 },
             )
 
-            logger.info("Updated saved script %d by user %s", script_id, current_user)
+            logger.info(
+                "Updated saved script %d by user %s",
+                sanitize_log(script_id),
+                sanitize_log(current_user),
+            )
             return SavedScriptResponse(
                 id=str(script.id),
                 name=script.name,
@@ -414,7 +418,11 @@ async def delete_saved_script(
                 },
             )
 
-            logger.info("Deleted saved script %d by user %s", script_id, current_user)
+            logger.info(
+                "Deleted saved script %d by user %s",
+                sanitize_log(script_id),
+                sanitize_log(current_user),
+            )
             return {"message": _("Script deleted successfully")}
 
     except HTTPException:

@@ -19,6 +19,7 @@ from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -177,9 +178,9 @@ async def update_ubuntu_pro_settings(
 
         logger.info(
             "Ubuntu Pro settings updated: organization=%s, has_master_key=%s, auto_attach=%s",
-            settings.organization_name,
+            sanitize_log(settings.organization_name),
             settings.master_key is not None,
-            settings.auto_attach_enabled,
+            sanitize_log(settings.auto_attach_enabled),
         )
 
         # Log audit entry for settings update

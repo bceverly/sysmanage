@@ -22,6 +22,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 
@@ -111,7 +112,7 @@ def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
         logging.getLogger(__name__).warning(
             "Init plan path failed for action=%s host=%s; engine path declined: %s",
             action,
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -684,7 +685,7 @@ def _try_kvm_network_plan_path(host_id, request) -> bool:
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "KVM net plan path failed for host %s; engine path declined: %s",
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -825,7 +826,7 @@ async def list_kvm_networks(
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 logging.getLogger(__name__).warning(
                     "KVM net list plan path failed for host %s; engine path declined: %s",
-                    host_id,
+                    sanitize_log(host_id),
                     exc,
                 )
 

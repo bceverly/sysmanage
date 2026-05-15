@@ -20,6 +20,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 
@@ -59,7 +60,9 @@ def _try_check_virtualization_support_plan(host_id: str) -> bool:
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
-            "Capability probe plan path failed for host %s: %s", host_id, exc
+            "Capability probe plan path failed for host %s: %s",
+            sanitize_log(host_id),
+            exc,
         )
         return False
 

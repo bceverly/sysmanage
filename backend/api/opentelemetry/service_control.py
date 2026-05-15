@@ -19,6 +19,7 @@ from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.observability_shim import try_engine_otel_service_control
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import OpenTelemetryDeployResponse
 
@@ -117,7 +118,7 @@ async def start_opentelemetry(
 
         logger.info(
             "Queued OpenTelemetry start for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 
@@ -214,7 +215,7 @@ async def stop_opentelemetry(
 
         logger.info(
             "Queued OpenTelemetry stop for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 
@@ -313,7 +314,7 @@ async def restart_opentelemetry(
 
         logger.info(
             "Queued OpenTelemetry restart for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 

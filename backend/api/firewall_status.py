@@ -27,6 +27,7 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 
 def _host_info_for_planner(host: models.Host) -> dict:
@@ -140,7 +141,9 @@ async def get_firewall_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting firewall status for host %s: %s", host_id, e)
+        logger.error(
+            "Error getting firewall status for host %s: %s", sanitize_log(host_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve firewall status: %s") % str(e),

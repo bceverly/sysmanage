@@ -17,6 +17,7 @@ from backend.persistence import db, models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +123,9 @@ async def get_antivirus_default_for_os(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting antivirus default for OS %s: %s", os_name, e)
+        logger.error(
+            "Error getting antivirus default for OS %s: %s", sanitize_log(os_name), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve antivirus default: %s") % str(e),
@@ -284,7 +287,7 @@ async def delete_antivirus_default(
             db.delete(default)
             db.commit()
 
-            logger.info("Antivirus default deleted for OS: %s", os_name)
+            logger.info("Antivirus default deleted for OS: %s", sanitize_log(os_name))
 
             # Log audit entry for deletion
             AuditService.log_delete(
@@ -302,7 +305,9 @@ async def delete_antivirus_default(
         return {"message": _("No antivirus default found for this OS")}
 
     except Exception as e:
-        logger.error("Error deleting antivirus default for OS %s: %s", os_name, e)
+        logger.error(
+            "Error deleting antivirus default for OS %s: %s", sanitize_log(os_name), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete antivirus default: %s") % str(e),

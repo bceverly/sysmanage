@@ -25,6 +25,7 @@ from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -332,8 +333,8 @@ async def create_enabled_package_manager(
 
         logger.info(
             "Enabled package manager created: %s/%s",
-            pm_data.os_name,
-            pm_data.package_manager,
+            sanitize_log(pm_data.os_name),
+            sanitize_log(pm_data.package_manager),
         )
 
         # Log audit entry
@@ -369,7 +370,7 @@ async def create_enabled_package_manager(
                 logger.info(
                     "Queued enable_package_manager commands for %d hosts with OS %s",
                     queued_count,
-                    pm_data.os_name,
+                    sanitize_log(pm_data.os_name),
                 )
         except Exception as e:
             # Don't fail the creation if we can't queue the messages
@@ -479,7 +480,9 @@ async def delete_enabled_package_manager(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting enabled package manager %s: %s", pm_id, e)
+        logger.error(
+            "Error deleting enabled package manager %s: %s", sanitize_log(pm_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete enabled package manager: %s") % str(e),

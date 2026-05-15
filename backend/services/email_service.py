@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from typing import List, Optional
 
 from backend.config import config
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,10 @@ class EmailService:
 
                 # Send the email
                 server.send_message(msg, sender_address, to_addresses)
-                logger.info("Email sent successfully to %s", ", ".join(to_addresses))
+                logger.info(
+                    "Email sent successfully to %s",
+                    sanitize_log(", ".join(to_addresses)),
+                )
                 return True
 
             finally:

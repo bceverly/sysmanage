@@ -44,6 +44,7 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.websocket.messages import MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 queue_ops = QueueOperations()
@@ -162,8 +163,8 @@ async def broadcast_to_fleet(
     logger.info(
         "Broadcast %s action=%s filter=%s enqueued=%d elapsed=%.1fms",
         broadcast_id,
-        request.broadcast_action,
-        target_filter,
+        sanitize_log(request.broadcast_action),
+        sanitize_log(target_filter),
         delivered,
         elapsed_ms,
     )

@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from backend.config.config import get_config
 from backend.i18n import _
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -174,8 +175,8 @@ class WebSocketSecurityManager:
                 )
                 logger.warning(
                     LOG_MSG_FROM_CONNECTION,
-                    error_msg,
-                    connection_id,
+                    sanitize_log(error_msg),
+                    sanitize_log(connection_id),
                 )
                 return False, error_msg
 
@@ -195,16 +196,16 @@ class WebSocketSecurityManager:
                     error_msg = f"Message timestamp too old ({int(time_diff)}s) in {message_type} message"
                     logger.warning(
                         LOG_MSG_FROM_CONNECTION,
-                        error_msg,
-                        connection_id,
+                        sanitize_log(error_msg),
+                        sanitize_log(connection_id),
                     )
                     return False, error_msg
             except (ValueError, AttributeError):
                 error_msg = f"Invalid timestamp format in {message_type} message"
                 logger.warning(
                     LOG_MSG_FROM_CONNECTION,
-                    error_msg,
-                    connection_id,
+                    sanitize_log(error_msg),
+                    sanitize_log(connection_id),
                 )
                 return False, error_msg
 
@@ -216,8 +217,8 @@ class WebSocketSecurityManager:
                 error_msg = f"Invalid message_id format '{message_id[:20]}...' in {message_type} message"
                 logger.warning(
                     LOG_MSG_FROM_CONNECTION,
-                    error_msg,
-                    connection_id,
+                    sanitize_log(error_msg),
+                    sanitize_log(connection_id),
                 )
                 return False, error_msg
 

@@ -18,6 +18,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -159,8 +160,8 @@ async def update_column_preferences(
 
         logger.info(
             "Column preferences updated for user %s, grid %s",
-            current_user,
-            preference_request.grid_identifier,
+            sanitize_log(current_user),
+            sanitize_log(preference_request.grid_identifier),
         )
 
         # Log audit entry for column preference update
@@ -228,8 +229,8 @@ async def delete_column_preferences(
 
             logger.info(
                 "Column preferences deleted for user %s, grid %s",
-                current_user,
-                grid_identifier,
+                sanitize_log(current_user),
+                sanitize_log(grid_identifier),
             )
 
             # Log audit entry for column preference deletion
@@ -366,7 +367,9 @@ async def update_dashboard_card_preferences(
 
         db.commit()
 
-        logger.info("Dashboard card preferences updated for user %s", current_user)
+        logger.info(
+            "Dashboard card preferences updated for user %s", sanitize_log(current_user)
+        )
 
         # Log audit entry for dashboard card preferences update
         AuditService.log_update(

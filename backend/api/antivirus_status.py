@@ -121,7 +121,9 @@ async def get_antivirus_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting antivirus status for host %s: %s", host_id, e)
+        logger.error(
+            "Error getting antivirus status for host %s: %s", sanitize_log(host_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve antivirus status: %s") % str(e),
@@ -312,12 +314,16 @@ async def deploy_antivirus(  # NOSONAR
                 logger.info(
                     "Antivirus deployment initiated for host %s (%s) with package %s",
                     host.fqdn,
-                    host_id_str,
+                    sanitize_log(host_id_str),
                     antivirus_default.antivirus_package,
                 )
 
             except Exception as e:
-                logger.error("Error deploying antivirus to host %s: %s", host_id_str, e)
+                logger.error(
+                    "Error deploying antivirus to host %s: %s",
+                    sanitize_log(host_id_str),
+                    e,
+                )
                 failed_hosts.append(
                     {"host_id": host_id_str, "hostname": "Unknown", "reason": str(e)}
                 )
@@ -488,20 +494,22 @@ async def remove_antivirus(
         )
         user = db.query(models.User).filter(models.User.userid == current_user).first()
         if not user:
-            logger.error("User not found: %s", current_user)
+            logger.error("User not found: %s", sanitize_log(current_user))
             raise HTTPException(status_code=401, detail=error_user_not_found())
 
         if user._role_cache is None:
             user.load_role_cache(db)
 
         if not user.has_role(SecurityRoles.REMOVE_ANTIVIRUS):
-            logger.error("User %s lacks REMOVE_ANTIVIRUS role", current_user)
+            logger.error(
+                "User %s lacks REMOVE_ANTIVIRUS role", sanitize_log(current_user)
+            )
             raise HTTPException(status_code=403, detail=error_permission_denied())
 
         # Get host
         host = db.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
-            logger.error("Host not found: %s", host_id)
+            logger.error("Host not found: %s", sanitize_log(host_id))
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
         plan = av_plan_builder.build_remove_plan(_host_info_for_av_planner(host))

@@ -12,6 +12,7 @@ from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import OpenTelemetryEligibilityResponse
 
@@ -60,7 +61,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
 
             logger.info(
                 "User %s has roles: %s",
-                current_user,
+                sanitize_log(current_user),
                 user._role_cache.get_role_names() if user._role_cache else "None",
             )
             logger.info(
@@ -73,7 +74,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
             if not has_permission:
                 logger.warning(
                     "User %s lacks DEPLOY_OPENTELEMETRY role for eligibility check",
-                    current_user,
+                    sanitize_log(current_user),
                 )
                 return OpenTelemetryEligibilityResponse(
                     eligible=False,
@@ -141,7 +142,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
 
         logger.info(
             "OpenTelemetry eligibility for host %s: grafana_enabled=%s, opentelemetry_installed=%s, agent_privileged=%s, eligible=%s",
-            host_id,
+            sanitize_log(host_id),
             grafana_enabled,
             opentelemetry_installed,
             agent_privileged,

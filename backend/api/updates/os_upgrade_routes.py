@@ -17,6 +17,7 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 queue_ops = QueueOperations()
 
@@ -194,8 +195,8 @@ async def execute_os_upgrades(  # NOSONAR
 
         logger.info(
             "Received OS upgrade execution request: host_ids=%s, package_managers=%s",
-            request.host_ids,
-            request.package_managers,
+            sanitize_log(request.host_ids),
+            sanitize_log(request.package_managers),
         )
 
         # Validate that only OS upgrade package managers are specified
@@ -319,7 +320,7 @@ async def execute_os_upgrades(  # NOSONAR
 
                     logger.info(
                         "OS upgrade command queued for host %s (%s): %d upgrades",
-                        host_id,
+                        sanitize_log(host_id),
                         host.fqdn,
                         len(available_upgrades),
                     )

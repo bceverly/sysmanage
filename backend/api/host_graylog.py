@@ -60,7 +60,9 @@ async def get_host_graylog_attachment(
             )
 
             if graylog_attachment:
-                logger.info("Found Graylog attachment for host %s", host_id)
+                logger.info(
+                    "Found Graylog attachment for host %s", sanitize_log(host_id)
+                )
                 return graylog_attachment.to_dict()
 
             # Return default "not attached" status if no record exists
@@ -156,7 +158,7 @@ async def attach_host_to_graylog(
         except Exception as exc:  # pylint: disable=broad-exception-caught
             logger.warning(
                 "Engine Graylog attach raised unexpectedly for host %s: %s",
-                host_id,
+                sanitize_log(host_id),
                 exc,
             )
             engine_message_id = None
@@ -172,7 +174,7 @@ async def attach_host_to_graylog(
 
         logger.info(
             "Graylog attach for host %s routed through engine; queued message_id=%s",
-            host_id,
+            sanitize_log(host_id),
             engine_message_id,
         )
 

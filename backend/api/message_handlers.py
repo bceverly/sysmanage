@@ -17,6 +17,7 @@ from backend.persistence.models import Host, SoftwareInstallationLog
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 # Re-export core handlers for backwards compatibility
+from backend.utils.verbosity_logger import sanitize_log
 from backend.api.message_handlers_core import (
     validate_host_authentication,
     handle_system_info,
@@ -373,7 +374,9 @@ async def handle_command_acknowledgment(  # NOSONAR
     hostname = getattr(connection, "hostname", "unknown")
 
     if not message_id:
-        logger.warning("Command acknowledgment from %s missing message_id", hostname)
+        logger.warning(
+            "Command acknowledgment from %s missing message_id", sanitize_log(hostname)
+        )
         return {
             "message_type": "error",
             "error_type": "missing_message_id",
@@ -404,31 +407,31 @@ async def handle_command_acknowledgment(  # NOSONAR
                 )
                 logger.info(
                     "ACK RECEIVED for create_child_host: message_id=%s, distribution=%s, from=%s, current_status=%s",
-                    message_id,
+                    sanitize_log(message_id),
                     distribution,
-                    hostname,
+                    sanitize_log(hostname),
                     original_msg.status,
                 )
             else:
                 logger.info(
                     "ACK RECEIVED: message_id=%s, command_type=%s, from=%s, current_status=%s",
-                    message_id,
+                    sanitize_log(message_id),
                     command_type,
-                    hostname,
+                    sanitize_log(hostname),
                     original_msg.status,
                 )
         except Exception as e:
             logger.info(
                 "ACK RECEIVED: message_id=%s, from=%s (could not parse details: %s)",
-                message_id,
-                hostname,
+                sanitize_log(message_id),
+                sanitize_log(hostname),
                 str(e),
             )
     else:
         logger.warning(
             "ACK RECEIVED for UNKNOWN message: message_id=%s, from=%s",
-            message_id,
-            hostname,
+            sanitize_log(message_id),
+            sanitize_log(hostname),
         )
 
     # Mark the message as acknowledged (completed)
@@ -437,14 +440,14 @@ async def handle_command_acknowledgment(  # NOSONAR
     if success:
         logger.info(
             "ACK PROCESSED: message %s marked as completed from %s",
-            message_id,
-            hostname,
+            sanitize_log(message_id),
+            sanitize_log(hostname),
         )
     else:
         logger.warning(
             "ACK FAILED: Could not mark message %s as acknowledged from %s - may not exist or wrong status",
-            message_id,
-            hostname,
+            sanitize_log(message_id),
+            sanitize_log(hostname),
         )
 
     return {

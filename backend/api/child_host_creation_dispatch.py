@@ -23,6 +23,7 @@ from typing import List, Optional
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
 from backend.persistence import models
+from backend.utils.verbosity_logger import sanitize_log
 
 
 def _load_network_details_payload(host_id: str):
@@ -375,8 +376,8 @@ def _try_kvm_plan_based_creation(command_params, host_id):
         _vlog.warning(
             "KVM plan path: missing vm_name=%r or cloud_image_url=%r — "
             "engine path declined",
-            vm_name,
-            cloud_image_url,
+            sanitize_log(vm_name),
+            sanitize_log(cloud_image_url),
         )
         return False
 
@@ -412,7 +413,7 @@ def _try_kvm_plan_based_creation(command_params, host_id):
         # Engine path declined; the caller raises 502 to surface the failure.
         _vlog.warning(
             "KVM plan path failed for host %s: %s — engine path declined",
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -568,7 +569,7 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
     except Exception as exc:  # nosec B110  pylint: disable=broad-exception-caught
         logging.getLogger(__name__).warning(
             "bhyve plan path failed for host %s; engine path declined: %s",
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -736,7 +737,7 @@ def _try_wsl_plan_based_creation(command_params, host_id):
         logging.getLogger(__name__).warning(
             "WSL engine plan path failed for host %s; falling back to legacy "
             "execute_command_sequence: %s",
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False
@@ -793,7 +794,7 @@ def _try_lxd_plan_based_creation(command_params, host_id):
         logging.getLogger(__name__).warning(
             "LXD engine plan path failed for host %s; falling back to legacy "
             "execute_command_sequence: %s",
-            host_id,
+            sanitize_log(host_id),
             exc,
         )
         return False

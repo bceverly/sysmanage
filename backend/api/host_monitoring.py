@@ -143,11 +143,15 @@ async def request_certificates_collection(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            logger.warning("CERTIFICATE COLLECTION: Host not found: %s", host_id)
+            logger.warning(
+                "CERTIFICATE COLLECTION: Host not found: %s", sanitize_log(host_id)
+            )
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
         logger.info(
-            "CERTIFICATE COLLECTION: Found host %s (fqdn: %s)", host_id, host.fqdn
+            "CERTIFICATE COLLECTION: Found host %s (fqdn: %s)",
+            sanitize_log(host_id),
+            host.fqdn,
         )
 
         validate_host_approval_status(host)
@@ -174,7 +178,7 @@ async def request_certificates_collection(host_id: str):
 
         logger.info(
             "CERTIFICATE COLLECTION: Successfully requested certificate collection for host: %s",
-            host_id,
+            sanitize_log(host_id),
         )
         return {"result": True, "message": _("Certificate collection requested")}
 
@@ -297,7 +301,7 @@ async def request_roles_collection(host_id: str):
 
         logger.info(
             "ROLE COLLECTION: Successfully requested role collection for host: %s",
-            host_id,
+            sanitize_log(host_id),
         )
 
         return {"result": True, "message": _("Role collection requested")}
@@ -390,7 +394,10 @@ async def control_services(
             parameters={"action": request.action, "services": request.services},
         )
 
-        logger.info("SERVICE CONTROL: Created command message: %s", command_message)
+        logger.info(
+            "SERVICE CONTROL: Created command message: %s",
+            sanitize_log(command_message),
+        )
 
         # Send command to agent via message queue
         queue_ops.enqueue_message(

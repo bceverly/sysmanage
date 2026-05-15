@@ -13,6 +13,7 @@ from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -120,11 +121,13 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
     # System info received from agent
     logger.info("=== SYSTEM INFO DEBUG ===")
-    logger.info("Hostname: %s", hostname)
-    logger.info("Message data keys: %s", list(message_data.keys()))
+    logger.info("Hostname: %s", sanitize_log(hostname))
+    logger.info("Message data keys: %s", sanitize_log(list(message_data.keys())))
     logger.info(
         "Script execution enabled in message: %s",
-        message_data.get("script_execution_enabled"),
+        sanitize_log(
+            message_data.get("script_execution_enabled"),
+        ),
     )
     logger.info("========================")
 
@@ -133,7 +136,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
         script_execution_enabled = message_data.get("script_execution_enabled", False)
         logger.info(
             "Passing script_execution_enabled=%s to update_or_create_host",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         host = await update_or_create_host(
             db, hostname, ipv4, ipv6, script_execution_enabled
@@ -155,7 +158,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
                 # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 logger.info(
                     "Auto-approving host %s with matching token from child host %s",
-                    hostname,
+                    sanitize_log(hostname),
                     matching_child.child_name,
                 )
 
@@ -199,7 +202,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
                 logger.info(
                     "Auto-approved host %s, linked to child %s (parent=%s)",
-                    hostname,
+                    sanitize_log(hostname),
                     matching_child.child_name,
                     matching_child.parent_host_id,
                 )
@@ -222,7 +225,7 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
                 ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
                     logger.warning(
                         "Default-mirror auto-apply failed for auto-approved host %s: %s",
-                        hostname,
+                        sanitize_log(hostname),
                         exc,
                     )
 
@@ -246,11 +249,15 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
                 # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 logger.warning(
                     "Auto-approve token provided but no matching child host found: %s",
-                    auto_approve_token[:8] + "..." if auto_approve_token else "None",
+                    sanitize_log(
+                        auto_approve_token[:8] + "..." if auto_approve_token else "None"
+                    ),
                 )
 
         # Check approval status
-        logger.info("Host %s approval status: %s", hostname, host.approval_status)
+        logger.info(
+            "Host %s approval status: %s", sanitize_log(hostname), host.approval_status
+        )
 
         # Always set hostname on connection so we can send approval messages
         connection.hostname = hostname
@@ -528,7 +535,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     result_rowcount = 1
                     logger.info(
                         "Created new host %s (ID: %s) from heartbeat",
-                        connection.hostname,
+                        sanitize_log(connection.hostname),
                         host.id,
                     )
                 else:

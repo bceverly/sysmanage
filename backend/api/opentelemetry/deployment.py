@@ -14,6 +14,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.services.observability_shim import (
     try_engine_otel_deploy,
     try_engine_otel_remove,
@@ -151,7 +152,7 @@ async def deploy_opentelemetry(
 
         logger.info(
             "Queued OpenTelemetry deployment for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 
@@ -256,7 +257,7 @@ async def remove_opentelemetry(
 
         logger.info(
             "Queued OpenTelemetry removal for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 

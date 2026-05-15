@@ -14,6 +14,7 @@ from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 from backend.services.observability_shim import (
     try_engine_otel_grafana_connection,
 )
@@ -138,7 +139,7 @@ async def connect_opentelemetry_to_grafana(
 
         logger.info(
             "Queued OpenTelemetry Grafana connection for host %s (FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 
@@ -246,7 +247,7 @@ async def disconnect_opentelemetry_from_grafana(
         logger.info(
             "Queued OpenTelemetry Grafana disconnection for host %s "
             "(FQDN: %s) via engine_plan",
-            host_id,
+            sanitize_log(host_id),
             host.fqdn,
         )
 

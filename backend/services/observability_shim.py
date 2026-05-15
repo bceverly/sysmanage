@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -312,7 +313,7 @@ def try_engine_graylog_attach(
             "mechanism=%s); falling back to legacy WS command: %s",
             host.id,
             plat,
-            mechanism,
+            sanitize_log(mechanism),
             exc,
         )
         return None

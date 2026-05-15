@@ -26,6 +26,7 @@ from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 
+from backend.utils.verbosity_logger import sanitize_log
 from backend.api.firewall_roles_helpers import (
     COMMON_PORTS,
     CommonPortsResponse,
@@ -163,7 +164,7 @@ async def get_firewall_role(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting firewall role %s: %s", role_id, err)
+        logger.error("Error getting firewall role %s: %s", sanitize_log(role_id), err)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve firewall role: %s") % str(err),
@@ -238,7 +239,7 @@ async def create_firewall_role(  # NOSONAR
         db_session.commit()
         db_session.refresh(new_role)
 
-        logger.info("Firewall role created: %s", role_data.name)
+        logger.info("Firewall role created: %s", sanitize_log(role_data.name))
 
         # Log audit entry
         AuditService.log_create(
@@ -365,7 +366,7 @@ async def update_firewall_role(  # NOSONAR
         db_session.commit()
         db_session.refresh(role)
 
-        logger.info("Firewall role updated: %s", role.name)
+        logger.info("Firewall role updated: %s", sanitize_log(role.name))
 
         # Log audit entry
         AuditService.log_update(
@@ -390,7 +391,7 @@ async def update_firewall_role(  # NOSONAR
     except ValueError as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
     except Exception as err:
-        logger.error("Error updating firewall role %s: %s", role_id, err)
+        logger.error("Error updating firewall role %s: %s", sanitize_log(role_id), err)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update firewall role: %s") % str(err),
@@ -473,7 +474,7 @@ async def delete_firewall_role(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error deleting firewall role %s: %s", role_id, err)
+        logger.error("Error deleting firewall role %s: %s", sanitize_log(role_id), err)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete firewall role: %s") % str(err),
@@ -553,7 +554,9 @@ async def get_host_firewall_roles(  # NOSONAR
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting host firewall roles for %s: %s", host_id, err)
+        logger.error(
+            "Error getting host firewall roles for %s: %s", sanitize_log(host_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve host firewall roles: %s") % str(err),
@@ -650,7 +653,9 @@ async def get_host_expected_ports(  # NOSONAR
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting expected ports for host %s: %s", host_id, err)
+        logger.error(
+            "Error getting expected ports for host %s: %s", sanitize_log(host_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve expected ports: %s") % str(err),
@@ -787,7 +792,7 @@ async def assign_firewall_role_to_host(
     except Exception as err:
         logger.error(
             "Error assigning firewall role to host %s: %s",
-            host_id,
+            sanitize_log(host_id),
             err,
         )
         raise HTTPException(
@@ -906,7 +911,7 @@ async def remove_firewall_role_from_host(
     except Exception as err:
         logger.error(
             "Error removing firewall role from host %s: %s",
-            host_id,
+            sanitize_log(host_id),
             err,
         )
         raise HTTPException(

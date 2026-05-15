@@ -124,7 +124,7 @@ async def apply_repository_to_matching_hosts(
         logger.info(
             "Found %d hosts matching OS '%s' for repository %s",
             len(hosts),
-            os_name,
+            sanitize_log(os_name),
             action,
         )
 
@@ -134,7 +134,9 @@ async def apply_repository_to_matching_hosts(
 
     except Exception as e:
         logger.error(
-            "Error applying repository to matching hosts for OS '%s': %s", os_name, e
+            "Error applying repository to matching hosts for OS '%s': %s",
+            sanitize_log(os_name),
+            e,
         )
 
 
@@ -348,7 +350,9 @@ async def get_default_repositories_by_os(
         return repositories
 
     except Exception as e:
-        logger.error("Error getting default repositories for OS %s: %s", os_name, e)
+        logger.error(
+            "Error getting default repositories for OS %s: %s", sanitize_log(os_name), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve default repositories: %s") % str(e),
@@ -585,7 +589,9 @@ async def delete_default_repository(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting default repository %s: %s", repo_id, e)
+        logger.error(
+            "Error deleting default repository %s: %s", sanitize_log(repo_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete default repository: %s") % str(e),

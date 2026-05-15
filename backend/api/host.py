@@ -37,6 +37,7 @@ from backend.websocket.messages import (
 )
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 # Split into separate routers for different authentication requirements
 public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
@@ -631,8 +632,8 @@ async def register_host(registration_data: HostRegistration):
             logger.info(
                 "Absorbed last-gasp registration for recently-deleted "
                 "child host fqdn=%s ipv4=%s",
-                registration_data.fqdn,
-                registration_data.ipv4,
+                sanitize_log(registration_data.fqdn),
+                sanitize_log(registration_data.ipv4),
             )
             return {
                 "result": True,

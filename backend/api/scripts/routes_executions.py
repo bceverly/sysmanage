@@ -216,8 +216,8 @@ async def execute_script(  # NOSONAR
             logger.info(
                 "Script execution %s requested by %s for host %d",
                 execution_id,
-                current_user,
-                execution_request.host_id,
+                sanitize_log(current_user),
+                sanitize_log(execution_request.host_id),
             )
 
             return ScriptExecutionResponse(
@@ -377,7 +377,9 @@ async def delete_script_execution(
             )
 
             logger.info(
-                "Deleted script execution %s by user %s", execution_id, current_user
+                "Deleted script execution %s by user %s",
+                sanitize_log(execution_id),
+                current_user,
             )
             return {"message": _("Script execution deleted successfully")}
     except HTTPException:
@@ -454,7 +456,7 @@ async def delete_script_executions_bulk(
             logger.info(
                 "Bulk deleted %d script executions by user %s",
                 deleted_count,
-                current_user,
+                sanitize_log(current_user),
             )
             return {
                 "message": _("Script executions deleted successfully"),

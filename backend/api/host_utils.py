@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.api.error_constants import error_host_not_found
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.utils.verbosity_logger import sanitize_log
 
 
 def get_host_by_id(host_id: str) -> Optional[models.Host]:
@@ -523,8 +524,10 @@ async def update_or_create_host(  # NOSONAR
 
     logger = logging.getLogger(__name__)
     logger.info("=== HOST UTILS DEBUG ===")
-    logger.info("Hostname: %s", hostname)
-    logger.info("Script execution enabled parameter: %s", script_execution_enabled)
+    logger.info("Hostname: %s", sanitize_log(hostname))
+    logger.info(
+        "Script execution enabled parameter: %s", sanitize_log(script_execution_enabled)
+    )
 
     host = db_session.query(models.Host).filter(models.Host.fqdn == hostname).first()
     logger.info("Found existing host: %s", host is not None)
@@ -533,7 +536,7 @@ async def update_or_create_host(  # NOSONAR
         # Update existing host
         logger.info(
             "Updating existing host with script_execution_enabled=%s",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         host.ipv4 = ipv4
         host.ipv6 = ipv6
@@ -546,8 +549,8 @@ async def update_or_create_host(  # NOSONAR
         host.is_agent_privileged = script_execution_enabled
         logger.info(
             "Set is_agent_privileged=%s, script_execution_enabled=%s",
-            script_execution_enabled,
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
+            sanitize_log(script_execution_enabled),
         )
 
         # Generate host_token for existing hosts that don't have one (migration support)
@@ -562,7 +565,7 @@ async def update_or_create_host(  # NOSONAR
         # Create new host with pending approval status
         logger.info(
             "Creating new host with script_execution_enabled=%s",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         # Generate secure host token
         from backend.persistence.models import generate_secure_host_token

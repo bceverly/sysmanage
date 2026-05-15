@@ -23,6 +23,7 @@ from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.vault_service import VaultError, VaultService
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -408,7 +409,7 @@ async def update_grafana_integration_settings(  # NOSONAR
         # If enabled and we have an API key, configure Prometheus data source
         logger.info(
             "Checking if should configure Prometheus: enabled=%s, has_api_key=%s",
-            settings.enabled,
+            sanitize_log(settings.enabled),
             bool(settings.api_key_vault_token),
         )
         if settings.enabled and settings.api_key_vault_token:
