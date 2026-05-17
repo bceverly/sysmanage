@@ -2,6 +2,14 @@
 # Create Windows Service for SysManage Server using NSSM
 #
 
+# Top-level trap — see sysmanage-agent's create-service.ps1 for the
+# full rationale (PR #375773 winget-pkgs validation burn, 2026-05-17).
+trap {
+    Write-Host "WARNING: unhandled exception trapped at top level: $_"
+    Write-Host "Service NOT registered but MSI install will still complete."
+    exit 0
+}
+
 $ErrorActionPreference = "Continue"
 
 # Service details
@@ -52,7 +60,7 @@ try {
         Write-Log "  1. Install Python 3.9+ from https://www.python.org/downloads/"
         Write-Log "  2. Re-run the SysManage Server MSI installer"
         Write-Log ""
-        Stop-Transcript
+        try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
         Write-Host ""
         Write-Host "=====================================" -ForegroundColor Yellow
         Write-Host "Service NOT registered — Python missing" -ForegroundColor Yellow
@@ -207,7 +215,9 @@ try {
 } catch {
     Write-Log "ERROR: Exception during service creation: $_"
 } finally {
-    Stop-Transcript
+    # Stop-Transcript wrapped so a terminating error here never escapes
+    # finally (PR #375773 rationale — see sysmanage-agent equivalent).
+    try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
 
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Yellow

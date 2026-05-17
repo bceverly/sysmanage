@@ -3,6 +3,16 @@
 # Sets up Python virtual environment and installs dependencies
 #
 
+# Top-level trap — see sysmanage-agent's install.ps1 for the full
+# rationale (PR #375773 winget-pkgs validation burn, 2026-05-17).
+# Catches any unhandled exception escaping any scope below and exits
+# 0 so the MSI engine doesn't trigger Error 1722 + rollback.
+trap {
+    Write-Host "WARNING: unhandled exception trapped at top level: $_"
+    Write-Host "Install step had errors but MSI install will still complete."
+    exit 0
+}
+
 $ErrorActionPreference = "Continue"
 
 # Get the installation directory
@@ -262,7 +272,9 @@ try {
     Write-Log "Error: $_"
     Write-Log ""
 } finally {
-    Stop-Transcript
+    # Stop-Transcript wrapped so a terminating error here never escapes
+    # finally (would make script exit 1 → MSI Error 1722 → rollback).
+    try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
 
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Yellow
