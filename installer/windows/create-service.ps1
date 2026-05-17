@@ -222,7 +222,23 @@ try {
 }
 
 if ($ServiceCreated) {
-    exit 0
+    Write-Host "Windows Service creation complete"
 } else {
-    exit 1
+    # NEVER exit non-zero — the WiX CustomAction uses ``Return="check"``,
+    # which would roll back the whole MSI install on any non-zero exit
+    # from this script.  That cascades into ``Installation Verification:
+    # Completed`` / ``##[error] Failed`` on the winget-pkgs pipeline
+    # (PR #375773 burn, 2026-05-17), because the MSI rolls back, no ARP
+    # entry is written, and the verifier sees nothing to verify.
+    # Service registration is post-install ergonomics, not install-
+    # blocking.  Land the MSI; tell the operator how to finish.
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host "Service NOT registered — MSI install will still complete." -ForegroundColor Yellow
+    Write-Host "To register the service manually after installing Python 3.9+:" -ForegroundColor Yellow
+    Write-Host "  1. Re-run the MSI (MajorUpgrade re-fires the custom actions)" -ForegroundColor Yellow
+    Write-Host "  2. Or run create-service.ps1 directly as administrator" -ForegroundColor Yellow
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host ""
 }
+exit 0

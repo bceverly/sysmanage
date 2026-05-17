@@ -277,6 +277,21 @@ try {
 
 if ($InstallSuccess) {
     exit 0
-} else {
-    exit 1
 }
+
+# NEVER exit non-zero — the WiX CustomAction uses ``Return="check"``,
+# which rolls back the entire MSI on any non-zero return.  See the
+# matching block in sysmanage-agent/installer/windows/install.ps1 for
+# the full rationale (PR #375773 winget-pkgs validation burn,
+# 2026-05-17).  Any failure inside this script leaves the MSI landed;
+# operator can re-run the MSI after fixing whatever broke (typically:
+# install Python 3.9+ and re-run for MajorUpgrade to re-fire the CAs).
+if (-not $InstallSuccess) {
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host "Install step had errors — MSI install will still complete." -ForegroundColor Yellow
+    Write-Host "See log files for the failure and recovery steps." -ForegroundColor Yellow
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host ""
+}
+exit 0

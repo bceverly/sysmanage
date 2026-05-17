@@ -1,6 +1,6 @@
 # Maintainer: SysManage <support@sysmanage.org>
 pkgname=sysmanage
-pkgver=2.3.0.17
+pkgver=2.3.0.16
 pkgrel=0
 pkgdesc="Centralized system management server"
 url="https://sysmanage.org"
