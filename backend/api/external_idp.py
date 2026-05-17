@@ -118,9 +118,7 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
         #
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         ref_kind = "literal" if (secret_id or "").startswith("literal:") else "vault"
-        logger.warning(
-            "Could not resolve IdP reference (kind=%s) from Vault", ref_kind
-        )
+        logger.warning("Could not resolve IdP reference (kind=%s) from Vault", ref_kind)
         return None
 
 

@@ -126,8 +126,16 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             # /etc/environment) — NOT request/user-controlled.  The
             # subprocess argv is a fixed list of literal strings + the
             # validated binary path; no user input reaches argv.
-            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-            result = subprocess.run(  # nosec B603
+            #
+            # Semgrep anchors ``dangerous-subprocess-use-tainted-env-args``
+            # on the FIRST POSITIONAL ARGUMENT line (the ``[`` opener
+            # below), NOT on the ``subprocess.run(`` call line.  Its
+            # nosemgrep matcher honours comments on the SAME line OR
+            # the line IMMEDIATELY before the anchor — so the
+            # suppression has to live on the ``subprocess.run(`` line
+            # right above the ``[``.  Earlier placements on the
+            # comment block two lines up were silently ignored.
+            result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 [
                     bao_cmd,
                     "status",
@@ -135,7 +143,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
                 capture_output=True,
                 text=True,
                 timeout=5,
-                env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                env=env,
                 check=False,
             )
 
@@ -572,9 +580,10 @@ def seal_openbao() -> Dict[str, Any]:
 
         # bao_cmd is the operator-controlled OpenBAO binary path
         # validated by find_bao_binary (see openbao.py:128 comment).
-        # No user input reaches argv.
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run(  # nosec B603
+        # No user input reaches argv.  See openbao.py:128 for why
+        # the nosemgrep marker has to live on the ``subprocess.run(``
+        # line — the rule anchors on the argv list opener below.
+        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             [
                 bao_cmd,
                 "operator",
@@ -583,7 +592,7 @@ def seal_openbao() -> Dict[str, Any]:
             capture_output=True,
             text=True,
             timeout=10,
-            env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            env=env,
             check=False,
         )
 
@@ -677,9 +686,9 @@ def unseal_openbao() -> Dict[str, Any]:
         # In dev mode, try to use the dev token to unseal.  bao_cmd
         # is the operator-validated OpenBAO binary (see openbao.py:128
         # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
-        # Neither is request/user-controlled.
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run(  # nosec B603
+        # Neither is request/user-controlled.  See openbao.py:128 for
+        # why nosemgrep lives on the ``subprocess.run(`` line.
+        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             [
                 bao_cmd,
                 "operator",
@@ -690,7 +699,7 @@ def unseal_openbao() -> Dict[str, Any]:
             capture_output=True,
             text=True,
             timeout=10,
-            env=env,  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            env=env,
             check=False,
             input="dev-only-token-change-me\n",  # Dev mode unseal key
         )

@@ -156,10 +156,28 @@ export default defineConfig({
       // Let Vite auto-detect the host from the browser location
       clientPort: finalPort // Ensure client connects to the same port
     },
-    // Proxy API requests to backend server
+    // Proxy API requests to backend server.
+    //
+    // Resolution order (first match wins):
+    //   1. VITE_BACKEND_HOST / VITE_BACKEND_PORT  — env vars from CI/dev shell
+    //   2. config.api.host / config.api.port      — yaml-loaded config
+    //   3. localhost:8080                          — package default
+    //
+    // Falling back from env -> yaml -> default matters on Windows CI:
+    // ``loadConfig`` only looks at Unix-style paths (``/etc/sysmanage.yaml``,
+    // ``../sysmanage-dev.yaml``) and can't find the Windows config at
+    // ``C:\ProgramData\sysmanage\sysmanage.yaml``, so without the env-var
+    // override the proxy defaulted to port 8080 while the backend was
+    // actually on 8001 — every ``/api/v1/server-info`` request returned
+    // 500 from the proxy and the Playwright "no critical failed requests"
+    // assertion failed.
     proxy: {
       '/api': {
-        target: `http://${config?.api?.host || 'localhost'}:${config?.api?.port || 8080}`,
+        target: `http://${
+          process.env.VITE_BACKEND_HOST || config?.api?.host || 'localhost'
+        }:${
+          process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
+        }`,
         changeOrigin: true,
         secure: false
       }

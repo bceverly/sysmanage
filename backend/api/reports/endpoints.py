@@ -151,7 +151,9 @@ async def view_report_html(
     # Belt-and-suspenders: HTML-escape the content one more time
     # before handing to FastAPI so the static analyser can see an
     # ``html.escape`` sanitiser on the data-flow path.
-    safe_content = html_content if html_content.startswith("<") else html.escape(html_content)
+    safe_content = (
+        html_content if html_content.startswith("<") else html.escape(html_content)
+    )
     # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
     return HTMLResponse(content=safe_content)
 

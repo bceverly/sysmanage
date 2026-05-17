@@ -17,23 +17,49 @@
 #      from this author with the version in the title and closes
 #      them with a "superseded by corrected submission" comment.
 #      Useful when a prior run submitted a broken manifest (e.g.
-#      the CRLF-anchor bug captured below) and you want a clean
-#      resubmit.
+#      the Python-dep scope-mismatch capture below) and you want a
+#      clean resubmit.
 #   3. For each of the two packages:
 #        a. ``komac new --dry-run --output <tmp>`` dumps fresh
 #           manifests for ``sysmanage.sysmanage`` /
 #           ``sysmanage.sysmanage-agent``.
-#        b. Sed-injects ``Dependencies: PackageDependencies:
-#           Python.Python.3.12`` into the installer manifest.
-#           komac 2.16.0 has no flag for this today.
-#        c. POST-INJECTION GREP verifies the marker landed; aborts
-#           loud if it didn't.
-#        d. ``komac submit --yes <tmp>`` pushes to your fork +
+#        b. (Disabled — see WHY below.)  Set
+#           ``INJECT_PYTHON_DEP=1`` to opt back into the legacy
+#           sed-injection of ``Dependencies: PackageDependencies:
+#           Python.Python.3.12``.  Reserved for the day winget
+#           handles cross-scope deps properly.
+#        c. ``komac submit --yes <tmp>`` pushes to your fork +
 #           opens a PR upstream.
 #   4. Posts ``@microsoft-github-policy-service agree`` on each new
 #      PR so the CLA bot drops the Needs-CLA label.
 #
-# CRLF gotcha (the reason the post-injection grep exists):
+# WHY the Python.Python.3.12 dep is off by default (PR #375209 +
+# #375210 burn report, 2026-05-15):
+#   The winget validation pipeline rejected both submissions with
+#   ``APPINSTALLER_CLI_ERROR_INSTALL_MISSING_DEPENDENCY`` →
+#   "No suitable installer found for manifest Python.Python.3.12
+#   with version 3.12.10".  Despite the wording, the v3.12.10
+#   manifest *does* exist — winget choked because our MSI is
+#   ``Scope: machine`` (Program Files) while Python.org's winget
+#   manifest for the entire 3.12.x line carries only a user-scope
+#   installer.  Cross-scope dep resolution isn't supported, so the
+#   validator can't find an installer for the dep that matches the
+#   parent's scope, and the install fails before our MSI ever runs.
+#
+#   No version of ``Python.Python.3.12`` we can pin to via
+#   ``MinimumVersion`` or exact ``Version`` fixes this (Python.org
+#   dropped the per-machine MSI from winget years ago), and there
+#   is no "scope override" on a dependency declaration today.
+#
+#   Mitigation that lets the install succeed without the dep: the
+#   MSI's ``install.ps1`` + ``create-service.ps1`` already
+#   soft-fail when Python isn't present — the MSI lands cleanly,
+#   the service-install step skips, and the post-install log tells
+#   the user to run ``winget install Python.Python.3.12``
+#   themselves.  This matches how the vast majority of packages in
+#   winget-pkgs handle runtime dependencies on Python today.
+#
+# CRLF gotcha (only relevant if INJECT_PYTHON_DEP=1):
 #   komac writes manifests with CRLF line endings (it's Rust +
 #   targets a Windows package manager).  A plain
 #   ``^ManifestType: installer$`` regex on Linux silently misses
@@ -176,7 +202,7 @@ if [ "${SKIP_STALE_CLOSE:-0}" != "1" ]; then
     if [ -z "${STALE_PRS}" ]; then
         echo "  No prior PRs found.  Proceeding to submission."
     else
-        STALE_COMMENT="Superseded by the v${VERSION} submission.  The corresponding MSI on the GitHub release for v${VERSION} carries every fix this PR was bouncing on (install.ps1 / create-service.ps1 soft-fail when Python is absent, MSI metadata corrected, Python.Python.3.12 declared as a winget \`PackageDependencies\` entry).  Closing in favour of the fresh PR."
+        STALE_COMMENT="Superseded by a fresh v${VERSION} submission.  The new manifest drops the \`Python.Python.3.12\` PackageDependencies entry that was causing this PR to fail validation with APPINSTALLER_CLI_ERROR_INSTALL_MISSING_DEPENDENCY — Python.org's winget manifest for the 3.12.x line is user-scope only, while our MSI is machine-scope, so winget's dependency resolver can't satisfy it cross-scope.  The MSI's \`install.ps1\` + \`create-service.ps1\` already soft-fail when Python is missing and emit a clear \`winget install Python.Python.3.12\` instruction in the post-install log.  Closing in favour of the fresh PR."
         for pr in ${STALE_PRS}; do
             echo "  - PR #${pr}: posting supersede comment + closing"
             gh pr comment "${pr}" --repo microsoft/winget-pkgs --body "${STALE_COMMENT}" \
@@ -273,7 +299,17 @@ process_package() {
     fi
     echo "  Manifest dir: $manifest_dir"
 
-    inject_python_dependency "${manifest_dir}/${pkg_id}.installer.yaml"
+    # Python.Python.3.12 dependency injection is off by default —
+    # see header WHY-block for the winget cross-scope rejection
+    # that drove PR #375209 + #375210 into Validation-Installation-Error
+    # on 2026-05-15.  Set ``INJECT_PYTHON_DEP=1`` to opt back in once
+    # winget supports scope-overridden dep resolution.
+    if [ "${INJECT_PYTHON_DEP:-0}" = "1" ]; then
+        inject_python_dependency "${manifest_dir}/${pkg_id}.installer.yaml"
+    else
+        echo "  Skipping Python.Python.3.12 dependency injection (cross-scope FP)."
+        echo "  Set INJECT_PYTHON_DEP=1 to override."
+    fi
 
     echo
     echo "============================================================"

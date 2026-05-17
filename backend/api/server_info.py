@@ -15,6 +15,16 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
+# Top-level imports for ``config_module`` and ``module_loader`` are
+# required by the test suite (tests patch
+# ``backend.api.server_info.config_module.get_server_role`` directly).
+# The route handler still wraps all usage of these in a broad-except so
+# a cold-start race on Windows CI — where a request can hit the worker
+# before app startup has finished wiring config — degrades gracefully
+# instead of returning 500.
+from backend.config import config as config_module  # noqa: E402
+from backend.licensing.module_loader import module_loader  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["server-info"])
@@ -76,14 +86,6 @@ def get_server_info():
     ``logger.exception`` for post-mortem.
     """
     try:
-        # Import lazily — if ``config`` or ``module_loader`` haven't
-        # finished initialising (which is observable on cold Windows CI
-        # starts where the worker handles the first ``/api/v1/server-info``
-        # before app startup completes), we'd otherwise raise at import
-        # time before even reaching the broad-except below.
-        from backend.config import config as config_module  # noqa: PLC0415
-        from backend.licensing.module_loader import module_loader  # noqa: PLC0415
-
         role = config_module.get_server_role()
         loaded_dict = getattr(module_loader, "loaded_modules", None) or {}
         loaded = sorted(loaded_dict.keys())
