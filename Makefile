@@ -1670,13 +1670,17 @@ installer-openbsd: build
 	@CURRENT_DIR=$$(pwd); \
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	PORT_DIR="$$CURRENT_DIR/installer/openbsd"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.1.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
@@ -1994,13 +1998,17 @@ installer-freebsd: build
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	BUILD_DIR="$$CURRENT_DIR/build/freebsd"; \
 	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.9.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.9.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Cleaning build directory..."; \
@@ -2126,13 +2134,17 @@ installer-macos: build
 	BUILD_TEMP="$$OUTPUT_DIR/build-temp-macos"; \
 	PAYLOAD_DIR="$$BUILD_TEMP/payload"; \
 	SCRIPTS_DIR="$$BUILD_TEMP/scripts"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.9.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.9.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
@@ -2232,13 +2244,17 @@ installer-netbsd: build
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	BUILD_DIR="$$CURRENT_DIR/build/netbsd"; \
 	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.1.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \

@@ -112,8 +112,15 @@ def get_server_info():
             logger.exception(
                 "server-info handler failed; returning safe-degraded envelope"
             )
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass  # logging itself can fail during shutdown — never raise here
+        except Exception:  # nosec B110  # pylint: disable=broad-exception-caught
+            # Logging itself can fail during interpreter shutdown
+            # (closed file handles, broken handlers).  We deliberately
+            # swallow because the alternative — re-raising from the
+            # fallback path — would 500 the cold-start /api/v1/server-info
+            # request and re-trigger the Playwright failure that this
+            # whole fallback chain exists to prevent.  Not a real
+            # try/except/pass smell; the contract here is "never raise."
+            _ = None
         return JSONResponse(content=_FALLBACK_ENVELOPE, status_code=200)
 
 

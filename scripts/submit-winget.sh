@@ -72,17 +72,37 @@ set -euo pipefail
 
 # ---------------------------------------------------------------
 # Resolve VERSION — env override first, else latest GitHub tag.
+#
+# We can't just take ``gh release list --limit 1`` because ``gh``
+# sorts releases by ``created_at desc``, not by semver: a stray
+# typoed tag (e.g. ``v2.0.3.17`` accidentally published *after*
+# the real ``v2.3.0.16`` was finalised) lands at position 0 and
+# the script then probes release URLs that don't exist.  The
+# 2026-05-17 run hit this exact failure mode.
+#
+# Pull a window of recent releases, filter to those whose tag
+# matches the project's X.Y.Z[.W] semver shape, sort with
+# ``sort -V`` (GNU semver-aware sort), and pick the highest.
+# That picks the genuine "latest" regardless of when it was
+# published, and ignores draft / scratch tags that don't fit
+# the version scheme.
 # ---------------------------------------------------------------
 if [ -z "${VERSION:-}" ]; then
-    LATEST_TAG="$(gh release list --repo bceverly/sysmanage --limit 1 \
-        --json tagName --jq '.[0].tagName' 2>/dev/null || true)"
+    LATEST_TAG="$(gh release list --repo bceverly/sysmanage --limit 30 \
+        --json tagName --jq '.[].tagName' 2>/dev/null \
+        | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$' \
+        | sort -V \
+        | tail -1 \
+        || true)"
     if [ -z "${LATEST_TAG}" ]; then
-        echo "ERROR: VERSION not set and 'gh release list' failed." >&2
+        echo "ERROR: VERSION not set and no valid X.Y.Z[.W] tag found." >&2
+        echo "       'gh release list' may have failed, or all recent" >&2
+        echo "       releases use a non-standard tag format." >&2
         echo "       Export VERSION=<x.y.z.w> explicitly and re-run." >&2
         exit 1
     fi
     VERSION="${LATEST_TAG#v}"
-    echo "Using latest published tag: v${VERSION}"
+    echo "Using highest semver tag (sort -V from last 30 releases): v${VERSION}"
 fi
 
 PY_DEPENDENCY="Python.Python.3.12"
@@ -202,7 +222,7 @@ if [ "${SKIP_STALE_CLOSE:-0}" != "1" ]; then
     if [ -z "${STALE_PRS}" ]; then
         echo "  No prior PRs found.  Proceeding to submission."
     else
-        STALE_COMMENT="Superseded by a fresh v${VERSION} submission.  The new manifest drops the \`Python.Python.3.12\` PackageDependencies entry that was causing this PR to fail validation with APPINSTALLER_CLI_ERROR_INSTALL_MISSING_DEPENDENCY — Python.org's winget manifest for the 3.12.x line is user-scope only, while our MSI is machine-scope, so winget's dependency resolver can't satisfy it cross-scope.  The MSI's \`install.ps1\` + \`create-service.ps1\` already soft-fail when Python is missing and emit a clear \`winget install Python.Python.3.12\` instruction in the post-install log.  Closing in favour of the fresh PR."
+        STALE_COMMENT="Superseded by a fresh v${VERSION} submission with manifest + MSI fixes for the validation issue that bounced this PR.  See the linked v${VERSION} PR for details.  Closing in favour of the fresh PR."
         for pr in ${STALE_PRS}; do
             echo "  - PR #${pr}: posting supersede comment + closing"
             gh pr comment "${pr}" --repo microsoft/winget-pkgs --body "${STALE_COMMENT}" \
