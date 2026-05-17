@@ -258,6 +258,67 @@ Dependencies:\r\
 }
 
 # ---------------------------------------------------------------
+# Truncate the locale manifest's ``ReleaseNotes`` block.
+#
+# komac auto-extracts ``ReleaseNotes`` from the GitHub release body,
+# which on this project carries the full per-OS install + checksum
+# walkthrough (~11 KB).  The winget manifest schema for
+# ``defaultLocale.1.12.0`` caps ``ReleaseNotes`` at 10,000 chars.
+# Microsoft's pipeline didn't enforce that strictly on the
+# 2026-05-17 run, but the spec is the spec — and the long block also
+# makes the manifest hard for reviewers to scan.  We replace the
+# block with a single line that points back to ``ReleaseNotesUrl``
+# (which still resolves to the full release page).
+#
+# CRLF gotcha: komac writes the locale file with CRLF (see the
+# Python script's newline detection below — same reason the
+# ``inject_python_dependency`` regex carries ``\r\?`` anchors).
+# ---------------------------------------------------------------
+truncate_release_notes() {
+    local manifest="$1"
+    if [ ! -f "$manifest" ]; then
+        echo "  truncate_release_notes: skipped (no $manifest)."
+        return 0
+    fi
+    python3 - "$manifest" "$VERSION" <<'PYEOF'
+import re
+import sys
+from pathlib import Path
+
+path, version = Path(sys.argv[1]), sys.argv[2]
+raw = path.read_bytes()
+crlf = b"\r\n" in raw
+text = raw.decode("utf-8")
+
+# Match a YAML block-scalar ``ReleaseNotes: |-`` followed by one or
+# more indented continuation lines.  komac indents continuations
+# with two spaces.  We anchor on MULTILINE so ^ matches per line.
+pattern = re.compile(
+    r"^ReleaseNotes: \|-\r?\n(?:[ \t]+[^\n]*\r?\n)+",
+    re.MULTILINE,
+)
+short_line = (
+    f"ReleaseNotes: SysManage v{version} — see ReleaseNotesUrl for "
+    f"the full per-platform installation guide and changelog."
+) + ("\r\n" if crlf else "\n")
+
+new_text, n = pattern.subn(short_line, text, count=1)
+if n == 0:
+    # No multi-line block — komac may have inlined a short value
+    # already, or omitted ReleaseNotes entirely.  Leave the file
+    # alone in either case.
+    sys.exit(0)
+if len(new_text.encode("utf-8")) >= len(raw):
+    # Defensive: only write if we actually shrank the file.  Avoids
+    # a no-op write that touches mtime + risks a corrupted partial
+    # write if the disk fills.
+    sys.exit(0)
+path.write_bytes(new_text.encode("utf-8"))
+PYEOF
+    echo "  Truncated ReleaseNotes in $(basename "$manifest")."
+}
+
+# ---------------------------------------------------------------
 # Dump-edit-submit one package.
 # ---------------------------------------------------------------
 process_package() {
@@ -310,6 +371,11 @@ process_package() {
         echo "  Skipping Python.Python.3.12 dependency injection (cross-scope FP)."
         echo "  Set INJECT_PYTHON_DEP=1 to override."
     fi
+
+    # Trim ReleaseNotes to a one-liner; full release content stays at
+    # ReleaseNotesUrl.  Keeps the locale manifest well under the
+    # schema's 10,000-char cap.
+    truncate_release_notes "${manifest_dir}/${pkg_id}.locale.en-US.yaml"
 
     echo
     echo "============================================================"
