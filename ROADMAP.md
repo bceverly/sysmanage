@@ -35,9 +35,10 @@ This document provides a detailed roadmap for realizing all features in both ope
 24. [Phase 10: Pro+ Enterprise Tier - Part 3](#phase-10-pro-enterprise-tier---part-3)
 25. [Phase 11: Air-Gapped Environment Support (Enterprise)](#phase-11-air-gapped-environment-support-enterprise)
 26. [Phase 12: Multi-Site Federation (Enterprise)](#phase-12-multi-site-federation-enterprise)
-27. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
-28. [Release Schedule Summary](#release-schedule-summary)
-29. [Module Migration Plan](#module-migration-plan)
+27. [Phase 12.5: Windows Server Child Hosts (Enterprise)](#phase-125-windows-server-child-hosts-enterprise)
+28. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
+29. [Release Schedule Summary](#release-schedule-summary)
+30. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -490,6 +491,9 @@ Each stabilization phase produces a release. Feature phases may produce one or m
 │                                                                                 │
 │  Phase 12: Multi-Site Federation                                    v2.4.0.0   │
 │     └── Coordinator + site servers, rollup reporting, command dispatch          │
+│                                                                                 │
+│  Phase 12.5: Windows Server Child Hosts                             v2.4.x    │
+│     └── Win Server 2022/2025 VMs on KVM parents; RDP+SSH+agent auto-register   │
 │                                                                                 │
 │  Phase 13: Major Enterprise GA                                      v3.0.0.0   │
 │     └── Multi-tenancy, API completeness, platform-native logging, GA release   │
@@ -2928,6 +2932,187 @@ distro/OS combinations."  Estimated 1-2 weeks of focused work,
 mostly per-channel publish-pipeline plumbing rather than novel
 engineering.  Several entries (Mac App Store, Microsoft Store) may
 remain permanently ❌ due to sandboxing incompatibilities.
+
+---
+
+## Phase 12.5: Windows Server Child Hosts (Enterprise)
+
+**Target Release:** v2.4.x (between Phase 12 federation work and Phase 13 GA)
+**Focus:** Extend `virtualization_engine` to provision modern Windows
+Server VMs as child hosts on KVM/libvirt parents, with full unattended
+setup including sysmanage-agent auto-install and auto-registration.
+
+### Overview
+
+The Phase 10 / 11 virtualization plumbing covers Linux cloud-image
+guests (Ubuntu cloud-init flow on test2404 etc.).  This phase adds
+the Windows Server path so a fleet operator can create a Windows
+Server 2022 / 2025 VM from the same Create Child Host dialog, with
+the resulting VM reachable via RDP **and** SSH and managed by a
+sysmanage-agent that auto-registered against the parent's server.
+
+### Why Windows Server, not Windows 11
+
+Windows 11 client SKU is licensed and feature-shaped for end-user
+desktops, not managed-infrastructure fleet workloads.  Windows
+Server (2022 LTSC / 2025) is the right target because:
+
+  * Server licensing (per-core / per-socket) matches the
+    enterprise-fleet-host use case the rest of the ROADMAP targets;
+    OEM client licensing doesn't.
+  * Server doesn't ship with the consumer-tier Store apps and
+    modern-provisioning packages that make Win11 sysprep notoriously
+    brittle after Cumulative Updates.
+  * Server SKUs ship with a cleaner Server Core option (no GUI) that
+    matches what an SSH/RDP-managed fleet host actually wants, and
+    keeps the install image + disk footprint small.
+  * Server 2022 does not require TPM 2.0 (Win11 hard requirement);
+    Server 2025 does require TPM but Server SKUs document
+    `host-passthrough` CPU compatibility clearly.  Both are
+    well-supported by KVM + swtpm + OVMF on Linux hosts.
+
+### Architecture
+
+**Host stack (on the KVM parent — e.g., gdr-t14)**
+
+  * `swtpm` software-TPM emulator (TPM 2.0 ≥ Server 2025)
+  * `OVMF` UEFI firmware with per-VM `OVMF_VARS.fd` for Secure Boot
+  * `virtio-win` driver ISO (Red Hat builds) attached as second
+    CD-ROM during install so the Windows installer can see virtio
+    storage/network devices
+  * `Q35` chipset + `host-passthrough` CPU
+  * Existing `libvirt` + `virt-install` already used by the Linux
+    KVM path — no new host-side dependency beyond `swtpm` /
+    `ovmf` / `virtio-win` packages
+
+**Engine plan (Pro+ `virtualization_engine` extension)**
+
+  * New `os_family=windows` branch in `build_kvm_create_plan` that
+    emits a different command + file list than the cloud-image
+    branch
+  * Plan generates a small per-VM "config CD" ISO containing:
+      - `Autounattend.xml` (template-filled with hostname, admin
+        password, time zone, locale, license key, network config,
+        and `<RunSynchronousCommand>` block listed below)
+      - `sysmanage-agent.yaml` (server URL + per-VM auto-approve
+        token already generated server-side by the existing flow)
+      - `sysmanage-agent-X.Y.Z.W-windows-x64.msi` (the MSI bits we
+        already ship via the winget pipeline)
+  * `virt-install` invocation differences: `--tpm` device,
+    `--boot uefi,loader_secure=yes,...`, `--os-variant
+    win2022`/`win2025`, three CD-ROM disks (Windows ISO,
+    virtio-win ISO, autounattend ISO)
+
+**First-boot RunSynchronousCommand sequence in Autounattend.xml**
+
+  1. Enable RDP: registry tweak +
+     `Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'`
+  2. Enable SSH: `Add-WindowsCapability -Online -Name
+     OpenSSH.Server~~~~0.0.1.0` + start sshd
+  3. `msiexec /i D:\sysmanage-agent.msi /qn /norestart /l*v
+     C:\Windows\Temp\sm-install.log`
+  4. `copy /Y D:\sysmanage-agent.yaml
+     C:\ProgramData\SysManage\sysmanage-agent.yaml`
+  5. `net start SysManageAgent`
+
+RDP + SSH come BEFORE the agent install so even if the agent
+registration somehow fails on first boot, the operator has both
+fallback paths to recover.
+
+**Auto-registration**
+
+The agent's first-registration flow is platform-agnostic and
+already works for Linux child hosts: agent reads
+`auto_approve.token` from config, opens a WebSocket to the server,
+presents the token, server matches the dispatched-plan record and
+auto-approves.  No server-side change needed — Windows child hosts
+flow through the same code path as Linux child hosts.
+
+### Features
+
+- [ ] `virtualization_engine` accepts `os_family=windows`,
+      `os_version=server-2022` / `server-2025`, `edition=standard` /
+      `datacenter`, `image_kind=server-core` / `server-with-gui`
+- [ ] Autounattend.xml template generator with parameterized
+      hostname / admin-password / locale / timezone / product-key /
+      static-or-DHCP network config
+- [ ] Per-VM config-CD ISO build step (genisoimage / mkisofs /
+      xorrisofs fallback, same chain as the Linux cloud-init seed
+      ISO)
+- [ ] `virt-install` plan-builder branch with TPM + UEFI Secure
+      Boot + virtio-win driver CD attachment + correct
+      `--os-variant`
+- [ ] swtpm per-VM state directory provisioning (engine plan
+      writes `/var/lib/swtpm/<vm-name>/` before virt-install)
+- [ ] OVMF NVRAM per-VM copy of `OVMF_VARS.fd`
+- [ ] Bundled agent MSI delivery via the config CD (avoids
+      requiring network access during install for air-gapped
+      environments)
+- [ ] RDP + SSH auto-enable in Autounattend's
+      `<RunSynchronousCommand>` block
+- [ ] Frontend Create Child Host dialog learns the Windows path:
+      edition picker, version picker, license key field, admin
+      password, hostname, optional join-domain config
+- [ ] License-key handling: support generic AVMA / MAK / KMS keys;
+      UI field is secret-typed and stored hashed
+- [ ] Optional pre-baked sysprep'd golden image path: operator
+      workflow for baking a Server 2022 image with Cloudbase-Init
+      installed, sysprep'd, stored as a host-local qcow2 — drops
+      per-VM provision time from ~30 min to ~5 min
+- [ ] Cloudbase-Init userdata path for the pre-baked-image option
+      (Linux-style cloud-init userdata works via Cloudbase-Init's
+      NoCloud datasource)
+- [ ] Provision-progress reporting: long-running install needs UI
+      feedback consistent with the in-flight journal pattern from
+      Phase 11.6
+- [ ] Documentation: per-distro install channels page extended with
+      "Windows Server child host" section; runbook covers license
+      handling, sysprep refresh cadence, virtio-win driver updates
+- [ ] i18n/l10n for all 14 languages (UI strings + docs)
+- [ ] Integration tests: virtualization_engine plan-builder
+      Windows-branch tests + mocked virt-install command-list
+      assertions; full live-VM test gated behind a CI label /
+      manual job because of provision latency
+
+### Success Criteria
+
+- An operator can open Create Child Host on a KVM parent, select
+  Windows Server 2022 (or 2025), provide hostname + admin password
+  (+ license key for production), and click Create.
+- ~25-45 min later (or ~5 min if pre-baked golden image is
+  configured), a new Windows Server VM appears in the hosts list,
+  marked approved and healthy.
+- The VM accepts RDP from the parent's network on TCP 3389.
+- The VM accepts SSH from the parent's network on TCP 22.
+- sysmanage-agent is installed and running as a Windows service
+  (NSSM-managed), reporting heartbeat + inventory to the server.
+- Full agent feature set (package inventory, firewall config,
+  service control, command execution) works on the Windows guest
+  via the same OSS endpoints used for Linux guests.
+
+### Scope note
+
+This is a `virtualization_engine` extension, not a new engine.
+The Pro+ module count doesn't change; the existing engine's plan
+builder gains a Windows branch.  Estimated 6-8 weeks of focused
+work, with the first 1-2 weeks being a hands-on spike on the
+target KVM parent to validate swtpm + OVMF + virtio-win + agent
+MSI + RDP + SSH end-to-end before committing to the full
+plan-builder + UI integration.
+
+### Deferred / out-of-scope for this phase
+
+- Windows 11 / 10 client SKU support — not the managed-fleet
+  target; revisit only if customer demand surfaces a specific
+  use case (e.g., admin-workstation provisioning) that justifies
+  the licensing + sysprep complexity.
+- Hyper-V parent hosts — KVM is the only virt parent in scope.
+  Hyper-V parent support would be its own engine fold-in if ever
+  wanted.
+- Active Directory domain controller role on the child host
+  itself — child hosts can JOIN an AD domain via Autounattend's
+  `<Identification>` block (covered by the join-domain config
+  field above), but standing up a new DC isn't covered.
 
 ---
 
