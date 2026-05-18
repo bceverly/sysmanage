@@ -3,7 +3,7 @@
 # Sets up Python virtual environment and installs dependencies
 #
 
-# Top-level trap — see sysmanage-agent's install.ps1 for the full
+# Top-level trap -- see sysmanage-agent's install.ps1 for the full
 # rationale (PR #375773 winget-pkgs validation burn, 2026-05-17).
 # Catches any unhandled exception escaping any scope below and exits
 # 0 so the MSI engine doesn't trigger Error 1722 + rollback.
@@ -273,7 +273,7 @@ try {
     Write-Log ""
 } finally {
     # Stop-Transcript wrapped so a terminating error here never escapes
-    # finally (would make script exit 1 → MSI Error 1722 → rollback).
+    # finally (would make script exit 1 -> MSI Error 1722 -> rollback).
     try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
 
     Write-Host ""
@@ -291,7 +291,7 @@ if ($InstallSuccess) {
     exit 0
 }
 
-# NEVER exit non-zero — the WiX CustomAction uses ``Return="check"``,
+# NEVER exit non-zero -- the WiX CustomAction uses ``Return="check"``,
 # which rolls back the entire MSI on any non-zero return.  See the
 # matching block in sysmanage-agent/installer/windows/install.ps1 for
 # the full rationale (PR #375773 winget-pkgs validation burn,
@@ -301,7 +301,7 @@ if ($InstallSuccess) {
 if (-not $InstallSuccess) {
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Yellow
-    Write-Host "Install step had errors — MSI install will still complete." -ForegroundColor Yellow
+    Write-Host "Install step had errors -- MSI install will still complete." -ForegroundColor Yellow
     Write-Host "See log files for the failure and recovery steps." -ForegroundColor Yellow
     Write-Host "=====================================" -ForegroundColor Yellow
     Write-Host ""

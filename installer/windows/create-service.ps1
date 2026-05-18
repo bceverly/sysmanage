@@ -2,7 +2,7 @@
 # Create Windows Service for SysManage Server using NSSM
 #
 
-# Top-level trap — see sysmanage-agent's create-service.ps1 for the
+# Top-level trap -- see sysmanage-agent's create-service.ps1 for the
 # full rationale (PR #375773 winget-pkgs validation burn, 2026-05-17).
 trap {
     Write-Host "WARNING: unhandled exception trapped at top level: $_"
@@ -45,7 +45,7 @@ try {
         # winget-pkgs sandboxed validation environment, where
         # check-python.ps1 can't reach python.org to install Python),
         # install.ps1 skipped the venv create.  Without a venv we
-        # can't register the service to point at one — so log the
+        # can't register the service to point at one -- so log the
         # situation and exit 0 cleanly rather than failing the MSI
         # with the misleading 1722/1603 chain.  The operator can
         # install Python and re-run the MSI to register the service
@@ -63,7 +63,7 @@ try {
         try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
         Write-Host ""
         Write-Host "=====================================" -ForegroundColor Yellow
-        Write-Host "Service NOT registered — Python missing" -ForegroundColor Yellow
+        Write-Host "Service NOT registered -- Python missing" -ForegroundColor Yellow
         Write-Host "See $LogFile for recovery steps." -ForegroundColor Yellow
         Write-Host "=====================================" -ForegroundColor Yellow
         Write-Host ""
@@ -216,7 +216,7 @@ try {
     Write-Log "ERROR: Exception during service creation: $_"
 } finally {
     # Stop-Transcript wrapped so a terminating error here never escapes
-    # finally (PR #375773 rationale — see sysmanage-agent equivalent).
+    # finally (PR #375773 rationale -- see sysmanage-agent equivalent).
     try { Stop-Transcript } catch { Write-Host "Stop-Transcript error swallowed: $_" }
 
     Write-Host ""
@@ -234,7 +234,7 @@ try {
 if ($ServiceCreated) {
     Write-Host "Windows Service creation complete"
 } else {
-    # NEVER exit non-zero — the WiX CustomAction uses ``Return="check"``,
+    # NEVER exit non-zero -- the WiX CustomAction uses ``Return="check"``,
     # which would roll back the whole MSI install on any non-zero exit
     # from this script.  That cascades into ``Installation Verification:
     # Completed`` / ``##[error] Failed`` on the winget-pkgs pipeline
@@ -244,7 +244,7 @@ if ($ServiceCreated) {
     # blocking.  Land the MSI; tell the operator how to finish.
     Write-Host ""
     Write-Host "=====================================" -ForegroundColor Yellow
-    Write-Host "Service NOT registered — MSI install will still complete." -ForegroundColor Yellow
+    Write-Host "Service NOT registered -- MSI install will still complete." -ForegroundColor Yellow
     Write-Host "To register the service manually after installing Python 3.9+:" -ForegroundColor Yellow
     Write-Host "  1. Re-run the MSI (MajorUpgrade re-fires the custom actions)" -ForegroundColor Yellow
     Write-Host "  2. Or run create-service.ps1 directly as administrator" -ForegroundColor Yellow
