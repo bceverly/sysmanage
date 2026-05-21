@@ -131,6 +131,19 @@ class RegistrationKey(Base):
         ForeignKey(_FK_ACCESS_GROUPS_ID, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
+    # Phase 12.4: optional federation-site scope.  When set, a key
+    # generated at the coordinator restricts the hosts it can enroll
+    # to a specific subordinate site — agents presenting this key
+    # are accepted ONLY at the named site, blocking key reuse across
+    # the federation.  NULL means "any site can accept this key"
+    # (default OSS / single-server behaviour).  FK uses SET NULL
+    # on site removal so revoking a site doesn't cascade-delete
+    # historical registration keys.
+    site_id = Column(
+        GUID(),
+        ForeignKey("federation_sites.id", ondelete=_ON_DELETE_SET_NULL),
+        nullable=True,
+    )
     auto_approve = Column(Boolean, nullable=False, default=False)
     revoked = Column(Boolean, nullable=False, default=False)
     # max_uses unset means the key is good for an unlimited number of uses.
@@ -147,6 +160,7 @@ class RegistrationKey(Base):
     __table_args__ = (
         Index("ix_registration_keys_key", "key"),
         Index("ix_registration_keys_access_group_id", "access_group_id"),
+        Index("ix_registration_keys_site_id", "site_id"),
         Index("ix_registration_keys_revoked", "revoked"),
     )
 
@@ -181,6 +195,7 @@ class RegistrationKey(Base):
             "access_group_id": (
                 str(self.access_group_id) if self.access_group_id else None
             ),
+            "site_id": (str(self.site_id) if self.site_id else None),
             "auto_approve": self.auto_approve,
             "revoked": self.revoked,
             "max_uses": self.max_uses,

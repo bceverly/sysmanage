@@ -197,7 +197,8 @@
     "error": "An error occurred while processing your request",
     "sendReset": "Send Reset Link",
     "sending": "Sending...",
-    "title": "Forgot Password"
+    "title": "Forgot Password",
+    "didntReceive": "Didn't receive an email? Check your spam folder or try again."
   },
   "grafana": {
     "apiKey": {
@@ -323,7 +324,10 @@
     "usernameHelp": "Letters, numbers, underscores, and dashes allowed",
     "usernameRequired": "Username is required",
     "windowsDescription": "Create a new local user account on this Windows host.",
-    "passwordHelp": "Minimum 8 characters required"
+    "passwordHelp": "Minimum 8 characters required",
+    "confirmDelete": "Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
+    "invalidUidPlatform": "UID must be a number >= {{}}",
+    "uidHelpPlatform": "Leave empty to auto-assign. Must be >= {{}} if specified."
   },
   "hostDefaults": {
     "addNewPackageManager": "Add New Enabled Package Manager",
@@ -817,7 +821,18 @@
     "tagRemoveFailed": "Failed to remove tag",
     "tagRemoved": "Tag removed successfully",
     "tags": "Tags",
-    "vendor": "Vendor"
+    "vendor": "Vendor",
+    "cancelChildHostMessage": "Are you sure you want to cancel the creation of \"{{name}}\"?",
+    "childHostHostnameHelp": "Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
+    "childHostsEmptyBhyveReady": "Click \"Create Child Host\" to create a new bhyve virtual machine.",
+    "childHostsEmptyLxdReady": "Click \"Create Child Host\" to create a new LXD container.",
+    "childHostsEmptyVmmReady": "Click \"Create Child Host\" to create a new VMM virtual machine.",
+    "childHostsEmptyWslEnabled": "Click \"Create Child Host\" to create a new WSL instance.",
+    "clickRequestData": "Click \"Request Host Data\" to collect diagnostic information from the agent.",
+    "deleteChildHostMessage": "Are you sure you want to delete the child host \"{{name}}\"?",
+    "geoLocation": "Geographic Location",
+    "publicIp": "Public IP",
+    "selectedServices": "{{}} service(s) selected"
   },
   "hostGroup": {
     "add": "Add",
@@ -838,7 +853,8 @@
     "invalidGid": "GID must be a number >= 1000",
     "invalidGroupName": "Group name must start with a letter and contain only letters, numbers, underscores, and dashes",
     "unixDescription": "Create a new group on this host.",
-    "windowsDescription": "Create a new local group on this Windows host."
+    "windowsDescription": "Create a new local group on this Windows host.",
+    "confirmDelete": "Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
   },
   "hosts": {
     "agentVersion": "Agent Version",
@@ -895,7 +911,9 @@
       "statusRebooting": "Rebooting host, waiting for reconnect...",
       "statusRestarting": "Restarting child hosts...",
       "statusShuttingDown": "Stopping child hosts...",
-      "ungracefulWarning": "This host has {{count}} running child host(s) that will be ungracefully terminated during reboot. Upgrade to SysManage Professional+ for orchestrated safe reboot."
+      "ungracefulWarning": "This host has {{count}} running child host(s) that will be ungracefully terminated during reboot. Upgrade to SysManage Professional+ for orchestrated safe reboot.",
+      "proceedAnyway": "Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
+      "proceedOrchestrated": "Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
     },
     "rebootRequested": "Reboot requested successfully",
     "rebootSelected": "Reboot Selected",
@@ -935,7 +953,12 @@
     "runningUnprivileged": "Running Unprivileged",
     "scriptsDisabledTooltip": "Scripts Disabled Tooltip",
     "scriptsEnabledTooltip": "Scripts Enabled Tooltip",
-    "up": "Up"
+    "up": "Up",
+    "antivirusDeployAllFailed": "Antivirus deployment failed for all hosts:\\n\\n{{}}",
+    "antivirusDeployPartialSuccess": "Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
+    "antivirusDeploySuccess": "Antivirus deployment initiated for {{}} host(s)",
+    "approveSelected": "Approve Selected",
+    "opentelemetryDeploySuccess": "OpenTelemetry deployment queued for {{}} host(s)"
   },
   "login": {
     "loggingIn": "Logging in...",
@@ -951,7 +974,9 @@
     "password": "Password",
     "submit": "Sign In",
     "title": "Login",
-    "username": "Username or Email"
+    "username": "Username or Email",
+    "forgotPassword": "Forgot password?",
+    "remember": "Remember me"
   },
   "logout": {
     "loading": "Logging out..."
@@ -983,7 +1008,9 @@
       "collector": "Collector",
       "repository": "Repository"
     },
-    "airgapRepositories": "Air-Gap Repos"
+    "airgapRepositories": "Air-Gap Repos",
+    "map": "[MISSING:nav.map]",
+    "sites": "[MISSING:nav.sites]"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -1408,7 +1435,11 @@
     "retryNow": "Retry Now",
     "retrying": "Retrying...",
     "title": "Connection Interrupted",
-    "titleFailed": "Server Unavailable"
+    "titleFailed": "Server Unavailable",
+    "attempts": "Attempts: {{}}",
+    "lastConnected": "[MISSING:serverDown.lastConnected]",
+    "secondsRemaining": "{{}}s",
+    "timeRemaining": "{{}}m {{}}s"
   },
   "tags": {
     "addTag": "Add Tag",
@@ -1454,7 +1485,9 @@
       "targets": "Targets",
       "title": "Prometheus Status",
       "url": "URL",
-      "version": "Version"
+      "version": "Version",
+      "manageHint": "Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
+      "notRunningMessage": "Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1528,7 +1561,10 @@
     "source": "Source",
     "title": "Title",
     "type": "Type",
-    "url": "Url"
+    "url": "Url",
+    "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
+    "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
   },
   "ubuntuPro": {
     "actions": {
@@ -1547,7 +1583,8 @@
       "resultsNote": "Please check the host details or agent logs for more information about the enrollment process.",
       "selectedHosts": "Selected Hosts",
       "title": "Ubuntu Pro Enrollment",
-      "useMasterKey": "Use configured master key"
+      "useMasterKey": "Use configured master key",
+      "customKeyHelp": "Contract-based Ubuntu Pro key starting with \"C\""
     },
     "errors": {
       "clearFailed": "Failed to clear master key",
@@ -1560,7 +1597,8 @@
       "autoAttachEnabledHelp": "Automatically attach new Ubuntu hosts to Pro using the master key",
       "masterKey": "Ubuntu Pro Master Key",
       "organizationName": "Organization Name",
-      "organizationNameHelp": "Optional organization name for Ubuntu Pro enrollment"
+      "organizationNameHelp": "Optional organization name for Ubuntu Pro enrollment",
+      "masterKeyHelp": "Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
     },
     "messages": {
       "keyCleared": "Master key cleared successfully",
@@ -1574,7 +1612,10 @@
       "autoAttachEnabled": "Auto-attach enabled",
       "keyConfigured": "Master key configured"
     },
-    "title": "Ubuntu Pro"
+    "title": "Ubuntu Pro",
+    "validation": {
+      "invalidKey": "Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+    }
   },
   "updates": {
     "clearSearch": "Clear search",
@@ -1716,7 +1757,10 @@
     "imageUploadSuccess": "Profile image uploaded successfully",
     "invalidImageType": "Invalid image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "Profile Image",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "passwordNeedsCharTypes": "Password must contain at least {{}} different character types",
+    "passwordTooLong": "Password must be no more than {{}} characters long",
+    "passwordTooShort": "Password must be at least {{}} characters long"
   },
   "users": {
     "email": "Email",
@@ -1731,7 +1775,11 @@
     "noResults": "No Results",
     "noRows": "No Rows",
     "unlockSelected": "Unlock Selected",
-    "unlocked": "Unlocked"
+    "unlocked": "Unlocked",
+    "editInfo": "Edit the user's information below.",
+    "emailNotification": "An email will be sent to the user with a secure link to set their initial password.",
+    "emailUnique": "Email address must be unique",
+    "enterInfo": "Enter the new user's information below."
   },
   "emailConfig": {
     "title": "Email Configuration",
@@ -1765,50 +1813,6 @@
   "reportViewer": {
     "iframeTitle": "Report Content"
   },
-  "accessGroups": {
-    "add": "Add Group",
-    "addKey": "Add Registration Key",
-    "copied": "Copied to clipboard",
-    "copy": "Copy",
-    "copyError": "Failed to copy",
-    "created": "Access group created",
-    "deleteError": "Failed to delete access group",
-    "deleted": "Access group deleted",
-    "description": "Description",
-    "editGroup": "Edit Access Group",
-    "empty": "No access groups defined yet.",
-    "generateKey": "Generate Key",
-    "keyAccessGroup": "Access Group",
-    "keyAutoApprove": "Auto-Approve",
-    "keyAutoApproveLabel": "Auto-approve registrations using this key",
-    "keyCreateError": "Failed to create registration key",
-    "keyDeleteError": "Failed to delete registration key",
-    "keyDeleted": "Registration key deleted",
-    "keyExpires": "Expires At",
-    "keyMaxUses": "Max Uses (blank = unlimited)",
-    "keyName": "Name",
-    "keyNeverExpires": "Never",
-    "keyRevealTitle": "Registration Key Created",
-    "keyRevealWarning": "This is the only time the key value will be shown. Copy it now — there is no recovery.",
-    "keysEmpty": "No registration keys yet.",
-    "loadError": "Failed to load access groups",
-    "name": "Name",
-    "nameRequired": "Name is required",
-    "noGroup": "(none)",
-    "noParent": "(no parent / root)",
-    "parent": "Parent",
-    "regKeysSubtitle": "Tokens that scope incoming agent registrations to an access group",
-    "regKeysTitle": "Registration Keys",
-    "revoke": "Revoke",
-    "revokeError": "Failed to revoke registration key",
-    "revoked": "Registration key revoked",
-    "revokedStatus": "Revoked",
-    "saveError": "Failed to save access group",
-    "subtitle": "Hierarchical groups for scoping hosts and users",
-    "title": "Access Groups",
-    "updated": "Access group updated",
-    "useCount": "Used"
-  },
   "upgradeProfiles": {
     "add": "Add Profile",
     "allHosts": "All Hosts",
@@ -1840,7 +1844,9 @@
     "updated": "Update profile saved",
     "window": "Staggered Window (minutes)",
     "windowHelp": "Spread agent dispatches over this many minutes (0–720)",
-    "windowRange": "Staggered window must be between 0 and 720 minutes"
+    "windowRange": "Staggered window must be between 0 and 720 minutes",
+    "confirmDelete": "Delete update profile \"{{name}}\"?",
+    "confirmTrigger": "Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
   },
   "packageProfiles": {
     "add": "Add Compliance Profile",
@@ -1870,7 +1876,8 @@
     "updated": "Compliance profile saved",
     "version": "Version",
     "versionOp": "Op",
-    "versionOpAny": "(any)"
+    "versionOpAny": "(any)",
+    "confirmDelete": "Delete compliance profile \"{{name}}\"?"
   },
   "compliance": {
     "compliant": "Compliant",
@@ -1919,7 +1926,8 @@
     "subtitle": "Org logo and header text injected into every generated PDF/HTML report",
     "title": "Report Branding",
     "uploadError": "Logo upload failed",
-    "uploadLogo": "Upload Logo"
+    "uploadLogo": "Upload Logo",
+    "headerTextHelp": "Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
   },
   "reportTemplates": {
     "add": "Add Template",
@@ -1942,7 +1950,8 @@
     "saveError": "Failed to save template",
     "subtitle": "Custom layouts the report renderer applies on top of the built-in report types",
     "title": "Report Templates",
-    "updated": "Template saved"
+    "updated": "Template saved",
+    "confirmDelete": "Delete report template \"{{name}}\"?"
   },
   "dynamicSecrets": {
     "copied": "Secret copied to clipboard",
@@ -1976,7 +1985,8 @@
     "subtitle": "Short-lived credentials issued via OpenBAO/Vault that auto-expire",
     "title": "Dynamic Secrets",
     "ttl": "TTL (seconds)",
-    "ttlHelp": "Lease lifetime — between {{min}} and {{max}} seconds"
+    "ttlHelp": "Lease lifetime — between {{min}} and {{max}} seconds",
+    "confirmRevoke": "Revoke \"{{name}}\" now?"
   },
   "idp": {
     "action": {
@@ -2074,7 +2084,8 @@
     "backupCodesWarning": "These one-time backup codes will not be shown again. Save them in a password manager or print them. Each code works once if you lose access to your authenticator.",
     "disableWarning": "Confirm with your account password. Your TOTP secret and backup codes will be deleted.",
     "notEnrolledDescription": "Add a second factor to your account. You'll be asked for a one-time code from an authenticator app each time you sign in.",
-    "regenPrompt": "Enter a current TOTP code. Existing backup codes will be invalidated."
+    "regenPrompt": "Enter a current TOTP code. Existing backup codes will be invalidated.",
+    "backupCodesConfirm": "I've saved these codes in a safe place"
   },
   "mirror": {
     "action": {
@@ -2557,5 +2568,164 @@
         "restart_vms_from_persist": "restart {{hypervisor}} VMs from {{persist_path}}"
       }
     }
+  },
+  "audit": {
+    "columns": {
+      "actor": "Actor",
+      "details": "Details",
+      "openSite": "Open",
+      "operation": "Operation",
+      "site": "Site",
+      "timestamp": "Timestamp"
+    },
+    "empty": "No federation audit entries yet.",
+    "emptyFiltered": "No audit entries match the filters.",
+    "errorLoad": "Failed to load federation audit log.",
+    "filters": {
+      "actor": "Actor",
+      "apply": "Apply",
+      "clear": "Clear",
+      "operation": "Operation",
+      "siteId": "Site ID"
+    },
+    "subtitle": "Every cross-site operation logged centrally by the coordinator.",
+    "title": "Federation Audit Log"
+  },
+  "map": {
+    "errorLoadHosts": "Failed to load host locations.",
+    "openHost": "Open host",
+    "subtitle": "Geographic distribution of agents that have reported a public IP.",
+    "title": "Host Map"
+  },
+  "policies": {
+    "actions": {
+      "assign": "Assign",
+      "deactivate": "Deactivate",
+      "edit": "Edit",
+      "push": "Push now"
+    },
+    "active": "active",
+    "assign": {
+      "error": "Failed to update assignments.",
+      "errorLoad": "Failed to load sites.",
+      "noSites": "No federation sites are enrolled.  Enroll a site first.",
+      "statusLine": "Push status: {{status}}",
+      "submit": "Save assignments",
+      "success": "Policy assignments updated.",
+      "title": "Assign to sites"
+    },
+    "columns": {
+      "actions": "Actions",
+      "active": "Active",
+      "name": "Name",
+      "type": "Type",
+      "version": "Version"
+    },
+    "create": {
+      "button": "New Policy",
+      "cancel": "Cancel",
+      "customType": "Custom policy type",
+      "definition": "Definition (JSON)",
+      "description": "Description",
+      "engineUnavailable": "The federation controller engine is not loaded; cannot create policies.",
+      "error": "Failed to create policy.",
+      "invalidJson": "Definition must be a JSON object.",
+      "name": "Name",
+      "submit": "Create",
+      "success": "Policy created.",
+      "title": "Create policy",
+      "type": "Policy type",
+      "typeOther": "Other...",
+      "typeRequired": "Policy type is required."
+    },
+    "deactivate": {
+      "error": "Failed to deactivate policy.",
+      "success": "'{{name}}' deactivated."
+    },
+    "edit": {
+      "error": "Failed to update policy.",
+      "submit": "Save",
+      "success": "Policy updated.",
+      "title": "Edit policy",
+      "versionNote": "Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+    },
+    "empty": "No policies have been defined yet. Click 'New Policy' to create one.",
+    "errorLoad": "Failed to load federation policies.",
+    "filters": {
+      "activeOnly": "Active only",
+      "allTypes": "All types",
+      "type": "Policy type"
+    },
+    "inactive": "inactive",
+    "push": {
+      "error": "Failed to push policy.",
+      "success": "Push triggered for '{{name}}'."
+    },
+    "subtitle": "Centrally-defined policies pushed to subordinate sites.",
+    "title": "Federation Policies"
+  },
+  "sites": {
+    "actions": {
+      "remove": "Remove",
+      "resume": "Resume",
+      "suspend": "Suspend"
+    },
+    "addSite": "Enroll Site",
+    "confirmRemove": {
+      "body": "The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
+      "cancel": "Cancel",
+      "confirm": "Remove site",
+      "title": "Remove federation site?"
+    },
+    "detail": {
+      "agentVersionMin": "Minimum agent version",
+      "backToList": "Back to Sites",
+      "connection": "Connection",
+      "enrolledAt": "Enrolled at",
+      "errorLoad": "Failed to load site.",
+      "hostCount": "Host count",
+      "lastSyncAt": "Last sync at",
+      "lastSyncStatus": "Last sync status",
+      "metadata": "Metadata",
+      "notFound": "Site not found.",
+      "seeHosts": "See hosts at this site",
+      "syncInterval": "Sync interval",
+      "syncIntervalValue": "{{seconds}}s",
+      "url": "URL",
+      "viewAuditLog": "View audit log"
+    },
+    "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "enroll": {
+      "cancel": "Cancel",
+      "done": "Done",
+      "engineUnavailable": "The federation controller engine is not loaded; cannot enroll a site.",
+      "error": "Failed to enroll site.",
+      "location": "Location label (optional)",
+      "name": "Site name",
+      "submit": "Generate token",
+      "successTitle": "Site enrolled",
+      "syncIntervalSeconds": "Sync interval (seconds)",
+      "title": "Enroll a federation site",
+      "tokenInstructions": "Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
+      "url": "Site URL"
+    },
+    "enterpriseRequired": {
+      "body": "Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
+      "title": "Multi-site federation requires Enterprise"
+    },
+    "errorLoad": "Failed to load federation sites.",
+    "hostCount": "{{count}} hosts",
+    "lastSync": "Synced {{when}}",
+    "mapView": "Map view",
+    "policiesLink": "Policies",
+    "subtitle": "Subordinate SysManage servers enrolled with this coordinator.",
+    "title": "Federation Sites"
+  },
+  "sitesMap": {
+    "errorLoad": "Failed to load federation sites.",
+    "gridView": "Grid view",
+    "openSite": "Open site",
+    "subtitle": "Geographic distribution of subordinate site servers.",
+    "title": "Federation Sites Map"
   }
 }

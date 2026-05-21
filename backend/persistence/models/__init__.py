@@ -12,6 +12,7 @@ from .child_host import *
 from .core import *
 from .dynamic_secrets import *
 from .external_idp import *
+from .federation import *
 from .mfa import *
 from .package_compliance import *
 from .report_branding import *
@@ -165,6 +166,21 @@ __all__ = [
     "IdpRoleMapping",
     "ExternalIdpSettings",
     "SINGLETON_IDP_SETTINGS_ID",
+    # Multi-site federation (Phase 12.6)
+    "FederationSite",
+    "FederationHostDirectory",
+    "FederationHostRollup",
+    "FederationComplianceRollup",
+    "FederationVulnerabilityRollup",
+    "FederationPolicy",
+    "FederationPolicyAssignment",
+    "FederationDispatchedCommand",
+    "FederationAuditLog",
+    "FederationCoordinator",
+    "FederationSyncQueue",
+    "FederationReceivedPolicy",
+    "FederationReceivedCommand",
+    "SINGLETON_FEDERATION_COORDINATOR_ID",
     # Dynamic secret leases (Phase 8.7)
     "DynamicSecretLease",
     "LEASE_ACTIVE",

@@ -11,12 +11,39 @@ to simulate a successful OpenBAO write.  We exercise:
   - List filters by status / kind.
   - Revoke flips status from ACTIVE → REVOKED.
   - Reconcile transitions ACTIVE-but-expired rows to EXPIRED.
+
+Phase 12.5: the router is now gated behind ``ModuleCode.SECRETS_ENGINE``.
+An autouse fixture below stubs the license + module-loader checks so
+the existing CRUD tests keep exercising their happy paths without a
+loaded engine; the gate's deny path is covered by a separate test
+class at the bottom of the file.
 """
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
 
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _grant_secrets_engine(request):
+    """Pretend the ``secrets_engine`` module is licensed AND loaded for
+    every test in this file, except those in
+    ``TestDynamicSecretsSecretsEngineGate`` which want the deny path."""
+    if (
+        request.cls is not None
+        and request.cls.__name__ == "TestDynamicSecretsSecretsEngineGate"
+    ):
+        yield
+        return
+    with patch("backend.licensing.feature_gate.license_service") as mock_license, patch(
+        "backend.licensing.module_loader.module_loader"
+    ) as mock_loader:
+        mock_license.has_module.return_value = True
+        mock_loader.is_module_loaded.return_value = True
+        yield
 
 
 def _mock_vault_post():
@@ -224,3 +251,51 @@ class TestDynamicSecretsReconcile:
 
         session.refresh(old)
         assert old.status == "EXPIRED"
+
+
+# ---------------------------------------------------------------------------
+# Phase 12.5: secrets_engine gate
+# ---------------------------------------------------------------------------
+
+
+class TestDynamicSecretsSecretsEngineGate:
+    """Verify ``/api/dynamic-secrets/*`` returns 403 / 503 when the
+    Pro+ ``secrets_engine`` module isn't available.  The autouse
+    fixture at the top of the file is skipped for this class so the
+    real license-service + module-loader calls fire."""
+
+    def test_list_returns_403_when_license_missing(self, client, auth_headers):
+        with patch("backend.licensing.feature_gate.license_service") as mock_license:
+            mock_license.has_module.return_value = False
+            r = client.get("/api/dynamic-secrets/leases", headers=auth_headers)
+        assert r.status_code == 403
+        body = r.json()
+        assert body["detail"]["error"] == "pro_plus_required"
+        assert body["detail"]["module"] == "secrets_engine"
+
+    def test_list_returns_503_when_license_ok_but_unloaded(self, client, auth_headers):
+        with patch(
+            "backend.licensing.feature_gate.license_service"
+        ) as mock_license, patch(
+            "backend.licensing.module_loader.module_loader"
+        ) as mock_loader:
+            mock_license.has_module.return_value = True
+            mock_loader.is_module_loaded.return_value = False
+            r = client.get("/api/dynamic-secrets/leases", headers=auth_headers)
+        assert r.status_code == 503
+        body = r.json()
+        assert body["detail"]["error"] == "module_not_available"
+        assert body["detail"]["module"] == "secrets_engine"
+
+    def test_issue_is_gated_too(self, client, auth_headers):
+        """Write-side shares the router-level gate, but pin a write
+        endpoint explicitly to defend against future per-handler
+        override drift."""
+        with patch("backend.licensing.feature_gate.license_service") as mock_license:
+            mock_license.has_module.return_value = False
+            r = client.post(
+                "/api/dynamic-secrets/issue",
+                json={"name": "blocked", "kind": "token"},
+                headers=auth_headers,
+            )
+        assert r.status_code == 403

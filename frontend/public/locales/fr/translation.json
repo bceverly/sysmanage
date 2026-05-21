@@ -197,7 +197,8 @@
     "error": "Une erreur s'est produite lors du traitement de votre demande",
     "sendReset": "Envoyer le lien de réinitialisation",
     "sending": "Envoi en cours...",
-    "title": "Mot de passe oublié"
+    "title": "Mot de passe oublié",
+    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
   },
   "grafana": {
     "apiKey": {
@@ -323,7 +324,10 @@
     "usernameHelp": "Lettres, chiffres, tirets bas et tirets autorisés",
     "usernameRequired": "Le nom d'utilisateur est requis",
     "windowsDescription": "Créer un nouveau compte utilisateur local sur cet hôte Windows.",
-    "passwordHelp": "Minimum de 8 caractères requis"
+    "passwordHelp": "Minimum de 8 caractères requis",
+    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
+    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
+    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
   },
   "hostDefaults": {
     "addNewPackageManager": "Ajouter un Nouveau Gestionnaire de Paquets Activé",
@@ -817,7 +821,18 @@
     "servicesUpdateRequested": "Mise à jour des services Ubuntu Pro demandée",
     "size": "Taille",
     "softwarePackages": "Paquets logiciels",
-    "vendor": "Fournisseur"
+    "vendor": "Fournisseur",
+    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
+    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
+    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
+    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
+    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
+    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
+    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
+    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
+    "geoLocation": "[TODO] Geographic Location",
+    "publicIp": "[TODO] Public IP",
+    "selectedServices": "[TODO] {{}} service(s) selected"
   },
   "hostGroup": {
     "add": "Ajouter",
@@ -838,7 +853,8 @@
     "invalidGid": "Le GID doit être un nombre >= 1000",
     "invalidGroupName": "Le nom du groupe doit commencer par une lettre et contenir uniquement des lettres, des chiffres, des tirets bas et des tirets",
     "unixDescription": "Créer un nouveau groupe sur cet hôte.",
-    "windowsDescription": "Créer un nouveau groupe local sur cet hôte Windows."
+    "windowsDescription": "Créer un nouveau groupe local sur cet hôte Windows.",
+    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
   },
   "hosts": {
     "agentVersion": "Version de l'agent",
@@ -895,7 +911,9 @@
       "statusRebooting": "Redémarrage de l'hôte, en attente de reconnexion...",
       "statusRestarting": "Redémarrage des hôtes enfants...",
       "statusShuttingDown": "Arrêt des hôtes enfants...",
-      "ungracefulWarning": "Cet hôte a {{count}} hôte(s) enfant(s) en cours d'exécution qui seront arrêté(s) brutalement lors du redémarrage. Passez à SysManage Professional+ pour un redémarrage orchestré sécurisé."
+      "ungracefulWarning": "Cet hôte a {{count}} hôte(s) enfant(s) en cours d'exécution qui seront arrêté(s) brutalement lors du redémarrage. Passez à SysManage Professional+ pour un redémarrage orchestré sécurisé.",
+      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
+      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
     },
     "rebootRequested": "Redémarrage demandé avec succès",
     "rebootSelected": "Redémarrer Sélectionnés",
@@ -935,7 +953,12 @@
     "runningUnprivileged": "Exécution non privilégiée",
     "scriptsDisabledTooltip": "Les scripts sont désactivés pour cet hôte",
     "scriptsEnabledTooltip": "Les scripts sont activés pour cet hôte",
-    "up": "Up"
+    "up": "Up",
+    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
+    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
+    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
+    "approveSelected": "[TODO] Approve Selected",
+    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
   },
   "login": {
     "loggingIn": "Connexion en cours...",
@@ -951,7 +974,9 @@
     "password": "Mot de passe",
     "submit": "Se connecter",
     "title": "Connexion",
-    "username": "Nom d'utilisateur ou e-mail"
+    "username": "Nom d'utilisateur ou e-mail",
+    "forgotPassword": "[TODO] Forgot password?",
+    "remember": "[TODO] Remember me"
   },
   "logout": {
     "loading": "Déconnexion en cours..."
@@ -983,7 +1008,9 @@
       "collector": "Collecteur",
       "repository": "Référentiel"
     },
-    "airgapRepositories": "Air-Gap Repos"
+    "airgapRepositories": "Air-Gap Repos",
+    "map": "[MISSING:nav.map]",
+    "sites": "[MISSING:nav.sites]"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -1408,7 +1435,11 @@
     "retryNow": "Réessayer Maintenant",
     "retrying": "Nouvelle tentative...",
     "title": "Connexion Interrompue",
-    "titleFailed": "Serveur Indisponible"
+    "titleFailed": "Serveur Indisponible",
+    "attempts": "[TODO] Attempts: {{}}",
+    "lastConnected": "[MISSING:serverDown.lastConnected]",
+    "secondsRemaining": "[TODO] {{}}s",
+    "timeRemaining": "[TODO] {{}}m {{}}s"
   },
   "tags": {
     "addTag": "Ajouter une balise",
@@ -1454,7 +1485,9 @@
       "targets": "Cibles",
       "title": "Statut de Prometheus",
       "url": "URL",
-      "version": "Version"
+      "version": "Version",
+      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
+      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1528,7 +1561,10 @@
     "source": "Source",
     "title": "Titre",
     "type": "Type",
-    "url": "Url"
+    "url": "Url",
+    "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
+    "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
   },
   "ubuntuPro": {
     "actions": {
@@ -1547,7 +1583,8 @@
       "resultsNote": "Veuillez vérifier les détails de l'hôte ou les journaux de l'agent pour plus d'informations sur le processus d'inscription.",
       "selectedHosts": "Hôtes sélectionnés",
       "title": "Inscription Ubuntu Pro",
-      "useMasterKey": "Utiliser la clé maîtresse configurée"
+      "useMasterKey": "Utiliser la clé maîtresse configurée",
+      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
     },
     "errors": {
       "clearFailed": "Échec de l'effacement de la clé maîtresse",
@@ -1560,7 +1597,8 @@
       "autoAttachEnabledHelp": "Attacher automatiquement les nouveaux hôtes Ubuntu à Pro en utilisant la clé maîtresse",
       "masterKey": "Clé maîtresse Ubuntu Pro",
       "organizationName": "Nom de l'organisation",
-      "organizationNameHelp": "Nom d'organisation optionnel pour l'inscription Ubuntu Pro"
+      "organizationNameHelp": "Nom d'organisation optionnel pour l'inscription Ubuntu Pro",
+      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
     },
     "messages": {
       "keyCleared": "Clé maîtresse effacée avec succès",
@@ -1574,7 +1612,10 @@
       "autoAttachEnabled": "Attachement automatique activé",
       "keyConfigured": "Clé maîtresse configurée"
     },
-    "title": "Ubuntu Pro"
+    "title": "Ubuntu Pro",
+    "validation": {
+      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+    }
   },
   "updates": {
     "clearSearch": "Effacer la recherche",
@@ -1716,7 +1757,10 @@
     "imageUploadSuccess": "Image de profil téléversée avec succès",
     "invalidImageType": "Format d'image invalide. Formats autorisés : PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "Image de profil",
-    "uploading": "Téléversement..."
+    "uploading": "Téléversement...",
+    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
+    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
+    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
   },
   "users": {
     "email": "E-mail",
@@ -1731,7 +1775,11 @@
     "noResults": "Aucun résultat",
     "noRows": "Aucune ligne",
     "unlockSelected": "Déverrouiller la sélection",
-    "unlocked": "Déverrouillé"
+    "unlocked": "Déverrouillé",
+    "editInfo": "[TODO] Edit the user's information below.",
+    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
+    "emailUnique": "[TODO] Email address must be unique",
+    "enterInfo": "[TODO] Enter the new user's information below."
   },
   "emailConfig": {
     "title": "Configuration de la messagerie",
@@ -1765,50 +1813,6 @@
   "reportViewer": {
     "iframeTitle": "Contenu du rapport"
   },
-  "accessGroups": {
-    "add": "Ajouter un groupe",
-    "addKey": "Ajouter une clé d'enregistrement",
-    "copied": "Copié dans le presse-papiers",
-    "copy": "Copier",
-    "copyError": "Échec de la copie",
-    "created": "Groupe d'accès créé",
-    "deleteError": "Échec de la suppression du groupe d'accès",
-    "deleted": "Groupe d'accès supprimé",
-    "description": "Description",
-    "editGroup": "Modifier le groupe d'accès",
-    "empty": "Aucun groupe d'accès défini.",
-    "generateKey": "Générer la clé",
-    "keyAccessGroup": "Groupe d'accès",
-    "keyAutoApprove": "Approuver automatiquement",
-    "keyAutoApproveLabel": "Approuver automatiquement les enregistrements utilisant cette clé",
-    "keyCreateError": "Échec de la création de la clé d'enregistrement",
-    "keyDeleteError": "Échec de la suppression de la clé d'enregistrement",
-    "keyDeleted": "Clé d'enregistrement supprimée",
-    "keyExpires": "Expire le",
-    "keyMaxUses": "Utilisations max. (vide = illimité)",
-    "keyName": "Nom",
-    "keyNeverExpires": "Jamais",
-    "keyRevealTitle": "Clé d'enregistrement créée",
-    "keyRevealWarning": "C'est la seule fois où la valeur de la clé sera affichée. Copiez-la maintenant — aucune récupération n'est possible.",
-    "keysEmpty": "Aucune clé d'enregistrement.",
-    "loadError": "Échec du chargement des groupes d'accès",
-    "name": "Nom",
-    "nameRequired": "Le nom est obligatoire",
-    "noGroup": "(aucun)",
-    "noParent": "(sans parent / racine)",
-    "parent": "Parent",
-    "regKeysSubtitle": "Jetons qui rattachent les enregistrements d'agent entrants à un groupe d'accès",
-    "regKeysTitle": "Clés d'enregistrement",
-    "revoke": "Révoquer",
-    "revokeError": "Échec de la révocation de la clé d'enregistrement",
-    "revoked": "Clé d'enregistrement révoquée",
-    "revokedStatus": "Révoquée",
-    "saveError": "Échec de l'enregistrement du groupe d'accès",
-    "subtitle": "Groupes hiérarchiques pour délimiter les hôtes et les utilisateurs",
-    "title": "Groupes d'accès",
-    "updated": "Groupe d'accès mis à jour",
-    "useCount": "Utilisé"
-  },
   "upgradeProfiles": {
     "add": "Ajouter un profil",
     "allHosts": "Tous les hôtes",
@@ -1840,7 +1844,9 @@
     "updated": "Profil de mise à jour enregistré",
     "window": "Fenêtre échelonnée (minutes)",
     "windowHelp": "Répartir les envois d'agents sur ce nombre de minutes (0–720)",
-    "windowRange": "La fenêtre échelonnée doit être comprise entre 0 et 720 minutes"
+    "windowRange": "La fenêtre échelonnée doit être comprise entre 0 et 720 minutes",
+    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
+    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
   },
   "packageProfiles": {
     "add": "Ajouter un profil de conformité",
@@ -1870,7 +1876,8 @@
     "updated": "Profil de conformité enregistré",
     "version": "Version",
     "versionOp": "Op",
-    "versionOpAny": "(tout)"
+    "versionOpAny": "(tout)",
+    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
   },
   "compliance": {
     "compliant": "Conforme",
@@ -1919,7 +1926,8 @@
     "subtitle": "Logo de l'organisation et texte d'en-tête injectés dans chaque rapport PDF/HTML généré",
     "title": "Marquage des rapports",
     "uploadError": "Échec du téléversement du logo",
-    "uploadLogo": "Téléverser le logo"
+    "uploadLogo": "Téléverser le logo",
+    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
   },
   "reportTemplates": {
     "add": "Ajouter un modèle",
@@ -1942,7 +1950,8 @@
     "saveError": "Échec de l'enregistrement du modèle",
     "subtitle": "Mises en page personnalisées appliquées par le moteur de rendu sur les types de rapports intégrés",
     "title": "Modèles de rapport",
-    "updated": "Modèle enregistré"
+    "updated": "Modèle enregistré",
+    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
   "dynamicSecrets": {
     "copied": "Secret copié dans le presse-papiers",
@@ -1976,7 +1985,8 @@
     "subtitle": "Identifiants à durée de vie courte émis via OpenBAO/Vault qui expirent automatiquement",
     "title": "Secrets dynamiques",
     "ttl": "TTL (secondes)",
-    "ttlHelp": "Durée du bail — entre {{min}} et {{max}} secondes"
+    "ttlHelp": "Durée du bail — entre {{min}} et {{max}} secondes",
+    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
   },
   "idp": {
     "action": {
@@ -2074,7 +2084,8 @@
     "backupCodesWarning": "Ces codes de secours à usage unique ne seront plus affichés. Enregistrez-les dans un gestionnaire de mots de passe ou imprimez-les. Chaque code fonctionne une fois si vous perdez l'accès à votre authentificateur.",
     "disableWarning": "Confirmez avec le mot de passe de votre compte. Votre secret TOTP et vos codes de secours seront supprimés.",
     "notEnrolledDescription": "Ajoutez un deuxième facteur à votre compte. Un code à usage unique provenant d'une application d'authentification vous sera demandé à chaque connexion.",
-    "regenPrompt": "Saisissez un code TOTP actuel. Les codes de secours existants seront invalidés."
+    "regenPrompt": "Saisissez un code TOTP actuel. Les codes de secours existants seront invalidés.",
+    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
   },
   "mirror": {
     "action": {
@@ -2557,5 +2568,164 @@
         "restart_vms_from_persist": "restart {{hypervisor}} VMs from {{persist_path}}"
       }
     }
+  },
+  "audit": {
+    "columns": {
+      "actor": "[TODO] Actor",
+      "details": "[TODO] Details",
+      "openSite": "[TODO] Open",
+      "operation": "[TODO] Operation",
+      "site": "[TODO] Site",
+      "timestamp": "[TODO] Timestamp"
+    },
+    "empty": "[TODO] No federation audit entries yet.",
+    "emptyFiltered": "[TODO] No audit entries match the filters.",
+    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "filters": {
+      "actor": "[TODO] Actor",
+      "apply": "[TODO] Apply",
+      "clear": "[TODO] Clear",
+      "operation": "[TODO] Operation",
+      "siteId": "[TODO] Site ID"
+    },
+    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
+    "title": "[TODO] Federation Audit Log"
+  },
+  "map": {
+    "errorLoadHosts": "[TODO] Failed to load host locations.",
+    "openHost": "[TODO] Open host",
+    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
+    "title": "[TODO] Host Map"
+  },
+  "policies": {
+    "actions": {
+      "assign": "[TODO] Assign",
+      "deactivate": "[TODO] Deactivate",
+      "edit": "[TODO] Edit",
+      "push": "[TODO] Push now"
+    },
+    "active": "[TODO] active",
+    "assign": {
+      "error": "[TODO] Failed to update assignments.",
+      "errorLoad": "[TODO] Failed to load sites.",
+      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
+      "statusLine": "[TODO] Push status: {{status}}",
+      "submit": "[TODO] Save assignments",
+      "success": "[TODO] Policy assignments updated.",
+      "title": "[TODO] Assign to sites"
+    },
+    "columns": {
+      "actions": "[TODO] Actions",
+      "active": "[TODO] Active",
+      "name": "[TODO] Name",
+      "type": "[TODO] Type",
+      "version": "[TODO] Version"
+    },
+    "create": {
+      "button": "[TODO] New Policy",
+      "cancel": "[TODO] Cancel",
+      "customType": "[TODO] Custom policy type",
+      "definition": "[TODO] Definition (JSON)",
+      "description": "[TODO] Description",
+      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
+      "error": "[TODO] Failed to create policy.",
+      "invalidJson": "[TODO] Definition must be a JSON object.",
+      "name": "[TODO] Name",
+      "submit": "[TODO] Create",
+      "success": "[TODO] Policy created.",
+      "title": "[TODO] Create policy",
+      "type": "[TODO] Policy type",
+      "typeOther": "[TODO] Other...",
+      "typeRequired": "[TODO] Policy type is required."
+    },
+    "deactivate": {
+      "error": "[TODO] Failed to deactivate policy.",
+      "success": "[TODO] '{{name}}' deactivated."
+    },
+    "edit": {
+      "error": "[TODO] Failed to update policy.",
+      "submit": "[TODO] Save",
+      "success": "[TODO] Policy updated.",
+      "title": "[TODO] Edit policy",
+      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+    },
+    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
+    "errorLoad": "[TODO] Failed to load federation policies.",
+    "filters": {
+      "activeOnly": "[TODO] Active only",
+      "allTypes": "[TODO] All types",
+      "type": "[TODO] Policy type"
+    },
+    "inactive": "[TODO] inactive",
+    "push": {
+      "error": "[TODO] Failed to push policy.",
+      "success": "[TODO] Push triggered for '{{name}}'."
+    },
+    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
+    "title": "[TODO] Federation Policies"
+  },
+  "sites": {
+    "actions": {
+      "remove": "[TODO] Remove",
+      "resume": "[TODO] Resume",
+      "suspend": "[TODO] Suspend"
+    },
+    "addSite": "[TODO] Enroll Site",
+    "confirmRemove": {
+      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
+      "cancel": "[TODO] Cancel",
+      "confirm": "[TODO] Remove site",
+      "title": "[TODO] Remove federation site?"
+    },
+    "detail": {
+      "agentVersionMin": "[TODO] Minimum agent version",
+      "backToList": "[TODO] Back to Sites",
+      "connection": "[TODO] Connection",
+      "enrolledAt": "[TODO] Enrolled at",
+      "errorLoad": "[TODO] Failed to load site.",
+      "hostCount": "[TODO] Host count",
+      "lastSyncAt": "[TODO] Last sync at",
+      "lastSyncStatus": "[TODO] Last sync status",
+      "metadata": "[TODO] Metadata",
+      "notFound": "[TODO] Site not found.",
+      "seeHosts": "[TODO] See hosts at this site",
+      "syncInterval": "[TODO] Sync interval",
+      "syncIntervalValue": "[TODO] {{seconds}}s",
+      "url": "[TODO] URL",
+      "viewAuditLog": "[TODO] View audit log"
+    },
+    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "enroll": {
+      "cancel": "[TODO] Cancel",
+      "done": "[TODO] Done",
+      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
+      "error": "[TODO] Failed to enroll site.",
+      "location": "[TODO] Location label (optional)",
+      "name": "[TODO] Site name",
+      "submit": "[TODO] Generate token",
+      "successTitle": "[TODO] Site enrolled",
+      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
+      "title": "[TODO] Enroll a federation site",
+      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
+      "url": "[TODO] Site URL"
+    },
+    "enterpriseRequired": {
+      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
+      "title": "[TODO] Multi-site federation requires Enterprise"
+    },
+    "errorLoad": "[TODO] Failed to load federation sites.",
+    "hostCount": "[TODO] {{count}} hosts",
+    "lastSync": "[TODO] Synced {{when}}",
+    "mapView": "[TODO] Map view",
+    "policiesLink": "[TODO] Policies",
+    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
+    "title": "[TODO] Federation Sites"
+  },
+  "sitesMap": {
+    "errorLoad": "[TODO] Failed to load federation sites.",
+    "gridView": "[TODO] Grid view",
+    "openSite": "[TODO] Open site",
+    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
+    "title": "[TODO] Federation Sites Map"
   }
 }

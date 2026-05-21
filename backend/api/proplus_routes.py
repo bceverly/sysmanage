@@ -1040,6 +1040,102 @@ def mount_observability_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_federation_site_routes(app: FastAPI) -> bool:
+    """Mount site-side federation routes from federation_site_engine.
+
+    The site engine handles the inbound side of the federation
+    protocol — endpoints the coordinator calls to enroll, push
+    policies, and dispatch commands — plus an outbound sync worker
+    that drains ``federation_sync_queue`` upstream.  When loaded,
+    its router replaces the OSS stubs under ``/api/v1/federation/site/*``.
+
+    Coordinator and site engines are mutually exclusive in practice
+    (a server runs as one role or the other), but both mount-paths
+    are tested independently so a misconfigured deployment that
+    loads both engines doesn't surprise the operator.
+    """
+    site_engine = module_loader.get_module("federation_site_engine")
+    if site_engine is None:
+        logger.debug(
+            "federation_site_engine module not loaded, "
+            "skipping federation site routes"
+        )
+        return False
+
+    module_info = site_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("federation_site_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = site_engine.get_federation_site_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted federation site routes from federation_site_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to mount federation site routes: %s", exc)
+        return False
+
+
+def mount_federation_controller_routes(app: FastAPI) -> bool:
+    """Mount federation coordinator routes from federation_controller_engine.
+
+    Returns True if the engine was loaded and its routes were mounted,
+    False otherwise.  The Cython engine (lives in the Pro+ source repo,
+    NOT this OSS one) exposes ``get_federation_controller_router(...)``
+    with the same dependency-injection signature as every other Pro+
+    engine — keeping the wiring uniform.
+    """
+    federation_engine = module_loader.get_module("federation_controller_engine")
+    if federation_engine is None:
+        logger.debug(
+            "federation_controller_engine module not loaded, "
+            "skipping federation controller routes"
+        )
+        return False
+
+    module_info = federation_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("federation_controller_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = federation_engine.get_federation_controller_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted federation controller routes from "
+            "federation_controller_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.error("Failed to mount federation controller routes: %s", exc)
+        return False
+
+
 def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
     """
     Mount stub routes for Pro+ modules that weren't loaded.
@@ -1602,6 +1698,282 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         stubs_mounted += 1
         logger.debug("Mounted observability_engine stub routes")
 
+    if not results.get("federation_controller_engine"):
+        from fastapi import APIRouter
+
+        # 12.1.A surface — every endpoint here returns
+        # ``{"licensed": False}`` until the Pro+ controller engine is
+        # loaded.  Frontend (12.3) probes any of these to know whether
+        # to render the federation UI.  When the engine loads, its own
+        # router replaces these stubs (see ``mount_federation_controller_routes``).
+        router = APIRouter(
+            prefix="/v1/federation", tags=["federation-controller-stubs"]
+        )
+
+        # --- Sites registry --------------------------------------------------
+
+        @router.get("/sites")
+        async def fed_list_sites_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "sites": []}
+
+        @router.post("/sites")
+        async def fed_enroll_site_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/enrollment/{token}/complete")
+        async def fed_complete_enrollment_stub(  # pylint: disable=unused-argument
+            token: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/sites/{site_id}")
+        async def fed_site_detail_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.patch("/sites/{site_id}")
+        async def fed_site_update_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/suspend")
+        async def fed_site_suspend_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/resume")
+        async def fed_site_resume_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.delete("/sites/{site_id}")
+        async def fed_site_remove_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/sites/{site_id}/sync-status")
+        async def fed_site_sync_status_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Cross-site host directory ---------------------------------------
+
+        @router.get("/hosts")
+        async def fed_hosts_search_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "hosts": []}
+
+        @router.get("/hosts/{host_id}")
+        async def fed_host_detail_stub(  # pylint: disable=unused-argument
+            host_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Rollups ---------------------------------------------------------
+
+        @router.get("/rollups/dashboard")
+        async def fed_rollup_dashboard_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/rollups/hosts")
+        async def fed_rollup_hosts_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "rollups": []}
+
+        @router.get("/rollups/compliance")
+        async def fed_rollup_compliance_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "rollups": []}
+
+        @router.get("/rollups/vulnerabilities")
+        async def fed_rollup_vulnerabilities_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "rollups": []}
+
+        # --- Policies --------------------------------------------------------
+
+        @router.get("/policies")
+        async def fed_list_policies_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "policies": []}
+
+        @router.post("/policies")
+        async def fed_create_policy_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/policies/{policy_id}")
+        async def fed_policy_detail_stub(  # pylint: disable=unused-argument
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.patch("/policies/{policy_id}")
+        async def fed_policy_update_stub(  # pylint: disable=unused-argument
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.delete("/policies/{policy_id}")
+        async def fed_policy_deactivate_stub(  # pylint: disable=unused-argument
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/policies/{policy_id}/assign")
+        async def fed_policy_assign_stub(  # pylint: disable=unused-argument
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/policies/{policy_id}/push")
+        async def fed_policy_push_stub(  # pylint: disable=unused-argument
+            policy_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Commands --------------------------------------------------------
+
+        @router.post("/commands/dispatch")
+        async def fed_command_dispatch_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/commands")
+        async def fed_command_list_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "commands": []}
+
+        @router.get("/commands/{command_id}")
+        async def fed_command_detail_stub(  # pylint: disable=unused-argument
+            command_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Audit -----------------------------------------------------------
+
+        @router.get("/audit")
+        async def fed_audit_list_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "entries": []}
+
+        @router.get("/audit/{entry_id}")
+        async def fed_audit_detail_stub(  # pylint: disable=unused-argument
+            entry_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted federation_controller_engine stub routes")
+
+    if not results.get("federation_site_engine"):
+        from fastapi import APIRouter
+
+        # 12.2 surface — endpoints the *coordinator* calls on the
+        # site server.  Distinct prefix from the controller's outbound
+        # surface (``/api/v1/federation/*``) so a server running as
+        # both roles (test fixture, never production) keeps them
+        # cleanly separated.
+        router = APIRouter(
+            prefix="/v1/federation/site",
+            tags=["federation-site-stubs"],
+        )
+
+        # --- Enrollment handshake (site side) -----------------------------
+
+        @router.post("/enroll")
+        async def fed_site_enroll_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/enrollment-status")
+        async def fed_site_enrollment_status_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "status": "unknown"}
+
+        # --- Inbound: coordinator → site ---------------------------------
+
+        @router.post("/policies")
+        async def fed_site_receive_policy_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.post("/commands")
+        async def fed_site_receive_command_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Site → operator: status surface -----------------------------
+
+        @router.get("/sync-status")
+        async def fed_site_engine_sync_status_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/sync-queue/depth")
+        async def fed_site_queue_depth_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "depth": 0}
+
+        @router.get("/received-policies")
+        async def fed_site_received_policies_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "policies": []}
+
+        @router.get("/received-commands")
+        async def fed_site_received_commands_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "commands": []}
+
+        app.include_router(router, prefix="/api")
+        stubs_mounted += 1
+        logger.debug("Mounted federation_site_engine stub routes")
+
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
@@ -1637,6 +2009,8 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "fleet_engine": mount_fleet_routes(app),
         "virtualization_engine": mount_virtualization_routes(app),
         "observability_engine": mount_observability_routes(app),
+        "federation_controller_engine": mount_federation_controller_routes(app),
+        "federation_site_engine": mount_federation_site_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

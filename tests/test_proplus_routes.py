@@ -253,6 +253,8 @@ class TestMountProplusRoutes:
             "fleet_engine",
             "virtualization_engine",
             "observability_engine",
+            "federation_controller_engine",
+            "federation_site_engine",
         }
         assert set(results.keys()) == expected_keys
         assert all(v is False for v in results.values())
@@ -445,6 +447,8 @@ class TestStubsSkippedWhenModuleLoaded:
                 "fleet_engine": True,
                 "virtualization_engine": True,
                 "observability_engine": True,
+                "federation_controller_engine": True,
+                "federation_site_engine": True,
             },
         )
         assert len(app.routes) == before

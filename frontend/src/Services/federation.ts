@@ -1,0 +1,481 @@
+/**
+ * Phase 12.3: client for the federation controller API.
+ *
+ * Every endpoint here returns either a real payload (when the Pro+
+ * ``federation_controller_engine`` is loaded on the coordinator) or
+ * a uniform ``{licensed: false, ...}`` stub (OSS / Community / unlicensed
+ * Enterprise).  The page-level callers must check ``licensed`` before
+ * trusting the rest of the payload — see ``Pages/Sites.tsx`` for the
+ * canonical pattern.
+ */
+
+import { useEffect, useState } from "react";
+
+import axiosInstance from "./api";
+
+// Wire-shape contracts.  These match the OSS stub responses in
+// ``backend/api/proplus_routes.py`` and what the future Pro+ engine
+// will produce for the same routes.
+
+export interface FederationSiteSummary {
+  id: string;
+  name: string;
+  location_label?: string | null;
+  url: string;
+  status: "pending" | "enrolled" | "suspended" | "removed";
+  host_count: number;
+  last_sync_at?: string | null;
+  last_sync_status?: string | null;
+  agent_version_min?: string | null;
+  geo_latitude?: number | null;
+  geo_longitude?: number | null;
+  geo_country_code?: string | null;
+}
+
+/**
+ * Envelope shape returned by every federation endpoint.  ``licensed``
+ * is the OSS probe: ``false`` means "the engine isn't loaded; render
+ * a Pro+ upsell instead of trying to use the data".  The frontend
+ * should NEVER infer engine availability from any other field.
+ */
+export interface FederationListSitesResponse {
+  licensed: boolean;
+  sites?: FederationSiteSummary[];
+}
+
+/**
+ * Detail-tier site representation.  Superset of the list-tier
+ * summary; includes timestamps the Sites card doesn't need.
+ */
+export interface FederationSiteDetail extends FederationSiteSummary {
+  enrolled_at?: string | null;
+  enrollment_token_expires_at?: string | null;
+  sync_interval_seconds?: number;
+}
+
+export interface FederationSiteDetailResponse {
+  licensed: boolean;
+  site?: FederationSiteDetail;
+}
+
+/** Sync-status detail surface for the per-site Connection card. */
+export interface FederationSiteSyncStatus {
+  last_sync_at?: string | null;
+  last_sync_status?: string | null;
+  pending_queue_depth?: number;
+}
+
+export interface FederationSiteSyncStatusResponse {
+  licensed: boolean;
+  status?: FederationSiteSyncStatus;
+}
+
+/** Body for the operator's "Add Site" enrollment form. */
+export interface FederationEnrollSiteRequest {
+  name: string;
+  url: string;
+  location_label?: string | null;
+  sync_interval_seconds?: number;
+  token_ttl_hours?: number;
+}
+
+/**
+ * Response from POST /sites.  Carries the plaintext enrollment
+ * token EXACTLY ONCE — the UI must surface it to the operator on
+ * the success screen because it cannot be retrieved afterwards.
+ */
+export interface FederationEnrollSiteResponse {
+  licensed: boolean;
+  site?: FederationSiteDetail;
+  enrollment_token?: string;
+  enrollment_token_expires_at?: string | null;
+}
+
+/** Acknowledgement envelope for lifecycle actions. */
+export interface FederationActionResponse {
+  licensed: boolean;
+  site?: FederationSiteDetail;
+}
+
+// ---------------------------------------------------------------------
+// Endpoints
+// ---------------------------------------------------------------------
+
+/**
+ * Fetch the list of federation sites.  Returns the raw envelope so
+ * callers can branch on ``licensed``.  Network errors propagate as
+ * the usual axios rejection.
+ */
+export async function doListFederationSites(): Promise<FederationListSitesResponse> {
+  const response = await axiosInstance.get<FederationListSitesResponse>(
+    "/api/v1/federation/sites",
+  );
+  return response.data;
+}
+
+/**
+ * Fetch one site by its UUID.  ``licensed=false`` means the Pro+
+ * engine isn't loaded; ``site`` undefined means the engine IS
+ * loaded but no row matched (caller should render a 404 state).
+ */
+export async function doGetFederationSite(
+  siteId: string,
+): Promise<FederationSiteDetailResponse> {
+  const response = await axiosInstance.get<FederationSiteDetailResponse>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+  );
+  return response.data;
+}
+
+/**
+ * Begin an enrollment.  The plaintext ``enrollment_token`` in the
+ * response is the one-time-only value an operator delivers to the
+ * subordinate site server out-of-band; the dialog must surface it
+ * + warn that it cannot be retrieved later.
+ */
+export async function doEnrollFederationSite(
+  body: FederationEnrollSiteRequest,
+): Promise<FederationEnrollSiteResponse> {
+  const response = await axiosInstance.post<FederationEnrollSiteResponse>(
+    "/api/v1/federation/sites",
+    body,
+  );
+  return response.data;
+}
+
+export async function doSuspendFederationSite(
+  siteId: string,
+): Promise<FederationActionResponse> {
+  const response = await axiosInstance.post<FederationActionResponse>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/suspend`,
+  );
+  return response.data;
+}
+
+export async function doResumeFederationSite(
+  siteId: string,
+): Promise<FederationActionResponse> {
+  const response = await axiosInstance.post<FederationActionResponse>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/resume`,
+  );
+  return response.data;
+}
+
+export async function doRemoveFederationSite(
+  siteId: string,
+): Promise<FederationActionResponse> {
+  const response = await axiosInstance.delete<FederationActionResponse>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}`,
+  );
+  return response.data;
+}
+
+export async function doGetFederationSiteSyncStatus(
+  siteId: string,
+): Promise<FederationSiteSyncStatusResponse> {
+  const response =
+    await axiosInstance.get<FederationSiteSyncStatusResponse>(
+      `/api/v1/federation/sites/${encodeURIComponent(siteId)}/sync-status`,
+    );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Federation audit log
+// ---------------------------------------------------------------------
+
+/**
+ * One row from the federation audit log.  Schema mirrors the
+ * ``FederationAuditLog`` SQLAlchemy model.  ``target_site_name`` is
+ * an engine-side enrichment — when the engine has the site row,
+ * it returns the operator-friendly name alongside the raw UUID so
+ * the UI doesn't have to join client-side.
+ */
+export interface FederationAuditEntry {
+  id: string;
+  created_at: string;
+  operation: string;
+  actor_userid?: string | null;
+  target_site_id?: string | null;
+  target_site_name?: string | null;
+  target_host_id?: string | null;
+  details?: Record<string, unknown> | null;
+}
+
+export interface FederationAuditListResponse {
+  licensed: boolean;
+  entries?: FederationAuditEntry[];
+  total?: number;
+}
+
+export interface FederationAuditListParams {
+  site_id?: string;
+  operation?: string;
+  actor_userid?: string;
+  /** Inclusive lower bound on ``created_at`` (ISO 8601). */
+  since?: string;
+  /** Exclusive upper bound on ``created_at`` (ISO 8601). */
+  until?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Fetch federation audit log entries.  Filters compose with AND.
+ * The engine is the source of truth for ordering (newest first by
+ * convention); the OSS stub returns ``[]`` regardless.
+ */
+export async function doListFederationAuditLog(
+  params: FederationAuditListParams = {},
+): Promise<FederationAuditListResponse> {
+  const response = await axiosInstance.get<FederationAuditListResponse>(
+    "/api/v1/federation/audit",
+    { params },
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Site-side stub: enrollment status (the site-engine surface — same
+// envelope shape).  Used by the Sites map's per-site connectivity
+// badge when running on a coordinator.  Kept here next to the rest
+// of the federation surface so route names live in one place.
+// ---------------------------------------------------------------------
+
+export interface FederationSiteEnrollmentStatusResponse {
+  licensed: boolean;
+  status?: string;
+}
+
+// ---------------------------------------------------------------------
+// Module-scoped license probe (Phase 12.3 UI gating)
+//
+// The OSS rule is "don't show menus for features that aren't available".
+// Every federation page already renders an Enterprise upsell on
+// ``licensed: false`` — but the navbar entry and in-page action
+// buttons would otherwise be reachable when the engine isn't loaded.
+// To hide them, we probe ``/api/v1/federation/sites`` once per page
+// load and cache the result in module scope so subsequent calls
+// (from Navbar, Sites header, etc.) don't re-fetch.
+// ---------------------------------------------------------------------
+
+let _federationLicensedCache: boolean | null = null;
+let _federationLicensedPromise: Promise<boolean> | null = null;
+
+/**
+ * Resolve the cached licensed flag (or fetch it if we haven't yet).
+ * Always resolves — any network / engine error is treated as
+ * "not licensed" so the menu hides rather than flashes.
+ *
+ * Skipped entirely when there's no bearer token: the Navbar lives
+ * outside ``<Routes>`` in ``App.tsx`` and therefore mounts on the
+ * ``/login`` page too.  If we fire the probe pre-auth, the API call
+ * 401s, axios's response interceptor tries ``/refresh``, that also
+ * 401s, and ``handle401Refresh`` does ``location.href = '/login'``,
+ * triggering a full page reload — which remounts Navbar, fires the
+ * probe again, and loops indefinitely.  The short-circuit caches a
+ * ``false`` result so the loop never starts; ``_resetFederationLicensedCacheForTests``
+ * clears it after login so the next mount re-fires the real probe.
+ */
+export function probeFederationLicensed(): Promise<boolean> {
+  if (_federationLicensedCache !== null) {
+    return Promise.resolve(_federationLicensedCache);
+  }
+  if (_federationLicensedPromise !== null) {
+    return _federationLicensedPromise;
+  }
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem('bearer_token')) {
+    return Promise.resolve(false);
+  }
+  _federationLicensedPromise = doListFederationSites()
+    .then((data) => {
+      _federationLicensedCache = Boolean(data.licensed);
+      return _federationLicensedCache;
+    })
+    .catch(() => {
+      _federationLicensedCache = false;
+      return false;
+    });
+  return _federationLicensedPromise;
+}
+
+/**
+ * React hook for gating UI on the federation-engine licensed flag.
+ * Returns ``loading=true`` for the first render after mount so
+ * components can choose whether to flash the menu or just leave a
+ * gap — Navbar uses the latter (renders nothing until resolved).
+ */
+export function useFederationLicensed(): {
+  loading: boolean;
+  licensed: boolean;
+} {
+  const [state, setState] = useState<{ loading: boolean; licensed: boolean }>(
+    () => ({
+      // If the probe already resolved earlier in this page load,
+      // skip the loading flash entirely.
+      loading: _federationLicensedCache === null,
+      licensed: _federationLicensedCache === true,
+    }),
+  );
+  useEffect(() => {
+    let cancelled = false;
+    probeFederationLicensed().then((licensed) => {
+      if (!cancelled) {
+        setState({ loading: false, licensed });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return state;
+}
+
+/**
+ * Test-only: clear the module-scope cache.  Production code never
+ * calls this; the cache is the right behaviour at runtime since the
+ * engine load state is fixed for the life of the page.
+ */
+export function _resetFederationLicensedCacheForTests(): void {
+  _federationLicensedCache = null;
+  _federationLicensedPromise = null;
+}
+
+// ---------------------------------------------------------------------
+// Federation policies (Phase 12.1.F + 12.3 policy UI)
+// ---------------------------------------------------------------------
+
+/**
+ * Coordinator-defined policy that gets pushed to sites.  Polymorphic
+ * by ``policy_type`` (update_profile, firewall_role, compliance_baseline,
+ * ...); the type-specific body is in ``definition_json`` as a JSON
+ * string the UI shows as a code-editor.
+ */
+export interface FederationPolicy {
+  id: string;
+  policy_type: string;
+  name: string;
+  description?: string | null;
+  definition_json: string;
+  version: number;
+  is_active: boolean;
+  created_by?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface FederationPolicyAssignment {
+  policy_id: string;
+  site_id: string;
+  /** Coordinator-side name of the assigned site — engine-enriched
+   * so the UI doesn't have to join client-side. */
+  site_name?: string | null;
+  assigned_at?: string | null;
+  assigned_by?: string | null;
+  /** pending / pushed / acknowledged / error */
+  push_status: string;
+  last_push_attempt_at?: string | null;
+  last_push_error?: string | null;
+  pushed_version?: number | null;
+}
+
+export interface FederationPolicyListResponse {
+  licensed: boolean;
+  policies?: FederationPolicy[];
+}
+
+export interface FederationPolicyDetailResponse {
+  licensed: boolean;
+  policy?: FederationPolicy;
+  assignments?: FederationPolicyAssignment[];
+}
+
+export interface FederationPolicyActionResponse {
+  licensed: boolean;
+  policy?: FederationPolicy;
+  assignments?: FederationPolicyAssignment[];
+}
+
+export interface FederationPolicyCreateRequest {
+  policy_type: string;
+  name: string;
+  description?: string | null;
+  /** Native dict; serialised server-side. */
+  definition: Record<string, unknown>;
+}
+
+export interface FederationPolicyUpdateRequest {
+  name?: string;
+  description?: string | null;
+  definition?: Record<string, unknown>;
+}
+
+export async function doListFederationPolicies(
+  params: { policy_type?: string; active_only?: boolean } = {},
+): Promise<FederationPolicyListResponse> {
+  const response = await axiosInstance.get<FederationPolicyListResponse>(
+    "/api/v1/federation/policies",
+    { params },
+  );
+  return response.data;
+}
+
+export async function doGetFederationPolicy(
+  policyId: string,
+): Promise<FederationPolicyDetailResponse> {
+  const response = await axiosInstance.get<FederationPolicyDetailResponse>(
+    `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+  );
+  return response.data;
+}
+
+export async function doCreateFederationPolicy(
+  body: FederationPolicyCreateRequest,
+): Promise<FederationPolicyActionResponse> {
+  const response = await axiosInstance.post<FederationPolicyActionResponse>(
+    "/api/v1/federation/policies",
+    body,
+  );
+  return response.data;
+}
+
+export async function doUpdateFederationPolicy(
+  policyId: string,
+  body: FederationPolicyUpdateRequest,
+): Promise<FederationPolicyActionResponse> {
+  const response = await axiosInstance.patch<FederationPolicyActionResponse>(
+    `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+    body,
+  );
+  return response.data;
+}
+
+export async function doDeactivateFederationPolicy(
+  policyId: string,
+): Promise<FederationPolicyActionResponse> {
+  const response =
+    await axiosInstance.delete<FederationPolicyActionResponse>(
+      `/api/v1/federation/policies/${encodeURIComponent(policyId)}`,
+    );
+  return response.data;
+}
+
+export async function doAssignFederationPolicy(
+  policyId: string,
+  siteIds: string[],
+): Promise<FederationPolicyActionResponse> {
+  const response = await axiosInstance.post<FederationPolicyActionResponse>(
+    `/api/v1/federation/policies/${encodeURIComponent(policyId)}/assign`,
+    { site_ids: siteIds },
+  );
+  return response.data;
+}
+
+export async function doPushFederationPolicy(
+  policyId: string,
+): Promise<FederationPolicyActionResponse> {
+  const response = await axiosInstance.post<FederationPolicyActionResponse>(
+    `/api/v1/federation/policies/${encodeURIComponent(policyId)}/push`,
+  );
+  return response.data;
+}

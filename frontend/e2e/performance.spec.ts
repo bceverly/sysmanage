@@ -105,9 +105,15 @@ test.describe('Performance - Network', () => {
       // networkidle may timeout, continue anyway
     }
 
-    // Should not have excessive requests (under 500 for initial load with all dependencies)
-    // Modern SPAs with many chunks and dependencies can have many requests
-    expect(requests.length).toBeLessThan(500);
+    // Should not have excessive requests on initial load.  Each Pro+
+    // plugin bundle the host downloads is one request, each plugin's
+    // i18n + axios probes contribute a few more, and Vite dev mode
+    // streams each module file individually so the count is naturally
+    // chunk-heavy.  Bump the cap whenever a new plugin lands rather
+    // than over-tightening — the budget exists to catch accidental
+    // request storms (polling loops, redirect cycles), not to gate
+    // legitimate growth.
+    expect(requests.length).toBeLessThan(600);
   });
 
   test('should not have critical failed requests', async ({ page }) => {

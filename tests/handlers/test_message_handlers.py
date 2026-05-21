@@ -209,6 +209,40 @@ class TestHandleCommandResult:
         assert result["message_type"] == "command_result_ack"
         assert "timestamp" in result
 
+    @pytest.mark.asyncio
+    async def test_apply_updates_result_not_routed_to_package_collection(
+        self, mock_connection
+    ):
+        """Regression: ``apply_updates`` results carry ``packages`` as a list
+        of package names, NOT a dict keyed by manager.  The router used to
+        unconditionally hand any payload with a ``packages`` key to
+        ``handle_package_collection``, which then crashed with
+        ``'list' object has no attribute 'keys'``.  After the dict-shape
+        check, this path must short-circuit to the regular ack."""
+        message_data = {
+            "command_id": "abc-123",
+            "success": True,
+            "result": {
+                "result": "Updates started in background",
+                "packages": [
+                    "libnss-systemd",
+                    "libpam-systemd",
+                    "linux-image-virtual",
+                ],
+            },
+            "error": None,
+            "exit_code": None,
+        }
+
+        with patch(
+            "backend.api.handlers.handle_package_collection",
+            new_callable=MagicMock,
+        ) as mock_handler:
+            result = await handle_command_result(mock_connection, message_data)
+
+        mock_handler.assert_not_called()
+        assert result["message_type"] == "command_result_ack"
+
 
 class TestHandleConfigAcknowledgment:
     """Test cases for handle_config_acknowledgment function."""

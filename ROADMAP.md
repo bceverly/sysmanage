@@ -327,8 +327,8 @@ This section documents the development history of SysManage from initial commit 
 
 - [x] **vuln_engine** - CVE vulnerability scanning
 - [x] **alerting_engine** - Email/Webhook/Slack/Teams notifications
-- [ ] **federation_controller_engine** - Multi-site coordinator with rollup reporting and command dispatch
-- [ ] **federation_site_engine** - Site server federation sync and command reception
+- [x] **federation_controller_engine** - Multi-site coordinator with rollup reporting and command dispatch (scaffolded May 2026 — Cython router wires OSS service layer to all coordinator endpoints; smoke tests green)
+- [x] **federation_site_engine** - Site server federation sync and command reception (scaffolded May 2026 — Cython router wires OSS coordinator/sync_queue/inbox services to all site-side endpoints; smoke tests green)
 
 ### Licensing System
 
@@ -403,8 +403,8 @@ The following virtualization features are implemented and will be migrated to Pr
 | compliance_engine | Professional | ✅ Complete | CIS/DISA STIG auditing |
 | vuln_engine | Enterprise | ✅ Complete | CVE vulnerability scanning |
 | alerting_engine | Enterprise | ✅ Complete | Email/Webhook/Slack/Teams alerts |
-| federation_controller_engine | Enterprise | Planned (Phase 12) | Multi-site coordinator, rollup reporting, command dispatch |
-| federation_site_engine | Enterprise | Planned (Phase 12) | Site server sync, command reception, offline resilience |
+| federation_controller_engine | Enterprise | Scaffolded (Phase 12.1.G, May 2026) | Multi-site coordinator, rollup reporting, command dispatch |
+| federation_site_engine | Enterprise | Scaffolded (Phase 12.2.B, May 2026) | Site server sync, command reception, offline resilience |
 
 ### Licensing System
 - [x] License key validation (ECDSA P-521 signatures)
@@ -1778,7 +1778,7 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 - [x] **Integrations** (Grafana + Graylog + OTEL cards in `renderIntegrationsTab` line ~947) — gate behind `observability_engine`. *(Settings.tsx:180 — `moduleRequired: 'observability_engine'`)*
 - [x] **Antivirus** — gate behind `av_management_engine`. *(Settings.tsx:187)*
 - [x] **Firewall Roles** — gate behind `firewall_orchestration_engine`. *(Settings.tsx:199)*
-- [ ] **Access Groups** — gate behind `federation_controller_engine` (deferred to Phase 12.4 fold-in; currently no gating since it's an OSS feature today).  Land the gating once 12.4 lands; for now, leave it visible.
+- [x] **Access Groups** — gate behind `federation_controller_engine` (Phase 12.4 fold-in landed May 2026). *(Settings.tsx:205 — `moduleRequired: 'federation_controller_engine'`; access_groups.py:53 already has the router-level `Depends(require_module_loaded(...))` gate)*
 - [x] **Update Profiles** — gate behind `automation_engine` (lands together with 10.6 above). *(Settings.tsx:214)*
 - [x] **Compliance Profiles** — gate behind `compliance_engine` (Phase 11.5 fold-in landed). *(Settings.tsx:225 — `moduleRequired: 'compliance_engine'`)*
 - [x] **Report Branding** — gate behind `reporting_engine`. *(Settings.tsx:221)*
@@ -2259,6 +2259,92 @@ one go; the data volume doesn't allow it.
 
 #### 12.1 federation_controller_engine (Enterprise)
 
+**Status (12.1.A — OSS skeleton + stubs):** ✅ Landed (May 2026).
+The OSS side of the engine wiring is in place: `ModuleCode.FEDERATION_CONTROLLER_ENGINE`
++ 7 federation `FeatureCode` entries added to `backend/licensing/features.py`,
+both bundled into `TIER_MODULES[ENTERPRISE]` / `TIER_FEATURES[ENTERPRISE]`.
+`mount_federation_controller_routes()` in `backend/api/proplus_routes.py`
+mirrors every other engine's mount pattern (Pro+ engine repo provides
+`get_federation_controller_router(...)`), and a stub block in
+`mount_proplus_stub_routes()` exposes 27 stub endpoints under
+`/api/v1/federation/*` that respond `200 {"licensed": False, ...}`
+when the engine isn't loaded.  32 mount-function + stub-surface tests
+in `backend/tests/test_proplus_routes.py` pin the contract.
+
+**Status (12.1.B — OSS site-service layer):** ✅ Landed (May 2026).
+`backend/services/federation_site_service.py` provides the OSS-side
+domain logic the Pro+ engine will wrap: `create_site` /
+`complete_enrollment` / `get_site` / `list_sites` / `update_site` /
+`suspend_site` / `resume_site` / `remove_site` / `record_sync`, with
+SHA-256-hashed enrollment tokens, status-machine transitions, and an
+audit trail to `federation_audit_log`.  Service-layer errors
+(`SiteNotFoundError`, `SiteNameConflictError`, `InvalidEnrollmentTokenError`,
+`InvalidSiteStateError`) are typed so the engine can map them to
+HTTP codes.
+
+**Status (12.1.C — enrollment refinements):** ✅ Landed (May 2026).
+Migration `m2fed12c` adds `enrollment_token_expires_at` and
+`enrolled_at` columns to `federation_sites` (idempotent, cross-dialect).
+Service additions: token TTL on `create_site` (default 24 h),
+expiry check + `enrolled_at` stamp in `complete_enrollment`,
+`EnrollmentTokenExpiredError`, `cancel_enrollment(site)` (pending →
+removed with token scrub), `regenerate_enrollment_token(site, ttl_hours)`.
+
+**Status (12.1.D — rollup ingestion service):** ✅ Landed (May 2026).
+`backend/services/federation_rollup_service.py` accepts upstream
+syncs from sites: `upsert_host_directory_entry` (cross-dialect
+INSERT-or-UPDATE with site-move support), append-only
+`record_host_rollup_snapshot` / `record_compliance_rollup_snapshot` /
+`record_vulnerability_rollup_snapshot` (each with count validation),
+and latest-snapshot getters plus a one-shot `get_dashboard_rollup`
+that the Sites page card consumes.  Host-count caching onto
+`FederationSite` + automatic `record_sync` are wired in by default
+on host-rollup ingestion.
+
+**Status (12.1.E — cross-site host directory search):** ✅ Landed (May 2026).
+`backend/services/federation_host_directory_service.py` provides
+the read-side query helpers: `search_hosts` with paginated,
+order-by-whitelisted, AND-composed filtering on site / fqdn / ipv4 /
+os_family / platform / status / geo / last_seen, plus a free-text
+OR clause across fqdn/ipv4/public_ip.  `count_hosts` for
+filter-cardinality probes.  `status_breakdown` and
+`country_breakdown` for the Sites page tiles and the federation
+map's per-region coloring — NULL bucketed under "unknown" / "".
+
+**Status (12.1.F — policy + dispatch tracking):** ✅ Landed (May 2026).
+Two new services:
+* `backend/services/federation_policy_service.py` — polymorphic
+  policy CRUD (by `policy_type` + `name`, version-bumped on edit),
+  idempotent assignment to sites, per-(policy, site) push-status
+  tracking with `pushed_version` for stale-detection,
+  `list_pending_push_targets()` returns rows that need a re-push
+  (never pushed OR version drifted).
+* `backend/services/federation_dispatch_service.py` — dispatched-
+  command record with a strict FSM (`queued_at_site` → `in_progress`
+  → `partial` / `completed` / `failed`; terminal states are
+  terminal; same-state replays are idempotent for offline-reconnect
+  safety).  `list_dispatched_commands(..., open_only=True)` drives
+  the "active commands" dashboard widget.
+
+**Status (12.1.G — Pro+ engine scaffolded + compiled):** ✅ Landed (May 2026).
+`module-source/federation_controller_engine/` in the
+`sysmanage-professional-plus` repo now ships the Cython module
+that the OSS loader (`mount_federation_controller_routes`) calls
+into.  Standard engine layout — `metadata.json` (v0.1.0, tier
+`enterprise`, `provides_routes: true`), `setup.py`, `build.sh`,
+`federation_controller_engine.pyx`, and a `test_*` smoke-test
+file.  The `.pyx` exports `get_federation_controller_router(...)`
+with the canonical 8-arg factory signature; the returned
+`APIRouter` wires every endpoint the OSS stub block exposes
+(sites CRUD + enrollment-token completion + suspend/resume,
+host-directory search + detail, dashboard rollup, polymorphic
+policy CRUD + assign + push, dispatched-command FSM, audit log)
+to the OSS service-layer modules from 12.1.B-F.  `build.sh`
+compiled cleanly under Py 3.14 / linux / x86_64 and dropped the
+`.so` under `storage/modules/federation_controller_engine/0.1.0/linux/x86_64/3.14/`
+ready for the license server's distribution path.  All 3 smoke
+tests pass against the built artifact.
+
 **Features:**
 - [ ] Site server registry (add, remove, suspend, monitor subordinate servers)
 - [ ] Secure site enrollment workflow (enrollment token + mutual TLS certificate exchange)
@@ -2285,37 +2371,148 @@ one go; the data volume doesn't allow it.
 
 #### 12.2 federation_site_engine (Enterprise)
 
-**Features:**
-- [ ] Coordinator enrollment and registration (exchange TLS certificates, receive site ID)
-- [ ] Upstream data sync (push host summaries, compliance scores, alert summaries to coordinator)
-- [ ] Downstream policy sync (receive and apply update policies, firewall roles, compliance baselines)
-- [ ] Command reception from coordinator (receive dispatched commands and queue for local agents)
-- [ ] Command result reporting (send command outcomes back to coordinator)
-- [ ] Offline queue for upstream data (buffer syncs when coordinator is unreachable)
-- [ ] Offline queue replay with deduplication when connectivity is restored
-- [ ] Local autonomy mode (full local operation continues when coordinator is unavailable)
-- [ ] Sync status dashboard (show last sync time, pending items, connectivity health)
-- [ ] Coordinator connection health monitoring with automatic reconnection
-- [ ] Site metadata reporting (site name, location, host count, server version)
-- [ ] i18n/l10n for all 14 languages
+**Status (12.2 — OSS service layer + stubs):** ✅ Landed (May 2026).
+Mirrors 12.1.A-F for the site side: a `mount_federation_site_routes()`
+function in `backend/api/proplus_routes.py` plus an OSS stub block
+exposing 8 endpoints under `/api/v1/federation/site/*` that respond
+`200 {"licensed": False, ...}` when the engine isn't loaded.  Three
+new pure-Python service modules for the Pro+ engine to wrap:
 
-**Estimated Size:** ~5,000 lines
+* `backend/services/federation_coordinator_service.py` — singleton
+  row management with a `pending → enrolled → suspended → enrolled →
+  removed` FSM, blocks switching coordinators mid-enrollment,
+  `record_sync_attempt()` for per-tick status updates.
+* `backend/services/federation_sync_queue_service.py` — outbound
+  outbox with dedup-on-replay (re-enqueueing the same `dedup_key`
+  replaces rather than appends), FIFO drain via `peek_batch()`,
+  per-payload retry tracking, `purge_oldest` safety valve.
+* `backend/services/federation_inbox_service.py` — two inboxes:
+  received-policies with version-based dedup (older-version replays
+  ignored, newer versions reset `applied=False`) and received-commands
+  with the same FSM as the coordinator's dispatched-command service.
+
+**Status (12.2.B — Pro+ engine scaffolded + compiled):** ✅ Landed (May 2026).
+`module-source/federation_site_engine/` in the
+`sysmanage-professional-plus` repo now ships the Cython module
+that the OSS loader (`mount_federation_site_routes`) calls into.
+Same engine layout as the controller — `metadata.json` (v0.1.0,
+tier `enterprise`, `provides_routes: true`), `setup.py`,
+`build.sh`, `federation_site_engine.pyx`, and smoke tests.  The
+`.pyx` exports `get_federation_site_router(...)` and wires every
+endpoint the OSS stub block exposes (enrollment + status,
+inbound policy + command reception, sync-status + queue depth +
+received-policies/commands listings) to the OSS coordinator,
+sync_queue, and inbox services.  `build.sh` compiled cleanly
+under Py 3.14 / linux / x86_64 and dropped the `.so` under
+`storage/modules/federation_site_engine/0.1.0/linux/x86_64/3.14/`.
+All 3 smoke tests pass against the built artifact.
+
+**Features:**
+- [x] Coordinator enrollment and registration (TLS pinning + site_id assignment via `federation_coordinator_service`)
+- [x] Upstream data sync OSS layer (`federation_sync_queue_service.enqueue` + `peek_batch` + `mark_sent` / `mark_failed`)
+- [x] Downstream policy sync OSS layer (`federation_inbox_service.receive_policy` + `mark_policy_applied` / `mark_policy_apply_failed`)
+- [x] Command reception OSS layer (`federation_inbox_service.receive_command` + FSM)
+- [x] Command result reporting — enqueue `payload_type='command_result'` into sync queue
+- [x] Offline queue for upstream data (`federation_sync_queue` table + service)
+- [x] Offline queue replay with deduplication when connectivity is restored (`dedup_key` replace semantics + completed-command replay no-op)
+- [ ] Local autonomy mode — site server stays operational; engine work
+- [x] Sync status surface (`queue_depth`, `queue_depth_by_payload_type`, `record_sync_attempt`)
+- [ ] Coordinator connection health monitoring with automatic reconnection — engine work
+- [ ] Site metadata reporting — engine work
+- [ ] i18n/l10n for all 14 languages — engine work
+
+**Estimated Size:** ~5,000 lines (engine).  OSS service layer + stubs ≈ 1,800 LOC.
 
 #### 12.3 Federation Frontend
 
 Implements both architectural rules from the "Frontend Architecture"
 section above: sites-as-first-class-entities, never-draw-individual-agents.
 
+**Status (12.3 — Sites page skeleton):** ✅ Landed (May 2026).
+`frontend/src/Pages/Sites.tsx` + `frontend/src/Services/federation.ts`
+ship the OSS-facing Sites page that fetches `/api/v1/federation/sites`
+and gracefully renders either an Enterprise upsell (when the response
+shows `licensed: false` — the OSS install default), an empty-state
+hint, or a card grid keyed off the engine's real payload.  Status
+chips colour-code by site state (enrolled / pending / suspended);
+relative-time formatting for last-sync; navbar entry between Map
+and Users; i18n for all 14 locales (`nav.sites`, `sites.*` namespace
+including `enterpriseRequired.title` / `enterpriseRequired.body`).
+Navbar test count bumped 10 → 11.
+
+**Status (12.3 — Policy management UI):** ✅ Landed (May 2026).
+`frontend/src/Pages/FederationPolicies.tsx` at `/federation/policies`
+ships full CRUD on coordinator-defined policies — list with type +
+active-only filters, create dialog (type select with "Other..."
+custom-string escape hatch + JSON-object validation), edit dialog
+(same shape, pre-filled, with a note that saving bumps the
+policy version), and an assign-to-sites dialog that fetches the
+site list + the policy's current assignments in parallel and
+multi-selects via checkboxes (re-assignment resets push status
+per 12.1.F semantics).  Per-row "Push now" and "Deactivate"
+actions, both reflected in a snackbar toast.  Service client
+gained 7 new functions and 6 new types covering policies +
+assignments.  Sites grid header gained a "Policies" link button.
+i18n: `policies.*` namespace (≈55 keys) plus `sites.policiesLink`
+added in all 14 locales.  `sysmanage-docs` got a new
+`docs/professional-plus/federation.html` page covering the
+overall federation architecture, both engines, the data-tier
+split, the new UI surface, and the enrollment workflow; a
+matching section card was added to
+`docs/professional-plus/index.html`.
+
+**Status (12.3 — Audit log viewer + sites geographic map):** ✅ Landed (May 2026).
+`frontend/src/Pages/FederationAuditLog.tsx` at `/audit/federation`
+ships the federation audit log viewer: paginated, server-side
+filtering by `site_id` / `operation` / `actor_userid`, URL-shareable
+filter state, click-through to site detail.  Engine returns
+`{licensed: false}` on OSS → same Enterprise upsell every other
+federation page uses.  SiteDetail gained a "View audit log" button
+that deep-links the viewer pre-filtered by the current site.
+`frontend/src/Pages/SitesMap.tsx` at `/sites/map` plots each
+site at its operator-supplied `(geo_latitude, geo_longitude)` on
+Leaflet + OSM tiles — DivIcon markers coloured by status,
+click-popup with name / status / last-sync + "Open site" deep-link
+into SiteDetail.  Sites grid gained a "Map view" toggle button in
+the header; the map page has the inverse "Grid view" toggle for
+the round trip.  Sites without geo coordinates are silently
+skipped (they still appear in the grid).  i18n: `audit.*` namespace
+(title, subtitle, filters, columns, empty states), `sitesMap.*`
+namespace, plus `sites.mapView` and `sites.detail.viewAuditLog`
+added in all 14 locales.
+
+**Status (12.3 — Site detail + lifecycle UI):** ✅ Landed (May 2026).
+`frontend/src/Pages/SiteDetail.tsx` is mounted at `/sites/:siteId`;
+each card on the Sites grid is now a `CardActionArea` that
+navigates to the detail page.  The detail page renders a metadata
+card (URL, enrolled-at, sync interval, host count), a connection
+card (last-sync timestamp + status, minimum agent version), and a
+contextual action surface — Suspend / Resume / Remove buttons
+appear only for states that allow each transition.  Remove is
+gated by a confirmation Dialog with copy explaining that the row
+is preserved for audit.  A "See hosts at this site" button links
+to `/hosts?site_id=<id>` (the Hosts-page facet is the next 12.3
+slice).  Sites grid gained an "Enroll Site" button that opens an
+enrollment Dialog; on success the dialog surfaces the plaintext
+token EXACTLY ONCE with copy explaining there is no recovery.
+Federation service client gained 6 new functions
+(`doGetFederationSite`, `doEnrollFederationSite`,
+`doSuspendFederationSite`, `doResumeFederationSite`,
+`doRemoveFederationSite`, `doGetFederationSiteSyncStatus`) plus
+matching response types.  i18n keys for `sites.addSite`,
+`sites.actions.*`, `sites.confirmRemove.*`, `sites.detail.*`,
+`sites.enroll.*` added in all 14 locales.
+
 **Sites surface (new top-level page):**
-- [ ] ``Sites`` page — one card per subordinate site server with host
-      count, last sync, connectivity status (green/yellow/red), aggregate
-      compliance %, open alert count, and a "manage" action menu
-- [ ] Site detail view (drill into a site card) — site-level metadata,
-      sync history, audit log, and a "see hosts" link that jumps to the
-      Hosts page pre-filtered to ``?site_id=<this>``
-- [ ] Site server lifecycle UI — add a site (enrollment flow), remove,
-      suspend (admin keeps the site enrolled but stops accepting upstream
-      sync), and resume
+- [x] ``Sites`` page — initial card-grid skeleton; full status traffic
+      light + manage menu come once 12.1.B+ ships real handlers
+- [x] Site detail view (drill into a site card) — site-level metadata,
+      connection card, "see hosts" link to ``/hosts?site_id=<id>``;
+      sync-history timeline + per-site audit log are later 12.3 slices
+- [x] Site server lifecycle UI — enroll dialog on the Sites grid,
+      Suspend / Resume / Remove buttons on the detail page (each
+      visible only for states that permit the transition); remove
+      guarded by a confirmation Dialog
 - [ ] Connection-health detail — last successful sync timestamp, sync
       latency histogram, current backlog size in the site's offline
       queue (read from the site server's sync-status endpoint)
@@ -2334,33 +2531,38 @@ section above: sites-as-first-class-entities, never-draw-individual-agents.
       definitions; existing report types unchanged
 
 **Enterprise map (two flavors, same data):**
-- [ ] **Geographic map** — Leaflet + OpenStreetMap tiles, sites pinned
-      at data-center coordinates, connection lines to the coordinator
-      animating sync activity.  Host markers (from 12.7) cluster within
-      each site's neighborhood.  Coloring: site nodes green/yellow/red
-      by connectivity + compliance; host clusters scaled by density.
+- [x] **Geographic map** — Leaflet + OpenStreetMap tiles, sites pinned
+      at operator-supplied data-center coordinates, DivIcon markers
+      colored by status.  Click → popup with name / status / last-sync
+      + deep-link into site detail.  Connection-line animation and
+      density-scaled host clusters within each site come in a later
+      slice once 12.1.D's per-site host-directory data is wired.
 - [ ] **Tile dashboard view** — sites as a grid of status cards, lines
       to the coordinator at top, no geography.  Same color coding.
       Faster to scan, no cognitive load of geographic memory, better
       for screen-of-glass / war-room displays.
-- [ ] View toggle in the same page — both feed off the same coordinator
-      aggregate + host-directory tables, just different layouts
-- [ ] **Never** draw individual agents as nodes — always cluster or
-      site-summarize.  At fleet scale (1M hosts) this is a hard constraint,
-      not a stylistic preference
+- [x] View toggle in the same page — "Map view" / "Grid view"
+      buttons on the Sites page and SitesMap page header
+- [x] **Never** draw individual agents as nodes — both views
+      currently render at the site granularity only (host-cluster
+      overlay deferred to the next 12.3 slice)
 
 **Policy + dispatch UI:**
-- [ ] Policy management — create / edit / push update profiles, firewall
-      roles, compliance baselines.  Push targets a site-selector with
-      multi-select.
+- [x] Policy management — `/federation/policies` page with list +
+      filter, create dialog (type + name + description + JSON
+      definition), edit dialog, assign-to-sites dialog
+      (multi-select with current-assignment indicator), push-now
+      action, deactivate action.  Per-policy version bumping on
+      edit is handled engine-side (12.1.F).
 - [ ] Command dispatch — select hosts across sites (via Hosts-page
       multi-select or saved query), dispatch commands.  Progress view
       tracks per-site queueing + per-agent acknowledgement.
 
 **Audit + observability:**
-- [ ] Federation audit log viewer — every cross-site operation
-      (enrollment, policy push, command dispatch, site suspend/resume)
-      with filter by site, user, action type
+- [x] Federation audit log viewer — paginated table at
+      `/audit/federation` with URL-shareable filters on site,
+      operation, and actor; SiteDetail's "View audit log" button
+      deep-links pre-filtered by site
 - [ ] Sync status timeline per site — graph of upstream sync latency,
       offline-queue depth, deduplication-on-replay events
 
@@ -2390,22 +2592,81 @@ expiry/max-uses.  That complexity profile (multi-tenant fleet
 segmentation, per-group enrollment scoping) is exactly what federation
 needs — it's MSP/Enterprise functionality that doesn't fit free-tier.
 
+**Status (12.4 — API gate + site-scoped registration keys):** ✅ (May 2026)
+Both routers (`/api/access-groups/*` and `/api/registration-keys/*`)
+are gated by `Depends(require_module_loaded(ModuleCode.FEDERATION_CONTROLLER_ENGINE))`.
+A new public helper `require_module_loaded()` in
+`backend/licensing/feature_gate.py` provides a router-level Depends-
+friendly equivalent of the existing `@requires_module` decorator
+(403 when license missing, 503 when license OK but engine unloaded).
+The SQLAlchemy models stay in OSS for migration / FK compatibility —
+only the API surface flips behind the gate.
+
+Registration keys now also carry an optional `site_id` scope
+(migration `n3regkey12d`, FK to `federation_sites.id` with SET NULL
+on site removal).  When set, a coordinator-issued key restricts the
+hosts it can enroll to a specific subordinate site — blocking key
+reuse across the federation if one site's key leaks.  The
+`/api/registration-keys` POST validates the referenced site exists
+and isn't already removed; existing OSS keys with NULL `site_id`
+keep the legacy "any site" semantics untouched.  31 tests in
+`tests/api/test_access_groups.py` (23 existing + 4 gate + 4 new
+site-scope).
+
+**Status (12.4 — frontend tab gate):** ✅ Landed (May 2026).
+The `access-groups` tab def in `frontend/src/Pages/Settings.tsx` now
+carries `moduleRequired: 'federation_controller_engine'`, matching
+the pattern used by Firewall Roles / Update Profiles / Compliance
+Profiles / Report Branding / Repository Mirroring / Authentication
+elsewhere in the same `tabDefs` array.  Result: on OSS installs
+(or any deployment where the federation controller engine isn't
+licensed + loaded) the tab is hidden entirely instead of showing
+up and returning 403/503 on click.  The Settings comment above
+the tab def shrank — it used to defer Access Groups / Compliance
+Profiles / Dynamic Secrets together; Compliance Profiles already
+landed its gate in Phase 11.5, and now Access Groups joins it,
+leaving only Dynamic Secrets on the "deferred" list (waits on
+12.5).
+
 **Migration Steps:**
 1. [ ] Move `AccessGroup`, `RegistrationKey`, `HostAccessGroup`, and
        `UserAccessGroup` models into `federation_controller_engine` —
        the coordinator becomes the authoritative source for tenant /
        group definitions, sites pull them on policy sync
-2. [ ] Extend the federation enrollment flow (12.1) so registration
-       keys carry an optional `site_id` scope — keys generated at the
-       coordinator can be issued to enroll hosts at a specific site
+       *(stays in OSS for now — relocating SQLAlchemy classes from
+       Python to Cython requires the engine repo)*
+2. [x] Extend the federation enrollment flow (12.1) so registration
+       keys carry an optional `site_id` scope — schema + validation
+       landed in migration `n3regkey12d`, API surface accepts/echoes
+       the field
 3. [ ] Recursive descendant lookup (the legacy hot path) becomes a
        coordinator-side responsibility; sites cache the materialized
        view they need locally to avoid round-trips on every enroll
-4. [ ] Gate `/api/access-groups/*` and `/api/registration-keys/*`
-       behind `federation_controller_engine` (402 stub OSS)
-5. [ ] Frontend `AccessGroupsSettings.tsx` moves into the federation
-       plugin bundle
-6. [ ] i18n/l10n for all 14 languages
+4. [x] Gate `/api/access-groups/*` and `/api/registration-keys/*`
+       behind `federation_controller_engine` (router-level
+       `require_module_loaded` Depends)
+5. [x] Frontend `AccessGroupsSettings.tsx` moves into the federation
+       plugin bundle (May 2026).  Component + inline service + 14-locale
+       i18n bundle ship from
+       `sysmanage-professional-plus/frontend/plugin-src/{components,entries,i18n}/`
+       through the new `federation_controller_engine-plugin.iife.js`
+       built by `make build-federation-controller-plugin`.  Plugin
+       registers the settings tab with `moduleRequired: 'federation_controller_engine'`
+       so it stays hidden on OSS / unlicensed deployments.  OSS-side
+       deletions: `frontend/src/Components/AccessGroupsSettings.tsx`,
+       `frontend/src/Services/accessGroups.ts`, the hardcoded tab def
+       + import + render block in `frontend/src/Pages/Settings.tsx`,
+       and the `accessGroups.*` namespace in all 14 OSS locale JSONs
+       (translations moved into the plugin's en bundle + i18n module).
+       Verified end-to-end with the dual-tab transition state: real
+       CRUD ran clean against the plugin tab before the OSS fallback
+       was removed.
+6. [x] i18n/l10n for all 14 languages (May 2026).  Inline en bundle
+       in `federation-controller-entry.ts` (46 keys including the new
+       `tabLabel` alias) plus 13-locale `federation-controller-i18n.ts`,
+       merged into the host i18next instance via
+       `i18n.addResourceBundle('<lang>', 'translation', …)` at plugin
+       init.
 
 **Estimated Size:** ~446 lines + 4 model classes migrated from OSS.
 
@@ -2420,43 +2681,63 @@ short-lived credentials is a federation concern (rotate creds for hosts
 in restricted sites without those sites needing direct OpenBAO access),
 so the migration lands in Phase 12 where federation primitives exist.
 
+**Status (12.5 — API gate landed):** ✅ (May 2026).  The
+`/api/dynamic-secrets/*` router is gated behind
+`Depends(require_module_loaded(ModuleCode.SECRETS_ENGINE))`, mirroring
+the static-secrets gate from Phase 2.3 and the access-groups gate
+from 12.4.  16 tests in `tests/api/test_dynamic_secrets.py` (13
+existing + 3 new gate-deny tests) cover the licensed and unlicensed
+paths.
+
 **Migration Steps:**
 1. [ ] Move `DynamicSecretLease` model + service into `secrets_engine.pyx`
        alongside the existing static-secret CRUD
+       *(stays in OSS for now — relocation needs the engine repo)*
 2. [ ] Add a federation-aware lease-issue path: the coordinator owns
        the master Vault; sites can request leases on behalf of their
        hosts via the federation downstream channel (existing 12.2
        command dispatch infrastructure)
 3. [ ] Sweeper/reconcile loop runs at the coordinator — no need for
        per-site sweepers because all leases live in the master Vault
-4. [ ] Gate `/api/dynamic-secrets/*` behind `secrets_engine` loaded
+4. [x] Gate `/api/dynamic-secrets/*` behind `secrets_engine` loaded
        (consistent with the existing static-secrets gate from Phase 2.3)
 5. [ ] Frontend `DynamicSecretsSettings.tsx` moves into the secrets_engine
-       plugin bundle
-6. [ ] i18n/l10n for all 14 languages
+       plugin bundle *(stays in OSS for now)*
+6. [ ] i18n/l10n for all 14 languages — pending engine UI
 
 **Estimated Size:** ~253 lines migrated from OSS, plus federation glue
 in `secrets_engine.pyx`.
 
 #### 12.6 Database Schema
 
+**Status:** ✅ Landed (May 2026).  13 federation tables defined as
+SQLAlchemy ORM in `backend/persistence/models/federation.py`,
+idempotent Alembic migration `m1fedschema_add_federation_schema.py`
+creates the full schema on both SQLite (test) and PostgreSQL (prod)
+without dialect-specific types.  Both coordinator-side and site-side
+tables are created on every instance — role differentiation happens
+at the API layer in 12.1 / 12.2.  18 smoke tests in
+`tests/persistence/test_federation_models.py` verify model
+registration, upgrade/downgrade idempotency, and ORM round-trip.
+
 **Coordinator-side tables:**
-- [ ] `federation_sites` — registered subordinate servers (id, name, location, url, tls_cert, status, last_sync)
-- [ ] `federation_host_rollup` — aggregated host data from all sites (site_id, host_count, active_count, os_breakdown)
-- [ ] `federation_compliance_rollup` — aggregated compliance scores per site
-- [ ] `federation_vulnerability_rollup` — aggregated CVE exposure per site
-- [ ] `federation_policies` — centrally defined policies (update profiles, firewall roles)
-- [ ] `federation_policy_assignments` — which policies are pushed to which sites
-- [ ] `federation_dispatched_commands` — commands sent from coordinator to sites (tracking status)
-- [ ] `federation_audit_log` — all federation operations
+- [x] `federation_sites` — registered subordinate servers (id, name, location, url, tls_cert, status, last_sync, geo coordinates)
+- [x] `federation_host_directory` — host-directory tier (1 KB × 1 M hosts ≈ 1 GB target); only columns operators filter / search on, geo columns mirroring Phase 12.7
+- [x] `federation_host_rollup` — aggregated host data from all sites (site_id, host_count, active_count, os_breakdown JSON, status_breakdown JSON)
+- [x] `federation_compliance_rollup` — aggregated compliance scores per site per baseline (CIS/STIG/...)
+- [x] `federation_vulnerability_rollup` — aggregated CVE exposure per site bucketed by severity, plus top-N CVE IDs JSON
+- [x] `federation_policies` — centrally defined policies (update profiles, firewall roles), polymorphic by `policy_type`, version-counted
+- [x] `federation_policy_assignments` — composite-PK (policy_id, site_id) with push status + pushed_version tracking
+- [x] `federation_dispatched_commands` — commands sent from coordinator to sites (queued_at_site → in_progress → completed/failed)
+- [x] `federation_audit_log` — all federation operations (enrollment, policy push, command dispatch, site suspend/resume)
 
 **Site-side tables:**
-- [ ] `federation_coordinator` — coordinator connection details (url, tls_cert, site_id, enrollment_status)
-- [ ] `federation_sync_queue` — pending upstream data pushes
-- [ ] `federation_received_policies` — policies received from coordinator
-- [ ] `federation_received_commands` — commands received from coordinator
+- [x] `federation_coordinator` — singleton (fixed UUID PK) holding coordinator connection details + this site's enrollment status
+- [x] `federation_sync_queue` — pending upstream pushes with `dedup_key` for offline-replay safety
+- [x] `federation_received_policies` — coordinator-pushed policies + applied / apply_error tracking
+- [x] `federation_received_commands` — coordinator-dispatched commands awaiting / executing locally
 
-**Estimated Size:** ~1,000 lines (Alembic migrations, idempotent, sqlite + postgresql compatible)
+**Estimated Size:** ~1,000 lines (Alembic migrations, idempotent, sqlite + postgresql compatible).  Actual: ~600 LOC migration + ~470 LOC ORM models + ~200 LOC smoke tests.
 
 #### 12.7 Host Geo-Location + Global Map
 

@@ -147,6 +147,46 @@ try:
             config["license"]["phone_home_interval_hours"] = 24
         if "modules_path" not in config["license"]:
             config["license"]["modules_path"] = "/var/lib/sysmanage/modules"
+
+        # Phase 12.7: Host geo-location settings.
+        #
+        # The agent reports its public IP via heartbeat and the server
+        # resolves it to (country, subdivision, city, lat/lon) via a
+        # bundled MaxMind GeoLite2 database, with an ipapi.co fallback
+        # only when the local DB misses.  Operators must supply a free
+        # MaxMind license key for the GeoLite2 download — without one,
+        # all lookups fall back to ipapi.co's 1k/day free tier.
+        #
+        # Defaults below are tuned for "works out of the box on a
+        # standard internet-connected deployment, harmless on airgap":
+        # enabled=True turns on the lookup chain; missing license_key
+        # means GeoLite2 is skipped and ipapi.co serves all queries
+        # (which silently degrades to country=unknown when the free
+        # tier is exhausted).
+        if "geo_lookup" not in config:
+            config["geo_lookup"] = {}
+        if "enabled" not in config["geo_lookup"]:
+            config["geo_lookup"]["enabled"] = True
+        if "database_path" not in config["geo_lookup"]:
+            config["geo_lookup"][
+                "database_path"
+            ] = "/var/lib/sysmanage/geoip/GeoLite2-City.mmdb"
+        if "maxmind_license_key" not in config["geo_lookup"]:
+            # Empty by default — sites that haven't registered with
+            # MaxMind get ipapi.co fallback only.  Set this to the
+            # license key from https://www.maxmind.com/en/accounts/
+            # to enable weekly GeoLite2 refresh.
+            config["geo_lookup"]["maxmind_license_key"] = ""
+        if "refresh_interval_hours" not in config["geo_lookup"]:
+            # MaxMind publishes the GeoLite2 City DB on Tuesdays and
+            # Fridays.  168 hours (7d) keeps us reasonably current
+            # without thrashing their download endpoint.
+            config["geo_lookup"]["refresh_interval_hours"] = 168
+        if "ipapi_fallback_enabled" not in config["geo_lookup"]:
+            # Operators who want pure local-only lookups (e.g.
+            # privacy-conscious deployments or airgapped fleets)
+            # can set this to False to disable the ipapi.co fallback.
+            config["geo_lookup"]["ipapi_fallback_enabled"] = True
 except yaml.YAMLError as exc:
     if hasattr(exc, "problem_mark"):
         mark = exc.problem_mark
@@ -329,9 +369,48 @@ def get_server_role():
     Return the server role: ``standard``, ``collector``, or ``repository``.
 
     Phase 11 air-gap topology — same binary runs as either half of an
-    air-gapped pair, or as a standalone (``standard``) deployment.
+    air-gap pair, or as a standalone (``standard``) deployment.
     """
     return config.get("role", "standard")
+
+
+# Phase 12.7: Host geo-location config accessors.
+#
+# These intentionally return individual values rather than the dict
+# so callers can't accidentally mutate the loaded config; matches the
+# vault/license accessor pattern above.
+
+
+def get_geo_lookup_config():
+    """Return the complete geo_lookup configuration dict."""
+    return config.get("geo_lookup", {})
+
+
+def is_geo_lookup_enabled() -> bool:
+    """Check if geo-location lookup is enabled for this deployment."""
+    return bool(config.get("geo_lookup", {}).get("enabled", False))
+
+
+def get_geo_lookup_database_path() -> str:
+    """Filesystem path to the bundled GeoLite2-City.mmdb."""
+    return config.get("geo_lookup", {}).get(
+        "database_path", "/var/lib/sysmanage/geoip/GeoLite2-City.mmdb"
+    )
+
+
+def get_geo_lookup_maxmind_license_key() -> str:
+    """MaxMind license key for GeoLite2 downloads.  Empty -> ipapi.co only."""
+    return config.get("geo_lookup", {}).get("maxmind_license_key", "")
+
+
+def get_geo_lookup_refresh_interval_hours() -> int:
+    """Hours between background-task GeoLite2 refresh runs (default 168 = 7d)."""
+    return int(config.get("geo_lookup", {}).get("refresh_interval_hours", 168))
+
+
+def is_geo_lookup_ipapi_fallback_enabled() -> bool:
+    """Whether to query ipapi.co when the local GeoLite2 DB misses."""
+    return bool(config.get("geo_lookup", {}).get("ipapi_fallback_enabled", True))
 
 
 def is_collector():

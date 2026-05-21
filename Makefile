@@ -722,11 +722,27 @@ endif
 	@echo ""
 	@echo "Development environment setup complete!"
 
-# Database migration target
-migrate:
+# Database migration target.
+#
+# Depends on ``stop`` so the running backend releases its sessions on
+# the ``host`` table (and any other tables alembic might ALTER) before
+# we run DDL.  Without this, PostgreSQL's ``ALTER TABLE ... ADD COLUMN``
+# queues behind the backend's idle-in-transaction sessions and the
+# whole thing hangs indefinitely.  The ``stop`` target is a no-op when
+# nothing is running, so this is safe on fresh installs / CI.
+#
+# After migrate completes the user has to start the server back up
+# themselves — we don't auto-start because:
+#   * we don't know whether they wanted ``make start`` or
+#     ``make start-privileged``;
+#   * if migrate failed they'd want to investigate before restarting.
+migrate: stop
 	@echo "Running database migrations..."
 	@$(PYTHON) -m alembic upgrade head
 	@echo "[OK] Database migrations completed"
+	@echo ""
+	@echo "NOTE: backend / frontend / telemetry / OpenBAO were stopped before migrate."
+	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
 
 # Clean trailing whitespace from Python files (cross-platform)
 clean-whitespace: $(VENV_ACTIVATE)

@@ -48,6 +48,19 @@ DYNAMIC_KEY_PREFIXES = (
     "secrets.type.",
 )
 
+# Match a JS string literal: ``"..."`` or ``'...'`` with backslash
+# escapes.  Crucially, the OPPOSITE quote character is freely allowed
+# inside — so the earlier ``[^'"\\]`` shape was wrong because it
+# rejected apostrophes inside ``"don't"``.  Build the two forms
+# separately and union them.
+_DOUBLE_QUOTED = r'"(?:[^"\\]|\\.)*"'
+_SINGLE_QUOTED = r"'(?:[^'\\]|\\.)*'"
+_STRING_LITERAL = rf"(?:{_DOUBLE_QUOTED}|{_SINGLE_QUOTED})"
+# Fallbacks are sometimes split with JS string concatenation
+# (``"long line one " + "long line two"``) to keep individual literals
+# under the line-length cap.  Match one or more literals joined by ``+``.
+_CONCAT_STRING = rf"{_STRING_LITERAL}(?:\s*\+\s*{_STRING_LITERAL})*"
+
 # Match ``t('key.path' [, 'English fallback'])`` — the fallback is
 # optional because Pro+ tends to call ``t('login.title')`` without one
 # (relying on en/ as the source of truth) while OSS calls
@@ -56,13 +69,76 @@ DYNAMIC_KEY_PREFIXES = (
 # only when present.  Ignores ``t(`template`)`` template literals — those
 # need DYNAMIC_KEY_PREFIXES coverage instead.
 T_CALL_WITH_FALLBACK = re.compile(
-    r"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*['"]((?:[^'"\\]|\\.)*)['"]\s*[,)]""",
+    rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*({_CONCAT_STRING})\s*[,)]""",
     re.MULTILINE,
 )
+# Permissive reference-only matcher: catches the key from any ``t('key',
+# …)`` or ``t('key')`` call regardless of what the second argument looks
+# like.  Used to mark keys as "referenced" even when the strict fallback
+# regex can't parse the fallback expression (e.g., function-call
+# fallbacks, complex template literals).  Note: ``[,)]`` here covers both
+# one-arg and two-arg call shapes.
 T_CALL_KEY_ONLY = re.compile(
-    r"""\bt\(\s*['"]([\w.-]+)['"]\s*\)""",
+    r"""\bt\(\s*['"]([\w.-]+)['"]\s*[,)]""",
     re.MULTILINE,
 )
+
+# Match a static template literal: backtick-delimited string with no
+# ``${...}`` interpolation.  These behave like ordinary string fallbacks
+# (e.g., ``t('key', `Some text`)``) and can be safely captured.
+_PLAIN_TEMPLATE = r"`(?:[^`\\$]|\\.|\$(?!\{))*`"
+
+# Match ``t('key', `static template`)`` for static template fallbacks.
+T_CALL_TEMPLATE_FALLBACK = re.compile(
+    rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*({_PLAIN_TEMPLATE})\s*[,)]""",
+    re.MULTILINE,
+)
+
+# Match any template literal (with or without ``${...}`` interpolation)
+# as a fallback.  Static text is extracted; ``${expr}`` segments are
+# replaced with ``{{}}`` placeholders so the JSON value remains
+# user-readable instead of containing raw JS expressions.  Used as a
+# fallback when ``T_CALL_TEMPLATE_FALLBACK`` doesn't match.
+_ANY_TEMPLATE = r"`(?:[^`\\]|\\.|\$\{[^}]*\})*`"
+T_CALL_INTERP_TEMPLATE_FALLBACK = re.compile(
+    rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*({_ANY_TEMPLATE})\s*[,)]""",
+    re.MULTILINE,
+)
+_INTERP_EXPR = re.compile(r"\$\{[^}]*\}")
+
+# Match ``t('key', { defaultValue: 'fallback', ...other options })`` — a
+# common i18next idiom when the call also passes interpolation params.
+# Restricted to single-line object literals to avoid back-tracking
+# explosions; multi-line cases would need a real JS parser.
+T_CALL_DEFAULTVALUE = re.compile(
+    rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*\{{[^{{}}\n]*?defaultValue\s*:\s*({_STRING_LITERAL})""",
+    re.MULTILINE,
+)
+
+
+def _decode_string_literal(literal: str) -> str:
+    """Decode a single JS string literal (with surrounding quotes) into
+    its runtime value.  Handles the common escapes (``\\n``, ``\\t``,
+    quote-self, backslash-self)."""
+    quote = literal[0]
+    inner = literal[1:-1]
+    # Order matters: unescape backslash last so we don't double-process
+    # already-decoded escapes.
+    inner = inner.replace(f"\\{quote}", quote)
+    inner = inner.replace("\\n", "\n").replace("\\t", "\t")
+    inner = inner.replace("\\\\", "\\")
+    return inner
+
+
+_STRING_LITERAL_RE = re.compile(_STRING_LITERAL)
+
+
+def _decode_fallback(expr: str) -> str:
+    """Decode a fallback expression (one literal or several joined by
+    ``+``) into the final English string."""
+    return "".join(
+        _decode_string_literal(m.group(0)) for m in _STRING_LITERAL_RE.finditer(expr)
+    )
 
 
 def extract_keys() -> dict[str, str]:
@@ -81,15 +157,47 @@ def _extract_from_file(path: Path) -> dict[str, str]:
         text = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return found
-    # Two-arg form first — the fallback is the en authoritative value.
+    # Two-arg form first — the fallback expression is the en authoritative
+    # value.  The expression may be one literal, several literals joined
+    # by ``+``, or contain the opposite quote character internally; the
+    # decoder handles all three shapes.
     for match in T_CALL_WITH_FALLBACK.finditer(text):
-        key, fallback = match.group(1), match.group(2)
+        key, fallback_expr = match.group(1), match.group(2)
+        fallback = _decode_fallback(fallback_expr)
         if key in found and found[key] != fallback:
             continue  # first writer wins on conflict
-        found[key] = fallback.replace("\\'", "'").replace('\\"', '"')
-    # One-arg form for keys we haven't seen with a fallback.  We don't
-    # know the en value from source, so the seeder will use the dotted
-    # key as a placeholder when populating en.
+        found[key] = fallback
+    # Static template-literal form: ``t('key', `Some text`)``.  Treated
+    # identically to a plain string fallback once the backticks are
+    # stripped.  Skipped silently for interpolated templates.
+    for match in T_CALL_TEMPLATE_FALLBACK.finditer(text):
+        key = match.group(1)
+        if key in found and found[key]:
+            continue
+        literal = match.group(2)
+        found[key] = literal[1:-1]  # strip surrounding backticks
+    # ``defaultValue:`` option form: ``t('key', { defaultValue: '...' })``
+    # — common when the call also passes interpolation params.
+    for match in T_CALL_DEFAULTVALUE.finditer(text):
+        key = match.group(1)
+        if key in found and found[key]:
+            continue
+        found[key] = _decode_string_literal(match.group(2))
+    # Interpolated template-literal fallback — last-resort extraction so
+    # ``t('key', `Hello ${name}`)`` doesn't end up with no fallback at
+    # all.  ``${expr}`` is rewritten to ``{{}}`` so the resulting string
+    # is human-readable (and i18next-compatible enough that calling
+    # interpolation with the right options would still work).
+    for match in T_CALL_INTERP_TEMPLATE_FALLBACK.finditer(text):
+        key = match.group(1)
+        if key in found and found[key]:
+            continue
+        literal = match.group(2)[1:-1]  # strip surrounding backticks
+        found[key] = _INTERP_EXPR.sub("{{}}", literal)
+    # Permissive reference matcher for keys whose fallback expression the
+    # strict regex couldn't capture (e.g., function-call fallbacks).  We
+    # don't know the en value from source, so the seeder will leave an
+    # empty placeholder when populating en.
     for match in T_CALL_KEY_ONLY.finditer(text):
         key = match.group(1)
         found.setdefault(key, "")

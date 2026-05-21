@@ -112,6 +112,18 @@ class FeatureCode(str, Enum):
     # tick driver hook; the engine itself owns cron/plan/apply logic.
     CVE_FEED_MANAGEMENT = "cve_feed_management"
 
+    # Federation Controller Engine (Phase 12.1) — coordinator-side
+    # capabilities.  Split into seven feature codes so a future SKU
+    # could license sites-registry-only deployments without policy
+    # push, or read-only rollup access for auditors, etc.
+    FEDERATION_SITES_MANAGE = "federation_sites_manage"
+    FEDERATION_HOSTS_SEARCH = "federation_hosts_search"
+    FEDERATION_ROLLUPS_READ = "federation_rollups_read"
+    FEDERATION_POLICY_MANAGE = "federation_policy_manage"
+    FEDERATION_POLICY_PUSH = "federation_policy_push"
+    FEDERATION_COMMAND_DISPATCH = "federation_command_dispatch"
+    FEDERATION_AUDIT_READ = "federation_audit_read"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -177,6 +189,14 @@ class ModuleCode(str, Enum):
     # One Enterprise license includes both — see Phase 11 in ROADMAP.md.
     AIRGAP_COLLECTOR_ENGINE = "airgap_collector_engine"
     AIRGAP_REPOSITORY_ENGINE = "airgap_repository_engine"
+
+    # Phase 12 Enterprise modules — Multi-Site Federation.  Mutually
+    # exclusive at the deployment level: a SysManage server runs as
+    # EITHER the coordinator (loads FEDERATION_CONTROLLER_ENGINE) or
+    # as a subordinate site (loads FEDERATION_SITE_ENGINE).  Both are
+    # bundled in one Enterprise SKU — see Phase 12 in ROADMAP.md.
+    FEDERATION_CONTROLLER_ENGINE = "federation_controller_engine"
+    FEDERATION_SITE_ENGINE = "federation_site_engine"
 
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
@@ -288,6 +308,14 @@ TIER_FEATURES = {
         FeatureCode.AIRGAP_VERIFY_FRESHNESS,
         # Phase 11.4 — CVE feed management
         FeatureCode.CVE_FEED_MANAGEMENT,
+        # Phase 12.1 — federation controller features
+        FeatureCode.FEDERATION_SITES_MANAGE,
+        FeatureCode.FEDERATION_HOSTS_SEARCH,
+        FeatureCode.FEDERATION_ROLLUPS_READ,
+        FeatureCode.FEDERATION_POLICY_MANAGE,
+        FeatureCode.FEDERATION_POLICY_PUSH,
+        FeatureCode.FEDERATION_COMMAND_DISPATCH,
+        FeatureCode.FEDERATION_AUDIT_READ,
     },
 }
 
@@ -337,5 +365,10 @@ TIER_MODULES = {
         # ``role:`` in sysmanage.yaml picks which one this server loads)
         ModuleCode.AIRGAP_COLLECTOR_ENGINE,
         ModuleCode.AIRGAP_REPOSITORY_ENGINE,
+        # Phase 12 — Federation (one Enterprise SKU includes both
+        # engines; ``role: coordinator`` vs ``role: site`` in
+        # sysmanage.yaml picks which one this server loads)
+        ModuleCode.FEDERATION_CONTROLLER_ENGINE,
+        ModuleCode.FEDERATION_SITE_ENGINE,
     },
 }

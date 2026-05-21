@@ -8,6 +8,7 @@ import SysManageLogo from "../assets/sysmanage-logo.svg";
 import LanguageSelector from "./LanguageSelector";
 import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
+import { useFederationLicensed } from "../Services/federation";
 import NotificationBell from "./NotificationBell";
 import ScrollableNavList from "./ScrollableNavList";
 import { refreshLicenseCache } from "../Services/license";
@@ -16,6 +17,11 @@ import { usePlugins } from "../plugins";
 const Navbar = () => {
   const [showMenu, setShowMenu] = useState(false);
   const { t } = useTranslation();
+  // Phase 12.3: hide the Sites link entirely when the federation
+  // controller engine isn't loaded.  The Sites page itself remains
+  // reachable by direct URL (where it shows the Enterprise upsell),
+  // but it's not surfaced via the nav for OSS / unlicensed users.
+  const { licensed: federationLicensed } = useFederationLicensed();
   const navigate = useNavigate();
   const { navItems } = usePlugins();
   const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
@@ -165,6 +171,26 @@ const Navbar = () => {
                 {t('nav.hosts')}
               </NavLink>
             </li>
+            <li className="nav__item">
+              <NavLink
+                to="/map"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.map')}
+              </NavLink>
+            </li>
+            {federationLicensed && (
+              <li className="nav__item">
+                <NavLink
+                  to="/sites"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.sites')}
+                </NavLink>
+              </li>
+            )}
             <li className="nav__item">
               <NavLink
                 to="/users"

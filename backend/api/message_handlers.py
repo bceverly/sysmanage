@@ -242,12 +242,28 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         type(result_data),
         list(result_data.keys()) if isinstance(result_data, dict) else "N/A",
     )
-    if (
-        "packages" in message_data
-        or "package_managers" in message_data
-        or "packages" in result_data
-        or "package_managers" in result_data
-    ):
+
+    # Package COLLECTION results carry ``packages`` as a dict keyed by
+    # package_manager (apt / dnf / fwupd / ...).  ``apply_updates``
+    # command_results also have a top-level ``packages`` key but it's a
+    # LIST of package names ("started in background" acknowledgment).
+    # Without this dict-shape check we mis-route the apply_updates
+    # result into ``handle_package_collection``, which then crashes on
+    # ``packages.keys()`` with ``'list' object has no attribute 'keys'``.
+    def _is_collection_shape(payload):
+        if not isinstance(payload, dict):
+            return False
+        pkgs = payload.get("packages")
+        pkg_mgrs = payload.get("package_managers")
+        if isinstance(pkgs, dict) or isinstance(pkg_mgrs, dict):
+            return True
+        # ``package_managers`` as a list is the legacy "platform supports
+        # these managers" shape used by collection — accept that too.
+        if isinstance(pkg_mgrs, list) and pkg_mgrs:
+            return True
+        return False
+
+    if _is_collection_shape(message_data) or _is_collection_shape(result_data):
         logger.info("Detected package collection result, routing to package handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_package_collection

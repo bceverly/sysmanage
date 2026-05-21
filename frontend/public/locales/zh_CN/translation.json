@@ -197,7 +197,8 @@
     "error": "处理您的请求时发生错误",
     "sendReset": "发送重置链接",
     "sending": "发送中...",
-    "title": "忘记密码"
+    "title": "忘记密码",
+    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
   },
   "grafana": {
     "apiKey": {
@@ -323,7 +324,10 @@
     "usernameHelp": "允许字母、数字、下划线和破折号",
     "usernameRequired": "需要用户名",
     "windowsDescription": "在此Windows主机上创建新的本地用户账户。",
-    "passwordHelp": "至少需要 8 个字符"
+    "passwordHelp": "至少需要 8 个字符",
+    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
+    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
+    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -817,7 +821,18 @@
     "servicesUpdateRequested": "已请求更新 Ubuntu Pro 服务",
     "size": "大小",
     "softwarePackages": "软件包",
-    "vendor": "供应商"
+    "vendor": "供应商",
+    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
+    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
+    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
+    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
+    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
+    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
+    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
+    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
+    "geoLocation": "[TODO] Geographic Location",
+    "publicIp": "[TODO] Public IP",
+    "selectedServices": "[TODO] {{}} service(s) selected"
   },
   "hostGroup": {
     "add": "添加",
@@ -838,7 +853,8 @@
     "invalidGid": "GID必须是>=1000的数字",
     "invalidGroupName": "组名必须以字母开头，只能包含字母、数字、下划线和破折号",
     "unixDescription": "在此主机上创建新组。",
-    "windowsDescription": "在此Windows主机上创建新的本地组。"
+    "windowsDescription": "在此Windows主机上创建新的本地组。",
+    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
   },
   "hosts": {
     "agentVersion": "代理版本",
@@ -895,7 +911,9 @@
       "statusRebooting": "正在重启主机，等待重新连接...",
       "statusRestarting": "正在重启子主机...",
       "statusShuttingDown": "正在停止子主机...",
-      "ungracefulWarning": "此主机有 {{count}} 个正在运行的子主机，在重启期间将被强制终止。升级到 SysManage Professional+ 以使用编排安全重启。"
+      "ungracefulWarning": "此主机有 {{count}} 个正在运行的子主机，在重启期间将被强制终止。升级到 SysManage Professional+ 以使用编排安全重启。",
+      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
+      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
     },
     "rebootRequested": "重启请求成功",
     "rebootSelected": "重启所选",
@@ -935,7 +953,12 @@
     "runningUnprivileged": "非特权运行中",
     "scriptsDisabledTooltip": "此主机的脚本已禁用",
     "scriptsEnabledTooltip": "此主机的脚本已启用",
-    "up": "Up"
+    "up": "Up",
+    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
+    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
+    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
+    "approveSelected": "[TODO] Approve Selected",
+    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
   },
   "login": {
     "loggingIn": "正在登录...",
@@ -951,7 +974,9 @@
     "password": "密码",
     "submit": "登录",
     "title": "登录",
-    "username": "用户名或邮箱"
+    "username": "用户名或邮箱",
+    "forgotPassword": "[TODO] Forgot password?",
+    "remember": "[TODO] Remember me"
   },
   "logout": {
     "loading": "退出中..."
@@ -983,7 +1008,9 @@
       "collector": "采集器",
       "repository": "存储库"
     },
-    "airgapRepositories": "Air-Gap Repos"
+    "airgapRepositories": "Air-Gap Repos",
+    "map": "[MISSING:nav.map]",
+    "sites": "[MISSING:nav.sites]"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -1408,7 +1435,11 @@
     "retryNow": "立即重试",
     "retrying": "重试中...",
     "title": "连接中断",
-    "titleFailed": "服务器不可用"
+    "titleFailed": "服务器不可用",
+    "attempts": "[TODO] Attempts: {{}}",
+    "lastConnected": "[MISSING:serverDown.lastConnected]",
+    "secondsRemaining": "[TODO] {{}}s",
+    "timeRemaining": "[TODO] {{}}m {{}}s"
   },
   "tags": {
     "addTag": "添加标签",
@@ -1454,7 +1485,9 @@
       "targets": "目标",
       "title": "Prometheus 状态",
       "url": "URL",
-      "version": "版本"
+      "version": "版本",
+      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
+      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1528,7 +1561,10 @@
     "source": "源",
     "title": "标题",
     "type": "类型",
-    "url": "Url"
+    "url": "Url",
+    "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
+    "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
   },
   "ubuntuPro": {
     "actions": {
@@ -1547,7 +1583,8 @@
       "resultsNote": "请检查主机详细信息或代理日志以获取有关注册过程的更多信息。",
       "selectedHosts": "选定的主机",
       "title": "Ubuntu Pro注册",
-      "useMasterKey": "使用配置的主密钥"
+      "useMasterKey": "使用配置的主密钥",
+      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
     },
     "errors": {
       "clearFailed": "清除主密钥失败",
@@ -1560,7 +1597,8 @@
       "autoAttachEnabledHelp": "使用主密钥自动将新的Ubuntu主机附加到Pro",
       "masterKey": "Ubuntu Pro主密钥",
       "organizationName": "组织名称",
-      "organizationNameHelp": "Ubuntu Pro注册的可选组织名称"
+      "organizationNameHelp": "Ubuntu Pro注册的可选组织名称",
+      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
     },
     "messages": {
       "keyCleared": "主密钥清除成功",
@@ -1574,7 +1612,10 @@
       "autoAttachEnabled": "自动附加已启用",
       "keyConfigured": "主密钥已配置"
     },
-    "title": "Ubuntu Pro"
+    "title": "Ubuntu Pro",
+    "validation": {
+      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+    }
   },
   "updates": {
     "clearSearch": "清除搜索",
@@ -1716,7 +1757,10 @@
     "imageUploadSuccess": "个人资料图像已成功上传",
     "invalidImageType": "无效的图像格式。允许的格式:PNG、JPEG、JPG、GIF、WEBP",
     "profileImage": "个人资料图像",
-    "uploading": "正在上传..."
+    "uploading": "正在上传...",
+    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
+    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
+    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
   },
   "users": {
     "email": "邮箱",
@@ -1731,7 +1775,11 @@
     "noResults": "无结果",
     "noRows": "无行",
     "unlockSelected": "解锁所选项",
-    "unlocked": "已解锁"
+    "unlocked": "已解锁",
+    "editInfo": "[TODO] Edit the user's information below.",
+    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
+    "emailUnique": "[TODO] Email address must be unique",
+    "enterInfo": "[TODO] Enter the new user's information below."
   },
   "emailConfig": {
     "title": "电子邮件配置",
@@ -1765,50 +1813,6 @@
   "reportViewer": {
     "iframeTitle": "报告内容"
   },
-  "accessGroups": {
-    "add": "添加组",
-    "addKey": "添加注册密钥",
-    "copied": "已复制到剪贴板",
-    "copy": "复制",
-    "copyError": "复制失败",
-    "created": "访问组已创建",
-    "deleteError": "删除访问组失败",
-    "deleted": "访问组已删除",
-    "description": "描述",
-    "editGroup": "编辑访问组",
-    "empty": "尚未定义访问组。",
-    "generateKey": "生成密钥",
-    "keyAccessGroup": "访问组",
-    "keyAutoApprove": "自动批准",
-    "keyAutoApproveLabel": "使用此密钥的注册自动批准",
-    "keyCreateError": "创建注册密钥失败",
-    "keyDeleteError": "删除注册密钥失败",
-    "keyDeleted": "注册密钥已删除",
-    "keyExpires": "到期时间",
-    "keyMaxUses": "最大使用次数 (留空 = 无限制)",
-    "keyName": "名称",
-    "keyNeverExpires": "永不",
-    "keyRevealTitle": "注册密钥已创建",
-    "keyRevealWarning": "这是密钥值唯一一次显示。请立即复制 — 无法恢复。",
-    "keysEmpty": "尚无注册密钥。",
-    "loadError": "加载访问组失败",
-    "name": "名称",
-    "nameRequired": "名称为必填项",
-    "noGroup": "(无)",
-    "noParent": "(无上级 / 根)",
-    "parent": "上级",
-    "regKeysSubtitle": "将传入的代理注册限定到访问组的令牌",
-    "regKeysTitle": "注册密钥",
-    "revoke": "撤销",
-    "revokeError": "撤销注册密钥失败",
-    "revoked": "注册密钥已撤销",
-    "revokedStatus": "已撤销",
-    "saveError": "保存访问组失败",
-    "subtitle": "用于限定主机和用户范围的分层组",
-    "title": "访问组",
-    "updated": "访问组已更新",
-    "useCount": "已使用"
-  },
   "upgradeProfiles": {
     "add": "添加配置文件",
     "allHosts": "所有主机",
@@ -1840,7 +1844,9 @@
     "updated": "更新配置文件已保存",
     "window": "分阶段窗口 (分钟)",
     "windowHelp": "将代理调度分散在这么多分钟内 (0–720)",
-    "windowRange": "分阶段窗口必须在 0 至 720 分钟之间"
+    "windowRange": "分阶段窗口必须在 0 至 720 分钟之间",
+    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
+    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
   },
   "packageProfiles": {
     "add": "添加合规配置文件",
@@ -1870,7 +1876,8 @@
     "updated": "合规配置文件已保存",
     "version": "版本",
     "versionOp": "运算符",
-    "versionOpAny": "(任意)"
+    "versionOpAny": "(任意)",
+    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
   },
   "compliance": {
     "compliant": "合规",
@@ -1919,7 +1926,8 @@
     "subtitle": "在每个生成的 PDF/HTML 报告中注入组织徽标和页眉文本",
     "title": "报告品牌",
     "uploadError": "徽标上传失败",
-    "uploadLogo": "上传徽标"
+    "uploadLogo": "上传徽标",
+    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
   },
   "reportTemplates": {
     "add": "添加模板",
@@ -1942,7 +1950,8 @@
     "saveError": "保存模板失败",
     "subtitle": "渲染器在内置报告类型之上应用的自定义布局",
     "title": "报告模板",
-    "updated": "模板已保存"
+    "updated": "模板已保存",
+    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
   "dynamicSecrets": {
     "copied": "密钥已复制到剪贴板",
@@ -1976,7 +1985,8 @@
     "subtitle": "通过 OpenBAO/Vault 颁发的短期凭据，自动过期",
     "title": "动态密钥",
     "ttl": "TTL (秒)",
-    "ttlHelp": "租约生命周期 — {{min}} 至 {{max}} 秒"
+    "ttlHelp": "租约生命周期 — {{min}} 至 {{max}} 秒",
+    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
   },
   "idp": {
     "action": {
@@ -2074,7 +2084,8 @@
     "backupCodesWarning": "这些一次性备份代码不会再次显示。请将它们保存在密码管理器中或打印出来。如果您失去对身份验证器的访问权限,每个代码可使用一次。",
     "disableWarning": "用您的账户密码确认。您的 TOTP 密钥和备份代码将被删除。",
     "notEnrolledDescription": "为您的账户添加第二种身份验证因素。每次登录时,系统都会要求您输入身份验证应用程序中的一次性代码。",
-    "regenPrompt": "输入当前的 TOTP 代码。现有的备份代码将失效。"
+    "regenPrompt": "输入当前的 TOTP 代码。现有的备份代码将失效。",
+    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
   },
   "mirror": {
     "action": {
@@ -2557,5 +2568,164 @@
         "restart_vms_from_persist": "restart {{hypervisor}} VMs from {{persist_path}}"
       }
     }
+  },
+  "audit": {
+    "columns": {
+      "actor": "[TODO] Actor",
+      "details": "[TODO] Details",
+      "openSite": "[TODO] Open",
+      "operation": "[TODO] Operation",
+      "site": "[TODO] Site",
+      "timestamp": "[TODO] Timestamp"
+    },
+    "empty": "[TODO] No federation audit entries yet.",
+    "emptyFiltered": "[TODO] No audit entries match the filters.",
+    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "filters": {
+      "actor": "[TODO] Actor",
+      "apply": "[TODO] Apply",
+      "clear": "[TODO] Clear",
+      "operation": "[TODO] Operation",
+      "siteId": "[TODO] Site ID"
+    },
+    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
+    "title": "[TODO] Federation Audit Log"
+  },
+  "map": {
+    "errorLoadHosts": "[TODO] Failed to load host locations.",
+    "openHost": "[TODO] Open host",
+    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
+    "title": "[TODO] Host Map"
+  },
+  "policies": {
+    "actions": {
+      "assign": "[TODO] Assign",
+      "deactivate": "[TODO] Deactivate",
+      "edit": "[TODO] Edit",
+      "push": "[TODO] Push now"
+    },
+    "active": "[TODO] active",
+    "assign": {
+      "error": "[TODO] Failed to update assignments.",
+      "errorLoad": "[TODO] Failed to load sites.",
+      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
+      "statusLine": "[TODO] Push status: {{status}}",
+      "submit": "[TODO] Save assignments",
+      "success": "[TODO] Policy assignments updated.",
+      "title": "[TODO] Assign to sites"
+    },
+    "columns": {
+      "actions": "[TODO] Actions",
+      "active": "[TODO] Active",
+      "name": "[TODO] Name",
+      "type": "[TODO] Type",
+      "version": "[TODO] Version"
+    },
+    "create": {
+      "button": "[TODO] New Policy",
+      "cancel": "[TODO] Cancel",
+      "customType": "[TODO] Custom policy type",
+      "definition": "[TODO] Definition (JSON)",
+      "description": "[TODO] Description",
+      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
+      "error": "[TODO] Failed to create policy.",
+      "invalidJson": "[TODO] Definition must be a JSON object.",
+      "name": "[TODO] Name",
+      "submit": "[TODO] Create",
+      "success": "[TODO] Policy created.",
+      "title": "[TODO] Create policy",
+      "type": "[TODO] Policy type",
+      "typeOther": "[TODO] Other...",
+      "typeRequired": "[TODO] Policy type is required."
+    },
+    "deactivate": {
+      "error": "[TODO] Failed to deactivate policy.",
+      "success": "[TODO] '{{name}}' deactivated."
+    },
+    "edit": {
+      "error": "[TODO] Failed to update policy.",
+      "submit": "[TODO] Save",
+      "success": "[TODO] Policy updated.",
+      "title": "[TODO] Edit policy",
+      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+    },
+    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
+    "errorLoad": "[TODO] Failed to load federation policies.",
+    "filters": {
+      "activeOnly": "[TODO] Active only",
+      "allTypes": "[TODO] All types",
+      "type": "[TODO] Policy type"
+    },
+    "inactive": "[TODO] inactive",
+    "push": {
+      "error": "[TODO] Failed to push policy.",
+      "success": "[TODO] Push triggered for '{{name}}'."
+    },
+    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
+    "title": "[TODO] Federation Policies"
+  },
+  "sites": {
+    "actions": {
+      "remove": "[TODO] Remove",
+      "resume": "[TODO] Resume",
+      "suspend": "[TODO] Suspend"
+    },
+    "addSite": "[TODO] Enroll Site",
+    "confirmRemove": {
+      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
+      "cancel": "[TODO] Cancel",
+      "confirm": "[TODO] Remove site",
+      "title": "[TODO] Remove federation site?"
+    },
+    "detail": {
+      "agentVersionMin": "[TODO] Minimum agent version",
+      "backToList": "[TODO] Back to Sites",
+      "connection": "[TODO] Connection",
+      "enrolledAt": "[TODO] Enrolled at",
+      "errorLoad": "[TODO] Failed to load site.",
+      "hostCount": "[TODO] Host count",
+      "lastSyncAt": "[TODO] Last sync at",
+      "lastSyncStatus": "[TODO] Last sync status",
+      "metadata": "[TODO] Metadata",
+      "notFound": "[TODO] Site not found.",
+      "seeHosts": "[TODO] See hosts at this site",
+      "syncInterval": "[TODO] Sync interval",
+      "syncIntervalValue": "[TODO] {{seconds}}s",
+      "url": "[TODO] URL",
+      "viewAuditLog": "[TODO] View audit log"
+    },
+    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "enroll": {
+      "cancel": "[TODO] Cancel",
+      "done": "[TODO] Done",
+      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
+      "error": "[TODO] Failed to enroll site.",
+      "location": "[TODO] Location label (optional)",
+      "name": "[TODO] Site name",
+      "submit": "[TODO] Generate token",
+      "successTitle": "[TODO] Site enrolled",
+      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
+      "title": "[TODO] Enroll a federation site",
+      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
+      "url": "[TODO] Site URL"
+    },
+    "enterpriseRequired": {
+      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
+      "title": "[TODO] Multi-site federation requires Enterprise"
+    },
+    "errorLoad": "[TODO] Failed to load federation sites.",
+    "hostCount": "[TODO] {{count}} hosts",
+    "lastSync": "[TODO] Synced {{when}}",
+    "mapView": "[TODO] Map view",
+    "policiesLink": "[TODO] Policies",
+    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
+    "title": "[TODO] Federation Sites"
+  },
+  "sitesMap": {
+    "errorLoad": "[TODO] Failed to load federation sites.",
+    "gridView": "[TODO] Grid view",
+    "openSite": "[TODO] Open site",
+    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
+    "title": "[TODO] Federation Sites Map"
   }
 }

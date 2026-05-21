@@ -265,6 +265,18 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
                 {"id": str(tag.id), "name": tag.name, "description": tag.description}
                 for tag in host_tags
             ],
+            # Phase 12.7: agent-reported public IP + geo resolution
+            "public_ip": host.public_ip,
+            "public_ip_resolved_at": (
+                host.public_ip_resolved_at.replace(tzinfo=timezone.utc).isoformat()
+                if host.public_ip_resolved_at
+                else None
+            ),
+            "geo_country_code": host.geo_country_code,
+            "geo_subdivision_code": host.geo_subdivision_code,
+            "geo_city": host.geo_city,
+            "geo_latitude": host.geo_latitude,
+            "geo_longitude": host.geo_longitude,
         }
 
 
@@ -460,6 +472,76 @@ async def get_all_hosts():
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _get_all_hosts_sync)
+
+
+def _get_host_geolocations_sync():
+    """
+    Phase 12.7: return geo-locatable hosts for the world-map UI.
+
+    Filters to rows where ``geo_latitude`` and ``geo_longitude`` are
+    both populated — hosts that haven't been resolved yet (or whose
+    public IP is internal-only / airgapped) are excluded.  The map
+    component doesn't try to plot "unknown location" markers; those
+    hosts simply don't appear until their next heartbeat resolves.
+
+    Honours the privacy opt-out tag: a host tagged ``no_geo_track``
+    is excluded from the result via a NOT EXISTS subquery against the
+    host_tags / tags join.  Subquery form keeps the filter portable
+    across SQLite (no LATERAL) and PostgreSQL.
+
+    Returned shape mirrors what the frontend MapView actually consumes:
+    just the fields needed for marker placement + popup metadata, not
+    the full Host row.  Keeps the response under a few hundred KB even
+    at 10k-host scale.
+    """
+    from backend.services.geolocation_service import NO_GEO_TRACK_TAG
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db.get_engine()
+    )
+    with session_local() as session:
+        # NOT EXISTS subquery: exclude hosts where any tag with
+        # name = NO_GEO_TRACK_TAG is linked to the host via host_tags.
+        opt_out_exists = (
+            session.query(models.HostTag.id)
+            .join(models.Tag, models.HostTag.tag_id == models.Tag.id)
+            .filter(
+                models.HostTag.host_id == models.Host.id,
+                models.Tag.name == NO_GEO_TRACK_TAG,
+            )
+            .exists()
+        )
+        rows = (
+            session.query(models.Host)
+            .filter(
+                models.Host.geo_latitude.isnot(None),
+                models.Host.geo_longitude.isnot(None),
+                models.Host.active.is_(True),
+                ~opt_out_exists,
+            )
+            .all()
+        )
+        return [
+            {
+                "host_id": str(host.id),
+                "fqdn": host.fqdn,
+                "status": host.status,
+                "platform": host.platform,
+                "country_code": host.geo_country_code,
+                "subdivision_code": host.geo_subdivision_code,
+                "city": host.geo_city,
+                "latitude": host.geo_latitude,
+                "longitude": host.geo_longitude,
+            }
+            for host in rows
+        ]
+
+
+@auth_router.get("/hosts/geolocations", dependencies=[Depends(JWTBearer())])
+async def get_host_geolocations():
+    """Return geo-located hosts for the world-map visualization (Phase 12.7)."""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _get_host_geolocations_sync)
 
 
 @auth_router.post("/host", dependencies=[Depends(JWTBearer())])

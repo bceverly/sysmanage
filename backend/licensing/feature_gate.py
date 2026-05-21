@@ -205,6 +205,50 @@ def requires_module(module: ModuleCode | str) -> Callable:
     return decorator
 
 
+def require_module_loaded(module: ModuleCode | str) -> Callable:
+    """Build a ``Depends``-friendly dependency that gates on a module.
+
+    Unlike ``requires_module`` (which is a *decorator* applied to a
+    handler function), this returns a no-arg callable suitable for
+    FastAPI router-level ``dependencies=[Depends(...)]`` lists.  That
+    lets a whole router (e.g. access groups, registration keys) be
+    gated in one place instead of decorating every handler.
+
+    Raises HTTP 403 when the calling license doesn't include the
+    module, or 503 when the license has it but the Cython engine
+    isn't loaded — same response shape as the decorator path so
+    clients can branch on ``detail.error`` uniformly.
+
+    Usage:
+        router = APIRouter(
+            ...,
+            dependencies=[
+                Depends(require_module_loaded(ModuleCode.FEDERATION_CONTROLLER_ENGINE))
+            ],
+        )
+
+    Phase 12.4 uses this to fold the OSS access-groups + registration-keys
+    surface behind the federation controller engine; see ROADMAP §12.4.
+    """
+    if isinstance(module, str):
+        try:
+            module_code = ModuleCode(module)
+        except ValueError as exc:
+            raise ValueError(f"Unknown module code: {module}") from exc
+    else:
+        module_code = module
+
+    def _check_module_gate() -> None:
+        _check_module_licensed_http(module_code)
+        _check_module_loaded_http(module_code)
+
+    # Naming the function helps FastAPI's OpenAPI generation produce a
+    # readable dependency name in the spec, and pylint stops flagging
+    # the inner def as anonymous.
+    _check_module_gate.__name__ = f"require_module_loaded__{module_code.value}"
+    return _check_module_gate
+
+
 def requires_pro_plus() -> Callable:
     """
     Decorator to require any active Pro+ license.

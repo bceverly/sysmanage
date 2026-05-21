@@ -8,9 +8,44 @@ Exercises:
   - Registration-key create returns the secret EXACTLY ONCE; subsequent
     list calls do not echo it.
   - Revoke is idempotent.
+
+Phase 12.4: both routers are now gated behind the federation
+controller engine.  An autouse fixture below stubs the license-service
++ module-loader checks so the existing access-groups CRUD tests still
+exercise their happy paths without requiring an actual loaded engine.
+The federation-gate behavior itself is covered separately by
+``TestAccessGroupsFederationGate`` at the bottom of this file.
 """
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,redefined-outer-name
+
+from unittest.mock import patch
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _grant_federation_engine(request):
+    """Pretend the ``federation_controller_engine`` module is licensed
+    AND loaded for every test in this file, except those in
+    ``TestAccessGroupsFederationGate`` which want to verify the
+    gate's deny path.
+
+    Without this, every existing access-groups test would 403 at the
+    router-level dependency before reaching its assertion.
+    """
+    if (
+        request.cls is not None
+        and request.cls.__name__ == "TestAccessGroupsFederationGate"
+    ):
+        yield
+        return
+    with patch("backend.licensing.feature_gate.license_service") as mock_license, patch(
+        "backend.licensing.module_loader.module_loader"
+    ) as mock_loader:
+        mock_license.has_module.return_value = True
+        mock_loader.is_module_loaded.return_value = True
+        yield
 
 
 class TestAccessGroupsAuth:
@@ -197,6 +232,101 @@ class TestRegistrationKeys:
         )
         assert r.status_code == 404
 
+    # ------------------------------------------------------------------
+    # Phase 12.4: registration-key federation-site scoping
+    # ------------------------------------------------------------------
+
+    def test_create_with_unknown_site_id_returns_404(self, client, auth_headers):
+        """Validation must reject a ``site_id`` that doesn't reference an
+        existing FederationSite — otherwise a typo or stale client
+        cache would create an unusable key that silently rejects
+        every enrolling agent."""
+        r = client.post(
+            "/api/registration-keys",
+            json={
+                "name": "bad-site",
+                "site_id": "00000000-0000-0000-0000-000000000def",
+            },
+            headers=auth_headers,
+        )
+        assert r.status_code == 404, r.text
+
+    def test_create_without_site_id_keeps_field_null(self, client, auth_headers):
+        """Default OSS / single-server keys have ``site_id=NULL`` so
+        they're not federation-scoped — pre-Phase-12.4 behaviour."""
+        r = client.post(
+            "/api/registration-keys",
+            json={"name": "any-site"},
+            headers=auth_headers,
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["site_id"] is None
+        # ``list`` should also echo NULL.
+        listing = client.get("/api/registration-keys", headers=auth_headers).json()
+        match = [entry for entry in listing if entry["id"] == body["id"]]
+        assert match and match[0]["site_id"] is None
+
+    def test_create_with_valid_site_id_persists(self, client, auth_headers, session):
+        """When the site exists, the key persists its ``site_id`` and
+        the response echoes it.
+
+        Inserts the FederationSite directly via the SQLAlchemy session
+        instead of going through the federation API (which the autouse
+        fixture grants the engine for) — fewer moving parts, just the
+        registration-key path under test."""
+        import uuid
+
+        from backend.persistence.models import FederationSite  # noqa: PLC0415
+
+        site_id = uuid.uuid4()
+        session.add(
+            FederationSite(
+                id=site_id,
+                name="cle-test",
+                url="https://cle.example.com",
+                status="enrolled",
+                created_at=__import__("datetime").datetime.utcnow(),
+                updated_at=__import__("datetime").datetime.utcnow(),
+            )
+        )
+        session.commit()
+
+        r = client.post(
+            "/api/registration-keys",
+            json={"name": "scoped-key", "site_id": str(site_id)},
+            headers=auth_headers,
+        )
+        assert r.status_code == 200, r.text
+        assert r.json()["site_id"] == str(site_id)
+
+    def test_create_with_removed_site_returns_404(self, client, auth_headers, session):
+        """A removed site must not be a valid scope target — its row
+        is preserved for audit but can no longer accept enrollments."""
+        import uuid
+
+        from backend.persistence.models import FederationSite  # noqa: PLC0415
+
+        site_id = uuid.uuid4()
+        session.add(
+            FederationSite(
+                id=site_id,
+                name="dead-site",
+                url="https://dead.example.com",
+                status="removed",
+                created_at=__import__("datetime").datetime.utcnow(),
+                updated_at=__import__("datetime").datetime.utcnow(),
+            )
+        )
+        session.commit()
+
+        r = client.post(
+            "/api/registration-keys",
+            json={"name": "key-for-dead", "site_id": str(site_id)},
+            headers=auth_headers,
+        )
+        assert r.status_code == 404, r.text
+
     def test_delete(self, client, auth_headers):
         created = client.post(
             "/api/registration-keys",
@@ -349,3 +479,70 @@ class TestRegistrationKeyModel:
 
         key = RegistrationKey(name="x", revoked=False, max_uses=None, use_count=0)
         assert key.is_usable() is True
+
+
+# ---------------------------------------------------------------------------
+# Phase 12.4: federation controller engine gate
+# ---------------------------------------------------------------------------
+
+
+class TestAccessGroupsFederationGate:
+    """Verify that both routers (``/api/access-groups`` and
+    ``/api/registration-keys``) return 403 (license missing) or 503
+    (license OK but engine not loaded) when the federation controller
+    engine isn't available.
+
+    The autouse fixture at the top of this file is skipped for this
+    class so the real ``license_service`` / ``module_loader`` calls
+    fire — we patch them explicitly per test for the specific failure
+    mode we want to assert.
+    """
+
+    def test_groups_list_returns_403_when_license_missing(self, client, auth_headers):
+        with patch("backend.licensing.feature_gate.license_service") as mock_license:
+            mock_license.has_module.return_value = False
+            r = client.get("/api/access-groups", headers=auth_headers)
+        assert r.status_code == 403
+        body = r.json()
+        assert body["detail"]["error"] == "pro_plus_required"
+        assert body["detail"]["module"] == "federation_controller_engine"
+
+    def test_groups_list_returns_503_when_license_ok_but_unloaded(
+        self, client, auth_headers
+    ):
+        with patch(
+            "backend.licensing.feature_gate.license_service"
+        ) as mock_license, patch(
+            "backend.licensing.module_loader.module_loader"
+        ) as mock_loader:
+            mock_license.has_module.return_value = True
+            mock_loader.is_module_loaded.return_value = False
+            r = client.get("/api/access-groups", headers=auth_headers)
+        assert r.status_code == 503
+        body = r.json()
+        assert body["detail"]["error"] == "module_not_available"
+        assert body["detail"]["module"] == "federation_controller_engine"
+
+    def test_registration_keys_list_is_gated_too(self, client, auth_headers):
+        """The second router (``/api/registration-keys``) wears the
+        same gate.  A separate test pin so a future refactor that
+        drops the gate on one router but not the other gets caught."""
+        with patch("backend.licensing.feature_gate.license_service") as mock_license:
+            mock_license.has_module.return_value = False
+            r = client.get("/api/registration-keys", headers=auth_headers)
+        assert r.status_code == 403
+        body = r.json()
+        assert body["detail"]["module"] == "federation_controller_engine"
+
+    def test_groups_create_is_gated(self, client, auth_headers):
+        """Write-side endpoints share the router-level dependency, so
+        gating one read endpoint implicitly gates them all — but pin
+        a write to defend against future per-handler override drift."""
+        with patch("backend.licensing.feature_gate.license_service") as mock_license:
+            mock_license.has_module.return_value = False
+            r = client.post(
+                "/api/access-groups",
+                json={"name": "blocked-by-gate"},
+                headers=auth_headers,
+            )
+        assert r.status_code == 403

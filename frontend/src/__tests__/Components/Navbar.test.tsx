@@ -109,13 +109,22 @@ describe('Navbar Component', () => {
     // Use getAllByRole to get all links including hidden ones
     const allLinks = screen.getAllByRole('link', { hidden: true });
     
-    // Verify we have the expected links (no more logout link in main nav)
-    expect(allLinks).toHaveLength(9); // SysManage logo + 8 nav links (Dashboard, Users, Hosts, Updates, OS Upgrades, Secrets, Scripts, Reports)
+    // Verify we have the expected links (no more logout link in main nav).
+    // Phase 12.7: added /map (host geolocation world view).
+    // Phase 12.3: added /sites (federation sites page), gated on the
+    // federation controller engine being loaded.  In this test the
+    // MSW federation handler isn't installed, so the probe falls
+    // through to ``licensed: false`` and the Sites entry is hidden —
+    // exactly the OSS behaviour we want.  10 links: logo + Dashboard,
+    // Users, Hosts, Map, Updates, OS Upgrades, Secrets, Scripts, Reports.
+    expect(allLinks).toHaveLength(10);
 
     // Find links by their href attributes since they don't have accessible names when hidden
     const dashboardLink = allLinks.find(link => link.getAttribute('href') === '/');
     const usersLink = allLinks.find(link => link.getAttribute('href') === '/users');
     const hostsLink = allLinks.find(link => link.getAttribute('href') === '/hosts');
+    const mapLink = allLinks.find(link => link.getAttribute('href') === '/map');
+    const sitesLink = allLinks.find(link => link.getAttribute('href') === '/sites');
     const updatesLink = allLinks.find(link => link.getAttribute('href') === '/updates');
     const osUpgradesLink = allLinks.find(link => link.getAttribute('href') === '/os-upgrades');
     const secretsLink = allLinks.find(link => link.getAttribute('href') === '/secrets');
@@ -125,6 +134,11 @@ describe('Navbar Component', () => {
     expect(dashboardLink).toHaveAttribute('href', '/');
     expect(usersLink).toHaveAttribute('href', '/users');
     expect(hostsLink).toHaveAttribute('href', '/hosts');
+    expect(mapLink).toHaveAttribute('href', '/map');
+    // Sites is OFF in tests — see the comment above.  Asserting
+    // ``undefined`` here pins the gated-out state so a future
+    // refactor that accidentally always-renders it gets caught.
+    expect(sitesLink).toBeUndefined();
     expect(updatesLink).toHaveAttribute('href', '/updates');
     expect(osUpgradesLink).toHaveAttribute('href', '/os-upgrades');
     expect(secretsLink).toHaveAttribute('href', '/secrets');

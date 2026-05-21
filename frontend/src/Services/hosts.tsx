@@ -111,6 +111,14 @@ type SysManageHost = {
     virtualization_capabilities?: string;  // JSON string with detailed capabilities
     // Timezone
     timezone?: string;
+    // Phase 12.7: agent-reported public IP + GeoLite2 resolution
+    public_ip?: string | null;
+    public_ip_resolved_at?: string | null;
+    geo_country_code?: string | null;
+    geo_subdivision_code?: string | null;
+    geo_city?: string | null;
+    geo_latitude?: number | null;
+    geo_longitude?: number | null;
 }
 
 type StorageDevice = {

@@ -4191,6 +4191,28 @@ const HostDetail = () => { // NOSONAR
                                 </Grid>
                                 <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.publicIp', 'Public IP')}
+                                    </Typography>
+                                    <Typography variant="body1">{host.public_ip || t('common.notAvailable')}</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.geoLocation', 'Geographic Location')}
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {host.geo_city || host.geo_country_code
+                                            ? [
+                                                host.geo_city,
+                                                host.geo_subdivision_code,
+                                                host.geo_country_code,
+                                              ]
+                                                  .filter(Boolean)
+                                                  .join(', ')
+                                            : t('common.notAvailable')}
+                                    </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
                                         {t('hosts.status', 'Status')}
                                     </Typography>
                                     <Chip

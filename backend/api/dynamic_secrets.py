@@ -20,6 +20,8 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.feature_gate import require_module_loaded
+from backend.licensing.features import ModuleCode
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models.dynamic_secrets import (
@@ -43,10 +45,21 @@ from backend.services.dynamic_secrets import (
 logger = logging.getLogger(__name__)
 
 
+# Phase 12.5: gate the dynamic-secrets surface behind ``secrets_engine``.
+# Static secret CRUD was already gated in Phase 2.3; the dynamic-lease
+# half (this file) is the natural dependent and is folded in here so
+# both halves move together.  The federation-aware lease channel
+# (coordinator owns the master Vault; sites request leases via the
+# downstream channel) lives in the engine module the Pro+ build wires
+# in — this OSS gate just denies the route until that engine loads.
+# Single Depends instance is shared across the router so the license
+# probe happens once per request.
+_SECRETS_GATE = Depends(require_module_loaded(ModuleCode.SECRETS_ENGINE))
+
 router = APIRouter(
     prefix="/api/dynamic-secrets",
     tags=["dynamic-secrets"],
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), _SECRETS_GATE],
 )
 
 

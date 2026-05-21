@@ -37,6 +37,12 @@ import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import AirgapRepositories from './Pages/AirgapRepositories';
+import FederationAuditLog from './Pages/FederationAuditLog';
+import FederationPolicies from './Pages/FederationPolicies';
+import MapView from './Pages/MapView';
+import Sites from './Pages/Sites';
+import SiteDetail from './Pages/SiteDetail';
+import SitesMap from './Pages/SitesMap';
 import Logout from './Pages/Logout';
 import { PluginProvider, usePlugins } from './plugins';
 
@@ -62,6 +68,14 @@ function AppRoutes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/airgap/repositories" element={<AirgapRepositories />} />
+      <Route path="/map" element={<MapView />} />
+      <Route path="/sites" element={<Sites />} />
+      {/* ``/sites/map`` is listed BEFORE the dynamic ``:siteId``
+          variant so react-router prefers the literal match. */}
+      <Route path="/sites/map" element={<SitesMap />} />
+      <Route path="/sites/:siteId" element={<SiteDetail />} />
+      <Route path="/audit/federation" element={<FederationAuditLog />} />
+      <Route path="/federation/policies" element={<FederationPolicies />} />
       <Route path="/logout" element={<Logout />} />
       {routes.map(route => (
         <Route

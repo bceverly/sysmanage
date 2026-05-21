@@ -20,6 +20,7 @@ import {
     Button,
     Card,
     CardContent,
+    CardHeader,
     Checkbox,
     Chip,
     CircularProgress,
@@ -42,6 +43,7 @@ import {
     MenuItem,
     Paper,
     Select,
+    Snackbar,
     Stack,
     Switch,
     Tab,
@@ -61,13 +63,17 @@ import {
 import { DataGrid } from '@mui/x-data-grid';
 
 // MUI Icons used by plugins
+import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BlockIcon from '@mui/icons-material/Block';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import BusinessIcon from '@mui/icons-material/Business';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ComputerIcon from '@mui/icons-material/Computer';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import ErrorIcon from '@mui/icons-material/Error';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExtensionIcon from '@mui/icons-material/Extension';
@@ -115,6 +121,7 @@ import { pluginManager } from './PluginManager';
         Button,
         Card,
         CardContent,
+        CardHeader,
         Checkbox,
         Chip,
         CircularProgress,
@@ -137,6 +144,7 @@ import { pluginManager } from './PluginManager';
         MenuItem,
         Paper,
         Select,
+        Snackbar,
         Stack,
         Switch,
         Tab,
@@ -155,13 +163,17 @@ import { pluginManager } from './PluginManager';
         DataGrid,
     },
     MuiIcons: {
+        AddIcon,
         ArrowBackIcon,
+        BlockIcon,
         BugReportIcon,
         BusinessIcon,
         CalendarTodayIcon,
         CheckCircleIcon,
         ComputerIcon,
+        ContentCopyIcon,
         DeleteIcon,
+        EditIcon,
         ErrorIcon,
         ExpandMoreIcon,
         ExtensionIcon,

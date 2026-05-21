@@ -17,6 +17,8 @@ SQLite Compatibility Rules:
 See README.md and TESTING.md for detailed guidelines.
 """
 
+# pylint: disable=too-many-lines
+
 import hashlib
 import os
 import tempfile
@@ -32,6 +34,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     LargeBinary,
@@ -162,6 +165,15 @@ def test_db():
         parent_host_id = Column(
             GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True
         )
+
+        # Phase 12.7: agent-reported public IP + GeoLite2 resolution
+        public_ip = Column(String(45), nullable=True)
+        public_ip_resolved_at = Column(DateTime, nullable=True)
+        geo_country_code = Column(String(2), nullable=True)
+        geo_subdivision_code = Column(String(10), nullable=True)
+        geo_city = Column(String(200), nullable=True)
+        geo_latitude = Column(Float, nullable=True)
+        geo_longitude = Column(Float, nullable=True)
 
         # Add relationship
         tags = relationship(
@@ -697,6 +709,34 @@ def test_db():
         host = relationship("Host", back_populates="firewall_roles")
         firewall_role = relationship("FirewallRole", back_populates="host_assignments")
 
+    # Phase 12.6 — federation_sites mirror.  Tests that exercise
+    # registration-key ``site_id`` validation (Phase 12.4) INSERT
+    # rows directly via the production SQLAlchemy class, so the
+    # test schema must include every column the production INSERT
+    # emits — not just the ones the tests read.  Columns kept in
+    # lockstep with ``backend/persistence/models/federation.py``.
+    class FederationSite(TestBase):
+        __tablename__ = "federation_sites"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        name = Column(String(255), nullable=False, unique=True)
+        location_label = Column(String(255), nullable=True)
+        url = Column(String(512), nullable=False)
+        tls_cert_pem = Column(Text, nullable=True)
+        enrollment_token_hash = Column(String(128), nullable=True)
+        enrollment_token_expires_at = Column(DateTime, nullable=True)
+        enrolled_at = Column(DateTime, nullable=True)
+        status = Column(String(32), nullable=False, default="enrolled")
+        host_count = Column(Integer, nullable=False, default=0)
+        last_sync_at = Column(DateTime, nullable=True)
+        last_sync_status = Column(String(32), nullable=True)
+        sync_interval_seconds = Column(Integer, nullable=False, default=300)
+        agent_version_min = Column(String(32), nullable=True)
+        geo_latitude = Column(Float, nullable=True)
+        geo_longitude = Column(Float, nullable=True)
+        geo_country_code = Column(String(2), nullable=True)
+        created_at = Column(DateTime, nullable=False)
+        updated_at = Column(DateTime, nullable=False)
+
     # Phase 8.1 — access groups + registration keys (test-side mirrors).
     class AccessGroup(TestBase):
         __tablename__ = "access_groups"
@@ -724,6 +764,12 @@ def test_db():
             ForeignKey("access_groups.id", ondelete="SET NULL"),
             nullable=True,
         )
+        # Phase 12.4: federation-site scope.  No FK constraint here
+        # because the test TestBase metadata doesn't include the
+        # ``federation_sites`` table — referential integrity is
+        # enforced in production via the m1fedschema FK; tests just
+        # need the column to exist for SELECT/INSERT.
+        site_id = Column(GUID(), nullable=True)
         auto_approve = Column(Boolean, nullable=False, default=False)
         revoked = Column(Boolean, nullable=False, default=False)
         max_uses = Column(Integer, nullable=True)

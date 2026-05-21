@@ -316,6 +316,23 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("Heartbeat monitor task created: %s", heartbeat_task)
         logger.info("Heartbeat monitor service started successfully")
 
+        # Phase 12.7: Start the GeoLite2 weekly-refresh background task.
+        # Self-skipping when geo_lookup is disabled or no MaxMind license
+        # key is configured — operators who don't want geo-IP just leave
+        # the config defaults and the task sleeps forever without doing
+        # any work.  See backend/services/geolocation_service.py for
+        # the refresh + ipapi.co fallback logic.
+        try:
+            logger.info("=== GEOLITE2 REFRESH STARTUP ===")
+            from backend.services.geolocation_service import (  # noqa: PLC0415
+                geolite_refresh_service,
+            )
+
+            geolite_refresh_task = asyncio.create_task(geolite_refresh_service())
+            logger.info("GeoLite2 refresh task created: %s", geolite_refresh_task)
+        except Exception as geo_exc:  # pylint: disable=broad-exception-caught
+            logger.warning("Failed to start GeoLite2 refresh task: %s", geo_exc)
+
         # Startup: Start the Graylog health monitor service
         logger.info("=== GRAYLOG HEALTH MONITOR STARTUP ===")
         logger.info("About to start Graylog health monitor service")

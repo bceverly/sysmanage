@@ -22,6 +22,8 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.feature_gate import require_module_loaded
+from backend.licensing.features import ModuleCode
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -40,15 +42,28 @@ _ERR_ACCESS_GROUP_NOT_FOUND = "Access group not found"
 _ERR_REGISTRATION_KEY_NOT_FOUND = "Registration key not found"
 
 
+# Phase 12.4: both routers below are gated behind the federation
+# controller engine.  The OSS schema for ``access_groups`` /
+# ``registration_keys`` stays in place (existing rows aren't lost,
+# alembic migrations still apply) but the API surface returns 403
+# (license missing) or 503 (engine not loaded) instead of letting
+# unlicensed callers exercise multi-tenant fleet segmentation.
+# Single ``Depends()`` instance is shared by both routers so the
+# license probe happens once per request.
+_FEDERATION_GATE = Depends(
+    require_module_loaded(ModuleCode.FEDERATION_CONTROLLER_ENGINE)
+)
+
+
 groups_router = APIRouter(
     prefix="/api/access-groups",
     tags=["access-groups"],
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), _FEDERATION_GATE],
 )
 keys_router = APIRouter(
     prefix="/api/registration-keys",
     tags=["registration-keys"],
-    dependencies=[Depends(JWTBearer())],
+    dependencies=[Depends(JWTBearer()), _FEDERATION_GATE],
 )
 
 
@@ -81,6 +96,11 @@ class AccessGroupResponse(BaseModel):
 class RegistrationKeyCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     access_group_id: Optional[str] = None
+    # Phase 12.4: optional federation-site scope.  When set, hosts
+    # presenting this key are accepted ONLY at the named subordinate
+    # site — coordinator-issued keys can be scoped per site so a
+    # leaked key from one site can't be reused to enroll into another.
+    site_id: Optional[str] = None
     auto_approve: bool = False
     max_uses: Optional[int] = Field(None, ge=1)
     expires_at: Optional[datetime] = None
@@ -90,6 +110,9 @@ class RegistrationKeyResponse(BaseModel):
     id: str
     name: str
     access_group_id: Optional[str] = None
+    # Phase 12.4: mirrors the request field.  NULL means the key
+    # works at any site (default OSS / single-server behaviour).
+    site_id: Optional[str] = None
     auto_approve: bool
     revoked: bool
     max_uses: Optional[int] = None
@@ -350,6 +373,20 @@ async def create_registration_key(
     ):
         raise HTTPException(status_code=404, detail=_(_ERR_ACCESS_GROUP_NOT_FOUND))
 
+    # Phase 12.4: validate optional site scope.  If the caller
+    # specified a ``site_id``, it must reference an existing,
+    # non-removed ``FederationSite`` — otherwise a typo or stale
+    # client cache would silently create an unusable key.
+    site_uuid = _parse_uuid_or_400(request.site_id, "site_id")
+    if site_uuid is not None:
+        site = (
+            db.query(models.FederationSite)
+            .filter(models.FederationSite.id == site_uuid)
+            .first()
+        )
+        if site is None or site.status == "removed":
+            raise HTTPException(status_code=404, detail=_("Federation site not found"))
+
     expires = request.expires_at
     if expires is not None and expires.tzinfo is not None:
         # Persistence layer stores naive UTC.
@@ -358,6 +395,7 @@ async def create_registration_key(
     key = models.RegistrationKey(
         name=request.name,
         access_group_id=ag_uuid,
+        site_id=site_uuid,
         auto_approve=request.auto_approve,
         max_uses=request.max_uses,
         expires_at=expires,

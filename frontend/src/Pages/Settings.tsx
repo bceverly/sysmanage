@@ -49,7 +49,6 @@ import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
-import AccessGroupsSettings from '../Components/AccessGroupsSettings';
 import UpgradeProfilesSettings from '../Components/UpgradeProfilesSettings';
 import PackageProfilesSettings from '../Components/PackageProfilesSettings';
 import ReportBrandingSettings from '../Components/ReportBrandingSettings';
@@ -199,10 +198,14 @@ const Settings: React.FC = () => {
         moduleRequired: 'firewall_orchestration_engine',
       },
       { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
-      // Access Groups, Compliance Profiles, Dynamic Secrets: visibility
-      // deferred until their respective Pro+ folds-in land.  They remain
-      // visible (and OSS-functional) until then.
-      { id: 'access-groups', labelKey: 'accessGroups.tabLabel', labelDefault: 'Access Groups' },
+      // Dynamic Secrets: visibility deferred until its Pro+ fold-in
+      // lands.  Stays visible (and OSS-functional) until then.
+      //
+      // Access Groups + Registration Keys (Phase 12.4): contributed at
+      // runtime via the federation controller plugin bundle (see
+      // ``sysmanage-professional-plus/frontend/plugin-src/entries/federation-controller-entry.ts``).
+      // Picked up by the ``pluginSettingsTabs`` loop further down with
+      // ``moduleRequired: 'federation_controller_engine'`` gating.
       {
         id: 'update-profiles',
         labelKey: 'upgradeProfiles.tabLabel',
@@ -1261,7 +1264,6 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'host-defaults' && <HostDefaultsSettings />}
         {tabNames[activeTab] === 'firewall-roles' && <FirewallRolesSettings />}
         {tabNames[activeTab] === 'distributions' && <DistributionsSettings />}
-        {tabNames[activeTab] === 'access-groups' && <AccessGroupsSettings />}
         {tabNames[activeTab] === 'update-profiles' && <UpgradeProfilesSettings />}
         {tabNames[activeTab] === 'compliance-profiles' && <PackageProfilesSettings />}
         {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}

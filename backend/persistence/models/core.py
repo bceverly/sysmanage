@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     LargeBinary,
@@ -174,6 +175,24 @@ class Host(Base):
     # Parent host reference for child hosts (WSL instances, VMs, containers)
     # NULL for standalone hosts, populated for child hosts
     parent_host_id = Column(GUID(), nullable=True, index=True)
+
+    # Phase 12.7: Public IP + GeoLite2 geo-location.
+    #
+    # The agent fetches its public-facing IP at startup + on a 24h
+    # heartbeat cadence (configurable) from a small allowlist of
+    # public echo endpoints (api.ipify.org / ifconfig.co / icanhazip.com),
+    # silently skipping when none are reachable so air-gapped hosts
+    # stay air-gapped.  The server caches the result and only
+    # re-resolves via GeoLite2 when the IP changes.  See Phase 12.7 in
+    # ROADMAP.md for the full design (offline-first lookup, ipapi.co
+    # fallback only on cache miss, opt-out via ``no_geo_track`` tag).
+    public_ip = Column(String(45), nullable=True)
+    public_ip_resolved_at = Column(DateTime, nullable=True)
+    geo_country_code = Column(String(2), nullable=True)
+    geo_subdivision_code = Column(String(10), nullable=True)
+    geo_city = Column(String(200), nullable=True)
+    geo_latitude = Column(Float, nullable=True)
+    geo_longitude = Column(Float, nullable=True)
 
     # Relationships
     tags = relationship(

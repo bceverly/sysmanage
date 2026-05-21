@@ -3,6 +3,7 @@ Core message handlers for SysManage agent WebSocket communication.
 Handles authentication, system info, and heartbeat messages from agents.
 """
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 
@@ -459,6 +460,69 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 agent_version = message_data.get("agent_version")
                 if agent_version:
                     host.agent_version = agent_version
+
+                # Phase 12.7: resolve public-IP -> geo when the agent reports it.
+                # The agent fetches its public IP at startup + on the
+                # 24h heartbeat cadence; we only re-resolve via the
+                # GeoLite2 / ipapi.co chain when the IP actually
+                # changed (or the geo columns are NULL).  Saves both
+                # MaxMind DB reads and the ipapi.co rate-limit budget
+                # on steady-state hosts whose public IP doesn't move.
+                #
+                # Runs in a worker thread because geolocation_service
+                # is synchronous (memory-mapped MaxMind read + optional
+                # httpx.get to ipapi.co).  We don't block the heartbeat
+                # ack on geo failure — None result leaves the existing
+                # columns alone.
+                reported_public_ip = message_data.get("public_ip")
+                if reported_public_ip:
+                    # Phase 12.7 privacy opt-out: a host carrying the
+                    # ``no_geo_track`` tag is excluded from any
+                    # geo-resolution call — we don't persist the
+                    # public IP, don't call MaxMind / ipapi.co, and
+                    # don't touch the existing geo columns.  Operator-
+                    # facing contract: tag the host, the map forgets
+                    # about it.
+                    from backend.services.geolocation_service import (  # noqa: PLC0415
+                        NO_GEO_TRACK_TAG,
+                        lookup_ip,
+                    )
+
+                    opt_out = (
+                        host.tags.filter_by(name=NO_GEO_TRACK_TAG).first() is not None
+                    )
+                    if not opt_out:
+                        ip_changed = host.public_ip != reported_public_ip
+                        never_resolved = host.geo_country_code is None
+                        if ip_changed or never_resolved:
+                            host.public_ip = reported_public_ip
+                            host.public_ip_resolved_at = datetime.now(
+                                timezone.utc
+                            ).replace(tzinfo=None)
+                            try:
+                                geo = await asyncio.to_thread(
+                                    lookup_ip, reported_public_ip
+                                )
+                                if geo is not None:
+                                    host.geo_country_code = geo.country_code
+                                    host.geo_subdivision_code = geo.subdivision_code
+                                    host.geo_city = geo.city
+                                    host.geo_latitude = geo.latitude
+                                    host.geo_longitude = geo.longitude
+                            except (
+                                Exception
+                            ) as geo_err:  # pylint: disable=broad-exception-caught
+                                # Never let a geo lookup failure derail
+                                # the heartbeat write — the public_ip
+                                # is already persisted above, geo
+                                # columns just stay at their previous
+                                # values until the next heartbeat
+                                # resolves cleanly.
+                                logger.debug(
+                                    "Heartbeat: geo lookup for %s failed: %s",
+                                    reported_public_ip,
+                                    geo_err,
+                                )
 
                 # Check for pending reboot orchestration (Pro+ safe reboot)
                 try:
