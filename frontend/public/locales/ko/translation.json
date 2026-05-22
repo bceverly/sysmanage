@@ -1009,8 +1009,8 @@
       "repository": "저장소"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "지도",
+    "sites": "사이트"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -1953,41 +1953,6 @@
     "updated": "템플릿이 저장되었습니다",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "시크릿이 클립보드에 복사됨",
-    "copy": "복사",
-    "copyError": "복사에 실패했습니다",
-    "empty": "현재 필터와 일치하는 리스가 없습니다.",
-    "expiresAt": "만료",
-    "expiresOn": "만료:",
-    "issue": "리스 발급",
-    "issueError": "리스 발급에 실패했습니다",
-    "issueTitle": "새 리스 발급",
-    "issuedAt": "발급됨",
-    "kind": "종류",
-    "loadError": "리스를 불러오지 못했습니다",
-    "name": "이름",
-    "nameRequired": "이름이 필요합니다",
-    "note": "메모 (선택)",
-    "reconcile": "조정",
-    "reconcileError": "조정에 실패했습니다",
-    "reconciled": "만료된 리스 {{count}}건이 표시됨",
-    "revealTitle": "리스 발급됨 — 지금 복사하세요",
-    "revealWarning": "시크릿이 표시되는 유일한 기회입니다. 지금 복사하세요 — 이 대화 상자를 닫은 후에는 복구할 수 없습니다.",
-    "revoke": "취소",
-    "revokeError": "취소에 실패했습니다",
-    "revoked": "리스가 취소되었습니다",
-    "role": "백엔드 역할",
-    "roleRequired": "백엔드 역할이 필요합니다",
-    "secret": "시크릿 값",
-    "status": "상태",
-    "statusFilter": "상태 필터",
-    "subtitle": "OpenBAO/Vault를 통해 발급되어 자동 만료되는 단기 자격 증명",
-    "title": "동적 시크릿",
-    "ttl": "TTL (초)",
-    "ttlHelp": "리스 수명 — {{min}}초에서 {{max}}초 사이",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "삭제",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

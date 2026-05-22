@@ -725,6 +725,8 @@ def test_db():
         enrollment_token_hash = Column(String(128), nullable=True)
         enrollment_token_expires_at = Column(DateTime, nullable=True)
         enrolled_at = Column(DateTime, nullable=True)
+        sync_bearer_token_hash = Column(String(128), nullable=True)
+        coordinator_outbound_bearer_token = Column(Text, nullable=True)
         status = Column(String(32), nullable=False, default="enrolled")
         host_count = Column(Integer, nullable=False, default=0)
         last_sync_at = Column(DateTime, nullable=True)

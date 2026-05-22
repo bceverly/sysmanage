@@ -1009,8 +1009,8 @@
       "repository": "रिपॉजिटरी"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "मानचित्र",
+    "sites": "साइटें"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -1953,41 +1953,6 @@
     "updated": "टेम्पलेट सहेजा गया",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "क्लिपबोर्ड पर सीक्रेट कॉपी किया गया",
-    "copy": "कॉपी",
-    "copyError": "कॉपी विफल",
-    "empty": "वर्तमान फ़िल्टर से कोई लीज़ मेल नहीं खाती।",
-    "expiresAt": "समाप्ति",
-    "expiresOn": "समाप्ति:",
-    "issue": "लीज़ जारी करें",
-    "issueError": "लीज़ जारी करने में विफल",
-    "issueTitle": "नई लीज़ जारी करें",
-    "issuedAt": "जारी किया गया",
-    "kind": "प्रकार",
-    "loadError": "लीज़ लोड करने में विफल",
-    "name": "नाम",
-    "nameRequired": "नाम आवश्यक है",
-    "note": "नोट (वैकल्पिक)",
-    "reconcile": "सुलह करें",
-    "reconcileError": "सुलह विफल",
-    "reconciled": "{{count}} समाप्त लीज़ चिह्नित",
-    "revealTitle": "लीज़ जारी की गई — अभी कॉपी करें",
-    "revealWarning": "यह केवल एक बार है जब सीक्रेट दिखाया जाएगा। अभी कॉपी करें — इस संवाद को बंद करने के बाद इसे पुनर्प्राप्त नहीं किया जा सकता।",
-    "revoke": "रद्द करें",
-    "revokeError": "रद्द करने में विफल",
-    "revoked": "लीज़ रद्द की गई",
-    "role": "बैकएंड भूमिका",
-    "roleRequired": "बैकएंड भूमिका आवश्यक है",
-    "secret": "सीक्रेट मान",
-    "status": "स्थिति",
-    "statusFilter": "स्थिति फ़िल्टर",
-    "subtitle": "OpenBAO/Vault के माध्यम से जारी अल्पकालिक क्रेडेंशियल जो स्वतः समाप्त होते हैं",
-    "title": "डायनामिक सीक्रेट्स",
-    "ttl": "TTL (सेकंड)",
-    "ttlHelp": "लीज़ जीवनकाल — {{min}} और {{max}} सेकंड के बीच",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "हटाएं",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

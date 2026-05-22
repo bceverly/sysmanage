@@ -2629,19 +2629,34 @@ leaving only Dynamic Secrets on the "deferred" list (waits on
 12.5).
 
 **Migration Steps:**
-1. [ ] Move `AccessGroup`, `RegistrationKey`, `HostAccessGroup`, and
-       `UserAccessGroup` models into `federation_controller_engine` —
-       the coordinator becomes the authoritative source for tenant /
-       group definitions, sites pull them on policy sync
-       *(stays in OSS for now — relocating SQLAlchemy classes from
-       Python to Cython requires the engine repo)*
+1. **[Deferred — not load-bearing]** Move `AccessGroup`,
+   `RegistrationKey`, `HostAccessGroup`, and `UserAccessGroup`
+   models into `federation_controller_engine`.  *Rationale (May 2026):*
+   the functional intent ("coordinator is the authoritative source")
+   is already satisfied by step 4's router-level
+   `require_module_loaded` gate — the API surface that mutates the
+   models won't respond on a site that isn't federation-licensed.
+   Physically relocating the SQLAlchemy classes into the Cython
+   engine would break OSS imports (`host.py` registration flow,
+   Alembic migrations, ~30 test files), require a parallel test-
+   harness shim for tests that need the classes, and deliver no
+   user-visible behaviour change.  Architectural purity vs. cost
+   trade-off didn't pencil out.  Re-open if a concrete bug or
+   feature ever requires a hard boundary here.
 2. [x] Extend the federation enrollment flow (12.1) so registration
        keys carry an optional `site_id` scope — schema + validation
        landed in migration `n3regkey12d`, API surface accepts/echoes
        the field
-3. [ ] Recursive descendant lookup (the legacy hot path) becomes a
-       coordinator-side responsibility; sites cache the materialized
-       view they need locally to avoid round-trips on every enroll
+3. **[Deferred — solves a non-problem]** Recursive descendant
+   lookup becomes a coordinator-side responsibility; sites cache
+   the materialized view locally.  *Rationale (May 2026):* code
+   path audit found no actual cross-site descendant lookup in the
+   wire protocol — `host.py::_validate_registration_key` does a
+   single-row hash lookup, no tree descent.  The "materialized
+   view + invalidation on push" design would address a round-trip
+   that doesn't happen.  Re-open if a future feature (e.g.,
+   coordinator-side bulk re-key, fleet-wide group-membership
+   queries) introduces a real descendant-lookup hot path.
 4. [x] Gate `/api/access-groups/*` and `/api/registration-keys/*`
        behind `federation_controller_engine` (router-level
        `require_module_loaded` Depends)
@@ -2690,20 +2705,43 @@ existing + 3 new gate-deny tests) cover the licensed and unlicensed
 paths.
 
 **Migration Steps:**
-1. [ ] Move `DynamicSecretLease` model + service into `secrets_engine.pyx`
-       alongside the existing static-secret CRUD
-       *(stays in OSS for now — relocation needs the engine repo)*
+1. **[Deferred — same reasoning as 12.4 step 1]** Move
+   `DynamicSecretLease` model + service into `secrets_engine.pyx`.
+   *Rationale (May 2026):* the API gate (step 4 below) already
+   delivers the functional intent — sites without
+   ``secrets_engine`` loaded can't mutate the model at all.
+   Physically relocating the SQLAlchemy class to Cython would
+   break OSS imports + Alembic migrations + test fixtures for
+   no user-visible benefit.  Re-open if a hard boundary is ever
+   needed.
 2. [ ] Add a federation-aware lease-issue path: the coordinator owns
        the master Vault; sites can request leases on behalf of their
        hosts via the federation downstream channel (existing 12.2
-       command dispatch infrastructure)
+       command dispatch infrastructure).  *Real future work; needs
+       a new ``request_dynamic_secret`` command type + lease-result
+       echo through the inbox surface.*
 3. [ ] Sweeper/reconcile loop runs at the coordinator — no need for
-       per-site sweepers because all leases live in the master Vault
+       per-site sweepers because all leases live in the master Vault.
+       *Real future work; needs an aiohttp/httpx Vault-side fan-out
+       that touches every enrolled site's tracked leases.*
 4. [x] Gate `/api/dynamic-secrets/*` behind `secrets_engine` loaded
        (consistent with the existing static-secrets gate from Phase 2.3)
-5. [ ] Frontend `DynamicSecretsSettings.tsx` moves into the secrets_engine
-       plugin bundle *(stays in OSS for now)*
-6. [ ] i18n/l10n for all 14 languages — pending engine UI
+5. [x] Frontend `DynamicSecretsSettings.tsx` moves into the secrets_engine
+       plugin bundle (May 2026).  513 LOC of TSX + 76 LOC of service
+       relocated to `sysmanage-professional-plus/frontend/plugin-src/
+       components/DynamicSecretsSettings.tsx` with shim imports and
+       inline service helpers; registered as a settings tab in
+       `secrets-entry.ts` gated on `moduleRequired: 'secrets_engine'`.
+       OSS shells (`DynamicSecretsSettings.tsx`, `Services/
+       dynamicSecrets.ts`, `Settings.tsx` import + tab def + render
+       block) deleted; `dynamicSecrets.*` keys stripped from all 14
+       locales.  Without a secrets_engine license, the tab no longer
+       appears in Settings.
+6. [x] i18n/l10n for all 14 languages — landed alongside step 5; the
+       `dynamicSecrets.*` namespace lives in `secrets-entry.ts` (en)
+       and `secrets-i18n.ts` (13 foreign locales), and the OSS
+       `[TODO]` placeholder for `confirmRevoke` was translated in
+       the same pass.
 
 **Estimated Size:** ~253 lines migrated from OSS, plus federation glue
 in `secrets_engine.pyx`.
@@ -3213,6 +3251,298 @@ distro/OS combinations."  Estimated 1-2 weeks of focused work,
 mostly per-channel publish-pipeline plumbing rather than novel
 engineering.  Several entries (Mac App Store, Microsoft Store) may
 remain permanently ❌ due to sandboxing incompatibilities.
+
+#### 12.10 Federation wire protocol
+
+The federation engines from 12.1.G and 12.2.B expose HTTP route
+surfaces but no actual cross-server transport — enrolling a second
+site is decorative until sites can push rollup data to the coordinator
+and the coordinator can push policies and dispatched commands back.
+This phase wires up the transport in three coherent slices.
+
+**Status (12.10 Slice 1 — coordinator ingest surface + bearer auth):**
+✅ Landed (May 2026).  Five new POST endpoints in
+`federation_controller_engine.pyx` give sites somewhere to push
+data into the coordinator:
+
+  - `POST /api/v1/federation/sites/{id}/rollups/hosts`
+  - `POST /api/v1/federation/sites/{id}/rollups/compliance`
+  - `POST /api/v1/federation/sites/{id}/rollups/vulnerabilities`
+  - `POST /api/v1/federation/sites/{id}/host-directory` (batched
+    deltas — malformed rows skip without failing the batch)
+  - `POST /api/v1/federation/sites/{id}/command-results` (batched
+    FSM transitions — terminal/idempotent failures captured in a
+    ``skipped`` array rather than 4xx'ing the whole call)
+
+Each endpoint wraps the existing OSS service layer (`record_*_rollup_snapshot`,
+`upsert_host_directory_entry`, `update_command_status`).
+
+**Auth model.** Long-lived per-site bearer tokens, minted at
+`complete_enrollment` time and returned to the caller exactly once
+(plaintext); only the SHA-256 hash persists on the coordinator in
+the new `federation_sites.sync_bearer_token_hash` column (migration
+`o4syncauth_add_sync_bearer_token.py`, idempotent, cross-dialect).
+The engine's `_verify_site_bearer` dependency extracts
+`Authorization: Bearer <token>`, looks up the owning site via
+`site_svc.find_site_by_sync_bearer_token`, and rejects (403) if the
+resolved site doesn't match the `{site_id}` in the URL — preventing
+a leaked bearer for site A from pushing fake data attributed to
+site B.  `remove_site` scrubs the bearer hash so administratively
+removed sites can't keep pushing.  mTLS is deferred as a future
+hardening pass — bearer-over-TLS is sufficient for v1.
+
+**OSS-side parallel work:**
+  - 5 matching stub endpoints in `mount_proplus_stub_routes` that
+    return `200 {"licensed": false}` when the engine isn't loaded.
+    The stub count locked test bumped 27 → 32.
+  - Eight new service-layer tests in `tests/services/test_federation_site_service.py`
+    cover `generate_sync_bearer_token`, `find_site_by_sync_bearer_token`,
+    `complete_enrollment`'s tuple return, suspended/removed lookup
+    rejection, two-site bearer uniqueness, and remove-time scrub.
+  - `tests/api/conftest.py` FederationSite mirror gained the new
+    column so API tests can INSERT without schema drift.
+  - 302/302 federation-related tests pass; pylint 10.00/10;
+    cython-lint clean.
+
+**Status (12.10 Slice 2 — site outbound worker):** ✅ Landed (May 2026).
+The Pro+ `federation_site_engine` now drains
+`federation_sync_queue` to the coordinator's ingest surface on a
+configurable tick interval.  Wired into
+`backend/startup/lifecycle.py` behind `provides_background_task`,
+matching the pattern used by `alerting_engine`,
+`automation_engine`, `fleet_engine`, etc.
+
+**Wire-protocol contract.**  Five payload types route to five
+endpoints under `/api/v1/federation/sites/{site_id}/...`:
+
+  - `host_rollup` → `POST .../rollups/hosts`
+  - `compliance_rollup` → `POST .../rollups/compliance`
+  - `vulnerability_rollup` → `POST .../rollups/vulnerabilities`
+  - `host_directory` → `POST .../host-directory`
+  - `command_result` → `POST .../command-results`
+
+Auth is the Slice-1 bearer presented as `Authorization: Bearer
+<token>`.  Unknown payload types fail closed: the entry stays in
+the queue but is `mark_failed`'d so operators see the drift on
+`/site/sync-status` rather than data silently disappearing.
+
+**Storage additions.**  Migration `p5sitebearer_add_coordinator_sync_bearer.py`
+(idempotent, cross-dialect) adds `federation_coordinator.sync_bearer_token`
+— plaintext, nullable.  Distinct from the coordinator's per-site
+`federation_sites.sync_bearer_token_hash` (which only keeps the
+SHA-256): the SITE has to hold the literal bearer because every
+outbound HTTP request needs the original header.  Filesystem
+permissions on the DB protect it at rest; rotation replaces the
+value via the enrollment refresh flow.  `mark_enrolled()` gained
+an optional `sync_bearer_token` kwarg; `clear_enrollment()` and
+the removed-status path scrub it.
+
+**Worker mechanics.**  `_drain_once` is the testable unit-of-work
+coroutine — pure async, accepts an injectable `http_client`, runs
+exactly one tick (read coordinator config → peek batch → post each
+entry → mark sent/failed → record_sync_attempt → commit).  The
+outer `start_federation_sync_worker` wraps it in a `while True`
+that re-reads `sync_interval_seconds` from the row each iteration
+(operator can bump it at runtime without restart, floored at 5s to
+prevent a coordinator-hammering hot loop).  Cancellation via
+`asyncio.CancelledError` exits cleanly and closes the owned
+`httpx.AsyncClient`.
+
+**Tests.**  9 OSS integration tests in
+`tests/services/test_federation_sync_worker.py` drive `_drain_once`
+against a real in-memory SQLite + a mocked `httpx.AsyncClient`:
+idle-when-not-enrolled, idle-when-bearer-missing, happy-path POST
+with URL + bearer header verification, all-five-payload-types
+routing, 4xx-marks-failed, network-exception-marks-failed,
+unknown-payload-type-skips, record-sync-attempt-on-success,
+record-sync-attempt-on-failure.  Plus 3 engine smoke tests in
+`module-source/federation_site_engine/test_federation_site_engine.py`
+that pin `provides_background_task=True`, the worker symbol
+export, and the payload-type → endpoint suffix contract.
+
+**Status (12.10 Slice 2.5 — enrollment handshake):** ✅ Landed (May 2026).
+Site engine's `/site/enroll` now actually calls the coordinator's
+`/api/v1/federation/sites/enrollment/{token}/complete` over HTTPS:
+
+  1. `coord_svc.start_enrollment()` persists URL + pinned TLS cert.
+  2. `httpx.AsyncClient.post(...)` with `{"tls_cert_pem": ...}`.
+  3. Parse the response, extract `sync_bearer_token`,
+     `coordinator_inbound_bearer_token_hash`, and the
+     coordinator-assigned `site.id`.
+  4. `coord_svc.mark_enrolled()` flips the singleton to `enrolled`
+     with all three pieces.
+
+Coordinator-side: the `complete_enrollment` route's `Depends(get_current_user)`
+JWT gate has been REMOVED.  The enrollment token IS the auth —
+site servers don't have JWT creds with the coordinator at
+enrollment time, so requiring one was chicken-and-egg.  Token
+security comes from 32-byte entropy + one-shot + expiry; the
+service-layer scrubs the hash on success.  The OSS stub mirrors
+this change.
+
+**Status (12.10 Slice 3 — coordinator → site outbound push):**
+✅ Landed (May 2026).  Mirror of Slice 2 in the reverse
+direction.  Background `start_federation_push_worker` in
+`federation_controller_engine` ticks every 30 seconds (configurable,
+floored at 5s) and:
+
+  1. Walks `list_all_pending_pushes()` — every (policy, assignment)
+     pair where `pushed_version < policy.version` or the row is
+     `pending`/`error`.  Inactive policies skipped.
+  2. POSTs each to `<site.url>/api/v1/federation/site/policies`
+     with `Authorization: Bearer <site.coordinator_outbound_bearer_token>`.
+  3. On 2xx, `mark_policy_pushed(pushed_version=policy.version)`;
+     on non-2xx or network error, `mark_policy_push_failed(error)`.
+  4. Walks `list_dispatched_commands(status='queued_at_site')`,
+     posts each to `<site.url>/api/v1/federation/site/commands`,
+     advances FSM `queued_at_site` → `in_progress` on 2xx.  Transport
+     failure leaves the FSM at `queued_at_site` so the next tick
+     retries — only operator-visible work (the site reporting back a
+     real result) advances to terminal states.
+
+**Symmetric bearer architecture.**  Migration
+`q6coordbearer_add_coordinator_inbound_bearer.py` (idempotent,
+cross-dialect) adds two columns:
+
+  * `federation_sites.coordinator_outbound_bearer_token` — plaintext,
+    on the coordinator (the sender for this direction).
+  * `federation_coordinator.coordinator_inbound_bearer_token_hash` —
+    SHA-256, on the site (the verifier for this direction).
+
+Both bearers are minted by the coordinator at `complete_enrollment`
+time:
+
+  * Sync bearer (site → coord): coordinator returns plaintext, site
+    stores it; coordinator persists only the SHA-256.
+  * Coordinator-outbound bearer (coord → site): coordinator
+    persists the plaintext, returns ONLY the SHA-256 to the site;
+    the site stores the hash for verifying incoming pushes.
+
+Plaintext lives on exactly one side per direction — a DB leak on
+the verifier side never exposes a usable secret in that direction.
+
+**Site-engine inbound auth.**  `/site/policies` and `/site/commands`
+now reject any request whose `Authorization: Bearer <token>` doesn't
+SHA-256 to the stored `coordinator_inbound_bearer_token_hash`.
+`Depends(get_current_user)` JWT requirement removed there too
+(coordinator doesn't have user creds with the site, same
+chicken-and-egg).
+
+**Tests.**  12 new push-worker integration tests in
+`tests/services/test_federation_push_worker.py` cover: idle when
+nothing pending, happy-path policy delivery with bearer + URL
+verification, 4xx-records-failure, network-error-records-failure,
+already-pushed-skipped, re-push-after-version-bump,
+inactive-policy-skipped, no-bearer-skipped, suspended-site-skipped,
+command-delivery-advances-FSM, command-transport-failure-stays-queued,
+multi-site-routing.  Plus 2 new controller-engine smoke tests
+that pin `provides_background_task=True` and the worker symbol
+export.
+
+**Total Slice 3 surface:** 505/505 federation-touching tests pass;
+pylint 10.00/10; cython-lint clean.
+
+**End-to-end loop closed.**  An operator can now: (a) `POST /sites`
+on coordinator to mint an enrollment token, (b) feed the token +
+coordinator URL + TLS cert into a site server's `/site/enroll`,
+(c) watch both engines start pushing data in their respective
+directions on the next tick.  No more direct-DB-write
+prerequisites.
+
+**Status (12.10 hardening — exponential backoff + dead-letter):**
+✅ Landed (May 2026).  Before this slice the wire-protocol
+workers retried every entry on every tick — a down coordinator
+got hammered, a malformed payload chewed CPU forever.  Now:
+
+  * `backend/services/federation_retry_policy.py` provides
+    `compute_backoff(attempts) -> seconds` (exponential, +/-20%
+    jitter, capped at 1200s / 20min — schedule: 10/20/40/80/160/
+    320/640/1200s) and `is_dead_lettered(attempts) -> bool` at
+    `MAX_ATTEMPTS = 8`.
+  * `peek_batch` (sync queue), `list_all_pending_pushes`
+    (policies), and `list_dispatched_commands(..., ready_only=True)`
+    (commands) all honour the backoff window — entries fail and
+    naturally skip subsequent ticks until their backoff has
+    elapsed.  Rows that exceed `MAX_ATTEMPTS` are excluded entirely.
+  * Dead-letter transitions:
+      - sync_queue: skipped via `attempts < MAX_ATTEMPTS` filter
+        (no separate status column needed; the row stays in the
+        queue for operator inspection).
+      - policy_assignments: new `push_status='dead'` value.  Re-
+        assigning the policy via `assign_policy_to_sites` resets
+        `push_attempts=0` and flips back to `pending` for a fresh
+        window.
+      - dispatched_commands: `mark_push_failed` advances the FSM
+        to terminal `failed` with `result_summary='Push failed
+        after N attempts: ...'`.  Operator dispatches a new
+        command if they still want the work done.
+  * Migration `r7hardening_add_push_attempts.py` (idempotent,
+    cross-dialect) adds `push_attempts` to both
+    `federation_policy_assignments` and `federation_dispatched_commands`,
+    plus `last_push_attempt_at` + `last_push_error` to the latter
+    (assignments already had those).
+
+**Worker integration.**  `federation_controller_engine.pyx`'s
+`_push_once` now passes `ready_only=True` to the dispatch listing
+and calls `dispatch_svc.mark_push_failed` on transport / FSM-
+advance failures (was: just logging).  This is what closes the
+loop — the next tick honours the backoff naturally.  Sync worker
+unchanged in shape; `peek_batch` does the new filtering
+transparently.
+
+**Tests.**  21 new tests:
+
+  * `tests/services/test_federation_retry_policy.py` — 15 pure
+    unit tests pinning the backoff math (zero-attempts immediate,
+    first failure ~base, doubling, cap, jitter envelope), the
+    readiness predicate (never-attempted ready, fresh failure not
+    ready, post-window ready), and the dead-letter threshold
+    (locked at 8).
+  * `test_federation_policy_service.py` gained 6 hardening tests
+    covering counter bump, dead-letter after MAX, exclusion from
+    pending pushes, reset on re-assignment, backoff filtering,
+    backoff release.
+  * `test_federation_dispatch_service.py` gained 6 mirror tests
+    for the command surface: `mark_push_failed` counter bump,
+    dead-letter advances FSM to `failed`, empty-error rejection,
+    `ready_only` exclusion of dead-lettered rows, `ready_only`
+    filtering of recently-failed, `ready_only` release after
+    window.
+  * Existing 12 push-worker integration tests still green —
+    backoff is transparent to the worker's contract.
+
+**Total:** 532/532 federation-touching tests pass; pylint
+10.00/10; cython-lint clean.  Engines rebuilt + smoke tests
+green.
+
+**Remaining hardening (out of scope this slice):**
+  * Rate limiting per site (only meaningful when one site is slow
+    AND there are many sites; per-entry backoff already handles
+    the simple cases).
+  * Push-attempt audit-log entries with full ``before`` / ``after``
+    state — the existing `mark_policy_push_failed` audit captures
+    the attempt; if we want SIEM-grade granularity we'd add an
+    entry per attempt rather than just per status flip.
+  * Operator UI for resetting dead-lettered rows (today: re-assign
+    via API or direct DB).
+
+**Slice 3 (TODO) — coordinator outbound worker.** Reverse direction
+in `federation_controller_engine.pyx`:
+  1. Tick worker enumerates pending policy pushes via
+     `policy_svc.list_pending_push_targets()` and pending command
+     dispatches.
+  2. For each (policy, site), POSTs to `<site.url>/api/v1/federation/site/policies`
+     with the same Bearer auth — the site's own bearer (coordinator
+     stores both halves at enrollment time).  Wait — actually the
+     coordinator should present its OWN identity here, so this
+     slice also needs a coordinator-issued bearer that sites pin
+     to.  Design TBD; might fold mTLS in at this point since the
+     trust model is symmetric.
+  3. Updates `FederationPolicyAssignment.push_status` /
+     `pushed_version` / `last_push_error` per the result.
+
+**Estimated remaining size:** ~600 LOC across both engines + ~200
+LOC tests.  Each slice fits in a single focused session.
 
 ---
 

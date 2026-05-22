@@ -42,12 +42,15 @@ FEDERATION_TABLE_NAMES = [
 @pytest.fixture
 def session():
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
-    )
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as s:
-        yield s
+    try:
+        Base.metadata.create_all(
+            engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
+        )
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as s:
+            yield s
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
@@ -279,3 +282,123 @@ class TestFsm:
             dsvc.update_command_status(
                 session, uuid.uuid4(), new_status=dsvc.STATUS_IN_PROGRESS
             )
+
+
+# ---------------------------------------------------------------------------
+# Phase 12.10 hardening: push-attempt tracking + backoff filter +
+# dead-letter on the dispatched-command surface.
+# ---------------------------------------------------------------------------
+
+
+class TestPushAttemptsAndBackoff:
+    def test_mark_push_failed_bumps_counter(self, session, enrolled_site):
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        dsvc.mark_push_failed(session, cmd.id, error="HTTP 502")
+        session.commit()
+        assert cmd.push_attempts == 1
+        assert cmd.last_push_error == "HTTP 502"
+        assert cmd.last_push_attempt_at is not None
+        # FSM unchanged on a single failure.
+        assert cmd.status == dsvc.STATUS_QUEUED_AT_SITE
+
+    def test_mark_push_failed_dead_letters_after_max(self, session, enrolled_site):
+        from backend.services import federation_retry_policy as rp
+
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        for _ in range(rp.MAX_ATTEMPTS):
+            dsvc.mark_push_failed(session, cmd.id, error="net down")
+        session.commit()
+        assert cmd.push_attempts == rp.MAX_ATTEMPTS
+        # Once dead-lettered, FSM advances to terminal failed.
+        assert cmd.status == dsvc.STATUS_FAILED
+        assert cmd.completed_at is not None
+        assert "Push failed after" in (cmd.result_summary or "")
+
+    def test_mark_push_failed_requires_error_string(self, session, enrolled_site):
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        with pytest.raises(ValueError):
+            dsvc.mark_push_failed(session, cmd.id, error="")
+
+    def test_ready_only_excludes_dead_lettered(self, session, enrolled_site):
+        from backend.services import federation_retry_policy as rp
+
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        for _ in range(rp.MAX_ATTEMPTS):
+            dsvc.mark_push_failed(session, cmd.id, error="boom")
+        session.commit()
+        rows = dsvc.list_dispatched_commands(
+            session, status=dsvc.STATUS_QUEUED_AT_SITE, ready_only=True
+        )
+        assert rows == []
+
+    def test_ready_only_filters_recently_failed(self, session, enrolled_site):
+        from datetime import datetime as _dt
+
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        dsvc.mark_push_failed(session, cmd.id, error="transient")
+        session.commit()
+        not_yet = dsvc.list_dispatched_commands(
+            session,
+            status=dsvc.STATUS_QUEUED_AT_SITE,
+            ready_only=True,
+            now=_dt.utcnow().replace(tzinfo=None),
+        )
+        assert not_yet == []
+
+    def test_ready_only_releases_after_window(self, session, enrolled_site):
+        from datetime import datetime as _dt, timedelta
+
+        cmd = dsvc.dispatch_command(
+            session,
+            command_type="reboot",
+            target_site_id=enrolled_site.id,
+            parameters={},
+            target_host_ids=[],
+        )
+        session.commit()
+        dsvc.mark_push_failed(session, cmd.id, error="transient")
+        session.commit()
+        future = _dt.utcnow().replace(tzinfo=None) + timedelta(hours=2)
+        ready = dsvc.list_dispatched_commands(
+            session,
+            status=dsvc.STATUS_QUEUED_AT_SITE,
+            ready_only=True,
+            now=future,
+        )
+        assert len(ready) == 1
+        assert ready[0].id == cmd.id

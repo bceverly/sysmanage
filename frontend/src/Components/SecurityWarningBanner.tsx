@@ -178,7 +178,7 @@ const SecurityWarningBanner: React.FC = () => {
                         padding: '2px 6px',
                         borderRadius: '3px'
                       }}>
-                        python3 scripts/migrate-security-config.py --jwt-only
+                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --jwt-only
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>
@@ -189,7 +189,7 @@ const SecurityWarningBanner: React.FC = () => {
                         padding: '2px 6px',
                         borderRadius: '3px'
                       }}>
-                        python3 scripts/migrate-security-config.py --salt-only
+                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --salt-only
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>

@@ -151,8 +151,15 @@ async def view_report_html(
     # Belt-and-suspenders: HTML-escape the content one more time
     # before handing to FastAPI so the static analyser can see an
     # ``html.escape`` sanitiser on the data-flow path.
+    # The Pro+ generator's f-string templates emit a leading newline
+    # + indentation before ``<!DOCTYPE html>``, so lstrip() before the
+    # startswith() check — otherwise the trust branch is skipped and
+    # the entire HTML doc gets HTML-escaped, which the iframe srcDoc
+    # then unescapes into visible markup text in the browser.
     safe_content = (
-        html_content if html_content.startswith("<") else html.escape(html_content)
+        html_content
+        if html_content.lstrip().startswith("<")
+        else html.escape(html_content)
     )
     # nosemgrep: python.fastapi.web.tainted-direct-response-fastapi.tainted-direct-response-fastapi
     return HTMLResponse(content=safe_content)

@@ -239,6 +239,71 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 fleet_e,
                             )
 
+                # Start federation_controller_engine outbound push
+                # worker (Phase 12.10 Slice 3).  Walks pending policy
+                # assignments + queued dispatched commands and posts
+                # them to subordinate sites' ``/site/policies`` and
+                # ``/site/commands`` endpoints using each site's
+                # ``coordinator_outbound_bearer_token``.  Idles on any
+                # tick where no work is pending — safe to start
+                # unconditionally when the engine is loaded.
+                federation_controller_engine = module_loader.get_module(
+                    "federation_controller_engine"
+                )
+                if federation_controller_engine:
+                    fed_ctl_info = federation_controller_engine.get_module_info()
+                    if fed_ctl_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== FEDERATION CONTROLLER ENGINE PUSH WORKER STARTUP ==="
+                        )
+                        try:
+                            federation_push_task = asyncio.create_task(
+                                federation_controller_engine.start_federation_push_worker(
+                                    db_maker=get_db,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info(
+                                "Federation controller engine push worker started"
+                            )
+                        except Exception as fed_ctl_e:
+                            logger.warning(
+                                "Failed to start federation push worker: %s",
+                                fed_ctl_e,
+                            )
+
+                # Start federation_site_engine outbound sync worker
+                # (Phase 12.10 Slice 2).  Drains
+                # ``federation_sync_queue`` to the coordinator's
+                # ingest endpoints on the interval configured in the
+                # singleton ``federation_coordinator`` row.  Only
+                # makes outbound HTTP calls when the row is in
+                # ``enrolled`` state with a bearer token; idles
+                # otherwise, so the task is safe to start
+                # unconditionally when the engine is loaded.
+                federation_site_engine = module_loader.get_module(
+                    "federation_site_engine"
+                )
+                if federation_site_engine:
+                    fed_site_info = federation_site_engine.get_module_info()
+                    if fed_site_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== FEDERATION SITE ENGINE SYNC WORKER STARTUP ==="
+                        )
+                        try:
+                            federation_sync_task = asyncio.create_task(
+                                federation_site_engine.start_federation_sync_worker(
+                                    db_maker=get_db,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Federation site engine sync worker started")
+                        except Exception as fed_e:
+                            logger.warning(
+                                "Failed to start federation sync worker: %s",
+                                fed_e,
+                            )
+
                 # Start air-gap collection schedule tick service if the
                 # collector engine is loaded.  The /tick endpoint and
                 # DB model are always available (OSS-side), but the

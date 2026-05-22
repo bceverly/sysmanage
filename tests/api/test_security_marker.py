@@ -51,7 +51,7 @@ def test_jwt_with_expired_timestamp_is_rejected(client, mock_config):
         mock_config["security"]["jwt_secret"],
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/logout", headers={"Authorization": f"Bearer {token}"})
+    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code in (
         401,
         403,
@@ -70,7 +70,7 @@ def test_jwt_signed_with_wrong_secret_is_rejected(client, mock_config):
         _WRONG_SECRET_SHORT,
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/logout", headers={"Authorization": f"Bearer {forged}"})
+    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {forged}"})
     assert resp.status_code in (
         401,
         403,
@@ -97,7 +97,7 @@ def test_jwt_with_alg_none_is_rejected(
     ).rstrip(b"=")
     bad_token = (header + b"." + body + b".").decode()
 
-    resp = client.post("/logout", headers={"Authorization": f"Bearer {bad_token}"})
+    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {bad_token}"})
     assert resp.status_code in (
         401,
         403,
@@ -113,7 +113,7 @@ def test_jwt_missing_required_claims_is_rejected(client, mock_config):
         mock_config["security"]["jwt_secret"],
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/logout", headers={"Authorization": f"Bearer {token}"})
+    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code in (
         401,
         403,
@@ -123,7 +123,7 @@ def test_jwt_missing_required_claims_is_rejected(client, mock_config):
 @pytest.mark.security
 def test_request_without_authorization_header_is_rejected(client):
     """Endpoints behind JWTBearer must reject unauthenticated requests."""
-    resp = client.post("/logout")
+    resp = client.post("/api/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -136,7 +136,7 @@ def test_request_with_malformed_authorization_header_is_rejected(client):
         "Bearer ",  # empty token
         "not-even-a-scheme",
     ]:
-        resp = client.post("/logout", headers={"Authorization": header_val})
+        resp = client.post("/api/logout", headers={"Authorization": header_val})
         assert resp.status_code in (
             401,
             403,
@@ -151,7 +151,7 @@ def test_request_with_malformed_authorization_header_is_rejected(client):
 @pytest.mark.security
 def test_refresh_without_cookie_is_rejected(client):
     """The /refresh endpoint must reject calls without a refresh_token cookie."""
-    resp = client.post("/refresh")
+    resp = client.post("/api/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -173,7 +173,7 @@ def test_refresh_with_expired_cookie_is_rejected(client, mock_config):
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
     client.cookies.set("refresh_token", expired_refresh)
-    resp = client.post("/refresh")
+    resp = client.post("/api/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -198,7 +198,7 @@ def test_refresh_with_forged_cookie_signature_is_rejected(
         algorithm="HS256",
     )
     client.cookies.set("refresh_token", forged)
-    resp = client.post("/refresh")
+    resp = client.post("/api/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -216,7 +216,7 @@ def test_login_with_unknown_user_returns_401_not_404(
 ):
     """Auth must not leak whether a username exists (401, not 404, on miss)."""
     resp = client.post(
-        "/login",
+        "/api/login",
         json={"userid": "nobody@example.com", "password": "irrelevant"},
     )
     # 401 = "invalid credentials" — what we want.  404 would leak existence.
@@ -239,7 +239,7 @@ def test_inactive_user_cannot_login(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/login",
+        "/api/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],
@@ -270,7 +270,7 @@ def test_rate_limited_login_is_blocked(
     )
 
     resp = client.post(
-        "/login",
+        "/api/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],  # CORRECT password
@@ -307,7 +307,7 @@ def test_anonymous_cannot_access_admin_endpoints(client):
 @pytest.mark.security
 def test_anonymous_cannot_post_to_state_changing_endpoints(client):
     """POST endpoints that change state must reject unauthenticated callers."""
-    resp = client.post("/logout")
+    resp = client.post("/api/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -321,7 +321,9 @@ def test_valid_token_authenticates(
     client, admin_token, create_admin_user_with_roles
 ):  # pylint: disable=unused-argument
     """Positive control: a freshly-issued admin token does authenticate."""
-    resp = client.post("/logout", headers={"Authorization": f"Bearer {admin_token}"})
+    resp = client.post(
+        "/api/logout", headers={"Authorization": f"Bearer {admin_token}"}
+    )
     # /logout returns 200 on success; the negative-case tests above all
     # expect 401/403, so this positive check pins the contract.
     assert resp.status_code == 200, (

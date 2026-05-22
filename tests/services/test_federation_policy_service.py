@@ -43,12 +43,15 @@ FEDERATION_TABLE_NAMES = [
 @pytest.fixture
 def session():
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
-    )
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as s:
-        yield s
+    try:
+        Base.metadata.create_all(
+            engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
+        )
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as s:
+            yield s
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
@@ -368,3 +371,108 @@ class TestPendingPushTargets:
         targets = psvc.list_pending_push_targets(session, p.id)
         assert len(targets) == 1
         assert targets[0].pushed_version == 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 12.10 hardening: backoff + dead-letter integration with policy
+# assignments.
+# ---------------------------------------------------------------------------
+
+
+class TestPushBackoffAndDeadLetter:
+    def test_failure_bumps_push_attempts(self, session, enrolled_site):
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        session.commit()
+        assignment = psvc.mark_policy_push_failed(
+            session, p.id, enrolled_site.id, error="HTTP 500"
+        )
+        session.commit()
+        assert assignment.push_attempts == 1
+        assert assignment.push_status == psvc.PUSH_STATUS_ERROR
+
+    def test_dead_letter_after_max_attempts(self, session, enrolled_site):
+        # Simulate MAX_ATTEMPTS failures.  The first MAX-1 leave the
+        # row in ``error``; the MAX-th flips to ``dead``.
+        from backend.services import federation_retry_policy as rp
+
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        session.commit()
+        for _ in range(rp.MAX_ATTEMPTS - 1):
+            psvc.mark_policy_push_failed(
+                session, p.id, enrolled_site.id, error="HTTP 500"
+            )
+        session.commit()
+        a = psvc.mark_policy_push_failed(
+            session, p.id, enrolled_site.id, error="HTTP 500"
+        )
+        session.commit()
+        assert a.push_attempts == rp.MAX_ATTEMPTS
+        assert a.push_status == psvc.PUSH_STATUS_DEAD
+
+    def test_dead_letter_excluded_from_pending_pushes(self, session, enrolled_site):
+        # Dead-lettered assignments must never appear in the push
+        # worker's view — that's the whole point.
+        from backend.services import federation_retry_policy as rp
+
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        for _ in range(rp.MAX_ATTEMPTS):
+            psvc.mark_policy_push_failed(session, p.id, enrolled_site.id, error="boom")
+        session.commit()
+        pending = psvc.list_all_pending_pushes(session)
+        assert pending == []
+
+    def test_re_assignment_resets_attempts(self, session, enrolled_site):
+        # Operator re-assigning a dead-lettered policy gives it a
+        # fresh window.
+        from backend.services import federation_retry_policy as rp
+
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        for _ in range(rp.MAX_ATTEMPTS):
+            psvc.mark_policy_push_failed(session, p.id, enrolled_site.id, error="boom")
+        session.commit()
+        # Re-assign.
+        psvc.assign_policy_to_sites(
+            session, p.id, [enrolled_site.id], assigned_by="operator"
+        )
+        session.commit()
+        # ``now`` far in the future so the new (zero) attempts +
+        # never-attempted ``last_push_attempt_at`` clearly pass the
+        # backoff filter.
+        from datetime import datetime as _dt, timedelta
+
+        future = _dt.utcnow().replace(tzinfo=None) + timedelta(hours=2)
+        pending = psvc.list_all_pending_pushes(session, now=future)
+        assert len(pending) == 1
+        _, a = pending[0]
+        assert a.push_attempts == 0
+        assert a.push_status == psvc.PUSH_STATUS_PENDING
+
+    def test_backoff_filters_recently_failed(self, session, enrolled_site):
+        # Just-failed assignments are still in their backoff window
+        # and shouldn't appear in the worker's view immediately.
+        from datetime import datetime as _dt
+
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        psvc.mark_policy_push_failed(session, p.id, enrolled_site.id, error="transient")
+        session.commit()
+        not_yet = psvc.list_all_pending_pushes(
+            session, now=_dt.utcnow().replace(tzinfo=None)
+        )
+        assert not_yet == []
+
+    def test_backoff_releases_after_window(self, session, enrolled_site):
+        # ``now`` far in the future → past the backoff cap, ready.
+        from datetime import datetime as _dt, timedelta
+
+        p = psvc.create_policy(session, policy_type="x", name="y", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        psvc.mark_policy_push_failed(session, p.id, enrolled_site.id, error="transient")
+        session.commit()
+        future = _dt.utcnow().replace(tzinfo=None) + timedelta(hours=2)
+        ready = psvc.list_all_pending_pushes(session, now=future)
+        assert len(ready) == 1

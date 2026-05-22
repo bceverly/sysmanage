@@ -34,6 +34,7 @@ from uuid import UUID
 from sqlalchemy import and_, desc, select
 from sqlalchemy.orm import Session
 
+from backend.services import federation_retry_policy as retry_policy
 from backend.persistence.models.federation import (
     FederationAuditLog,
     FederationDispatchedCommand,
@@ -212,6 +213,8 @@ def list_dispatched_commands(
     site_id: Optional[Any] = None,
     status: Optional[str] = None,
     open_only: bool = False,
+    ready_only: bool = False,
+    now: Optional[datetime] = None,
     limit: int = 100,
     offset: int = 0,
 ) -> List[FederationDispatchedCommand]:
@@ -220,6 +223,15 @@ def list_dispatched_commands(
     ``open_only=True`` filters to non-terminal statuses (queued /
     in_progress) — used by the Coordinator's "active commands"
     dashboard widget.
+
+    Phase 12.10 hardening: ``ready_only=True`` additionally applies
+    the exponential-backoff filter — rows whose ``push_attempts``
+    is > 0 and whose ``last_push_attempt_at + compute_backoff(...)
+    > now`` are excluded.  Rows whose ``push_attempts >=
+    MAX_ATTEMPTS`` are excluded entirely (the push worker won't
+    see dead-lettered commands).  This is what the
+    coordinator-side push worker uses to find what to send next.
+    ``now`` is injectable for deterministic tests.
     """
     if limit <= 0:
         raise ValueError("limit must be > 0")
@@ -235,12 +247,58 @@ def list_dispatched_commands(
         stmt = stmt.where(FederationDispatchedCommand.status == status)
     if open_only:
         stmt = stmt.where(FederationDispatchedCommand.status.not_in(_TERMINAL_STATUSES))
+    if ready_only:
+        stmt = stmt.where(
+            FederationDispatchedCommand.push_attempts < retry_policy.MAX_ATTEMPTS
+        )
     stmt = (
         stmt.order_by(desc(FederationDispatchedCommand.dispatched_at))
         .offset(offset)
         .limit(limit)
     )
-    return list(session.execute(stmt).scalars().all())
+    rows = list(session.execute(stmt).scalars().all())
+    if not ready_only:
+        return rows
+    if now is None:
+        now = _utcnow_naive()
+    return [
+        cmd
+        for cmd in rows
+        if retry_policy.is_ready_for_retry(
+            cmd.last_push_attempt_at, cmd.push_attempts, now
+        )
+    ]
+
+
+def mark_push_failed(
+    session: Session,
+    command_id: Any,
+    *,
+    error: str,
+) -> FederationDispatchedCommand:
+    """Record a coordinator → site push failure.
+
+    Increments ``push_attempts``, stamps ``last_push_attempt_at`` +
+    ``last_push_error``.  Does NOT advance the FSM unless the row
+    has exceeded ``retry_policy.MAX_ATTEMPTS`` — at that point we
+    flip ``status='failed'`` (a terminal FSM state) to take the
+    row out of the push worker's view.  Operator can dispatch a
+    fresh command if they still want the work done.
+    """
+    if not error:
+        raise ValueError("error string is required for mark_push_failed")
+    cmd = _ensure_command(session, command_id)
+    cmd.push_attempts = (cmd.push_attempts or 0) + 1
+    cmd.last_push_attempt_at = _utcnow_naive()
+    cmd.last_push_error = error
+    if retry_policy.is_dead_lettered(cmd.push_attempts):
+        # Forced terminal transition: bypass the FSM whitelist
+        # because this isn't an agent-reported state, it's the
+        # coordinator giving up on transport.
+        cmd.status = STATUS_FAILED
+        cmd.completed_at = _utcnow_naive()
+        cmd.result_summary = f"Push failed after {cmd.push_attempts} attempts: {error}"
+    return cmd
 
 
 def update_command_status(

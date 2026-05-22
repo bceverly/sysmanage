@@ -360,7 +360,7 @@ class TestHostRegister:
             "ipv6": "2001:db8::150",
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -400,7 +400,7 @@ class TestHostRegister:
             "ipv6": "2001:db8::101",  # Updated IP
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -422,7 +422,7 @@ class TestHostRegister:
             "hostname": "minimal",
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -443,19 +443,19 @@ class TestHostRegister:
         """Test host registration with missing required fields."""
         # Missing FQDN
         response = client.post(
-            "/host/register", json={"active": True, "hostname": "test"}
+            "/api/host/register", json={"active": True, "hostname": "test"}
         )
         assert response.status_code == 422
 
         # Missing hostname
         response = client.post(
-            "/host/register", json={"active": True, "fqdn": "test.example.com"}
+            "/api/host/register", json={"active": True, "fqdn": "test.example.com"}
         )
         assert response.status_code == 422
 
         # Missing active flag
         response = client.post(
-            "/host/register", json={"fqdn": "test.example.com", "hostname": "test"}
+            "/api/host/register", json={"fqdn": "test.example.com", "hostname": "test"}
         )
         assert response.status_code == 422
 
@@ -463,7 +463,7 @@ class TestHostRegister:
         """Test host registration with invalid data types."""
         # Invalid active field (should be boolean) - use a value that won't coerce
         response = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": ["invalid"],  # Array won't coerce to boolean
                 "fqdn": "test.example.com",
@@ -474,7 +474,7 @@ class TestHostRegister:
 
         # Empty FQDN - API accepts empty strings
         response = client.post(
-            "/host/register", json={"active": True, "fqdn": "", "hostname": "test"}
+            "/api/host/register", json={"active": True, "fqdn": "", "hostname": "test"}
         )
         assert response.status_code == 200
 

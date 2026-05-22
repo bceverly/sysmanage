@@ -26,12 +26,13 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 from uuid import UUID
 
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
+from backend.services import federation_retry_policy as retry_policy
 from backend.persistence.models.federation import (
     FederationAuditLog,
     FederationPolicy,
@@ -47,6 +48,13 @@ PUSH_STATUS_PENDING = "pending"
 PUSH_STATUS_PUSHED = "pushed"
 PUSH_STATUS_ACKNOWLEDGED = "acknowledged"
 PUSH_STATUS_ERROR = "error"
+# Phase 12.10 hardening: terminal "give up" state.  An assignment
+# is moved here when ``push_attempts >= retry_policy.MAX_ATTEMPTS``;
+# the push worker excludes ``dead`` rows from
+# ``list_all_pending_pushes`` so they don't get retried every tick.
+# Operator intervention (re-assignment via ``assign_policy_to_sites``)
+# resets to ``pending`` and clears the counter for a fresh window.
+PUSH_STATUS_DEAD = "dead"
 
 # Audit-log operation codes.
 AUDIT_OP_POLICY_CREATED = "policy_created"
@@ -365,9 +373,12 @@ def assign_policy_to_sites(
             )
             session.add(assignment)
         else:
-            # Re-assignment is a "re-push intent" — reset status.
+            # Re-assignment is a "re-push intent" — reset status AND
+            # reset the retry counter so a previously dead-lettered
+            # assignment gets a fresh exponential-backoff window.
             existing.push_status = PUSH_STATUS_PENDING
             existing.last_push_error = None
+            existing.push_attempts = 0
             existing.assigned_by = assigned_by
             existing.assigned_at = _utcnow_naive()
             assignment = existing
@@ -533,9 +544,16 @@ def mark_policy_push_failed(
         raise PolicyAssignmentNotFoundError(
             f"No assignment for policy={pid} site={sid}"
         )
-    assignment.push_status = PUSH_STATUS_ERROR
+    assignment.push_attempts = (assignment.push_attempts or 0) + 1
     assignment.last_push_attempt_at = _utcnow_naive()
     assignment.last_push_error = error
+    # Dead-letter transition: after MAX_ATTEMPTS failures, stop
+    # retrying.  Operator can re-assign to reset the counter via
+    # ``assign_policy_to_sites``.
+    if retry_policy.is_dead_lettered(assignment.push_attempts):
+        assignment.push_status = PUSH_STATUS_DEAD
+    else:
+        assignment.push_status = PUSH_STATUS_ERROR
     _log_audit(
         session,
         AUDIT_OP_POLICY_PUSH_FAILED,
@@ -570,3 +588,61 @@ def list_pending_push_targets(
         .scalars()
         .all()
     )
+
+
+def list_all_pending_pushes(
+    session: Session,
+    *,
+    now: Optional[datetime] = None,
+) -> List[Tuple[FederationPolicy, FederationPolicyAssignment]]:
+    """Cross-policy variant for the coordinator's push worker.
+
+    Returns every ``(policy, assignment)`` pair where the assignment
+    needs delivery — either never pushed, or its ``pushed_version`` is
+    behind the policy's current version.  ``is_active=False`` policies
+    are skipped (deactivation should prevent further pushes).  Joins
+    in a single query so the worker doesn't N+1 the policy table.
+
+    Phase 12.10 hardening: assignments in their backoff window
+    (after a failed push attempt) are skipped, and assignments
+    whose ``push_attempts >= MAX_ATTEMPTS`` are excluded entirely
+    via the ``PUSH_STATUS_DEAD`` check — the operator must re-
+    assign the policy to give them a fresh window.  ``now`` is
+    injectable for deterministic tests.
+    """
+    if now is None:
+        now = _utcnow_naive()
+    rows = list(
+        session.execute(
+            select(FederationPolicy, FederationPolicyAssignment)
+            .join(
+                FederationPolicyAssignment,
+                FederationPolicyAssignment.policy_id == FederationPolicy.id,
+            )
+            .where(
+                and_(
+                    FederationPolicy.is_active.is_(True),
+                    FederationPolicyAssignment.push_status != PUSH_STATUS_DEAD,
+                    (
+                        (FederationPolicyAssignment.push_status != PUSH_STATUS_PUSHED)
+                        | (
+                            FederationPolicyAssignment.pushed_version
+                            < FederationPolicy.version
+                        )
+                    ),
+                )
+            )
+        ).all()
+    )
+    # Backoff gate.  Done in Python so the formula stays one place
+    # (``retry_policy.compute_backoff``) and so jitter doesn't
+    # bleed into the SQL plan.
+    return [
+        (policy, assignment)
+        for policy, assignment in rows
+        if retry_policy.is_ready_for_retry(
+            assignment.last_push_attempt_at,
+            assignment.push_attempts,
+            now,
+        )
+    ]

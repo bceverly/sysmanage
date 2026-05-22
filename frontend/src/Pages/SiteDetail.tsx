@@ -40,9 +40,11 @@ import Typography from "@mui/material/Typography";
 
 import {
   doGetFederationSite,
+  doListFederationCommands,
   doRemoveFederationSite,
   doResumeFederationSite,
   doSuspendFederationSite,
+  FederationDispatchedCommand,
   FederationSiteDetail,
 } from "../Services/federation";
 
@@ -92,6 +94,34 @@ const SiteDetail: React.FC = () => {
   const [state, setState] = useState<SiteDetailState>(initialState);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
   const [actionInFlight, setActionInFlight] = useState(false);
+  // Phase 12.10 visibility: open dispatched commands targeting this
+  // site.  Loaded alongside the site detail; refreshed on resume +
+  // suspend so the operator sees the FSM update without a page
+  // reload.  ``null`` = not yet fetched.
+  const [commands, setCommands] = useState<FederationDispatchedCommand[] | null>(
+    null,
+  );
+
+  const refreshCommands = useCallback(async () => {
+    if (!siteId) return;
+    try {
+      const resp = await doListFederationCommands({
+        site_id: siteId,
+        open_only: true,
+        limit: 25,
+      });
+      if (resp.licensed) {
+        setCommands(resp.commands ?? []);
+      } else {
+        setCommands([]);
+      }
+    } catch {
+      // Non-fatal: just leave the panel empty.  The main page
+      // already shows an error banner if the site itself fails to
+      // load.
+      setCommands([]);
+    }
+  }, [siteId]);
 
   const refresh = useCallback(async () => {
     if (!siteId) return;
@@ -155,10 +185,11 @@ const SiteDetail: React.FC = () => {
             t("sites.detail.errorLoad", "Failed to load site."),
         });
       });
+    refreshCommands();
     return () => {
       cancelled = true;
     };
-  }, [siteId, t]);
+  }, [siteId, t, refreshCommands]);
 
   const handleSuspend = async () => {
     if (!siteId || actionInFlight) return;
@@ -166,6 +197,7 @@ const SiteDetail: React.FC = () => {
     try {
       await doSuspendFederationSite(siteId);
       await refresh();
+      await refreshCommands();
     } finally {
       setActionInFlight(false);
     }
@@ -177,6 +209,7 @@ const SiteDetail: React.FC = () => {
     try {
       await doResumeFederationSite(siteId);
       await refresh();
+      await refreshCommands();
     } finally {
       setActionInFlight(false);
     }
@@ -376,6 +409,111 @@ const SiteDetail: React.FC = () => {
                   </Box>
                 )}
               </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Active commands card (Phase 12.10 visibility) ---------------
+            Shows open dispatched commands targeting this site, with
+            the FSM state, retry counter, and last push error.  An
+            empty list renders a quiet "no active commands" line
+            rather than hiding the card entirely — operators want to
+            know the panel is up to date, not silently absent. */}
+        <Grid size={{ xs: 12 }}>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {t("sites.detail.activeCommands", "Active commands")}
+              </Typography>
+              {commands === null ? (
+                <Typography variant="body2" color="text.secondary">
+                  {t("sites.detail.activeCommandsLoading", "Loading…")}
+                </Typography>
+              ) : commands.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  {t(
+                    "sites.detail.activeCommandsEmpty",
+                    "No active commands.",
+                  )}
+                </Typography>
+              ) : (
+                <Stack spacing={1.5}>
+                  {commands.map((cmd) => (
+                    <Box
+                      key={cmd.id}
+                      sx={{
+                        borderLeft: 2,
+                        borderColor:
+                          cmd.last_push_error || (cmd.push_attempts ?? 0) > 0
+                            ? "warning.main"
+                            : "divider",
+                        pl: 1.5,
+                        py: 0.5,
+                      }}
+                    >
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        sx={{ flexWrap: "wrap" }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{ fontFamily: "monospace" }}
+                        >
+                          {cmd.command_type}
+                        </Typography>
+                        <Chip
+                          label={cmd.status}
+                          size="small"
+                          color={
+                            cmd.status === "in_progress"
+                              ? "info"
+                              : cmd.status === "queued_at_site"
+                                ? "default"
+                                : "warning"
+                          }
+                        />
+                        {(cmd.push_attempts ?? 0) > 0 && (
+                          <Chip
+                            label={t(
+                              "sites.detail.commandAttempts",
+                              "{{n}} push attempts",
+                              { n: cmd.push_attempts },
+                            )}
+                            size="small"
+                            variant="outlined"
+                            color="warning"
+                          />
+                        )}
+                      </Stack>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        component="div"
+                      >
+                        {cmd.dispatched_at
+                          ? t(
+                              "sites.detail.commandDispatchedAt",
+                              "Dispatched {{when}}",
+                              { when: formatAbsolute(cmd.dispatched_at) },
+                            )
+                          : null}
+                      </Typography>
+                      {cmd.last_push_error && (
+                        <Typography
+                          variant="caption"
+                          color="error.main"
+                          component="div"
+                          sx={{ mt: 0.25, wordBreak: "break-word" }}
+                        >
+                          {cmd.last_push_error}
+                        </Typography>
+                      )}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
             </CardContent>
           </Card>
         </Grid>

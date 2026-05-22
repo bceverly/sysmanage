@@ -227,16 +227,47 @@ test.describe('Host Actions', () => {
   test('should be able to refresh host data', async ({ page }) => {
     await page.goto('/hosts');
 
-    if (await navigateToFirstHostDetail(page)) {
-      // Look for refresh button
-      const refreshButton = page.getByRole('button', { name: /refresh/i }).first();
-      if (await refreshButton.isVisible()) {
-        await refreshButton.click();
-
-        // Wait for the refresh action to complete
-        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
-      }
+    if (!(await navigateToFirstHostDetail(page))) {
+      // No hosts in the grid — nothing to refresh; treat as a no-op pass.
+      return;
     }
+
+    // Anchor on the host-detail "Request Host Data" button (i18n key
+    // hostDetail.requestHostData).  The earlier locator was
+    // ``getByRole('button', { name: /refresh/i }).first()`` which is
+    // too broad — it also matched the global "Broadcast Refresh"
+    // button on the /hosts list page (whose Tooltip title
+    // "Send a refresh-inventory broadcast..." hoists into the
+    // accessible name) and the per-section "Refresh" buttons on
+    // host-detail tabs (certificates, child hosts).  When the page
+    // re-rendered between Playwright's stability check and click,
+    // the matched DOM node detached and the click retried until the
+    // 60s timeout.  Anchoring on the exact button text removes both
+    // the ambiguity and the re-render race.
+    const refreshButton = page.getByRole('button', { name: 'Request Host Data' });
+
+    // The button is disabled while a diagnostics request is in-flight.
+    // Wait for it to be both visible AND enabled before clicking — that
+    // also lets host-detail's initial fetches settle, so we don't race
+    // a re-render mid-click.
+    try {
+      await refreshButton.waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      // Diagnostics tab not present for this host (older agent, etc.);
+      // treat as a no-op pass rather than a hard failure.
+      return;
+    }
+    await expect(refreshButton).toBeEnabled({ timeout: 15000 });
+    await refreshButton.scrollIntoViewIfNeeded();
+    await refreshButton.click();
+
+    // After clicking, the button flips to "Requesting..." while the
+    // backend processes the request.  Wait for either state to confirm
+    // the click actually landed; don't block on networkidle (the
+    // host-detail page has periodic polling that never goes idle).
+    await expect(
+      page.getByRole('button', { name: /^Requesting\.\.\.$|^Request Host Data$/ }),
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test('should navigate back to hosts list', async ({ page }) => {

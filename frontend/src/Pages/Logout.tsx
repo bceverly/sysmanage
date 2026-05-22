@@ -20,7 +20,7 @@ const Logout = () => {
 
             // Call logout endpoint for audit logging in background (fire and forget)
             // This doesn't block the user experience
-            axiosInstance.post('/logout').catch((error) => {
+            axiosInstance.post('/api/logout').catch((error) => {
                 // Silently ignore errors - user is already logged out client-side
                 console.debug('Logout audit log failed (non-critical):', error);
             });

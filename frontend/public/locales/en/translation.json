@@ -997,7 +997,7 @@
     "logoAlt": "SysManage",
     "dashboard": "Dashboard",
     "hosts": "Hosts",
-    "osUpgrades": "Os Upgrades",
+    "osUpgrades": "OS Upgrades",
     "reports": "Reports",
     "scripts": "Scripts",
     "secrets": "Secrets",
@@ -1009,8 +1009,8 @@
       "repository": "Repository"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "Map",
+    "sites": "Sites"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -1953,41 +1953,6 @@
     "updated": "Template saved",
     "confirmDelete": "Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "Secret copied to clipboard",
-    "copy": "Copy",
-    "copyError": "Copy failed",
-    "empty": "No leases match the current filter.",
-    "expiresAt": "Expires",
-    "expiresOn": "Expires:",
-    "issue": "Issue Lease",
-    "issueError": "Failed to issue lease",
-    "issueTitle": "Issue New Lease",
-    "issuedAt": "Issued",
-    "kind": "Kind",
-    "loadError": "Failed to load leases",
-    "name": "Name",
-    "nameRequired": "Name is required",
-    "note": "Note (optional)",
-    "reconcile": "Reconcile",
-    "reconcileError": "Reconcile failed",
-    "reconciled": "{{count}} expired lease(s) marked",
-    "revealTitle": "Lease Issued — Copy Now",
-    "revealWarning": "This is the only time the secret will be shown. Copy it now — there is no recovery once you close this dialog.",
-    "revoke": "Revoke",
-    "revokeError": "Failed to revoke",
-    "revoked": "Lease revoked",
-    "role": "Backend Role",
-    "roleRequired": "Backend role is required",
-    "secret": "Secret value",
-    "status": "Status",
-    "statusFilter": "Status filter",
-    "subtitle": "Short-lived credentials issued via OpenBAO/Vault that auto-expire",
-    "title": "Dynamic Secrets",
-    "ttl": "TTL (seconds)",
-    "ttlHelp": "Lease lifetime — between {{min}} and {{max}} seconds",
-    "confirmRevoke": "Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "Delete",
@@ -2612,7 +2577,8 @@
       "statusLine": "Push status: {{status}}",
       "submit": "Save assignments",
       "success": "Policy assignments updated.",
-      "title": "Assign to sites"
+      "title": "Assign to sites",
+      "statusLineWithAttempts": "Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "Actions",
@@ -2662,7 +2628,8 @@
       "success": "Push triggered for '{{name}}'."
     },
     "subtitle": "Centrally-defined policies pushed to subordinate sites.",
-    "title": "Federation Policies"
+    "title": "Federation Policies",
+    "deadLetter": "dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "Sync interval",
       "syncIntervalValue": "{{seconds}}s",
       "url": "URL",
-      "viewAuditLog": "View audit log"
+      "viewAuditLog": "View audit log",
+      "activeCommands": "Active commands",
+      "activeCommandsEmpty": "No active commands.",
+      "activeCommandsLoading": "Loading…",
+      "commandAttempts": "{{n}} push attempts",
+      "commandDispatchedAt": "Dispatched {{when}}"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

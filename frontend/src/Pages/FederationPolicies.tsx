@@ -887,6 +887,43 @@ const FederationPolicies: React.FC = () => {
                 const assignment = assignDialog.existingAssignments.find(
                   (a) => a.site_id === site.id,
                 );
+                // Phase 12.10 hardening: surface retry counts +
+                // dead-letter state so the operator can see WHY a
+                // push isn't landing instead of just "still pending".
+                let secondary: React.ReactNode;
+                if (assignment) {
+                  const attempts = assignment.push_attempts ?? 0;
+                  const statusLine =
+                    attempts > 0
+                      ? t(
+                          "policies.assign.statusLineWithAttempts",
+                          "Push status: {{status}} ({{attempts}} attempts)",
+                          { status: assignment.push_status, attempts },
+                        )
+                      : t(
+                          "policies.assign.statusLine",
+                          "Push status: {{status}}",
+                          { status: assignment.push_status },
+                        );
+                  secondary = (
+                    <>
+                      {statusLine}
+                      {assignment.last_push_error && (
+                        <Typography
+                          variant="caption"
+                          color="error.main"
+                          component="div"
+                          sx={{ mt: 0.25, wordBreak: "break-word" }}
+                        >
+                          {assignment.last_push_error}
+                        </Typography>
+                      )}
+                    </>
+                  );
+                } else {
+                  secondary = site.location_label || site.url;
+                }
+                const isDead = assignment?.push_status === "dead";
                 return (
                   <ListItem key={site.id} disablePadding>
                     <ListItemButton
@@ -894,16 +931,19 @@ const FederationPolicies: React.FC = () => {
                     >
                       <Checkbox edge="start" checked={checked} tabIndex={-1} />
                       <ListItemText
-                        primary={site.name}
-                        secondary={
-                          assignment
-                            ? t(
-                                "policies.assign.statusLine",
-                                "Push status: {{status}}",
-                                { status: assignment.push_status },
-                              )
-                            : site.location_label || site.url
+                        primary={
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <span>{site.name}</span>
+                            {isDead && (
+                              <Chip
+                                label={t("policies.deadLetter", "dead-letter")}
+                                color="error"
+                                size="small"
+                              />
+                            )}
+                          </Stack>
                         }
+                        secondary={secondary}
                       />
                     </ListItemButton>
                   </ListItem>

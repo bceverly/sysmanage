@@ -1009,8 +1009,8 @@
       "repository": "Opslagplaats"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "Kaart",
+    "sites": "Sites"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -1953,41 +1953,6 @@
     "updated": "Sjabloon opgeslagen",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "Geheim gekopieerd naar klembord",
-    "copy": "Kopiëren",
-    "copyError": "Kopiëren mislukt",
-    "empty": "Geen leases komen overeen met het huidige filter.",
-    "expiresAt": "Verloopt",
-    "expiresOn": "Verloopt:",
-    "issue": "Lease uitgeven",
-    "issueError": "Lease uitgeven mislukt",
-    "issueTitle": "Nieuwe lease uitgeven",
-    "issuedAt": "Uitgegeven",
-    "kind": "Soort",
-    "loadError": "Leases laden mislukt",
-    "name": "Naam",
-    "nameRequired": "Naam is verplicht",
-    "note": "Opmerking (optioneel)",
-    "reconcile": "Afstemmen",
-    "reconcileError": "Afstemmen mislukt",
-    "reconciled": "{{count}} verlopen lease(s) gemarkeerd",
-    "revealTitle": "Lease uitgegeven — nu kopiëren",
-    "revealWarning": "Dit is de enige keer dat het geheim wordt weergegeven. Kopieer het nu — herstel is niet mogelijk na het sluiten van dit dialoogvenster.",
-    "revoke": "Intrekken",
-    "revokeError": "Intrekken mislukt",
-    "revoked": "Lease ingetrokken",
-    "role": "Backend-rol",
-    "roleRequired": "Backend-rol is verplicht",
-    "secret": "Geheime waarde",
-    "status": "Status",
-    "statusFilter": "Statusfilter",
-    "subtitle": "Kortlevende credentials uitgegeven via OpenBAO/Vault die automatisch verlopen",
-    "title": "Dynamische geheimen",
-    "ttl": "TTL (seconden)",
-    "ttlHelp": "Lease-levensduur — tussen {{min}} en {{max}} seconden",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "Verwijderen",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

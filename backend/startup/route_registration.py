@@ -82,8 +82,10 @@ def register_routes(app: FastAPI):
     # Unauthenticated routes (no /api prefix)
     logger.debug("Registering unauthenticated routes:")
 
-    logger.debug("Adding auth router (no prefix)")
-    app.include_router(auth.router)  # /login, /refresh
+    logger.debug("Adding auth router with /api prefix")
+    app.include_router(
+        auth.router, prefix="/api"
+    )  # /api/login, /api/refresh, /api/logout
     logger.debug("Auth router added")
 
     logger.debug(
@@ -126,8 +128,10 @@ def register_routes(app: FastAPI):
     app.include_router(external_idp.router)
     logger.debug("External IdP router added")
 
-    logger.debug("Adding agent public router (no prefix)")
-    app.include_router(agent.public_router)  # /agent/auth (no auth required)
+    logger.debug("Adding agent public router with /api prefix")
+    app.include_router(
+        agent.public_router, prefix="/api"
+    )  # /api/agent/auth (no auth required)
     logger.debug("Agent public router added")
 
     logger.debug("Adding agent authenticated router with /api prefix")
@@ -136,20 +140,22 @@ def register_routes(app: FastAPI):
     )  # /api/agent/connect, /api/agent/installation-complete
     logger.debug("Agent authenticated router added")
 
-    logger.debug("Adding host public router (no prefix)")
-    app.include_router(host.public_router)  # /host/register (no auth)
+    logger.debug("Adding host public router with /api prefix")
+    app.include_router(
+        host.public_router, prefix="/api"
+    )  # /api/host/register (no auth)
     logger.debug("Host public router added")
 
-    logger.debug("Adding certificates public router (no prefix)")
+    logger.debug("Adding certificates public router with /api prefix")
     app.include_router(
-        certificates.public_router
-    )  # /certificates/server-fingerprint, /certificates/ca-certificate (no auth)
+        certificates.public_router, prefix="/api"
+    )  # /api/certificates/server-fingerprint, /api/certificates/ca-certificate (no auth)
     logger.debug("Certificates public router added")
 
-    logger.debug("Adding password reset router (no prefix)")
+    logger.debug("Adding password reset router with /api prefix")
     app.include_router(
-        password_reset.router
-    )  # /forgot-password, /reset-password, /validate-reset-token (no auth)
+        password_reset.router, prefix="/api"
+    )  # /api/forgot-password, /api/reset-password, /api/validate-reset-token (no auth)
     logger.debug("Password reset router added")
 
     # Secure routes (with /api prefix and JWT authentication required)

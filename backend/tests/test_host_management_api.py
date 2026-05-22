@@ -1248,11 +1248,15 @@ class TestHostDataUpdates:
         ) as mock_queue:
             mock_db.get_engine.return_value = MagicMock()
 
-            # First host exists, second doesn't
+            # Phase 6 N+1 audit refactored ``request_hardware_update_bulk``
+            # to bulk-fetch via ``.filter(Host.id.in_(host_ids)).all()``
+            # and dict-lookup per id, instead of one ``.first()`` per
+            # host.  Mock ``.all()`` with only the host that "exists" —
+            # the missing id is reported as not-found by the dict
+            # ``.get()`` returning ``None``.
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
+            mock_session.query.return_value.filter.return_value.all.return_value = [
                 mock_host,
-                None,
             ]
 
             with patch(

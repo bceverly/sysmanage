@@ -34,7 +34,7 @@ class TestAuthLogin:
 
         # Test login
         response = client.post(
-            "/login",
+            "/api/login",
             json={
                 "userid": test_user_data["userid"],
                 "password": test_user_data["password"],
@@ -68,7 +68,7 @@ class TestAuthLogin:
 
         # Test login with wrong password
         response = client.post(
-            "/login",
+            "/api/login",
             json={"userid": test_user_data["userid"], "password": "wrong_password"},
         )
 
@@ -85,7 +85,7 @@ class TestAuthLogin:
         mock_login_security.validate_login_attempt.return_value = (True, "")
 
         response = client.post(
-            "/login",
+            "/api/login",
             json={"userid": "nonexistent@example.com", "password": "password123"},
         )
 
@@ -116,7 +116,7 @@ class TestAuthLogin:
         mock_login_security.validate_login_attempt.return_value = (True, "")
 
         response = client.post(
-            "/login",
+            "/api/login",
             json={
                 "userid": test_user_data["userid"],
                 "password": test_user_data["password"],
@@ -137,7 +137,7 @@ class TestAuthLogin:
         )
 
         response = client.post(
-            "/login", json={"userid": "test@example.com", "password": "password123"}
+            "/api/login", json={"userid": "test@example.com", "password": "password123"}
         )
 
         assert response.status_code == 429
@@ -147,7 +147,7 @@ class TestAuthLogin:
     def test_login_invalid_email_format(self, client):
         """Test login with invalid email format."""
         response = client.post(
-            "/login", json={"userid": "invalid-email", "password": "password123"}
+            "/api/login", json={"userid": "invalid-email", "password": "password123"}
         )
 
         assert response.status_code == 422  # Validation error
@@ -155,15 +155,15 @@ class TestAuthLogin:
     def test_login_missing_fields(self, client):
         """Test login with missing required fields."""
         # Missing password
-        response = client.post("/login", json={"userid": "test@example.com"})
+        response = client.post("/api/login", json={"userid": "test@example.com"})
         assert response.status_code == 422
 
         # Missing userid
-        response = client.post("/login", json={"password": "password123"})
+        response = client.post("/api/login", json={"password": "password123"})
         assert response.status_code == 422
 
         # Empty request
-        response = client.post("/login", json={})
+        response = client.post("/api/login", json={})
         assert response.status_code == 422
 
     def test_login_locked_account(
@@ -188,7 +188,7 @@ class TestAuthLogin:
         )
 
         response = client.post(
-            "/login",
+            "/api/login",
             json={
                 "userid": test_user_data["userid"],
                 "password": test_user_data["password"],
@@ -223,7 +223,7 @@ class TestAuthRefresh:
 
             # Set refresh token in cookies
             client.cookies.set("refresh_token", "valid_refresh_token")
-            response = client.post("/refresh")
+            response = client.post("/api/refresh")
 
             assert response.status_code == 200
             data = response.json()
@@ -235,7 +235,7 @@ class TestAuthRefresh:
             mock_decode.return_value = None
 
             client.cookies.set("refresh_token", "invalid_token")
-            response = client.post("/refresh")
+            response = client.post("/api/refresh")
 
             assert response.status_code == 403
             data = response.json()
@@ -247,7 +247,7 @@ class TestAuthRefresh:
             mock_decode.return_value = {"user_id": "nonexistent@example.com"}
 
             client.cookies.set("refresh_token", "valid_token_but_user_gone")
-            response = client.post("/refresh")
+            response = client.post("/api/refresh")
 
             assert response.status_code == 200
             data = response.json()
@@ -271,7 +271,7 @@ class TestAuthRefresh:
             }
 
             client.cookies.set("refresh_token", "valid_token")
-            response = client.post("/refresh")
+            response = client.post("/api/refresh")
 
             assert response.status_code == 200
             data = response.json()
@@ -279,7 +279,7 @@ class TestAuthRefresh:
 
     def test_refresh_missing_token(self, client):
         """Test refresh with missing refresh token."""
-        response = client.post("/refresh")
+        response = client.post("/api/refresh")
         assert response.status_code == 403
 
     def test_refresh_locked_user(self, client, session, test_user_data, mock_config):
@@ -301,7 +301,7 @@ class TestAuthRefresh:
             }
 
             client.cookies.set("refresh_token", "valid_token")
-            response = client.post("/refresh")
+            response = client.post("/api/refresh")
 
             assert response.status_code == 200
             data = response.json()

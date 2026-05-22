@@ -20,7 +20,7 @@ class TestAgentAuth:
 
         # Mock request with agent hostname header
         response = client.post(
-            "/agent/auth", headers={"x-agent-hostname": "test-agent.example.com"}
+            "/api/agent/auth", headers={"x-agent-hostname": "test-agent.example.com"}
         )
 
         assert response.status_code == 200
@@ -42,7 +42,7 @@ class TestAgentAuth:
         # Mock rate limiting
         mock_security.is_connection_rate_limited.return_value = True
 
-        response = client.post("/agent/auth")
+        response = client.post("/api/agent/auth")
 
         assert response.status_code == 200
         data = response.json()
@@ -60,7 +60,7 @@ class TestAgentAuth:
         mock_security.is_connection_rate_limited.return_value = False
         mock_security.generate_connection_token.return_value = "test_token_456"
 
-        response = client.post("/agent/auth")
+        response = client.post("/api/agent/auth")
 
         assert response.status_code == 200
         data = response.json()
@@ -80,7 +80,7 @@ class TestAgentAuth:
 
         # Test with X-Forwarded-For header (simulating proxy)
         response = client.post(
-            "/agent/auth",
+            "/api/agent/auth",
             headers={
                 "x-agent-hostname": "proxy-agent.example.com",
                 "x-forwarded-for": "192.168.1.100",
@@ -285,7 +285,7 @@ class TestAgentErrorHandling:
 
         # The security exception should cause the request to fail
         with pytest.raises(Exception, match="Security error"):
-            client.post("/agent/auth")
+            client.post("/api/agent/auth")
 
     @patch("backend.api.agent.websocket_security")
     def test_auth_token_generation_failure(self, mock_security, client):
@@ -293,7 +293,7 @@ class TestAgentErrorHandling:
         mock_security.is_connection_rate_limited.return_value = False
         mock_security.generate_connection_token.return_value = None
 
-        response = client.post("/agent/auth")
+        response = client.post("/api/agent/auth")
 
         # Should handle token generation failure
         assert response.status_code in [200, 500]

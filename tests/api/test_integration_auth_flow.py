@@ -46,7 +46,7 @@ def test_login_issues_usable_jwt(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/login",
+        "/api/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],
@@ -57,7 +57,9 @@ def test_login_issues_usable_jwt(
     assert token, f"login response had no Authorization field: {resp.json()}"
 
     # Now use that token on /logout (the simplest JWT-gated endpoint).
-    logout_resp = client.post("/logout", headers={"Authorization": f"Bearer {token}"})
+    logout_resp = client.post(
+        "/api/logout", headers={"Authorization": f"Bearer {token}"}
+    )
     assert logout_resp.status_code == 200, (
         f"freshly-issued JWT was not accepted by /logout (status="
         f"{logout_resp.status_code}); auth wiring broken"
@@ -78,7 +80,7 @@ def test_login_then_use_health_endpoint_unauth(client):
 @pytest.mark.integration
 def test_logout_without_auth_rejected(client):
     """The /logout endpoint must reject anonymous calls."""
-    resp = client.post("/logout")
+    resp = client.post("/api/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -93,7 +95,7 @@ def test_failed_login_records_audit_attempt(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/login",
+        "/api/login",
         json={
             "userid": test_user_data["userid"],
             "password": "definitely-not-the-right-password",
@@ -115,7 +117,7 @@ def test_login_unknown_user_does_not_distinguish_from_wrong_password(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/login",
+        "/api/login",
         json={
             "userid": "no-such-user@example.com",
             "password": "anything",

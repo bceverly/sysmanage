@@ -43,11 +43,16 @@ def test_engine():
         poolclass=StaticPool,
     )
     try:
-        models.Base.metadata.create_all(bind=engine, checkfirst=True)
-    except Exception:
-        # If there's an issue with model definitions, create a minimal engine
-        pass
-    return engine
+        try:
+            models.Base.metadata.create_all(bind=engine, checkfirst=True)
+        except Exception:
+            # If there's an issue with model definitions, create a minimal engine
+            pass
+        yield engine
+    finally:
+        # ``engine.dispose()`` in teardown closes the underlying sqlite3
+        # connections so they don't surface as ResourceWarnings later.
+        engine.dispose()
 
 
 @pytest.fixture

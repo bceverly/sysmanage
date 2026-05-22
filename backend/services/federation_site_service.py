@@ -132,6 +132,64 @@ def _hash_token(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
+def generate_sync_bearer_token() -> Tuple[str, str]:
+    """Return ``(plaintext_token, sha256_hash_hex)`` for the long-lived
+    site → coordinator sync bearer.
+
+    Distinct from ``generate_enrollment_token`` even though the
+    cryptographic shape is identical — keeping the helpers separate
+    makes the lifecycle distinction grep-able (enrollment tokens are
+    one-shot, sync bearers are long-lived) and lets us evolve them
+    independently (e.g., different entropy budgets, different
+    rotation policies).
+    """
+    plaintext = secrets.token_urlsafe(_TOKEN_BYTES)
+    sha256_hash = hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
+    return plaintext, sha256_hash
+
+
+def generate_coordinator_outbound_bearer_token() -> str:
+    """Return a fresh plaintext bearer for the coordinator → site
+    direction.
+
+    The coordinator stores the plaintext (it's the SENDER for this
+    direction).  Only the SHA-256 is shipped to the site at enrollment
+    time, where the site keeps it in
+    ``federation_coordinator.coordinator_inbound_bearer_token_hash``
+    for verifying incoming push calls.
+    """
+    return secrets.token_urlsafe(_TOKEN_BYTES)
+
+
+def find_site_by_sync_bearer_token(
+    session: Session, plaintext_token: str
+) -> Optional[FederationSite]:
+    """Resolve a presented sync bearer token to its owning site row.
+
+    Returns ``None`` if no site matches, the site is not in
+    ``status='enrolled'``, or the token is empty.  Callers (the engine's
+    FastAPI dependency) translate the ``None`` into HTTP 401.
+
+    The lookup is by hash equality on the indexed token column — no
+    plaintext comparison ever touches the DB.
+    """
+    if not plaintext_token:
+        return None
+    expected_hash = _hash_token(plaintext_token)
+    return (
+        session.execute(
+            select(FederationSite).where(
+                and_(
+                    FederationSite.sync_bearer_token_hash == expected_hash,
+                    FederationSite.status == STATUS_ENROLLED,
+                )
+            )
+        )
+        .scalars()
+        .first()
+    )
+
+
 # ---------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------
@@ -287,15 +345,34 @@ def complete_enrollment(
     plaintext_token: str,
     tls_cert_pem: str,
     actor_userid: Optional[str] = None,
-) -> FederationSite:
+) -> Tuple[FederationSite, str, str]:
     """Finalise a pending site enrollment.
 
     Looks up the pending site by hashed token (NOT by id — the site
     presents the token over the network, not the site_id), checks
     the token hasn't expired, records the site's TLS certificate for
-    future mTLS pinning, flips ``status`` to ``enrolled``, stamps
-    ``enrolled_at``, and scrubs the token hash so it can't be
-    replayed.
+    future mTLS pinning, mints BOTH directional bearers (Phase 12.10
+    Slice 1 + Slice 3), flips ``status`` to ``enrolled``, stamps
+    ``enrolled_at``, and scrubs the enrollment token hash so it
+    can't be replayed.
+
+    Returns ``(site, plaintext_sync_bearer_token,
+    plaintext_coordinator_outbound_bearer_token_for_hashing)``:
+
+      * The sync bearer (site → coordinator) is returned as plaintext
+        for the site server to STORE.  The coordinator only retains
+        the SHA-256 hash on the row.
+      * The coordinator-outbound bearer (coordinator → site) is
+        returned as plaintext SOLELY so the caller can SHA-256 it for
+        delivery to the site.  The coordinator persists the PLAINTEXT
+        on the site row (it's the sender for that direction); the
+        site stores only the hash for verifying incoming pushes.
+
+    Caller responsibility: in the HTTP response, ship
+    ``sync_bearer_token`` (plaintext) and
+    ``coordinator_inbound_bearer_token_hash`` (SHA-256 of the third
+    return value) to the site.  Never let the coordinator-outbound
+    plaintext leave the coordinator.
     """
     if not plaintext_token:
         raise InvalidEnrollmentTokenError("Empty enrollment token")
@@ -338,6 +415,18 @@ def complete_enrollment(
     site.enrolled_at = _utcnow_naive()
     site.status = STATUS_ENROLLED
 
+    # Mint BOTH directional bearers.  Same one-shot semantics as the
+    # enrollment token: plaintext returns to the caller exactly once;
+    # what we persist depends on direction.
+    plaintext_sync_bearer, sync_bearer_hash = generate_sync_bearer_token()
+    site.sync_bearer_token_hash = sync_bearer_hash
+
+    # Phase 12.10 Slice 3 — coordinator → site direction.  The
+    # coordinator IS the sender, so we keep the plaintext on the
+    # row.  The caller HASHES this and ships the hash to the site.
+    coord_outbound_plaintext = generate_coordinator_outbound_bearer_token()
+    site.coordinator_outbound_bearer_token = coord_outbound_plaintext
+
     _log_audit(
         session,
         AUDIT_OP_SITE_ENROLLMENT_COMPLETED,
@@ -345,7 +434,7 @@ def complete_enrollment(
         target_site_id=site.id,
         details={"name": site.name, "url": site.url},
     )
-    return site
+    return site, plaintext_sync_bearer, coord_outbound_plaintext
 
 
 def cancel_enrollment(
@@ -624,9 +713,17 @@ def remove_site(
         return site  # idempotent
     previous_status = site.status
     site.status = STATUS_REMOVED
-    # Scrub the enrollment token hash if any was still pending — a
-    # removed site can't be enrolled later, so the token is dead.
+    # Scrub all live credentials.  Removed sites can't authenticate
+    # in EITHER direction:
+    #   * ``enrollment_token_hash``: enrollment hasn't completed
+    #     (operator cancelled mid-flow).
+    #   * ``sync_bearer_token_hash``: site → coord push credential.
+    #   * ``coordinator_outbound_bearer_token``: coord → site push
+    #     credential.  Leaving it intact would let the coordinator's
+    #     own push worker keep firing at a removed site every tick.
     site.enrollment_token_hash = None
+    site.sync_bearer_token_hash = None
+    site.coordinator_outbound_bearer_token = None
     _log_audit(
         session,
         AUDIT_OP_SITE_REMOVED,

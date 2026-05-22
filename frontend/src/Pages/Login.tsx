@@ -74,7 +74,7 @@ const Login = () => {
       e.preventDefault();
       if (input.userid !== "" && input.password !== "") {
         setIsLoggingIn(true);
-        api.post<LoginResponse>("/login", {
+        api.post<LoginResponse>("/api/login", {
           userid: input.userid,
           password: input.password
         })

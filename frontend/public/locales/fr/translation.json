@@ -1009,8 +1009,8 @@
       "repository": "Référentiel"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "Carte",
+    "sites": "Sites"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -1953,41 +1953,6 @@
     "updated": "Modèle enregistré",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "Secret copié dans le presse-papiers",
-    "copy": "Copier",
-    "copyError": "Échec de la copie",
-    "empty": "Aucun bail ne correspond au filtre actuel.",
-    "expiresAt": "Expire",
-    "expiresOn": "Expire :",
-    "issue": "Émettre un bail",
-    "issueError": "Échec de l'émission du bail",
-    "issueTitle": "Émettre un nouveau bail",
-    "issuedAt": "Émis",
-    "kind": "Type",
-    "loadError": "Échec du chargement des baux",
-    "name": "Nom",
-    "nameRequired": "Le nom est obligatoire",
-    "note": "Note (facultative)",
-    "reconcile": "Réconcilier",
-    "reconcileError": "Échec de la réconciliation",
-    "reconciled": "{{count}} bail(s) expiré(s) marqué(s)",
-    "revealTitle": "Bail émis — copier maintenant",
-    "revealWarning": "C'est la seule fois où le secret sera affiché. Copiez-le maintenant — aucune récupération possible après la fermeture de cette boîte de dialogue.",
-    "revoke": "Révoquer",
-    "revokeError": "Échec de la révocation",
-    "revoked": "Bail révoqué",
-    "role": "Rôle du backend",
-    "roleRequired": "Le rôle du backend est obligatoire",
-    "secret": "Valeur du secret",
-    "status": "Statut",
-    "statusFilter": "Filtre de statut",
-    "subtitle": "Identifiants à durée de vie courte émis via OpenBAO/Vault qui expirent automatiquement",
-    "title": "Secrets dynamiques",
-    "ttl": "TTL (secondes)",
-    "ttlHelp": "Durée du bail — entre {{min}} et {{max}} secondes",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "Supprimer",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

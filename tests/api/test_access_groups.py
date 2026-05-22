@@ -349,7 +349,7 @@ class TestRegistrationKeyEnrollmentFlow:
         """Sanity:  no registration_key → host created with pending
         approval, same as before Phase 8.1."""
         r = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": True,
                 "fqdn": "no-key-host.example.com",
@@ -362,7 +362,7 @@ class TestRegistrationKeyEnrollmentFlow:
 
     def test_register_with_invalid_key_403(self, client, auth_headers):
         r = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": True,
                 "fqdn": "bad-key.example.com",
@@ -386,7 +386,7 @@ class TestRegistrationKeyEnrollmentFlow:
         secret = key_resp.json()["key"]
 
         r = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": True,
                 "fqdn": "auto-approved-host.example.com",
@@ -424,7 +424,7 @@ class TestRegistrationKeyEnrollmentFlow:
         )
         secret = key_resp.json()["key"]
         r = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": True,
                 "fqdn": "manual-key-host.example.com",

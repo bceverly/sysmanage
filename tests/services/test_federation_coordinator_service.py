@@ -43,12 +43,15 @@ FEDERATION_TABLE_NAMES = [
 @pytest.fixture
 def session():
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
-    )
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as s:
-        yield s
+    try:
+        Base.metadata.create_all(
+            engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
+        )
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as s:
+            yield s
+    finally:
+        engine.dispose()
 
 
 # ---------------------------------------------------------------------
@@ -245,6 +248,44 @@ class TestEnrollmentLifecycle:
         assert row.site_id is None
         assert row.site_tls_cert_pem is None
         assert row.enrolled_at is None
+        # Phase 12.10 Slice 2: sync bearer must also be scrubbed on
+        # clear so a stale plaintext can't keep firing on every tick.
+        assert row.sync_bearer_token is None
+
+    def test_mark_enrolled_stores_sync_bearer(self, session):
+        # Phase 12.10 Slice 2: the coordinator's complete_enrollment
+        # response carries the long-lived bearer; the site stores it
+        # here so the outbound tick worker can read it on every tick.
+        self._pending(session)
+        sid = uuid.uuid4()
+        csvc.mark_enrolled(
+            session,
+            site_id=sid,
+            site_tls_cert_pem="sc",
+            sync_bearer_token="abc-secret-bearer-xyz",
+        )
+        session.commit()
+        row = csvc.get_coordinator(session)
+        assert row.sync_bearer_token == "abc-secret-bearer-xyz"
+
+    def test_mark_enrolled_without_bearer_leaves_column_unchanged(self, session):
+        # Existing test fixtures call ``mark_enrolled`` without the
+        # bearer (the param is optional for backwards compat).  Make
+        # sure that path doesn't NULL-out a previously-set bearer
+        # on a resume (suspended → enrolled).
+        self._pending(session)
+        sid = uuid.uuid4()
+        csvc.mark_enrolled(
+            session,
+            site_id=sid,
+            site_tls_cert_pem="sc",
+            sync_bearer_token="original-bearer",
+        )
+        csvc.mark_suspended(session)
+        csvc.mark_enrolled(session, site_id=sid, site_tls_cert_pem="sc")
+        session.commit()
+        row = csvc.get_coordinator(session)
+        assert row.sync_bearer_token == "original-bearer"
 
 
 # ---------------------------------------------------------------------

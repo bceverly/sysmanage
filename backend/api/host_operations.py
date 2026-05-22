@@ -10,6 +10,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -60,13 +61,6 @@ async def refresh_host_software(
         )
 
         # Audit log the software refresh request
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         AuditService.log(
             db=session,
             user_id=user.id,
@@ -136,13 +130,6 @@ async def reboot_host(host_id: str, current_user: str = Depends(get_current_user
         )
 
         # Audit log the reboot request
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         AuditService.log(
             db=session,
             user_id=user.id,
@@ -212,13 +199,6 @@ async def shutdown_host(host_id: str, current_user: str = Depends(get_current_us
         )
 
         # Audit log the shutdown request
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         AuditService.log(
             db=session,
             user_id=user.id,
@@ -288,13 +268,6 @@ async def update_agent(host_id: str, current_user: str = Depends(get_current_use
         )
 
         # Audit log the agent update request
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         AuditService.log(
             db=session,
             user_id=user.id,
@@ -353,13 +326,6 @@ async def request_packages(host_id: str, current_user: str = Depends(get_current
         )
 
         # Audit log the package collection request
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         AuditService.log(
             db=session,
             user_id=user.id,

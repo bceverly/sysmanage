@@ -147,32 +147,38 @@ def test_upgrade_creates_all_tables_idempotently():
     """First upgrade creates all 13 tables; second upgrade is a no-op
     (no exception raised, same table set)."""
     engine = sa.create_engine("sqlite:///:memory:")
-    _run_alembic_func(engine, "upgrade")
-    inspector = sa.inspect(engine)
-    tables_after_first = set(inspector.get_table_names())
-    for name in EXPECTED_TABLES:
-        assert name in tables_after_first, f"Missing after upgrade: {name}"
+    try:
+        _run_alembic_func(engine, "upgrade")
+        inspector = sa.inspect(engine)
+        tables_after_first = set(inspector.get_table_names())
+        for name in EXPECTED_TABLES:
+            assert name in tables_after_first, f"Missing after upgrade: {name}"
 
-    # Second upgrade must not raise and must produce the same set.
-    _run_alembic_func(engine, "upgrade")
-    inspector = sa.inspect(engine)
-    tables_after_second = set(inspector.get_table_names())
-    assert tables_after_second == tables_after_first
+        # Second upgrade must not raise and must produce the same set.
+        _run_alembic_func(engine, "upgrade")
+        inspector = sa.inspect(engine)
+        tables_after_second = set(inspector.get_table_names())
+        assert tables_after_second == tables_after_first
+    finally:
+        engine.dispose()
 
 
 def test_downgrade_drops_all_tables_idempotently():
     """After upgrade then downgrade, every federation table is gone.
     A second downgrade is a no-op."""
     engine = sa.create_engine("sqlite:///:memory:")
-    _run_alembic_func(engine, "upgrade")
-    _run_alembic_func(engine, "downgrade")
-    inspector = sa.inspect(engine)
-    remaining = set(inspector.get_table_names())
-    for name in EXPECTED_TABLES:
-        assert name not in remaining, f"Still present after downgrade: {name}"
+    try:
+        _run_alembic_func(engine, "upgrade")
+        _run_alembic_func(engine, "downgrade")
+        inspector = sa.inspect(engine)
+        remaining = set(inspector.get_table_names())
+        for name in EXPECTED_TABLES:
+            assert name not in remaining, f"Still present after downgrade: {name}"
 
-    # Second downgrade must not raise.
-    _run_alembic_func(engine, "downgrade")
+        # Second downgrade must not raise.
+        _run_alembic_func(engine, "downgrade")
+    finally:
+        engine.dispose()
 
 
 # ---------------------------------------------------------------------
@@ -188,22 +194,25 @@ def test_round_trip_through_orm():
     from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine, tables=[Base.metadata.tables[t] for t in EXPECTED_TABLES]
-    )
-
-    Session = sessionmaker(bind=engine)
-    with Session() as session:
-        site = FederationSite(
-            name="Site-Cleveland",
-            location_label="Cleveland DC1",
-            url="https://sysmanage.cle.example.com",
+    try:
+        Base.metadata.create_all(
+            engine, tables=[Base.metadata.tables[t] for t in EXPECTED_TABLES]
         )
-        session.add(site)
-        session.commit()
-        assert site.id is not None
-        assert site.status == "enrolled"  # column default
-        assert site.host_count == 0
-        assert site.sync_interval_seconds == 300
-        assert site.created_at is not None
-        assert site.updated_at is not None
+
+        Session = sessionmaker(bind=engine)
+        with Session() as session:
+            site = FederationSite(
+                name="Site-Cleveland",
+                location_label="Cleveland DC1",
+                url="https://sysmanage.cle.example.com",
+            )
+            session.add(site)
+            session.commit()
+            assert site.id is not None
+            assert site.status == "enrolled"  # column default
+            assert site.host_count == 0
+            assert site.sync_interval_seconds == 300
+            assert site.created_at is not None
+            assert site.updated_at is not None
+    finally:
+        engine.dispose()

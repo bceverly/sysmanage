@@ -1009,8 +1009,8 @@
       "repository": "Репозиторий"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "Карта",
+    "sites": "Сайты"
   },
   "notifications": {
     "applicationUpdates": "Обновления Приложений",
@@ -1953,41 +1953,6 @@
     "updated": "Шаблон сохранён",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "Секрет скопирован в буфер обмена",
-    "copy": "Копировать",
-    "copyError": "Сбой копирования",
-    "empty": "Нет аренд, соответствующих текущему фильтру.",
-    "expiresAt": "Истекает",
-    "expiresOn": "Истекает:",
-    "issue": "Выдать аренду",
-    "issueError": "Не удалось выдать аренду",
-    "issueTitle": "Выдать новую аренду",
-    "issuedAt": "Выдан",
-    "kind": "Тип",
-    "loadError": "Не удалось загрузить аренды",
-    "name": "Имя",
-    "nameRequired": "Имя обязательно",
-    "note": "Примечание (необязательно)",
-    "reconcile": "Сверить",
-    "reconcileError": "Сверка не удалась",
-    "reconciled": "Отмечено просроченных аренд: {{count}}",
-    "revealTitle": "Аренда выдана — скопируйте сейчас",
-    "revealWarning": "Это единственный раз, когда секрет будет показан. Скопируйте его сейчас — после закрытия этого диалога восстановление невозможно.",
-    "revoke": "Отозвать",
-    "revokeError": "Не удалось отозвать",
-    "revoked": "Аренда отозвана",
-    "role": "Роль бэкенда",
-    "roleRequired": "Роль бэкенда обязательна",
-    "secret": "Значение секрета",
-    "status": "Статус",
-    "statusFilter": "Фильтр по статусу",
-    "subtitle": "Краткосрочные учётные данные, выдаваемые через OpenBAO/Vault, с автоматическим истечением",
-    "title": "Динамические секреты",
-    "ttl": "TTL (секунд)",
-    "ttlHelp": "Время жизни аренды — от {{min}} до {{max}} секунд",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "Удалить",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

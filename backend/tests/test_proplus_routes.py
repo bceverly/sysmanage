@@ -467,6 +467,15 @@ class TestFederationControllerStubRoutes:
         ("GET", "/api/v1/federation/commands/cmd-1"),
         ("GET", "/api/v1/federation/audit"),
         ("GET", "/api/v1/federation/audit/entry-1"),
+        # Phase 12.6 — sync ingest surface (site → coordinator).
+        # These return 401 in the engine (no bearer token) but the
+        # OSS stub layer returns 200 ``{licensed: false}`` uniformly
+        # so callers can detect "module not licensed" without auth.
+        ("POST", "/api/v1/federation/sites/site-1/rollups/hosts"),
+        ("POST", "/api/v1/federation/sites/site-1/rollups/compliance"),
+        ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
+        ("POST", "/api/v1/federation/sites/site-1/host-directory"),
+        ("POST", "/api/v1/federation/sites/site-1/command-results"),
     ]
 
     @pytest.fixture
@@ -510,11 +519,12 @@ class TestFederationControllerStubRoutes:
             ), f"{method} {path} body missing licensed=False: {body}"
 
     def test_federation_stub_count_locked(self, stub_only_app):
-        """A safety net: the federation stub surface is exactly 27
-        endpoint routes (matching ``STUB_ENDPOINTS``).  If this count
-        drifts unexpectedly, either someone added an endpoint without
-        updating the test, or removed one — both should be a deliberate
-        decision.
+        """A safety net: the federation stub surface is exactly 32
+        endpoint routes (matching ``STUB_ENDPOINTS``) — 27 from
+        Phase 12.1/12.3 plus 5 ingest stubs from Phase 12.6.  If this
+        count drifts unexpectedly, either someone added an endpoint
+        without updating the test, or removed one — both should be a
+        deliberate decision.
 
         Filter excludes ``/api/v1/federation/site/`` because Phase 12.2
         added a separate site-engine stub block at that prefix; those

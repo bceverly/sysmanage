@@ -582,7 +582,15 @@ def main():
 
     print("\n[OK] Security migration completed successfully!")
     print("\n📋 Next steps:")
-    print("   1. Restart the SysManage server: ./run.sh")
+    # Detect packaged install (/opt/sysmanage) vs dev tree and print the
+    # correct restart hint.  In a dev checkout you re-run ./run.sh; in a
+    # PPA-installed deployment the service is managed by systemd.
+    if os.path.exists("/opt/sysmanage/.venv") and os.path.exists(
+        "/usr/lib/systemd/system/sysmanage.service"
+    ):
+        print("   1. Restart the SysManage server: sudo systemctl restart sysmanage")
+    else:
+        print("   1. Restart the SysManage server: ./run.sh")
     if update_salt and migrations_needed:
         print("   2. Share temporary passwords with affected users (shown above)")
         print("   3. Ensure users change their temporary passwords immediately")

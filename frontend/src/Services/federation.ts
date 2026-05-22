@@ -372,11 +372,23 @@ export interface FederationPolicyAssignment {
   site_name?: string | null;
   assigned_at?: string | null;
   assigned_by?: string | null;
-  /** pending / pushed / acknowledged / error */
+  /**
+   * Lifecycle of the per-(policy, site) push:
+   *
+   *   pending       — never pushed (or operator re-assigned to reset).
+   *   pushed        — at least one successful delivery.
+   *   acknowledged  — site applied the policy (reserved for future).
+   *   error         — most recent attempt failed; backoff window active.
+   *   dead          — Phase 12.10 hardening: exceeded MAX_ATTEMPTS,
+   *                   no further retries until operator re-assigns.
+   */
   push_status: string;
   last_push_attempt_at?: string | null;
   last_push_error?: string | null;
   pushed_version?: number | null;
+  /** Phase 12.10 hardening: total transport attempts (success + fail).
+   *  Reset to 0 on re-assignment.  When >= 8 the row dead-letters. */
+  push_attempts?: number;
 }
 
 export interface FederationPolicyListResponse {
@@ -476,6 +488,61 @@ export async function doPushFederationPolicy(
 ): Promise<FederationPolicyActionResponse> {
   const response = await axiosInstance.post<FederationPolicyActionResponse>(
     `/api/v1/federation/policies/${encodeURIComponent(policyId)}/push`,
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Dispatched commands (coordinator → site)
+// ---------------------------------------------------------------------
+
+export interface FederationDispatchedCommand {
+  id: string;
+  command_type: string;
+  parameters?: Record<string, unknown> | null;
+  target_site_id: string;
+  target_host_ids?: string[];
+  dispatched_by?: string | null;
+  dispatched_at?: string | null;
+  /** queued_at_site / in_progress / partial / completed / failed */
+  status: string;
+  result_summary?: string | null;
+  completed_at?: string | null;
+  /** Phase 12.10 hardening: transport-attempt counter.  When >=
+   *  MAX_ATTEMPTS the coordinator dead-letters the command (status
+   *  forced to ``failed``); operator must redispatch. */
+  push_attempts?: number;
+  last_push_attempt_at?: string | null;
+  last_push_error?: string | null;
+}
+
+export interface FederationCommandListResponse {
+  licensed: boolean;
+  commands?: FederationDispatchedCommand[];
+}
+
+/**
+ * List dispatched commands targeting a specific site.  The operator
+ * UI uses this to render a "what's queued / in flight / failed" panel
+ * on the SiteDetail page.  ``open_only=true`` excludes terminal
+ * statuses (completed / failed / partial).
+ */
+export async function doListFederationCommands(params: {
+  site_id?: string;
+  status?: string;
+  open_only?: boolean;
+  limit?: number;
+  offset?: number;
+}): Promise<FederationCommandListResponse> {
+  const search = new URLSearchParams();
+  if (params.site_id) search.set("site_id", params.site_id);
+  if (params.status) search.set("status", params.status);
+  if (params.open_only) search.set("open_only", "true");
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  if (params.offset !== undefined) search.set("offset", String(params.offset));
+  const qs = search.toString();
+  const response = await axiosInstance.get<FederationCommandListResponse>(
+    `/api/v1/federation/commands${qs ? `?${qs}` : ""}`,
   );
   return response.data;
 }

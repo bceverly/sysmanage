@@ -16,7 +16,7 @@ class TestCertificateEndpoints:
                 "ABCD1234" * 8
             )
 
-            response = client.get("/certificates/server-fingerprint")
+            response = client.get("/api/certificates/server-fingerprint")
 
             assert response.status_code == 200
             data = response.json()
@@ -30,7 +30,7 @@ class TestCertificateEndpoints:
                 Exception("Certificate error")
             )
 
-            response = client.get("/certificates/server-fingerprint")
+            response = client.get("/api/certificates/server-fingerprint")
 
             assert response.status_code == 500
             assert "Failed to get server fingerprint" in response.json()["detail"]
@@ -43,7 +43,7 @@ class TestCertificateEndpoints:
             )
             mock_cert_manager.get_ca_certificate.return_value = mock_cert_data
 
-            response = client.get("/certificates/ca-certificate")
+            response = client.get("/api/certificates/ca-certificate")
 
             assert response.status_code == 200
             assert response.headers["content-type"] == "application/x-pem-file"
@@ -55,7 +55,7 @@ class TestCertificateEndpoints:
         with patch("backend.api.certificates.certificate_manager") as mock_cert_manager:
             mock_cert_manager.get_ca_certificate.side_effect = Exception("CA error")
 
-            response = client.get("/certificates/ca-certificate")
+            response = client.get("/api/certificates/ca-certificate")
 
             assert response.status_code == 500
             assert "Failed to get CA certificate" in response.json()["detail"]
@@ -241,11 +241,13 @@ class TestCertificateEndpointsIntegration:
                 mock_x509.load_pem_x509_certificate.return_value = mock_cert
 
                 # 1. Get server fingerprint (unauthenticated)
-                fingerprint_response = client.get("/certificates/server-fingerprint")
+                fingerprint_response = client.get(
+                    "/api/certificates/server-fingerprint"
+                )
                 assert fingerprint_response.status_code == 200
 
                 # 2. Get CA certificate (unauthenticated)
-                ca_response = client.get("/certificates/ca-certificate")
+                ca_response = client.get("/api/certificates/ca-certificate")
                 assert ca_response.status_code == 200
 
                 # 3. Get client certificate (authenticated)

@@ -53,7 +53,6 @@ import UpgradeProfilesSettings from '../Components/UpgradeProfilesSettings';
 import PackageProfilesSettings from '../Components/PackageProfilesSettings';
 import ReportBrandingSettings from '../Components/ReportBrandingSettings';
 import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
-import DynamicSecretsSettings from '../Components/DynamicSecretsSettings';
 import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import axiosInstance from '../Services/api';
@@ -239,7 +238,6 @@ const Settings: React.FC = () => {
         labelDefault: 'Report Templates',
         moduleRequired: 'reporting_engine',
       },
-      { id: 'dynamic-secrets', labelKey: 'dynamicSecrets.tabLabel', labelDefault: 'Dynamic Secrets' },
       {
         id: 'repository-mirroring',
         labelKey: 'mirror.tabLabel',
@@ -1268,7 +1266,6 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'compliance-profiles' && <PackageProfilesSettings />}
         {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}
         {tabNames[activeTab] === 'report-templates' && <ReportTemplatesSettings />}
-        {tabNames[activeTab] === 'dynamic-secrets' && <DynamicSecretsSettings />}
         {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
         {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
         {visiblePluginSettingsTabs.map(pt => (

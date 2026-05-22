@@ -39,6 +39,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import FederationSyncQueue
+from backend.services import federation_retry_policy as retry_policy
 
 # ---------------------------------------------------------------------
 # Errors
@@ -141,27 +142,54 @@ def enqueue(
 # ---------------------------------------------------------------------
 
 
-def peek_batch(session: Session, *, limit: int = 100) -> List[FederationSyncQueue]:
-    """Return the next ``limit`` queue rows in FIFO order WITHOUT
-    locking them.
+def peek_batch(
+    session: Session,
+    *,
+    limit: int = 100,
+    now: Optional[datetime] = None,
+) -> List[FederationSyncQueue]:
+    """Return the next ``limit`` queue rows that are READY for
+    transmission, in FIFO order, WITHOUT locking them.
 
     The site engine's worker calls this to fetch a batch, sends them
     upstream, and then calls :func:`mark_sent` / :func:`mark_failed`
     per row based on the coordinator's response.  Because the worker
     is single-threaded per process, no SELECT-FOR-UPDATE is needed —
     the FIFO ordering keeps correctness simple.
+
+    Phase 12.10 hardening: rows whose ``attempts > 0`` are gated by
+    :func:`federation_retry_policy.is_ready_for_retry` — entries
+    still in their exponential-backoff window are skipped, so a
+    down coordinator doesn't get hammered every tick.  Rows whose
+    ``attempts >= MAX_ATTEMPTS`` are dead-lettered (never returned;
+    operator must reset the counter via direct DB intervention or
+    a re-enqueue).  ``now`` is injectable for deterministic tests.
     """
     if limit <= 0:
         raise ValueError("limit must be > 0")
-    return list(
+    if now is None:
+        now = _utcnow_naive()
+    # Cheap pre-filter at the DB level: never-attempted rows are
+    # always ready; dead-lettered rows are never ready.  The fine-
+    # grained backoff check happens in Python because the
+    # ``compute_backoff`` formula uses runtime jitter.
+    candidates = list(
         session.execute(
             select(FederationSyncQueue)
+            .where(FederationSyncQueue.attempts < retry_policy.MAX_ATTEMPTS)
             .order_by(FederationSyncQueue.created_at, FederationSyncQueue.id)
-            .limit(limit)
+            .limit(limit * 4)
         )
         .scalars()
         .all()
     )
+    ready: List[FederationSyncQueue] = []
+    for entry in candidates:
+        if retry_policy.is_ready_for_retry(entry.last_attempt_at, entry.attempts, now):
+            ready.append(entry)
+            if len(ready) >= limit:
+                break
+    return ready
 
 
 def queue_depth(session: Session) -> int:

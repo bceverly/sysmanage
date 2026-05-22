@@ -51,57 +51,69 @@ class TestTestMode:
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-
-        assert db.IS_TEST_MODE is True
+        try:
+            db.enter_test_mode(test_engine)
+            assert db.IS_TEST_MODE is True
+        finally:
+            test_engine.dispose()
 
     def test_enter_test_mode_sets_engine(self):
         """Test enter_test_mode sets TEST_ENGINE."""
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-
-        assert db.TEST_ENGINE is test_engine
+        try:
+            db.enter_test_mode(test_engine)
+            assert db.TEST_ENGINE is test_engine
+        finally:
+            test_engine.dispose()
 
     def test_enter_test_mode_creates_session_local(self):
         """Test enter_test_mode creates TEST_SESSION_LOCAL."""
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-
-        assert db.TEST_SESSION_LOCAL is not None
+        try:
+            db.enter_test_mode(test_engine)
+            assert db.TEST_SESSION_LOCAL is not None
+        finally:
+            test_engine.dispose()
 
     def test_exit_test_mode_clears_flag(self):
         """Test exit_test_mode clears IS_TEST_MODE flag."""
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-        db.exit_test_mode()
-
-        assert db.IS_TEST_MODE is False
+        try:
+            db.enter_test_mode(test_engine)
+            db.exit_test_mode()
+            assert db.IS_TEST_MODE is False
+        finally:
+            test_engine.dispose()
 
     def test_exit_test_mode_clears_engine(self):
         """Test exit_test_mode clears TEST_ENGINE."""
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-        db.exit_test_mode()
-
-        assert db.TEST_ENGINE is None
+        try:
+            db.enter_test_mode(test_engine)
+            db.exit_test_mode()
+            assert db.TEST_ENGINE is None
+        finally:
+            test_engine.dispose()
 
     def test_exit_test_mode_clears_session_local(self):
         """Test exit_test_mode clears TEST_SESSION_LOCAL."""
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
-        db.exit_test_mode()
-
-        assert db.TEST_SESSION_LOCAL is None
+        try:
+            db.enter_test_mode(test_engine)
+            db.exit_test_mode()
+            assert db.TEST_SESSION_LOCAL is None
+        finally:
+            test_engine.dispose()
 
 
 class TestGetEngine:

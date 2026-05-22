@@ -28,14 +28,21 @@ from backend.persistence import models
 
 @pytest.fixture
 def test_engine():
-    """Create a shared in-memory SQLite database for testing."""
+    """Create a shared in-memory SQLite database for testing.
+
+    ``engine.dispose()`` in teardown closes the underlying sqlite3
+    connections so they don't surface as ResourceWarnings later.
+    """
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     models.Base.metadata.create_all(bind=engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture

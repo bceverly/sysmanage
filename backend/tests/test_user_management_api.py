@@ -282,11 +282,22 @@ class TestUserLogin:
 
         with patch("backend.api.auth.login_security") as mock_login_security, patch(
             "backend.api.auth.db"
-        ) as mock_db, patch("backend.api.auth.config") as mock_config_module:
+        ) as mock_db, patch("backend.api.auth.config") as mock_config_module, patch(
+            "backend.api.auth.mfa_service"
+        ) as mock_mfa_service:
             mock_login_security.validate_login_attempt.return_value = (True, "Allowed")
             mock_login_security.is_user_account_locked.return_value = False
 
             mock_config_module.get_config.return_value = TEST_CONFIG
+
+            # Phase 10.3 MFA flow: ``login`` returns ``{mfa_required,
+            # pending_token}`` instead of a real session token when the
+            # user has an MFA enrollment.  This test exercises the
+            # legacy no-MFA path, so make ``get_enrollment`` return None
+            # and ``get_settings().admin_required`` return False so the
+            # function falls through to issuing a regular Authorization.
+            mock_mfa_service.get_enrollment.return_value = None
+            mock_mfa_service.get_settings.return_value = MagicMock(admin_required=False)
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (

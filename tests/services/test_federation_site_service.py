@@ -47,15 +47,25 @@ FEDERATION_TABLE_NAMES = [
 
 @pytest.fixture
 def session():
-    """Fresh in-memory SQLite + a session.  Each test is hermetic."""
+    """Fresh in-memory SQLite + a session.  Each test is hermetic.
+
+    ``engine.dispose()`` is in the ``finally`` so we don't leave
+    sqlite3.Connection objects pending GC across the test run —
+    pytest's ``ResourceWarning: unclosed database`` plumbing
+    surfaces every undisposed engine, and on a 5000-test sweep
+    those warnings become the bulk of the output.
+    """
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine,
-        tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES],
-    )
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as s:
-        yield s
+    try:
+        Base.metadata.create_all(
+            engine,
+            tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES],
+        )
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as s:
+            yield s
+    finally:
+        engine.dispose()
 
 
 # ---------------------------------------------------------------------
@@ -158,7 +168,7 @@ class TestCompleteEnrollment:
     def test_valid_token_flips_to_enrolled(self, session):
         _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
         session.commit()
-        site = svc.complete_enrollment(
+        site, bearer, _coord_outbound = svc.complete_enrollment(
             session,
             plaintext_token=token,
             tls_cert_pem="-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----\n",
@@ -167,9 +177,17 @@ class TestCompleteEnrollment:
         session.commit()
 
         assert site.status == svc.STATUS_ENROLLED
-        # Token hash is scrubbed so it can't be replayed.
+        # Enrollment-token hash is scrubbed so it can't be replayed.
         assert site.enrollment_token_hash is None
         assert site.tls_cert_pem.startswith("-----BEGIN CERTIFICATE-----")
+        # Phase 12.6: long-lived sync bearer is minted on completion.
+        # Plaintext is returned exactly once; only the hash persists.
+        assert bearer  # non-empty plaintext
+        assert site.sync_bearer_token_hash is not None
+        assert site.sync_bearer_token_hash == svc._hash_token(bearer)
+        # Plaintext != hash — confirms we didn't accidentally store
+        # the plaintext on the row.
+        assert bearer != site.sync_bearer_token_hash
 
     def test_invalid_token_raises(self, session):
         svc.create_site(session, name="Cleveland", url="https://a.x")
@@ -377,6 +395,19 @@ class TestStateTransitions:
         session.commit()
         assert site.status == svc.STATUS_REMOVED
         assert site.enrollment_token_hash is None
+
+    def test_remove_enrolled_scrubs_sync_bearer(self, session):
+        # Phase 12.6: removing a site must invalidate its sync bearer
+        # so a leaked plaintext token can't keep pushing rollup data
+        # after administrative removal.
+        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        session.commit()
+        assert site.sync_bearer_token_hash is not None
+        svc.remove_site(session, site.id)
+        session.commit()
+        assert site.status == svc.STATUS_REMOVED
+        assert site.sync_bearer_token_hash is None
 
     def test_remove_is_idempotent(self, session):
         site, _ = svc.create_site(session, name="Cleveland", url="https://a.x")
@@ -621,3 +652,78 @@ class TestRegenerateEnrollmentToken:
         site, _ = svc.create_site(session, name="Cleveland", url="https://a.x")
         with pytest.raises(ValueError):
             svc.regenerate_enrollment_token(session, site.id, token_ttl_hours=0)
+
+
+# ---------------------------------------------------------------------------
+# Phase 12.6: sync bearer token (long-lived site → coordinator auth)
+# ---------------------------------------------------------------------------
+
+
+class TestSyncBearerToken:
+    def test_generate_returns_plaintext_and_hash(self):
+        plaintext, sha = svc.generate_sync_bearer_token()
+        assert plaintext
+        assert sha
+        assert plaintext != sha
+        # Hash must be deterministic for the same plaintext.
+        assert svc._hash_token(plaintext) == sha
+
+    def test_lookup_matches_enrolled_site(self, session):
+        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        site, bearer, _coord_outbound = svc.complete_enrollment(
+            session, plaintext_token=token, tls_cert_pem="c"
+        )
+        session.commit()
+        resolved = svc.find_site_by_sync_bearer_token(session, bearer)
+        assert resolved is not None
+        assert resolved.id == site.id
+
+    def test_lookup_returns_none_for_unknown_token(self, session):
+        # Set up an enrolled site so the DB isn't trivially empty.
+        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        session.commit()
+        assert svc.find_site_by_sync_bearer_token(session, "not-a-real-token") is None
+
+    def test_lookup_returns_none_for_empty_token(self, session):
+        assert svc.find_site_by_sync_bearer_token(session, "") is None
+
+    def test_lookup_rejects_suspended_site(self, session):
+        # Suspended sites can't push data — only ``status='enrolled'``
+        # rows are valid bearer-token holders.
+        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        _, bearer, _coord_outbound = svc.complete_enrollment(
+            session, plaintext_token=token, tls_cert_pem="c"
+        )
+        session.commit()
+        svc.suspend_site(session, site.id)
+        session.commit()
+        assert svc.find_site_by_sync_bearer_token(session, bearer) is None
+
+    def test_lookup_rejects_removed_site(self, session):
+        # Removed sites have their bearer hash scrubbed entirely
+        # (verified in TestRemoveSite); this confirms the lookup-side
+        # gate also short-circuits on status.
+        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        _, bearer, _coord_outbound = svc.complete_enrollment(
+            session, plaintext_token=token, tls_cert_pem="c"
+        )
+        session.commit()
+        svc.remove_site(session, site.id)
+        session.commit()
+        assert svc.find_site_by_sync_bearer_token(session, bearer) is None
+
+    def test_two_sites_get_distinct_bearers(self, session):
+        _, ta = svc.create_site(session, name="Alpha", url="https://a.x")
+        _, tb = svc.create_site(session, name="Bravo", url="https://b.x")
+        _, ba, _ = svc.complete_enrollment(
+            session, plaintext_token=ta, tls_cert_pem="c"
+        )
+        _, bb, _ = svc.complete_enrollment(
+            session, plaintext_token=tb, tls_cert_pem="c"
+        )
+        session.commit()
+        assert ba != bb
+        # Each bearer resolves to its own site.
+        assert svc.find_site_by_sync_bearer_token(session, ba).name == "Alpha"
+        assert svc.find_site_by_sync_bearer_token(session, bb).name == "Bravo"

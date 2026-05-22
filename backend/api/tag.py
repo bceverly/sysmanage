@@ -24,6 +24,7 @@ from backend.persistence import db as db_module
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.models import HostTag, Tag
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.security.roles import SecurityRoles
 
 router = APIRouter()
@@ -187,11 +188,6 @@ async def create_tag(
         db.refresh(new_tag)
 
         # Audit log tag creation
-        from backend.services.audit_service import (
-            AuditService,
-            EntityType,
-        )
-
         with session_local() as audit_session:
             AuditService.log_create(
                 db=audit_session,
@@ -284,11 +280,6 @@ async def update_tag(
         db.refresh(tag)
 
         # Audit log tag update
-        from backend.services.audit_service import (
-            AuditService,
-            EntityType,
-        )
-
         with session_local() as audit_session:
             AuditService.log_update(
                 db=audit_session,
@@ -377,11 +368,6 @@ async def delete_tag(
         db.commit()
 
         # Audit log tag deletion
-        from backend.services.audit_service import (
-            AuditService,
-            EntityType,
-        )
-
         with session_local() as audit_session:
             AuditService.log_delete(
                 db=audit_session,
@@ -562,13 +548,6 @@ async def add_tag_to_host(
         db.commit()
 
         # Audit log tag addition to host
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         with session_local() as audit_session:
             AuditService.log(
                 db=audit_session,
@@ -652,13 +631,6 @@ async def remove_tag_from_host(
         db.commit()
 
         # Audit log tag removal from host
-        from backend.services.audit_service import (
-            ActionType,
-            AuditService,
-            EntityType,
-            Result,
-        )
-
         with session_local() as audit_session:
             AuditService.log(
                 db=audit_session,

@@ -450,11 +450,11 @@ class TestAuthEndpoints:
     """backend/api/auth.py — log-out path is rarely tested."""
 
     def test_logout_requires_auth(self, client):
-        r = client.post("/logout")
+        r = client.post("/api/logout")
         assert r.status_code in [200, 401, 403, 404]
 
     def test_refresh_requires_auth(self, client):
-        r = client.post("/refresh")
+        r = client.post("/api/refresh")
         assert r.status_code in [200, 401, 403, 404, 422]
 
 

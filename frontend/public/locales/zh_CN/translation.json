@@ -1009,8 +1009,8 @@
       "repository": "存储库"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "地图",
+    "sites": "站点"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -1953,41 +1953,6 @@
     "updated": "模板已保存",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "密钥已复制到剪贴板",
-    "copy": "复制",
-    "copyError": "复制失败",
-    "empty": "没有匹配当前筛选的租约。",
-    "expiresAt": "过期时间",
-    "expiresOn": "过期：",
-    "issue": "签发租约",
-    "issueError": "签发租约失败",
-    "issueTitle": "签发新租约",
-    "issuedAt": "签发时间",
-    "kind": "种类",
-    "loadError": "加载租约失败",
-    "name": "名称",
-    "nameRequired": "名称为必填项",
-    "note": "备注 (可选)",
-    "reconcile": "对账",
-    "reconcileError": "对账失败",
-    "reconciled": "已标记 {{count}} 个过期租约",
-    "revealTitle": "租约已签发 — 立即复制",
-    "revealWarning": "这是密钥唯一一次显示。请立即复制 — 关闭此对话框后无法恢复。",
-    "revoke": "撤销",
-    "revokeError": "撤销失败",
-    "revoked": "租约已撤销",
-    "role": "后端角色",
-    "roleRequired": "后端角色为必填项",
-    "secret": "密钥值",
-    "status": "状态",
-    "statusFilter": "状态筛选",
-    "subtitle": "通过 OpenBAO/Vault 颁发的短期凭据，自动过期",
-    "title": "动态密钥",
-    "ttl": "TTL (秒)",
-    "ttlHelp": "租约生命周期 — {{min}} 至 {{max}} 秒",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "删除",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

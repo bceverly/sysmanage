@@ -1,15 +1,11 @@
 import axios from "axios";
 
-// Dynamically determine the backend URL based on current host
-const getBackendBaseURL = () => {
-  const currentHost = globalThis.location.hostname;
-  // Use environment variable if available, otherwise default to 8080
-  const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
-  return `http://${currentHost}:${backendPort}`;
-};
-
+// Same-origin baseURL — every backend route is now under /api, and both
+// nginx (production) and vite (dev) reverse-proxy /api/* to the backend.
+// Keeping requests relative means the browser never has to know what
+// host:port the backend bound to.
 const axiosInstance = axios.create({
-  baseURL: getBackendBaseURL(),
+  baseURL: "",
   headers: {
     "Content-Type": "application/json",
   },
@@ -78,7 +74,7 @@ async function handle401Refresh(originalConfig) {
   originalConfig._retry = true;
   console.log("Calling /refresh to get a new auth token...");
   try {
-    const response = await axiosInstance.post("/refresh", {});
+    const response = await axiosInstance.post("/api/refresh", {});
     console.log('Received response:', response);
     localStorage.setItem("bearer_token", response.data.Authorization);
     return axiosInstance(originalConfig);

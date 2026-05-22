@@ -1009,8 +1009,8 @@
       "repository": "المستودع"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "الخريطة",
+    "sites": "المواقع"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -1953,41 +1953,6 @@
     "updated": "تم حفظ القالب",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "تم نسخ السر إلى الحافظة",
-    "copy": "نسخ",
-    "copyError": "فشل النسخ",
-    "empty": "لا توجد عقود إيجار مطابقة للتصفية الحالية.",
-    "expiresAt": "تنتهي",
-    "expiresOn": "تنتهي:",
-    "issue": "إصدار عقد إيجار",
-    "issueError": "فشل إصدار عقد الإيجار",
-    "issueTitle": "إصدار عقد إيجار جديد",
-    "issuedAt": "تم الإصدار",
-    "kind": "النوع",
-    "loadError": "فشل تحميل عقود الإيجار",
-    "name": "الاسم",
-    "nameRequired": "الاسم مطلوب",
-    "note": "ملاحظة (اختياري)",
-    "reconcile": "تسوية",
-    "reconcileError": "فشلت التسوية",
-    "reconciled": "تم وضع علامة على {{count}} عقد إيجار منتهي",
-    "revealTitle": "تم إصدار عقد الإيجار — انسخ الآن",
-    "revealWarning": "هذه هي المرة الوحيدة التي سيُعرض فيها السر. انسخه الآن — لا توجد إمكانية للاسترداد بعد إغلاق هذا المربع.",
-    "revoke": "إلغاء",
-    "revokeError": "فشل الإلغاء",
-    "revoked": "تم إلغاء عقد الإيجار",
-    "role": "دور الخلفية",
-    "roleRequired": "دور الخلفية مطلوب",
-    "secret": "قيمة السر",
-    "status": "الحالة",
-    "statusFilter": "تصفية الحالة",
-    "subtitle": "بيانات اعتماد قصيرة العمر تُصدر عبر OpenBAO/Vault وتنتهي تلقائيًا",
-    "title": "الأسرار الديناميكية",
-    "ttl": "مدة البقاء (بالثواني)",
-    "ttlHelp": "مدة عقد الإيجار — بين {{min}} و {{max}} ثانية",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "حذف",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

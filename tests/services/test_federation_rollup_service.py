@@ -43,12 +43,15 @@ FEDERATION_TABLE_NAMES = [
 @pytest.fixture
 def session():
     engine = sa.create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(
-        engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
-    )
-    Session = sessionmaker(bind=engine, expire_on_commit=False)
-    with Session() as s:
-        yield s
+    try:
+        Base.metadata.create_all(
+            engine, tables=[Base.metadata.tables[t] for t in FEDERATION_TABLE_NAMES]
+        )
+        Session = sessionmaker(bind=engine, expire_on_commit=False)
+        with Session() as s:
+            yield s
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture

@@ -125,6 +125,21 @@ class FederationSite(Base):
     # Survives suspend/resume cycles — only ``complete_enrollment``
     # writes this column.  NULL until first enrollment completes.
     enrolled_at = Column(DateTime, nullable=True)
+    # Phase 12.6: SHA-256 of the long-lived bearer token the site
+    # presents on every inbound sync POST (host rollup, host directory,
+    # command results, etc.).  Minted at ``complete_enrollment`` time,
+    # returned to the site server once as plaintext, then never stored
+    # in plaintext on the coordinator.  NULL until enrollment completes;
+    # also NULL after ``remove_site`` scrubs credentials.
+    sync_bearer_token_hash = Column(String(128), nullable=True)
+    # Phase 12.10 Slice 3: plaintext bearer the COORDINATOR presents on
+    # every outbound push to this subordinate site (policy push, command
+    # dispatch).  Stored as plaintext on this row because the coordinator
+    # is the SENDER for this direction — it needs the literal value to
+    # set the ``Authorization`` header.  The site stores the SHA-256
+    # equivalent in ``federation_coordinator.coordinator_inbound_bearer_token_hash``
+    # so a leak on the verifier side never exposes a usable secret.
+    coordinator_outbound_bearer_token = Column(Text, nullable=True)
     status = Column(String(32), nullable=False, default="enrolled")
     # Cached from the latest host rollup so the Sites page doesn't
     # have to JOIN through ``federation_host_rollup`` to render.
@@ -370,10 +385,18 @@ class FederationPolicyAssignment(Base):
     )
     assigned_at = Column(DateTime, nullable=False, default=_utcnow_naive)
     assigned_by = Column(String(255), nullable=True)
-    # pending / pushed / acknowledged / error
+    # pending / pushed / acknowledged / error / dead
+    # ``dead`` = exceeded ``MAX_ATTEMPTS``; the push worker skips it
+    # until operator intervention resets ``push_status='pending'``
+    # via a re-assignment.
     push_status = Column(String(32), nullable=False, default="pending")
     last_push_attempt_at = Column(DateTime, nullable=True)
     last_push_error = Column(Text, nullable=True)
+    # Phase 12.10 hardening: push attempt counter for backoff +
+    # dead-letter.  Bumps on every transport attempt regardless of
+    # outcome; reset to 0 only by explicit operator action
+    # (re-assignment).
+    push_attempts = Column(Integer, nullable=False, default=0)
     # The version of ``federation_policies.version`` that was last
     # successfully pushed to this site — lets the coordinator detect
     # when a policy edit needs to be re-pushed.
@@ -413,6 +436,14 @@ class FederationDispatchedCommand(Base):
     status = Column(String(32), nullable=False, default="queued_at_site")
     result_summary = Column(Text, nullable=True)
     completed_at = Column(DateTime, nullable=True)
+    # Phase 12.10 hardening: push retry tracking.  ``push_attempts``
+    # increments on every coordinator push attempt regardless of
+    # outcome; the backoff filter on ``list_dispatched_commands(..., ready_only=True)``
+    # checks ``last_push_attempt_at + compute_backoff(push_attempts) <= now``
+    # so failures naturally back off rather than hammering every tick.
+    push_attempts = Column(Integer, nullable=False, default=0)
+    last_push_attempt_at = Column(DateTime, nullable=True)
+    last_push_error = Column(Text, nullable=True)
 
     __table_args__ = (
         Index(
@@ -487,6 +518,21 @@ class FederationCoordinator(Base):
     site_id = Column(GUID(), nullable=True)
     # Our own TLS leaf cert that the coordinator pinned at enrollment.
     site_tls_cert_pem = Column(Text, nullable=True)
+    # Phase 12.10 Slice 2: plaintext bearer this site presents on every
+    # outbound sync POST.  Distinct from the coordinator's per-site
+    # ``federation_sites.sync_bearer_token_hash`` (which only keeps the
+    # SHA-256) — the site MUST hold the literal value because every
+    # outbound HTTP request needs the original ``Authorization: Bearer
+    # <token>`` header.  Rotation replaces this value via the
+    # enrollment refresh flow.
+    sync_bearer_token = Column(Text, nullable=True)
+    # Phase 12.10 Slice 3: SHA-256 of the bearer the COORDINATOR
+    # presents when it pushes policy versions / dispatched commands
+    # INTO this site (the reverse direction of ``sync_bearer_token``).
+    # The site uses this hash to verify incoming ``/site/policies`` and
+    # ``/site/commands`` POSTs.  The plaintext lives on the coordinator
+    # in ``federation_sites.coordinator_outbound_bearer_token``.
+    coordinator_inbound_bearer_token_hash = Column(String(128), nullable=True)
     # pending / enrolled / suspended / removed
     enrollment_status = Column(String(32), nullable=False, default="pending")
     enrolled_at = Column(DateTime, nullable=True)

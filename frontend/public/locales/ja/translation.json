@@ -1009,8 +1009,8 @@
       "repository": "リポジトリ"
     },
     "airgapRepositories": "Air-Gap Repos",
-    "map": "[MISSING:nav.map]",
-    "sites": "[MISSING:nav.sites]"
+    "map": "マップ",
+    "sites": "サイト"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -1953,41 +1953,6 @@
     "updated": "テンプレートを保存しました",
     "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
   },
-  "dynamicSecrets": {
-    "copied": "シークレットをクリップボードにコピーしました",
-    "copy": "コピー",
-    "copyError": "コピーに失敗しました",
-    "empty": "現在のフィルターに一致するリースはありません。",
-    "expiresAt": "有効期限",
-    "expiresOn": "有効期限:",
-    "issue": "リースを発行",
-    "issueError": "リースの発行に失敗しました",
-    "issueTitle": "新しいリースを発行",
-    "issuedAt": "発行日時",
-    "kind": "種別",
-    "loadError": "リースの読み込みに失敗しました",
-    "name": "名前",
-    "nameRequired": "名前は必須です",
-    "note": "メモ (任意)",
-    "reconcile": "照合",
-    "reconcileError": "照合に失敗しました",
-    "reconciled": "{{count}} 件の期限切れリースをマークしました",
-    "revealTitle": "リース発行 — 今すぐコピーしてください",
-    "revealWarning": "シークレットが表示されるのはこれが唯一の機会です。今すぐコピーしてください — このダイアログを閉じた後に復元はできません。",
-    "revoke": "取り消し",
-    "revokeError": "取り消しに失敗しました",
-    "revoked": "リースを取り消しました",
-    "role": "バックエンドロール",
-    "roleRequired": "バックエンドロールは必須です",
-    "secret": "シークレット値",
-    "status": "ステータス",
-    "statusFilter": "ステータスフィルター",
-    "subtitle": "OpenBAO/Vault 経由で発行され自動的に期限切れになる短命の認証情報",
-    "title": "動的シークレット",
-    "ttl": "TTL (秒)",
-    "ttlHelp": "リースの有効期間 — {{min}} 秒から {{max}} 秒まで",
-    "confirmRevoke": "[TODO] Revoke \"{{name}}\" now?"
-  },
   "idp": {
     "action": {
       "delete": "削除",
@@ -2612,7 +2577,8 @@
       "statusLine": "[TODO] Push status: {{status}}",
       "submit": "[TODO] Save assignments",
       "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites"
+      "title": "[TODO] Assign to sites",
+      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
     },
     "columns": {
       "actions": "[TODO] Actions",
@@ -2662,7 +2628,8 @@
       "success": "[TODO] Push triggered for '{{name}}'."
     },
     "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies"
+    "title": "[TODO] Federation Policies",
+    "deadLetter": "[TODO] dead-letter"
   },
   "sites": {
     "actions": {
@@ -2692,7 +2659,12 @@
       "syncInterval": "[TODO] Sync interval",
       "syncIntervalValue": "[TODO] {{seconds}}s",
       "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log"
+      "viewAuditLog": "[TODO] View audit log",
+      "activeCommands": "[TODO] Active commands",
+      "activeCommandsEmpty": "[TODO] No active commands.",
+      "activeCommandsLoading": "[TODO] Loading…",
+      "commandAttempts": "[TODO] {{n}} push attempts",
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

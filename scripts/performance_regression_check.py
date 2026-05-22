@@ -27,6 +27,12 @@ METRIC_BAD_DIRECTION = {
     "response_time_median": "higher",
     "error_rate": "higher",
     "requests_per_second": "lower",
+    # Per-OS throughput variants emitted by the artillery harness —
+    # without these entries, the default-"higher" fallback flips an
+    # ``increase`` (faster fleet) into a "regression" alarm.
+    "linux_requests_per_second": "lower",
+    "darwin_requests_per_second": "lower",
+    "windows_requests_per_second": "lower",
     # Playwright-side metrics
     "dom_content_loaded": "higher",
     "load_complete": "higher",

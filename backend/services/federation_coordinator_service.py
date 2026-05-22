@@ -170,6 +170,8 @@ def mark_enrolled(
     *,
     site_id: Any,
     site_tls_cert_pem: str,
+    sync_bearer_token: Optional[str] = None,
+    coordinator_inbound_bearer_token_hash: Optional[str] = None,
 ) -> FederationCoordinator:
     """Record a successful handshake response from the coordinator.
 
@@ -178,6 +180,22 @@ def mark_enrolled(
     pins the site's TLS cert (for the reverse direction of the mTLS
     handshake); we store the same cert here so the site engine can
     surface it in diagnostics.
+
+    Phase 12.10 Slice 2: ``sync_bearer_token`` is the long-lived
+    plaintext bearer the coordinator returns from its
+    ``complete_enrollment`` response.  The site stores it here so
+    the outbound tick worker can present it on every sync POST.
+
+    Phase 12.10 Slice 3: ``coordinator_inbound_bearer_token_hash`` is
+    the SHA-256 of the bearer the COORDINATOR will present on every
+    push into this site.  The plaintext lives on the coordinator
+    (it's the sender for that direction); the site only needs the
+    hash to verify incoming ``/site/policies`` and ``/site/commands``
+    POSTs.
+
+    Both bearer kwargs are optional only so existing test fixtures
+    that pre-date these columns don't break; production callers
+    should always supply both.
 
     Only valid against ``pending`` or ``suspended``.  ``suspended``
     → ``enrolled`` is the resume path after a coordinator-side
@@ -192,6 +210,12 @@ def mark_enrolled(
         )
     row.site_id = site_id
     row.site_tls_cert_pem = site_tls_cert_pem
+    if sync_bearer_token is not None:
+        row.sync_bearer_token = sync_bearer_token
+    if coordinator_inbound_bearer_token_hash is not None:
+        row.coordinator_inbound_bearer_token_hash = (
+            coordinator_inbound_bearer_token_hash
+        )
     row.enrollment_status = STATUS_ENROLLED
     row.enrolled_at = _utcnow_naive()
     return row
@@ -232,15 +256,20 @@ def mark_removed(session: Session) -> FederationCoordinator:
 def clear_enrollment(session: Session) -> FederationCoordinator:
     """Reset the singleton row so a fresh enrollment can begin.
 
-    Wipes the coordinator URL + cert pin + site_id.  Used when an
-    operator wants to migrate this site to a different coordinator,
-    or when a re-enrollment is needed after ``mark_removed``.
+    Wipes the coordinator URL + cert pin + site_id + sync bearer.
+    Used when an operator wants to migrate this site to a different
+    coordinator, or when a re-enrollment is needed after
+    ``mark_removed``.  The bearer scrub is critical — a stale bearer
+    pointed at a former coordinator would otherwise keep firing on
+    every tick.
     """
     row = _get_or_create(session)
     row.coordinator_url = None
     row.coordinator_tls_cert_pem = None
     row.site_id = None
     row.site_tls_cert_pem = None
+    row.sync_bearer_token = None
+    row.coordinator_inbound_bearer_token_hash = None
     row.enrolled_at = None
     row.last_sync_at = None
     row.last_sync_status = None

@@ -1727,8 +1727,11 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         @router.post("/sites/enrollment/{token}/complete")
         async def fed_complete_enrollment_stub(  # pylint: disable=unused-argument
             token: str,
-            current_user=Depends(get_current_user),
         ):
+            # Phase 12.10 Slice 2.5: no ``Depends(get_current_user)``
+            # here — the enrollment token IS the auth (chicken-and-egg
+            # otherwise: site servers don't have JWT credentials with
+            # the coordinator until enrollment completes).
             return {"licensed": False}
 
         @router.get("/sites/{site_id}")
@@ -1896,6 +1899,43 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         async def fed_audit_detail_stub(  # pylint: disable=unused-argument
             entry_id: str,
             current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # Phase 12.6 ingest surface — endpoints sites POST data INTO
+        # the coordinator over the federation wire protocol.  These
+        # are authenticated by the site's long-lived sync bearer token
+        # (NOT the operator's JWT), so they intentionally do NOT
+        # ``Depends(get_current_user)`` — the stub layer just refuses
+        # unlicensed access uniformly.
+
+        @router.post("/sites/{site_id}/rollups/hosts")
+        async def fed_ingest_host_rollup_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/rollups/compliance")
+        async def fed_ingest_compliance_rollup_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/rollups/vulnerabilities")
+        async def fed_ingest_vuln_rollup_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/host-directory")
+        async def fed_ingest_host_directory_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/command-results")
+        async def fed_ingest_command_results_stub(  # pylint: disable=unused-argument
+            site_id: str,
         ):
             return {"licensed": False}
 
