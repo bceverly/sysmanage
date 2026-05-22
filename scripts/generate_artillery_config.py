@@ -52,7 +52,7 @@ def generate_artillery_config():
     Scenario design notes:
     - Health Check hits /api/health (the actual route registered by the server,
       see backend/startup/route_registration.py).
-    - API Authentication Flow logs in via POST /login. Body keys are 'userid'
+    - API Authentication Flow logs in via POST /api/login. Body keys are 'userid'
       (an EmailStr per backend.api.auth.UserLogin) and 'password'. Response is
       {"Authorization": "<token>"}. Credentials match scripts/e2e_test_user.py
       so 'make test-performance' can reuse the same provisioning helper.
@@ -138,7 +138,7 @@ def generate_artillery_config():
                 'flow': [
                     {
                         'post': {
-                            'url': "/login",
+                            'url': "/api/login",
                             'json': {
                                 'userid': perf_test_userid,
                                 'password': perf_test_password
@@ -166,7 +166,7 @@ def generate_artillery_config():
                     # a single scenario flow, not across scenarios.
                     {
                         'post': {
-                            'url': "/login",
+                            'url': "/api/login",
                             'json': {
                                 'userid': perf_test_userid,
                                 'password': perf_test_password

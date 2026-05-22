@@ -170,7 +170,9 @@ class _GeoLite2ReaderHolder:
             if self._reader is not None:
                 try:
                     self._reader.close()
-                except Exception:  # pylint: disable=broad-exception-caught
+                except (
+                    Exception
+                ):  # nosec B110 - best-effort close before reopen; the new Reader replaces it regardless  # pylint: disable=broad-exception-caught
                     pass
                 self._reader = None
             if not os.path.isfile(db_path):
@@ -201,7 +203,9 @@ class _GeoLite2ReaderHolder:
             if self._reader is not None:
                 try:
                     self._reader.close()
-                except Exception:  # pylint: disable=broad-exception-caught
+                except (
+                    Exception
+                ):  # nosec B110 - teardown path; nothing else can recover if close() raises  # pylint: disable=broad-exception-caught
                     pass
                 self._reader = None
                 self._reader_path = None

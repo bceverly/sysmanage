@@ -1639,6 +1639,7 @@ installer-deb:
 	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$BUILD_DIR/frontend/public/"; \
 	cp requirements.txt "$$BUILD_DIR/"; \
 	cp alembic.ini "$$BUILD_DIR/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' alembic/ "$$BUILD_DIR/alembic/"; \
 	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
