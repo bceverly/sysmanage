@@ -563,6 +563,19 @@ def main():
                 print(f"   User accounts: {len(migrations_needed)} would need password resets")
         return
 
+    # Short-circuit: --salt-only with no users in the database is a no-op
+    # (no user passwords to re-hash against the new salt).  Rotating the
+    # yaml-level salt anyway leaves an unnecessary backup file behind, so
+    # skip the write entirely.  --jwt-only / --all paths still proceed
+    # because the JWT secret rotation is meaningful even with no users.
+    if update_salt and not update_jwt and not migrations_needed:
+        print(
+            "\n[INFO] Salt rotation is a no-op with zero users in the database; "
+            "skipping backup + write.  Re-run after creating users to actually "
+            "migrate them to a new salt."
+        )
+        return
+
     if debug:
         print("[DEBUG] DEBUG: About to create backup and save changes")
 

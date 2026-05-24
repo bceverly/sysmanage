@@ -699,21 +699,67 @@ jobs:
     - name: Start frontend server
       working-directory: frontend
       run: |
-        echo "🚀 Starting frontend server on port 3000..."
-        # Use nohup to prevent process from being killed when shell exits
-        nohup npx serve -s dist -l 3000 > /tmp/frontend.log 2>&1 &
-        FRONTEND_PID=$!
-        echo $FRONTEND_PID > /tmp/frontend.pid
-        echo "Frontend started with PID: $FRONTEND_PID"
+        echo "🚀 Starting frontend server on port 3000 via nginx..."
+        # Production-style reverse-proxy setup: nginx serves the SPA on
+        # :3000 and reverse-proxies /api/* + /ws to the backend on :8080.
+        # We can't use ``npx serve`` here because the frontend bundle
+        # makes relative API calls (/api/login etc.) that need to reach
+        # the backend — ``serve -s`` would fall through to /index.html
+        # for any /api/* path and login would silently get HTML back.
+        sudo tee /etc/nginx/sites-available/sysmanage-e2e > /dev/null <<NGINX_CONF
+        server {
+            listen 3000 default_server;
+            listen [::]:3000 default_server;
+            server_name _;
 
-        # Wait and verify it's still running
+            location / {
+                root $(pwd)/dist;
+                try_files \$uri \$uri/ /index.html;
+            }
+
+            location /api/ {
+                proxy_pass http://127.0.0.1:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto \$scheme;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection upgrade;
+            }
+
+            location /ws {
+                proxy_pass http://127.0.0.1:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade \$http_upgrade;
+                proxy_set_header Connection upgrade;
+                proxy_set_header Host \$host;
+            }
+        }
+        NGINX_CONF
+        sudo rm -f /etc/nginx/sites-enabled/default
+        sudo ln -sf /etc/nginx/sites-available/sysmanage-e2e /etc/nginx/sites-enabled/sysmanage-e2e
+        sudo nginx -t
+        sudo systemctl restart nginx
+        echo "✅ nginx serving SPA + proxying /api/* to backend"
+
+        # No PID file to track — nginx is managed by systemd.  Write a
+        # sentinel value so later steps that look for the file don't fail.
+        echo "nginx-managed-by-systemd" > /tmp/frontend.pid
+        # Also write the access/error logs to /tmp/frontend.log so the
+        # subsequent "cat /tmp/frontend.log" diagnostics still work.
+        sudo touch /tmp/frontend.log
+        sudo chmod 644 /tmp/frontend.log
+
+        # Wait and verify nginx is still up
         sleep 5
-        if ! kill -0 $FRONTEND_PID 2>/dev/null; then
-          echo "❌ Frontend process died immediately! Log contents:"
-          cat /tmp/frontend.log
+        if ! systemctl is-active --quiet nginx; then
+          echo "❌ nginx died immediately! journalctl + error.log:"
+          sudo journalctl -u nginx --no-pager -n 50
+          sudo tail -50 /var/log/nginx/error.log || true
           exit 1
         fi
-        echo "✅ Frontend process is running"
+        echo "✅ nginx is running"
       env:
         NODE_AUTH_TOKEN: ''
 
@@ -899,7 +945,14 @@ jobs:
           kill $(cat /tmp/backend.pid) || true
         fi
         if [ -f /tmp/frontend.pid ]; then
-          kill $(cat /tmp/frontend.pid) || true
+          # Sentinel "nginx-managed-by-systemd" means we used nginx, not a
+          # PID — `kill` on that string would just print an error.
+          PID=$(cat /tmp/frontend.pid)
+          if [[ "$PID" =~ ^[0-9]+$ ]]; then
+            kill "$PID" || true
+          else
+            sudo systemctl stop nginx || true
+          fi
         fi
         pkill -f "uvicorn" || true
         pkill -f "serve" || true

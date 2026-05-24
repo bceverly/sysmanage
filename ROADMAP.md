@@ -3929,6 +3929,40 @@ of new generic deployment handlers.
 
 ---
 
+## Air-Gap Install Bundle Builder (May 2026)
+
+UI-triggered multi-OS air-gap bundle generation.  From the new "Air-Gap
+Bundles" tab under Settings, an admin can build a single multi-OS ISO
+containing the sysmanage server (or agent) plus every per-platform
+dependency the postinst needs, ready to mount on an air-gapped target.
+
+✅ Landed:
+* `scripts/buildAirGapBundle.sh server|agent` orchestrator with
+  per-platform builder functions (Ubuntu jammy/noble/questing/resolute
+  fully working via Docker; Win/macOS partial via GitHub Releases;
+  Debian/Fedora/RHEL/openSUSE/Alpine/BSD as stubs).
+* `installer/airgap-bundle/install.sh` dispatcher (POSIX sh) that
+  detects host OS and routes to the matching platform subdir.
+* `airgap_bundle` DB table + alembic migration `r8abld`.
+* Background subprocess runner in
+  `backend/services/airgap_bundle_builder.py` (threaded; writes
+  per-job log to `/var/lib/sysmanage/airgap-bundles/<id>.log`).
+* `POST/GET/DELETE /api/airgap-bundles` + streaming download endpoint.
+* `frontend/src/Components/AirGapBundlesSettings.tsx` Settings tab
+  with build buttons, polling status grid, download/delete actions.
+* `installer/ubuntu/debian/control` declares `docker.io` + `xorriso`
+  as Depends so the build host has the prerequisites by default.
+* API tests in `tests/api/test_airgap_bundles.py` (9 tests).
+
+🚧 Follow-ups (tracked):
+* Fill in stub builders for Debian, Fedora, RHEL, openSUSE, Alpine
+  once each platform has a published native-package repo or release.
+* Wire Win/macOS/BSD installer fetchers to actual GitHub Releases
+  asset names (asset name patterns may differ from current guesses).
+* Per-platform smoke tests on real airgap VMs of each distro.
+
+---
+
 *Document Version: 1.1*
 *Last Updated: February 2026*
 *Current Product Version: v1.1.0.0*

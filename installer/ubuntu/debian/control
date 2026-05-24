@@ -21,7 +21,9 @@ Depends: ${misc:Depends},
  adduser,
  systemd,
  nodejs (>= 18),
- nginx
+ nginx,
+ xorriso,
+ docker.io
 Recommends: postgresql (>= 12)
 Suggests: postgresql-client
 Description: Centralized system management server

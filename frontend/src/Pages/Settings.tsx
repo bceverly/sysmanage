@@ -53,6 +53,7 @@ import UpgradeProfilesSettings from '../Components/UpgradeProfilesSettings';
 import PackageProfilesSettings from '../Components/PackageProfilesSettings';
 import ReportBrandingSettings from '../Components/ReportBrandingSettings';
 import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
+import AirGapBundlesSettings from '../Components/AirGapBundlesSettings';
 import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import axiosInstance from '../Services/api';
@@ -145,15 +146,21 @@ const Settings: React.FC = () => {
   // Plugin system for dynamic settings tabs
   const { settingsTabs: pluginSettingsTabs } = usePlugins();
 
-  // Active license modules (for Pro+ tab gating).
+  // Active license modules (for Pro+ tab gating).  ``licenseActive``
+  // means "any Pro+ tier is licensed at all" — used by tabs like
+  // ``airgap-bundles`` that aren't tied to a specific engine but
+  // still want to disappear on the Community edition.
   const [licenseModules, setLicenseModules] = useState<string[]>([]);
+  const [licenseActive, setLicenseActive] = useState<boolean>(false);
   useEffect(() => {
     (async () => {
       try {
         const info = await refreshLicenseCache();
         setLicenseModules(info?.modules ?? []);
+        setLicenseActive(!!info?.active);
       } catch {
         setLicenseModules([]);
+        setLicenseActive(false);
       }
     })();
   }, []);
@@ -168,6 +175,7 @@ const Settings: React.FC = () => {
       labelKey: string;
       labelDefault: string;
       moduleRequired?: string;
+      requiresLicense?: boolean;
     }> = [
       { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
       { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
@@ -239,6 +247,15 @@ const Settings: React.FC = () => {
         moduleRequired: 'reporting_engine',
       },
       {
+        id: 'airgap-bundles',
+        labelKey: 'airgapBundles.tabLabel',
+        labelDefault: 'Air-Gap Bundles',
+        // Multi-OS bundle generation is a Pro+ feature.  Hides on
+        // Community edition since the Docker-per-distro workflow is
+        // explicitly part of the Pro+ value proposition.
+        requiresLicense: true,
+      },
+      {
         id: 'repository-mirroring',
         labelKey: 'mirror.tabLabel',
         labelDefault: 'Repository Mirroring',
@@ -256,8 +273,12 @@ const Settings: React.FC = () => {
         moduleRequired: 'external_idp_engine',
       },
     ];
-    return defs.filter(d => !d.moduleRequired || licenseModules.includes(d.moduleRequired));
-  }, [licenseModules]);
+    return defs.filter(d => {
+      if (d.moduleRequired && !licenseModules.includes(d.moduleRequired)) return false;
+      if (d.requiresLicense && !licenseActive) return false;
+      return true;
+    });
+  }, [licenseModules, licenseActive]);
 
   // Plugin-contributed Settings tabs honour the same ``moduleRequired``
   // gate the hardcoded ``tabDefs`` use above (Phase 10.7 line 1822).
@@ -1266,6 +1287,7 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'compliance-profiles' && <PackageProfilesSettings />}
         {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}
         {tabNames[activeTab] === 'report-templates' && <ReportTemplatesSettings />}
+        {tabNames[activeTab] === 'airgap-bundles' && <AirGapBundlesSettings />}
         {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
         {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
         {visiblePluginSettingsTabs.map(pt => (

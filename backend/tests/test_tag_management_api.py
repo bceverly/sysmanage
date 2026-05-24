@@ -285,7 +285,7 @@ class TestCreateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -423,7 +423,7 @@ class TestCreateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -475,7 +475,7 @@ class TestUpdateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -512,7 +512,7 @@ class TestUpdateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -661,7 +661,7 @@ class TestDeleteTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -757,7 +757,7 @@ class TestDeleteTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -809,7 +809,7 @@ class TestAddTagToHost:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -1010,7 +1010,7 @@ class TestRemoveTagFromHost:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -1624,9 +1624,7 @@ class TestTagAuditLogging:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1661,9 +1659,7 @@ class TestTagAuditLogging:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1696,9 +1692,7 @@ class TestTagAuditLogging:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1728,9 +1722,7 @@ class TestTagAuditLogging:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1770,9 +1762,7 @@ class TestTagAuditLogging:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1819,7 +1809,7 @@ class TestBulkTagOperations:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch("backend.services.audit_service.AuditService"):
+        ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1877,7 +1867,7 @@ class TestBulkTagOperations:
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
             "backend.api.tag.get_db"
-        ) as mock_get_db, patch("backend.services.audit_service.AuditService"):
+        ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()

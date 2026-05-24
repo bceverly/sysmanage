@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from backend.api import (
     access_groups,
     agent,
+    airgap_bundles,
     airgap_collection_schedule,
     airgap_repository_buckets,
     airgap_repository_list,
@@ -208,6 +209,9 @@ def register_routes(app: FastAPI):
     logger.debug("Adding access-groups + registration-keys routers (Phase 8.1)")
     app.include_router(access_groups.groups_router)
     app.include_router(access_groups.keys_router)
+
+    logger.debug("Adding airgap-bundles router with /api prefix")
+    app.include_router(airgap_bundles.router, prefix="/api", tags=["airgap-bundles"])
 
     logger.debug("Adding upgrade-profiles router (Phase 8.2)")
     app.include_router(upgrade_profiles.router)

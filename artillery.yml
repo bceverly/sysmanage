@@ -29,7 +29,7 @@ scenarios:
   weight: 40
   flow:
   - post:
-      url: /login
+      url: /api/login
       json:
         userid: e2e-test@sysmanage.org
         password: E2ETestPassword123!
@@ -43,7 +43,7 @@ scenarios:
   weight: 20
   flow:
   - post:
-      url: /login
+      url: /api/login
       json:
         userid: e2e-test@sysmanage.org
         password: E2ETestPassword123!

@@ -954,6 +954,22 @@ def test_db():
         created_at = Column(DateTime, nullable=True)
         updated_at = Column(DateTime, nullable=True)
 
+    class AirGapBundle(TestBase):
+        __tablename__ = "airgap_bundle"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        product = Column(String(16), nullable=False)
+        status = Column(String(16), nullable=False, default="queued")
+        created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+        started_at = Column(DateTime, nullable=True)
+        completed_at = Column(DateTime, nullable=True)
+        file_path = Column(Text, nullable=True)
+        size_bytes = Column(Integer, nullable=True)
+        log_path = Column(Text, nullable=True)
+        error_message = Column(Text, nullable=True)
+        created_by_user_id = Column(
+            GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+        )
+
     class DynamicSecretLease(TestBase):
         __tablename__ = "dynamic_secret_lease"
         id = Column(GUID(), primary_key=True, default=uuid.uuid4)

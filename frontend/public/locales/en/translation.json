@@ -2699,5 +2699,27 @@
     "openSite": "Open site",
     "subtitle": "Geographic distribution of subordinate site servers.",
     "title": "Federation Sites Map"
+  },
+  "airgapBundles": {
+    "buildAgent": "Build Agent Bundle",
+    "buildError": "Failed to queue build",
+    "buildServer": "Build Server Bundle",
+    "completedAt": "Completed",
+    "confirmDelete": "Delete this bundle and its ISO file?",
+    "createdAt": "Created",
+    "delete": "Delete",
+    "deleteError": "Failed to delete bundle",
+    "deleted": "Bundle deleted",
+    "download": "Download ISO",
+    "empty": "No bundles yet. Click a build button above to create one.",
+    "loadError": "Failed to load bundles",
+    "product": "Product",
+    "queued": "Bundle build queued — refreshing list",
+    "recentFailures": "Recent build failures:",
+    "requiresDocker": "Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
+    "size": "Size",
+    "status": "Status",
+    "subtitle": "Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
+    "title": "Air-Gap Install Bundles"
   }
 }

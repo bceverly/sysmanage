@@ -2699,5 +2699,27 @@
     "openSite": "[TODO] Open site",
     "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
     "title": "[TODO] Federation Sites Map"
+  },
+  "airgapBundles": {
+    "buildAgent": "[TODO] Build Agent Bundle",
+    "buildError": "[TODO] Failed to queue build",
+    "buildServer": "[TODO] Build Server Bundle",
+    "completedAt": "[TODO] Completed",
+    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
+    "createdAt": "[TODO] Created",
+    "delete": "[TODO] Delete",
+    "deleteError": "[TODO] Failed to delete bundle",
+    "deleted": "[TODO] Bundle deleted",
+    "download": "[TODO] Download ISO",
+    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
+    "loadError": "[TODO] Failed to load bundles",
+    "product": "[TODO] Product",
+    "queued": "[TODO] Bundle build queued — refreshing list",
+    "recentFailures": "[TODO] Recent build failures:",
+    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
+    "size": "[TODO] Size",
+    "status": "[TODO] Status",
+    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
+    "title": "[TODO] Air-Gap Install Bundles"
   }
 }

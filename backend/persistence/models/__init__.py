@@ -8,6 +8,7 @@ All models are re-exported here for backward compatibility.
 # Re-export all models for backward compatibility
 from .access_groups import *
 from .airgap import *
+from .airgap_bundle import *
 from .child_host import *
 from .core import *
 from .dynamic_secrets import *
@@ -181,6 +182,16 @@ __all__ = [
     "FederationReceivedPolicy",
     "FederationReceivedCommand",
     "SINGLETON_FEDERATION_COORDINATOR_ID",
+    # Air-gap install bundles (multi-OS ISO builder)
+    "AirGapBundle",
+    "BUNDLE_PRODUCT_SERVER",
+    "BUNDLE_PRODUCT_AGENT",
+    "BUNDLE_PRODUCTS",
+    "BUNDLE_STATUS_QUEUED",
+    "BUNDLE_STATUS_BUILDING",
+    "BUNDLE_STATUS_READY",
+    "BUNDLE_STATUS_FAILED",
+    "BUNDLE_STATUSES",
     # Dynamic secret leases (Phase 8.7)
     "DynamicSecretLease",
     "LEASE_ACTIVE",
