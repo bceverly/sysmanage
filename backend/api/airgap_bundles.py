@@ -10,7 +10,11 @@ All endpoints require an authenticated user with the
 allowed through for bootstrap.
 """
 
+import grp
 import os
+import pwd
+import shutil
+import subprocess  # nosec B404 - used only for `docker info` readiness probe
 import uuid
 from typing import List, Optional
 
@@ -56,6 +60,16 @@ class BundleResponse(BaseModel):
     error_message: Optional[str]
 
 
+class DockerStatusResponse(BaseModel):
+    installed: bool  # docker binary on PATH
+    running: bool  # `docker info` succeeds
+    version: Optional[str]  # parsed from `docker --version`
+    user_in_group: bool  # current process user is in the docker group
+    process_user: str  # the OS user the API is running as
+    error: Optional[str]  # short human-readable diagnostic when not ready
+    permission_denied: bool  # daemon reachable on socket but we can't read it
+
+
 def _row_to_response(row: models.AirGapBundle) -> BundleResponse:
     return BundleResponse(
         id=str(row.id),
@@ -93,6 +107,111 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
             .first()
         )
         return user.id if user else None
+
+
+# ---------------------------------------------------------------------------
+# GET /airgap-bundles/docker-status — pre-flight check before kicking
+# off a build (the Settings UI uses this to surface a "Docker isn't
+# ready, here's how to install it" banner instead of letting the
+# build subprocess fail silently with a cryptic log file).
+# ---------------------------------------------------------------------------
+
+
+@router.get("/docker-status", response_model=DockerStatusResponse)
+@requires_pro_plus()
+async def docker_status(
+    current_user: str = Depends(get_current_user),  # noqa: ARG001
+) -> DockerStatusResponse:
+    # Identify the OS user this API process is running as — that's
+    # the user that needs docker socket access, since the build
+    # subprocess inherits the same uid/gid set.  In a packaged
+    # install it's the 'sysmanage' system user; in dev it's whoever
+    # ran `make start`.
+    try:
+        process_user = pwd.getpwuid(os.geteuid()).pw_name
+    except KeyError:
+        process_user = ""
+
+    docker_path = shutil.which("docker")
+    if not docker_path:
+        return DockerStatusResponse(
+            installed=False,
+            running=False,
+            version=None,
+            user_in_group=False,
+            process_user=process_user,
+            error="docker binary not found on PATH",
+            permission_denied=False,
+        )
+
+    version: Optional[str] = None
+    try:
+        proc = subprocess.run(  # nosec B603 - fixed args, no user input
+            [docker_path, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if proc.returncode == 0:
+            version = proc.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+    running = False
+    error: Optional[str] = None
+    permission_denied = False
+    try:
+        proc = subprocess.run(  # nosec B603 - fixed args, no user input
+            [docker_path, "info"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        running = proc.returncode == 0
+        if not running:
+            # Trim long output to a single useful line.
+            stderr_line = (proc.stderr or "").strip().splitlines()
+            error = stderr_line[0] if stderr_line else "docker info exited non-zero"
+            # Differentiate "daemon down" from "daemon up but I can't
+            # read the socket" — the latter is a group-membership
+            # problem and needs a very different remediation.
+            if error and "permission denied" in error.lower():
+                permission_denied = True
+    except (OSError, subprocess.SubprocessError) as exc:
+        error = str(exc)
+
+    user_in_group = False
+    try:
+        docker_group = grp.getgrnam("docker")
+        # Check the *current process user* — that's who actually
+        # spawns the build subprocess.  In a packaged install this is
+        # the 'sysmanage' system user; in dev it's whoever started
+        # `make run`.  Hardcoding 'sysmanage' would mis-flag dev hosts.
+        try:
+            current_username = pwd.getpwuid(os.geteuid()).pw_name
+        except KeyError:
+            current_username = ""
+        # Either named-membership or the user's primary GID matches.
+        user_in_group = (
+            current_username in docker_group.gr_mem
+            or docker_group.gr_gid in os.getgroups()
+        )
+    except KeyError:
+        # No 'docker' group at all means docker package was never
+        # installed via the system package manager.
+        pass
+
+    return DockerStatusResponse(
+        installed=True,
+        running=running,
+        version=version,
+        user_in_group=user_in_group,
+        process_user=process_user,
+        error=error,
+        permission_denied=permission_denied,
+    )
 
 
 # ---------------------------------------------------------------------------

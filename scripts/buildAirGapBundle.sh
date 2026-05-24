@@ -224,13 +224,14 @@ build_ubuntu_like() {
     -v "$outdir:/out" \
     -e PKG="$PKG_NAME" \
     -e PPA="$PPA_NAME" \
+    -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH="$REQ_PATH_IN_DEB" \
     -e PY="$py" \
     "$image" bash -euxc '
       export DEBIAN_FRONTEND=noninteractive
       apt-get update -qq
       apt-get install -y --no-install-recommends \
-        ca-certificates curl gnupg software-properties-common \
+        ca-certificates curl jq gnupg software-properties-common \
         python3 python3-pip python3-venv \
         gcc libffi-dev libssl-dev libpq-dev python3-dev
       add-apt-repository -y "ppa:${PPA}"
@@ -239,12 +240,34 @@ build_ubuntu_like() {
       cd /out
       mkdir -p apt-deps wheels
 
-      # Main package
-      apt-get download "$PKG"
+      # Main package — try PPA first, fall back to GitHub Releases.
+      # The PPA path fails when Launchpad has not yet built (or has
+      # failed to build) the binary for this codename, even though
+      # the source upload succeeded.  GitHub Releases ships a generic
+      # .deb that is binary-compatible with both Debian and Ubuntu
+      # (same glibc family, Architecture: all package), so it serves
+      # as a resilient fallback.
+      if ! apt-get download "$PKG" 2>/dev/null; then
+        echo "[$PKG] PPA download failed for ${PPA} — falling back to GitHub Releases ($REPO)"
+        ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
+                    | jq -r ".assets[] | select(.name | test(\"\\\\.deb$\")) | .browser_download_url" \
+                    | head -1)
+        [ -n "$ASSET_URL" ] || { echo "no .deb in releases for $REPO" >&2; exit 1; }
+        # Save under the same _<version>_<arch>.deb glob pattern that
+        # apt-get download produces, so downstream globs (`"$PKG"_*.deb`)
+        # still match.  The exact version string in the filename does
+        # not matter to dpkg-deb invocations below.
+        curl -fsSL -o "${PKG}_releases_all.deb" "$ASSET_URL"
+      fi
 
-      # Recursive apt deps (filtered to amd64/all)
+      # Recursive apt deps (filtered to amd64/all).  Note the
+      # triple-backslash on \\\${  — we want the inner bash to see
+      # \${ as four literal chars (one backslash + dollar + brace)
+      # so grep gets the regex ^\${ to filter Debian-style unresolved
+      # template deps like ${PYTHON3}.  A single \\ would make the
+      # inner bash try to expand ${...} and choke on the missing }.
       DIRECT="$(dpkg-deb -f "$PKG"_*.deb Depends | tr "," "\n" \
-                | awk "{print \$1}" | grep -v "^\\${" | grep -vE "^$" | sort -u)"
+                | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
       cd apt-deps
       apt-cache depends --recurse --no-recommends --no-suggests \
                         --no-conflicts --no-breaks --no-replaces --no-enhances \
@@ -315,7 +338,7 @@ build_debian_like() {
       # Recursive apt deps via apt-cache (Debian repos are configured
       # by default in the base image).
       DIRECT="$(dpkg-deb -f ${PKG}.deb Depends | tr "," "\n" \
-                | awk "{print \$1}" | grep -v "^\\${" | grep -vE "^$" | sort -u)"
+                | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
       cd apt-deps
       apt-cache depends --recurse --no-recommends --no-suggests \
                         --no-conflicts --no-breaks --no-replaces --no-enhances \

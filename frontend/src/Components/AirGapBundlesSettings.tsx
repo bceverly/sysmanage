@@ -21,6 +21,7 @@ import {
 } from '@mui/x-data-grid';
 import {
   Build as BuildIcon,
+  ContentCopy as ContentCopyIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
   Refresh as RefreshIcon,
@@ -42,6 +43,32 @@ interface Bundle {
   size_bytes: number | null;
   error_message: string | null;
 }
+
+interface DockerStatus {
+  installed: boolean;
+  running: boolean;
+  version: string | null;
+  user_in_group: boolean;
+  process_user: string;
+  error: string | null;
+  permission_denied: boolean;
+}
+
+const buildInstallCommand = (status: DockerStatus): string => {
+  const user = status.process_user || 'sysmanage';
+  const restart =
+    user === 'sysmanage'
+      ? 'sudo systemctl restart sysmanage'
+      : '# then kill your dev server (make start) and run it again so the new group takes effect';
+  if (!status.installed) {
+    return `sudo apt install -y docker.io && sudo systemctl enable --now docker && sudo usermod -aG docker ${user} && ${restart}`;
+  }
+  if (!status.running && !status.permission_denied) {
+    return 'sudo systemctl enable --now docker';
+  }
+  // permission_denied OR user_in_group is false: just need the group fix.
+  return `sudo usermod -aG docker ${user}\n${restart}`;
+};
 
 const statusColor = (
   s: BundleStatus,
@@ -78,6 +105,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState<'server' | 'agent' | null>(null);
+  const [docker, setDocker] = useState<DockerStatus | null>(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -109,9 +137,22 @@ const AirGapBundlesSettings: React.FC = () => {
     }
   }, [t]);
 
+  const refreshDocker = useCallback(async () => {
+    try {
+      const r = await axiosInstance.get<DockerStatus>(
+        '/api/airgap-bundles/docker-status',
+      );
+      setDocker(r.data);
+    } catch (e) {
+      console.error(e);
+      // Don't snackbar — banner remains hidden if probe fails.
+    }
+  }, []);
+
   useEffect(() => {
     refresh();
-  }, [refresh]);
+    refreshDocker();
+  }, [refresh, refreshDocker]);
 
   // Auto-poll while any bundle is in-flight, so the status chip ticks
   // from "queued" -> "building" -> "ready"/"failed" without manual refresh.
@@ -248,6 +289,137 @@ const AirGapBundlesSettings: React.FC = () => {
 
   const errorRows = bundles.filter((b) => b.status === 'failed' && b.error_message);
 
+  // Docker is "ready" when the binary is installed, the daemon
+  // responds to `docker info`, and the sysmanage user is in the
+  // docker group (so the background build subprocess can talk to
+  // the socket).  Any of those failing → block the Build buttons
+  // and surface an install banner with the exact remediation.
+  const dockerReady =
+    docker !== null && docker.installed && docker.running && docker.user_in_group;
+
+  const copyInstallCommand = async (cmd: string) => {
+    try {
+      await globalThis.navigator.clipboard.writeText(cmd);
+      showSuccess(t('airgapBundles.copied', 'Command copied to clipboard'));
+    } catch (e) {
+      console.error(e);
+      showError(t('airgapBundles.copyError', 'Could not access the clipboard'));
+    }
+  };
+
+  const renderDockerBanner = () => {
+    if (docker === null) {
+      // Probe still pending — show the original neutral notice so
+      // the layout doesn't shift in/out.
+      return (
+        <Alert severity="info">
+          {t(
+            'airgapBundles.requiresDocker',
+            'Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.',
+          )}
+        </Alert>
+      );
+    }
+    if (dockerReady) {
+      return (
+        <Alert severity="success">
+          {t('airgapBundles.dockerReady', 'Docker is ready')}
+          {docker.version ? ` — ${docker.version}` : ''}.{' '}
+          {t(
+            'airgapBundles.dockerReadyHint',
+            'Builds typically take 5-30 minutes depending on how many platforms are enabled.',
+          )}
+        </Alert>
+      );
+    }
+    // Something's off — describe what and offer the install line.
+    let summary: string;
+    if (!docker.installed) {
+      summary = t(
+        'airgapBundles.dockerNotInstalled',
+        'Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.',
+      );
+    } else if (docker.permission_denied) {
+      // Daemon is up; we just can't read the socket.  This usually
+      // means the current process user isn't in the docker group,
+      // OR usermod was run but the process hasn't been restarted yet
+      // (group membership is fixed at process spawn time).
+      summary = t(
+        'airgapBundles.dockerPermissionDenied',
+        'The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.',
+        { user: docker.process_user || 'sysmanage' },
+      );
+    } else if (!docker.running) {
+      summary = t(
+        'airgapBundles.dockerNotRunning',
+        'Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.',
+      );
+    } else {
+      summary = t(
+        'airgapBundles.dockerNoGroup',
+        'Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.',
+        { user: docker.process_user || 'sysmanage' },
+      );
+    }
+    const installCommand = buildInstallCommand(docker);
+    return (
+      <Alert severity="warning">
+        <Typography variant="subtitle2" gutterBottom>
+          {summary}
+        </Typography>
+        {docker.error && (
+          <Typography
+            variant="caption"
+            sx={{ fontFamily: 'monospace', display: 'block', mb: 1 }}
+          >
+            {docker.error}
+          </Typography>
+        )}
+        <Typography variant="body2" gutterBottom>
+          {t(
+            'airgapBundles.dockerInstallHint',
+            'Run this on the sysmanage server as a user with sudo:',
+          )}
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1,
+            // Dark slab so text contrast is independent of the
+            // Alert's warning palette (which tinted nested text yellow).
+            backgroundColor: 'grey.900',
+            color: 'common.white',
+            border: '1px solid',
+            borderColor: 'grey.700',
+            borderRadius: 1,
+            p: 1,
+            fontFamily: 'monospace',
+            fontSize: '0.85rem',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+          }}
+        >
+          <Box sx={{ flex: 1 }}>{installCommand}</Box>
+          <Tooltip title={t('airgapBundles.copy', 'Copy to clipboard')}>
+            <IconButton
+              size="small"
+              onClick={() => copyInstallCommand(installCommand)}
+              sx={{ color: 'common.white' }}
+            >
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+          <Button size="small" onClick={refreshDocker} startIcon={<RefreshIcon />}>
+            {t('airgapBundles.recheckDocker', 'Re-check Docker')}
+          </Button>
+        </Stack>
+      </Alert>
+    );
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Card>
@@ -267,12 +439,7 @@ const AirGapBundlesSettings: React.FC = () => {
         />
         <CardContent>
           <Stack spacing={2}>
-            <Alert severity="info">
-              {t(
-                'airgapBundles.requiresDocker',
-                'Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.',
-              )}
-            </Alert>
+            {renderDockerBanner()}
             <Stack direction="row" spacing={2}>
               <Button
                 variant="contained"
@@ -283,7 +450,7 @@ const AirGapBundlesSettings: React.FC = () => {
                     <BuildIcon />
                   )
                 }
-                disabled={building !== null}
+                disabled={building !== null || !dockerReady}
                 onClick={() => handleBuild('server')}
               >
                 {t('airgapBundles.buildServer', 'Build Server Bundle')}
@@ -298,7 +465,7 @@ const AirGapBundlesSettings: React.FC = () => {
                     <BuildIcon />
                   )
                 }
-                disabled={building !== null}
+                disabled={building !== null || !dockerReady}
                 onClick={() => handleBuild('agent')}
               >
                 {t('airgapBundles.buildAgent', 'Build Agent Bundle')}

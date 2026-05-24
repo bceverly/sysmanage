@@ -14,7 +14,7 @@ how many platforms are enabled.  The caller polls the row's
 
 import logging
 import os
-import subprocess
+import subprocess  # nosec B404 - intentional: we exec the bundled build script (path + arg fully controlled below)
 import threading
 import uuid
 from datetime import datetime, timezone

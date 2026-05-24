@@ -132,6 +132,85 @@ class TestAirGapBundlesAPI:
         resp = client.post("/api/airgap-bundles", json={"product": "server"})
         assert resp.status_code in (401, 403)
 
+    def test_docker_status_missing_binary(self, client, auth_headers):
+        # When `docker` isn't on PATH, the endpoint must return
+        # installed=False rather than 500.  We force shutil.which to
+        # return None to simulate a docker-less host.
+        with patch("backend.api.airgap_bundles.shutil.which", return_value=None):
+            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            assert resp.status_code == 200, resp.text
+            body = resp.json()
+            assert body["installed"] is False
+            assert body["running"] is False
+            assert body["user_in_group"] is False
+            assert body["permission_denied"] is False
+            assert body["process_user"]  # always populated
+            assert body["error"]
+
+    def test_docker_status_installed_but_daemon_down(self, client, auth_headers):
+        # docker binary exists but `docker info` returns non-zero.  The
+        # response should report installed=True/running=False with a
+        # non-empty error preview.
+        import subprocess as _subprocess
+
+        version_proc = _subprocess.CompletedProcess(
+            args=["docker", "--version"],
+            returncode=0,
+            stdout="Docker version 24.0.0, build abcdef\n",
+            stderr="",
+        )
+        info_proc = _subprocess.CompletedProcess(
+            args=["docker", "info"],
+            returncode=1,
+            stdout="",
+            stderr="Cannot connect to the Docker daemon at unix:///var/run/docker.sock\n",
+        )
+        with patch(
+            "backend.api.airgap_bundles.shutil.which", return_value="/usr/bin/docker"
+        ), patch(
+            "backend.api.airgap_bundles.subprocess.run",
+            side_effect=[version_proc, info_proc],
+        ):
+            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            assert resp.status_code == 200, resp.text
+            body = resp.json()
+            assert body["installed"] is True
+            assert body["running"] is False
+            assert body["version"].startswith("Docker version")
+            assert body["permission_denied"] is False
+            assert "daemon" in body["error"].lower()
+
+    def test_docker_status_permission_denied(self, client, auth_headers):
+        # docker binary exists, daemon is up, but the calling user
+        # isn't in the docker group — the endpoint must flag this as
+        # permission_denied=True so the UI shows the right remediation.
+        import subprocess as _subprocess
+
+        version_proc = _subprocess.CompletedProcess(
+            args=["docker", "--version"],
+            returncode=0,
+            stdout="Docker version 24.0.0, build abcdef\n",
+            stderr="",
+        )
+        info_proc = _subprocess.CompletedProcess(
+            args=["docker", "info"],
+            returncode=1,
+            stdout="",
+            stderr="permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock\n",
+        )
+        with patch(
+            "backend.api.airgap_bundles.shutil.which", return_value="/usr/bin/docker"
+        ), patch(
+            "backend.api.airgap_bundles.subprocess.run",
+            side_effect=[version_proc, info_proc],
+        ):
+            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            assert resp.status_code == 200, resp.text
+            body = resp.json()
+            assert body["installed"] is True
+            assert body["running"] is False
+            assert body["permission_denied"] is True
+
 
 class TestAirGapBundlesProPlusGate:
     """The Pro+ gate must reject Community-tier access even when the
