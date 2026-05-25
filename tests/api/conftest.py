@@ -966,6 +966,7 @@ def test_db():
         size_bytes = Column(Integer, nullable=True)
         log_path = Column(Text, nullable=True)
         error_message = Column(Text, nullable=True)
+        version = Column(String(64), nullable=True)
         created_by_user_id = Column(
             GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
         )

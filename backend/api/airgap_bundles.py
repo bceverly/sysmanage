@@ -58,6 +58,7 @@ class BundleResponse(BaseModel):
     completed_at: Optional[str]
     size_bytes: Optional[int]
     error_message: Optional[str]
+    version: Optional[str]
 
 
 class DockerStatusResponse(BaseModel):
@@ -80,6 +81,7 @@ def _row_to_response(row: models.AirGapBundle) -> BundleResponse:
         completed_at=(row.completed_at.isoformat() + "Z" if row.completed_at else None),
         size_bytes=row.size_bytes,
         error_message=row.error_message,
+        version=row.version,
     )
 
 

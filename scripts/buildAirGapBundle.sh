@@ -93,14 +93,32 @@ log()  { printf '\033[1;36m[%s]\033[0m %s\n' "$(date +%H:%M:%S)" "$*"; }
 warn() { printf '\033[1;33m[WARN]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; exit 1; }
 
+# Remove a staging subdir that may contain root-owned files left
+# behind by Docker (which runs containers as root by default and
+# bind-mounted /out is therefore populated as root, not the host
+# user).  Plain ``rm -rf`` returns non-zero on those files which —
+# under ``set -e`` — would kill the entire build prematurely.
+# Spin up a throwaway container to chown the tree back to us, then
+# rm.  Errors are always swallowed: cleanup is best-effort.
+_safe_rmdir() {
+  local target="$1"
+  [[ -e "$target" ]] || return 0
+  if ! rm -rf "$target" 2>/dev/null; then
+    docker run --rm -v "$target":/work alpine:3.20 \
+      sh -c "chown -R $(id -u):$(id -g) /work" >/dev/null 2>&1 || true
+    rm -rf "$target" 2>/dev/null || true
+  fi
+  return 0
+}
+
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
 
-for cmd in docker curl awk xorrisofs; do
+for cmd in docker curl jq awk xorrisofs; do
   command -v "$cmd" >/dev/null 2>&1 \
     || die "missing required tool: $cmd
-Install with:  sudo apt install xorriso docker.io curl"
+Install with:  sudo apt install xorriso docker.io curl jq"
 done
 
 docker info >/dev/null 2>&1 \
@@ -115,6 +133,27 @@ log "PPA       : $PPA_NAME"
 log "Staging   : $STAGING_DIR"
 log "Output    : $ISO_PATH"
 log "Platforms : $PLATFORMS"
+
+# Resolve the upstream release version (e.g. "2.4.0.2") from the
+# GitHub release tag.  We strip a leading "v" because tags are
+# typically vX.Y.Z but the user-facing version is X.Y.Z.  If the
+# fetch fails (rate-limited, offline, etc.) we leave the marker
+# empty and the API row stays version=null — non-fatal.
+if [[ -n "${BUNDLE_VERSION_FILE:-}" ]]; then
+  case "$PRODUCT" in
+    server) _gh_repo="bceverly/sysmanage" ;;
+    agent)  _gh_repo="bceverly/sysmanage-agent" ;;
+  esac
+  BUNDLE_VERSION="$(curl -fsSL "https://api.github.com/repos/${_gh_repo}/releases/latest" 2>/dev/null \
+                    | awk -F\" '/"tag_name":/ {print $4; exit}' \
+                    | sed -E 's/^v//')" || true
+  if [[ -n "${BUNDLE_VERSION:-}" ]]; then
+    printf '%s' "$BUNDLE_VERSION" > "$BUNDLE_VERSION_FILE"
+    log "Version   : $BUNDLE_VERSION"
+  else
+    warn "could not resolve upstream release tag for ${_gh_repo}"
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Per-platform builders
@@ -151,9 +190,18 @@ if [ -z "\$MAIN_DEB" ]; then
   exit 3
 fi
 
-echo "Installing \$MAIN_DEB + \$(ls -1 apt-deps/*.deb | wc -l) deps..."
-exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
-     dpkg -i apt-deps/*.deb "\$MAIN_DEB"
+# apt-deps/ may be empty (e.g. a build host where the dep walk
+# produced nothing) — don't let the literal "apt-deps/*.deb" reach
+# dpkg or it'll error before installing anything.
+DEP_COUNT=\$(ls -1 apt-deps/*.deb 2>/dev/null | wc -l)
+echo "Installing \$MAIN_DEB + \$DEP_COUNT deps..."
+if [ "\$DEP_COUNT" -gt 0 ]; then
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       dpkg -i apt-deps/*.deb "\$MAIN_DEB"
+else
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       dpkg -i "\$MAIN_DEB"
+fi
 EOF
   chmod +x "$outdir/install.sh"
 }
@@ -179,9 +227,17 @@ if [ -z "\$MAIN_RPM" ]; then
   exit 3
 fi
 
-echo "Installing \$MAIN_RPM + \$(ls -1 rpm-deps/*.rpm 2>/dev/null | wc -l) deps..."
-exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
-     ${tool} install -y --allowerasing rpm-deps/*.rpm "\$MAIN_RPM"
+# rpm-deps/ may be empty — don't let the literal "rpm-deps/*.rpm"
+# reach ${tool} or it'll error before installing anything.
+DEP_COUNT=\$(ls -1 rpm-deps/*.rpm 2>/dev/null | wc -l)
+echo "Installing \$MAIN_RPM + \$DEP_COUNT deps..."
+if [ "\$DEP_COUNT" -gt 0 ]; then
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       ${tool} install -y --allowerasing rpm-deps/*.rpm "\$MAIN_RPM"
+else
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       ${tool} install -y --allowerasing "\$MAIN_RPM"
+fi
 EOF
   chmod +x "$outdir/install.sh"
 }
@@ -269,11 +325,30 @@ build_ubuntu_like() {
       DIRECT="$(dpkg-deb -f "$PKG"_*.deb Depends | tr "," "\n" \
                 | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
       cd apt-deps
-      apt-cache depends --recurse --no-recommends --no-suggests \
-                        --no-conflicts --no-breaks --no-replaces --no-enhances \
-                        $DIRECT \
-        | awk "/^\\w/ {print \$1}" | sort -u \
-        | xargs -n50 apt-get download 2>/dev/null || true
+      # Expand the dep tree, then filter out two kinds of entries
+      # that would poison a batched apt-get download: virtual
+      # provides (printed as <name> in angle brackets) and
+      # arch-suffixed names like python3:i386 that have no archive
+      # entry on amd64.  Then download per-package so one missing
+      # entry does not abort the whole batch under xargs.
+      DEP_PKGS="$(apt-cache depends --recurse --no-recommends --no-suggests \
+                                    --no-conflicts --no-breaks --no-replaces --no-enhances \
+                                    $DIRECT \
+                  | awk "/^[A-Za-z0-9]/ {print \$1}" \
+                  | grep -v "<.*>" \
+                  | grep -v ":" \
+                  | sort -u)"
+      echo "Resolved $(echo "$DEP_PKGS" | wc -l) candidate dep packages"
+      _ok=0; _fail=0
+      while IFS= read -r _pkg; do
+        [ -z "$_pkg" ] && continue
+        if apt-get download "$_pkg" >/dev/null 2>&1; then
+          _ok=$((_ok+1))
+        else
+          _fail=$((_fail+1))
+        fi
+      done <<<"$DEP_PKGS"
+      echo "downloaded $_ok apt deps; $_fail were unavailable/virtual"
       find . -maxdepth 1 -name "*.deb" ! -name "*_amd64.deb" ! -name "*_all.deb" -delete
       cd ..
 
@@ -282,7 +357,7 @@ build_ubuntu_like() {
       dpkg-deb --fsys-tarfile "$PKG"_*.deb | tar -xO "$REQ_PATH" > "$REQ"
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; die "[$platform] docker build failed (log: $outdir/build.log)"; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   _write_deb_installer "$outdir"
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -336,15 +411,29 @@ build_debian_like() {
       curl -fsSL -o "${PKG}.deb" "$ASSET_URL"
 
       # Recursive apt deps via apt-cache (Debian repos are configured
-      # by default in the base image).
+      # by default in the base image).  Same filter+loop pattern as
+      # the Ubuntu builder — see comment there for the rationale.
       DIRECT="$(dpkg-deb -f ${PKG}.deb Depends | tr "," "\n" \
                 | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
       cd apt-deps
-      apt-cache depends --recurse --no-recommends --no-suggests \
-                        --no-conflicts --no-breaks --no-replaces --no-enhances \
-                        $DIRECT \
-        | awk "/^\\w/ {print \$1}" | sort -u \
-        | xargs -n50 apt-get download 2>/dev/null || true
+      DEP_PKGS="$(apt-cache depends --recurse --no-recommends --no-suggests \
+                                    --no-conflicts --no-breaks --no-replaces --no-enhances \
+                                    $DIRECT \
+                  | awk "/^[A-Za-z0-9]/ {print \$1}" \
+                  | grep -v "<.*>" \
+                  | grep -v ":" \
+                  | sort -u)"
+      echo "Resolved $(echo "$DEP_PKGS" | wc -l) candidate dep packages"
+      _ok=0; _fail=0
+      while IFS= read -r _pkg; do
+        [ -z "$_pkg" ] && continue
+        if apt-get download "$_pkg" >/dev/null 2>&1; then
+          _ok=$((_ok+1))
+        else
+          _fail=$((_fail+1))
+        fi
+      done <<<"$DEP_PKGS"
+      echo "downloaded $_ok apt deps; $_fail were unavailable/virtual"
       find . -maxdepth 1 -name "*.deb" ! -name "*_amd64.deb" ! -name "*_all.deb" -delete
       cd ..
 
@@ -352,7 +441,7 @@ build_debian_like() {
       dpkg-deb --fsys-tarfile ${PKG}.deb | tar -xO "$REQ_PATH" > "$REQ"
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; rm -rf "$outdir"; return; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   _write_deb_installer "$outdir"
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -381,10 +470,14 @@ build_fedora() {
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
     "fedora:$ver" bash -euxc '
+      # dnf-plugins-core provides the `dnf download` subcommand —
+      # absent in stock fedora images, so without it the download
+      # step below silently no-ops and we ship a Fedora bundle with
+      # only the main .rpm and no transitive deps.
       dnf install -y -q \
         curl jq python3 python3-pip python3-devel \
         gcc libffi-devel openssl-devel libpq-devel \
-        cpio rpm-build
+        cpio rpm-build dnf-plugins-core
       cd /out
       mkdir -p rpm-deps wheels
 
@@ -411,7 +504,7 @@ build_fedora() {
       cp "./${REQ_PATH_RPM}" "$REQ"
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; rm -rf "$outdir"; return; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -431,10 +524,12 @@ build_rhel() {
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
     "rockylinux:$ver" bash -euxc '
+      # dnf-plugins-core provides `dnf download`; Rocky 9 stock image
+      # ships without it.
       dnf install -y -q --allowerasing \
         curl jq python3 python3-pip python3-devel \
         gcc libffi-devel openssl-devel libpq-devel \
-        cpio
+        cpio dnf-plugins-core
       cd /out
       mkdir -p rpm-deps wheels
 
@@ -457,7 +552,7 @@ build_rhel() {
       cp "./${REQ_PATH_RPM}" "$REQ"
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; rm -rf "$outdir"; return; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -509,7 +604,7 @@ build_opensuse() {
       cp "./${REQ_PATH_RPM}" "$REQ"
       python3.11 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; rm -rf "$outdir"; return; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "zypper"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -564,7 +659,7 @@ build_alpine() {
         || { echo "no requirements file at ${REQ_PATH_RPM} inside ${PKG}.apk" >&2; exit 1; }
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; rm -rf "$outdir"; return; }
+    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
 
   # Alpine installer uses apk add --allow-untrusted on local files.
   cat > "$outdir/install.sh" <<EOF
@@ -578,8 +673,17 @@ if ! command -v apk >/dev/null 2>&1; then
 fi
 MAIN_APK="\$(ls -1 *.apk 2>/dev/null | head -1)"
 [ -n "\$MAIN_APK" ] || { echo "ERROR: no .apk found" >&2; exit 3; }
-exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
-     apk add --no-cache --allow-untrusted apk-deps/*.apk "\$MAIN_APK"
+# apk-deps/ may be empty — don't let the literal "apk-deps/*.apk"
+# reach apk add or it'll error before installing anything.
+DEP_COUNT=\$(ls -1 apk-deps/*.apk 2>/dev/null | wc -l)
+echo "Installing \$MAIN_APK + \$DEP_COUNT deps..."
+if [ "\$DEP_COUNT" -gt 0 ]; then
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       apk add --no-cache --allow-untrusted apk-deps/*.apk "\$MAIN_APK"
+else
+  exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
+       apk add --no-cache --allow-untrusted "\$MAIN_APK"
+fi
 EOF
   chmod +x "$outdir/install.sh"
   log "[$platform] done — $(find "$outdir/apk-deps" -name '*.apk' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -600,23 +704,30 @@ _gh_owner_repo() {
 }
 
 _fetch_latest_release_asset() {
-  # $1 = include regex, $2 = exclude regex (optional, "" for none), $3 = output path
+  # $1 = include regex (matched against asset .name), $2 = exclude regex
+  # (optional, "" for none), $3 = output path.
   #
-  # Asset name patterns are derived from build-and-release.yml's release
-  # job (uploads ``release-files/*``).  The deploy-docs-repo step in
-  # that workflow shows the literal filename globs for each platform —
-  # this helper's regex needs to match those.  See the per-builder
-  # comments for the exact pattern each platform uses.
+  # The previous implementation used awk against the raw JSON and
+  # tried to anchor patterns with `$` for end-of-line — but GitHub's
+  # pretty-printed JSON puts the URL inside quotes and often followed
+  # by a comma, so end-of-line anchors never matched and every BSD/
+  # macOS asset silently came back empty.  jq matches against the
+  # asset .name field directly, which is the clean filename, so the
+  # same regex anchors work as intended.
   local include="$1" exclude="$2" outpath="$3"
   local repo; repo=$(_gh_owner_repo)
   local url
-  url=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" \
-        | awk -v inc="$include" -v exc="$exclude" '
-            /"browser_download_url"/ && $0 ~ inc {
-              if (exc != "" && $0 ~ exc) next
-              print $2; exit
-            }' \
-        | tr -d '",')
+  if [[ -n "$exclude" ]]; then
+    url=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" \
+          | jq -r --arg inc "$include" --arg exc "$exclude" \
+              '.assets[] | select(.name | test($inc)) | select(.name | test($exc) | not) | .browser_download_url' \
+          | head -1)
+  else
+    url=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" \
+          | jq -r --arg inc "$include" \
+              '.assets[] | select(.name | test($inc)) | .browser_download_url' \
+          | head -1)
+  fi
   if [[ -z "$url" ]]; then
     return 1
   fi
@@ -700,7 +811,7 @@ build_freebsd() {
     _write_bsd_installer "$outdir" "pkg add"
   else
     warn "[freebsd] no non-macOS .pkg found in latest release — skipping"
-    rm -rf "$outdir"
+    _safe_rmdir "$outdir"
   fi
 }
 
@@ -716,7 +827,7 @@ build_netbsd() {
     _write_bsd_installer "$outdir" "pkg_add"
   else
     warn "[netbsd] no non-openbsd .tgz found in latest release — skipping"
-    rm -rf "$outdir"
+    _safe_rmdir "$outdir"
   fi
 }
 
@@ -734,7 +845,7 @@ build_openbsd() {
     _write_bsd_installer "$outdir" "pkg_add"
   else
     warn "[openbsd] no openbsd[NN].tgz found in latest release — skipping"
-    rm -rf "$outdir"
+    _safe_rmdir "$outdir"
   fi
 }
 
@@ -788,8 +899,9 @@ fi
 cp "$DISPATCHER_SH" "$STAGING_DIR/install.sh"
 chmod +x "$STAGING_DIR/install.sh"
 
-# Sanity check: at least one platform produced output.
-PLATFORMS_BUILT=$(find "$STAGING_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l)
+# Sanity check: at least one platform produced an install.sh.  An
+# empty subdir isn't useful — it'd just confuse the dispatcher.
+PLATFORMS_BUILT=$(find "$STAGING_DIR" -maxdepth 2 -mindepth 2 -name install.sh -type f | wc -l)
 [[ "$PLATFORMS_BUILT" -gt 0 ]] \
   || die "no platforms produced output — every builder failed or stubbed"
 
@@ -806,7 +918,9 @@ Size  : $(du -sh "$STAGING_DIR" | cut -f1)
 
 Install on the air-gapped host:
 
-  sudo mount /dev/sr1 /mnt          # or wherever this ISO mounts
+  sudo mount -o loop sysmanage-${PRODUCT}-bundle.iso /mnt
+  # or if the ISO is on physical media:
+  sudo mount /dev/sr0 /mnt
   sudo /mnt/install.sh
 
 That dispatcher detects the host OS and runs the right platform's

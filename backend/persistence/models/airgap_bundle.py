@@ -79,6 +79,12 @@ class AirGapBundle(Base):
     # subprocess stderr, truncated.
     error_message = Column(Text, nullable=True)
 
+    # Upstream sysmanage/sysmanage-agent release version captured at
+    # build time (e.g. "2.4.0.2").  The builder writes this to a
+    # marker file once it has resolved the package source; null until
+    # then.
+    version = Column(String(64), nullable=True)
+
     # The user who triggered the build.  Nullable because the recovery
     # config-admin account has no DB row (and is allowed to trigger
     # bundles for bootstrap scenarios).

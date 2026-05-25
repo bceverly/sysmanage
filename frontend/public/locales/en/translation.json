@@ -2704,6 +2704,7 @@
     "buildAgent": "Build Agent Bundle",
     "buildError": "Failed to queue build",
     "buildServer": "Build Server Bundle",
+    "bundle": "Bundle",
     "completedAt": "Completed",
     "confirmDelete": "Delete this bundle and its ISO file?",
     "copied": "Command copied to clipboard",
@@ -2721,9 +2722,9 @@
     "dockerReady": "Docker is ready",
     "dockerReadyHint": "Builds typically take 5-30 minutes depending on how many platforms are enabled.",
     "download": "Download ISO",
+    "downloadError": "Failed to download bundle",
     "empty": "No bundles yet. Click a build button above to create one.",
     "loadError": "Failed to load bundles",
-    "product": "Product",
     "queued": "Bundle build queued — refreshing list",
     "recentFailures": "Recent build failures:",
     "recheckDocker": "Re-check Docker",
@@ -2731,6 +2732,7 @@
     "size": "Size",
     "status": "Status",
     "subtitle": "Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "Air-Gap Install Bundles"
+    "title": "Air-Gap Install Bundles",
+    "version": "Version"
   }
 }

@@ -96,6 +96,10 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
     BUNDLE_DIR.mkdir(parents=True, exist_ok=True)
     log_path = BUNDLE_DIR / f"{bundle_id}.log"
     iso_path = BUNDLE_DIR / f"sysmanage-{product}-bundle-{bundle_id}.iso"
+    # The build script writes the upstream release version (e.g.
+    # "2.4.0.2") to this file once it has resolved the package
+    # source.  We read it back after the run to stamp the bundle row.
+    version_path = BUNDLE_DIR / f"{bundle_id}.version"
 
     _update_bundle(
         bundle_id,
@@ -106,6 +110,7 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
 
     env = os.environ.copy()
     env["DEST_DIR"] = str(BUNDLE_DIR)
+    env["BUNDLE_VERSION_FILE"] = str(version_path)
     # Override the script's hardcoded output filename so concurrent
     # builds don't collide.  The script's default is
     # sysmanage-<product>-bundle.iso; we rename after the run.
@@ -156,14 +161,29 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
         )
         return
 
+    version: Optional[str] = None
+    if version_path.is_file():
+        try:
+            version = version_path.read_text(encoding="utf-8").strip() or None
+        except OSError:
+            version = None
+        # Tidy up — the per-bundle version marker file is consumed.
+        try:
+            version_path.unlink()
+        except OSError:
+            pass
+
     _update_bundle(
         bundle_id,
         status=models.BUNDLE_STATUS_READY,
         completed_at=_now_naive_utc(),
         file_path=str(iso_path),
         size_bytes=iso_path.stat().st_size,
+        version=version,
     )
-    logger.info("airgap_bundle %s ready at %s", bundle_id, iso_path)
+    logger.info(
+        "airgap_bundle %s ready at %s (version=%s)", bundle_id, iso_path, version
+    )
 
 
 def start_build(bundle_id: uuid.UUID, product: str) -> None:

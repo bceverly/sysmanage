@@ -706,6 +706,17 @@ jobs:
         # makes relative API calls (/api/login etc.) that need to reach
         # the backend — ``serve -s`` would fall through to /index.html
         # for any /api/* path and login would silently get HTML back.
+        #
+        # Copy dist into /var/www/sysmanage rather than pointing nginx
+        # at $(pwd)/dist directly: /home/runner is mode 0750 on GitHub
+        # runners, so the www-data user can't traverse the path and
+        # nginx 500s with a permission-denied in error.log.
+        sudo rm -rf /var/www/sysmanage
+        sudo mkdir -p /var/www/sysmanage
+        sudo cp -R dist/. /var/www/sysmanage/
+        sudo chown -R www-data:www-data /var/www/sysmanage
+        sudo find /var/www/sysmanage -type d -exec chmod 755 {} +
+        sudo find /var/www/sysmanage -type f -exec chmod 644 {} +
         sudo tee /etc/nginx/sites-available/sysmanage-e2e > /dev/null <<NGINX_CONF
         server {
             listen 3000 default_server;
@@ -713,7 +724,7 @@ jobs:
             server_name _;
 
             location / {
-                root $(pwd)/dist;
+                root /var/www/sysmanage;
                 try_files \$uri \$uri/ /index.html;
             }
 
@@ -787,8 +798,12 @@ jobs:
         echo "Waiting for frontend..."
         if ! timeout 60 bash -c 'until curl -f http://localhost:3000/; do echo "Waiting for frontend..."; sleep 2; done'; then
           echo "❌ Frontend health check failed!"
-          echo "Frontend logs:"
-          cat /tmp/frontend.log || echo "No frontend log file found"
+          echo "Frontend logs (nginx error log — /tmp/frontend.log is a placeholder):"
+          sudo tail -100 /var/log/nginx/error.log || echo "No nginx error log"
+          echo "Frontend logs (nginx access log):"
+          sudo tail -50 /var/log/nginx/access.log || echo "No nginx access log"
+          echo "SPA root listing:"
+          ls -la /var/www/sysmanage 2>&1 | head -20
           echo "Port 3000 status:"
           netstat -tulpn | grep :3000 || ss -tulpn | grep :3000 || echo "Nothing listening on port 3000"
           exit 1
@@ -812,7 +827,10 @@ jobs:
         echo "Frontend check:"
         if ! curl -f http://localhost:3000/; then
           echo "❌ Frontend not responding!"
-          cat /tmp/frontend.log || echo "No frontend log"
+          echo "nginx error log:"
+          sudo tail -100 /var/log/nginx/error.log || echo "No nginx error log"
+          echo "nginx access log:"
+          sudo tail -50 /var/log/nginx/access.log || echo "No nginx access log"
           echo "Frontend process status:"
           if [ -f /tmp/frontend.pid ]; then
             PID=$(cat /tmp/frontend.pid)

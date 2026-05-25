@@ -77,7 +77,13 @@ case "${OS_ID}:${OS_VERSION}" in
                  SUBDIR=linux-rhel-9          ;;
   opensuse-leap:15*|sles:15*)
                  SUBDIR=linux-opensuse-leap   ;;
-  alpine:3.*)    SUBDIR=linux-alpine          ;;
+  alpine:3.*)
+    # Builder writes to linux-alpine-<ver> (e.g. linux-alpine-3.20).
+    # Pick the first matching subdir actually present in the bundle.
+    for d in "$SELF_DIR"/linux-alpine-*; do
+      [ -d "$d" ] && SUBDIR="$(basename "$d")" && break
+    done
+    ;;
   freebsd:*)     SUBDIR=freebsd               ;;
   netbsd:*)      SUBDIR=netbsd                ;;
   openbsd:*)     SUBDIR=openbsd               ;;

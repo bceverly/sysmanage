@@ -42,6 +42,7 @@ interface Bundle {
   completed_at: string | null;
   size_bytes: number | null;
   error_message: string | null;
+  version: string | null;
 }
 
 interface DockerStatus {
@@ -206,22 +207,42 @@ const AirGapBundlesSettings: React.FC = () => {
     }
   };
 
-  const handleDownload = (bundle: Bundle) => {
-    // Use a plain anchor click so the browser handles the streaming
-    // response naturally (a single large file).
-    const url = `/api/airgap-bundles/${bundle.id}/download`;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  const handleDownload = async (bundle: Bundle) => {
+    // A plain anchor click wouldn't carry the Bearer JWT, so the
+    // API would 401 and Chrome shows "File wasn't available on
+    // site".  Fetch through the authenticated axios client, then
+    // hand the blob to a hidden anchor.  Matches the same pattern
+    // already used elsewhere (AuditLogViewer, Reports, etc.).
+    try {
+      const response = await axiosInstance.get(
+        `/api/airgap-bundles/${bundle.id}/download`,
+        { responseType: 'blob' },
+      );
+      const blob = new Blob([response.data], {
+        type: 'application/octet-stream',
+      });
+      const url = globalThis.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sysmanage-${bundle.product}-bundle${
+        bundle.version ? `-${bundle.version}` : ''
+      }.iso`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      globalThis.URL.revokeObjectURL(url);
+    } catch (e: unknown) {
+      console.error(e);
+      showError(
+        t('airgapBundles.downloadError', 'Failed to download bundle'),
+      );
+    }
   };
 
   const columns: GridColDef[] = [
     {
       field: 'product',
-      headerName: t('airgapBundles.product', 'Product'),
+      headerName: t('airgapBundles.bundle', 'Bundle'),
       width: 110,
       renderCell: (p: GridRenderCellParams<Bundle>) => (
         <Chip
@@ -230,6 +251,12 @@ const AirGapBundlesSettings: React.FC = () => {
           color={p.row.product === 'server' ? 'primary' : 'secondary'}
         />
       ),
+    },
+    {
+      field: 'version',
+      headerName: t('airgapBundles.version', 'Version'),
+      width: 120,
+      valueGetter: (_v, row) => row.version || '—',
     },
     {
       field: 'status',
