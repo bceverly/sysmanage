@@ -53,26 +53,54 @@ set -euo pipefail
 
 PRODUCT="${1:-}"
 case "$PRODUCT" in
-  server|agent) ;;
+  server|agent|proplus) ;;
   *)
-    echo "usage: $0 server|agent" >&2
+    echo "usage: $0 server|agent|proplus" >&2
     exit 2
     ;;
 esac
 
 # Map abstract product → concrete package details.
+#
+# EXTRAS_* are extra top-level package roots fed into the recursive
+# dep walk on top of the package's own Depends: field.  The sysmanage
+# server bundle needs PostgreSQL server too, but that's declared as a
+# Recommends: on the .deb (so it's intentionally omitted from the
+# Depends: chain, and the dep walk uses --no-recommends).  Injecting
+# it as an explicit root pulls postgresql + its transitive deps into
+# the bundle so an air-gapped target can stand up the DB locally.
 case "$PRODUCT" in
   server)
     PKG_NAME="sysmanage"
     PPA_NAME="bceverly/sysmanage"
     REQ_PATH_IN_DEB="./opt/sysmanage/requirements.txt"
     REQ_PATH_IN_RPM="/opt/sysmanage/requirements.txt"
+    EXTRAS_DEB="postgresql postgresql-contrib"
+    EXTRAS_RPM="postgresql-server postgresql-contrib"
+    EXTRAS_APK="postgresql postgresql-contrib"
     ;;
   agent)
     PKG_NAME="sysmanage-agent"
     PPA_NAME="bceverly/sysmanage-agent"
     REQ_PATH_IN_DEB="./opt/sysmanage-agent/requirements-prod.txt"
     REQ_PATH_IN_RPM="/opt/sysmanage-agent/requirements-prod.txt"
+    EXTRAS_DEB=""
+    EXTRAS_RPM=""
+    EXTRAS_APK=""
+    ;;
+  proplus)
+    # The Pro+ overlay doesn't bundle OS packages — it carries the
+    # build host's Cython engine .so files, JS plugin shims, license
+    # JWT, and cached public_key.pem.  None of the PKG_NAME / PPA /
+    # EXTRAS variables apply; the proplus path short-circuits past
+    # the per-platform builders entirely.
+    PKG_NAME=""
+    PPA_NAME=""
+    REQ_PATH_IN_DEB=""
+    REQ_PATH_IN_RPM=""
+    EXTRAS_DEB=""
+    EXTRAS_RPM=""
+    EXTRAS_APK=""
     ;;
 esac
 
@@ -141,8 +169,9 @@ log "Platforms : $PLATFORMS"
 # empty and the API row stays version=null — non-fatal.
 if [[ -n "${BUNDLE_VERSION_FILE:-}" ]]; then
   case "$PRODUCT" in
-    server) _gh_repo="bceverly/sysmanage" ;;
-    agent)  _gh_repo="bceverly/sysmanage-agent" ;;
+    server)  _gh_repo="bceverly/sysmanage" ;;
+    agent)   _gh_repo="bceverly/sysmanage-agent" ;;
+    proplus) _gh_repo="bceverly/sysmanage" ;;  # Pro+ rides server's tag.
   esac
   BUNDLE_VERSION="$(curl -fsSL "https://api.github.com/repos/${_gh_repo}/releases/latest" 2>/dev/null \
                     | awk -F\" '/"tag_name":/ {print $4; exit}' \
@@ -153,6 +182,248 @@ if [[ -n "${BUNDLE_VERSION_FILE:-}" ]]; then
   else
     warn "could not resolve upstream release tag for ${_gh_repo}"
   fi
+fi
+
+# ---------------------------------------------------------------------------
+# Pro+ overlay bundle — assembled from the build host's own license
+# artifacts (Cython engine .so files, JS plugin shims, license JWT,
+# cached public_key.pem).  No Docker, no per-distro builders; the
+# overlay is OS-agnostic because the engines are loaded by the
+# already-installed sysmanage server's Python interpreter on the
+# target.  Bails early if the build host isn't itself Pro+-licensed.
+# ---------------------------------------------------------------------------
+
+build_proplus() {
+  local sysmanage_yaml="/etc/sysmanage.yaml"
+  local modules_src="/var/lib/sysmanage/modules"
+  local public_key_src="/var/lib/sysmanage/license/public_key.pem"
+
+  [[ -r "$sysmanage_yaml" ]] \
+    || die "cannot read $sysmanage_yaml — build host must be a sysmanage server"
+  [[ -d "$modules_src" ]] \
+    || die "modules dir not found at $modules_src — build host must have Pro+ active"
+  [[ -r "$public_key_src" ]] \
+    || die "license public key not found at $public_key_src — build host must have phoned home at least once"
+
+  # Pull the license.key string from the yaml (one-line value or a
+  # quoted string).  Use grep+sed rather than a yaml parser so this
+  # works in the bare shell environment.
+  local license_key
+  license_key="$(awk '
+    BEGIN { in_license = 0 }
+    /^license:/ { in_license = 1; next }
+    /^[^[:space:]]/ { in_license = 0 }
+    in_license && /^[[:space:]]+key:/ {
+      sub(/^[[:space:]]+key:[[:space:]]*/, "")
+      gsub(/^"|"$/, "")
+      print
+      exit
+    }
+  ' "$sysmanage_yaml")"
+  [[ -n "$license_key" ]] \
+    || die "license.key not set in $sysmanage_yaml — build host is not Pro+ licensed"
+
+  log "Staging Pro+ overlay (modules + license + public key)"
+  mkdir -p "$STAGING_DIR/modules"
+  cp -R "$modules_src/." "$STAGING_DIR/modules/"
+  cp "$public_key_src" "$STAGING_DIR/public_key.pem"
+  printf '%s\n' "$license_key" > "$STAGING_DIR/license.key"
+  chmod 600 "$STAGING_DIR/license.key"
+
+  # Idempotent installer that the air-gap target runs as root.  Uses
+  # the already-installed sysmanage venv's PyYAML so we don't need a
+  # standalone yaml editor on the target.
+  cat > "$STAGING_DIR/install.sh" <<'EOF'
+#!/bin/sh
+# Pro+ overlay installer for sysmanage.  Idempotent — safe to re-run.
+#
+# Prerequisite: the sysmanage server package must already be installed
+# (i.e. the OS-level air-gap server bundle ran first).  This script
+# copies the bundled Pro+ engine modules, license key, and license
+# public key into place, edits /etc/sysmanage.yaml to operate offline,
+# and restarts the sysmanage service.
+
+set -eu
+cd "$(dirname "$0")"
+
+if [ "$(id -u)" != "0" ]; then
+  echo "ERROR: must run as root (try: sudo ./install.sh)" >&2
+  exit 1
+fi
+
+if [ ! -f /etc/sysmanage.yaml ]; then
+  echo "ERROR: /etc/sysmanage.yaml not found.  Install the sysmanage" >&2
+  echo "       server bundle first, then re-run this overlay." >&2
+  exit 2
+fi
+if [ ! -x /opt/sysmanage/.venv/bin/python ]; then
+  echo "ERROR: /opt/sysmanage/.venv/bin/python not found.  This overlay" >&2
+  echo "       requires the sysmanage server to be installed first." >&2
+  exit 2
+fi
+
+echo "[proplus] Installing Pro+ engine modules..."
+install -d -o sysmanage -g sysmanage -m 0750 /var/lib/sysmanage/modules
+# Copy then chown — using install(1) per-file would lose
+# subdirectories if the vendor ever adds them.
+cp -R modules/. /var/lib/sysmanage/modules/
+chown -R sysmanage:sysmanage /var/lib/sysmanage/modules
+find /var/lib/sysmanage/modules -type f -exec chmod 0644 {} +
+
+echo "[proplus] Installing license public key..."
+install -d -o sysmanage -g sysmanage -m 0750 /var/lib/sysmanage/license
+install -o sysmanage -g sysmanage -m 0644 public_key.pem \
+  /var/lib/sysmanage/license/public_key.pem
+
+echo "[proplus] Updating /etc/sysmanage.yaml for offline operation..."
+LICENSE_KEY="$(cat license.key)"
+/opt/sysmanage/.venv/bin/python - "$LICENSE_KEY" <<'PYEOF'
+import sys
+import yaml
+from pathlib import Path
+
+key = sys.argv[1].strip()
+path = Path("/etc/sysmanage.yaml")
+data = yaml.safe_load(path.read_text()) or {}
+
+lic = data.setdefault("license", {})
+lic["key"] = key
+# Deliberately do NOT blank phone_home_url here.  The JWT's
+# offline_days grace window is the vendor's enforcement lever
+# against ISO sharing: an air-gapped target will fail phone-home,
+# fall back to the local validator + cached public_key.pem, and
+# stay Pro+-active for offline_days (~30) from the last successful
+# phone-home.  Operators must refresh this overlay before the grace
+# expires.  If we silenced phone_home_url, every shared copy of
+# this ISO would run Pro+ until the JWT's exp date — months or
+# years — with no revocation path.
+
+geo = data.setdefault("geo_lookup", {})
+geo["enabled"] = False
+geo["ipapi_fallback_enabled"] = False
+
+path.write_text(yaml.safe_dump(data, sort_keys=False))
+print("[proplus] /etc/sysmanage.yaml updated")
+PYEOF
+
+echo "[proplus] Registering modules in proplus_module_cache..."
+# The module loader queries the proplus_module_cache table to decide
+# whether each engine module is already on disk; if no row exists it
+# tries to download from license.sysmanage.org (which fails on an
+# air-gap host).  Walk /var/lib/sysmanage/modules/*.so and upsert a
+# row per module so the loader finds them locally on next startup.
+cd /opt/sysmanage && PYTHONPATH=/opt/sysmanage /opt/sysmanage/.venv/bin/python - <<'PYEOF'
+import hashlib
+import platform
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from sqlalchemy.orm import sessionmaker
+from backend.persistence import db
+from backend.persistence.models import ProPlusModuleCache
+
+MODULES_DIR = Path("/var/lib/sysmanage/modules")
+# Filenames are <module_code>_<py_major>.<py_minor>.so e.g.
+# health_engine_3.14.so or airgap_repository_engine_3.14.so.
+FILE_RE = re.compile(r"^(?P<code>[a-z0-9_]+)_(?P<py>\d+\.\d+)\.so$")
+SYSTEM = platform.system().lower()  # "linux"
+MACHINE = {"x86_64": "x86_64", "amd64": "x86_64",
+           "aarch64": "aarch64", "arm64": "aarch64"}.get(
+    platform.machine().lower(), platform.machine().lower())
+
+def sha512(path):
+    h = hashlib.sha512()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+Session = sessionmaker(bind=db.get_engine())
+now = datetime.now(timezone.utc).replace(tzinfo=None)
+inserted = updated = 0
+with Session() as s:
+    for so in sorted(MODULES_DIR.glob("*.so")):
+        m = FILE_RE.match(so.name)
+        if not m:
+            continue
+        code, pyv = m.group("code"), m.group("py")
+        digest = sha512(so)
+        row = (s.query(ProPlusModuleCache)
+                .filter_by(module_code=code, platform=SYSTEM,
+                           architecture=MACHINE, python_version=pyv)
+                .first())
+        if row is None:
+            s.add(ProPlusModuleCache(
+                module_code=code, version="airgap",
+                platform=SYSTEM, architecture=MACHINE,
+                python_version=pyv, file_path=str(so),
+                file_hash=digest, downloaded_at=now,
+            ))
+            inserted += 1
+        else:
+            row.file_path = str(so)
+            row.file_hash = digest
+            row.downloaded_at = now
+            updated += 1
+    s.commit()
+print(f"[proplus] module cache: {inserted} inserted, {updated} updated")
+PYEOF
+
+echo "[proplus] Restarting sysmanage service..."
+systemctl restart sysmanage
+
+echo
+echo "Pro+ overlay installed.  Verify with:"
+echo "  systemctl status sysmanage"
+echo "  curl -ks https://localhost:8443/api/v1/server-info | python3 -m json.tool"
+echo "The 'license_tier' field should now be 'professional' or 'enterprise'."
+EOF
+  chmod +x "$STAGING_DIR/install.sh"
+
+  cat > "$STAGING_DIR/README.txt" <<EOF
+SysManage Pro+ overlay bundle
+==============================
+
+Built  : $(date -u +'%Y-%m-%dT%H:%M:%SZ')
+Source : $(hostname -f 2>/dev/null || hostname)
+
+This ISO carries the Pro+ engine modules, license JWT, and license
+public key from a sysmanage server with an active Pro+ license, ready
+to drop onto an air-gapped sysmanage server that has the standard
+sysmanage server bundle already installed.
+
+Install on the air-gapped server:
+
+  sudo mount -o loop sysmanage-proplus-bundle.iso /mnt
+  sudo /mnt/install.sh
+  sudo umount /mnt
+
+The installer is idempotent: re-running it overwrites the modules,
+the license key, and the relevant /etc/sysmanage.yaml fields.
+
+Layout:
+
+  install.sh         offline installer (run as root)
+  README.txt         this file
+  modules/           Cython engine .so files + JS plugin shims
+  public_key.pem     ECDSA P-521 public key for license verification
+  license.key        license JWT (single line, 0600 perms)
+EOF
+
+  log "Building ISO with xorrisofs"
+  rm -f "$ISO_PATH" 2>/dev/null || true
+  xorrisofs -quiet -o "$ISO_PATH" -V "$ISO_LABEL" -r -J "$STAGING_DIR"
+  log "Done."
+  log "ISO : $ISO_PATH ($(du -h "$ISO_PATH" | cut -f1))"
+}
+
+# Branch off here when building the Pro+ overlay — no per-platform
+# orchestration, no dispatcher install.sh.  build_proplus mints the
+# ISO itself and we exit clean.
+if [[ "$PRODUCT" == "proplus" ]]; then
+  build_proplus
+  exit 0
 fi
 
 # ---------------------------------------------------------------------------
@@ -283,6 +554,7 @@ build_ubuntu_like() {
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH="$REQ_PATH_IN_DEB" \
     -e PY="$py" \
+    -e EXTRAS="$EXTRAS_DEB" \
     "$image" bash -euxc '
       export DEBIAN_FRONTEND=noninteractive
       apt-get update -qq
@@ -324,6 +596,10 @@ build_ubuntu_like() {
       # inner bash try to expand ${...} and choke on the missing }.
       DIRECT="$(dpkg-deb -f "$PKG"_*.deb Depends | tr "," "\n" \
                 | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
+      # Inject product-specific extras (e.g. postgresql for the
+      # server) as additional dep-walk roots.  Set by the PRODUCT
+      # case at the top of the outer script; agent passes empty.
+      ROOTS="$DIRECT $EXTRAS"
       cd apt-deps
       # Expand the dep tree, then filter out two kinds of entries
       # that would poison a batched apt-get download: virtual
@@ -333,7 +609,7 @@ build_ubuntu_like() {
       # entry does not abort the whole batch under xargs.
       DEP_PKGS="$(apt-cache depends --recurse --no-recommends --no-suggests \
                                     --no-conflicts --no-breaks --no-replaces --no-enhances \
-                                    $DIRECT \
+                                    $ROOTS \
                   | awk "/^[A-Za-z0-9]/ {print \$1}" \
                   | grep -v "<.*>" \
                   | grep -v ":" \
@@ -350,6 +626,15 @@ build_ubuntu_like() {
       done <<<"$DEP_PKGS"
       echo "downloaded $_ok apt deps; $_fail were unavailable/virtual"
       find . -maxdepth 1 -name "*.deb" ! -name "*_amd64.deb" ! -name "*_all.deb" -delete
+      # Drop legacy "X" packages when a "X-stable" replacement is
+      # also bundled.  Ubuntu 26.04 (resolute) introduced runc-stable
+      # as the Conflicts: replacement for runc; apt-cache depends
+      # --recurse follows both branches and downloads both.  Without
+      # this filter, dpkg -i fails on the second of the pair.
+      for _stable in $(ls *-stable_*.deb 2>/dev/null); do
+        _legacy="${_stable%%-stable_*}"
+        rm -f "${_legacy}"_*.deb 2>/dev/null || true
+      done
       cd ..
 
       # requirements.txt → wheels (pip wheel compiles sdists too)
@@ -389,6 +674,7 @@ build_debian_like() {
     -e PKG="$PKG_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH="$REQ_PATH_IN_DEB" \
+    -e EXTRAS="$EXTRAS_DEB" \
     "$image" bash -euxc '
       export DEBIAN_FRONTEND=noninteractive
       apt-get update -qq
@@ -415,10 +701,11 @@ build_debian_like() {
       # the Ubuntu builder — see comment there for the rationale.
       DIRECT="$(dpkg-deb -f ${PKG}.deb Depends | tr "," "\n" \
                 | awk "{print \$1}" | grep -v "^\\\${" | grep -vE "^$" | sort -u)"
+      ROOTS="$DIRECT $EXTRAS"
       cd apt-deps
       DEP_PKGS="$(apt-cache depends --recurse --no-recommends --no-suggests \
                                     --no-conflicts --no-breaks --no-replaces --no-enhances \
-                                    $DIRECT \
+                                    $ROOTS \
                   | awk "/^[A-Za-z0-9]/ {print \$1}" \
                   | grep -v "<.*>" \
                   | grep -v ":" \
@@ -435,6 +722,12 @@ build_debian_like() {
       done <<<"$DEP_PKGS"
       echo "downloaded $_ok apt deps; $_fail were unavailable/virtual"
       find . -maxdepth 1 -name "*.deb" ! -name "*_amd64.deb" ! -name "*_all.deb" -delete
+      # Same legacy-vs-stable filter as the Ubuntu builder — see the
+      # comment there for the rationale.
+      for _stable in $(ls *-stable_*.deb 2>/dev/null); do
+        _legacy="${_stable%%-stable_*}"
+        rm -f "${_legacy}"_*.deb 2>/dev/null || true
+      done
       cd ..
 
       REQ=/tmp/req.txt
@@ -469,6 +762,7 @@ build_fedora() {
     -e PKG="$PKG_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
+    -e EXTRAS="$EXTRAS_RPM" \
     "fedora:$ver" bash -euxc '
       # dnf-plugins-core provides the `dnf download` subcommand —
       # absent in stock fedora images, so without it the download
@@ -496,6 +790,11 @@ build_fedora() {
       # dnf download with --resolve walks recursive deps for us.
       dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
         || dnf download --resolve --destdir=rpm-deps "${PKG}"
+      # Pull the extra product-specific roots (e.g. postgresql-server)
+      # and their transitive deps too.
+      for _extra in $EXTRAS; do
+        dnf download --resolve --destdir=rpm-deps "$_extra" || true
+      done
       # Drop the main package out of rpm-deps if dnf staged it there.
       find rpm-deps -maxdepth 1 -name "${PKG}-*.rpm" -delete 2>/dev/null || true
 
@@ -523,6 +822,7 @@ build_rhel() {
     -e PKG="$PKG_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
+    -e EXTRAS="$EXTRAS_RPM" \
     "rockylinux:$ver" bash -euxc '
       # dnf-plugins-core provides `dnf download`; Rocky 9 stock image
       # ships without it.
@@ -545,6 +845,9 @@ build_rhel() {
 
       dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
         || dnf download --resolve --destdir=rpm-deps "${PKG}"
+      for _extra in $EXTRAS; do
+        dnf download --resolve --destdir=rpm-deps "$_extra" || true
+      done
       find rpm-deps -maxdepth 1 -name "${PKG}-*.rpm" -delete 2>/dev/null || true
 
       REQ=/tmp/req.txt
@@ -571,6 +874,7 @@ build_opensuse() {
     -e PKG="$PKG_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
+    -e EXTRAS="$EXTRAS_RPM" \
     "opensuse/leap:15.5" bash -euxc '
       zypper -nq install -y \
         curl jq python311 python311-pip python311-devel \
@@ -594,7 +898,7 @@ build_opensuse() {
       # fully reproducible bundle, rebuild the metadata via createrepo
       # in a follow-up.
       DIRECT_DEPS=$(rpm -qpR "${PKG}.rpm" | awk "{print \$1}" | grep -v "^rpmlib\\|^/" | sort -u)
-      zypper -nq --pkg-cache-dir=rpm-deps download $DIRECT_DEPS 2>/dev/null || true
+      zypper -nq --pkg-cache-dir=rpm-deps download $DIRECT_DEPS $EXTRAS 2>/dev/null || true
       find rpm-deps -name "*.rpm" -exec cp {} rpm-deps/ \;
       find rpm-deps -mindepth 2 -type f -name "*.rpm" -delete 2>/dev/null || true
       find rpm-deps -mindepth 1 -type d -empty -delete 2>/dev/null || true
@@ -624,6 +928,7 @@ build_alpine() {
     -e PKG="$PKG_NAME" \
     -e REPO="$(_gh_owner_repo)" \
     -e REQ_PATH_RPM="${REQ_PATH_IN_RPM#/}" \
+    -e EXTRAS="$EXTRAS_APK" \
     "alpine:$ver" sh -euxc '
       apk add --no-cache \
         curl jq python3 py3-pip python3-dev \
@@ -651,6 +956,10 @@ build_alpine() {
                      | awk -F " = " "/^depend = /{print \$2}" \
                      | awk "{print \$1}" | sort -u); do
           apk fetch --recursive --no-cache "$dep" 2>/dev/null || true
+        done
+        # Product-specific extras (e.g. postgresql for the server).
+        for _extra in $EXTRAS; do
+          apk fetch --recursive --no-cache "$_extra" 2>/dev/null || true
         done
       )
 

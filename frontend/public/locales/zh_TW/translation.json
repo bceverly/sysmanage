@@ -1004,13 +1004,14 @@
     "updates": "更新",
     "users": "使用者",
     "role": {
+      "collector": "[TODO] Air-Gap Collector",
       "engineMissing": "未載入所需的Pro+引擎；請檢查授權。",
-      "collector": "採集器",
-      "repository": "儲存庫"
+      "repository": "[TODO] Air-Gapped Repository"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "地圖",
-    "sites": "站點"
+    "sites": "站點",
+    "airgapCollections": "[TODO] Air-Gap Collections"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -2093,7 +2094,8 @@
       "snapshotKeep": "保留的快照數",
       "upstream": "上游 URL",
       "version": "版本",
-      "upstreamHelp": "從上面的版本自動填寫;僅當您有區域特定的鏡像可指向時才覆寫。"
+      "upstreamHelp": "從上面的版本自動填寫;僅當您有區域特定的鏡像可指向時才覆寫。",
+      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
     },
     "listTitle": "倉庫鏡像",
     "loadError": "無法載入倉庫鏡像。",
@@ -2703,6 +2705,7 @@
   "airgapBundles": {
     "buildAgent": "[TODO] Build Agent Bundle",
     "buildError": "[TODO] Failed to queue build",
+    "buildProplus": "[TODO] Build Pro+ Bundle",
     "buildServer": "[TODO] Build Server Bundle",
     "bundle": "[TODO] Bundle",
     "completedAt": "[TODO] Completed",
@@ -2734,5 +2737,47 @@
     "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
     "title": "[TODO] Air-Gap Install Bundles",
     "version": "[TODO] Version"
+  },
+  "airgapCollections": {
+    "actions": {
+      "delete": "[TODO] Delete",
+      "download": "[TODO] Download ISO"
+    },
+    "column": {
+      "actions": "[TODO] Actions",
+      "completed": "[TODO] Completed",
+      "created": "[TODO] Created",
+      "isoLabel": "[TODO] ISO Label",
+      "size": "[TODO] Size",
+      "started": "[TODO] Started",
+      "status": "[TODO] Status"
+    },
+    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
+    "createError": "[TODO] Failed to create run",
+    "created": "[TODO] Collection run queued",
+    "deleteError": "[TODO] Failed to delete run",
+    "deleted": "[TODO] Collection run deleted",
+    "dialog": {
+      "cancel": "[TODO] Cancel",
+      "includeCompliance": "[TODO] Include compliance bundle",
+      "includeCve": "[TODO] Include CVE feed snapshot",
+      "isoLabel": "[TODO] ISO Label",
+      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
+      "isoLabelRequired": "[TODO] ISO label is required",
+      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
+      "mediaSizeMb": "[TODO] Media Size (MB)",
+      "submit": "[TODO] Queue Run",
+      "title": "[TODO] New Collection Run"
+    },
+    "downloadError": "[TODO] Failed to download ISO",
+    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
+    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
+    "loadError": "[TODO] Failed to load runs",
+    "newRun": "[TODO] New Collection Run",
+    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
+    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
+    "refresh": "[TODO] Refresh",
+    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
+    "title": "[TODO] Air-Gap Collection Runs"
   }
 }

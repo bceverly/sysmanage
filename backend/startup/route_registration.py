@@ -12,6 +12,7 @@ from backend.api import (
     agent,
     airgap_bundles,
     airgap_collection_schedule,
+    airgap_collector_runs,
     airgap_repository_buckets,
     airgap_repository_list,
     antivirus_defaults,
@@ -106,6 +107,13 @@ def register_routes(app: FastAPI):
     # / repository roles).
     app.include_router(airgap_collection_schedule.router)
     logger.debug("Air-gap collection schedule router added")
+
+    # Phase 11 — one-shot collector runs (ad-hoc UI-triggered).  Same
+    # license-gate-at-handler pattern as the schedules router; safe to
+    # mount unconditionally because the handler returns 402 on non-
+    # collector deployments.
+    app.include_router(airgap_collector_runs.router)
+    logger.debug("Air-gap collector runs router added")
 
     # Phase 11 B5 — host-scoped compliance bucket endpoint that feeds
     # the AirgapComplianceBucketsCard frontend component.

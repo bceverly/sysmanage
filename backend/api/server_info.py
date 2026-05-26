@@ -145,13 +145,19 @@ def _resolve_version() -> str:
 
 def _resolve_license_tier() -> str:
     """Best-effort license tier — falls back to ``community`` if no
-    license is configured or the licensing service can't be reached."""
+    license is configured or the licensing service can't be reached.
+
+    Uses the ``license_service`` singleton's ``license_tier`` property
+    (not a ``get_active_tier()`` module function — that name doesn't
+    exist and previously caused this helper to always return
+    ``community`` even when a valid Pro+ license was loaded).
+    """
     try:
         from backend.licensing.license_service import (  # type: ignore
-            get_active_tier,
+            license_service,
         )
 
-        tier = get_active_tier()
+        tier = license_service.license_tier
         if tier is None:
             return "community"
         return str(getattr(tier, "value", tier))

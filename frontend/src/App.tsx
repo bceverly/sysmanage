@@ -37,6 +37,7 @@ import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
 import AirgapRepositories from './Pages/AirgapRepositories';
+import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
 import FederationPolicies from './Pages/FederationPolicies';
 import MapView from './Pages/MapView';
@@ -68,6 +69,7 @@ function AppRoutes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/airgap/repositories" element={<AirgapRepositories />} />
+      <Route path="/airgap/collections" element={<AirgapCollections />} />
       <Route path="/map" element={<MapView />} />
       <Route path="/sites" element={<Sites />} />
       {/* ``/sites/map`` is listed BEFORE the dynamic ``:siteId``

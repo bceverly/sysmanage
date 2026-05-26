@@ -852,6 +852,14 @@ def test_db():
         error_message = Column(Text, nullable=True)
         # Phase 11.1 follow-up — cron_schedule for re-firing runs via tick.
         cron_schedule = Column(String(200), nullable=True)
+        # Phase 11 B3 — delta runs reference their parent.  Self-FK
+        # mirrors the real schema; included so the API's ORDER BY
+        # SELECT doesn't crash against the SQLite test database.
+        parent_run_id = Column(
+            GUID(),
+            ForeignKey("airgap_collection_run.id", ondelete="SET NULL"),
+            nullable=True,
+        )
         created_at = Column(DateTime, nullable=True)
         created_by = Column(
             GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
@@ -874,6 +882,47 @@ def test_db():
         next_run = Column(DateTime, nullable=True)
         created_at = Column(DateTime, nullable=True)
         updated_at = Column(DateTime, nullable=True)
+
+    # Phase 11 — per-distro target rows owned by a collection run.
+    # The runs cascade-deletes them via the relationship; the table
+    # must exist or DELETE on the parent row crashes the test session.
+    class AirgapCollectionTarget(TestBase):
+        __tablename__ = "airgap_collection_target"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        run_id = Column(
+            GUID(),
+            ForeignKey("airgap_collection_run.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        distro = Column(String(40), nullable=False)
+        version = Column(String(40), nullable=False)
+        repos = Column(Text, nullable=True)
+        byte_count = Column(BigInteger, nullable=True)
+        file_count = Column(Integer, nullable=True)
+        status = Column(String(40), nullable=True)
+
+    # Phase 11 — produced-media manifests (test-side mirror for the
+    # collector runs API).  Mirrors backend/persistence/models/airgap.py
+    # ``AirgapMediaManifest``; columns are kept minimal for SQLite parity.
+    class AirgapMediaManifest(TestBase):
+        __tablename__ = "airgap_media_manifest"
+        id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+        run_id = Column(
+            GUID(),
+            ForeignKey("airgap_collection_run.id", ondelete="CASCADE"),
+            nullable=False,
+        )
+        disc_index = Column(Integer, nullable=False, default=1)
+        disc_count = Column(Integer, nullable=False, default=1)
+        iso_path = Column(String(500), nullable=False)
+        iso_sha256 = Column(String(64), nullable=False)
+        iso_size_bytes = Column(BigInteger, nullable=False)
+        manifest_json = Column(Text, nullable=False)
+        signature = Column(Text, nullable=False)
+        signer_fingerprint = Column(String(128), nullable=False)
+        signature_algorithm = Column(String(40), nullable=False, default="ed25519")
+        format_version = Column(Integer, nullable=False, default=1)
+        created_at = Column(DateTime, nullable=True)
 
     # Phase 8.3 — package compliance (test-side mirrors).
     from sqlalchemy import JSON as _JSON  # local import — only needed here
@@ -963,7 +1012,7 @@ def test_db():
         started_at = Column(DateTime, nullable=True)
         completed_at = Column(DateTime, nullable=True)
         file_path = Column(Text, nullable=True)
-        size_bytes = Column(Integer, nullable=True)
+        size_bytes = Column(BigInteger, nullable=True)
         log_path = Column(Text, nullable=True)
         error_message = Column(Text, nullable=True)
         version = Column(String(64), nullable=True)

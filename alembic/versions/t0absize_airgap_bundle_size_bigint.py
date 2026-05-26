@@ -1,0 +1,46 @@
+"""Widen airgap_bundle.size_bytes to BigInteger.
+
+Revision ID: t0absize
+Revises: s9abver
+Create Date: 2026-05-25 16:10:00.000000
+
+Multi-OS server bundles routinely exceed 2 GB (Postgres INT4_MAX is
+~2.15 GB), which caused commit failures and left bundle rows stuck in
+the "building" state.  Widen to BigInteger (INT8).
+
+Reversible — downgrade narrows back to Integer.  Doesn't lose data
+because actual stored sizes will fit in Integer if-and-only-if the
+narrowing target is reached after they're cleared.  Downgrade will
+fail loudly if any row has size > INT4_MAX at the time.
+"""
+
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+from alembic import op
+
+
+revision: str = "t0absize"
+down_revision: Union[str, None] = "s9abver"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    op.alter_column(
+        "airgap_bundle",
+        "size_bytes",
+        existing_type=sa.Integer(),
+        type_=sa.BigInteger(),
+        existing_nullable=True,
+    )
+
+
+def downgrade() -> None:
+    op.alter_column(
+        "airgap_bundle",
+        "size_bytes",
+        existing_type=sa.BigInteger(),
+        type_=sa.Integer(),
+        existing_nullable=True,
+    )

@@ -1004,13 +1004,14 @@
     "updates": "Atualizações",
     "users": "Usuários",
     "role": {
+      "collector": "[TODO] Air-Gap Collector",
       "engineMissing": "Motor Pro+ necessário não carregado; verifique a licença.",
-      "collector": "Coletor",
-      "repository": "Repositório"
+      "repository": "[TODO] Air-Gapped Repository"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "Mapa",
-    "sites": "Sites"
+    "sites": "Sites",
+    "airgapCollections": "[TODO] Air-Gap Collections"
   },
   "notifications": {
     "applicationUpdates": "Atualizações de Aplicações",
@@ -2093,7 +2094,8 @@
       "snapshotKeep": "Snapshots a manter",
       "upstream": "URL upstream",
       "version": "Versão",
-      "upstreamHelp": "Preenchido automaticamente a partir da versão acima; substitua apenas se tiver um mirror específico de região para apontar."
+      "upstreamHelp": "Preenchido automaticamente a partir da versão acima; substitua apenas se tiver um mirror específico de região para apontar.",
+      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
     },
     "listTitle": "Espelhos de repositórios",
     "loadError": "Não foi possível carregar os espelhos de repositórios.",
@@ -2703,6 +2705,7 @@
   "airgapBundles": {
     "buildAgent": "[TODO] Build Agent Bundle",
     "buildError": "[TODO] Failed to queue build",
+    "buildProplus": "[TODO] Build Pro+ Bundle",
     "buildServer": "[TODO] Build Server Bundle",
     "bundle": "[TODO] Bundle",
     "completedAt": "[TODO] Completed",
@@ -2734,5 +2737,47 @@
     "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
     "title": "[TODO] Air-Gap Install Bundles",
     "version": "[TODO] Version"
+  },
+  "airgapCollections": {
+    "actions": {
+      "delete": "[TODO] Delete",
+      "download": "[TODO] Download ISO"
+    },
+    "column": {
+      "actions": "[TODO] Actions",
+      "completed": "[TODO] Completed",
+      "created": "[TODO] Created",
+      "isoLabel": "[TODO] ISO Label",
+      "size": "[TODO] Size",
+      "started": "[TODO] Started",
+      "status": "[TODO] Status"
+    },
+    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
+    "createError": "[TODO] Failed to create run",
+    "created": "[TODO] Collection run queued",
+    "deleteError": "[TODO] Failed to delete run",
+    "deleted": "[TODO] Collection run deleted",
+    "dialog": {
+      "cancel": "[TODO] Cancel",
+      "includeCompliance": "[TODO] Include compliance bundle",
+      "includeCve": "[TODO] Include CVE feed snapshot",
+      "isoLabel": "[TODO] ISO Label",
+      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
+      "isoLabelRequired": "[TODO] ISO label is required",
+      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
+      "mediaSizeMb": "[TODO] Media Size (MB)",
+      "submit": "[TODO] Queue Run",
+      "title": "[TODO] New Collection Run"
+    },
+    "downloadError": "[TODO] Failed to download ISO",
+    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
+    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
+    "loadError": "[TODO] Failed to load runs",
+    "newRun": "[TODO] New Collection Run",
+    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
+    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
+    "refresh": "[TODO] Refresh",
+    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
+    "title": "[TODO] Air-Gap Collection Runs"
   }
 }

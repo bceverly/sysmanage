@@ -21,10 +21,10 @@ Depends: ${misc:Depends},
  adduser,
  systemd,
  nodejs (>= 18),
- nginx,
+ nginx
+Recommends: postgresql (>= 12),
  xorriso,
  docker.io
-Recommends: postgresql (>= 12)
 Suggests: postgresql-client
 Description: Centralized system management server
  SysManage is a comprehensive system management platform that provides:

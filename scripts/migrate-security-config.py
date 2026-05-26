@@ -568,7 +568,25 @@ def main():
     # yaml-level salt anyway leaves an unnecessary backup file behind, so
     # skip the write entirely.  --jwt-only / --all paths still proceed
     # because the JWT secret rotation is meaningful even with no users.
-    if update_salt and not update_jwt and not migrations_needed:
+    #
+    # EXCEPTION: if the salt is still the literal placeholder string the
+    # .deb postinst drops in ("GENERATE_NEW_SALT_FOR_PRODUCTION"), the
+    # operator definitely wants it rotated — even with zero users, the
+    # placeholder is not a usable salt and leaving it in place causes
+    # the next account creation to silently use it.  Force the write
+    # through in that case.
+    placeholder_salts = {
+        "GENERATE_NEW_SALT_FOR_PRODUCTION",
+        "",
+        None,
+    }
+    salt_is_placeholder = current_salt in placeholder_salts
+    if (
+        update_salt
+        and not update_jwt
+        and not migrations_needed
+        and not salt_is_placeholder
+    ):
         print(
             "\n[INFO] Salt rotation is a no-op with zero users in the database; "
             "skipping backup + write.  Re-run after creating users to actually "

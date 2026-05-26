@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # force-user-password.sh — Reset a sysmanage user's password directly in
-# the database when email-based reset isn't available (test VMs, lab
-# instances, etc.).
+# the database AND grant the user every security role, when email-based
+# reset / UI-based role assignment isn't available (test VMs, lab
+# instances, recovering an air-gapped install, etc.).
 #
 # Usage:
 #   sudo scripts/force-user-password.sh <userid> <new-password>
 #
 # Reads the postgres connection from /etc/sysmanage.yaml.  Uses argon2
 # (the same hasher backend/api/user.py uses) so the new hash is in the
-# format the login path expects.
+# format the login path expects.  After the password reset, every row
+# from ``security_roles`` is mapped to the user via
+# ``user_security_roles``, replacing any prior role assignments — so
+# this user becomes a full administrator with access to every UI page.
 
 set -euo pipefail
 
@@ -64,12 +68,33 @@ with psycopg2.connect(dsn) as conn:
             '    is_locked = FALSE, '
             '    locked_at = NULL, '
             '    active = TRUE '
-            'WHERE userid = %s',
+            'WHERE userid = %s '
+            'RETURNING id',
             (hashed, os.environ["FORCE_USERID"]),
         )
-        if cur.rowcount == 0:
+        row = cur.fetchone()
+        if row is None:
             print(f"no user found with userid={os.environ['FORCE_USERID']!r}", file=sys.stderr)
             sys.exit(3)
-        print(f"reset password for {os.environ['FORCE_USERID']} ({cur.rowcount} row updated)")
+        user_id = row[0]
+        print(f"reset password for {os.environ['FORCE_USERID']} (id={user_id})")
+
+        # Grant every security role to the user.  Replaces any prior
+        # role assignment so re-running yields an idempotent state of
+        # "this user has every permission".  Mirrors what an
+        # administrator would do via the Security Roles UI once their
+        # account is wired up, but works without UI access.
+        cur.execute(
+            'DELETE FROM user_security_roles WHERE user_id = %s',
+            (user_id,),
+        )
+        cur.execute(
+            'INSERT INTO user_security_roles '
+            '    (id, user_id, role_id, granted_at) '
+            'SELECT gen_random_uuid(), %s, id, NOW() '
+            '  FROM security_roles',
+            (user_id,),
+        )
+        print(f"granted {cur.rowcount} security role(s)")
     conn.commit()
 PY

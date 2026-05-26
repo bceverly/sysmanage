@@ -796,10 +796,30 @@ const MirrorListCard: React.FC<{
             <TextField
               label={t('mirror.field.name', 'Name (used as on-disk subdir)')}
               value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              onChange={(e) => {
+                // The backend uses ``name`` verbatim as a directory
+                // segment under ``mirror_root_path`` and the engine
+                // rejects anything outside ``[a-z0-9_-]`` with a 400
+                // "invalid characters in path segment".  Filter at the
+                // input layer so the user never gets that 400: spaces
+                // and dots collapse to hyphens (the most common
+                // freeform typing patterns), everything else outside
+                // the safe class is dropped, and the result is
+                // lowercased.
+                const safe = e.target.value
+                  .toLowerCase()
+                  .replace(/[\s.]+/g, '-')
+                  .replace(/[^a-z0-9_-]/g, '')
+                  .replace(/-+/g, '-');
+                setDraft({ ...draft, name: safe });
+              }}
               required
               fullWidth
               autoFocus
+              helperText={t(
+                'mirror.field.name_helper',
+                'Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens.',
+              )}
             />
             {/* Phase 10.4.4 — version dropdown sourced from the
                 pre-populated ``mirror_known_version`` catalog.  Picking

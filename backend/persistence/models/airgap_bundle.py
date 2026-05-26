@@ -22,16 +22,25 @@ States:
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, String, Text
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
-# Product the bundle targets.  Two values today; nothing stopping us from
-# adding more later (e.g. "scanner" once that surfaces).
+# Product the bundle targets.
+#   server   = sysmanage server + OS deps
+#   agent    = sysmanage agent + OS deps
+#   proplus  = Pro+ overlay — engine .so files, JS plugin shims, the
+#              license JWT, and the cached public_key.pem.  Applied
+#              on top of a server bundle that was already installed.
 BUNDLE_PRODUCT_SERVER = "server"
 BUNDLE_PRODUCT_AGENT = "agent"
-BUNDLE_PRODUCTS = (BUNDLE_PRODUCT_SERVER, BUNDLE_PRODUCT_AGENT)
+BUNDLE_PRODUCT_PROPLUS = "proplus"
+BUNDLE_PRODUCTS = (
+    BUNDLE_PRODUCT_SERVER,
+    BUNDLE_PRODUCT_AGENT,
+    BUNDLE_PRODUCT_PROPLUS,
+)
 
 # Lifecycle states.
 BUNDLE_STATUS_QUEUED = "queued"
@@ -69,7 +78,9 @@ class AirGapBundle(Base):
     # sysmanage server's filesystem; the API serves the file from here
     # via streaming response.
     file_path = Column(Text, nullable=True)
-    size_bytes = Column(Integer, nullable=True)
+    # BigInteger because multi-OS server bundles routinely exceed
+    # 2 GB once postgresql + per-distro transitive deps are bundled.
+    size_bytes = Column(BigInteger, nullable=True)
 
     # Path to the build log on disk (kept whether the build succeeded
     # or failed — useful for debugging failed builds).

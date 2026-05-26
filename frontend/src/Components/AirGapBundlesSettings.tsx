@@ -35,7 +35,7 @@ type BundleStatus = 'queued' | 'building' | 'ready' | 'failed';
 
 interface Bundle {
   id: string;
-  product: 'server' | 'agent';
+  product: 'server' | 'agent' | 'proplus';
   status: BundleStatus;
   created_at: string | null;
   started_at: string | null;
@@ -105,7 +105,9 @@ const AirGapBundlesSettings: React.FC = () => {
 
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [building, setBuilding] = useState<'server' | 'agent' | null>(null);
+  const [building, setBuilding] = useState<'server' | 'agent' | 'proplus' | null>(
+    null,
+  );
   const [docker, setDocker] = useState<DockerStatus | null>(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -166,7 +168,7 @@ const AirGapBundlesSettings: React.FC = () => {
     return () => globalThis.clearInterval(id);
   }, [bundles, refresh]);
 
-  const handleBuild = async (product: 'server' | 'agent') => {
+  const handleBuild = async (product: 'server' | 'agent' | 'proplus') => {
     setBuilding(product);
     try {
       await axiosInstance.post('/api/airgap-bundles', { product });
@@ -244,13 +246,12 @@ const AirGapBundlesSettings: React.FC = () => {
       field: 'product',
       headerName: t('airgapBundles.bundle', 'Bundle'),
       width: 110,
-      renderCell: (p: GridRenderCellParams<Bundle>) => (
-        <Chip
-          size="small"
-          label={p.row.product}
-          color={p.row.product === 'server' ? 'primary' : 'secondary'}
-        />
-      ),
+      renderCell: (p: GridRenderCellParams<Bundle>) => {
+        let chipColor: 'primary' | 'secondary' | 'success' = 'secondary';
+        if (p.row.product === 'server') chipColor = 'primary';
+        else if (p.row.product === 'proplus') chipColor = 'success';
+        return <Chip size="small" label={p.row.product} color={chipColor} />;
+      },
     },
     {
       field: 'version',
@@ -496,6 +497,26 @@ const AirGapBundlesSettings: React.FC = () => {
                 onClick={() => handleBuild('agent')}
               >
                 {t('airgapBundles.buildAgent', 'Build Agent Bundle')}
+              </Button>
+              {/* Pro+ overlay bundle.  Doesn't need Docker — just
+                  copies the build host's modules + license artifacts.
+                  The whole tab is already Pro+-gated, so reaching
+                  this button at all means the build host has the
+                  artifacts to package up. */}
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={
+                  building === 'proplus' ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <BuildIcon />
+                  )
+                }
+                disabled={building !== null}
+                onClick={() => handleBuild('proplus')}
+              >
+                {t('airgapBundles.buildProplus', 'Build Pro+ Bundle')}
               </Button>
             </Stack>
 

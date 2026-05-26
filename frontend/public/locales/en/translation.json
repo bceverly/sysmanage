@@ -1004,11 +1004,12 @@
     "updates": "Updates",
     "users": "Users",
     "role": {
+      "collector": "Air-Gap Collector",
       "engineMissing": "Required Pro+ engine not loaded; check license.",
-      "collector": "Collector",
-      "repository": "Repository"
+      "repository": "Air-Gapped Repository"
     },
     "airgapRepositories": "Air-Gap Repos",
+    "airgapCollections": "Air-Gap Collections",
     "map": "Map",
     "sites": "Sites"
   },
@@ -2093,7 +2094,8 @@
       "snapshotKeep": "Snapshots to keep",
       "upstream": "Upstream URL",
       "version": "Version",
-      "upstreamHelp": "Auto-filled from the version above; override only if you have a region-specific mirror to point at."
+      "upstreamHelp": "Auto-filled from the version above; override only if you have a region-specific mirror to point at.",
+      "name_helper": "Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
     },
     "listTitle": "Mirror Repositories",
     "loadError": "Could not load repository mirrors.",
@@ -2700,9 +2702,52 @@
     "subtitle": "Geographic distribution of subordinate site servers.",
     "title": "Federation Sites Map"
   },
+  "airgapCollections": {
+    "title": "Air-Gap Collection Runs",
+    "subtitle": "Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
+    "notApplicable": "This page is only meaningful on collector-role deployments.",
+    "licenseRequired": "Air-gap collector engine not loaded; Pro+ license required.",
+    "loadError": "Failed to load runs",
+    "newRun": "New Collection Run",
+    "refresh": "Refresh",
+    "empty": "No collection runs yet. Click \"New Collection Run\" to start one.",
+    "created": "Collection run queued",
+    "createError": "Failed to create run",
+    "deleted": "Collection run deleted",
+    "deleteError": "Failed to delete run",
+    "confirmDelete": "Delete this collection run and its manifests?",
+    "downloadError": "Failed to download ISO",
+    "noManifestFound": "Run has no manifest yet — try again once status is COMPLETE.",
+    "column": {
+      "isoLabel": "ISO Label",
+      "status": "Status",
+      "created": "Created",
+      "started": "Started",
+      "completed": "Completed",
+      "size": "Size",
+      "actions": "Actions"
+    },
+    "actions": {
+      "download": "Download ISO",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "title": "New Collection Run",
+      "isoLabel": "ISO Label",
+      "isoLabelHelper": "Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
+      "isoLabelRequired": "ISO label is required",
+      "mediaSizeMb": "Media Size (MB)",
+      "mediaSizeHelper": "Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
+      "includeCve": "Include CVE feed snapshot",
+      "includeCompliance": "Include compliance bundle",
+      "cancel": "Cancel",
+      "submit": "Queue Run"
+    }
+  },
   "airgapBundles": {
     "buildAgent": "Build Agent Bundle",
     "buildError": "Failed to queue build",
+    "buildProplus": "Build Pro+ Bundle",
     "buildServer": "Build Server Bundle",
     "bundle": "Bundle",
     "completedAt": "Completed",

@@ -10,13 +10,22 @@ All endpoints require an authenticated user with the
 allowed through for bootstrap.
 """
 
-import grp
 import os
-import pwd
 import shutil
 import subprocess  # nosec B404 - used only for `docker info` readiness probe
 import uuid
 from typing import List, Optional
+
+# grp/pwd are POSIX-only stdlib modules; on Windows the airgap bundle
+# builder doesn't run (Docker-per-distro-Linux can only be driven from
+# a Linux host) but the module still has to import cleanly so the
+# rest of the backend works on Windows CI.
+try:
+    import grp
+    import pwd
+except ImportError:  # Windows
+    grp = None  # type: ignore[assignment]
+    pwd = None  # type: ignore[assignment]
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -124,6 +133,21 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
 async def docker_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
 ) -> DockerStatusResponse:
+    # The bundle builder only works from a Linux host (Docker-per-
+    # distro-Linux containers can't be driven from Windows).  Return
+    # a clean "not supported here" response on Windows rather than
+    # tripping over pwd/grp being unavailable.
+    if pwd is None or grp is None:
+        return DockerStatusResponse(
+            installed=False,
+            running=False,
+            version=None,
+            user_in_group=False,
+            process_user="",
+            error="Air-gap bundle builder is only supported on Linux build hosts",
+            permission_denied=False,
+        )
+
     # Identify the OS user this API process is running as — that's
     # the user that needs docker socket access, since the build
     # subprocess inherits the same uid/gid set.  In a packaged

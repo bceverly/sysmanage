@@ -100,7 +100,7 @@ const Navbar = () => {
   };
 
   // Paths that are hardcoded in the navbar - plugins must not duplicate these
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports', '/airgap/repositories']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports', '/airgap/repositories', '/airgap/collections']);
 
   // Labels that are hardcoded in the navbar - plugins with matching labels are duplicates
   const hardcodedLabels = new Set([
@@ -123,7 +123,7 @@ const Navbar = () => {
   // Compute the role-label fallback up front so the JSX has no nested
   // ternaries (SonarQube readability rule).
   const roleLabelFallback =
-    serverRole === 'collector' ? 'Collector' : 'Repository';
+    serverRole === 'collector' ? 'Air-Gap Collector' : 'Air-Gapped Repository';
   const roleLabelText = t(`nav.role.${serverRole}`, roleLabelFallback);
   const tooltipText = roleEngineLoaded
     ? roleLabelText
@@ -271,6 +271,18 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
+            {serverRole === 'collector' &&
+              activeLicenseModules.includes('airgap_collector_engine') && (
+                <li className="nav__item">
+                  <NavLink
+                    to="/airgap/collections"
+                    className="nav__link"
+                    onClick={closeMenuOnMobile}
+                  >
+                    {t('nav.airgapCollections', 'Air-Gap Collections')}
+                  </NavLink>
+                </li>
+              )}
           </ScrollableNavList>
           <button
               className="nav__close"
