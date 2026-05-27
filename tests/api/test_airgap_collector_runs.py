@@ -9,23 +9,53 @@ and serves the produced ISO file.
 
 # pylint: disable=missing-class-docstring,missing-function-docstring
 
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from unittest.mock import MagicMock, patch
 
 from backend.api import airgap_collector_runs as runs_module
 
 
+# Phase 12 Option-B: every run-creation POST now needs at least one
+# ``{mirror_id}`` target, validated against the mirror_repository table
+# and turned into a per-target snapshot dispatch.  Tests that exercise
+# the run-row lifecycle (create/list/get/delete/order) don't care about
+# any of that mirror-resolution machinery; ``_engine()`` mocks out
+# ``_resolve_target_mirrors`` and ``_snapshot_mirrors_for_run`` so the
+# create endpoint stops at the row insert, and tests pass this dummy
+# UUID in their ``targets`` array to clear the "at least one target"
+# 400 gate without seeding a real mirror.
+_DUMMY_TARGETS = [{"mirror_id": "00000000-0000-0000-0000-000000000001"}]
+
+
 @contextmanager
 def _engine(loaded=True):
     """Patch module_loader.get_module so the collector engine is
-    deterministically loaded / unloaded per test."""
+    deterministically loaded / unloaded per test, and (when loaded)
+    stub out the Option-B target-resolution path so tests that don't
+    care about it don't have to seed mirrors."""
 
     def _resolver(name):
         if name == "airgap_collector_engine" and loaded:
             return MagicMock()
         return None
 
-    with patch.object(runs_module.module_loader, "get_module", side_effect=_resolver):
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch.object(
+                runs_module.module_loader, "get_module", side_effect=_resolver
+            )
+        )
+        if loaded:
+            stack.enter_context(
+                patch.object(
+                    runs_module, "_resolve_target_mirrors", return_value=[]
+                )
+            )
+            stack.enter_context(
+                patch.object(
+                    runs_module, "_snapshot_mirrors_for_run", return_value={}
+                )
+            )
         yield
 
 
@@ -72,6 +102,7 @@ class TestRunsCrud:
                     "media_size_bytes": 700_000_000,
                     "include_cve": False,
                     "include_compliance": True,
+                    "targets": _DUMMY_TARGETS,
                 },
                 headers=auth_headers,
             )
@@ -91,7 +122,7 @@ class TestRunsCrud:
         with _engine():
             r = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "defaults"},
+                json={"iso_label": "defaults", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             )
         assert r.status_code == 200, r.text
@@ -120,7 +151,7 @@ class TestRunsCrud:
         with _engine():
             create = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "to-delete"},
+                json={"iso_label": "to-delete", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             )
             assert create.status_code == 200, create.text
@@ -142,12 +173,12 @@ class TestRunsCrud:
         with _engine():
             first = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "first"},
+                json={"iso_label": "first", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             ).json()
             second = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "second"},
+                json={"iso_label": "second", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             ).json()
             rows = client.get(
@@ -166,7 +197,7 @@ class TestRunManifests:
         with _engine():
             run = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "no-manifests"},
+                json={"iso_label": "no-manifests", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             ).json()
             r = client.get(
@@ -212,7 +243,7 @@ class TestRunDownload:
         with _engine():
             create = client.post(
                 "/api/v1/airgap/collector/runs",
-                json={"iso_label": "incomplete"},
+                json={"iso_label": "incomplete", "targets": _DUMMY_TARGETS},
                 headers=auth_headers,
             )
             assert create.status_code == 200, create.text

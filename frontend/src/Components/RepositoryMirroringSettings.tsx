@@ -30,7 +30,9 @@ import {
   Card,
   CardContent,
   Checkbox,
+  Chip,
   CircularProgress,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -50,6 +52,7 @@ import {
   TableRow,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -57,6 +60,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SyncIcon from '@mui/icons-material/Sync';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import RestoreIcon from '@mui/icons-material/Restore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 
@@ -68,11 +74,14 @@ import {
   listKnownVersions,
   listMirrors,
   listPlatformConfigs,
+  listSnapshots,
   MirrorKnownVersion,
   MirrorPlatform,
   MirrorPlatformConfig,
   MirrorRepository,
   MirrorRepositoryCreate,
+  MirrorSnapshot,
+  restoreMirror,
   snapshotMirror,
   syncMirror,
   updateMirror,
@@ -121,6 +130,36 @@ interface HostSummary {
   platform_release: string | null;
 }
 
+// Client-side mirror of the engine's ``validate_mirror_config``
+// — returns true when every server-required field is populated for
+// the draft's package_manager.  Drives the Save button's disabled
+// state so the user can never submit a payload that would 400.
+//
+// Keep this in lock-step with
+// ``repository_mirroring_engine.pyx::validate_mirror_config``:
+//   * name, host_id, upstream_url required for every PM
+//   * apt:    suite + components required
+//   * dnf:    repoid required
+//   * zypper: repo_alias required
+//   * pkg:    no extra required fields
+const isDraftValid = (draft: MirrorRepositoryCreate): boolean => {
+  if (!draft.name?.trim()) return false;
+  if (!draft.host_id) return false;
+  if (!draft.upstream_url?.trim()) return false;
+  switch (draft.package_manager) {
+    case 'apt':
+      return !!draft.suite?.trim() && !!draft.components?.trim();
+    case 'dnf':
+      return !!draft.repoid?.trim();
+    case 'zypper':
+      return !!draft.repo_alias?.trim();
+    case 'pkg':
+      return true;
+    default:
+      return false;
+  }
+};
+
 const EMPTY_DRAFT_FOR = (
   pm: MirrorRepository['package_manager'],
 ): MirrorRepositoryCreate => ({
@@ -131,6 +170,13 @@ const EMPTY_DRAFT_FOR = (
   bandwidth_cap_kbps: 0,
   sync_cron: '0 4 * * *',
   enabled: true,
+  // apt sources MUST have at least one component (the engine's
+  // ``validate_mirror_config`` rejects empty components with
+  // "apt mirror requires non-empty components"), and ``main``
+  // is universally the safe default — covers the canonical
+  // Ubuntu/Debian-officially-supported subset.  Other PMs don't
+  // use components at all, so leave undefined.
+  components: pm === 'apt' ? 'main' : undefined,
 });
 
 const RepositoryMirroringSettings: React.FC = () => {
@@ -168,12 +214,22 @@ const RepositoryMirroringSettings: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-poll while any mirror has an in-flight sync/snapshot/restore
-  // op (status == 'DISPATCHED').  Once every row is settled (SUCCESS,
-  // FAILED, or NULL) the interval clears so we don't pin a backend
-  // connection.  Re-arms automatically when the next op fires.
+  // Auto-poll while ANY action on ANY mirror is in-flight.  We key off
+  // the per-action ``last_*_message_id`` columns (stamped at dispatch,
+  // cleared on result) rather than ``status == DISPATCHED``; the
+  // message_id is the load-bearing "still running" signal because a
+  // result handler always clears it, including on failure.  Once every
+  // row's marker is NULL the interval clears so we don't pin the
+  // backend.  Re-arms automatically when the next op fires.
   useEffect(() => {
-    const inflight = mirrors.some((m) => m.last_sync_status === 'DISPATCHED');
+    const inflight = mirrors.some(
+      (m) =>
+        m.last_sync_message_id ||
+        m.last_snapshot_message_id ||
+        m.last_restore_message_id ||
+        m.last_integrity_message_id ||
+        m.last_gc_message_id,
+    );
     if (!inflight) return;
     const handle = setInterval(() => {
       // Only refetch the mirror list (lightweight) rather than the
@@ -581,6 +637,270 @@ const ComponentsMultiSelect: React.FC<{
 };
 
 // ---------------------------------------------------------------------
+// Per-action status chip
+//
+// Each mirror has five independent action lifecycles (sync, snapshot,
+// restore, integrity, gc) that the old UI flattened onto one
+// ``last_sync_status`` column.  This chip renders ONE action's state:
+//
+//   never run        → muted "—"
+//   DISPATCHED + msg → spinner + "Nm ago" elapsed-time
+//   SUCCESS          → green chip with absolute timestamp on hover
+//   FAILED           → red chip; hover reveals the full error text
+//
+// The chip is keyed off ``message_id`` (not ``status``) for the
+// in-flight check because the dispatch endpoints stamp message_id at
+// dispatch and the result handler clears it on success OR failure —
+// which means message_id is the load-bearing "is this still in
+// flight" signal.  ``status`` alone can lie (the DISPATCHED string
+// might linger on a stuck row whose result handler never fired).
+// ---------------------------------------------------------------------
+
+interface ActionStatusChipProps {
+  label: string;
+  status: string | null | undefined;
+  errorText: string | null | undefined;
+  inFlightMessageId: string | null | undefined;
+  at: string | null | undefined;
+}
+
+const formatElapsed = (since: Date): string => {
+  const ms = Date.now() - since.getTime();
+  if (ms < 60_000) return `${Math.max(1, Math.round(ms / 1000))}s`;
+  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
+  return `${Math.round(ms / 3_600_000)}h`;
+};
+
+const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
+  label, status, errorText, inFlightMessageId, at,
+}) => {
+  const { t } = useTranslation();
+  const atDate = at ? new Date(at) : null;
+  const inFlight = !!inFlightMessageId;
+
+  if (inFlight) {
+    const elapsed = atDate ? formatElapsed(atDate) : '';
+    return (
+      <Tooltip
+        title={t('mirror.chip.inFlight', '{{label}} in progress since {{at}}', {
+          label,
+          at: atDate ? atDate.toLocaleString() : 'unknown time',
+        })}
+        arrow
+      >
+        <Chip
+          size="small"
+          icon={<CircularProgress size={10} thickness={6} sx={{ ml: 1, color: 'inherit !important' }} />}
+          label={elapsed ? `${label} · ${elapsed}` : label}
+          color="info"
+          variant="outlined"
+        />
+      </Tooltip>
+    );
+  }
+
+  if (!status) {
+    return (
+      <Chip
+        size="small"
+        label={label}
+        variant="outlined"
+        sx={{ opacity: 0.4 }}
+      />
+    );
+  }
+
+  if (status === 'FAILED') {
+    return (
+      <Tooltip
+        title={errorText || t('mirror.chip.failedNoText', 'Failed; no error text returned.')}
+        arrow
+        placement="top"
+        slotProps={{
+          tooltip: {
+            sx: {
+              whiteSpace: 'pre-wrap',
+              maxWidth: 600,
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+            },
+          },
+        }}
+      >
+        <Chip
+          size="small"
+          label={`${label} · ${t('mirror.chip.failed', 'failed')}`}
+          color="error"
+          sx={{ cursor: 'help' }}
+        />
+      </Tooltip>
+    );
+  }
+
+  if (status === 'SUCCESS') {
+    return (
+      <Tooltip
+        title={atDate ? atDate.toLocaleString() : ''}
+        arrow
+        placement="top"
+      >
+        <Chip
+          size="small"
+          label={`${label} · ${t('mirror.chip.ok', 'ok')}`}
+          color="success"
+          variant="outlined"
+        />
+      </Tooltip>
+    );
+  }
+
+  // Any other state (e.g. ``DISPATCHED`` without a message_id, which
+  // shouldn't happen but might if a buggy migration partially-fills
+  // the row).  Fall back to a neutral chip with the raw status.
+  return <Chip size="small" label={`${label} · ${status}`} variant="outlined" />;
+};
+
+
+// ---------------------------------------------------------------------
+// Snapshot expand row
+//
+// One inline collapsible per mirror row showing the snapshots-list
+// API result with a Restore icon-button per snapshot.  Loads lazily
+// when expanded and re-polls every 10s while expanded so a fresh
+// snapshot appears without a manual refresh.
+// ---------------------------------------------------------------------
+
+const formatBytes = (bytes: number | null | undefined): string => {
+  if (bytes == null) return '—';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+  return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+};
+
+interface SnapshotsExpandRowProps {
+  mirror: MirrorRepository;
+  colSpan: number;
+  expanded: boolean;
+  onRestoreDispatched: () => void;
+}
+
+const SnapshotsExpandRow: React.FC<SnapshotsExpandRowProps> = ({
+  mirror, colSpan, expanded, onRestoreDispatched,
+}) => {
+  const { t } = useTranslation();
+  const [snapshots, setSnapshots] = useState<MirrorSnapshot[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+
+  const fetchSnapshots = React.useCallback(async () => {
+    try {
+      const data = await listSnapshots(mirror.id);
+      setSnapshots(data);
+      setError(null);
+    } catch {
+      setError(t('mirror.snapshots.loadError', 'Could not load snapshots.'));
+    }
+  }, [mirror.id, t]);
+
+  // Lazy-load on first expansion, then poll every 10s while expanded.
+  // The polling also picks up size_bytes/file_count once a fresh
+  // snapshot's result handler runs server-side.
+  useEffect(() => {
+    if (!expanded) return;
+    fetchSnapshots();
+    const handle = setInterval(fetchSnapshots, 10_000);
+    return () => clearInterval(handle);
+  }, [expanded, fetchSnapshots]);
+
+  const handleRestore = async (snap: MirrorSnapshot) => {
+    if (!globalThis.confirm(
+      t(
+        'mirror.snapshots.restoreConfirm',
+        'Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.',
+        { id: snap.snapshot_id },
+      ),
+    )) return;
+    setRestoringId(snap.id);
+    try {
+      await restoreMirror(mirror.id, snap.snapshot_id);
+      onRestoreDispatched();
+    } catch {
+      setError(t('mirror.snapshots.restoreError', 'Restore dispatch failed.'));
+    } finally {
+      setRestoringId(null);
+    }
+  };
+
+  return (
+    <TableRow>
+      <TableCell colSpan={colSpan} sx={{ py: 0, borderBottom: expanded ? undefined : 'none' }}>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <Box sx={{ py: 1, pl: 4, pr: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {t('mirror.snapshots.title', 'Snapshots for {{name}}', { name: mirror.name })}
+            </Typography>
+            {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+            {snapshots && snapshots.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                {t('mirror.snapshots.empty', 'No snapshots yet. Click the camera icon to take one.')}
+              </Typography>
+            )}
+            {snapshots && snapshots.length > 0 && (
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{t('mirror.snapshots.col.id', 'Snapshot')}</TableCell>
+                    <TableCell>{t('mirror.snapshots.col.taken', 'Taken at')}</TableCell>
+                    <TableCell align="right">{t('mirror.snapshots.col.size', 'Size')}</TableCell>
+                    <TableCell align="right">{t('mirror.snapshots.col.files', 'Files')}</TableCell>
+                    <TableCell align="right">{t('mirror.snapshots.col.actions', 'Actions')}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {snapshots.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell sx={{ fontFamily: 'monospace' }}>{s.snapshot_id}</TableCell>
+                      <TableCell>{s.taken_at ? new Date(s.taken_at).toLocaleString() : '—'}</TableCell>
+                      <TableCell align="right">{formatBytes(s.size_bytes)}</TableCell>
+                      <TableCell align="right">{s.file_count?.toLocaleString() ?? '—'}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip
+                          title={t(
+                            'mirror.snapshots.restore',
+                            'Restore live tree to this snapshot',
+                          )}
+                          arrow
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              disabled={restoringId === s.id}
+                              onClick={() => handleRestore(s)}
+                            >
+                              {restoringId === s.id ? (
+                                <CircularProgress size={16} />
+                              ) : (
+                                <RestoreIcon fontSize="small" />
+                              )}
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </Box>
+        </Collapse>
+      </TableCell>
+    </TableRow>
+  );
+};
+
+
+// ---------------------------------------------------------------------
 // Mirror list card with Add/Edit dialog
 // ---------------------------------------------------------------------
 
@@ -598,6 +918,19 @@ const MirrorListCard: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [knownVersions, setKnownVersions] = useState<MirrorKnownVersion[]>([]);
   const [selectedVersionId, setSelectedVersionId] = useState<string>('');
+  // Which mirror's snapshots expand-row is open.  A single Set rather
+  // than a per-row boolean keeps state flat and lets us toggle by id.
+  const [expandedSnapshots, setExpandedSnapshots] = useState<Set<string>>(() => new Set());
+  const toggleSnapshots = (id: string) =>
+    setExpandedSnapshots((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
 
   // Load the catalog on mount + whenever the platform changes — used
   // both by the Add/Edit dialog dropdown AND by the table to resolve
@@ -722,26 +1055,78 @@ const MirrorListCard: React.FC<{
           <Table size="small">
             <TableHead>
               <TableRow>
+                {/* Expand chevron — narrow column so it doesn't steal layout. */}
+                <TableCell sx={{ width: 32, p: 0 }} />
                 <TableCell>{t('mirror.col.name', 'Name')}</TableCell>
                 <TableCell>{t('mirror.col.osVersion', 'OS / Version')}</TableCell>
                 <TableCell>{t('mirror.col.upstream', 'Upstream')}</TableCell>
                 <TableCell>{t('mirror.col.cron', 'Cron')}</TableCell>
-                <TableCell>{t('mirror.col.lastSync', 'Last sync')}</TableCell>
-                <TableCell>{t('mirror.col.status', 'Status')}</TableCell>
+                {/* One column per actionable lifecycle, replacing the
+                    single ambiguous Status column.  Sync/Snapshot/Restore
+                    are the operator-triggered ones; integrity_check + gc
+                    don't have UI buttons yet so they're collapsed into
+                    the snapshot chip's hidden-state for now. */}
+                <TableCell>{t('mirror.col.statusSync', 'Sync')}</TableCell>
+                <TableCell>{t('mirror.col.statusSnapshot', 'Snapshot')}</TableCell>
+                <TableCell>{t('mirror.col.statusRestore', 'Restore')}</TableCell>
                 <TableCell>{t('mirror.col.actions', 'Actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {mirrors.map((m) => (
-                <TableRow key={m.id}>
+                <React.Fragment key={m.id}>
+                <TableRow>
+                  <TableCell sx={{ width: 32, p: 0 }}>
+                    <Tooltip
+                      title={
+                        expandedSnapshots.has(m.id)
+                          ? t('mirror.expand.collapse', 'Hide snapshots')
+                          : t('mirror.expand.expand', 'Show snapshots')
+                      }
+                      arrow
+                    >
+                      <IconButton size="small" onClick={() => toggleSnapshots(m.id)}>
+                        {expandedSnapshots.has(m.id) ? (
+                          <ExpandLessIcon fontSize="small" />
+                        ) : (
+                          <ExpandMoreIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
                   <TableCell>{m.name}</TableCell>
                   <TableCell>{versionLabelFor(m)}</TableCell>
                   <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {m.upstream_url}
                   </TableCell>
                   <TableCell>{m.sync_cron}</TableCell>
-                  <TableCell>{m.last_sync_at ? new Date(m.last_sync_at).toLocaleString() : '—'}</TableCell>
-                  <TableCell>{m.last_sync_status ?? '—'}</TableCell>
+                  <TableCell>
+                    <ActionStatusChip
+                      label={t('mirror.chip.label.sync', 'sync')}
+                      status={m.last_sync_status}
+                      errorText={m.last_sync_error}
+                      inFlightMessageId={m.last_sync_message_id}
+                      at={m.last_sync_at}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ActionStatusChip
+                      label={t('mirror.chip.label.snapshot', 'snap')}
+                      status={m.last_snapshot_status}
+                      errorText={m.last_snapshot_error}
+                      inFlightMessageId={m.last_snapshot_message_id}
+                      at={m.last_snapshot_at}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <ActionStatusChip
+                      label={t('mirror.chip.label.restore', 'restore')}
+                      status={m.last_restore_status}
+                      errorText={m.last_restore_error}
+                      inFlightMessageId={m.last_restore_message_id}
+                      at={m.last_restore_at}
+                    />
+                  </TableCell>
                   <TableCell>
                     <IconButton size="small" title={t('mirror.action.sync', 'Sync now')}
                       onClick={() => handleAction(syncMirror, m.id, 'mirror.syncError')}>
@@ -767,10 +1152,17 @@ const MirrorListCard: React.FC<{
                     </IconButton>
                   </TableCell>
                 </TableRow>
+                <SnapshotsExpandRow
+                  mirror={m}
+                  colSpan={9}
+                  expanded={expandedSnapshots.has(m.id)}
+                  onRestoreDispatched={onChange}
+                />
+                </React.Fragment>
               ))}
               {mirrors.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={9} align="center">
                     <Typography variant="body2" color="text.secondary">
                       {t('mirror.empty', 'No mirrors configured for this platform yet.')}
                     </Typography>
@@ -924,7 +1316,17 @@ const MirrorListCard: React.FC<{
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>{t('mirror.cancel', 'Cancel')}</Button>
-          <Button variant="contained" onClick={saveDialog} disabled={busy}>
+          {/* Disable Save when any field the engine's
+              ``validate_mirror_config`` would reject is empty.  This
+              keeps the user from learning about required fields via a
+              400 round-trip — mirrors the server-side rules exactly so
+              a click that's enabled always corresponds to a server
+              that'll accept it. */}
+          <Button
+            variant="contained"
+            onClick={saveDialog}
+            disabled={busy || !isDraftValid(draft)}
+          >
             {busy ? t('mirror.saving', 'Saving…') : t('mirror.save', 'Save')}
           </Button>
         </DialogActions>

@@ -25,8 +25,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   FormControlLabel,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Snackbar,
   Stack,
   TextField,
@@ -66,6 +70,27 @@ const IN_FLIGHT_STATUSES: RunStatus[] = [
   'BURNING',
 ];
 
+interface RunTarget {
+  // Option-B: operator picks a mirror; backend derives distro/version.
+  mirror_id: string;
+  distro?: string | null;
+  version?: string | null;
+  repos: string[];
+  mirror_name?: string | null;
+  source_snapshot_id?: string | null;
+}
+
+// Trimmed projection of a MirrorRepository row — just what the
+// run-create dialog needs to render its picker.
+interface MirrorPickItem {
+  id: string;
+  name: string;
+  package_manager: string;
+  host_id: string;
+  enabled: boolean;
+  known_version_id: string | null;
+}
+
 interface CollectionRun {
   id: string;
   iso_label: string;
@@ -79,7 +104,17 @@ interface CollectionRun {
   cron_schedule: string | null;
   parent_run_id: string | null;
   created_at: string | null;
+  worker_message_id?: string | null;
+  burn_device?: string | null;
+  targets?: RunTarget[];
 }
+
+// Distros the Pro+ engine accepts (validate_collection_request gate).
+// Keep in sync with airgap_collector_engine.SUPPORTED_DISTROS.
+// SUPPORTED_DISTROS used to drive the picker; now the picker reads
+// mirrors from /api/mirror-repositories so this constant has no
+// runtime consumer.  Kept as a doc-style reference of what the Pro+
+// engine accepts in case a future feature needs it again.
 
 interface Manifest {
   id: string;
@@ -92,6 +127,12 @@ interface Manifest {
   signature_algorithm: string;
   format_version: number;
   created_at: string | null;
+}
+
+interface DiscInfo {
+  disc_index: number;
+  filename: string;
+  size_bytes: number;
 }
 
 interface ServerInfo {
@@ -147,12 +188,28 @@ const AirgapCollections: React.FC = () => {
   const [formMediaSizeMB, setFormMediaSizeMB] = useState<number>(4700);
   const [formIncludeCve, setFormIncludeCve] = useState(true);
   const [formIncludeCompliance, setFormIncludeCompliance] = useState(true);
+  // Mirror-id picker state.  Multi-select; all picks must share a
+  // host_id (the backend enforces this and 400s otherwise — we mirror
+  // the validation client-side so the user gets feedback before
+  // submit).
+  const [formMirrorIds, setFormMirrorIds] = useState<string[]>([]);
+  const [availableMirrors, setAvailableMirrors] = useState<MirrorPickItem[]>([]);
+  // Optional optical-burn device.  Empty string = "don't burn, just
+  // build the ISO file" (the typical flow).  Non-empty = orchestrator
+  // dispatches a burn plan after ISO_BUILT.
+  const [formBurnDevice, setFormBurnDevice] = useState<string>('');
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>(
-    'success',
-  );
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    'success' | 'error' | 'info'
+  >('success');
+
+  // Multi-disc picker.  Opened when the operator clicks Download on a
+  // run that produced >1 disc.  Each entry is one downloadable ISO;
+  // the picker calls handleDownload(run, disc_index) on selection.
+  const [discPickerRun, setDiscPickerRun] = useState<CollectionRun | null>(null);
+  const [discPickerEntries, setDiscPickerEntries] = useState<DiscInfo[]>([]);
 
   const showError = (m: string) => {
     setSnackbarMessage(m);
@@ -162,6 +219,11 @@ const AirgapCollections: React.FC = () => {
   const showSuccess = (m: string) => {
     setSnackbarMessage(m);
     setSnackbarSeverity('success');
+    setSnackbarOpen(true);
+  };
+  const showInfo = (m: string) => {
+    setSnackbarMessage(m);
+    setSnackbarSeverity('info');
     setSnackbarOpen(true);
   };
 
@@ -230,19 +292,69 @@ const AirgapCollections: React.FC = () => {
     return () => globalThis.clearInterval(id);
   }, [runs, refresh]);
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = async () => {
     setFormIsoLabel('');
     setFormMediaSizeMB(4700);
     setFormIncludeCve(true);
     setFormIncludeCompliance(true);
+    setFormMirrorIds([]);
+    setFormBurnDevice('');
     setDialogOpen(true);
+    // Lazy-load configured mirrors so the picker has fresh data
+    // each time the dialog opens.  Filter to enabled-only here —
+    // the backend would reject disabled picks but no point showing
+    // them.
+    try {
+      const r = await axiosInstance.get<MirrorPickItem[]>(
+        '/api/mirror-repositories',
+      );
+      setAvailableMirrors(r.data.filter((m) => m.enabled));
+    } catch {
+      // Non-fatal: show a hint inside the dialog if the list is
+      // empty.  Submit-time backend validation catches a stale
+      // local list.
+      setAvailableMirrors([]);
+    }
   };
+
+  // Check that every picked mirror has the same host_id.  Backend
+  // does the authoritative check; this exists so the operator sees
+  // the constraint before clicking Submit.
+  const pickedHostMismatch = useMemo(() => {
+    if (formMirrorIds.length < 2) return false;
+    const hosts = new Set(
+      formMirrorIds
+        .map((id) => availableMirrors.find((m) => m.id === id)?.host_id)
+        .filter(Boolean),
+    );
+    return hosts.size > 1;
+  }, [formMirrorIds, availableMirrors]);
 
   const handleCreate = async () => {
     const label = formIsoLabel.trim();
     if (!label) {
       showError(
         t('airgapCollections.dialog.isoLabelRequired', 'ISO label is required'),
+      );
+      return;
+    }
+    // Option-B input shape: send a mirror_id per target; backend
+    // derives distro/version from the mirror's catalog row.
+    if (formMirrorIds.length === 0) {
+      showError(
+        t(
+          'airgapCollections.dialog.mirrorsRequired',
+          'At least one mirror target is required.',
+        ),
+      );
+      return;
+    }
+    if (pickedHostMismatch) {
+      showError(
+        t(
+          'airgapCollections.dialog.hostMismatch',
+          'All picked mirrors must live on the same host.',
+        ),
       );
       return;
     }
@@ -257,6 +369,10 @@ const AirgapCollections: React.FC = () => {
         media_size_bytes: formMediaSizeMB * 1_000_000,
         include_cve: formIncludeCve,
         include_compliance: formIncludeCompliance,
+        targets: formMirrorIds.map((id) => ({ mirror_id: id })),
+        // Empty string = no burn step (build downloadable ISO and stop).
+        // Trimmed so a stray space doesn't get treated as a device path.
+        burn_device: formBurnDevice.trim() || null,
       });
       showSuccess(
         t('airgapCollections.created', 'Collection run queued'),
@@ -298,11 +414,105 @@ const AirgapCollections: React.FC = () => {
     }
   };
 
-  const handleDownload = async (run: CollectionRun) => {
-    // The download flow needs an authenticated request (Bearer JWT)
-    // and the server returns a file stream — so we mirror the bundle
-    // download pattern: fetch manifests, pick disc 1, then fetch the
-    // ISO blob through axios and hand it to a hidden anchor.
+  const handleDownloadClick = async (run: CollectionRun) => {
+    // Entry point from the Download icon.  Probes /discs first:
+    //   * empty: surface "no ISO on disk" (rare; status said ready)
+    //   * 1: skip the picker and download immediately
+    //   * >1: open the picker; operator picks a disc
+    try {
+      const list = await axiosInstance.get<DiscInfo[]>(
+        `${RUNS_URL}/${run.id}/discs`,
+      );
+      const discs = list.data;
+      if (discs.length === 0) {
+        showError(
+          t(
+            'airgapCollections.noIsoOnDisk',
+            'No ISO file found on disk yet — re-poll in a moment.',
+          ),
+        );
+        return;
+      }
+      if (discs.length === 1) {
+        await handleDownload(run, discs[0].disc_index);
+        return;
+      }
+      // Multi-disc: open the picker.  The picker's onSelect calls
+      // back into handleDownload with the chosen disc_index.
+      setDiscPickerRun(run);
+      setDiscPickerEntries(discs);
+      showInfo(
+        t(
+          'airgapCollections.multiDiscInfo',
+          'This run produced {{count}} discs. Pick which to download.',
+          { count: discs.length },
+        ),
+      );
+    } catch (e: unknown) {
+      // /discs is new — fall back to the legacy single-disc path so
+      // older backends still work.
+      const status = (e as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        await handleDownload(run);
+      } else {
+        const detail = (e as { response?: { data?: { detail?: string } } })
+          ?.response?.data?.detail;
+        showError(
+          detail ||
+            t('airgapCollections.downloadError', 'Failed to download ISO'),
+        );
+      }
+    }
+  };
+
+  const handleDownload = async (run: CollectionRun, discIndex?: number) => {
+    // Three paths:
+    //   1. Raw ISO from /runs/{id}/iso[?disc=N] — works as soon as the
+    //      run reaches ISO_BUILT.  This is the typical "build an ISO
+    //      and download it" flow; no optical disc, no signed manifest.
+    //   2. Signed manifest disc from /manifests/{id}/download — used
+    //      when the run actually burned to disc and produced a
+    //      manifest envelope.  Only kicks in when the ISO endpoint
+    //      can't satisfy the request (e.g. file purged).
+    // The optional ``discIndex`` argument selects which disc to
+    // download on multi-disc runs (passed via ?disc=N).  Omit for the
+    // first-disc / single-disc default.
+    try {
+      const apiUrl =
+        discIndex && discIndex > 1
+          ? `${RUNS_URL}/${run.id}/iso?disc=${discIndex}`
+          : `${RUNS_URL}/${run.id}/iso`;
+      const response = await axiosInstance.get(apiUrl, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/octet-stream',
+      });
+      const blobUrl = globalThis.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${run.iso_label}-${run.id}.iso`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      globalThis.URL.revokeObjectURL(blobUrl);
+      return;
+    } catch (isoErr: unknown) {
+      const status = (isoErr as { response?: { status?: number } })?.response
+        ?.status;
+      // Only fall back to manifest download for "file gone" /
+      // "wrong status" outcomes.  401/403/etc. should bubble up as
+      // the original error.
+      if (status !== 410 && status !== 404 && status !== 409) {
+        const detail = (isoErr as { response?: { data?: { detail?: string } } })
+          ?.response?.data?.detail;
+        showError(
+          detail ||
+            t('airgapCollections.downloadError', 'Failed to download ISO'),
+        );
+        return;
+      }
+    }
     try {
       const list = await axiosInstance.get<Manifest[]>(
         `${RUNS_URL}/${run.id}/manifests`,
@@ -312,7 +522,7 @@ const AirgapCollections: React.FC = () => {
         showError(
           t(
             'airgapCollections.noManifestFound',
-            'Run has no manifest yet — try again once status is COMPLETE.',
+            'Run has no downloadable ISO yet — wait until status reaches ISO_BUILT or COMPLETE.',
           ),
         );
         return;
@@ -395,11 +605,16 @@ const AirgapCollections: React.FC = () => {
         sortable: false,
         renderCell: (p: GridRenderCellParams<CollectionRun>) => (
           <Stack direction="row" spacing={0.5}>
-            {p.row.status === 'COMPLETE' && (
+            {/* Show the download icon as soon as the ISO file exists
+                on disk (ISO_BUILT) — operators shouldn't have to wait
+                through an optional BURNING stage to get the ISO. */}
+            {(p.row.status === 'ISO_BUILT' ||
+              p.row.status === 'BURNING' ||
+              p.row.status === 'COMPLETE') && (
               <Tooltip
                 title={t('airgapCollections.actions.download', 'Download ISO')}
               >
-                <IconButton size="small" onClick={() => handleDownload(p.row)}>
+                <IconButton size="small" onClick={() => handleDownloadClick(p.row)}>
                   <DownloadIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -562,6 +777,99 @@ const AirgapCollections: React.FC = () => {
                 'Include compliance bundle',
               )}
             />
+
+            {/* Mirror picker.  Option-B sources the bundle from
+                snapshots of configured mirror_repository rows — the
+                operator picks which ones to bundle and the backend
+                handles snapshot dispatch + distro/version derivation. */}
+            <Typography variant="subtitle2" sx={{ mt: 1 }}>
+              {t('airgapCollections.dialog.mirrorsTitle', 'Mirrors')}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {t(
+                'airgapCollections.dialog.mirrorsHelper',
+                'Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.',
+              )}
+            </Typography>
+            {availableMirrors.length === 0 ? (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                {t(
+                  'airgapCollections.dialog.noMirrors',
+                  'No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.',
+                )}
+              </Alert>
+            ) : (
+              <FormControl size="small" fullWidth>
+                <InputLabel id="mirror-picker-label">
+                  {t('airgapCollections.dialog.mirrorPicker', 'Pick mirrors')}
+                </InputLabel>
+                <Select
+                  labelId="mirror-picker-label"
+                  multiple
+                  value={formMirrorIds}
+                  label={t(
+                    'airgapCollections.dialog.mirrorPicker',
+                    'Pick mirrors',
+                  )}
+                  onChange={(e) =>
+                    setFormMirrorIds(
+                      typeof e.target.value === 'string'
+                        ? e.target.value.split(',')
+                        : (e.target.value as string[]),
+                    )
+                  }
+                  renderValue={(selected) =>
+                    (selected as string[])
+                      .map(
+                        (id) =>
+                          availableMirrors.find((m) => m.id === id)?.name ?? id,
+                      )
+                      .join(', ')
+                  }
+                >
+                  {availableMirrors.map((m) => (
+                    <MenuItem key={m.id} value={m.id}>
+                      <Checkbox checked={formMirrorIds.includes(m.id)} />
+                      <Typography variant="body2">
+                        {m.name}{' '}
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          component="span"
+                        >
+                          ({m.package_manager}
+                          {m.known_version_id ? '' : ' — no catalog version!'})
+                        </Typography>
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+            {pickedHostMismatch && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {t(
+                  'airgapCollections.dialog.hostMismatchWarning',
+                  'The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.',
+                )}
+              </Alert>
+            )}
+
+            <TextField
+              fullWidth
+              size="small"
+              label={t(
+                'airgapCollections.dialog.burnDevice',
+                'Optical burn device (optional)',
+              )}
+              placeholder="/dev/sr0"
+              value={formBurnDevice}
+              onChange={(e) => setFormBurnDevice(e.target.value)}
+              helperText={t(
+                'airgapCollections.dialog.burnDeviceHelper',
+                'Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT.',
+              )}
+            />
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -575,6 +883,49 @@ const AirgapCollections: React.FC = () => {
             startIcon={submitting ? <CircularProgress size={16} /> : undefined}
           >
             {t('airgapCollections.dialog.submit', 'Queue Run')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Multi-disc picker.  Opens when handleDownloadClick sees the
+          run produced >1 disc; closes on disc selection or cancel. */}
+      <Dialog
+        open={discPickerRun !== null}
+        onClose={() => setDiscPickerRun(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>
+          {t(
+            'airgapCollections.discPicker.title',
+            'Pick a disc to download',
+          )}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={1} sx={{ mt: 1 }}>
+            {discPickerEntries.map((d) => (
+              <Button
+                key={d.disc_index}
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={async () => {
+                  if (!discPickerRun) return;
+                  const run = discPickerRun;
+                  setDiscPickerRun(null);
+                  await handleDownload(run, d.disc_index);
+                }}
+              >
+                {t('airgapCollections.discPicker.row', 'Disc {{n}} — {{size}}', {
+                  n: d.disc_index,
+                  size: formatBytes(d.size_bytes),
+                })}
+              </Button>
+            ))}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDiscPickerRun(null)}>
+            {t('airgapCollections.discPicker.cancel', 'Cancel')}
           </Button>
         </DialogActions>
       </Dialog>

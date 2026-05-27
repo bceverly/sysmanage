@@ -48,12 +48,25 @@ interface Props {
 }
 
 const POLL_MS = 2000;
+// Max time we'll wait for a probe / install to come back before we
+// surface "agent didn't respond" to the user and stop the spinner.
+// Sized for: a slow first ``apt-get update`` + ``apt-get install``
+// chain on a fresh VM with empty caches (~60-90s typical) + safety
+// margin.  Past this, something is wrong (agent dedup swallowed the
+// result, agent crashed, WebSocket died mid-flight, etc.) and the
+// operator needs a definitive failure state instead of an
+// indefinite "Checking..." spinner.
+const IN_FLIGHT_TIMEOUT_MS = 5 * 60 * 1000;
 
 const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManager }) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState<MirrorSetupStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // ``now`` ticks once per poll so the elapsed-time check below
+  // re-evaluates each cycle.  Refs would be marginally cheaper but
+  // we need a re-render anyway to flip the "timed out" UI state.
+  const [now, setNow] = useState<number>(() => Date.now());
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -75,7 +88,10 @@ const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManag
     const inFlight =
       status.last_check_message_id || status.last_install_message_id;
     if (!inFlight) return;
-    const handle = setInterval(fetchStatus, POLL_MS);
+    const handle = setInterval(() => {
+      fetchStatus();
+      setNow(Date.now());
+    }, POLL_MS);
     return () => clearInterval(handle);
   }, [status, fetchStatus]);
 
@@ -144,8 +160,24 @@ const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManag
     pkg: status.ready_pkg,
   }[packageManager];
 
-  const probeInFlight = !!status?.last_check_message_id;
-  const installInFlight = !!status?.last_install_message_id;
+  // Compute "in flight" but also a timeout — if the agent silently
+  // swallowed our command (e.g. duplicate-skip without emitting a
+  // result), the server-side ``last_*_message_id`` never clears and
+  // we'd spin forever without this gate.
+  const elapsedSinceCheckMs =
+    status?.last_check_at && status.last_check_message_id
+      ? now - new Date(status.last_check_at).getTime()
+      : 0;
+  const elapsedSinceInstallMs =
+    status?.last_install_at && status.last_install_message_id
+      ? now - new Date(status.last_install_at).getTime()
+      : 0;
+  const probeTimedOut = elapsedSinceCheckMs > IN_FLIGHT_TIMEOUT_MS;
+  const installTimedOut = elapsedSinceInstallMs > IN_FLIGHT_TIMEOUT_MS;
+  // Treat a timed-out operation as no longer in-flight — stops the
+  // spinner + re-enables the buttons so the operator can retry.
+  const probeInFlight = !!status?.last_check_message_id && !probeTimedOut;
+  const installInFlight = !!status?.last_install_message_id && !installTimedOut;
   const neverProbed = status && !status.last_check_at;
 
   return (
@@ -206,6 +238,16 @@ const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManag
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
+          </Alert>
+        )}
+
+        {(probeTimedOut || installTimedOut) && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            {t(
+              'mirror.setupStatus.timedOut',
+              'Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched.',
+              { minutes: Math.round(IN_FLIGHT_TIMEOUT_MS / 60000) },
+            )}
           </Alert>
         )}
 

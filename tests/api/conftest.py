@@ -864,6 +864,11 @@ def test_db():
         created_by = Column(
             GUID(), ForeignKey("user.id", ondelete="SET NULL"), nullable=True
         )
+        # Phase 12 — orchestrator + optical burn opt-in.  Mirror the real
+        # schema or every ``SELECT * FROM airgap_collection_run`` blows
+        # up on the test SQLite session with "no such column".
+        worker_message_id = Column(String(80), nullable=True)
+        burn_device = Column(String(200), nullable=True)
 
     class AirgapCollectionSchedule(TestBase):
         __tablename__ = "airgap_collection_schedule"
@@ -900,6 +905,18 @@ def test_db():
         byte_count = Column(BigInteger, nullable=True)
         file_count = Column(Integer, nullable=True)
         status = Column(String(40), nullable=True)
+        # Phase 12 Option-B — each target binds to a specific mirror
+        # and the snapshot of that mirror the orchestrator pinned.
+        mirror_id = Column(
+            GUID(),
+            ForeignKey("mirror_repository.id", ondelete="SET NULL"),
+            nullable=True,
+        )
+        source_snapshot_id = Column(
+            GUID(),
+            ForeignKey("mirror_snapshot.id", ondelete="SET NULL"),
+            nullable=True,
+        )
 
     # Phase 11 — produced-media manifests (test-side mirror for the
     # collector runs API).  Mirrors backend/persistence/models/airgap.py

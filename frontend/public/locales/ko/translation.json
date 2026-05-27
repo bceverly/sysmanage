@@ -2066,11 +2066,12 @@
     "col": {
       "actions": "작업",
       "cron": "Cron",
-      "lastSync": "마지막 동기화",
       "name": "이름",
       "osVersion": "OS / 버전",
-      "status": "상태",
-      "upstream": "업스트림"
+      "upstream": "업스트림",
+      "statusSync": "Sync",
+      "statusSnapshot": "Snapshot",
+      "statusRestore": "Restore"
     },
     "configureTitle": "{{platform}} 미러링 구성",
     "create": "생성",
@@ -2122,11 +2123,42 @@
       "notProbedYet": "아직 프로브가 실행되지 않았습니다 — 이 호스트를 확인하려면 새로고침을 클릭하세요.",
       "notReady": "{{pm}}에 필요한 도구가 누락되었습니다 — 동기화를 트리거하기 전에 설치하세요.",
       "ready": "{{pm}} 저장소를 미러링할 준비가 되었습니다.",
-      "subtitle": "이 호스트에서 {{pm}} 미러 계획을 실행하는 데 필요한 도구"
+      "subtitle": "이 호스트에서 {{pm}} 미러 계획을 실행하는 데 필요한 도구",
+      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
     },
     "configureSubtitle": "이 플랫폼의 미러 계획을 실행할 호스트를 선택하세요. 플랫폼이 탭과 일치하는 호스트만 표시됩니다.",
     "deleteConfigInUse": "먼저 이 플랫폼 아래의 {{n}}개 미러를 삭제하세요.",
-    "noEligibleHosts": "등록된 {{family}} 호스트가 없습니다 — 하나를 등록하고 새로고침하세요."
+    "noEligibleHosts": "등록된 {{family}} 호스트가 없습니다 — 하나를 등록하고 새로고침하세요.",
+    "chip": {
+      "inFlight": "{{label}} in progress since {{at}}",
+      "failedNoText": "Failed; no error text returned.",
+      "failed": "failed",
+      "ok": "ok",
+      "label": {
+        "sync": "sync",
+        "snapshot": "snap",
+        "restore": "restore"
+      }
+    },
+    "snapshots": {
+      "loadError": "Could not load snapshots.",
+      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
+      "restoreError": "Restore dispatch failed.",
+      "title": "Snapshots for {{name}}",
+      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "col": {
+        "id": "Snapshot",
+        "taken": "Taken at",
+        "size": "Size",
+        "files": "Files",
+        "actions": "Actions"
+      },
+      "restore": "Restore live tree to this snapshot"
+    },
+    "expand": {
+      "collapse": "Hide snapshots",
+      "expand": "Show snapshots"
+    }
   },
   "integrations": {
     "description": "외부 서비스 통합 및 설정을 구성합니다.",
@@ -2767,7 +2799,16 @@
       "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
       "mediaSizeMb": "[TODO] Media Size (MB)",
       "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run"
+      "title": "[TODO] New Collection Run",
+      "mirrorsRequired": "At least one mirror target is required.",
+      "hostMismatch": "All picked mirrors must live on the same host.",
+      "mirrorsTitle": "Mirrors",
+      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
+      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
+      "mirrorPicker": "Pick mirrors",
+      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
+      "burnDevice": "Optical burn device (optional)",
+      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
     "downloadError": "[TODO] Failed to download ISO",
     "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
@@ -2778,6 +2819,13 @@
     "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
     "refresh": "[TODO] Refresh",
     "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs"
+    "title": "[TODO] Air-Gap Collection Runs",
+    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
+    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "discPicker": {
+      "title": "Pick a disc to download",
+      "row": "Disc {{n}} — {{size}}",
+      "cancel": "Cancel"
+    }
   }
 }

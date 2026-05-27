@@ -37,6 +37,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -102,12 +103,37 @@ class MirrorRepository(Base):
         ForeignKey("mirror_known_version.id", ondelete=_FK_SET_NULL),
         nullable=True,
     )
-    # Execution state — written by the OSS /tick driver after each
-    # plan dispatch.
+    # Lazy-loaded relationship so the airgap-collector code can resolve
+    # the catalog row (os_family, version_key, default_suite) when it
+    # derives target metadata from a picked mirror.
+    known_version = relationship("MirrorKnownVersion", lazy="joined")
+    # Execution state — one (at, status, error, message_id) group per
+    # action.  Each group is written by the result handler in
+    # backend/services/proplus_dispatch.py::_apply_mirror_sync_status.
+    # ``last_*_message_id`` is stamped at dispatch and cleared on
+    # result; the UI keys off non-NULL message_id to show an
+    # "in-flight, X minutes ago" indicator with a spinner.
     last_sync_at = Column(DateTime, nullable=True)
     last_sync_status = Column(String(40), nullable=True)
     last_sync_error = Column(Text, nullable=True)
+    last_sync_message_id = Column(String(80), nullable=True)
     next_sync_at = Column(DateTime, nullable=True)
+    last_snapshot_at = Column(DateTime, nullable=True)
+    last_snapshot_status = Column(String(40), nullable=True)
+    last_snapshot_error = Column(Text, nullable=True)
+    last_snapshot_message_id = Column(String(80), nullable=True)
+    last_restore_at = Column(DateTime, nullable=True)
+    last_restore_status = Column(String(40), nullable=True)
+    last_restore_error = Column(Text, nullable=True)
+    last_restore_message_id = Column(String(80), nullable=True)
+    last_integrity_at = Column(DateTime, nullable=True)
+    last_integrity_status = Column(String(40), nullable=True)
+    last_integrity_error = Column(Text, nullable=True)
+    last_integrity_message_id = Column(String(80), nullable=True)
+    last_gc_at = Column(DateTime, nullable=True)
+    last_gc_status = Column(String(40), nullable=True)
+    last_gc_error = Column(Text, nullable=True)
+    last_gc_message_id = Column(String(80), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -145,9 +171,32 @@ class MirrorRepository(Base):
             ),
             "last_sync_status": self.last_sync_status,
             "last_sync_error": self.last_sync_error,
+            "last_sync_message_id": self.last_sync_message_id,
             "next_sync_at": (
                 self.next_sync_at.isoformat() if self.next_sync_at else None
             ),
+            "last_snapshot_at": (
+                self.last_snapshot_at.isoformat() if self.last_snapshot_at else None
+            ),
+            "last_snapshot_status": self.last_snapshot_status,
+            "last_snapshot_error": self.last_snapshot_error,
+            "last_snapshot_message_id": self.last_snapshot_message_id,
+            "last_restore_at": (
+                self.last_restore_at.isoformat() if self.last_restore_at else None
+            ),
+            "last_restore_status": self.last_restore_status,
+            "last_restore_error": self.last_restore_error,
+            "last_restore_message_id": self.last_restore_message_id,
+            "last_integrity_at": (
+                self.last_integrity_at.isoformat() if self.last_integrity_at else None
+            ),
+            "last_integrity_status": self.last_integrity_status,
+            "last_integrity_error": self.last_integrity_error,
+            "last_integrity_message_id": self.last_integrity_message_id,
+            "last_gc_at": (self.last_gc_at.isoformat() if self.last_gc_at else None),
+            "last_gc_status": self.last_gc_status,
+            "last_gc_error": self.last_gc_error,
+            "last_gc_message_id": self.last_gc_message_id,
         }
 
 

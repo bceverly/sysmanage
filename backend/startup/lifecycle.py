@@ -334,6 +334,30 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             tick_e,
                         )
 
+                    # And the run-lifecycle orchestrator.  The
+                    # schedule-tick above CREATES QUEUED runs but
+                    # nothing else advances them — the run-tick is
+                    # what actually walks a run through MIRRORING ->
+                    # STAGING_COMPLETE -> BUILDING_ISO -> ISO_BUILT ->
+                    # COMPLETE.  Same gate (collector engine present);
+                    # same blast-radius treatment if it fails to start.
+                    logger.info("=== AIRGAP RUN ORCHESTRATOR STARTUP ===")
+                    try:
+                        from backend.services.airgap_run_tick import (
+                            airgap_run_tick_service,
+                        )
+
+                        airgap_run_task = asyncio.create_task(airgap_run_tick_service())
+                        logger.info(
+                            "Air-gap run orchestrator started: %s",
+                            airgap_run_task,
+                        )
+                    except Exception as run_e:
+                        logger.warning(
+                            "Failed to start air-gap run orchestrator: %s",
+                            run_e,
+                        )
+
                 # Start vuln_engine CVE refresh scheduler and staleness check
                 vuln_engine = module_loader.get_module("vuln_engine")
                 if vuln_engine:

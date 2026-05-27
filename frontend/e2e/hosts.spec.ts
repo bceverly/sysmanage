@@ -258,8 +258,16 @@ test.describe('Host Actions', () => {
       return;
     }
     await expect(refreshButton).toBeEnabled({ timeout: 15000 });
-    await refreshButton.scrollIntoViewIfNeeded();
-    await refreshButton.click();
+    // ``click()`` auto-scrolls the element into view and runs its own
+    // actionability retries (visible / stable / enabled / receives
+    // events) under the configured timeout.  The earlier two-step
+    // ``scrollIntoViewIfNeeded()`` + ``click()`` opened a window where
+    // host-detail's periodic polling could re-render between the
+    // scroll and the click, detaching the matched DOM node and
+    // restarting the locator wait against a freshly-mounted button.
+    // Collapsing to a single ``click`` with a generous timeout closes
+    // that race.
+    await refreshButton.click({ timeout: 15000 });
 
     // After clicking, the button flips to "Requesting..." while the
     // backend processes the request.  Wait for either state to confirm

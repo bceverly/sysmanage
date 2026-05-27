@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -172,6 +173,25 @@ def register_repo_mirror_correlation(
         message_id,
         "repo_mirror_op",
         f"{action}:{mirror_id}",
+        host_id,
+    )
+
+
+def register_airgap_run_correlation(
+    message_id: str, stage: str, run_id: str, host_id: str
+) -> None:
+    """Register an air-gap collection-run plan for result-routing.
+
+    ``stage`` is the lifecycle phase the plan represents ("mirroring"
+    or "building_iso"); the result handler keys off it to decide which
+    state transition to apply (MIRRORING → STAGING_COMPLETE vs
+    BUILDING_ISO → ISO_BUILT).  ``primary_id`` encodes
+    ``"<stage>:<run_id>"``.
+    """
+    _register_correlation(
+        message_id,
+        "airgap_run",
+        f"{stage}:{run_id}",
         host_id,
     )
 
@@ -355,7 +375,14 @@ def queue_fleet_bulk_op(operation, schedule) -> None:
 def _extract_command_outcome(result_data: dict) -> Dict[str, Any]:
     """Flatten the agent's apply_deployment_plan payload into one dict.
 
-    Returns keys: status, returncode, stdout, stderr, error.
+    Returns keys: status, returncode, stdout, stderr, error, commands.
+
+    ``stdout``/``stderr`` are the FIRST command's streams (preserved for
+    handlers that just need a one-shot stderr).  ``commands`` is the
+    full per-command list so action-specific handlers can attribute
+    errors to the actually-failed step and parse stats from a
+    later-in-the-plan command (e.g. rsync ``--stats`` output for
+    snapshot size/file-count).
     """
     success = bool(result_data.get("success", False))
     inner = result_data.get("result") or {}
@@ -370,7 +397,53 @@ def _extract_command_outcome(result_data: dict) -> Dict[str, Any]:
         "stdout": first.get("stdout") or "",
         "stderr": first.get("stderr") or "",
         "error": result_data.get("error"),
+        "commands": cmd_results,
     }
+
+
+def _best_failure_text(outcome: Dict[str, Any]) -> str:
+    """Pick the most useful error string from a failed outcome.
+
+    The agent's plan executor stops on the first hard failure, so the
+    failed step is the LAST entry in ``commands`` with ``success: False``.
+    Use that command's stderr in preference to the first command's
+    stderr (which is often empty when the first command succeeded and
+    a later one failed).  Falls back to ``outcome["error"]`` then a
+    static "no error message returned" sentinel.
+    """
+    for cmd in reversed(outcome.get("commands") or []):
+        if cmd.get("success") is False:
+            stderr = (cmd.get("stderr") or "").strip()
+            if stderr:
+                return stderr
+            description = cmd.get("description") or " ".join(cmd.get("argv") or [])
+            rc = cmd.get("returncode")
+            return f"{description} exited {rc} with no stderr"
+    return outcome.get("stderr") or outcome.get("error") or "no error message returned"
+
+
+# rsync --stats output is human-readable but two lines are reliably
+# parseable for ints:
+#   Number of files: <total>,<details>
+#   Total file size: <bytes> bytes
+# ``--stats`` uses thousands-separator commas in newer rsync, so we
+# strip them before int() parsing.
+_RSYNC_STATS_FILES_RE = re.compile(r"Number of files:\s*([\d,]+)")
+_RSYNC_STATS_BYTES_RE = re.compile(r"Total file size:\s*([\d,]+)\s+bytes")
+
+
+def _parse_rsync_stats(stdout: str) -> Dict[str, Optional[int]]:
+    """Pull file count + total bytes out of rsync ``--stats`` output."""
+    out: Dict[str, Optional[int]] = {"file_count": None, "size_bytes": None}
+    if not stdout:
+        return out
+    m = _RSYNC_STATS_FILES_RE.search(stdout)
+    if m:
+        out["file_count"] = int(m.group(1).replace(",", ""))
+    m = _RSYNC_STATS_BYTES_RE.search(stdout)
+    if m:
+        out["size_bytes"] = int(m.group(1).replace(",", ""))
+    return out
 
 
 def _apply_engine_result(
@@ -1029,6 +1102,91 @@ def _apply_repo_mirror_op_result(
         _queue_followup_setup_check(host_id, session_local)
 
 
+def _apply_airgap_run_result(
+    primary_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Handle completion of an air-gap collection-run plan.
+
+    ``primary_id`` is ``"<stage>:<run_id>"``.  The stage drives the
+    state transition:
+
+      mirroring     → MIRRORING -> STAGING_COMPLETE on success,
+                                  -> FAILED on failure.  The
+                                  airgap_run_tick will pick up
+                                  STAGING_COMPLETE on its next pass
+                                  and dispatch the ISO plan.
+      building_iso  → BUILDING_ISO -> ISO_BUILT on success.
+                                     airgap_run_tick then advances
+                                     ISO_BUILT -> COMPLETE.
+
+    Always clears ``worker_message_id`` so the orchestrator's "is a
+    plan in flight on this row?" check resets correctly.
+    """
+    _ = host_id  # not used in row update; logged elsewhere for audit
+    if ":" not in primary_id:
+        logger.warning(
+            "airgap_run result with malformed primary_id %r — dropping",
+            primary_id,
+        )
+        return
+    stage, run_id = primary_id.split(":", 1)
+
+    session_local = db.get_session_local()
+    with session_local() as session:
+        run = (
+            session.query(models.AirgapCollectionRun)
+            .filter(models.AirgapCollectionRun.id == run_id)
+            .first()
+        )
+        if run is None:
+            logger.info(
+                "airgap collection run %s no longer exists; dropping %s result",
+                run_id,
+                stage,
+            )
+            return
+
+        succeeded = outcome["status"] == "succeeded"
+        run.worker_message_id = None
+
+        if not succeeded:
+            run.status = "FAILED"
+            run.error_message = _best_failure_text(outcome)[:8000]
+            run.completed_at = _now_naive()
+            session.commit()
+            return
+
+        if stage == "mirroring":
+            run.status = "STAGING_COMPLETE"
+            run.error_message = None
+        elif stage == "building_iso":
+            run.status = "ISO_BUILT"
+            run.error_message = None
+        elif stage == "multidisc":
+            # Multi-disc plan does staging AND ISO build inline per
+            # disc; success means all per-disc ISOs are on disk.
+            # Skip STAGING_COMPLETE; advance straight to ISO_BUILT
+            # so the operator's "is my ISO ready?" check is uniform
+            # across single-disc and multi-disc paths.
+            run.status = "ISO_BUILT"
+            run.error_message = None
+        elif stage == "burning":
+            # The burn plan is the last stage in the lifecycle when
+            # ``burn_device`` is set — go straight to COMPLETE rather
+            # than detouring back through the tick.
+            run.status = "COMPLETE"
+            run.completed_at = _now_naive()
+            run.error_message = None
+        else:
+            logger.warning(
+                "airgap_run result with unknown stage %r (run_id=%s); leaving row at %s",
+                stage,
+                run_id,
+                run.status,
+            )
+        session.commit()
+
+
 def _queue_followup_setup_check(host_id: str, session_local) -> None:
     """Auto-chain a setup_check after a successful install so the card
     reflects the new tool presence.  The follow-up message rides the
@@ -1061,10 +1219,37 @@ def _queue_followup_setup_check(host_id: str, session_local) -> None:
         )
 
 
+# Map a plan ``action`` string to the column prefix on
+# ``mirror_repository`` that records its outcome.  ``integrity_check``
+# is collapsed to ``integrity`` for shorter column names.
+_ACTION_COLUMN_PREFIX = {
+    "sync": "last_sync",
+    "snapshot": "last_snapshot",
+    "restore": "last_restore",
+    "integrity_check": "last_integrity",
+    "gc": "last_gc",
+}
+
+
 def _apply_mirror_sync_status(
     session, action: str, mirror_id: str, outcome: Dict[str, Any]
 ) -> None:
-    """Update ``mirror_repository.last_sync_*`` after a sync-family plan."""
+    """Update the action-specific ``mirror_repository.last_<action>_*`` group.
+
+    Each action (sync/snapshot/restore/integrity_check/gc) writes to
+    its own ``_at`` / ``_status`` / ``_error`` / ``_message_id`` columns
+    so a failed snapshot no longer overwrites a previously successful
+    sync — the UI shows one chip per action.
+
+    Side effects for snapshot:
+        * Always clears the in-flight ``_message_id``.
+        * On success, parses rsync ``--stats`` output (the second
+          command in the snapshot plan) and populates the matching
+          ``MirrorSnapshot`` row's ``size_bytes`` + ``file_count``.
+        * On failure, deletes the placeholder ``MirrorSnapshot`` row
+          (inserted at dispatch time) so the snapshots list doesn't
+          accumulate ghosts.
+    """
     if not mirror_id:
         return
     row = (
@@ -1075,14 +1260,79 @@ def _apply_mirror_sync_status(
     if row is None:
         logger.info("Mirror %s no longer exists; dropping %s result", mirror_id, action)
         return
-    if outcome["status"] == "succeeded":
-        row.last_sync_status = "SUCCESS"
-        row.last_sync_error = None
-    else:
-        row.last_sync_status = "FAILED"
-        row.last_sync_error = (
-            outcome["stderr"] or outcome["error"] or "no error message returned"
-        )[:8000]
+    prefix = _ACTION_COLUMN_PREFIX.get(action)
+    if prefix is None:
+        logger.warning(
+            "Mirror result for unknown action %r (mirror_id=%s) — no column to write",
+            action,
+            mirror_id,
+        )
+        return
+
+    now = _now_naive()
+    succeeded = outcome["status"] == "succeeded"
+    status_value = "SUCCESS" if succeeded else "FAILED"
+    error_value = None if succeeded else _best_failure_text(outcome)[:8000]
+
+    setattr(row, f"{prefix}_at", now)
+    setattr(row, f"{prefix}_status", status_value)
+    setattr(row, f"{prefix}_error", error_value)
+    # Clear the in-flight marker regardless of outcome — the operator
+    # needs the UI to leave the spinner state either way.
+    setattr(row, f"{prefix}_message_id", None)
+
+    if action == "snapshot":
+        _post_snapshot_outcome(session, mirror_id, succeeded, outcome)
+    elif action == "restore":
+        _post_restore_outcome(session, mirror_id, succeeded)
+
+
+def _post_snapshot_outcome(
+    session, mirror_id: str, succeeded: bool, outcome: Dict[str, Any]
+) -> None:
+    """Reconcile the ``MirrorSnapshot`` placeholder row with the agent result.
+
+    The dispatch endpoint inserts a snapshot row eagerly (so the UI
+    can show "in progress") — here we either fill in its size/file
+    count on success, or delete it on failure so the list doesn't
+    accumulate phantom snapshots.
+    """
+    # The placeholder row is the most recently created snapshot for
+    # this mirror; the dispatch endpoint stamps ``taken_at = now`` so
+    # ordering by ``taken_at`` desc gives us the right one.
+    placeholder = (
+        session.query(models.MirrorSnapshot)
+        .filter(models.MirrorSnapshot.repository_id == mirror_id)
+        .order_by(models.MirrorSnapshot.taken_at.desc())
+        .first()
+    )
+    if placeholder is None:
+        return
+    if not succeeded:
+        session.delete(placeholder)
+        return
+    # On success, parse rsync ``--stats`` output from the rsync
+    # command in the plan (description starts with "rsync live tree").
+    for cmd in outcome.get("commands") or []:
+        description = cmd.get("description") or ""
+        if "rsync" in description and cmd.get("success"):
+            stats = _parse_rsync_stats(cmd.get("stdout") or "")
+            if stats["size_bytes"] is not None:
+                placeholder.size_bytes = stats["size_bytes"]
+            if stats["file_count"] is not None:
+                placeholder.file_count = stats["file_count"]
+            break
+
+
+def _post_restore_outcome(session, mirror_id: str, succeeded: bool) -> None:
+    """Hook for future restore-side bookkeeping.
+
+    Currently a no-op — the restore action doesn't have per-snapshot
+    state to reconcile.  Carved out so the snapshot-side logic stays
+    in its own helper and a future "mark snapshot as restored from"
+    feature has an obvious place to live.
+    """
+    _ = session, mirror_id, succeeded  # documenting intent
 
 
 _PROBE_TOOL_KEYS = {
@@ -1239,6 +1489,23 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         except Exception as exc:
             logger.warning(
                 "Failed to apply repo_mirror_op result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Air-gap collection-run plans (mirroring / building_iso).  The
+    # ``airgap_run_tick`` orchestrator dispatches these as it walks the
+    # run through its lifecycle; the handler below advances the row's
+    # status based on which stage just completed.  ``primary_id`` is
+    # encoded as ``"<stage>:<run_id>"``.
+    if engine_name == "airgap_run":
+        try:
+            _apply_airgap_run_result(primary_id, host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply airgap_run result for %s on host %s: %s",
                 primary_id,
                 host_id,
                 exc,

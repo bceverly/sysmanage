@@ -2066,11 +2066,12 @@
     "col": {
       "actions": "الإجراءات",
       "cron": "Cron",
-      "lastSync": "آخر مزامنة",
       "name": "الاسم",
       "osVersion": "نظام التشغيل / الإصدار",
-      "status": "الحالة",
-      "upstream": "المنبع"
+      "upstream": "المنبع",
+      "statusSync": "Sync",
+      "statusSnapshot": "Snapshot",
+      "statusRestore": "Restore"
     },
     "configureTitle": "تكوين النسخ المرآة لـ {{platform}}",
     "create": "إنشاء",
@@ -2122,11 +2123,42 @@
       "notProbedYet": "لم يتم تشغيل أي مسبار بعد — انقر فوق تحديث للتحقق من هذا المضيف.",
       "notReady": "الأدوات المطلوبة لـ {{pm}} مفقودة — قم بالتثبيت قبل بدء المزامنة.",
       "ready": "جاهز لمرآة مستودعات {{pm}}.",
-      "subtitle": "الأدوات المطلوبة لتشغيل خطط مرآة {{pm}} على هذا المضيف"
+      "subtitle": "الأدوات المطلوبة لتشغيل خطط مرآة {{pm}} على هذا المضيف",
+      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
     },
     "configureSubtitle": "اختر المضيف الذي سيقوم بتشغيل خطط المرآة لهذه المنصة. يتم إدراج المضيفين الذين تتطابق منصتهم مع علامة التبويب فقط.",
     "deleteConfigInUse": "احذف {{n}} مرآة (مرايا) ضمن هذه المنصة أولاً.",
-    "noEligibleHosts": "لا توجد مضيفات {{family}} مسجلة — قم بتسجيل واحدة وقم بالتحديث."
+    "noEligibleHosts": "لا توجد مضيفات {{family}} مسجلة — قم بتسجيل واحدة وقم بالتحديث.",
+    "chip": {
+      "inFlight": "{{label}} in progress since {{at}}",
+      "failedNoText": "Failed; no error text returned.",
+      "failed": "failed",
+      "ok": "ok",
+      "label": {
+        "sync": "sync",
+        "snapshot": "snap",
+        "restore": "restore"
+      }
+    },
+    "snapshots": {
+      "loadError": "Could not load snapshots.",
+      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
+      "restoreError": "Restore dispatch failed.",
+      "title": "Snapshots for {{name}}",
+      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "col": {
+        "id": "Snapshot",
+        "taken": "Taken at",
+        "size": "Size",
+        "files": "Files",
+        "actions": "Actions"
+      },
+      "restore": "Restore live tree to this snapshot"
+    },
+    "expand": {
+      "collapse": "Hide snapshots",
+      "expand": "Show snapshots"
+    }
   },
   "integrations": {
     "description": "تكوين تكاملات وإعدادات الخدمات الخارجية.",
@@ -2767,7 +2799,16 @@
       "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
       "mediaSizeMb": "[TODO] Media Size (MB)",
       "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run"
+      "title": "[TODO] New Collection Run",
+      "mirrorsRequired": "At least one mirror target is required.",
+      "hostMismatch": "All picked mirrors must live on the same host.",
+      "mirrorsTitle": "Mirrors",
+      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
+      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
+      "mirrorPicker": "Pick mirrors",
+      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
+      "burnDevice": "Optical burn device (optional)",
+      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
     "downloadError": "[TODO] Failed to download ISO",
     "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
@@ -2778,6 +2819,13 @@
     "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
     "refresh": "[TODO] Refresh",
     "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs"
+    "title": "[TODO] Air-Gap Collection Runs",
+    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
+    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "discPicker": {
+      "title": "Pick a disc to download",
+      "row": "Disc {{n}} — {{size}}",
+      "cancel": "Cancel"
+    }
   }
 }

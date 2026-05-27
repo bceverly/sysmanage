@@ -20,6 +20,8 @@ import os
 import uuid
 from typing import List, Optional
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -94,6 +96,28 @@ def _parse_manifest_uuid(manifest_id: str) -> uuid.UUID:
         ) from exc
 
 
+class RunTargetSpec(BaseModel):
+    """One target inside a collection run.
+
+    Option-B input shape: the operator picks a configured mirror by id
+    and the server derives distro / version from the mirror's
+    metadata.  The orchestrator pins a specific snapshot of that
+    mirror at QUEUED → MIRRORING — the bundle is then byte-for-byte
+    that snapshot's tree.
+
+    ``mirror_id`` is required on input.  ``distro``, ``version``,
+    ``mirror_name`` are server-populated on output for display; clients
+    sending these on input are ignored.
+    """
+
+    mirror_id: str = Field(..., min_length=1, max_length=80)
+    distro: Optional[str] = Field(default=None, max_length=40)
+    version: Optional[str] = Field(default=None, max_length=40)
+    repos: List[str] = Field(default_factory=list)
+    mirror_name: Optional[str] = Field(default=None, max_length=200)
+    source_snapshot_id: Optional[str] = Field(default=None, max_length=80)
+
+
 class RunCreateRequest(BaseModel):
     iso_label: str = Field(..., min_length=1, max_length=80)
     # 4.7 GB DVD-5 default — the engine's media-size ceiling for the
@@ -102,6 +126,18 @@ class RunCreateRequest(BaseModel):
     media_size_bytes: int = Field(default=4_700_000_000, gt=0)
     include_cve: bool = True
     include_compliance: bool = True
+    # At least one target is required for the orchestrator to build a
+    # meaningful collection plan.  The Pydantic validator below
+    # enforces the non-empty invariant so we surface the 400 before
+    # the row is even inserted, rather than letting the orchestrator
+    # mark a target-less row as FAILED after the fact.
+    targets: List[RunTargetSpec] = Field(default_factory=list)
+    # Optional optical-burn device.  When set, the orchestrator
+    # advances ISO_BUILT → BURNING by dispatching ``build_burn_plan``;
+    # when NULL the run stops at ISO_BUILT (which then auto-advances
+    # straight to COMPLETE).  Operators leave this NULL for the typical
+    # "build an ISO file and download it" workflow.
+    burn_device: Optional[str] = Field(default=None, max_length=200)
 
 
 class RunResponse(BaseModel):
@@ -117,6 +153,9 @@ class RunResponse(BaseModel):
     cron_schedule: Optional[str] = None
     parent_run_id: Optional[str] = None
     created_at: Optional[str] = None
+    worker_message_id: Optional[str] = None
+    burn_device: Optional[str] = None
+    targets: List[RunTargetSpec] = Field(default_factory=list)
 
 
 class ManifestResponse(BaseModel):
@@ -132,32 +171,316 @@ class ManifestResponse(BaseModel):
     created_at: Optional[str] = None
 
 
+def _snapshot_mirrors_for_run(
+    db: Session,
+    mirrors: List[models.MirrorRepository],
+) -> dict:
+    """Dispatch a snapshot for each of a run's target mirrors.
+
+    Returns ``{mirror_id_str: placeholder_snapshot_row}`` so the
+    caller can stamp each target row's ``source_snapshot_id`` to the
+    placeholder snapshot id — that way the orchestrator can recognize
+    the snapshot the run is waiting for even before the agent reports
+    completion.
+
+    Each mirror gets a fresh snapshot regardless of whether it had
+    one moments ago: the goal is to bundle exactly the tree state at
+    run-creation time, not some earlier state.
+
+    Raises HTTPException(400) if the repository_mirroring engine
+    isn't loaded — Option-B runs need it.  Caller is responsible for
+    rolling back if any single dispatch fails (best-effort isn't OK
+    here: a target missing its snapshot can never produce a bundle).
+    """
+    mirror_engine = module_loader.get_module("repository_mirroring_engine")
+    if mirror_engine is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "Air-gap collection runs require the "
+                "repository_mirroring_engine module to be loaded — "
+                "the collector reads each target's bundle from a "
+                "snapshot of its mirror tree."
+            ),
+        )
+    settings_row = db.query(models.MirrorSettings).first()
+    if settings_row is None or not settings_row.mirror_root_path:
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "Global mirror settings missing or mirror_root_path "
+                "not configured.  Configure mirror settings before "
+                "creating a collection run."
+            ),
+        )
+
+    # Late import so this module stays importable when
+    # ``repository_mirroring`` isn't on the route registration list.
+    from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+        _config_from_row,
+        _dispatch_plan,
+    )
+
+    placeholders: dict = {}
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    for mirror in mirrors:
+        snapshot_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")[:-3]
+        plan = mirror_engine.build_mirror_snapshot_plan(
+            _config_from_row(mirror),
+            settings_row.mirror_root_path,
+            snapshot_id,
+        )
+        msg_id = _dispatch_plan(
+            plan,
+            mirror.host_id,
+            action="snapshot",
+            mirror_id=str(mirror.id),
+            timeout=600,
+        )
+        snap = models.MirrorSnapshot(
+            repository_id=mirror.id,
+            snapshot_id=snapshot_id,
+            taken_at=now,
+        )
+        db.add(snap)
+        db.flush()  # need snap.id immediately so we can FK target rows to it
+        mirror.last_snapshot_at = now
+        mirror.last_snapshot_status = "DISPATCHED"
+        mirror.last_snapshot_error = None
+        mirror.last_snapshot_message_id = msg_id
+        placeholders[str(mirror.id)] = snap
+    return placeholders
+
+
+def _derive_target_meta(
+    mirror: models.MirrorRepository,
+) -> tuple[str, str]:
+    """Return ``(distro, version)`` for a mirror.
+
+    Pulled out of create_run so the same logic resolves both the
+    insert-time stamping AND any later "re-derive after the operator
+    edited the mirror" flow.  Requires the mirror to have
+    ``known_version_id`` set — the catalog row's ``os_family`` is the
+    canonical distro identifier; rolling our own apt-mirror url
+    parsing here would just duplicate that registry.
+    """
+    if mirror.known_version_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "Mirror %r has no known_version_id set; "
+                "Option-B collection runs need the mirror to be "
+                "tied to a catalog version so distro / version can "
+                "be derived.  Edit the mirror and pick a version "
+                "from the dropdown."
+            )
+            % mirror.name,
+        )
+    known = mirror.known_version  # SQLAlchemy lazy-load via relationship
+    if known is None:
+        # known_version_id non-NULL but the row was deleted out from
+        # under us — extremely rare.  Still a 400 since the operator
+        # needs to fix the mirror config before we can proceed.
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "Mirror %r references a catalog version that no "
+                "longer exists.  Re-pick a version on the mirror."
+            )
+            % mirror.name,
+        )
+    distro = known.os_family
+    # Pick the per-PM "version-shaped" field on the mirror itself
+    # first (operators may override the catalog default at row
+    # creation), falling back to the catalog defaults, finally to
+    # the catalog's version_key.
+    if mirror.package_manager == "apt":
+        version = mirror.suite or known.default_suite or known.version_key
+    elif mirror.package_manager == "dnf":
+        version = mirror.release or known.default_release or known.version_key
+    elif mirror.package_manager == "zypper":
+        version = mirror.release or known.default_release or known.version_key
+    elif mirror.package_manager == "pkg":
+        version = mirror.release or known.default_release or known.version_key
+    else:
+        version = known.version_key
+    return distro, version
+
+
+def _serialize_target(target: models.AirgapCollectionTarget) -> RunTargetSpec:
+    """Translate the persisted target row into the API response shape."""
+    repos = (target.repos or "").split(",") if target.repos else []
+    return RunTargetSpec(
+        mirror_id=str(target.mirror_id) if target.mirror_id else "",
+        distro=target.distro,
+        version=target.version,
+        repos=[r.strip() for r in repos if r.strip()],
+        mirror_name=target.mirror.name if target.mirror else None,
+        source_snapshot_id=(
+            str(target.source_snapshot_id) if target.source_snapshot_id else None
+        ),
+    )
+
+
+def _run_to_response(run: models.AirgapCollectionRun) -> RunResponse:
+    """Convert a run row + its eagerly-loaded targets into RunResponse.
+
+    Centralises the serialization so every endpoint produces the same
+    shape — particularly important now that ``targets`` and
+    ``burn_device`` join the existing scalar columns and the
+    relationship lookup must happen under the session that's about
+    to close.
+    """
+    payload = run.to_dict()
+    payload["burn_device"] = run.burn_device
+    payload["targets"] = [
+        _serialize_target(t).model_dump() for t in (run.targets or [])
+    ]
+    return RunResponse(**payload)
+
+
+def _resolve_target_mirrors(
+    db: Session, target_specs: List[RunTargetSpec]
+) -> List[models.MirrorRepository]:
+    """Load + validate every mirror the operator picked.
+
+    Enforces the Option-B invariants:
+      * Each mirror_id exists.
+      * Each mirror is enabled (a disabled mirror's tree is
+        unreliable — operator should re-enable + sync first).
+      * All picked mirrors share a single host_id (the collection
+        plan dispatches to one host, so cross-host targets aren't
+        supported in v1 of Option-B).
+
+    Returns the mirror rows in input order so the caller can pair
+    them up with their target specs.
+    """
+    if not target_specs:
+        raise HTTPException(
+            status_code=400,
+            detail=_("At least one target is required to create a collection run."),
+        )
+    mirrors: List[models.MirrorRepository] = []
+    seen_hosts = set()
+    for spec in target_specs:
+        try:
+            mid = uuid.UUID(spec.mirror_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Invalid UUID for mirror_id: %s") % spec.mirror_id,
+            ) from exc
+        mirror = (
+            db.query(models.MirrorRepository)
+            .filter(models.MirrorRepository.id == mid)
+            .first()
+        )
+        if mirror is None:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Mirror %s not found") % spec.mirror_id,
+            )
+        if not mirror.enabled:
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "Mirror %r is disabled; enable + sync it before "
+                    "using it in a collection run."
+                )
+                % mirror.name,
+            )
+        seen_hosts.add(str(mirror.host_id))
+        mirrors.append(mirror)
+    if len(seen_hosts) > 1:
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "All target mirrors must live on the same host "
+                "(the collection plan dispatches to a single agent). "
+                "Selected mirrors span %d hosts."
+            )
+            % len(seen_hosts),
+        )
+    return mirrors
+
+
 @router.post("/runs", response_model=RunResponse)
 async def create_run(
     request: RunCreateRequest,
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
-    """Create a one-shot collection run.
+    """Create a one-shot collection run (Option-B / snapshot-sourced).
 
     ``cron_schedule`` is left NULL — recurring runs go through
     ``airgap_collection_schedule.py``'s tick mechanism; this endpoint
-    is strictly for ad-hoc UI-triggered runs.  The background worker
-    picks the row up from ``status='QUEUED'`` and drives it through
-    the lifecycle.
+    is strictly for ad-hoc UI-triggered runs.  The ``airgap_run_tick``
+    background service picks the row up from ``status='QUEUED'`` and
+    drives it through the lifecycle.
+
+    Flow:
+
+      1. Resolve every target's mirror, validate, derive (distro,
+         version) from the mirror's known_version catalog row.
+      2. Dispatch one snapshot per target mirror — these are the
+         exact snapshots the bundle will rsync from.
+      3. Insert AirgapCollectionTarget rows pointing at the mirror
+         AND the placeholder snapshot row.
+      4. Insert the AirgapCollectionRun row at status=QUEUED.
+
+    The orchestrator polls QUEUED runs, waits for each target's
+    snapshot's ``last_snapshot_message_id`` to clear, then dispatches
+    a snapshot-sourced collection plan that rsyncs each snapshot dir
+    into the staging tree.
     """
     _check_collector_module()
+    if not request.targets:
+        raise HTTPException(
+            status_code=400,
+            detail=_("At least one target is required to create a collection run."),
+        )
     user = _get_user(db, current_user)
+
+    # Resolve + validate before any side-effect — we want a clean 400
+    # if anything's wrong, not a half-created run with a snapshot
+    # dispatched to nowhere.
+    mirrors = _resolve_target_mirrors(db, request.targets)
+    target_meta = [_derive_target_meta(m) for m in mirrors]
+
+    # Snapshot side-effect.  If any single dispatch raises we let it
+    # bubble out as a 500 — caller will see the run wasn't created
+    # and can retry.  Previously-dispatched snapshots in this loop
+    # will still complete server-side; they just won't be tied to a
+    # run, which is fine (operator can restore from them if desired).
+    snapshot_placeholders = _snapshot_mirrors_for_run(db, mirrors)
+
     run = models.AirgapCollectionRun(
         iso_label=request.iso_label,
         media_size_bytes=request.media_size_bytes,
         include_cve=request.include_cve,
         include_compliance=request.include_compliance,
+        burn_device=request.burn_device,
         status="QUEUED",
         cron_schedule=None,
         created_by=user.id,
     )
     db.add(run)
+    db.flush()  # need run.id before inserting targets
+    for spec, mirror, (distro, version) in zip(request.targets, mirrors, target_meta):
+        placeholder = snapshot_placeholders.get(str(mirror.id))
+        db.add(
+            models.AirgapCollectionTarget(
+                run_id=run.id,
+                mirror_id=mirror.id,
+                source_snapshot_id=placeholder.id if placeholder else None,
+                distro=distro,
+                version=version,
+                # AirgapCollectionTarget stores ``repos`` as a CSV
+                # column — the engine consumes that same shape via
+                # ``target.repos.split(',')`` in the orchestrator.
+                repos=",".join(spec.repos) if spec.repos else None,
+            )
+        )
     db.commit()
     db.refresh(run)
     AuditService.log(
@@ -166,12 +489,18 @@ async def create_run(
         entity_type=EntityType.SETTING,
         entity_id=str(run.id),
         entity_name=run.iso_label,
-        description=_("Created one-shot air-gap collection run '%s'") % run.iso_label,
+        description=(
+            _(
+                "Created one-shot air-gap collection run '%s' with "
+                "%d target mirror(s); snapshots dispatched."
+            )
+            % (run.iso_label, len(mirrors))
+        ),
         user_id=user.id,
         username=current_user,
         result=Result.SUCCESS,
     )
-    return RunResponse(**run.to_dict())
+    return _run_to_response(run)
 
 
 @router.get("/runs", response_model=List[RunResponse])
@@ -182,7 +511,7 @@ async def list_runs(db: Session = Depends(get_db)):
         .order_by(models.AirgapCollectionRun.created_at.desc())
         .all()
     )
-    return [RunResponse(**r.to_dict()) for r in rows]
+    return [_run_to_response(r) for r in rows]
 
 
 @router.get("/runs/{run_id}", response_model=RunResponse)
@@ -196,7 +525,165 @@ async def get_run(run_id: str, db: Session = Depends(get_db)):
     )
     if not run:
         raise HTTPException(status_code=404, detail=_(_ERR_RUN_NOT_FOUND))
-    return RunResponse(**run.to_dict())
+    return _run_to_response(run)
+
+
+# Where the orchestrator's build_iso_plan / multi-disc plan writes
+# its output.  Mirrors the path baked into airgap_run_tick — both
+# sides must agree or the download 410s.
+_ISO_OUTPUT_DIR = "/var/lib/sysmanage/airgap-iso"
+
+
+def _list_run_discs(run_id: uuid.UUID) -> List[str]:
+    """Return absolute paths of every disc ISO on disk for a run.
+
+    Single-disc runs produce ``<run_id>.iso``; multi-disc runs produce
+    ``<run_id>-disc-1.iso``, ``<run_id>-disc-2.iso``, etc.  Returns the
+    list sorted by disc index (single-disc first if both exist, which
+    shouldn't happen but we don't enforce it).
+    """
+    single = os.path.join(_ISO_OUTPUT_DIR, f"{run_id}.iso")
+    out: List[str] = []
+    if os.path.isfile(single):
+        out.append(single)
+    idx = 1
+    while True:
+        disc = os.path.join(_ISO_OUTPUT_DIR, f"{run_id}-disc-{idx}.iso")
+        if not os.path.isfile(disc):
+            break
+        out.append(disc)
+        idx += 1
+    return out
+
+
+@router.get("/runs/{run_id}/discs")
+async def list_run_discs(run_id: str, db: Session = Depends(get_db)):
+    """List the disc ISOs available for a run (multi-disc runs only).
+
+    Used by the UI to render a per-disc download list when
+    ``disc_count > 1``.  Returns ``[{disc_index, filename, size_bytes}]``;
+    empty list if the run hasn't finished or single-disc.
+    """
+    _check_collector_module()
+    rid = _parse_run_uuid(run_id)
+    run = (
+        db.query(models.AirgapCollectionRun)
+        .filter(models.AirgapCollectionRun.id == rid)
+        .first()
+    )
+    if not run:
+        raise HTTPException(status_code=404, detail=_(_ERR_RUN_NOT_FOUND))
+    discs = _list_run_discs(rid)
+    result = []
+    for path in discs:
+        name = os.path.basename(path)
+        # Pull the disc index out of the suffix; single-disc files
+        # report disc_index=1 for UI uniformity.
+        if "-disc-" in name:
+            try:
+                index = int(name.rsplit("-disc-", 1)[1].split(".", 1)[0])
+            except ValueError:
+                index = 0
+        else:
+            index = 1
+        result.append(
+            {
+                "disc_index": index,
+                "filename": name,
+                "size_bytes": os.path.getsize(path),
+            }
+        )
+    return result
+
+
+@router.get("/runs/{run_id}/iso")
+async def download_run_iso(
+    run_id: str,
+    disc: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    """Stream an ISO file produced by a completed collection run.
+
+    Separate from the existing ``/manifests/{id}/download`` endpoint
+    (which serves the signed manifest envelope for an inserted disc
+    written via the agent's burn step).  This route serves the raw
+    ISO file(s) the orchestrator materialized.
+
+    Single-disc runs: ``/var/lib/sysmanage/airgap-iso/{run_id}.iso``.
+    Multi-disc runs: ``…/{run_id}-disc-{N}.iso``; pass ``?disc=N`` to
+    pick which one.  ``disc=1`` returns the first (lowest-index)
+    available file regardless of whether the run was single- or
+    multi-disc — that's the "just give me the bundle" default.
+    """
+    _check_collector_module()
+    rid = _parse_run_uuid(run_id)
+    run = (
+        db.query(models.AirgapCollectionRun)
+        .filter(models.AirgapCollectionRun.id == rid)
+        .first()
+    )
+    if not run:
+        raise HTTPException(status_code=404, detail=_(_ERR_RUN_NOT_FOUND))
+    # ISO_BUILT means the file(s) exist but the (optional) burn step
+    # hasn't run yet; COMPLETE means the lifecycle finished.  Both
+    # states are valid download points.  Anything earlier and the
+    # file isn't on disk yet.
+    if run.status not in ("ISO_BUILT", "BURNING", "COMPLETE"):
+        raise HTTPException(
+            status_code=409,
+            detail=_(
+                "ISO is not ready for download yet (status: %s). "
+                "Wait until the run reaches ISO_BUILT."
+            )
+            % run.status,
+        )
+
+    available = _list_run_discs(rid)
+    if not available:
+        raise HTTPException(
+            status_code=410,
+            detail=_(
+                "ISO file no longer on disk; the staging volume may "
+                "have been cleaned. Re-run the collection to rebuild."
+            ),
+        )
+
+    if disc is None or disc == 1:
+        # Default: first ISO on disk.  Filename uses run.iso_label so
+        # the operator sees a friendly name in the download dialog
+        # regardless of the on-disk run-uuid naming.
+        chosen = available[0]
+    else:
+        # Specific disc requested.  Build the exact expected path and
+        # check it's in the available list (defends against ../ in disc
+        # number via the int type already).
+        target = os.path.join(_ISO_OUTPUT_DIR, f"{run.id}-disc-{disc}.iso")
+        if target not in available:
+            raise HTTPException(
+                status_code=404,
+                detail=_("Disc %d not found for this run.  Available discs: %s")
+                % (disc, ", ".join(os.path.basename(p) for p in available)),
+            )
+        chosen = target
+
+    # Friendly download filename: iso_label + (-disc-N when multi-disc).
+    is_multidisc = len(available) > 1 or "-disc-" in os.path.basename(chosen)
+    if is_multidisc:
+        # Re-extract index for the filename.
+        name = os.path.basename(chosen)
+        try:
+            idx = int(name.rsplit("-disc-", 1)[1].split(".", 1)[0])
+            friendly = f"{run.iso_label}-disc-{idx}.iso"
+        except ValueError:
+            friendly = f"{run.iso_label}-{run.id}.iso"
+    else:
+        friendly = f"{run.iso_label}-{run.id}.iso"
+
+    return FileResponse(
+        chosen,
+        media_type="application/octet-stream",
+        filename=friendly,
+    )
 
 
 @router.delete("/runs/{run_id}", status_code=204)

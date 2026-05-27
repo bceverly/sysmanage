@@ -30,12 +30,17 @@
 #   sudo apt install libvirt-clients libvirt-daemon-system virtinst \
 #                    qemu-utils qemu-system-x86 cloud-image-utils curl
 #
-# Resource sizing is deliberately small:
-#   online        : 2 vCPU / 2 GiB RAM / 16 GiB disk
-#   airgap        : 2 vCPU / 2 GiB RAM / 24 GiB disk  (extra room for staged ISOs)
-#   private-agent : 1 vCPU / 1 GiB RAM / 10 GiB disk
-# Bump via environment variables (see top of script) if 2 GiB ends up
-# tight when you run the full sysmanage stack with postgres + OpenBAO.
+# Resource sizing.  Disk sizes are the maximum the VM filesystem can
+# grow to — qcow2 is thin-allocated so unused space doesn't actually
+# consume host disk.  Defaults are sized for a real end-to-end test:
+#   online        : 2 vCPU / 2 GiB RAM / 80 GiB disk  (room for apt-mirror
+#                   tree of one suite + snapshots + staged bundle ISOs)
+#   airgap        : 2 vCPU / 2 GiB RAM / 80 GiB disk  (must hold the imported
+#                   mirror after the ISO is mounted + ingested)
+#   private-agent : 1 vCPU / 1 GiB RAM / 20 GiB disk  (just OS + agent state)
+# Bump via environment variables (see top of script) if 2 GiB of RAM
+# ends up tight when running the full sysmanage stack with postgres +
+# OpenBAO.
 
 set -euo pipefail
 
@@ -64,20 +69,20 @@ PRIVATE_NET_MASK="${PRIVATE_NET_MASK:-255.255.255.0}"
 ONLINE_NAME="${ONLINE_NAME:-sysmanage-online}"
 ONLINE_VCPUS="${ONLINE_VCPUS:-2}"
 ONLINE_RAM="${ONLINE_RAM:-2048}"
-ONLINE_DISK_GB="${ONLINE_DISK_GB:-16}"
+ONLINE_DISK_GB="${ONLINE_DISK_GB:-80}"
 ONLINE_MAC="${ONLINE_MAC:-52:54:00:60:50:00}"
 
 AIRGAP_NAME="${AIRGAP_NAME:-sysmanage-airgap}"
 AIRGAP_VCPUS="${AIRGAP_VCPUS:-2}"
 AIRGAP_RAM="${AIRGAP_RAM:-2048}"
-AIRGAP_DISK_GB="${AIRGAP_DISK_GB:-24}"
+AIRGAP_DISK_GB="${AIRGAP_DISK_GB:-80}"
 AIRGAP_MAC="${AIRGAP_MAC:-52:54:00:60:00:01}"
 AIRGAP_IP="${AIRGAP_IP:-10.60.0.1}"
 
 AGENT_NAME="${AGENT_NAME:-sysmanage-private-agent}"
 AGENT_VCPUS="${AGENT_VCPUS:-1}"
 AGENT_RAM="${AGENT_RAM:-1024}"
-AGENT_DISK_GB="${AGENT_DISK_GB:-10}"
+AGENT_DISK_GB="${AGENT_DISK_GB:-20}"
 AGENT_MAC="${AGENT_MAC:-52:54:00:60:00:02}"
 AGENT_IP="${AGENT_IP:-10.60.0.2}"
 
@@ -452,17 +457,23 @@ cmd_start() {
 cmd_stop() {
   check_deps
   for name in "${VM_NAMES[@]}"; do
+    # Always try destroy first, regardless of what vm_running thinks.
+    # Skipping destroy when vm_running returned false (e.g. a transient
+    # libvirt state lie, a previously-failed run, or a fast-moving
+    # crash) and then undefining leaves a "transient" running domain
+    # that ``start`` can't recreate ("Domain is already active").
+    # destroy on a stopped domain is a no-op + non-zero exit, which
+    # ``|| true`` absorbs cleanly.
+    log "$name: destroying (if running)"
+    virsh_ destroy "$name" >/dev/null 2>&1 || true
     if vm_exists "$name"; then
-      if vm_running "$name"; then
-        log "$name: destroying"
-        virsh_ destroy "$name" >/dev/null || true
-      fi
       log "$name: undefining (removing disks)"
       virsh_ undefine "$name" --remove-all-storage --nvram >/dev/null 2>&1 \
         || virsh_ undefine "$name" --remove-all-storage >/dev/null 2>&1 \
-        || true
+        || virsh_ undefine "$name" >/dev/null 2>&1 \
+        || warn "$name: undefine failed — may need manual cleanup with 'virsh undefine $name --remove-all-storage'"
     else
-      log "$name: not defined — skipping"
+      log "$name: not defined — skipping undefine"
     fi
   done
 

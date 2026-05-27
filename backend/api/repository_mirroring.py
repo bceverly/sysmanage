@@ -393,9 +393,13 @@ async def sync_mirror(mirror_id: str, db: Session = Depends(get_db)):
         )
     plan = builder(config, settings.mirror_root_path)
     msg_id = _dispatch_plan(plan, row.host_id, action="sync", mirror_id=str(row.id))
-    row.last_sync_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    row.last_sync_at = now
     row.last_sync_status = "DISPATCHED"
     row.last_sync_error = None
+    # Stamp the in-flight marker so the UI can render
+    # "syncing since N minutes ago" until the result handler clears it.
+    row.last_sync_message_id = msg_id
     db.commit()
     return {
         "message": _("Mirror sync dispatched"),
@@ -418,6 +422,7 @@ async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_db)):
     if not row:
         raise HTTPException(status_code=404, detail=_(_MIRROR_NOT_FOUND))
     settings = _get_settings(db)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     snapshot_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     plan = engine.build_mirror_snapshot_plan(
         _config_from_row(row), settings.mirror_root_path, snapshot_id
@@ -425,12 +430,20 @@ async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_db)):
     msg_id = _dispatch_plan(
         plan, row.host_id, action="snapshot", mirror_id=str(row.id), timeout=600
     )
+    # Eagerly insert the snapshot row so the UI's expand-row can show
+    # "snapshot in progress" immediately; the result handler later
+    # populates size_bytes / file_count on success or deletes the row
+    # on failure (so the list doesn't accumulate phantom snapshots).
     snap = models.MirrorSnapshot(
         repository_id=row.id,
         snapshot_id=snapshot_id,
-        taken_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        taken_at=now,
     )
     db.add(snap)
+    row.last_snapshot_at = now
+    row.last_snapshot_status = "DISPATCHED"
+    row.last_snapshot_error = None
+    row.last_snapshot_message_id = msg_id
     db.commit()
     return {"snapshot_id": snapshot_id, "message_id": msg_id}
 
@@ -458,6 +471,12 @@ async def restore_mirror(
     msg_id = _dispatch_plan(
         plan, row.host_id, action="restore", mirror_id=str(row.id), timeout=600
     )
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    row.last_restore_at = now
+    row.last_restore_status = "DISPATCHED"
+    row.last_restore_error = None
+    row.last_restore_message_id = msg_id
+    db.commit()
     return {"snapshot_id": snapshot_id, "message_id": msg_id}
 
 

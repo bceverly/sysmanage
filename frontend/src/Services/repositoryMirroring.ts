@@ -33,8 +33,33 @@ export interface MirrorRepository {
   last_sync_at?: string | null;
   last_sync_status?: string | null;
   last_sync_error?: string | null;
+  last_sync_message_id?: string | null;
   next_sync_at?: string | null;
+  last_snapshot_at?: string | null;
+  last_snapshot_status?: string | null;
+  last_snapshot_error?: string | null;
+  last_snapshot_message_id?: string | null;
+  last_restore_at?: string | null;
+  last_restore_status?: string | null;
+  last_restore_error?: string | null;
+  last_restore_message_id?: string | null;
+  last_integrity_at?: string | null;
+  last_integrity_status?: string | null;
+  last_integrity_error?: string | null;
+  last_integrity_message_id?: string | null;
+  last_gc_at?: string | null;
+  last_gc_status?: string | null;
+  last_gc_error?: string | null;
+  last_gc_message_id?: string | null;
 }
+
+/** The plan ``action`` keys the OSS dispatch routes through. */
+export type MirrorActionKey =
+  | 'sync'
+  | 'snapshot'
+  | 'restore'
+  | 'integrity'
+  | 'gc';
 
 export interface MirrorRepositoryCreate {
   name: string;

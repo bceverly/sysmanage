@@ -1837,11 +1837,16 @@ jobs:
           # occasionally drops mid-transfer with "cannot read from
           # timed out object" — retry up to 3× with linear backoff
           # before failing the workflow.  Mirrors the same pattern
-          # used in the sysmanage-agent workflow.
+          # used in the sysmanage-agent workflow.  ``-f`` (force) is
+          # required on retries because a Broken-pipe failure during
+          # the first attempt leaves a partial .tar.xz on Launchpad's
+          # FTP endpoint; without --force, dput's duplicate check
+          # rejects the retry with "Upload permissions error" and
+          # the upload never recovers.
           changes_file="sysmanage_${VERSION}+ppa1~${RELEASE}1_source.changes"
           attempt=1
           max_attempts=3
-          until dput launchpad "$changes_file"; do
+          until dput -f launchpad "$changes_file"; do
             if [ "$attempt" -ge "$max_attempts" ]; then
               echo "::error::dput failed after $attempt attempts uploading $changes_file"
               exit 1

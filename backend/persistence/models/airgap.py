@@ -49,12 +49,30 @@ class AirgapCollectionRun(Base):
     include_cve = Column(Boolean, nullable=False, default=True)
     include_compliance = Column(Boolean, nullable=False, default=True)
 
-    # Lifecycle: QUEUED -> MIRRORING -> STAGING_COMPLETE -> ISO_BUILT
-    #          -> BURNING -> COMPLETE | FAILED
+    # Lifecycle: QUEUED -> MIRRORING -> STAGING_COMPLETE -> BUILDING_ISO
+    #          -> ISO_BUILT -> COMPLETE | FAILED
+    # (BURNING is reserved for future operator-driven optical-burn flows
+    # — the auto-orchestrator stops at ISO_BUILT.)
     status = Column(String(40), nullable=False, default="QUEUED")
     started_at = Column(DateTime, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
+    # ``airgap_run_tick`` stamps the in-flight command's message_id
+    # here when it dispatches a stage's plan to the agent, and clears
+    # it when the result is processed.  Two purposes:
+    #   1. The orchestrator skips runs whose ``worker_message_id`` is
+    #      non-NULL on the next tick so a slow-running plan isn't
+    #      re-dispatched.
+    #   2. The result handler keys off ``worker_message_id`` to know
+    #      which run a result corresponds to (defense-in-depth; the
+    #      correlation map is the primary keying mechanism).
+    worker_message_id = Column(String(80), nullable=True)
+    # Optional optical-burn target.  When set, the orchestrator
+    # advances ISO_BUILT → BURNING by dispatching ``build_burn_plan``
+    # at this device path (e.g. ``/dev/sr0``).  When NULL the run
+    # goes ISO_BUILT → COMPLETE directly — the typical "build a
+    # downloadable ISO file" flow that doesn't touch optical media.
+    burn_device = Column(String(200), nullable=True)
 
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
@@ -125,11 +143,20 @@ class AirgapCollectionRun(Base):
             "cron_schedule": self.cron_schedule,
             "parent_run_id": (str(self.parent_run_id) if self.parent_run_id else None),
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "worker_message_id": self.worker_message_id,
         }
 
 
 class AirgapCollectionTarget(Base):
-    """A single distro/version target inside a collection run."""
+    """A single distro/version target inside a collection run.
+
+    Option-B link: each target points at the mirror_repository it
+    bundles AND the specific snapshot of that mirror the orchestrator
+    pinned at QUEUED → MIRRORING transition.  ``distro`` and
+    ``version`` are server-derived from the mirror's metadata at run-
+    creation time (preserved on the row for engine/display purposes,
+    but the source of truth is ``mirror_id``).
+    """
 
     __tablename__ = "airgap_collection_target"
 
@@ -149,8 +176,28 @@ class AirgapCollectionTarget(Base):
     byte_count = Column(BigInteger, nullable=True)
     file_count = Column(Integer, nullable=True)
     status = Column(String(40), nullable=True)
+    # Option-B: the mirror this target reads from.  Stamped at run
+    # creation when the operator picks a mirror.  Nullable on the
+    # schema for compat with legacy free-text (distro, version) rows;
+    # the API rejects new runs with NULL mirror_id.
+    mirror_id = Column(
+        GUID(),
+        ForeignKey("mirror_repository.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    # The mirror snapshot the bundle was built from.  Populated by the
+    # orchestrator at QUEUED → MIRRORING once the per-target snapshot
+    # has completed.  Pin lets us prove the bundle is byte-for-byte
+    # identical to a specific point-in-time mirror state.
+    source_snapshot_id = Column(
+        GUID(),
+        ForeignKey("mirror_snapshot.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     run = relationship("AirgapCollectionRun", back_populates="targets")
+    mirror = relationship("MirrorRepository")
+    source_snapshot = relationship("MirrorSnapshot")
 
 
 class AirgapMediaManifest(Base):
