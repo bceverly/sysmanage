@@ -750,8 +750,35 @@ clean-whitespace: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/clean_whitespace.py
 
 # Python linting
-lint-python: format-python
+#
+# Auto-fix-with-tripwire pattern: ``make lint`` keeps the convenient
+# "format my code while you're at it" behaviour, but if black actually
+# DID reformat anything we exit non-zero so the dev knows to ``git
+# add`` + re-commit before pushing.  Previously ``lint-python``
+# depended on ``format-python`` and never reported black drift — black
+# would silently rewrite the working tree, pylint would run against
+# the already-formatted code, and ``make lint`` reported "passed".
+# The dev then commit + pushed the un-formatted version that was
+# already staged, and CI's ``black --check`` would reject it.  This
+# target now closes that loop: black still runs (so ``make lint``
+# doubles as a fix-it command) but a pre-flight ``--check`` decides
+# whether to fail at the end.
+lint-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Python Linting ==="
+	@echo "Running black..."
+	@$(PYTHON) -m black --check backend/ tests/ >/dev/null 2>&1; \
+	black_drift=$$?; \
+	$(PYTHON) -m black backend/ tests/; \
+	if [ "$$black_drift" != "0" ]; then \
+		echo ""; \
+		echo "[FAIL] black reformatted files in your working tree."; \
+		echo "       The fix was applied locally — but CI runs"; \
+		echo "       'black --check' against committed code, so you"; \
+		echo "       MUST: git add <files> && git commit --amend"; \
+		echo "       (or a fresh commit) before pushing."; \
+		echo ""; \
+		exit 1; \
+	fi
 	@echo "Running pylint..."
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc

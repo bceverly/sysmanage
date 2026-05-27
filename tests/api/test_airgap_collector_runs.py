@@ -14,7 +14,6 @@ from unittest.mock import MagicMock, patch
 
 from backend.api import airgap_collector_runs as runs_module
 
-
 # Phase 12 Option-B: every run-creation POST now needs at least one
 # ``{mirror_id}`` target, validated against the mirror_repository table
 # and turned into a per-target snapshot dispatch.  Tests that exercise
@@ -41,20 +40,14 @@ def _engine(loaded=True):
 
     with ExitStack() as stack:
         stack.enter_context(
-            patch.object(
-                runs_module.module_loader, "get_module", side_effect=_resolver
-            )
+            patch.object(runs_module.module_loader, "get_module", side_effect=_resolver)
         )
         if loaded:
             stack.enter_context(
-                patch.object(
-                    runs_module, "_resolve_target_mirrors", return_value=[]
-                )
+                patch.object(runs_module, "_resolve_target_mirrors", return_value=[])
             )
             stack.enter_context(
-                patch.object(
-                    runs_module, "_snapshot_mirrors_for_run", return_value={}
-                )
+                patch.object(runs_module, "_snapshot_mirrors_for_run", return_value={})
             )
         yield
 
