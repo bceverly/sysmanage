@@ -274,6 +274,19 @@ class AirgapIngestionRun(Base):
     file_count = Column(Integer, nullable=True)
     byte_count = Column(BigInteger, nullable=True)
 
+    # In-flight marker for the repository ingestion orchestrator
+    # (``airgap_ingest_tick``): set to the dispatched plan's message_id
+    # while a mount/copy plan is outstanding on the repository host's
+    # agent, cleared when the result arrives.  Prevents the next tick
+    # from re-dispatching a plan that's still running.
+    worker_message_id = Column(String(80), nullable=True)
+
+    # The verified inner manifest captured at the mount/verify step,
+    # stored as JSON.  Persisted so the copy-complete step can register
+    # per-distro ``AirgapLocalRepository`` rows from ``targets`` even
+    # across a restart, and so the ingest is auditable after the fact.
+    manifest_json = Column(Text, nullable=True)
+
     created_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
@@ -303,6 +316,7 @@ class AirgapIngestionRun(Base):
             "error_message": self.error_message,
             "file_count": self.file_count,
             "byte_count": self.byte_count,
+            "worker_message_id": self.worker_message_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 

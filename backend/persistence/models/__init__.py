@@ -28,6 +28,7 @@ from .host_role import *
 from .operations import *
 from .proplus import *
 from .secret import *
+from .server_configuration import *
 from .software import *
 
 __all__ = [
@@ -36,6 +37,8 @@ __all__ = [
     "Host",
     "User",
     "generate_secure_host_token",
+    # Server-wide configuration singleton
+    "ServerConfiguration",
     # Hardware models
     "StorageDevice",
     "NetworkInterface",

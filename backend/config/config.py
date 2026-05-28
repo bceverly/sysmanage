@@ -122,19 +122,12 @@ try:
         if "subject_prefix" not in config["email"]["templates"]:
             config["email"]["templates"]["subject_prefix"] = "[SysManage]"
 
-        # Server role (Phase 11) — picks which air-gap engine loads.
-        # ``standard`` is the default for ordinary deployments and matches
-        # pre-Phase-11 behavior.  ``collector`` is the public-side
-        # half of an air-gap pair; ``repository`` is the private-side
-        # half.  See Phase 11 in ROADMAP.md for the architecture.
-        if "role" not in config:
-            config["role"] = "standard"
-        if config["role"] not in ("standard", "collector", "repository"):
-            print(
-                f"ERROR: invalid role '{config['role']}' in {CONFIG_PATH}; "
-                f"must be one of: standard | collector | repository"
-            )
-            sys.exit(1)
+        # Server role (Phase 12) is no longer read from YAML — it lives
+        # in the ``server_configuration`` DB singleton and is set via
+        # Settings → Server Role in the web UI.  Any leftover ``role:``
+        # key in an old YAML file is harmlessly ignored.  See
+        # ``backend/services/server_config_service.py`` and
+        # ``get_server_role()`` below.
 
         # License (Pro+) settings
         if "license" not in config:
@@ -147,6 +140,36 @@ try:
             config["license"]["phone_home_interval_hours"] = 24
         if "modules_path" not in config["license"]:
             config["license"]["modules_path"] = "/var/lib/sysmanage/modules"
+
+        # Phase 12: Air-gap manifest signing/verification key locations.
+        #
+        # Zero-touch by default: the collector auto-generates an ed25519
+        # keypair at ``signing_key_file`` the first time the role is set
+        # to ``collector``; the air-gap server bundle embeds the public
+        # half so the repository side gets it for free.  All keys are
+        # optional config overrides — the defaults below "just work" so
+        # operators never have to set them.
+        #
+        #   signing_key_file          collector's ed25519 private PEM
+        #   collector_public_key_dir  repository's keyring of trusted
+        #                             collector public PEMs (a DIRECTORY,
+        #                             not a file, so multiple collectors
+        #                             / key rotation work — verify tries
+        #                             each pubkey, matched by fingerprint)
+        #   verify_strict             repository rejects unsigned / HMAC-
+        #                             fallback envelopes when True
+        if "airgap" not in config:
+            config["airgap"] = {}
+        if "signing_key_file" not in config["airgap"]:
+            config["airgap"][
+                "signing_key_file"
+            ] = "/var/lib/sysmanage/airgap/collector-ed25519.pem"
+        if "collector_public_key_dir" not in config["airgap"]:
+            config["airgap"][
+                "collector_public_key_dir"
+            ] = "/var/lib/sysmanage/airgap/trusted-collectors"
+        if "verify_strict" not in config["airgap"]:
+            config["airgap"]["verify_strict"] = True
 
         # Phase 12.7: Host geo-location settings.
         #
@@ -370,8 +393,18 @@ def get_server_role():
 
     Phase 11 air-gap topology — same binary runs as either half of an
     air-gap pair, or as a standalone (``standard``) deployment.
+
+    Phase 12: the role moved from ``sysmanage.yaml`` into the
+    ``server_configuration`` DB singleton (set via Settings → Server
+    Role).  We read it through the service, which defaults to
+    ``standard`` if the DB isn't reachable yet.  Late import keeps the
+    config module free of a DB dependency at import time.
     """
-    return config.get("role", "standard")
+    from backend.services.server_config_service import (  # pylint: disable=import-outside-toplevel
+        get_server_role as _db_get_server_role,
+    )
+
+    return _db_get_server_role()
 
 
 # Phase 12.7: Host geo-location config accessors.
@@ -421,3 +454,30 @@ def is_collector():
 def is_repository():
     """True when this server is the private-side of an air-gap pair."""
     return get_server_role() == "repository"
+
+
+# Phase 12: air-gap manifest signing/verification key locations.
+
+
+def get_airgap_signing_key_file() -> str:
+    """Filesystem path to the collector's ed25519 private signing PEM."""
+    return config.get("airgap", {}).get(
+        "signing_key_file", "/var/lib/sysmanage/airgap/collector-ed25519.pem"
+    )
+
+
+def get_airgap_collector_public_key_dir() -> str:
+    """Directory of trusted collector public-key PEMs (repository side).
+
+    A directory rather than a single file so multiple collectors and
+    key rotation work: the repository verifies a manifest against each
+    pubkey in the dir, matched by the envelope's signer_fingerprint.
+    """
+    return config.get("airgap", {}).get(
+        "collector_public_key_dir", "/var/lib/sysmanage/airgap/trusted-collectors"
+    )
+
+
+def is_airgap_verify_strict() -> bool:
+    """When True, the repository rejects unsigned / HMAC-fallback manifests."""
+    return bool(config.get("airgap", {}).get("verify_strict", True))

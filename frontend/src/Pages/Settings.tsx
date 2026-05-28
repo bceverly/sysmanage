@@ -56,6 +56,7 @@ import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
 import AirGapBundlesSettings from '../Components/AirGapBundlesSettings';
 import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
+import ServerRoleSettings from '../Components/ServerRoleSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -179,6 +180,14 @@ const Settings: React.FC = () => {
     }> = [
       { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
       { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
+      // Server Role (air-gap topology) — ungated: every deployment,
+      // including standalone Community, can pick its role.  Replaces
+      // the old sysmanage.yaml ``role:`` key.
+      {
+        id: 'server-role',
+        labelKey: 'serverRole.heading',
+        labelDefault: 'Server Role',
+      },
       {
         id: 'integrations',
         labelKey: 'integrations.title',
@@ -1276,6 +1285,7 @@ const Settings: React.FC = () => {
       <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
         {tabNames[activeTab] === 'queues' && renderQueuesTab()}
+        {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'integrations' && renderIntegrationsTab()}
         {tabNames[activeTab] === 'ubuntu-pro' && renderUbuntuProTab()}
         {tabNames[activeTab] === 'antivirus' && <AntivirusDefaultsSettings />}

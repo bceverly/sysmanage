@@ -81,6 +81,58 @@ def _now_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def _manifest_targets(run: "models.AirgapCollectionRun") -> list:
+    """The ``targets`` list embedded in (and signed with) the manifest.
+
+    The repository side reads this off the verified ``/manifest.json``
+    to populate its per-distro ``AirgapLocalRepository`` rows (which
+    drive freshness + compliance staleness) without having to re-scan
+    the copied tree.  Each entry is ``{distro, version}`` — the minimum
+    the repository needs to register what it just ingested.  Embedded
+    inside the signed payload so a tampered target list is rejected.
+    """
+    return [{"distro": t.distro, "version": t.version} for t in (run.targets or [])]
+
+
+def _sign_manifest_or_raw(engine, manifest: dict) -> dict:
+    """Return a signed manifest envelope, or the bare manifest on miss.
+
+    Reads the collector's ed25519 private key and asks the engine's
+    ``sign_manifest`` to wrap the manifest.  If the key is missing or
+    the engine doesn't expose ``sign_manifest`` (older module), logs a
+    warning and returns the unsigned manifest — the ISO still builds
+    and downloads, it just won't pass a strict repository ingest.  That
+    degrade-don't-crash choice keeps a key-misconfigured collector from
+    failing the whole run; the operator sees unsigned bundles get
+    rejected on ingest and fixes the key, rather than debugging a
+    mid-run failure.
+    """
+    signer = getattr(engine, "sign_manifest", None)
+    if signer is None:
+        logger.warning(
+            "collector engine has no sign_manifest; embedding UNSIGNED manifest"
+        )
+        return manifest
+    try:
+        from backend.services.airgap_signing_service import (  # pylint: disable=import-outside-toplevel
+            get_collector_private_key_pem,
+        )
+
+        private_pem = get_collector_private_key_pem()
+        if not private_pem:
+            logger.warning(
+                "collector signing key missing (set role to collector to "
+                "generate it); embedding UNSIGNED manifest"
+            )
+            return manifest
+        return signer(manifest, private_pem)
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.warning(
+            "manifest signing failed; embedding UNSIGNED manifest", exc_info=True
+        )
+        return manifest
+
+
 def _find_collector_host(db) -> "models.Host | None":
     """Return the Host row this server's collection plans should dispatch to.
 
@@ -331,6 +383,18 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
                     "Rebuild the Pro+ Cython modules.",
                 )
                 return
+            # Sign one manifest envelope; the engine stamps each disc's
+            # own disc_index/disc_count onto a copy.  Same signed
+            # payload the single-disc path embeds — so a multi-disc
+            # bundle passes the repository's strict verify too.
+            multidisc_manifest = {
+                "format_version": 1,
+                "iso_label": run.iso_label,
+                "include_cve": run.include_cve,
+                "include_compliance": run.include_compliance,
+                "targets": _manifest_targets(run),
+            }
+            signed_envelope = _sign_manifest_or_raw(engine, multidisc_manifest)
             try:
                 plan = multidisc_builder(
                     req,
@@ -341,6 +405,7 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
                     # locate them by run id alone.
                     iso_path_prefix=str(run.id),
                     staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
+                    manifest_envelope=signed_envelope,
                 )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 # CollectorConfigError raised when a single target
@@ -412,11 +477,22 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
             "iso_label": run.iso_label,
             "include_cve": run.include_cve,
             "include_compliance": run.include_compliance,
+            "targets": _manifest_targets(run),
         }
+        # Sign the manifest before embedding it.  The repository side
+        # verifies the ``/manifest.json`` that lives ON the disc (not
+        # the collector's DB row), and its ingest runs strict by
+        # default — an unsigned manifest is rejected at the air-gap
+        # crossing.  ``_sign_manifest_or_raw`` returns a signed envelope
+        # when the collector key is present, or the bare manifest (with
+        # a logged warning) when it isn't, so a misconfigured collector
+        # produces a downloadable-but-unverifiable ISO rather than a
+        # hard failure mid-run.
+        manifest_payload = _sign_manifest_or_raw(engine, manifest)
         plan = engine.build_iso_plan(
             staging_dir=f"/var/lib/sysmanage/airgap-staging/{run.id}",
             output_iso=f"/var/lib/sysmanage/airgap-iso/{run.id}.iso",
-            manifest_dict=manifest,
+            manifest_dict=manifest_payload,
             iso_label=run.iso_label,
         )
     except Exception as exc:  # pylint: disable=broad-exception-caught

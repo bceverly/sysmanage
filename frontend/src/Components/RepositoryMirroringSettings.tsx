@@ -678,6 +678,21 @@ const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
   const atDate = at ? new Date(at) : null;
   const inFlight = !!inFlightMessageId;
 
+  // Tick once per second WHILE in-flight so the elapsed-time label
+  // advances smoothly.  ``formatElapsed`` reads ``Date.now()`` at
+  // render, so the only thing missing was a reason to re-render
+  // between the parent's 10s data polls — this forces one every
+  // second.  The interval is torn down the moment the op settles
+  // (inFlight flips false), so idle chips never hold a timer.  Hooks
+  // run unconditionally before the early returns below, per the rules
+  // of hooks.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!inFlight) return undefined;
+    const handle = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(handle);
+  }, [inFlight]);
+
   if (inFlight) {
     const elapsed = atDate ? formatElapsed(atDate) : '';
     return (

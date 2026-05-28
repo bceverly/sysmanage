@@ -196,6 +196,24 @@ def register_airgap_run_correlation(
     )
 
 
+def register_airgap_ingest_correlation(
+    message_id: str, stage: str, run_id: str, host_id: str
+) -> None:
+    """Register a repository-side ingestion plan for result-routing.
+
+    ``stage`` is the ingestion phase the plan represents ("mount" or
+    "copy"); the result handler keys off it to decide which transition
+    to apply (mount → verify-then-VERIFIED, copy → COMPLETE).
+    ``primary_id`` encodes ``"<stage>:<run_id>"``.
+    """
+    _register_correlation(
+        message_id,
+        "airgap_ingest",
+        f"{stage}:{run_id}",
+        host_id,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Automation engine dispatch
 # ---------------------------------------------------------------------------
@@ -1187,6 +1205,80 @@ def _apply_airgap_run_result(
         session.commit()
 
 
+def _apply_airgap_ingest_result(
+    primary_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Handle completion of a repository-side ingestion plan.
+
+    ``primary_id`` is ``"<stage>:<run_id>"``.  The stage drives the
+    transition:
+
+      mount → on success, hand the mount outcome to
+              ``airgap_ingest_tick.process_mount_result`` (verifies the
+              embedded manifest against the trusted keyring; sets
+              VERIFIED on a good signature, FAILED otherwise).  The
+              ingest tick then picks up VERIFIED and dispatches the copy.
+      copy  → on success, ``process_copy_result`` sets COMPLETE,
+              records rsync counts, and registers per-distro repos.
+
+    Always clears ``worker_message_id`` so the orchestrator's in-flight
+    check resets.  A failed agent plan short-circuits to FAILED with the
+    best available stderr.
+    """
+    _ = host_id  # logged elsewhere for audit; not needed for the row update
+    if ":" not in primary_id:
+        logger.warning(
+            "airgap_ingest result with malformed primary_id %r — dropping",
+            primary_id,
+        )
+        return
+    stage, run_id = primary_id.split(":", 1)
+
+    # Late import: the orchestrator late-imports proplus_dispatch for
+    # dispatch helpers, so importing it at module top here would cycle.
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        airgap_ingest_tick,
+    )
+
+    session_local = db.get_session_local()
+    with session_local() as session:
+        run = (
+            session.query(models.AirgapIngestionRun)
+            .filter(models.AirgapIngestionRun.id == run_id)
+            .first()
+        )
+        if run is None:
+            logger.info(
+                "airgap ingestion run %s no longer exists; dropping %s result",
+                run_id,
+                stage,
+            )
+            return
+
+        run.worker_message_id = None
+
+        if outcome["status"] != "succeeded":
+            run.status = "FAILED"
+            run.error_message = _best_failure_text(outcome)[:8000]
+            run.completed_at = _now_naive()
+            session.commit()
+            return
+
+        if stage == "mount":
+            airgap_ingest_tick.process_mount_result(session, run, outcome)
+        elif stage == "copy":
+            airgap_ingest_tick.process_copy_result(session, run, outcome)
+        else:
+            logger.warning(
+                "airgap_ingest result with unknown stage %r (run_id=%s); "
+                "leaving row at %s",
+                stage,
+                run_id,
+                run.status,
+            )
+        session.commit()
+
+
 def _queue_followup_setup_check(host_id: str, session_local) -> None:
     """Auto-chain a setup_check after a successful install so the card
     reflects the new tool presence.  The follow-up message rides the
@@ -1506,6 +1598,22 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         except Exception as exc:
             logger.warning(
                 "Failed to apply airgap_run result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Repository-side ingestion plans (mount / copy).  The
+    # ``airgap_ingest_tick`` orchestrator dispatches these as it walks an
+    # AirgapIngestionRun through QUEUED → VERIFYING_SIG → VERIFIED →
+    # COPYING → COMPLETE.  ``primary_id`` is ``"<stage>:<run_id>"``.
+    if engine_name == "airgap_ingest":
+        try:
+            _apply_airgap_ingest_result(primary_id, host_id, outcome)
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply airgap_ingest result for %s on host %s: %s",
                 primary_id,
                 host_id,
                 exc,

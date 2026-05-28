@@ -2827,5 +2827,28 @@
     "subtitle": "Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
     "title": "Air-Gap Install Bundles",
     "version": "Version"
+  },
+  "serverRole": {
+    "loadError": "Could not load the current server role.",
+    "saveError": "Could not save the server role.",
+    "standard": {
+      "title": "Standard (no air gap)",
+      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+    },
+    "collector": {
+      "title": "Air-Gap Collector (online side)",
+      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+    },
+    "repository": {
+      "title": "Air-Gap Repository (disconnected side)",
+      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+    },
+    "heading": "Server Role",
+    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
+    "currentTag": "(current)",
+    "saving": "Saving…",
+    "save": "Save Role",
+    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
+    "saved": "Server role saved. Restart the server for it to take full effect."
   }
 }

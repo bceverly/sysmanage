@@ -12,8 +12,9 @@ Public — no auth required.  All fields are non-secret.
 
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 # Top-level imports for ``config_module`` and ``module_loader`` are
 # required by the test suite (tests patch
@@ -22,8 +23,21 @@ from fastapi.responses import JSONResponse
 # a cold-start race on Windows CI — where a request can hit the worker
 # before app startup has finished wiring config — degrades gracefully
 # instead of returning 500.
+from sqlalchemy.orm import Session
+
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config as config_module  # noqa: E402
+from backend.i18n import _
 from backend.licensing.module_loader import module_loader  # noqa: E402
+from backend.persistence.db import get_db
+from backend.persistence.models.server_configuration import VALID_SERVER_ROLES
+from backend.services import server_config_service
+from backend.services.audit_service import (
+    ActionType,
+    AuditService,
+    EntityType,
+    Result,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +136,97 @@ def get_server_info():
             # try/except/pass smell; the contract here is "never raise."
             _ = None
         return JSONResponse(content=_FALLBACK_ENVELOPE, status_code=200)
+
+
+class ServerRoleResponse(BaseModel):
+    role: str
+    valid_roles: list[str]
+
+
+class ServerRoleUpdate(BaseModel):
+    role: str
+
+
+@router.get(
+    "/server-role",
+    response_model=ServerRoleResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+def get_server_role_endpoint():
+    """Return the current server role + the set of valid choices.
+
+    Authenticated (any logged-in user) — drives the Settings → Server
+    Role radio UI.  The public ``/server-info`` endpoint also reports
+    the role for the header chip; this one additionally hands back the
+    valid-option list so the UI doesn't hardcode it.
+    """
+    return ServerRoleResponse(
+        role=server_config_service.get_server_role(),
+        valid_roles=list(VALID_SERVER_ROLES),
+    )
+
+
+@router.put(
+    "/server-role",
+    response_model=ServerRoleResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+def set_server_role_endpoint(
+    payload: ServerRoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Set the server role (standard | collector | repository).
+
+    Persists to the ``server_configuration`` singleton.  Validation
+    failures become a 400.  Audit-logged with the acting user.  The
+    role's cosmetic effects (header chip, server-info) update on the
+    next poll; any future role-gated engine behaviour takes effect on
+    the next server restart — surfaced to the operator in the UI copy.
+    """
+    try:
+        new_role = server_config_service.set_server_role(payload.role)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Collector keygen hook: setting the role to ``collector`` is the
+    # natural trigger to mint the ed25519 manifest-signing keypair (the
+    # role lives in the DB now, so "first boot" isn't a reliable
+    # trigger — a fresh server boots as ``standard``).  Idempotent and
+    # never overwrites an existing key, so re-selecting collector is
+    # safe.  Best-effort: a keygen failure logs but doesn't fail the
+    # role change — the operator can retry, and the collection-run path
+    # surfaces a clear error if the key is still missing at sign time.
+    if new_role == "collector":
+        try:
+            from backend.services.airgap_signing_service import (  # pylint: disable=import-outside-toplevel
+                ensure_collector_keypair,
+            )
+
+            ensure_collector_keypair()
+        except Exception:  # pylint: disable=broad-exception-caught
+            logger.warning(
+                "Failed to ensure collector signing keypair on role change",
+                exc_info=True,
+            )
+
+    try:
+        AuditService.log(
+            db=db,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.SETTING,
+            entity_id="server_role",
+            entity_name="server_role",
+            description=_("Set server role to '%s'") % new_role,
+            username=current_user,
+            result=Result.SUCCESS,
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        # Audit logging is best-effort here — the role change already
+        # committed; a logging hiccup shouldn't 500 the operator.
+        logger.warning("Failed to audit-log server role change", exc_info=True)
+
+    return ServerRoleResponse(role=new_role, valid_roles=list(VALID_SERVER_ROLES))
 
 
 def _resolve_version() -> str:

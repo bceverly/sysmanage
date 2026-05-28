@@ -173,6 +173,52 @@ const formatBytes = (n: number | null | undefined): string => {
   return `${v.toFixed(u === 0 ? 0 : 1)} ${units[u]}`;
 };
 
+const formatElapsed = (since: Date): string => {
+  const ms = Date.now() - since.getTime();
+  if (ms < 60_000) return `${Math.max(1, Math.round(ms / 1000))}s`;
+  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
+  return `${Math.round(ms / 3_600_000)}h`;
+};
+
+/**
+ * Status cell for a collection run.  For in-flight runs (QUEUED →
+ * BURNING) it shows the status chip plus a live elapsed-time that
+ * ticks every second — same UX as the mirror ActionStatusChip — so the
+ * operator can see at a glance that a run is progressing (or how long
+ * it's been wedged at QUEUED, which is the symptom that says the
+ * orchestrator isn't advancing it).  Self-tickers per in-flight row
+ * avoid rebuilding the whole DataGrid column array every second.
+ */
+const RunStatusCell: React.FC<{ row: CollectionRun }> = ({ row }) => {
+  const inFlight = IN_FLIGHT_STATUSES.includes(row.status as RunStatus);
+  // Throwaway tick state forces a 1s re-render while in-flight; the
+  // interval is torn down the moment the run settles.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!inFlight) return undefined;
+    const h = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(h);
+  }, [inFlight]);
+
+  // Anchor elapsed on started_at (set when the orchestrator dispatches
+  // the first plan) and fall back to created_at for runs still sitting
+  // at QUEUED before the orchestrator has touched them.
+  const anchorRaw = row.started_at || row.created_at;
+  const anchor = anchorRaw ? new Date(anchorRaw) : null;
+  const elapsed = inFlight && anchor ? formatElapsed(anchor) : '';
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Chip size="small" label={row.status} color={statusColor(row.status)} />
+      {elapsed && (
+        <Typography variant="caption" color="text.secondary">
+          {elapsed}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
 const AirgapCollections: React.FC = () => {
   const { t } = useTranslation();
 
@@ -562,13 +608,9 @@ const AirgapCollections: React.FC = () => {
       {
         field: 'status',
         headerName: t('airgapCollections.column.status', 'Status'),
-        width: 160,
+        width: 180,
         renderCell: (p: GridRenderCellParams<CollectionRun>) => (
-          <Chip
-            size="small"
-            label={p.row.status}
-            color={statusColor(p.row.status)}
-          />
+          <RunStatusCell row={p.row} />
         ),
       },
       {

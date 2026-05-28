@@ -358,6 +358,36 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             run_e,
                         )
 
+                # Repository-side ingestion orchestrator.  Gated on the
+                # repository engine (the other half of the air gap):
+                # walks an AirgapIngestionRun through mount -> keyring
+                # verify -> copy -> COMPLETE.  Without it, a transferred
+                # ISO POSTed to /ingest queues forever with no consumer —
+                # the exact gap the collector run-tick above closed for
+                # the collector side.
+                repository_engine_for_tick = module_loader.get_module(
+                    "airgap_repository_engine"
+                )
+                if repository_engine_for_tick is not None:
+                    logger.info("=== AIRGAP INGEST ORCHESTRATOR STARTUP ===")
+                    try:
+                        from backend.services.airgap_ingest_tick import (
+                            airgap_ingest_tick_service,
+                        )
+
+                        airgap_ingest_task = asyncio.create_task(
+                            airgap_ingest_tick_service()
+                        )
+                        logger.info(
+                            "Air-gap ingest orchestrator started: %s",
+                            airgap_ingest_task,
+                        )
+                    except Exception as ingest_e:
+                        logger.warning(
+                            "Failed to start air-gap ingest orchestrator: %s",
+                            ingest_e,
+                        )
+
                 # Start vuln_engine CVE refresh scheduler and staleness check
                 vuln_engine = module_loader.get_module("vuln_engine")
                 if vuln_engine:

@@ -230,6 +230,31 @@ build_proplus() {
   printf '%s\n' "$license_key" > "$STAGING_DIR/license.key"
   chmod 600 "$STAGING_DIR/license.key"
 
+  # Embed the collector's manifest-signing PUBLIC key, if this build
+  # host is a collector.  The repository server drops it into its
+  # trusted-collectors keyring (see install.sh below) so it can verify
+  # air-gap media signed by THIS collector — establishing cross-air-gap
+  # trust through the same media the operator already hand-carries,
+  # rather than a separate out-of-band key exchange.  Only the PUBLIC
+  # key travels; the private signing key never leaves the collector.
+  # Optional: a build host that isn't a collector ships no key and the
+  # repository operator must add it manually before the first ingest.
+  local collector_pub="/var/lib/sysmanage/airgap/collector-ed25519.pub"
+  if [[ -r "$collector_pub" ]]; then
+    log "Embedding collector signing public key into the bundle keyring"
+    mkdir -p "$STAGING_DIR/trusted-collectors"
+    # Name by sha256 of the key file so multiple collectors' keys can
+    # coexist in one repository keyring without clobbering.  This is a
+    # cosmetic filename only — the repository recomputes the canonical
+    # fingerprint internally when matching a signature to a key.
+    local fp
+    fp="$(sha256sum "$collector_pub" | awk '{print $1}')"
+    [[ -n "$fp" ]] || fp="collector"
+    cp "$collector_pub" "$STAGING_DIR/trusted-collectors/${fp}.pub"
+  else
+    warn "no collector signing key at $collector_pub — bundle ships without a trusted-collector key; the repository operator must add it manually before ingesting media"
+  fi
+
   # Idempotent installer that the air-gap target runs as root.  Uses
   # the already-installed sysmanage venv's PyYAML so we don't need a
   # standalone yaml editor on the target.
@@ -274,6 +299,23 @@ echo "[proplus] Installing license public key..."
 install -d -o sysmanage -g sysmanage -m 0750 /var/lib/sysmanage/license
 install -o sysmanage -g sysmanage -m 0644 public_key.pem \
   /var/lib/sysmanage/license/public_key.pem
+
+# Trusted-collector keyring: if the build host embedded a collector's
+# manifest-signing public key, drop it into the repository's keyring so
+# the ingestion orchestrator can verify air-gap media signed by that
+# collector.  Additive — never clears existing trusted keys, so an
+# overlay re-run or a second collector's bundle just adds another key.
+if [ -d trusted-collectors ]; then
+  echo "[proplus] Installing trusted-collector keyring..."
+  install -d -o sysmanage -g sysmanage -m 0750 \
+    /var/lib/sysmanage/airgap/trusted-collectors
+  for k in trusted-collectors/*.pub; do
+    [ -e "$k" ] || continue
+    install -o sysmanage -g sysmanage -m 0644 "$k" \
+      /var/lib/sysmanage/airgap/trusted-collectors/
+    echo "[proplus]   + $(basename "$k")"
+  done
+fi
 
 echo "[proplus] Updating /etc/sysmanage.yaml for offline operation..."
 LICENSE_KEY="$(cat license.key)"
