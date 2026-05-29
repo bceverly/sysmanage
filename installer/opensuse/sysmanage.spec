@@ -16,7 +16,15 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 # Disable automatic Python dependency generation
 # We manually specify python3 >= 3.11 in Requires
 %global __requires_exclude ^python\\(abi\\)
-%global __provides_exclude_from ^%{_libdir}/sysmanage/venv/.*$
+# Exclude the bundled venv from BOTH auto Provides and Requires scanning.
+# The vendored wheels (cryptography, Pillow, psycopg2, …) ship private
+# copies of libssl/libcrypto/libjpeg/libtiff/etc. with mangled sonames
+# (e.g. libcrypto-ea28cefb.so.1.1); RPM's auto-dep generator would emit
+# Requires on those phantom sonames that nothing provides, making the RPM
+# uninstallable via zypper.  The prior %{_libdir}/sysmanage/venv pattern
+# never matched — the real install path is /opt/sysmanage/.venv.
+%global __requires_exclude_from ^/opt/sysmanage/.venv/.*$
+%global __provides_exclude_from ^/opt/sysmanage/.venv/.*$
 
 BuildRequires:  python311-devel
 BuildRequires:  python311-pip

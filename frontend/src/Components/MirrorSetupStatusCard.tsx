@@ -45,6 +45,12 @@ interface Props {
    *  user clicks Install.  Driven by the package_manager field on the
    *  mirror_repository row this host owns. */
   packageManager: 'apt' | 'dnf' | 'zypper' | 'pkg';
+  /** Notify the parent whenever the "tools all present" boolean flips,
+   *  so it can ghost out the downstream cards (PlatformConfigCard,
+   *  MirrorListCard) until setup passes green.  ``undefined`` while
+   *  the status is still loading or unknown — the parent should treat
+   *  that as "not yet ready" and keep the gate engaged. */
+  onReadyChange?: (ready: boolean | undefined) => void;
 }
 
 const POLL_MS = 2000;
@@ -58,7 +64,12 @@ const POLL_MS = 2000;
 // indefinite "Checking..." spinner.
 const IN_FLIGHT_TIMEOUT_MS = 5 * 60 * 1000;
 
-const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManager }) => {
+const MirrorSetupStatusCard: React.FC<Props> = ({
+  hostId,
+  hostFqdn,
+  packageManager,
+  onReadyChange,
+}) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState<MirrorSetupStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -159,6 +170,17 @@ const MirrorSetupStatusCard: React.FC<Props> = ({ hostId, hostFqdn, packageManag
     zypper: status.ready_zypper,
     pkg: status.ready_pkg,
   }[packageManager];
+
+  // Surface the ready boolean upward so the parent section can ghost
+  // out the downstream cards (config + mirror list + actions) until
+  // setup_check passes green.  ``undefined`` while loading — the
+  // parent treats that as "keep the gate engaged" so the operator
+  // can't queue a sync against a host with missing tooling.
+  useEffect(() => {
+    if (onReadyChange) {
+      onReadyChange(ready === undefined ? undefined : Boolean(ready));
+    }
+  }, [ready, onReadyChange]);
 
   // Compute "in flight" but also a timeout — if the agent silently
   // swallowed our command (e.g. duplicate-skip without emitting a

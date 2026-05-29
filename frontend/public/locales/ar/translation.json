@@ -2158,6 +2158,10 @@
     "expand": {
       "collapse": "Hide snapshots",
       "expand": "Show snapshots"
+    },
+    "setupGate": {
+      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
+      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
     }
   },
   "integrations": {

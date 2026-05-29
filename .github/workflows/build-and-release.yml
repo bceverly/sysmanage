@@ -2017,6 +2017,13 @@ jobs:
           cp $WORKSPACE/installer/opensuse/*.example /tmp/$TAR_NAME/installer/opensuse/ || true
           cp $WORKSPACE/installer/opensuse/sysmanage-nginx.conf /tmp/$TAR_NAME/installer/opensuse/ || true
 
+          # Air-gap bundle dispatcher template — referenced by the spec's
+          # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
+          # "|| true"): a missing file must fail the build here, not silently
+          # produce a tarball that dies in %install on the OBS builder.
+          mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
+          cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
+
           # Create tarball
           cd /tmp
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
@@ -2249,6 +2256,13 @@ jobs:
           cp $WORKSPACE/installer/centos/*.service /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
           cp $WORKSPACE/installer/centos/*.conf /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
           cp $WORKSPACE/installer/centos/*.example /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
+
+          # Air-gap bundle dispatcher template — referenced by the spec's
+          # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
+          # "|| true"): if it's ever missing the build must fail here, not
+          # silently produce an SRPM that dies in %install on the COPR builder.
+          mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
+          cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
 
           # Copy documentation
           cp $WORKSPACE/README.md /tmp/$TAR_NAME/ || touch /tmp/$TAR_NAME/README.md

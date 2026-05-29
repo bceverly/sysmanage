@@ -295,12 +295,19 @@ const PlatformPanel: React.FC<PlatformPanelProps> = ({
   mirrors,
   onChange,
 }) => {
+  const { t } = useTranslation();
+  // ``undefined`` while the setup card is still loading — we treat
+  // that as "not yet ready" so the gate stays engaged on first paint
+  // (no flash of fully-enabled UI before the probe result lands).
+  const [setupReady, setSetupReady] = useState<boolean | undefined>(undefined);
+
   if (!config) {
     return <ConfigureEmptyState platform={platform} hosts={hosts} onCreated={onChange} />;
   }
 
   const platformMirrors = mirrors.filter((m) => m.platform_config_id === config.id);
   const hostName = hosts.find((h) => h.id === config.host_id)?.fqdn ?? config.host_id;
+  const gateOpen = setupReady === true;
 
   return (
     <Stack spacing={2}>
@@ -308,20 +315,49 @@ const PlatformPanel: React.FC<PlatformPanelProps> = ({
         hostId={config.host_id}
         hostFqdn={hostName}
         packageManager={platform}
+        onReadyChange={setSetupReady}
       />
-      <PlatformConfigCard
-        config={config}
-        hosts={hosts}
-        onSaved={onChange}
-        onRemoved={onChange}
-        mirrorCount={platformMirrors.length}
-      />
-      <MirrorListCard
-        platform={platform}
-        config={config}
-        mirrors={platformMirrors}
-        onChange={onChange}
-      />
+      {/* Gate the mirror-config + mirror-list cards behind the setup
+          probe.  When the host is missing required tooling (apt-mirror,
+          createrepo_c, etc.) the operator should not be able to create
+          mirrors or queue syncs against it — running them against an
+          empty toolchain produces an opaque sudo-deny three steps in
+          and a stuck FAILED row.  We grey out + intercept pointer
+          events on the downstream cards until setup_check returns
+          green; the setup card itself stays interactive so the
+          operator can hit "Install Tools" or "Refresh". */}
+      {!gateOpen && (
+        <Alert severity="info" variant="outlined">
+          {t(
+            'mirror.setupGate.message',
+            'Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.',
+          )}
+        </Alert>
+      )}
+      <Box
+        sx={{
+          opacity: gateOpen ? 1 : 0.45,
+          pointerEvents: gateOpen ? 'auto' : 'none',
+          transition: 'opacity 150ms ease',
+        }}
+        aria-disabled={!gateOpen}
+      >
+        <Stack spacing={2}>
+          <PlatformConfigCard
+            config={config}
+            hosts={hosts}
+            onSaved={onChange}
+            onRemoved={onChange}
+            mirrorCount={platformMirrors.length}
+          />
+          <MirrorListCard
+            platform={platform}
+            config={config}
+            mirrors={platformMirrors}
+            onChange={onChange}
+          />
+        </Stack>
+      </Box>
     </Stack>
   );
 };
@@ -339,11 +375,18 @@ const ConfigureEmptyState: React.FC<{
   const [hostId, setHostId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Track the chosen host's mirror-toolchain readiness so the Create
+  // button is gated the same way the per-platform action buttons are.
+  // ``undefined`` while the setup probe is still loading on the
+  // newly-selected host — treated as "not ready" so the operator can't
+  // commit to a host before its toolchain is confirmed green.
+  const [setupReady, setSetupReady] = useState<boolean | undefined>(undefined);
 
   const eligible = useMemo(
     () => hosts.filter((h) => hostMatchesPm(h, platform)),
     [hosts, platform],
   );
+  const selectedHost = hostId ? eligible.find((h) => h.id === hostId) ?? null : null;
 
   const submit = async () => {
     if (!hostId) return;
@@ -388,8 +431,13 @@ const ConfigureEmptyState: React.FC<{
             sx={{ minWidth: 360 }}
             options={eligible}
             getOptionLabel={(o) => o.fqdn}
-            value={eligible.find((h) => h.id === hostId) ?? null}
-            onChange={(_, v) => setHostId(v?.id ?? null)}
+            value={selectedHost}
+            onChange={(_, v) => {
+              setHostId(v?.id ?? null);
+              // Reset readiness when the operator swaps hosts — the
+              // new host's setup card will re-emit its own state.
+              setSetupReady(undefined);
+            }}
             renderInput={(params) => (
               <TextField {...params} label={t('mirror.field.host', 'Mirror host')} />
             )}
@@ -397,13 +445,32 @@ const ConfigureEmptyState: React.FC<{
           <Button
             variant="contained"
             onClick={submit}
-            disabled={!hostId || busy}
+            disabled={!hostId || busy || setupReady !== true}
           >
             {busy
               ? t('mirror.saving', 'Saving…')
               : t('mirror.create', 'Create')}
           </Button>
         </Stack>
+        {hostId && selectedHost && (
+          <Box sx={{ mt: 2 }}>
+            <MirrorSetupStatusCard
+              key={hostId}
+              hostId={hostId}
+              hostFqdn={selectedHost.fqdn}
+              packageManager={platform}
+              onReadyChange={setSetupReady}
+            />
+            {setupReady !== true && (
+              <Alert severity="info" variant="outlined" sx={{ mt: 2 }}>
+                {t(
+                  'mirror.setupGate.preConfigure',
+                  'Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present.',
+                )}
+              </Alert>
+            )}
+          </Box>
+        )}
         {eligible.length === 0 && (
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
             {t(
