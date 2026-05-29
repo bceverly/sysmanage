@@ -1680,6 +1680,8 @@ installer-deb:
 	cp installer/ubuntu/*.service "$$BUILD_DIR/installer/ubuntu/"; \
 	cp installer/ubuntu/*.example "$$BUILD_DIR/installer/ubuntu/"; \
 	cp installer/ubuntu/*.conf "$$BUILD_DIR/installer/ubuntu/" 2>/dev/null || true; \
+		mkdir -p "$$BUILD_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$BUILD_DIR/installer/airgap-bundle/"; \
 	echo "✓ Packaging files copied"; \
 	echo ""; \
 	echo "Building package..."; \
@@ -1838,6 +1840,8 @@ installer-rpm-centos:
 	cp installer/centos/*.service "$$TAR_DIR/installer/centos/"; \
 	cp installer/centos/*.conf "$$TAR_DIR/installer/centos/"; \
 	cp installer/centos/*.example "$$TAR_DIR/installer/centos/"; \
+		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \
@@ -1971,6 +1975,8 @@ installer-rpm-opensuse:
 	cp installer/opensuse/*.service "$$TAR_DIR/installer/opensuse/"; \
 	cp installer/opensuse/*.conf "$$TAR_DIR/installer/opensuse/"; \
 	cp installer/opensuse/*.example "$$TAR_DIR/installer/opensuse/"; \
+		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \
@@ -3307,6 +3313,8 @@ deploy-obs:
 	cp "$$WORKSPACE/installer/opensuse/"*.sudoers "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
 	cp "$$WORKSPACE/installer/opensuse/"*.example "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
 	cp "$$WORKSPACE/installer/opensuse/sysmanage-nginx.conf" "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
+		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
+		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" || true; \
 	cd /tmp; \
 	tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	echo "Created source tarball: sysmanage-$$VERSION.tar.gz"; \
@@ -3437,6 +3445,8 @@ deploy-copr:
 	cp "$$WORKSPACE/installer/centos/"*.service "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/installer/centos/"*.conf "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/installer/centos/"*.example "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
+		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
+		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/README.md" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/README.md"; \
 	cp "$$WORKSPACE/LICENSE" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/LICENSE"; \
 	if [ -d "$$WORKSPACE/sbom" ]; then \
