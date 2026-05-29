@@ -76,6 +76,13 @@ install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
 
+# Air-gap bundle dispatcher template — buildAirGapBundle.sh (in scripts/)
+# resolves this relative to itself (../installer/airgap-bundle/install.sh),
+# so it must be packaged alongside scripts/ or every bundle build dies at
+# the "dispatcher template not found" preflight.
+install -d %{buildroot}/opt/sysmanage/installer/airgap-bundle
+install -m 0755 installer/airgap-bundle/install.sh %{buildroot}/opt/sysmanage/installer/airgap-bundle/install.sh
+
 # Copy frontend static files
 install -d %{buildroot}/opt/sysmanage/frontend
 cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/

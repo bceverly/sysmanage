@@ -32,6 +32,15 @@ logger = logging.getLogger(__name__)
 # this directory.
 BUNDLE_DIR = Path("/var/lib/sysmanage/airgap-bundles")
 
+# Serialize bundle builds across the whole process.  Each build spins up
+# a Docker container per platform, downloads full dependency closures,
+# and assembles a multi-GB ISO; running several at once (e.g. an operator
+# kicking off server + agent + proplus together) multiplies peak memory
+# and disk and OOM-kills the backend that launched them.  A plain
+# module-level lock makes concurrent build requests queue and run one at
+# a time — the extra daemon threads just block until their turn.
+_BUILD_LOCK = threading.Lock()
+
 # Where the build script lives relative to the repo root / install root.
 # In a /opt/sysmanage install the script is at /opt/sysmanage/scripts/...;
 # in a dev tree it's relative to the cwd.  Resolve dynamically.
@@ -93,6 +102,16 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
         )
         return
 
+    # Only one build at a time — see _BUILD_LOCK.  Extra concurrent
+    # build requests (their own daemon threads) block here until the
+    # in-flight build finishes, instead of all running at once and
+    # exhausting memory/disk.
+    with _BUILD_LOCK:
+        _execute_build(bundle_id, product, script)
+
+
+def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
+    """Run the build script + record the result.  Holds ``_BUILD_LOCK``."""
     BUNDLE_DIR.mkdir(parents=True, exist_ok=True)
     log_path = BUNDLE_DIR / f"{bundle_id}.log"
     iso_path = BUNDLE_DIR / f"sysmanage-{product}-bundle-{bundle_id}.iso"

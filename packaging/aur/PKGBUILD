@@ -72,6 +72,13 @@ package() {
     cp -r config "${pkgdir}/opt/sysmanage/"
     cp -r scripts "${pkgdir}/opt/sysmanage/"
 
+    # Air-gap bundle dispatcher template — buildAirGapBundle.sh (in
+    # scripts/) resolves this relative to itself
+    # (../installer/airgap-bundle/install.sh), so it must be packaged
+    # alongside scripts/ or every bundle build dies at the "dispatcher
+    # template not found" preflight.
+    install -Dm0755 installer/airgap-bundle/install.sh "${pkgdir}/opt/sysmanage/installer/airgap-bundle/install.sh"
+
     # Pre-built frontend (dist + public) so the bootstrap nginx config
     # has something to serve out of the gate.
     install -d "${pkgdir}/opt/sysmanage/frontend"

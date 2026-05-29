@@ -105,7 +105,15 @@ case "$PRODUCT" in
 esac
 
 DEST_DIR="${DEST_DIR:-/tmp}"
-STAGING_DIR="${STAGING_DIR:-$(mktemp -d -t sysmanage-bundle-XXXXXX)}"
+# Stage under /var/tmp, NOT /tmp.  On systemd 256+ (Ubuntu resolute,
+# Fedora 40+) /tmp defaults to tmpfs — i.e. RAM-backed — so staging the
+# multi-GB bundle tree (per-distro package + wheel closures, then the
+# assembled ISO image) there fills physical memory and the OOM killer
+# takes down whatever has the largest RSS, frequently the sysmanage
+# backend that launched the build.  /var/tmp is disk-backed by FHS
+# convention and survives across the build, so the staging tree never
+# competes with RAM.  Honour an explicit STAGING_DIR / TMPDIR override.
+STAGING_DIR="${STAGING_DIR:-$(mktemp -d "${TMPDIR:-/var/tmp}/sysmanage-bundle-XXXXXX")}"
 PARALLEL="${PARALLEL:-1}"
 PLATFORMS_ALL="ubuntu-jammy ubuntu-noble ubuntu-questing ubuntu-resolute debian-bookworm fedora-40 fedora-41 rhel-9 opensuse-leap alpine-3.20 freebsd netbsd openbsd macos windows"
 PLATFORMS="${PLATFORMS:-$PLATFORMS_ALL}"
