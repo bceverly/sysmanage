@@ -66,14 +66,17 @@ def upgrade() -> None:
         )
     ).fetchone()
     if not existing:
-        # Generate the id in Python rather than calling
-        # ``gen_random_uuid()`` in SQL — that function is Postgres-only
-        # and breaks the SQLite migration CI with "no such function:
-        # gen_random_uuid".  Bind the value with a dialect-appropriate
-        # cast (``::uuid`` on Postgres, none on SQLite), the same pattern
-        # the security-roles seed migration uses.
+        # Generate the id in Python rather than calling ``gen_random_uuid()``
+        # in SQL (that function is Postgres-only and breaks SQLite with
+        # "no such function: gen_random_uuid").  Do NOT cast in the SQL:
+        # ``:id::uuid`` looks like a cast to SQLAlchemy, which then refuses
+        # to treat ``:id`` as a bind parameter (it reserves ``::`` for
+        # Postgres casts) and emits it literally — a syntax error.  Instead
+        # bind a value the driver maps to the column type directly:
+        # psycopg2 adapts a ``uuid.UUID`` object to the uuid column natively,
+        # and SQLite stores the string form in its CHAR(36) GUID column.
         is_sqlite = conn.dialect.name == "sqlite"
-        uuid_cast = "" if is_sqlite else "::uuid"
+        new_id = uuid.uuid4()
         conn.execute(
             sa.text(
                 "INSERT INTO mirror_known_version "
@@ -81,12 +84,12 @@ def upgrade() -> None:
                 "     match_regex, default_upstream_url, default_suite, "
                 "     default_repoid, default_repo_alias, default_release, "
                 "     is_active) "
-                f"VALUES (:id{uuid_cast}, :platform, :version_key, :label, "
+                "VALUES (:id, :platform, :version_key, :label, "
                 "        :os_family, :regex, :url, :suite, :repoid, :alias, "
-                "        :release, TRUE)"
+                "        :release, :active)"
             ),
             {
-                "id": str(uuid.uuid4()),
+                "id": str(new_id) if is_sqlite else new_id,
                 "platform": "apt",
                 "version_key": "ubuntu-25.10",
                 "label": "Ubuntu 25.10 (questing)",
@@ -97,6 +100,7 @@ def upgrade() -> None:
                 "repoid": None,
                 "alias": None,
                 "release": None,
+                "active": True,
             },
         )
 
