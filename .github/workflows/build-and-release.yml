@@ -376,6 +376,88 @@ jobs:
             installer/dist/sysmanage-*.rpm
             installer/dist/sysmanage-*.rpm.sha256
 
+  # EL9 (RHEL/Rocky/Alma 9) RPM Build
+  #
+  # Same spec as the CentOS/Fedora RPM, but built with the %el9 + %dist
+  # macros forced on so the dependency branch resolves to the python3.12
+  # AppStream packages.  Rocky/RHEL 9's DEFAULT python3 is 3.9, so the
+  # generic CentOS RPM's "Requires: python3 >= 3.12" is unsatisfiable
+  # there — and the same RPM can't also serve Fedora (which wants
+  # python3-pip, not EL9's python3.12-pip).  Publishing a distinct
+  # sysmanage-<ver>-1.el9.x86_64.rpm lets the air-gap builder select the
+  # right RPM per distro.
+  build-el9-rpm:
+    name: Build EL9 (RHEL/Rocky) RPM
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building EL9 RPM for version: $VERSION"
+
+      - name: Install RPM build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          python3 -m pip install cyclonedx-bom
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: using project-local cyclonedx-npm via npx"
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Force EL9 dependency branch via rpm macros
+        run: |
+          # rpmbuild reads ~/.rpmmacros automatically.  Defining el9 + dist
+          # here makes the shared spec take its EL9 branch (python3.12 /
+          # python3.12-pip, present in Rocky/RHEL 9 AppStream) and tags the
+          # RPM filename with .el9 — no Makefile change needed.
+          printf '%%el9 1\n%%dist .el9\n' > "$HOME/.rpmmacros"
+          cat "$HOME/.rpmmacros"
+
+      - name: Build EL9 RPM package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building EL9 RPM for version: ${VERSION}"
+          make installer-rpm-centos
+          echo "Produced:"
+          ls -1 installer/dist/sysmanage-*.rpm
+
+      - name: Upload EL9 RPM as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-el9-rpm
+          path: |
+            installer/dist/sysmanage-*.el9*.rpm
+            installer/dist/sysmanage-*.el9*.rpm.sha256
+
   # OpenSUSE/SLES RPM Build
   build-opensuse-rpm:
     name: Build OpenSUSE/SLES RPM
@@ -439,6 +521,24 @@ jobs:
         run: |
           echo "Building OpenSUSE RPM for version: ${VERSION}"
           make installer-rpm-opensuse
+          # The openSUSE spec emits the same sysmanage-<ver>-1.x86_64.rpm
+          # filename as the CentOS/RHEL/Fedora spec, so the two collide as
+          # GitHub release assets — the survivor (openSUSE, which Requires:
+          # python311-pip) then gets pulled by the Fedora/RHEL air-gap
+          # builders and fails with "nothing provides python311-pip".
+          # Tag the openSUSE RPM with a distinct, discoverable name so the
+          # air-gap builder selects the right RPM per distro: the
+          # Fedora/RHEL builders exclude *opensuse*; the openSUSE builder
+          # matches *opensuse-leap*.
+          cd installer/dist
+          for f in sysmanage-*.rpm; do
+            case "$f" in *opensuse*) continue ;; esac
+            new="${f%.rpm}.opensuse-leap.rpm"
+            mv "$f" "$new"
+            sha256sum "$new" > "$new.sha256"
+            rm -f "$f.sha256"
+            echo "Renamed openSUSE RPM: $f -> $new"
+          done
 
       - name: Upload OpenSUSE RPM as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -1019,7 +1119,7 @@ jobs:
   release:
     name: Create Release and Push to Docs
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
+    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
       - name: Checkout code

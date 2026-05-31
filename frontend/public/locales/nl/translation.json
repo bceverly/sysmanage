@@ -2772,7 +2772,10 @@
     "status": "[TODO] Status",
     "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
     "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version"
+    "version": "[TODO] Version",
+    "recheckResources": "[TODO] Re-check resources",
+    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
+    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
   },
   "airgapCollections": {
     "actions": {

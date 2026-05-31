@@ -2830,7 +2830,10 @@
     "status": "Status",
     "subtitle": "Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
     "title": "Air-Gap Install Bundles",
-    "version": "Version"
+    "version": "Version",
+    "recheckResources": "Re-check resources",
+    "resourcesInsufficient": "This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
+    "resourcesLow": "Low resources — the build can run but will lean on swap and may be slow."
   },
   "serverRole": {
     "loadError": "Could not load the current server role.",

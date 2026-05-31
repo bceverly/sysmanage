@@ -73,8 +73,13 @@ case "$PRODUCT" in
   server)
     PKG_NAME="sysmanage"
     PPA_NAME="bceverly/sysmanage"
-    REQ_PATH_IN_DEB="./opt/sysmanage/requirements.txt"
-    REQ_PATH_IN_RPM="/opt/sysmanage/requirements.txt"
+    # Use the runtime-only requirements (no playwright/semgrep/pytest/…),
+    # mirroring the agent.  The full requirements.txt drags dev tooling
+    # into every bundle and — critically — playwright has no musl wheel,
+    # which breaks the Alpine build.  Builders fall back to fetching this
+    # file from the repo tag if the package doesn't ship it yet.
+    REQ_PATH_IN_DEB="./opt/sysmanage/requirements-prod.txt"
+    REQ_PATH_IN_RPM="/opt/sysmanage/requirements-prod.txt"
     EXTRAS_DEB="postgresql postgresql-contrib"
     EXTRAS_RPM="postgresql-server postgresql-contrib"
     EXTRAS_APK="postgresql postgresql-contrib"
@@ -120,6 +125,19 @@ PLATFORMS="${PLATFORMS:-$PLATFORMS_ALL}"
 ISO_LABEL="SYSMANAGE-$(echo "$PRODUCT" | tr a-z A-Z)"
 ISO_PATH="${DEST_DIR}/sysmanage-${PRODUCT}-bundle.iso"
 
+# Per-platform build logs are preserved here — OUTSIDE the staging tree
+# so they never bloat the ISO — even when a platform fails and its
+# staging subdir is removed.  Without this the only evidence of WHY a
+# platform dropped out vanishes with _safe_rmdir, and the bundle
+# silently ships missing that platform's dependency closure.
+BUNDLE_LOG_DIR="${BUNDLE_LOG_DIR:-${DEST_DIR}/sysmanage-${PRODUCT}-bundle-logs}"
+# By default the build FAILS LOUDLY (non-zero exit, no ISO) if any
+# requested platform failed, because a partial bundle is missing
+# dependency closures and will fail to install offline on the dropped
+# platforms.  Set ALLOW_PARTIAL_BUNDLE=1 to intentionally ship a
+# subset (e.g. when you only care about a few platforms).
+ALLOW_PARTIAL_BUNDLE="${ALLOW_PARTIAL_BUNDLE:-0}"
+
 # Where on the host THIS script lives — needed to find installer assets
 # (the dispatcher install.sh) regardless of the cwd we're invoked from.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -147,6 +165,100 @@ _safe_rmdir() {
   return 0
 }
 
+# Map a platform key to its staging subdir name.  Linux builders stage
+# under linux-<platform>; the release-asset builders (bsd/macos/windows)
+# stage under <platform> directly.
+_outdir_for_platform() {
+  case "$1" in
+    ubuntu-*|debian-*|fedora-*|rhel-*|opensuse-*|alpine-*) echo "linux-$1" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+# True for the Docker-driven Linux platforms that carry a full
+# .deb/.rpm + wheel dependency closure (a failure there = broken
+# bundle).  False for the release-asset platforms (bsd/macos/windows).
+_is_linux_platform() {
+  case "$1" in
+    ubuntu-*|debian-*|fedora-*|rhel-*|opensuse-*|alpine-*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+# Failure handler for the Docker-based Linux builders.  Surface the tail
+# of the build log, PRESERVE the full log outside the staging tree (so
+# it survives the staging-dir cleanup), then drop the incomplete staging
+# subdir so it isn't wrapped into the ISO.
+_linux_build_failed() {
+  local platform="$1" outdir="$2"
+  tail -30 "$outdir/build.log" 2>/dev/null || true
+  mkdir -p "$BUNDLE_LOG_DIR"
+  cp -f "$outdir/build.log" "$BUNDLE_LOG_DIR/${platform}.log" 2>/dev/null || true
+  warn "[$platform] docker build failed — skipping (full log: $BUNDLE_LOG_DIR/${platform}.log)"
+  _safe_rmdir "$outdir"
+}
+
+# Resource thresholds for the build.  The per-distro Docker builds
+# compile wheels (~1 GB each) and stage a multi-GB tree; a starved host
+# OOM-kills them and silently ships a hollow ISO.  Mirror the values the
+# backend's resource-status preflight uses.  All overridable via env.
+MIN_BUILD_AVAIL_MB="${MIN_BUILD_AVAIL_MB:-2048}"   # RAM + free swap floor
+SOFT_BUILD_RAM_MB="${SOFT_BUILD_RAM_MB:-1024}"     # real-RAM warn threshold
+MIN_BUILD_DISK_GB="${MIN_BUILD_DISK_GB:-5}"        # free-disk floor
+SOFT_BUILD_DISK_GB="${SOFT_BUILD_DISK_GB:-10}"     # free-disk warn threshold
+
+# Read a /proc/meminfo field (e.g. MemAvailable, SwapFree) in MB, or -1.
+_meminfo_mb() {
+  awk -v k="$1:" '$1==k {printf "%d", $2/1024; f=1} END{ if(!f) print -1 }' \
+    /proc/meminfo 2>/dev/null
+}
+
+# Free whole-GB on the filesystem holding $1, walking up to an existing
+# ancestor so a not-yet-created dir doesn't break df.
+_disk_free_gb() {
+  local p="$1"
+  while [[ -n "$p" && ! -e "$p" ]]; do
+    [[ "$p" == "/" ]] && break
+    p="$(dirname "$p")"
+  done
+  df -PBG "$p" 2>/dev/null | awk 'NR==2 {gsub("G","",$4); print $4+0}'
+}
+
+# Refuse to start a starved build (override: SKIP_RESOURCE_CHECK=1).
+preflight_resources() {
+  if [[ "${SKIP_RESOURCE_CHECK:-0}" == "1" ]]; then
+    warn "resource pre-flight skipped (SKIP_RESOURCE_CHECK=1)"
+    return 0
+  fi
+  [[ -r /proc/meminfo ]] || { warn "no /proc/meminfo — skipping resource pre-flight"; return 0; }
+  local mem_avail swap_free avail disk_dest disk_stage disk_min
+  mem_avail="$(_meminfo_mb MemAvailable)"; [[ "$mem_avail" =~ ^[0-9]+$ ]] || mem_avail=0
+  swap_free="$(_meminfo_mb SwapFree)";     [[ "$swap_free" =~ ^[0-9]+$ ]] || swap_free=0
+  avail=$(( mem_avail + swap_free ))
+  disk_dest="$(_disk_free_gb "$DEST_DIR")";              [[ "$disk_dest"  =~ ^[0-9]+$ ]] || disk_dest=0
+  disk_stage="$(_disk_free_gb "${STAGING_DIR:-/var/tmp}")"; [[ "$disk_stage" =~ ^[0-9]+$ ]] || disk_stage=0
+  disk_min=$(( disk_dest < disk_stage ? disk_dest : disk_stage ))
+  log "Resources : RAM avail ${mem_avail}MB + swap free ${swap_free}MB = ${avail}MB ; disk free ${disk_min}GB"
+
+  local fatal=0
+  if (( avail < MIN_BUILD_AVAIL_MB )); then
+    warn "only ${avail}MB RAM+swap free; need >= ${MIN_BUILD_AVAIL_MB}MB (add swap or grow the VM)"
+    fatal=1
+  fi
+  if (( disk_min < MIN_BUILD_DISK_GB )); then
+    warn "only ${disk_min}GB free disk; need >= ${MIN_BUILD_DISK_GB}GB"
+    fatal=1
+  fi
+  if (( fatal )); then
+    die "insufficient resources for a bundle build — free up RAM/disk, or set SKIP_RESOURCE_CHECK=1 to try anyway."
+  fi
+  (( mem_avail < SOFT_BUILD_RAM_MB )) \
+    && warn "only ${mem_avail}MB real RAM free — the build will lean on swap and run slowly"
+  (( disk_min < SOFT_BUILD_DISK_GB )) \
+    && warn "only ${disk_min}GB free disk — a full build can use several GB"
+  return 0
+}
+
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
@@ -169,6 +281,10 @@ log "PPA       : $PPA_NAME"
 log "Staging   : $STAGING_DIR"
 log "Output    : $ISO_PATH"
 log "Platforms : $PLATFORMS"
+
+# The Pro+ overlay bundle is a lightweight file copy (no Docker, no
+# wheel compile), so it doesn't need the resource floor.
+[[ "$PRODUCT" == "proplus" ]] || preflight_resources
 
 # Resolve the upstream release version (e.g. "2.4.0.2") from the
 # GitHub release tag.  We strip a leading "v" because tags are
@@ -687,12 +803,20 @@ build_ubuntu_like() {
       done
       cd ..
 
-      # requirements.txt → wheels (pip wheel compiles sdists too)
+      # requirements -> wheels (pip wheel compiles sdists too).  Prefer
+      # the file shipped inside the package; if it is absent (e.g. the
+      # server package predates requirements-prod.txt) fetch it from the
+      # repo at the released tag so the version still matches.
       REQ=/tmp/req.txt
-      dpkg-deb --fsys-tarfile "$PKG"_*.deb | tar -xO "$REQ_PATH" > "$REQ"
+      dpkg-deb --fsys-tarfile "$PKG"_*.deb | tar -xO "$REQ_PATH" > "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH")" -o "$REQ" \
+          || { echo "could not obtain $(basename "$REQ_PATH") for ${PKG}" >&2; exit 1; }
+      fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_deb_installer "$outdir"
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -781,10 +905,15 @@ build_debian_like() {
       cd ..
 
       REQ=/tmp/req.txt
-      dpkg-deb --fsys-tarfile ${PKG}.deb | tar -xO "$REQ_PATH" > "$REQ"
+      dpkg-deb --fsys-tarfile ${PKG}.deb | tar -xO "$REQ_PATH" > "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH")" -o "$REQ" \
+          || { echo "could not obtain $(basename "$REQ_PATH") for ${PKG}" >&2; exit 1; }
+      fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_deb_installer "$outdir"
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -832,13 +961,20 @@ build_fedora() {
       # the name" (those come from build-opensuse and are NOT cross-
       # compatible).
       ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-                  | jq -r ".assets[] | select(.name | test(\"\\\\.rpm$\")) | select(.name | test(\"opensuse|sles\") | not) | .browser_download_url" \
+                  | jq -r ".assets[] | select(.name | test(\"\\\\.rpm$\")) | select(.name | test(\"opensuse|sles|el9\") | not) | .browser_download_url" \
                   | head -1)
       [ -n "$ASSET_URL" ] || { echo "no generic .rpm in releases for $REPO" >&2; exit 1; }
       curl -fsSL -o "${PKG}.rpm" "$ASSET_URL"
 
       # dnf download with --resolve walks recursive deps for us.
-      dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
+      # ``dnf download --resolve ./local.rpm`` works on dnf4 but dnf5
+      # (Fedora 41+) rejects a local-file path here ("No package
+      # ./x.rpm available").  ``dnf install --downloadonly --destdir``
+      # resolves + downloads the package AND its full dep closure on
+      # BOTH dnf4 and dnf5, so prefer it; keep the old forms as
+      # fallbacks for odd configs.
+      dnf install -y --downloadonly --allowerasing --destdir=rpm-deps "./${PKG}.rpm" \
+        || dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
         || dnf download --resolve --destdir=rpm-deps "${PKG}"
       # Pull the extra product-specific roots (e.g. postgresql-server)
       # and their transitive deps too.
@@ -849,11 +985,16 @@ build_fedora() {
       find rpm-deps -maxdepth 1 -name "${PKG}-*.rpm" -delete 2>/dev/null || true
 
       REQ=/tmp/req.txt
-      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null
-      cp "./${REQ_PATH_RPM}" "$REQ"
+      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null || true
+      cp "./${REQ_PATH_RPM}" "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
+          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+      fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -883,17 +1024,30 @@ build_rhel() {
       cd /out
       mkdir -p rpm-deps wheels
 
-      # RHEL/Rocky/Alma share the same generic ``sysmanage-agent-<ver>-*.rpm``
-      # build-centos produces — the .rpm has no "el<N>" discriminator
-      # (build-and-release.yml:353).  Pick any .rpm that is NOT one of
-      # the openSUSE/SLES variants.
+      # Prefer the EL9-specific RPM (sysmanage-<ver>-1.el9.x86_64.rpm) —
+      # its python3.12 deps resolve on Rocky/RHEL 9, where the generic
+      # CentOS RPM (Requires: python3 >= 3.12) is unsatisfiable.  Fall
+      # back to the generic non-openSUSE RPM for older releases that
+      # predate the el9 build.
       ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-                  | jq -r ".assets[] | select(.name | test(\"\\\\.rpm$\")) | select(.name | test(\"opensuse|sles\") | not) | .browser_download_url" \
+                  | jq -r ".assets[] | select(.name | test(\"\\\\.el9\\\\..*\\\\.rpm$\")) | .browser_download_url" \
                   | head -1)
-      [ -n "$ASSET_URL" ] || { echo "no generic .rpm in releases for $REPO" >&2; exit 1; }
+      if [ -z "$ASSET_URL" ]; then
+        ASSET_URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
+                    | jq -r ".assets[] | select(.name | test(\"\\\\.rpm$\")) | select(.name | test(\"opensuse|sles|el9\") | not) | .browser_download_url" \
+                    | head -1)
+      fi
+      [ -n "$ASSET_URL" ] || { echo "no el9/generic .rpm in releases for $REPO" >&2; exit 1; }
       curl -fsSL -o "${PKG}.rpm" "$ASSET_URL"
 
-      dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
+      # ``dnf download --resolve ./local.rpm`` works on dnf4 but dnf5
+      # (Fedora 41+) rejects a local-file path here ("No package
+      # ./x.rpm available").  ``dnf install --downloadonly --destdir``
+      # resolves + downloads the package AND its full dep closure on
+      # BOTH dnf4 and dnf5, so prefer it; keep the old forms as
+      # fallbacks for odd configs.
+      dnf install -y --downloadonly --allowerasing --destdir=rpm-deps "./${PKG}.rpm" \
+        || dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
         || dnf download --resolve --destdir=rpm-deps "${PKG}"
       for _extra in $EXTRAS; do
         dnf download --resolve --destdir=rpm-deps "$_extra" || true
@@ -901,11 +1055,16 @@ build_rhel() {
       find rpm-deps -maxdepth 1 -name "${PKG}-*.rpm" -delete 2>/dev/null || true
 
       REQ=/tmp/req.txt
-      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null
-      cp "./${REQ_PATH_RPM}" "$REQ"
+      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null || true
+      cp "./${REQ_PATH_RPM}" "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
+          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+      fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -954,11 +1113,16 @@ build_opensuse() {
       find rpm-deps -mindepth 1 -type d -empty -delete 2>/dev/null || true
 
       REQ=/tmp/req.txt
-      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null
-      cp "./${REQ_PATH_RPM}" "$REQ"
+      rpm2cpio "${PKG}.rpm" | cpio -id "./${REQ_PATH_RPM}" 2>/dev/null || true
+      cp "./${REQ_PATH_RPM}" "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
+          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+      fi
       python3.11 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "zypper"
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
@@ -1013,12 +1177,22 @@ build_alpine() {
         done
       )
 
+      # The Alpine package lays the app out under /usr/libexec/sysmanage
+      # and (unlike the deb/rpm) does not ship requirements.txt at the
+      # deb/rpm path, so extraction from the .apk misses.  Fall back to
+      # the canonical requirements.txt from the repo at the released tag
+      # — the exact dependency list the venv is built from, independent
+      # of how each platform package happens to be laid out.
       REQ=/tmp/req.txt
-      tar -xzf "${PKG}.apk" -O "${REQ_PATH_RPM}" > "$REQ" 2>/dev/null \
-        || { echo "no requirements file at ${REQ_PATH_RPM} inside ${PKG}.apk" >&2; exit 1; }
+      tar -xzf "${PKG}.apk" -O "${REQ_PATH_RPM}" > "$REQ" 2>/dev/null || true
+      if [ ! -s "$REQ" ]; then
+        TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+        curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "${REQ_PATH_RPM}")" -o "$REQ" \
+          || { echo "could not obtain $(basename "${REQ_PATH_RPM}") for ${PKG} (apk + repo fallback both failed)" >&2; exit 1; }
+      fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
-    || { tail -30 "$outdir/build.log"; warn "[$platform] docker build failed (log: $outdir/build.log) — skipping"; _safe_rmdir "$outdir"; return; }
+    || { _linux_build_failed "$platform" "$outdir"; return; }
 
   # Alpine installer uses apk add --allow-untrusted on local files.
   cat > "$outdir/install.sh" <<EOF
@@ -1258,12 +1432,49 @@ fi
 cp "$DISPATCHER_SH" "$STAGING_DIR/install.sh"
 chmod +x "$STAGING_DIR/install.sh"
 
-# Sanity check: at least one platform produced an install.sh.  An
-# empty subdir isn't useful — it'd just confuse the dispatcher.
-PLATFORMS_BUILT=$(find "$STAGING_DIR" -maxdepth 2 -mindepth 2 -name install.sh -type f | wc -l)
-[[ "$PLATFORMS_BUILT" -gt 0 ]] \
-  || die "no platforms produced output — every builder failed or stubbed"
+# Per-platform result summary.  A bundle that silently drops platforms
+# is worse than a failed build: it installs fine on the platforms that
+# DID make it and mysteriously fails offline on the ones that didn't.
+# But the two failure classes are NOT equal:
+#   * Linux platforms (ubuntu/debian/fedora/rhel/opensuse/alpine) carry
+#     the .deb/.rpm + wheel dependency closures — a Linux failure means
+#     a genuinely broken bundle, so it's FATAL (this is the OOM/silent-
+#     hollow-bundle case we're guarding against).
+#   * Release-asset platforms (windows/macos/*bsd) just fetch a prebuilt
+#     installer from GitHub Releases; one being absent is expected (e.g.
+#     the server product ships no Windows installer) and is a WARNING,
+#     not a build failure.
+_built=(); _failed_linux=(); _failed_asset=()
+for p in $PLATFORMS; do
+  if [[ -f "$STAGING_DIR/$(_outdir_for_platform "$p")/install.sh" ]]; then
+    _built+=("$p")
+  elif _is_linux_platform "$p"; then
+    _failed_linux+=("$p")
+  else
+    _failed_asset+=("$p")
+  fi
+done
 
+log "============================================================"
+log "Bundle platform summary for '$PRODUCT':"
+log "  succeeded     (${#_built[@]}): ${_built[*]:-none}"
+(( ${#_failed_linux[@]} )) \
+  && warn "  FAILED Linux  (${#_failed_linux[@]}): ${_failed_linux[*]}  <-- missing dependency closures"
+(( ${#_failed_asset[@]} )) \
+  && warn "  no installer  (${#_failed_asset[@]}): ${_failed_asset[*]}  (not published for this product — skipped)"
+{ (( ${#_failed_linux[@]} )) || (( ${#_failed_asset[@]} )); } && [[ -d "$BUNDLE_LOG_DIR" ]] \
+  && warn "  failure logs: $BUNDLE_LOG_DIR/<platform>.log"
+log "============================================================"
+
+if (( ${#_built[@]} == 0 )); then
+  die "no platforms produced output — every builder failed or stubbed (logs: $BUNDLE_LOG_DIR)"
+fi
+if (( ${#_failed_linux[@]} )) && [[ "$ALLOW_PARTIAL_BUNDLE" != "1" ]]; then
+  die "${#_failed_linux[@]} Linux platform(s) failed — the ISO would be missing their dependency closures and fail to install offline.
+Fix the failures above (see $BUNDLE_LOG_DIR), or set ALLOW_PARTIAL_BUNDLE=1 to ship a partial bundle on purpose."
+fi
+
+PLATFORMS_BUILT=${#_built[@]}
 log "Platforms staged: $PLATFORMS_BUILT"
 log "Staging tree size: $(du -sh "$STAGING_DIR" | cut -f1)"
 

@@ -55,6 +55,21 @@ interface DockerStatus {
   permission_denied: boolean;
 }
 
+interface ResourceStatus {
+  ram_total_mb: number | null;
+  ram_available_mb: number | null;
+  swap_total_mb: number | null;
+  swap_free_mb: number | null;
+  available_mb: number | null;
+  disk_free_gb: number | null;
+  disk_total_gb: number | null;
+  min_available_mb: number;
+  min_disk_gb: number;
+  severity: 'ok' | 'warn' | 'insufficient';
+  sufficient: boolean;
+  reason: string | null;
+}
+
 const buildInstallCommand = (status: DockerStatus): string => {
   const user = status.process_user || 'sysmanage';
   const restart =
@@ -109,6 +124,7 @@ const AirGapBundlesSettings: React.FC = () => {
     null,
   );
   const [docker, setDocker] = useState<DockerStatus | null>(null);
+  const [resources, setResources] = useState<ResourceStatus | null>(null);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -152,10 +168,24 @@ const AirGapBundlesSettings: React.FC = () => {
     }
   }, []);
 
+  const refreshResources = useCallback(async () => {
+    try {
+      const r = await axiosInstance.get<ResourceStatus>(
+        '/api/airgap-bundles/resource-status',
+      );
+      setResources(r.data);
+    } catch (e) {
+      console.error(e);
+      // Leave resources null on probe failure -> non-blocking (the
+      // server-side gate still enforces it on the actual build call).
+    }
+  }, []);
+
   useEffect(() => {
     refresh();
     refreshDocker();
-  }, [refresh, refreshDocker]);
+    refreshResources();
+  }, [refresh, refreshDocker, refreshResources]);
 
   // Auto-poll while any bundle is in-flight, so the status chip ticks
   // from "queued" -> "building" -> "ready"/"failed" without manual refresh.
@@ -164,9 +194,12 @@ const AirGapBundlesSettings: React.FC = () => {
       (b) => b.status === 'queued' || b.status === 'building',
     );
     if (!inFlight) return;
-    const id = globalThis.setInterval(() => refresh(), 5000);
+    const id = globalThis.setInterval(() => {
+      refresh();
+      refreshResources();
+    }, 5000);
     return () => globalThis.clearInterval(id);
-  }, [bundles, refresh]);
+  }, [bundles, refresh, refreshResources]);
 
   const handleBuild = async (product: 'server' | 'agent' | 'proplus') => {
     setBuilding(product);
@@ -325,6 +358,12 @@ const AirGapBundlesSettings: React.FC = () => {
   const dockerReady =
     docker !== null && docker.installed && docker.running && docker.user_in_group;
 
+  // Resource gate for the heavy Docker builds (server/agent).  Null =
+  // probe pending/failed -> don't block in the UI (the server still
+  // enforces it).  Only an explicit "insufficient" disables the
+  // buttons; a "warn" is allowed but flagged.
+  const resourcesReady = resources === null ? true : resources.sufficient;
+
   const copyInstallCommand = async (cmd: string) => {
     try {
       await globalThis.navigator.clipboard.writeText(cmd);
@@ -333,6 +372,59 @@ const AirGapBundlesSettings: React.FC = () => {
       console.error(e);
       showError(t('airgapBundles.copyError', 'Could not access the clipboard'));
     }
+  };
+
+  const renderResourceBanner = () => {
+    if (resources === null) return null;
+    if (resources.severity === 'ok') return null; // keep the UI clean when fine
+    const stats = (
+      <Typography
+        variant="caption"
+        sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}
+      >
+        {`RAM available: ${resources.ram_available_mb ?? '—'} MB`}
+        {resources.swap_free_mb != null
+          ? ` · swap free: ${resources.swap_free_mb} MB`
+          : ''}
+        {resources.disk_free_gb != null
+          ? ` · disk free: ${resources.disk_free_gb} GB`
+          : ''}
+      </Typography>
+    );
+    const insufficient = resources.severity === 'insufficient';
+    return (
+      <Alert severity={insufficient ? 'error' : 'warning'}>
+        <Typography variant="subtitle2" gutterBottom>
+          {insufficient
+            ? t(
+                'airgapBundles.resourcesInsufficient',
+                'This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).',
+              )
+            : t(
+                'airgapBundles.resourcesLow',
+                'Low resources — the build can run but will lean on swap and may be slow.',
+              )}
+        </Typography>
+        {resources.reason && (
+          <Typography
+            variant="caption"
+            sx={{ fontFamily: 'monospace', display: 'block' }}
+          >
+            {resources.reason}
+          </Typography>
+        )}
+        {stats}
+        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+          <Button
+            size="small"
+            onClick={refreshResources}
+            startIcon={<RefreshIcon />}
+          >
+            {t('airgapBundles.recheckResources', 'Re-check resources')}
+          </Button>
+        </Stack>
+      </Alert>
+    );
   };
 
   const renderDockerBanner = () => {
@@ -468,6 +560,7 @@ const AirGapBundlesSettings: React.FC = () => {
         <CardContent>
           <Stack spacing={2}>
             {renderDockerBanner()}
+            {renderResourceBanner()}
             <Stack direction="row" spacing={2}>
               <Button
                 variant="contained"
@@ -478,7 +571,7 @@ const AirGapBundlesSettings: React.FC = () => {
                     <BuildIcon />
                   )
                 }
-                disabled={building !== null || !dockerReady}
+                disabled={building !== null || !dockerReady || !resourcesReady}
                 onClick={() => handleBuild('server')}
               >
                 {t('airgapBundles.buildServer', 'Build Server Bundle')}
@@ -493,7 +586,7 @@ const AirGapBundlesSettings: React.FC = () => {
                     <BuildIcon />
                   )
                 }
-                disabled={building !== null || !dockerReady}
+                disabled={building !== null || !dockerReady || !resourcesReady}
                 onClick={() => handleBuild('agent')}
               >
                 {t('airgapBundles.buildAgent', 'Build Agent Bundle')}

@@ -80,6 +80,160 @@ class DockerStatusResponse(BaseModel):
     permission_denied: bool  # daemon reachable on socket but we can't read it
 
 
+class ResourceStatusResponse(BaseModel):
+    ram_total_mb: Optional[int]
+    ram_available_mb: Optional[int]  # real RAM a new process can take now
+    swap_total_mb: Optional[int]
+    swap_free_mb: Optional[int]
+    available_mb: Optional[int]  # ram_available + swap_free
+    disk_free_gb: Optional[float]  # min free across bundle dir + staging
+    disk_total_gb: Optional[float]
+    min_available_mb: int  # threshold below which a build is blocked
+    min_disk_gb: int
+    severity: str  # "ok" | "warn" | "insufficient"
+    sufficient: bool  # False => build is blocked
+    reason: Optional[str]  # human-readable detail when not "ok"
+
+
+# Resource thresholds for a Docker-driven multi-platform bundle build.
+# The dominant costs are per-distro ``pip wheel`` compilation (cryptography,
+# cffi, …) — each wants ~1 GB — plus a multi-GB staging tree and the ISO.
+# A host that can't cover these silently OOM-kills the per-distro builds
+# and ships a hollow ISO, so we gate the build on them up front.
+_MIN_BUILD_AVAIL_MB = 2048  # RAM + free swap below this -> block
+_SOFT_BUILD_RAM_MB = 1024  # real RAM available below this -> warn (swap-heavy)
+_MIN_BUILD_DISK_GB = 5  # free disk below this -> block
+_SOFT_BUILD_DISK_GB = 10  # free disk below this -> warn
+
+
+def _read_meminfo_mb():
+    """(mem_total, mem_available, swap_total, swap_free) in MB, or None
+    on non-Linux / unreadable ``/proc/meminfo``."""
+    try:
+        vals = {}
+        with open("/proc/meminfo", encoding="utf-8") as fh:
+            for line in fh:
+                parts = line.split(":")
+                if len(parts) != 2:
+                    continue
+                num = parts[1].strip().split()
+                if num and num[0].isdigit():
+                    vals[parts[0].strip()] = int(num[0]) // 1024  # kB -> MB
+        return (
+            vals.get("MemTotal", 0),
+            vals.get("MemAvailable", 0),
+            vals.get("SwapTotal", 0),
+            vals.get("SwapFree", 0),
+        )
+    except OSError:
+        return None
+
+
+def _disk_free_bytes(path: str) -> Optional[int]:
+    """Free bytes on the filesystem holding ``path``.  Walks up to the
+    nearest existing ancestor so a not-yet-created bundle dir doesn't
+    raise."""
+    p = path
+    while p and not os.path.exists(p):
+        parent = os.path.dirname(p)
+        if parent == p:
+            break
+        p = parent
+    if not p or not os.path.exists(p):
+        return None
+    try:
+        return shutil.disk_usage(p).free
+    except OSError:
+        return None
+
+
+def _check_build_resources() -> dict:
+    """Assess whether the host can run a Docker bundle build.  Shape
+    matches ``ResourceStatusResponse``."""
+    # Disk: the build stages under /var/tmp and writes the ISO to
+    # BUNDLE_DIR — both need room, possibly on different filesystems.
+    frees = [
+        b
+        for b in (
+            _disk_free_bytes(str(airgap_bundle_builder.BUNDLE_DIR)),
+            _disk_free_bytes("/var/tmp"),
+        )
+        if b is not None
+    ]
+    disk_free_bytes = min(frees) if frees else None
+    disk_free_gb = (
+        round(disk_free_bytes / (1024**3), 1) if disk_free_bytes is not None else None
+    )
+    try:
+        disk_total_gb = round(shutil.disk_usage("/var/tmp").total / (1024**3), 1)
+    except OSError:
+        disk_total_gb = None
+
+    mem = _read_meminfo_mb()
+    if mem is None:
+        # Non-Linux / unreadable.  docker-status already blocks non-Linux
+        # hosts, so don't double-block here — report unknown but allow.
+        return {
+            "ram_total_mb": None,
+            "ram_available_mb": None,
+            "swap_total_mb": None,
+            "swap_free_mb": None,
+            "available_mb": None,
+            "disk_free_gb": disk_free_gb,
+            "disk_total_gb": disk_total_gb,
+            "min_available_mb": _MIN_BUILD_AVAIL_MB,
+            "min_disk_gb": _MIN_BUILD_DISK_GB,
+            "severity": "ok",
+            "sufficient": True,
+            "reason": None,
+        }
+
+    mem_total, mem_avail, swap_total, swap_free = mem
+    available_mb = mem_avail + swap_free
+    reasons = []
+    severity = "ok"
+
+    if available_mb < _MIN_BUILD_AVAIL_MB:
+        severity = "insufficient"
+        reasons.append(
+            f"only {available_mb} MB of RAM+swap free; need ≥ {_MIN_BUILD_AVAIL_MB} MB "
+            f"(add swap or grow the VM)"
+        )
+    if disk_free_gb is not None and disk_free_gb < _MIN_BUILD_DISK_GB:
+        severity = "insufficient"
+        reasons.append(
+            f"only {disk_free_gb} GB free disk; need ≥ {_MIN_BUILD_DISK_GB} GB"
+        )
+
+    if severity != "insufficient":
+        if mem_avail < _SOFT_BUILD_RAM_MB:
+            severity = "warn"
+            reasons.append(
+                f"only {mem_avail} MB real RAM free — the build will lean on swap "
+                f"and run slowly"
+            )
+        if disk_free_gb is not None and disk_free_gb < _SOFT_BUILD_DISK_GB:
+            severity = "warn"
+            reasons.append(
+                f"only {disk_free_gb} GB free disk — a full build can use several GB"
+            )
+
+    return {
+        "ram_total_mb": mem_total,
+        "ram_available_mb": mem_avail,
+        "swap_total_mb": swap_total,
+        "swap_free_mb": swap_free,
+        "available_mb": available_mb,
+        "disk_free_gb": disk_free_gb,
+        "disk_total_gb": disk_total_gb,
+        "min_available_mb": _MIN_BUILD_AVAIL_MB,
+        "min_disk_gb": _MIN_BUILD_DISK_GB,
+        "severity": severity,
+        "sufficient": severity != "insufficient",
+        "reason": "; ".join(reasons) if reasons else None,
+    }
+
+
 def _row_to_response(row: models.AirGapBundle) -> BundleResponse:
     return BundleResponse(
         id=str(row.id),
@@ -241,6 +395,22 @@ async def docker_status(
 
 
 # ---------------------------------------------------------------------------
+# GET /airgap-bundles/resource-status — RAM / swap / disk pre-flight.
+# The Settings UI uses this to disable the Build buttons (and show a
+# banner) when the host can't take a build, rather than letting the
+# per-distro Docker builds get OOM-killed and silently ship a hollow ISO.
+# ---------------------------------------------------------------------------
+
+
+@router.get("/resource-status", response_model=ResourceStatusResponse)
+@requires_pro_plus()
+async def resource_status(
+    current_user: str = Depends(get_current_user),  # noqa: ARG001
+) -> ResourceStatusResponse:
+    return ResourceStatusResponse(**_check_build_resources())
+
+
+# ---------------------------------------------------------------------------
 # POST /airgap-bundles — start a build
 # ---------------------------------------------------------------------------
 
@@ -255,6 +425,21 @@ async def create_bundle(
             status_code=400,
             detail=_("product must be one of: ") + ", ".join(models.BUNDLE_PRODUCTS),
         )
+
+    # Resource gate.  The server/agent builds run Docker per distro and
+    # compile wheels; refuse to start when the host can't take it — a
+    # too-small host OOM-kills the per-distro builds and ships a hollow
+    # ISO.  Pro+ overlay bundles are a lightweight file copy and skip
+    # this gate.  Enforced server-side so it can't be bypassed by a
+    # stale UI.
+    if req.product in ("server", "agent"):
+        res = _check_build_resources()
+        if not res["sufficient"]:
+            raise HTTPException(
+                status_code=409,
+                detail=_("Insufficient host resources to build a bundle: ")
+                + (res["reason"] or ""),
+            )
 
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
     with SessionLocal() as session:

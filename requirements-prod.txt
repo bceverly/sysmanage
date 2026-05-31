@@ -1,0 +1,91 @@
+# Production runtime dependencies only
+# This file is AUTO-GENERATED from requirements.txt
+# DO NOT EDIT MANUALLY - run scripts/update-requirements-prod.py instead
+#
+# For development dependencies, see requirements.txt
+
+alembic>=1.16.5
+annotated-types==0.7.0
+aiofiles>=24.1.0
+aiohttp>=3.13.5  # 27 CVEs across the 3.9-3.13 series; 3.13.5 is latest patched
+anyio>=4.5.0
+certifi==2026.1.4
+cffi>=2.0.0
+click>=8.1.8
+cryptography==46.0.7  # CVE-2026-34073 (buffer overflow), CVE-2026-39892 (DNS name constraints)
+defusedxml>=0.7.1
+dnspython>=2.7.0
+email_validator==2.1.1
+fastapi==0.129.0
+gevent==25.9.1
+greenlet>=3.1.0
+h11>=0.16.0
+httpcore>=1.0.6
+httptools==0.7.1
+httpx>=0.27.2
+idna==3.11
+itsdangerous==2.2.0
+Jinja2>=3.1.6
+Mako==1.3.12  # CVE-2026-44307 path-traversal fix (was 1.3.11)
+MarkupSafe==3.0.2
+orjson==3.11.6  # CVE-2025-67221 (no recursion limit on deeply nested JSON)
+packaging>=24.0
+Pillow>=12.2.0  # multiple CVEs in the 11.x series (heap overflows in image parsers)
+platformdirs>=4.0.0
+psycopg2-binary==2.9.10
+argon2-cffi==25.1.0
+bcrypt>=4.0.0
+pyotp>=2.9.0  # Phase 10.3: TOTP-based multi-factor authentication
+ldap3>=2.9.0  # Phase 10.5: LDAP/AD external IdP support
+authlib>=1.7.2  # Phase 10.5 OIDC external IdP support; 10 CVEs in 1.3-1.6 (signature bypass + token-leak)
+geoip2>=4.8.0  # Phase 12.7: GeoLite2 city/country lookup (pulls maxminddb transitively, both Apache-2.0)
+pycparser==2.23
+pydantic>=2.9.0,<2.13.0
+pydantic-extra-types==2.11.0
+pydantic-settings==2.13.0
+PyJWT==2.12.0  # CVE-2026-32597 (accepts unknown crit header extensions)
+python-dotenv==1.2.2  # CVE-2026-28684 (symlink following in set_key)
+python-multipart>=0.0.27  # 0.0.20 has DoS + form-parser bypass CVEs
+PyYAML==6.0.2
+setuptools>=82.0.1  # 80.9.0 had CVE in pkg_resources path traversal
+sniffio==1.3.1
+SQLAlchemy==2.0.43
+# SECURITY NOTE: 0.48-0.51 has CVE-2025-62727 (DoS via crafted Range headers) and
+
+# follow-on header-handling fixes; 0.52.1 is the latest patched 0.5x series.
+
+# Upper bound stays <1.0 because FastAPI 0.129.0 hasn't validated against starlette 1.x yet.
+starlette>=0.52.1,<1.0
+typing_extensions>=4.12.2
+ujson==5.12.1  # patch covers prior CVEs (memory-leak DoS / integer overflow) + Dependabot #115 (ujson.dump() write-failure memory leak)
+uvicorn==0.40.0
+watchfiles==1.1.0
+websockets==16.0
+zope.event==6.1
+zope.interface==8.2
+Babel==2.18.0
+reportlab==4.4.4
+
+# Note: On OpenBSD 7.7, coverage.py C tracer requires gcc and py3-cffi
+
+# Install with: doas pkg_add gcc py3-cffi
+
+# The install-dev target will automatically handle C tracer setup
+requests>=2.33.1  # 2.32.0-2.32.5 has urllib3 redirect-leak CVE chain; 2.33.x is latest patched
+urllib3>=2.7.0  # 2.5.0-2.6.3 has 3 CVEs (Set-Cookie isolation + redirect-Authorization leak); 2.7.0 is latest patched
+
+# OpenTelemetry for observability
+
+# Note: Using minimum versions to allow pip to resolve compatible version sets
+
+# Instrumentation packages and exporters must be compatible with the resolved API/SDK version
+opentelemetry-api>=1.12.0
+opentelemetry-sdk>=1.12.0
+opentelemetry-instrumentation>=0.48b0
+opentelemetry-instrumentation-fastapi>=0.48b0
+opentelemetry-instrumentation-sqlalchemy>=0.48b0
+opentelemetry-instrumentation-requests>=0.48b0
+opentelemetry-instrumentation-logging>=0.48b0
+opentelemetry-exporter-otlp>=1.12.0
+opentelemetry-exporter-prometheus>=0.48b0
+

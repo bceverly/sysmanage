@@ -1373,6 +1373,16 @@ def _apply_mirror_sync_status(
     # needs the UI to leave the spinner state either way.
     setattr(row, f"{prefix}_message_id", None)
 
+    # Track consecutive sync failures so ``tick_mirrors`` can back off
+    # and eventually auto-disable a mirror that keeps failing (e.g. one
+    # too large to sync without OOMing its host) instead of redispatching
+    # it every cron tick.  Reset on success.
+    if action == "sync":
+        if succeeded:
+            row.consecutive_sync_failures = 0
+        else:
+            row.consecutive_sync_failures = (row.consecutive_sync_failures or 0) + 1
+
     if action == "snapshot":
         _post_snapshot_outcome(session, mirror_id, succeeded, outcome)
     elif action == "restore":

@@ -20,6 +20,7 @@ Reversible — downgrade restores "(next)" + ``noble`` and removes the
 25.10 row.
 """
 
+import uuid
 from typing import Sequence, Union
 
 import sqlalchemy as sa
@@ -65,9 +66,14 @@ def upgrade() -> None:
         )
     ).fetchone()
     if not existing:
-        # Some installs may have a uuid_generate_v4()/gen_random_uuid()
-        # available; use gen_random_uuid() (Postgres 13+, ships built-in)
-        # since the rest of the codebase already requires it.
+        # Generate the id in Python rather than calling
+        # ``gen_random_uuid()`` in SQL — that function is Postgres-only
+        # and breaks the SQLite migration CI with "no such function:
+        # gen_random_uuid".  Bind the value with a dialect-appropriate
+        # cast (``::uuid`` on Postgres, none on SQLite), the same pattern
+        # the security-roles seed migration uses.
+        is_sqlite = conn.dialect.name == "sqlite"
+        uuid_cast = "" if is_sqlite else "::uuid"
         conn.execute(
             sa.text(
                 "INSERT INTO mirror_known_version "
@@ -75,11 +81,12 @@ def upgrade() -> None:
                 "     match_regex, default_upstream_url, default_suite, "
                 "     default_repoid, default_repo_alias, default_release, "
                 "     is_active) "
-                "VALUES (gen_random_uuid(), :platform, :version_key, :label, "
+                f"VALUES (:id{uuid_cast}, :platform, :version_key, :label, "
                 "        :os_family, :regex, :url, :suite, :repoid, :alias, "
                 "        :release, TRUE)"
             ),
             {
+                "id": str(uuid.uuid4()),
                 "platform": "apt",
                 "version_key": "ubuntu-25.10",
                 "label": "Ubuntu 25.10 (questing)",

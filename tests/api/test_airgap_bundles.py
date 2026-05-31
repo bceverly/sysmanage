@@ -25,6 +25,10 @@ class TestAirGapBundlesAPI:
         # to True — endpoints are Pro+-gated and the test fixture has
         # no license configured.  PropertyMock is required because a
         # plain ``patch`` on a property has no deleter to restore.
+        # Also force the resource pre-flight to "sufficient" so the
+        # build gate doesn't 409 on a low-RAM CI runner (it reads real
+        # /proc/meminfo otherwise).  The gate itself is covered by its
+        # own test below, which overrides this.
         with patch(
             "backend.api.airgap_bundles.airgap_bundle_builder.start_build"
         ) as m, patch.object(
@@ -32,6 +36,22 @@ class TestAirGapBundlesAPI:
             "is_pro_plus_active",
             new_callable=PropertyMock,
             return_value=True,
+        ), patch(
+            "backend.api.airgap_bundles._check_build_resources",
+            return_value={
+                "ram_total_mb": 8000,
+                "ram_available_mb": 6000,
+                "swap_total_mb": 0,
+                "swap_free_mb": 0,
+                "available_mb": 6000,
+                "disk_free_gb": 50.0,
+                "disk_total_gb": 100.0,
+                "min_available_mb": 2048,
+                "min_disk_gb": 5,
+                "severity": "ok",
+                "sufficient": True,
+                "reason": None,
+            },
         ):
             yield m
 
@@ -62,6 +82,70 @@ class TestAirGapBundlesAPI:
         )
         assert resp.status_code == 202
         assert resp.json()["product"] == "agent"
+
+    def test_create_blocked_when_resources_insufficient(self, client, auth_headers):
+        # Override the autouse "sufficient" mock with an insufficient one
+        # and confirm the build is refused with 409 before any thread is
+        # spawned (server-side gate).
+        with patch(
+            "backend.api.airgap_bundles._check_build_resources",
+            return_value={
+                "ram_total_mb": 1000,
+                "ram_available_mb": 400,
+                "swap_total_mb": 0,
+                "swap_free_mb": 0,
+                "available_mb": 400,
+                "disk_free_gb": 50.0,
+                "disk_total_gb": 100.0,
+                "min_available_mb": 2048,
+                "min_disk_gb": 5,
+                "severity": "insufficient",
+                "sufficient": False,
+                "reason": "only 400 MB of RAM+swap free; need >= 2048 MB",
+            },
+        ):
+            resp = client.post(
+                "/api/airgap-bundles",
+                json={"product": "server"},
+                headers=auth_headers,
+            )
+        assert resp.status_code == 409, resp.text
+        assert "Insufficient host resources" in resp.json()["detail"]
+
+    def test_proplus_bundle_not_resource_gated(self, client, auth_headers):
+        # The Pro+ overlay bundle is a lightweight file copy and must
+        # NOT be blocked by the resource gate even when it would report
+        # insufficient for the Docker-driven products.
+        with patch(
+            "backend.api.airgap_bundles._check_build_resources",
+            return_value={
+                "ram_total_mb": 1000,
+                "ram_available_mb": 400,
+                "swap_total_mb": 0,
+                "swap_free_mb": 0,
+                "available_mb": 400,
+                "disk_free_gb": 50.0,
+                "disk_total_gb": 100.0,
+                "min_available_mb": 2048,
+                "min_disk_gb": 5,
+                "severity": "insufficient",
+                "sufficient": False,
+                "reason": "low",
+            },
+        ):
+            resp = client.post(
+                "/api/airgap-bundles",
+                json={"product": "proplus"},
+                headers=auth_headers,
+            )
+        assert resp.status_code == 202, resp.text
+
+    def test_resource_status_endpoint(self, client, auth_headers):
+        resp = client.get("/api/airgap-bundles/resource-status", headers=auth_headers)
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        for key in ("sufficient", "severity", "min_available_mb", "min_disk_gb"):
+            assert key in body
 
     def test_create_rejects_unknown_product(self, client, auth_headers):
         resp = client.post(

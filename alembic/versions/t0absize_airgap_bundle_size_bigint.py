@@ -27,6 +27,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # SQLite has no ``ALTER COLUMN ... TYPE`` and its ``INTEGER`` is
+    # already a dynamic, up-to-8-byte type that stores >INT4_MAX values
+    # fine — so widening to BigInteger is a no-op there.  Only emit the
+    # real DDL on backends that need (and support) it.  Without this
+    # guard alembic emits ``ALTER TABLE ... ALTER COLUMN ... TYPE BIGINT``
+    # which SQLite rejects with "near 'ALTER': syntax error".
+    if op.get_bind().dialect.name == "sqlite":
+        return
     op.alter_column(
         "airgap_bundle",
         "size_bytes",
@@ -37,6 +45,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    if op.get_bind().dialect.name == "sqlite":
+        return
     op.alter_column(
         "airgap_bundle",
         "size_bytes",

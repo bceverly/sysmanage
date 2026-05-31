@@ -117,6 +117,12 @@ class MirrorRepository(Base):
     last_sync_status = Column(String(40), nullable=True)
     last_sync_error = Column(Text, nullable=True)
     last_sync_message_id = Column(String(80), nullable=True)
+    # Count of consecutive failed syncs.  Reset to 0 on any success;
+    # incremented by the result handler on failure.  ``tick_mirrors``
+    # reads it to back off and eventually auto-disable a mirror that
+    # keeps failing (e.g. one too large to sync without OOMing the host)
+    # rather than re-dispatching it on every cron tick.
+    consecutive_sync_failures = Column(Integer, nullable=False, default=0)
     next_sync_at = Column(DateTime, nullable=True)
     last_snapshot_at = Column(DateTime, nullable=True)
     last_snapshot_status = Column(String(40), nullable=True)
@@ -172,6 +178,7 @@ class MirrorRepository(Base):
             "last_sync_status": self.last_sync_status,
             "last_sync_error": self.last_sync_error,
             "last_sync_message_id": self.last_sync_message_id,
+            "consecutive_sync_failures": self.consecutive_sync_failures or 0,
             "next_sync_at": (
                 self.next_sync_at.isoformat() if self.next_sync_at else None
             ),

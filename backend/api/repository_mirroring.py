@@ -496,6 +496,13 @@ async def list_snapshots(mirror_id: str, db: Session = Depends(get_db)):
     return [r.to_dict() for r in rows]
 
 
+# A mirror that fails this many syncs in a row is auto-disabled by the
+# tick so it stops re-dispatching every cron cycle — a mirror too large
+# to sync without OOMing its host would otherwise fail forever.  The
+# counter resets to 0 on any successful sync (see proplus_dispatch).
+_MIRROR_MAX_SYNC_FAILURES = 5
+
+
 @router.post("/api/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
 async def tick_mirrors(db: Session = Depends(get_db)):
     """Driver hook for an external scheduler.  Selects every enabled
@@ -519,8 +526,24 @@ async def tick_mirrors(db: Session = Depends(get_db)):
         .all()
     )
     fired = []
+    disabled = []
     for row in due:
         if row.next_sync_at is not None and row.next_sync_at > now:
+            continue
+        if (row.consecutive_sync_failures or 0) >= _MIRROR_MAX_SYNC_FAILURES:
+            # Too many consecutive failures — stop re-dispatching.
+            # Disable the mirror and surface why; an operator must fix
+            # the root cause and re-enable it to resume syncing.
+            row.enabled = False
+            row.last_sync_status = "DISABLED"
+            row.last_sync_error = (
+                f"Auto-disabled after {row.consecutive_sync_failures} consecutive "
+                "sync failures; re-enable once the cause is addressed (check host "
+                "resources / prior last_sync_error)."
+            )
+            row.last_sync_message_id = None
+            row.next_sync_at = None
+            disabled.append({"mirror_id": str(row.id), "name": row.name})
             continue
         try:
             config = _config_from_row(row)
@@ -559,7 +582,12 @@ async def tick_mirrors(db: Session = Depends(get_db)):
             row.last_sync_status = "FAILURE"
             row.last_sync_error = str(exc)
     db.commit()
-    return {"fired_count": len(fired), "fired": fired}
+    return {
+        "fired_count": len(fired),
+        "fired": fired,
+        "disabled_count": len(disabled),
+        "disabled": disabled,
+    }
 
 
 # ---------------------------------------------------------------------
