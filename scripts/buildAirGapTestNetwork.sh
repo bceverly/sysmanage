@@ -33,8 +33,9 @@
 # Resource sizing.  Disk sizes are the maximum the VM filesystem can
 # grow to — qcow2 is thin-allocated so unused space doesn't actually
 # consume host disk.  Defaults are sized for a real end-to-end test:
-#   online        : 2 vCPU / 2 GiB RAM / 80 GiB disk  (room for apt-mirror
-#                   tree of one suite + snapshots + staged bundle ISOs)
+#   online        : 2 vCPU / 8 GiB RAM / 80 GiB disk  (runs the full stack
+#                   AND builds air-gap bundles — ~6 per-distro Docker builds
+#                   whose pip-wheel compiles peak ~1 GiB each; 2 GiB OOM'd)
 #   airgap        : 2 vCPU / 2 GiB RAM / 80 GiB disk  (must hold the imported
 #                   mirror after the ISO is mounted + ingested)
 #   private-agent : 1 vCPU / 1 GiB RAM / 20 GiB disk  (just OS + agent state)
@@ -68,7 +69,12 @@ PRIVATE_NET_MASK="${PRIVATE_NET_MASK:-255.255.255.0}"
 
 ONLINE_NAME="${ONLINE_NAME:-sysmanage-online}"
 ONLINE_VCPUS="${ONLINE_VCPUS:-2}"
-ONLINE_RAM="${ONLINE_RAM:-2048}"
+# 8 GiB: the online node runs the full sysmanage stack (postgres + OpenBAO
+# + backend) AND builds the air-gap bundles, which fan out ~6 per-distro
+# Docker builds whose pip-wheel compiles peak around ~1 GiB each.  At the
+# old 2 GiB it OOM-killed the builds (and the agent) and shipped hollow
+# ISOs.  Override with ONLINE_RAM=<MiB> for a smaller/larger host.
+ONLINE_RAM="${ONLINE_RAM:-8192}"
 ONLINE_DISK_GB="${ONLINE_DISK_GB:-80}"
 ONLINE_MAC="${ONLINE_MAC:-52:54:00:60:50:00}"
 

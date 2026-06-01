@@ -513,12 +513,17 @@ jobs:
         for i in {1..120}; do
           if curl -f http://localhost:8001/api/health > /dev/null 2>&1; then
             echo "✅ Backend API health check passed on port 8001"
-            # Also test the login endpoint specifically
-            if curl -f -X POST http://localhost:8001/login -H "Content-Type: application/json" -d '{"userid":"admin@test.com","password":"admin"}' > /dev/null 2>&1; then
-              echo "✅ Backend login endpoint is accessible"
+            # Also confirm the login endpoint is mounted.  It lives at
+            # /api/login (the auth router prefix), NOT /login — the old
+            # path 404'd forever.  This is a readiness probe, so any
+            # non-404 response (200 success, or 401/422 from a cred/shape
+            # mismatch) means the route is up and the backend is ready.
+            LOGIN_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8001/api/login -H "Content-Type: application/json" -d '{"userid":"admin@test.com","password":"admin"}' 2>/dev/null)
+            if [ "$LOGIN_CODE" != "404" ] && [ "$LOGIN_CODE" != "000" ]; then
+              echo "✅ Backend login endpoint is accessible (HTTP $LOGIN_CODE)"
               break
             else
-              echo "⚠️ Health check passed but login endpoint not ready yet..."
+              echo "⚠️ Health check passed but login endpoint not ready yet (HTTP $LOGIN_CODE)..."
             fi
           fi
           if [ $i -eq 120 ]; then

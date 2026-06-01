@@ -14,6 +14,7 @@ Covers:
 # pylint: disable=missing-function-docstring,missing-class-docstring
 
 import json
+from datetime import datetime, timedelta
 
 import pytest
 import sqlalchemy as sa
@@ -140,10 +141,18 @@ class TestEnqueue:
 class TestPeekBatch:
     def test_returns_fifo_order(self, session):
         a = qsvc.enqueue(session, payload_type="x", payload={"n": 1})
-        session.commit()
         b = qsvc.enqueue(session, payload_type="x", payload={"n": 2})
-        session.commit()
         c = qsvc.enqueue(session, payload_type="x", payload={"n": 3})
+        # peek_batch orders by (created_at, id).  All three rows are
+        # inserted in the same instant here, and on a coarse-resolution
+        # clock (e.g. Windows) they get an identical created_at — which
+        # makes the id (a random UUID) the tiebreaker and the order
+        # non-deterministic.  Stamp strictly-increasing created_at values
+        # so the test deterministically exercises the FIFO ordering.
+        base = datetime(2026, 1, 1, 0, 0, 0)
+        a.created_at = base
+        b.created_at = base + timedelta(seconds=1)
+        c.created_at = base + timedelta(seconds=2)
         session.commit()
         rows = qsvc.peek_batch(session)
         assert [r.id for r in rows] == [a.id, b.id, c.id]

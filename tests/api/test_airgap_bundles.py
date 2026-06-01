@@ -7,9 +7,20 @@ contract; the actual buildAirGapBundle.sh execution is its own beast
 script's smoke test, not here.
 """
 
+import sys
 from unittest.mock import PropertyMock, patch
 
 import pytest
+
+# The docker-status endpoint is Linux-only: it relies on pwd/grp/os.geteuid
+# to identify the OS user that owns the docker socket.  On a Windows runner
+# those are absent, so the endpoint returns a "not supported on Linux"
+# sentinel and the Linux-behaviour assertions below cannot hold.  Skip
+# those specific cases on Windows rather than assert platform-specific output.
+_skip_on_windows = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="docker-status is Linux-only (needs pwd/grp/os.geteuid)",
+)
 
 from backend.licensing.license_service import LicenseService
 
@@ -216,6 +227,7 @@ class TestAirGapBundlesAPI:
         resp = client.post("/api/airgap-bundles", json={"product": "server"})
         assert resp.status_code in (401, 403)
 
+    @_skip_on_windows
     def test_docker_status_missing_binary(self, client, auth_headers):
         # When `docker` isn't on PATH, the endpoint must return
         # installed=False rather than 500.  We force shutil.which to
@@ -231,6 +243,7 @@ class TestAirGapBundlesAPI:
             assert body["process_user"]  # always populated
             assert body["error"]
 
+    @_skip_on_windows
     def test_docker_status_installed_but_daemon_down(self, client, auth_headers):
         # docker binary exists but `docker info` returns non-zero.  The
         # response should report installed=True/running=False with a
@@ -264,6 +277,7 @@ class TestAirGapBundlesAPI:
             assert body["permission_denied"] is False
             assert "daemon" in body["error"].lower()
 
+    @_skip_on_windows
     def test_docker_status_permission_denied(self, client, auth_headers):
         # docker binary exists, daemon is up, but the calling user
         # isn't in the docker group — the endpoint must flag this as

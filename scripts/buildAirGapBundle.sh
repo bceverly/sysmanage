@@ -812,7 +812,8 @@ build_ubuntu_like() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH")" -o "$REQ" \
-          || { echo "could not obtain $(basename "$REQ_PATH") for ${PKG}" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
@@ -909,7 +910,8 @@ build_debian_like() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH")" -o "$REQ" \
-          || { echo "could not obtain $(basename "$REQ_PATH") for ${PKG}" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
@@ -966,16 +968,16 @@ build_fedora() {
       [ -n "$ASSET_URL" ] || { echo "no generic .rpm in releases for $REPO" >&2; exit 1; }
       curl -fsSL -o "${PKG}.rpm" "$ASSET_URL"
 
-      # dnf download with --resolve walks recursive deps for us.
-      # ``dnf download --resolve ./local.rpm`` works on dnf4 but dnf5
-      # (Fedora 41+) rejects a local-file path here ("No package
-      # ./x.rpm available").  ``dnf install --downloadonly --destdir``
-      # resolves + downloads the package AND its full dep closure on
-      # BOTH dnf4 and dnf5, so prefer it; keep the old forms as
-      # fallbacks for odd configs.
-      dnf install -y --downloadonly --allowerasing --destdir=rpm-deps "./${PKG}.rpm" \
-        || dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
-        || dnf download --resolve --destdir=rpm-deps "${PKG}"
+      # Download the full dependency closure of the rpm into rpm-deps.
+      # This must work on BOTH dnf4 (Fedora 40, Rocky 9) and dnf5
+      # (Fedora 41+): dnf5 rejects ``dnf download --resolve ./local.rpm``
+      # ("No package ./x.rpm available") and ``dnf install --downloadonly``
+      # does not take --destdir.  Portable path: read the rpm Requires and
+      # let dnf download those by name (plus their transitive deps) from
+      # the repos; the main rpm itself is already fetched above.
+      REQS=$(rpm -qpR "${PKG}.rpm" | awk "{print \$1}" \
+             | grep -vE "^(rpmlib|/|python\\(abi\\))" | sort -u)
+      dnf download --resolve --destdir=rpm-deps $REQS || true
       # Pull the extra product-specific roots (e.g. postgresql-server)
       # and their transitive deps too.
       for _extra in $EXTRAS; do
@@ -990,7 +992,8 @@ build_fedora() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
-          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
@@ -1016,9 +1019,11 @@ build_rhel() {
     -e EXTRAS="$EXTRAS_RPM" \
     "rockylinux:$ver" bash -euxc '
       # dnf-plugins-core provides `dnf download`; Rocky 9 stock image
-      # ships without it.
+      # ships without it.  Use python3.12 (AppStream) — Rocky/RHEL 9 ships
+      # python3 = 3.9 by default, but the server requires >= 3.12 (e.g.
+      # fastapi 0.129.0 dropped 3.9), so wheels must be built for 3.12.
       dnf install -y -q --allowerasing \
-        curl jq python3 python3-pip python3-devel \
+        curl jq python3.12 python3.12-pip python3.12-devel \
         gcc libffi-devel openssl-devel libpq-devel \
         cpio dnf-plugins-core
       cd /out
@@ -1040,15 +1045,13 @@ build_rhel() {
       [ -n "$ASSET_URL" ] || { echo "no el9/generic .rpm in releases for $REPO" >&2; exit 1; }
       curl -fsSL -o "${PKG}.rpm" "$ASSET_URL"
 
-      # ``dnf download --resolve ./local.rpm`` works on dnf4 but dnf5
-      # (Fedora 41+) rejects a local-file path here ("No package
-      # ./x.rpm available").  ``dnf install --downloadonly --destdir``
-      # resolves + downloads the package AND its full dep closure on
-      # BOTH dnf4 and dnf5, so prefer it; keep the old forms as
-      # fallbacks for odd configs.
-      dnf install -y --downloadonly --allowerasing --destdir=rpm-deps "./${PKG}.rpm" \
-        || dnf download --resolve --destdir=rpm-deps "./${PKG}.rpm" \
-        || dnf download --resolve --destdir=rpm-deps "${PKG}"
+      # Download the full dependency closure of the rpm into rpm-deps.
+      # Portable across dnf4 (Rocky 9) and dnf5: read the rpm Requires and
+      # let dnf download those by name (plus their transitive deps); the
+      # main rpm itself is already fetched above.
+      REQS=$(rpm -qpR "${PKG}.rpm" | awk "{print \$1}" \
+             | grep -vE "^(rpmlib|/|python\\(abi\\))" | sort -u)
+      dnf download --resolve --destdir=rpm-deps $REQS || true
       for _extra in $EXTRAS; do
         dnf download --resolve --destdir=rpm-deps "$_extra" || true
       done
@@ -1060,9 +1063,10 @@ build_rhel() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
-          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
-      python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
+      python3.12 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
@@ -1118,7 +1122,8 @@ build_opensuse() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "$REQ_PATH_RPM")" -o "$REQ" \
-          || { echo "could not obtain $(basename "$REQ_PATH_RPM") for ${PKG}" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG}" >&2; exit 1; }
       fi
       python3.11 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \
@@ -1188,7 +1193,8 @@ build_alpine() {
       if [ ! -s "$REQ" ]; then
         TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
         curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/$(basename "${REQ_PATH_RPM}")" -o "$REQ" \
-          || { echo "could not obtain $(basename "${REQ_PATH_RPM}") for ${PKG} (apk + repo fallback both failed)" >&2; exit 1; }
+          || curl -fsSL "https://raw.githubusercontent.com/$REPO/${TAG}/requirements.txt" -o "$REQ" \
+          || { echo "could not obtain requirements for ${PKG} (apk + repo fallback both failed)" >&2; exit 1; }
       fi
       python3 -m pip wheel --wheel-dir wheels -r "$REQ" pip setuptools wheel
     ' >"$outdir/build.log" 2>&1 \

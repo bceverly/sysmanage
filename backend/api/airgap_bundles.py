@@ -105,6 +105,11 @@ _SOFT_BUILD_RAM_MB = 1024  # real RAM available below this -> warn (swap-heavy)
 _MIN_BUILD_DISK_GB = 5  # free disk below this -> block
 _SOFT_BUILD_DISK_GB = 10  # free disk below this -> warn
 
+# Where buildAirGapBundle.sh stages the build (its STAGING_DIR default).
+# We only ``stat`` its free space here — we never create a file in it — so
+# the bandit hardcoded-tmp warning does not apply.
+_STAGING_PARENT = "/var/tmp"  # nosec B108 - read-only disk_usage probe, not a temp file
+
 
 def _read_meminfo_mb():
     """(mem_total, mem_available, swap_total, swap_free) in MB, or None
@@ -156,7 +161,7 @@ def _check_build_resources() -> dict:
         b
         for b in (
             _disk_free_bytes(str(airgap_bundle_builder.BUNDLE_DIR)),
-            _disk_free_bytes("/var/tmp"),
+            _disk_free_bytes(_STAGING_PARENT),
         )
         if b is not None
     ]
@@ -165,7 +170,7 @@ def _check_build_resources() -> dict:
         round(disk_free_bytes / (1024**3), 1) if disk_free_bytes is not None else None
     )
     try:
-        disk_total_gb = round(shutil.disk_usage("/var/tmp").total / (1024**3), 1)
+        disk_total_gb = round(shutil.disk_usage(_STAGING_PARENT).total / (1024**3), 1)
     except OSError:
         disk_total_gb = None
 
