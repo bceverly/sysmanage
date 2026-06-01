@@ -1791,7 +1791,7 @@ jobs:
       - name: Install packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg
+          sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko
 
       - name: Import GPG key
         env:
@@ -1836,14 +1836,55 @@ jobs:
           echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
           echo "Using GPG key: $GPG_KEY_ID"
 
+      - name: Set up SSH key for Launchpad SFTP upload
+        env:
+          LAUNCHPAD_SSH_KEY: ${{ secrets.LAUNCHPAD_SSH_KEY }}
+        run: |
+          # Launchpad's anonymous FTP upload endpoint is unreliable from
+          # GitHub-hosted runners: dput opens the FTP control channel and
+          # reports SUCCESS, but the PASV data channel carrying the actual
+          # .tar.xz/.dsc bytes is silently dropped by the runner's egress
+          # firewall (Launchpad bug #1836059).  The files never reach
+          # Launchpad, so the upload is silently discarded with no
+          # acceptance/rejection email.  SFTP (authenticated by a
+          # Launchpad-registered SSH key) is Launchpad's recommended,
+          # firewall-friendly transport and gets real server-side feedback.
+          if [ -z "$LAUNCHPAD_SSH_KEY" ]; then
+            echo "ERROR: LAUNCHPAD_SSH_KEY secret is not set!"
+            echo "Generate a key, add the PUBLIC half to https://launchpad.net/~bceverly/+editsshkeys"
+            echo "and store the PRIVATE half as the LAUNCHPAD_SSH_KEY repo secret."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$LAUNCHPAD_SSH_KEY" > ~/.ssh/launchpad_sftp
+          chmod 600 ~/.ssh/launchpad_sftp
+
+          # Pre-seed known_hosts so the non-interactive sftp session does not
+          # block on the host-key trust prompt.  ssh-keyscan (TOFU) is the
+          # standard CI approach for this.
+          ssh-keyscan -t rsa,ecdsa,ed25519 ppa.launchpad.net >> ~/.ssh/known_hosts 2>/dev/null
+
+          # dput-ng's sftp uploader uses paramiko, which does NOT parse
+          # ~/.ssh/config and only auto-discovers keys at the default names.
+          # Load the key into an ssh-agent (paramiko honours allow_agent by
+          # default) and persist the agent socket into the job env so the
+          # later dput step in this same runner can reach it.
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/launchpad_sftp
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+
       - name: Configure dput for Launchpad
         run: |
           mkdir -p ~/.dput.d/profiles
           cat > ~/.dput.d/profiles/launchpad.json << 'DPUTEOF'
           {
             "fqdn": "ppa.launchpad.net",
-            "incoming": "~bceverly/ubuntu/sysmanage",
-            "method": "ftp",
+            "incoming": "~bceverly/ubuntu/sysmanage/",
+            "method": "sftp",
+            "login": "bceverly",
             "allow_unsigned_uploads": false
           }
           DPUTEOF
@@ -1933,16 +1974,14 @@ jobs:
           # Clean up passphrase file
           rm -f /tmp/gpg-passphrase-${RELEASE}
 
-          # Upload to Launchpad PPA.  Launchpad's FTP endpoint
-          # occasionally drops mid-transfer with "cannot read from
-          # timed out object" — retry up to 3× with linear backoff
-          # before failing the workflow.  Mirrors the same pattern
-          # used in the sysmanage-agent workflow.  ``-f`` (force) is
-          # required on retries because a Broken-pipe failure during
-          # the first attempt leaves a partial .tar.xz on Launchpad's
-          # FTP endpoint; without --force, dput's duplicate check
-          # rejects the retry with "Upload permissions error" and
-          # the upload never recovers.
+          # Upload to Launchpad PPA over SFTP (the launchpad dput profile
+          # uses method=sftp; see the SSH setup step above for why FTP was
+          # abandoned — it silently dropped the data channel from GitHub
+          # runners and Launchpad never received the files, Bug #1836059).
+          # An sftp session can still hiccup mid-transfer, so retry up to
+          # 3× with linear backoff before failing the workflow.  ``-f``
+          # (force) makes a retry re-send even if dput's local .upload log
+          # marks a prior partial attempt as done.
           changes_file="sysmanage_${VERSION}+ppa1~${RELEASE}1_source.changes"
           attempt=1
           max_attempts=3
