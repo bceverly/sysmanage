@@ -44,7 +44,7 @@ POST-INSTALL)
 	cd /usr/pkg/lib/sysmanage
 	/usr/pkg/bin/python3.12 -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
-	.venv/bin/pip install --quiet -r requirements.txt
+	.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 
 	echo ""
 	echo "==========================================="

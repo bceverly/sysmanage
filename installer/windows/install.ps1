@@ -182,15 +182,20 @@ try {
 
         # Install dependencies
         $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
-        $RequirementsFile = Join-Path $InstallDir "requirements.txt"
+        # Prefer the runtime-only requirements (matches the air-gap wheel
+        # set; the full requirements.txt carries dev tooling like astroid/
+        # pylint/pytest that the server does not need to run).  Fall back to
+        # the full list only if the prod file isn't present.
+        $ProdRequirements = Join-Path $InstallDir "requirements-prod.txt"
+        $RequirementsFile = if (Test-Path $ProdRequirements) { $ProdRequirements } else { Join-Path $InstallDir "requirements.txt" }
 
         if (-not (Test-Path $RequirementsFile)) {
-            Write-Log "ERROR: requirements.txt not found at $RequirementsFile"
-            throw "requirements.txt not found"
+            Write-Log "ERROR: requirements file not found at $RequirementsFile"
+            throw "requirements file not found"
         }
 
         Write-Log "Installing Python dependencies..."
-        Write-Log "Running: pip install -r requirements.txt"
+        Write-Log "Running: pip install -r $RequirementsFile"
         & $VenvPython -m pip install -r $RequirementsFile --disable-pip-version-check 2>&1 | Tee-Object -FilePath $LogFile -Append
 
         if ($LASTEXITCODE -eq 0) {

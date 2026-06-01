@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        2.4.0.14
+Version:        2.4.0.15
 Release:        1
 Summary:        Centralized system management server with web-based interface
 

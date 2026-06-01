@@ -14,6 +14,7 @@ how many platforms are enabled.  The caller polls the row's
 
 import logging
 import os
+import shutil
 import subprocess  # nosec B404 - intentional: we exec the bundled build script (path + arg fully controlled below)
 import threading
 import uuid
@@ -110,6 +111,38 @@ def _run_build(bundle_id: uuid.UUID, product: str) -> None:
         _execute_build(bundle_id, product, script)
 
 
+def _cleanup_staging(staging: Path) -> None:
+    """Remove a build's staging tree.  Docker writes into it as root, so a
+    plain rmtree fails on those files — fall back to a throwaway container
+    that chowns the tree back to us, then remove it.  Best-effort."""
+    if not staging.exists():
+        return
+    try:
+        shutil.rmtree(staging)
+        return
+    except OSError:
+        pass
+    try:
+        subprocess.run(  # nosec B603,B607 - fixed args, internal path
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{staging}:/work",
+                "alpine:3.20",
+                "sh",
+                "-c",
+                f"chown -R {os.getuid()}:{os.getgid()} /work",
+            ],
+            check=False,
+            timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError):
+        pass
+    shutil.rmtree(staging, ignore_errors=True)
+
+
 def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
     """Run the build script + record the result.  Holds ``_BUILD_LOCK``."""
     BUNDLE_DIR.mkdir(parents=True, exist_ok=True)
@@ -127,8 +160,21 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
         log_path=str(log_path),
     )
 
+    # Stage UNDER /var/lib/sysmanage (BUNDLE_DIR), NOT the script's default
+    # /var/tmp.  The backend runs as a systemd service with PrivateTmp=yes,
+    # so its /tmp and /var/tmp are a private namespace — but the docker
+    # daemon bind-mounts the HOST's /var/tmp.  A staging path under /var/tmp
+    # therefore resolves to two different directories: the per-distro
+    # containers write their wheels/deps into the host view, while the
+    # backend reads its private view and finds nothing ("0 deps + 0 wheels"
+    # -> hollow ISO).  BUNDLE_DIR is a normal shared path, so the bind mount
+    # and the backend see the same files.
+    staging_dir = BUNDLE_DIR / f".staging-{bundle_id}"
+    staging_dir.mkdir(parents=True, exist_ok=True)
+
     env = os.environ.copy()
     env["DEST_DIR"] = str(BUNDLE_DIR)
+    env["STAGING_DIR"] = str(staging_dir)
     env["BUNDLE_VERSION_FILE"] = str(version_path)
     # Override the script's hardcoded output filename so concurrent
     # builds don't collide.  The script's default is
@@ -143,6 +189,7 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
                 check=False,
             )
     except OSError as exc:
+        _cleanup_staging(staging_dir)
         _update_bundle(
             bundle_id,
             status=models.BUNDLE_STATUS_FAILED,
@@ -150,6 +197,10 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
             error_message=f"Failed to launch build script: {exc}",
         )
         return
+
+    # The ISO is written to DEST_DIR (BUNDLE_DIR), not the staging tree, so
+    # the staging tree is safe to remove now regardless of the outcome.
+    _cleanup_staging(staging_dir)
 
     if proc.returncode != 0:
         # Pull the last 200 chars of the log as the error preview.

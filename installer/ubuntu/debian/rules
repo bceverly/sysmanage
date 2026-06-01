@@ -11,7 +11,12 @@ override_dh_auto_clean:
 	# Nothing to clean - files are copied via debian/install
 
 override_dh_auto_build:
-	# Nothing to build - frontend built before packaging, backend installed in postinst
+	# Frontend is built before packaging; backend is copied via debian/install.
+	# Generate requirements-prod.txt (runtime-only deps) so debian/install can
+	# ship it and the postinst can build the venv from it.  The full
+	# requirements.txt carries dev tooling (pylint/astroid/pytest/playwright)
+	# which is NOT in the air-gap wheel set, so installing it offline fails.
+	python3 scripts/update-requirements-prod.py
 
 override_dh_auto_test:
 	# Skip tests during package build

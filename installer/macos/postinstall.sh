@@ -28,12 +28,12 @@ if [ "$ACTUAL_ARCH" = "arm64" ]; then
 	arch -arm64 python3 -m venv .venv
 	echo "Installing Python dependencies for ARM64..."
 	arch -arm64 ./.venv/bin/pip install --upgrade pip setuptools wheel
-	arch -arm64 ./.venv/bin/pip install -r requirements.txt
+	arch -arm64 ./.venv/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 else
 	echo "Intel architecture detected"
 	python3 -m venv .venv
 	./.venv/bin/pip install --upgrade pip setuptools wheel
-	./.venv/bin/pip install -r requirements.txt
+	./.venv/bin/pip install -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 fi
 
 if [ ! -f "/etc/sysmanage.yaml" ]; then

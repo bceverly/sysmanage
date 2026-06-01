@@ -34,7 +34,16 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	rm -rf .venv
 	python3 -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
-	.venv/bin/pip install --quiet -r requirements.txt
+	# Install runtime-only deps.  The full requirements.txt carries dev
+	# tooling (pylint/astroid/pytest/playwright) that the server does not
+	# need to run AND that the air-gap wheel set does not contain — using
+	# it offline fails with "No matching distribution found for astroid".
+	# Fall back to requirements.txt only if the prod file isn't shipped.
+	if [ -f requirements-prod.txt ]; then
+		.venv/bin/pip install --quiet -r requirements-prod.txt
+	else
+		.venv/bin/pip install --quiet -r requirements.txt
+	fi
 	cd -
 	echo "✓ Python dependencies installed"
 

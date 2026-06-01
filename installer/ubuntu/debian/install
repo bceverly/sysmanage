@@ -2,6 +2,7 @@ backend/* opt/sysmanage/backend/
 frontend/dist/* opt/sysmanage/frontend/dist/
 frontend/public/* opt/sysmanage/frontend/public/
 requirements.txt opt/sysmanage/
+requirements-prod.txt opt/sysmanage/
 alembic.ini opt/sysmanage/
 alembic/* opt/sysmanage/alembic/
 config/* opt/sysmanage/config/

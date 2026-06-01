@@ -61,9 +61,11 @@
         <File Id="AlembicIni" Source="..\..\alembic.ini" KeyPath="yes" />
       </Component>
 
-      <!-- Requirements file -->
+      <!-- Requirements files (full + runtime-only; the installer prefers
+           requirements-prod.txt to match the air-gap wheel set) -->
       <Component Id="Requirements" Guid="B2C3D4E5-F6A7-4B5C-8D9E-0F1A2B3C4D5E">
         <File Id="RequirementsTxt" Source="..\..\requirements.txt" />
+        <File Id="RequirementsProdTxt" Source="..\..\requirements-prod.txt" />
       </Component>
 
       <!-- Service wrapper script -->

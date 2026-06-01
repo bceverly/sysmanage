@@ -96,7 +96,7 @@ chown -R sysmanage:sysmanage /etc/sysmanage
 cd /usr/local/lib/sysmanage
 python3.11 -m venv .venv
 .venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r requirements.txt
+.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 
 # Use existing config or create symlink to system config
 if [ -f /etc/sysmanage.yaml ]; then

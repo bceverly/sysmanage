@@ -6,10 +6,10 @@
 # Run on the build host (e.g. sysmanage-online) as root:
 #     sudo bash diagnoseAirGapBundle.sh
 #
-# It is READ-ONLY: it inspects the deployed build script, the tools on
-# PATH (both root's and the sysmanage service user's, since the backend
-# runs the build as 'sysmanage'), and the most recent server/agent build
-# logs.  Nothing is modified.
+# READ-ONLY.  It inspects the deployed build script, the tools on PATH
+# (root AND the sysmanage service user, since the backend runs builds as
+# 'sysmanage'), and — the important part — the PER-PLATFORM output of the
+# most recent server/agent builds.  Nothing is modified.
 
 set -uo pipefail
 
@@ -24,81 +24,71 @@ hr "DEPLOYED BUILD SCRIPT"
 if [[ -f "$SCRIPT" ]]; then
   ls -l "$SCRIPT"
   echo "sha256: $(sha256sum "$SCRIPT" 2>/dev/null | cut -d' ' -f1)"
-  echo
-  echo "Fix markers (each should be >= 1 if the up-to-date script is deployed):"
-  printf '  dnf5 download fix (rpm -qpR)     : %s\n' "$(grep -c 'rpm -qpR' "$SCRIPT")"
-  printf '  rhel python3.12 wheels           : %s\n' "$(grep -c 'python3.12 -m pip' "$SCRIPT")"
-  printf '  requirements.txt fallback        : %s\n' "$(grep -c 'requirements.txt\" -o \"\$REQ\"' "$SCRIPT")"
-  printf '  strict per-platform summary      : %s\n' "$(grep -c 'FAILED Linux' "$SCRIPT")"
-  printf '  resource preflight               : %s\n' "$(grep -c 'preflight_resources' "$SCRIPT")"
-  echo
-  echo ">> If any marker above is 0, the host has a STALE script -> re-deploy it."
+  printf 'markers: rpmqpR=%s py312=%s reqfallback=%s strict=%s preflight=%s\n' \
+    "$(grep -c 'rpm -qpR' "$SCRIPT")" \
+    "$(grep -c 'python3.12 -m pip' "$SCRIPT")" \
+    "$(grep -c 'requirements.txt\" -o \"\$REQ\"' "$SCRIPT")" \
+    "$(grep -c 'FAILED Linux' "$SCRIPT")" \
+    "$(grep -c 'preflight_resources' "$SCRIPT")"
 else
-  echo "MISSING: $SCRIPT does not exist."
+  echo "MISSING: $SCRIPT"
 fi
 
 # ---------------------------------------------------------------------------
-hr "TOOLS ON PATH"
-echo "As root:"
+hr "TOOLS"
+printf 'root : '
 for t in docker xorrisofs jq curl awk df rpm2cpio; do
-  printf '  %-10s: %s\n' "$t" "$(command -v "$t" 2>/dev/null || echo MISSING)"
-done
-echo
-echo "As the build user ($BUILD_USER) — this is who the backend actually runs the build as:"
+  command -v "$t" >/dev/null 2>&1 && printf '%s ' "$t" || printf '%s=MISSING ' "$t"
+done; echo
 if id "$BUILD_USER" >/dev/null 2>&1; then
+  printf '%s : ' "$BUILD_USER"
   for t in docker xorrisofs jq curl awk df; do
-    path=$(sudo -u "$BUILD_USER" bash -lc "command -v $t" 2>/dev/null || echo MISSING)
-    printf '  %-10s: %s\n' "$t" "${path:-MISSING}"
-  done
-  echo
-  echo "  $BUILD_USER can reach docker daemon? : $(sudo -u "$BUILD_USER" docker info >/dev/null 2>&1 && echo YES || echo NO)"
-else
-  echo "  user '$BUILD_USER' not found on this host"
+    sudo -u "$BUILD_USER" bash -lc "command -v $t" >/dev/null 2>&1 \
+      && printf '%s ' "$t" || printf '%s=MISSING ' "$t"
+  done; echo
+  echo "$BUILD_USER docker daemon reachable: $(sudo -u "$BUILD_USER" docker info >/dev/null 2>&1 && echo YES || echo NO)"
 fi
-echo
-echo ">> Any MISSING above (especially for $BUILD_USER) is the likely cause of exit 127."
 
 # ---------------------------------------------------------------------------
-_newest_log_for() {  # $1 = product (server|agent)
-  grep -l "Product   : $1" "$LOGDIR"/*.log 2>/dev/null | xargs -r ls -t 2>/dev/null | head -1
+# For a given product, dump the NEWEST build log with the per-platform
+# results.  The "[<platform>] done — N deps + M wheels" lines are the
+# smoking gun: a platform reporting "0 deps + 0 wheels" succeeded but is
+# EMPTY, which is what makes a bundle hollow even though the build "passes".
+_dump_build() {  # $1 = product (server|agent)
+  local prod="$1" log
+  log=$(grep -l "Product   : $prod" "$LOGDIR"/*.log 2>/dev/null | xargs -r ls -t 2>/dev/null | head -1)
+  hr "NEWEST ${prod^^} BUILD"
+  if [[ -z "$log" ]]; then
+    echo "no $prod build log found in $LOGDIR"
+    return
+  fi
+  echo "log: $log"
+  echo "when: $(stat -c '%y' "$log" 2>/dev/null)"
+  echo
+  echo "--- per-platform output (look for '0 deps + 0 wheels' = empty/hollow) ---"
+  grep -E "docker run .* to fetch|\] done —|no installer|\] .*failed — skipping" "$log"
+  echo
+  echo "--- summary / result ---"
+  grep -E "succeeded |FAILED Linux|no installer|Linux platform.*failed|Staging tree|ISO :|exited|no platforms produced" "$log"
+  echo
+  echo "--- errors / abort cause ---"
+  grep -nE "command not found|: 127|Unknown argument|No package|could not obtain|No matching distribution|No space|ERROR|Traceback|\[ERROR\]" "$log" | tail -25
 }
 
-hr "NEWEST SERVER BUILD LOG"
-SL=$(_newest_log_for server)
-if [[ -n "$SL" ]]; then
-  echo "log: $SL"
-  echo "--- platform summary ---"
-  grep -E "succeeded|FAILED Linux|no installer|Linux platform.*failed|Staging tree|ISO :" "$SL" | tail -12
-  echo "--- exit-127 / errors (the line before a 127 names the missing command) ---"
-  grep -nE "command not found|: 127|not found|exited|ERROR|could not obtain|insufficient" "$SL" | tail -20
-else
-  echo "no server build log found in $LOGDIR"
-fi
-
-hr "NEWEST AGENT BUILD LOG"
-AL=$(_newest_log_for agent)
-if [[ -n "$AL" ]]; then
-  echo "log: $AL"
-  echo "--- platform summary (why the ISO is the size it is) ---"
-  grep -E "succeeded|FAILED Linux|no installer|Linux platform.*failed|Staging tree|ISO :" "$AL" | tail -12
-else
-  echo "no agent build log found in $LOGDIR"
-fi
+_dump_build server
+_dump_build agent
 
 # ---------------------------------------------------------------------------
-hr "PRESERVED PER-PLATFORM FAILURE LOGS"
+hr "PRESERVED PER-PLATFORM FAILURE LOGS (if any)"
 for prod in server agent; do
   d="$LOGDIR/sysmanage-${prod}-bundle-logs"
   [[ -d "$d" ]] || continue
-  echo "### ${prod} (${d}):"
   shopt -s nullglob
   for f in "$d"/*.log; do
-    echo "----- $(basename "$f") -----"
-    tail -12 "$f"
-    echo
+    echo "### ${prod}/$(basename "$f")  (mtime $(stat -c '%y' "$f" 2>/dev/null | cut -d. -f1))"
+    tail -15 "$f"; echo
   done
   shopt -u nullglob
 done
 
-hr "DONE"
-echo "Paste this entire output back."
+hr "DONE — paste this entire output back"
