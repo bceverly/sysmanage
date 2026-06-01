@@ -123,7 +123,7 @@ def _cleanup_staging(staging: Path) -> None:
     except OSError:
         pass
     try:
-        subprocess.run(  # nosec B603,B607 - fixed args, internal path
+        subprocess.run(  # nosec B603 B607 - fixed docker argv for staging cleanup
             [
                 "docker",
                 "run",
