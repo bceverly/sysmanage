@@ -13,6 +13,8 @@ from backend.api import (
     airgap_bundles,
     airgap_collection_schedule,
     airgap_collector_runs,
+    airgap_devices,
+    airgap_keys,
     airgap_repository_buckets,
     airgap_repository_list,
     antivirus_defaults,
@@ -113,6 +115,10 @@ def register_routes(app: FastAPI):
     # mount unconditionally because the handler returns 402 on non-
     # collector deployments.
     app.include_router(airgap_collector_runs.router)
+    # Token-authed streaming ISO download lives on a separate router
+    # (no blanket Authorization-header dependency) so the browser can
+    # download multi-GB bundles natively via a short-lived URL token.
+    app.include_router(airgap_collector_runs.download_router)
     logger.debug("Air-gap collector runs router added")
 
     # Phase 11 B5 — host-scoped compliance bucket endpoint that feeds
@@ -124,6 +130,15 @@ def register_routes(app: FastAPI):
     # AirgapRepositories dashboard and RepositoryFreshnessCard.
     app.include_router(airgap_repository_list.router)
     logger.debug("Air-gap repository list router added")
+
+    # Collector public-key display + repository trusted-key import,
+    # wired into Settings → Server Role.
+    app.include_router(airgap_keys.router)
+    logger.debug("Air-gap keys router added")
+
+    # Block-device enumeration + device-based ISO import (repository).
+    app.include_router(airgap_devices.router)
+    logger.debug("Air-gap devices router added")
 
     logger.debug(
         "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"
@@ -220,6 +235,11 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding airgap-bundles router with /api prefix")
     app.include_router(airgap_bundles.router, prefix="/api", tags=["airgap-bundles"])
+    # Token-authed streaming bundle download (no blanket JWTBearer) so the
+    # browser can stream multi-GB ISOs without buffering them in a Blob.
+    app.include_router(
+        airgap_bundles.download_router, prefix="/api", tags=["airgap-bundles"]
+    )
 
     logger.debug("Adding upgrade-profiles router (Phase 8.2)")
     app.include_router(upgrade_profiles.router)

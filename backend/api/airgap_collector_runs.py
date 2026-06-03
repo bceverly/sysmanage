@@ -28,6 +28,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_handler import (
+    decode_airgap_download_token,
+    sign_airgap_download_token,
+)
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
@@ -46,6 +50,17 @@ router = APIRouter(
     prefix="/api/v1/airgap/collector",
     tags=["airgap-collector-runs"],
     dependencies=[Depends(JWTBearer())],
+)
+
+# Separate router WITHOUT the blanket JWTBearer header dependency, for the
+# streaming ISO download only.  A browser following a plain download link
+# can't supply the Authorization header, so this route authenticates via a
+# short-lived, single-run download token in the query string (minted by the
+# authenticated POST /runs/{id}/iso-token below).  Everything else stays on
+# the header-authenticated ``router``.
+download_router = APIRouter(
+    prefix="/api/v1/airgap/collector",
+    tags=["airgap-collector-runs"],
 )
 
 
@@ -155,6 +170,11 @@ class RunResponse(BaseModel):
     created_at: Optional[str] = None
     worker_message_id: Optional[str] = None
     burn_device: Optional[str] = None
+    # Actual on-disk size of the produced ISO(s), summed across discs.
+    # None until the run has built something.  Distinct from
+    # ``media_size_bytes`` (the configured per-disc capacity) so the UI can
+    # show the REAL bundle size instead of the disc-size setting.
+    iso_size_bytes: Optional[int] = None
     targets: List[RunTargetSpec] = Field(default_factory=list)
 
 
@@ -336,6 +356,16 @@ def _run_to_response(run: models.AirgapCollectionRun) -> RunResponse:
     payload["targets"] = [
         _serialize_target(t).model_dump() for t in (run.targets or [])
     ]
+    # Real on-disk ISO size (sum across discs) so the UI shows the actual
+    # bundle size, not the configured media-size setting.  None when no ISO
+    # has been built yet, or if the files were cleaned off disk.
+    try:
+        discs = _list_run_discs(run.id)
+        payload["iso_size_bytes"] = (
+            sum(os.path.getsize(p) for p in discs) if discs else None
+        )
+    except OSError:
+        payload["iso_size_bytes"] = None
     return RunResponse(**payload)
 
 
@@ -596,27 +626,7 @@ async def list_run_discs(run_id: str, db: Session = Depends(get_db)):
     return result
 
 
-@router.get("/runs/{run_id}/iso")
-async def download_run_iso(
-    run_id: str,
-    disc: Optional[int] = None,
-    db: Session = Depends(get_db),
-):
-    """Stream an ISO file produced by a completed collection run.
-
-    Separate from the existing ``/manifests/{id}/download`` endpoint
-    (which serves the signed manifest envelope for an inserted disc
-    written via the agent's burn step).  This route serves the raw
-    ISO file(s) the orchestrator materialized.
-
-    Single-disc runs: ``/var/lib/sysmanage/airgap-iso/{run_id}.iso``.
-    Multi-disc runs: ``…/{run_id}-disc-{N}.iso``; pass ``?disc=N`` to
-    pick which one.  ``disc=1`` returns the first (lowest-index)
-    available file regardless of whether the run was single- or
-    multi-disc — that's the "just give me the bundle" default.
-    """
-    _check_collector_module()
-    rid = _parse_run_uuid(run_id)
+def _get_run_or_404(db: Session, rid: uuid.UUID) -> models.AirgapCollectionRun:
     run = (
         db.query(models.AirgapCollectionRun)
         .filter(models.AirgapCollectionRun.id == rid)
@@ -624,10 +634,12 @@ async def download_run_iso(
     )
     if not run:
         raise HTTPException(status_code=404, detail=_(_ERR_RUN_NOT_FOUND))
-    # ISO_BUILT means the file(s) exist but the (optional) burn step
-    # hasn't run yet; COMPLETE means the lifecycle finished.  Both
-    # states are valid download points.  Anything earlier and the
-    # file isn't on disk yet.
+    return run
+
+
+def _assert_iso_ready(run: models.AirgapCollectionRun) -> List[str]:
+    """409 if the run hasn't produced an ISO yet, 410 if the file(s) were
+    cleaned off disk; otherwise return the list of available disc paths."""
     if run.status not in ("ISO_BUILT", "BURNING", "COMPLETE"):
         raise HTTPException(
             status_code=409,
@@ -637,8 +649,7 @@ async def download_run_iso(
             )
             % run.status,
         )
-
-    available = _list_run_discs(rid)
+    available = _list_run_discs(run.id)
     if not available:
         raise HTTPException(
             status_code=410,
@@ -647,16 +658,20 @@ async def download_run_iso(
                 "have been cleaned. Re-run the collection to rebuild."
             ),
         )
+    return available
 
+
+def _iso_file_response(
+    run: models.AirgapCollectionRun, disc: Optional[int]
+) -> FileResponse:
+    """Resolve the on-disk ISO for ``run`` (+ optional ``disc``) and return
+    a streaming FileResponse.  Shared by the header-authed ``/iso`` route
+    and the token-authed ``/iso-download`` route.  FileResponse streams the
+    file in chunks, so a multi-GB ISO never buffers in memory."""
+    available = _assert_iso_ready(run)
     if disc is None or disc == 1:
-        # Default: first ISO on disk.  Filename uses run.iso_label so
-        # the operator sees a friendly name in the download dialog
-        # regardless of the on-disk run-uuid naming.
         chosen = available[0]
     else:
-        # Specific disc requested.  Build the exact expected path and
-        # check it's in the available list (defends against ../ in disc
-        # number via the int type already).
         target = os.path.join(_ISO_OUTPUT_DIR, f"{run.id}-disc-{disc}.iso")
         if target not in available:
             raise HTTPException(
@@ -665,11 +680,8 @@ async def download_run_iso(
                 % (disc, ", ".join(os.path.basename(p) for p in available)),
             )
         chosen = target
-
-    # Friendly download filename: iso_label + (-disc-N when multi-disc).
     is_multidisc = len(available) > 1 or "-disc-" in os.path.basename(chosen)
     if is_multidisc:
-        # Re-extract index for the filename.
         name = os.path.basename(chosen)
         try:
             idx = int(name.rsplit("-disc-", 1)[1].split(".", 1)[0])
@@ -678,12 +690,73 @@ async def download_run_iso(
             friendly = f"{run.iso_label}-{run.id}.iso"
     else:
         friendly = f"{run.iso_label}-{run.id}.iso"
-
     return FileResponse(
         chosen,
         media_type="application/octet-stream",
         filename=friendly,
     )
+
+
+@router.get("/runs/{run_id}/iso")
+async def download_run_iso(
+    run_id: str,
+    disc: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    """Stream an ISO file produced by a completed collection run
+    (header-authenticated).  Kept for API clients that can send the
+    Authorization header; the UI uses the token-authed ``/iso-download``
+    route below for large native downloads.
+    """
+    _check_collector_module()
+    rid = _parse_run_uuid(run_id)
+    run = _get_run_or_404(db, rid)
+    return _iso_file_response(run, disc)
+
+
+@router.post("/runs/{run_id}/iso-token")
+async def create_iso_download_token(
+    run_id: str,
+    current_user: str = Depends(get_current_user),  # noqa: ARG001
+    db: Session = Depends(get_db),
+):
+    """Mint a short-lived, single-run token for a native streaming ISO
+    download.  The browser can't put the session JWT in the Authorization
+    header when it follows a plain download link, and buffering a multi-GB
+    ISO through fetch() to add the header OOMs the tab — so the UI calls
+    this (authenticated), then points the browser at GET /iso-download with
+    the returned token, which streams straight to disk.
+    """
+    _check_collector_module()
+    rid = _parse_run_uuid(run_id)
+    run = _get_run_or_404(db, rid)
+    _assert_iso_ready(run)  # don't hand out a token unless it's downloadable
+    return {"token": sign_airgap_download_token(str(rid)), "expires_in": 300}
+
+
+@download_router.get("/runs/{run_id}/iso-download")
+async def download_run_iso_streamed(
+    run_id: str,
+    token: str,
+    disc: Optional[int] = None,
+    db: Session = Depends(get_db),
+):
+    """Token-authenticated streaming ISO download.
+
+    NOT on the header-authed router: the browser navigates here directly
+    (so it can't carry the Authorization header), authenticating with the
+    short-lived, single-run token minted by POST /runs/{id}/iso-token.  The
+    response streams straight to disk — no in-memory buffering — so a
+    multi-GB bundle downloads without OOMing the browser or the backend.
+    """
+    rid = _parse_run_uuid(run_id)
+    if not decode_airgap_download_token(token, str(rid)):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Invalid or expired download token."),
+        )
+    run = _get_run_or_404(db, rid)
+    return _iso_file_response(run, disc)
 
 
 @router.delete("/runs/{run_id}", status_code=204)

@@ -33,6 +33,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_handler import (
+    decode_airgap_bundle_token,
+    sign_airgap_bundle_token,
+)
 from backend.config import config
 from backend.i18n import _
 from backend.licensing.feature_gate import requires_pro_plus
@@ -46,6 +50,16 @@ router = APIRouter(
     prefix="/airgap-bundles",
     tags=["airgap-bundles"],
     dependencies=[Depends(JWTBearer())],
+)
+
+# Bundle ISOs are multi-GB; a browser can't put the session JWT on a
+# plain download link and buffering the whole file through fetch() to
+# add the header OOMs the tab.  So this router carries NO blanket
+# JWTBearer — its one route is authorised by a short-lived single-bundle
+# token minted by the authenticated POST /{id}/download-token below.
+download_router = APIRouter(
+    prefix="/airgap-bundles",
+    tags=["airgap-bundles"],
 )
 
 
@@ -517,12 +531,14 @@ async def get_bundle(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/{bundle_id}/download")
-@requires_pro_plus()
-async def download_bundle(
-    bundle_id: uuid.UUID,
-    current_user: str = Depends(get_current_user),  # noqa: ARG001
-):
+def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
+    """Resolve a READY bundle to a streaming FileResponse, or raise.
+
+    FileResponse streams the file off disk in chunks — it never loads
+    the multi-GB ISO into memory — so this is safe for any size.  Shared
+    by the header-authed ``/download`` route and the token-authed
+    ``/download-stream`` route.
+    """
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
     with SessionLocal() as session:
         row = (
@@ -546,6 +562,49 @@ async def download_bundle(
             media_type="application/octet-stream",
             filename=os.path.basename(row.file_path),
         )
+
+
+@router.get("/{bundle_id}/download")
+@requires_pro_plus()
+async def download_bundle(
+    bundle_id: uuid.UUID,
+    current_user: str = Depends(get_current_user),  # noqa: ARG001
+):
+    """Header-authed streaming download (kept for API clients/scripts)."""
+    return _bundle_file_response(bundle_id)
+
+
+@router.post("/{bundle_id}/download-token")
+@requires_pro_plus()
+async def mint_bundle_download_token(
+    bundle_id: uuid.UUID,
+    current_user: str = Depends(get_current_user),  # noqa: ARG001
+):
+    """Mint a short-lived token authorising one streaming bundle download.
+
+    The UI POSTs here (authenticated), then points the browser straight
+    at GET /{id}/download-stream?token=… so the browser streams the
+    multi-GB ISO to disk without buffering it in a fetch()/Blob.
+    """
+    # Validate the bundle is real + ready before handing out a token.
+    _bundle_file_response(bundle_id)
+    return {"token": sign_airgap_bundle_token(str(bundle_id)), "expires_in": 300}
+
+
+@download_router.get("/{bundle_id}/download-stream")
+@requires_pro_plus()
+async def download_bundle_stream(bundle_id: uuid.UUID, token: str = ""):
+    """Token-authed streaming bundle download (no Authorization header).
+
+    Authorised by the short-lived single-bundle token from POST
+    /{id}/download-token.  The browser navigates here directly so the
+    download streams to disk.
+    """
+    if not decode_airgap_bundle_token(token, str(bundle_id)):
+        raise HTTPException(
+            status_code=401, detail=_("Invalid or expired download token")
+        )
+    return _bundle_file_response(bundle_id)
 
 
 # ---------------------------------------------------------------------------

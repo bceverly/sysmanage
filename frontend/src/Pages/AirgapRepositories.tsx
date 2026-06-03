@@ -53,6 +53,8 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
+import AirgapImportPanel from '../Components/AirgapImportPanel';
+
 // Default freshness threshold used by the dashboard when the backend
 // doesn't surface its own.  Matches the conservative default used in
 // other air-gap views.
@@ -254,6 +256,8 @@ const AirgapRepositories: React.FC = () => {
           'Per-repository statistics for this private-side mirror, plus aggregate freshness.',
         )}
       </Typography>
+
+      {serverRole === 'repository' && <AirgapImportPanel />}
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

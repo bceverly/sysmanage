@@ -240,11 +240,36 @@ class ModuleLoader:
                     timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
                 ) as response:
                     if response.status != 200:
-                        logger.error(
-                            "Module download failed: %s returned %d",
-                            url,
-                            response.status,
-                        )
+                        if response.status == 404:
+                            # Fatal-for-this-engine and distinct from the
+                            # benign plugin-bundle 404s: the license server
+                            # has NO compiled build of this engine for this
+                            # platform/arch/Python, so the engine cannot load
+                            # and anything gated on it (orchestrators, ticks,
+                            # routes) stays disabled.  Name the exact missing
+                            # target and the remedy so it is actionable, not
+                            # buried among optional-plugin warnings.
+                            logger.error(
+                                "Pro+ ENGINE UNAVAILABLE: '%s' has no build for "
+                                "%s/%s Python %s on the license server (HTTP 404). "
+                                "The engine will NOT load and its features are "
+                                "disabled. Build '%s' for Python %s on the license "
+                                "server and re-run 'make update'. URL: %s",
+                                module_code,
+                                platform_info["platform"],
+                                platform_info["architecture"],
+                                platform_info["python_version"],
+                                module_code,
+                                platform_info["python_version"],
+                                url,
+                            )
+                        else:
+                            logger.error(
+                                "Module download failed for '%s': %s returned %d",
+                                module_code,
+                                url,
+                                response.status,
+                            )
                         return False
 
                     # Get expected hash from header

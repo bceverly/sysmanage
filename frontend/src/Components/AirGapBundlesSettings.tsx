@@ -243,29 +243,30 @@ const AirGapBundlesSettings: React.FC = () => {
   };
 
   const handleDownload = async (bundle: Bundle) => {
-    // A plain anchor click wouldn't carry the Bearer JWT, so the
-    // API would 401 and Chrome shows "File wasn't available on
-    // site".  Fetch through the authenticated axios client, then
-    // hand the blob to a hidden anchor.  Matches the same pattern
-    // already used elsewhere (AuditLogViewer, Reports, etc.).
+    // Bundle ISOs are multi-GB.  Buffering one through fetch()/Blob
+    // (the old approach) loads the whole file into browser memory and
+    // OOM-crashes the tab — and on the server side it used to crash the
+    // backend too.  Instead: mint a short-lived single-bundle token
+    // (authenticated POST), then point the browser straight at the
+    // token-authed streaming route so it downloads to disk without
+    // buffering.  A plain anchor click can't carry the Bearer header,
+    // which is exactly why the token route exists.
     try {
-      const response = await axiosInstance.get(
-        `/api/airgap-bundles/${bundle.id}/download`,
-        { responseType: 'blob' },
+      const tok = await axiosInstance.post<{ token: string }>(
+        `/api/airgap-bundles/${bundle.id}/download-token`,
       );
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const url = globalThis.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sysmanage-${bundle.product}-bundle${
+      const filename = `sysmanage-${bundle.product}-bundle${
         bundle.version ? `-${bundle.version}` : ''
       }.iso`;
+      const url = `/api/airgap-bundles/${bundle.id}/download-stream?token=${encodeURIComponent(
+        tok.data.token,
+      )}`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      globalThis.URL.revokeObjectURL(url);
     } catch (e: unknown) {
       console.error(e);
       showError(

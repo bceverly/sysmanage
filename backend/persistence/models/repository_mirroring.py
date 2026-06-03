@@ -28,6 +28,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Column,
     DateTime,
@@ -222,7 +223,12 @@ class MirrorSnapshot(Base):
     taken_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
-    size_bytes = Column(Integer, nullable=True)
+    # BigInteger: a mirror snapshot's byte total routinely exceeds the
+    # 2.1 GB signed-32-bit INTEGER ceiling (e.g. a 9.7 GB Ubuntu mirror),
+    # which made the snapshot-result UPDATE raise NumericValueOutOfRange,
+    # roll back, and leave the snapshot stuck DISPATCHED — blocking any
+    # air-gap collection run sourcing from it.
+    size_bytes = Column(BigInteger, nullable=True)
     file_count = Column(Integer, nullable=True)
     manifest = Column(JSON, nullable=True)  # optional per-file SHA256 list
     retention_until = Column(DateTime, nullable=True)

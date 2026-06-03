@@ -2857,5 +2857,54 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect."
+  },
+  "airgapDevices": {
+    "empty": "No eligible drives found. Insert media and press Rescan.",
+    "help": "Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
+    "label": "Block device",
+    "loadError": "Could not enumerate drives.",
+    "none": "(none)",
+    "rescan": "Rescan drives",
+    "saveError": "Could not save device.",
+    "title": "Import Drive"
+  },
+  "airgapImport": {
+    "device": "Drive",
+    "import": "Import ISO",
+    "importError": "Could not start import.",
+    "noDevice": "No import drive selected. Choose one in Settings → Server Role.",
+    "notReady": "Not ready",
+    "queued": "Import queued from {{dev}} (run {{id}}).",
+    "ready": "Ready{{label}}",
+    "rescan": "Rescan",
+    "statusError": "Could not probe the import device.",
+    "title": "Import from Media"
+  },
+  "airgapKeys": {
+    "collector": {
+      "copyKey": "Copy Public Key",
+      "help": "Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
+      "loadError": "Could not load the collector public key.",
+      "title": "Collector Public Key"
+    },
+    "copied": "Copied!",
+    "copyError": "Could not copy to clipboard.",
+    "copyFingerprint": "Copy fingerprint",
+    "fingerprint": "Fingerprint",
+    "trusted": {
+      "badKey": "(unreadable key)",
+      "count": "{{n}} trusted",
+      "empty": "No trusted collector keys yet.",
+      "help": "Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
+      "import": "Import Key",
+      "importError": "Could not import key.",
+      "imported": "Imported key {{fp}}",
+      "loadError": "Could not load trusted keys.",
+      "nameLabel": "Collector name",
+      "pemLabel": "Public key (PEM)",
+      "removeError": "Could not remove key.",
+      "required": "Name and public key are both required.",
+      "title": "Trusted Collector Keys"
+    }
   }
 }

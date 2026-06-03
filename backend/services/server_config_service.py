@@ -64,3 +64,37 @@ def set_server_role(role: str) -> str:
             row.server_role = role
         session.commit()
     return role
+
+
+def get_import_device():
+    """Return the configured air-gap import block device, or None.
+
+    The device node (e.g. ``/dev/sr0``) an Air-Gap Repository operator
+    picked as the import drive.  None when unset or on any DB failure.
+    """
+    try:
+        session_local = db.get_session_local()
+        with session_local() as session:
+            row = session.query(models.ServerConfiguration).first()
+            return row.airgap_import_device if row else None
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not read airgap_import_device from DB: %s", exc)
+        return None
+
+
+def set_import_device(device):
+    """Persist the air-gap import block device (or None to clear)."""
+    session_local = db.get_session_local()
+    with session_local() as session:
+        row = session.query(models.ServerConfiguration).first()
+        if row is None:
+            row = models.ServerConfiguration(
+                id=SINGLETON_SERVER_CONFIG_ID,
+                server_role=DEFAULT_SERVER_ROLE,
+                airgap_import_device=device,
+            )
+            session.add(row)
+        else:
+            row.airgap_import_device = device
+        session.commit()
+    return device

@@ -92,6 +92,69 @@ def decode_mfa_pending_token(token: str):
     return decoded
 
 
+# Air-gap ISO download tokens are short-lived, single-purpose tokens that
+# authorise ONE streaming ISO download.  A browser can't put the session
+# JWT in the Authorization header when it follows a plain download link,
+# and buffering a multi-GB ISO through fetch() to add the header OOMs the
+# tab — so the UI requests one of these (authenticated) and then navigates
+# the browser straight to the token-authed download route.  Scoped to a
+# single run_id and expiring in minutes so a leaked URL is low-impact.
+_AIRGAP_DOWNLOAD_TTL_SECONDS = 5 * 60
+
+
+def sign_airgap_download_token(run_id: str) -> str:
+    """Sign a short-lived token authorising a streaming download of one
+    air-gap collection run's ISO (and nothing else)."""
+    payload = {
+        "run_id": str(run_id),
+        "scope": "airgap-iso-download",
+        "expires": time.time() + _AIRGAP_DOWNLOAD_TTL_SECONDS,
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def decode_airgap_download_token(token: str, run_id: str) -> bool:
+    """Return True only when ``token`` is a valid, unexpired air-gap
+    download token scoped to ``run_id``."""
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+        return False
+    return (
+        decoded.get("scope") == "airgap-iso-download"
+        and str(decoded.get("run_id")) == str(run_id)
+        and decoded.get("expires", 0) >= time.time()
+    )
+
+
+def sign_airgap_bundle_token(bundle_id: str) -> str:
+    """Sign a short-lived token authorising a streaming download of one
+    air-gap bundle ISO (and nothing else).  Same rationale as
+    ``sign_airgap_download_token`` — a browser following a plain
+    download link can't set the Authorization header, and buffering a
+    multi-GB bundle through fetch() to add it OOMs the tab."""
+    payload = {
+        "bundle_id": str(bundle_id),
+        "scope": "airgap-bundle-download",
+        "expires": time.time() + _AIRGAP_DOWNLOAD_TTL_SECONDS,
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def decode_airgap_bundle_token(token: str, bundle_id: str) -> bool:
+    """Return True only when ``token`` is a valid, unexpired air-gap
+    bundle-download token scoped to ``bundle_id``."""
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except (jwt.exceptions.InvalidTokenError, jwt.exceptions.DecodeError):
+        return False
+    return (
+        decoded.get("scope") == "airgap-bundle-download"
+        and str(decoded.get("bundle_id")) == str(bundle_id)
+        and decoded.get("expires", 0) >= time.time()
+    )
+
+
 def decode_jwt(token: str) -> Optional[dict]:
     """
     This function decodes a JWT token

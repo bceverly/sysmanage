@@ -131,17 +131,33 @@ def _cmd(argv, timeout, ignore_errors, description, desc_key):
     }
 
 
+def _is_block_device_path(iso_path: str) -> bool:
+    """True when the ingest source is a block device node (optical /
+    USB media) rather than an ISO *file*.  Device-based import (insert /
+    burn the disc, pick the drive in the UI) passes ``/dev/sr0`` etc.;
+    file-based import passes a path under the repo's incoming dir.
+    """
+    return bool(iso_path) and iso_path.startswith("/dev/")
+
+
 def _build_mount_plan(iso_path: str) -> dict:
-    """Loop-mount the ISO read-only and read its embedded manifest.
+    """Mount the ingest media read-only and read its embedded manifest.
+
+    Handles both sources:
+      * an ISO *file*  → ``mount -o loop,ro`` (loop-back the file).
+      * a block device → ``mount -o ro`` (mount the optical/USB node
+        directly; a loop device would be wrong/refused for a real block
+        device).
 
     A leading best-effort ``umount`` clears any stale mount left by a
     prior failed ingest (so the fresh ``mount`` to the same point never
     fails with "busy").  The final ``cat`` returns ``/manifest.json``'s
     bytes in the command result's stdout — that's what the mount result
     handler verifies against the keyring.  ``cat`` runs WITHOUT sudo:
-    ISO files are world-readable and the manifest is written 0644, so
-    no privileged read is needed (and none is granted in sudoers).
+    the manifest is world-readable, so no privileged read is needed (and
+    none is granted in sudoers).
     """
+    mount_opts = "ro" if _is_block_device_path(iso_path) else "loop,ro"
     return {
         "commands": [
             _cmd(
@@ -159,10 +175,10 @@ def _build_mount_plan(iso_path: str) -> dict:
                 "engine.airgap_repository.cmd.create_mount_point",
             ),
             _cmd(
-                ["sudo", "mount", "-o", "loop,ro", iso_path, MOUNT_POINT],
+                ["sudo", "mount", "-o", mount_opts, iso_path, MOUNT_POINT],
                 120,
                 False,
-                "mount ingest ISO read-only",
+                "mount ingest media read-only",
                 "engine.airgap_repository.cmd.mount_iso",
             ),
             _cmd(
@@ -424,6 +440,53 @@ def process_copy_result(session, run, outcome) -> None:
     _register_local_repositories(session, run)
 
 
+def _mirror_base_url() -> str:
+    """Base URL air-gapped agents use to reach this repository's mirror.
+
+    Host is this server's own name (single-box air-gap deploy serves the
+    mirror from the same host that runs sysmanage); port is the webui
+    nginx port that serves ``/airgap-repo/`` (omitted when it's 80).
+    NOT ``localhost`` — other air-gapped agents have to resolve it.
+    """
+    host = socket.getfqdn() or socket.gethostname()
+    port = 0
+    try:
+        webui = config_module.get_config().get("webui", {}) or {}
+        port = int(webui.get("port") or 0)
+    except (ValueError, TypeError, AttributeError):
+        port = 0
+    netloc = host if port in (0, 80) else f"{host}:{port}"
+    return f"http://{netloc}/airgap-repo"
+
+
+def _discover_apt_root(distro: str, version: str):
+    """Locate the real apt repo root for a copied target and count debs.
+
+    The collector mirrors with ``apt-mirror``, whose on-disk layout
+    nests the serveable tree under ``mirror/<upstream-host>/<path>`` (a
+    metadata-only ``skel/`` sits alongside it).  Rather than assume a
+    flat tree, find the directory that holds BOTH ``dists/`` and
+    ``pool/`` — that's the apt root.  Returns
+    ``(relpath_from_REPO_ROOT, deb_count)`` or ``(None, None)`` when the
+    tree isn't found (best-effort; caller falls back).
+    """
+    base = os.path.join(REPO_ROOT, distro, version)
+    if not os.path.isdir(base):
+        return None, None
+    apt_root = None
+    for root, dirs, _files in os.walk(base):
+        if "dists" in dirs and "pool" in dirs:
+            apt_root = root
+            break
+    if apt_root is None:
+        return None, None
+    rel = os.path.relpath(apt_root, REPO_ROOT)
+    count = 0
+    for _root, _dirs, files in os.walk(os.path.join(apt_root, "pool")):
+        count += sum(1 for f in files if f.endswith(".deb"))
+    return rel, count
+
+
 def _register_local_repositories(session, run) -> None:
     """Upsert one ``AirgapLocalRepository`` per verified manifest target.
 
@@ -441,6 +504,7 @@ def _register_local_repositories(session, run) -> None:
         return
     targets = manifest.get("targets") or []
     now = _now_naive()
+    base_url = _mirror_base_url()
     for target in targets:
         if not isinstance(target, dict):
             continue
@@ -448,6 +512,8 @@ def _register_local_repositories(session, run) -> None:
         version = target.get("version")
         if not distro or not version:
             continue
+        rel, pkg_count = _discover_apt_root(distro, version)
+        repo_url = f"{base_url}/{rel}" if rel else f"{base_url}/{distro}/{version}"
         row = (
             session.query(models.AirgapLocalRepository)
             .filter(
@@ -460,11 +526,14 @@ def _register_local_repositories(session, run) -> None:
             row = models.AirgapLocalRepository(
                 distro=distro,
                 version=version,
-                repo_url=f"http://localhost/airgap-repo/{distro}/{version}",
+                repo_url=repo_url,
             )
             session.add(row)
+        else:
+            row.repo_url = repo_url
         row.last_ingest_run_id = run.id
         row.last_ingest_at = now
+        row.package_count = pkg_count
 
 
 # ---------------------------------------------------------------------------

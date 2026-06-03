@@ -57,6 +57,7 @@ type RunStatus =
   | 'QUEUED'
   | 'MIRRORING'
   | 'STAGING_COMPLETE'
+  | 'BUILDING_ISO'
   | 'ISO_BUILT'
   | 'BURNING'
   | 'COMPLETE'
@@ -66,6 +67,7 @@ const IN_FLIGHT_STATUSES: RunStatus[] = [
   'QUEUED',
   'MIRRORING',
   'STAGING_COMPLETE',
+  'BUILDING_ISO',
   'ISO_BUILT',
   'BURNING',
 ];
@@ -95,6 +97,9 @@ interface CollectionRun {
   id: string;
   iso_label: string;
   media_size_bytes: number;
+  // Actual on-disk ISO size (sum across discs); null until built.  The
+  // Size column shows this, falling back to media_size_bytes when absent.
+  iso_size_bytes?: number | null;
   include_cve: boolean;
   include_compliance: boolean;
   status: RunStatus | string;
@@ -149,6 +154,7 @@ const statusColor = (
       return 'default';
     case 'MIRRORING':
     case 'STAGING_COMPLETE':
+    case 'BUILDING_ISO':
     case 'ISO_BUILT':
     case 'BURNING':
       return 'info';
@@ -524,24 +530,28 @@ const AirgapCollections: React.FC = () => {
     // download on multi-disc runs (passed via ?disc=N).  Omit for the
     // first-disc / single-disc default.
     try {
-      const apiUrl =
-        discIndex && discIndex > 1
-          ? `${RUNS_URL}/${run.id}/iso?disc=${discIndex}`
-          : `${RUNS_URL}/${run.id}/iso`;
-      const response = await axiosInstance.get(apiUrl, {
-        responseType: 'blob',
-      });
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const blobUrl = globalThis.URL.createObjectURL(blob);
+      // Native streaming download.  Mint a short-lived, single-run token
+      // (authenticated POST), then point the browser straight at the
+      // token-authed download route so it streams to disk.  We must NOT
+      // pull the response into a Blob — a multi-GB ISO buffered in memory
+      // OOMs the browser tab (and can take the backend down behind a
+      // buffering proxy).  The mint POST performs the same readiness
+      // checks (404/409/410) the old GET did, so the catch below still
+      // drives the manifest fallback correctly.
+      const tokenResp = await axiosInstance.post(
+        `${RUNS_URL}/${run.id}/iso-token`,
+      );
+      const dlToken = (tokenResp.data as { token: string }).token;
+      const discQuery = discIndex && discIndex > 1 ? `&disc=${discIndex}` : '';
+      const url = `${RUNS_URL}/${run.id}/iso-download?token=${encodeURIComponent(
+        dlToken,
+      )}${discQuery}`;
       const a = document.createElement('a');
-      a.href = blobUrl;
+      a.href = url;
       a.download = `${run.iso_label}-${run.id}.iso`;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      globalThis.URL.revokeObjectURL(blobUrl);
       return;
     } catch (isoErr: unknown) {
       const status = (isoErr as { response?: { status?: number } })?.response
@@ -635,10 +645,15 @@ const AirgapCollections: React.FC = () => {
           row.completed_at ? formatUTCTimestamp(row.completed_at, '—') : '—',
       },
       {
-        field: 'media_size_bytes',
+        field: 'iso_size_bytes',
         headerName: t('airgapCollections.column.size', 'Size'),
         width: 110,
-        valueGetter: (_v, row: CollectionRun) => formatBytes(row.media_size_bytes),
+        // Show the ACTUAL built ISO size; before it's built (null) fall
+        // back to the configured media size so the column isn't blank.
+        valueGetter: (_v, row: CollectionRun) =>
+          formatBytes(
+            row.iso_size_bytes != null ? row.iso_size_bytes : row.media_size_bytes,
+          ),
       },
       {
         field: 'actions',

@@ -40,6 +40,10 @@ class ServerConfiguration(Base):
 
     id = Column(GUID(), primary_key=True, default=lambda: SINGLETON_SERVER_CONFIG_ID)
     server_role = Column(String(40), nullable=False, default=DEFAULT_SERVER_ROLE)
+    # Block-device node (e.g. /dev/sr0) the operator picked as the
+    # air-gap import drive on an Air-Gap Repository server.  NULL until
+    # chosen; only meaningful when server_role == 'repository'.
+    airgap_import_device = Column(String(200), nullable=True)
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -49,5 +53,6 @@ class ServerConfiguration(Base):
     def to_dict(self) -> dict:
         return {
             "server_role": self.server_role,
+            "airgap_import_device": self.airgap_import_device,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -23,6 +23,11 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import axiosInstance from '../Services/api';
+import {
+  CollectorPublicKeyCard,
+  ImportDeviceCard,
+  TrustedCollectorsCard,
+} from './AirgapKeyManagement';
 
 type ServerRole = 'standard' | 'collector' | 'repository';
 
@@ -211,6 +216,17 @@ const ServerRoleSettings: React.FC = () => {
           </Typography>
         )}
       </Box>
+
+      {/* Role-specific key management. Keyed on the *saved* role
+          (currentRole), not the radio selection, so the cards reflect
+          what the server actually is until a new role is saved. */}
+      {currentRole === 'collector' && <CollectorPublicKeyCard />}
+      {currentRole === 'repository' && (
+        <>
+          <ImportDeviceCard />
+          <TrustedCollectorsCard />
+        </>
+      )}
 
       <Snackbar
         open={snackOpen}

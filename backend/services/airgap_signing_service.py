@@ -18,16 +18,26 @@ manages where the key lives and hands the PEM to the engine.
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
-from typing import Optional, Tuple
+import re
+from typing import List, Optional, Tuple
 
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+    Ed25519PrivateKey,
+    Ed25519PublicKey,
+)
 
 from backend.config import config as config_module
 
 logger = logging.getLogger(__name__)
+
+# Trusted-collector key filenames: keep them tame so they map 1:1 to a
+# filesystem path with no traversal.  Operator-supplied "name" is
+# slugified to this charset before becoming ``<name>.pub``.
+_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 def _public_key_path(private_key_path: str) -> str:
@@ -125,3 +135,109 @@ def get_collector_public_key_pem() -> Optional[str]:
                 return fh.read()
         except Exception:  # pylint: disable=broad-exception-caught
             return None
+
+
+# ---------------------------------------------------------------------------
+# Fingerprints + trusted-collector keyring (repository side)
+# ---------------------------------------------------------------------------
+def _canonical_public_pem(pem: str | bytes) -> bytes:
+    """Load an Ed25519 public PEM and re-serialise it to the canonical
+    SubjectPublicKeyInfo PEM bytes.  Raises ``ValueError`` if the input
+    isn't a valid Ed25519 public key.  Re-serialising means an operator
+    can paste a key with odd whitespace and still get the same
+    fingerprint the collector computed.
+    """
+    raw = pem.encode("utf-8") if isinstance(pem, str) else pem
+    pub = serialization.load_pem_public_key(raw)
+    if not isinstance(pub, Ed25519PublicKey):
+        raise ValueError("not an Ed25519 public key")
+    return pub.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+
+
+def fingerprint_of_public_pem(pem: str | bytes) -> str:
+    """SHA-256 hex of the canonical public PEM — identical to the
+    ``signer_fingerprint`` the collector engine stamps into a manifest
+    (``sha256(public_bytes(PEM, SubjectPublicKeyInfo))``).
+    """
+    return hashlib.sha256(_canonical_public_pem(pem)).hexdigest()
+
+
+def get_collector_public_key_fingerprint() -> Optional[str]:
+    """Fingerprint of THIS server's collector public key, or None."""
+    pem = get_collector_public_key_pem()
+    if not pem:
+        return None
+    try:
+        return fingerprint_of_public_pem(pem)
+    except ValueError:
+        return None
+
+
+def _safe_key_name(name: str) -> str:
+    slug = _NAME_RE.sub("-", (name or "").strip()).strip("-._")
+    return slug or "collector"
+
+
+def list_trusted_collectors() -> List[dict]:
+    """List the repository's trusted-collector keys.
+
+    Returns ``[{"name", "fingerprint"}]`` — ``name`` is the filename
+    stem, ``fingerprint`` the sha256 of the canonical PEM (or None if
+    the file isn't a parseable Ed25519 key).  Missing dir → empty list.
+    """
+    keyring_dir = config_module.get_airgap_collector_public_key_dir()
+    out: List[dict] = []
+    try:
+        names = sorted(os.listdir(keyring_dir))
+    except OSError:
+        return out
+    for fname in names:
+        path = os.path.join(keyring_dir, fname)
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                pem = fh.read()
+            fp = fingerprint_of_public_pem(pem)
+        except (OSError, ValueError):
+            fp = None
+        stem, _ext = os.path.splitext(fname)
+        out.append({"name": stem, "fingerprint": fp})
+    return out
+
+
+def import_trusted_collector(name: str, public_key_pem: str) -> dict:
+    """Add a collector public key to the repository's trusted keyring.
+
+    Validates it's an Ed25519 public PEM, writes the canonical form to
+    ``<keyring_dir>/<slug>.pub`` (0644), and returns
+    ``{"name", "fingerprint"}``.  Raises ``ValueError`` on a bad key.
+    """
+    canonical = _canonical_public_pem(public_key_pem)  # raises on bad key
+    fingerprint = hashlib.sha256(canonical).hexdigest()
+    keyring_dir = config_module.get_airgap_collector_public_key_dir()
+    os.makedirs(keyring_dir, exist_ok=True)
+    slug = _safe_key_name(name)
+    path = os.path.join(keyring_dir, slug + ".pub")
+    _atomic_write(path, canonical, 0o644)
+    logger.info(
+        "Imported trusted collector key '%s' (fingerprint %s)", slug, fingerprint
+    )
+    return {"name": slug, "fingerprint": fingerprint}
+
+
+def remove_trusted_collector(name: str) -> bool:
+    """Delete a trusted-collector key by name (filename stem).  Returns
+    True if a file was removed.  Path-traversal-safe via slugify."""
+    keyring_dir = config_module.get_airgap_collector_public_key_dir()
+    slug = _safe_key_name(name)
+    path = os.path.join(keyring_dir, slug + ".pub")
+    try:
+        os.unlink(path)
+        logger.info("Removed trusted collector key '%s'", slug)
+        return True
+    except OSError:
+        return False

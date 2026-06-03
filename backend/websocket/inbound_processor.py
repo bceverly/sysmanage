@@ -147,6 +147,17 @@ async def process_pending_messages(  # NOSONAR
         for message in host_messages:
             await process_validated_message(message, host, db)
 
+        # Air-gap repository auto-repoint: if this server is an Air-Gap
+        # Repository, ensure the agent that just communicated is pointed
+        # at the local mirror (and off the internet).  Best-effort and
+        # self-throttling — no-ops unless the role is 'repository' and
+        # the agent's config actually needs to change.
+        from backend.services import (  # pylint: disable=import-outside-toplevel
+            airgap_repoint_service,
+        )
+
+        airgap_repoint_service.maybe_repoint(db, host)
+
     # Second, handle messages with NULL host_id by extracting hostname from message data
     # Exclude expired messages from processing
     null_host_messages = (

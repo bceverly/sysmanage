@@ -2857,5 +2857,54 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect."
+  },
+  "airgapDevices": {
+    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
+    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
+    "label": "[TODO] Block device",
+    "loadError": "[TODO] Could not enumerate drives.",
+    "none": "[TODO] (none)",
+    "rescan": "[TODO] Rescan drives",
+    "saveError": "[TODO] Could not save device.",
+    "title": "[TODO] Import Drive"
+  },
+  "airgapImport": {
+    "device": "[TODO] Drive",
+    "import": "[TODO] Import ISO",
+    "importError": "[TODO] Could not start import.",
+    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
+    "notReady": "[TODO] Not ready",
+    "queued": "[TODO] Import queued from {{dev}} (run {{id}}).",
+    "ready": "[TODO] Ready{{label}}",
+    "rescan": "[TODO] Rescan",
+    "statusError": "[TODO] Could not probe the import device.",
+    "title": "[TODO] Import from Media"
+  },
+  "airgapKeys": {
+    "collector": {
+      "copyKey": "[TODO] Copy Public Key",
+      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
+      "loadError": "[TODO] Could not load the collector public key.",
+      "title": "[TODO] Collector Public Key"
+    },
+    "copied": "[TODO] Copied!",
+    "copyError": "[TODO] Could not copy to clipboard.",
+    "copyFingerprint": "[TODO] Copy fingerprint",
+    "fingerprint": "[TODO] Fingerprint",
+    "trusted": {
+      "badKey": "[TODO] (unreadable key)",
+      "count": "[TODO] {{n}} trusted",
+      "empty": "[TODO] No trusted collector keys yet.",
+      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
+      "import": "[TODO] Import Key",
+      "importError": "[TODO] Could not import key.",
+      "imported": "[TODO] Imported key {{fp}}",
+      "loadError": "[TODO] Could not load trusted keys.",
+      "nameLabel": "[TODO] Collector name",
+      "pemLabel": "[TODO] Public key (PEM)",
+      "removeError": "[TODO] Could not remove key.",
+      "required": "[TODO] Name and public key are both required.",
+      "title": "[TODO] Trusted Collector Keys"
+    }
   }
 }

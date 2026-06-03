@@ -60,6 +60,11 @@ const Navbar = () => {
   // role chip.  ``/api/v1/server-info`` is unauthenticated, so this works
   // pre-login too (the chip is hidden anyway when role === "standard").
   useEffect(() => {
+    // Only fetch role info once authenticated.  The role chip is
+    // operator-facing detail; an unauthenticated visitor on the login
+    // screen must not be able to learn this server's air-gap role
+    // (collector / repository) — that's pre-auth information disclosure.
+    if (!localStorage.getItem('bearer_token')) return;
     let cancelled = false;
     fetch('/api/v1/server-info')
       .then(r => (r.ok ? r.json() : null))
@@ -128,7 +133,10 @@ const Navbar = () => {
   const tooltipText = roleEngineLoaded
     ? roleLabelText
     : t('nav.role.engineMissing', 'Required Pro+ engine not loaded; check license.');
-  const roleChip = serverRole === 'standard' ? null : (
+  // Never render the role chip pre-login (defense-in-depth alongside the
+  // gated fetch above): no air-gap role disclosure to unauthenticated
+  // visitors on the login screen.
+  const roleChip = (serverRole === 'standard' || menuVisible !== 'visible') ? null : (
     <span
       className={`nav__role-chip nav__role-chip--${serverRole}` +
         (roleEngineLoaded ? '' : ' nav__role-chip--degraded')}

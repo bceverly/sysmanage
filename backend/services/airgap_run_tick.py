@@ -370,6 +370,17 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
             total_bytes += size
         need_multidisc = not unknown_size and total_bytes > media_size and target_sizes
 
+        # A run with no ``burn_device`` produces a downloadable ISO meant to
+        # be attached as virtual media (e.g. a VM's CD/DVD drive), which has
+        # no physical single-disc size limit.  Multi-disc splitting exists
+        # only to fit physical media — and v0.1.0 can't file-split a single
+        # oversize repo anyway — so when nobody is burning a disc, always
+        # emit ONE ISO regardless of size instead of failing the disc-fit
+        # check.  The single-disc builder below has no size cap; xorriso /
+        # UDF handle multi-GB ISOs fine.
+        if run.burn_device is None:
+            need_multidisc = False
+
         if need_multidisc:
             multidisc_builder = getattr(
                 engine, "build_snapshot_multidisc_collection_plan", None
@@ -431,7 +442,21 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
                 )
                 plan = engine.build_collection_run_plan(req)
             else:
-                plan = single_builder(req, source_snapshots=source_snapshots)
+                # CRITICAL: pass the SAME run-id-scoped staging root that
+                # the ISO-build stage reads from
+                # (_advance_staging_complete_to_building_iso ->
+                # staging_dir=/var/lib/sysmanage/airgap-staging/<run.id>).
+                # Without this the engine defaults staging_root to the bare
+                # /var/lib/sysmanage/airgap-staging, so the packages land in
+                # .../airgap-staging/<target>/ while xorriso later bundles the
+                # empty .../airgap-staging/<run.id>/ -> a manifest-only
+                # (hollow) ISO.  The multi-disc path above already scopes by
+                # run.id; the single-disc path must match it.
+                plan = single_builder(
+                    req,
+                    source_snapshots=source_snapshots,
+                    staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
+                )
             stage = "mirroring"
             timeout = 14400
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -498,6 +523,23 @@ def _advance_staging_complete_to_building_iso(db, run, engine) -> None:
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _mark_failed(run, f"ISO plan build failed: {exc}")
         return
+
+    # The engine's build_iso_plan writes the ISO to
+    # /var/lib/sysmanage/airgap-iso/<id>.iso but never creates that parent
+    # directory, and xorriso/libburn refuse to create it themselves
+    # ("Neither stdio-path nor its directory exist") — so the build fails
+    # on any collector host where the dir doesn't already exist.  Prepend a
+    # mkdir to the plan so the output dir is guaranteed before xorriso runs
+    # (mkdir is already in the agent's sudoers allowlist).
+    if isinstance(plan, dict) and isinstance(plan.get("commands"), list):
+        plan["commands"].insert(
+            0,
+            {
+                "argv": ["sudo", "mkdir", "-p", "/var/lib/sysmanage/airgap-iso"],
+                "description": "ensure ISO output dir exists",
+            },
+        )
+
     try:
         from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
             enqueue_apply_plan,

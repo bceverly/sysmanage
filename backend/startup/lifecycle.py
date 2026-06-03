@@ -72,14 +72,35 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("=== PRO+ MODULE LOADING ===")
                 module_loader.initialize()
                 if license_service.cached_license:
+                    failed_modules = []
                     for module_code in license_service.cached_license.modules:
                         logger.info("Loading Pro+ module: %s", module_code)
                         try:
-                            await module_loader.ensure_module_available(module_code)
+                            ok = await module_loader.ensure_module_available(
+                                module_code
+                            )
+                            if ok is False:
+                                failed_modules.append(module_code)
                         except Exception as mod_e:
                             logger.warning(
                                 "Failed to load module %s: %s", module_code, mod_e
                             )
+                            failed_modules.append(module_code)
+                    # Surface licensed-but-unavailable engines as ONE loud
+                    # summary instead of leaving the operator to find the
+                    # individual 404 lines.  Most common cause: the license
+                    # server has no build of the engine for this host's
+                    # Python version (see module_loader's "ENGINE UNAVAILABLE"
+                    # log).  Anything gated on these engines stays disabled.
+                    if failed_modules:
+                        logger.error(
+                            "Pro+ ENGINES LICENSED BUT UNAVAILABLE (%d): %s — these "
+                            "did not load (typically: no build for this platform/"
+                            "Python on the license server); their features and any "
+                            "orchestrators/ticks gated on them are DISABLED.",
+                            len(failed_modules),
+                            ", ".join(failed_modules),
+                        )
                 # Mount Pro+ routes now that modules are loaded
                 logger.info("=== MOUNTING PRO+ MODULE ROUTES ===")
                 proplus_results = mount_proplus_routes(_fastapi_app)
