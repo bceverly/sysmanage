@@ -244,6 +244,20 @@ const Sites: React.FC = () => {
               </Button>
               <Button
                 variant="outlined"
+                onClick={() => navigate("/sites/tiles")}
+                data-testid="sites-tiles-toggle"
+              >
+                {t("sites.tilesView", "Dashboard")}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate("/federation/hosts")}
+                data-testid="sites-hosts-link"
+              >
+                {t("sites.hostsLink", "Hosts")}
+              </Button>
+              <Button
+                variant="outlined"
                 onClick={() => navigate("/federation/policies")}
                 data-testid="sites-policies-link"
               >

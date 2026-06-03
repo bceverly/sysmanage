@@ -157,6 +157,26 @@ def register_host_op_correlation(message_id: str, action: str, host_id: str) -> 
     )
 
 
+def register_federation_command_correlation(
+    message_id: str, federated_command_id: str, host_id: str
+) -> None:
+    """Register a coordinator-dispatched federated command for result-routing.
+
+    The site's actuation worker (``federation_actuation_service``) fans a
+    federated command out to local agents as normal ``command`` messages;
+    each agent's ``command_result`` echoes the queue message_id, which we
+    route back to the federation inbox here.  ``primary_id`` carries the
+    federated (received-command) id so the per-host outcome aggregates
+    against the right inbox row.
+    """
+    _register_correlation(
+        message_id,
+        "federation_command",
+        federated_command_id,
+        host_id,
+    )
+
+
 def register_repo_mirror_correlation(
     message_id: str, action: str, host_id: str, mirror_id: str = ""
 ) -> None:
@@ -1575,6 +1595,35 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
         except Exception as exc:
             logger.warning(
                 "Failed to apply host_op result for %s on host %s: %s",
+                primary_id,
+                host_id,
+                exc,
+            )
+        return True
+
+    # Federated commands dispatched by a coordinator and fanned out to
+    # this site's local agents.  ``primary_id`` is the received-command
+    # id; aggregate this host's outcome into the inbox row and, once all
+    # dispatched hosts have reported, queue the result back upstream.
+    if engine_name == "federation_command":
+        try:
+            from backend.persistence.db import get_db
+            from backend.services import federation_actuation_service
+
+            db_session = next(get_db())
+            try:
+                federation_actuation_service.record_command_host_result(
+                    db_session,
+                    primary_id,
+                    host_id,
+                    success=(outcome["status"] == "succeeded"),
+                    detail=_outcome_error_text(outcome, "") or outcome["stdout"][:2000],
+                )
+            finally:
+                db_session.close()
+        except Exception as exc:
+            logger.warning(
+                "Failed to apply federation_command result for %s on host %s: %s",
                 primary_id,
                 host_id,
                 exc,

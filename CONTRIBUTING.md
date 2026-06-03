@@ -87,6 +87,31 @@ SysManage supports 14 languages. To add or update translations:
 
 Include a short note describing the translation changes in your PR.
 
+### Translation tooling (local-model assisted)
+
+Frontend strings are referenced in code as `t('key', 'English fallback')`.
+The tooling keeps every locale in sync:
+
+- `make i18n-seed` — copy any new keys into all 14 locales, prefixing the
+  non-English ones with `[TODO] ` so they're easy to find.
+- `make i18n-translate` — fill the `[TODO]` strings via a **local**
+  OpenAI-compatible endpoint (vLLM / Ollama / llama.cpp). Runs entirely on
+  your own hardware — no external API. Configure with `I18N_LLM_BASE_URL`,
+  `I18N_LLM_MODEL`, `I18N_LLM_API_KEY`; scope with `LANG=de` (default `all`).
+- `make i18n-backtranslate` — local round-trip QA: samples translated
+  strings, back-translates them, and flags semantic drift for human review.
+
+CI enforces two deterministic, network-free gates (no model needed):
+
+- `make i18n-validate` — every code-referenced key exists in every locale.
+- `make i18n-placeholders` — every translated value preserves the exact
+  interpolation tokens (`{{var}}`, `%s`, `<tags>`, …) of its English source.
+  This is part of `make lint`.
+
+Once a locale is fully translated, `make i18n-check` adds a completeness
+gate (no `[TODO]` strings remain); flip `lint` from `i18n-placeholders` to
+`i18n-check` to make untranslated strings a hard failure.
+
 ---
 
 ## Code of Conduct

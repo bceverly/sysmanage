@@ -114,8 +114,23 @@ jobs:
         find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
         find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 
-        # Run Python tests (excluding UI tests)
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        # Backend Python tests run as TWO separate pytest processes that
+        # accumulate into one coverage dataset via --cov-append:
+        #   1. tests/         — the canonical suite
+        #   2. backend/tests/ — a second tree (proplus dispatch/routes,
+        #                       federation services, host/user/tag/license
+        #                       management APIs, ...) that was historically
+        #                       NOT collected by CI, so the ~490 tests there
+        #                       were neither enforced nor counted toward
+        #                       coverage.  They MUST run in a separate
+        #                       process: merging both trees into one
+        #                       ``-n auto`` xdist run crashes workers
+        #                       (cross-tree import/resource interference).
+        # The ``--cov-fail-under`` ratchet on the SECOND (final) run gates
+        # the COMBINED total so coverage can hold/rise but never silently
+        # decline.  Bump it whenever the real number moves up.
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
+        python -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -250,6 +265,11 @@ jobs:
     - name: Run Pylint
       run: |
         python -m pylint backend/ --rcfile=.pylintrc --exit-zero
+
+    - name: Run i18n gates (key coverage + placeholder integrity)
+      run: |
+        python scripts/i18n_validate.py --validate
+        python scripts/i18n_check_translations.py --placeholders
 
     - name: Run Bandit security scan
       run: |

@@ -37,8 +37,17 @@ This document provides a detailed roadmap for realizing all features in both ope
 26. [Phase 12: Multi-Site Federation (Enterprise)](#phase-12-multi-site-federation-enterprise)
 27. [Phase 12.5: Windows Server Child Hosts (Enterprise)](#phase-125-windows-server-child-hosts-enterprise)
 28. [Phase 13: Enterprise GA (v3.0.0.0)](#phase-13-enterprise-ga-v3000)
-29. [Release Schedule Summary](#release-schedule-summary)
-30. [Module Migration Plan](#module-migration-plan)
+29. [Phase 14: Patch & Maintenance Lifecycle (Pro+ / Enterprise)](#phase-14-patch--maintenance-lifecycle-pro--enterprise)
+30. [Phase 15: Stabilization](#phase-15-stabilization)
+31. [Phase 16: Content Lifecycle Management (Enterprise)](#phase-16-content-lifecycle-management-enterprise)
+32. [Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)](#phase-17-content-distribution--image-mode-hosts-enterprise)
+33. [Phase 18: Provisioning & Discovery (Enterprise)](#phase-18-provisioning--discovery-enterprise)
+34. [Phase 19: Stabilization](#phase-19-stabilization)
+35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
+36. [Phase 21: Proactive Operations & Advisor (Enterprise)](#phase-21-proactive-operations--advisor-enterprise)
+37. [Phase 22: Stabilization & v4.0 GA](#phase-22-stabilization--v40-ga)
+38. [Release Schedule Summary](#release-schedule-summary)
+39. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -422,13 +431,96 @@ The following virtualization features are implemented and will be migrated to Pr
 
 Between major feature development phases, we insert **stabilization phases** focused on:
 
-1. **Unit Test Coverage** - Increase test coverage by 5% each stabilization phase
+1. **Unit Test Coverage** - Increase test coverage by 5% each stabilization
+   phase.  Applies to **backend AND every frontend** (see "Frontend Test
+   Coverage" below) — historically the per-phase push only tracked
+   Python; the frontends drifted to single digits while the backend held
+   ~72%.  Each phase ratchets the enforced floor up; it never moves down.
 2. **Playwright E2E Tests** - Ensure UI flows work correctly
 3. **SonarQube Cleanup** - Resolve all code quality issues
 4. **Dependabot Updates** - Apply security patches and dependency updates
 5. **Security Analysis** - Review for vulnerabilities (OWASP top 10)
 6. **Performance Testing** - Identify and resolve bottlenecks
-7. **Documentation Updates** - Keep docs current with features
+7. **Documentation Updates** - Keep `sysmanage-docs` current with features.
+   **Standing requirement (every phase, not just stabilization):** any PR
+   that adds or changes user-visible functionality MUST land the matching
+   `sysmanage-docs` update in the same change — new pages, screenshots,
+   workflow docs, and the 14-language `data-i18n` seed.  "Docs lag" is
+   treated as incomplete work, not a follow-up.  Stabilization phases
+   additionally do a full docs/i18n audit to catch anything that slipped.
+
+### Frontend Test Coverage
+
+The per-phase coverage push above historically tracked only the Python
+backend(s); the three frontends were never gated, so — exactly like the
+backend before its ratchet — they were *measured but not enforced* and
+drifted down as feature pages shipped without tests.
+
+**Current state (measured 2026-06, `vitest run --coverage`):**
+
+| Frontend | Path | Lines coverage | vs. backend (~72%) |
+|---|---|---|---|
+| OSS SysManage | `sysmanage/frontend/src` | **~9%** | far below |
+| License server (admin portal) | `sysmanage-professional-plus/frontend/src` | **~23%** | below |
+| Pro+ components (plugin bundles) | `sysmanage-professional-plus/frontend/plugin-src` | **~7%** | far below |
+
+**Goal:** bring all three to **parity with the backend (~70%)**, climbed
+incrementally across the remaining stabilization phases rather than in one
+unrealistic jump.  The first tests on an almost-untested app are
+high-yield (a handful of large Pages/Services move the number fast), so
+the ladder front-loads gains then tapers:
+
+| Milestone | OSS frontend | License-server FE | Pro+ components FE |
+|---|---|---|---|
+| **Now (2026-06)** | ~9% | ~23% | ~7% |
+| **Phase 13 (Enterprise GA)** — install the ratchet | ≥10% floor | ≥25% floor | ≥10% floor |
+| **Phase 15 (Stabilization)** | 30% | 40% | 30% |
+| **Phase 19 (Stabilization)** | 50% | 55% | 50% |
+| **Phase 22 (Stabilization & v4.0 GA)** | **70%** | **70%** | **70%** |
+
+**Mechanism (mirrors the backend `--cov-fail-under` ratchet):**
+
+- Enforce a floor with vitest `test.coverage.thresholds` (lines) in each
+  project's `vite.config.ts`, wired into the CI frontend job (which
+  already runs `npm run test:coverage` but enforces nothing today).  The
+  Pro+ project needs **two** threshold scopes — `src/**` (license server)
+  and `plugin-src/**` (Pro+ components) — since they climb on separate
+  tracks.
+- Each stabilization phase raises the threshold to that phase's milestone;
+  the floor only ever moves up.
+- **New code ships with tests** — the standing rule that actually stops
+  the drift: a new Page/Service/Component lands with a test that keeps the
+  project at-or-above its current floor.  This is the frontend equivalent
+  of the backend "no PR may lower coverage" gate and is what converts
+  "coverage declining" into "coverage can only hold or rise."
+
+> Note: CI currently generates `test:coverage` for the OSS frontend but
+> sets no threshold, and the Pro+ frontend's `test` script is bare
+> `vitest` (watch).  Phase 13 wires `vitest run --coverage` with a
+> threshold into CI for all three scopes as the activation step.
+
+### Phase Exit Gate (mandatory final item for EVERY phase)
+
+No phase is "done" — and no release ships from it — until ALL of the
+following pass.  This is the standing Definition of Done; every phase
+below carries it as its explicit final exit item, and every already-
+shipped phase (0–11) met it at its release tag.  (Phases 1–11 list it
+implicitly via their existing Exit Criteria + the shipped release;
+the explicit bullet is added to the in-progress and future phases.)
+
+- [ ] **All tests pass** — backend (`tests/` + `backend/tests/`), every
+      frontend (vitest), agent, Pro+ engine suites, and E2E (Playwright);
+      zero failures, zero unexpected skips.
+- [ ] **Linting is issue-free** — `make lint` clean across backend
+      (black, pylint, i18n validate + placeholder), frontend (eslint,
+      `tsc`), and the agent/Pro+ repos; zero warnings.
+- [ ] **No performance regressions** — load/perf benchmarks at or above
+      the prior phase's baseline (no statistically significant regression
+      in latency/throughput/memory).
+- [ ] **SonarQube/SonarCloud scans are issue-free** — 0 new bugs, 0
+      vulnerabilities, 0 code smells above threshold, security hotspots
+      reviewed, and the coverage ratchet (backend `--cov-fail-under` +
+      frontend `coverage.thresholds`) is green and not lowered.
 
 ### Release Versioning
 
@@ -2355,10 +2447,10 @@ tests pass against the built artifact.
 - [ ] Rollup compliance reporting (aggregate CIS/STIG scores across sites)
 - [ ] Rollup vulnerability reporting (aggregate CVE exposure across sites)
 - [ ] Rollup alerting (enterprise-wide alert rules that trigger on cross-site conditions)
-- [ ] Enterprise-wide update policy management (define policies centrally, push to sites)
-- [ ] Enterprise-wide firewall role management (define roles centrally, push to sites)
-- [ ] Command dispatch to subordinate servers (reboot, update, deploy, script execution)
-- [ ] Batch command dispatch (target hosts across multiple sites in a single operation)
+- [~] Enterprise-wide update policy management (define policies centrally, push to sites) — push + inbox + apply-worker framework landed (June 2026); `firewall_role` materialises locally, `update_profile` awaits an OSS update-profile target table (records a structured apply_error until then)
+- [x] Enterprise-wide firewall role management (define roles centrally, push to sites) — end-to-end June 2026: coordinator push worker → site inbox → `federation_policy_apply_service` materialises into local `firewall_role` + `firewall_role_open_port`
+- [x] Command dispatch to subordinate servers (reboot, update, deploy, script execution) — end-to-end June 2026: `federation_actuation_service.fanout_queued_commands` fans received-commands out to local agents (queued, never direct), results aggregate back via `route_proplus_command_result` → `command_result` sync packet upstream; wired into the `federation_site_engine` tick
+- [x] Batch command dispatch (target hosts across multiple sites in a single operation) — coordinator dispatch already targets multiple sites; each site fans out to its local hosts per the actuation path above
 - [ ] Conflict resolution for policy changes (coordinator wins, with audit trail)
 - [ ] Federation audit log (all cross-site operations logged centrally)
 - [ ] Site server version tracking (ensure all sites run compatible SysManage versions)
@@ -2513,22 +2605,57 @@ matching response types.  i18n keys for `sites.addSite`,
       Suspend / Resume / Remove buttons on the detail page (each
       visible only for states that permit the transition); remove
       guarded by a confirmation Dialog
-- [ ] Connection-health detail — last successful sync timestamp, sync
-      latency histogram, current backlog size in the site's offline
-      queue (read from the site server's sync-status endpoint)
+- [~] Connection-health detail — landed (June 2026) on SiteDetail: the
+      Connection card now polls `/sites/{id}/sync-status` every 15s and
+      shows last-sync (absolute + locale-aware relative), a health chip
+      (healthy / stale / overdue / never, derived from last-sync age vs
+      `sync_interval_seconds`), pending upstream-queue depth (when the site
+      reports it), and a manual Refresh.  *Remaining:* the sync-latency
+      **histogram** needs historical sync samples persisted server-side
+      (none stored today) — deferred until that backend metric exists.
 - [ ] Per-site action surface — push a policy now, dispatch a batch
       command to all hosts at this site, view this site's audit log,
       compare configuration to fleet defaults
 
+**Status (12.3 — cross-site Federated Hosts page):** ✅ Landed (June 2026).
+`frontend/src/Pages/FederationHosts.tsx` at `/federation/hosts` renders the
+coordinator's synced cross-site host directory: a paginated table
+(FQDN / IPv4 / OS / platform / status-chip / last-seen) driven by
+`/api/v1/federation/hosts` with URL-shareable AND-composed filters
+(`free_text`, `status`, `os_family`) plus a `?site_id=` scope chip.
+`federation.ts` gained `doSearchFederationHosts` / `doGetFederationHostDetail`
++ host-directory types.  A per-row "Details" dialog fetches
+`/hosts/{host_id}` and renders the summary plus a NAVIGATIONAL deep-link
+(`site_detail_url`) into the owning site's own UI — no synchronous proxy.
+This closes the previously-dead "See hosts at this site" link (SiteDetail
+now routes to `/federation/hosts?site_id=`), and the Sites grid header
+gained a "Hosts" button.  Same `{licensed:false}` Enterprise upsell as
+the rest of the surface.  i18n: `federationHosts.*` (27 keys) +
+`sites.hostsLink` seeded across all 14 locales.
+
 **Augmented existing pages (filter facets):**
-- [ ] ``Hosts`` page — new ``site`` facet in the existing tag-filter
-      panel; URL-shareable as ``?site_id=...`` (or multi-select).
-      Cross-site search continues to work; the facet just narrows it.
-- [ ] ``Updates`` page — same ``site`` facet so an operator can target
-      "patch all hosts at site-A on the v2.4 update profile"
-- [ ] ``Compliance`` page — same facet for cross-site compliance drill-down
-- [ ] ``Reports`` page — site selector becomes a multi-select on report
-      definitions; existing report types unchanged
+- [x] Cross-site host facet — delivered as the dedicated
+      ``/federation/hosts`` page above (URL-shareable ``?site_id=``),
+      rather than bolting onto the LOCAL ``Hosts`` page: on a coordinator
+      "hosts at a site" come from the synced ``federation_host_directory``,
+      not this server's own ``host`` table, so they're a distinct view.
+      The local Hosts page keeps showing only this server's own agents.
+- [x] ``Updates`` intent ("patch all hosts at site-A") — delivered the
+      federation-correct way via **command dispatch** (dispatch
+      ``apply_updates`` to a site, or to multi-selected hosts on the
+      Federated Hosts page) rather than a ``site`` facet on the LOCAL
+      Updates page.  The local Updates page shows only THIS server's own
+      hosts (no site dimension); federated patching is a dispatch op.
+- [x] ``Compliance`` cross-site drill-down — delivered as a
+      **Compliance & vulnerabilities rollup card on SiteDetail**
+      (`doGetFederationDashboardRollup` → per-site aggregate compliance
+      scores + CVE counts the site pushed up).  NOTE: there is no OSS
+      "Compliance page" to facet, and federated compliance is per-site
+      ROLLUP data (aggregate), not per-host — so the site-scoped rollup
+      card is the right home, not a facet on a local page.
+- [ ] ``Reports`` page — site selector / multi-select on report
+      definitions.  Deferred: federated reporting needs the rollup data
+      wired into the report generator (report types are local today).
 
 **Enterprise map (two flavors, same data):**
 - [x] **Geographic map** — Leaflet + OpenStreetMap tiles, sites pinned
@@ -2537,11 +2664,15 @@ matching response types.  i18n keys for `sites.addSite`,
       + deep-link into site detail.  Connection-line animation and
       density-scaled host clusters within each site come in a later
       slice once 12.1.D's per-site host-directory data is wired.
-- [ ] **Tile dashboard view** — sites as a grid of status cards, lines
-      to the coordinator at top, no geography.  Same color coding.
-      Faster to scan, no cognitive load of geographic memory, better
-      for screen-of-glass / war-room displays.
-- [x] View toggle in the same page — "Map view" / "Grid view"
+- [x] **Tile dashboard view** — landed (June 2026):
+      `frontend/src/Pages/SitesTiles.tsx` at `/sites/tiles`.  Coordinator
+      hub card at top (aggregate enrolled/pending/suspended/host counts) +
+      a status-coloured tile grid below (no geography), each tile click →
+      SiteDetail.  Built for screen-of-glass / war-room scanning; renders
+      at site granularity only.  "Dashboard" toggle added to the Sites
+      grid + SitesMap headers; the tiles page toggles back to Grid/Map.
+- [x] View toggle in the same page — "Map view" / "Grid view" /
+      "Dashboard" across the Sites grid, SitesMap, and SitesTiles headers
       buttons on the Sites page and SitesMap page header
 - [x] **Never** draw individual agents as nodes — both views
       currently render at the site granularity only (host-cluster
@@ -2554,9 +2685,16 @@ matching response types.  i18n keys for `sites.addSite`,
       (multi-select with current-assignment indicator), push-now
       action, deactivate action.  Per-policy version bumping on
       edit is handled engine-side (12.1.F).
-- [ ] Command dispatch — select hosts across sites (via Hosts-page
-      multi-select or saved query), dispatch commands.  Progress view
-      tracks per-site queueing + per-agent acknowledgement.
+- [x] Command dispatch — landed (June 2026):
+      `frontend/src/Components/FederationCommandDispatchDialog.tsx` +
+      `doDispatchFederationCommand` (POST `/federation/commands/dispatch`).
+      Two modes: **single-site** (SiteDetail's "Dispatch command" button —
+      command-type select with type-specific params, all-hosts-at-site or
+      specific IDs) and **cross-site multi-select** (checkbox-select hosts
+      on the Federated Hosts page → bulk "Dispatch command" → the dialog
+      fans out ONE command per distinct site).  The active-commands card
+      shows per-command FSM progress.  *Remaining (minor):* a richer
+      per-agent acknowledgement progress view.
 
 **Audit + observability:**
 - [x] Federation audit log viewer — paginated table at
@@ -2779,6 +2917,15 @@ registration, upgrade/downgrade idempotency, and ORM round-trip.
 
 #### 12.7 Host Geo-Location + Global Map
 
+**Status (12.7 — geo-location + map):** ✅ Landed (June 2026).  Agent
+reports public IP via heartbeat; `backend/services/geolocation_service.py`
+resolves it to country/subdivision/city/lat-lon (bundled MaxMind
+GeoLite2 with ipapi.co fallback), persisted on the `host` geo columns.
+World map UI shipped as `frontend/src/Pages/MapView.tsx` (host density)
++ `frontend/src/Pages/SitesMap.tsx` (federation sites).  Remaining
+polish (cluster drill-down depth, per-region host lists) tracked as
+follow-ups, not blockers.
+
 Every connected agent contributes a rough geographic location to the
 fleet view.  The federation frontend's geographic map (see 12.3) plots
 hosts (clustered) on a world map so an operator can see at-a-glance
@@ -2954,6 +3101,7 @@ rather than blocking.
 - Policy changes pushed from coordinator are applied at subordinate sites
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 #### 12.8 i18n/l10n debt repayment
 
@@ -3038,8 +3186,43 @@ cannot grow; this phase pays the residual down to zero.
      strings across 16 engines follow the same pattern
      incrementally.
 
-**Translation-service pipeline (the long-form-paragraph close-out
-in item 2 above):**
+**Local-model translation tooling — ✅ Landed (June 2026).**  Rather
+than a paid SaaS translator, the pipeline runs against a **local,
+OpenAI-compatible endpoint** (vLLM / Ollama / llama.cpp on the
+operator's GPU rig — a 3×RTX 5090 box runs 30–70B-class models).
+Translation tokens cost zero external API spend, and air-gapped /
+sovereignty-sensitive deployments never ship strings to a third party.
+Shipped this cycle:
+
+- [x] ``scripts/i18n_translate.py`` + ``make i18n-translate`` — fills
+      the ``[TODO]``-seeded frontend leaves via the local endpoint,
+      batched, idempotent (re-runs skip translated keys), and rejects
+      any translation that drops an interpolation token (left ``[TODO]``
+      and reported).  ``LANG=<code>`` scopes a single locale;
+      ``I18N_LLM_BASE_URL`` / ``I18N_LLM_MODEL`` select the backend.
+- [x] ``scripts/i18n_check_translations.py`` — deterministic,
+      network-free CI gates: ``--placeholders`` (interpolation-token
+      integrity, now part of ``make lint`` and ``ci.yml``) and
+      ``--completeness`` (no ``[TODO]`` remains; flip ``lint`` to
+      ``make i18n-check`` once a locale is fully translated).  Caught
+      and fixed a live regression — ``ja hosts.lastSeen`` had dropped
+      its ``{{minutes}}`` placeholder.
+- [x] ``scripts/i18n_backtranslate.py`` + ``make i18n-backtranslate`` —
+      local round-trip QA: samples translated strings, back-translates,
+      and flags semantic drift below a score threshold for native
+      review.  (Satisfies the "round-trip back-translation check" item
+      below, run locally rather than as a hard CI gate since the model
+      isn't present in CI.)
+- [x] ``CONTRIBUTING.md`` documents the full seed → translate →
+      validate → back-translate workflow.
+
+Remaining: run the translate pass on the rig to drain the 295×13
+``[TODO]`` frontend backlog, then extend the same local-endpoint tooling
+to the docs ``data-i18n`` corpus (item 2/5 above) and the agent ``.po``
+catalogs.
+
+**Translation-service pipeline (superseded by the local-model tooling
+above for cost/sovereignty; retained as the fallback option):**
 
 - [ ] Pick a translation-service partner.  Options:
       * **DeepL Pro API** — best machine-translation quality on
@@ -3064,9 +3247,12 @@ in item 2 above):**
       (typically es / de / fr / ja / zh_CN — the highest-traffic
       languages).  Pay-per-string via professional reviewers, or
       community contributors if an OSS contribution flow is set up.
-- [ ] Round-trip back-translation check as a CI gate — every locale
-      string back-translates to within N edit-distance of its
-      English source; flagged drift becomes a review item.
+- [x] Round-trip back-translation check — landed as
+      ``scripts/i18n_backtranslate.py`` (``make i18n-backtranslate``).
+      Runs locally rather than as a hard CI gate (the model isn't in
+      CI); flagged drift becomes a review item.  The deterministic
+      placeholder-integrity portion *is* a CI gate
+      (``i18n_check_translations.py --placeholders``).
 - [ ] Footer disclosure: "Machine-translated, native-reviewed for
       <list>.  Contributions welcome — see ``CONTRIBUTING.md``."
 
@@ -3135,9 +3321,10 @@ deliberately stopped at the docs body paragraphs.
 | Snap Store (``sysmanage-agent``, strict) | Any snapd-capable Linux | ✅ published; ❌ not consumed by engine |
 | Flatpak (``sysmanage.org/sysmanage.flatpakrepo``) | Any flatpak-capable Linux | ✅ published; ❌ not consumed by engine |
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
-| **winget / Microsoft Store** | Windows | ✅ submitted 2026-05-12; awaiting microsoft/winget-pkgs PR merge |
+| **winget** | Windows | ⚠️ submitted 2026-05-12; first PR NOT yet merged — stalled on winget-pkgs sandbox validation (PR #375773).  `komac update` automation inert until it lands.  See "winget first-submission close-out" |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Mac App Store** | macOS (sandboxed) | ❌ not published, not consumed |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (see Microsoft Store submission) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (see macOS App Store submission) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3229,11 +3416,12 @@ direct GitHub-release URLs cannot easily be mirrored).
       operator action.
 - [ ] In-app "Update Agent" button works on every distro family
       (currently silently no-ops on direct-.deb installs).
-- [x] winget + Homebrew tap publishing automated in build-and-
-      release.yml.  *(winget: first-time ``komac new`` submitted
-      2026-05-12 via /tmp/komac.sh; future releases auto-update
-      through ``komac update`` step; Homebrew tap auto-bumps
-      ``Formula/sysmanage-agent.rb`` on every release tag)*
+- [~] winget + Homebrew tap publishing automated in build-and-
+      release.yml.  *(Homebrew tap auto-bumps
+      ``Formula/sysmanage-agent.rb`` on every release tag — ✅ done.
+      winget: the ``komac update`` automation step EXISTS but is
+      gated behind a first-time manual submission that has NOT yet
+      merged — see "winget first-submission close-out" below.)*
 - [ ] Air-gapped Phase 11.1 can substitute private mirrors for any
       of the upstream channels (per-channel mirror URL config in
       agent registration).
@@ -3249,8 +3437,82 @@ direct GitHub-release URLs cannot easily be mirrored).
 deep on Ubuntu/Debian; finish the matrix for the other 8+ supported
 distro/OS combinations."  Estimated 1-2 weeks of focused work,
 mostly per-channel publish-pipeline plumbing rather than novel
-engineering.  Several entries (Mac App Store, Microsoft Store) may
-remain permanently ❌ due to sandboxing incompatibilities.
+engineering.
+
+##### winget first-submission close-out (BLOCKER — must land before automation)
+
+The `komac update` automation in `build-and-release.yml`
+(`winget-manifest` job) is real but **inert**: it can only bump an
+*already-published* package, and the first-ever `sysmanage.sysmanage-agent`
+manifest has not yet merged into `microsoft/winget-pkgs`.  The
+2026-05-12 `komac new` submission stalled on the winget-pkgs
+**sandboxed validation** run (PR #375773, "validation burn"
+2026-05-17): the validation sandbox has no internet, so the MSI's
+custom actions can't reach python.org, and any hard failure there
+fails validation.  `installer/windows/install.ps1`,
+`check-python.ps1`, and `create-service.ps1` were already softened to
+**soft-fail** when Python/network is absent (MSI still exits 0) so the
+MSI installs cleanly inside the sandbox.
+
+- [ ] Get a clean `microsoft/winget-pkgs` validation pass for
+      `sysmanage.sysmanage-agent` (x64 + arm64 MSIs) — iterate on the
+      manifest / MSI until `wingetbot` validation is green.
+- [ ] Land the first PR merge (manual TTY `komac new`); confirm
+      `winget install --id sysmanage.sysmanage-agent --silent` works
+      from a clean Windows host.
+- [ ] Flip the `winget-manifest` job from `dry_run` → `publish`
+      (workflow_dispatch input) and verify the next release tag
+      auto-bumps the manifest via `komac update`.
+- [ ] Only then mark the automation acceptance criterion above ✅.
+
+##### Microsoft Store submission (MSIX)
+
+Add an official **Microsoft Store** distribution channel.  The blocker
+is the same root-privilege conflict that scoped it out before: the
+agent needs admin rights for package + service management, which a
+default-sandboxed Store app can't hold.  The viable path is an **MSIX
+package with a fully-trusted / packaged-with-external-location identity**
+(or the `runFullTrust`/`allowElevation` restricted capabilities), or a
+split into a Store-sandboxed UI shell + an out-of-package privileged
+Windows service installed on first run.
+
+- [ ] Decide the identity model — MSIX `runFullTrust` restricted
+      capability vs. UI-shell-plus-privileged-service split.
+- [ ] Enroll / confirm the Partner Center publisher account + reserve
+      the `SysManage Agent` Store name.
+- [ ] Produce a signed MSIX (reuse the WiX `Manufacturer` /
+      `ProductName` identity already used for winget) and pass the
+      Store certification / WACK checks.
+- [ ] Manual first submission through Partner Center; document the
+      one-time steps, then automate version bumps in build-and-release.
+
+##### macOS App Store submission
+
+Add an official **Mac App Store** channel.  Same core conflict: MAS
+apps run in the App Sandbox, which is incompatible with the agent's
+need for root (package management, service control, privileged system
+queries).  The realistic path is splitting the agent into a
+**sandboxed MAS UI app + a separately-installed privileged helper**
+(`SMAppService` / launchd daemon) — the UI ships via MAS, the helper
+via the existing notarized pkg / Homebrew path — OR shipping only a
+read-only "status viewer" through MAS while the privileged agent stays
+on the current notarized-pkg channel.
+
+- [ ] Decide scope — full split (sandboxed UI + privileged launchd
+      helper) vs. MAS status-viewer-only companion.
+- [ ] Apple Developer Program org account + App Store Connect record;
+      reserve the bundle id + app name.
+- [ ] Sandbox-entitlement audit: enumerate every privileged operation
+      and route it through the helper / XPC, not the sandboxed app.
+- [ ] Notarize + pass App Review (App Sandbox + Hardened Runtime);
+      manual first submission, then automate subsequent uploads.
+
+**Note on the two app stores.** These were previously marked "likely
+permanent ❌" precisely because of the sandbox-vs-root conflict above;
+they are now in scope per product direction, but each carries real
+architectural work (a privileged-helper split) that dwarfs the
+publish-pipeline plumbing of the other channels — treat them as their
+own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 #### 12.10 Federation wire protocol
 
@@ -3725,6 +3987,10 @@ plan-builder + UI integration.
   `<Identification>` block (covered by the join-domain config
   field above), but standing up a new DC isn't covered.
 
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
 ---
 
 ## Phase 13: Enterprise GA (v3.0.0.0)
@@ -3762,14 +4028,296 @@ plan-builder + UI integration.
 
 - [ ] All planned features implemented
 - [ ] All tests passing (unit, integration, E2E)
+- [ ] **Backend coverage ratchet enforced** — `--cov-fail-under` gate in
+      CI/Makefile across both Python test trees (`tests/` + `backend/tests/`);
+      floor at the current measured number (≥70%)
+- [ ] **Frontend coverage ratchet installed** — vitest
+      `coverage.thresholds` wired into CI for all three scopes with floors
+      at today's measured values (OSS ≥10%, license-server ≥25%, Pro+
+      components ≥10%); see "Frontend Test Coverage"
 - [ ] SonarQube: 0 critical issues
 - [ ] Security audit complete
 - [ ] Performance benchmarks met
-- [ ] Documentation 100% complete
+- [ ] Documentation 100% complete — `sysmanage-docs` covers every GA
+      feature; no doc lag carried into GA
 - [ ] All 14 translations verified
 - [ ] Customer beta feedback addressed
 - [ ] Marketing materials ready
 - [ ] Support processes in place
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 14: Patch & Maintenance Lifecycle (Pro+ / Enterprise)
+
+**Target Release:** v3.1.0.0
+**Focus:** Close the patch-management depth gap vs. Landscape/Satellite — advisory-driven patching, change windows, OS release lifecycle, and FIPS posture. Mostly built on existing patch + compliance infrastructure, so a lighter "many small items" phase to balance the heavier ones that follow.
+
+**Market gap addressed:** Red Hat Satellite errata workflow; Canonical Landscape maintenance profiles + Ubuntu Pro FIPS / release management.
+
+#### 14.1 Errata / Advisory Management (Pro+)
+
+Build the advisory abstraction on top of the existing CVE + update tracking: ingest vendor advisories, map advisory↔CVE↔package, compute *applicable* advisories per host, and patch by advisory rather than raw package.
+
+- [ ] Advisory source registry (parallel to `cve_source_registry.py` / `cis_stig_source_registry.py`) — USN, RHSA/RHBA/RHEA, openSUSE-SU/SUSE-SU, Debian DSA, FreeBSD-SA
+- [ ] `AdvisoryRecord` + `HostApplicableAdvisory` schema + alembic migration; advisory↔CVE↔package join model
+- [ ] Per-host applicable-advisory computation (installed vs. advisory fixed version)
+- [ ] "Install by advisory" agent action (advisory → package set → existing update path)
+- [ ] Severity/type filter (Security / Bugfix / Enhancement) + advisory drawer in HostDetail
+- [ ] Fleet advisory dashboard: applicable security advisories across the fleet, by severity
+- [ ] i18n/l10n for all 14 languages
+
+**Estimated Size:** ~4,000 lines
+
+#### 14.2 Maintenance Windows (OSS + Pro+)
+
+First-class change windows so updates/commands only execute inside operator-defined windows.
+
+- [ ] `MaintenanceWindow` schema (cron recurrence + timezone + per-host/tag/site scope) + migration
+- [ ] Window-gating in the update/command dispatch path (queue, release at window open)
+- [ ] Blackout windows + emergency override with audit trail
+- [ ] Settings UI for window CRUD + assignment; HostDetail "next window" surface
+- [ ] i18n/l10n
+
+**Estimated Size:** ~1,500 lines
+
+#### 14.3 Fleet OS Release-Upgrade Orchestration + EOL Tracking (Pro+)
+
+- [ ] Orchestrated distro release upgrades (`do-release-upgrade`, dnf system-upgrade, zypper dup, freebsd-update) with pre-checks, staged rollout, rollback guidance
+- [ ] OS support-lifecycle / EOL registry per release; "approaching EOL" on hosts + fleet EOL report
+- [ ] Release-upgrade as a schedulable, maintenance-window-aware job
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+#### 14.4 FIPS Compliance Mode Management (Enterprise)
+
+Extends the existing Ubuntu Pro integration + `compliance_engine`.
+
+- [ ] Detect + report FIPS mode (enabled/disabled/kernel) per host
+- [ ] Enable/disable FIPS via Ubuntu Pro (`pro enable fips`) / RHEL (`fips-mode-setup`) where licensed
+- [ ] FIPS posture column in the compliance dashboard + per-host status
+- [ ] i18n/l10n
+
+**Estimated Size:** ~1,500 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 15: Stabilization
+
+**Target Release:** v3.1.x
+**Focus:** Integration-test the advisory/window/release-upgrade paths; verify license gating on the new surfaces; i18n audit; docs.
+
+### Exit Criteria
+
+- [ ] Advisory computation validated against real USN/RHSA data per distro family
+- [ ] Maintenance-window gating verified end-to-end (queue → window open → execute)
+- [ ] All new endpoints return 402 cleanly when the gating engine is unlicensed
+- [ ] Docs + 14-language i18n complete for Phase 14 surfaces
+- [ ] **Coverage push (+5% backend; frontend ladder milestone):** backend
+      ≥ prior floor +5%; frontend floors raised to **OSS 30% /
+      license-server 40% / Pro+ components 30%** and the ratchet thresholds
+      bumped to match (see "Frontend Test Coverage")
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 16: Content Lifecycle Management (Enterprise)
+
+**Target Release:** v3.2.0.0
+**Focus:** The single largest market-parity gap — Satellite-style versioned, filtered, environment-gated content. Heavy enough to anchor its own phase.
+
+**Market gap addressed:** Red Hat Satellite Content Views + Lifecycle Environments + content promotion.
+
+#### 16.1 content_lifecycle_engine (Enterprise)
+
+Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate: turn flat mirrors into versioned, promotable content.
+
+- [ ] Lifecycle Environment model (ordered path, e.g. Library → Dev → Test → Prod) + schema/migration
+- [ ] Content View = named, filtered, versioned selection of repos/packages; publish creates an immutable version
+- [ ] Content View *filters* (package allow/deny, advisory cut-off date, "security only", by-date)
+- [ ] Promotion: publish a CV version, promote env-to-env with gating + audit + rollback to a prior version
+- [ ] Per-environment repo URLs the agent repoint targets (an env is a content snapshot served at a stable URL)
+- [ ] Composite Content Views (compose multiple CVs)
+- [ ] Integration with the air-gap collector (a CV version is what gets burned to media) and federation (promote centrally, sync to sites)
+- [ ] Frontend: Content Views page (create/filter/publish/promote/diff versions), Environments lane view
+- [ ] i18n/l10n
+
+**Estimated Size:** ~9,000 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)
+
+**Target Release:** v3.3.0.0
+**Focus:** Extend content management to snaps + container images, and add immutable/image-based host support.
+
+**Market gap addressed:** Landscape snap store proxy; Satellite container-image content views + image-mode (bootc/OSTree) hosts.
+
+#### 17.1 Snap Store Proxy / Offline Snap Content (Enterprise)
+
+- [ ] Snap content capture into the mirror/air-gap pipeline (snap proxy / offline assertions + blobs)
+- [ ] Channel-aware snap management (track/refresh by channel) beyond current detection
+- [ ] Serve snaps to repointed agents (snap store proxy URL), incl. air-gapped
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines
+
+#### 17.2 Container Image Content Lifecycle (Enterprise)
+
+- [ ] Container image registry/proxy integrated with Content Views (image content view, tag/digest pinning)
+- [ ] Promote image content through Lifecycle Environments alongside packages
+- [ ] Air-gap: include image content in collection media
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines
+
+#### 17.3 Image-Mode / bootc / OSTree Host Management (Enterprise)
+
+- [ ] Detect + manage image-based hosts (rpm-ostree / bootc): deployed image digest, pending/rolled-back deployments
+- [ ] Stage/apply image updates + rollback as first-class actions (distinct from package updates)
+- [ ] Surface image-mode status in HostDetail; gate the package-update UI off for image-mode hosts
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 18: Provisioning & Discovery (Enterprise)
+
+**Target Release:** v3.4.0.0
+**Focus:** Net-new host provisioning (bare-metal + cloud) — the other major Satellite gap. Today SysManage only provisions *child* hosts on already-managed hosts. Anchors its own phase.
+
+**Market gap addressed:** Red Hat Satellite provisioning, host discovery, compute resources.
+
+#### 18.1 provisioning_engine (Enterprise)
+
+- [ ] Bare-metal provisioning: PXE/iPXE + kickstart/preseed/AutoYaST/cloud-init template generation
+- [ ] Host discovery (PXE-boot unprovisioned hardware → discovered-hosts inventory → provision)
+- [ ] Compute resources: provision VMs on external hypervisors/clouds (remote libvirt, VMware, Proxmox, EC2/Azure/GCE) via a pluggable provider model
+- [ ] Provisioning, partition, and finish templates (parameterized, versioned)
+- [ ] Bootdisk / ISO-based provisioning for networks without PXE
+- [ ] Auto-enroll the provisioned host into SysManage (+ optional site / access-group assignment) on first boot
+- [ ] Frontend: provisioning templates, compute resources, discovered hosts, "provision host" wizard
+- [ ] i18n/l10n
+
+**Estimated Size:** ~10,000 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 19: Stabilization
+
+**Target Release:** v3.4.x
+**Focus:** Harden content lifecycle + provisioning across distros/providers; air-gap + federation interplay; performance on large content sets.
+
+### Exit Criteria
+
+- [ ] Content View publish/promote validated on apt + dnf + snap + container content
+- [ ] Provisioning validated on ≥1 bare-metal path + ≥2 compute providers
+- [ ] Image-mode update/rollback validated on bootc + rpm-ostree
+- [ ] Docs + 14-language i18n complete
+- [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
+      floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
+      and the ratchet thresholds bumped to match
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 20: Configuration Management & Drift (Enterprise)
+
+**Target Release:** v3.5.0.0
+**Focus:** Move from ad-hoc script execution to desired-state config + drift detection.
+
+**Market gap addressed:** Satellite Ansible/Puppet config management; Insights configuration drift.
+
+#### 20.1 config_management_engine (Enterprise)
+
+- [ ] Desired-state config-as-code: Ansible role/playbook execution at scale (job templates; inventories from SysManage hosts/tags/sites) with results + idempotency reporting
+- [ ] Config profiles assignable per host/tag/site, enforced on a schedule
+- [ ] Remediation playbooks (apply to bring a host into compliance)
+- [ ] (Optional) Puppet/Salt adapters behind the same profile abstraction
+- [ ] i18n/l10n
+
+**Estimated Size:** ~6,000 lines
+
+#### 20.2 Configuration Drift Analysis (Enterprise)
+
+- [ ] Baseline capture (per profile / per "golden host") + scheduled drift comparison
+- [ ] Drift findings (what changed, since when) + drift dashboard + alert rules (via `alerting_engine`)
+- [ ] One-click remediate-to-baseline (ties into 20.1)
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 21: Proactive Operations & Advisor (Enterprise)
+
+**Target Release:** v3.6.0.0
+**Focus:** Insights-style proactive recommendations + malware detection — from reactive reporting to prescriptive guidance.
+
+**Market gap addressed:** Red Hat Insights advisor / recommendations + malware detection.
+
+#### 21.1 advisor_engine (Enterprise)
+
+- [ ] Rule-based recommendation framework (security / performance / availability / stability lenses) over collected host facts + CVE + compliance + config state
+- [ ] Per-host + fleet recommendation feed with risk scoring (impact × likelihood)
+- [ ] Auto-generated remediation (script or Ansible playbook from 20.1) per recommendation, gated behind operator approval + maintenance windows
+- [ ] Curated, versioned rule packs (shipped + operator-authored), offline-updatable for air-gap
+- [ ] Recommendations dashboard + per-host advisor tab
+- [ ] i18n/l10n
+
+**Estimated Size:** ~5,000 lines
+
+#### 21.2 Malware Detection (Enterprise)
+
+- [ ] Signature/YARA-based malware scan dispatched to agents (offline-updatable signature feed for air-gap)
+- [ ] Findings surface + alert + quarantine/remediation hook
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+### Exit Criteria
+
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 22: Stabilization & v4.0 GA
+
+**Target Release:** **v4.0.0.0**
+**Focus:** Full market-parity GA — content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
+
+### Exit Criteria
+
+- [ ] All Phase 14–21 engines license-gated + 402-clean when unlicensed
+- [ ] Advisor recommendations validated against a known-issue corpus per distro
+- [ ] End-to-end: provision → enroll → content-view assign → config profile → advisor remediation, on one host, across all supported distros
+- [ ] 14-language i18n + docs complete; performance + security targets met
+- [ ] **Coverage parity reached:** all three frontends at **≥70% lines**
+      (OSS / license-server / Pro+ components), matching the backend; the
+      ratchet thresholds hold the parity line going forward
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
 
@@ -3791,6 +4339,15 @@ plan-builder + UI integration.
 | 11 | v2.3.0.0 | Air-Gapped Support | Dual-server architecture, optical media transfer, offline CVE |
 | 12 | v2.4.0.0 | Multi-Site Federation | Coordinator + site servers, rollup reporting, command dispatch |
 | 13 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
+| 14 | v3.1.0.0 | Patch & Maintenance Lifecycle | Errata/advisory mgmt, maintenance windows, OS release-upgrade + EOL, FIPS mode |
+| 15 | v3.1.x | Stabilization | Advisory/window/release-upgrade integration testing |
+| 16 | v3.2.0.0 | Content Lifecycle Management | Content Views + Lifecycle Environments + gated promotion |
+| 17 | v3.3.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
+| 18 | v3.4.0.0 | Provisioning & Discovery | PXE/kickstart bare-metal + cloud compute provisioning, host discovery |
+| 19 | v3.4.x | Stabilization | Content lifecycle + provisioning hardening |
+| 20 | v3.5.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation |
+| 21 | v3.6.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection |
+| 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
 
 ---
 
@@ -3963,7 +4520,7 @@ dependency the postinst needs, ready to mount on an air-gapped target.
 
 ---
 
-*Document Version: 1.1*
-*Last Updated: February 2026*
+*Document Version: 1.2*
+*Last Updated: June 2026*
 *Current Product Version: v1.1.0.0*
 *Based on: docs/planning/FEATURES-TODO.md, docs/planning/FEATURE-TIERING-ANALYSIS.md, docs/planning/VMM-VMD.md, docs/planning/BHYVE.md, docs/planning/KVM-QEMU.md*

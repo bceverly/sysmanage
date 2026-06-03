@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 
@@ -268,9 +269,14 @@ const SitesMap: React.FC = () => {
               )}
             </Typography>
           </Box>
-          <Button variant="outlined" onClick={() => navigate("/sites")}>
-            {t("sitesMap.gridView", "Grid view")}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button variant="outlined" onClick={() => navigate("/sites")}>
+              {t("sitesMap.gridView", "Grid view")}
+            </Button>
+            <Button variant="outlined" onClick={() => navigate("/sites/tiles")}>
+              {t("sitesMap.tilesView", "Dashboard")}
+            </Button>
+          </Stack>
         </Box>
         {state.licensed === false && (
           <Alert severity="info" sx={{ mb: 1 }}>

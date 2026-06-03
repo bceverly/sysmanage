@@ -2702,7 +2702,23 @@
       "activeCommandsEmpty": "No active commands.",
       "activeCommandsLoading": "Loading…",
       "commandAttempts": "{{n}} push attempts",
-      "commandDispatchedAt": "Dispatched {{when}}"
+      "commandDispatchedAt": "Dispatched {{when}}",
+      "dispatchCommand": "Dispatch command",
+      "backlogDepth": "Pending upstream queue",
+      "backlogUnknown": "—",
+      "refresh": "Refresh",
+      "syncHealthy": "Healthy",
+      "syncNever": "Never synced",
+      "syncOverdue": "Overdue",
+      "syncStale": "Stale",
+      "rollupCompliance": "Compliance",
+      "rollupEmpty": "No compliance or vulnerability data synced from this site yet.",
+      "rollupTitle": "Compliance & vulnerabilities",
+      "rollupVulnerabilities": "Vulnerabilities ({{hosts}} hosts affected)",
+      "vulnCritical": "{{n}} critical",
+      "vulnHigh": "{{n}} high",
+      "vulnLow": "{{n}} low",
+      "vulnMedium": "{{n}} medium"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -2729,14 +2745,17 @@
     "mapView": "Map view",
     "policiesLink": "Policies",
     "subtitle": "Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "Federation Sites"
+    "title": "Federation Sites",
+    "hostsLink": "Hosts",
+    "tilesView": "Dashboard"
   },
   "sitesMap": {
     "errorLoad": "Failed to load federation sites.",
     "gridView": "Grid view",
     "openSite": "Open site",
     "subtitle": "Geographic distribution of subordinate site servers.",
-    "title": "Federation Sites Map"
+    "title": "Federation Sites Map",
+    "tilesView": "Dashboard"
   },
   "airgapCollections": {
     "title": "Air-Gap Collection Runs",
@@ -2916,5 +2935,93 @@
       "required": "Name and public key are both required.",
       "title": "Trusted Collector Keys"
     }
+  },
+  "federationHosts": {
+    "actions": {
+      "detail": "Details",
+      "openSite": "Site"
+    },
+    "columns": {
+      "fqdn": "Host",
+      "ipv4": "IPv4",
+      "lastSeen": "Last seen",
+      "os": "OS",
+      "platform": "Platform",
+      "status": "Status"
+    },
+    "detail": {
+      "close": "Close",
+      "ipv6": "IPv6",
+      "noLiveLink": "Live detail link unavailable (owning site has no URL).",
+      "notFound": "This host is no longer in the directory.",
+      "site": "Owning site",
+      "theSite": "the site",
+      "title": "Host detail",
+      "viewLive": "View live detail on {{site}} →"
+    },
+    "empty": "No hosts have been synced from any site yet.",
+    "emptyFiltered": "No hosts match the current filters.",
+    "errorLoad": "Failed to load cross-site hosts.",
+    "filters": {
+      "apply": "Apply",
+      "clear": "Clear",
+      "osFamily": "OS family",
+      "search": "Search (name / IP)",
+      "status": "Status"
+    },
+    "scopedToSite": "Scoped to one site",
+    "subtitle": "Every host across all enrolled sites, from the coordinator's synced directory.",
+    "title": "Cross-Site Hosts",
+    "bulk": {
+      "clear": "Clear",
+      "dispatch": "Dispatch command",
+      "selectAll": "Select all on this page",
+      "selected": "{{n}} hosts selected"
+    }
+  },
+  "federationDispatch": {
+    "cancel": "Cancel",
+    "commandType": "Command",
+    "dispatch": "Dispatch",
+    "dispatching": "Dispatching…",
+    "errors": {
+      "failed": "Failed to dispatch command.",
+      "packagesRequired": "Enter at least one package name.",
+      "scriptRequired": "Enter the script to run.",
+      "unlicensed": "Federation requires an Enterprise license.",
+      "partial": "{{failed}} of {{total}} site dispatches failed."
+    },
+    "hostIds": "Host IDs",
+    "hostIdsHint": "Comma-separated host IDs (from the Hosts page)",
+    "packages": "Package names",
+    "packagesOptional": "Package names (optional — blank = all updates)",
+    "script": "Script",
+    "subtitle": "Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
+    "targetAll": "All hosts at this site",
+    "targetSpecific": "Specific hosts (by ID)",
+    "thisSite": "this site",
+    "title": "Dispatch command",
+    "types": {
+      "applyUpdates": "Apply updates",
+      "deployPackages": "Install packages",
+      "reboot": "Reboot",
+      "runScript": "Run script"
+    },
+    "subtitleMulti": "Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+  },
+  "sitesTiles": {
+    "coordinator": "Coordinator",
+    "coordinatorThisServer": "This server",
+    "countEnrolled": "{{n}} enrolled",
+    "countHosts": "{{n}} hosts",
+    "countPending": "{{n}} pending",
+    "countSuspended": "{{n}} suspended",
+    "empty": "No sites enrolled yet.",
+    "errorLoad": "Failed to load sites.",
+    "gridView": "Grid view",
+    "hostsLabel": "{{n}} hosts",
+    "lastSync": "Synced {{when}}",
+    "mapView": "Map view",
+    "title": "Federation Dashboard"
   }
 }

@@ -884,7 +884,7 @@
     "ipv6": "IPv6アドレス",
     "justNow": "たった今",
     "lastCheckin": "最終チェックイン",
-    "lastSeen": "最終確認",
+    "lastSeen": "{{minutes}}分前に最終確認",
     "minutesAgo": "{{minutes}}分前",
     "never": "未確認",
     "noEligibleHostsForAntivirus": "適格なホストが選択されていません。ウイルス対策のデプロイにはホストがアクティブかつ特権モードである必要があります。",
@@ -2702,7 +2702,23 @@
       "activeCommandsEmpty": "[TODO] No active commands.",
       "activeCommandsLoading": "[TODO] Loading…",
       "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}"
+      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
+      "dispatchCommand": "[TODO] Dispatch command",
+      "backlogDepth": "[TODO] Pending upstream queue",
+      "backlogUnknown": "[TODO] —",
+      "refresh": "[TODO] Refresh",
+      "syncHealthy": "[TODO] Healthy",
+      "syncNever": "[TODO] Never synced",
+      "syncOverdue": "[TODO] Overdue",
+      "syncStale": "[TODO] Stale",
+      "rollupCompliance": "[TODO] Compliance",
+      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
+      "rollupTitle": "[TODO] Compliance & vulnerabilities",
+      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
+      "vulnCritical": "[TODO] {{n}} critical",
+      "vulnHigh": "[TODO] {{n}} high",
+      "vulnLow": "[TODO] {{n}} low",
+      "vulnMedium": "[TODO] {{n}} medium"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -2729,14 +2745,17 @@
     "mapView": "[TODO] Map view",
     "policiesLink": "[TODO] Policies",
     "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites"
+    "title": "[TODO] Federation Sites",
+    "hostsLink": "[TODO] Hosts",
+    "tilesView": "[TODO] Dashboard"
   },
   "sitesMap": {
     "errorLoad": "[TODO] Failed to load federation sites.",
     "gridView": "[TODO] Grid view",
     "openSite": "[TODO] Open site",
     "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map"
+    "title": "[TODO] Federation Sites Map",
+    "tilesView": "[TODO] Dashboard"
   },
   "airgapBundles": {
     "buildAgent": "[TODO] Build Agent Bundle",
@@ -2916,5 +2935,93 @@
       "required": "[TODO] Name and public key are both required.",
       "title": "[TODO] Trusted Collector Keys"
     }
+  },
+  "federationHosts": {
+    "actions": {
+      "detail": "[TODO] Details",
+      "openSite": "[TODO] Site"
+    },
+    "columns": {
+      "fqdn": "[TODO] Host",
+      "ipv4": "[TODO] IPv4",
+      "lastSeen": "[TODO] Last seen",
+      "os": "[TODO] OS",
+      "platform": "[TODO] Platform",
+      "status": "[TODO] Status"
+    },
+    "detail": {
+      "close": "[TODO] Close",
+      "ipv6": "[TODO] IPv6",
+      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
+      "notFound": "[TODO] This host is no longer in the directory.",
+      "site": "[TODO] Owning site",
+      "theSite": "[TODO] the site",
+      "title": "[TODO] Host detail",
+      "viewLive": "[TODO] View live detail on {{site}} →"
+    },
+    "empty": "[TODO] No hosts have been synced from any site yet.",
+    "emptyFiltered": "[TODO] No hosts match the current filters.",
+    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "filters": {
+      "apply": "[TODO] Apply",
+      "clear": "[TODO] Clear",
+      "osFamily": "[TODO] OS family",
+      "search": "[TODO] Search (name / IP)",
+      "status": "[TODO] Status"
+    },
+    "scopedToSite": "[TODO] Scoped to one site",
+    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
+    "title": "[TODO] Cross-Site Hosts",
+    "bulk": {
+      "clear": "[TODO] Clear",
+      "dispatch": "[TODO] Dispatch command",
+      "selectAll": "[TODO] Select all on this page",
+      "selected": "[TODO] {{n}} hosts selected"
+    }
+  },
+  "federationDispatch": {
+    "cancel": "[TODO] Cancel",
+    "commandType": "[TODO] Command",
+    "dispatch": "[TODO] Dispatch",
+    "dispatching": "[TODO] Dispatching…",
+    "errors": {
+      "failed": "[TODO] Failed to dispatch command.",
+      "packagesRequired": "[TODO] Enter at least one package name.",
+      "scriptRequired": "[TODO] Enter the script to run.",
+      "unlicensed": "[TODO] Federation requires an Enterprise license.",
+      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+    },
+    "hostIds": "[TODO] Host IDs",
+    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
+    "packages": "[TODO] Package names",
+    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
+    "script": "[TODO] Script",
+    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
+    "targetAll": "[TODO] All hosts at this site",
+    "targetSpecific": "[TODO] Specific hosts (by ID)",
+    "thisSite": "[TODO] this site",
+    "title": "[TODO] Dispatch command",
+    "types": {
+      "applyUpdates": "[TODO] Apply updates",
+      "deployPackages": "[TODO] Install packages",
+      "reboot": "[TODO] Reboot",
+      "runScript": "[TODO] Run script"
+    },
+    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+  },
+  "sitesTiles": {
+    "coordinator": "[TODO] Coordinator",
+    "coordinatorThisServer": "[TODO] This server",
+    "countEnrolled": "[TODO] {{n}} enrolled",
+    "countHosts": "[TODO] {{n}} hosts",
+    "countPending": "[TODO] {{n}} pending",
+    "countSuspended": "[TODO] {{n}} suspended",
+    "empty": "[TODO] No sites enrolled yet.",
+    "errorLoad": "[TODO] Failed to load sites.",
+    "gridView": "[TODO] Grid view",
+    "hostsLabel": "[TODO] {{n}} hosts",
+    "lastSync": "[TODO] Synced {{when}}",
+    "mapView": "[TODO] Map view",
+    "title": "[TODO] Federation Dashboard"
   }
 }

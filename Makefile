@@ -806,7 +806,7 @@ lint-version-fix:
 	@$(PYTHON) scripts/check_version_drift.py --fix
 
 # Combined linting
-lint: lint-python lint-typescript i18n-validate lint-version
+lint: lint-python lint-typescript i18n-validate i18n-placeholders lint-version
 	@echo "[OK] All linting completed successfully!"
 
 # i18n: extract user-visible t('key', 'fallback') calls and verify every
@@ -825,6 +825,42 @@ i18n-seed: $(VENV_ACTIVATE)
 
 i18n-extract: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/i18n_validate.py --extract
+
+# Deterministic, network-free placeholder-integrity gate.  Every
+# translated value must carry the SAME interpolation tokens ({{var}},
+# {var}, %s, %(x)s, <tags>) as its English source.  Untranslated
+# ``[TODO]`` values still carry the source tokens, so this passes today
+# and is part of the default ``lint`` target — it catches a machine
+# translator mangling a placeholder, which would be a runtime bug.
+i18n-placeholders: $(VENV_ACTIVATE)
+	@echo "=== i18n placeholder integrity ==="
+	@$(PYTHON) scripts/i18n_check_translations.py --placeholders
+	@echo "[OK] i18n placeholder integrity verified"
+
+# Full translation-completeness gate: fails while any ``[TODO]`` string
+# remains.  NOT in ``lint`` yet (295 strings/locale still to translate).
+# Once ``make i18n-translate`` has populated the locales on the local
+# model rig, switch the ``lint`` line above from ``i18n-placeholders`` to
+# ``i18n-check`` to make untranslated strings a hard CI failure.
+i18n-check: $(VENV_ACTIVATE)
+	@echo "=== i18n completeness + placeholder check ==="
+	@$(PYTHON) scripts/i18n_check_translations.py
+	@echo "[OK] i18n translations complete and consistent"
+
+# Machine-translate the [TODO]-seeded strings via a LOCAL OpenAI-compatible
+# endpoint (vLLM/Ollama/llama.cpp).  Runs on the operator's GPU rig, not
+# in CI; zero external API tokens.  Override the endpoint with
+# I18N_LLM_BASE_URL / I18N_LLM_MODEL.  LANG=all (default) or LANG=<code>.
+LANG ?= all
+i18n-translate: $(VENV_ACTIVATE)
+	@echo "=== i18n machine translation (local model) ==="
+	@$(PYTHON) scripts/i18n_translate.py --lang $(LANG)
+	@$(MAKE) i18n-placeholders
+
+# Local round-trip QA: sample translated strings, back-translate, and
+# flag semantic drift for human review.  Local model only; not a CI gate.
+i18n-backtranslate: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_backtranslate.py --lang $(LANG) --sample 25
 
 # Comprehensive security analysis (default)
 security: security-full
@@ -1027,10 +1063,19 @@ else
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
+# Backend tests run as TWO separate pytest processes accumulating into
+# one coverage dataset via --cov-append: tests/ (canonical) then
+# backend/tests/ (a second tree CI used to skip — proplus/federation/
+# management-API suites).  They CANNOT share one -n auto run (cross-tree
+# xdist worker crashes).  The --cov-fail-under ratchet on the final run
+# gates the COMBINED total so coverage can't silently decline; bump it
+# when the real number rises.
 ifeq ($(OS),Windows_NT)
-	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
 else
-	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
+	@OTEL_ENABLED=false $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
 endif
 	@echo "[OK] Python tests completed"
 

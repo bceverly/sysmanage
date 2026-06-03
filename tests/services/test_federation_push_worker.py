@@ -17,6 +17,7 @@ Skipped automatically when the engine ``.so`` isn't on disk.
 import importlib.util
 import logging
 import sys
+import sysconfig
 import uuid
 from pathlib import Path
 from unittest.mock import AsyncMock
@@ -50,7 +51,13 @@ def _candidate_so_paths():
             for version in sorted(version_dir.iterdir(), reverse=True):
                 py_dir = version / "linux" / "x86_64" / py
                 if py_dir.exists():
-                    candidates.extend(sorted(py_dir.glob("*.so")))
+                    # ONLY match the .so built for THIS interpreter's ABI
+                    # (e.g. ``.cpython-314-...so``).  A bare ``*.so`` glob
+                    # would sort a stale ``cpython-313`` build ahead of the
+                    # correct one and load it, segfaulting on the
+                    # compile-time/runtime Python version mismatch.
+                    ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
+                    candidates.extend(sorted(py_dir.glob(f"*{ext}")))
     candidates.append(
         Path("/var/lib/sysmanage/modules") / f"federation_controller_engine_{py}.so"
     )

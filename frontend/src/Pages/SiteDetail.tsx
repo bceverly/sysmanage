@@ -6,10 +6,8 @@
  *   - Metadata header (name, location, URL, status chip, enrolled-at)
  *   - Sync status card (last sync timestamp + status indicator)
  *   - Lifecycle action buttons (Suspend / Resume / Remove)
- *   - "See hosts" link → /hosts?site_id=<id>  (pre-filtering the
- *     Hosts page is the planned 12.3 Hosts-page facet; until that
- *     lands the link still routes correctly so the URL stays
- *     stable as new facets ship)
+ *   - "See hosts" link → /federation/hosts?site_id=<id>  (the
+ *     cross-site federated Hosts page, scoped to this site)
  *
  * On OSS / Community / unlicensed Enterprise installs the backend
  * returns ``{licensed: false}`` and this page renders the Enterprise
@@ -39,14 +37,19 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import {
+  doGetFederationDashboardRollup,
   doGetFederationSite,
+  doGetFederationSiteSyncStatus,
   doListFederationCommands,
   doRemoveFederationSite,
   doResumeFederationSite,
   doSuspendFederationSite,
+  FederationDashboardRollupResponse,
   FederationDispatchedCommand,
   FederationSiteDetail,
+  FederationSiteSyncStatus,
 } from "../Services/federation";
+import FederationCommandDispatchDialog from "../Components/FederationCommandDispatchDialog";
 
 function statusChipColor(
   status: FederationSiteDetail["status"],
@@ -70,6 +73,51 @@ function formatAbsolute(iso: string | null | undefined): string {
   return date.toLocaleString();
 }
 
+/** Locale-aware "N minutes ago" via the browser's Intl, no hardcoded units. */
+function formatRelative(
+  iso: string | null | undefined,
+  locale: string,
+): string | null {
+  if (!iso) return null;
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return null;
+  const diffSec = Math.round((then - Date.now()) / 1000);
+  const abs = Math.abs(diffSec);
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  if (abs < 60) return rtf.format(Math.round(diffSec), "second");
+  if (abs < 3600) return rtf.format(Math.round(diffSec / 60), "minute");
+  if (abs < 86400) return rtf.format(Math.round(diffSec / 3600), "hour");
+  return rtf.format(Math.round(diffSec / 86400), "day");
+}
+
+type SyncHealth = "healthy" | "stale" | "overdue" | "unknown";
+
+/** Classify connection health by comparing last-sync age to the expected
+ * interval: within 2× = healthy, 2–4× = stale, beyond (or never) = overdue. */
+function syncHealth(
+  lastSyncIso: string | null | undefined,
+  intervalSeconds: number | undefined,
+): SyncHealth {
+  if (!lastSyncIso) return "unknown";
+  const then = new Date(lastSyncIso).getTime();
+  if (Number.isNaN(then)) return "unknown";
+  const ageSec = (Date.now() - then) / 1000;
+  const interval = intervalSeconds && intervalSeconds > 0 ? intervalSeconds : 300;
+  if (ageSec <= interval * 2) return "healthy";
+  if (ageSec <= interval * 4) return "stale";
+  return "overdue";
+}
+
+const SYNC_HEALTH_COLOR: Record<
+  SyncHealth,
+  "success" | "warning" | "error" | "default"
+> = {
+  healthy: "success",
+  stale: "warning",
+  overdue: "error",
+  unknown: "default",
+};
+
 interface SiteDetailState {
   loading: boolean;
   licensed: boolean | null;
@@ -87,12 +135,13 @@ const initialState: SiteDetailState = {
 };
 
 const SiteDetail: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { siteId } = useParams<{ siteId: string }>();
 
   const [state, setState] = useState<SiteDetailState>(initialState);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+  const [dispatchOpen, setDispatchOpen] = useState(false);
   const [actionInFlight, setActionInFlight] = useState(false);
   // Phase 12.10 visibility: open dispatched commands targeting this
   // site.  Loaded alongside the site detail; refreshed on resume +
@@ -101,6 +150,36 @@ const SiteDetail: React.FC = () => {
   const [commands, setCommands] = useState<FederationDispatchedCommand[] | null>(
     null,
   );
+  // Live connection-health metrics from the dedicated sync-status endpoint
+  // (fresher than the site-detail snapshot; polled).
+  const [syncStatus, setSyncStatus] = useState<FederationSiteSyncStatus | null>(
+    null,
+  );
+
+  const refreshSyncStatus = useCallback(async () => {
+    if (!siteId) return;
+    try {
+      const resp = await doGetFederationSiteSyncStatus(siteId);
+      setSyncStatus(resp.licensed ? (resp.status ?? null) : null);
+    } catch {
+      // Non-fatal; the card falls back to the site-detail snapshot.
+    }
+  }, [siteId]);
+
+  // Latest compliance + vulnerability rollup the site has pushed up.
+  const [rollup, setRollup] = useState<FederationDashboardRollupResponse | null>(
+    null,
+  );
+
+  const refreshRollup = useCallback(async () => {
+    if (!siteId) return;
+    try {
+      const resp = await doGetFederationDashboardRollup(siteId);
+      setRollup(resp.licensed ? resp : null);
+    } catch {
+      setRollup(null);
+    }
+  }, [siteId]);
 
   const refreshCommands = useCallback(async () => {
     if (!siteId) return;
@@ -186,10 +265,16 @@ const SiteDetail: React.FC = () => {
         });
       });
     refreshCommands();
+    refreshSyncStatus();
+    refreshRollup();
+    // Poll connection health so an operator watching the page sees the
+    // site go stale/overdue without a manual reload.
+    const poll = setInterval(refreshSyncStatus, 15000);
     return () => {
       cancelled = true;
+      clearInterval(poll);
     };
-  }, [siteId, t, refreshCommands]);
+  }, [siteId, t, refreshCommands, refreshSyncStatus, refreshRollup]);
 
   const handleSuspend = async () => {
     if (!siteId || actionInFlight) return;
@@ -371,44 +456,225 @@ const SiteDetail: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* Sync status card -------------------------------------------- */}
+        {/* Connection-health card -------------------------------------- */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card variant="outlined">
             <CardContent>
+              {(() => {
+                // Prefer the live sync-status poll; fall back to the
+                // site-detail snapshot when the endpoint hasn't answered yet.
+                const lastSyncAt =
+                  syncStatus?.last_sync_at ?? site.last_sync_at;
+                const lastSyncStatus =
+                  syncStatus?.last_sync_status ?? site.last_sync_status;
+                const health = syncHealth(
+                  lastSyncAt,
+                  site.sync_interval_seconds,
+                );
+                const relative = formatRelative(lastSyncAt, i18n.language);
+                const healthLabel = {
+                  healthy: t("sites.detail.syncHealthy", "Healthy"),
+                  stale: t("sites.detail.syncStale", "Stale"),
+                  overdue: t("sites.detail.syncOverdue", "Overdue"),
+                  unknown: t("sites.detail.syncNever", "Never synced"),
+                }[health];
+                return (
+                  <>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      sx={{ mb: 1 }}
+                    >
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="h6">
+                          {t("sites.detail.connection", "Connection health")}
+                        </Typography>
+                        <Chip
+                          label={healthLabel}
+                          size="small"
+                          color={SYNC_HEALTH_COLOR[health]}
+                        />
+                      </Stack>
+                      <Button
+                        size="small"
+                        onClick={refreshSyncStatus}
+                        data-testid="refresh-sync-status"
+                      >
+                        {t("sites.detail.refresh", "Refresh")}
+                      </Button>
+                    </Stack>
+                    <Stack spacing={1}>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {t("sites.detail.lastSyncAt", "Last sync at")}
+                        </Typography>
+                        <Typography variant="body2">
+                          {formatAbsolute(lastSyncAt)}
+                          {relative ? ` (${relative})` : ""}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {t("sites.detail.lastSyncStatus", "Last sync status")}
+                        </Typography>
+                        <Typography variant="body2">
+                          {lastSyncStatus ?? "—"}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {t(
+                            "sites.detail.backlogDepth",
+                            "Pending upstream queue",
+                          )}
+                        </Typography>
+                        <Typography variant="body2">
+                          {syncStatus?.pending_queue_depth != null
+                            ? syncStatus.pending_queue_depth
+                            : t("sites.detail.backlogUnknown", "—")}
+                        </Typography>
+                      </Box>
+                      {site.agent_version_min && (
+                        <Box>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            {t(
+                              "sites.detail.agentVersionMin",
+                              "Minimum agent version",
+                            )}
+                          </Typography>
+                          <Typography variant="body2">
+                            {site.agent_version_min}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Stack>
+                  </>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Compliance & vulnerability rollup card ---------------------
+            The federation-correct "cross-site compliance/vuln drill-down":
+            the latest AGGREGATE snapshot this site pushed up (per-host
+            detail stays on the site). */}
+        <Grid size={{ xs: 12 }}>
+          <Card variant="outlined">
+            <CardContent>
               <Typography variant="h6" gutterBottom>
-                {t("sites.detail.connection", "Connection")}
+                {t(
+                  "sites.detail.rollupTitle",
+                  "Compliance & vulnerabilities",
+                )}
               </Typography>
-              <Stack spacing={1}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    {t("sites.detail.lastSyncAt", "Last sync at")}
-                  </Typography>
-                  <Typography variant="body2">
-                    {formatAbsolute(site.last_sync_at)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    {t("sites.detail.lastSyncStatus", "Last sync status")}
-                  </Typography>
-                  <Typography variant="body2">
-                    {site.last_sync_status ?? "—"}
-                  </Typography>
-                </Box>
-                {site.agent_version_min && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
+              {(() => {
+                const compliance = rollup?.compliance_rollups ?? [];
+                const vuln = rollup?.vulnerability_rollup ?? null;
+                if (compliance.length === 0 && !vuln) {
+                  return (
+                    <Typography variant="body2" color="text.secondary">
                       {t(
-                        "sites.detail.agentVersionMin",
-                        "Minimum agent version",
+                        "sites.detail.rollupEmpty",
+                        "No compliance or vulnerability data synced from this site yet.",
                       )}
                     </Typography>
-                    <Typography variant="body2">
-                      {site.agent_version_min}
-                    </Typography>
-                  </Box>
-                )}
-              </Stack>
+                  );
+                }
+                return (
+                  <Stack spacing={2}>
+                    {compliance.length > 0 && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          {t("sites.detail.rollupCompliance", "Compliance")}
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ flexWrap: "wrap", mt: 0.5 }}
+                        >
+                          {compliance.map((c) => (
+                            <Chip
+                              key={c.baseline}
+                              size="small"
+                              variant="outlined"
+                              color={
+                                c.score_percent >= 90
+                                  ? "success"
+                                  : c.score_percent >= 70
+                                    ? "warning"
+                                    : "error"
+                              }
+                              label={`${c.baseline}: ${Math.round(
+                                c.score_percent,
+                              )}% (${c.hosts_compliant}/${c.hosts_in_scope})`}
+                            />
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                    {vuln && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          {t(
+                            "sites.detail.rollupVulnerabilities",
+                            "Vulnerabilities ({{hosts}} hosts affected)",
+                            { hosts: vuln.affected_host_count },
+                          )}
+                        </Typography>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ flexWrap: "wrap", mt: 0.5 }}
+                        >
+                          <Chip
+                            size="small"
+                            color="error"
+                            label={t(
+                              "sites.detail.vulnCritical",
+                              "{{n}} critical",
+                              { n: vuln.critical_count },
+                            )}
+                          />
+                          <Chip
+                            size="small"
+                            color="warning"
+                            label={t("sites.detail.vulnHigh", "{{n}} high", {
+                              n: vuln.high_count,
+                            })}
+                          />
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={t(
+                              "sites.detail.vulnMedium",
+                              "{{n}} medium",
+                              { n: vuln.medium_count },
+                            )}
+                          />
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            label={t("sites.detail.vulnLow", "{{n}} low", {
+                              n: vuln.low_count,
+                            })}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+                  </Stack>
+                );
+              })()}
             </CardContent>
           </Card>
         </Grid>
@@ -422,9 +688,24 @@ const SiteDetail: React.FC = () => {
         <Grid size={{ xs: 12 }}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" gutterBottom>
-                {t("sites.detail.activeCommands", "Active commands")}
-              </Typography>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 1 }}
+              >
+                <Typography variant="h6">
+                  {t("sites.detail.activeCommands", "Active commands")}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setDispatchOpen(true)}
+                  data-testid="dispatch-command-button"
+                >
+                  {t("sites.detail.dispatchCommand", "Dispatch command")}
+                </Button>
+              </Stack>
               {commands === null ? (
                 <Typography variant="body2" color="text.secondary">
                   {t("sites.detail.activeCommandsLoading", "Loading…")}
@@ -523,7 +804,9 @@ const SiteDetail: React.FC = () => {
       <Box sx={{ mt: 3, display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Button
           variant="outlined"
-          onClick={() => navigate(`/hosts?site_id=${encodeURIComponent(site.id)}`)}
+          onClick={() =>
+            navigate(`/federation/hosts?site_id=${encodeURIComponent(site.id)}`)
+          }
         >
           {t("sites.detail.seeHosts", "See hosts at this site")}
         </Button>
@@ -605,6 +888,14 @@ const SiteDetail: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <FederationCommandDispatchDialog
+        siteId={site.id}
+        siteName={site.name}
+        open={dispatchOpen}
+        onClose={() => setDispatchOpen(false)}
+        onDispatched={refreshCommands}
+      />
     </Box>
   );
 };

@@ -546,3 +546,200 @@ export async function doListFederationCommands(params: {
   );
   return response.data;
 }
+
+// ---------------------------------------------------------------------
+// Per-site rollups (Phase 12.3 — cross-site compliance/vuln drill-down)
+// ---------------------------------------------------------------------
+
+export interface FederationComplianceRollup {
+  baseline: string;
+  score_percent: number;
+  hosts_in_scope: number;
+  hosts_compliant: number;
+  hosts_noncompliant: number;
+  snapshot_at?: string | null;
+}
+
+export interface FederationVulnerabilityRollup {
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  affected_host_count: number;
+  top_cve_ids?: string[];
+  snapshot_at?: string | null;
+}
+
+export interface FederationDashboardRollupResponse {
+  licensed: boolean;
+  host_rollup?: {
+    host_count: number;
+    active_count: number;
+    snapshot_at?: string | null;
+  } | null;
+  compliance_rollups?: FederationComplianceRollup[];
+  vulnerability_rollup?: FederationVulnerabilityRollup | null;
+}
+
+/**
+ * Latest synced compliance + vulnerability rollup for one site.  This is
+ * the federation-correct "cross-site compliance/vuln drill-down": the
+ * coordinator serves the per-site AGGREGATE snapshots the site pushed up
+ * (not per-host detail — that lives on the site).  Returns
+ * ``{licensed:false}`` on OSS.
+ */
+export async function doGetFederationDashboardRollup(
+  siteId: string,
+): Promise<FederationDashboardRollupResponse> {
+  const response = await axiosInstance.get<FederationDashboardRollupResponse>(
+    `/api/v1/federation/rollups/dashboard?site_id=${encodeURIComponent(siteId)}`,
+  );
+  return response.data;
+}
+
+export interface FederationDispatchCommandRequest {
+  command_type: string;
+  target_site_id: string;
+  /** Command-type-specific payload (e.g. {package_names:[…]}, {script:"…"}). */
+  parameters?: Record<string, unknown> | null;
+  /** Specific hosts at the site; omit/empty ⇒ all hosts at the site. */
+  target_host_ids?: string[] | null;
+}
+
+export interface FederationDispatchCommandResponse {
+  licensed: boolean;
+  command?: FederationDispatchedCommand;
+}
+
+/**
+ * Dispatch a command to a subordinate site (and optionally specific hosts
+ * at that site).  The coordinator queues it; the site's actuation worker
+ * fans it out to local agents and reports results back upstream — nothing
+ * is executed synchronously here.  Returns the created command record so
+ * the caller can show it immediately.
+ */
+export async function doDispatchFederationCommand(
+  body: FederationDispatchCommandRequest,
+): Promise<FederationDispatchCommandResponse> {
+  const response = await axiosInstance.post<FederationDispatchCommandResponse>(
+    `/api/v1/federation/commands/dispatch`,
+    body,
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Cross-site host directory (Phase 12.3 — federated Hosts page)
+// ---------------------------------------------------------------------
+
+/**
+ * One row of the coordinator's synced cross-site host directory.  This
+ * is the SUMMARY tier — the coordinator never holds full per-host
+ * detail; the ``site_detail_url`` on the detail endpoint deep-links to
+ * the owning site's own UI for that.  Mirrors the engine's
+ * ``_host_directory_to_dict``.
+ */
+export interface FederationHostDirectoryEntry {
+  host_id: string;
+  site_id: string;
+  fqdn?: string | null;
+  ipv4?: string | null;
+  ipv6?: string | null;
+  public_ip?: string | null;
+  os_family?: string | null;
+  os_version?: string | null;
+  platform?: string | null;
+  status?: string | null;
+  last_seen?: string | null;
+  tags_json?: string | null;
+  geo_country_code?: string | null;
+  geo_subdivision_code?: string | null;
+  geo_city?: string | null;
+  geo_latitude?: number | null;
+  geo_longitude?: number | null;
+  mtime?: string | null;
+}
+
+export interface FederationHostSearchResponse {
+  licensed: boolean;
+  hosts?: FederationHostDirectoryEntry[];
+  /** Total matches across all pages, for "showing X of N" + paging. */
+  total?: number;
+}
+
+/**
+ * Owning-site descriptor returned alongside a host's detail so the UI
+ * can render "lives at <name>" and a click-through.
+ */
+export interface FederationHostSite {
+  site_id: string;
+  name: string;
+  url: string;
+}
+
+export interface FederationHostDetailResponse {
+  licensed: boolean;
+  host?: FederationHostDirectoryEntry | null;
+  /** Owning site, or null if it was removed after the row synced. */
+  site?: FederationHostSite | null;
+  /**
+   * Deep-link into the OWNING SITE's own web UI for this host's live
+   * detail.  Drill-down is navigational, not a synchronous proxy — the
+   * coordinator never blocks on a subordinate to answer a read.
+   */
+  site_detail_url?: string | null;
+}
+
+/**
+ * Paginated cross-site host search.  ``site_id`` narrows to one site
+ * (drives the "See hosts at this site" link from SiteDetail); the other
+ * filters compose with AND, and ``free_text`` ORs across fqdn / ipv4 /
+ * public_ip for the search box.  Returns ``{licensed:false}`` on OSS.
+ */
+export async function doSearchFederationHosts(params: {
+  site_id?: string;
+  fqdn_contains?: string;
+  ipv4_contains?: string;
+  os_family?: string;
+  platform?: string;
+  status?: string;
+  geo_country_code?: string;
+  free_text?: string;
+  order_by?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<FederationHostSearchResponse> {
+  const search = new URLSearchParams();
+  const set = (k: string, v: string | number | undefined) => {
+    if (v !== undefined && v !== "") search.set(k, String(v));
+  };
+  set("site_id", params.site_id);
+  set("fqdn_contains", params.fqdn_contains);
+  set("ipv4_contains", params.ipv4_contains);
+  set("os_family", params.os_family);
+  set("platform", params.platform);
+  set("status", params.status);
+  set("geo_country_code", params.geo_country_code);
+  set("free_text", params.free_text);
+  set("order_by", params.order_by);
+  set("limit", params.limit);
+  set("offset", params.offset);
+  const qs = search.toString();
+  const response = await axiosInstance.get<FederationHostSearchResponse>(
+    `/api/v1/federation/hosts${qs ? `?${qs}` : ""}`,
+  );
+  return response.data;
+}
+
+/**
+ * Fetch a single directory entry plus its owning site + the deep-link
+ * to that site's live host detail.
+ */
+export async function doGetFederationHostDetail(
+  hostId: string,
+): Promise<FederationHostDetailResponse> {
+  const response = await axiosInstance.get<FederationHostDetailResponse>(
+    `/api/v1/federation/hosts/${encodeURIComponent(hostId)}`,
+  );
+  return response.data;
+}
