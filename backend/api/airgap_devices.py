@@ -129,3 +129,53 @@ def ingest_from_device(db: Session = Depends(get_db)):
     db.refresh(run)
     logger.info("Queued device ingest run %s from %s", run.id, selected)
     return IngestDeviceResponse(run_id=str(run.id), device=selected)
+
+
+class IngestRun(BaseModel):
+    id: str
+    status: str
+    error_message: str | None = None
+    file_count: int | None = None
+    byte_count: int | None = None
+    iso_path: str | None = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    created_at: str | None = None
+
+
+class IngestRunList(BaseModel):
+    runs: list[IngestRun]
+
+
+@router.get("/repository/ingest-runs", response_model=IngestRunList)
+def list_ingest_runs(limit: int = 10, db: Session = Depends(get_db)):
+    """Recent ingestion runs (newest first) for the Import panel to poll.
+
+    Lets the UI show an in-flight import advancing
+    (QUEUED → VERIFYING_SIG → COPYING → COMPLETE) and refresh the
+    repository list when a run finishes, instead of requiring a manual
+    page reload.
+    """
+    limit = max(1, min(limit, 50))
+    rows = (
+        db.query(models.AirgapIngestionRun)
+        .order_by(models.AirgapIngestionRun.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return IngestRunList(
+        runs=[
+            IngestRun(
+                id=str(r.id),
+                status=r.status,
+                error_message=r.error_message,
+                file_count=r.file_count,
+                byte_count=r.byte_count,
+                iso_path=r.iso_path,
+                started_at=r.started_at.isoformat() if r.started_at else None,
+                completed_at=r.completed_at.isoformat() if r.completed_at else None,
+                created_at=r.created_at.isoformat() if r.created_at else None,
+            )
+            for r in rows
+        ]
+    )

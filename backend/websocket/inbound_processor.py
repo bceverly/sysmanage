@@ -147,17 +147,6 @@ async def process_pending_messages(  # NOSONAR
         for message in host_messages:
             await process_validated_message(message, host, db)
 
-        # Air-gap repository auto-repoint: if this server is an Air-Gap
-        # Repository, ensure the agent that just communicated is pointed
-        # at the local mirror (and off the internet).  Best-effort and
-        # self-throttling — no-ops unless the role is 'repository' and
-        # the agent's config actually needs to change.
-        from backend.services import (  # pylint: disable=import-outside-toplevel
-            airgap_repoint_service,
-        )
-
-        airgap_repoint_service.maybe_repoint(db, host)
-
     # Second, handle messages with NULL host_id by extracting hostname from message data
     # Exclude expired messages from processing
     null_host_messages = (
@@ -360,6 +349,21 @@ async def process_validated_message(message, host, db: Session) -> None:
                 _("Failed to process message %s: unknown message type"),
                 message.message_id,
             )
+
+        # Air-gap repository auto-repoint: now that this agent has
+        # communicated, ensure it's pointed at the local mirror (and off
+        # the internet) when this server runs as an Air-Gap Repository.
+        # Hooked HERE (not in the caller loops) because BOTH the host-id
+        # and the null-host-id inbound paths funnel through this function
+        # — agents that put host_id in the message body hit the
+        # null-host path, which the loop-level hook missed.  Best-effort
+        # and self-throttling: a no-op unless the role is 'repository'
+        # and the agent's mirror config actually needs to change.
+        from backend.services import (  # pylint: disable=import-outside-toplevel
+            airgap_repoint_service,
+        )
+
+        airgap_repoint_service.maybe_repoint(db, host)
 
     except Exception as e:
         logger.error(

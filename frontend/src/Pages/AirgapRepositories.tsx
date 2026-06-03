@@ -35,7 +35,7 @@
  * When the backend hasn't shipped the list endpoint yet, the page
  * renders an explanatory empty state rather than a hard error.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -125,13 +125,13 @@ const AirgapRepositories: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!roleLoaded) return;
+  // Extracted so the Import panel can trigger a refresh when an ingest
+  // completes (no manual page reload needed).
+  const loadRepos = useCallback(() => {
     if (serverRole !== 'repository') {
       setLoading(false);
       return;
     }
-    let cancelled = false;
     const token = localStorage.getItem('bearer_token');
     fetch('/api/v1/airgap/repository/repositories', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -147,7 +147,6 @@ const AirgapRepositories: React.FC = () => {
         return r.json();
       })
       .then((body: RepositoriesResponse | RepositoryRow[] | null) => {
-        if (cancelled) return;
         // Tolerate the legacy flat-array shape from older deployments.
         if (Array.isArray(body)) {
           setRepos(body);
@@ -162,14 +161,15 @@ const AirgapRepositories: React.FC = () => {
         setLoading(false);
       })
       .catch((err: Error) => {
-        if (cancelled) return;
         setError(err.message);
         setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [serverRole, roleLoaded]);
+  }, [serverRole]);
+
+  useEffect(() => {
+    if (!roleLoaded) return;
+    loadRepos();
+  }, [roleLoaded, loadRepos]);
 
   const aggregate = useMemo(() => {
     // Prefer the backend-supplied aggregate when available — it
@@ -257,7 +257,9 @@ const AirgapRepositories: React.FC = () => {
         )}
       </Typography>
 
-      {serverRole === 'repository' && <AirgapImportPanel />}
+      {serverRole === 'repository' && (
+        <AirgapImportPanel onComplete={loadRepos} />
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

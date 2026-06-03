@@ -2874,11 +2874,21 @@
     "importError": "Could not start import.",
     "noDevice": "No import drive selected. Choose one in Settings → Server Role.",
     "notReady": "Not ready",
-    "queued": "Import queued from {{dev}} (run {{id}}).",
     "ready": "Ready{{label}}",
     "rescan": "Rescan",
     "statusError": "Could not probe the import device.",
-    "title": "Import from Media"
+    "title": "Import from Media",
+    "run": {
+      "complete": "Complete",
+      "copying": "Copying packages",
+      "failed": "Failed",
+      "queued": "Queued",
+      "verified": "Verified",
+      "verifying": "Verifying signature"
+    },
+    "runDone": "Import complete — the repository list below is refreshed.",
+    "runStats": "{{files}} files · {{size}}",
+    "runStatus": "Import status"
   },
   "airgapKeys": {
     "collector": {

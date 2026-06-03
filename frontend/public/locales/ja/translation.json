@@ -2874,11 +2874,21 @@
     "importError": "[TODO] Could not start import.",
     "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
     "notReady": "[TODO] Not ready",
-    "queued": "[TODO] Import queued from {{dev}} (run {{id}}).",
     "ready": "[TODO] Ready{{label}}",
     "rescan": "[TODO] Rescan",
     "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media"
+    "title": "[TODO] Import from Media",
+    "run": {
+      "complete": "[TODO] Complete",
+      "copying": "[TODO] Copying packages",
+      "failed": "[TODO] Failed",
+      "queued": "[TODO] Queued",
+      "verified": "[TODO] Verified",
+      "verifying": "[TODO] Verifying signature"
+    },
+    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
+    "runStats": "[TODO] {{files}} files · {{size}}",
+    "runStatus": "[TODO] Import status"
   },
   "airgapKeys": {
     "collector": {

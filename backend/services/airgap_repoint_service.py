@@ -64,45 +64,57 @@ def _cmd(argv, timeout, ignore_errors, description):
 def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
     """Point apt at the local mirror and disable upstream sources.
 
-    Mirrors the validated repoint flow: write a single deb source for
-    the mirror, disable the (unreachable) online sources, then refresh.
-    The mirror's InRelease is the genuine Ubuntu-signed metadata copied
-    verbatim, so apt verifies it against the host keyring — no
-    ``[trusted=yes]`` needed.
+    Writes the mirror's deb source via the plan's ``files`` mechanism
+    (the agent's deploy_files → ``sudo install -D``) rather than
+    ``sudo sh -c "printf > file"``: the agent sudoers deliberately does
+    NOT authorize ``/bin/sh`` (blanket shell would defeat the
+    constrained-sudo model), and a shell-wrapped write is denied with
+    "user not allowed to run" — silently leaving the agent unrepointed.
+    ``files`` are deployed before ``commands`` run.
+
+    Online sources are then disabled with ``sed`` (an authorized
+    binary): comment the deb822 ``ubuntu.sources`` keys and any legacy
+    ``sources.list`` deb lines.  Both steps ignore errors so a host that
+    has only one of the two source styles still succeeds.  Finally
+    ``apt-get update`` refreshes against the mirror; its Ubuntu-signed
+    InRelease verifies against the host keyring (no ``[trusted=yes]``).
     """
     deb_line = f"deb {repo_url} {suite} {components}\n"
     list_path = "/etc/apt/sources.list.d/sysmanage-airgap.list"
     return {
+        "files": [
+            {
+                "path": list_path,
+                "content": deb_line,
+                "permissions": "0644",
+                "owner_uid": 0,
+                "owner_gid": 0,
+            },
+        ],
         "commands": [
-            _cmd(
-                ["sudo", "sh", "-c", f"printf %s {_shq(deb_line)} > {list_path}"],
-                30,
-                False,
-                "write sysmanage-airgap apt source",
-            ),
-            # Disable the deb822 OS sources (resolute+) if present.
+            # Disable the deb822 OS sources (resolute+) if present.  A
+            # deb822 stanza must be disabled WHOLESALE — commenting only
+            # some fields (e.g. Types) leaves a stanza missing a required
+            # field, which apt rejects with "Malformed stanza … (type)"
+            # and then refuses to read ANY source.  So comment every
+            # non-comment line: an all-commented file has zero stanzas
+            # and apt ignores it cleanly.  sed -i errors if the file is
+            # absent; ignore_errors handles that.
             _cmd(
                 [
                     "sudo",
-                    "sh",
-                    "-c",
-                    "test -f /etc/apt/sources.list.d/ubuntu.sources && "
-                    "mv /etc/apt/sources.list.d/ubuntu.sources "
-                    "/etc/apt/sources.list.d/ubuntu.sources.disabled || true",
+                    "sed",
+                    "-i",
+                    "s/^[^#]/#&/",
+                    "/etc/apt/sources.list.d/ubuntu.sources",
                 ],
                 30,
                 True,
-                "disable upstream ubuntu.sources",
+                "disable upstream ubuntu.sources (comment all lines)",
             ),
             # Comment out any active deb lines in the legacy sources.list.
             _cmd(
-                [
-                    "sudo",
-                    "sh",
-                    "-c",
-                    "test -f /etc/apt/sources.list && "
-                    "sed -i 's/^deb /#deb /' /etc/apt/sources.list || true",
-                ],
+                ["sudo", "sed", "-i", "s/^deb /#deb /", "/etc/apt/sources.list"],
                 30,
                 True,
                 "disable legacy online sources.list",
@@ -113,13 +125,8 @@ def _build_apt_repoint_plan(repo_url: str, suite: str, components: str) -> dict:
                 False,
                 "refresh apt against the local mirror",
             ),
-        ]
+        ],
     }
-
-
-def _shq(value: str) -> str:
-    """Minimal single-quote shell-quote for embedding in sh -c."""
-    return "'" + value.replace("'", "'\\''") + "'"
 
 
 def _agent_distro_hint(host) -> str:
