@@ -2721,7 +2721,17 @@
       "vulnMedium": "[TODO] {{n}} medium",
       "alertAck": "[TODO] Acknowledge",
       "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts"
+      "alertsTitle": "[TODO] Open alerts",
+      "autonomous": "[TODO] Operating independently",
+      "pushPolicies": "[TODO] Push policies",
+      "repushFailed": "[TODO] Failed to queue policy re-push.",
+      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
+      "siteCapabilities": "[TODO] Capabilities",
+      "siteVersion": "[TODO] Reported version",
+      "syncLatency": "[TODO] Upstream sync latency (recent)",
+      "syncPoints": "[TODO] {{n}} sync events",
+      "syncTimeline": "[TODO] Sync timeline",
+      "syncTimelineEmpty": "[TODO] No sync events recorded yet."
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -3026,5 +3036,13 @@
     "lastSync": "[TODO] Synced {{when}}",
     "mapView": "[TODO] Map view",
     "title": "[TODO] Federation Dashboard"
+  },
+  "federationAlertConfig": {
+    "effective": "[TODO] effective",
+    "save": "[TODO] Save thresholds",
+    "saveFailed": "[TODO] Failed to save thresholds.",
+    "saved": "[TODO] Alert thresholds saved.",
+    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
+    "title": "[TODO] Alert thresholds"
   }
 }

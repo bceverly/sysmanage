@@ -2721,7 +2721,17 @@
       "vulnMedium": "{{n}} medium",
       "alertAck": "Acknowledge",
       "alertAcked": "Acknowledged",
-      "alertsTitle": "Open alerts"
+      "alertsTitle": "Open alerts",
+      "autonomous": "Operating independently",
+      "pushPolicies": "Push policies",
+      "repushFailed": "Failed to queue policy re-push.",
+      "repushQueued": "Queued {{n}} policy push(es) for re-delivery.",
+      "siteCapabilities": "Capabilities",
+      "siteVersion": "Reported version",
+      "syncLatency": "Upstream sync latency (recent)",
+      "syncPoints": "{{n}} sync events",
+      "syncTimeline": "Sync timeline",
+      "syncTimelineEmpty": "No sync events recorded yet."
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
@@ -3026,5 +3036,13 @@
     "lastSync": "Synced {{when}}",
     "mapView": "Map view",
     "title": "Federation Dashboard"
+  },
+  "federationAlertConfig": {
+    "effective": "effective",
+    "save": "Save thresholds",
+    "saveFailed": "Failed to save thresholds.",
+    "saved": "Alert thresholds saved.",
+    "subtitle": "Leave a field blank to use the built-in default.",
+    "title": "Alert thresholds"
   }
 }
