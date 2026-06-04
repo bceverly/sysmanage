@@ -197,6 +197,63 @@ class ModuleLoader:
                 logger.error("Error querying module cache: %s", e)
                 return None
 
+    def _log_failed_download_response(
+        self,
+        module_code: str,
+        url: str,
+        status: int,
+        platform_info: Dict[str, str],
+    ) -> None:
+        """Emit the right error log for a non-200 download response."""
+        if status == 404:
+            # Fatal-for-this-engine and distinct from the benign
+            # plugin-bundle 404s: the license server has NO compiled
+            # build of this engine for this platform/arch/Python, so the
+            # engine cannot load and anything gated on it (orchestrators,
+            # ticks, routes) stays disabled.  Name the exact missing
+            # target and the remedy so it is actionable, not buried among
+            # optional-plugin warnings.
+            logger.error(
+                "Pro+ ENGINE UNAVAILABLE: '%s' has no build for "
+                "%s/%s Python %s on the license server (HTTP 404). "
+                "The engine will NOT load and its features are "
+                "disabled. Build '%s' for Python %s on the license "
+                "server and re-run 'make update'. URL: %s",
+                module_code,
+                platform_info["platform"],
+                platform_info["architecture"],
+                platform_info["python_version"],
+                module_code,
+                platform_info["python_version"],
+                url,
+            )
+        else:
+            logger.error(
+                "Module download failed for '%s': %s returned %d",
+                module_code,
+                url,
+                status,
+            )
+
+    def _verify_downloaded_hash(
+        self, temp_path: str, expected_hash: Optional[str]
+    ) -> Optional[str]:
+        """Compute the temp file's hash, comparing to ``expected_hash``.
+
+        Returns the computed hash on success, or ``None`` (after
+        removing the temp file) when a provided hash does not match.
+        """
+        actual_hash = self._compute_file_hash(temp_path)
+        if expected_hash and actual_hash.lower() != expected_hash.lower():
+            logger.error(
+                "Module hash mismatch: expected %s, got %s",
+                expected_hash,
+                actual_hash,
+            )
+            os.remove(temp_path)
+            return None
+        return actual_hash
+
     async def _download_and_cache_module(
         self, module_code: str, version: Optional[str] = None
     ) -> bool:
@@ -240,36 +297,9 @@ class ModuleLoader:
                     timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
                 ) as response:
                     if response.status != 200:
-                        if response.status == 404:
-                            # Fatal-for-this-engine and distinct from the
-                            # benign plugin-bundle 404s: the license server
-                            # has NO compiled build of this engine for this
-                            # platform/arch/Python, so the engine cannot load
-                            # and anything gated on it (orchestrators, ticks,
-                            # routes) stays disabled.  Name the exact missing
-                            # target and the remedy so it is actionable, not
-                            # buried among optional-plugin warnings.
-                            logger.error(
-                                "Pro+ ENGINE UNAVAILABLE: '%s' has no build for "
-                                "%s/%s Python %s on the license server (HTTP 404). "
-                                "The engine will NOT load and its features are "
-                                "disabled. Build '%s' for Python %s on the license "
-                                "server and re-run 'make update'. URL: %s",
-                                module_code,
-                                platform_info["platform"],
-                                platform_info["architecture"],
-                                platform_info["python_version"],
-                                module_code,
-                                platform_info["python_version"],
-                                url,
-                            )
-                        else:
-                            logger.error(
-                                "Module download failed for '%s': %s returned %d",
-                                module_code,
-                                url,
-                                response.status,
-                            )
+                        self._log_failed_download_response(
+                            module_code, url, response.status, platform_info
+                        )
                         return False
 
                     # Get expected hash from header
@@ -284,18 +314,9 @@ class ModuleLoader:
                             await f.write(chunk)
 
             # Verify hash if provided
-            if expected_hash:
-                actual_hash = self._compute_file_hash(temp_path)
-                if actual_hash.lower() != expected_hash.lower():
-                    logger.error(
-                        "Module hash mismatch: expected %s, got %s",
-                        expected_hash,
-                        actual_hash,
-                    )
-                    os.remove(temp_path)
-                    return False
-            else:
-                actual_hash = self._compute_file_hash(temp_path)
+            actual_hash = self._verify_downloaded_hash(temp_path, expected_hash)
+            if actual_hash is None:
+                return False
 
             # Move to final location
             os.rename(temp_path, final_path)

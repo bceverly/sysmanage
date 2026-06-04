@@ -2718,7 +2718,10 @@
       "vulnCritical": "{{n}} critical",
       "vulnHigh": "{{n}} high",
       "vulnLow": "{{n}} low",
-      "vulnMedium": "{{n}} medium"
+      "vulnMedium": "{{n}} medium",
+      "alertAck": "Acknowledge",
+      "alertAcked": "Acknowledged",
+      "alertsTitle": "Open alerts"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

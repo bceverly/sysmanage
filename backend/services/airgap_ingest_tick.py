@@ -358,6 +358,17 @@ def _manifest_from_mount_outcome(outcome: dict):
     return None
 
 
+def _parse_rsync_int(stdout, pattern):
+    """First capture group of ``pattern`` in ``stdout`` as an int, or None."""
+    match = pattern.search(stdout)
+    if not match:
+        return None
+    try:
+        return int(match.group(1).replace(",", ""))
+    except ValueError:
+        return None
+
+
 def _ingest_rsync_stats(outcome: dict) -> dict:
     """Parse file/byte counts from the copy plan's rsync ``--stats``."""
     result = {"files": None, "bytes": None}
@@ -366,25 +377,19 @@ def _ingest_rsync_stats(outcome: dict) -> dict:
         if "rsync" not in " ".join(str(a) for a in argv):
             continue
         stdout = cmd.get("stdout") or ""
-        m = _RSYNC_FILES_RE.search(stdout)
-        if m:
-            try:
-                result["files"] = int(m.group(1).replace(",", ""))
-            except ValueError:
-                pass
-        m = _RSYNC_BYTES_RE.search(stdout)
-        if m:
-            try:
-                result["bytes"] = int(m.group(1).replace(",", ""))
-            except ValueError:
-                pass
+        files = _parse_rsync_int(stdout, _RSYNC_FILES_RE)
+        if files is not None:
+            result["files"] = files
+        size = _parse_rsync_int(stdout, _RSYNC_BYTES_RE)
+        if size is not None:
+            result["bytes"] = size
     return result
 
 
 # ---------------------------------------------------------------------------
 # Result-side processors (invoked by proplus_dispatch with an open session)
 # ---------------------------------------------------------------------------
-def process_mount_result(session, run, outcome) -> None:
+def process_mount_result(_session, run, outcome) -> None:
     """Verify the mounted media's manifest; set VERIFIED or FAILED.
 
     Caller has already confirmed the mount plan *succeeded* and cleared
@@ -456,7 +461,7 @@ def _mirror_base_url() -> str:
     except (ValueError, TypeError, AttributeError):
         port = 0
     netloc = host if port in (0, 80) else f"{host}:{port}"
-    return f"http://{netloc}/airgap-repo"
+    return f"http://{netloc}/airgap-repo"  # NOSONAR S5332 - air-gap LAN repo, no PKI in the enclave; agents fetch over http intentionally
 
 
 def _discover_apt_root(distro: str, version: str):

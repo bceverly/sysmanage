@@ -467,6 +467,15 @@ class TestFederationControllerStubRoutes:
         ("GET", "/api/v1/federation/commands/cmd-1"),
         ("GET", "/api/v1/federation/audit"),
         ("GET", "/api/v1/federation/audit/entry-1"),
+        # Phase 12.2 — per-site sync timeline.
+        ("GET", "/api/v1/federation/sites/site-1/sync-timeline"),
+        # Phase 12.3 — per-site one-click policy re-push.
+        ("POST", "/api/v1/federation/sites/site-1/repush-policies"),
+        # Phase 12.1 — rollup alerts + configurable thresholds.
+        ("GET", "/api/v1/federation/alerts"),
+        ("POST", "/api/v1/federation/alerts/alert-1/acknowledge"),
+        ("GET", "/api/v1/federation/alert-config"),
+        ("PUT", "/api/v1/federation/alert-config"),
         # Phase 12.6 — sync ingest surface (site → coordinator).
         # These return 401 in the engine (no bearer token) but the
         # OSS stub layer returns 200 ``{licensed: false}`` uniformly
@@ -476,6 +485,8 @@ class TestFederationControllerStubRoutes:
         ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
         ("POST", "/api/v1/federation/sites/site-1/host-directory"),
         ("POST", "/api/v1/federation/sites/site-1/command-results"),
+        # Phase 12.2 — site metadata ingest.
+        ("POST", "/api/v1/federation/sites/site-1/metadata"),
     ]
 
     @pytest.fixture
@@ -519,12 +530,12 @@ class TestFederationControllerStubRoutes:
             ), f"{method} {path} body missing licensed=False: {body}"
 
     def test_federation_stub_count_locked(self, stub_only_app):
-        """A safety net: the federation stub surface is exactly 32
-        endpoint routes (matching ``STUB_ENDPOINTS``) — 27 from
-        Phase 12.1/12.3 plus 5 ingest stubs from Phase 12.6.  If this
-        count drifts unexpectedly, either someone added an endpoint
-        without updating the test, or removed one — both should be a
-        deliberate decision.
+        """A safety net: the federation stub surface matches
+        ``STUB_ENDPOINTS`` exactly — Phase 12.1/12.3 + 12.6 ingest stubs,
+        plus the Phase 12.2 sync-timeline, alert-config (GET/PUT) and
+        site-metadata ingest stubs.  If this count drifts unexpectedly,
+        either someone added an endpoint without updating the test, or
+        removed one — both should be a deliberate decision.
 
         Filter excludes ``/api/v1/federation/site/`` because Phase 12.2
         added a separate site-engine stub block at that prefix; those

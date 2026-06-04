@@ -33,6 +33,7 @@ FEDERATION_TABLE_NAMES = [
     "federation_policy_assignments",
     "federation_dispatched_commands",
     "federation_audit_log",
+    "federation_site_sync_event",
     "federation_coordinator",
     "federation_sync_queue",
     "federation_received_policies",

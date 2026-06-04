@@ -234,6 +234,55 @@ def list_policies(
 _UPDATABLE_FIELDS = frozenset({"name", "description", "definition"})
 
 
+def _apply_name_update(
+    session: Session,
+    policy: FederationPolicy,
+    fields: Dict[str, Any],
+    changes: Dict[str, Any],
+) -> None:
+    """Apply a ``name`` change, enforcing per-type uniqueness."""
+    if "name" not in fields:
+        return
+    new_name = fields["name"]
+    if new_name == policy.name:
+        return
+    # Uniqueness check against the same policy_type.
+    collision = (
+        session.execute(
+            select(FederationPolicy).where(
+                FederationPolicy.policy_type == policy.policy_type,
+                FederationPolicy.name == new_name,
+                FederationPolicy.id != policy.id,
+            )
+        )
+        .scalars()
+        .first()
+    )
+    if collision is not None:
+        raise PolicyNameConflictError(
+            f"A '{policy.policy_type}' policy named '{new_name}' already exists"
+        )
+    policy.name = new_name
+    changes["name"] = new_name
+
+
+def _apply_definition_update(
+    policy: FederationPolicy,
+    fields: Dict[str, Any],
+    changes: Dict[str, Any],
+) -> None:
+    """Apply a ``definition`` change, validating + canonicalizing JSON."""
+    if "definition" not in fields:
+        return
+    new_def = fields["definition"]
+    if not isinstance(new_def, dict):
+        raise ValueError("definition must be a dict")
+    new_json = json.dumps(new_def, sort_keys=True)
+    if new_json != policy.definition_json:
+        policy.definition_json = new_json
+        changes["definition_changed"] = True
+
+
 def update_policy(
     session: Session,
     policy_id: Any,
@@ -257,41 +306,13 @@ def update_policy(
 
     changes: Dict[str, Any] = {}
 
-    if "name" in fields:
-        new_name = fields["name"]
-        if new_name != policy.name:
-            # Uniqueness check against the same policy_type.
-            collision = (
-                session.execute(
-                    select(FederationPolicy).where(
-                        FederationPolicy.policy_type == policy.policy_type,
-                        FederationPolicy.name == new_name,
-                        FederationPolicy.id != policy.id,
-                    )
-                )
-                .scalars()
-                .first()
-            )
-            if collision is not None:
-                raise PolicyNameConflictError(
-                    f"A '{policy.policy_type}' policy named '{new_name}' "
-                    f"already exists"
-                )
-            policy.name = new_name
-            changes["name"] = new_name
+    _apply_name_update(session, policy, fields, changes)
 
     if "description" in fields and fields["description"] != policy.description:
         policy.description = fields["description"]
         changes["description"] = fields["description"]
 
-    if "definition" in fields:
-        new_def = fields["definition"]
-        if not isinstance(new_def, dict):
-            raise ValueError("definition must be a dict")
-        new_json = json.dumps(new_def, sort_keys=True)
-        if new_json != policy.definition_json:
-            policy.definition_json = new_json
-            changes["definition_changed"] = True
+    _apply_definition_update(policy, fields, changes)
 
     if changes:
         policy.version += 1
@@ -462,6 +483,42 @@ def list_assignments_for_site(
         .scalars()
         .all()
     )
+
+
+def requeue_site_policies(
+    session: Session,
+    site_id: Any,
+    *,
+    requested_by: Optional[str] = None,
+) -> List[FederationPolicyAssignment]:
+    """Force a re-push of every policy assigned to ``site_id``.
+
+    The per-site "Push policies now" action.  Like a re-assignment, this
+    is a *re-push intent*: it resets each of the site's assignments to
+    ``pending`` and clears the error + retry counter (rescuing any
+    dead-lettered rows) so the background push worker re-delivers them on
+    its next tick.  It does NOT push synchronously — per the
+    queue-everything rule, delivery stays with the worker so it survives a
+    coordinator→site network blip.
+
+    Returns the affected assignments (empty list when the site has none).
+    Caller commits.
+    """
+    site = _ensure_site(session, site_id)
+    assignments = list_assignments_for_site(session, site.id)
+    for assignment in assignments:
+        assignment.push_status = PUSH_STATUS_PENDING
+        assignment.last_push_error = None
+        assignment.push_attempts = 0
+    if assignments:
+        _log_audit(
+            session,
+            AUDIT_OP_POLICY_PUSHED,
+            actor_userid=requested_by,
+            target_site_id=site.id,
+            details={"requeued": len(assignments), "trigger": "site_repush"},
+        )
+    return assignments
 
 
 # ---------------------------------------------------------------------

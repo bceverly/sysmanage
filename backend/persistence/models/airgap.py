@@ -182,7 +182,7 @@ class AirgapCollectionTarget(Base):
     # the API rejects new runs with NULL mirror_id.
     mirror_id = Column(
         GUID(),
-        ForeignKey("mirror_repository.id", ondelete="SET NULL"),
+        ForeignKey("mirror_repository.id", ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
     # The mirror snapshot the bundle was built from.  Populated by the
@@ -191,7 +191,7 @@ class AirgapCollectionTarget(Base):
     # identical to a specific point-in-time mirror state.
     source_snapshot_id = Column(
         GUID(),
-        ForeignKey("mirror_snapshot.id", ondelete="SET NULL"),
+        ForeignKey("mirror_snapshot.id", ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
 

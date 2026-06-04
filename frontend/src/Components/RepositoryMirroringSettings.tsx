@@ -753,7 +753,7 @@ const ActionStatusChip: React.FC<ActionStatusChipProps> = ({
   // (inFlight flips false), so idle chips never hold a timer.  Hooks
   // run unconditionally before the early returns below, per the rules
   // of hooks.
-  const [, setTick] = useState(0);
+  const [, setTick] = useState(0); // NOSONAR S6754 - re-render tick; value intentionally unused
   useEffect(() => {
     if (!inFlight) return undefined;
     const handle = setInterval(() => setTick((n) => n + 1), 1000);
@@ -923,7 +923,7 @@ const SnapshotsExpandRow: React.FC<SnapshotsExpandRowProps> = ({
               {t('mirror.snapshots.title', 'Snapshots for {{name}}', { name: mirror.name })}
             </Typography>
             {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-            {snapshots && snapshots.length === 0 && (
+            {snapshots?.length === 0 && (
               <Typography variant="body2" color="text.secondary">
                 {t('mirror.snapshots.empty', 'No snapshots yet. Click the camera icon to take one.')}
               </Typography>
@@ -1282,9 +1282,9 @@ const MirrorListCard: React.FC<{
                 // lowercased.
                 const safe = e.target.value
                   .toLowerCase()
-                  .replace(/[\s.]+/g, '-')
-                  .replace(/[^a-z0-9_-]/g, '')
-                  .replace(/-+/g, '-');
+                  .replaceAll(/[\s.]+/g, '-')
+                  .replaceAll(/[^a-z0-9_-]/g, '')
+                  .replaceAll(/-+/g, '-');
                 setDraft({ ...draft, name: safe });
               }}
               required

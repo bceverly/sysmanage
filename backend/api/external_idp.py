@@ -33,6 +33,9 @@ from backend.persistence.db import get_db
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# Prefix marking a local-development literal secret reference.
+_LITERAL_PREFIX = "literal:"
+
 
 def _check_idp_module():
     """Refuse the request when the Pro+ ``external_idp_engine`` isn't loaded."""
@@ -97,8 +100,8 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
     """
     if not secret_id:
         return None
-    if secret_id.startswith("literal:"):
-        return secret_id[len("literal:") :]
+    if secret_id.startswith(_LITERAL_PREFIX):
+        return secret_id[len(_LITERAL_PREFIX) :]
     # pylint: disable=import-outside-toplevel
     try:
         from backend.services.vault_service import VaultService
@@ -117,7 +120,9 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
         # not the specific path.
         #
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-        ref_kind = "literal" if (secret_id or "").startswith("literal:") else "vault"
+        ref_kind = (
+            "literal" if (secret_id or "").startswith(_LITERAL_PREFIX) else "vault"
+        )
         logger.warning("Could not resolve IdP reference (kind=%s) from Vault", ref_kind)
         return None
 

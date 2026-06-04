@@ -8,7 +8,7 @@ script's smoke test, not here.
 """
 
 import sys
-from unittest.mock import PropertyMock, patch
+from unittest.mock import AsyncMock, PropertyMock, patch
 
 import pytest
 
@@ -247,26 +247,24 @@ class TestAirGapBundlesAPI:
     def test_docker_status_installed_but_daemon_down(self, client, auth_headers):
         # docker binary exists but `docker info` returns non-zero.  The
         # response should report installed=True/running=False with a
-        # non-empty error preview.
-        import subprocess as _subprocess
-
-        version_proc = _subprocess.CompletedProcess(
-            args=["docker", "--version"],
-            returncode=0,
-            stdout="Docker version 24.0.0, build abcdef\n",
-            stderr="",
-        )
-        info_proc = _subprocess.CompletedProcess(
-            args=["docker", "info"],
-            returncode=1,
-            stdout="",
-            stderr="Cannot connect to the Docker daemon at unix:///var/run/docker.sock\n",
-        )
+        # non-empty error preview.  ``_run_docker`` is the async helper
+        # docker_status calls (once for --version, once for info); it
+        # returns ``(returncode, stdout, stderr)``.
         with patch(
             "backend.api.airgap_bundles.shutil.which", return_value="/usr/bin/docker"
         ), patch(
-            "backend.api.airgap_bundles.subprocess.run",
-            side_effect=[version_proc, info_proc],
+            "backend.api.airgap_bundles._run_docker",
+            new=AsyncMock(
+                side_effect=[
+                    (0, "Docker version 24.0.0, build abcdef\n", ""),
+                    (
+                        1,
+                        "",
+                        "Cannot connect to the Docker daemon at "
+                        "unix:///var/run/docker.sock\n",
+                    ),
+                ]
+            ),
         ):
             resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
             assert resp.status_code == 200, resp.text
@@ -282,25 +280,21 @@ class TestAirGapBundlesAPI:
         # docker binary exists, daemon is up, but the calling user
         # isn't in the docker group — the endpoint must flag this as
         # permission_denied=True so the UI shows the right remediation.
-        import subprocess as _subprocess
-
-        version_proc = _subprocess.CompletedProcess(
-            args=["docker", "--version"],
-            returncode=0,
-            stdout="Docker version 24.0.0, build abcdef\n",
-            stderr="",
-        )
-        info_proc = _subprocess.CompletedProcess(
-            args=["docker", "info"],
-            returncode=1,
-            stdout="",
-            stderr="permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock\n",
-        )
         with patch(
             "backend.api.airgap_bundles.shutil.which", return_value="/usr/bin/docker"
         ), patch(
-            "backend.api.airgap_bundles.subprocess.run",
-            side_effect=[version_proc, info_proc],
+            "backend.api.airgap_bundles._run_docker",
+            new=AsyncMock(
+                side_effect=[
+                    (0, "Docker version 24.0.0, build abcdef\n", ""),
+                    (
+                        1,
+                        "",
+                        "permission denied while trying to connect to the "
+                        "Docker daemon socket at unix:///var/run/docker.sock\n",
+                    ),
+                ]
+            ),
         ):
             resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
             assert resp.status_code == 200, resp.text

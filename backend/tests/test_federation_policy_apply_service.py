@@ -126,7 +126,7 @@ def test_reapply_replaces_port_set(session):
 def test_unknown_policy_type_records_error_and_retries(session):
     policy = _receive_policy(
         session,
-        policy_type="update_profile",
+        policy_type="totally_unknown_policy_type",
         name="nightly",
         definition={"schedule": "0 3 * * *"},
     )
@@ -173,3 +173,85 @@ def test_invalid_port_range_fails(session):
 
 def test_supported_policy_types_lists_firewall_role(session):  # noqa: ARG001
     assert "firewall_role" in apply_svc.supported_policy_types()
+    assert "update_profile" in apply_svc.supported_policy_types()
+
+
+# ---------------------------------------------------------------------
+# update_profile applier
+# ---------------------------------------------------------------------
+
+
+def _profile(session, name):
+    return (
+        session.query(models.UpgradeProfile)
+        .filter(models.UpgradeProfile.name == name)
+        .first()
+    )
+
+
+def test_apply_update_profile_creates_upgrade_profile(session):
+    _receive_policy(
+        session,
+        policy_type="update_profile",
+        name="nightly-security",
+        definition={
+            "name": "nightly-security",
+            "description": "security only",
+            "cron": "0 4 * * *",
+            "security_only": True,
+            "package_managers": ["apt", "dnf"],
+            "staggered_window_min": 15,
+        },
+    )
+
+    summary = apply_svc.apply_pending_policies(session)
+
+    assert summary == {"applied": 1, "failed": 0}
+    prof = _profile(session, "nightly-security")
+    assert prof is not None
+    assert prof.cron == "0 4 * * *"
+    assert prof.security_only is True
+    assert prof.package_managers == "apt,dnf"
+    assert prof.staggered_window_min == 15
+
+
+def test_apply_update_profile_upserts_by_name(session):
+    _receive_policy(
+        session,
+        policy_type="update_profile",
+        name="weekly",
+        definition={"name": "weekly", "security_only": False},
+    )
+    apply_svc.apply_pending_policies(session)
+
+    # A newer version narrows to security-only; re-apply upserts in place.
+    _receive_policy(
+        session,
+        policy_type="update_profile",
+        name="weekly",
+        definition={"name": "weekly", "security_only": True},
+        version=2,
+    )
+    apply_svc.apply_pending_policies(session)
+
+    assert (
+        session.query(models.UpgradeProfile)
+        .filter(models.UpgradeProfile.name == "weekly")
+        .count()
+        == 1
+    )
+    assert _profile(session, "weekly").security_only is True
+
+
+def test_apply_update_profile_requires_name(session):
+    policy = _receive_policy(
+        session,
+        policy_type="update_profile",
+        name="x",
+        definition={"security_only": True},  # missing 'name'
+    )
+    summary = apply_svc.apply_pending_policies(session)
+    assert summary == {"applied": 0, "failed": 1}
+    refreshed = inbox_svc.get_received_policy(session, policy.policy_id)
+    assert refreshed.applied is False
+    assert "name" in refreshed.apply_error

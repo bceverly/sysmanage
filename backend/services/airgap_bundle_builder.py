@@ -73,8 +73,8 @@ def _update_bundle(bundle_id: uuid.UUID, **fields) -> None:
     Spawned threads can't safely share the request-scoped session, so
     every state transition opens a new session.
     """
-    SessionLocal = _make_session()
-    with SessionLocal() as session:
+    session_local = _make_session()
+    with session_local() as session:
         row = (
             session.query(models.AirGapBundle)
             .filter(models.AirGapBundle.id == bundle_id)

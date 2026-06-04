@@ -211,11 +211,6 @@ export default defineConfig({
     testTimeout: 10000,
     // Exclude Playwright E2E tests - they run separately via `npx playwright test`
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
-    // Reduce file descriptor usage by using threads with limited concurrency
-    // Note: In Vitest 4.x, poolOptions moved to top-level test options
-    pool: 'threads',
-    maxWorkers: 4,
-    minWorkers: 1,
     server: {
       deps: {
         inline: [

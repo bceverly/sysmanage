@@ -24,6 +24,15 @@ from backend.config.config import get_config
 LOCATION_SAN_FRANCISCO = "San Francisco"
 
 
+def _secure_chmod(path, mode) -> None:
+    """``os.chmod`` with the intended cert/key mode (single suppression site).
+
+    Callers pass 0o600 for private keys and 0o644 for the public CA/server
+    certs that agents must read to validate the TLS chain.
+    """
+    os.chmod(path, mode)  # NOSONAR S2612 # lgtm[py/overly-permissive-file]
+
+
 class CertificateManager:
     """Manages X.509 certificates for mTLS authentication."""
 
@@ -148,8 +157,8 @@ class CertificateManager:
         # the correct mode.  CodeQL ``py/overly-permissive-file`` flags
         # the world-readable bit but does not distinguish public certs
         # from private keys; for the key (above) we set 0o600.
-        os.chmod(self.ca_key_path, 0o600)  # NOSONAR
-        os.chmod(self.ca_cert_path, 0o644)  # lgtm[py/overly-permissive-file]  NOSONAR
+        _secure_chmod(self.ca_key_path, 0o600)
+        _secure_chmod(self.ca_cert_path, 0o644)
 
     def ensure_server_certificate(self) -> None:
         """Ensure server certificate exists, create if not."""
@@ -247,10 +256,8 @@ class CertificateManager:
         # artefact and must be world-readable so client tooling that
         # runs as non-root can validate the chain; key stays 0o600.
         # See the CA chmod block for the CodeQL FP rationale.
-        os.chmod(self.server_key_path, 0o600)  # NOSONAR
-        os.chmod(
-            self.server_cert_path, 0o644
-        )  # lgtm[py/overly-permissive-file]  NOSONAR
+        _secure_chmod(self.server_key_path, 0o600)
+        _secure_chmod(self.server_cert_path, 0o644)
 
     def generate_client_certificate(
         self, hostname: str, host_id: str

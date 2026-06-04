@@ -2437,17 +2437,18 @@ compiled cleanly under Py 3.14 / linux / x86_64 and dropped the
 ready for the license server's distribution path.  All 3 smoke
 tests pass against the built artifact.
 
-**Features:**
-- [ ] Site server registry (add, remove, suspend, monitor subordinate servers)
-- [ ] Secure site enrollment workflow (enrollment token + mutual TLS certificate exchange)
-- [ ] Site server health monitoring (last sync time, connectivity status, host count)
-- [ ] Enterprise-wide host inventory rollup (aggregated from all sites)
-- [ ] Enterprise-wide dashboard with per-site breakdown
-- [ ] Cross-site search (find a host by name, IP, or tag across all sites)
-- [ ] Rollup compliance reporting (aggregate CIS/STIG scores across sites)
-- [ ] Rollup vulnerability reporting (aggregate CVE exposure across sites)
-- [ ] Rollup alerting (enterprise-wide alert rules that trigger on cross-site conditions)
-- [~] Enterprise-wide update policy management (define policies centrally, push to sites) — push + inbox + apply-worker framework landed (June 2026); `firewall_role` materialises locally, `update_profile` awaits an OSS update-profile target table (records a structured apply_error until then)
+**Features:** *(items below landed across 12.1.B–G — see the Status blocks
+above for the implementing services/migrations.)*
+- [x] Site server registry (add, remove, suspend, monitor subordinate servers) — `federation_site_service` (12.1.B)
+- [x] Secure site enrollment workflow (enrollment token + mutual TLS certificate exchange) — `complete_enrollment` + bearer mint (12.1.B/12.10)
+- [x] Site server health monitoring (last sync time, connectivity status, host count) — `record_sync` + the 12.2 connection-health series
+- [x] Enterprise-wide host inventory rollup (aggregated from all sites) — `federation_rollup_service` (12.1.D)
+- [x] Enterprise-wide dashboard with per-site breakdown — `get_dashboard_rollup` + Sites map/tiles (12.1.D/12.3)
+- [x] Cross-site search (find a host by name, IP, or tag across all sites) — `federation_host_directory_service` (12.1.E)
+- [x] Rollup compliance reporting (aggregate CIS/STIG scores across sites) — `record_compliance_rollup_snapshot` (12.1.D)
+- [x] Rollup vulnerability reporting (aggregate CVE exposure across sites) — `record_vulnerability_rollup_snapshot` (12.1.D)
+- [x] Rollup alerting (enterprise-wide alert rules that trigger on cross-site conditions) — end-to-end June 2026: `federation_alert_service` evaluates three built-in conditions per enrolled site (site_offline / compliance_below / vulnerabilities_high) against synced rollups, opening/refreshing or auto-resolving rows in a new `federation_alert` table (migration `m3fedalert`, idempotent + sqlite/postgres-clean). Wired into the controller push-worker tick; surfaced via `GET/POST /federation/alerts[/{id}/acknowledge]` + an Open-alerts card on SiteDetail. Operator-configurable rule thresholds landed June 2026: `federation_alert_config` singleton (migration `m5fedalertcfg`) + `federation_alert_config_service` (NULL override = built-in default) read by the tick via `evaluate_with_config`; exposed at `GET/PUT /federation/alert-config`. Tests in `test_federation_alert_config_service`.
+- [x] Enterprise-wide update policy management (define policies centrally, push to sites) — June 2026: both `firewall_role` AND `update_profile` now materialise locally (`update_profile` → the `upgrade_profiles` table via `federation_policy_apply_service.apply_update_profile`); push + inbox + apply-worker path complete
 - [x] Enterprise-wide firewall role management (define roles centrally, push to sites) — end-to-end June 2026: coordinator push worker → site inbox → `federation_policy_apply_service` materialises into local `firewall_role` + `firewall_role_open_port`
 - [x] Command dispatch to subordinate servers (reboot, update, deploy, script execution) — end-to-end June 2026: `federation_actuation_service.fanout_queued_commands` fans received-commands out to local agents (queued, never direct), results aggregate back via `route_proplus_command_result` → `command_result` sync packet upstream; wired into the `federation_site_engine` tick
 - [x] Batch command dispatch (target hosts across multiple sites in a single operation) — coordinator dispatch already targets multiple sites; each site fans out to its local hosts per the actuation path above
@@ -2455,7 +2456,12 @@ tests pass against the built artifact.
 - [ ] Federation audit log (all cross-site operations logged centrally)
 - [ ] Site server version tracking (ensure all sites run compatible SysManage versions)
 - [ ] Configurable sync intervals per site (bandwidth-constrained sites can sync less frequently)
-- [ ] Data retention policies for rollup data
+- [x] Data retention policies for rollup data — June 2026:
+      `federation_rollup_service` prunes each append-only series (host /
+      compliance / vulnerability) to the newest `DEFAULT_ROLLUP_RETENTION`
+      (90) snapshots opportunistically at ingest, plus a `prune_rollups`
+      sweep (count + optional `older_than_days`).  No schema change /
+      migration; dialect-neutral ORM delete.
 - [ ] REST API for all federation operations (enabling automation and CI/CD integration)
 - [ ] i18n/l10n for all 14 languages
 
@@ -2507,10 +2513,10 @@ All 3 smoke tests pass against the built artifact.
 - [x] Command result reporting — enqueue `payload_type='command_result'` into sync queue
 - [x] Offline queue for upstream data (`federation_sync_queue` table + service)
 - [x] Offline queue replay with deduplication when connectivity is restored (`dedup_key` replace semantics + completed-command replay no-op)
-- [ ] Local autonomy mode — site server stays operational; engine work
+- [x] Local autonomy mode — June 2026: `federation_coordinator_service.is_autonomous` flags enrolled-but-offline; the site engine tick keeps enqueuing deltas/metadata for replay and skips the coordinator round-trip while the uplink is down (agents/upgrades unaffected). Surfaced as the "Operating independently" banner on SiteDetail.
 - [x] Sync status surface (`queue_depth`, `queue_depth_by_payload_type`, `record_sync_attempt`)
-- [ ] Coordinator connection health monitoring with automatic reconnection — engine work
-- [ ] Site metadata reporting — engine work
+- [x] Coordinator connection health monitoring with automatic reconnection — June 2026: `record_sync_attempt` now tracks `consecutive_sync_failures` → derived `connection_state` (online/degraded/offline) + `last_successful_sync_at`; `should_attempt_sync` gates the tick on an exponential reconnect backoff (`next_reconnect_at`, capped). Migration `m4fedconn`, idempotent + sqlite/postgres-clean. Tests in `test_federation_connection_health`.
+- [x] Site metadata reporting — June 2026: `federation_site_metadata_service` collects version / active-host count + OS breakdown / loaded-engine capabilities / uplink state and ENQUEUES a dedup-keyed `site_metadata` payload (never a direct call); the coordinator ingests it via `POST /sites/{id}/metadata` → `apply_site_metadata` + a `federation_site_sync_event` timeline point. Tests in `test_federation_site_metadata_service` / `test_federation_site_sync_events`.
 - [ ] i18n/l10n for all 14 languages — engine work
 
 **Estimated Size:** ~5,000 lines (engine).  OSS service layer + stubs ≈ 1,800 LOC.
@@ -2613,9 +2619,11 @@ matching response types.  i18n keys for `sites.addSite`,
       reports it), and a manual Refresh.  *Remaining:* the sync-latency
       **histogram** needs historical sync samples persisted server-side
       (none stored today) — deferred until that backend metric exists.
-- [ ] Per-site action surface — push a policy now, dispatch a batch
-      command to all hosts at this site, view this site's audit log,
-      compare configuration to fleet defaults
+- [x] Per-site action surface — June 2026: SiteDetail header now carries a
+      per-site action group (batch "Dispatch command", gated to enrolled
+      sites; "Push policies" → policy management); the site audit log is
+      already linked from the page.  *(Site-scoped one-click policy re-push
+      still pending a site-scoped push endpoint — tracked as a follow-up.)*
 
 **Status (12.3 — cross-site Federated Hosts page):** ✅ Landed (June 2026).
 `frontend/src/Pages/FederationHosts.tsx` at `/federation/hosts` renders the
@@ -2701,8 +2709,11 @@ the rest of the surface.  i18n: `federationHosts.*` (27 keys) +
       `/audit/federation` with URL-shareable filters on site,
       operation, and actor; SiteDetail's "View audit log" button
       deep-links pre-filtered by site
-- [ ] Sync status timeline per site — graph of upstream sync latency,
-      offline-queue depth, deduplication-on-replay events
+- [x] Sync status timeline per site — June 2026: SiteDetail renders a
+      dependency-free SVG sparkline of recent upstream-sync latency (falling
+      back to offline-queue depth) from `GET /sites/{id}/sync-timeline`
+      (`federation_site_sync_event` series, pruned per-site + by age), plus
+      the site's reported version + capability chips and the autonomy banner.
 
 **Constraint on the API surface (informs 12.1 implementation):**
 
@@ -2981,43 +2992,43 @@ federation-specific code in it).
 
 **Schema additions** (folded into the 12.6 migration set):
 
-- [ ] ``host.public_ip`` (INET / VARCHAR(45) for IPv6-safe storage)
-- [ ] ``host.public_ip_resolved_at`` (DateTime — last lookup time;
+- [x] ``host.public_ip`` (INET / VARCHAR(45) for IPv6-safe storage)
+- [x] ``host.public_ip_resolved_at`` (DateTime — last lookup time;
       drives cache invalidation)
-- [ ] ``host.geo_country_code`` (CHAR(2), ISO 3166-1 alpha-2)
-- [ ] ``host.geo_subdivision_code`` (VARCHAR(10), ISO 3166-2)
-- [ ] ``host.geo_city`` (VARCHAR(200), MaxMind canonical English
+- [x] ``host.geo_country_code`` (CHAR(2), ISO 3166-1 alpha-2)
+- [x] ``host.geo_subdivision_code`` (VARCHAR(10), ISO 3166-2)
+- [x] ``host.geo_city`` (VARCHAR(200), MaxMind canonical English
       name — used as the lookup key for localized display)
-- [ ] ``host.geo_latitude`` (NUMERIC(8,5))
-- [ ] ``host.geo_longitude`` (NUMERIC(8,5))
+- [x] ``host.geo_latitude`` (NUMERIC(8,5))
+- [x] ``host.geo_longitude`` (NUMERIC(8,5))
 - [ ] Index on ``(geo_country_code, geo_subdivision_code)`` for map
       cluster queries
 
 **Frontend (extends 12.3 federation map):**
 
-- [ ] World map view using existing map library (likely Leaflet +
+- [x] World map view using existing map library (likely Leaflet +
       OpenStreetMap tiles; respects the project's no-third-party-tracker
       stance) with marker clustering for dense regions
-- [ ] Click a cluster → drill into that geographic region's hosts
-- [ ] Click a marker → jump to the host detail page
-- [ ] Filter overlay: by country, by health, by OS, by tag — same
+- [x] Click a cluster → drill into that geographic region's hosts
+- [x] Click a marker → jump to the host detail page
+- [x] Filter overlay: by country, by health, by OS, by tag — same
       facets as the Hosts page so an operator can ask "show me all
       Linux hosts in EMEA running an outdated agent" visually
-- [ ] Toggle between map view and the tiled site-card view (per
+- [x] Toggle between map view and the tiled site-card view (per
       12.3) — same data, different lens
 
 **Privacy / opt-out:**
 
-- [ ] Per-deployment ``geo_lookup.enabled`` server config flag
+- [x] Per-deployment ``geo_lookup.enabled`` server config flag
       (default true, false for air-gapped per Phase 11 deployments
       where geo is meaningless anyway)
-- [ ] Per-host opt-out via tag (operator can tag a host
+- [x] Per-host opt-out via tag (operator can tag a host
       ``no_geo_track`` and it's excluded from lookup + map)
-- [ ] No reverse-geocoding of internal IPs (RFC 1918 / RFC 6598 /
+- [x] No reverse-geocoding of internal IPs (RFC 1918 / RFC 6598 /
       link-local ranges) — those would just resolve to nonsense or
       to the NAT egress point, which is the site server's public IP
       and already known from the site row anyway
-- [ ] No third-party telemetry beyond the optional ipapi.co fallback
+- [x] No third-party telemetry beyond the optional ipapi.co fallback
       — the bundled GeoLite2 lookup happens locally on the site
       server
 
@@ -3063,31 +3074,31 @@ rather than blocking.
 
 ### Migration Steps
 
-1. [ ] Create `module-source/federation_controller_engine/` structure
-2. [ ] Create `federation_controller_engine.pyx` Cython module
-3. [ ] Create `module-source/federation_site_engine/` structure
-4. [ ] Create `federation_site_engine.pyx` Cython module
-5. [ ] Create coordinator database migrations (idempotent, sqlite + postgresql)
-6. [ ] Create site-side database migrations (idempotent, sqlite + postgresql)
-7. [ ] Create frontend plugin bundle for federation UI
-8. [ ] Implement mutual TLS enrollment workflow
-9. [ ] Implement upstream/downstream sync protocol
-10. [ ] Implement command dispatch and result tracking
-11. [ ] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
+1. [x] Create `module-source/federation_controller_engine/` structure
+2. [x] Create `federation_controller_engine.pyx` Cython module
+3. [x] Create `module-source/federation_site_engine/` structure
+4. [x] Create `federation_site_engine.pyx` Cython module
+5. [x] Create coordinator database migrations (idempotent, sqlite + postgresql) — m1fedschema/m3fedalert/m4fedconn/m5fedalertcfg
+6. [x] Create site-side database migrations (idempotent, sqlite + postgresql) — same migration chain (site + coordinator tables co-located)
+7. [x] Create frontend plugin bundle for federation UI
+8. [x] Implement mutual TLS enrollment workflow (12.10)
+9. [x] Implement upstream/downstream sync protocol
+10. [x] Implement command dispatch and result tracking
+11. [x] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
 12. [ ] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5)
 13. [ ] Create federation deployment guide
 14. [ ] i18n/l10n for all 14 languages
 
 ### Deliverables
 
-- [ ] 2 new Pro+ modules (federation_controller_engine, federation_site_engine)
-- [ ] Federation frontend plugin bundle
-- [ ] Database migrations for coordinator and site schemas
-- [ ] Access groups + registration keys folded into `federation_controller_engine`
+- [x] 2 new Pro+ modules (federation_controller_engine, federation_site_engine)
+- [x] Federation frontend plugin bundle
+- [x] Database migrations for coordinator and site schemas
+- [x] Access groups + registration keys folded into `federation_controller_engine`
 - [ ] Dynamic-secret leases folded into `secrets_engine` with federation-aware rotation
 - [ ] Federation deployment and operations guide
 - [ ] Mutual TLS enrollment procedures documentation
-- [ ] Integration tests for sync, dispatch, and offline resilience
+- [ ] Integration tests for sync, dispatch, and offline resilience *(extensive unit coverage exists; full multi-process integration harness still pending)*
 - [ ] Performance tests validating 100-site / 1M-host target
 
 ### Exit Criteria

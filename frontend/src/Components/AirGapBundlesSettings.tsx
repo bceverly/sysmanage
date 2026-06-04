@@ -384,12 +384,12 @@ const AirGapBundlesSettings: React.FC = () => {
         sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}
       >
         {`RAM available: ${resources.ram_available_mb ?? '—'} MB`}
-        {resources.swap_free_mb != null
-          ? ` · swap free: ${resources.swap_free_mb} MB`
-          : ''}
-        {resources.disk_free_gb != null
-          ? ` · disk free: ${resources.disk_free_gb} GB`
-          : ''}
+        {resources.swap_free_mb == null
+          ? ''
+          : ` · swap free: ${resources.swap_free_mb} MB`}
+        {resources.disk_free_gb == null
+          ? ''
+          : ` · disk free: ${resources.disk_free_gb} GB`}
       </Typography>
     );
     const insufficient = resources.severity === 'insufficient';
@@ -470,16 +470,16 @@ const AirGapBundlesSettings: React.FC = () => {
         'The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.',
         { user: docker.process_user || 'sysmanage' },
       );
-    } else if (!docker.running) {
-      summary = t(
-        'airgapBundles.dockerNotRunning',
-        'Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.',
-      );
-    } else {
+    } else if (docker.running) {
       summary = t(
         'airgapBundles.dockerNoGroup',
         'Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.',
         { user: docker.process_user || 'sysmanage' },
+      );
+    } else {
+      summary = t(
+        'airgapBundles.dockerNotRunning',
+        'Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.',
       );
     }
     const installCommand = buildInstallCommand(docker);
@@ -538,6 +538,41 @@ const AirGapBundlesSettings: React.FC = () => {
           </Button>
         </Stack>
       </Alert>
+    );
+  };
+
+  const renderBundleList = () => {
+    if (loading) {
+      return (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            p: 3,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      );
+    }
+    if (bundles.length === 0) {
+      return (
+        <Typography color="text.secondary">
+          {t(
+            'airgapBundles.empty',
+            'No bundles yet. Click a build button above to create one.',
+          )}
+        </Typography>
+      );
+    }
+    return (
+      <DataGrid
+        rows={bundles}
+        columns={columns}
+        getRowId={(r) => r.id}
+        disableRowSelectionOnClick
+        density="compact"
+      />
     );
   };
 
@@ -634,34 +669,7 @@ const AirGapBundlesSettings: React.FC = () => {
               </Alert>
             )}
 
-            <Box sx={{ height: 480 }}>
-              {loading ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    p: 3,
-                  }}
-                >
-                  <CircularProgress />
-                </Box>
-              ) : bundles.length === 0 ? (
-                <Typography color="text.secondary">
-                  {t(
-                    'airgapBundles.empty',
-                    'No bundles yet. Click a build button above to create one.',
-                  )}
-                </Typography>
-              ) : (
-                <DataGrid
-                  rows={bundles}
-                  columns={columns}
-                  getRowId={(r) => r.id}
-                  disableRowSelectionOnClick
-                  density="compact"
-                />
-              )}
-            </Box>
+            <Box sx={{ height: 480 }}>{renderBundleList()}</Box>
           </Stack>
         </CardContent>
       </Card>

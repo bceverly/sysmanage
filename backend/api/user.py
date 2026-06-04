@@ -4,7 +4,7 @@ This module contains the API implementation for the user object in the system.
 
 import asyncio
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from argon2 import PasswordHasher
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -25,9 +25,6 @@ from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 
 # Import will be added at runtime to avoid circular imports
-
-if TYPE_CHECKING:
-    pass
 
 argon2_hasher = PasswordHasher()
 

@@ -402,11 +402,13 @@ const FederationHosts: React.FC = () => {
                         return next;
                       });
                     }}
-                    inputProps={{
-                      "aria-label": t(
-                        "federationHosts.bulk.selectAll",
-                        "Select all on this page",
-                      ),
+                    slotProps={{
+                      input: {
+                        "aria-label": t(
+                          "federationHosts.bulk.selectAll",
+                          "Select all on this page",
+                        ),
+                      },
                     }}
                   />
                 </TableCell>
@@ -491,7 +493,7 @@ const FederationHosts: React.FC = () => {
             onPageChange={(_, p) => setPage(p)}
             rowsPerPage={pageSize}
             onRowsPerPageChange={(e) => {
-              setPageSize(parseInt(e.target.value, 10));
+              setPageSize(Number.parseInt(e.target.value, 10));
               setPage(0);
             }}
             rowsPerPageOptions={[10, 25, 50, 100]}
@@ -511,18 +513,20 @@ const FederationHosts: React.FC = () => {
             t("federationHosts.detail.title", "Host detail")}
         </DialogTitle>
         <DialogContent dividers>
-          {detailLoading ? (
+          {detailLoading && (
             <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
               <CircularProgress />
             </Box>
-          ) : !detailHost ? (
+          )}
+          {!detailLoading && !detailHost && (
             <Alert severity="warning">
               {t(
                 "federationHosts.detail.notFound",
                 "This host is no longer in the directory.",
               )}
             </Alert>
-          ) : (
+          )}
+          {!detailLoading && detailHost && (
             <Stack spacing={1}>
               <DetailRow
                 label={t("federationHosts.columns.fqdn", "Host")}

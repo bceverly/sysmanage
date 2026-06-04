@@ -21,7 +21,7 @@ State machine for ``enrollment_status``:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from sqlalchemy.orm import Session
@@ -40,6 +40,29 @@ STATUS_PENDING = "pending"
 STATUS_ENROLLED = "enrolled"
 STATUS_SUSPENDED = "suspended"
 STATUS_REMOVED = "removed"
+
+# ---------------------------------------------------------------------
+# Connection-health classification (Phase 12.2)
+# ---------------------------------------------------------------------
+
+CONN_ONLINE = "online"
+CONN_DEGRADED = "degraded"
+CONN_OFFLINE = "offline"
+CONN_UNKNOWN = "unknown"
+
+# How many *consecutive* failed sync attempts before the uplink is
+# considered fully offline (and the site flips into local autonomy mode).
+# Anything between 1 and this is "degraded" — a transient blip the operator
+# usually shouldn't be paged about.
+OFFLINE_AFTER_FAILURES = 3
+
+# Reconnect backoff: after a failure the outbound tick must wait at least
+# this long before contacting the coordinator again, doubling per
+# consecutive failure up to the cap.  Keeps a hard-down coordinator from
+# being hammered every ``sync_interval_seconds`` while still recovering
+# quickly once it returns.
+RECONNECT_BACKOFF_BASE_SECONDS = 30
+RECONNECT_BACKOFF_CAP_SECONDS = 900  # 15 minutes
 
 
 # ---------------------------------------------------------------------
@@ -64,6 +87,32 @@ class InvalidCoordinatorStateError(FederationCoordinatorError, ValueError):
 
 def _utcnow_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _classify_connection(consecutive_failures: int) -> str:
+    """Map a consecutive-failure count to a ``connection_state`` label."""
+    if consecutive_failures <= 0:
+        return CONN_ONLINE
+    if consecutive_failures < OFFLINE_AFTER_FAILURES:
+        return CONN_DEGRADED
+    return CONN_OFFLINE
+
+
+def _backoff_seconds(consecutive_failures: int) -> int:
+    """Exponential reconnect backoff (base · 2^(failures-1)) capped.
+
+    ``consecutive_failures`` is the post-increment count, so the first
+    failure (count 1) waits ``base``; failures saturate at the cap rather
+    than overflowing the shift.
+    """
+    if consecutive_failures <= 1:
+        return RECONNECT_BACKOFF_BASE_SECONDS
+    # Cap the exponent so 2**n can't blow up on a long outage.
+    exponent = min(consecutive_failures - 1, 20)
+    return min(
+        RECONNECT_BACKOFF_BASE_SECONDS * (2**exponent),
+        RECONNECT_BACKOFF_CAP_SECONDS,
+    )
 
 
 def _get_or_create(session: Session) -> FederationCoordinator:
@@ -289,14 +338,121 @@ def record_sync_attempt(
     success: bool,
     error: Optional[str] = None,
 ) -> FederationCoordinator:
-    """Mark that we just attempted an upstream sync.
+    """Mark that we just attempted an upstream sync, updating uplink health.
 
-    Updates ``last_sync_at`` and ``last_sync_status``; on failure
-    records the error string so the operator can see it on the
-    sync-status dashboard without scraping logs.
+    Updates ``last_sync_at`` / ``last_sync_status`` (the most recent
+    *attempt*) and, on success, ``last_successful_sync_at`` (the most
+    recent *success* — survives a run of failures so the UI can show "no
+    contact for 2h").  Maintains ``consecutive_sync_failures``, the derived
+    ``connection_state`` (online / degraded / offline), and the
+    ``next_reconnect_at`` backoff gate.
+
+    On success the failure counter resets to 0, the state goes ``online``,
+    and the backoff gate clears.  On failure the counter increments, the
+    state is reclassified, and the gate is pushed out by an exponential
+    backoff so a hard-down coordinator isn't hammered every interval.
     """
     row = _get_or_create(session)
-    row.last_sync_at = _utcnow_naive()
+    now = _utcnow_naive()
+    row.last_sync_at = now
     row.last_sync_status = "success" if success else (error or "error")
     row.last_sync_error = None if success else error
+
+    if success:
+        row.consecutive_sync_failures = 0
+        row.last_successful_sync_at = now
+        row.connection_state = CONN_ONLINE
+        row.next_reconnect_at = None
+    else:
+        row.consecutive_sync_failures = (row.consecutive_sync_failures or 0) + 1
+        row.connection_state = _classify_connection(row.consecutive_sync_failures)
+        row.next_reconnect_at = now + timedelta(
+            seconds=_backoff_seconds(row.consecutive_sync_failures)
+        )
     return row
+
+
+# ---------------------------------------------------------------------
+# Connection health + local autonomy (read/decision side)
+# ---------------------------------------------------------------------
+
+
+def should_attempt_sync(
+    session: Session,
+    *,
+    now: Optional[datetime] = None,
+) -> bool:
+    """Whether the outbound tick may contact the coordinator right now.
+
+    Implements the reconnect backoff: returns False while
+    ``next_reconnect_at`` is in the future, so the tick skips the network
+    round-trip (it still drains/queues locally) until the gate opens.  A
+    site that has never failed (gate is NULL) always returns True.
+
+    The site must also be enrolled (or suspended — a suspended site still
+    polls so it learns when the coordinator resumes it); ``pending`` /
+    ``removed`` / ``not_enrolled`` short-circuit to False.
+    """
+    row = get_coordinator(session)
+    if row is None:
+        return False
+    if row.enrollment_status not in {STATUS_ENROLLED, STATUS_SUSPENDED}:
+        return False
+    if row.next_reconnect_at is None:
+        return True
+    now = now or _utcnow_naive()
+    return now >= row.next_reconnect_at
+
+
+def is_autonomous(session: Session) -> bool:
+    """True iff the site is enrolled but currently cut off from its
+    coordinator (``connection_state == offline``).
+
+    In this state the site runs in *local autonomy mode*: agents keep
+    reporting, OS upgrades keep running, and local deltas keep queuing in
+    ``federation_sync_queue`` for replay once the uplink recovers — nothing
+    blocks on the coordinator.  The flag exists so the UI can show an
+    "operating independently" banner and the engine can suppress
+    coordinator-dependent actions.
+    """
+    row = get_coordinator(session)
+    return (
+        row is not None
+        and row.enrollment_status == STATUS_ENROLLED
+        and row.connection_state == CONN_OFFLINE
+    )
+
+
+def connection_health(session: Session) -> dict:
+    """Snapshot of the site's uplink health for the sync-status surface.
+
+    Returns a plain dict (not the ORM row) so the engine router and the
+    OSS stub can both emit it without leaking SQLAlchemy objects.  Shape is
+    stable regardless of enrollment: an unenrolled site reports
+    ``state == unknown`` with null timestamps.
+    """
+    row = get_coordinator(session)
+    if row is None:
+        return {
+            "state": CONN_UNKNOWN,
+            "enrolled": False,
+            "autonomous": False,
+            "consecutive_failures": 0,
+            "last_sync_at": None,
+            "last_successful_sync_at": None,
+            "last_sync_status": None,
+            "last_sync_error": None,
+            "next_reconnect_at": None,
+        }
+    enrolled = row.enrollment_status == STATUS_ENROLLED
+    return {
+        "state": row.connection_state or CONN_UNKNOWN,
+        "enrolled": enrolled,
+        "autonomous": enrolled and row.connection_state == CONN_OFFLINE,
+        "consecutive_failures": row.consecutive_sync_failures or 0,
+        "last_sync_at": row.last_sync_at,
+        "last_successful_sync_at": row.last_successful_sync_at,
+        "last_sync_status": row.last_sync_status,
+        "last_sync_error": row.last_sync_error,
+        "next_reconnect_at": row.next_reconnect_at,
+    }

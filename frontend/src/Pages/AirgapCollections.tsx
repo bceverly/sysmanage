@@ -63,14 +63,14 @@ type RunStatus =
   | 'COMPLETE'
   | 'FAILED';
 
-const IN_FLIGHT_STATUSES: RunStatus[] = [
+const IN_FLIGHT_STATUSES = new Set<RunStatus>([
   'QUEUED',
   'MIRRORING',
   'STAGING_COMPLETE',
   'BUILDING_ISO',
   'ISO_BUILT',
   'BURNING',
-];
+]);
 
 interface RunTarget {
   // Option-B: operator picks a mirror; backend derives distro/version.
@@ -102,7 +102,7 @@ interface CollectionRun {
   iso_size_bytes?: number | null;
   include_cve: boolean;
   include_compliance: boolean;
-  status: RunStatus | string;
+  status: string;
   started_at: string | null;
   completed_at: string | null;
   error_message: string | null;
@@ -196,10 +196,11 @@ const formatElapsed = (since: Date): string => {
  * avoid rebuilding the whole DataGrid column array every second.
  */
 const RunStatusCell: React.FC<{ row: CollectionRun }> = ({ row }) => {
-  const inFlight = IN_FLIGHT_STATUSES.includes(row.status as RunStatus);
+  const inFlight = IN_FLIGHT_STATUSES.has(row.status as RunStatus);
   // Throwaway tick state forces a 1s re-render while in-flight; the
-  // interval is torn down the moment the run settles.
-  const [, setTick] = useState(0);
+  // interval is torn down the moment the run settles.  Only the setter
+  // is needed (the value is meaningless), hence the unused first slot.
+  const [, setTick] = useState(0); // NOSONAR S6754 - re-render tick; value intentionally unused
   useEffect(() => {
     if (!inFlight) return undefined;
     const h = setInterval(() => setTick((n) => n + 1), 1000);
@@ -338,7 +339,7 @@ const AirgapCollections: React.FC = () => {
   // QUEUED -> MIRRORING -> ... -> COMPLETE without a manual refresh.
   // Stops polling once everything's settled to avoid hammering the API.
   useEffect(() => {
-    const inFlight = runs.some((r) => IN_FLIGHT_STATUSES.includes(r.status as RunStatus));
+    const inFlight = runs.some((r) => IN_FLIGHT_STATUSES.has(r.status as RunStatus));
     if (!inFlight) return;
     const id = globalThis.setInterval(() => refresh(), 5000);
     return () => globalThis.clearInterval(id);
@@ -652,7 +653,7 @@ const AirgapCollections: React.FC = () => {
         // back to the configured media size so the column isn't blank.
         valueGetter: (_v, row: CollectionRun) =>
           formatBytes(
-            row.iso_size_bytes != null ? row.iso_size_bytes : row.media_size_bytes,
+            row.iso_size_bytes ?? row.media_size_bytes,
           ),
       },
       {
@@ -750,18 +751,20 @@ const AirgapCollections: React.FC = () => {
       </Stack>
 
       <Box sx={{ height: 540 }}>
-        {loading ? (
+        {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <CircularProgress />
           </Box>
-        ) : runs.length === 0 ? (
+        )}
+        {!loading && runs.length === 0 && (
           <Typography color="text.secondary">
             {t(
               'airgapCollections.empty',
               'No collection runs yet. Click "New Collection Run" to start one.',
             )}
           </Typography>
-        ) : (
+        )}
+        {!loading && runs.length > 0 && (
           <DataGrid
             rows={runs}
             columns={columns}
@@ -790,7 +793,7 @@ const AirgapCollections: React.FC = () => {
               label={t('airgapCollections.dialog.isoLabel', 'ISO Label')}
               value={formIsoLabel}
               onChange={(e) => setFormIsoLabel(e.target.value)}
-              inputProps={{ maxLength: 80 }}
+              slotProps={{ htmlInput: { maxLength: 80 } }}
               helperText={t(
                 'airgapCollections.dialog.isoLabelHelper',
                 'Short identifier embedded in the produced ISO (e.g. "monthly-2026-05").',
@@ -803,7 +806,7 @@ const AirgapCollections: React.FC = () => {
               label={t('airgapCollections.dialog.mediaSizeMb', 'Media Size (MB)')}
               value={formMediaSizeMB}
               onChange={(e) =>
-                setFormMediaSizeMB(Math.max(1, parseInt(e.target.value, 10) || 0))
+                setFormMediaSizeMB(Math.max(1, Number.parseInt(e.target.value, 10) || 0))
               }
               helperText={t(
                 'airgapCollections.dialog.mediaSizeHelper',
@@ -872,11 +875,11 @@ const AirgapCollections: React.FC = () => {
                     setFormMirrorIds(
                       typeof e.target.value === 'string'
                         ? e.target.value.split(',')
-                        : (e.target.value as string[]),
+                        : e.target.value,
                     )
                   }
                   renderValue={(selected) =>
-                    (selected as string[])
+                    selected
                       .map(
                         (id) =>
                           availableMirrors.find((m) => m.id === id)?.name ?? id,

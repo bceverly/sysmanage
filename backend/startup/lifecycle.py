@@ -25,6 +25,19 @@ from backend.websocket.message_processor import message_processor
 
 logger = get_logger("backend.startup.lifecycle")
 
+# Strong references to fire-and-forget background tasks.  ``asyncio`` only
+# keeps a WEAK reference to a task, so a task whose handle isn't retained
+# can be garbage-collected mid-flight; the done-callback discards it once
+# it finishes.  (Tasks held in lifespan locals are kept alive by the
+# suspended frame; the ones started here use this set instead.)
+_BACKGROUND_TASKS: set = set()
+
+
+def _track_background_task(task) -> None:
+    """Retain a strong ref to ``task`` until it completes (GC-safe)."""
+    _BACKGROUND_TASKS.add(task)
+    task.add_done_callback(_BACKGROUND_TASKS.discard)
+
 
 @asynccontextmanager
 async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
@@ -278,10 +291,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             "=== FEDERATION CONTROLLER ENGINE PUSH WORKER STARTUP ==="
                         )
                         try:
-                            federation_push_task = asyncio.create_task(
-                                federation_controller_engine.start_federation_push_worker(
-                                    db_maker=get_db,
-                                    logger=logger,
+                            _track_background_task(
+                                asyncio.create_task(
+                                    federation_controller_engine.start_federation_push_worker(
+                                        db_maker=get_db,
+                                        logger=logger,
+                                    )
                                 )
                             )
                             logger.info(
@@ -312,10 +327,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             "=== FEDERATION SITE ENGINE SYNC WORKER STARTUP ==="
                         )
                         try:
-                            federation_sync_task = asyncio.create_task(
-                                federation_site_engine.start_federation_sync_worker(
-                                    db_maker=get_db,
-                                    logger=logger,
+                            _track_background_task(
+                                asyncio.create_task(
+                                    federation_site_engine.start_federation_sync_worker(
+                                        db_maker=get_db,
+                                        logger=logger,
+                                    )
                                 )
                             )
                             logger.info("Federation site engine sync worker started")

@@ -158,19 +158,6 @@ def mock_auth_header():
 class TestPackageInstallationAPI:
     """Test cases for package installation API endpoints"""
 
-    @pytest.mark.xfail(
-        reason=(
-            "Test written against pre-Phase-8 data model.  The install "
-            "endpoint now writes to ``InstallationRequest`` + "
-            "``InstallationPackage`` (one request, many packages, "
-            "grouped under a single ``request_id``) rather than the "
-            "legacy ``SoftwareInstallationLog`` table the assertions "
-            "below still query.  HTTP shape + status are validated; "
-            "the row-level assertions are obsolete.  Rewrite against "
-            "the new schema is tracked as latent test debt."
-        ),
-        strict=False,
-    )
     def test_install_packages_success(
         self, client, test_session, test_host, mock_auth_header
     ):
@@ -200,34 +187,40 @@ class TestPackageInstallationAPI:
         assert data["request_id"]
         assert "Successfully queued 3 packages for installation" in data["message"]
 
-        # Verify that installation log entries were created.  The
-        # endpoint commits via its OWN sessionmaker (the get_engine
-        # override points it at the same engine), so the rows are
-        # written on a different SQLAlchemy session than ``test_session``.
-        # ``test_session.expire_all()`` invalidates the identity-map
-        # so the next query re-fetches from the DB and sees the rows
-        # the endpoint just committed.
+        # Phase 8 schema: the endpoint writes ONE InstallationRequest
+        # (carrying the shared ``request_id``) plus one InstallationPackage
+        # per package, grouped by ``installation_request_id``.  The endpoint
+        # commits on its OWN sessionmaker (pointed at the same engine), so
+        # ``expire_all()`` drops the test session's identity map and forces
+        # a re-read of the rows the endpoint just committed.
         test_session.expire_all()
-        installation_logs = (
-            test_session.query(models.SoftwareInstallationLog)
-            .filter(models.SoftwareInstallationLog.host_id == test_host.id)
+        requests = (
+            test_session.query(models.InstallationRequest)
+            .filter(models.InstallationRequest.host_id == test_host.id)
             .all()
         )
-        assert len(installation_logs) == 3
+        assert len(requests) == 1
+        request_row = requests[0]
+        assert str(request_row.id) == data["request_id"]
+        # Created "pending", then advanced to "in_progress" once the
+        # command message is queued to the agent.
+        assert request_row.status == "in_progress"
+        assert request_row.requested_by == "test-user"
+        assert request_row.operation_type == "install"
 
-        package_names = [log.package_name for log in installation_logs]
-        assert "vim" in package_names
-        assert "curl" in package_names
-        assert "htop" in package_names
-
-        # Verify all logs have correct initial status.  Each log's
-        # ``installation_id`` now equals the SHARED ``request_id`` so
-        # the coordinator can correlate.
-        for log in installation_logs:
-            assert log.status == "queued"
-            assert log.requested_by == "test-user"
-            assert log.package_manager == "auto"
-            assert log.installation_id == data["request_id"]
+        # One InstallationPackage row per package, all under the request.
+        packages = (
+            test_session.query(models.InstallationPackage)
+            .filter(
+                models.InstallationPackage.installation_request_id == request_row.id
+            )
+            .all()
+        )
+        assert len(packages) == 3
+        assert {pkg.package_name for pkg in packages} == {"vim", "curl", "htop"}
+        for pkg in packages:
+            # The agent picks the real manager; the request defaults to "auto".
+            assert pkg.package_manager == "auto"
 
     def test_install_packages_host_not_found(self, client, mock_auth_header):
         """Test package installation with non-existent host"""

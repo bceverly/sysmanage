@@ -75,11 +75,11 @@ function makeSiteIcon(status: FederationSiteSummary["status"]): L.DivIcon {
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function popupHtml(site: FederationSiteSummary, openLabel: string): string {
@@ -179,8 +179,8 @@ const SitesMap: React.FC = () => {
         // map already torn down — fine.
       }
     };
-    const rafId = window.requestAnimationFrame(invalidate);
-    window.addEventListener("resize", invalidate);
+    const rafId = globalThis.requestAnimationFrame(invalidate);
+    globalThis.addEventListener("resize", invalidate);
 
     // Click-delegate for "Open site detail" links in popups.
     const onContainerClick = (event: globalThis.Event) => {
@@ -202,8 +202,8 @@ const SitesMap: React.FC = () => {
 
     return () => {
       container.removeEventListener("click", onContainerClick);
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", invalidate);
+      globalThis.cancelAnimationFrame(rafId);
+      globalThis.removeEventListener("resize", invalidate);
       map.remove();
       mapRef.current = null;
       markerGroupRef.current = null;

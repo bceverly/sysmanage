@@ -64,6 +64,37 @@ const POLL_MS = 2000;
 // indefinite "Checking..." spinner.
 const IN_FLIGHT_TIMEOUT_MS = 5 * 60 * 1000;
 
+// Derives the in-flight / timeout state for the probe + install
+// operations.  Pulled out of the component body to keep its cognitive
+// complexity in check — pure function of the current status + clock.
+const computeFlightState = (
+  status: MirrorSetupStatus | null,
+  now: number,
+) => {
+  const elapsedSinceCheckMs =
+    status?.last_check_at && status.last_check_message_id
+      ? now - new Date(status.last_check_at).getTime()
+      : 0;
+  const elapsedSinceInstallMs =
+    status?.last_install_at && status.last_install_message_id
+      ? now - new Date(status.last_install_at).getTime()
+      : 0;
+  const probeTimedOut = elapsedSinceCheckMs > IN_FLIGHT_TIMEOUT_MS;
+  const installTimedOut = elapsedSinceInstallMs > IN_FLIGHT_TIMEOUT_MS;
+  // Treat a timed-out operation as no longer in-flight — stops the
+  // spinner + re-enables the buttons so the operator can retry.
+  const probeInFlight = !!status?.last_check_message_id && !probeTimedOut;
+  const installInFlight = !!status?.last_install_message_id && !installTimedOut;
+  const neverProbed = status && !status.last_check_at;
+  return {
+    probeTimedOut,
+    installTimedOut,
+    probeInFlight,
+    installInFlight,
+    neverProbed,
+  };
+};
+
 const MirrorSetupStatusCard: React.FC<Props> = ({
   hostId,
   hostFqdn,
@@ -186,21 +217,13 @@ const MirrorSetupStatusCard: React.FC<Props> = ({
   // swallowed our command (e.g. duplicate-skip without emitting a
   // result), the server-side ``last_*_message_id`` never clears and
   // we'd spin forever without this gate.
-  const elapsedSinceCheckMs =
-    status?.last_check_at && status.last_check_message_id
-      ? now - new Date(status.last_check_at).getTime()
-      : 0;
-  const elapsedSinceInstallMs =
-    status?.last_install_at && status.last_install_message_id
-      ? now - new Date(status.last_install_at).getTime()
-      : 0;
-  const probeTimedOut = elapsedSinceCheckMs > IN_FLIGHT_TIMEOUT_MS;
-  const installTimedOut = elapsedSinceInstallMs > IN_FLIGHT_TIMEOUT_MS;
-  // Treat a timed-out operation as no longer in-flight — stops the
-  // spinner + re-enables the buttons so the operator can retry.
-  const probeInFlight = !!status?.last_check_message_id && !probeTimedOut;
-  const installInFlight = !!status?.last_install_message_id && !installTimedOut;
-  const neverProbed = status && !status.last_check_at;
+  const {
+    probeTimedOut,
+    installTimedOut,
+    probeInFlight,
+    installInFlight,
+    neverProbed,
+  } = computeFlightState(status, now);
 
   return (
     <Card sx={{ mb: 2 }}>

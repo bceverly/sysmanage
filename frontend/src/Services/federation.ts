@@ -181,6 +181,47 @@ export async function doGetFederationSiteSyncStatus(
 }
 
 // ---------------------------------------------------------------------
+// Per-site sync-status timeline (Phase 12.2)
+// ---------------------------------------------------------------------
+
+/** One point on a site's upstream-sync timeline. */
+export interface FederationSyncEvent {
+  recorded_at: string | null;
+  sync_status: string;
+  latency_ms: number | null;
+  queue_depth: number | null;
+  host_count: number | null;
+}
+
+/**
+ * Per-site sync-status timeline plus the site's latest self-reported
+ * metadata.  ``connection_state`` here is the SITE's own view of its
+ * uplink (online / degraded / offline) — when ``offline`` the site is
+ * operating in local autonomy mode.  ``capabilities`` is the list of
+ * Pro+ engine modules the site advertises.
+ */
+export interface FederationSiteSyncTimeline {
+  licensed: boolean;
+  site_id?: string;
+  sysmanage_version?: string | null;
+  connection_state?: string | null;
+  capabilities?: string[];
+  last_metadata_at?: string | null;
+  events: FederationSyncEvent[];
+}
+
+export async function doGetFederationSiteSyncTimeline(
+  siteId: string,
+  limit = 100,
+): Promise<FederationSiteSyncTimeline> {
+  const response = await axiosInstance.get<FederationSiteSyncTimeline>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/sync-timeline`,
+    { params: { limit } },
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
 // Federation audit log
 // ---------------------------------------------------------------------
 
@@ -492,6 +533,58 @@ export async function doPushFederationPolicy(
   return response.data;
 }
 
+/** Per-site "Push policies now": requeues every policy assigned to the
+ * site for re-delivery on the next push-worker tick. */
+export interface FederationRepushResponse {
+  licensed: boolean;
+  requeued_count?: number;
+}
+
+export async function doRepushSitePolicies(
+  siteId: string,
+): Promise<FederationRepushResponse> {
+  const response = await axiosInstance.post<FederationRepushResponse>(
+    `/api/v1/federation/sites/${encodeURIComponent(siteId)}/repush-policies`,
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Alert thresholds (Phase 12.1 — operator-configurable)
+// ---------------------------------------------------------------------
+
+/** The four configurable rollup-alert thresholds.  A null override means
+ * "use the built-in default" (reflected in ``effective``). */
+export interface FederationAlertThresholds {
+  offline_multiplier: number | null;
+  min_offline_seconds: number | null;
+  compliance_threshold: number | null;
+  critical_cve_threshold: number | null;
+}
+
+export interface FederationAlertConfigResponse {
+  licensed: boolean;
+  effective?: FederationAlertThresholds;
+  overrides?: FederationAlertThresholds;
+}
+
+export async function doGetFederationAlertConfig(): Promise<FederationAlertConfigResponse> {
+  const response = await axiosInstance.get<FederationAlertConfigResponse>(
+    `/api/v1/federation/alert-config`,
+  );
+  return response.data;
+}
+
+export async function doUpdateFederationAlertConfig(
+  overrides: Partial<FederationAlertThresholds>,
+): Promise<FederationAlertConfigResponse> {
+  const response = await axiosInstance.put<FederationAlertConfigResponse>(
+    `/api/v1/federation/alert-config`,
+    overrides,
+  );
+  return response.data;
+}
+
 // ---------------------------------------------------------------------
 // Dispatched commands (coordinator → site)
 // ---------------------------------------------------------------------
@@ -541,8 +634,9 @@ export async function doListFederationCommands(params: {
   if (params.limit !== undefined) search.set("limit", String(params.limit));
   if (params.offset !== undefined) search.set("offset", String(params.offset));
   const qs = search.toString();
+  const query = qs ? `?${qs}` : "";
   const response = await axiosInstance.get<FederationCommandListResponse>(
-    `/api/v1/federation/commands${qs ? `?${qs}` : ""}`,
+    `/api/v1/federation/commands${query}`,
   );
   return response.data;
 }
@@ -593,6 +687,66 @@ export async function doGetFederationDashboardRollup(
 ): Promise<FederationDashboardRollupResponse> {
   const response = await axiosInstance.get<FederationDashboardRollupResponse>(
     `/api/v1/federation/rollups/dashboard?site_id=${encodeURIComponent(siteId)}`,
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
+// Rollup alerts (Phase 12.1 — cross-site alerting)
+// ---------------------------------------------------------------------
+
+export interface FederationAlert {
+  id: string;
+  site_id: string;
+  /** site_offline | compliance_below | vulnerabilities_high */
+  condition: string;
+  /** warning | critical */
+  severity: string;
+  title: string;
+  message: string;
+  details?: Record<string, unknown> | null;
+  triggered_at?: string | null;
+  resolved: boolean;
+  resolved_at?: string | null;
+  acknowledged: boolean;
+  acknowledged_at?: string | null;
+}
+
+export interface FederationAlertListResponse {
+  licensed: boolean;
+  alerts?: FederationAlert[];
+}
+
+export interface FederationAlertAckResponse {
+  licensed: boolean;
+  alert?: FederationAlert | null;
+}
+
+/** List federation rollup alerts (open-only by default). */
+export async function doListFederationAlerts(params: {
+  site_id?: string;
+  include_resolved?: boolean;
+  limit?: number;
+}): Promise<FederationAlertListResponse> {
+  const search = new URLSearchParams();
+  if (params.site_id) search.set("site_id", params.site_id);
+  if (params.include_resolved) search.set("include_resolved", "true");
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  const qs = search.toString();
+  const query = qs ? `?${qs}` : "";
+  const response = await axiosInstance.get<FederationAlertListResponse>(
+    `/api/v1/federation/alerts${query}`,
+  );
+  return response.data;
+}
+
+/** Acknowledge an open alert. */
+export async function doAcknowledgeFederationAlert(
+  alertId: string,
+): Promise<FederationAlertAckResponse> {
+  const response = await axiosInstance.post<FederationAlertAckResponse>(
+    `/api/v1/federation/alerts/${encodeURIComponent(alertId)}/acknowledge`,
+    {},
   );
   return response.data;
 }
@@ -725,8 +879,9 @@ export async function doSearchFederationHosts(params: {
   set("limit", params.limit);
   set("offset", params.offset);
   const qs = search.toString();
+  const query = qs ? `?${qs}` : "";
   const response = await axiosInstance.get<FederationHostSearchResponse>(
-    `/api/v1/federation/hosts${qs ? `?${qs}` : ""}`,
+    `/api/v1/federation/hosts${query}`,
   );
   return response.data;
 }

@@ -10,11 +10,11 @@ All endpoints require an authenticated user with the
 allowed through for bootstrap.
 """
 
+import asyncio
 import os
 import shutil
-import subprocess  # nosec B404 - used only for `docker info` readiness probe
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 # grp/pwd are POSIX-only stdlib modules; on Windows the airgap bundle
 # builder doesn't run (Docker-per-distro-Linux can only be driven from
@@ -76,37 +76,37 @@ class BundleResponse(BaseModel):
     id: str
     product: str
     status: str
-    created_at: Optional[str]
-    started_at: Optional[str]
-    completed_at: Optional[str]
-    size_bytes: Optional[int]
-    error_message: Optional[str]
-    version: Optional[str]
+    created_at: Optional[str] = None
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    size_bytes: Optional[int] = None
+    error_message: Optional[str] = None
+    version: Optional[str] = None
 
 
 class DockerStatusResponse(BaseModel):
     installed: bool  # docker binary on PATH
     running: bool  # `docker info` succeeds
-    version: Optional[str]  # parsed from `docker --version`
+    version: Optional[str] = None  # parsed from `docker --version`
     user_in_group: bool  # current process user is in the docker group
     process_user: str  # the OS user the API is running as
-    error: Optional[str]  # short human-readable diagnostic when not ready
+    error: Optional[str] = None  # short human-readable diagnostic when not ready
     permission_denied: bool  # daemon reachable on socket but we can't read it
 
 
 class ResourceStatusResponse(BaseModel):
-    ram_total_mb: Optional[int]
-    ram_available_mb: Optional[int]  # real RAM a new process can take now
-    swap_total_mb: Optional[int]
-    swap_free_mb: Optional[int]
-    available_mb: Optional[int]  # ram_available + swap_free
-    disk_free_gb: Optional[float]  # min free across bundle dir + staging
-    disk_total_gb: Optional[float]
+    ram_total_mb: Optional[int] = None
+    ram_available_mb: Optional[int] = None  # real RAM a new process can take now
+    swap_total_mb: Optional[int] = None
+    swap_free_mb: Optional[int] = None
+    available_mb: Optional[int] = None  # ram_available + swap_free
+    disk_free_gb: Optional[float] = None  # min free across bundle dir + staging
+    disk_total_gb: Optional[float] = None
     min_available_mb: int  # threshold below which a build is blocked
     min_disk_gb: int
     severity: str  # "ok" | "warn" | "insufficient"
     sufficient: bool  # False => build is blocked
-    reason: Optional[str]  # human-readable detail when not "ok"
+    reason: Optional[str] = None  # human-readable detail when not "ok"
 
 
 # Resource thresholds for a Docker-driven multi-platform bundle build.
@@ -122,7 +122,10 @@ _SOFT_BUILD_DISK_GB = 10  # free disk below this -> warn
 # Where buildAirGapBundle.sh stages the build (its STAGING_DIR default).
 # We only ``stat`` its free space here — we never create a file in it — so
 # the bandit hardcoded-tmp warning does not apply.
-_STAGING_PARENT = "/var/tmp"  # nosec B108 - read-only disk_usage probe, not a temp file
+_STAGING_PARENT = "/var/tmp"  # nosec B108  # NOSONAR S5443 - read-only disk_usage probe, never written to
+
+# Reused 404 detail for missing-bundle lookups.
+_BUNDLE_NOT_FOUND = "Bundle not found"
 
 
 def _read_meminfo_mb():
@@ -301,7 +304,7 @@ def _resolve_caller_user_id(current_user: str) -> Optional[uuid.UUID]:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/docker-status", response_model=DockerStatusResponse)
+@router.get("/docker-status")
 @requires_pro_plus()
 async def docker_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -343,73 +346,90 @@ async def docker_status(
             permission_denied=False,
         )
 
-    version: Optional[str] = None
-    try:
-        proc = subprocess.run(  # nosec B603 - fixed args, no user input
-            [docker_path, "--version"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-        if proc.returncode == 0:
-            version = proc.stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        pass
-
-    running = False
-    error: Optional[str] = None
-    permission_denied = False
-    try:
-        proc = subprocess.run(  # nosec B603 - fixed args, no user input
-            [docker_path, "info"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
-        running = proc.returncode == 0
-        if not running:
-            # Trim long output to a single useful line.
-            stderr_line = (proc.stderr or "").strip().splitlines()
-            error = stderr_line[0] if stderr_line else "docker info exited non-zero"
-            # Differentiate "daemon down" from "daemon up but I can't
-            # read the socket" — the latter is a group-membership
-            # problem and needs a very different remediation.
-            if error and "permission denied" in error.lower():
-                permission_denied = True
-    except (OSError, subprocess.SubprocessError) as exc:
-        error = str(exc)
-
-    user_in_group = False
-    try:
-        docker_group = grp.getgrnam("docker")
-        # Check the *current process user* — that's who actually
-        # spawns the build subprocess.  In a packaged install this is
-        # the 'sysmanage' system user; in dev it's whoever started
-        # `make run`.  Hardcoding 'sysmanage' would mis-flag dev hosts.
-        try:
-            current_username = pwd.getpwuid(os.geteuid()).pw_name
-        except KeyError:
-            current_username = ""
-        # Either named-membership or the user's primary GID matches.
-        user_in_group = (
-            current_username in docker_group.gr_mem
-            or docker_group.gr_gid in os.getgroups()
-        )
-    except KeyError:
-        # No 'docker' group at all means docker package was never
-        # installed via the system package manager.
-        pass
-
+    rc, out, _err = await _run_docker(docker_path, "--version")
+    version: Optional[str] = out.strip() if rc == 0 else None
+    running, error, permission_denied = await _docker_running_state(docker_path)
     return DockerStatusResponse(
         installed=True,
         running=running,
         version=version,
-        user_in_group=user_in_group,
+        user_in_group=_user_in_docker_group(),
         process_user=process_user,
         error=error,
         permission_denied=permission_denied,
+    )
+
+
+async def _run_docker(
+    docker_path: str,
+    *args: str,
+    timeout: float = 5.0,  # NOSONAR - 3.9 floor: no asyncio.timeout() ctx mgr
+) -> Tuple[int, str, str]:
+    """Run ``docker <args>`` without blocking the event loop (async subprocess).
+
+    Returns ``(returncode, stdout, stderr)``; returncode ``-1`` on a
+    spawn error or timeout.  Fixed argv, no user input.
+    """
+    try:
+        proc = await asyncio.create_subprocess_exec(  # nosec B603 - fixed args
+            docker_path,
+            *args,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    except OSError as exc:
+        return -1, "", str(exc)
+    # asyncio.timeout() (the context-manager form Sonar prefers) is
+    # Python 3.11+; this project's floor is 3.9, so wait_for stays.
+    comm = proc.communicate()
+    try:
+        out, err = await asyncio.wait_for(comm, timeout=timeout)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        return -1, "", "timed out"
+    return (
+        proc.returncode if proc.returncode is not None else -1,
+        out.decode(errors="replace"),
+        err.decode(errors="replace"),
+    )
+
+
+async def _docker_running_state(docker_path: str) -> Tuple[bool, Optional[str], bool]:
+    """Probe ``docker info`` → (running, error, permission_denied)."""
+    rc, _out, err = await _run_docker(docker_path, "info")
+    if rc == 0:
+        return True, None, False
+    # Trim long output to a single useful line.
+    stderr_line = (err or "").strip().splitlines()
+    error = stderr_line[0] if stderr_line else "docker info exited non-zero"
+    # Differentiate "daemon down" from "daemon up but I can't read the
+    # socket" — the latter is a group-membership problem with very
+    # different remediation.
+    permission_denied = bool(error) and "permission denied" in error.lower()
+    return False, error, permission_denied
+
+
+def _user_in_docker_group() -> bool:
+    """True if the current process user can reach the docker socket.
+
+    Checks the *current process user* (who actually spawns the build
+    subprocess) — the 'sysmanage' system user in a packaged install, or
+    whoever started ``make run`` in dev.  Hardcoding 'sysmanage' would
+    mis-flag dev hosts.
+    """
+    try:
+        docker_group = grp.getgrnam("docker")
+    except KeyError:
+        # No 'docker' group means docker was never installed via the
+        # system package manager.
+        return False
+    try:
+        current_username = pwd.getpwuid(os.geteuid()).pw_name
+    except KeyError:
+        current_username = ""
+    return (
+        current_username in docker_group.gr_mem or docker_group.gr_gid in os.getgroups()
     )
 
 
@@ -421,7 +441,7 @@ async def docker_status(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/resource-status", response_model=ResourceStatusResponse)
+@router.get("/resource-status")
 @requires_pro_plus()
 async def resource_status(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -434,7 +454,7 @@ async def resource_status(
 # ---------------------------------------------------------------------------
 
 
-@router.post("", response_model=BundleResponse, status_code=202)
+@router.post("", status_code=202)
 @requires_pro_plus()
 async def create_bundle(
     req: BundleCreateRequest, current_user: str = Depends(get_current_user)
@@ -488,7 +508,7 @@ async def create_bundle(
 # ---------------------------------------------------------------------------
 
 
-@router.get("", response_model=List[BundleResponse])
+@router.get("")
 @requires_pro_plus()
 async def list_bundles(
     current_user: str = Depends(get_current_user),  # noqa: ARG001
@@ -508,7 +528,7 @@ async def list_bundles(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/{bundle_id}", response_model=BundleResponse)
+@router.get("/{bundle_id}")
 @requires_pro_plus()
 async def get_bundle(
     bundle_id: uuid.UUID,
@@ -522,7 +542,7 @@ async def get_bundle(
             .first()
         )
         if row is None:
-            raise HTTPException(status_code=404, detail=_("Bundle not found"))
+            raise HTTPException(status_code=404, detail=_(_BUNDLE_NOT_FOUND))
         return _row_to_response(row)
 
 
@@ -547,7 +567,7 @@ def _bundle_file_response(bundle_id: uuid.UUID) -> FileResponse:
             .first()
         )
         if row is None:
-            raise HTTPException(status_code=404, detail=_("Bundle not found"))
+            raise HTTPException(status_code=404, detail=_(_BUNDLE_NOT_FOUND))
         if row.status != models.BUNDLE_STATUS_READY:
             raise HTTPException(
                 status_code=409,
@@ -626,7 +646,7 @@ async def delete_bundle(
             .first()
         )
         if row is None:
-            raise HTTPException(status_code=404, detail=_("Bundle not found"))
+            raise HTTPException(status_code=404, detail=_(_BUNDLE_NOT_FOUND))
         # Remove on-disk artifact + log (best effort).
         for path_attr in ("file_path", "log_path"):
             p = getattr(row, path_attr, None)

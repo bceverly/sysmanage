@@ -476,3 +476,46 @@ class TestPushBackoffAndDeadLetter:
         future = _dt.utcnow().replace(tzinfo=None) + timedelta(hours=2)
         ready = psvc.list_all_pending_pushes(session, now=future)
         assert len(ready) == 1
+
+
+class TestRequeueSitePolicies:
+    def test_resets_assignments_to_pending(self, session, enrolled_site):
+        p1 = psvc.create_policy(session, policy_type="x", name="p1", definition={})
+        p2 = psvc.create_policy(session, policy_type="x", name="p2", definition={})
+        psvc.assign_policy_to_sites(session, p1.id, [enrolled_site.id])
+        psvc.assign_policy_to_sites(session, p2.id, [enrolled_site.id])
+        # Mark both as pushed so requeue has something to reset.
+        psvc.mark_policy_pushed(session, p1.id, enrolled_site.id, pushed_version=1)
+        psvc.mark_policy_pushed(session, p2.id, enrolled_site.id, pushed_version=1)
+        session.commit()
+
+        affected = psvc.requeue_site_policies(session, enrolled_site.id)
+        session.commit()
+        assert len(affected) == 2
+        rows = psvc.list_assignments_for_site(session, enrolled_site.id)
+        assert all(r.push_status == psvc.PUSH_STATUS_PENDING for r in rows)
+
+    def test_rescues_dead_lettered_assignment(self, session, enrolled_site):
+        p = psvc.create_policy(session, policy_type="x", name="p", definition={})
+        psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id])
+        row = psvc.list_assignments_for_site(session, enrolled_site.id)[0]
+        row.push_status = psvc.PUSH_STATUS_DEAD
+        row.push_attempts = 99
+        row.last_push_error = "gave up"
+        session.commit()
+
+        psvc.requeue_site_policies(session, enrolled_site.id)
+        session.commit()
+        row = psvc.list_assignments_for_site(session, enrolled_site.id)[0]
+        assert row.push_status == psvc.PUSH_STATUS_PENDING
+        assert row.push_attempts == 0
+        assert row.last_push_error is None
+
+    def test_empty_when_site_has_no_policies(self, session, enrolled_site):
+        assert psvc.requeue_site_policies(session, enrolled_site.id) == []
+
+    def test_unknown_site_raises_lookup(self, session):
+        import uuid as _uuid
+
+        with pytest.raises(LookupError):
+            psvc.requeue_site_policies(session, _uuid.uuid4())

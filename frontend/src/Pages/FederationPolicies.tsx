@@ -68,6 +68,7 @@ import {
   FederationPolicyAssignment,
   FederationSiteSummary,
 } from "../Services/federation";
+import FederationAlertConfig from "../Components/FederationAlertConfig";
 
 // Operator-visible policy types.  Mirrored from
 // federation_policy_service's docstring — the engine accepts any
@@ -435,7 +436,7 @@ const FederationPolicies: React.FC = () => {
   const distinctTypes = useMemo(() => {
     const types = new Set<string>(KNOWN_POLICY_TYPES);
     for (const p of state.policies) types.add(p.policy_type);
-    return Array.from(types).sort();
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
   }, [state.policies]);
 
   // ----- Render branches -----
@@ -509,6 +510,9 @@ const FederationPolicies: React.FC = () => {
           {t("policies.create.button", "New Policy")}
         </Button>
       </Box>
+
+      {/* Operator-configurable rollup-alert thresholds (Phase 12.1). */}
+      <FederationAlertConfig />
 
       {/* Filter row */}
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -869,18 +873,20 @@ const FederationPolicies: React.FC = () => {
               {assignDialog.error}
             </Alert>
           )}
-          {assignDialog.loadingSites ? (
+          {assignDialog.loadingSites && (
             <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
               <CircularProgress />
             </Box>
-          ) : assignDialog.sites.length === 0 ? (
+          )}
+          {!assignDialog.loadingSites && assignDialog.sites.length === 0 && (
             <DialogContentText>
               {t(
                 "policies.assign.noSites",
                 "No federation sites are enrolled.  Enroll a site first.",
               )}
             </DialogContentText>
-          ) : (
+          )}
+          {!assignDialog.loadingSites && assignDialog.sites.length > 0 && (
             <List dense>
               {assignDialog.sites.map((site) => {
                 const checked = assignDialog.selected.has(site.id);

@@ -159,7 +159,7 @@ def _pick_repo(db, host) -> Optional["models.AirgapLocalRepository"]:
     return None
 
 
-def maybe_repoint(db, host, connection_send=None) -> None:
+def maybe_repoint(db, host, _connection_send=None) -> None:
     """Repoint ``host`` at the mirror if needed.  Best-effort; never raises.
 
     Called for every inbound agent message.  No-ops unless this server is

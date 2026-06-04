@@ -109,7 +109,9 @@ class GeoResult:
 # check it explicitly.  ULA (fc00::/7) and IPv6 link-local (fe80::/10)
 # ARE caught by ``is_private`` / ``is_link_local`` on all supported
 # Python versions.
-_CGNAT_NETWORK = ipaddress.ip_network("100.64.0.0/10")
+_CGNAT_NETWORK = ipaddress.ip_network(
+    "100.64.0.0/10"  # NOSONAR S1313 - RFC 6598 CGNAT constant, not a target
+)
 
 
 def is_internal_ip(ip_str: str) -> bool:
@@ -364,7 +366,93 @@ _MAXMIND_DOWNLOAD_URL = (
 _DOWNLOAD_TIMEOUT_SECONDS = 300.0  # 75MB on a slow link
 
 
-def refresh_geolite_db() -> bool:
+# GeoLite2-City is ~75 MB compressed / ~120 MB on disk.  Cap the total
+# extracted size well above that so a malformed / malicious tarball can't
+# fill the disk (decompression-bomb defence), while still allowing normal
+# growth of the real DB.
+_MAX_EXTRACT_BYTES = 512 * 1024 * 1024  # 512 MB
+
+
+def _download_maxmind_tarball(url: str, db_dir: str) -> Optional[str]:
+    """Stream the MaxMind tarball to a temp file; return its path or None."""
+    try:
+        with httpx.stream("GET", url, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response:
+            if response.status_code != 200:
+                logger.warning(
+                    "MaxMind download returned HTTP %d; keeping existing DB",
+                    response.status_code,
+                )
+                return None
+            with tempfile.NamedTemporaryFile(
+                suffix=".tar.gz", dir=db_dir, delete=False
+            ) as tmp_tarball:
+                for chunk in response.iter_bytes(chunk_size=65536):
+                    tmp_tarball.write(chunk)
+                return tmp_tarball.name
+    except (httpx.RequestError, httpx.TimeoutException) as exc:
+        logger.warning("MaxMind download network error: %s", exc)
+        return None
+
+
+def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
+    """Extract ``tar`` into ``extract_dir`` with path-traversal AND total-size
+    guards.  Returns False (without extracting) on a suspicious member."""
+    base = Path(extract_dir).resolve()
+    total = 0
+    for member in tar.getmembers():
+        target = (base / member.name).resolve()
+        if not str(target).startswith(str(base) + os.sep):
+            logger.warning(
+                "MaxMind tarball contained suspicious path %s; aborting", member.name
+            )
+            return False
+        total += max(member.size, 0)
+        if total > _MAX_EXTRACT_BYTES:
+            logger.warning(
+                "MaxMind tarball exceeds %d-byte extract cap; aborting",
+                _MAX_EXTRACT_BYTES,
+            )
+            return False
+    tar.extractall(extract_dir)  # nosec B202  # path + size validated above
+    return True
+
+
+def _locate_mmdb(extract_dir: str) -> Optional[str]:
+    """Find the first ``.mmdb`` file under ``extract_dir``."""
+    for root, _dirs, files in os.walk(extract_dir):
+        for fname in files:
+            if fname.endswith(".mmdb"):
+                return os.path.join(root, fname)
+    return None
+
+
+def _install_mmdb_from_tarball(tarball_path: str, db_dir: str, db_path: str) -> bool:
+    """Extract the tarball and atomically install its ``.mmdb`` at ``db_path``."""
+    try:
+        with tempfile.TemporaryDirectory(dir=db_dir) as extract_dir:
+            # Extraction is size-capped + path-traversal-guarded in
+            # _safe_extract_tarball (decompression-bomb / Zip-Slip defence).
+            with tarfile.open(tarball_path, "r:gz") as tar:  # NOSONAR S5042
+                if not _safe_extract_tarball(tar, extract_dir):
+                    return False
+            mmdb_path = _locate_mmdb(extract_dir)
+            if mmdb_path is None:
+                logger.warning(
+                    "MaxMind tarball did not contain a .mmdb file; keeping existing DB"
+                )
+                return False
+            # Close the current reader BEFORE the replace so Windows (which
+            # can't replace open files) doesn't EACCES.
+            _reader_holder.close()
+            shutil.move(mmdb_path, db_path)
+            logger.info("GeoLite2-City database refreshed to %s", db_path)
+            return True
+    except (tarfile.TarError, OSError) as exc:
+        logger.warning("MaxMind tarball extraction error: %s", exc)
+        return False
+
+
+def refresh_geolite_db() -> bool:  # NOSONAR S3516 - True on success, False on failure
     """Download + install the latest GeoLite2-City DB.  Returns True on success.
 
     Synchronous (network + filesystem only).  The background-task
@@ -372,9 +460,8 @@ def refresh_geolite_db() -> bool:
     function at the configured interval.
 
     Atomic-replace semantics: download to a temp file, extract to a
-    temp dir, then ``os.replace`` the .mmdb into place and close+reopen
-    the Reader.  A failed download / extract leaves the previous DB
-    untouched.
+    temp dir, then ``shutil.move`` the .mmdb into place.  A failed
+    download / extract leaves the previous DB untouched.
     """
     license_key = get_geo_lookup_maxmind_license_key()
     if not license_key:
@@ -389,71 +476,14 @@ def refresh_geolite_db() -> bool:
         logger.warning("Cannot create GeoLite2 directory %s: %s", db_dir, exc)
         return False
 
-    url = _MAXMIND_DOWNLOAD_URL.format(key=license_key)
     logger.info("Refreshing GeoLite2-City database from MaxMind")
-    try:
-        with httpx.stream("GET", url, timeout=_DOWNLOAD_TIMEOUT_SECONDS) as response:
-            if response.status_code != 200:
-                logger.warning(
-                    "MaxMind download returned HTTP %d; keeping existing DB",
-                    response.status_code,
-                )
-                return False
-            with tempfile.NamedTemporaryFile(
-                suffix=".tar.gz", dir=db_dir, delete=False
-            ) as tmp_tarball:
-                tarball_path = tmp_tarball.name
-                for chunk in response.iter_bytes(chunk_size=65536):
-                    tmp_tarball.write(chunk)
-    except (httpx.RequestError, httpx.TimeoutException) as exc:
-        logger.warning("MaxMind download network error: %s", exc)
+    tarball_path = _download_maxmind_tarball(
+        _MAXMIND_DOWNLOAD_URL.format(key=license_key), db_dir
+    )
+    if tarball_path is None:
         return False
-
-    # Extract — the tarball contains a dated directory with the .mmdb
-    # inside (e.g. ``GeoLite2-City_20260518/GeoLite2-City.mmdb``).  We
-    # find the .mmdb by walking the extracted tree rather than guessing
-    # the date prefix.
     try:
-        with tempfile.TemporaryDirectory(dir=db_dir) as extract_dir:
-            with tarfile.open(tarball_path, "r:gz") as tar:
-                # Verify members don't escape the extract dir before
-                # extracting — defense in depth even though MaxMind's
-                # tarballs are well-formed.
-                base = Path(extract_dir).resolve()
-                for member in tar.getmembers():
-                    target = (base / member.name).resolve()
-                    if not str(target).startswith(str(base) + os.sep):
-                        logger.warning(
-                            "MaxMind tarball contained suspicious path %s; aborting",
-                            member.name,
-                        )
-                        return False
-                tar.extractall(extract_dir)  # nosec B202  # path-validated above
-            # Locate the .mmdb file
-            mmdb_path = None
-            for root, _dirs, files in os.walk(extract_dir):
-                for fname in files:
-                    if fname.endswith(".mmdb"):
-                        mmdb_path = os.path.join(root, fname)
-                        break
-                if mmdb_path:
-                    break
-            if mmdb_path is None:
-                logger.warning(
-                    "MaxMind tarball did not contain a .mmdb file; keeping existing DB"
-                )
-                return False
-            # Atomic replace into the configured location.  Close the
-            # current reader BEFORE the replace so Windows (which can't
-            # replace open files) doesn't EACCES.
-            _reader_holder.close()
-            shutil.move(mmdb_path, db_path)
-            logger.info("GeoLite2-City database refreshed to %s", db_path)
-            # Trigger reopen on next lookup (lazy).
-            return True
-    except (tarfile.TarError, OSError) as exc:
-        logger.warning("MaxMind tarball extraction error: %s", exc)
-        return False
+        return _install_mmdb_from_tarball(tarball_path, db_dir, db_path)
     finally:
         try:
             os.unlink(tarball_path)

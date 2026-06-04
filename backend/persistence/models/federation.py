@@ -67,6 +67,7 @@ from backend.persistence.models.core import GUID
 # ---------------------------------------------------------------------
 
 SINGLETON_FEDERATION_COORDINATOR_ID = uuid.UUID("00000000-0000-0000-0000-00000000fed0")
+SINGLETON_FEDERATION_ALERT_CONFIG_ID = uuid.UUID("00000000-0000-0000-0000-00000000fed1")
 
 
 # FK targets pulled into constants so a future rename is a one-line
@@ -147,6 +148,17 @@ class FederationSite(Base):
     last_sync_at = Column(DateTime, nullable=True)
     last_sync_status = Column(String(32), nullable=True)
     sync_interval_seconds = Column(Integer, nullable=False, default=300)
+    # Phase 12.2: latest site-reported metadata (from the site's
+    # ``site_metadata`` sync payload).  ``sysmanage_version`` lets the
+    # coordinator flag version-skewed sites; ``connection_state`` is the
+    # site's OWN view of its uplink (online/degraded/offline — i.e. whether
+    # it is currently in local autonomy mode); ``capabilities_json`` is the
+    # JSON list of loaded engine modules the site advertises.
+    # ``last_metadata_at`` is when that report last landed.
+    sysmanage_version = Column(String(32), nullable=True)
+    connection_state = Column(String(16), nullable=True)
+    capabilities_json = Column(Text, nullable=True)
+    last_metadata_at = Column(DateTime, nullable=True)
     # Minimum acceptable agent version on the site — used to gate
     # command dispatch (coordinator refuses to send a command that
     # the site is too old to handle).
@@ -492,6 +504,108 @@ class FederationAuditLog(Base):
     )
 
 
+class FederationAlert(Base):
+    """A SITE-scoped alert fired on a cross-site rollup condition.
+
+    Distinct from the host-scoped ``alert`` table (which requires a
+    ``host_id``) — these have only a ``site_id``.  An alert stays OPEN
+    (``resolved=False``) while its condition holds and auto-resolves
+    when the condition clears; the operator can also acknowledge it.
+    There is at most one open alert per (site, condition).
+    """
+
+    __tablename__ = "federation_alert"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    site_id = Column(
+        GUID(),
+        ForeignKey("federation_sites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # site_offline | compliance_below | vulnerabilities_high
+    condition = Column(String(64), nullable=False)
+    severity = Column(String(20), nullable=False)  # warning | critical
+    title = Column(String(500), nullable=False)
+    message = Column(Text, nullable=False)
+    details_json = Column(Text, nullable=True)
+    triggered_at = Column(DateTime, nullable=False, default=_utcnow_naive)
+    resolved = Column(Boolean, nullable=False, default=False)
+    resolved_at = Column(DateTime, nullable=True)
+    acknowledged = Column(Boolean, nullable=False, default=False)
+    acknowledged_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (Index("ix_federation_alert_resolved", "resolved"),)
+
+
+class FederationAlertConfig(Base):
+    """Singleton row: operator-configured thresholds for the three built-in
+    rollup-alert conditions (Phase 12.1 follow-up).
+
+    Fixed PK (``SINGLETON_FEDERATION_ALERT_CONFIG_ID``) so the coordinator
+    upserts by PK.  All columns are nullable — a NULL means "use the
+    built-in default" so an operator can override just the one threshold
+    they care about and leave the rest on defaults.
+    """
+
+    __tablename__ = "federation_alert_config"
+
+    id = Column(
+        GUID(),
+        primary_key=True,
+        default=lambda: SINGLETON_FEDERATION_ALERT_CONFIG_ID,
+    )
+    # site_offline: fire when last_sync age exceeds
+    # max(sync_interval × multiplier, min_offline_seconds).
+    offline_multiplier = Column(Integer, nullable=True)
+    min_offline_seconds = Column(Integer, nullable=True)
+    # compliance_below: fire when a baseline score drops under this percent.
+    compliance_threshold = Column(Float, nullable=True)
+    # vulnerabilities_high: fire when critical_count strictly exceeds this.
+    critical_cve_threshold = Column(Integer, nullable=True)
+    updated_at = Column(
+        DateTime, nullable=False, default=_utcnow_naive, onupdate=_utcnow_naive
+    )
+
+
+class FederationSiteSyncEvent(Base):
+    """Coordinator-side time-series of a subordinate site's sync attempts.
+
+    One row per upstream sync the coordinator receives from a site (plus
+    the metadata report that rides along).  Powers the per-site
+    "sync status timeline" (latency / queue-depth / host-count over time)
+    on SiteDetail.  Pruned like the rollup series — capped per site and by
+    age — so the table can't grow without bound on a busy fleet.
+    """
+
+    __tablename__ = "federation_site_sync_event"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    site_id = Column(
+        GUID(),
+        ForeignKey("federation_sites.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    recorded_at = Column(DateTime, nullable=False, default=_utcnow_naive)
+    # success | error — mirrors ``federation_sites.last_sync_status``.
+    sync_status = Column(String(32), nullable=False)
+    # Round-trip latency the site reported for this sync, if known.
+    latency_ms = Column(Integer, nullable=True)
+    # Site-side outbound queue depth at sync time (backlog indicator).
+    queue_depth = Column(Integer, nullable=True)
+    # Host count the site advertised in this sync's metadata.
+    host_count = Column(Integer, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_federation_site_sync_event_site_recorded",
+            "site_id",
+            "recorded_at",
+        ),
+    )
+
+
 # =====================================================================
 # Site-side tables
 # =====================================================================
@@ -540,6 +654,25 @@ class FederationCoordinator(Base):
     last_sync_at = Column(DateTime, nullable=True)
     last_sync_status = Column(String(32), nullable=True)
     last_sync_error = Column(Text, nullable=True)
+    # Phase 12.2: coordinator-connection health.  ``last_sync_at`` records
+    # the most recent *attempt* (success or failure); this records the most
+    # recent *success* so "how long have we been cut off" survives a run of
+    # failures.  ``consecutive_sync_failures`` drives the connection-state
+    # classifier and the reconnect backoff.  ``connection_state`` is the
+    # derived label the site engine + UI read:
+    #   online    — last attempt succeeded
+    #   degraded  — 1..(OFFLINE_AFTER_FAILURES-1) consecutive failures
+    #   offline   — >= OFFLINE_AFTER_FAILURES failures; site runs in local
+    #               autonomy mode (agents keep reporting, upgrades keep
+    #               running, deltas keep queuing for replay on reconnect)
+    #   unknown   — never attempted a sync yet
+    # ``next_reconnect_at`` is the backoff gate: the outbound tick skips
+    # contacting the coordinator until this time passes, so a hard-down
+    # coordinator isn't hammered every interval.
+    last_successful_sync_at = Column(DateTime, nullable=True)
+    consecutive_sync_failures = Column(Integer, nullable=False, default=0)
+    connection_state = Column(String(16), nullable=False, default="unknown")
+    next_reconnect_at = Column(DateTime, nullable=True)
 
 
 class FederationSyncQueue(Base):

@@ -1776,6 +1776,13 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False}
 
+        @router.get("/sites/{site_id}/sync-timeline")
+        async def fed_site_sync_timeline_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "events": []}
+
         # --- Cross-site host directory ---------------------------------------
 
         @router.get("/hosts")
@@ -1866,6 +1873,13 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False}
 
+        @router.post("/sites/{site_id}/repush-policies")
+        async def fed_site_repush_policies_stub(  # pylint: disable=unused-argument
+            site_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
         # --- Commands --------------------------------------------------------
 
         @router.post("/commands/dispatch")
@@ -1898,6 +1912,34 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         @router.get("/audit/{entry_id}")
         async def fed_audit_detail_stub(  # pylint: disable=unused-argument
             entry_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        # --- Rollup alerts ---------------------------------------------------
+
+        @router.get("/alerts")
+        async def fed_alerts_list_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "alerts": []}
+
+        @router.post("/alerts/{alert_id}/acknowledge")
+        async def fed_alert_ack_stub(  # pylint: disable=unused-argument
+            alert_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/alert-config")
+        async def fed_alert_config_get_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.put("/alert-config")
+        async def fed_alert_config_put_stub(  # pylint: disable=unused-argument
+            body: dict = None,
             current_user=Depends(get_current_user),
         ):
             return {"licensed": False}
@@ -1935,6 +1977,12 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
 
         @router.post("/sites/{site_id}/command-results")
         async def fed_ingest_command_results_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/metadata")
+        async def fed_ingest_site_metadata_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
             return {"licensed": False}

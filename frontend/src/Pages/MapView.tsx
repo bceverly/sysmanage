@@ -91,13 +91,21 @@ function makeHostIcon(status: string | null): L.DivIcon {
  */
 function popupHtml(host: HostGeolocation, openLabel: string): string {
   const safeFqdn = escapeHtml(host.fqdn);
-  const cityLine = host.city
-    ? `<div>${escapeHtml(host.city)}${
-        host.subdivision_code ? `, ${escapeHtml(host.subdivision_code)}` : ""
-      }${host.country_code ? ` (${escapeHtml(host.country_code)})` : ""}</div>`
-    : host.country_code
-      ? `<div>${escapeHtml(host.country_code)}</div>`
-      : "";
+  const cityLine = (() => {
+    if (host.city) {
+      const subdivisionPart = host.subdivision_code
+        ? `, ${escapeHtml(host.subdivision_code)}`
+        : "";
+      const countryPart = host.country_code
+        ? ` (${escapeHtml(host.country_code)})`
+        : "";
+      return `<div>${escapeHtml(host.city)}${subdivisionPart}${countryPart}</div>`;
+    }
+    if (host.country_code) {
+      return `<div>${escapeHtml(host.country_code)}</div>`;
+    }
+    return "";
+  })();
   const statusLine = host.status
     ? `<div><b>Status:</b> ${escapeHtml(host.status)}</div>`
     : "";
@@ -119,11 +127,11 @@ function popupHtml(host: HostGeolocation, openLabel: string): string {
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 const MapView: React.FC = () => {
@@ -197,8 +205,8 @@ const MapView: React.FC = () => {
         // map already torn down — fine.
       }
     };
-    const rafId = window.requestAnimationFrame(invalidate);
-    window.addEventListener("resize", invalidate);
+    const rafId = globalThis.requestAnimationFrame(invalidate);
+    globalThis.addEventListener("resize", invalidate);
 
     // Click-delegate for "Open host" links inside marker popups.
     // Leaflet popups render into the map container; capturing clicks
@@ -232,8 +240,8 @@ const MapView: React.FC = () => {
 
     return () => {
       container.removeEventListener("click", onContainerClick);
-      window.cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", invalidate);
+      globalThis.cancelAnimationFrame(rafId);
+      globalThis.removeEventListener("resize", invalidate);
       map.remove();
       mapRef.current = null;
       clusterGroupRef.current = null;

@@ -102,35 +102,28 @@ def _build_filter_clauses(
     return clauses
 
 
-def search_hosts(
-    session: Session,
-    *,
-    site_ids: Optional[List[Any]] = None,
-    fqdn_contains: Optional[str] = None,
-    ipv4_contains: Optional[str] = None,
-    os_family: Optional[str] = None,
-    platform: Optional[str] = None,
-    status: Optional[str] = None,
-    geo_country_code: Optional[str] = None,
-    geo_subdivision_code: Optional[str] = None,
-    last_seen_after: Optional[datetime] = None,
-    last_seen_before: Optional[datetime] = None,
-    free_text: Optional[str] = None,
-    order_by: str = "fqdn",
-    limit: int = DEFAULT_PAGE_LIMIT,
-    offset: int = 0,
-) -> Tuple[List[FederationHostDirectory], int]:
-    """Paginated cross-site host search.
+# Filter kwargs ``search_hosts`` forwards verbatim to
+# :func:`_build_filter_clauses`.  Kept as a module constant so the
+# ``**filters`` passthrough can reject typos with the same error a
+# real keyword parameter would have raised.
+_FILTER_FIELDS = frozenset(
+    {
+        "site_ids",
+        "fqdn_contains",
+        "ipv4_contains",
+        "os_family",
+        "platform",
+        "status",
+        "geo_country_code",
+        "geo_subdivision_code",
+        "last_seen_after",
+        "last_seen_before",
+    }
+)
 
-    Returns ``(rows, total_match_count)`` so the frontend can render
-    "Page 3 of 27" without a second round-trip.  All filters compose
-    with AND; the special ``free_text`` parameter ORs across fqdn /
-    ipv4 / public_ip for the Hosts-page search box.
 
-    ``order_by`` accepts ``fqdn``, ``last_seen``, ``status``,
-    ``os_family``, or any column name on ``FederationHostDirectory``
-    that's safe to order by (validated against a whitelist below).
-    """
+def _validate_pagination(limit: int, offset: int) -> None:
+    """Raise ``ValueError`` for out-of-range pagination knobs."""
     if limit <= 0:
         raise ValueError("limit must be > 0")
     if limit > MAX_PAGE_LIMIT:
@@ -138,35 +131,13 @@ def search_hosts(
     if offset < 0:
         raise ValueError("offset must be >= 0")
 
-    clauses = _build_filter_clauses(
-        site_ids=site_ids,
-        fqdn_contains=fqdn_contains,
-        ipv4_contains=ipv4_contains,
-        os_family=os_family,
-        platform=platform,
-        status=status,
-        geo_country_code=geo_country_code,
-        geo_subdivision_code=geo_subdivision_code,
-        last_seen_after=last_seen_after,
-        last_seen_before=last_seen_before,
-    )
 
-    # Free-text OR clause: typed-in box in the Hosts page hits all
-    # the "identifier" columns at once.  Done as a single ``or_``
-    # rather than UNION so paging/count still works.
-    if free_text:
-        pat = f"%{free_text}%"
-        clauses.append(
-            or_(
-                FederationHostDirectory.fqdn.ilike(pat),
-                FederationHostDirectory.ipv4.ilike(pat),
-                FederationHostDirectory.public_ip.ilike(pat),
-            )
-        )
+def _resolve_order_column(order_by: str):
+    """Map an ``order_by`` token to its column, validating the whitelist.
 
-    # Order-by whitelist — open columns to "any column" would let a
-    # caller surface internal columns the engine's audit policy
-    # might want to suppress.
+    Open columns to "any column" would let a caller surface internal
+    columns the engine's audit policy might want to suppress.
+    """
     order_columns = {
         "fqdn": FederationHostDirectory.fqdn,
         "last_seen": FederationHostDirectory.last_seen,
@@ -180,7 +151,65 @@ def search_hosts(
         raise ValueError(
             f"order_by must be one of {sorted(order_columns)}; got {order_by!r}"
         )
-    order_col = order_columns[order_by]
+    return order_columns[order_by]
+
+
+def _append_free_text_clause(clauses: list, free_text: Optional[str]) -> None:
+    """Append the free-text OR clause across the identifier columns.
+
+    Free-text OR clause: typed-in box in the Hosts page hits all the
+    "identifier" columns at once.  Done as a single ``or_`` rather than
+    UNION so paging/count still works.
+    """
+    if free_text:
+        pat = f"%{free_text}%"
+        clauses.append(
+            or_(
+                FederationHostDirectory.fqdn.ilike(pat),
+                FederationHostDirectory.ipv4.ilike(pat),
+                FederationHostDirectory.public_ip.ilike(pat),
+            )
+        )
+
+
+def search_hosts(
+    session: Session,
+    *,
+    free_text: Optional[str] = None,
+    order_by: str = "fqdn",
+    limit: int = DEFAULT_PAGE_LIMIT,
+    offset: int = 0,
+    **filters: Any,
+) -> Tuple[List[FederationHostDirectory], int]:
+    """Paginated cross-site host search.
+
+    Returns ``(rows, total_match_count)`` so the frontend can render
+    "Page 3 of 27" without a second round-trip.  All filters compose
+    with AND; the special ``free_text`` parameter ORs across fqdn /
+    ipv4 / public_ip for the Hosts-page search box.
+
+    Column filters (``site_ids``, ``fqdn_contains``, ``ipv4_contains``,
+    ``os_family``, ``platform``, ``status``, ``geo_country_code``,
+    ``geo_subdivision_code``, ``last_seen_after``, ``last_seen_before``)
+    are accepted as keyword arguments and forwarded verbatim to
+    :func:`_build_filter_clauses`; an unknown filter name raises
+    ``TypeError`` just as a stray keyword parameter would have.
+
+    ``order_by`` accepts ``fqdn``, ``last_seen``, ``status``,
+    ``os_family``, or any column name on ``FederationHostDirectory``
+    that's safe to order by (validated against a whitelist below).
+    """
+    unknown = set(filters) - _FILTER_FIELDS
+    if unknown:
+        raise TypeError(
+            f"search_hosts() got unexpected keyword argument(s): {sorted(unknown)}"
+        )
+
+    _validate_pagination(limit, offset)
+    order_col = _resolve_order_column(order_by)
+
+    clauses = _build_filter_clauses(**filters)
+    _append_free_text_clause(clauses, free_text)
 
     base = select(FederationHostDirectory)
     if clauses:

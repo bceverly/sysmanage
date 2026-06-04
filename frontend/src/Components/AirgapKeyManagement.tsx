@@ -179,7 +179,7 @@ export const CollectorPublicKeyCard: React.FC = () => {
             fullWidth
             minRows={4}
             maxRows={8}
-            InputProps={{ readOnly: true, sx: monoSx }}
+            slotProps={{ input: { readOnly: true, sx: monoSx } }}
           />
           <Button
             sx={{ mt: 1 }}
@@ -334,7 +334,7 @@ export const TrustedCollectorsCard: React.FC = () => {
           multiline
           minRows={4}
           fullWidth
-          InputProps={{ sx: monoSx }}
+          slotProps={{ input: { sx: monoSx } }}
         />
         <Button
           sx={{ mt: 1 }}
@@ -404,6 +404,12 @@ export const ImportDeviceCard: React.FC = () => {
     }
   };
 
+  const deviceKind = (d: { is_optical?: boolean; removable?: boolean }) => {
+    if (d.is_optical) return ' · optical';
+    if (d.removable) return ' · removable';
+    return '';
+  };
+
   return (
     <Box sx={cardSx}>
       <Typography variant="subtitle1" gutterBottom>
@@ -431,7 +437,7 @@ export const ImportDeviceCard: React.FC = () => {
             labelId="airgap-device-label"
             label={t('airgapDevices.label', 'Block device')}
             value={selected}
-            onChange={(e) => persist(e.target.value as string)}
+            onChange={(e) => persist(e.target.value)}
           >
             <MenuItem value="">
               <em>{t('airgapDevices.none', '(none)')}</em>
@@ -439,7 +445,7 @@ export const ImportDeviceCard: React.FC = () => {
             {devices.map((d) => (
               <MenuItem key={d.path} value={d.path}>
                 {d.path}
-                {d.is_optical ? ' · optical' : d.removable ? ' · removable' : ''}
+                {deviceKind(d)}
                 {d.size_bytes ? ` · ${fmtBytes(d.size_bytes)}` : ''}
                 {d.label ? ` · ${d.label}` : ''}
               </MenuItem>

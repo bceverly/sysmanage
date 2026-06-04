@@ -1197,15 +1197,12 @@ def _apply_airgap_run_result(
         if stage == "mirroring":
             run.status = "STAGING_COMPLETE"
             run.error_message = None
-        elif stage == "building_iso":
-            run.status = "ISO_BUILT"
-            run.error_message = None
-        elif stage == "multidisc":
-            # Multi-disc plan does staging AND ISO build inline per
-            # disc; success means all per-disc ISOs are on disk.
-            # Skip STAGING_COMPLETE; advance straight to ISO_BUILT
-            # so the operator's "is my ISO ready?" check is uniform
-            # across single-disc and multi-disc paths.
+        elif stage in ("building_iso", "multidisc"):
+            # ``multidisc`` does staging AND ISO build inline per disc;
+            # success means all per-disc ISOs are on disk.  Both stages
+            # skip STAGING_COMPLETE and advance straight to ISO_BUILT so
+            # the operator's "is my ISO ready?" check is uniform across
+            # the single-disc and multi-disc paths.
             run.status = "ISO_BUILT"
             run.error_message = None
         elif stage == "burning":
@@ -1553,6 +1550,63 @@ def _now_naive():
     return datetime.now(_tz.utc).replace(tzinfo=None)
 
 
+def _apply_simple_result(handler, engine_name, primary_id, host_id, outcome) -> None:
+    """Run a uniform ``_apply_X(primary_id, host_id, outcome)`` result handler,
+    swallowing + logging failures so one bad result never breaks routing."""
+    try:
+        handler(primary_id, host_id, outcome)
+    except Exception as exc:
+        logger.warning(
+            "Failed to apply %s result for %s on host %s: %s",
+            engine_name,
+            primary_id,
+            host_id,
+            exc,
+        )
+
+
+def _route_federation_command_result(primary_id, host_id, outcome) -> None:
+    """Aggregate a federated command's per-host outcome into the inbox.
+
+    Needs a DB session and a different call shape than the simple
+    engine-path handlers, so it's routed separately.
+    """
+    try:
+        from backend.persistence.db import get_db
+        from backend.services import federation_actuation_service
+
+        db_session = next(get_db())
+        try:
+            federation_actuation_service.record_command_host_result(
+                db_session,
+                primary_id,
+                host_id,
+                success=(outcome["status"] == "succeeded"),
+                detail=_outcome_error_text(outcome, "") or outcome["stdout"][:2000],
+            )
+        finally:
+            db_session.close()
+    except Exception as exc:
+        logger.warning(
+            "Failed to apply federation_command result for %s on host %s: %s",
+            primary_id,
+            host_id,
+            exc,
+        )
+
+
+# engine_name -> uniform ``_apply_X(primary_id, host_id, outcome)`` handler.
+# Adding an engine-path correlation kind is a one-line entry here rather
+# than another branch in ``route_proplus_command_result``.
+_SIMPLE_RESULT_HANDLERS = {
+    "child_host_op": _apply_child_host_op_result,
+    "host_op": _apply_host_op_result,
+    "repo_mirror_op": _apply_repo_mirror_op_result,
+    "airgap_run": _apply_airgap_run_result,
+    "airgap_ingest": _apply_airgap_ingest_result,
+}
+
+
 def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
     """
     Route a command_result message to the right Pro+ engine, if it
@@ -1575,111 +1629,22 @@ def route_proplus_command_result(command_id: str, result_data: dict) -> bool:
     engine_name, primary_id, host_id = correlation
     outcome = _extract_command_outcome(result_data)
 
-    # Child-host engine-path operations: update the HostChild row directly.
-    if engine_name == "child_host_op":
-        try:
-            _apply_child_host_op_result(primary_id, host_id, outcome)
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply child_host_op result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
+    # Engine-path operations with a uniform result handler — child_host_op
+    # / host_op (update the HostChild/parent row), repo_mirror_op (sync /
+    # snapshot / restore / ...), airgap_run (mirroring / building_iso) and
+    # airgap_ingest (mount / copy).  See ``_SIMPLE_RESULT_HANDLERS``.
+    simple_handler = _SIMPLE_RESULT_HANDLERS.get(engine_name)
+    if simple_handler is not None:
+        _apply_simple_result(simple_handler, engine_name, primary_id, host_id, outcome)
         return True
 
-    # Parent-host engine-path operations (init/disable/etc.).
-    if engine_name == "host_op":
-        try:
-            _apply_host_op_result(primary_id, host_id, outcome)
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply host_op result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
-        return True
-
-    # Federated commands dispatched by a coordinator and fanned out to
-    # this site's local agents.  ``primary_id`` is the received-command
-    # id; aggregate this host's outcome into the inbox row and, once all
-    # dispatched hosts have reported, queue the result back upstream.
+    # Federated commands fanned out to local agents need a DB session and a
+    # different call shape, so they route on their own.
     if engine_name == "federation_command":
-        try:
-            from backend.persistence.db import get_db
-            from backend.services import federation_actuation_service
-
-            db_session = next(get_db())
-            try:
-                federation_actuation_service.record_command_host_result(
-                    db_session,
-                    primary_id,
-                    host_id,
-                    success=(outcome["status"] == "succeeded"),
-                    detail=_outcome_error_text(outcome, "") or outcome["stdout"][:2000],
-                )
-            finally:
-                db_session.close()
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply federation_command result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
+        _route_federation_command_result(primary_id, host_id, outcome)
         return True
 
-    # Repository-mirroring engine plans (sync / snapshot / restore /
-    # integrity_check / gc / setup_check / setup_install).  ``primary_id``
-    # is encoded as ``"<action>:<mirror_id>"`` (mirror_id is empty for
-    # host-level setup operations).
-    if engine_name == "repo_mirror_op":
-        try:
-            _apply_repo_mirror_op_result(primary_id, host_id, outcome)
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply repo_mirror_op result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
-        return True
-
-    # Air-gap collection-run plans (mirroring / building_iso).  The
-    # ``airgap_run_tick`` orchestrator dispatches these as it walks the
-    # run through its lifecycle; the handler below advances the row's
-    # status based on which stage just completed.  ``primary_id`` is
-    # encoded as ``"<stage>:<run_id>"``.
-    if engine_name == "airgap_run":
-        try:
-            _apply_airgap_run_result(primary_id, host_id, outcome)
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply airgap_run result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
-        return True
-
-    # Repository-side ingestion plans (mount / copy).  The
-    # ``airgap_ingest_tick`` orchestrator dispatches these as it walks an
-    # AirgapIngestionRun through QUEUED → VERIFYING_SIG → VERIFIED →
-    # COPYING → COMPLETE.  ``primary_id`` is ``"<stage>:<run_id>"``.
-    if engine_name == "airgap_ingest":
-        try:
-            _apply_airgap_ingest_result(primary_id, host_id, outcome)
-        except Exception as exc:
-            logger.warning(
-                "Failed to apply airgap_ingest result for %s on host %s: %s",
-                primary_id,
-                host_id,
-                exc,
-            )
-        return True
-
-    # Existing engines (automation_engine, fleet_engine).
+    # Existing module-loaded engines (automation_engine, fleet_engine).
     engine = module_loader.get_module(engine_name)
     if engine is None:
         logger.warning(

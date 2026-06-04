@@ -35,7 +35,7 @@ const STATUS_URL = '/api/v1/airgap/import-device/status';
 const INGEST_URL = '/api/v1/airgap/repository/ingest-device';
 const RUNS_URL = '/api/v1/airgap/repository/ingest-runs';
 
-const TERMINAL = ['COMPLETE', 'FAILED'];
+const TERMINAL = new Set(['COMPLETE', 'FAILED']);
 
 interface DeviceStatus {
   device: string | null;
@@ -111,14 +111,14 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
     fetchLatestRun().then((latest) => {
       if (latest) {
         setRun(latest);
-        if (!TERMINAL.includes(latest.status)) trackedId.current = latest.id;
+        if (!TERMINAL.has(latest.status)) trackedId.current = latest.id;
       }
     });
   }, [rescan, fetchLatestRun]);
 
   // Poll while we're tracking a non-terminal run.
   useEffect(() => {
-    if (!run || TERMINAL.includes(run.status)) return undefined;
+    if (!run || TERMINAL.has(run.status)) return undefined;
     const timer = globalThis.setInterval(async () => {
       const latest = await fetchLatestRun();
       if (!latest) return;
@@ -154,10 +154,13 @@ const AirgapImportPanel: React.FC<Props> = ({ onComplete }) => {
   };
 
   const noDevice = !status?.device;
-  const inFlight = run != null && !TERMINAL.includes(run.status);
+  const inFlight = run != null && !TERMINAL.has(run.status);
 
-  const runColor = (s: string): 'success' | 'error' | 'info' =>
-    s === 'COMPLETE' ? 'success' : s === 'FAILED' ? 'error' : 'info';
+  const runColor = (s: string): 'success' | 'error' | 'info' => {
+    if (s === 'COMPLETE') return 'success';
+    if (s === 'FAILED') return 'error';
+    return 'info';
+  };
 
   const runLabel = (s: string): string => {
     const map: Record<string, string> = {

@@ -2718,7 +2718,10 @@
       "vulnCritical": "[TODO] {{n}} critical",
       "vulnHigh": "[TODO] {{n}} high",
       "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium"
+      "vulnMedium": "[TODO] {{n}} medium",
+      "alertAck": "[TODO] Acknowledge",
+      "alertAcked": "[TODO] Acknowledged",
+      "alertsTitle": "[TODO] Open alerts"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

@@ -32,11 +32,11 @@ Architectural notes (see ROADMAP §12 "Data Architecture"):
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
-from sqlalchemy import desc, select
+from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import (
@@ -94,7 +94,7 @@ def _require_site(session: Session, site_id: Any) -> FederationSite:
         raise UnknownSiteError(f"No federation site with id={uid}")
     if site.status == "removed":
         raise UnknownSiteError(
-            f"Federation site {uid} is removed; rollups for it are " f"not accepted."
+            f"Federation site {uid} is removed; rollups for it are not accepted."
         )
     return site
 
@@ -244,7 +244,7 @@ def record_host_rollup_snapshot(
         raise ValueError("host_count and active_count must be non-negative")
     if active_count > host_count:
         raise ValueError(
-            f"active_count ({active_count}) cannot exceed " f"host_count ({host_count})"
+            f"active_count ({active_count}) cannot exceed host_count ({host_count})"
         )
     site = _require_site(session, site_id)
     row = FederationHostRollup(
@@ -256,6 +256,7 @@ def record_host_rollup_snapshot(
         status_breakdown_json=_json_or_none(status_breakdown),
     )
     session.add(row)
+    _prune_series(session, FederationHostRollup, site_id=site.id)
     if update_site_host_count:
         site.host_count = host_count
         # A successful rollup ingestion implies the site is talking
@@ -298,6 +299,12 @@ def record_compliance_rollup_snapshot(
         hosts_noncompliant=hosts_noncompliant,
     )
     session.add(row)
+    _prune_series(
+        session,
+        FederationComplianceRollup,
+        site_id=site.id,
+        baseline=baseline.strip(),
+    )
     return row
 
 
@@ -335,7 +342,109 @@ def record_vulnerability_rollup_snapshot(
         top_cve_ids_json=_json_or_none(top_cve_ids),
     )
     session.add(row)
+    _prune_series(session, FederationVulnerabilityRollup, site_id=site.id)
     return row
+
+
+# ---------------------------------------------------------------------
+# Retention sweeper (the append-only rollup tables would grow forever
+# otherwise — see the module docstring's "retention sweeper" note).
+# ---------------------------------------------------------------------
+
+# How many snapshots to keep per series (per site, or per (site, baseline)
+# for compliance).  Generous enough to preserve trend history; bounded so
+# a long-running coordinator's rollup tables can't grow without limit.
+DEFAULT_ROLLUP_RETENTION = 90
+
+
+def _prune_series(
+    session: Session,
+    model: Any,
+    *,
+    site_id: Any,
+    baseline: Optional[str] = None,
+    keep: int = DEFAULT_ROLLUP_RETENTION,
+) -> int:
+    """Delete all but the newest ``keep`` snapshots for one series.
+
+    Called opportunistically after each ingest so growth stays bounded
+    without a separate background tick.  Idempotent: re-running once the
+    series is already at/under ``keep`` deletes nothing.  Returns the
+    number of rows pruned.  A query here autoflushes the just-added row,
+    so it is counted among the kept newest.
+    """
+    if keep <= 0:
+        return 0
+    stmt = select(model.id).where(model.site_id == site_id)
+    if baseline is not None:
+        stmt = stmt.where(model.baseline == baseline)
+    stmt = stmt.order_by(desc(model.snapshot_at), desc(model.id))
+    ids = list(session.execute(stmt).scalars().all())
+    stale = ids[keep:]
+    if not stale:
+        return 0
+    session.execute(delete(model).where(model.id.in_(stale)))
+    return len(stale)
+
+
+def prune_rollups(
+    session: Session,
+    *,
+    keep_per_series: int = DEFAULT_ROLLUP_RETENTION,
+    older_than_days: Optional[int] = None,
+) -> Dict[str, int]:
+    """Explicit retention sweep across ALL sites and all three rollup
+    series.  ``keep_per_series`` bounds each series by count; when
+    ``older_than_days`` is also given, snapshots older than that cutoff
+    are removed too (count-keep applied first so a slow-syncing site
+    still retains its latest snapshot regardless of age).
+
+    Idempotent and dialect-neutral (plain ORM ``delete``/``select``;
+    no SQLite/PostgreSQL-specific SQL).  Returns per-table prune counts.
+    Caller commits.
+    """
+    counts = {"host": 0, "compliance": 0, "vulnerability": 0}
+
+    # Count-bounded prune, per series.  Compliance is per (site, baseline).
+    for site_id in session.execute(select(FederationSite.id)).scalars().all():
+        counts["host"] += _prune_series(
+            session, FederationHostRollup, site_id=site_id, keep=keep_per_series
+        )
+        counts["vulnerability"] += _prune_series(
+            session,
+            FederationVulnerabilityRollup,
+            site_id=site_id,
+            keep=keep_per_series,
+        )
+        baselines = (
+            session.execute(
+                select(FederationComplianceRollup.baseline)
+                .where(FederationComplianceRollup.site_id == site_id)
+                .distinct()
+            )
+            .scalars()
+            .all()
+        )
+        for baseline in baselines:
+            counts["compliance"] += _prune_series(
+                session,
+                FederationComplianceRollup,
+                site_id=site_id,
+                baseline=baseline,
+                keep=keep_per_series,
+            )
+
+    if older_than_days is not None and older_than_days > 0:
+        cutoff = _utcnow_naive() - timedelta(days=older_than_days)
+        for key, model in (
+            ("host", FederationHostRollup),
+            ("compliance", FederationComplianceRollup),
+            ("vulnerability", FederationVulnerabilityRollup),
+        ):
+            result = session.execute(delete(model).where(model.snapshot_at < cutoff))
+            counts[key] += result.rowcount or 0
+
+    return counts
 
 
 # ---------------------------------------------------------------------

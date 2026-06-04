@@ -133,6 +133,54 @@ register_applier("firewall_role", apply_firewall_role)
 
 
 # ---------------------------------------------------------------------
+# update_profile applier
+# ---------------------------------------------------------------------
+
+
+def apply_update_profile(session: Session, definition: Dict[str, Any]) -> None:
+    """Materialise an ``update_profile`` policy into the local
+    ``upgrade_profiles`` table (a named, schedulable update plan).
+
+    Upserts by name so a centrally-defined patch policy becomes a real
+    local UpgradeProfile, exactly as if an operator had created it.
+    Materialising does not run it — execution stays on the profile's own
+    cron / a separate queued operation.  ``package_managers`` accepts a
+    list or a comma-separated string (NULL/empty ⇒ all managers).
+    """
+    name = (definition.get("name") or "").strip()
+    if not name:
+        raise PolicyApplyError("update_profile policy requires a 'name'")
+
+    pkg = definition.get("package_managers")
+    if isinstance(pkg, (list, tuple)):
+        pkg = ",".join(str(p).strip() for p in pkg if str(p).strip()) or None
+    elif isinstance(pkg, str):
+        pkg = pkg.strip() or None
+    else:
+        pkg = None
+
+    profile = (
+        session.query(models.UpgradeProfile)
+        .filter(models.UpgradeProfile.name == name)
+        .first()
+    )
+    if profile is None:
+        profile = models.UpgradeProfile(name=name)
+        session.add(profile)
+
+    profile.description = definition.get("description")
+    if definition.get("cron"):
+        profile.cron = str(definition["cron"])
+    profile.enabled = bool(definition.get("enabled", True))
+    profile.security_only = bool(definition.get("security_only", False))
+    profile.package_managers = pkg
+    profile.staggered_window_min = int(definition.get("staggered_window_min", 0))
+
+
+register_applier("update_profile", apply_update_profile)
+
+
+# ---------------------------------------------------------------------
 # Worker
 # ---------------------------------------------------------------------
 

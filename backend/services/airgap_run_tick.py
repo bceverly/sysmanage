@@ -268,6 +268,188 @@ def _mark_failed(run: models.AirgapCollectionRun, reason: str) -> None:
     run.completed_at = _now_naive()
 
 
+def _resolve_dispatch_host(db, run):
+    """Run the QUEUED→MIRRORING gates and resolve the dispatch host.
+
+    Encapsulates steps 1–2 of :func:`_advance_queued_to_mirroring`:
+    validate targets/mirror_ids, apply the snapshot-readiness gate
+    (leaving the run QUEUED when snapshots are still in flight, or
+    FAILED when one blew up), then locate the shared dispatch host.
+
+    Returns the ``Host`` to dispatch to, or ``None`` when the caller
+    should stop this tick (either the run was marked FAILED, or it is
+    intentionally left QUEUED to retry next tick).
+    """
+    if not run.targets:
+        _mark_failed(
+            run,
+            "no targets configured on this run — add at least one "
+            "target via the runs API before retrying",
+        )
+        return None
+    if any(t.mirror_id is None for t in run.targets):
+        _mark_failed(
+            run,
+            "one or more targets has no mirror_id; Option-B requires "
+            "every target to be tied to a mirror_repository row",
+        )
+        return None
+
+    # Snapshot readiness gate.  Leave QUEUED if any are still working,
+    # flip to FAILED if any blew up.
+    ready, still, failed = _targets_snapshot_state(run)
+    if failed:
+        joined = "; ".join(f"{name}: {err}" for name, err in failed)
+        _mark_failed(run, f"target snapshot(s) failed — {joined}")
+        return None
+    if not ready:
+        # In-flight; come back next tick.  Log on a coarse interval
+        # to avoid spamming when the snapshot takes a long time.
+        logger.debug(
+            "airgap run %s waiting on snapshots: %s",
+            run.id,
+            ", ".join(still),
+        )
+        return None
+
+    # All snapshots ready — figure out which host to dispatch to.
+    # In Option-B every target shares the same mirror.host_id (the
+    # create_run endpoint validates this) so any target's host is
+    # the right one.
+    first_target = run.targets[0]
+    host_id = first_target.mirror.host_id if first_target.mirror else None
+    if host_id is None:
+        _mark_failed(
+            run,
+            "first target's mirror has no host_id — mirror was deleted?",
+        )
+        return None
+    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    if host is None:
+        _mark_failed(
+            run,
+            f"host {host_id} for the target mirrors no longer exists",
+        )
+        return None
+    return host
+
+
+def _compute_target_sizing(run):
+    """Sum per-target snapshot sizes for the disc-fit decision.
+
+    rsync ``--stats`` populated each snapshot's ``size_bytes`` at
+    completion, so we have authoritative numbers without spawning a
+    sizing query.  A target with NULL size_bytes (older agent, missing
+    --stats parse, etc.) is treated as "size unknown" and the run falls
+    through to single-disc; the rsync just won't fit if it overflows
+    but at least we tried.
+
+    Returns ``(target_sizes, total_bytes, unknown_size)``.
+    """
+    target_sizes = {}
+    total_bytes = 0
+    unknown_size = False
+    for target in run.targets:
+        size = (
+            target.source_snapshot.size_bytes
+            if target.source_snapshot is not None
+            else None
+        )
+        if size is None:
+            unknown_size = True
+            continue
+        key = (target.distro, target.version)
+        target_sizes[key] = size
+        total_bytes += size
+    return target_sizes, total_bytes, unknown_size
+
+
+def _build_multidisc_plan(
+    engine, run, req, source_snapshots, target_sizes, total_bytes, media_size
+):
+    """Build the multi-disc collection plan, or mark the run FAILED.
+
+    Returns the plan dict, or ``None`` when the engine lacks the
+    multi-disc builder or the build raised (both mark the run FAILED).
+    """
+    multidisc_builder = getattr(
+        engine, "build_snapshot_multidisc_collection_plan", None
+    )
+    if multidisc_builder is None:
+        _mark_failed(
+            run,
+            f"snapshot tree ({total_bytes} bytes) exceeds disc "
+            f"size ({media_size}) but airgap_collector_engine."
+            "build_snapshot_multidisc_collection_plan is missing. "
+            "Rebuild the Pro+ Cython modules.",
+        )
+        return None
+    # Sign one manifest envelope; the engine stamps each disc's
+    # own disc_index/disc_count onto a copy.  Same signed
+    # payload the single-disc path embeds — so a multi-disc
+    # bundle passes the repository's strict verify too.
+    multidisc_manifest = {
+        "format_version": 1,
+        "iso_label": run.iso_label,
+        "include_cve": run.include_cve,
+        "include_compliance": run.include_compliance,
+        "targets": _manifest_targets(run),
+    }
+    signed_envelope = _sign_manifest_or_raw(engine, multidisc_manifest)
+    try:
+        plan = multidisc_builder(
+            req,
+            source_snapshots=source_snapshots,
+            target_sizes=target_sizes,
+            # Disc files land at /var/lib/sysmanage/airgap-iso/
+            # <run.id>-disc-<N>.iso so the download endpoint can
+            # locate them by run id alone.
+            iso_path_prefix=str(run.id),
+            staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
+            manifest_envelope=signed_envelope,
+        )
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        # CollectorConfigError raised when a single target
+        # exceeds disc size; surface verbatim so the operator
+        # sees which target is too big.
+        _mark_failed(run, f"multi-disc plan build failed: {exc}")
+        return None
+    logger.info(
+        "airgap run %s using multi-disc plan: %d bytes across discs",
+        run.id,
+        total_bytes,
+    )
+    return plan
+
+
+def _build_single_disc_plan(engine, run, req, source_snapshots):
+    """Build the single-disc collection plan (or legacy fallback)."""
+    single_builder = getattr(engine, "build_snapshot_collection_run_plan", None)
+    if single_builder is None:
+        logger.warning(
+            "airgap_collector_engine.build_snapshot_collection_"
+            "run_plan missing; falling back to legacy upstream-"
+            "fetch plan for run %s",
+            run.id,
+        )
+        return engine.build_collection_run_plan(req)
+    # CRITICAL: pass the SAME run-id-scoped staging root that
+    # the ISO-build stage reads from
+    # (_advance_staging_complete_to_building_iso ->
+    # staging_dir=/var/lib/sysmanage/airgap-staging/<run.id>).
+    # Without this the engine defaults staging_root to the bare
+    # /var/lib/sysmanage/airgap-staging, so the packages land in
+    # .../airgap-staging/<target>/ while xorriso later bundles the
+    # empty .../airgap-staging/<run.id>/ -> a manifest-only
+    # (hollow) ISO.  The multi-disc path above already scopes by
+    # run.id; the single-disc path must match it.
+    return single_builder(
+        req,
+        source_snapshots=source_snapshots,
+        staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
+    )
+
+
 def _advance_queued_to_mirroring(db, run, engine) -> None:
     """Wait for per-target snapshots; then dispatch snapshot-sourced plan.
 
@@ -283,56 +465,8 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
       4. Dispatch to the mirror's host (all targets share one host
          per create_run validation).  Status → MIRRORING.
     """
-    if not run.targets:
-        _mark_failed(
-            run,
-            "no targets configured on this run — add at least one "
-            "target via the runs API before retrying",
-        )
-        return
-    if any(t.mirror_id is None for t in run.targets):
-        _mark_failed(
-            run,
-            "one or more targets has no mirror_id; Option-B requires "
-            "every target to be tied to a mirror_repository row",
-        )
-        return
-
-    # Snapshot readiness gate.  Leave QUEUED if any are still working,
-    # flip to FAILED if any blew up.
-    ready, still, failed = _targets_snapshot_state(run)
-    if failed:
-        joined = "; ".join(f"{name}: {err}" for name, err in failed)
-        _mark_failed(run, f"target snapshot(s) failed — {joined}")
-        return
-    if not ready:
-        # In-flight; come back next tick.  Log on a coarse interval
-        # to avoid spamming when the snapshot takes a long time.
-        logger.debug(
-            "airgap run %s waiting on snapshots: %s",
-            run.id,
-            ", ".join(still),
-        )
-        return
-
-    # All snapshots ready — figure out which host to dispatch to.
-    # In Option-B every target shares the same mirror.host_id (the
-    # create_run endpoint validates this) so any target's host is
-    # the right one.
-    first_target = run.targets[0]
-    host_id = first_target.mirror.host_id if first_target.mirror else None
-    if host_id is None:
-        _mark_failed(
-            run,
-            "first target's mirror has no host_id — mirror was deleted?",
-        )
-        return
-    host = db.query(models.Host).filter(models.Host.id == host_id).first()
+    host = _resolve_dispatch_host(db, run)
     if host is None:
-        _mark_failed(
-            run,
-            f"host {host_id} for the target mirrors no longer exists",
-        )
         return
 
     try:
@@ -346,28 +480,9 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
             )
             return
         # Decide single-disc vs multi-disc up front based on total
-        # snapshot size.  rsync ``--stats`` populated each snapshot's
-        # ``size_bytes`` at completion, so we have authoritative numbers
-        # without spawning a sizing query.  A target with NULL
-        # size_bytes (older agent, missing --stats parse, etc.) we
-        # treat as "size unknown" and fall through to single-disc; the
-        # rsync just won't fit if it overflows but at least we tried.
+        # snapshot size.
         media_size = int(run.media_size_bytes or 4_700_000_000)
-        target_sizes = {}
-        total_bytes = 0
-        unknown_size = False
-        for target in run.targets:
-            size = (
-                target.source_snapshot.size_bytes
-                if target.source_snapshot is not None
-                else None
-            )
-            if size is None:
-                unknown_size = True
-                continue
-            key = (target.distro, target.version)
-            target_sizes[key] = size
-            total_bytes += size
+        target_sizes, total_bytes, unknown_size = _compute_target_sizing(run)
         need_multidisc = not unknown_size and total_bytes > media_size and target_sizes
 
         # A run with no ``burn_device`` produces a downloadable ISO meant to
@@ -382,81 +497,21 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
             need_multidisc = False
 
         if need_multidisc:
-            multidisc_builder = getattr(
-                engine, "build_snapshot_multidisc_collection_plan", None
+            plan = _build_multidisc_plan(
+                engine,
+                run,
+                req,
+                source_snapshots,
+                target_sizes,
+                total_bytes,
+                media_size,
             )
-            if multidisc_builder is None:
-                _mark_failed(
-                    run,
-                    f"snapshot tree ({total_bytes} bytes) exceeds disc "
-                    f"size ({media_size}) but airgap_collector_engine."
-                    "build_snapshot_multidisc_collection_plan is missing. "
-                    "Rebuild the Pro+ Cython modules.",
-                )
-                return
-            # Sign one manifest envelope; the engine stamps each disc's
-            # own disc_index/disc_count onto a copy.  Same signed
-            # payload the single-disc path embeds — so a multi-disc
-            # bundle passes the repository's strict verify too.
-            multidisc_manifest = {
-                "format_version": 1,
-                "iso_label": run.iso_label,
-                "include_cve": run.include_cve,
-                "include_compliance": run.include_compliance,
-                "targets": _manifest_targets(run),
-            }
-            signed_envelope = _sign_manifest_or_raw(engine, multidisc_manifest)
-            try:
-                plan = multidisc_builder(
-                    req,
-                    source_snapshots=source_snapshots,
-                    target_sizes=target_sizes,
-                    # Disc files land at /var/lib/sysmanage/airgap-iso/
-                    # <run.id>-disc-<N>.iso so the download endpoint can
-                    # locate them by run id alone.
-                    iso_path_prefix=str(run.id),
-                    staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
-                    manifest_envelope=signed_envelope,
-                )
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                # CollectorConfigError raised when a single target
-                # exceeds disc size; surface verbatim so the operator
-                # sees which target is too big.
-                _mark_failed(run, f"multi-disc plan build failed: {exc}")
+            if plan is None:
                 return
             stage = "multidisc"
             timeout = 28800  # multi-hour for big bundles
-            logger.info(
-                "airgap run %s using multi-disc plan: %d bytes across discs",
-                run.id,
-                total_bytes,
-            )
         else:
-            single_builder = getattr(engine, "build_snapshot_collection_run_plan", None)
-            if single_builder is None:
-                logger.warning(
-                    "airgap_collector_engine.build_snapshot_collection_"
-                    "run_plan missing; falling back to legacy upstream-"
-                    "fetch plan for run %s",
-                    run.id,
-                )
-                plan = engine.build_collection_run_plan(req)
-            else:
-                # CRITICAL: pass the SAME run-id-scoped staging root that
-                # the ISO-build stage reads from
-                # (_advance_staging_complete_to_building_iso ->
-                # staging_dir=/var/lib/sysmanage/airgap-staging/<run.id>).
-                # Without this the engine defaults staging_root to the bare
-                # /var/lib/sysmanage/airgap-staging, so the packages land in
-                # .../airgap-staging/<target>/ while xorriso later bundles the
-                # empty .../airgap-staging/<run.id>/ -> a manifest-only
-                # (hollow) ISO.  The multi-disc path above already scopes by
-                # run.id; the single-disc path must match it.
-                plan = single_builder(
-                    req,
-                    source_snapshots=source_snapshots,
-                    staging_root=f"/var/lib/sysmanage/airgap-staging/{run.id}",
-                )
+            plan = _build_single_disc_plan(engine, run, req, source_snapshots)
             stage = "mirroring"
             timeout = 14400
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -608,6 +663,53 @@ def _advance_iso_built_to_burning(db, run, engine) -> None:
     run.error_message = None
 
 
+def _dispatch_run_advance(db, run, engine) -> None:
+    """Drive the single state transition appropriate for ``run.status``.
+
+    Pure dispatch on the run's current status — the caller owns the
+    surrounding skip-inflight check, the FAILED/advanced tallying, and
+    the per-run exception handling.
+    """
+    if run.status == STATUS_QUEUED:
+        _advance_queued_to_mirroring(db, run, engine)
+    elif run.status == STATUS_STAGING_COMPLETE:
+        _advance_staging_complete_to_building_iso(db, run, engine)
+    elif run.status == STATUS_ISO_BUILT:
+        # Branch on burn_device: with it set we dispatch a burn plan to
+        # an agent that has access to the optical device.  Without it,
+        # ISO_BUILT IS the done-state and we shortcut to COMPLETE.
+        if run.burn_device:
+            _advance_iso_built_to_burning(db, run, engine)
+        else:
+            _advance_iso_built_to_complete(run)
+
+
+def _advance_one_run(db, run, engine, summary: dict) -> None:
+    """Advance a single run row and update ``summary`` in place.
+
+    Skips rows still carrying a ``worker_message_id`` (defense-in-depth
+    against a crashed result handler re-dispatching), then runs the
+    status-appropriate transition and tallies the outcome.
+    """
+    # Defense-in-depth: skip rows that still carry a non-NULL
+    # ``worker_message_id`` — the result handler should have cleared it
+    # before the row could land in a ready-to-advance state, but if it
+    # didn't (race with a crashed handler), don't re-dispatch.
+    if run.worker_message_id is not None:
+        summary["skipped_inflight"] += 1
+        return
+    try:
+        _dispatch_run_advance(db, run, engine)
+        if run.status == STATUS_FAILED:
+            summary["failed"] += 1
+        else:
+            summary["advanced"] += 1
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.exception("airgap run tick failed for run %s: %s", run.id, exc)
+        _mark_failed(run, f"tick exception: {exc}")
+        summary["failed"] += 1
+
+
 def _run_one_tick() -> dict:
     """Advance every AirgapCollectionRun that's ready to progress."""
     summary = {"advanced": 0, "failed": 0, "skipped_inflight": 0}
@@ -630,36 +732,7 @@ def _run_one_tick() -> dict:
             .all()
         )
         for run in rows:
-            # Defense-in-depth: skip rows that still carry a non-NULL
-            # ``worker_message_id`` — the result handler should have
-            # cleared it before the row could land in a ready-to-
-            # advance state, but if it didn't (race with a crashed
-            # handler), don't re-dispatch.
-            if run.worker_message_id is not None:
-                summary["skipped_inflight"] += 1
-                continue
-            try:
-                if run.status == STATUS_QUEUED:
-                    _advance_queued_to_mirroring(db, run, engine)
-                elif run.status == STATUS_STAGING_COMPLETE:
-                    _advance_staging_complete_to_building_iso(db, run, engine)
-                elif run.status == STATUS_ISO_BUILT:
-                    # Branch on burn_device: with it set we dispatch
-                    # a burn plan to an agent that has access to the
-                    # optical device.  Without it, ISO_BUILT IS the
-                    # done-state and we shortcut to COMPLETE.
-                    if run.burn_device:
-                        _advance_iso_built_to_burning(db, run, engine)
-                    else:
-                        _advance_iso_built_to_complete(run)
-                if run.status == STATUS_FAILED:
-                    summary["failed"] += 1
-                else:
-                    summary["advanced"] += 1
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                logger.exception("airgap run tick failed for run %s: %s", run.id, exc)
-                _mark_failed(run, f"tick exception: {exc}")
-                summary["failed"] += 1
+            _advance_one_run(db, run, engine, summary)
         if rows:
             db.commit()
     except Exception:  # pylint: disable=broad-except

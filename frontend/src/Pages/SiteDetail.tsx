@@ -21,6 +21,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -37,17 +38,23 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import {
+  doAcknowledgeFederationAlert,
   doGetFederationDashboardRollup,
   doGetFederationSite,
   doGetFederationSiteSyncStatus,
+  doGetFederationSiteSyncTimeline,
+  doListFederationAlerts,
   doListFederationCommands,
   doRemoveFederationSite,
+  doRepushSitePolicies,
   doResumeFederationSite,
   doSuspendFederationSite,
+  FederationAlert,
   FederationDashboardRollupResponse,
   FederationDispatchedCommand,
   FederationSiteDetail,
   FederationSiteSyncStatus,
+  FederationSiteSyncTimeline,
 } from "../Services/federation";
 import FederationCommandDispatchDialog from "../Components/FederationCommandDispatchDialog";
 
@@ -118,6 +125,59 @@ const SYNC_HEALTH_COLOR: Record<
   unknown: "default",
 };
 
+/** Dependency-free SVG sparkline for the sync-status timeline.  Plots a
+ * numeric series left-to-right; failed points are dropped to null so the
+ * line breaks rather than spiking to zero.  Returns null for an empty
+ * series so the caller can render an empty-state instead. */
+function Sparkline({
+  values,
+  width = 280,
+  height = 48,
+  color = "#1976d2",
+  testId,
+}: {
+  values: (number | null)[];
+  width?: number;
+  height?: number;
+  color?: string;
+  testId?: string;
+}) {
+  const present = values.filter((v): v is number => v !== null);
+  if (present.length === 0) return null;
+  const max = Math.max(...present);
+  const min = Math.min(...present);
+  const span = max - min || 1;
+  const stepX = values.length > 1 ? width / (values.length - 1) : 0;
+  const points = values
+    .map((v, i) => {
+      if (v === null) return null;
+      const x = i * stepX;
+      // Invert Y so larger values sit higher on the chart.
+      const y = height - ((v - min) / span) * height;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .filter((p): p is string => p !== null)
+    .join(" ");
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      data-testid={testId}
+    >
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 interface SiteDetailState {
   loading: boolean;
   licensed: boolean | null;
@@ -166,6 +226,21 @@ const SiteDetail: React.FC = () => {
     }
   }, [siteId]);
 
+  // Phase 12.2: per-site sync timeline + the site's self-reported uplink
+  // state / version / capabilities (from its metadata reports).
+  const [syncTimeline, setSyncTimeline] =
+    useState<FederationSiteSyncTimeline | null>(null);
+
+  const refreshSyncTimeline = useCallback(async () => {
+    if (!siteId) return;
+    try {
+      const resp = await doGetFederationSiteSyncTimeline(siteId);
+      setSyncTimeline(resp.licensed ? resp : null);
+    } catch {
+      // Non-fatal; the timeline card simply renders empty.
+    }
+  }, [siteId]);
+
   // Latest compliance + vulnerability rollup the site has pushed up.
   const [rollup, setRollup] = useState<FederationDashboardRollupResponse | null>(
     null,
@@ -180,6 +255,31 @@ const SiteDetail: React.FC = () => {
       setRollup(null);
     }
   }, [siteId]);
+
+  // Open rollup alerts targeting this site.
+  const [alerts, setAlerts] = useState<FederationAlert[]>([]);
+
+  const refreshAlerts = useCallback(async () => {
+    if (!siteId) return;
+    try {
+      const resp = await doListFederationAlerts({ site_id: siteId });
+      setAlerts(resp.licensed ? (resp.alerts ?? []) : []);
+    } catch {
+      setAlerts([]);
+    }
+  }, [siteId]);
+
+  const acknowledge = useCallback(
+    async (alertId: string) => {
+      try {
+        await doAcknowledgeFederationAlert(alertId);
+        await refreshAlerts();
+      } catch {
+        // Non-fatal.
+      }
+    },
+    [refreshAlerts],
+  );
 
   const refreshCommands = useCallback(async () => {
     if (!siteId) return;
@@ -266,15 +366,29 @@ const SiteDetail: React.FC = () => {
       });
     refreshCommands();
     refreshSyncStatus();
+    refreshSyncTimeline();
     refreshRollup();
-    // Poll connection health so an operator watching the page sees the
-    // site go stale/overdue without a manual reload.
-    const poll = setInterval(refreshSyncStatus, 15000);
+    refreshAlerts();
+    // Poll connection health + alerts so an operator watching the page
+    // sees the site go stale/overdue (and new alerts) without a reload.
+    const poll = setInterval(() => {
+      refreshSyncStatus();
+      refreshSyncTimeline();
+      refreshAlerts();
+    }, 15000);
     return () => {
       cancelled = true;
       clearInterval(poll);
     };
-  }, [siteId, t, refreshCommands, refreshSyncStatus, refreshRollup]);
+  }, [
+    siteId,
+    t,
+    refreshCommands,
+    refreshSyncStatus,
+    refreshSyncTimeline,
+    refreshRollup,
+    refreshAlerts,
+  ]);
 
   const handleSuspend = async () => {
     if (!siteId || actionInFlight) return;
@@ -295,6 +409,30 @@ const SiteDetail: React.FC = () => {
       await doResumeFederationSite(siteId);
       await refresh();
       await refreshCommands();
+    } finally {
+      setActionInFlight(false);
+    }
+  };
+
+  const [repushMsg, setRepushMsg] = useState<string | null>(null);
+
+  const handleRepushPolicies = async () => {
+    if (!siteId || actionInFlight) return;
+    setActionInFlight(true);
+    try {
+      const resp = await doRepushSitePolicies(siteId);
+      const n = resp.requeued_count ?? 0;
+      setRepushMsg(
+        t(
+          "sites.detail.repushQueued",
+          "Queued {{n}} policy push(es) for re-delivery.",
+          { n },
+        ),
+      );
+    } catch {
+      setRepushMsg(
+        t("sites.detail.repushFailed", "Failed to queue policy re-push."),
+      );
     } finally {
       setActionInFlight(false);
     }
@@ -401,11 +539,34 @@ const SiteDetail: React.FC = () => {
             </Typography>
           )}
         </Box>
-        <Chip
-          label={site.status}
-          color={statusChipColor(site.status)}
-          data-testid="site-status-chip"
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          {/* Per-site action surface (Phase 12.3): a batch dispatch is
+              the primary per-site action; disabled unless the site is
+              actively enrolled (a suspended/removed site can't actuate). */}
+          <Button
+            variant="contained"
+            size="small"
+            disabled={site.status !== "enrolled"}
+            onClick={() => setDispatchOpen(true)}
+            data-testid="header-dispatch-button"
+          >
+            {t("sites.detail.dispatchCommand", "Dispatch command")}
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={site.status !== "enrolled" || actionInFlight}
+            onClick={handleRepushPolicies}
+            data-testid="header-policies-button"
+          >
+            {t("sites.detail.pushPolicies", "Push policies")}
+          </Button>
+          <Chip
+            label={site.status}
+            color={statusChipColor(site.status)}
+            data-testid="site-status-chip"
+          />
+        </Stack>
       </Box>
 
       <Grid container spacing={2}>
@@ -530,9 +691,8 @@ const SiteDetail: React.FC = () => {
                           )}
                         </Typography>
                         <Typography variant="body2">
-                          {syncStatus?.pending_queue_depth != null
-                            ? syncStatus.pending_queue_depth
-                            : t("sites.detail.backlogUnknown", "—")}
+                          {syncStatus?.pending_queue_depth ??
+                            t("sites.detail.backlogUnknown", "—")}
                         </Typography>
                       </Box>
                       {site.agent_version_min && (
@@ -558,6 +718,163 @@ const SiteDetail: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Sync timeline + site-reported metadata (Phase 12.2) -------- */}
+        <Grid size={{ xs: 12 }}>
+          <Card variant="outlined" data-testid="sync-timeline-card">
+            <CardContent>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 1 }}
+              >
+                <Typography variant="h6">
+                  {t("sites.detail.syncTimeline", "Sync timeline")}
+                </Typography>
+                {syncTimeline?.connection_state === "offline" && (
+                  <Chip
+                    size="small"
+                    color="warning"
+                    data-testid="autonomy-banner"
+                    label={t(
+                      "sites.detail.autonomous",
+                      "Operating independently",
+                    )}
+                  />
+                )}
+              </Stack>
+              {syncTimeline && syncTimeline.events.length > 0 ? (
+                <Stack spacing={1}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t(
+                        "sites.detail.syncLatency",
+                        "Upstream sync latency (recent)",
+                      )}
+                    </Typography>
+                    <Box>
+                      <Sparkline
+                        testId="sync-latency-sparkline"
+                        values={syncTimeline.events.map((e) =>
+                          e.latency_ms ?? e.queue_depth ?? null,
+                        )}
+                      />
+                    </Box>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {t("sites.detail.syncPoints", "{{n}} sync events", {
+                      n: syncTimeline.events.length,
+                    })}
+                  </Typography>
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {t(
+                    "sites.detail.syncTimelineEmpty",
+                    "No sync events recorded yet.",
+                  )}
+                </Typography>
+              )}
+              {syncTimeline?.sysmanage_version && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {t("sites.detail.siteVersion", "Reported version")}
+                  </Typography>
+                  <Typography variant="body2" data-testid="site-version">
+                    {syncTimeline.sysmanage_version}
+                  </Typography>
+                </Box>
+              )}
+              {syncTimeline?.capabilities &&
+                syncTimeline.capabilities.length > 0 && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("sites.detail.siteCapabilities", "Capabilities")}
+                    </Typography>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ flexWrap: "wrap", mt: 0.5 }}
+                    >
+                      {syncTimeline.capabilities.map((cap) => (
+                        <Chip key={cap} size="small" label={cap} />
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Open alerts card (Phase 12.1 rollup alerting) -------------- */}
+        {alerts.length > 0 && (
+          <Grid size={{ xs: 12 }}>
+            <Card variant="outlined" sx={{ borderColor: "error.main" }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  {t("sites.detail.alertsTitle", "Open alerts")}
+                </Typography>
+                <Stack spacing={1.5}>
+                  {alerts.map((a) => (
+                    <Box
+                      key={a.id}
+                      sx={{
+                        borderLeft: 3,
+                        borderColor:
+                          a.severity === "critical"
+                            ? "error.main"
+                            : "warning.main",
+                        pl: 1.5,
+                        py: 0.5,
+                      }}
+                    >
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        alignItems="center"
+                        sx={{ flexWrap: "wrap" }}
+                      >
+                        <Chip
+                          label={a.severity}
+                          size="small"
+                          color={
+                            a.severity === "critical" ? "error" : "warning"
+                          }
+                        />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {a.title}
+                        </Typography>
+                        {a.acknowledged ? (
+                          <Chip
+                            label={t("sites.detail.alertAcked", "Acknowledged")}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ) : (
+                          <Button
+                            size="small"
+                            onClick={() => acknowledge(a.id)}
+                            data-testid="ack-alert"
+                          >
+                            {t("sites.detail.alertAck", "Acknowledge")}
+                          </Button>
+                        )}
+                      </Stack>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        component="div"
+                      >
+                        {a.message}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
         {/* Compliance & vulnerability rollup card ---------------------
             The federation-correct "cross-site compliance/vuln drill-down":
@@ -600,23 +917,24 @@ const SiteDetail: React.FC = () => {
                           spacing={1}
                           sx={{ flexWrap: "wrap", mt: 0.5 }}
                         >
-                          {compliance.map((c) => (
+                          {compliance.map((c) => {
+                            const complianceColor = (() => {
+                              if (c.score_percent >= 90) return "success";
+                              if (c.score_percent >= 70) return "warning";
+                              return "error";
+                            })();
+                            return (
                             <Chip
                               key={c.baseline}
                               size="small"
                               variant="outlined"
-                              color={
-                                c.score_percent >= 90
-                                  ? "success"
-                                  : c.score_percent >= 70
-                                    ? "warning"
-                                    : "error"
-                              }
+                              color={complianceColor}
                               label={`${c.baseline}: ${Math.round(
                                 c.score_percent,
                               )}% (${c.hosts_compliant}/${c.hosts_in_scope})`}
                             />
-                          ))}
+                            );
+                          })}
                         </Stack>
                       </Box>
                     )}
@@ -706,20 +1024,28 @@ const SiteDetail: React.FC = () => {
                   {t("sites.detail.dispatchCommand", "Dispatch command")}
                 </Button>
               </Stack>
-              {commands === null ? (
+              {commands === null && (
                 <Typography variant="body2" color="text.secondary">
                   {t("sites.detail.activeCommandsLoading", "Loading…")}
                 </Typography>
-              ) : commands.length === 0 ? (
+              )}
+              {commands !== null && commands.length === 0 && (
                 <Typography variant="body2" color="text.secondary">
                   {t(
                     "sites.detail.activeCommandsEmpty",
                     "No active commands.",
                   )}
                 </Typography>
-              ) : (
+              )}
+              {commands !== null && commands.length > 0 && (
                 <Stack spacing={1.5}>
-                  {commands.map((cmd) => (
+                  {commands.map((cmd) => {
+                    const statusColor = (() => {
+                      if (cmd.status === "in_progress") return "info";
+                      if (cmd.status === "queued_at_site") return "default";
+                      return "warning";
+                    })();
+                    return (
                     <Box
                       key={cmd.id}
                       sx={{
@@ -747,13 +1073,7 @@ const SiteDetail: React.FC = () => {
                         <Chip
                           label={cmd.status}
                           size="small"
-                          color={
-                            cmd.status === "in_progress"
-                              ? "info"
-                              : cmd.status === "queued_at_site"
-                                ? "default"
-                                : "warning"
-                          }
+                          color={statusColor}
                         />
                         {(cmd.push_attempts ?? 0) > 0 && (
                           <Chip
@@ -792,7 +1112,8 @@ const SiteDetail: React.FC = () => {
                         </Typography>
                       )}
                     </Box>
-                  ))}
+                    );
+                  })}
                 </Stack>
               )}
             </CardContent>
@@ -895,6 +1216,14 @@ const SiteDetail: React.FC = () => {
         open={dispatchOpen}
         onClose={() => setDispatchOpen(false)}
         onDispatched={refreshCommands}
+      />
+
+      <Snackbar
+        open={repushMsg !== null}
+        autoHideDuration={5000}
+        onClose={() => setRepushMsg(null)}
+        message={repushMsg ?? ""}
+        data-testid="repush-snackbar"
       />
     </Box>
   );

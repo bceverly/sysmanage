@@ -33,7 +33,14 @@ from sqlalchemy.orm import Session
 from backend.persistence.models.federation import (
     FederationAuditLog,
     FederationSite,
+    FederationSiteSyncEvent,
 )
+
+# Per-site cap and age cap for the sync-event timeline series (Phase 12.2).
+# Mirrors the rollup-retention defaults: keep recent points for the graph,
+# prune the tail so the table can't grow without bound on a busy fleet.
+DEFAULT_SYNC_EVENT_KEEP_PER_SITE = 500
+DEFAULT_SYNC_EVENT_RETENTION_DAYS = 30
 
 # ---------------------------------------------------------------------
 # Status constants (kept in lockstep with the database column values
@@ -746,6 +753,9 @@ def record_sync(
     success: bool,
     host_count: Optional[int] = None,
     error: Optional[str] = None,
+    latency_ms: Optional[int] = None,
+    queue_depth: Optional[int] = None,
+    record_event: bool = True,
 ) -> FederationSite:
     """Mark that we just heard from a site.
 
@@ -753,10 +763,152 @@ def record_sync(
     site (or fails to).  Updates ``last_sync_at`` / ``last_sync_status``
     plus optionally the cached ``host_count``.  Does NOT log audit —
     sync events are too high-frequency to write per-row.
+
+    Phase 12.2: also appends a ``FederationSiteSyncEvent`` point to the
+    per-site timeline (latency / queue-depth / host-count over time) so
+    SiteDetail can graph upstream sync health.  Pass ``record_event=False``
+    to suppress that (e.g. a backfill that would distort the series).
+    The series is pruned opportunistically so it can't grow unbounded.
     """
     site = _ensure_site(session, site_id)
-    site.last_sync_at = _utcnow_naive()
+    now = _utcnow_naive()
+    site.last_sync_at = now
     site.last_sync_status = "success" if success else (error or "error")
     if host_count is not None and host_count >= 0:
         site.host_count = host_count
+
+    if record_event:
+        session.add(
+            FederationSiteSyncEvent(
+                site_id=site.id,
+                recorded_at=now,
+                sync_status="success" if success else "error",
+                latency_ms=latency_ms,
+                queue_depth=queue_depth,
+                host_count=host_count if host_count is not None else site.host_count,
+            )
+        )
+        session.flush()
+        prune_sync_events(session, site.id)
     return site
+
+
+def apply_site_metadata(
+    session: Session,
+    site_id: Any,
+    metadata: Dict[str, Any],
+) -> FederationSite:
+    """Cache a site's self-reported metadata onto its registry row.
+
+    Called when the coordinator ingests a ``site_metadata`` sync payload.
+    Records the site's SysManage version, its own connection-state (the
+    site's view of *its* uplink — distinct from the coordinator's
+    ``last_sync_status``), the JSON capability/module list, and a
+    ``last_metadata_at`` stamp.  ``host_count`` is also refreshed when the
+    metadata carries it.  Unknown keys are ignored, so the site can add
+    fields the coordinator doesn't yet understand without breaking
+    ingestion.
+    """
+    import json  # noqa: PLC0415
+
+    site = _ensure_site(session, site_id)
+    version = metadata.get("sysmanage_version")
+    if version is not None:
+        site.sysmanage_version = str(version)[:32]
+    conn_state = metadata.get("connection_state")
+    if conn_state is not None:
+        site.connection_state = str(conn_state)[:16]
+    capabilities = metadata.get("capabilities")
+    if capabilities is not None:
+        site.capabilities_json = json.dumps(capabilities, sort_keys=True)
+    host_count = metadata.get("host_count")
+    if isinstance(host_count, int) and host_count >= 0:
+        site.host_count = host_count
+    site.last_metadata_at = _utcnow_naive()
+    return site
+
+
+def list_sync_events(
+    session: Session,
+    site_id: Any,
+    *,
+    limit: int = 100,
+) -> List[FederationSiteSyncEvent]:
+    """Return the most recent sync-timeline points for a site, oldest-first.
+
+    The UI plots these left-to-right, so we fetch the newest ``limit`` and
+    reverse them into chronological order.
+    """
+    uid = _coerce_uuid(site_id)
+    rows = (
+        session.execute(
+            select(FederationSiteSyncEvent)
+            .where(FederationSiteSyncEvent.site_id == uid)
+            .order_by(FederationSiteSyncEvent.recorded_at.desc())
+            .limit(max(1, limit))
+        )
+        .scalars()
+        .all()
+    )
+    return list(reversed(rows))
+
+
+def prune_sync_events(
+    session: Session,
+    site_id: Any,
+    *,
+    keep_per_site: int = DEFAULT_SYNC_EVENT_KEEP_PER_SITE,
+    older_than_days: int = DEFAULT_SYNC_EVENT_RETENTION_DAYS,
+) -> int:
+    """Trim a site's sync-event series: drop rows beyond ``keep_per_site``
+    newest AND rows older than ``older_than_days``.  Returns the count
+    deleted.  Cheap enough to call opportunistically after each insert.
+    """
+    uid = _coerce_uuid(site_id)
+    deleted = 0
+
+    cutoff = _utcnow_naive() - timedelta(days=older_than_days)
+    old_ids = (
+        session.execute(
+            select(FederationSiteSyncEvent.id).where(
+                and_(
+                    FederationSiteSyncEvent.site_id == uid,
+                    FederationSiteSyncEvent.recorded_at < cutoff,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    keep_ids = (
+        session.execute(
+            select(FederationSiteSyncEvent.id)
+            .where(FederationSiteSyncEvent.site_id == uid)
+            .order_by(FederationSiteSyncEvent.recorded_at.desc())
+            .limit(max(0, keep_per_site))
+        )
+        .scalars()
+        .all()
+    )
+    keep_set = set(keep_ids)
+    overflow_ids = (
+        session.execute(
+            select(FederationSiteSyncEvent.id).where(
+                FederationSiteSyncEvent.site_id == uid
+            )
+        )
+        .scalars()
+        .all()
+    )
+    to_delete = {row_id for row_id in overflow_ids if row_id not in keep_set}
+    to_delete.update(old_ids)
+
+    for row_id in to_delete:
+        row = session.get(FederationSiteSyncEvent, row_id)
+        if row is not None:
+            session.delete(row)
+            deleted += 1
+    if deleted:
+        session.flush()
+    return deleted
