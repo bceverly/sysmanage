@@ -135,13 +135,13 @@ function Sparkline({
   height = 48,
   color = "#1976d2",
   testId,
-}: {
+}: Readonly<{
   values: (number | null)[];
   width?: number;
   height?: number;
   color?: string;
   testId?: string;
-}) {
+}>) {
   const present = values.filter((v): v is number => v !== null);
   if (present.length === 0) return null;
   const max = Math.max(...present);
@@ -163,7 +163,7 @@ function Sparkline({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      role="img"
+      aria-hidden="true"
       data-testid={testId}
     >
       <polyline

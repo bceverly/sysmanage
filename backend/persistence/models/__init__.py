@@ -183,6 +183,8 @@ __all__ = [
     "FederationAlert",
     "FederationAlertConfig",
     "FederationSiteSyncEvent",
+    "FederationSecretLease",
+    "FederationReceivedSecretLease",
     "FederationCoordinator",
     "SINGLETON_FEDERATION_ALERT_CONFIG_ID",
     "FederationSyncQueue",

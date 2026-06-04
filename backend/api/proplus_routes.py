@@ -1806,6 +1806,12 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False}
 
+        @router.get("/reports/rollup")
+        async def fed_reports_rollup_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "sites": [], "totals": {}}
+
         @router.get("/rollups/hosts")
         async def fed_rollup_hosts_stub(  # pylint: disable=unused-argument
             current_user=Depends(get_current_user),
@@ -1944,6 +1950,20 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False}
 
+        # Phase 12.5 — federation-aware dynamic-secret leases.
+        @router.get("/secret-leases")
+        async def fed_secret_leases_list_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "leases": []}
+
+        @router.post("/secret-leases/{lease_id}/revoke")
+        async def fed_secret_lease_revoke_stub(  # pylint: disable=unused-argument
+            lease_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
         # Phase 12.6 ingest surface — endpoints sites POST data INTO
         # the coordinator over the federation wire protocol.  These
         # are authenticated by the site's long-lived sync bearer token
@@ -1983,6 +2003,12 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
 
         @router.post("/sites/{site_id}/metadata")
         async def fed_ingest_site_metadata_stub(  # pylint: disable=unused-argument
+            site_id: str,
+        ):
+            return {"licensed": False}
+
+        @router.post("/sites/{site_id}/secret-lease-requests")
+        async def fed_ingest_secret_lease_request_stub(  # pylint: disable=unused-argument
             site_id: str,
         ):
             return {"licensed": False}

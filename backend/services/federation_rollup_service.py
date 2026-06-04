@@ -543,3 +543,84 @@ def get_dashboard_rollup(session: Session, site_id: Any) -> Tuple[
             latest_per_baseline[row.baseline] = row
     latest_vuln = get_latest_vulnerability_rollup(session, uid)
     return latest_host, list(latest_per_baseline.values()), latest_vuln
+
+
+# Numeric per-site columns summed into the enterprise-wide totals.
+_CROSS_SITE_TOTAL_KEYS = (
+    "host_count",
+    "active_count",
+    "critical_count",
+    "high_count",
+    "medium_count",
+    "low_count",
+)
+
+
+def _resolve_report_sites(
+    session: Session, site_ids: Optional[List[Any]]
+) -> List[FederationSite]:
+    """The sites a cross-site report covers: the requested ids (existing
+    only), or every enrolled site when none are given."""
+    if site_ids:
+        uids = [_coerce_uuid(s) for s in site_ids]
+        return [
+            site
+            for site in (session.get(FederationSite, u) for u in uids)
+            if site is not None
+        ]
+    return list(
+        session.execute(
+            select(FederationSite).where(FederationSite.status == "enrolled")
+        )
+        .scalars()
+        .all()
+    )
+
+
+def _worst_compliance(compliance) -> Optional[Dict[str, Any]]:
+    """The lowest-scoring baseline (ignoring null scores), or None."""
+    scored = [c for c in compliance if c.score_percent is not None]
+    if not scored:
+        return None
+    worst = min(scored, key=lambda c: c.score_percent)
+    return {"baseline": worst.baseline, "score_percent": worst.score_percent}
+
+
+def _cross_site_report_row(session: Session, site: FederationSite) -> Dict[str, Any]:
+    """One per-site row for the federated report (latest rollups)."""
+    host, compliance, vuln = get_dashboard_rollup(session, site.id)
+    return {
+        "site_id": str(site.id),
+        "site_name": site.name,
+        "host_count": host.host_count if host else site.host_count,
+        "active_count": host.active_count if host else 0,
+        "worst_compliance": _worst_compliance(compliance),
+        "critical_count": vuln.critical_count if vuln else 0,
+        "high_count": vuln.high_count if vuln else 0,
+        "medium_count": vuln.medium_count if vuln else 0,
+        "low_count": vuln.low_count if vuln else 0,
+        "last_sync_at": site.last_sync_at,
+    }
+
+
+def get_cross_site_report(
+    session: Session,
+    site_ids: Optional[List[Any]] = None,
+) -> Dict[str, Any]:
+    """Aggregate the latest rollups across sites for the federated Reports
+    facet (Phase 12.3).
+
+    ``site_ids`` restricts the report to those sites; ``None`` (or an empty
+    list) reports on every *enrolled* site.  Returns one row per site (host
+    counts, worst compliance baseline, CVE-severity counts) plus
+    enterprise-wide totals so the UI can render a cross-site table without
+    N round-trips.  Read-only — safe from any report context.
+    """
+    rows = [
+        _cross_site_report_row(session, site)
+        for site in _resolve_report_sites(session, site_ids)
+    ]
+    totals: Dict[str, int] = {"site_count": len(rows)}
+    for key in _CROSS_SITE_TOTAL_KEYS:
+        totals[key] = sum(row.get(key) or 0 for row in rows)
+    return {"sites": rows, "totals": totals}

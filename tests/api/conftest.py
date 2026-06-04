@@ -732,6 +732,11 @@ def test_db():
         last_sync_at = Column(DateTime, nullable=True)
         last_sync_status = Column(String(32), nullable=True)
         sync_interval_seconds = Column(Integer, nullable=False, default=300)
+        # Phase 12.2 — site-reported metadata (lockstep with the real model).
+        sysmanage_version = Column(String(32), nullable=True)
+        connection_state = Column(String(16), nullable=True)
+        capabilities_json = Column(Text, nullable=True)
+        last_metadata_at = Column(DateTime, nullable=True)
         agent_version_min = Column(String(32), nullable=True)
         geo_latitude = Column(Float, nullable=True)
         geo_longitude = Column(Float, nullable=True)

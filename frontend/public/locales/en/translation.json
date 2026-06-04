@@ -1133,7 +1133,8 @@
     "tabs": {
       "hosts": "Hosts",
       "security": "Security",
-      "users": "Users"
+      "users": "Users",
+      "federation": "Federation"
     },
     "title": "Reports",
     "viewReport": "View Report"
@@ -3044,5 +3045,20 @@
     "saved": "Alert thresholds saved.",
     "subtitle": "Leave a field blank to use the built-in default.",
     "title": "Alert thresholds"
+  },
+  "federationReport": {
+    "col": {
+      "active": "Active",
+      "compliance": "Worst compliance",
+      "critical": "Critical CVEs",
+      "high": "High CVEs",
+      "hosts": "Hosts",
+      "site": "Site"
+    },
+    "generate": "Generate report",
+    "sites": "Sites (all if none selected)",
+    "subtitle": "Aggregate host, compliance, and vulnerability rollups across sites.",
+    "totals": "Totals ({{n}} sites)",
+    "upsell": "Multi-site federation requires Enterprise."
   }
 }

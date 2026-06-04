@@ -1133,7 +1133,8 @@
     "tabs": {
       "hosts": "المضيفين",
       "security": "الأمان",
-      "users": "المستخدمين"
+      "users": "المستخدمين",
+      "federation": "[TODO] Federation"
     },
     "title": "التقارير",
     "viewReport": "عرض التقرير"
@@ -3044,5 +3045,20 @@
     "saved": "[TODO] Alert thresholds saved.",
     "subtitle": "[TODO] Leave a field blank to use the built-in default.",
     "title": "[TODO] Alert thresholds"
+  },
+  "federationReport": {
+    "col": {
+      "active": "[TODO] Active",
+      "compliance": "[TODO] Worst compliance",
+      "critical": "[TODO] Critical CVEs",
+      "high": "[TODO] High CVEs",
+      "hosts": "[TODO] Hosts",
+      "site": "[TODO] Site"
+    },
+    "generate": "[TODO] Generate report",
+    "sites": "[TODO] Sites (all if none selected)",
+    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
+    "totals": "[TODO] Totals ({{n}} sites)",
+    "upsell": "[TODO] Multi-site federation requires Enterprise."
   }
 }

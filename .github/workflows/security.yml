@@ -17,6 +17,29 @@ permissions:
   actions: read
 
 jobs:
+  bandit:
+    name: Bandit (Python SAST)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      with:
+        python-version: '3.12'
+
+    - name: Install Bandit
+      run: pip install bandit
+
+    # Gating bandit (matches the release ci.yml). The codebase tunes findings
+    # with inline ``# nosec`` annotations; a NEW high-severity finding should
+    # fail a PR rather than wait for a release tag. Mirrors local
+    # ``make security-python`` scope (backend/, excluding backend/tests/).
+    - name: Run Bandit
+      run: python -m bandit -r backend/ -f screen -x backend/tests/
+
   semgrep:
     name: Semgrep PRO Security Scan
     runs-on: ubuntu-latest

@@ -549,3 +549,76 @@ class TestDashboardRollup:
         assert host is None
         assert compliance == []
         assert vuln is None
+
+
+class TestCrossSiteReport:
+    def _site(self, session, name):
+        site, token = ssvc.create_site(session, name=name, url=f"https://{name}.x")
+        ssvc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        session.commit()
+        return site
+
+    def test_aggregates_across_enrolled_sites(self, session):
+        a = self._site(session, "a")
+        b = self._site(session, "b")
+        rsvc.record_host_rollup_snapshot(
+            session, site_id=a.id, host_count=10, active_count=8
+        )
+        rsvc.record_host_rollup_snapshot(
+            session, site_id=b.id, host_count=5, active_count=5
+        )
+        rsvc.record_vulnerability_rollup_snapshot(
+            session, site_id=a.id, critical_count=2, high_count=3
+        )
+        session.commit()
+
+        report = rsvc.get_cross_site_report(session)
+        assert report["totals"]["site_count"] == 2
+        assert report["totals"]["host_count"] == 15
+        assert report["totals"]["active_count"] == 13
+        assert report["totals"]["critical_count"] == 2
+        assert {r["site_name"] for r in report["sites"]} == {"a", "b"}
+
+    def test_filters_to_requested_sites(self, session):
+        a = self._site(session, "a")
+        self._site(session, "b")
+        rsvc.record_host_rollup_snapshot(
+            session, site_id=a.id, host_count=10, active_count=8
+        )
+        session.commit()
+
+        report = rsvc.get_cross_site_report(session, [a.id])
+        assert report["totals"]["site_count"] == 1
+        assert report["sites"][0]["site_name"] == "a"
+        assert report["sites"][0]["host_count"] == 10
+
+    def test_worst_compliance_baseline_wins(self, session):
+        a = self._site(session, "a")
+        rsvc.record_compliance_rollup_snapshot(
+            session,
+            site_id=a.id,
+            baseline="CIS",
+            score_percent=92.0,
+            hosts_in_scope=10,
+            hosts_compliant=9,
+            hosts_noncompliant=1,
+        )
+        rsvc.record_compliance_rollup_snapshot(
+            session,
+            site_id=a.id,
+            baseline="STIG",
+            score_percent=61.0,
+            hosts_in_scope=10,
+            hosts_compliant=6,
+            hosts_noncompliant=4,
+        )
+        session.commit()
+        report = rsvc.get_cross_site_report(session, [a.id])
+        worst = report["sites"][0]["worst_compliance"]
+        assert worst["baseline"] == "STIG"
+        assert worst["score_percent"] == 61.0
+
+    def test_empty_when_no_enrolled_sites(self, session):
+        report = rsvc.get_cross_site_report(session)
+        assert report["totals"]["site_count"] == 0
+        assert report["sites"] == []

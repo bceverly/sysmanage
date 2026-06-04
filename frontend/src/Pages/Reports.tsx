@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import api from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import FederationReportPanel from '../Components/FederationReportPanel';
 
 import {
   Box,
@@ -170,7 +171,10 @@ const Reports: React.FC = () => {
   const navigate = useNavigate();
 
   // Tab names for URL hash
-  const tabNames = useMemo(() => ['hosts', 'users', 'security'], []);
+  const tabNames = useMemo(
+    () => ['hosts', 'users', 'security', 'federation'],
+    [],
+  );
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -385,6 +389,7 @@ const Reports: React.FC = () => {
             <Tab label={t('reports.tabs.hosts', 'Hosts')} />
             <Tab label={t('reports.tabs.users', 'Users')} />
             <Tab label={t('reports.tabs.security', 'Security')} />
+            <Tab label={t('reports.tabs.federation', 'Federation')} />
           </Tabs>
         </Box>
 
@@ -548,6 +553,10 @@ const Reports: React.FC = () => {
               </Typography>
             </Box>
           )}
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={3}>
+          <FederationReportPanel />
         </TabPanel>
       </Box>
     </div>

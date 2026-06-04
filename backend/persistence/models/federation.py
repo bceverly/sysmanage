@@ -519,7 +519,7 @@ class FederationAlert(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     site_id = Column(
         GUID(),
-        ForeignKey("federation_sites.id", ondelete="CASCADE"),
+        ForeignKey(_FK_FEDERATION_SITES_ID, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -583,7 +583,7 @@ class FederationSiteSyncEvent(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     site_id = Column(
         GUID(),
-        ForeignKey("federation_sites.id", ondelete="CASCADE"),
+        ForeignKey(_FK_FEDERATION_SITES_ID, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -773,5 +773,107 @@ class FederationReceivedCommand(Base):
             "ix_federation_received_commands_status",
             "status",
             "received_at",
+        ),
+    )
+
+
+# =====================================================================
+# Federation-aware dynamic-secret leases (Phase 12.5)
+# =====================================================================
+
+# Lifecycle of a coordinator-tracked federation secret lease.
+FED_LEASE_REQUESTED = "requested"  # site asked; not yet issued from Vault
+FED_LEASE_ACTIVE = "active"  # issued + live in the master Vault
+FED_LEASE_REVOKED = "revoked"  # explicitly revoked
+FED_LEASE_EXPIRED = "expired"  # TTL elapsed, not renewed
+FED_LEASE_FAILED = "failed"  # Vault issue/renew failed
+FED_LEASE_STATUSES = (
+    FED_LEASE_REQUESTED,
+    FED_LEASE_ACTIVE,
+    FED_LEASE_REVOKED,
+    FED_LEASE_EXPIRED,
+    FED_LEASE_FAILED,
+)
+
+
+class FederationSecretLease(Base):
+    """Coordinator-side record of a dynamic-secret lease issued on behalf of
+    a host at a subordinate site (Phase 12.5).
+
+    The coordinator owns the master OpenBAO/Vault; restricted sites never
+    need direct Vault access.  A site requests a short-lived credential for
+    one of its hosts (upstream ``secret_lease_request`` sync payload); the
+    coordinator issues it from the master Vault and tracks the lease here so
+    a single coordinator-side reconcile loop can renew/revoke/expire every
+    site's leases — no per-site sweeper.
+
+    NEVER stores the secret value itself — only the Vault ``lease_id`` (for
+    renew/revoke) and non-sensitive ``secret_metadata`` (e.g. generated
+    username), mirroring ``DynamicSecretLease``.
+    """
+
+    __tablename__ = "federation_secret_lease"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    site_id = Column(
+        GUID(),
+        ForeignKey(_FK_FEDERATION_SITES_ID, ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # The requesting host at the site — opaque string to the coordinator.
+    host_id = Column(String(255), nullable=False)
+    # Operator-facing name of the credential + the Vault backend role.
+    secret_name = Column(String(255), nullable=False)
+    backend_role = Column(String(255), nullable=False)
+    kind = Column(String(40), nullable=False)
+    # requested / active / revoked / expired / failed
+    status = Column(String(20), nullable=False, default=FED_LEASE_REQUESTED)
+    # OpenBAO lease id — NULL until issued (or if issue failed).
+    vault_lease_id = Column(String(500), nullable=True, index=True)
+    ttl_seconds = Column(Integer, nullable=True)
+    requested_at = Column(DateTime, nullable=False, default=_utcnow_naive)
+    issued_at = Column(DateTime, nullable=True)
+    expires_at = Column(DateTime, nullable=True, index=True)
+    last_renewed_at = Column(DateTime, nullable=True)
+    revoked_at = Column(DateTime, nullable=True)
+    last_error = Column(Text, nullable=True)
+    # Correlates with the site's request + downstream result echo.
+    correlation_key = Column(String(64), nullable=True, index=True)
+    secret_metadata_json = Column(Text, nullable=True)
+
+    __table_args__ = (
+        Index("ix_federation_secret_lease_site_status", "site_id", "status"),
+    )
+
+
+class FederationReceivedSecretLease(Base):
+    """Site-side inbox: the result of a lease the site requested upstream
+    (Phase 12.5).
+
+    The coordinator echoes the lease outcome down to the requesting site so
+    the site engine can deliver the credential to the host through the
+    agent's secure channel.  Status + non-sensitive metadata only — the
+    secret value is delivered transiently by the engine and NEVER persisted.
+    """
+
+    __tablename__ = "federation_received_secret_lease"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    # Matches ``FederationSecretLease.correlation_key`` at the coordinator.
+    correlation_key = Column(String(64), nullable=False, index=True)
+    host_id = Column(String(255), nullable=False)
+    secret_name = Column(String(255), nullable=False)
+    # issued / failed / revoked
+    status = Column(String(20), nullable=False)
+    secret_metadata_json = Column(Text, nullable=True)
+    received_at = Column(DateTime, nullable=False, default=_utcnow_naive)
+    delivered_at = Column(DateTime, nullable=True)
+    last_error = Column(Text, nullable=True)
+
+    __table_args__ = (
+        Index(
+            "ix_federation_received_secret_lease_delivered",
+            "delivered_at",
         ),
     )

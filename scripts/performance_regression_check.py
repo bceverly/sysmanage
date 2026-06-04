@@ -11,7 +11,6 @@ import statistics
 import sys
 from datetime import datetime
 
-
 # For each metric we track, which direction is bad?
 #   "higher" -> a regression occurs when current is meaningfully GREATER than baseline
 #              (latency, error rate, memory use, page-load time)
@@ -55,6 +54,16 @@ PER_METRIC_TOLERANCE_OVERRIDE = {
     "windows_response_time_p99": 100,
 }
 
+# Throughput noise floor.  The Artillery harness drives only a few requests
+# per second (arrivalRate 2->5->10) against a freshly-started backend, so a
+# ``*_requests_per_second`` baseline in the single/low digits is dominated by
+# cold-start + host-load jitter, not by code.  Below this ABSOLUTE baseline a
+# percentage swing isn't statistically meaningful, so we don't fail the build
+# on it (still reported, informationally).  The floor is on the BASELINE, so a
+# genuine collapse from a healthy throughput (e.g. 100 -> 3 req/s) still fires
+# — only inherently-tiny runs are exempted.
+THROUGHPUT_NOISE_FLOOR = 50  # req/s
+
 
 class PerformanceRegessionDetector:
     """Detects performance regressions using statistical analysis"""
@@ -75,7 +84,7 @@ class PerformanceRegessionDetector:
         """Load historical performance data"""
         if os.path.exists(self.performance_history_file):
             try:
-                with open(self.performance_history_file, 'r') as f:
+                with open(self.performance_history_file, "r") as f:
                     return json.load(f)
             except (json.JSONDecodeError, FileNotFoundError):
                 print("⚠️ Could not load performance history, starting fresh")
@@ -85,24 +94,32 @@ class PerformanceRegessionDetector:
     def save_performance_history(self, history):
         """Save performance history to file"""
         try:
-            with open(self.performance_history_file, 'w') as f:
+            with open(self.performance_history_file, "w") as f:
                 json.dump(history, f, indent=2)
-            print(f"[INFO] Performance history saved to {self.performance_history_file}")
+            print(
+                f"[INFO] Performance history saved to {self.performance_history_file}"
+            )
         except Exception as e:
             print(f"[ERROR] Failed to save performance history: {e}")
 
     def calculate_baseline(self, metric_history):
-        """Calculate baseline using rolling average of recent runs"""
+        """Calculate baseline from recent runs.
+
+        Uses the MEDIAN (not mean) so a single cold-start / loaded-host
+        outlier in the window doesn't drag the baseline and cause the next
+        run to look like a regression (or, conversely, mask one).  Spread is
+        still reported as stdev for the tolerance band.
+        """
         if len(metric_history) < 2:
             return None, None
 
         # Use recent runs for baseline calculation
-        recent_values = metric_history[-self.history_window:]
+        recent_values = metric_history[-self.history_window :]
 
         if len(recent_values) < 2:
             return recent_values[0], 0
 
-        baseline = statistics.mean(recent_values)
+        baseline = statistics.median(recent_values)
         std_dev = statistics.stdev(recent_values) if len(recent_values) > 1 else 0
 
         return baseline, std_dev
@@ -134,10 +151,25 @@ class PerformanceRegessionDetector:
         else:
             deviation = abs(current_value - baseline) / baseline * 100
 
+        # Low-throughput noise floor: when the baseline req/s is tiny the
+        # whole run is cold-start + host-load jitter, so a big percentage
+        # swing isn't a code signal.  Report it but don't gate on it.
+        if (
+            metric_name
+            and metric_name.endswith("requests_per_second")
+            and baseline < THROUGHPUT_NOISE_FLOOR
+        ):
+            return False, (
+                f"{deviation:.1f}% swing, but baseline {baseline:.1f} req/s is below "
+                f"the {THROUGHPUT_NOISE_FLOOR} req/s noise floor — load too light to "
+                f"gate on (informational)"
+            )
+
         # Use tolerance percentage or 2 standard deviations, whichever is more generous.
         # Per-metric overrides exist for famously noisy measures (p99).
         tolerance_by_percentage = PER_METRIC_TOLERANCE_OVERRIDE.get(
-            metric_name, self.tolerance_percentage,
+            metric_name,
+            self.tolerance_percentage,
         )
         tolerance_by_stddev = (
             (2 * std_dev / baseline * 100) if baseline > 0 else float("inf")
@@ -145,7 +177,10 @@ class PerformanceRegessionDetector:
         effective_tolerance = max(tolerance_by_percentage, tolerance_by_stddev)
 
         if deviation <= effective_tolerance:
-            return False, f"{deviation:.1f}% deviation (within {effective_tolerance:.1f}% tolerance)"
+            return (
+                False,
+                f"{deviation:.1f}% deviation (within {effective_tolerance:.1f}% tolerance)",
+            )
 
         is_increase = current_value > baseline
         direction_word = "increase" if is_increase else "decrease"
@@ -154,15 +189,15 @@ class PerformanceRegessionDetector:
         bad_direction = METRIC_BAD_DIRECTION.get(metric_name, "higher")
         if bad_direction is None:
             # Informational metric — always pass.
-            return False, (
-                f"{deviation:.1f}% {direction_word} (informational metric)"
-            )
-        is_regression = (
-            (bad_direction == "higher" and is_increase)
-            or (bad_direction == "lower" and not is_increase)
+            return False, (f"{deviation:.1f}% {direction_word} (informational metric)")
+        is_regression = (bad_direction == "higher" and is_increase) or (
+            bad_direction == "lower" and not is_increase
         )
         if is_regression:
-            return True, f"{deviation:.1f}% {direction_word} (threshold: {effective_tolerance:.1f}%)"
+            return (
+                True,
+                f"{deviation:.1f}% {direction_word} (threshold: {effective_tolerance:.1f}%)",
+            )
         # Bigger-than-threshold move in the GOOD direction — improvement, not a regression.
         return False, (
             f"{deviation:.1f}% {direction_word} — improvement vs baseline "
@@ -172,7 +207,7 @@ class PerformanceRegessionDetector:
     def analyze_playwright_results(self, results_file):
         """Analyze Playwright performance results"""
         try:
-            with open(results_file, 'r') as f:
+            with open(results_file, "r") as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"[ERROR] Could not load Playwright results: {e}")
@@ -181,22 +216,22 @@ class PerformanceRegessionDetector:
         metrics = {}
 
         # Extract key performance metrics
-        if 'navigation' in data:
-            nav = data['navigation']
-            metrics['dom_content_loaded'] = nav.get('domContentLoaded', 0)
-            metrics['load_complete'] = nav.get('loadComplete', 0)
-            metrics['first_byte'] = nav.get('firstByte', 0)
+        if "navigation" in data:
+            nav = data["navigation"]
+            metrics["dom_content_loaded"] = nav.get("domContentLoaded", 0)
+            metrics["load_complete"] = nav.get("loadComplete", 0)
+            metrics["first_byte"] = nav.get("firstByte", 0)
 
-        if 'paint' in data:
-            paint = data['paint']
-            metrics['first_contentful_paint'] = paint.get('firstContentfulPaint', 0)
-            metrics['first_paint'] = paint.get('firstPaint', 0)
+        if "paint" in data:
+            paint = data["paint"]
+            metrics["first_contentful_paint"] = paint.get("firstContentfulPaint", 0)
+            metrics["first_paint"] = paint.get("firstPaint", 0)
 
-        if 'resources' in data and 'total' in data['resources']:
-            metrics['resource_count'] = data['resources']['total']
+        if "resources" in data and "total" in data["resources"]:
+            metrics["resource_count"] = data["resources"]["total"]
 
-        if 'memory' in data and data['memory']:
-            metrics['memory_used'] = data['memory']['used']
+        if "memory" in data and data["memory"]:
+            metrics["memory_used"] = data["memory"]["used"]
 
         return metrics
 
@@ -212,54 +247,55 @@ class PerformanceRegessionDetector:
             aggregate.counters.http.{requests,responses}
         """
         try:
-            with open(results_file, 'r') as f:
+            with open(results_file, "r") as f:
                 data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"[ERROR] Could not load Artillery results: {e}")
             return {}
 
         metrics = {}
-        agg = data.get('aggregate', {})
+        agg = data.get("aggregate", {})
         if not agg:
             return metrics
 
-        summaries = agg.get('summaries', {})
-        rates = agg.get('rates', {})
-        counters = agg.get('counters', {})
+        summaries = agg.get("summaries", {})
+        rates = agg.get("rates", {})
+        counters = agg.get("counters", {})
 
         # Response times
-        rt = summaries.get('http.response_time', {})
+        rt = summaries.get("http.response_time", {})
         if rt:
-            metrics['response_time_p95'] = rt.get('p95', 0)
-            metrics['response_time_p99'] = rt.get('p99', 0)
-            metrics['response_time_median'] = rt.get('median', rt.get('p50', 0))
-            metrics['response_time_mean'] = rt.get('mean', 0)
+            metrics["response_time_p95"] = rt.get("p95", 0)
+            metrics["response_time_p99"] = rt.get("p99", 0)
+            metrics["response_time_median"] = rt.get("median", rt.get("p50", 0))
+            metrics["response_time_mean"] = rt.get("mean", 0)
 
         # Request rate (modern artillery exposes a single number, not a dict)
-        if 'http.request_rate' in rates:
-            rps_value = rates['http.request_rate']
+        if "http.request_rate" in rates:
+            rps_value = rates["http.request_rate"]
             # Defensive: older artillery 1.x exposed this as {mean: N}
-            metrics['requests_per_second'] = (
-                rps_value if isinstance(rps_value, (int, float))
-                else rps_value.get('mean', 0)
+            metrics["requests_per_second"] = (
+                rps_value
+                if isinstance(rps_value, (int, float))
+                else rps_value.get("mean", 0)
             )
 
         # Error rate (% of HTTP responses that were not 2xx)
-        responses = counters.get('http.responses', 0)
-        ok_2xx = sum(v for k, v in counters.items() if k.startswith('http.codes.2'))
+        responses = counters.get("http.responses", 0)
+        ok_2xx = sum(v for k, v in counters.items() if k.startswith("http.codes.2"))
         if responses > 0:
-            metrics['error_rate'] = ((responses - ok_2xx) / responses) * 100
+            metrics["error_rate"] = ((responses - ok_2xx) / responses) * 100
 
         # Environmental health signal: socket-timeout failures from artillery
         # mean the load generator could not even reach the backend (the box
         # was contended, the network was congested, or the backend ran out of
         # workers).  Capture the count so the orchestrator can decide whether
         # the run is trustworthy enough to fold into the rolling baseline.
-        sock_timeouts = counters.get('errors.ERR_SOCKET_TIMEOUT', 0)
-        vusers_created = counters.get('vusers.created', 0)
-        metrics['_socket_timeouts'] = sock_timeouts
+        sock_timeouts = counters.get("errors.ERR_SOCKET_TIMEOUT", 0)
+        vusers_created = counters.get("vusers.created", 0)
+        metrics["_socket_timeouts"] = sock_timeouts
         if vusers_created > 0:
-            metrics['_socket_timeout_rate'] = sock_timeouts / vusers_created * 100
+            metrics["_socket_timeout_rate"] = sock_timeouts / vusers_created * 100
 
         return metrics
 
@@ -274,16 +310,20 @@ class PerformanceRegessionDetector:
         env_signals = {
             k: current_results.pop(k)
             for k in list(current_results)
-            if '_socket_timeout' in k
+            if "_socket_timeout" in k
         }
         # Aggregate the env signals across OS prefixes — the orchestrator only
         # cares whether the run as a whole was healthy.
         env_summary = {
-            '_socket_timeouts': sum(
-                v for k, v in env_signals.items() if k.endswith('_socket_timeouts')
+            "_socket_timeouts": sum(
+                v for k, v in env_signals.items() if k.endswith("_socket_timeouts")
             ),
-            '_socket_timeout_rate': max(
-                (v for k, v in env_signals.items() if k.endswith('_socket_timeout_rate')),
+            "_socket_timeout_rate": max(
+                (
+                    v
+                    for k, v in env_signals.items()
+                    if k.endswith("_socket_timeout_rate")
+                ),
                 default=0,
             ),
         }
@@ -291,8 +331,8 @@ class PerformanceRegessionDetector:
 
         # Add current run to history
         current_run = {
-            'timestamp': datetime.now().isoformat(),
-            'metrics': current_results
+            "timestamp": datetime.now().isoformat(),
+            "metrics": current_results,
         }
 
         regressions_found = []
@@ -303,8 +343,8 @@ class PerformanceRegessionDetector:
         # network is bad).  Treat the run as untrustworthy so it doesn't
         # poison the rolling baseline AND doesn't fail the build with a
         # phantom regression.
-        sock_timeout_rate = env_signals.get('_socket_timeout_rate', 0)
-        sock_timeouts = env_signals.get('_socket_timeouts', 0)
+        sock_timeout_rate = env_signals.get("_socket_timeout_rate", 0)
+        sock_timeouts = env_signals.get("_socket_timeouts", 0)
         ENVIRONMENTAL_TIMEOUT_THRESHOLD_PCT = 20  # >=20% timeouts → untrusted
         if sock_timeout_rate >= ENVIRONMENTAL_TIMEOUT_THRESHOLD_PCT:
             print("\n[WARN] Performance Regression Analysis SKIPPED")
@@ -331,20 +371,23 @@ class PerformanceRegessionDetector:
         for metric_name, current_value in current_results.items():
             # Get historical values for this metric
             metric_history = []
-            for run in history['runs']:
-                if metric_name in run['metrics']:
-                    metric_history.append(run['metrics'][metric_name])
+            for run in history["runs"]:
+                if metric_name in run["metrics"]:
+                    metric_history.append(run["metrics"][metric_name])
 
             # Calculate baseline
             baseline, std_dev = self.calculate_baseline(metric_history)
 
             # Check for regression (direction-aware per metric)
             is_regression, details = self.check_regression(
-                current_value, baseline, std_dev, metric_name=metric_name,
+                current_value,
+                baseline,
+                std_dev,
+                metric_name=metric_name,
             )
 
             # Format metric name for display
-            display_name = metric_name.replace('_', ' ').title()
+            display_name = metric_name.replace("_", " ").title()
 
             if baseline is not None:
                 print(f"{display_name}:")
@@ -354,12 +397,14 @@ class PerformanceRegessionDetector:
 
                 if is_regression:
                     print(f"  ⚠️ REGRESSION DETECTED!")
-                    regressions_found.append({
-                        'metric': metric_name,
-                        'current': current_value,
-                        'baseline': baseline,
-                        'details': details
-                    })
+                    regressions_found.append(
+                        {
+                            "metric": metric_name,
+                            "current": current_value,
+                            "baseline": baseline,
+                            "details": details,
+                        }
+                    )
                 else:
                     print(f"  ✅ Within acceptable range")
             else:
@@ -367,20 +412,22 @@ class PerformanceRegessionDetector:
 
             print()
 
-            performance_summary.append({
-                'metric': metric_name,
-                'current': current_value,
-                'baseline': baseline,
-                'is_regression': is_regression,
-                'details': details
-            })
+            performance_summary.append(
+                {
+                    "metric": metric_name,
+                    "current": current_value,
+                    "baseline": baseline,
+                    "is_regression": is_regression,
+                    "details": details,
+                }
+            )
 
         # Add current run to history
-        history['runs'].append(current_run)
+        history["runs"].append(current_run)
 
         # Keep only recent runs to prevent unbounded growth
-        if len(history['runs']) > self.history_window * 2:
-            history['runs'] = history['runs'][-self.history_window * 2:]
+        if len(history["runs"]) > self.history_window * 2:
+            history["runs"] = history["runs"][-self.history_window * 2 :]
 
         # Save updated history
         self.save_performance_history(history)
@@ -411,14 +458,15 @@ def main():
     artillery_candidates = [
         ("artillery-report.json", platform.system().lower()),
     ] + [
-        (f"artillery-report-{n}.json", n.lower())
-        for n in ("Linux", "macOS", "Windows")
+        (f"artillery-report-{n}.json", n.lower()) for n in ("Linux", "macOS", "Windows")
     ]
     for artillery_file, os_label in artillery_candidates:
         if os.path.exists(artillery_file):
             print(f"⚡ Analyzing Artillery results from {artillery_file}...")
             artillery_metrics = detector.analyze_artillery_results(artillery_file)
-            prefixed_metrics = {f"{os_label}_{k}": v for k, v in artillery_metrics.items()}
+            prefixed_metrics = {
+                f"{os_label}_{k}": v for k, v in artillery_metrics.items()
+            }
             all_metrics.update(prefixed_metrics)
 
     if not all_metrics:

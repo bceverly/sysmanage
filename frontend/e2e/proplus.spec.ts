@@ -394,7 +394,12 @@ async function openSettingsTab(page: Page, tabName: RegExp): Promise<boolean> {
   // elapse (gated-away branch) — no flaky instantaneous reads.
   const tab = page.getByRole('tab', { name: tabName }).first();
   try {
-    await tab.waitFor({ state: 'attached', timeout: 3000 });
+    // 10s (not 3s): the ``/api/license`` fetch + module-load that gates the
+    // tab list can be slow on the first app load after a Pro+ module rebuild
+    // (every engine re-scans).  A 3s window raced that and returned a false
+    // "gated-away" for a tab that was merely slow to attach — matching the
+    // file's other 10s timeouts removes the flake.
+    await tab.waitFor({ state: 'attached', timeout: 10000 });
   } catch {
     return false;
   }

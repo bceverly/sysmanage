@@ -2453,9 +2453,9 @@ above for the implementing services/migrations.)*
 - [x] Command dispatch to subordinate servers (reboot, update, deploy, script execution) — end-to-end June 2026: `federation_actuation_service.fanout_queued_commands` fans received-commands out to local agents (queued, never direct), results aggregate back via `route_proplus_command_result` → `command_result` sync packet upstream; wired into the `federation_site_engine` tick
 - [x] Batch command dispatch (target hosts across multiple sites in a single operation) — coordinator dispatch already targets multiple sites; each site fans out to its local hosts per the actuation path above
 - [ ] Conflict resolution for policy changes (coordinator wins, with audit trail)
-- [ ] Federation audit log (all cross-site operations logged centrally)
+- [x] Federation audit log (all cross-site operations logged centrally) — `FederationAuditLog` + `_log_audit` across the policy / site / dispatch services (enroll, suspend/resume, policy assign/push, command dispatch)
 - [ ] Site server version tracking (ensure all sites run compatible SysManage versions)
-- [ ] Configurable sync intervals per site (bandwidth-constrained sites can sync less frequently)
+- [x] Configurable sync intervals per site (bandwidth-constrained sites can sync less frequently) — `sync_interval_seconds` on `create_site` / `update_site`, persisted per `FederationSite` and honoured by the site engine tick
 - [x] Data retention policies for rollup data — June 2026:
       `federation_rollup_service` prunes each append-only series (host /
       compliance / vulnerability) to the newest `DEFAULT_ROLLUP_RETENTION`
@@ -2661,9 +2661,12 @@ the rest of the surface.  i18n: `federationHosts.*` (27 keys) +
       "Compliance page" to facet, and federated compliance is per-site
       ROLLUP data (aggregate), not per-host — so the site-scoped rollup
       card is the right home, not a facet on a local page.
-- [ ] ``Reports`` page — site selector / multi-select on report
-      definitions.  Deferred: federated reporting needs the rollup data
-      wired into the report generator (report types are local today).
+- [x] ``Reports`` page — site selector / multi-select on report — June 2026:
+      a "Federation" tab on Reports renders `FederationReportPanel` (site
+      multi-select → cross-site rollup table + enterprise totals), backed by
+      `federation_rollup_service.get_cross_site_report` and
+      `GET /federation/reports/rollup` (+ OSS stub).  Self-gates to the
+      Enterprise upsell when unlicensed.
 
 **Enterprise map (two flavors, same data):**
 - [x] **Geographic map** — Leaflet + OpenStreetMap tiles, sites pinned
@@ -2863,16 +2866,25 @@ paths.
    break OSS imports + Alembic migrations + test fixtures for
    no user-visible benefit.  Re-open if a hard boundary is ever
    needed.
-2. [ ] Add a federation-aware lease-issue path: the coordinator owns
-       the master Vault; sites can request leases on behalf of their
-       hosts via the federation downstream channel (existing 12.2
-       command dispatch infrastructure).  *Real future work; needs
-       a new ``request_dynamic_secret`` command type + lease-result
-       echo through the inbox surface.*
-3. [ ] Sweeper/reconcile loop runs at the coordinator — no need for
-       per-site sweepers because all leases live in the master Vault.
-       *Real future work; needs an aiohttp/httpx Vault-side fan-out
-       that touches every enrolled site's tracked leases.*
+2. [x] Add a federation-aware lease-issue path — June 2026: a site
+       enqueues an upstream ``secret_lease_request`` (queue-everything);
+       the coordinator ingests it at ``POST /sites/{id}/secret-lease-requests``
+       → `federation_secret_lease_service.record_requested_lease` (status
+       ``requested``) and echoes the result down to the site's
+       ``federation_received_secret_lease`` inbox for transient delivery to
+       the host.  New models `FederationSecretLease` (coordinator) +
+       `FederationReceivedSecretLease` (site), migration `m6fedsecret`.  The
+       secret VALUE is never persisted — only the Vault lease_id + metadata.
+3. [x] Sweeper/reconcile loop runs at the coordinator — June 2026: a single
+       `_reconcile_secret_leases_once` pass in the controller push worker
+       issues ``requested`` leases from the master Vault (`dynamic_secrets.
+       issue_lease`), expires overdue leases, and prunes terminal rows for
+       EVERY site — no per-site sweeper (all leases live in the one master
+       Vault).  Service helpers `list_pending` / `list_expiring` /
+       `expire_overdue` / `prune_terminal`; `GET /federation/secret-leases`
+       + `POST /federation/secret-leases/{id}/revoke`.  Tests:
+       `test_federation_secret_lease_service` (13) +
+       `test_federation_secret_request_service` (7).
 4. [x] Gate `/api/dynamic-secrets/*` behind `secrets_engine` loaded
        (consistent with the existing static-secrets gate from Phase 2.3)
 5. [x] Frontend `DynamicSecretsSettings.tsx` moves into the secrets_engine

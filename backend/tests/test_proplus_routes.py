@@ -469,13 +469,17 @@ class TestFederationControllerStubRoutes:
         ("GET", "/api/v1/federation/audit/entry-1"),
         # Phase 12.2 — per-site sync timeline.
         ("GET", "/api/v1/federation/sites/site-1/sync-timeline"),
-        # Phase 12.3 — per-site one-click policy re-push.
+        # Phase 12.3 — per-site one-click policy re-push + federated report.
         ("POST", "/api/v1/federation/sites/site-1/repush-policies"),
+        ("GET", "/api/v1/federation/reports/rollup"),
         # Phase 12.1 — rollup alerts + configurable thresholds.
         ("GET", "/api/v1/federation/alerts"),
         ("POST", "/api/v1/federation/alerts/alert-1/acknowledge"),
         ("GET", "/api/v1/federation/alert-config"),
         ("PUT", "/api/v1/federation/alert-config"),
+        # Phase 12.5 — federation-aware dynamic-secret leases.
+        ("GET", "/api/v1/federation/secret-leases"),
+        ("POST", "/api/v1/federation/secret-leases/lease-1/revoke"),
         # Phase 12.6 — sync ingest surface (site → coordinator).
         # These return 401 in the engine (no bearer token) but the
         # OSS stub layer returns 200 ``{licensed: false}`` uniformly
@@ -487,6 +491,8 @@ class TestFederationControllerStubRoutes:
         ("POST", "/api/v1/federation/sites/site-1/command-results"),
         # Phase 12.2 — site metadata ingest.
         ("POST", "/api/v1/federation/sites/site-1/metadata"),
+        # Phase 12.5 — site secret-lease request ingest.
+        ("POST", "/api/v1/federation/sites/site-1/secret-lease-requests"),
     ]
 
     @pytest.fixture

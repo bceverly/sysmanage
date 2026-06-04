@@ -586,6 +586,55 @@ export async function doUpdateFederationAlertConfig(
 }
 
 // ---------------------------------------------------------------------
+// Cross-site report (Phase 12.3 — federated Reports facet)
+// ---------------------------------------------------------------------
+
+export interface FederationReportRow {
+  site_id: string;
+  site_name: string;
+  host_count: number;
+  active_count: number;
+  worst_compliance: { baseline: string; score_percent: number } | null;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  last_sync_at: string | null;
+}
+
+export interface FederationReportTotals {
+  site_count: number;
+  host_count: number;
+  active_count: number;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+}
+
+export interface FederationCrossSiteReport {
+  licensed: boolean;
+  sites: FederationReportRow[];
+  totals: Partial<FederationReportTotals>;
+}
+
+/** Aggregate the latest host/compliance/vuln rollups across sites.
+ * Omit ``siteIds`` (or pass an empty array) to report on every site. */
+export async function doGetFederationCrossSiteReport(
+  siteIds?: string[],
+): Promise<FederationCrossSiteReport> {
+  const params =
+    siteIds && siteIds.length > 0
+      ? { site_ids: siteIds.join(",") }
+      : undefined;
+  const response = await axiosInstance.get<FederationCrossSiteReport>(
+    `/api/v1/federation/reports/rollup`,
+    { params },
+  );
+  return response.data;
+}
+
+// ---------------------------------------------------------------------
 // Dispatched commands (coordinator → site)
 // ---------------------------------------------------------------------
 
