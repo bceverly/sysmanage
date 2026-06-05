@@ -12,8 +12,10 @@ import logging
 
 from backend.persistence import db, models
 from backend.persistence.models.server_configuration import (
+    DEFAULT_FEDERATION_ROLE,
     DEFAULT_SERVER_ROLE,
     SINGLETON_SERVER_CONFIG_ID,
+    VALID_FEDERATION_ROLES,
     VALID_SERVER_ROLES,
 )
 
@@ -62,6 +64,51 @@ def set_server_role(role: str) -> str:
             session.add(row)
         else:
             row.server_role = role
+        session.commit()
+    return role
+
+
+def get_federation_role() -> str:
+    """Return the configured federation role, or the default on any failure.
+
+    Separate axis from :func:`get_server_role` — reads ``federation_role``
+    from the same singleton row.  Falls back to ``DEFAULT_FEDERATION_ROLE``
+    ("none") when the row is missing or the DB isn't reachable.
+    """
+    try:
+        session_local = db.get_session_local()
+        with session_local() as session:
+            row = session.query(models.ServerConfiguration).first()
+            if row is None or not row.federation_role:
+                return DEFAULT_FEDERATION_ROLE
+            return row.federation_role
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not read federation_role from DB; defaulting: %s", exc)
+        return DEFAULT_FEDERATION_ROLE
+
+
+def set_federation_role(role: str) -> str:
+    """Persist the federation role to the singleton row.
+
+    Upserts the singleton (creating it with the sentinel id if a fresh DB
+    lacks it).  Raises ``ValueError`` on an invalid role.  Returns the
+    stored role.
+    """
+    if role not in VALID_FEDERATION_ROLES:
+        raise ValueError(
+            f"invalid federation role {role!r}; must be one of: "
+            f"{', '.join(VALID_FEDERATION_ROLES)}"
+        )
+    session_local = db.get_session_local()
+    with session_local() as session:
+        row = session.query(models.ServerConfiguration).first()
+        if row is None:
+            row = models.ServerConfiguration(
+                id=SINGLETON_SERVER_CONFIG_ID, federation_role=role
+            )
+            session.add(row)
+        else:
+            row.federation_role = role
         session.commit()
     return role
 

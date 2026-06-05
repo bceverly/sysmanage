@@ -3060,5 +3060,45 @@
     "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
     "totals": "[TODO] Totals ({{n}} sites)",
     "upsell": "[TODO] Multi-site federation requires Enterprise."
+  },
+  "federationRole": {
+    "coordinator": {
+      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
+      "title": "[TODO] Federation Coordinator"
+    },
+    "copied": "[TODO] Copied!",
+    "copyError": "[TODO] Could not copy to clipboard.",
+    "copyFingerprint": "[TODO] Copy fingerprint",
+    "currentTag": "[TODO] (current)",
+    "heading": "[TODO] Federation Role",
+    "identity": {
+      "copyKey": "[TODO] Copy Public Key",
+      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can pin the other's identity. The private key never leaves this server.",
+      "pending": "[TODO] Generating identity key…",
+      "title": "[TODO] This server's identity key"
+    },
+    "importError": "[TODO] Could not import the key.",
+    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
+    "loadError": "[TODO] Could not load the federation role.",
+    "none": {
+      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
+      "title": "[TODO] Not federated"
+    },
+    "peers": {
+      "empty": "[TODO] No trusted peer keys yet.",
+      "import": "[TODO] Import Peer Key",
+      "name": "[TODO] Peer name",
+      "pem": "[TODO] Peer public key (PEM)",
+      "title": "[TODO] Trusted peer keys"
+    },
+    "removeError": "[TODO] Could not remove the key.",
+    "save": "[TODO] Save Role",
+    "saveError": "[TODO] Could not save the federation role.",
+    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
+    "saving": "[TODO] Saving…",
+    "site": {
+      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
+      "title": "[TODO] Federation Site"
+    }
   }
 }

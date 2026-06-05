@@ -3060,5 +3060,45 @@
     "subtitle": "Aggregate host, compliance, and vulnerability rollups across sites.",
     "totals": "Totals ({{n}} sites)",
     "upsell": "Multi-site federation requires Enterprise."
+  },
+  "federationRole": {
+    "coordinator": {
+      "description": "The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
+      "title": "Federation Coordinator"
+    },
+    "copied": "Copied!",
+    "copyError": "Could not copy to clipboard.",
+    "copyFingerprint": "Copy fingerprint",
+    "currentTag": "(current)",
+    "heading": "Federation Role",
+    "identity": {
+      "copyKey": "Copy Public Key",
+      "help": "Copy this public key and paste it into the peer's federation card so each side can pin the other's identity. The private key never leaves this server.",
+      "pending": "Generating identity key…",
+      "title": "This server's identity key"
+    },
+    "importError": "Could not import the key.",
+    "intro": "Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
+    "loadError": "Could not load the federation role.",
+    "none": {
+      "description": "The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
+      "title": "Not federated"
+    },
+    "peers": {
+      "empty": "No trusted peer keys yet.",
+      "import": "Import Peer Key",
+      "name": "Peer name",
+      "pem": "Peer public key (PEM)",
+      "title": "Trusted peer keys"
+    },
+    "removeError": "Could not remove the key.",
+    "save": "Save Role",
+    "saveError": "Could not save the federation role.",
+    "saved": "Federation role saved. Restart the server for it to take full effect.",
+    "saving": "Saving…",
+    "site": {
+      "description": "A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
+      "title": "Federation Site"
+    }
   }
 }

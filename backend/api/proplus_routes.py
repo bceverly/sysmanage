@@ -1040,6 +1040,24 @@ def mount_observability_routes(app: FastAPI) -> bool:
         return False
 
 
+def _federation_role() -> str:
+    """This server's configured federation role (``none`` on any failure).
+
+    Read from the ``server_configuration`` DB singleton so the role chosen
+    in Settings → Server Role actually gates which federation engine is
+    active.  Late import keeps route-registration import-time free of a DB
+    dependency; degrades to ``none`` (mount nothing) if the DB isn't ready.
+    """
+    try:
+        from backend.services.server_config_service import (  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
+            get_federation_role,
+        )
+
+        return get_federation_role()
+    except Exception:  # pylint: disable=broad-exception-caught
+        return "none"
+
+
 def mount_federation_site_routes(app: FastAPI) -> bool:
     """Mount site-side federation routes from federation_site_engine.
 
@@ -1065,6 +1083,15 @@ def mount_federation_site_routes(app: FastAPI) -> bool:
     module_info = site_engine.get_module_info()
     if not module_info.get("provides_routes", False):
         logger.debug("federation_site_engine module does not provide routes")
+        return False
+
+    role = _federation_role()
+    if role != "site":
+        logger.info(
+            "federation_site_engine is loaded but this server's federation role "
+            "is %r, not 'site'; serving the OSS stubs instead.",
+            role,
+        )
         return False
 
     try:
@@ -1110,6 +1137,15 @@ def mount_federation_controller_routes(app: FastAPI) -> bool:
     module_info = federation_engine.get_module_info()
     if not module_info.get("provides_routes", False):
         logger.debug("federation_controller_engine module does not provide routes")
+        return False
+
+    role = _federation_role()
+    if role != "coordinator":
+        logger.info(
+            "federation_controller_engine is loaded but this server's federation "
+            "role is %r, not 'coordinator'; serving the OSS stubs instead.",
+            role,
+        )
         return False
 
     try:

@@ -30,7 +30,10 @@ from backend.config import config as config_module  # noqa: E402
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader  # noqa: E402
 from backend.persistence.db import get_db
-from backend.persistence.models.server_configuration import VALID_SERVER_ROLES
+from backend.persistence.models.server_configuration import (
+    VALID_FEDERATION_ROLES,
+    VALID_SERVER_ROLES,
+)
 from backend.services import server_config_service
 from backend.services.audit_service import (
     ActionType,
@@ -227,6 +230,88 @@ def set_server_role_endpoint(
         logger.warning("Failed to audit-log server role change", exc_info=True)
 
     return ServerRoleResponse(role=new_role, valid_roles=list(VALID_SERVER_ROLES))
+
+
+class FederationRoleResponse(BaseModel):
+    role: str
+    valid_roles: list[str]
+
+
+class FederationRoleUpdate(BaseModel):
+    role: str
+
+
+@router.get(
+    "/federation-role",
+    response_model=FederationRoleResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+def get_federation_role_endpoint():
+    """Return the current federation role + valid choices.
+
+    Independent of the air-gap ``server-role`` axis — drives the federation
+    card on Settings → Server Role.
+    """
+    return FederationRoleResponse(
+        role=server_config_service.get_federation_role(),
+        valid_roles=list(VALID_FEDERATION_ROLES),
+    )
+
+
+@router.put(
+    "/federation-role",
+    response_model=FederationRoleResponse,
+    dependencies=[Depends(JWTBearer())],
+)
+def set_federation_role_endpoint(
+    payload: FederationRoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user),
+):
+    """Set the federation role (none | coordinator | site).
+
+    Persists to the ``server_configuration`` singleton.  Choosing a real
+    role (coordinator/site) ensures this server's federation identity
+    keypair exists so the operator can immediately copy its public key.
+    Role-gated engine behaviour takes effect on the next restart.
+    """
+    try:
+        new_role = server_config_service.set_federation_role(payload.role)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # Mint the federation identity keypair when joining a federation (the
+    # public key the peer pins).  Idempotent + never overwrites; best-effort.
+    if new_role in ("coordinator", "site"):
+        try:
+            from backend.services.federation_identity_service import (  # pylint: disable=import-outside-toplevel
+                ensure_federation_identity_keypair,
+            )
+
+            ensure_federation_identity_keypair()
+        except Exception:  # pylint: disable=broad-exception-caught
+            logger.warning(
+                "Failed to ensure federation identity keypair on role change",
+                exc_info=True,
+            )
+
+    try:
+        AuditService.log(
+            db=db,
+            action_type=ActionType.UPDATE,
+            entity_type=EntityType.SETTING,
+            entity_id="federation_role",
+            entity_name="federation_role",
+            description=_("Set federation role to '%s'") % new_role,
+            username=current_user,
+            result=Result.SUCCESS,
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.warning("Failed to audit-log federation role change", exc_info=True)
+
+    return FederationRoleResponse(
+        role=new_role, valid_roles=list(VALID_FEDERATION_ROLES)
+    )
 
 
 def _resolve_version() -> str:

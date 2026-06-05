@@ -12,9 +12,12 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   CircularProgress,
   FormControl,
   FormControlLabel,
+  Grid,
   Radio,
   RadioGroup,
   Snackbar,
@@ -28,6 +31,7 @@ import {
   ImportDeviceCard,
   TrustedCollectorsCard,
 } from './AirgapKeyManagement';
+import FederationRoleCard from './FederationRoleCard';
 
 type ServerRole = 'standard' | 'collector' | 'repository';
 
@@ -131,9 +135,14 @@ const ServerRoleSettings: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 760 }}>
+    <Box sx={{ p: 3 }}>
+      <Grid container spacing={2} alignItems="flex-start">
+        {/* Left card: air-gap topology role (existing). */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card variant="outlined">
+            <CardContent>
       <Typography variant="h6" gutterBottom>
-        {t('serverRole.heading', 'Server Role')}
+        {t('serverRole.heading', 'Air-Gap Role')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t(
@@ -227,6 +236,15 @@ const ServerRoleSettings: React.FC = () => {
           <TrustedCollectorsCard />
         </>
       )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Right card: federation role (independent axis). */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <FederationRoleCard />
+        </Grid>
+      </Grid>
 
       <Snackbar
         open={snackOpen}

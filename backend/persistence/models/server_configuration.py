@@ -32,6 +32,15 @@ SINGLETON_SERVER_CONFIG_ID = uuid.UUID("00000000-0000-0000-0000-000000000004")
 VALID_SERVER_ROLES = ("standard", "collector", "repository")
 DEFAULT_SERVER_ROLE = "standard"
 
+# Phase 12: multi-site federation role.  INDEPENDENT of the air-gap
+# ``server_role`` axis above — a server can be, say, an air-gap
+# ``collector`` AND a federation ``site`` at the same time.  ``none`` =
+# not part of any federation (the default).  ``coordinator`` = aggregates
+# subordinate site servers.  ``site`` = a subordinate that reports up to a
+# coordinator.
+VALID_FEDERATION_ROLES = ("none", "coordinator", "site")
+DEFAULT_FEDERATION_ROLE = "none"
+
 
 class ServerConfiguration(Base):
     """Singleton row of server-instance-wide settings."""
@@ -44,6 +53,10 @@ class ServerConfiguration(Base):
     # air-gap import drive on an Air-Gap Repository server.  NULL until
     # chosen; only meaningful when server_role == 'repository'.
     airgap_import_device = Column(String(200), nullable=True)
+    # Phase 12: federation role — separate axis from server_role.
+    federation_role = Column(
+        String(40), nullable=False, default=DEFAULT_FEDERATION_ROLE
+    )
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -54,5 +67,6 @@ class ServerConfiguration(Base):
         return {
             "server_role": self.server_role,
             "airgap_import_device": self.airgap_import_device,
+            "federation_role": self.federation_role,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -398,7 +398,10 @@ class TestMountFederationControllerRoutes:
         mock_module, mock_router = mock_module_with_routes
         mock_module.get_federation_controller_router.return_value = mock_router
 
-        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
             mock_loader.get_module.return_value = mock_module
 
             result = mount_federation_controller_routes(mock_app)
@@ -407,13 +410,30 @@ class TestMountFederationControllerRoutes:
             mock_module.get_federation_controller_router.assert_called_once()
             mock_app.include_router.assert_called_once_with(mock_router, prefix="/api")
 
+    def test_routes_skipped_when_role_not_coordinator(
+        self, mock_app, mock_module_with_routes
+    ):
+        # Engine loaded, but the federation role isn't 'coordinator' → the
+        # real routes don't mount (the OSS stubs serve instead).
+        mock_module, _ = mock_module_with_routes
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
+            mock_loader.get_module.return_value = mock_module
+            result = mount_federation_controller_routes(mock_app)
+            assert result is False
+            mock_app.include_router.assert_not_called()
+
     def test_routes_exception(self, mock_app, mock_module_with_routes):
         mock_module, _ = mock_module_with_routes
         mock_module.get_federation_controller_router.side_effect = RuntimeError(
             "engine boom"
         )
 
-        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
             mock_loader.get_module.return_value = mock_module
 
             result = mount_federation_controller_routes(mock_app)
@@ -722,15 +742,29 @@ class TestMountFederationSiteRoutes:
     def test_routes_success(self, mock_app, mock_module_with_routes):
         mock_module, mock_router = mock_module_with_routes
         mock_module.get_federation_site_router.return_value = mock_router
-        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
             mock_loader.get_module.return_value = mock_module
             assert mount_federation_site_routes(mock_app) is True
             mock_app.include_router.assert_called_once_with(mock_router, prefix="/api")
 
+    def test_routes_skipped_when_role_not_site(self, mock_app, mock_module_with_routes):
+        mock_module, _ = mock_module_with_routes
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
+            mock_loader.get_module.return_value = mock_module
+            assert mount_federation_site_routes(mock_app) is False
+            mock_app.include_router.assert_not_called()
+
     def test_routes_exception(self, mock_app, mock_module_with_routes):
         mock_module, _ = mock_module_with_routes
         mock_module.get_federation_site_router.side_effect = RuntimeError("boom")
-        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
             mock_loader.get_module.return_value = mock_module
             assert mount_federation_site_routes(mock_app) is False
             mock_app.include_router.assert_not_called()

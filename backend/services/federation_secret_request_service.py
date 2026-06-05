@@ -25,7 +25,9 @@ from sqlalchemy.orm import Session
 from backend.persistence.models.federation import FederationReceivedSecretLease
 from backend.services import federation_sync_queue_service as sync_svc
 
-SECRET_LEASE_REQUEST_PAYLOAD_TYPE = "secret_lease_request"
+SECRET_LEASE_REQUEST_PAYLOAD_TYPE = (
+    "secret_lease_request"  # nosec B105 - payload-type identifier, not a credential
+)
 
 
 def _utcnow_naive() -> datetime:

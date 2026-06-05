@@ -2452,9 +2452,9 @@ above for the implementing services/migrations.)*
 - [x] Enterprise-wide firewall role management (define roles centrally, push to sites) — end-to-end June 2026: coordinator push worker → site inbox → `federation_policy_apply_service` materialises into local `firewall_role` + `firewall_role_open_port`
 - [x] Command dispatch to subordinate servers (reboot, update, deploy, script execution) — end-to-end June 2026: `federation_actuation_service.fanout_queued_commands` fans received-commands out to local agents (queued, never direct), results aggregate back via `route_proplus_command_result` → `command_result` sync packet upstream; wired into the `federation_site_engine` tick
 - [x] Batch command dispatch (target hosts across multiple sites in a single operation) — coordinator dispatch already targets multiple sites; each site fans out to its local hosts per the actuation path above
-- [ ] Conflict resolution for policy changes (coordinator wins, with audit trail)
+- [x] Conflict resolution for policy changes (coordinator wins, with audit trail) — coordinator-authoritative by design: pushes carry `pushed_version` and overwrite the site's received policy; every push writes `AUDIT_OP_POLICY_PUSHED` to the federation audit log
 - [x] Federation audit log (all cross-site operations logged centrally) — `FederationAuditLog` + `_log_audit` across the policy / site / dispatch services (enroll, suspend/resume, policy assign/push, command dispatch)
-- [ ] Site server version tracking (ensure all sites run compatible SysManage versions)
+- [x] Site server version tracking (ensure all sites run compatible SysManage versions) — June 2026: each site reports its `sysmanage_version` in the 12.2 `site_metadata` payload; the coordinator caches it on `FederationSite.sysmanage_version` (plus `agent_version_min` gates command dispatch)
 - [x] Configurable sync intervals per site (bandwidth-constrained sites can sync less frequently) — `sync_interval_seconds` on `create_site` / `update_site`, persisted per `FederationSite` and honoured by the site engine tick
 - [x] Data retention policies for rollup data — June 2026:
       `federation_rollup_service` prunes each append-only series (host /
@@ -2462,7 +2462,7 @@ above for the implementing services/migrations.)*
       (90) snapshots opportunistically at ingest, plus a `prune_rollups`
       sweep (count + optional `older_than_days`).  No schema change /
       migration; dialect-neutral ORM delete.
-- [ ] REST API for all federation operations (enabling automation and CI/CD integration)
+- [x] REST API for all federation operations (enabling automation and CI/CD integration) — the `federation_controller_engine` exposes 40 REST endpoints under `/api/v1/federation/*` (sites lifecycle + enrollment, rollup ingest, host directory, policies, command dispatch, alerts + alert-config, secret-leases, cross-site reports, audit log)
 - [ ] i18n/l10n for all 14 languages
 
 **Estimated Size:** ~8,000 lines
@@ -3013,8 +3013,9 @@ federation-specific code in it).
       name — used as the lookup key for localized display)
 - [x] ``host.geo_latitude`` (NUMERIC(8,5))
 - [x] ``host.geo_longitude`` (NUMERIC(8,5))
-- [ ] Index on ``(geo_country_code, geo_subdivision_code)`` for map
-      cluster queries
+- [x] Index on ``(geo_country_code, geo_subdivision_code)`` for map
+      cluster queries — `ix_host_geo_country_subdivision`, created by the
+      `l0geo10` migration (idempotent)
 
 **Frontend (extends 12.3 federation map):**
 
@@ -3098,7 +3099,7 @@ rather than blocking.
 10. [x] Implement command dispatch and result tracking
 11. [x] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
 12. [ ] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5)
-13. [ ] Create federation deployment guide
+13. [x] Create federation deployment guide — sysmanage-docs `federation.html` "Deployment & Operations" section
 14. [ ] i18n/l10n for all 14 languages
 
 ### Deliverables
@@ -3108,9 +3109,9 @@ rather than blocking.
 - [x] Database migrations for coordinator and site schemas
 - [x] Access groups + registration keys folded into `federation_controller_engine`
 - [ ] Dynamic-secret leases folded into `secrets_engine` with federation-aware rotation
-- [ ] Federation deployment and operations guide
-- [ ] Mutual TLS enrollment procedures documentation
-- [ ] Integration tests for sync, dispatch, and offline resilience *(extensive unit coverage exists; full multi-process integration harness still pending)*
+- [x] Federation deployment and operations guide — June 2026: `docs/professional-plus/federation.html` "Deployment & Operations" section (roles, bring-up sequence, day-2 ops, troubleshooting); i18n keys seeded across all 15 locales
+- [x] Mutual TLS enrollment procedures documentation — June 2026: `federation.html` "Mutual-TLS Enrollment Procedures" section (certificate pinning, bidirectional bearer tokens, handshake flow, rotation/revocation)
+- [x] Integration tests for sync, dispatch, and offline resilience — June 2026: `tests/integration/test_federation_round_trip.py` (`@pytest.mark.integration`) exercises the full coordinator↔site round-trip across TWO real databases with a simulated wire transport — host/compliance/vuln rollups + metadata sync, command dispatch + result settle, outage→dedup-on-replay→recover, and the 12.5 secret-lease request path. (Stops short of two OS processes + the Pro+ engines/HTTP, which are thin tick-wrappers over these same services; called out in the file docstring.)
 - [ ] Performance tests validating 100-site / 1M-host target
 
 ### Exit Criteria

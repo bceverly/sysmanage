@@ -273,18 +273,31 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 fleet_e,
                             )
 
+                # The federation role (Settings → Server Role) gates which
+                # worker runs: a coordinator runs the push worker, a site
+                # runs the sync worker, and a server with role 'none' runs
+                # neither even when an engine is licensed/loaded.  Read once.
+                try:
+                    from backend.config import (  # pylint: disable=import-outside-toplevel
+                        config as _fed_config,
+                    )
+
+                    _federation_role = _fed_config.get_federation_role()
+                except Exception:  # pylint: disable=broad-exception-caught
+                    _federation_role = "none"
+
                 # Start federation_controller_engine outbound push
                 # worker (Phase 12.10 Slice 3).  Walks pending policy
                 # assignments + queued dispatched commands and posts
                 # them to subordinate sites' ``/site/policies`` and
                 # ``/site/commands`` endpoints using each site's
                 # ``coordinator_outbound_bearer_token``.  Idles on any
-                # tick where no work is pending — safe to start
-                # unconditionally when the engine is loaded.
+                # tick where no work is pending.  Only runs when this server's
+                # federation role is 'coordinator'.
                 federation_controller_engine = module_loader.get_module(
                     "federation_controller_engine"
                 )
-                if federation_controller_engine:
+                if federation_controller_engine and _federation_role == "coordinator":
                     fed_ctl_info = federation_controller_engine.get_module_info()
                     if fed_ctl_info.get("provides_background_task", False):
                         logger.info(
@@ -315,12 +328,12 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 # singleton ``federation_coordinator`` row.  Only
                 # makes outbound HTTP calls when the row is in
                 # ``enrolled`` state with a bearer token; idles
-                # otherwise, so the task is safe to start
-                # unconditionally when the engine is loaded.
+                # otherwise.  Only runs when this server's federation role
+                # is 'site'.
                 federation_site_engine = module_loader.get_module(
                     "federation_site_engine"
                 )
-                if federation_site_engine:
+                if federation_site_engine and _federation_role == "site":
                     fed_site_info = federation_site_engine.get_module_info()
                     if fed_site_info.get("provides_background_task", False):
                         logger.info(

@@ -407,6 +407,31 @@ def get_server_role():
     return _db_get_server_role()
 
 
+def get_federation_role():
+    """Return the federation role: ``none``, ``coordinator``, or ``site``.
+
+    Phase 12 multi-site federation.  Independent of :func:`get_server_role`
+    (a server can be an air-gap collector AND a federation site).  Lives in
+    the ``server_configuration`` DB singleton (set via Settings → Server
+    Role); defaults to ``none`` if the DB isn't reachable yet.
+    """
+    from backend.services.server_config_service import (  # pylint: disable=import-outside-toplevel
+        get_federation_role as _db_get_federation_role,
+    )
+
+    return _db_get_federation_role()
+
+
+def is_federation_coordinator() -> bool:
+    """True when this server is a federation coordinator."""
+    return get_federation_role() == "coordinator"
+
+
+def is_federation_site() -> bool:
+    """True when this server is a federation subordinate site."""
+    return get_federation_role() == "site"
+
+
 # Phase 12.7: Host geo-location config accessors.
 #
 # These intentionally return individual values rather than the dict
@@ -475,6 +500,24 @@ def get_airgap_collector_public_key_dir() -> str:
     """
     return config.get("airgap", {}).get(
         "collector_public_key_dir", "/var/lib/sysmanage/airgap/trusted-collectors"
+    )
+
+
+def get_federation_identity_key_file() -> str:
+    """Filesystem path to this server's ed25519 federation identity PEM."""
+    return config.get("federation", {}).get(
+        "identity_key_file", "/var/lib/sysmanage/federation/identity-ed25519.pem"
+    )
+
+
+def get_federation_peer_public_key_dir() -> str:
+    """Directory of trusted federation peer public-key PEMs.
+
+    A directory (not a single file) so a coordinator can hold several
+    sites' keys and vice versa, and key rotation just adds a new file.
+    """
+    return config.get("federation", {}).get(
+        "peer_public_key_dir", "/var/lib/sysmanage/federation/trusted-peers"
     )
 
 

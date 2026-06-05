@@ -34,6 +34,7 @@ from backend.api import (
     email,
     enabled_package_managers,
     external_idp,
+    federation_identity,
     firewall_roles,
     firewall_status,
     fleet,
@@ -135,6 +136,11 @@ def register_routes(app: FastAPI):
     # wired into Settings → Server Role.
     app.include_router(airgap_keys.router)
     logger.debug("Air-gap keys router added")
+
+    # Federation identity public-key display + trusted-peer import,
+    # wired into the federation card on Settings → Server Role.
+    app.include_router(federation_identity.router)
+    logger.debug("Federation identity router added")
 
     # Block-device enumeration + device-based ISO import (repository).
     app.include_router(airgap_devices.router)
