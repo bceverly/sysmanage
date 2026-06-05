@@ -230,13 +230,23 @@ jobs:
           version: ${{ inputs.release_netbsd || '10.0' }}
           environment_variables: PYTEST_MARKER
           run: |
-            # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip
-            # them in below instead.  || true so missing pkg names don't
-            # fail the whole install.
-            sudo pkgin -y install \
-              python311 py311-pip git \
-              py311-cryptography py311-yaml py311-aiohttp py311-websockets \
-              py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
+            # The cross-platform-actions NetBSD image ships pkgin pointed at
+            # ftp.NetBSD.org over FTP, which routinely times out fetching
+            # pkg_summary.gz (that timeout is what failed this job: no python311
+            # installed -> later "python3.11: not found" exit 127).  Repoint at
+            # the HTTPS CDN mirror, which is far more reliable.
+            REL="$(uname -r)"
+            echo "https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/amd64/${REL}/All" | sudo tee /usr/pkg/etc/pkgin/repositories.conf
+            # Refresh the index + install the REQUIRED toolchain with retries so
+            # a single transient mirror blip doesn't fail the whole job.
+            n=0; until [ "$n" -ge 5 ]; do sudo pkgin -y update && sudo pkgin -y install python311 py311-pip git && break; n=$((n+1)); echo "pkgin core install attempt $n failed; retrying in 15s..."; sleep 15; done
+            # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip them
+            # in below.  These py311-* deps are best-effort optimizations the
+            # --system-site-packages venv reuses instead of pip-compiling on
+            # NetBSD; || true so a renamed/missing pkg doesn't fail the job.
+            sudo pkgin -y install py311-cryptography py311-yaml py311-aiohttp py311-websockets py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
+            # Fail loudly (not at a downstream 127) if the mirror was unreachable.
+            command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed — NetBSD pkg mirror unreachable after retries."; exit 1; }
             cd sysmanage-agent
             python3.11 -m venv --system-site-packages .venv
             . .venv/bin/activate

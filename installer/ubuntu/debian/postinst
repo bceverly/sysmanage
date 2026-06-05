@@ -80,6 +80,34 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		fi
 	fi
 
+	# On a configure, $2 holds the previously-installed version: empty on a
+	# fresh install, set on an in-place upgrade.  The upgrade path leaves the
+	# existing config + database in place, so print the short migrate+restart
+	# checklist instead of the full first-time configuration wall.
+	if [ -n "$2" ]; then
+	echo ""
+	echo "=========================================="
+	echo "SysManage Server upgrade complete!"
+	echo "=========================================="
+	echo ""
+	echo "Your existing /etc/sysmanage.yaml was preserved and the service was"
+	echo "stopped for the upgrade.  It is NOT restarted automatically — two"
+	echo "manual steps remain:"
+	echo ""
+	echo "1. Apply database migrations"
+	echo "   ------------------------"
+	echo "     cd /opt/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
+	echo ""
+	echo "2. Restart the service"
+	echo "   -------------------"
+	echo "     sudo systemctl restart sysmanage"
+	echo "     sudo systemctl status sysmanage"
+	echo ""
+	echo "Log files: /var/log/sysmanage/"
+	echo "Web interface: https://your-server:8443/"
+	echo ""
+	else
 	echo ""
 	echo "=========================================="
 	echo "SysManage Server installation complete!"
@@ -130,6 +158,7 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "Log files: /var/log/sysmanage/"
 	echo "Web interface: https://your-server:8443/ (after configuration)"
 	echo ""
+	fi
 fi
 
 #DEBHELPER#

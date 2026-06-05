@@ -37,12 +37,18 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 
 import axiosInstance from "../Services/api";
+import { copyToClipboard } from "../utils/clipboard";
 
 type FederationRole = "none" | "coordinator" | "site";
 
 const ROLE_URL = "/api/v1/federation-role";
 const IDENTITY_URL = "/api/v1/federation/identity-key";
 const PEERS_URL = "/api/v1/federation/trusted-peers";
+// NB: the site engine router is mounted at prefix "/v1/federation/site"
+// (the controller is "/v1/federation"), so the site-side handshake routes
+// live under .../federation/site/*, not .../federation/*.
+const ENROLL_URL = "/api/v1/federation/site/enroll";
+const ENROLL_STATUS_URL = "/api/v1/federation/site/enrollment-status";
 
 interface IdentityKey {
   public_key_pem: string;
@@ -70,6 +76,14 @@ const FederationRoleCard: React.FC = () => {
   const [peerName, setPeerName] = useState("");
   const [peerPem, setPeerPem] = useState("");
   const [peerBusy, setPeerBusy] = useState(false);
+
+  // Site-side enrollment: only shown when this server's role is "site".
+  const [coordUrl, setCoordUrl] = useState("");
+  const [enrollToken, setEnrollToken] = useState("");
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollStatus, setEnrollStatus] = useState<string | null>(null);
+  const [enrollCoordUrl, setEnrollCoordUrl] = useState<string | null>(null);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
 
   const fetchRole = useCallback(async () => {
     setLoading(true);
@@ -107,9 +121,23 @@ const FederationRoleCard: React.FC = () => {
     fetchRole();
   }, [fetchRole]);
 
+  const fetchEnrollmentStatus = useCallback(async () => {
+    try {
+      const s = await axiosInstance.get<{
+        status: string;
+        coordinator: { coordinator_url?: string | null } | null;
+      }>(ENROLL_STATUS_URL);
+      setEnrollStatus(s.data.status ?? null);
+      setEnrollCoordUrl(s.data.coordinator?.coordinator_url ?? null);
+    } catch {
+      setEnrollStatus(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (currentRole !== "none") fetchKeyAndPeers();
-  }, [currentRole, fetchKeyAndPeers]);
+    if (currentRole === "site") fetchEnrollmentStatus();
+  }, [currentRole, fetchKeyAndPeers, fetchEnrollmentStatus]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -130,11 +158,10 @@ const FederationRoleCard: React.FC = () => {
   };
 
   const copy = async (value: string, what: string) => {
-    try {
-      await globalThis.navigator.clipboard.writeText(value);
+    if (await copyToClipboard(value)) {
       setCopied(what);
       globalThis.setTimeout(() => setCopied(null), 2000);
-    } catch {
+    } else {
       setError(t("federationRole.copyError", "Could not copy to clipboard."));
     }
   };
@@ -156,6 +183,28 @@ const FederationRoleCard: React.FC = () => {
       setError(detail || t("federationRole.importError", "Could not import the key."));
     } finally {
       setPeerBusy(false);
+    }
+  };
+
+  const handleEnroll = async () => {
+    setEnrolling(true);
+    setEnrollError(null);
+    try {
+      await axiosInstance.post(ENROLL_URL, {
+        coordinator_url: coordUrl.trim(),
+        enrollment_token: enrollToken.trim(),
+      });
+      setEnrollToken("");
+      await fetchEnrollmentStatus();
+    } catch (e: unknown) {
+      const detail = (e as { response?: { data?: { detail?: string } } })
+        ?.response?.data?.detail;
+      setEnrollError(
+        detail ||
+          t("federationRole.enroll.error", "Could not enroll with the coordinator."),
+      );
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -286,7 +335,7 @@ const FederationRoleCard: React.FC = () => {
           >
             {saving
               ? t("federationRole.saving", "Saving…")
-              : t("federationRole.save", "Save Role")}
+              : t("federationRole.save", "Save Federation Role")}
           </Button>
         </Box>
 
@@ -403,6 +452,89 @@ const FederationRoleCard: React.FC = () => {
             >
               {t("federationRole.peers.import", "Import Peer Key")}
             </Button>
+
+            {/* Site-side enrollment handshake — only on a subordinate site. */}
+            {currentRole === "site" && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2" gutterBottom>
+                  {t("federationRole.enroll.title", "Enroll with coordinator")}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  {t(
+                    "federationRole.enroll.help",
+                    "Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
+                  )}
+                </Typography>
+                {enrollStatus === "enrolled" ? (
+                  <Alert
+                    severity="success"
+                    sx={{ mb: 1 }}
+                    data-testid="federation-enroll-status"
+                  >
+                    {t("federationRole.enroll.enrolled", "Enrolled with coordinator")}
+                    {enrollCoordUrl ? ` (${enrollCoordUrl})` : ""}
+                  </Alert>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                    data-testid="federation-enroll-status"
+                  >
+                    {t(
+                      "federationRole.enroll.notEnrolled",
+                      "Not yet enrolled with a coordinator.",
+                    )}
+                  </Typography>
+                )}
+                {enrollError && (
+                  <Alert severity="error" sx={{ mb: 1 }}>
+                    {enrollError}
+                  </Alert>
+                )}
+                <TextField
+                  size="small"
+                  fullWidth
+                  label={t("federationRole.enroll.coordUrl", "Coordinator URL")}
+                  placeholder="http://10.70.0.1:8080"
+                  value={coordUrl}
+                  onChange={(e) => setCoordUrl(e.target.value)}
+                  sx={{ mb: 1 }}
+                  slotProps={{
+                    htmlInput: { "data-testid": "federation-enroll-url" },
+                  }}
+                />
+                <TextField
+                  size="small"
+                  fullWidth
+                  label={t("federationRole.enroll.token", "Enrollment token")}
+                  value={enrollToken}
+                  onChange={(e) => setEnrollToken(e.target.value)}
+                  sx={{ mb: 1 }}
+                  slotProps={{
+                    htmlInput: { "data-testid": "federation-enroll-token" },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleEnroll}
+                  disabled={enrolling || !coordUrl.trim() || !enrollToken.trim()}
+                  startIcon={
+                    enrolling ? <CircularProgress size={16} /> : undefined
+                  }
+                  data-testid="federation-enroll-submit"
+                >
+                  {enrolling
+                    ? t("federationRole.enroll.submitting", "Enrolling…")
+                    : t("federationRole.enroll.submit", "Enroll with coordinator")}
+                </Button>
+              </>
+            )}
           </>
         )}
 

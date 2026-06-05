@@ -140,6 +140,8 @@ def register_routes(app: FastAPI):
     # Federation identity public-key display + trusted-peer import,
     # wired into the federation card on Settings → Server Role.
     app.include_router(federation_identity.router)
+    # Unauthenticated public-cert endpoint (a peer fetches it to pin our cert).
+    app.include_router(federation_identity.public_router)
     logger.debug("Federation identity router added")
 
     # Block-device enumeration + device-based ISO import (repository).

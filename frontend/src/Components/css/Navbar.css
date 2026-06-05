@@ -229,8 +229,22 @@
   color: #ffffff;
 }
 
+/* Phase 12 federation chips — distinct hues from the air-gap chips so a
+   dual-role server (air-gap + federation) is readable at a glance.
+   Coordinator = purple, Site = teal. */
+.nav__federation-chip--coordinator {
+  background-color: #5b3c88;
+  color: #ffffff;
+}
+
+.nav__federation-chip--site {
+  background-color: #1f7a7a;
+  color: #ffffff;
+}
+
 /* Degraded state — the role-specific Pro+ engine isn't loaded.  Rendered
-   in red so an operator notices at a glance.  Tooltip explains. */
+   in red so an operator notices at a glance.  Tooltip explains.  Placed
+   after the role/federation color rules so it wins the cascade. */
 .nav__role-chip--degraded {
   background-color: #b32d2d;
   color: #ffffff;

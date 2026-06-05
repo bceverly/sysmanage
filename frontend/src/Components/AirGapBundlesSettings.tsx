@@ -29,6 +29,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import axiosInstance from '../Services/api';
+import { copyToClipboard } from '../utils/clipboard';
 import { formatUTCTimestamp } from '../utils/dateUtils';
 
 type BundleStatus = 'queued' | 'building' | 'ready' | 'failed';
@@ -366,11 +367,9 @@ const AirGapBundlesSettings: React.FC = () => {
   const resourcesReady = resources === null ? true : resources.sufficient;
 
   const copyInstallCommand = async (cmd: string) => {
-    try {
-      await globalThis.navigator.clipboard.writeText(cmd);
+    if (await copyToClipboard(cmd)) {
       showSuccess(t('airgapBundles.copied', 'Command copied to clipboard'));
-    } catch (e) {
-      console.error(e);
+    } else {
       showError(t('airgapBundles.copyError', 'Could not access the clipboard'));
     }
   };

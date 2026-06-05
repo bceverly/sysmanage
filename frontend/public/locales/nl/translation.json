@@ -1011,7 +1011,10 @@
     "airgapRepositories": "Air-Gap Repos",
     "map": "Kaart",
     "sites": "Sites",
-    "airgapCollections": "[TODO] Air-Gap Collections"
+    "airgapCollections": "[TODO] Air-Gap Collections",
+    "federationRole": {
+      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
+    }
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3099,6 +3102,17 @@
     "site": {
       "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
       "title": "[TODO] Federation Site"
+    },
+    "enroll": {
+      "coordUrl": "[TODO] Coordinator URL",
+      "enrolled": "[TODO] Enrolled with coordinator",
+      "error": "[TODO] Could not enroll with the coordinator.",
+      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
+      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
+      "submit": "[TODO] Enroll with coordinator",
+      "submitting": "[TODO] Enrolling…",
+      "title": "[TODO] Enroll with coordinator",
+      "token": "[TODO] Enrollment token"
     }
   }
 }

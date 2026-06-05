@@ -24,7 +24,36 @@ def keydirs(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "backend.config.config.get_federation_peer_public_key_dir", lambda: peer_dir
     )
+    cert_file = str(tmp_path / "id" / "identity-cert.pem")
+    monkeypatch.setattr(
+        "backend.config.config.get_federation_tls_cert_file", lambda: cert_file
+    )
     return key_file, peer_dir
+
+
+class TestTlsCert:
+    def test_ensure_creates_cert_and_key_with_modes(self, keydirs, tmp_path):
+        cert, key = fid.ensure_federation_tls_cert()
+        assert os.path.isfile(cert) and os.path.isfile(key)
+        assert cert == str(tmp_path / "id" / "identity-cert.pem")
+        assert key == str(tmp_path / "id" / "identity-cert-key.pem")
+        assert oct(os.stat(cert).st_mode)[-3:] == "644"
+        assert oct(os.stat(key).st_mode)[-3:] == "600"
+
+    def test_cert_pem_is_a_valid_x509_certificate(self, keydirs):
+        pem = fid.get_federation_tls_cert_pem()
+        assert pem and "BEGIN CERTIFICATE" in pem
+        from cryptography import x509  # pylint: disable=import-outside-toplevel
+
+        assert x509.load_pem_x509_certificate(pem.encode("utf-8")) is not None
+
+    def test_ensure_is_idempotent_and_never_overwrites(self, keydirs):
+        cert, _key = fid.ensure_federation_tls_cert()
+        with open(cert, "rb") as fh:
+            first = fh.read()
+        fid.ensure_federation_tls_cert()
+        with open(cert, "rb") as fh:
+            assert fh.read() == first
 
 
 class TestIdentityKeypair:
@@ -100,3 +129,53 @@ class TestPeerKeyring:
 
     def test_remove_missing_returns_false(self, keydirs):
         assert fid.remove_federation_peer("nope") is False
+
+
+class TestWireSigning:
+    def test_sign_then_verify_roundtrip(self, keydirs):
+        body = b'{"hello":"world"}'
+        sig = fid.sign_federation_request(body)
+        assert sig
+        cert_pem = fid.get_federation_tls_cert_pem()
+        assert fid.verify_federation_request(body, sig, cert_pem) is True
+
+    def test_tampered_body_fails(self, keydirs):
+        sig = fid.sign_federation_request(b'{"hello":"world"}')
+        cert_pem = fid.get_federation_tls_cert_pem()
+        assert fid.verify_federation_request(b'{"hello":"x"}', sig, cert_pem) is False
+
+    def test_wrong_cert_fails(self, keydirs):
+        sig = fid.sign_federation_request(b"payload")
+        # A different self-signed cert (different key) must not verify.
+        from cryptography import x509  # pylint: disable=import-outside-toplevel
+        from cryptography.hazmat.primitives import (  # pylint: disable=import-outside-toplevel
+            hashes,
+            serialization,
+        )
+        from cryptography.hazmat.primitives.asymmetric import (  # pylint: disable=import-outside-toplevel
+            rsa,
+        )
+        from cryptography.x509.oid import (  # pylint: disable=import-outside-toplevel
+            NameOID,
+        )
+        import datetime  # pylint: disable=import-outside-toplevel
+
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "other")])
+        now = datetime.datetime.now(datetime.timezone.utc)
+        other = (
+            x509.CertificateBuilder()
+            .subject_name(name)
+            .issuer_name(name)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now)
+            .not_valid_after(now + datetime.timedelta(days=1))
+            .sign(key, hashes.SHA256())
+        )
+        other_pem = other.public_bytes(serialization.Encoding.PEM).decode("utf-8")
+        assert fid.verify_federation_request(b"payload", sig, other_pem) is False
+
+    def test_empty_inputs_fail_closed(self, keydirs):
+        assert fid.verify_federation_request(b"x", "", "cert") is False
+        assert fid.verify_federation_request(b"x", "sig", "") is False

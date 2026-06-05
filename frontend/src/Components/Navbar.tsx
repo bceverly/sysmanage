@@ -30,6 +30,11 @@ const Navbar = () => {
   // ``standard`` deployments so the OSS UI stays uncluttered.
   const [serverRole, setServerRole] = useState<string>("standard");
   const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
+  // Phase 12 — federation role chip ("Coordinator" / "Site").  Independent
+  // axis from the air-gap role above; hidden when federation_role is "none".
+  const [federationRole, setFederationRole] = useState<string>("none");
+  const [federationEngineLoaded, setFederationEngineLoaded] =
+    useState<boolean>(true);
 
   // Refresh the license cache (shared with HostDetail / Hosts / Settings via
   // ``getCachedLicense``) and mirror the result into local state so this
@@ -72,6 +77,8 @@ const Navbar = () => {
         if (cancelled || !info) return;
         setServerRole(info.role || 'standard');
         setRoleEngineLoaded(Boolean(info.role_engine_loaded));
+        setFederationRole(info.federation_role || 'none');
+        setFederationEngineLoaded(Boolean(info.federation_engine_loaded));
       })
       .catch(() => {
         // Endpoint may not be reachable yet during cold-start; default
@@ -146,12 +153,32 @@ const Navbar = () => {
     </span>
   );
 
+  // Phase 12 federation chip — independent of the air-gap chip above, so a
+  // server that is both shows two chips.  Same health semantics: degraded
+  // (red) when the federation Pro+ engine should be loaded but isn't.
+  const federationLabelFallback =
+    federationRole === 'coordinator' ? 'Federation Coordinator' : 'Federation Site';
+  const federationLabelText = t(`nav.federationRole.${federationRole}`, federationLabelFallback);
+  const federationTooltip = federationEngineLoaded
+    ? federationLabelText
+    : t('nav.federationRole.engineMissing', 'Required Pro+ federation engine not loaded; check license.');
+  const federationChip = (federationRole === 'none' || menuVisible !== 'visible') ? null : (
+    <span
+      className={`nav__role-chip nav__federation-chip nav__federation-chip--${federationRole}` +
+        (federationEngineLoaded ? '' : ' nav__role-chip--degraded')}
+      title={federationTooltip}
+    >
+      {federationLabelText}
+    </span>
+  );
+
   return (
     <header className="header">
       <nav className="nav container">
         <NavLink to="/" className="nav__logo">
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
           {roleChip}
+          {federationChip}
         </NavLink>
 
         <div

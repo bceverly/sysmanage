@@ -20,19 +20,32 @@ a deliberate copy so the two role exchanges feel identical to the operator.
 
 from __future__ import annotations
 
+import base64
+import datetime
 import hashlib
 import logging
 import os
 import re
+import socket
 from typing import List, Optional, Tuple
 
-from cryptography.hazmat.primitives import serialization
+from cryptography import x509
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
 )
+from cryptography.x509.oid import NameOID
 
 from backend.config import config as config_module
+
+# Federation TLS cert validity.  Long-lived (10y) — it's a pinned, self-
+# signed identity cert, not a CA-chained web cert, so rotation is a
+# deliberate operator action rather than a calendar event.
+_TLS_CERT_DAYS = 3650
+_TLS_BACKDATE_SECONDS = 300  # tolerate small clock skew between peers
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +128,138 @@ def get_federation_identity_public_key_pem() -> Optional[str]:
                 return fh.read()
         except Exception:  # pylint: disable=broad-exception-caught
             return None
+
+
+# ---------------------------------------------------------------------------
+# Federation TLS certificate (mutual-TLS pinning material)
+# ---------------------------------------------------------------------------
+#
+# The enrollment handshake exchanges X.509 certs so each side can pin the
+# other for mutual TLS.  We auto-mint a self-signed cert so the operator
+# never has to generate or paste one — enrollment is just URL + token.
+
+
+def _tls_key_path(cert_path: str) -> str:
+    base, _ = os.path.splitext(cert_path)
+    return base + "-key.pem"
+
+
+def ensure_federation_tls_cert() -> Tuple[str, str]:
+    """Generate this server's self-signed federation TLS cert if absent.
+
+    Returns ``(cert_path, key_path)``.  Idempotent and NEVER overwrites — the
+    cert is pinned by the peer at enrollment time, so regenerating it would
+    silently break an existing federation relationship.  0644 cert / 0600 key.
+    """
+    cert_path = config_module.get_federation_tls_cert_file()
+    key_path = _tls_key_path(cert_path)
+    os.makedirs(os.path.dirname(cert_path), exist_ok=True)
+
+    if os.path.isfile(cert_path) and os.path.isfile(key_path):
+        return cert_path, key_path
+
+    logger.info("Generating federation TLS certificate at %s", cert_path)
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    common_name = socket.gethostname() or "sysmanage-federation"
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, common_name)])
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(seconds=_TLS_BACKDATE_SECONDS))
+        .not_valid_after(now + datetime.timedelta(days=_TLS_CERT_DAYS))
+        .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
+        .sign(key, hashes.SHA256())
+    )
+    key_pem = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+    cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+    _atomic_write(key_path, key_pem, 0o600)
+    _atomic_write(cert_path, cert_pem, 0o644)
+    return cert_path, key_path
+
+
+def get_federation_tls_cert_pem() -> Optional[str]:
+    """This server's federation TLS cert PEM (auto-creates if absent)."""
+    cert_path = config_module.get_federation_tls_cert_file()
+    try:
+        with open(cert_path, "r", encoding="utf-8") as fh:
+            return fh.read()
+    except OSError:
+        try:
+            ensure_federation_tls_cert()
+            with open(cert_path, "r", encoding="utf-8") as fh:
+                return fh.read()
+        except Exception:  # pylint: disable=broad-exception-caught
+            return None
+
+
+# ---------------------------------------------------------------------------
+# Wire-request signing (proof the sender holds the pinned cert's private key)
+# ---------------------------------------------------------------------------
+#
+# Each federation wire request is signed with the sender's federation TLS
+# private key (RSA / PKCS1v15-SHA256 over the exact request bytes); the
+# receiver verifies against the cert it pinned for that peer at enrollment.
+# This is what turns the pinned certs from "stored" into "enforced" — a
+# leaked bearer alone can't impersonate a peer without its private key.  The
+# receiver only *enforces* under HTTPS (see ``config.federation_enforce_cert_pinning``);
+# on plain-HTTP dev deployments the signature is attached but ignored.
+
+
+def sign_federation_request(body: bytes) -> Optional[str]:
+    """Sign request bytes with this server's federation TLS private key.
+
+    Returns a base64 signature, or ``None`` on any failure so the caller can
+    fail open (send unsigned) rather than stall the federation on a keygen
+    hiccup — the receiver decides whether to require it.
+    """
+    try:
+        ensure_federation_tls_cert()
+        key_path = _tls_key_path(config_module.get_federation_tls_cert_file())
+        with open(key_path, "rb") as fh:
+            private_key = serialization.load_pem_private_key(fh.read(), password=None)
+        signature = private_key.sign(body, padding.PKCS1v15(), hashes.SHA256())
+        return base64.b64encode(signature).decode("ascii")
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not sign federation request", exc_info=True)
+        return None
+
+
+def verify_federation_request(
+    body: bytes, signature_b64: str, peer_cert_pem: str | bytes
+) -> bool:
+    """Verify a base64 signature over ``body`` against a peer's pinned cert.
+
+    Returns ``False`` (never raises) on a bad signature, malformed cert, or
+    any decode error — the caller turns that into a 401.
+    """
+    if not signature_b64 or not peer_cert_pem:
+        return False
+    try:
+        raw_cert = (
+            peer_cert_pem.encode("utf-8")
+            if isinstance(peer_cert_pem, str)
+            else peer_cert_pem
+        )
+        cert = x509.load_pem_x509_certificate(raw_cert)
+        cert.public_key().verify(
+            base64.b64decode(signature_b64),
+            body,
+            padding.PKCS1v15(),
+            hashes.SHA256(),
+        )
+        return True
+    except (InvalidSignature, ValueError, TypeError):
+        return False
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
 
 
 # ---------------------------------------------------------------------------

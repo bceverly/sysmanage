@@ -214,7 +214,7 @@ const ServerRoleSettings: React.FC = () => {
         >
           {saving
             ? t('serverRole.saving', 'Saving…')
-            : t('serverRole.save', 'Save Role')}
+            : t('serverRole.save', 'Save Air-Gap Role')}
         </Button>
         {selectedRole !== currentRole && (
           <Typography variant="caption" color="warning.main">

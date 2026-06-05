@@ -37,6 +37,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 
 import axiosInstance from '../Services/api';
+import { copyToClipboard } from '../utils/clipboard';
 
 const COLLECTOR_KEY_URL = '/api/v1/airgap/collector-key';
 const TRUSTED_URL = '/api/v1/airgap/trusted-collectors';
@@ -129,11 +130,10 @@ export const CollectorPublicKeyCard: React.FC = () => {
   }, [t]);
 
   const copy = async (value: string, what: string) => {
-    try {
-      await globalThis.navigator.clipboard.writeText(value);
+    if (await copyToClipboard(value)) {
       setCopied(what);
       globalThis.setTimeout(() => setCopied(null), 2000);
-    } catch {
+    } else {
       setError(t('airgapKeys.copyError', 'Could not copy to clipboard.'));
     }
   };

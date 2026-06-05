@@ -51,6 +51,9 @@ class TestServerInfoShape:
             "loaded_engines",
             "expected_engine_for_role",
             "role_engine_loaded",
+            "federation_role",
+            "expected_federation_engine_for_role",
+            "federation_engine_loaded",
         }
 
     def test_loaded_engines_is_a_list(self, client):
@@ -99,6 +102,41 @@ class TestServerInfoRepositoryRole:
         assert body["role"] == "repository"
         assert body["expected_engine_for_role"] == "airgap_repository_engine"
         assert body["role_engine_loaded"] is True
+
+
+class TestServerInfoFederationRole:
+    def test_default_federation_role_is_none(self, client):
+        body = _server_info(client)
+        assert body["federation_role"] == "none"
+        assert body["expected_federation_engine_for_role"] is None
+        assert body["federation_engine_loaded"] is True
+
+    def test_coordinator_with_engine_loaded_is_healthy(self, client):
+        with patch(
+            "backend.api.server_info.config_module.get_federation_role",
+            return_value="coordinator",
+        ), _override_loaded({"federation_controller_engine": object()}):
+            body = _server_info(client)
+        assert body["federation_role"] == "coordinator"
+        assert (
+            body["expected_federation_engine_for_role"]
+            == "federation_controller_engine"
+        )
+        assert body["federation_engine_loaded"] is True
+        assert "federation_controller_engine" in body["loaded_engines"]
+
+    def test_site_without_engine_is_degraded(self, client):
+        # Operator set the federation role to site but the Pro+ engine isn't
+        # loaded (stale module cache, missing build, or license problem) —
+        # the UI flips the federation chip to red.
+        with patch(
+            "backend.api.server_info.config_module.get_federation_role",
+            return_value="site",
+        ), _override_loaded({}):
+            body = _server_info(client)
+        assert body["federation_role"] == "site"
+        assert body["expected_federation_engine_for_role"] == "federation_site_engine"
+        assert body["federation_engine_loaded"] is False
 
 
 class TestServerInfoUnauthenticated:

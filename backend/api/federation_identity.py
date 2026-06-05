@@ -31,6 +31,35 @@ router = APIRouter(
     dependencies=[Depends(JWTBearer())],
 )
 
+# A second router WITHOUT the JWT gate: the federation TLS certificate is
+# public material (it's exactly what a TLS peer sees in a handshake), and an
+# enrolling *site* must fetch the coordinator's cert to pin it BEFORE it has
+# any coordinator credentials.  Same prefix, distinct path — no collision.
+public_router = APIRouter(
+    prefix="/api/v1/federation",
+    tags=["federation-identity"],
+)
+
+
+class TlsCertResponse(BaseModel):
+    cert_pem: str
+
+
+@public_router.get("/tls-cert", response_model=TlsCertResponse)
+def get_tls_cert():
+    """Return this server's federation TLS certificate (public, unauthenticated).
+
+    Auto-creates it on first read.  An enrolling site GETs this from its
+    coordinator to pin the coordinator's cert for the mutual-TLS handshake.
+    """
+    pem = federation_identity_service.get_federation_tls_cert_pem()
+    if not pem:
+        raise HTTPException(
+            status_code=500,
+            detail=_("Could not load or generate the federation TLS certificate."),
+        )
+    return TlsCertResponse(cert_pem=pem)
+
 
 class IdentityKeyResponse(BaseModel):
     public_key_pem: str

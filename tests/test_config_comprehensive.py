@@ -455,3 +455,30 @@ security:
             config_module.get_smtp_config()
         except Exception as e:
             pytest.fail(f"Config accessor function failed: {e}")
+
+
+class TestDevModeDetection:
+    """HTTP-vs-HTTPS auto-detection drives dev mode (no manual switch)."""
+
+    def test_https_enabled_when_both_cert_and_key_set(self):
+        with patch.object(
+            config,
+            "config",
+            {"api": {"certFile": "/etc/ssl/cert.pem", "keyFile": "/etc/ssl/key.pem"}},
+        ):
+            assert config.is_https_enabled() is True
+            assert config.is_dev_mode() is False
+            assert config.federation_enforce_cert_pinning() is True
+
+    def test_dev_mode_when_no_tls_configured(self):
+        with patch.object(config, "config", {"api": {"host": "0.0.0.0", "port": 8080}}):
+            assert config.is_https_enabled() is False
+            assert config.is_dev_mode() is True
+            # Pin enforcement auto-relaxes on plain HTTP.
+            assert config.federation_enforce_cert_pinning() is False
+
+    def test_dev_mode_when_only_one_of_cert_key_set(self):
+        # A half-configured TLS pair isn't HTTPS — stays dev (fail-safe).
+        with patch.object(config, "config", {"api": {"certFile": "/etc/ssl/cert.pem"}}):
+            assert config.is_https_enabled() is False
+            assert config.is_dev_mode() is True

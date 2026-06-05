@@ -34,11 +34,11 @@ def get_server_role() -> str:
         session_local = db.get_session_local()
         with session_local() as session:
             row = session.query(models.ServerConfiguration).first()
-            if row is None or not row.server_role:
+            if row is None or not row.air_gap_role:
                 return DEFAULT_SERVER_ROLE
-            return row.server_role
+            return row.air_gap_role
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.warning("Could not read server_role from DB; defaulting: %s", exc)
+        logger.warning("Could not read air_gap_role from DB; defaulting: %s", exc)
         return DEFAULT_SERVER_ROLE
 
 
@@ -59,11 +59,11 @@ def set_server_role(role: str) -> str:
         row = session.query(models.ServerConfiguration).first()
         if row is None:
             row = models.ServerConfiguration(
-                id=SINGLETON_SERVER_CONFIG_ID, server_role=role
+                id=SINGLETON_SERVER_CONFIG_ID, air_gap_role=role
             )
             session.add(row)
         else:
-            row.server_role = role
+            row.air_gap_role = role
         session.commit()
     return role
 
@@ -137,7 +137,7 @@ def set_import_device(device):
         if row is None:
             row = models.ServerConfiguration(
                 id=SINGLETON_SERVER_CONFIG_ID,
-                server_role=DEFAULT_SERVER_ROLE,
+                air_gap_role=DEFAULT_SERVER_ROLE,
                 airgap_import_device=device,
             )
             session.add(row)

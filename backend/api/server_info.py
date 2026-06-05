@@ -59,12 +59,21 @@ _FALLBACK_ENVELOPE = {
     "loaded_engines": [],
     "expected_engine_for_role": None,
     "role_engine_loaded": True,
+    "federation_role": "none",
+    "expected_federation_engine_for_role": None,
+    "federation_engine_loaded": True,
 }
 
 
 _AIRGAP_ENGINE_FOR_ROLE = {
     "collector": "airgap_collector_engine",
     "repository": "airgap_repository_engine",
+}
+
+
+_FEDERATION_ENGINE_FOR_ROLE = {
+    "coordinator": "federation_controller_engine",
+    "site": "federation_site_engine",
 }
 
 
@@ -108,6 +117,16 @@ def get_server_info():
         loaded = sorted(loaded_dict.keys())
         expected_engine = _AIRGAP_ENGINE_FOR_ROLE.get(role)
         role_engine_loaded = expected_engine is None or expected_engine in loaded
+        # Federation is an independent axis from the air-gap role: a server
+        # can be e.g. an air-gap collector AND a federation site.  Same
+        # health-check shape — when the role is coordinator/site,
+        # federation_engine_loaded is true only if the matching Pro+ engine
+        # is currently loaded.
+        federation_role = config_module.get_federation_role()
+        expected_federation_engine = _FEDERATION_ENGINE_FOR_ROLE.get(federation_role)
+        federation_engine_loaded = (
+            expected_federation_engine is None or expected_federation_engine in loaded
+        )
         license_tier = _resolve_license_tier()
 
         return {
@@ -117,6 +136,9 @@ def get_server_info():
             "loaded_engines": loaded,
             "expected_engine_for_role": expected_engine,
             "role_engine_loaded": role_engine_loaded,
+            "federation_role": federation_role,
+            "expected_federation_engine_for_role": expected_federation_engine,
+            "federation_engine_loaded": federation_engine_loaded,
         }
     except Exception:  # pylint: disable=broad-exception-caught
         # See docstring above — the audit trail goes to logs;
@@ -218,8 +240,8 @@ def set_server_role_endpoint(
             db=db,
             action_type=ActionType.UPDATE,
             entity_type=EntityType.SETTING,
-            entity_id="server_role",
-            entity_name="server_role",
+            entity_id="air_gap_role",
+            entity_name="air_gap_role",
             description=_("Set server role to '%s'") % new_role,
             username=current_user,
             result=Result.SUCCESS,
@@ -280,18 +302,22 @@ def set_federation_role_endpoint(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    # Mint the federation identity keypair when joining a federation (the
-    # public key the peer pins).  Idempotent + never overwrites; best-effort.
+    # Mint the federation identity keypair + TLS cert when joining a
+    # federation (the identity key the peer pins, and the TLS cert the
+    # enrollment handshake presents for mutual TLS).  Idempotent + never
+    # overwrites; best-effort — keygen failure shouldn't block the role save.
     if new_role in ("coordinator", "site"):
         try:
             from backend.services.federation_identity_service import (  # pylint: disable=import-outside-toplevel
                 ensure_federation_identity_keypair,
+                ensure_federation_tls_cert,
             )
 
             ensure_federation_identity_keypair()
+            ensure_federation_tls_cert()
         except Exception:  # pylint: disable=broad-exception-caught
             logger.warning(
-                "Failed to ensure federation identity keypair on role change",
+                "Failed to ensure federation identity material on role change",
                 exc_info=True,
             )
 

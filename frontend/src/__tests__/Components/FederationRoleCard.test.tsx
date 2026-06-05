@@ -1,5 +1,17 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  configure,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import { vi, beforeEach, test, expect } from "vitest";
+
+// This card loads through two chained async hops (role fetch → identity-key +
+// enrollment-status fetch).  The default 1s findBy timeout gets starved when
+// the full vitest suite runs everything in parallel (the component passes
+// fine in isolation), so give the async utilities more headroom here.
+configure({ asyncUtilTimeout: 5000 });
 
 // Stable `t` — FederationRoleCard puts `t` in useCallback/useEffect deps, so a
 // fresh `t` per render would infinite-loop (see project memory).
@@ -95,6 +107,34 @@ test("copying the public key writes it to the clipboard", async () => {
       expect.stringContaining("PUBLIC KEY"),
     ),
   );
+});
+
+test("a site can enroll with a coordinator (POSTs url + token)", async () => {
+  primeGet("site");
+  m(api.post).mockResolvedValue({ data: { licensed: true, status: "enrolled" } });
+  render(<FederationRoleCard />);
+  const url = (await screen.findByTestId(
+    "federation-enroll-url",
+  )) as HTMLInputElement;
+  const token = screen.getByTestId("federation-enroll-token") as HTMLInputElement;
+  fireEvent.change(url, { target: { value: "http://10.70.0.1:8080" } });
+  fireEvent.change(token, { target: { value: "TOK123" } });
+  fireEvent.click(screen.getByTestId("federation-enroll-submit"));
+  await waitFor(() =>
+    expect(m(api.post)).toHaveBeenCalledWith("/api/v1/federation/site/enroll", {
+      coordinator_url: "http://10.70.0.1:8080",
+      enrollment_token: "TOK123",
+    }),
+  );
+});
+
+test("the enroll section is hidden on a coordinator", async () => {
+  primeGet("coordinator");
+  render(<FederationRoleCard />);
+  // Identity-key section renders for a coordinator...
+  await screen.findByTestId("federation-copy-key");
+  // ...but the site-only enroll handshake does not.
+  expect(screen.queryByTestId("federation-enroll-submit")).toBeNull();
 });
 
 test("importing a peer POSTs name + pem", async () => {

@@ -521,6 +521,50 @@ def get_federation_peer_public_key_dir() -> str:
     )
 
 
+def get_federation_tls_cert_file() -> str:
+    """Filesystem path to this server's federation TLS certificate PEM.
+
+    A self-signed X.509 cert the enrollment handshake presents for mutual-TLS
+    pinning (the private key sits next to it as ``<stem>-key.pem``).  Auto-
+    generated on demand so the operator never has to mint or paste a cert.
+    """
+    return config.get("federation", {}).get(
+        "tls_cert_file", "/var/lib/sysmanage/federation/identity-cert.pem"
+    )
+
+
+def is_https_enabled() -> bool:
+    """True when the API is configured to serve HTTPS.
+
+    The server runs TLS only when BOTH ``api.certFile`` and ``api.keyFile``
+    are set (see ``backend/main.py``); otherwise it serves plain HTTP.
+    """
+    api = config.get("api", {}) or {}
+    return bool(api.get("certFile") and api.get("keyFile"))
+
+
+def is_dev_mode() -> bool:
+    """True when this deployment is plain HTTP (no TLS) — treated as dev.
+
+    Security checks that would impede local testing (e.g. federation
+    certificate-pin enforcement) auto-relax in dev mode, so an operator
+    running over HTTP never has to flip a switch.  Configure
+    ``api.certFile`` + ``api.keyFile`` (i.e. run HTTPS) and the same checks
+    enforce automatically.
+    """
+    return not is_https_enabled()
+
+
+def federation_enforce_cert_pinning() -> bool:
+    """Whether to ENFORCE federation cert/identity pinning on the wire.
+
+    Auto-derived from the deployment posture: warn-only in dev (plain HTTP),
+    enforced once the server runs HTTPS.  No dedicated config flag — HTTPS
+    *is* the signal that this is a real deployment.
+    """
+    return is_https_enabled()
+
+
 def is_airgap_verify_strict() -> bool:
     """When True, the repository rejects unsigned / HMAC-fallback manifests."""
     return bool(config.get("airgap", {}).get("verify_strict", True))

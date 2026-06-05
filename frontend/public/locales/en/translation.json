@@ -1011,7 +1011,10 @@
     "airgapRepositories": "Air-Gap Repos",
     "airgapCollections": "Air-Gap Collections",
     "map": "Map",
-    "sites": "Sites"
+    "sites": "Sites",
+    "federationRole": {
+      "engineMissing": "Required Pro+ federation engine not loaded; check license."
+    }
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -2883,11 +2886,11 @@
       "title": "Air-Gap Repository (disconnected side)",
       "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
     },
-    "heading": "Server Role",
+    "heading": "Air-Gap Role",
     "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
     "currentTag": "(current)",
     "saving": "Saving…",
-    "save": "Save Role",
+    "save": "Save Air-Gap Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect."
   },
@@ -3092,13 +3095,24 @@
       "title": "Trusted peer keys"
     },
     "removeError": "Could not remove the key.",
-    "save": "Save Role",
+    "save": "Save Federation Role",
     "saveError": "Could not save the federation role.",
     "saved": "Federation role saved. Restart the server for it to take full effect.",
     "saving": "Saving…",
     "site": {
       "description": "A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
       "title": "Federation Site"
+    },
+    "enroll": {
+      "coordUrl": "Coordinator URL",
+      "enrolled": "Enrolled with coordinator",
+      "error": "Could not enroll with the coordinator.",
+      "help": "Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
+      "notEnrolled": "Not yet enrolled with a coordinator.",
+      "submit": "Enroll with coordinator",
+      "submitting": "Enrolling…",
+      "title": "Enroll with coordinator",
+      "token": "Enrollment token"
     }
   }
 }
