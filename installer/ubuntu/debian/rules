@@ -17,6 +17,10 @@ override_dh_auto_build:
 	# requirements.txt carries dev tooling (pylint/astroid/pytest/playwright)
 	# which is NOT in the air-gap wheel set, so installing it offline fails.
 	python3 scripts/update-requirements-prod.py
+	# Stamp the package version into backend/__init__.py so backend.__version__
+	# resolves at runtime (server-info + federation "Reported version" show it
+	# instead of "unknown").  Strip the Debian revision suffix (e.g. -1).
+	printf '__version__ = "%s"\n' "$$(dpkg-parsechangelog -S Version | sed 's/-[^-]*$$//')" > backend/__init__.py
 
 override_dh_auto_test:
 	# Skip tests during package build

@@ -2500,8 +2500,14 @@ jobs:
           echo "Project: $COPR_USERNAME/sysmanage"
           echo "SRPM: $SRPM_PATH"
 
-          # Upload and build
-          copr-cli build $COPR_USERNAME/sysmanage $SRPM_PATH
+          # Upload and build. Copr's API has transient connectivity blips
+          # ("Unable to connect to .../api_3/"), so retry before failing.
+          ok=0; n=0
+          until [ "$n" -ge 5 ]; do
+            if copr-cli build "$COPR_USERNAME/sysmanage" "$SRPM_PATH"; then ok=1; break; fi
+            n=$((n+1)); echo "copr-cli build attempt $n failed; retrying in 20s..."; sleep 20
+          done
+          [ "$ok" = 1 ] || { echo "::error::copr-cli build failed after 5 attempts"; exit 1; }
 
           echo ""
           echo "=========================================="
