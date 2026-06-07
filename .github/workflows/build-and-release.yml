@@ -2835,6 +2835,10 @@ jobs:
           MODE: ${{ github.event.inputs.winget_mode || 'publish' }}
           VERSION: ${{ steps.version.outputs.version }}
           WINGET_PKGS_TOKEN: ${{ secrets.WINGET_PKGS_TOKEN }}
+          # Authenticates the api.github.com read below so it doesn't hit the
+          # 60-req/hr UNauthenticated rate limit (shared across Actions runner
+          # IPs), which returns 403 + an empty body and breaks the JSON parse.
+          GH_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
@@ -2869,7 +2873,22 @@ jobs:
           # The asset is a TARBALL, not a raw binary — extract it
           # before invoking (an earlier version of this step
           # ``chmod +x``'d the tarball and got "Exec format error").
-          KOMAC_URL=$(curl -sSfL https://api.github.com/repos/russellbanks/Komac/releases/latest \
+          # Fetch + parse in two steps so a 403/empty body surfaces as a
+          # clear error here rather than a downstream JSONDecodeError.  Send
+          # the GITHUB_TOKEN when present (authenticated => 1000 req/hr) and
+          # retry transient blips.
+          KOMAC_API="https://api.github.com/repos/russellbanks/Komac/releases/latest"
+          AUTH_HEADER=()
+          if [ -n "${GH_API_TOKEN:-}" ]; then
+            AUTH_HEADER=(-H "Authorization: Bearer ${GH_API_TOKEN}")
+          fi
+          if ! KOMAC_JSON=$(curl -sSfL --retry 3 --retry-delay 5 \
+              -H "Accept: application/vnd.github+json" \
+              "${AUTH_HEADER[@]}" "$KOMAC_API"); then
+            echo "::error::Could not query the komac latest-release API (HTTP error / rate limit)."
+            exit 1
+          fi
+          KOMAC_URL=$(printf '%s' "$KOMAC_JSON" \
             | python3 -c "import sys, json; data=json.load(sys.stdin); name_ok = lambda n: 'linux' in n.lower() and 'x86_64' in n.lower() and n.endswith('.tar.gz') and 'setup' not in n.lower(); print(next(a['browser_download_url'] for a in data['assets'] if name_ok(a['name'])))")
           echo "Downloading $KOMAC_URL"
           curl -sSfL -o /tmp/komac.tar.gz "$KOMAC_URL"

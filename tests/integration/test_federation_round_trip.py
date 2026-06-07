@@ -188,8 +188,12 @@ def cluster():
     c = FederationCluster()
     c.enroll()
     yield c
-    c.coord.close()
-    c.site.close()
+    # Close the sessions AND dispose their engines — otherwise each cluster's
+    # two in-memory sqlite connections are gc'd unclosed (ResourceWarning).
+    for sess in (c.coord, c.site):
+        bind = sess.get_bind()
+        sess.close()
+        bind.dispose()
 
 
 # ---------------------------------------------------------------------

@@ -2892,7 +2892,8 @@
     "saving": "Saving…",
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect."
+    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "menuTitle": "[TODO] Server Role"
   },
   "airgapDevices": {
     "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",

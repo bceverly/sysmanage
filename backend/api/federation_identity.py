@@ -16,7 +16,7 @@ All routes require a logged-in user.
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from backend.auth.auth_bearer import JWTBearer
@@ -24,6 +24,22 @@ from backend.i18n import _
 from backend.services import federation_identity_service
 
 logger = logging.getLogger(__name__)
+
+
+async def federation_request(request: Request) -> Request:
+    """Pure-Python FastAPI dependency that simply returns the live Request.
+
+    The Pro+ federation engines are Cython-compiled, and FastAPI CANNOT
+    introspect special parameters declared inside a compiled module — a
+    ``request: Request`` parameter is mis-read as a required ``query.request``
+    (HTTP 422), and a ``Header()`` default fails route registration outright
+    ("Expected str, got Header").  ``Depends(...)`` markers DO work, so the
+    engines depend on this interpreted helper to obtain the Request and then
+    read the Authorization / ``X-Federation-Signature`` headers and the raw
+    body off it.  Keep it dependency-injectable from the engines.
+    """
+    return request
+
 
 router = APIRouter(
     prefix="/api/v1/federation",

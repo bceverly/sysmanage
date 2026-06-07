@@ -25,6 +25,7 @@ the expected state in a fresh OSS-only checkout.
 
 import importlib
 import importlib.util
+import json
 import logging
 import sys
 import sysconfig
@@ -271,7 +272,9 @@ async def test_drain_once_posts_with_bearer_and_marks_sent(engine, db_maker):
     headers = call.kwargs["headers"]
     assert headers["Authorization"] == "Bearer secret-xyz"
     assert headers["Content-Type"] == "application/json"
-    assert call.kwargs["json"] == {"host_count": 5, "active_count": 4}
+    # Worker now sends the exact JSON bytes via ``content=`` (to sign them),
+    # not ``json=``.
+    assert json.loads(call.kwargs["content"]) == {"host_count": 5, "active_count": 4}
     assert _queue_depth(db_maker) == 0
 
 

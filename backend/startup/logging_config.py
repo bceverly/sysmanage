@@ -59,6 +59,12 @@ def configure_logging():
     # FastAPI startup banner into test output.  The mkdir above still runs
     # so the existing ``test_configure_logging_*`` tests pass.
     if "PYTEST_VERSION" in os.environ or "PYTEST_CURRENT_TEST" in os.environ:
+        # We created the file handler above but never attach it under pytest;
+        # close it so its open backend.log stream isn't garbage-collected
+        # unclosed (a stray "ResourceWarning: unclosed file" in the suite).
+        for handler in handlers:
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
         return
 
     logger.debug("Configuring basic logging with %d handlers", len(handlers))

@@ -2886,6 +2886,7 @@
       "title": "Air-Gap Repository (disconnected side)",
       "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
     },
+    "menuTitle": "Server Role",
     "heading": "Air-Gap Role",
     "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
     "currentTag": "(current)",

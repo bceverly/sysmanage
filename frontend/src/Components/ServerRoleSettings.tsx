@@ -136,6 +136,12 @@ const ServerRoleSettings: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Page title — distinct from the per-card "Air-Gap Role" /
+          "Federation Role" headings.  Also the canonical reference for the
+          ``serverRole.menuTitle`` key used by the Settings menu item. */}
+      <Typography variant="h5" gutterBottom>
+        {t('serverRole.menuTitle', 'Server Role')}
+      </Typography>
       <Grid container spacing={2} alignItems="flex-start">
         {/* Left card: air-gap topology role (existing). */}
         <Grid size={{ xs: 12, md: 6 }}>

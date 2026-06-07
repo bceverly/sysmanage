@@ -185,7 +185,10 @@ const Settings: React.FC = () => {
       // the old sysmanage.yaml ``role:`` key.
       {
         id: 'server-role',
-        labelKey: 'serverRole.heading',
+        // The page hosts BOTH the air-gap and federation role cards, so the
+        // menu item is "Server Role" — distinct from ``serverRole.heading``,
+        // which is the air-gap card's own "Air-Gap Role" title.
+        labelKey: 'serverRole.menuTitle',
         labelDefault: 'Server Role',
       },
       {

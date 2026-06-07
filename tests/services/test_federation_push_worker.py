@@ -15,6 +15,7 @@ Skipped automatically when the engine ``.so`` isn't on disk.
 # pylint: disable=missing-class-docstring,missing-function-docstring,protected-access,redefined-outer-name
 
 import importlib.util
+import json
 import logging
 import sys
 import sysconfig
@@ -220,7 +221,9 @@ async def test_push_once_delivers_policy_with_bearer(engine, fed_db, db_maker):
         "https://site-alpha.example.com/api/v1/federation/site/policies"
     )
     assert call.kwargs["headers"]["Authorization"] == f"Bearer {bearer}"
-    body = call.kwargs["json"]
+    # The worker now POSTs the exact JSON bytes via ``content=`` (so it can
+    # attach an X-Federation-Signature over those bytes) instead of ``json=``.
+    body = json.loads(call.kwargs["content"])
     assert body["policy_type"] == "update_profile"
     assert body["name"] == "default-update"
     assert body["definition"] == {"channel": "stable"}
@@ -324,7 +327,7 @@ async def test_push_once_re_pushes_after_policy_version_bump(engine, fed_db, db_
     counts = await engine._push_once(db_maker, client, logging.getLogger("test"))
     assert counts["policies_pushed"] == 1
     # Payload reflects the new version.
-    assert client.post.call_args.kwargs["json"]["version"] == 2
+    assert json.loads(client.post.call_args.kwargs["content"])["version"] == 2
 
 
 @pytest.mark.asyncio
@@ -408,7 +411,7 @@ async def test_push_once_delivers_command_and_advances_to_in_progress(
         "https://site-alpha.example.com/api/v1/federation/site/commands"
     )
     assert call.kwargs["headers"]["Authorization"] == f"Bearer {bearer}"
-    body = call.kwargs["json"]
+    body = json.loads(call.kwargs["content"])
     assert body["command_id"] == str(cmd_id)
     assert body["command_type"] == "run_script"
     assert body["parameters"] == {"script": "df -h"}

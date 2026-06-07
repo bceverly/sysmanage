@@ -42,6 +42,13 @@ class TestTestMode:
         """Restore original state."""
         from backend.persistence import db
 
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
+
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine
         db.TEST_SESSION_LOCAL = self._orig_test_session_local
@@ -131,6 +138,13 @@ class TestGetEngine:
         """Restore original state."""
         from backend.persistence import db
 
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
+
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine
         db.TEST_SESSION_LOCAL = self._orig_test_session_local
@@ -140,11 +154,15 @@ class TestGetEngine:
         from backend.persistence import db
 
         test_engine = create_engine("sqlite:///:memory:")
-        db.enter_test_mode(test_engine)
+        try:
+            db.enter_test_mode(test_engine)
 
-        result = db.get_engine()
+            result = db.get_engine()
 
-        assert result is test_engine
+            assert result is test_engine
+        finally:
+            db.exit_test_mode()
+            test_engine.dispose()
 
     def test_get_engine_raises_without_test_engine(self):
         """Test get_engine raises RuntimeError if test engine not set."""
@@ -173,6 +191,13 @@ class TestGetDb:
     def teardown_method(self):
         """Restore original state."""
         from backend.persistence import db
+
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
 
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine
@@ -245,6 +270,13 @@ class TestGetSessionLocal:
         """Restore original state."""
         from backend.persistence import db
 
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
+
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine
         db.TEST_SESSION_LOCAL = self._orig_test_session_local
@@ -275,6 +307,13 @@ class TestGetDatabaseUrl:
     def teardown_method(self):
         """Restore original state."""
         from backend.persistence import db
+
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
 
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine
@@ -318,6 +357,13 @@ class TestLegacyFunctions:
     def teardown_method(self):
         """Restore original state."""
         from backend.persistence import db
+
+        # Dispose any engine this test installed (via enter_test_mode/
+        # set_test_engine) so its in-memory sqlite connection is closed now,
+        # not garbage-collected unclosed later (ResourceWarning noise).
+        current_engine = db.TEST_ENGINE
+        if current_engine is not None and current_engine is not self._orig_test_engine:
+            current_engine.dispose()
 
         db.IS_TEST_MODE = self._orig_is_test_mode
         db.TEST_ENGINE = self._orig_test_engine

@@ -43,7 +43,8 @@
 #                 engine)
 #   site-a/b    : 2 vCPU / 4 GiB RAM / 40 GiB disk  (full sysmanage stack +
 #                 the federation_site engine)
-#   fed-agent   : 1 vCPU / 1 GiB RAM / 20 GiB disk  (just OS + agent state)
+#   fed-agent   : 1 vCPU / 2 GiB RAM / 20 GiB disk  (OS + agent; 1 GiB OOM'd
+#                 the agent during package/update-detection collection)
 # Three full server stacks is ~12 GiB of guest RAM; bump/shrink any node via
 # the environment variables below if your host is tight.
 
@@ -99,7 +100,10 @@ SITE_B_IP="${SITE_B_IP:-10.70.0.3}"
 
 AGENT_NAME="${AGENT_NAME:-sysmanage-fed-agent}"
 AGENT_VCPUS="${AGENT_VCPUS:-1}"
-AGENT_RAM="${AGENT_RAM:-1024}"
+# 2 GiB: at 1 GiB the agent's Python process OOM-kills in a crash-restart loop
+# during its package/update-detection collection (the apt available-package
+# universe balloons RSS to ~700 MiB).  Override with AGENT_RAM=<MiB>.
+AGENT_RAM="${AGENT_RAM:-2048}"
 AGENT_DISK_GB="${AGENT_DISK_GB:-20}"
 AGENT_NAT_MAC="${AGENT_NAT_MAC:-52:54:00:70:50:0b}"
 AGENT_FED_MAC="${AGENT_FED_MAC:-52:54:00:70:00:0b}"
