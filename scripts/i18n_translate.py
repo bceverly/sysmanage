@@ -112,6 +112,9 @@ def _chat(base, model, key, system, user, timeout=120):
         },
         method="POST",
     )
+    # Dev-only CLI tool; the endpoint is an operator-configured LLM URL
+    # (I18N_LLM_BASE_URL), never request/user-derived — no SSRF surface.
+    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
         body = json.loads(resp.read().decode("utf-8"))
     return body["choices"][0]["message"]["content"]

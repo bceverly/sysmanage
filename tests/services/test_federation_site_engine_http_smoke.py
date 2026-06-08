@@ -184,6 +184,36 @@ def test_inbound_command_accepts_coordinator_bearer(harness):
     assert resp.status_code == 200, resp.text
 
 
+def test_inbound_secret_lease_accepts_coordinator_bearer(harness):
+    """coordinator → site dynamic-secret lease delivery (Phase 12.5) records the
+    echo in the inbox; the plaintext is never reflected back."""
+    resp = harness.post(
+        "/api/v1/federation/site/secret-leases",
+        json={
+            "correlation_key": "corr-smoke-1",
+            "host_id": "host-1",
+            "secret_name": "db-readonly",
+            "status": "issued",
+            "secret_metadata": {"username": "svc"},
+            "secret_value": "super-secret-transient-value",
+        },
+        headers=_auth(),
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["status"] == "issued"
+    assert "secret_value" not in body  # plaintext never echoed back
+
+
+def test_inbound_secret_lease_requires_correlation_key(harness):
+    resp = harness.post(
+        "/api/v1/federation/site/secret-leases",
+        json={"host_id": "h", "secret_name": "s", "status": "issued"},
+        headers=_auth(),
+    )
+    assert resp.status_code == 400
+
+
 def test_inbound_rejects_missing_bearer(harness):
     resp = harness.post(
         "/api/v1/federation/site/policies",

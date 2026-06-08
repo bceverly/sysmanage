@@ -125,13 +125,19 @@ function popupHtml(host: HostGeolocation, openLabel: string): string {
   `;
 }
 
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+// Escape the full set of HTML-significant characters (covers both element-text
+// and attribute contexts used by the popup markup below).  Mapping each
+// character avoids both a global-regex replace and chained replaceAll calls.
 function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+  return Array.from(value, (ch) => HTML_ESCAPES[ch] ?? ch).join("");
 }
 
 const MapView: React.FC = () => {

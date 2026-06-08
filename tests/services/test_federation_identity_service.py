@@ -68,9 +68,12 @@ class TestIdentityKeypair:
 
     def test_ensure_is_idempotent_and_never_overwrites(self, keydirs):
         priv, _pub = fid.ensure_federation_identity_keypair()
-        first = open(priv, "rb").read()
+        with open(priv, "rb") as fh:
+            first = fh.read()
         fid.ensure_federation_identity_keypair()  # second call
-        assert open(priv, "rb").read() == first  # untouched
+        with open(priv, "rb") as fh:
+            second = fh.read()
+        assert second == first  # untouched
 
     def test_public_key_auto_creates_on_first_read(self, keydirs):
         # No ensure() call first — the getter mints the keypair.

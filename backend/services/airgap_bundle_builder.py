@@ -139,6 +139,8 @@ def _cleanup_staging(staging: Path) -> None:
             timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
+        # Best-effort ownership fix-up: a failure here must not abort teardown —
+        # the staging dir is removed unconditionally just below regardless.
         pass
     shutil.rmtree(staging, ignore_errors=True)
 
@@ -241,6 +243,7 @@ def _execute_build(bundle_id: uuid.UUID, product: str, script: Path) -> None:
         try:
             version_path.unlink()
         except OSError:
+            # Already gone / not writable — harmless; the marker is transient.
             pass
 
     _update_bundle(

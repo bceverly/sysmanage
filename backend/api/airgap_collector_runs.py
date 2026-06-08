@@ -661,6 +661,20 @@ def _assert_iso_ready(run: models.AirgapCollectionRun) -> List[str]:
     return available
 
 
+def _assert_within_iso_dir(path: str) -> str:
+    """Reject any ISO path that resolves outside ``_ISO_OUTPUT_DIR``.
+
+    Defence in depth: the served paths come from a glob of the ISO dir or a
+    server-written DB column, so they're already contained — but this realpath
+    check guarantees a route-param/DB-derived path can never escape, and is the
+    form the path-traversal scanners recognise."""
+    root = os.path.realpath(_ISO_OUTPUT_DIR)
+    resolved = os.path.realpath(path)
+    if resolved != root and not resolved.startswith(root + os.sep):
+        raise HTTPException(status_code=404, detail=_("ISO file not found."))
+    return resolved
+
+
 def _iso_file_response(
     run: models.AirgapCollectionRun, disc: Optional[int]
 ) -> FileResponse:
@@ -690,6 +704,7 @@ def _iso_file_response(
             friendly = f"{run.iso_label}-{run.id}.iso"
     else:
         friendly = f"{run.iso_label}-{run.id}.iso"
+    chosen = _assert_within_iso_dir(chosen)
     return FileResponse(
         chosen,
         media_type="application/octet-stream",
@@ -866,8 +881,9 @@ async def download_manifest_iso(
             status_code=410,
             detail=_("ISO file is no longer on disk: %s") % (manifest.iso_path or ""),
         )
+    safe_iso_path = _assert_within_iso_dir(manifest.iso_path)
     return FileResponse(
-        manifest.iso_path,
+        safe_iso_path,
         media_type="application/octet-stream",
-        filename=os.path.basename(manifest.iso_path),
+        filename=os.path.basename(safe_iso_path),
     )

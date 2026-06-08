@@ -16,14 +16,14 @@ cryptography==46.0.7  # CVE-2026-34073 (buffer overflow), CVE-2026-39892 (DNS na
 defusedxml>=0.7.1
 dnspython>=2.7.0
 email_validator==2.1.1
-fastapi==0.129.0
+fastapi==0.136.3  # drops the starlette<1.0 cap so the CVE-2026-48710 fix can land
 gevent==25.9.1
 greenlet>=3.1.0
 h11>=0.16.0
 httpcore>=1.0.6
 httptools==0.7.1
 httpx>=0.27.2
-idna==3.11
+idna==3.18  # CVE bypass of CVE-2024-3651 fix in idna.encode() (was 3.11)
 itsdangerous==2.2.0
 Jinja2>=3.1.6
 Mako==1.3.12  # CVE-2026-44307 path-traversal fix (was 1.3.11)
@@ -50,12 +50,16 @@ PyYAML==6.0.2
 setuptools>=82.0.1  # 80.9.0 had CVE in pkg_resources path traversal
 sniffio==1.3.1
 SQLAlchemy==2.0.43
-# SECURITY NOTE: 0.48-0.51 has CVE-2025-62727 (DoS via crafted Range headers) and
+# SECURITY NOTE: starlette 1.0.1 is the first release with the CVE-2026-48710
 
-# follow-on header-handling fixes; 0.52.1 is the latest patched 0.5x series.
+# fix (missing Host-header validation poisons request.url.path, bypassing
 
-# Upper bound stays <1.0 because FastAPI 0.129.0 hasn't validated against starlette 1.x yet.
-starlette>=0.52.1,<1.0
+# path-based security checks).  Earlier <1.0 releases (incl. 0.52.1) are all
+
+# affected.  FastAPI 0.136.3 dropped its starlette<1.0 cap (now >=0.46.0), so
+
+# the fixed 1.x line is permitted; validated against the full backend suite.
+starlette>=1.0.1
 typing_extensions>=4.12.2
 ujson==5.12.1  # patch covers prior CVEs (memory-leak DoS / integer overflow) + Dependabot #115 (ujson.dump() write-failure memory leak)
 uvicorn==0.40.0

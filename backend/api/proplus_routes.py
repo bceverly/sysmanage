@@ -2094,6 +2094,12 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False}
 
+        @router.post("/secret-leases")
+        async def fed_site_receive_secret_lease_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
         # --- Site → operator: status surface -----------------------------
 
         @router.get("/sync-status")

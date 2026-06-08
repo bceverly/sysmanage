@@ -851,6 +851,11 @@ class FederationSecretLease(Base):
     expires_at = Column(DateTime, nullable=True, index=True)
     last_renewed_at = Column(DateTime, nullable=True)
     revoked_at = Column(DateTime, nullable=True)
+    # When the issued/rotated secret was successfully delivered to the site.
+    # NULL on an issued lease means "still needs delivery" — the reconcile loop
+    # rotates + re-delivers undelivered leases (so a site offline at issue time
+    # gets a fresh credential when it returns).
+    delivered_at = Column(DateTime, nullable=True)
     last_error = Column(Text, nullable=True)
     # Correlates with the site's request + downstream result echo.
     correlation_key = Column(String(64), nullable=True, index=True)

@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from backend.persistence.models.federation import (
@@ -185,6 +185,17 @@ def mark_renewed(
     return row
 
 
+def mark_delivered(session: Session, lease_id: Any) -> FederationSecretLease:
+    """Record that the issued/rotated secret reached the requesting site.
+
+    A delivered lease drops out of the reconcile loop's rotation candidates
+    until it next nears expiry."""
+    row = _require(session, lease_id)
+    row.delivered_at = _utcnow_naive()
+    row.last_error = None
+    return row
+
+
 def mark_revoked(session: Session, lease_id: Any) -> FederationSecretLease:
     """Record a revocation (terminal ``revoked``)."""
     row = _require(session, lease_id)
@@ -234,6 +245,44 @@ def list_expiring(
                     FederationSecretLease.status == FED_LEASE_ACTIVE,
                     FederationSecretLease.expires_at.isnot(None),
                     FederationSecretLease.expires_at <= horizon,
+                )
+            )
+            .order_by(FederationSecretLease.expires_at)
+        )
+        .scalars()
+        .all()
+    )
+
+
+def list_rotation_candidates(
+    session: Session,
+    *,
+    within_seconds: int,
+    now: Optional[datetime] = None,
+) -> List[FederationSecretLease]:
+    """Active, already-issued leases that need a rotate+deliver pass.
+
+    A candidate is either nearing expiry (``expires_at`` within
+    ``within_seconds``) OR issued-but-not-yet-delivered (a site that was offline
+    when the lease was first issued).  Both get a fresh credential generated and
+    delivered: rotation before expiry, and recovery for a missed delivery.
+    Leases without a Vault id (never successfully issued) are excluded."""
+    now = now or _utcnow_naive()
+    horizon = now + timedelta(seconds=within_seconds)
+    return list(
+        session.execute(
+            select(FederationSecretLease)
+            .where(
+                and_(
+                    FederationSecretLease.status == FED_LEASE_ACTIVE,
+                    FederationSecretLease.vault_lease_id.isnot(None),
+                    or_(
+                        FederationSecretLease.delivered_at.is_(None),
+                        and_(
+                            FederationSecretLease.expires_at.isnot(None),
+                            FederationSecretLease.expires_at <= horizon,
+                        ),
+                    ),
                 )
             )
             .order_by(FederationSecretLease.expires_at)
@@ -334,6 +383,7 @@ def to_dict(lease: FederationSecretLease) -> Dict[str, Any]:
         "expires_at": _iso(lease.expires_at),
         "last_renewed_at": _iso(lease.last_renewed_at),
         "revoked_at": _iso(lease.revoked_at),
+        "delivered_at": _iso(lease.delivered_at),
         "last_error": lease.last_error,
         "secret_metadata": (
             json.loads(lease.secret_metadata_json)

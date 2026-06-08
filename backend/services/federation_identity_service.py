@@ -225,6 +225,10 @@ def sign_federation_request(body: bytes) -> Optional[str]:
         key_path = _tls_key_path(config_module.get_federation_tls_cert_file())
         with open(key_path, "rb") as fh:
             private_key = serialization.load_pem_private_key(fh.read(), password=None)
+        # RSA PKCS#1 v1.5 *signatures* (unlike v1.5 encryption) are not broken;
+        # the peer verifies against the cert it pinned at enrollment, and moving
+        # to PSS would break every already-established federation relationship.
+        # nosemgrep: python.cryptography.cryptography-rsa-pkcs1-signature.cryptography-rsa-pkcs1-signature
         signature = private_key.sign(body, padding.PKCS1v15(), hashes.SHA256())
         return base64.b64encode(signature).decode("ascii")
     except Exception:  # pylint: disable=broad-exception-caught
@@ -249,6 +253,9 @@ def verify_federation_request(
             else peer_cert_pem
         )
         cert = x509.load_pem_x509_certificate(raw_cert)
+        # Verifies the PKCS#1 v1.5 signature made by ``sign_federation_request``
+        # against the pinned peer cert — see that function re: PKCS1v15 vs PSS.
+        # nosemgrep: python.cryptography.cryptography-rsa-pkcs1-signature.cryptography-rsa-pkcs1-signature
         cert.public_key().verify(
             base64.b64decode(signature_b64),
             body,
@@ -302,6 +309,22 @@ def _safe_key_name(name: str) -> str:
     return slug or "peer"
 
 
+def _keyring_key_path(keyring_dir: str, name: str) -> str:
+    """Resolve ``<keyring_dir>/<slug>.pub`` and HARD-VERIFY it stays inside the
+    keyring directory.
+
+    ``_safe_key_name`` already strips path separators, but this adds an explicit
+    realpath-containment check on top — defence in depth, and an unambiguous
+    guard against path traversal from the caller-supplied ``name``.  Raises
+    ``ValueError`` if the resolved path's parent isn't the keyring dir.
+    """
+    slug = _safe_key_name(name)
+    resolved = os.path.realpath(os.path.join(keyring_dir, slug + ".pub"))
+    if os.path.dirname(resolved) != os.path.realpath(keyring_dir):
+        raise ValueError("resolved keyring path escapes the keyring directory")
+    return resolved
+
+
 def list_federation_peers() -> List[dict]:
     """List the trusted federation peer keys as ``[{"name", "fingerprint"}]``."""
     keyring_dir = config_module.get_federation_peer_public_key_dir()
@@ -336,8 +359,10 @@ def import_federation_peer(name: str, public_key_pem: str) -> dict:
     fingerprint = hashlib.sha256(canonical).hexdigest()
     keyring_dir = config_module.get_federation_peer_public_key_dir()
     os.makedirs(keyring_dir, exist_ok=True)
-    slug = _safe_key_name(name)
-    path = os.path.join(keyring_dir, slug + ".pub")
+    path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
+    # Slug is taken from the validated, contained filename — provably free of
+    # path separators / control characters, so it's safe to log + return.
+    slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)
     logger.info("Imported federation peer key '%s' (fingerprint %s)", slug, fingerprint)
     return {"name": slug, "fingerprint": fingerprint}
@@ -346,8 +371,11 @@ def import_federation_peer(name: str, public_key_pem: str) -> dict:
 def remove_federation_peer(name: str) -> bool:
     """Delete a trusted peer key by name (filename stem).  Path-safe."""
     keyring_dir = config_module.get_federation_peer_public_key_dir()
-    slug = _safe_key_name(name)
-    path = os.path.join(keyring_dir, slug + ".pub")
+    try:
+        path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
+    except ValueError:
+        return False
+    slug = os.path.splitext(os.path.basename(path))[0]
     try:
         os.unlink(path)
         logger.info("Removed federation peer key '%s'", slug)

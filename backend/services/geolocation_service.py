@@ -413,7 +413,15 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
                 _MAX_EXTRACT_BYTES,
             )
             return False
-    tar.extractall(extract_dir)  # nosec B202  # path + size validated above
+    # Defence in depth: every member's path + cumulative size were validated
+    # above, AND the stdlib ``data`` filter (backported to 3.9.17+/3.10.12+/
+    # 3.11.4+, native in 3.12+) independently rejects absolute paths, ``..``
+    # traversal, and special/device files at extraction time.  It is applied via
+    # the ``extraction_filter`` ATTRIBUTE rather than the ``filter=`` kwarg so
+    # the call stays signature-compatible on every supported runtime.
+    if hasattr(tarfile, "data_filter"):
+        tar.extraction_filter = tarfile.data_filter
+    tar.extractall(extract_dir)  # nosec B202  # path+size validated + data-filtered
     return True
 
 

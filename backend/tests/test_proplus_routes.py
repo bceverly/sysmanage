@@ -779,6 +779,7 @@ class TestFederationSiteStubRoutes:
         ("GET", "/api/v1/federation/site/enrollment-status"),
         ("POST", "/api/v1/federation/site/policies"),
         ("POST", "/api/v1/federation/site/commands"),
+        ("POST", "/api/v1/federation/site/secret-leases"),
         ("GET", "/api/v1/federation/site/sync-status"),
         ("GET", "/api/v1/federation/site/sync-queue/depth"),
         ("GET", "/api/v1/federation/site/received-policies"),

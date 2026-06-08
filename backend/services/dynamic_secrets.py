@@ -179,6 +179,86 @@ def issue_lease(
     return {"lease": lease.to_dict(), "secret": secret_value}
 
 
+def renew_lease(
+    db,
+    *,
+    vault_lease_id: str,
+    kind: str,
+    backend_role: str,
+    ttl_seconds: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Rotate a dynamic-secret lease IN PLACE.
+
+    Writes a freshly-generated credential value to the SAME Vault path with a
+    renewed ``delete_version_after`` TTL and returns the new plaintext.  Used by
+    the federation reconcile loop to rotate leases nearing expiry (or to
+    re-deliver to a site that was offline when the lease was first issued)
+    WITHOUT the site ever touching OpenBAO.  Refreshes the local
+    ``DynamicSecretLease`` row if one exists for this path.
+
+    The returned ``secret`` is the new plaintext — transient, delivered to the
+    site over the mTLS push channel and NEVER logged or persisted here.
+    """
+    if kind not in LEASE_KINDS:
+        raise DynamicSecretError(f"Unknown kind: {kind!r}")
+    if not vault_lease_id:
+        raise DynamicSecretError("vault_lease_id is required to renew a lease")
+
+    ttl = ttl_seconds if ttl_seconds is not None else TTL_DEFAULT_SECONDS
+    if ttl < TTL_MIN_SECONDS or ttl > TTL_MAX_SECONDS:
+        raise DynamicSecretError(
+            f"ttl_seconds must be within [{TTL_MIN_SECONDS}, {TTL_MAX_SECONDS}]"
+        )
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    expires_at = now + timedelta(seconds=ttl)
+    secret_value = _generate_secret_value(kind)
+
+    # The local row (if any) carries the lease_id we stamp into the Vault
+    # payload; for a federation lease issued through ``issue_lease`` it always
+    # exists, keyed by the same ``vault_lease_id`` (the KV path).
+    row = (
+        db.query(models.DynamicSecretLease)
+        .filter(models.DynamicSecretLease.vault_lease_id == vault_lease_id)
+        .first()
+    )
+    lease_id_str = str(row.id) if row is not None else vault_lease_id
+
+    try:
+        vault = VaultService()
+        vault._make_request(  # pylint: disable=protected-access
+            "POST",
+            f"{vault.mount_path}/data/{vault_lease_id}",
+            data={
+                "data": {
+                    "value": secret_value,
+                    "kind": kind,
+                    "backend_role": backend_role,
+                    "lease_id": lease_id_str,
+                    "issued_at": now.isoformat(),
+                    "expires_at": expires_at.isoformat(),
+                },
+                "options": {"delete_version_after": f"{ttl}s"},
+            },
+        )
+    except VaultError as exc:
+        raise DynamicSecretError(f"vault renewal failure: {exc}") from exc
+
+    if row is not None:
+        row.ttl_seconds = ttl
+        row.expires_at = expires_at
+        row.status = LEASE_ACTIVE
+        db.add(row)
+        db.commit()
+
+    return {
+        "secret": secret_value,
+        "ttl_seconds": ttl,
+        "expires_at": expires_at,
+        "secret_metadata": {"vault_path": vault_lease_id},
+    }
+
+
 def revoke_lease(db, *, lease_id: uuid.UUID) -> Dict[str, Any]:
     """Mark a lease revoked AND delete it from OpenBAO so its content
     can no longer be retrieved.  Idempotent — already-revoked /

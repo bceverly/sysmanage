@@ -518,9 +518,12 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                                 # columns just stay at their previous
                                 # values until the next heartbeat
                                 # resolves cleanly.
+                                # sanitize_log strips control chars / newlines
+                                # from the agent-reported IP so a crafted value
+                                # can't forge log lines (log injection).
                                 logger.debug(
                                     "Heartbeat: geo lookup for %s failed: %s",
-                                    reported_public_ip,
+                                    sanitize_log(reported_public_ip),
                                     geo_err,
                                 )
 

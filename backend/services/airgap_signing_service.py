@@ -181,6 +181,22 @@ def _safe_key_name(name: str) -> str:
     return slug or "collector"
 
 
+def _keyring_key_path(keyring_dir: str, name: str) -> str:
+    """Resolve ``<keyring_dir>/<slug>.pub`` and HARD-VERIFY it stays inside the
+    keyring directory.
+
+    ``_safe_key_name`` already strips path separators, but this adds an explicit
+    realpath-containment check on top — defence in depth against path traversal
+    from the caller-supplied ``name``.  Raises ``ValueError`` if the resolved
+    path's parent isn't the keyring dir.
+    """
+    slug = _safe_key_name(name)
+    resolved = os.path.realpath(os.path.join(keyring_dir, slug + ".pub"))
+    if os.path.dirname(resolved) != os.path.realpath(keyring_dir):
+        raise ValueError("resolved keyring path escapes the keyring directory")
+    return resolved
+
+
 def list_trusted_collectors() -> List[dict]:
     """List the repository's trusted-collector keys.
 
@@ -220,8 +236,10 @@ def import_trusted_collector(name: str, public_key_pem: str) -> dict:
     fingerprint = hashlib.sha256(canonical).hexdigest()
     keyring_dir = config_module.get_airgap_collector_public_key_dir()
     os.makedirs(keyring_dir, exist_ok=True)
-    slug = _safe_key_name(name)
-    path = os.path.join(keyring_dir, slug + ".pub")
+    path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
+    # Slug from the validated, contained filename — provably free of path
+    # separators / control characters, so it's safe to log + return.
+    slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)
     logger.info(
         "Imported trusted collector key '%s' (fingerprint %s)", slug, fingerprint
@@ -233,8 +251,11 @@ def remove_trusted_collector(name: str) -> bool:
     """Delete a trusted-collector key by name (filename stem).  Returns
     True if a file was removed.  Path-traversal-safe via slugify."""
     keyring_dir = config_module.get_airgap_collector_public_key_dir()
-    slug = _safe_key_name(name)
-    path = os.path.join(keyring_dir, slug + ".pub")
+    try:
+        path = _keyring_key_path(keyring_dir, name)  # contained + traversal-safe
+    except ValueError:
+        return False
+    slug = os.path.splitext(os.path.basename(path))[0]
     try:
         os.unlink(path)
         logger.info("Removed trusted collector key '%s'", slug)
