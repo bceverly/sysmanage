@@ -27,6 +27,13 @@ from backend.persistence.models.federation import (
     FederationSite,
 )
 from backend.services import federation_site_service as svc
+from tests.federation_crypto import (
+    enroll_site,
+    make_identity_keypair,
+    make_self_signed_cert,
+    quick_enroll,
+    sign_enrollment_proof,
+)
 
 FEDERATION_TABLE_NAMES = [
     "federation_sites",
@@ -167,12 +174,21 @@ class TestCreateSite:
 
 class TestCompleteEnrollment:
     def test_valid_token_flips_to_enrolled(self, session):
-        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
+        priv, pub = make_identity_keypair()
+        cert = make_self_signed_cert("cle")
+        _, token = svc.create_site(
+            session,
+            name="Cleveland",
+            url="https://a.x",
+            site_identity_public_key_pem=pub,
+        )
         session.commit()
+        proof = sign_enrollment_proof(priv, role="site", tls_cert_pem=cert)
         site, bearer, _coord_outbound = svc.complete_enrollment(
             session,
             plaintext_token=token,
-            tls_cert_pem="-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----\n",
+            tls_cert_pem=cert,
+            identity_proof_b64=proof,
             actor_userid="site@itself",
         )
         session.commit()
@@ -210,19 +226,32 @@ class TestCompleteEnrollment:
             svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="")
 
     def test_already_enrolled_token_cannot_be_reused(self, session):
-        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="cert1")
+        priv, pub = make_identity_keypair()
+        cert = make_self_signed_cert("cle")
+        _, token = svc.create_site(
+            session,
+            name="Cleveland",
+            url="https://a.x",
+            site_identity_public_key_pem=pub,
+        )
+        proof = sign_enrollment_proof(priv, role="site", tls_cert_pem=cert)
+        svc.complete_enrollment(
+            session, plaintext_token=token, tls_cert_pem=cert, identity_proof_b64=proof
+        )
         session.commit()
         # Re-presenting the same token after scrubbing must fail.
         with pytest.raises(svc.InvalidEnrollmentTokenError):
             svc.complete_enrollment(
-                session, plaintext_token=token, tls_cert_pem="cert2"
+                session,
+                plaintext_token=token,
+                tls_cert_pem=cert,
+                identity_proof_b64=proof,
             )
 
     def test_audits_enrollment_completed(self, session):
-        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        session.commit()
-        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="cert")
+        site, _bearer, _outbound = enroll_site(
+            session, name="Cleveland", url="https://a.x"
+        )
         session.commit()
         entries = (
             session.query(FederationAuditLog)
@@ -282,8 +311,7 @@ class TestGetters:
 
     def test_list_filtered_by_status(self, session):
         a, _ = svc.create_site(session, name="A", url="https://a.x")
-        b, t = svc.create_site(session, name="B", url="https://b.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        b, _bearer, _outbound = enroll_site(session, name="B", url="https://b.x")
         session.commit()
         pending = svc.list_sites(session, status=svc.STATUS_PENDING)
         enrolled = svc.list_sites(session, status=svc.STATUS_ENROLLED)
@@ -353,8 +381,7 @@ class TestUpdateSite:
 
 class TestStateTransitions:
     def _enrolled(self, session):
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         return site
 
@@ -401,8 +428,7 @@ class TestStateTransitions:
         # Phase 12.6: removing a site must invalidate its sync bearer
         # so a leaked plaintext token can't keep pushing rollup data
         # after administrative removal.
-        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         assert site.sync_bearer_token_hash is not None
         svc.remove_site(session, site.id)
@@ -442,8 +468,7 @@ class TestStateTransitions:
 
 class TestRecordSync:
     def test_success_updates_columns(self, session):
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         svc.record_sync(session, site.id, success=True, host_count=42)
         session.commit()
@@ -452,8 +477,7 @@ class TestRecordSync:
         assert site.host_count == 42
 
     def test_failure_records_error(self, session):
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         svc.record_sync(session, site.id, success=False, error="network_timeout")
         session.commit()
@@ -461,8 +485,7 @@ class TestRecordSync:
 
     def test_does_not_audit(self, session):
         """Sync events are too frequent to audit-per-row."""
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         before = session.query(FederationAuditLog).count()
         svc.record_sync(session, site.id, success=True)
@@ -518,9 +541,9 @@ class TestEnrollmentTimestamps:
             )
 
     def test_complete_stamps_enrolled_at_and_scrubs_expiry(self, session):
-        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        session.commit()
-        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="cert")
+        site, _bearer, _outbound = enroll_site(
+            session, name="Cleveland", url="https://a.x"
+        )
         session.commit()
         assert site.enrolled_at is not None
         assert site.enrollment_token_expires_at is None
@@ -573,8 +596,7 @@ class TestCancelEnrollment:
         """Cancellation is for *pending* enrollment only — flipping an
         already-enrolled site needs ``remove_site``, not cancel.  This
         is what the operator path expects."""
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         with pytest.raises(svc.InvalidSiteStateError):
             svc.cancel_enrollment(session, site.id)
@@ -602,11 +624,24 @@ class TestRegenerateEnrollmentToken:
             )
 
     def test_new_token_can_complete_enrollment(self, session):
-        site, _ = svc.create_site(session, name="Cleveland", url="https://a.x")
+        priv, pub = make_identity_keypair()
+        cert = make_self_signed_cert("cle")
+        site, _ = svc.create_site(
+            session,
+            name="Cleveland",
+            url="https://a.x",
+            site_identity_public_key_pem=pub,
+        )
         session.commit()
         _, new_token = svc.regenerate_enrollment_token(session, site.id)
         session.commit()
-        svc.complete_enrollment(session, plaintext_token=new_token, tls_cert_pem="c")
+        proof = sign_enrollment_proof(priv, role="site", tls_cert_pem=cert)
+        svc.complete_enrollment(
+            session,
+            plaintext_token=new_token,
+            tls_cert_pem=cert,
+            identity_proof_b64=proof,
+        )
         session.commit()
         assert site.status == svc.STATUS_ENROLLED
 
@@ -643,8 +678,7 @@ class TestRegenerateEnrollmentToken:
         assert len(entries) == 1
 
     def test_cannot_regenerate_for_enrolled_site(self, session):
-        site, t = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        site = quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         with pytest.raises(svc.InvalidSiteStateError):
             svc.regenerate_enrollment_token(session, site.id)
@@ -670,9 +704,8 @@ class TestSyncBearerToken:
         assert svc._hash_token(plaintext) == sha
 
     def test_lookup_matches_enrolled_site(self, session):
-        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        site, bearer, _coord_outbound = svc.complete_enrollment(
-            session, plaintext_token=token, tls_cert_pem="c"
+        site, bearer, _coord_outbound = enroll_site(
+            session, name="Cleveland", url="https://a.x"
         )
         session.commit()
         resolved = svc.find_site_by_sync_bearer_token(session, bearer)
@@ -681,8 +714,7 @@ class TestSyncBearerToken:
 
     def test_lookup_returns_none_for_unknown_token(self, session):
         # Set up an enrolled site so the DB isn't trivially empty.
-        _, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        svc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        quick_enroll(session, name="Cleveland", url="https://a.x")
         session.commit()
         assert svc.find_site_by_sync_bearer_token(session, "not-a-real-token") is None
 
@@ -692,9 +724,8 @@ class TestSyncBearerToken:
     def test_lookup_rejects_suspended_site(self, session):
         # Suspended sites can't push data — only ``status='enrolled'``
         # rows are valid bearer-token holders.
-        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        _, bearer, _coord_outbound = svc.complete_enrollment(
-            session, plaintext_token=token, tls_cert_pem="c"
+        site, bearer, _coord_outbound = enroll_site(
+            session, name="Cleveland", url="https://a.x"
         )
         session.commit()
         svc.suspend_site(session, site.id)
@@ -705,9 +736,8 @@ class TestSyncBearerToken:
         # Removed sites have their bearer hash scrubbed entirely
         # (verified in TestRemoveSite); this confirms the lookup-side
         # gate also short-circuits on status.
-        site, token = svc.create_site(session, name="Cleveland", url="https://a.x")
-        _, bearer, _coord_outbound = svc.complete_enrollment(
-            session, plaintext_token=token, tls_cert_pem="c"
+        site, bearer, _coord_outbound = enroll_site(
+            session, name="Cleveland", url="https://a.x"
         )
         session.commit()
         svc.remove_site(session, site.id)
@@ -715,14 +745,8 @@ class TestSyncBearerToken:
         assert svc.find_site_by_sync_bearer_token(session, bearer) is None
 
     def test_two_sites_get_distinct_bearers(self, session):
-        _, ta = svc.create_site(session, name="Alpha", url="https://a.x")
-        _, tb = svc.create_site(session, name="Bravo", url="https://b.x")
-        _, ba, _ = svc.complete_enrollment(
-            session, plaintext_token=ta, tls_cert_pem="c"
-        )
-        _, bb, _ = svc.complete_enrollment(
-            session, plaintext_token=tb, tls_cert_pem="c"
-        )
+        _a, ba, _ = enroll_site(session, name="Alpha", url="https://a.x")
+        _b, bb, _ = enroll_site(session, name="Bravo", url="https://b.x")
         session.commit()
         assert ba != bb
         # Each bearer resolves to its own site.

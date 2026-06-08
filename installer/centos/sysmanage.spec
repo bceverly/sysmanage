@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        2.4.0.24
+Version:        2.4.0.25
 Release:        1%{?dist}
 Summary:        Centralized system management server with web-based interface
 
@@ -90,7 +90,10 @@ if [ -f %{SOURCE1} ]; then
 fi
 
 %build
-# No build step needed - Python application with pre-built frontend
+# No compile step (Python app w/ pre-built frontend), but stamp the package
+# version into backend/__init__.py so backend.__version__ resolves at runtime
+# (server-info + federation "Reported version" show it instead of "unknown").
+printf '__version__ = "%s"\n' "%{version}" > backend/__init__.py
 
 %install
 # Create directory structure

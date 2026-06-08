@@ -83,6 +83,7 @@ parts:
       - libffi-dev
       - libssl-dev
       - rsync
+      - git
     override-build: |
       # $CRAFT_PROJECT_DIR is the project root when running snapcraft from root with path to snapcraft.yaml
       # Create temp build directory
@@ -92,6 +93,12 @@ parts:
       cp "$CRAFT_PROJECT_DIR/requirements.txt" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/scripts" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/backend" /tmp/build/
+      # Stamp the version into backend/__init__.py so backend.__version__
+      # resolves at runtime (server-info + federation "Reported version" show
+      # it instead of "unknown"); the checkout ships it empty.
+      VER="$(git -C "$CRAFT_PROJECT_DIR" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"
+      [ -n "$VER" ] || VER="${CRAFT_PROJECT_VERSION:-0.0.0}"
+      printf '__version__ = "%s"\n' "$VER" > /tmp/build/backend/__init__.py
       cp -r "$CRAFT_PROJECT_DIR/alembic" /tmp/build/
       cp "$CRAFT_PROJECT_DIR/alembic.ini" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/config" /tmp/build/

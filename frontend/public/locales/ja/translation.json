@@ -2750,7 +2750,9 @@
       "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
       "title": "[TODO] Enroll a federation site",
       "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL"
+      "url": "[TODO] Site URL",
+      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
+      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
     },
     "enterpriseRequired": {
       "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
@@ -3077,9 +3079,9 @@
     "heading": "[TODO] Federation Role",
     "identity": {
       "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can pin the other's identity. The private key never leaves this server.",
       "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key"
+      "title": "[TODO] This server's identity key",
+      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
     },
     "importError": "[TODO] Could not import the key.",
     "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
@@ -3089,11 +3091,12 @@
       "title": "[TODO] Not federated"
     },
     "peers": {
-      "empty": "[TODO] No trusted peer keys yet.",
       "import": "[TODO] Import Peer Key",
       "name": "[TODO] Peer name",
       "pem": "[TODO] Peer public key (PEM)",
-      "title": "[TODO] Trusted peer keys"
+      "empty": "[TODO] No peer identity keys recorded yet.",
+      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
+      "title": "[TODO] Peer identity keys"
     },
     "removeError": "[TODO] Could not remove the key.",
     "save": "[TODO] Save Role",
@@ -3113,7 +3116,9 @@
       "submit": "[TODO] Enroll with coordinator",
       "submitting": "[TODO] Enrolling…",
       "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token"
+      "token": "[TODO] Enrollment token",
+      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
+      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
     }
   }
 }

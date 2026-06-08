@@ -84,6 +84,10 @@ interface EnrollDialogState {
   url: string;
   location_label: string;
   sync_interval_seconds: string;
+  /** The site's identity public key, exchanged out of band and pasted in by
+   * the operator.  Required: the coordinator verifies the site's enrollment
+   * proof against it (strict-by-default anti-MITM). */
+  site_identity_public_key_pem: string;
   error: string | null;
   /** Plaintext token from the latest successful enrollment; shown
    * once to the operator and cleared when the dialog closes. */
@@ -97,6 +101,7 @@ const EMPTY_ENROLL: EnrollDialogState = {
   url: "",
   location_label: "",
   sync_interval_seconds: "300",
+  site_identity_public_key_pem: "",
   error: null,
   token: null,
 };
@@ -177,6 +182,8 @@ const Sites: React.FC = () => {
         sync_interval_seconds: Number.isFinite(parsedInterval)
           ? parsedInterval
           : undefined,
+        site_identity_public_key_pem:
+          enroll.site_identity_public_key_pem.trim(),
       });
       if (!response.licensed) {
         setEnroll((prev) => ({
@@ -481,6 +488,28 @@ const Sites: React.FC = () => {
                 fullWidth
                 disabled={enroll.submitting}
               />
+              <TextField
+                label={t(
+                  "sites.enroll.siteIdentityKey",
+                  "Site identity public key (PEM)",
+                )}
+                helperText={t(
+                  "sites.enroll.siteIdentityKeyHelp",
+                  "Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle.",
+                )}
+                value={enroll.site_identity_public_key_pem}
+                onChange={(e) =>
+                  setEnroll((prev) => ({
+                    ...prev,
+                    site_identity_public_key_pem: e.target.value,
+                  }))
+                }
+                fullWidth
+                required
+                multiline
+                minRows={3}
+                disabled={enroll.submitting}
+              />
             </Stack>
           )}
         </DialogContent>
@@ -497,7 +526,8 @@ const Sites: React.FC = () => {
               disabled={
                 enroll.submitting ||
                 !enroll.name.trim() ||
-                !enroll.url.trim()
+                !enroll.url.trim() ||
+                !enroll.site_identity_public_key_pem.trim()
               }
             >
               {t("sites.enroll.submit", "Generate token")}

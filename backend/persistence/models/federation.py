@@ -115,6 +115,13 @@ class FederationSite(Base):
     # The site's pinned TLS leaf certificate (PEM).  The coordinator
     # uses this to validate the site during mutual-TLS handshake.
     tls_cert_pem = Column(Text, nullable=True)
+    # Phase 12 strict trust: the site's Ed25519 IDENTITY public key, pasted
+    # in OUT OF BAND by the operator when the site row is created.  At
+    # ``complete_enrollment`` the coordinator requires the site to prove
+    # possession of the matching private key over the exact TLS cert it
+    # presents — defeating an enrollment-time MITM.  Strict-by-default:
+    # enrollment is refused when this is NULL.
+    site_identity_public_key_pem = Column(Text, nullable=True)
     # SHA-256 of the enrollment token, scrubbed after successful
     # enrollment.  NULL once the site is fully enrolled.
     enrollment_token_hash = Column(String(128), nullable=True)
@@ -628,6 +635,13 @@ class FederationCoordinator(Base):
     )
     coordinator_url = Column(String(512), nullable=True)
     coordinator_tls_cert_pem = Column(Text, nullable=True)
+    # Phase 12 strict trust: the coordinator's Ed25519 IDENTITY public key,
+    # pasted in OUT OF BAND by the operator before enrolling.  During the
+    # /enroll handshake the site requires the coordinator to prove possession
+    # of the matching private key over the exact TLS cert it fetched, before
+    # pinning that cert — defeating an enrollment-time MITM.  Strict-by-default:
+    # enrollment is refused when this is NULL.
+    coordinator_identity_public_key_pem = Column(Text, nullable=True)
     # The site_id the coordinator assigned us at enrollment time.
     site_id = Column(GUID(), nullable=True)
     # Our own TLS leaf cert that the coordinator pinned at enrollment.

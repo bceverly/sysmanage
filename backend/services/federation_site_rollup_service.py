@@ -167,3 +167,51 @@ def enqueue_compliance_rollups(session: Session) -> int:
         )
         queued += 1
     return queued
+
+
+HOST_ROLLUP_PAYLOAD_TYPE = "host_rollup"
+HOST_ROLLUP_DEDUP_KEY = "host_rollup:self"
+
+
+def collect_host_rollup(session: Session) -> Dict[str, Any]:
+    """Aggregate host-count snapshot for this site (total/active + breakdowns).
+
+    Feeds the coordinator's host-count *trend* charts (the per-tick current
+    count already rides on site_metadata; this is the time-series).
+    """
+    from backend.persistence.models.core import (
+        Host,
+    )  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
+
+    count_star = func.count()  # pylint: disable=not-callable
+    total = session.execute(select(count_star).select_from(Host)).scalar() or 0
+    active = (
+        session.execute(
+            select(count_star).select_from(Host).where(Host.active.is_(True))
+        ).scalar()
+        or 0
+    )
+    os_rows = session.execute(
+        select(Host.platform, count_star).select_from(Host).group_by(Host.platform)
+    ).all()
+    status_rows = session.execute(
+        select(Host.status, count_star).select_from(Host).group_by(Host.status)
+    ).all()
+    return {
+        "host_count": int(total),
+        "active_count": int(active),
+        "os_breakdown": {(p or "unknown"): int(c) for p, c in os_rows},
+        "status_breakdown": {(s or "unknown"): int(c) for s, c in status_rows},
+    }
+
+
+def enqueue_host_rollup(session: Session) -> Optional[Any]:
+    """Enqueue the host-count rollup snapshot if enrolled."""
+    if not coord_svc.is_enrolled(session):
+        return None
+    return sync_svc.enqueue(
+        session,
+        payload_type=HOST_ROLLUP_PAYLOAD_TYPE,
+        payload=collect_host_rollup(session),
+        dedup_key=HOST_ROLLUP_DEDUP_KEY,
+    )

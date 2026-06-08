@@ -77,6 +77,10 @@ export interface FederationEnrollSiteRequest {
   location_label?: string | null;
   sync_interval_seconds?: number;
   token_ttl_hours?: number;
+  /** The site's identity public key (PEM), exchanged out of band. Required
+   * for strict enrollment: the coordinator verifies the site's enrollment
+   * proof against it before pinning the site cert. */
+  site_identity_public_key_pem?: string;
 }
 
 /**

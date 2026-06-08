@@ -30,6 +30,7 @@ from backend.persistence.models.federation import (
     SINGLETON_FEDERATION_COORDINATOR_ID,
     FederationCoordinator,
 )
+from backend.services import federation_identity_service as identity_svc
 
 # ---------------------------------------------------------------------
 # Status constants (kept in lockstep with the site engine).
@@ -78,6 +79,14 @@ class InvalidCoordinatorStateError(FederationCoordinatorError, ValueError):
     """Raised when the requested transition isn't valid for the current
     ``enrollment_status``.  Distinct from ``LookupError`` because the
     site code typically wants to surface this as a 409 not a 404."""
+
+
+class CoordinatorIdentityProofError(FederationCoordinatorError, ValueError):
+    """Raised when the coordinator fails strict out-of-band identity
+    verification during enrollment — no coordinator identity key was
+    pre-registered on this site, or the coordinator's Ed25519 proof didn't
+    verify against it over the fetched TLS cert.  The site refuses to pin the
+    cert (the engine maps this to a 401)."""
 
 
 # ---------------------------------------------------------------------
@@ -168,6 +177,7 @@ def start_enrollment(
     coordinator_url: str,
     coordinator_tls_cert_pem: str,
     sync_interval_seconds: int = 300,
+    coordinator_identity_public_key_pem: Optional[str] = None,
 ) -> FederationCoordinator:
     """Begin an enrollment with the named coordinator.
 
@@ -176,6 +186,13 @@ def start_enrollment(
     token-exchange handshake against the coordinator happens at the
     engine layer; this helper just persists what the operator
     supplied.
+
+    ``coordinator_identity_public_key_pem`` is the coordinator's Ed25519
+    IDENTITY public key, exchanged OUT OF BAND and pasted in by the operator.
+    It is the anchor :func:`verify_coordinator_identity_proof` checks the
+    coordinator's enrollment proof against before the site pins the fetched
+    cert — closing the enrollment-time MITM.  Required for strict enrollment;
+    optional here only so a row can be staged before the key is supplied.
 
     Idempotent on the input — re-calling with the same coordinator
     URL is fine and just refreshes the cert.  But re-calling with a
@@ -189,6 +206,15 @@ def start_enrollment(
         raise ValueError("coordinator_tls_cert_pem is required")
     if sync_interval_seconds <= 0:
         raise ValueError("sync_interval_seconds must be > 0")
+    if coordinator_identity_public_key_pem:
+        # Fail fast on a malformed key rather than at the opaquer proof step.
+        try:
+            identity_svc.fingerprint_of_public_pem(coordinator_identity_public_key_pem)
+        except ValueError as exc:
+            raise ValueError(
+                "coordinator_identity_public_key_pem is not a valid Ed25519 "
+                "public key"
+            ) from exc
 
     coordinator_url = coordinator_url.strip()
     row = _get_or_create(session)
@@ -205,6 +231,8 @@ def start_enrollment(
 
     row.coordinator_url = coordinator_url
     row.coordinator_tls_cert_pem = coordinator_tls_cert_pem
+    if coordinator_identity_public_key_pem:
+        row.coordinator_identity_public_key_pem = coordinator_identity_public_key_pem
     row.sync_interval_seconds = sync_interval_seconds
     # Only flip status to ``pending`` when not already enrolled —
     # re-supplying the cert during an enrollment refresh shouldn't
@@ -212,6 +240,31 @@ def start_enrollment(
     if row.enrollment_status not in {STATUS_ENROLLED, STATUS_SUSPENDED}:
         row.enrollment_status = STATUS_PENDING
     return row
+
+
+def verify_coordinator_identity_proof(
+    session: Session,
+    *,
+    coordinator_tls_cert_pem: str,
+    identity_proof_b64: Optional[str],
+) -> bool:
+    """Strictly verify the coordinator's enrollment identity proof.
+
+    Returns ``True`` only when the coordinator's pre-registered (out-of-band)
+    identity key signed exactly ``coordinator_tls_cert_pem``.  ``False`` when no
+    coordinator identity key was registered on this site, the proof is missing,
+    or it doesn't verify — in which case the site engine must abort enrollment
+    and NOT pin the fetched cert.  The site engine calls this after fetching the
+    coordinator's cert + proof and before :func:`mark_enrolled`."""
+    row = get_coordinator(session)
+    if row is None or not row.coordinator_identity_public_key_pem:
+        return False
+    return identity_svc.verify_enrollment_proof(
+        role="coordinator",
+        tls_cert_pem=coordinator_tls_cert_pem,
+        signature_b64=identity_proof_b64 or "",
+        peer_identity_public_pem=row.coordinator_identity_public_key_pem,
+    )
 
 
 def mark_enrolled(

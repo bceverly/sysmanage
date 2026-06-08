@@ -2505,6 +2505,23 @@ under Py 3.14 / linux / x86_64 and dropped the `.so` under
 `storage/modules/federation_site_engine/0.1.0/linux/x86_64/3.14/`.
 All 3 smoke tests pass against the built artifact.
 
+**Status (12.2.C — site-side rollup producers + live-engine HTTP smoke test):** ✅ Landed (June 2026).
+`backend/services/federation_site_rollup_service.py` is the site-side
+counterpart to the coordinator's 12.1.D ingestion: `collect_/enqueue_`
+producers for the **vulnerability** rollup (severity counts + affected
+hosts), per-baseline **compliance** rollups (latest scan per host/profile),
+and the **host-count** rollup (total/active + os/status breakdowns, feeding
+the coordinator's host-count trend charts). Each is a no-op until the site
+is enrolled and has data, and all three are enqueued (never direct-called)
+by the engine's `_refresh_rollups_once` tick. `tests/services/test_federation_site_engine_http_smoke.py`
+loads the compiled `.so` and drives the inbound policy/command routes over
+real HTTP under the `_cython_compat` shim — it **caught a real model-field
+skew** (`_received_policy_to_dict`/`_received_command_to_dict` referenced
+nonexistent attributes that would have 500'd every coordinator→site push);
+fixed in `federation_site_engine.pyx`. The symmetric controller-side smoke
+test (`test_federation_engine_http_smoke.py`) guards the `Header()`/`request:
+Request` Cython-introspection regressions on the ingest path.
+
 **Features:**
 - [x] Coordinator enrollment and registration (TLS pinning + site_id assignment via `federation_coordinator_service`)
 - [x] Upstream data sync OSS layer (`federation_sync_queue_service.enqueue` + `peek_batch` + `mark_sent` / `mark_failed`)
@@ -3112,7 +3129,7 @@ rather than blocking.
 - [x] Federation deployment and operations guide — June 2026: `docs/professional-plus/federation.html` "Deployment & Operations" section (roles, bring-up sequence, day-2 ops, troubleshooting); i18n keys seeded across all 15 locales
 - [x] Mutual TLS enrollment procedures documentation — June 2026: `federation.html` "Mutual-TLS Enrollment Procedures" section (certificate pinning, bidirectional bearer tokens, handshake flow, rotation/revocation)
 - [x] Integration tests for sync, dispatch, and offline resilience — June 2026: `tests/integration/test_federation_round_trip.py` (`@pytest.mark.integration`) exercises the full coordinator↔site round-trip across TWO real databases with a simulated wire transport — host/compliance/vuln rollups + metadata sync, command dispatch + result settle, outage→dedup-on-replay→recover, and the 12.5 secret-lease request path. (Stops short of two OS processes + the Pro+ engines/HTTP, which are thin tick-wrappers over these same services; called out in the file docstring.)
-- [ ] Performance tests validating 100-site / 1M-host target
+- [x] Performance tests validating 100-site / 1M-host target — June 2026: `tests/performance/test_federation_scale.py` (`@pytest.mark.performance`) seeds the coordinator host-directory tier at a configurable scale (tiny by default, cranks to 100 sites × 10,000 = 1M hosts via `FED_PERF_SITES`/`FED_PERF_HOSTS_PER_SITE`, Postgres via `FED_PERF_DB_URL`) and times the hot read paths (paginated/free-text `search_hosts`, `count_hosts`, status/country breakdowns, cross-site report); `FED_PERF_ASSERT_MS` turns it into a CI latency gate. Validated at 1M hosts: page-1 search 163 ms, breakdowns ≤131 ms, cross-site report (100 sites) 49 ms.
 
 ### Exit Criteria
 

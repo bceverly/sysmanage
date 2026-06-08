@@ -80,7 +80,7 @@ test("shows the identity key + peer section when the server is a site", async ()
   expect(await screen.findByTestId("federation-copy-key")).toBeTruthy();
   expect(screen.getByTestId("federation-peer-import")).toBeTruthy();
   // Empty-state for peers.
-  expect(screen.getByText(/No trusted peer keys yet/i)).toBeTruthy();
+  expect(screen.getByText(/No peer identity keys recorded yet/i)).toBeTruthy();
 });
 
 test("saving the role PUTs the selected value", async () => {
@@ -117,13 +117,19 @@ test("a site can enroll with a coordinator (POSTs url + token)", async () => {
     "federation-enroll-url",
   )) as HTMLInputElement;
   const token = screen.getByTestId("federation-enroll-token") as HTMLInputElement;
+  const coordKey = screen.getByTestId(
+    "federation-enroll-coord-identity-key",
+  ) as HTMLInputElement;
   fireEvent.change(url, { target: { value: "http://10.70.0.1:8080" } });
   fireEvent.change(token, { target: { value: "TOK123" } });
+  // Strict trust: the coordinator identity key is required before enrolling.
+  fireEvent.change(coordKey, { target: { value: "COORD-ID-PEM" } });
   fireEvent.click(screen.getByTestId("federation-enroll-submit"));
   await waitFor(() =>
     expect(m(api.post)).toHaveBeenCalledWith("/api/v1/federation/site/enroll", {
       coordinator_url: "http://10.70.0.1:8080",
       enrollment_token: "TOK123",
+      coordinator_identity_public_key_pem: "COORD-ID-PEM",
     }),
   );
 });

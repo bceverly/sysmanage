@@ -354,3 +354,139 @@ def remove_federation_peer(name: str) -> bool:
         return True
     except OSError:
         return False
+
+
+# ---------------------------------------------------------------------------
+# Ed25519 identity signing + enrollment proof (Phase 12 — strict out-of-band
+# trust).
+#
+# The pinned TLS cert closes the channel AFTER enrollment, but the cert itself
+# is fetched over the (possibly hostile) network DURING enrollment — classic
+# trust-on-first-use.  The enrollment token can't fix that: it's a bearer
+# secret that transits the same channel, so an active MITM relays it and pins
+# itself on both sides.
+#
+# The ed25519 identity key is the fix BECAUSE its private half never transits
+# the wire.  The operator exchanges the *public* identity key OUT OF BAND
+# (it's public — phone, wiki, config-mgmt — secrecy doesn't matter), the peer
+# signs the exact cert it's offering, and the receiver verifies that signature
+# against the pre-loaded public key before pinning.  A swapped cert fails; a
+# MITM without the private key can't forge the proof.  Bonus: because the proof
+# is over the cert *fingerprint*, rotating the TLS cert is just a re-sign by the
+# same identity — no re-exchange.
+# ---------------------------------------------------------------------------
+
+ENROLLMENT_PROOF_CONTEXT = "sysmanage-federation-enroll-v1"
+
+
+def _load_identity_private_key() -> Ed25519PrivateKey:
+    """Load (auto-creating if absent) this server's Ed25519 identity private key."""
+    ensure_federation_identity_keypair()
+    private_path = config_module.get_federation_identity_key_file()
+    with open(private_path, "rb") as fh:
+        key = serialization.load_pem_private_key(fh.read(), password=None)
+    if not isinstance(key, Ed25519PrivateKey):
+        raise ValueError("federation identity key is not an Ed25519 private key")
+    return key
+
+
+def tls_cert_fingerprint(cert_pem: str | bytes) -> str:
+    """SHA-256 hex of a PEM X.509 cert's DER bytes — the standard cert
+    fingerprint operators compare.  Raises ``ValueError`` on a non-cert."""
+    raw = cert_pem.encode("utf-8") if isinstance(cert_pem, str) else cert_pem
+    cert = x509.load_pem_x509_certificate(raw)
+    return hashlib.sha256(
+        cert.public_bytes(encoding=serialization.Encoding.DER)
+    ).hexdigest()
+
+
+def sign_with_identity_key(message: bytes) -> Optional[str]:
+    """Ed25519-sign ``message`` with this server's identity private key.
+
+    Returns base64, or ``None`` on any failure so a keygen/IO hiccup can't
+    wedge the caller — the *receiver* decides whether a missing proof is fatal
+    (in strict mode it is)."""
+    try:
+        key = _load_identity_private_key()
+        return base64.b64encode(key.sign(message)).decode("ascii")
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not sign with federation identity key", exc_info=True)
+        return None
+
+
+def verify_with_peer_identity_key(
+    message: bytes, signature_b64: str, peer_public_pem: str | bytes
+) -> bool:
+    """Verify an Ed25519 ``signature_b64`` over ``message`` against a peer's
+    out-of-band-exchanged identity public key.
+
+    Returns ``False`` (never raises) on a bad signature, non-Ed25519 key,
+    malformed PEM, or decode error — the caller turns that into a 401/400."""
+    if not signature_b64 or not peer_public_pem:
+        return False
+    try:
+        raw = (
+            peer_public_pem.encode("utf-8")
+            if isinstance(peer_public_pem, str)
+            else peer_public_pem
+        )
+        pub = serialization.load_pem_public_key(raw)
+        if not isinstance(pub, Ed25519PublicKey):
+            return False
+        pub.verify(base64.b64decode(signature_b64), message)
+        return True
+    except (InvalidSignature, ValueError, TypeError):
+        return False
+    except Exception:  # pylint: disable=broad-exception-caught
+        return False
+
+
+def enrollment_proof_message(*, role: str, tls_cert_pem: str | bytes) -> bytes:
+    """Canonical bytes a party signs to prove its out-of-band identity vouches
+    for the exact TLS cert it is presenting.
+
+    Bound to: a fixed context string (no cross-protocol signature reuse), the
+    signer's ``role`` ("coordinator" | "site", so a coordinator proof can't be
+    replayed as a site proof), and the SHA-256 fingerprint of the cert being
+    pinned.  Raises ``ValueError`` on a bad role or non-cert PEM."""
+    role_norm = (role or "").strip().lower()
+    if role_norm not in ("coordinator", "site"):
+        raise ValueError("role must be 'coordinator' or 'site'")
+    fingerprint = tls_cert_fingerprint(tls_cert_pem)
+    return f"{ENROLLMENT_PROOF_CONTEXT}|{role_norm}|{fingerprint}".encode("utf-8")
+
+
+def build_enrollment_proof(*, role: str, tls_cert_pem: str | bytes) -> Optional[str]:
+    """Sign the enrollment proof for our OWN TLS cert (the one the peer pins).
+
+    Returns base64 signature, or ``None`` if signing fails or the cert is
+    unparseable."""
+    try:
+        message = enrollment_proof_message(role=role, tls_cert_pem=tls_cert_pem)
+    except ValueError:
+        return None
+    return sign_with_identity_key(message)
+
+
+def verify_enrollment_proof(
+    *,
+    role: str,
+    tls_cert_pem: str | bytes,
+    signature_b64: str,
+    peer_identity_public_pem: str | bytes,
+) -> bool:
+    """Strictly verify a peer's enrollment proof.
+
+    Confirms the pre-loaded (out-of-band) ``peer_identity_public_pem`` signed
+    EXACTLY ``tls_cert_pem`` for the given ``role``.  Any missing input, a bad
+    cert, or a signature mismatch → ``False``.  This is the gate that turns
+    TOFU into authenticated pinning."""
+    if not (tls_cert_pem and signature_b64 and peer_identity_public_pem):
+        return False
+    try:
+        message = enrollment_proof_message(role=role, tls_cert_pem=tls_cert_pem)
+    except ValueError:
+        return False
+    return verify_with_peer_identity_key(
+        message, signature_b64, peer_identity_public_pem
+    )

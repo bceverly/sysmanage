@@ -22,6 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.persistence.db import Base
 from backend.services import federation_rollup_service as rsvc
 from backend.services import federation_site_service as ssvc
+from tests.federation_crypto import quick_enroll
 
 FEDERATION_TABLE_NAMES = [
     "federation_sites",
@@ -59,8 +60,7 @@ def session():
 def enrolled_site(session):
     """A site that's already finished enrollment — most rollup tests
     just want a parent row to point at."""
-    site, token = ssvc.create_site(session, name="Cleveland", url="https://a.x")
-    ssvc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="cert")
+    site = quick_enroll(session, name="Cleveland", url="https://a.x")
     session.commit()
     return site
 
@@ -125,8 +125,7 @@ class TestUpsertHostDirectory:
         import uuid
 
         # Second site.
-        other, t = ssvc.create_site(session, name="Pittsburgh", url="https://b.x")
-        ssvc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        other = quick_enroll(session, name="Pittsburgh", url="https://b.x")
         session.commit()
 
         host_id = uuid.uuid4()
@@ -553,8 +552,7 @@ class TestDashboardRollup:
 
 class TestCrossSiteReport:
     def _site(self, session, name):
-        site, token = ssvc.create_site(session, name=name, url=f"https://{name}.x")
-        ssvc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="c")
+        site = quick_enroll(session, name=name, url=f"https://{name}.x")
         session.commit()
         return site
 

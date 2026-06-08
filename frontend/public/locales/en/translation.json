@@ -2750,7 +2750,9 @@
       "syncIntervalSeconds": "Sync interval (seconds)",
       "title": "Enroll a federation site",
       "tokenInstructions": "Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "Site URL"
+      "url": "Site URL",
+      "siteIdentityKey": "Site identity public key (PEM)",
+      "siteIdentityKeyHelp": "Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
     },
     "enterpriseRequired": {
       "body": "Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
@@ -3077,7 +3079,7 @@
     "heading": "Federation Role",
     "identity": {
       "copyKey": "Copy Public Key",
-      "help": "Copy this public key and paste it into the peer's federation card so each side can pin the other's identity. The private key never leaves this server.",
+      "help": "Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server.",
       "pending": "Generating identity key…",
       "title": "This server's identity key"
     },
@@ -3089,11 +3091,12 @@
       "title": "Not federated"
     },
     "peers": {
-      "empty": "No trusted peer keys yet.",
+      "empty": "No peer identity keys recorded yet.",
+      "help": "Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
       "import": "Import Peer Key",
       "name": "Peer name",
       "pem": "Peer public key (PEM)",
-      "title": "Trusted peer keys"
+      "title": "Peer identity keys"
     },
     "removeError": "Could not remove the key.",
     "save": "Save Federation Role",
@@ -3113,7 +3116,9 @@
       "submit": "Enroll with coordinator",
       "submitting": "Enrolling…",
       "title": "Enroll with coordinator",
-      "token": "Enrollment token"
+      "token": "Enrollment token",
+      "coordIdentityKey": "Coordinator identity public key (PEM)",
+      "coordIdentityKeyHelp": "Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
     }
   }
 }

@@ -23,6 +23,7 @@ from backend.persistence.db import Base
 from backend.services import federation_host_directory_service as hsvc
 from backend.services import federation_rollup_service as rsvc
 from backend.services import federation_site_service as ssvc
+from tests.federation_crypto import quick_enroll
 
 FEDERATION_TABLE_NAMES = [
     "federation_sites",
@@ -57,8 +58,7 @@ def session():
 
 def _make_site(session, name):
     """Helper: enrolled site with one line."""
-    site, token = ssvc.create_site(session, name=name, url=f"https://{name}.x")
-    ssvc.complete_enrollment(session, plaintext_token=token, tls_cert_pem="cert")
+    site = quick_enroll(session, name=name, url=f"https://{name}.x")
     session.commit()
     return site
 

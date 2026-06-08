@@ -722,6 +722,8 @@ def test_db():
         location_label = Column(String(255), nullable=True)
         url = Column(String(512), nullable=False)
         tls_cert_pem = Column(Text, nullable=True)
+        # Phase 12 strict trust — out-of-band identity-key pinning.
+        site_identity_public_key_pem = Column(Text, nullable=True)
         enrollment_token_hash = Column(String(128), nullable=True)
         enrollment_token_expires_at = Column(DateTime, nullable=True)
         enrolled_at = Column(DateTime, nullable=True)

@@ -35,6 +35,7 @@ from backend.persistence.models.federation import (
     FederationSite,
     FederationSiteSyncEvent,
 )
+from backend.services import federation_identity_service as identity_svc
 
 # Per-site cap and age cap for the sync-event timeline series (Phase 12.2).
 # Mirrors the rollup-retention defaults: keep recent points for the graph,
@@ -108,6 +109,14 @@ class InvalidSiteStateError(FederationSiteError, ValueError):
     """Raised when a state transition isn't valid (e.g. resuming an
     already-enrolled site, suspending a removed site).  Distinct from
     ``SiteNotFoundError`` so the router can map this to 409 vs 404."""
+
+
+class IdentityProofError(FederationSiteError, ValueError):
+    """Raised when strict out-of-band identity verification fails at
+    ``complete_enrollment`` — the site presented no proof, the row has no
+    pre-registered identity key, or the Ed25519 proof didn't verify against
+    that key over the presented TLS cert.  This is the gate that turns
+    trust-on-first-use into authenticated pinning; the router maps it to 401."""
 
 
 # ---------------------------------------------------------------------
@@ -279,6 +288,7 @@ def create_site(
     geo_country_code: Optional[str] = None,
     actor_userid: Optional[str] = None,
     token_ttl_hours: int = DEFAULT_ENROLLMENT_TOKEN_TTL_HOURS,
+    site_identity_public_key_pem: Optional[str] = None,
 ) -> Tuple[FederationSite, str]:
     """Register a new site in the coordinator registry.
 
@@ -286,6 +296,13 @@ def create_site(
     hash stored on the row), records its expiry timestamp, sets
     ``status='pending'`` until the site completes enrollment, and
     writes a ``site_enrollment_started`` audit entry.
+
+    ``site_identity_public_key_pem`` is the site's Ed25519 IDENTITY public
+    key, exchanged OUT OF BAND and pasted in by the operator.  It is stored
+    on the row and is the anchor :func:`complete_enrollment` verifies the
+    site's enrollment proof against — without it, the site cannot complete
+    strict enrollment.  Optional here (a row can be pre-created and the key
+    added later) but required to actually enroll; the UI makes it mandatory.
 
     Returns ``(site, plaintext_enrollment_token)``.  The plaintext is
     delivered to the operator out-of-band (UI download, CLI output);
@@ -297,6 +314,15 @@ def create_site(
         raise ValueError("Site url is required")
     if token_ttl_hours <= 0:
         raise ValueError("token_ttl_hours must be > 0")
+    if site_identity_public_key_pem:
+        # Fail fast on a malformed key at registration rather than at the
+        # opaquer enrollment-proof step later.
+        try:
+            identity_svc.fingerprint_of_public_pem(site_identity_public_key_pem)
+        except ValueError as exc:
+            raise ValueError(
+                "site_identity_public_key_pem is not a valid Ed25519 public key"
+            ) from exc
 
     # Uniqueness check on name (across non-removed sites).  The
     # ``unique=True`` constraint on the column catches collisions at
@@ -327,6 +353,7 @@ def create_site(
         geo_latitude=geo_latitude,
         geo_longitude=geo_longitude,
         geo_country_code=geo_country_code,
+        site_identity_public_key_pem=site_identity_public_key_pem,
     )
     session.add(site)
     session.flush()  # populate ``site.id`` for the audit row's FK
@@ -351,6 +378,7 @@ def complete_enrollment(
     *,
     plaintext_token: str,
     tls_cert_pem: str,
+    identity_proof_b64: Optional[str] = None,
     actor_userid: Optional[str] = None,
 ) -> Tuple[FederationSite, str, str]:
     """Finalise a pending site enrollment.
@@ -414,6 +442,29 @@ def complete_enrollment(
         raise EnrollmentTokenExpiredError(
             f"Enrollment token for site '{site.name}' expired at "
             f"{site.enrollment_token_expires_at.isoformat()}"
+        )
+
+    # Strict out-of-band identity verification (Phase 12 strict trust).
+    # The valid token only proves the caller holds a bearer secret that
+    # transited the network — an active MITM has it too.  Require the site to
+    # additionally prove that the Ed25519 identity key the operator registered
+    # OUT OF BAND signed the exact TLS cert it is presenting.  A swapped cert,
+    # a missing/forged proof, or a row with no registered key all refuse here,
+    # so the coordinator never pins a MITM's cert.
+    if not site.site_identity_public_key_pem:
+        raise IdentityProofError(
+            f"Site '{site.name}' has no registered identity key; re-create the "
+            "site with its Ed25519 identity public key before enrolling."
+        )
+    if not identity_svc.verify_enrollment_proof(
+        role="site",
+        tls_cert_pem=tls_cert_pem,
+        signature_b64=identity_proof_b64 or "",
+        peer_identity_public_pem=site.site_identity_public_key_pem,
+    ):
+        raise IdentityProofError(
+            f"Site '{site.name}' enrollment identity proof failed verification "
+            "against its registered identity key."
         )
 
     site.tls_cert_pem = tls_cert_pem

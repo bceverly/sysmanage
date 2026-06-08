@@ -59,6 +59,15 @@ public_router = APIRouter(
 
 class TlsCertResponse(BaseModel):
     cert_pem: str
+    # Phase 12 strict trust: an Ed25519 signature, made with this server's
+    # IDENTITY private key, over the fingerprint of the cert above (role-bound).
+    # The enrolling site verifies it against the coordinator identity key it was
+    # given OUT OF BAND before pinning ``cert_pem`` — so a MITM that swaps the
+    # cert here can't forge a matching proof.  ``identity_fingerprint`` lets the
+    # operator eyeball-match the key out of band.
+    identity_proof: str | None = None
+    identity_fingerprint: str | None = None
+    identity_role: str | None = None
 
 
 @public_router.get("/tls-cert", response_model=TlsCertResponse)
@@ -66,7 +75,9 @@ def get_tls_cert():
     """Return this server's federation TLS certificate (public, unauthenticated).
 
     Auto-creates it on first read.  An enrolling site GETs this from its
-    coordinator to pin the coordinator's cert for the mutual-TLS handshake.
+    coordinator to pin the coordinator's cert for the mutual-TLS handshake,
+    and uses ``identity_proof`` to authenticate that cert against the
+    out-of-band coordinator identity key before trusting it.
     """
     pem = federation_identity_service.get_federation_tls_cert_pem()
     if not pem:
@@ -74,7 +85,26 @@ def get_tls_cert():
             status_code=500,
             detail=_("Could not load or generate the federation TLS certificate."),
         )
-    return TlsCertResponse(cert_pem=pem)
+    # Sign the proof with whatever federation role this server is configured as
+    # (the verifier checks the role it expects, e.g. a site expects
+    # "coordinator").  Defaults to "coordinator" so a server that serves this
+    # endpoint to enrolling sites produces a verifiable proof even before its
+    # role row is populated.
+    from backend.config import config as config_module  # noqa: PLC0415
+
+    role = config_module.get_federation_role() or "coordinator"
+    if role not in ("coordinator", "site"):
+        role = "coordinator"
+    return TlsCertResponse(
+        cert_pem=pem,
+        identity_proof=federation_identity_service.build_enrollment_proof(
+            role=role, tls_cert_pem=pem
+        ),
+        identity_fingerprint=(
+            federation_identity_service.get_federation_identity_public_key_fingerprint()
+        ),
+        identity_role=role,
+    )
 
 
 class IdentityKeyResponse(BaseModel):

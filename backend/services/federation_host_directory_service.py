@@ -29,7 +29,7 @@ Architectural constraint (see ROADMAP §12 "Data Architecture"):
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List, Optional, Tuple
 from uuid import UUID
 
@@ -326,3 +326,27 @@ def country_breakdown(
         key = cc or ""
         breakdown[key] = breakdown.get(key, 0) + int(count)
     return breakdown
+
+
+# ---------------------------------------------------------------------------
+# Write side — re-exported from ``federation_rollup_service``, which owns the
+# canonical host-directory upsert/get (with fqdn + site validation).  The
+# Pro+ controller engine imports THIS module as ``host_dir_svc`` and calls
+# ``upsert_host_directory_entry`` / ``get_host_directory_entry`` on it during
+# ``ingest_host_directory``; surface them here so that resolves without a
+# second implementation that could drift.
+# ---------------------------------------------------------------------------
+
+from backend.services.federation_rollup_service import (  # noqa: E402  # pylint: disable=wrong-import-position
+    get_host_directory_entry,
+    upsert_host_directory_entry,
+)
+
+__all__ = [  # noqa: F822  (names defined above + re-exported here)
+    "search_hosts",
+    "count_hosts",
+    "status_breakdown",
+    "country_breakdown",
+    "upsert_host_directory_entry",
+    "get_host_directory_entry",
+]

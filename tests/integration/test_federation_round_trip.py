@@ -33,6 +33,7 @@ from backend.services import federation_rollup_service as rollup_svc
 from backend.services import federation_secret_lease_service as lease_svc
 from backend.services import federation_secret_request_service as secret_req_svc
 from backend.services import federation_site_service as site_svc
+from tests.federation_crypto import enroll_site
 from backend.services import federation_sync_queue_service as sync_svc
 
 pytestmark = pytest.mark.integration
@@ -65,10 +66,7 @@ class FederationCluster:
 
     def enroll(self, name="alpha", url="https://alpha.example.com"):
         # Coordinator side: register + complete enrollment.
-        registered, token = site_svc.create_site(self.coord, name=name, url=url)
-        site_svc.complete_enrollment(
-            self.coord, plaintext_token=token, tls_cert_pem="site-cert"
-        )
+        registered, _sync, _outbound = enroll_site(self.coord, name=name, url=url)
         self.coord.commit()
         self.site_id = registered.id
         # Site side: point at the coordinator + record the assigned id.

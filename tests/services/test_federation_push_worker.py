@@ -37,6 +37,7 @@ from backend.persistence.models.federation import (
 from backend.services import federation_dispatch_service as dispatch_svc
 from backend.services import federation_policy_service as policy_svc
 from backend.services import federation_site_service as site_svc
+from tests.federation_crypto import enroll_site
 
 
 def _candidate_so_paths():
@@ -146,11 +147,7 @@ def _seed_enrolled_site(fed_db, name="alpha", url="https://site-alpha.example.co
     """Create + enrol a single site row.  Returns ``(site_id, outbound_bearer)``."""
     Session = sessionmaker(bind=fed_db, expire_on_commit=False)
     with Session() as sess:
-        site, token = site_svc.create_site(sess, name=name, url=url)
-        sess.commit()
-        site_obj, _sync_bearer, coord_outbound = site_svc.complete_enrollment(
-            sess, plaintext_token=token, tls_cert_pem="cert"
-        )
+        site_obj, _sync_bearer, coord_outbound = enroll_site(sess, name=name, url=url)
         sess.commit()
         return site_obj.id, coord_outbound
 
@@ -353,12 +350,8 @@ async def test_push_once_skips_sites_without_outbound_bearer(engine, fed_db, db_
     rather than 500'd on with a missing-creds error."""
     Session = sessionmaker(bind=fed_db, expire_on_commit=False)
     with Session() as sess:
-        site, token = site_svc.create_site(
+        site_obj, _b, _c = enroll_site(
             sess, name="legacy", url="https://legacy.example.com"
-        )
-        sess.commit()
-        site_obj, _b, _c = site_svc.complete_enrollment(
-            sess, plaintext_token=token, tls_cert_pem="cert"
         )
         # Simulate a legacy row by NULLing the outbound bearer.
         site_obj.coordinator_outbound_bearer_token = None

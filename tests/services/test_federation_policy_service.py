@@ -22,6 +22,7 @@ from backend.persistence.db import Base
 from backend.persistence.models.federation import FederationAuditLog
 from backend.services import federation_policy_service as psvc
 from backend.services import federation_site_service as ssvc
+from tests.federation_crypto import quick_enroll
 
 FEDERATION_TABLE_NAMES = [
     "federation_sites",
@@ -56,8 +57,7 @@ def session():
 
 @pytest.fixture
 def enrolled_site(session):
-    site, t = ssvc.create_site(session, name="A", url="https://a.x")
-    ssvc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+    site = quick_enroll(session, name="A", url="https://a.x")
     session.commit()
     return site
 
@@ -248,8 +248,7 @@ class TestDeactivate:
 
 class TestAssignment:
     def test_assigns_to_multiple_sites(self, session, enrolled_site):
-        s2, t = ssvc.create_site(session, name="B", url="https://b.x")
-        ssvc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        s2 = quick_enroll(session, name="B", url="https://b.x")
         session.commit()
         p = psvc.create_policy(session, policy_type="x", name="y", definition={})
         psvc.assign_policy_to_sites(session, p.id, [enrolled_site.id, s2.id])

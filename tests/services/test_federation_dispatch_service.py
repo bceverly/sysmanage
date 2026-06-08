@@ -21,6 +21,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.persistence.db import Base
 from backend.services import federation_dispatch_service as dsvc
 from backend.services import federation_site_service as ssvc
+from tests.federation_crypto import quick_enroll
 
 FEDERATION_TABLE_NAMES = [
     "federation_sites",
@@ -55,8 +56,7 @@ def session():
 
 @pytest.fixture
 def enrolled_site(session):
-    site, t = ssvc.create_site(session, name="A", url="https://a.x")
-    ssvc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+    site = quick_enroll(session, name="A", url="https://a.x")
     session.commit()
     return site
 
@@ -161,8 +161,7 @@ class TestListing:
         assert rows[1].id == a.id
 
     def test_filter_by_site(self, session, enrolled_site):
-        other, t = ssvc.create_site(session, name="Other", url="https://o.x")
-        ssvc.complete_enrollment(session, plaintext_token=t, tls_cert_pem="c")
+        other = quick_enroll(session, name="Other", url="https://o.x")
         session.commit()
         dsvc.dispatch_command(
             session, command_type="x", target_site_id=enrolled_site.id

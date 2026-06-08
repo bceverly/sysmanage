@@ -131,8 +131,28 @@ class TestComplianceRollup:
         assert roll["hosts_noncompliant"] == 1  # host2
 
 
+class TestHostRollup:
+    def test_counts_total_active_and_breakdowns(self, session):
+        from backend.persistence.models.core import Host
+
+        session.add_all(
+            [
+                Host(active=True, fqdn="a", platform="Linux", status="up"),
+                Host(active=True, fqdn="b", platform="Linux", status="down"),
+                Host(active=False, fqdn="c", platform="Windows", status="up"),
+            ]
+        )
+        session.commit()
+        roll = rsvc.collect_host_rollup(session)
+        assert roll["host_count"] == 3
+        assert roll["active_count"] == 2
+        assert roll["os_breakdown"] == {"Linux": 2, "Windows": 1}
+        assert roll["status_breakdown"] == {"up": 2, "down": 1}
+
+
 class TestEnqueue:
     def test_noop_when_unenrolled(self, session):
         assert rsvc.enqueue_vulnerability_rollup(session) is None
         assert rsvc.enqueue_compliance_rollups(session) == 0
+        assert rsvc.enqueue_host_rollup(session) is None
         assert qsvc.queue_depth(session) == 0

@@ -80,6 +80,9 @@ const FederationRoleCard: React.FC = () => {
   // Site-side enrollment: only shown when this server's role is "site".
   const [coordUrl, setCoordUrl] = useState("");
   const [enrollToken, setEnrollToken] = useState("");
+  // Strict trust: the coordinator's identity public key, obtained OUT OF BAND
+  // and pasted here so this site can authenticate the coordinator's cert.
+  const [coordIdentityKey, setCoordIdentityKey] = useState("");
   const [enrolling, setEnrolling] = useState(false);
   const [enrollStatus, setEnrollStatus] = useState<string | null>(null);
   const [enrollCoordUrl, setEnrollCoordUrl] = useState<string | null>(null);
@@ -193,6 +196,7 @@ const FederationRoleCard: React.FC = () => {
       await axiosInstance.post(ENROLL_URL, {
         coordinator_url: coordUrl.trim(),
         enrollment_token: enrollToken.trim(),
+        coordinator_identity_public_key_pem: coordIdentityKey.trim(),
       });
       setEnrollToken("");
       await fetchEnrollmentStatus();
@@ -349,7 +353,7 @@ const FederationRoleCard: React.FC = () => {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {t(
                 "federationRole.identity.help",
-                "Copy this public key and paste it into the peer's federation card so each side can pin the other's identity. The private key never leaves this server.",
+                "Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server.",
               )}
             </Typography>
             {key ? (
@@ -395,7 +399,13 @@ const FederationRoleCard: React.FC = () => {
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle2" gutterBottom>
-              {t("federationRole.peers.title", "Trusted peer keys")}
+              {t("federationRole.peers.title", "Peer identity keys")}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              {t(
+                "federationRole.peers.help",
+                "Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
+              )}
             </Typography>
             <List dense data-testid="federation-peer-list">
               {peers.map((p) => (
@@ -420,7 +430,7 @@ const FederationRoleCard: React.FC = () => {
               ))}
               {peers.length === 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
-                  {t("federationRole.peers.empty", "No trusted peer keys yet.")}
+                  {t("federationRole.peers.empty", "No peer identity keys recorded yet.")}
                 </Typography>
               )}
             </List>
@@ -520,10 +530,37 @@ const FederationRoleCard: React.FC = () => {
                     htmlInput: { "data-testid": "federation-enroll-token" },
                   }}
                 />
+                <TextField
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  label={t(
+                    "federationRole.enroll.coordIdentityKey",
+                    "Coordinator identity public key (PEM)",
+                  )}
+                  helperText={t(
+                    "federationRole.enroll.coordIdentityKeyHelp",
+                    "Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle.",
+                  )}
+                  value={coordIdentityKey}
+                  onChange={(e) => setCoordIdentityKey(e.target.value)}
+                  sx={{ mb: 1 }}
+                  slotProps={{
+                    htmlInput: {
+                      "data-testid": "federation-enroll-coord-identity-key",
+                    },
+                  }}
+                />
                 <Button
                   variant="contained"
                   onClick={handleEnroll}
-                  disabled={enrolling || !coordUrl.trim() || !enrollToken.trim()}
+                  disabled={
+                    enrolling ||
+                    !coordUrl.trim() ||
+                    !enrollToken.trim() ||
+                    !coordIdentityKey.trim()
+                  }
                   startIcon={
                     enrolling ? <CircularProgress size={16} /> : undefined
                   }
