@@ -84,9 +84,16 @@ def _set_in(node, path, value):
     node[path[-1]] = value
 
 
+def _endpoint_display() -> tuple[str, str]:
+    """Operator-facing (base, model) — reads NO secret, so it is safe to print."""
+    return (
+        os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/"),
+        os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct"),
+    )
+
+
 def _endpoint() -> tuple[str, str, str]:
-    base = os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/")
-    model = os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct")
+    base, model = _endpoint_display()
     key = os.environ.get("I18N_LLM_API_KEY", "local")
     return base, model, key
 
@@ -210,7 +217,7 @@ def main() -> int:
     else:
         langs = [args.lang]
 
-    base, model, _key = _endpoint()
+    base, model = _endpoint_display()
     print(f"Endpoint: {base}  model: {model}  (dry-run={args.dry_run})")
     grand = {"translated": 0, "skipped": 0, "todo": 0}
     for lang in langs:

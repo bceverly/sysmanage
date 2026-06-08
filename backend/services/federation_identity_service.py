@@ -40,6 +40,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 from cryptography.x509.oid import NameOID
 
 from backend.config import config as config_module
+from backend.utils.verbosity_logger import sanitize_log
 
 # Federation TLS cert validity.  Long-lived (10y) — it's a pinned, self-
 # signed identity cert, not a CA-chained web cert, so rotation is a
@@ -319,8 +320,9 @@ def _keyring_key_path(keyring_dir: str, name: str) -> str:
     ``ValueError`` if the resolved path's parent isn't the keyring dir.
     """
     slug = _safe_key_name(name)
-    resolved = os.path.realpath(os.path.join(keyring_dir, slug + ".pub"))
-    if os.path.dirname(resolved) != os.path.realpath(keyring_dir):
+    base = os.path.realpath(keyring_dir)
+    resolved = os.path.realpath(os.path.join(base, slug + ".pub"))
+    if not resolved.startswith(base + os.sep):
         raise ValueError("resolved keyring path escapes the keyring directory")
     return resolved
 
@@ -364,7 +366,11 @@ def import_federation_peer(name: str, public_key_pem: str) -> dict:
     # path separators / control characters, so it's safe to log + return.
     slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)
-    logger.info("Imported federation peer key '%s' (fingerprint %s)", slug, fingerprint)
+    logger.info(
+        "Imported federation peer key '%s' (fingerprint %s)",
+        sanitize_log(slug),
+        fingerprint,
+    )
     return {"name": slug, "fingerprint": fingerprint}
 
 
@@ -378,7 +384,7 @@ def remove_federation_peer(name: str) -> bool:
     slug = os.path.splitext(os.path.basename(path))[0]
     try:
         os.unlink(path)
-        logger.info("Removed federation peer key '%s'", slug)
+        logger.info("Removed federation peer key '%s'", sanitize_log(slug))
         return True
     except OSError:
         return False

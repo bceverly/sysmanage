@@ -670,7 +670,7 @@ def _assert_within_iso_dir(path: str) -> str:
     form the path-traversal scanners recognise."""
     root = os.path.realpath(_ISO_OUTPUT_DIR)
     resolved = os.path.realpath(path)
-    if resolved != root and not resolved.startswith(root + os.sep):
+    if not resolved.startswith(root + os.sep):
         raise HTTPException(status_code=404, detail=_("ISO file not found."))
     return resolved
 
@@ -704,6 +704,9 @@ def _iso_file_response(
             friendly = f"{run.iso_label}-{run.id}.iso"
     else:
         friendly = f"{run.iso_label}-{run.id}.iso"
+    # Path containment enforced by _assert_within_iso_dir above; the served path
+    # is always a glob result under the ISO output dir.
+    # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
     chosen = _assert_within_iso_dir(chosen)
     return FileResponse(
         chosen,
@@ -881,6 +884,9 @@ async def download_manifest_iso(
             status_code=410,
             detail=_("ISO file is no longer on disk: %s") % (manifest.iso_path or ""),
         )
+    # Path containment enforced by _assert_within_iso_dir above; iso_path is a
+    # server-written column always under the ISO output dir.
+    # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
     safe_iso_path = _assert_within_iso_dir(manifest.iso_path)
     return FileResponse(
         safe_iso_path,

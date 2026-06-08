@@ -31,6 +31,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 )
 
 from backend.config import config as config_module
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -191,8 +192,9 @@ def _keyring_key_path(keyring_dir: str, name: str) -> str:
     path's parent isn't the keyring dir.
     """
     slug = _safe_key_name(name)
-    resolved = os.path.realpath(os.path.join(keyring_dir, slug + ".pub"))
-    if os.path.dirname(resolved) != os.path.realpath(keyring_dir):
+    base = os.path.realpath(keyring_dir)
+    resolved = os.path.realpath(os.path.join(base, slug + ".pub"))
+    if not resolved.startswith(base + os.sep):
         raise ValueError("resolved keyring path escapes the keyring directory")
     return resolved
 
@@ -242,7 +244,9 @@ def import_trusted_collector(name: str, public_key_pem: str) -> dict:
     slug = os.path.splitext(os.path.basename(path))[0]
     _atomic_write(path, canonical, 0o644)
     logger.info(
-        "Imported trusted collector key '%s' (fingerprint %s)", slug, fingerprint
+        "Imported trusted collector key '%s' (fingerprint %s)",
+        sanitize_log(slug),
+        fingerprint,
     )
     return {"name": slug, "fingerprint": fingerprint}
 
@@ -258,7 +262,7 @@ def remove_trusted_collector(name: str) -> bool:
     slug = os.path.splitext(os.path.basename(path))[0]
     try:
         os.unlink(path)
-        logger.info("Removed trusted collector key '%s'", slug)
+        logger.info("Removed trusted collector key '%s'", sanitize_log(slug))
         return True
     except OSError:
         return False

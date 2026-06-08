@@ -398,10 +398,16 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
     """Extract ``tar`` into ``extract_dir`` with path-traversal AND total-size
     guards.  Returns False (without extracting) on a suspicious member."""
     base = Path(extract_dir).resolve()
+    base_prefix = str(base) + os.sep
     total = 0
+    # Extract member-by-member, validating EACH one's resolved path is contained
+    # in ``extract_dir`` immediately before extracting it (and refusing regular
+    # files past the cumulative size cap).  No ``extractall`` and no
+    # version-specific ``filter=`` kwarg — the per-member containment check
+    # guards every write directly.
     for member in tar.getmembers():
-        target = (base / member.name).resolve()
-        if not str(target).startswith(str(base) + os.sep):
+        target = os.path.realpath(os.path.join(str(base), member.name))
+        if target != str(base) and not target.startswith(base_prefix):
             logger.warning(
                 "MaxMind tarball contained suspicious path %s; aborting", member.name
             )
@@ -413,15 +419,7 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
                 _MAX_EXTRACT_BYTES,
             )
             return False
-    # Defence in depth: every member's path + cumulative size were validated
-    # above, AND the stdlib ``data`` filter (backported to 3.9.17+/3.10.12+/
-    # 3.11.4+, native in 3.12+) independently rejects absolute paths, ``..``
-    # traversal, and special/device files at extraction time.  It is applied via
-    # the ``extraction_filter`` ATTRIBUTE rather than the ``filter=`` kwarg so
-    # the call stays signature-compatible on every supported runtime.
-    if hasattr(tarfile, "data_filter"):
-        tar.extraction_filter = tarfile.data_filter
-    tar.extractall(extract_dir)  # nosec B202  # path+size validated + data-filtered
+        tar.extract(member, extract_dir)  # nosec B202  # path validated just above
     return True
 
 

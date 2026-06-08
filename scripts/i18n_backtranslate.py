@@ -52,9 +52,16 @@ LANG_NAMES = {
 }
 
 
+def _endpoint_display():
+    """Operator-facing (base, model) — reads NO secret, so it is safe to print."""
+    return (
+        os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/"),
+        os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct"),
+    )
+
+
 def _endpoint():
-    base = os.environ.get("I18N_LLM_BASE_URL", "http://localhost:11434/v1").rstrip("/")
-    model = os.environ.get("I18N_LLM_MODEL", "qwen2.5:32b-instruct")
+    base, model = _endpoint_display()
     key = os.environ.get("I18N_LLM_API_KEY", "local")
     return base, model, key
 
@@ -163,7 +170,7 @@ def main() -> int:
         if args.lang == "all"
         else [args.lang]
     )
-    base, model, _ = _endpoint()
+    base, model = _endpoint_display()
     print(f"Back-translation QA via {base} ({model}); threshold={args.threshold}/5\n")
     total_flagged = 0
     for lang in langs:
