@@ -29,12 +29,22 @@ export async function copyToClipboard(value: string): Promise<boolean> {
   return legacyCopy(value);
 }
 
+// `document.execCommand('copy')` is the ONLY clipboard write available in a
+// non-secure context (plain HTTP by IP), where `navigator.clipboard` is
+// undefined — so the deprecated API is a deliberate, last-resort fallback.
+// Reference it through a local interface (without the lib's `@deprecated` tag)
+// so it doesn't trip deprecation lint while remaining typed.
+interface LegacyClipboardDocument {
+  body: HTMLElement | null;
+  execCommand(commandId: string): boolean;
+}
+
 function legacyCopy(value: string): boolean {
-  const doc = globalThis.document;
+  const doc = globalThis.document as unknown as LegacyClipboardDocument | undefined;
   if (!doc?.body || typeof doc.execCommand !== "function") {
     return false;
   }
-  const textarea = doc.createElement("textarea");
+  const textarea = globalThis.document.createElement("textarea");
   textarea.value = value;
   // Keep it off-screen so there's no scroll jump or mobile zoom on focus.
   textarea.style.position = "fixed";
@@ -50,6 +60,6 @@ function legacyCopy(value: string): boolean {
   } catch {
     return false;
   } finally {
-    doc.body.removeChild(textarea);
+    textarea.remove();
   }
 }

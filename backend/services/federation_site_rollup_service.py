@@ -41,7 +41,7 @@ def collect_vulnerability_rollup(session: Session) -> Optional[Dict[str, Any]]:
         HostVulnerabilityScan,
     )
 
-    counts = {sev: 0 for sev in _SEVERITIES}
+    counts = dict.fromkeys(_SEVERITIES, 0)
     total = 0
     severity_count = func.count()  # pylint: disable=not-callable
     for severity, num in session.execute(

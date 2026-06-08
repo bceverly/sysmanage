@@ -26,7 +26,7 @@ from backend.services import federation_identity_service
 logger = logging.getLogger(__name__)
 
 
-async def federation_request(request: Request) -> Request:
+def federation_request(request: Request) -> Request:
     """Pure-Python FastAPI dependency that simply returns the live Request.
 
     The Pro+ federation engines are Cython-compiled, and FastAPI CANNOT

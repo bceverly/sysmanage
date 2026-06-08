@@ -511,7 +511,7 @@ const FederationRoleCard: React.FC = () => {
                   size="small"
                   fullWidth
                   label={t("federationRole.enroll.coordUrl", "Coordinator URL")}
-                  placeholder="http://10.70.0.1:8080"
+                  placeholder="https://coordinator.example.com:8080"
                   value={coordUrl}
                   onChange={(e) => setCoordUrl(e.target.value)}
                   sx={{ mb: 1 }}
