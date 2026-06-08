@@ -1376,11 +1376,17 @@ jobs:
         pkill -f "uvicorn.*8001" || true
         pkill -f "serve.*3001" || true
 
-  # Job 7: SonarCloud Analysis (runs after all other jobs succeed)
+  # Job 7: SonarCloud Analysis (runs after the other jobs, but NOT gated on
+  # their success).  ``needs`` only orders it last; ``if: !cancelled()`` lets
+  # the scan run even when an upstream job failed, so a single flaky test no
+  # longer leaves sonarcloud.io (and the README badges) stale.  The job is
+  # self-contained — it regenerates its own backend + frontend coverage — so it
+  # doesn't depend on the other jobs' artifacts.
   sonarcloud:
     name: SonarCloud Code Analysis
     runs-on: ubuntu-latest
-    needs: [test-backend, lint-backend, test-frontend, build, ui-tests, performance-tests]  # Only runs when all jobs succeed
+    needs: [test-backend, lint-backend, test-frontend, build, ui-tests, performance-tests]
+    if: ${{ !cancelled() }}
     permissions:
       contents: read
 
