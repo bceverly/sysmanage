@@ -6701,6 +6701,7 @@ const HostDetail = () => { // NOSONAR
                                         onClick={handleRequestDiagnostics}
                                         disabled={diagnosticsLoading}
                                         color="primary"
+                                        data-testid="request-host-data-button"
                                     >
                                         {diagnosticsLoading
                                             ? t('hostDetail.requestingDiagnostics', 'Requesting...')

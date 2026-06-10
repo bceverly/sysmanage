@@ -161,7 +161,10 @@ def ensure_federation_tls_cert() -> Tuple[str, str]:
 
     logger.info("Generating federation TLS certificate at %s", cert_path)
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    common_name = socket.gethostname() or "sysmanage-federation"
+    # X.509 CommonName is capped at 64 chars; CI/cloud hostnames and long FQDNs
+    # can exceed that (and would raise ValueError).  The cert is pinned by
+    # fingerprint at enrollment, not by CN, so truncating is purely cosmetic.
+    common_name = (socket.gethostname() or "sysmanage-federation")[:64]
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, common_name)])
     now = datetime.datetime.now(datetime.timezone.utc)
     cert = (

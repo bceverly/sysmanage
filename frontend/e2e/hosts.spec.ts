@@ -232,19 +232,17 @@ test.describe('Host Actions', () => {
       return;
     }
 
-    // Anchor on the host-detail "Request Host Data" button (i18n key
-    // hostDetail.requestHostData).  The earlier locator was
-    // ``getByRole('button', { name: /refresh/i }).first()`` which is
-    // too broad — it also matched the global "Broadcast Refresh"
-    // button on the /hosts list page (whose Tooltip title
-    // "Send a refresh-inventory broadcast..." hoists into the
-    // accessible name) and the per-section "Refresh" buttons on
-    // host-detail tabs (certificates, child hosts).  When the page
-    // re-rendered between Playwright's stability check and click,
-    // the matched DOM node detached and the click retried until the
-    // 60s timeout.  Anchoring on the exact button text removes both
-    // the ambiguity and the re-render race.
-    const refreshButton = page.getByRole('button', { name: 'Request Host Data' });
+    // Anchor on the host-detail diagnostics button via its stable
+    // ``data-testid`` (request-host-data-button), NOT its accessible
+    // name.  The label toggles between "Request Host Data" and
+    // "Requesting..." (i18n keys hostDetail.requestHostData /
+    // requestingDiagnostics) as ``diagnosticsLoading`` flips, so a
+    // name-based locator drops the element the instant host-detail's
+    // initial fetch or periodic polling toggles that flag — the cause
+    // of the intermittent "element(s) not found" failure.  The testid
+    // is invariant across both states and is also unambiguous vs. the
+    // global "Broadcast Refresh" / per-tab "Refresh" buttons.
+    const refreshButton = page.getByTestId('request-host-data-button');
 
     // The button is disabled while a diagnostics request is in-flight.
     // Wait for it to be both visible AND enabled before clicking — that
@@ -269,13 +267,12 @@ test.describe('Host Actions', () => {
     // that race.
     await refreshButton.click({ timeout: 15000 });
 
-    // After clicking, the button flips to "Requesting..." while the
-    // backend processes the request.  Wait for either state to confirm
-    // the click actually landed; don't block on networkidle (the
+    // After clicking, the button stays mounted (its label flips to
+    // "Requesting..." while the backend processes the request, then
+    // back).  Assert on the same stable testid locator to confirm the
+    // click landed without detaching; don't block on networkidle (the
     // host-detail page has periodic polling that never goes idle).
-    await expect(
-      page.getByRole('button', { name: /^Requesting\.\.\.$|^Request Host Data$/ }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(refreshButton).toBeVisible({ timeout: 10000 });
   });
 
   test('should navigate back to hosts list', async ({ page }) => {
