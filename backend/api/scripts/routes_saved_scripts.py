@@ -70,7 +70,7 @@ def _get_scripts_sync(
             ]
 
     except Exception as e:
-        logger.error("Error fetching saved scripts: %s", e)
+        logger.exception("Error fetching saved scripts: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved scripts")
         ) from e
@@ -187,7 +187,7 @@ async def create_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error creating saved script: %s", e)
+        logger.exception("Error creating saved script: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to create saved script")
         ) from e
@@ -228,7 +228,9 @@ async def get_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error fetching saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved script")
         ) from e
@@ -340,7 +342,9 @@ async def update_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error updating saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to update saved script")
         ) from e
@@ -430,7 +434,9 @@ async def delete_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error deleting saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to delete saved script")
         ) from e

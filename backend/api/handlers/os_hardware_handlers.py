@@ -265,7 +265,7 @@ async def handle_os_version_update(  # NOSONAR
                                 os_version,
                             )
                         except Exception as e:
-                            debug_logger.error(
+                            debug_logger.exception(
                                 "Error queueing automatic package collection command for host %s: %s",
                                 host.fqdn,
                                 str(e),
@@ -296,7 +296,7 @@ async def handle_os_version_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error updating OS version: %s", e)
+        debug_logger.exception("Error updating OS version: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -489,7 +489,7 @@ async def handle_hardware_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error updating hardware: %s", e)
+        debug_logger.exception("Error updating hardware: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -589,7 +589,7 @@ async def handle_ubuntu_pro_update(  # NOSONAR
             len(services),
         )
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing Ubuntu Pro data for host %s: %s", host.id, e
         )
         # Don't re-raise - let the main OS update continue

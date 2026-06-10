@@ -441,13 +441,18 @@ Between major feature development phases, we insert **stabilization phases** foc
 4. **Dependabot Updates** - Apply security patches and dependency updates
 5. **Security Analysis** - Review for vulnerabilities (OWASP top 10)
 6. **Performance Testing** - Identify and resolve bottlenecks
-7. **Documentation Updates** - Keep `sysmanage-docs` current with features.
+7. **Documentation Updates** - Keep `sysmanage-docs` **and the four
+   project READMEs** (`sysmanage`, `sysmanage-agent`,
+   `sysmanage-professional-plus`, `sysmanage-docs`) current with features.
    **Standing requirement (every phase, not just stabilization):** any PR
    that adds or changes user-visible functionality MUST land the matching
-   `sysmanage-docs` update in the same change — new pages, screenshots,
-   workflow docs, and the 14-language `data-i18n` seed.  "Docs lag" is
-   treated as incomplete work, not a follow-up.  Stabilization phases
-   additionally do a full docs/i18n audit to catch anything that slipped.
+   `sysmanage-docs` update **and any README change it implies** (feature
+   lists, supported Python/OS versions, engine catalog, badges) in the
+   same change — new pages, screenshots, workflow docs, and the
+   14-language `data-i18n` seed.  "Docs lag" — including a stale README —
+   is treated as incomplete work, not a follow-up.  Stabilization phases
+   additionally do a full docs/i18n + README audit to catch anything that
+   slipped.
 
 ### Frontend Test Coverage
 
@@ -521,10 +526,17 @@ the explicit bullet is added to the in-progress and future phases.)
       vulnerabilities, 0 code smells above threshold, security hotspots
       reviewed, and the coverage ratchet (backend `--cov-fail-under` +
       frontend `coverage.thresholds`) is green and not lowered.
+- [ ] **READMEs are current** — the four project READMEs
+      (`sysmanage`, `sysmanage-agent`, `sysmanage-professional-plus`,
+      `sysmanage-docs`) reflect what shipped this phase: feature lists,
+      supported Python/OS versions, engine catalog, badges, and any new
+      capabilities. A README that lags the code is treated as incomplete
+      work, not a follow-up (same standing rule as the `sysmanage-docs`
+      requirement in Documentation Updates above).
 
 ### Release Versioning
 
-**Current Version:** v1.1.0.0
+**Current Version:** v2.4.0.0
 
 We use four-part versioning: `major.minor.patch.build`
 
@@ -3495,16 +3507,26 @@ fails validation.  `installer/windows/install.ps1`,
 **soft-fail** when Python/network is absent (MSI still exits 0) so the
 MSI installs cleanly inside the sandbox.
 
-- [ ] Get a clean `microsoft/winget-pkgs` validation pass for
-      `sysmanage.sysmanage-agent` (x64 + arm64 MSIs) — iterate on the
-      manifest / MSI until `wingetbot` validation is green.
-- [ ] Land the first PR merge (manual TTY `komac new`); confirm
-      `winget install --id sysmanage.sysmanage-agent --silent` works
-      from a clean Windows host.
-- [ ] Flip the `winget-manifest` job from `dry_run` → `publish`
-      (workflow_dispatch input) and verify the next release tag
-      auto-bumps the manifest via `komac update`.
-- [ ] Only then mark the automation acceptance criterion above ✅.
+- [x] Get a clean `microsoft/winget-pkgs` validation pass — June 2026:
+      `wingetbot` validation + the publish pipeline went green on both
+      `sysmanage.sysmanage` (PR #376004) and `sysmanage.sysmanage-agent`
+      (PR #376005).
+- [x] Land the first PR merge — June 8 2026: BOTH packages merged into
+      `microsoft:master` (`sysmanage.sysmanage` #376004, `sysmanage.sysmanage-agent`
+      #376005, v2.3.0.19).  The "installed shows 2.24" review concern was the
+      bundled NSSM service wrapper, not the product (ARP correctly reports
+      2.3.0.19); clarifying that cleared `Needs-Author-Feedback` and the
+      policy-service bot merged.
+- [x] `winget-manifest` job already publishes on tag — the
+      `build-and-release.yml` `winget-manifest` job defaults `MODE` to `publish`
+      on tag pushes (`github.event.inputs.winget_mode || 'publish'`) and runs
+      `komac update --submit … sysmanage.sysmanage-agent`.  No workflow change
+      needed now that the package exists in the catalog — the new→update
+      fallback (manual `komac new`) is no longer hit.  **Sole remaining
+      requirement: the `WINGET_PKGS_TOKEN` repo secret** (PAT w/ `public_repo`
+      on the winget-pkgs fork) on both repos; without it the job warns + exits 0.
+- [ ] Verify the next release tag auto-bumps the manifest via `komac update`
+      (pending the first tagged release after the merge).
 
 ##### Microsoft Store submission (MSIX)
 

@@ -227,7 +227,7 @@ async def handle_script_execution_result(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error storing script execution result: %s", e)
+        debug_logger.exception("Error storing script execution result: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -340,7 +340,7 @@ async def handle_reboot_status_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error updating reboot status: %s", e)
+        debug_logger.exception("Error updating reboot status: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -469,7 +469,7 @@ async def handle_host_certificates_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing certificates update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -584,7 +584,7 @@ async def handle_host_role_data_update(db: Session, connection, message_data: di
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing role data update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,

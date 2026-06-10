@@ -310,7 +310,7 @@ async def get_update_results(dependencies=Depends(JWTBearer())):
             application_updates=0,
         )
     except Exception as e:
-        logger.error("Error in get_update_results: %s", e)
+        logger.exception("Error in get_update_results: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to get update results: %s") % str(e)
         ) from e
@@ -328,5 +328,5 @@ async def get_update_status(dependencies=Depends(JWTBearer())):
                 return {"results": handler.update_results_cache.copy()}
         return {"results": {}}
     except Exception as e:
-        logger.error("Error fetching update status: %s", e)
+        logger.exception("Error fetching update status: %s", e)
         return {"results": {}, "error": "Failed to fetch update status"}

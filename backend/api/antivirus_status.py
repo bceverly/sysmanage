@@ -125,7 +125,7 @@ async def get_antivirus_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error getting antivirus status for host %s: %s", sanitize_log(host_id), e
         )
         raise HTTPException(
@@ -323,7 +323,7 @@ async def deploy_antivirus(  # NOSONAR
                 )
 
             except Exception as e:
-                logger.error(
+                logger.exception(
                     "Error deploying antivirus to host %s: %s",
                     sanitize_log(host_id_str),
                     e,
@@ -617,7 +617,7 @@ async def get_antivirus_coverage(db: Session = Depends(get_db)):
         )
 
     except Exception as e:
-        logger.error("Error getting antivirus coverage statistics: %s", e)
+        logger.exception("Error getting antivirus coverage statistics: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve antivirus coverage: %s") % str(e),

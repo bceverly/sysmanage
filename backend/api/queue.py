@@ -190,7 +190,7 @@ def _get_message_details_sync(message_id: str) -> Dict[str, Any]:
                 from backend.utils.verbosity_logger import get_logger
 
                 logger = get_logger(__name__)
-                logger.error(
+                logger.exception(
                     f"Failed to deserialize message {message.message_id}: {str(e)}"
                 )
                 message_data = {
@@ -237,7 +237,7 @@ def _get_message_details_sync(message_id: str) -> Dict[str, Any]:
             from backend.utils.verbosity_logger import get_logger
 
             logger = get_logger(__name__)
-            logger.error(
+            logger.exception(
                 f"Failed to fetch message details for message {message_id}: {str(e)}"
             )
             raise HTTPException(

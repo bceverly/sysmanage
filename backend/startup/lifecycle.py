@@ -547,7 +547,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("Task result: %s", result)
                 print(f"Task result: {result}")
             except Exception as task_e:
-                logger.error(
+                logger.exception(
                     "Message processor startup failed: %s", task_e, exc_info=True
                 )
                 print(f"Task exception: {task_e}")
@@ -569,10 +569,10 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("=== FASTAPI LIFESPAN SHUTDOWN BEGIN ===")
 
     except Exception as e:
-        logger.error("=== EXCEPTION IN LIFESPAN STARTUP ===")
-        logger.error("Exception in lifespan startup: %s", e, exc_info=True)
-        logger.error("Exception type: %s", type(e).__name__)
-        logger.error("Exception args: %s", e.args)
+        logger.exception("=== EXCEPTION IN LIFESPAN STARTUP ===")
+        logger.exception("Exception in lifespan startup: %s", e, exc_info=True)
+        logger.exception("Exception type: %s", type(e).__name__)
+        logger.exception("Exception args: %s", e.args)
         raise
 
     # Shutdown: Stop the license service
@@ -581,7 +581,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await license_service.shutdown()
         logger.info("License service stopped")
     except Exception as e:
-        logger.error("Error stopping license service: %s", e)
+        logger.exception("Error stopping license service: %s", e)
 
     # Shutdown: Stop the discovery beacon service
     logger.info("Stopping discovery beacon service")
@@ -589,7 +589,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await discovery_beacon.stop_beacon_service()
         logger.info("Discovery beacon service stopped")
     except Exception as e:
-        logger.error("Error stopping discovery beacon: %s", e)
+        logger.exception("Error stopping discovery beacon: %s", e)
 
     # Shutdown: Stop the message processor service
     logger.info("Stopping message processor service")
@@ -604,7 +604,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Message processor service stopped")
     except Exception as e:
-        logger.error("Error stopping message processor: %s", e)
+        logger.exception("Error stopping message processor: %s", e)
 
     # Shutdown: Cancel the Graylog health monitor service
     logger.info("Stopping Graylog health monitor service")
@@ -618,7 +618,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
-        logger.error("Error stopping Graylog health monitor: %s", e)
+        logger.exception("Error stopping Graylog health monitor: %s", e)
 
     # Shutdown: Cancel the alerting engine background task
     if alerting_task:
@@ -632,7 +632,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Alerting engine background task stopped")
         except Exception as e:
-            logger.error("Error stopping alerting engine task: %s", e)
+            logger.exception("Error stopping alerting engine task: %s", e)
 
     # Shutdown: Cancel the reporting engine background task
     if reporting_task:
@@ -646,7 +646,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Reporting engine background task stopped")
         except Exception as e:
-            logger.error("Error stopping reporting engine task: %s", e)
+            logger.exception("Error stopping reporting engine task: %s", e)
 
     # Shutdown: Cancel the audit engine retention background task
     if audit_retention_task:
@@ -660,7 +660,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Audit engine retention background task stopped")
         except Exception as e:
-            logger.error("Error stopping audit engine retention task: %s", e)
+            logger.exception("Error stopping audit engine retention task: %s", e)
 
     # Shutdown: Cancel the secrets engine rotation background task
     if secrets_rotation_task:
@@ -674,7 +674,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Secrets engine rotation background task stopped")
         except Exception as e:
-            logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 "Error stopping secrets engine rotation task (%s)", type(e).__name__
             )
 
@@ -690,7 +690,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("CVE refresh background task stopped")
         except Exception as e:
-            logger.error("Error stopping CVE refresh task: %s", e)
+            logger.exception("Error stopping CVE refresh task: %s", e)
 
     # Shutdown: Cancel the automation engine schedule dispatcher (Phase 5)
     if automation_sched_task:
@@ -703,7 +703,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("Automation schedule dispatcher cancelled successfully")
                 raise
         except Exception as e:
-            logger.error("Error stopping automation schedule dispatcher: %s", e)
+            logger.exception("Error stopping automation schedule dispatcher: %s", e)
 
     # Shutdown: Cancel the fleet engine schedule dispatcher (Phase 5)
     if fleet_sched_task:
@@ -716,7 +716,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("Fleet schedule dispatcher cancelled successfully")
                 raise
         except Exception as e:
-            logger.error("Error stopping fleet schedule dispatcher: %s", e)
+            logger.exception("Error stopping fleet schedule dispatcher: %s", e)
 
     # Shutdown: Stop the CVE refresh scheduler
     try:
@@ -725,7 +725,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await cve_refresh_service.stop_scheduler()
         logger.info("CVE refresh scheduler stopped")
     except Exception as e:
-        logger.error("Error stopping CVE refresh scheduler: %s", e)
+        logger.exception("Error stopping CVE refresh scheduler: %s", e)
 
     # Shutdown: Cancel the heartbeat monitor service
     logger.info("Stopping heartbeat monitor service")
@@ -739,6 +739,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Heartbeat monitor service stopped")
     except Exception as e:
-        logger.error("Error stopping heartbeat monitor: %s", e)
+        logger.exception("Error stopping heartbeat monitor: %s", e)
 
     logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")

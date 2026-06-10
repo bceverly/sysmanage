@@ -443,8 +443,7 @@ def _firewalld_remove_role_ports(
 
 def _windows_enable_plan(agent_ports: Optional[List[int]] = None) -> Dict[str, Any]:
     preserved_set = {3389}  # RDP
-    for p in DEFAULT_PRESERVED_PORTS:
-        preserved_set.add(p)
+    preserved_set.update(DEFAULT_PRESERVED_PORTS)
     if agent_ports:
         for p in agent_ports:
             if isinstance(p, int):

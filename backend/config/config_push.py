@@ -95,7 +95,7 @@ class ConfigPushManager:
             self.pending_configs[label] = agent_config
             return message.to_dict()
         except (ValueError, KeyError, OSError) as e:
-            logger.error(
+            logger.exception(
                 "Error building config envelope for %s: %s", sanitize_log(label), e
             )
             return None
@@ -123,7 +123,7 @@ class ConfigPushManager:
             )
             return True
         except Exception as enqueue_error:  # pylint: disable=broad-exception-caught
-            logger.error(
+            logger.exception(
                 "Failed to enqueue config push for host %s: %s",
                 host_id,
                 enqueue_error,

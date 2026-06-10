@@ -497,7 +497,7 @@ class TestHandleUpdateApplyResult:
         assert mock_db.rolled_back is True
 
         # Should log the error
-        mock_logger.error.assert_called()
+        mock_logger.exception.assert_called()
 
     @pytest.mark.asyncio
     @patch("backend.api.update_handlers.logger")

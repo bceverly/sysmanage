@@ -73,7 +73,7 @@ class PluginBundleLoader:
         try:
             Path(modules_path).mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            logger.error("Failed to create modules directory: %s", e)
+            logger.exception("Failed to create modules directory: %s", e)
 
         self._initialized = True
 
@@ -95,7 +95,7 @@ class PluginBundleLoader:
                     return cache_entry.version
                 return None
             except Exception as e:
-                logger.error("Error querying cached plugin version: %s", e)
+                logger.exception("Error querying cached plugin version: %s", e)
                 return None
 
     def _get_cached_plugin_hash(self, module_code: str) -> Optional[str]:
@@ -116,7 +116,7 @@ class PluginBundleLoader:
                     return cache_entry.file_hash
                 return None
             except Exception as e:
-                logger.error("Error querying cached plugin hash: %s", e)
+                logger.exception("Error querying cached plugin hash: %s", e)
                 return None
 
     async def _download_plugin_bundle(
@@ -200,12 +200,12 @@ class PluginBundleLoader:
             return True
 
         except aiohttp.ClientError as e:
-            logger.error("Plugin download network error: %s", e)
+            logger.exception("Plugin download network error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
         except Exception as e:
-            logger.error("Plugin download error: %s", e)
+            logger.exception("Plugin download error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
@@ -251,7 +251,7 @@ class PluginBundleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to save plugin to cache: %s", e)
+                logger.exception("Failed to save plugin to cache: %s", e)
                 session.rollback()
 
     def _remove_cached_plugin(self, module_code: str) -> None:
@@ -281,7 +281,9 @@ class PluginBundleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to remove cached plugin %s: %s", module_code, e)
+                logger.exception(
+                    "Failed to remove cached plugin %s: %s", module_code, e
+                )
                 session.rollback()
 
     async def ensure_plugin_available(self, module_code: str) -> bool:

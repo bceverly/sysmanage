@@ -46,13 +46,13 @@ def configure_logging():
         handlers.append(file_handler)
         logger.debug("File handler created successfully")
     except PermissionError as e:
-        logger.error("Permission denied for log file: %s", e)
+        logger.exception("Permission denied for log file: %s", e)
         print(
             "WARNING: Cannot write to logs/backend.log due to permissions. Logging to console only.",
             file=sys.stderr,
         )
     except Exception as e:
-        logger.error("Failed to create file handler: %s", e)
+        logger.exception("Failed to create file handler: %s", e)
 
     # Under pytest, skip the basicConfig + handler reconfiguration that
     # would override pytest.ini's log_level and re-introduce the import-time

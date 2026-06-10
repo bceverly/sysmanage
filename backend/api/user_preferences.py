@@ -107,7 +107,7 @@ async def get_column_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting column preferences: %s", e)
+        logger.exception("Error getting column preferences: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve column preferences: %s") % str(e),
@@ -191,7 +191,7 @@ async def update_column_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating column preferences: %s", e)
+        logger.exception("Error updating column preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -250,7 +250,7 @@ async def delete_column_preferences(
         return {"message": _("No preferences found to delete")}
 
     except Exception as e:
-        logger.error("Error deleting column preferences: %s", e)
+        logger.exception("Error deleting column preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -313,7 +313,7 @@ async def get_dashboard_card_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting dashboard card preferences: %s", e)
+        logger.exception("Error getting dashboard card preferences: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve dashboard card preferences: %s") % str(e),
@@ -406,7 +406,7 @@ async def update_dashboard_card_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating dashboard card preferences: %s", e)
+        logger.exception("Error updating dashboard card preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

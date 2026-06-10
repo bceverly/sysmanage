@@ -189,14 +189,14 @@ async def agent_connect(websocket: WebSocket):
                 e,
             )
         else:
-            logger.error(
+            logger.exception(
                 "WEBSOCKET_UNKNOWN_ERROR: Unexpected RuntimeError in WebSocket handler: %s",
                 e,
                 exc_info=True,
             )
             raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "WEBSOCKET_UNKNOWN_ERROR: Unexpected exception in WebSocket handler: %s",
             e,
             exc_info=True,
@@ -254,12 +254,12 @@ async def _process_websocket_message(data, connection, db, connection_id):
 
     except Exception as exc:
         # Error processing message from agent
-        logger.error("Error processing message: %s", exc, exc_info=True)
+        logger.exception("Error processing message: %s", exc, exc_info=True)
         error_msg = ErrorMessage("processing_error", str(exc))
         try:
             await connection.send_message(error_msg.to_dict())
         except Exception as send_exc:
-            logger.error("Failed to send error message: %s", send_exc)
+            logger.exception("Failed to send error message: %s", send_exc)
 
 
 def _enqueue_inbound_message(message, connection, db):
@@ -447,7 +447,7 @@ async def _handle_script_execution_result(message, connection, db):
         await connection.send_message(ack_msg)
 
     except Exception as e:
-        logger.error("Error enqueueing script execution result: %s", e)
+        logger.exception("Error enqueueing script execution result: %s", e)
         error_msg = ErrorMessage(
             "queue_error", f"Failed to queue script result: {str(e)}"
         )
@@ -470,7 +470,7 @@ async def _handle_diagnostic_result_msg(message, connection, db):
         if response:
             await connection.send_message(response)
     except Exception as e:
-        logger.error("Error processing diagnostic collection result: %s", e)
+        logger.exception("Error processing diagnostic collection result: %s", e)
         error_msg = ErrorMessage(
             "diagnostic_error",
             f"Failed to process diagnostic result: {str(e)}",
@@ -710,7 +710,7 @@ async def _handle_system_info_message(message, connection, db):
                 )
         logger.info("handle_system_info completed successfully")
     except Exception as e:
-        logger.error("Error in handle_system_info: %s", e, exc_info=True)
+        logger.exception("Error in handle_system_info: %s", e, exc_info=True)
         raise
 
 
@@ -722,7 +722,7 @@ async def _handle_update_result_message(message, connection, db):
         await handle_update_apply_result(db, connection, message.data)
         logger.info("Update apply result processed successfully")
     except Exception as e:
-        logger.error("Error processing update apply result: %s", e)
+        logger.exception("Error processing update apply result: %s", e)
         raise
 
 
@@ -816,7 +816,7 @@ async def _process_inventory_message(message, connection, db):
         )
 
     except Exception as e:
-        logger.error("Error enqueueing message %s: %s", message.message_type, e)
+        logger.exception("Error enqueueing message %s: %s", message.message_type, e)
         error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
         await connection.send_message(error_msg.to_dict())
 
@@ -882,7 +882,7 @@ async def _handle_packages_batch_message(message, connection, db):
         await connection.send_message(ack_msg)
 
     except Exception as e:
-        logger.error("Error enqueueing %s: %s", message.message_type, e)
+        logger.exception("Error enqueueing %s: %s", message.message_type, e)
         error_msg = ErrorMessage(
             "queue_error", f"Failed to queue {message.message_type}: {str(e)}"
         )
@@ -985,5 +985,5 @@ async def handle_installation_completion(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error processing installation completion: %s", e)
+        logger.exception("Error processing installation completion: %s", e)
         raise HTTPException(status_code=500, detail=_("Internal server error")) from e

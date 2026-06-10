@@ -43,7 +43,6 @@ import {
   PackageConstraint,
   PackageProfile,
   VERSION_OPS,
-  VersionOp,
   packageProfilesService,
 } from '../Services/packageProfiles';
 
@@ -435,7 +434,7 @@ const PackageProfilesSettings: React.FC = () => {
                         value={c.version_op ?? ''}
                         onChange={(e) =>
                           updateConstraint(idx, {
-                            version_op: (e.target.value || null) as VersionOp | null,
+                            version_op: e.target.value || null,
                           })
                         }
                       >

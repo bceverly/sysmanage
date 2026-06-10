@@ -196,7 +196,7 @@ async def process_outbound_message(message, host, db: Session) -> None:
             )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error processing outbound message %s: %s", message.message_id, str(e)
         )
         server_queue_manager.mark_failed(
@@ -251,5 +251,5 @@ async def send_command_to_agent(
         return success
 
     except Exception as e:
-        logger.error("Error sending command to agent: %s", str(e))
+        logger.exception("Error sending command to agent: %s", str(e))
         return False

@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
+.PHONY: test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
 
 # Default target
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make sonarqube-scan - Run SonarQube/SonarCloud analysis"
 	@echo "  make install-sonar-scanner - Install SonarQube scanner locally"
+	@echo "  make sonarqube-update-install - Update native local SonarQube server (systemd) + scanner CLI to latest"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make build         - Build frontend for production"
@@ -1044,6 +1045,102 @@ install-sonar-scanner:
 			;; \
 	esac
 	@echo "[OK] SonarScanner installed"
+
+# Native SonarQube install location + systemd service.  Defaults match a manual
+# /opt install managed by systemd; override if yours differs, e.g.:
+#   make sonarqube-update-install SONARQUBE_HOME=/opt/sonarqube SONARQUBE_SERVICE=sonar
+SONARQUBE_HOME ?= /opt/sonarqube-home
+SONARQUBE_SERVICE ?= sonarqube
+# Fallback sonar-scanner-cli version (the step auto-resolves the latest; this is
+# only used if that lookup is unavailable).
+SONAR_SCANNER_VERSION ?= 6.2.1.4610
+
+# Update the LOCAL *native* SonarQube server to the latest Community Build, then
+# the sonar-scanner CLI.  The server step resolves the latest version at runtime
+# and ABORTS (never guesses) if it can't; it backs up the current install by
+# rename (no extra disk), preserves conf/ (DB connection) + custom plugins, and
+# restarts via systemd.  Needs sudo (systemctl + writes under SONARQUBE_HOME).
+sonarqube-update-install:
+	@echo "=== Update native SonarQube (server + scanner CLI) ==="
+	@echo ""
+	@echo "--- 1/2: SonarQube server (native install at $(SONARQUBE_HOME)) ---"
+	@set -e; \
+	if ! command -v systemctl >/dev/null 2>&1; then \
+		echo "No systemd (systemctl) found — skipping native server update."; \
+	elif [ ! -d "$(SONARQUBE_HOME)" ]; then \
+		echo "ERROR: $(SONARQUBE_HOME) not found. Set SONARQUBE_HOME=<your install dir>."; exit 1; \
+	else \
+		if ! command -v unzip >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then \
+			sudo apt-get update && sudo apt-get install -y unzip; \
+		fi; \
+		UC="https://downloads.sonarsource.com/sonarqube/update/update-center.properties"; \
+		PROPS=$$(curl -fsSL "$$UC" 2>/dev/null); \
+		if [ -z "$$PROPS" ]; then echo "ERROR: could not fetch SonarQube update-center.properties (network?). Aborting -- not guessing."; exit 1; fi; \
+		LATEST=$$(echo "$$PROPS" | grep 'description=Latest Community Build version' | sed 's/.description=.*//' | sort -V | tail -1); \
+		LATEST_FULL=$$(echo "$$PROPS" | grep "^$$LATEST.downloadUrl=" | grep -oE 'sonarqube-[0-9.]+\.zip' | head -1 | sed 's/sonarqube-//; s/\.zip$$//'); \
+		if [ -z "$$LATEST" ] || [ -z "$$LATEST_FULL" ]; then echo "ERROR: could not resolve latest version from update-center. Aborting -- not guessing."; exit 1; fi; \
+		URL="https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-$$LATEST_FULL.zip"; \
+		CURRENT=$$(curl -fsS http://localhost:9000/api/server/version 2>/dev/null || echo "unknown"); \
+		CURRENT_MM=$$(echo "$$CURRENT" | cut -d. -f1,2); \
+		echo "Running version:   $$CURRENT"; \
+		echo "Latest available:  $$LATEST_FULL"; \
+		if [ "$$CURRENT_MM" = "$$LATEST" ]; then echo "Already on the latest Community Build ($$LATEST). Nothing to do."; else \
+			printf "Stop %s, back up %s, and replace it with $$LATEST_FULL? [y/N] " "$(SONARQUBE_SERVICE)" "$(SONARQUBE_HOME)"; \
+			read ans; case "$$ans" in [yY]*) ;; *) echo "Server update declined."; exit 0;; esac; \
+			OWNER=$$(stat -c '%U:%G' "$(SONARQUBE_HOME)"); \
+			echo "Downloading sonarqube-$$LATEST_FULL.zip..."; \
+			curl -fSL -o /tmp/sonarqube-$$LATEST_FULL.zip "$$URL"; \
+			rm -rf /tmp/sonarqube-$$LATEST_FULL; unzip -q /tmp/sonarqube-$$LATEST_FULL.zip -d /tmp/; \
+			echo "Stopping $(SONARQUBE_SERVICE)..."; sudo systemctl stop $(SONARQUBE_SERVICE); \
+			BACKUP=$(SONARQUBE_HOME).bak-$$(date +%Y%m%d-%H%M%S); \
+			sudo mv "$(SONARQUBE_HOME)" "$$BACKUP"; echo "Backed up old install to $$BACKUP"; \
+			sudo mv /tmp/sonarqube-$$LATEST_FULL "$(SONARQUBE_HOME)"; \
+			sudo cp -f "$$BACKUP/conf/sonar.properties" "$(SONARQUBE_HOME)/conf/sonar.properties"; \
+			[ -f "$$BACKUP/conf/wrapper.conf" ] && sudo cp -f "$$BACKUP/conf/wrapper.conf" "$(SONARQUBE_HOME)/conf/wrapper.conf" || true; \
+			for p in "$$BACKUP"/extensions/plugins/*.jar; do [ -e "$$p" ] && sudo cp -f "$$p" "$(SONARQUBE_HOME)/extensions/plugins/"; done; \
+			sudo chown -R "$$OWNER" "$(SONARQUBE_HOME)"; rm -f /tmp/sonarqube-$$LATEST_FULL.zip; \
+			echo "Reloading systemd (unit files changed on disk)..."; sudo systemctl daemon-reload; \
+			echo "Starting $(SONARQUBE_SERVICE)..."; sudo systemctl start $(SONARQUBE_SERVICE); \
+			echo "Waiting for the SonarQube web API..."; \
+			i=0; while [ $$i -lt 60 ]; do ST=$$(curl -fsS http://localhost:9000/api/system/status 2>/dev/null | grep -oE '"status":"[A-Z_]+"' | cut -d'"' -f4); { [ -n "$$ST" ] && [ "$$ST" != "STARTING" ] && [ "$$ST" != "DOWN" ]; } && break; printf '.'; sleep 5; i=$$((i+1)); done; echo ""; \
+			if [ "$$ST" = "DB_MIGRATION_NEEDED" ]; then echo "Running one-time database migration (clears the 'under maintenance' screen)..."; curl -fsS -X POST http://localhost:9000/api/system/migrate_db >/dev/null 2>&1 || true; i=0; while [ $$i -lt 120 ]; do ST=$$(curl -fsS http://localhost:9000/api/system/status 2>/dev/null | grep -oE '"status":"[A-Z_]+"' | cut -d'"' -f4); { [ "$$ST" = "UP" ] || [ "$$ST" = "STATUS_ERROR" ]; } && break; printf '.'; sleep 5; i=$$((i+1)); done; echo ""; fi; \
+			if [ "$$ST" = "UP" ]; then echo "[OK] SonarQube $$LATEST_FULL is UP at http://localhost:9000"; else echo "SonarQube status='$$ST' - if not UP shortly: sudo tail -f $(SONARQUBE_HOME)/logs/sonar.log (or open http://localhost:9000/setup)"; fi; \
+			echo "Rollback: sudo systemctl stop $(SONARQUBE_SERVICE) && sudo rm -rf $(SONARQUBE_HOME) && sudo mv $$BACKUP $(SONARQUBE_HOME) && sudo systemctl daemon-reload && sudo systemctl start $(SONARQUBE_SERVICE)"; \
+			echo "Once verified: sudo rm -rf $$BACKUP"; \
+		fi; \
+	fi
+	@echo ""
+	@echo "--- 2/2: sonar-scanner CLI ---"
+	@case "$$(uname -s)" in \
+		Linux) \
+			if ! command -v unzip >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then \
+				sudo apt-get update && sudo apt-get install -y unzip; \
+			fi; \
+			echo "Resolving latest sonar-scanner-cli version..."; \
+			VER=$$(curl -fsSL "https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/" 2>/dev/null | grep -oE 'sonar-scanner-cli-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.zip' | sed -E 's/.*cli-(.*)-linux-x64\.zip/\1/' | sort -V | uniq | tail -1); \
+			if [ -z "$$VER" ]; then VER="$(SONAR_SCANNER_VERSION)"; echo "Auto-resolve failed; using pinned $$VER"; else echo "Latest is $$VER"; fi; \
+			echo "Downloading sonar-scanner-cli $$VER..."; \
+			curl -fSL -o /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$$VER-linux-x64.zip"; \
+			unzip -o -q /tmp/sonar-scanner.zip -d /tmp/; \
+			sudo rm -rf /opt/sonar-scanner; \
+			sudo mv "/tmp/sonar-scanner-$$VER-linux-x64" /opt/sonar-scanner; \
+			sudo ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner; \
+			rm -f /tmp/sonar-scanner.zip; \
+			;; \
+		Darwin) \
+			if command -v brew >/dev/null 2>&1; then \
+				brew update && (brew upgrade sonar-scanner || brew install sonar-scanner); \
+			else \
+				echo "Install Homebrew first, then: brew install sonar-scanner"; exit 1; \
+			fi; \
+			;; \
+		*) \
+			echo "Please update sonar-scanner manually for this OS."; \
+			;; \
+	esac
+	@echo ""
+	@sonar-scanner --version 2>/dev/null | head -3 || echo "Run 'sonar-scanner --version' to verify."
+	@echo "[OK] SonarQube update complete"
 
 # Format Python code (helper target)
 format-python: $(VENV_ACTIVATE) clean-whitespace

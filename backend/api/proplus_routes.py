@@ -303,7 +303,7 @@ def mount_vulnerability_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount vulnerability routes: %s", e)
+        logger.exception("Failed to mount vulnerability routes: %s", e)
         return False
 
 
@@ -348,7 +348,7 @@ def mount_health_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount health routes: %s", e)
+        logger.exception("Failed to mount health routes: %s", e)
         return False
 
 
@@ -393,7 +393,7 @@ def mount_compliance_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount compliance routes: %s", e)
+        logger.exception("Failed to mount compliance routes: %s", e)
         return False
 
 
@@ -439,7 +439,7 @@ def mount_alerting_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount alerting routes: %s", e)
+        logger.exception("Failed to mount alerting routes: %s", e)
         return False
 
 
@@ -484,7 +484,7 @@ def mount_reporting_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount reporting routes: %s", e)
+        logger.exception("Failed to mount reporting routes: %s", e)
         return False
 
 
@@ -534,7 +534,7 @@ def mount_audit_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount audit routes: %s", e)
+        logger.exception("Failed to mount audit routes: %s", e)
         return False
 
 
@@ -579,7 +579,7 @@ def mount_secrets_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "Failed to mount secrets routes (%s)", type(e).__name__
         )
         return False
@@ -626,7 +626,7 @@ def mount_container_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount container routes: %s", e)
+        logger.exception("Failed to mount container routes: %s", e)
         return False
 
 
@@ -672,7 +672,7 @@ def mount_av_management_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount AV management routes: %s", e)
+        logger.exception("Failed to mount AV management routes: %s", e)
         return False
 
 
@@ -723,7 +723,7 @@ def mount_firewall_orchestration_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount firewall orchestration routes: %s", e)
+        logger.exception("Failed to mount firewall orchestration routes: %s", e)
         return False
 
 
@@ -768,7 +768,7 @@ def mount_automation_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount automation routes: %s", e)
+        logger.exception("Failed to mount automation routes: %s", e)
         return False
 
 
@@ -892,7 +892,7 @@ def mount_fleet_routes(app: FastAPI) -> bool:
         return True
 
     except Exception as e:
-        logger.error("Failed to mount fleet routes: %s", e)
+        logger.exception("Failed to mount fleet routes: %s", e)
         return False
 
 
@@ -964,7 +964,7 @@ def mount_virtualization_routes(app: FastAPI) -> bool:
         )
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.error("Failed to mount virtualization routes: %s", exc)
+        logger.exception("Failed to mount virtualization routes: %s", exc)
         return False
 
 
@@ -1036,7 +1036,7 @@ def mount_observability_routes(app: FastAPI) -> bool:
         )
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.error("Failed to mount observability routes: %s", exc)
+        logger.exception("Failed to mount observability routes: %s", exc)
         return False
 
 
@@ -1113,7 +1113,7 @@ def mount_federation_site_routes(app: FastAPI) -> bool:
         )
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.error("Failed to mount federation site routes: %s", exc)
+        logger.exception("Failed to mount federation site routes: %s", exc)
         return False
 
 
@@ -1168,7 +1168,7 @@ def mount_federation_controller_routes(app: FastAPI) -> bool:
         )
         return True
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.error("Failed to mount federation controller routes: %s", exc)
+        logger.exception("Failed to mount federation controller routes: %s", exc)
         return False
 
 

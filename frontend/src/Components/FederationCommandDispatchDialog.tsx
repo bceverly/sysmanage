@@ -280,7 +280,7 @@ const FederationCommandDispatchDialog: React.FC<Props> = ({
               label={t("federationDispatch.commandType", "Command")}
               value={commandType}
               onChange={(e) => {
-                setCommandType(e.target.value as CommandType);
+                setCommandType(e.target.value);
                 setError(null);
               }}
             >

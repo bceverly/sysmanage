@@ -216,7 +216,7 @@ async def get_cve_refresh_settings(
             updated_at=settings.updated_at,
         )
     except Exception as e:
-        logger.error("Error getting CVE refresh settings: %s", e)
+        logger.exception("Error getting CVE refresh settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE refresh settings: %s") % str(e),
@@ -283,7 +283,7 @@ async def update_cve_refresh_settings(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error updating CVE refresh settings: %s", e)
+        logger.exception("Error updating CVE refresh settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update CVE refresh settings: %s") % str(e),
@@ -300,7 +300,7 @@ async def get_database_stats(
         stats = cve_refresh_service.get_database_stats(db)
         return DatabaseStatsResponse(**stats)
     except Exception as e:
-        logger.error("Error getting CVE database stats: %s", e)
+        logger.exception("Error getting CVE database stats: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE database statistics: %s") % str(e),
@@ -336,7 +336,7 @@ async def get_ingestion_history(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting CVE ingestion history: %s", e)
+        logger.exception("Error getting CVE ingestion history: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE ingestion history: %s") % str(e),
@@ -410,7 +410,7 @@ async def trigger_cve_refresh(
                     total_vulns += src_result.get("vulnerabilities_processed", 0)
                     total_pkgs += src_result.get("packages_processed", 0)
                 except Exception as src_e:
-                    logger.error("CVE refresh failed for source %s: %s", src, src_e)
+                    logger.exception("CVE refresh failed for source %s: %s", src, src_e)
                     all_sources[src] = {"status": "error", "error": str(src_e)}
                     all_errors.append(_("Source %s failed: %s") % (src, str(src_e)))
 
@@ -428,7 +428,7 @@ async def trigger_cve_refresh(
             status_code=500, detail=_("CVE refresh failed: %s") % str(e)
         ) from e
     except Exception as e:
-        logger.error("Error triggering CVE refresh: %s", e)
+        logger.exception("Error triggering CVE refresh: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to trigger CVE refresh: %s") % str(e)
         ) from e
@@ -472,7 +472,7 @@ async def clear_nvd_api_key(
 
     except Exception as e:
         # Log error without exception details to avoid potential credential leakage
-        logger.error("Error clearing NVD API key", exc_info=True)
+        logger.exception("Error clearing NVD API key", exc_info=True)
         raise HTTPException(
             status_code=500, detail=_("Failed to clear NVD API key")
         ) from e

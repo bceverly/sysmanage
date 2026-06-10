@@ -148,7 +148,7 @@ const HypervisorStatusCard: React.FC<HypervisorStatusCardProps> = ({
         };
       default: {
         // Handle any future hypervisor types not yet in the union
-        const unknownType: string = type as string;
+        const unknownType: string = type;
         return {
           name: unknownType.toUpperCase(),
           description: '',

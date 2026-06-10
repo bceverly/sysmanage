@@ -195,7 +195,7 @@ async def handle_update_apply_result(  # NOSONAR
         }
 
     except Exception as e:
-        logger.error("Error processing update results: %s", e)
+        logger.exception("Error processing update results: %s", e)
         db.rollback()
         return {
             "message_type": "error",

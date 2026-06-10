@@ -121,7 +121,7 @@ class TestGetDatabaseUserCount:
         count = _get_database_user_count()
 
         assert count == 0
-        mock_logger.error.assert_called_once()
+        mock_logger.exception.assert_called_once()
 
     # Database session context manager tests removed due to complex mocking requirements
 

@@ -210,7 +210,7 @@ async def approve_host(  # NOSONAR
                 )
         except Exception as e:
             # Don't fail the approval process if we can't link child host
-            logger.error(
+            logger.exception(
                 "Error linking child host for %s (%s): %s",
                 host.id,
                 host.fqdn,
@@ -272,7 +272,7 @@ async def approve_host(  # NOSONAR
                     )
         except Exception as e:
             # Don't fail the approval process if we can't apply enabled PMs
-            logger.error(
+            logger.exception(
                 "Error applying enabled package managers to %s (%s): %s",
                 host.id,
                 host.fqdn,

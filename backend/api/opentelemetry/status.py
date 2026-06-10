@@ -104,7 +104,7 @@ async def get_opentelemetry_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting OpenTelemetry status: %s", e)
+        logger.exception("Error getting OpenTelemetry status: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to get OpenTelemetry status: %s") % str(e),
@@ -172,7 +172,7 @@ async def get_opentelemetry_coverage(db: Session = Depends(get_db)):
         )
 
     except Exception as e:
-        logger.error("Error getting OpenTelemetry coverage statistics: %s", e)
+        logger.exception("Error getting OpenTelemetry coverage statistics: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve OpenTelemetry coverage: %s") % str(e),

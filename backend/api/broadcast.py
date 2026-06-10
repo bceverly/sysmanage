@@ -162,7 +162,7 @@ async def broadcast_to_fleet(
 
     logger.info(
         "Broadcast %s action=%s filter=%s enqueued=%d elapsed=%.1fms",
-        broadcast_id,
+        sanitize_log(broadcast_id),
         sanitize_log(request.broadcast_action),
         sanitize_log(target_filter),
         delivered,
@@ -235,7 +235,7 @@ def _enqueue_envelope_for_hosts(
             )
             enqueued += 1
         except Exception as enqueue_error:
-            logger.error(
+            logger.exception(
                 "Failed to enqueue broadcast for host %s: %s",
                 host_id,
                 enqueue_error,

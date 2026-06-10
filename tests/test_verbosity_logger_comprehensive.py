@@ -242,6 +242,20 @@ class TestFlexibleLogger:
 
     @patch("backend.utils.verbosity_logger.get_log_levels")
     @patch("backend.utils.verbosity_logger.get_log_format")
+    def test_exception_logging_enabled(self, mock_get_format, mock_get_levels):
+        """Test exception logging (ERROR level + traceback) when enabled."""
+        mock_get_levels.return_value = "INFO|ERROR"
+        mock_get_format.return_value = "%(message)s"
+
+        logger = FlexibleLogger("exception.test")
+        logger.logger.exception = Mock()
+
+        logger.exception("Boom: %s", "details")
+
+        logger.logger.exception.assert_called_once_with("Boom: %s", "details")
+
+    @patch("backend.utils.verbosity_logger.get_log_levels")
+    @patch("backend.utils.verbosity_logger.get_log_format")
     def test_critical_logging_enabled(self, mock_get_format, mock_get_levels):
         """Test critical logging when CRITICAL level is enabled."""
         mock_get_levels.return_value = "ERROR|CRITICAL"

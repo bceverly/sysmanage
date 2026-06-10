@@ -201,7 +201,7 @@ def send_enable_package_manager_to_hosts(
             )
             queued_count += 1
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Error queueing enable_package_manager for host %s: %s", host.fqdn, e
             )
 
@@ -267,7 +267,7 @@ async def get_enabled_package_managers(
         return enabled_pms
 
     except Exception as e:
-        logger.error("Error getting enabled package managers: %s", e)
+        logger.exception("Error getting enabled package managers: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve enabled package managers: %s") % str(e),
@@ -378,7 +378,7 @@ async def create_enabled_package_manager(
                 )
         except Exception as e:
             # Don't fail the creation if we can't queue the messages
-            logger.error("Error queueing enable_package_manager commands: %s", e)
+            logger.exception("Error queueing enable_package_manager commands: %s", e)
 
         return new_pm
 
@@ -387,7 +387,7 @@ async def create_enabled_package_manager(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error creating enabled package manager: %s", e)
+        logger.exception("Error creating enabled package manager: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to create enabled package manager: %s") % str(e),
@@ -484,7 +484,7 @@ async def delete_enabled_package_manager(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error deleting enabled package manager %s: %s", sanitize_log(pm_id), e
         )
         raise HTTPException(

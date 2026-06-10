@@ -320,7 +320,7 @@ async def check_graylog_health():  # NOSONAR
         try:
             graylog_url = settings.graylog_url
         except Exception as e:
-            logger.error("Error accessing graylog_url property: %s", e)
+            logger.exception("Error accessing graylog_url property: %s", e)
             raise HTTPException(
                 status_code=500, detail=_("Error retrieving Graylog URL: %s") % str(e)
             ) from e
@@ -525,13 +525,13 @@ async def check_graylog_health():  # NOSONAR
             httpx.WriteTimeout,
             httpx.PoolTimeout,
         ) as e:
-            logger.error("Graylog health check timeout for %s: %s", graylog_url, e)
+            logger.exception("Graylog health check timeout for %s: %s", graylog_url, e)
             return GraylogHealthStatus(
                 healthy=False,
                 error=_("Connection timeout - Graylog server may be unreachable"),
             )
         except httpx.ConnectError as e:
-            logger.error(
+            logger.exception(
                 "Graylog health check connection failed for %s: %s", graylog_url, e
             )
             return GraylogHealthStatus(
@@ -541,7 +541,7 @@ async def check_graylog_health():  # NOSONAR
                 ),
             )
         except Exception as e:  # pylint: disable=broad-except
-            logger.error("Error checking Graylog health: %s", e)
+            logger.exception("Error checking Graylog health: %s", e)
             return GraylogHealthStatus(
                 healthy=False, error=_("Unexpected error checking Graylog health")
             )

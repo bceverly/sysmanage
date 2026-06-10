@@ -81,10 +81,10 @@ async def get_host_graylog_attachment(
             }
 
     except ValueError as e:
-        logger.error("Invalid host ID format for %s: %s", sanitize_log(host_id), e)
+        logger.exception("Invalid host ID format for %s: %s", sanitize_log(host_id), e)
         raise HTTPException(status_code=400, detail=_("Invalid host ID format")) from e
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error fetching Graylog attachment for host %s: %s",
             sanitize_log(host_id),
             e,

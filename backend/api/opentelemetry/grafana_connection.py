@@ -151,7 +151,7 @@ async def connect_opentelemetry_to_grafana(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error connecting OpenTelemetry to Grafana: %s", e)
+        logger.exception("Error connecting OpenTelemetry to Grafana: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -259,7 +259,7 @@ async def disconnect_opentelemetry_from_grafana(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error disconnecting OpenTelemetry from Grafana: %s", e)
+        logger.exception("Error disconnecting OpenTelemetry from Grafana: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

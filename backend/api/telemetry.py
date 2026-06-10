@@ -132,5 +132,5 @@ async def get_prometheus_status():  # NOSONAR
         logger.debug("Prometheus not reachable at %s", prometheus_url)
         return PrometheusStatus(running=False)
     except Exception as e:  # pylint: disable=broad-except
-        logger.error("Error checking Prometheus status: %s", e)
+        logger.exception("Error checking Prometheus status: %s", e)
         return PrometheusStatus(running=False)

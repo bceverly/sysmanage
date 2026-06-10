@@ -99,7 +99,7 @@ async def get_commercial_antivirus_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error getting commercial antivirus status for host %s: %s",
             sanitize_log(host_id),
             e,

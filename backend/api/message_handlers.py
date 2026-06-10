@@ -337,7 +337,7 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
             "status": "processed",
         }
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error processing diagnostic result from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -354,7 +354,7 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
                 db.execute(stmt)
                 db.commit()
             except Exception as db_error:
-                logger.error(
+                logger.exception(
                     "Failed to update diagnostics request status to failed: %s",
                     db_error,
                 )
@@ -598,7 +598,7 @@ async def handle_installation_status(  # NOSONAR
 
     except Exception as e:
         db.rollback()
-        logger.error(
+        logger.exception(
             "Error updating package installation status for %s: %s", installation_id, e
         )
         return {

@@ -120,7 +120,7 @@ class AgentConnection:
             return True
         except ConnectionClosed as e:
             # WebSocket connection closed - this is a communication error that warrants disconnection
-            logger.error(
+            logger.exception(
                 "WEBSOCKET_COMMUNICATION_ERROR: Connection closed during send to agent %s: %s",
                 getattr(self, "hostname", "unknown"),
                 e,
@@ -128,7 +128,7 @@ class AgentConnection:
             return False
         except (OSError, RuntimeError) as e:
             # Network/system level communication errors - warrants disconnection
-            logger.error(
+            logger.exception(
                 "WEBSOCKET_COMMUNICATION_ERROR: Network/system error sending to agent %s: %s",
                 getattr(self, "hostname", "unknown"),
                 e,
@@ -151,7 +151,7 @@ class AgentConnection:
                 or "timeout" in error_msg.lower()
             ):
                 # Network/connection related errors - warrants disconnection
-                logger.error(
+                logger.exception(
                     "WEBSOCKET_COMMUNICATION_ERROR: Connection error sending to agent %s: %s",
                     getattr(self, "hostname", "unknown"),
                     e,

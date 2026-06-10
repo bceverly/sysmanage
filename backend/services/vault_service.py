@@ -322,7 +322,7 @@ class VaultService:
                 if "not found" in str(e).lower():
                     logger.info("Secret not found during destroy - considering deleted")
                     return True
-                logger.error("Destroy failed: %s", str(e))
+                logger.exception("Destroy failed: %s", str(e))
                 raise
 
             # Finally, delete the metadata to completely remove all traces

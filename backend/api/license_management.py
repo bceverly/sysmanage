@@ -121,7 +121,7 @@ async def install_license(
     try:
         result = await license_service.install_license(request.license_key)
     except Exception as e:
-        logger.error("License installation error: %s", e)
+        logger.exception("License installation error: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=_("License installation failed: %(error)s") % {"error": str(e)},

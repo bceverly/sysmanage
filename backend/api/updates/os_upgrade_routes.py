@@ -91,7 +91,7 @@ async def get_os_upgrades(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching OS upgrades: %s", e)
+        logger.exception("Error fetching OS upgrades: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
@@ -158,7 +158,7 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
             }
 
     except Exception as e:
-        logger.error("Error fetching OS upgrades summary: %s", e)
+        logger.exception("Error fetching OS upgrades summary: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
@@ -302,7 +302,7 @@ async def execute_os_upgrades(  # NOSONAR
                     )
                     success = True
                 except Exception as enqueue_error:
-                    logger.error(
+                    logger.exception(
                         "Failed to enqueue OS upgrade command for host %s: %s",
                         host.fqdn,
                         enqueue_error,
@@ -378,5 +378,5 @@ async def execute_os_upgrades(  # NOSONAR
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error executing OS upgrades: %s", e)
+        logger.exception("Error executing OS upgrades: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e

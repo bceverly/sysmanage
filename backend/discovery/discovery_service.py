@@ -58,7 +58,7 @@ class DiscoveryBeaconService:
             )
 
         except Exception as e:
-            logger.error("Failed to start discovery beacon service: %s", e)
+            logger.exception("Failed to start discovery beacon service: %s", e)
             raise
 
     async def stop_beacon_service(self):  # NOSONAR
@@ -188,7 +188,7 @@ class DiscoveryProtocol(asyncio.DatagramProtocol):
         except json.JSONDecodeError:
             logger.warning("Invalid JSON in discovery request from %s", addr[0])
         except Exception as e:
-            logger.error("Error handling discovery request from %s: %s", addr[0], e)
+            logger.exception("Error handling discovery request from %s: %s", addr[0], e)
 
     def validate_discovery_request(
         self, request_data: Dict[str, Any], _addr: Tuple[str, int]
@@ -275,7 +275,7 @@ class NetworkScanner:
             logger.info("Server announcement broadcast to %s:%s", subnet, port)
 
         except Exception as e:
-            logger.error("Failed to broadcast server announcement: %s", e)
+            logger.exception("Failed to broadcast server announcement: %s", e)
 
     def get_local_subnets(self) -> list:  # NOSONAR
         """
@@ -314,7 +314,7 @@ class NetworkScanner:
                             continue
 
             except Exception as e:
-                logger.error("Error determining subnet broadcast addresses: %s", e)
+                logger.exception("Error determining subnet broadcast addresses: %s", e)
         else:
             logger.warning(
                 "netifaces module not available, using default broadcast addresses"

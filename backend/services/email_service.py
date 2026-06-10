@@ -125,7 +125,7 @@ class EmailService:
                 server.quit()
 
         except Exception as e:
-            logger.error("Failed to send email: %s", e)
+            logger.exception("Failed to send email: %s", e)
             return False
 
     def send_test_email(self, to_address: str) -> bool:

@@ -130,7 +130,7 @@ async def start_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error starting OpenTelemetry: %s", e)
+        logger.exception("Error starting OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -227,7 +227,7 @@ async def stop_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error stopping OpenTelemetry: %s", e)
+        logger.exception("Error stopping OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -326,7 +326,7 @@ async def restart_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error restarting OpenTelemetry: %s", e)
+        logger.exception("Error restarting OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

@@ -102,7 +102,7 @@ async def fetch_public_key() -> Optional[str]:
     except aiohttp.ClientError as e:
         logger.warning("Network error fetching public key: %s", e)
     except Exception as e:
-        logger.error("Unexpected error fetching public key: %s", e)
+        logger.exception("Unexpected error fetching public key: %s", e)
 
     return None
 

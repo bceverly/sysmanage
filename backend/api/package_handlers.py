@@ -131,7 +131,7 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
 
     except Exception as e:
         db.rollback()
-        debug_logger.error(
+        debug_logger.exception(
             "Error starting available packages batch for host %s: %s",
             connection.host_id,
             e,
@@ -255,7 +255,7 @@ async def handle_packages_batch(db: Session, connection, message_data: dict):  #
 
     except Exception as e:
         db.rollback()
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing available packages batch for host %s: %s",
             connection.host_id,
             e,
@@ -333,7 +333,7 @@ async def handle_packages_batch_end(db: Session, connection, message_data: dict)
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error ending available packages batch for host %s: %s",
             connection.host_id,
             e,

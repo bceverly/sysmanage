@@ -77,7 +77,7 @@ async def get_email_config(current_user=Depends(get_current_user)):
             configured=bool(is_configured),  # Ensure it's a boolean
         )
     except Exception as e:
-        logger.error("Failed to get email configuration: %s", str(e))
+        logger.exception("Failed to get email configuration: %s", str(e))
         raise HTTPException(
             status_code=500, detail=_("Failed to get email configuration")
         ) from e
@@ -117,7 +117,7 @@ async def test_email_config(
         )
 
     except Exception as e:
-        logger.error("Failed to send test email: %s", e)
+        logger.exception("Failed to send test email: %s", e)
         return EmailTestResponse(
             success=False,
             message=_("Error sending test email: {error}").format(error=str(e)),

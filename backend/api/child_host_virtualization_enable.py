@@ -827,7 +827,7 @@ async def list_kvm_networks(
                 logging.getLogger(__name__).warning(
                     "KVM net list plan path failed for host %s; engine path declined: %s",
                     sanitize_log(host_id),
-                    exc,
+                    sanitize_log(str(exc)),
                 )
 
         if not used_plan_path:

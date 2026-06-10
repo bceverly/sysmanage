@@ -22,7 +22,7 @@ async def check_host_heartbeats():  # NOSONAR
     try:
         db = next(get_db())
     except Exception as e:
-        logger.error("Failed to get database connection: %s", e)
+        logger.exception("Failed to get database connection: %s", e)
         return
 
     try:
@@ -53,7 +53,7 @@ async def check_host_heartbeats():  # NOSONAR
             logger.info("Marked %s hosts as down", len(stale_hosts))
 
     except Exception as e:
-        logger.error("Error checking host heartbeats: %s", e)
+        logger.exception("Error checking host heartbeats: %s", e)
         db.rollback()
     finally:
         db.close()
@@ -71,6 +71,6 @@ async def heartbeat_monitor_service():
             # Check every minute
             await asyncio.sleep(60)
         except Exception as e:
-            logger.error("Error in heartbeat monitor service: %s", e)
+            logger.exception("Error in heartbeat monitor service: %s", e)
             # Wait a bit before retrying
             await asyncio.sleep(30)

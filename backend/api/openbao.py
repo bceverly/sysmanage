@@ -135,8 +135,8 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             # suppression has to live on the ``subprocess.run(`` line
             # right above the ``[``.  Earlier placements on the
             # comment block two lines up were silently ignored.
-            result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-                [
+            result = subprocess.run(  # nosec B603
+                [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                     bao_cmd,
                     "status",
                 ],
@@ -416,7 +416,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
             "status": get_openbao_status(),
         }
     except Exception:  # NOSONAR
-        logger.error("Exception occurred while starting OpenBAO", exc_info=True)
+        logger.exception("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
             "message": _(
@@ -532,7 +532,9 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
             "status": get_openbao_status(),
         }
     except Exception as e:
-        logger.error("Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True)
+        logger.exception(
+            "Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True
+        )
         return {
             "success": False,
             "message": _(
@@ -583,8 +585,8 @@ def seal_openbao() -> Dict[str, Any]:
         # No user input reaches argv.  See openbao.py:128 for why
         # the nosemgrep marker has to live on the ``subprocess.run(``
         # line — the rule anchors on the argv list opener below.
-        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-            [
+        result = subprocess.run(  # nosec B603
+            [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 bao_cmd,
                 "operator",
                 "seal",
@@ -688,8 +690,8 @@ def unseal_openbao() -> Dict[str, Any]:
         # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
         # Neither is request/user-controlled.  See openbao.py:128 for
         # why nosemgrep lives on the ``subprocess.run(`` line.
-        result = subprocess.run(  # nosec B603  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-            [
+        result = subprocess.run(  # nosec B603
+            [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 bao_cmd,
                 "operator",
                 "unseal",

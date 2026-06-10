@@ -207,7 +207,7 @@ async def execute_script(  # NOSONAR
                 )
                 db_session.commit()
 
-                logger.error("Failed to queue script execution: %s", e)
+                logger.exception("Failed to queue script execution: %s", e)
                 raise HTTPException(
                     status_code=500,
                     detail=_("Failed to queue script execution"),
@@ -229,7 +229,7 @@ async def execute_script(  # NOSONAR
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error executing script: %s", e)
+        logger.exception("Error executing script: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to execute script")
         ) from e
@@ -310,7 +310,7 @@ async def get_script_executions(
             )
 
     except Exception as e:
-        logger.error("Error fetching script executions: %s", e)
+        logger.exception("Error fetching script executions: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch script executions")
         ) from e
@@ -386,7 +386,7 @@ async def delete_script_execution(
         raise
     except Exception as e:
         db_session.rollback()
-        logger.error(
+        logger.exception(
             "Error deleting script execution %s: %s", sanitize_log(execution_id), e
         )
         raise HTTPException(
@@ -464,7 +464,7 @@ async def delete_script_executions_bulk(
             }
     except Exception as e:
         db_session.rollback()
-        logger.error("Error bulk deleting script executions: %s", e)
+        logger.exception("Error bulk deleting script executions: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to delete script executions")
         ) from e
@@ -519,7 +519,7 @@ async def get_script_execution(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error fetching script execution %s: %s", sanitize_log(execution_id), e
         )
         raise HTTPException(

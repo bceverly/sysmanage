@@ -145,7 +145,7 @@ async def get_firewall_status(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error getting firewall status for host %s: %s", sanitize_log(host_id), e
         )
         raise HTTPException(

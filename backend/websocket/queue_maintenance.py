@@ -79,7 +79,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to cleanup old messages: %s"), str(e))
+            logger.exception(_("Failed to cleanup old messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -120,7 +120,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to delete messages for host %s: %s"), host_id, e)
+            logger.exception(_("Failed to delete messages for host %s: %s"), host_id, e)
             return 0
         finally:
             if not session_provided:
@@ -193,7 +193,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to expire old messages: %s"), str(e))
+            logger.exception(_("Failed to expire old messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -248,7 +248,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to delete failed messages: %s"), str(e))
+            logger.exception(_("Failed to delete failed messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:

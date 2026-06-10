@@ -102,7 +102,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         }
 
     except Exception as e:
-        debug_logger.error("Error updating software inventory: %s", e)
+        debug_logger.exception("Error updating software inventory: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -247,7 +247,7 @@ async def handle_package_updates_update(  # NOSONAR
                     update_type,
                 )
             except Exception as e:
-                debug_logger.error(
+                debug_logger.exception(
                     "Failed to add package update %s: %s",
                     package_update.get("package_name", "unknown"),
                     str(e),
@@ -280,7 +280,7 @@ async def handle_package_updates_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error storing package updates: %s", e)
+        debug_logger.exception("Error storing package updates: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -390,7 +390,7 @@ def handle_package_collection(db: Session, connection, message_data: dict):
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing package collection result from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -485,7 +485,7 @@ async def handle_third_party_repository_update(
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing third-party repository update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -568,7 +568,7 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing antivirus status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -699,7 +699,7 @@ async def handle_commercial_antivirus_status_update(
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing commercial antivirus status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -801,7 +801,7 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing firewall status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -887,7 +887,7 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing Graylog status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -977,7 +977,7 @@ async def handle_installation_complete(  # NOSONAR  # awaited by router
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing installation_complete for request %s: %s",
             request_id,
             e,

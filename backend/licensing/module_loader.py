@@ -120,7 +120,7 @@ class ModuleLoader:
             Path(modules_path).mkdir(parents=True, exist_ok=True)
             logger.info("Modules directory: %s", modules_path)
         except Exception as e:
-            logger.error("Failed to create modules directory: %s", e)
+            logger.exception("Failed to create modules directory: %s", e)
 
         self._plugin_loader.initialize()
         self._initialized = True
@@ -194,7 +194,7 @@ class ModuleLoader:
                     return cache_entry.file_path
                 return None
             except Exception as e:
-                logger.error("Error querying module cache: %s", e)
+                logger.exception("Error querying module cache: %s", e)
                 return None
 
     def _log_failed_download_response(
@@ -343,12 +343,12 @@ class ModuleLoader:
             return self._load_module_from_path(module_code, final_path)
 
         except aiohttp.ClientError as e:
-            logger.error("Module download network error: %s", e)
+            logger.exception("Module download network error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
         except Exception as e:
-            logger.error("Module download error: %s", e)
+            logger.exception("Module download error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
@@ -404,7 +404,7 @@ class ModuleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to save module to cache: %s", e)
+                logger.exception("Failed to save module to cache: %s", e)
                 session.rollback()
 
     def _load_module_from_path(self, module_code: str, file_path: str) -> bool:
@@ -439,7 +439,7 @@ class ModuleLoader:
             return True
 
         except Exception as e:
-            logger.error("Failed to load module %s: %s", module_code, e)
+            logger.exception("Failed to load module %s: %s", module_code, e)
             return False
 
     def _check_migration_compatibility(self, module_code: str, module: Any) -> bool:
@@ -561,7 +561,7 @@ class ModuleLoader:
                     return cache_entry.version
                 return None
             except Exception as e:
-                logger.error("Error querying cached module version: %s", e)
+                logger.exception("Error querying cached module version: %s", e)
                 return None
 
     def _get_cached_module_hash(self, module_code: str) -> Optional[str]:
@@ -591,7 +591,7 @@ class ModuleLoader:
                     return cache_entry.file_hash
                 return None
             except Exception as e:
-                logger.error("Error querying cached module hash: %s", e)
+                logger.exception("Error querying cached module hash: %s", e)
                 return None
 
     async def query_server_versions(self) -> Dict[str, Any]:
@@ -665,7 +665,7 @@ class ModuleLoader:
             logger.warning("Version check network error: %s", e)
             return {}
         except Exception as e:
-            logger.error("Version check error: %s", e)
+            logger.exception("Version check error: %s", e)
             return {}
 
     async def check_for_updates(self) -> List[str]:
@@ -827,7 +827,9 @@ class ModuleLoader:
                 logger.debug("Removed cache entries for module %s", module_code)
 
             except Exception as e:
-                logger.error("Failed to remove cached module %s: %s", module_code, e)
+                logger.exception(
+                    "Failed to remove cached module %s: %s", module_code, e
+                )
                 session.rollback()
 
     # --- Plugin bundle methods (delegated to PluginBundleLoader) ---
@@ -883,7 +885,7 @@ class ModuleLoader:
             else:
                 logger.info("All modules are up to date")
         except Exception as e:
-            logger.error("Module update check failed: %s", e)
+            logger.exception("Module update check failed: %s", e)
 
 
 # Global module loader instance

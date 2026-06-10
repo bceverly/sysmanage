@@ -110,7 +110,7 @@ async def get_ubuntu_pro_settings(
         return settings
 
     except Exception as e:
-        logger.error("Error getting Ubuntu Pro settings: %s", e)
+        logger.exception("Error getting Ubuntu Pro settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve Ubuntu Pro settings: %s") % str(e),
@@ -207,7 +207,7 @@ async def update_ubuntu_pro_settings(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error updating Ubuntu Pro settings: %s", e)
+        logger.exception("Error updating Ubuntu Pro settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update Ubuntu Pro settings: %s") % str(e),
@@ -257,7 +257,7 @@ async def clear_master_key(
         return {"message": _("No settings found to clear")}
 
     except Exception as e:
-        logger.error("Error clearing Ubuntu Pro master key: %s", e)
+        logger.exception("Error clearing Ubuntu Pro master key: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to clear master key: %s") % str(e),
@@ -284,7 +284,7 @@ async def get_master_key_status(
         }
 
     except Exception as e:
-        logger.error("Error getting master key status: %s", e)
+        logger.exception("Error getting master key status: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to get master key status: %s") % str(e),
@@ -431,7 +431,7 @@ async def enroll_hosts_in_ubuntu_pro(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error enrolling hosts in Ubuntu Pro: %s", e)
+        logger.exception("Error enrolling hosts in Ubuntu Pro: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to initiate Ubuntu Pro enrollment: %s") % str(e),

@@ -223,7 +223,7 @@ async def list_audit_logs(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error listing audit logs: %s", e)
+        logger.exception("Error listing audit logs: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to retrieve audit logs: %s") % str(e)
         ) from e
@@ -272,7 +272,7 @@ async def get_audit_log_entry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error retrieving audit log entry %s: %s", sanitize_log(audit_id), e
         )
         raise HTTPException(

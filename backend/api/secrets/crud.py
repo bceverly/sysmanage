@@ -116,7 +116,7 @@ async def get_secret_content(
         vault_data = vault.retrieve_secret(secret.vault_path, secret.vault_token)
         content = vault_data.get("content", "")
     except VaultError as e:
-        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "Failed to retrieve secret content from vault (%s)", type(e).__name__
         )
         raise HTTPException(
@@ -150,7 +150,7 @@ async def create_secret(
             secret_subtype=secret_data.secret_subtype,
         )
     except VaultError as e:
-        logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "Failed to store secret in vault (%s)", type(e).__name__
         )
         raise HTTPException(
@@ -213,7 +213,7 @@ async def update_secret(
             secret.vault_path = vault_result["vault_path"]
             secret.vault_token = vault_result["vault_token"]
         except VaultError as e:
-            logger.error(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
                 "Failed to update secret in vault (%s)", type(e).__name__
             )
             raise HTTPException(

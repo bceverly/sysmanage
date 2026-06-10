@@ -63,7 +63,7 @@ class MessageProcessor:
                     )
                     logger.info("Processing cycle #%s completed", cycle_count)
                 except Exception as e:
-                    logger.error(
+                    logger.exception(
                         _("Error in message processing loop: %s"), str(e), exc_info=True
                     )
                     print(
@@ -120,7 +120,9 @@ class MessageProcessor:
             logger.debug("Committed all message processing changes to database")
 
         except Exception as e:
-            logger.error("Error during message processing, rolling back: %s", str(e))
+            logger.exception(
+                "Error during message processing, rolling back: %s", str(e)
+            )
             db.rollback()
             raise
         finally:

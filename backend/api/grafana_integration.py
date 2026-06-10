@@ -106,7 +106,7 @@ async def configure_prometheus_datasource(  # NOSONAR
             return
 
     except Exception as e:  # pylint: disable=broad-except
-        logger.error("Failed to retrieve API key from vault: %s", e)
+        logger.exception("Failed to retrieve API key from vault: %s", e)
         return
 
     # Configure Prometheus data source in Grafana
@@ -387,7 +387,7 @@ async def update_grafana_integration_settings(  # NOSONAR
                 session.add(secret_entry)
 
             except VaultError as e:
-                logger.error("Failed to store Grafana API key in vault: %s", e)
+                logger.exception("Failed to store Grafana API key in vault: %s", e)
                 raise HTTPException(
                     status_code=500, detail=_("Failed to securely store API key")
                 ) from e
@@ -475,7 +475,7 @@ async def check_grafana_health():  # NOSONAR
         try:
             grafana_url = settings.grafana_url
         except Exception as e:
-            logger.error("Error accessing grafana_url property: %s", e)
+            logger.exception("Error accessing grafana_url property: %s", e)
             raise HTTPException(
                 status_code=500, detail=_("Error retrieving Grafana URL: %s") % str(e)
             ) from e
@@ -560,13 +560,13 @@ async def check_grafana_health():  # NOSONAR
             httpx.WriteTimeout,
             httpx.PoolTimeout,
         ) as e:
-            logger.error("Grafana health check timeout for %s: %s", grafana_url, e)
+            logger.exception("Grafana health check timeout for %s: %s", grafana_url, e)
             return GrafanaHealthStatus(
                 healthy=False,
                 error=_("Connection timeout - Grafana server may be unreachable"),
             )
         except httpx.ConnectError as e:
-            logger.error(
+            logger.exception(
                 "Grafana health check connection failed for %s: %s", grafana_url, e
             )
             return GrafanaHealthStatus(
@@ -576,7 +576,7 @@ async def check_grafana_health():  # NOSONAR
                 ),
             )
         except Exception as e:  # pylint: disable=broad-except
-            logger.error("Error checking Grafana health: %s", e)
+            logger.exception("Error checking Grafana health: %s", e)
             return GrafanaHealthStatus(
                 healthy=False, error=_("Unexpected error checking Grafana health")
             )

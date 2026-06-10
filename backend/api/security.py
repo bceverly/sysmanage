@@ -74,7 +74,7 @@ def _get_database_user_count():
         with session_local() as session:
             return session.query(models.User).count()
     except Exception as e:
-        logger.error("Failed to get user count: %s", e)
+        logger.exception("Failed to get user count: %s", e)
         return 0
 
 

@@ -176,7 +176,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error checking OpenTelemetry eligibility: %s", e)
+        logger.exception("Error checking OpenTelemetry eligibility: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to check OpenTelemetry eligibility: %s") % str(e),

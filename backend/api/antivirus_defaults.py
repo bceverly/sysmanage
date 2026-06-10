@@ -95,7 +95,7 @@ async def get_antivirus_defaults(
         return defaults
 
     except Exception as e:
-        logger.error("Error getting antivirus defaults: %s", e)
+        logger.exception("Error getting antivirus defaults: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve antivirus defaults: %s") % str(e),
@@ -127,7 +127,7 @@ async def get_antivirus_default_for_os(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error getting antivirus default for OS %s: %s", sanitize_log(os_name), e
         )
         raise HTTPException(
@@ -234,7 +234,7 @@ async def update_antivirus_defaults(  # NOSONAR
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error updating antivirus defaults: %s", e)
+        logger.exception("Error updating antivirus defaults: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update antivirus defaults: %s") % str(e),
@@ -309,7 +309,7 @@ async def delete_antivirus_default(
         return {"message": _("No antivirus default found for this OS")}
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error deleting antivirus default for OS %s: %s", sanitize_log(os_name), e
         )
         raise HTTPException(

@@ -246,7 +246,7 @@ async def process_pending_messages(  # NOSONAR
             await process_validated_message(message, host, db)
 
         except Exception as e:
-            logger.error(
+            logger.exception(
                 _("Error processing NULL host_id message %s: %s"),
                 message.message_id,
                 str(e),
@@ -366,7 +366,7 @@ async def process_validated_message(message, host, db: Session) -> None:
         airgap_repoint_service.maybe_repoint(db, host)
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             _("Error processing message %s for host %s: %s"),
             message.message_id,
             host.fqdn,
@@ -418,7 +418,7 @@ async def process_system_info_message(message, db: Session) -> None:
         logger.info("Successfully processed SYSTEM_INFO message %s", message.message_id)
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             _("Error processing SYSTEM_INFO message %s: %s"),
             message.message_id,
             str(e),

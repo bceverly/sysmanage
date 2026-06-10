@@ -632,7 +632,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
             }
 
         except Exception as e:
-            logger.error("Error processing heartbeat: %s", e)
+            logger.exception("Error processing heartbeat: %s", e)
             return {
                 "message_type": "error",
                 "error_type": "operation_failed",

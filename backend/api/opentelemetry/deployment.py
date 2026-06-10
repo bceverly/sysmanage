@@ -164,7 +164,7 @@ async def deploy_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deploying OpenTelemetry: %s", e)
+        logger.exception("Error deploying OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -269,7 +269,7 @@ async def remove_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error removing OpenTelemetry: %s", e)
+        logger.exception("Error removing OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

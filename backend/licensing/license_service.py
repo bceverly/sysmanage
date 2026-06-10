@@ -245,7 +245,7 @@ class LicenseService:
                 session.commit()
                 logger.debug("License saved to database")
             except Exception as e:
-                logger.error("Failed to save license to database: %s", e)
+                logger.exception("Failed to save license to database: %s", e)
                 session.rollback()
 
     def _log_validation(
@@ -277,7 +277,7 @@ class LicenseService:
                 session.add(log_entry)
                 session.commit()
             except Exception as e:
-                logger.error("Failed to log validation: %s", e)
+                logger.exception("Failed to log validation: %s", e)
                 session.rollback()
 
     async def _phone_home_loop(self) -> None:
@@ -292,7 +292,7 @@ class LicenseService:
             try:
                 await self._phone_home()
             except Exception as e:
-                logger.error("Phone-home error: %s", e)
+                logger.exception("Phone-home error: %s", e)
 
             await asyncio.sleep(interval_seconds)
 
@@ -309,7 +309,7 @@ class LicenseService:
                 logger.debug("Running periodic module update check")
                 await module_loader.check_and_update_on_startup()
             except Exception as e:
-                logger.error("Module update check error: %s", e)
+                logger.exception("Module update check error: %s", e)
 
             await asyncio.sleep(interval_seconds)
 
@@ -370,7 +370,7 @@ class LicenseService:
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
         except Exception as e:
-            logger.error("Phone-home unexpected error: %s", e)
+            logger.exception("Phone-home unexpected error: %s", e)
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
 
@@ -398,7 +398,7 @@ class LicenseService:
                     ).replace(tzinfo=None)
                     session.commit()
             except Exception as e:
-                logger.error("Failed to update phone-home timestamp: %s", e)
+                logger.exception("Failed to update phone-home timestamp: %s", e)
                 session.rollback()
 
     def _check_offline_grace(self) -> bool:
@@ -445,7 +445,7 @@ class LicenseService:
                     return False
 
             except Exception as e:
-                logger.error("Error checking offline grace: %s", e)
+                logger.exception("Error checking offline grace: %s", e)
                 return True  # Fail open during errors
 
     def _deactivate_license(self) -> None:
@@ -473,7 +473,7 @@ class LicenseService:
                     )
                     session.commit()
             except Exception as e:
-                logger.error("Failed to deactivate license: %s", e)
+                logger.exception("Failed to deactivate license: %s", e)
                 session.rollback()
 
         self._cached_license = None

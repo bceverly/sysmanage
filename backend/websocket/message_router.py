@@ -269,7 +269,7 @@ async def route_inbound_message(  # NOSONAR
             success = False
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             _("Error routing message type %s: %s"), message_type, str(e), exc_info=True
         )
         print(f"ERROR in routing message type {message_type}: {e}", flush=True)

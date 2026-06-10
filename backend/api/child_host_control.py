@@ -100,7 +100,6 @@ def _resolve_agent_install_commands(session, distribution_id: str) -> list:
     """
     # pylint: disable=import-outside-toplevel
     from backend.persistence.models import ChildHostDistribution
-    import json as _json
 
     if not distribution_id:
         return []
@@ -112,26 +111,36 @@ def _resolve_agent_install_commands(session, distribution_id: str) -> list:
     if dist is None:
         return []
 
-    # Preferred: engine-resolved commands.
-    virt_engine = module_loader.get_module("virtualization_engine")
-    if virt_engine is not None:
-        try:
-            engine_cmds = virt_engine.get_agent_install_commands(
-                getattr(dist, "distribution_name", "") or "",
-                getattr(dist, "distribution_version", "") or "",
-            )
-        except Exception:  # pylint: disable=broad-exception-caught
-            engine_cmds = []
-        if engine_cmds:
-            return list(engine_cmds)
+    # Engine-first, DB-fallback (see helpers below).
+    return _engine_install_commands(dist) or _db_install_commands(dist)
 
-    # Fallback: DB-stored commands.
-    if dist.agent_install_commands:
-        try:
-            return _json.loads(dist.agent_install_commands) or []
-        except (TypeError, ValueError):
-            return []
-    return []
+
+def _engine_install_commands(dist) -> list:
+    """Engine-resolved per-distro install recipe, or ``[]`` if unavailable."""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is None:
+        return []
+    try:
+        engine_cmds = virt_engine.get_agent_install_commands(
+            getattr(dist, "distribution_name", "") or "",
+            getattr(dist, "distribution_version", "") or "",
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return []
+    return list(engine_cmds) if engine_cmds else []
+
+
+def _db_install_commands(dist) -> list:
+    """DB-stored per-distro install recipe fallback, or ``[]`` if absent/invalid."""
+    # pylint: disable=import-outside-toplevel
+    import json as _json
+
+    if not dist.agent_install_commands:
+        return []
+    try:
+        return _json.loads(dist.agent_install_commands) or []
+    except (TypeError, ValueError):
+        return []
 
 
 def _try_update_agent_plan_dispatch(

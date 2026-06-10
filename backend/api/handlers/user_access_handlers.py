@@ -320,8 +320,8 @@ async def handle_user_access_update(db: Session, connection, message_data: dict)
     except Exception as e:
         import traceback
 
-        debug_logger.error("Error updating user access: %s", e)
-        debug_logger.error("Full traceback: %s", traceback.format_exc())
+        debug_logger.exception("Error updating user access: %s", e)
+        debug_logger.exception("Full traceback: %s", traceback.format_exc())
         db.rollback()
         return {
             "message_type": "error",

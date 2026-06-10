@@ -86,7 +86,7 @@ def apply_repository_to_host(
         )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to queue %s repository command for host %s: %s",
             action,
             host.fqdn,
@@ -133,7 +133,7 @@ async def apply_repository_to_matching_hosts(
             await apply_repository_to_host(db_session, host, repository_url, action)
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error applying repository to matching hosts for OS '%s': %s",
             sanitize_log(os_name),
             e,
@@ -200,7 +200,9 @@ async def apply_default_repositories_to_host(db_session: Session, host: models.H
             )
 
     except Exception as e:
-        logger.error("Error applying default repositories to host %s: %s", host.fqdn, e)
+        logger.exception(
+            "Error applying default repositories to host %s: %s", host.fqdn, e
+        )
 
 
 # Supported operating systems grouped by type
@@ -354,7 +356,7 @@ async def get_default_repositories_by_os(
         return repositories
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error getting default repositories for OS %s: %s", sanitize_log(os_name), e
         )
         raise HTTPException(
@@ -402,7 +404,7 @@ async def get_default_repositories(
         return repositories
 
     except Exception as e:
-        logger.error("Error getting default repositories: %s", e)
+        logger.exception("Error getting default repositories: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve default repositories: %s") % str(e),
@@ -489,7 +491,7 @@ async def create_default_repository(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error creating default repository: %s", e)
+        logger.exception("Error creating default repository: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to create default repository: %s") % str(e),
@@ -593,7 +595,7 @@ async def delete_default_repository(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error deleting default repository %s: %s", sanitize_log(repo_id), e
         )
         raise HTTPException(

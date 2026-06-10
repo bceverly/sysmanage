@@ -704,11 +704,11 @@ def _iso_file_response(
             friendly = f"{run.iso_label}-{run.id}.iso"
     else:
         friendly = f"{run.iso_label}-{run.id}.iso"
-    # Path containment enforced by _assert_within_iso_dir above; the served path
-    # is always a glob result under the ISO output dir.
-    # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
+    # Path containment is enforced by _assert_within_iso_dir (realpath +
+    # startswith); the served path is always a glob result under the ISO dir.
     chosen = _assert_within_iso_dir(chosen)
     return FileResponse(
+        # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
         chosen,
         media_type="application/octet-stream",
         filename=friendly,
@@ -884,11 +884,11 @@ async def download_manifest_iso(
             status_code=410,
             detail=_("ISO file is no longer on disk: %s") % (manifest.iso_path or ""),
         )
-    # Path containment enforced by _assert_within_iso_dir above; iso_path is a
-    # server-written column always under the ISO output dir.
-    # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
+    # Path containment is enforced by _assert_within_iso_dir (realpath +
+    # startswith); iso_path is a server-written column always under the ISO dir.
     safe_iso_path = _assert_within_iso_dir(manifest.iso_path)
     return FileResponse(
+        # nosemgrep: python.fastapi.file.tainted-path-traversal-fastapi.tainted-path-traversal-fastapi
         safe_iso_path,
         media_type="application/octet-stream",
         filename=os.path.basename(safe_iso_path),

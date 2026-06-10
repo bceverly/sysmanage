@@ -223,8 +223,8 @@ async def execute_updates(  # NOSONAR
         import traceback
 
         error_details = traceback.format_exc()
-        logger.error("Update execution failed: %s", str(e))
-        logger.error("Full traceback:\n%s", error_details)
+        logger.exception("Update execution failed: %s", str(e))
+        logger.exception("Full traceback:\n%s", error_details)
         raise HTTPException(
             status_code=500, detail=_("Failed to execute updates: %s") % str(e)
         ) from e
