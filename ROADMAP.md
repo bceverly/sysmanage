@@ -3461,14 +3461,26 @@ direct GitHub-release URLs cannot easily be mirrored).
 
 **Acceptance criteria:**
 
-- [ ] Every supported child-host distro family installs sysmanage-
+- [~] Every supported child-host distro family installs sysmanage-
       agent through its OS-native package manager, not via a
-      hard-coded GitHub-releases curl chain.
-- [ ] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+      hard-coded GitHub-releases curl chain.  *(Done for the 11
+      platforms with a native channel — ubuntu/debian → Launchpad
+      PPA, fedora/rhel/rocky/alma → Fedora Copr, opensuse-leap/sles
+      → OBS zypper repo, windows → winget, macos → Homebrew tap,
+      arch → AUR (all ``legacy=False`` in ``_AGENT_INSTALL``).
+      Deferred: alpine/freebsd/openbsd/netbsd stay ``legacy=True``
+      direct-download — no consumable upstream apk/pkg repository is
+      published for them yet, and flipping the engine entry without
+      one would break installs.  See Scope note.)*
+- [~] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
       ``brew upgrade`` natively pick up new agent releases without
-      operator action.
-- [ ] In-app "Update Agent" button works on every distro family
-      (currently silently no-ops on direct-.deb installs).
+      operator action.  *(Holds for the 11 native-channel platforms;
+      the 4 direct-download platforms don't auto-track upgrades until
+      their repos land.)*
+- [~] In-app "Update Agent" button works on every distro family
+      (currently silently no-ops on direct-.deb installs).  *(Works
+      on the 11 native-channel platforms; still a no-op on the 4
+      remaining direct-download platforms.)*
 - [~] winget + Homebrew tap publishing automated in build-and-
       release.yml.  *(Homebrew tap auto-bumps
       ``Formula/sysmanage-agent.rb`` on every release tag — ✅ done.
@@ -3486,11 +3498,20 @@ direct GitHub-release URLs cannot easily be mirrored).
       derives from the sudoers allowlist scope, not from
       kernel-level no-new-privs.
 
-**Scope note.** This is essentially "early Phase 11 close-out went
-deep on Ubuntu/Debian; finish the matrix for the other 8+ supported
-distro/OS combinations."  Estimated 1-2 weeks of focused work,
-mostly per-channel publish-pipeline plumbing rather than novel
-engineering.
+**Scope note.** The native-channel matrix is **complete for 11 of 15
+platforms** (apt PPA, dnf Copr, zypper OBS, winget, Homebrew, AUR) —
+done as of June 2026.  The remaining 4 — **alpine, freebsd, openbsd,
+netbsd** — are blocked not on engine work but on **publishing a
+consumable package repository** for each (only direct-download
+artifacts exist today).  Two routes per platform: an official
+upstream submission (Alpine aports / FreeBSD ports / OpenBSD ports /
+NetBSD pkgsrc — external, multi-week maintainer review) or a
+self-hosted signed repo on the docs GitHub Pages (mirroring the
+existing deb/rpm repos).  Until one lands per platform the engine
+keeps ``legacy=True`` direct-download, which installs + runs fine and
+only forgoes auto-upgrade tracking + the in-app Update-Agent button.
+**Deferred by product decision (June 2026)** — revisit when a repo
+publish pipeline is prioritized for these four.
 
 ##### winget first-submission close-out (BLOCKER — must land before automation)
 

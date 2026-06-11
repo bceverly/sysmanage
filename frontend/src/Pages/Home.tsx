@@ -226,7 +226,16 @@ const Dashboard = () => {
             // Apply saved preferences
             if (Array.isArray(prefs)) {
                 prefs.forEach((pref: { card_identifier: string; visible: boolean }) => {
-                    visibilityMap[pref.card_identifier] = pref.visible;
+                    // Only update known cards; blocks prototype pollution via a
+                    // malicious card_identifier such as "__proto__" (S6109).
+                    if (
+                        Object.prototype.hasOwnProperty.call(
+                            visibilityMap,
+                            pref.card_identifier,
+                        )
+                    ) {
+                        visibilityMap[pref.card_identifier] = pref.visible;
+                    }
                 });
             }
 

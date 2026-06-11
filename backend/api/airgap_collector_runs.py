@@ -329,7 +329,7 @@ def _derive_target_meta(
 
 def _serialize_target(target: models.AirgapCollectionTarget) -> RunTargetSpec:
     """Translate the persisted target row into the API response shape."""
-    repos = (target.repos or "").split(",") if target.repos else []
+    repos = target.repos.split(",") if target.repos else []
     return RunTargetSpec(
         mirror_id=str(target.mirror_id) if target.mirror_id else "",
         distro=target.distro,
