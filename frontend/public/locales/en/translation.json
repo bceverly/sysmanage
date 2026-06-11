@@ -2735,7 +2735,9 @@
       "syncLatency": "Upstream sync latency (recent)",
       "syncPoints": "{{n}} sync events",
       "syncTimeline": "Sync timeline",
-      "syncTimelineEmpty": "No sync events recorded yet."
+      "syncTimelineEmpty": "No sync events recorded yet.",
+      "pushPoliciesHint": "Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
+      "syncHealthHistogram": "Sync success / failure (recent)"
     },
     "empty": "No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {

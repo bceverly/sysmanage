@@ -36,6 +36,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
 import {
   doAcknowledgeFederationAlert,
@@ -174,6 +175,86 @@ function Sparkline({
         strokeLinejoin="round"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+
+/** Dependency-free SVG histogram of upstream-sync success vs. failure over
+ * time.  Buckets the timeline into equal time intervals and draws a stacked
+ * bar per bucket (success green on the bottom, failures red on top) so an
+ * operator can see at a glance whether a site's uplink has been flapping.
+ * Returns null for an empty series so the caller can render an empty-state. */
+function SyncHealthHistogram({
+  events,
+  width = 280,
+  height = 60,
+  buckets = 12,
+  testId,
+}: Readonly<{
+  events: ReadonlyArray<{ recorded_at: string | null; sync_status: string }>;
+  width?: number;
+  height?: number;
+  buckets?: number;
+  testId?: string;
+}>) {
+  const points = events
+    .map((e) => ({
+      t: e.recorded_at ? new Date(e.recorded_at).getTime() : NaN,
+      ok: e.sync_status === "success",
+    }))
+    .filter((p) => !Number.isNaN(p.t));
+  if (points.length === 0) return null;
+
+  const tMin = Math.min(...points.map((p) => p.t));
+  const tMax = Math.max(...points.map((p) => p.t));
+  const tSpan = tMax - tMin || 1;
+  const n = Math.max(1, buckets);
+  const agg = Array.from({ length: n }, () => ({ ok: 0, fail: 0 }));
+  for (const p of points) {
+    let idx = Math.floor(((p.t - tMin) / tSpan) * n);
+    if (idx >= n) idx = n - 1; // the latest point lands in the final bucket
+    if (p.ok) agg[idx].ok += 1;
+    else agg[idx].fail += 1;
+  }
+  const maxTotal = Math.max(1, ...agg.map((b) => b.ok + b.fail));
+  const gap = 2;
+  const barW = (width - gap * (n - 1)) / n;
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden="true"
+      data-testid={testId}
+    >
+      {agg.map((b, i) => {
+        const x = i * (barW + gap);
+        const okH = (b.ok / maxTotal) * height;
+        const failH = (b.fail / maxTotal) * height;
+        return (
+          <g key={`bucket-${i}`}>
+            {b.ok > 0 && (
+              <rect
+                x={x}
+                y={height - okH}
+                width={barW}
+                height={okH}
+                fill="#2e7d32"
+              />
+            )}
+            {b.fail > 0 && (
+              <rect
+                x={x}
+                y={height - okH - failH}
+                width={barW}
+                height={failH}
+                fill="#d32f2f"
+              />
+            )}
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -552,15 +633,24 @@ const SiteDetail: React.FC = () => {
           >
             {t("sites.detail.dispatchCommand", "Dispatch command")}
           </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={site.status !== "enrolled" || actionInFlight}
-            onClick={handleRepushPolicies}
-            data-testid="header-policies-button"
+          <Tooltip
+            title={t(
+              "sites.detail.pushPoliciesHint",
+              "Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
+            )}
           >
-            {t("sites.detail.pushPolicies", "Push policies")}
-          </Button>
+            <span>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={site.status !== "enrolled" || actionInFlight}
+                onClick={handleRepushPolicies}
+                data-testid="header-policies-button"
+              >
+                {t("sites.detail.pushPolicies", "Push policies")}
+              </Button>
+            </span>
+          </Tooltip>
           <Chip
             label={site.status}
             color={statusChipColor(site.status)}
@@ -759,6 +849,20 @@ const SiteDetail: React.FC = () => {
                         values={syncTimeline.events.map((e) =>
                           e.latency_ms ?? e.queue_depth ?? null,
                         )}
+                      />
+                    </Box>
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t(
+                        "sites.detail.syncHealthHistogram",
+                        "Sync success / failure (recent)",
+                      )}
+                    </Typography>
+                    <Box>
+                      <SyncHealthHistogram
+                        testId="sync-health-histogram"
+                        events={syncTimeline.events}
                       />
                     </Box>
                   </Box>

@@ -2640,19 +2640,27 @@ matching response types.  i18n keys for `sites.addSite`,
       Suspend / Resume / Remove buttons on the detail page (each
       visible only for states that permit the transition); remove
       guarded by a confirmation Dialog
-- [~] Connection-health detail — landed (June 2026) on SiteDetail: the
+- [x] Connection-health detail — landed (June 2026) on SiteDetail: the
       Connection card now polls `/sites/{id}/sync-status` every 15s and
       shows last-sync (absolute + locale-aware relative), a health chip
       (healthy / stale / overdue / never, derived from last-sync age vs
       `sync_interval_seconds`), pending upstream-queue depth (when the site
-      reports it), and a manual Refresh.  *Remaining:* the sync-latency
-      **histogram** needs historical sync samples persisted server-side
-      (none stored today) — deferred until that backend metric exists.
+      reports it), and a manual Refresh.  The sync-latency sparkline AND a
+      **success/failure histogram** (June 2026) plot the per-site
+      `federation_site_sync_event` series that `record_sync` already
+      persists coordinator-side (`list_sync_events` / `sync-timeline`
+      endpoint) — the earlier "no samples stored server-side" note was
+      stale; the histogram is a dependency-free SVG over data already in
+      hand, no backend/engine change needed.
 - [x] Per-site action surface — June 2026: SiteDetail header now carries a
       per-site action group (batch "Dispatch command", gated to enrolled
       sites; "Push policies" → policy management); the site audit log is
-      already linked from the page.  *(Site-scoped one-click policy re-push
-      still pending a site-scoped push endpoint — tracked as a follow-up.)*
+      already linked from the page.  Site-scoped one-click policy re-push is
+      wired end-to-end (`POST /sites/{id}/repush-policies` →
+      `requeue_site_policies`, which resets `push_status=pending` AND
+      `push_attempts=0` so **dead-lettered deliveries are cleared** — that
+      doubles as the operator dead-letter reset; the button's tooltip now
+      says so).  The earlier "still pending an endpoint" note was stale.
 
 **Status (12.3 — cross-site Federated Hosts page):** ✅ Landed (June 2026).
 `frontend/src/Pages/FederationHosts.tsx` at `/federation/hosts` renders the
@@ -2938,7 +2946,9 @@ in `secrets_engine.pyx`.
 
 #### 12.6 Database Schema
 
-**Status:** ✅ Landed (May 2026).  13 federation tables defined as
+**Status:** ✅ Landed (May 2026).  18 federation tables (13 at first
+landing; 5 added since — alert, alert_config, site_sync_event,
+secret_lease, received_secret_lease) defined as
 SQLAlchemy ORM in `backend/persistence/models/federation.py`,
 idempotent Alembic migration `m1fedschema_add_federation_schema.py`
 creates the full schema on both SQLite (test) and PostgreSQL (prod)
@@ -3311,8 +3321,12 @@ above for cost/sovereignty; retained as the fallback option):**
 
 **Acceptance criteria:**
 
-- [x] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
-      all 14 locales. *(autonomous pass 2026-05-08, sub-agent A)*
+- [ ] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
+      all 14 locales. *(NOT done — a 2026-06 code audit found ~461
+      ``[TODO]`` placeholders per non-English frontend locale (~6k strings)
+      still pending.  The translate tooling exists but the drain pass was
+      never run; the earlier ``[x]`` (autonomous pass 2026-05-08) was an
+      over-claim.  This is the main outstanding 12.8 work.)*
 - [x] Agent: empty msgstrs filled across all 14 locales with
       format-spec safety.  ``_strip_fuzzy_block`` guard prevents
       regression. *(autonomous pass, sub-agent B)*

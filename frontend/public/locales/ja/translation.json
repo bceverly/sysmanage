@@ -2735,7 +2735,9 @@
       "syncLatency": "[TODO] Upstream sync latency (recent)",
       "syncPoints": "[TODO] {{n}} sync events",
       "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet."
+      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
+      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
+      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
     },
     "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
     "enroll": {
