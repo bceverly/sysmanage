@@ -126,6 +126,17 @@ jobs:
         python-version: ['3.12']
 
     steps:
+    - name: Exclude workspace from Microsoft Defender (Windows CI speedup)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Defender real-time scanning of every file write/exec dominates this
+        # filesystem-heavy suite on Windows.  Excluding the workspace + temp
+        # (best-effort; never fails the build) cuts wall-clock substantially.
+        Add-MpPreference -ExclusionPath "${{ github.workspace }}" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionPath "$env:TEMP" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionProcess "python.exe" -ErrorAction SilentlyContinue
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Python ${{ matrix.python-version }}
@@ -287,6 +298,17 @@ jobs:
         node-version: ['20']
 
     steps:
+    - name: Exclude workspace from Microsoft Defender (Windows CI speedup)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Defender real-time scanning of every file write/exec dominates this
+        # filesystem-heavy suite on Windows.  Excluding the workspace + temp
+        # (best-effort; never fails the build) cuts wall-clock substantially.
+        Add-MpPreference -ExclusionPath "${{ github.workspace }}" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionPath "$env:TEMP" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionProcess "python.exe" -ErrorAction SilentlyContinue
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Node.js ${{ matrix.node-version }}
@@ -352,6 +374,17 @@ jobs:
         node-version: ['20']
 
     steps:
+    - name: Exclude workspace from Microsoft Defender (Windows CI speedup)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Defender real-time scanning of every file write/exec dominates this
+        # filesystem-heavy suite on Windows.  Excluding the workspace + temp
+        # (best-effort; never fails the build) cuts wall-clock substantially.
+        Add-MpPreference -ExclusionPath "${{ github.workspace }}" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionPath "$env:TEMP" -ErrorAction SilentlyContinue
+        Add-MpPreference -ExclusionProcess "python.exe" -ErrorAction SilentlyContinue
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set up Python ${{ matrix.python-version }}

@@ -37,8 +37,11 @@ class TestTlsCert:
         assert os.path.isfile(cert) and os.path.isfile(key)
         assert cert == str(tmp_path / "id" / "identity-cert.pem")
         assert key == str(tmp_path / "id" / "identity-cert-key.pem")
-        assert oct(os.stat(cert).st_mode)[-3:] == "644"
-        assert oct(os.stat(key).st_mode)[-3:] == "600"
+        # Unix permission bits only apply on POSIX; Windows ignores os.chmod's
+        # group/other bits and always reports 0o666 for a writable file.
+        if os.name == "posix":
+            assert oct(os.stat(cert).st_mode)[-3:] == "644"
+            assert oct(os.stat(key).st_mode)[-3:] == "600"
 
     def test_cert_pem_is_a_valid_x509_certificate(self, keydirs):
         pem = fid.get_federation_tls_cert_pem()
@@ -62,9 +65,10 @@ class TestIdentityKeypair:
         priv, pub = fid.ensure_federation_identity_keypair()
         assert os.path.isfile(priv) and os.path.isfile(pub)
         assert priv == key_file
-        # 0600 private, 0644 public.
-        assert oct(os.stat(priv).st_mode)[-3:] == "600"
-        assert oct(os.stat(pub).st_mode)[-3:] == "644"
+        # 0600 private, 0644 public — POSIX only (Windows ignores Unix modes).
+        if os.name == "posix":
+            assert oct(os.stat(priv).st_mode)[-3:] == "600"
+            assert oct(os.stat(pub).st_mode)[-3:] == "644"
 
     def test_ensure_is_idempotent_and_never_overwrites(self, keydirs):
         priv, _pub = fid.ensure_federation_identity_keypair()
