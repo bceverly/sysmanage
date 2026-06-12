@@ -199,7 +199,7 @@ function SyncHealthHistogram({
 }>) {
   const points = events
     .map((e) => ({
-      t: e.recorded_at ? new Date(e.recorded_at).getTime() : NaN,
+      t: e.recorded_at ? new Date(e.recorded_at).getTime() : Number.NaN,
       ok: e.sync_status === "success",
     }))
     .filter((p) => !Number.isNaN(p.t));
@@ -209,7 +209,15 @@ function SyncHealthHistogram({
   const tMax = Math.max(...points.map((p) => p.t));
   const tSpan = tMax - tMin || 1;
   const n = Math.max(1, buckets);
-  const agg = Array.from({ length: n }, () => ({ ok: 0, fail: 0 }));
+  // Each bucket's start timestamp is a stable, unique identity (tSpan >= 1,
+  // so every slice start differs) — used as the React key instead of the
+  // array index.
+  const bucketMs = tSpan / n;
+  const agg = Array.from({ length: n }, (_, i) => ({
+    startT: tMin + bucketMs * i,
+    ok: 0,
+    fail: 0,
+  }));
   for (const p of points) {
     let idx = Math.floor(((p.t - tMin) / tSpan) * n);
     if (idx >= n) idx = n - 1; // the latest point lands in the final bucket
@@ -233,7 +241,7 @@ function SyncHealthHistogram({
         const okH = (b.ok / maxTotal) * height;
         const failH = (b.fail / maxTotal) * height;
         return (
-          <g key={`bucket-${i}`}>
+          <g key={`bucket-${b.startT}`}>
             {b.ok > 0 && (
               <rect
                 x={x}
