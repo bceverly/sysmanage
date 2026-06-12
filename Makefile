@@ -767,6 +767,21 @@ clean-whitespace: $(VENV_ACTIVATE)
 lint-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Python Linting ==="
 	@echo "Running black..."
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -m black --check backend/ tests/ >nul 2>&1 & if errorlevel 1 ( \
+		$(PYTHON) -m black backend/ tests/ & \
+		echo. & \
+		echo [FAIL] black reformatted files in your working tree. & \
+		echo        The fix was applied locally -- but CI runs & \
+		echo        'black --check' against committed code, so you & \
+		echo        MUST: git add ^<files^> ^&^& git commit --amend & \
+		echo        ^(or a fresh commit^) before pushing. & \
+		echo. & \
+		exit /b 1 \
+	) else ( \
+		$(PYTHON) -m black backend/ tests/ \
+	)
+else
 	@$(PYTHON) -m black --check backend/ tests/ >/dev/null 2>&1; \
 	black_drift=$$?; \
 	$(PYTHON) -m black backend/ tests/; \
@@ -780,6 +795,7 @@ lint-python: $(VENV_ACTIVATE) clean-whitespace
 		echo ""; \
 		exit 1; \
 	fi
+endif
 	@echo "Running pylint..."
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc
