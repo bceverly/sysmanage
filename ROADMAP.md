@@ -2374,6 +2374,10 @@ mirrors every other engine's mount pattern (Pro+ engine repo provides
 `/api/v1/federation/*` that respond `200 {"licensed": False, ...}`
 when the engine isn't loaded.  32 mount-function + stub-surface tests
 in `backend/tests/test_proplus_routes.py` pin the contract.
+*(Current state, June 2026: as later sub-phases landed — alerts,
+alert-config, secret-leases, cross-site reports — the controller stub
+surface has grown to **43** endpoints and `test_proplus_routes.py` to
+**40** federation tests.  Verified by direct count, June 2026.)*
 
 **Status (12.1.B — OSS site-service layer):** ✅ Landed (May 2026).
 `backend/services/federation_site_service.py` provides the OSS-side
@@ -2485,7 +2489,9 @@ above for the implementing services/migrations.)*
 Mirrors 12.1.A-F for the site side: a `mount_federation_site_routes()`
 function in `backend/api/proplus_routes.py` plus an OSS stub block
 exposing 8 endpoints under `/api/v1/federation/site/*` that respond
-`200 {"licensed": False, ...}` when the engine isn't loaded.  Three
+`200 {"licensed": False, ...}` when the engine isn't loaded *(now
+**9** — the secret-lease reception stub was added in 12.5; verified by
+direct count, June 2026)*.  Three
 new pure-Python service modules for the Pro+ engine to wrap:
 
 * `backend/services/federation_coordinator_service.py` — singleton
@@ -3137,7 +3143,7 @@ rather than blocking.
 9. [x] Implement upstream/downstream sync protocol
 10. [x] Implement command dispatch and result tracking
 11. [x] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
-12. [ ] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5)
+12. [x] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5) — done June 2026; matches the checked Deliverable below. Code: `dynamic_secrets.renew_lease`, `federation_secret_lease_service` + `federation_secret_request_service` (issue/renew/deliver/rotate), `federation_received_secret_lease` site inbox, column `federation_secret_lease.delivered_at` (migration `m10fedseclease`). API gated behind `secrets_engine`. (Checkbox was stale — left unchecked alongside step 14's still-open i18n.)
 13. [x] Create federation deployment guide — sysmanage-docs `federation.html` "Deployment & Operations" section
 14. [ ] i18n/l10n for all 14 languages
 
@@ -3165,6 +3171,7 @@ rather than blocking.
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+  - *Audit status (June 2026):* ✅ all 527 federation tests pass · ✅ lint issue-free · ✅ SonarQube clean. **Remaining before this box can be checked:** a real-scale performance-regression run (the `test_federation_scale.py` harness exists but has only been run at tiny default scale, not the 100-site / 1M-host target) and the i18n/l10n translation pass (12.1 / 12.2 / 12.8 — ~283 federation strings still `[TODO]` passthroughs per non-English locale).
 
 #### 12.8 i18n/l10n debt repayment
 
@@ -3904,6 +3911,47 @@ in `federation_controller_engine.pyx`:
 **Estimated remaining size:** ~600 LOC across both engines + ~200
 LOC tests.  Each slice fits in a single focused session.
 
+**Status (12.10 hardening — strict identity pinning + server role):**
+✅ Landed (June 2026).  This is the slice that resolves the Slice-3
+"*Design TBD; might fold mTLS in… the trust model is symmetric*"
+musing above — it replaces enrollment-time TOFU (trust-on-first-use
+of whatever TLS cert the peer presents) with **authenticated
+out-of-band public-key pinning**, so an attacker who can MITM the
+enrollment HTTPS connection can no longer impersonate either side.
+*(This subsystem was previously undocumented in the Phase 12 text —
+backfilled here during the June 2026 audit.)*
+
+  * `backend/services/federation_identity_service.py` (~529 LOC) —
+    each server generates a long-lived **Ed25519 identity keypair**
+    and a matching 10-year self-signed TLS cert
+    (`ensure_federation_identity_keypair` / `ensure_federation_tls_cert`),
+    signs/verifies federation requests, and maintains a trusted-peer
+    keyring (`import_federation_peer` / `list_federation_peers` /
+    `remove_federation_peer`, path-traversal-safe via `_safe_key_name`).
+    `build_enrollment_proof` / `verify_enrollment_proof` are the gate
+    that turns TOFU into authenticated pinning: the enrolling side
+    signs a challenge with its identity key, the verifier checks it
+    against the **out-of-band-supplied** public key.
+  * Wired in (not dead code): `federation_coordinator_service.py` and
+    `federation_site_service.py` both call it to store the peer
+    identity key at enrollment and verify the proof on every
+    enrollment completion.
+  * REST surface: `backend/api/federation_identity.py` — 4 endpoints
+    (`GET` this server's identity key; `GET` / `POST` / `DELETE`
+    trusted peers) so an operator can exchange + pin keys OOB before
+    enrolling.
+  * Schema: migration `m7fedrole_add_federation_role.py` adds
+    `server_configuration.federation_role` (`none` / `coordinator` /
+    `site`) — the explicit per-server role axis the engines gate on;
+    migration `m9fedid_add_federation_identity_pinning.py` adds
+    `federation_sites.site_identity_public_key_pem` +
+    `federation_coordinator.coordinator_identity_public_key_pem` for
+    the pinned OOB keys.  Both idempotent + cross-dialect.
+  * Tests: `test_federation_identity_service.py` (16),
+    `test_federation_identity_enrollment.py` (22),
+    `test_server_config_federation_role.py` (5), and
+    `tests/api/test_federation_role.py` (5) — all green.
+
 ---
 
 ## Phase 12.5: Windows Server Child Hosts (Enterprise)
@@ -4098,14 +4146,72 @@ plan-builder + UI integration.
 
 ### Features
 
-#### 12.1 Multi-Tenancy (Enterprise)
+#### 13.1 Multi-Tenancy (Enterprise)
 
-- [ ] Account model with isolation
-- [ ] Account switching for users with multiple accounts
-- [ ] Per-account settings and limits
-- [ ] Data isolation verification
+> **Architecture & isolation design:** see
+> [`docs/planning/phase13-multi-tenancy-design.md`](docs/planning/phase13-multi-tenancy-design.md)
+> for the full design. Summary of the chosen direction (June 2026):
+>
+> - **Control plane + silo (database-per-tenant), with a small *registry* DB** as
+>   the source of truth for tenants, the email→tenant grant map, and per-tenant DB
+>   placement — modeled on the PeopleStrategy (c. 2000) architecture; pool +
+>   PostgreSQL RLS retained as an optional SMB-long-tail tier under the same
+>   registry.
+> - **Multi-tenancy is an opt-in deployment topology** (`multitenancy.enabled`,
+>   default off) and is kept **strictly separate from Federation** (multi-*site*).
+>   On-prem / homelab / federated installs are unaffected.
+> - **One codebase, three deployment modes** (homelab single-DB collapse →
+>   single-server schema-isolated → multi-DB SaaS, **2 + N** databases), via
+>   table-name **prefix namespacing** (`registry_*` / `shared_*` / unprefixed
+>   tenant) + an optional `schema_translate_map` resolver. The homelab/OSS user
+>   pays **zero** extra setup (one database).
+> - **Three independent Alembic chains** (`registry` / `shared` / `tenant`), each
+>   a single linear chain with its own version table; the `tenant` chain ≈ today's
+>   chain (head `m10fedseclease`) and runs per tenant DB. **No cross-partition
+>   foreign keys** (soft UUID references across partitions); a CI guard enforces
+>   the prefix convention. All migrations idempotent + SQLite/PostgreSQL-clean.
+> - **OpenBAO database-secrets engine** brokers dynamic per-tenant DB creds (no
+>   stored passwords), cached in-memory in the API layer with lease renewal; the
+>   `sysmanage.yaml` `database:` block becomes a pointer to the registry only —
+>   reference/tenant placements live in the registry as data.
+> - **Customer-owned SSO** (per-tenant Entra/Okta/OIDC/SAML + JIT/SCIM) and
+>   **enforced, time-boxed vendor-support grants** tied to credential issuance (no
+>   grant → no DB lease).
 
-#### 12.2 API Completeness
+- [ ] **13.1.A** Registry foundation — `registry` Alembic chain + models (tenant,
+      user, grant, placement), partition resolver + tenant-aware session factory,
+      `multitenancy.enabled` toggle (default off, no behavior change), control-plane
+      API skeleton, homelab single-DB collapse working
+- [ ] **13.1.B** Tenant routing & identity — `get_current_tenant`, token carries
+      active `tenant_id`, `POST /auth/switch-account`, email→tenant grant CRUD,
+      per-tenant email-domain allowlist ("account switching" + "account model")
+- [ ] **13.1.C** Credentials & placement — OpenBAO dynamic DB secrets, API-layer
+      lease cache + per-tenant warm pools, `registry_tenant_placement` engine
+      routing, per-tenant DB provisioning automation
+- [ ] **13.1.D** Shared-reference split — `shared` Alembic chain, relocate
+      `shared_*` reference tables, convert cross-partition FKs to soft references,
+      CI prefix guard
+- [ ] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
+      JIT/SCIM provisioning, vendor-support grants tied to OpenBAO issuance,
+      break-glass path
+- [ ] **13.1.F** Backup orchestration & **data isolation verification** —
+      per-tenant backup/RPO tracking + automated restore tests, two-tenant
+      cross-leak test harness, per-account settings/limits enforcement
+      *(GA ships silo-only; pool+RLS SMB tier deferred past v3.0)*
+- [ ] **13.1.G** Config builder & deployment docs — update the installer config
+      builder (`scripts/_sysmanage_secure_installation.py`) to emit the new
+      `registry:` / `multitenancy:` / `secrets:` config shape with a deployment-mode
+      prompt (homelab keeps its single-prompt simplicity; SaaS asks for
+      registry/OpenBAO details; tenant placements never written to YAML), keep the
+      `*.yaml.example` files in sync, and update the `sysmanage-docs` **deployment**
+      documentation (`docs/deployment/{configuration,deployment,installation,secure-installation}.html`,
+      `docs/server/deployment.html`, `docs/getting-started/first-deployment.html`)
+      to cover the control-plane/registry model, the three deployment modes, the
+      `2 + N` topology, OpenBAO dynamic creds, and per-tenant SSO/grants —
+      explicitly noting multi-tenancy is opt-in and homelab/on-prem/federated
+      installs are unaffected; i18n the new strings
+
+#### 13.2 API Completeness
 
 - [ ] Audit all features for missing endpoints
 - [ ] API versioning (/api/v1/, /api/v2/)
@@ -4113,7 +4219,7 @@ plan-builder + UI integration.
 - [ ] Rate limiting middleware
 - [ ] Complete OpenAPI documentation
 
-#### 12.3 Additional Polish Items
+#### 13.3 Additional Polish Items
 
 - [ ] GPG Key Management
 - [ ] Administrator Invitations
