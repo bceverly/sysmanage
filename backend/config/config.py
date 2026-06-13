@@ -57,6 +57,12 @@ try:
             config["security"]["account_lockout_duration"] = 15
         if "jwt_algorithm" not in config["security"]:
             config["security"]["jwt_algorithm"] = "HS256"
+        # JWT lifetimes were previously required keys (KeyError if absent);
+        # give them sane defaults so a minimal config still works.
+        if "jwt_auth_timeout" not in config["security"]:
+            config["security"]["jwt_auth_timeout"] = 3600
+        if "jwt_refresh_timeout" not in config["security"]:
+            config["security"]["jwt_refresh_timeout"] = 86400
         # Logging settings
         if "logging" not in config:
             config["logging"] = {}

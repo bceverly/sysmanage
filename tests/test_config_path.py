@@ -4,6 +4,26 @@ Simple test for config path determination to achieve full coverage.
 
 from unittest.mock import mock_open, patch
 
+import pytest
+
+import backend.config.config
+
+
+@pytest.fixture(autouse=True)
+def _restore_config_singleton():
+    """Restore the global config singleton after each test.
+
+    These tests ``importlib.reload(backend.config.config)`` with a mocked
+    config and never reload back, polluting the singleton for later tests in
+    the same pytest-xdist worker. Save/restore contains that leak.
+    """
+    saved = backend.config.config.config
+    try:
+        yield
+    finally:
+        backend.config.config.config = saved
+
+
 # Sample config data to mock file reading
 MOCK_CONFIG_DATA = """
 api:

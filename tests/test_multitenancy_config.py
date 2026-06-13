@@ -37,9 +37,15 @@ class TestRegistryAlias:
         with patch.object(config, "config", cfg):
             assert config.get_registry_config() == {"name": "legacy"}
 
-    def test_loaded_config_mirrors_keys(self):
-        """The live (loaded) config exposes both keys after normalization."""
-        # The dev config uses ``database:``; the loader mirrors it to
-        # ``registry:`` so both resolve to the same connection.
-        assert config.get_registry_config() is not None
-        assert config.get_registry_config() == config.get_config().get("database")
+    def test_registry_and_database_mirror_each_other(self):
+        """After load-time normalization both keys point at the same block, and
+        get_registry_config prefers ``registry``.
+
+        Uses a controlled config rather than the live module global so the test
+        is robust under the parallel suite (other tests patch ``config.config``,
+        which would otherwise perturb a read of the live singleton).
+        """
+        block = {"name": "sysmanage", "host": "db", "user": "sysmanage"}
+        with patch.object(config, "config", {"registry": block, "database": block}):
+            assert config.get_registry_config() is block
+            assert config.get_config().get("database") is block

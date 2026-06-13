@@ -11,6 +11,24 @@ import yaml
 from backend.config import config
 
 
+@pytest.fixture(autouse=True)
+def _restore_config_singleton():
+    """Protect the global ``config.config`` singleton across these tests.
+
+    Several tests here ``importlib.reload(config)`` with a mocked minimal
+    config (no database/registry/jwt timeouts) and never reload back, which
+    left the singleton polluted for every later test sharing the same
+    pytest-xdist worker — a latent cross-test flake that surfaced as missing
+    keys in unrelated tests (e.g. registry mirroring, switch-account). Saving
+    and restoring the singleton reference around each test contains it.
+    """
+    saved = config.config
+    try:
+        yield
+    finally:
+        config.config = saved
+
+
 class TestConfigAccessors:
     """Test configuration accessor functions."""
 

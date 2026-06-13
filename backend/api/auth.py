@@ -125,7 +125,9 @@ async def login(login_data: UserLogin, request: Request, response: Response):  #
 
     the_config = config.get_config()
     db.get_db()
-    jwt_refresh_timeout = int(the_config["security"]["jwt_refresh_timeout"])
+    jwt_refresh_timeout = int(
+        the_config.get("security", {}).get("jwt_refresh_timeout", 86400)
+    )
     is_secure = _is_secure_cookie_enabled(the_config)
 
     # Get the SQLAlchemy session
@@ -551,7 +553,9 @@ async def switch_account(
         session.close()
 
     the_config = config.get_config()
-    jwt_refresh_timeout = int(the_config["security"]["jwt_refresh_timeout"])
+    jwt_refresh_timeout = int(
+        the_config.get("security", {}).get("jwt_refresh_timeout", 86400)
+    )
     is_secure = _is_secure_cookie_enabled(the_config)
 
     refresh_token = sign_refresh_token(current_user, tenant_id=payload.tenant_id)

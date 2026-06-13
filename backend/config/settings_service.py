@@ -62,7 +62,9 @@ def _get_cached_settings_bag() -> Optional[dict]:
         if getattr(db, "IS_TEST_MODE", False):
             return _read_settings_bag()
     except Exception:  # noqa: BLE001
-        pass
+        # Non-fatal: if the db module can't be probed, fall through to the
+        # normal cached read path below.
+        _ = None
     now = time.time()
     with _cache_lock:
         if _cache_bag is not None and now < _cache_expiry:

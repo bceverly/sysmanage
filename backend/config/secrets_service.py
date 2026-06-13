@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # All SysManage config secrets live in one KV-v2 secret under the vault's
 # configured mount, keyed by name (jwt_secret, password_salt, ...).  The
 # secure-installation script primes this on a fresh install.
-_CONFIG_SECRET_SUBPATH = "sysmanage/config"
+_CONFIG_SECRET_SUBPATH = "sysmanage/config"  # nosec B105
 
 # Track which secrets we've already warned about so the deprecation notice
 # is logged once per process, not on every read.
