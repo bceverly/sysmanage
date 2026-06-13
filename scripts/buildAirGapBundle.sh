@@ -679,6 +679,80 @@ EOF
   chmod +x "$outdir/install.sh"
 }
 
+# ----- OpenBAO artifact staging (air-gap secrets broker) -------------------
+#
+# OpenBAO is central to SysManage and must be present for an offline install.
+# `bao` is a single static binary with no dependency tree, so staging it is
+# trivial: for deb/rpm platforms we drop the native package into the same
+# dep dir the per-platform install.sh already batch-installs (so OpenBAO is
+# installed offline "for free"); for the others we stage the extracted
+# binary under <subdir>/openbao/bao, which the platform install.sh drops at
+# /usr/local/bin/bao before installing the OS package.  Runs on the HOST
+# after the container build (curl + jq are host requirements).
+_OPENBAO_REPO="openbao/openbao"
+
+_openbao_asset_url() {
+  # $1 = jq regex matched against asset .name
+  curl -fsSL "https://api.github.com/repos/${_OPENBAO_REPO}/releases/latest" 2>/dev/null \
+    | jq -r ".assets[] | select(.name | test(\"$1\")) | .browser_download_url" \
+    | head -1
+}
+
+_stage_openbao() {
+  local outdir="$1" kind="$2"
+  case "$kind" in
+    deb)
+      local url; url=$(_openbao_asset_url "amd64\\\\.deb\$")
+      if [ -n "$url" ]; then
+        mkdir -p "$outdir/apt-deps"
+        curl -fsSL -o "$outdir/apt-deps/openbao_amd64.deb" "$url" \
+          && log "[openbao] staged .deb into $(basename "$outdir")/apt-deps" \
+          || warn "[openbao] .deb download failed for $(basename "$outdir")"
+      else
+        warn "[openbao] no .deb asset found"
+      fi
+      ;;
+    rpm)
+      local url; url=$(_openbao_asset_url "x86_64\\\\.rpm\$")
+      if [ -n "$url" ]; then
+        mkdir -p "$outdir/rpm-deps"
+        curl -fsSL -o "$outdir/rpm-deps/openbao_x86_64.rpm" "$url" \
+          && log "[openbao] staged .rpm into $(basename "$outdir")/rpm-deps" \
+          || warn "[openbao] .rpm download failed for $(basename "$outdir")"
+      else
+        warn "[openbao] no .rpm asset found"
+      fi
+      ;;
+    binary-*)
+      local osname="${kind#binary-}" tok ext bin
+      case "$osname" in
+        linux)   tok="Linux_x86_64";   ext="tar\\\\.gz"; bin="bao" ;;
+        freebsd) tok="Freebsd_x86_64"; ext="tar\\\\.gz"; bin="bao" ;;
+        netbsd)  tok="Netbsd_x86_64";  ext="tar\\\\.gz"; bin="bao" ;;
+        darwin)  tok="Darwin_arm64";   ext="tar\\\\.gz"; bin="bao" ;;
+        windows) tok="Windows_x86_64"; ext="zip";        bin="bao.exe" ;;
+        *) warn "[openbao] unknown binary os: $osname"; return ;;
+      esac
+      local url; url=$(_openbao_asset_url "${tok}\\\\.${ext}\$")
+      if [ -z "$url" ]; then warn "[openbao] no $osname asset found"; return; fi
+      mkdir -p "$outdir/openbao"
+      local tmp; tmp="$(mktemp)"
+      if curl -fsSL -o "$tmp" "$url"; then
+        if [ "$ext" = "zip" ]; then
+          (cd "$outdir/openbao" && unzip -o "$tmp" "$bin" >/dev/null 2>&1) || true
+        else
+          tar -xzf "$tmp" -C "$outdir/openbao" "$bin" 2>/dev/null || true
+        fi
+        [ -f "$outdir/openbao/$bin" ] \
+          && log "[openbao] staged $osname binary into $(basename "$outdir")/openbao" \
+          || warn "[openbao] could not extract $bin for $osname"
+      fi
+      rm -f "$tmp"
+      ;;
+    *) warn "[openbao] unknown stage kind: $kind" ;;
+  esac
+}
+
 # ----- Ubuntu / Debian builders (apt-based) --------------------------------
 
 # Ubuntu release codename → Python version + Docker image.
@@ -820,6 +894,7 @@ build_ubuntu_like() {
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_deb_installer "$outdir"
+  _stage_openbao "$outdir" deb
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -918,6 +993,7 @@ build_debian_like() {
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_deb_installer "$outdir"
+  _stage_openbao "$outdir" deb
   log "[$platform] done — $(find "$outdir/apt-deps" -name '*.deb' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -1000,6 +1076,7 @@ build_fedora() {
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
+  _stage_openbao "$outdir" rpm
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -1071,6 +1148,7 @@ build_rhel() {
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "dnf"
+  _stage_openbao "$outdir" rpm
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -1130,6 +1208,7 @@ build_opensuse() {
     || { _linux_build_failed "$platform" "$outdir"; return; }
 
   _write_rpm_installer "$outdir" "zypper"
+  _stage_openbao "$outdir" rpm
   log "[$platform] done — $(find "$outdir/rpm-deps" -name '*.rpm' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -1215,6 +1294,11 @@ MAIN_APK="\$(ls -1 *.apk 2>/dev/null | head -1)"
 # apk-deps/ may be empty — don't let the literal "apk-deps/*.apk"
 # reach apk add or it'll error before installing anything.
 DEP_COUNT=\$(ls -1 apk-deps/*.apk 2>/dev/null | wc -l)
+# OpenBAO ships no .apk; place the bundled static binary so the package
+# post-install finds it (offline) instead of trying to download it.
+if [ -x openbao/bao ]; then
+  sudo install -m 755 openbao/bao /usr/local/bin/bao
+fi
 echo "Installing \$MAIN_APK + \$DEP_COUNT deps..."
 if [ "\$DEP_COUNT" -gt 0 ]; then
   exec sudo env PIP_NO_INDEX=1 PIP_FIND_LINKS="\$(pwd)/wheels" \\
@@ -1225,6 +1309,7 @@ else
 fi
 EOF
   chmod +x "$outdir/install.sh"
+  _stage_openbao "$outdir" binary-linux
   log "[$platform] done — $(find "$outdir/apk-deps" -name '*.apk' | wc -l) deps + $(find "$outdir/wheels" -name '*.whl' | wc -l) wheels"
 }
 
@@ -1285,6 +1370,7 @@ build_windows() {
     warn "[windows] no windows-x64 .msi found in latest release — skipping"
   fi
   _fetch_latest_release_asset 'windows-arm64.*\.msi' '' "$outdir/${PKG_NAME}-arm64.msi" || true
+  _stage_openbao "$outdir" binary-windows
   # README — Windows install can't be scripted from POSIX sh; instruct user.
   cat > "$outdir/install.sh" <<EOF
 #!/bin/sh
@@ -1303,6 +1389,7 @@ build_macos() {
   # FreeBSD also produces a .pkg but without any platform name.
   if _fetch_latest_release_asset 'macos.*\.pkg' '' "$outdir/${PKG_NAME}.pkg"; then
     log "[macos] got .pkg"
+    _stage_openbao "$outdir" binary-darwin
   else
     warn "[macos] no macos .pkg found in latest release — skipping"
   fi
@@ -1332,6 +1419,12 @@ set -eu
 cd "\$(dirname "\$0")"
 ARTIFACT="\$(ls -1 *.pkg *.tgz 2>/dev/null | head -1)"
 [ -n "\$ARTIFACT" ] || { echo "ERROR: no .pkg/.tgz artifact found" >&2; exit 3; }
+# OpenBAO ships no BSD package; place the bundled static binary so the
+# package post-install finds it (offline) instead of trying to fetch it.
+if [ -x openbao/bao ]; then
+  sudo install -m 755 openbao/bao /usr/local/bin/bao 2>/dev/null || \
+    { sudo mkdir -p /usr/local/bin && sudo cp openbao/bao /usr/local/bin/bao && sudo chmod 755 /usr/local/bin/bao; }
+fi
 exec sudo ${installer_cmd} -f "./\$ARTIFACT"
 EOF
   chmod +x "$outdir/install.sh"
@@ -1348,6 +1441,7 @@ build_freebsd() {
   if _fetch_latest_release_asset '\.pkg$' 'macos' "$outdir/${PKG_NAME}.pkg"; then
     log "[freebsd] got .pkg"
     _write_bsd_installer "$outdir" "pkg add"
+    _stage_openbao "$outdir" binary-freebsd
   else
     warn "[freebsd] no non-macOS .pkg found in latest release — skipping"
     _safe_rmdir "$outdir"
@@ -1364,6 +1458,7 @@ build_netbsd() {
   if _fetch_latest_release_asset '\.tgz$' 'openbsd' "$outdir/${PKG_NAME}.tgz"; then
     log "[netbsd] got .tgz"
     _write_bsd_installer "$outdir" "pkg_add"
+    _stage_openbao "$outdir" binary-netbsd
   else
     warn "[netbsd] no non-openbsd .tgz found in latest release — skipping"
     _safe_rmdir "$outdir"

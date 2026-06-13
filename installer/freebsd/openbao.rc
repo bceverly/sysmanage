@@ -45,7 +45,9 @@ openbao_poststart()
 	# so the system python is fine.
 	/usr/local/bin/python3.11 \
 		/usr/local/lib/sysmanage/scripts/openbao_init_unseal.py \
-		--addr http://127.0.0.1:8200 --keyfile ${openbao_keyfile} 2>/dev/null || \
+		--addr http://127.0.0.1:8200 --keyfile ${openbao_keyfile} \
+		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage \
+		2>/dev/null || \
 		echo "openbao: init/unseal did not complete; see ${openbao_logfile}"
 }
 

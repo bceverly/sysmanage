@@ -1847,6 +1847,9 @@ installer-deb:
 	cp installer/ubuntu/*.conf "$$BUILD_DIR/installer/ubuntu/" 2>/dev/null || true; \
 		mkdir -p "$$BUILD_DIR/installer/airgap-bundle"; \
 		cp installer/airgap-bundle/install.sh "$$BUILD_DIR/installer/airgap-bundle/"; \
+		mkdir -p "$$BUILD_DIR/installer/openbao"; \
+		cp installer/openbao/openbao.hcl "$$BUILD_DIR/installer/openbao/"; \
+		cp installer/openbao/sysmanage-openbao-init.service "$$BUILD_DIR/installer/openbao/"; \
 	echo "✓ Packaging files copied"; \
 	echo ""; \
 	echo "Building package..."; \
@@ -2007,6 +2010,9 @@ installer-rpm-centos:
 	cp installer/centos/*.example "$$TAR_DIR/installer/centos/"; \
 		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
 		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
+	mkdir -p "$$TAR_DIR/installer/openbao"; \
+	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \
@@ -2142,6 +2148,9 @@ installer-rpm-opensuse:
 	cp installer/opensuse/*.example "$$TAR_DIR/installer/opensuse/"; \
 		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
 		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
+	mkdir -p "$$TAR_DIR/installer/openbao"; \
+	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \

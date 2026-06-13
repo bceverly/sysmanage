@@ -31,7 +31,7 @@ class VaultService:
     def __init__(self):
         self.vault_config = config.get_vault_config()
         self.base_url = self.vault_config.get("url", "http://localhost:8200")
-        self.token = self.vault_config.get("token", "")
+        self.token = self.vault_config.get("token", "") or self._load_token_file()
         self.mount_path = self.vault_config.get("mount_path", "secret")
         self.timeout = self.vault_config.get("timeout", 30)
         self.verify_ssl = self.vault_config.get("verify_ssl", True)
@@ -51,6 +51,27 @@ class VaultService:
         self.session.headers.update(
             {"X-Vault-Token": self.token, "Content-Type": "application/json"}
         )
+
+    @staticmethod
+    def _load_token_file() -> str:
+        """Read the app's OpenBAO token from disk when not set in config.
+
+        Phase 13.1.H bootstrap: ``sysmanage.yaml`` no longer carries the vault
+        token.  The OpenBAO init/unseal one-shot writes an app-readable token
+        file (default ``/etc/sysmanage/openbao-token``, owned by the service
+        user, 0640); we read it here so the data plane can authenticate to the
+        local OpenBAO without a secret in YAML.  Best-effort: returns "" if the
+        file is absent/unreadable, and the existing YAML ``vault.token`` (if
+        any) still wins.
+        """
+        token_file = config.get_vault_config().get(
+            "token_file", "/etc/sysmanage/openbao-token"
+        )
+        try:
+            with open(token_file, "r", encoding="utf-8") as handle:
+                return handle.read().strip()
+        except OSError:
+            return ""
 
     def _make_request(  # NOSONAR
         self, method: str, path: str, data: Optional[Dict] = None

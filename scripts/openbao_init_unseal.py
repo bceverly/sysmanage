@@ -96,10 +96,100 @@ def _unseal(addr: str, keys) -> bool:
     return bool(body) and not body.get("sealed", True)
 
 
+def _root_token(keyfile: str):
+    """Read the root token from the init keyfile, or None."""
+    try:
+        with open(keyfile, encoding="utf-8") as handle:
+            return json.load(handle).get("root_token")
+    except (OSError, ValueError):
+        return None
+
+
+def _write_app_token(app_token_file: str, owner, token: str) -> None:
+    """Write an app-readable OpenBAO token file (0640, optionally chowned).
+
+    Phase 13.1.H bootstrap: the data-plane app (running as the service user,
+    not root) reads this to authenticate to the local OpenBAO, so no token
+    lives in sysmanage.yaml.  Single-node appliance: the app token is the root
+    token; scoping it to a least-privilege policy is a hardening follow-up.
+    """
+    directory = os.path.dirname(app_token_file) or "."
+    os.makedirs(directory, exist_ok=True)
+    fd = os.open(app_token_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o640)
+    with os.fdopen(fd, "w") as handle:
+        handle.write(token)
+    if owner:
+        try:
+            import grp  # noqa: PLC0415
+            import pwd  # noqa: PLC0415
+
+            uid = pwd.getpwnam(owner).pw_uid
+            gid = grp.getgrnam(owner).gr_gid
+            os.chown(app_token_file, uid, gid)
+        except (KeyError, OSError, ImportError):
+            pass
+    print(f"App OpenBAO token written to {app_token_file} (0640).")
+
+
+def _ensure_unsealed(addr: str, keyfile: str) -> int:
+    """Initialize (once) + unseal OpenBAO.  Returns 0 on success."""
+    status, seal = _api(addr, "/v1/sys/seal-status")
+    if status != 200 or seal is None:
+        print(f"ERROR: unexpected seal-status response: {status}", file=sys.stderr)
+        return 1
+
+    if seal.get("initialized") and not seal.get("sealed"):
+        print("OpenBAO already initialized and unsealed.")
+        return 0
+
+    if not seal.get("initialized"):
+        print("Initializing OpenBAO (single-node appliance, 1 key share)...")
+        status, init = _api(
+            addr, "/v1/sys/init", "PUT", {"secret_shares": 1, "secret_threshold": 1}
+        )
+        if status != 200 or init is None:
+            print(f"ERROR: init failed: {status}", file=sys.stderr)
+            return 1
+        keys = init.get("keys_base64") or init.get("keys") or []
+        _write_keyfile(
+            keyfile, {"root_token": init.get("root_token"), "unseal_keys": keys}
+        )
+        print(f"OpenBAO initialized; material written to {keyfile} (0600).")
+        if _unseal(addr, keys):
+            print("OpenBAO unsealed.")
+            return 0
+        print("ERROR: unseal after init failed", file=sys.stderr)
+        return 1
+
+    if not os.path.exists(keyfile):
+        print(
+            f"ERROR: OpenBAO is sealed but no key material at {keyfile}",
+            file=sys.stderr,
+        )
+        return 1
+    with open(keyfile, encoding="utf-8") as handle:
+        material = json.load(handle)
+    if _unseal(addr, material.get("unseal_keys", [])):
+        print("OpenBAO unsealed.")
+        return 0
+    print("ERROR: unseal failed", file=sys.stderr)
+    return 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Initialize + unseal OpenBAO.")
     parser.add_argument("--addr", default=os.environ.get("BAO_ADDR", DEFAULT_ADDR))
     parser.add_argument("--keyfile", default=DEFAULT_KEYFILE)
+    parser.add_argument(
+        "--app-token-file",
+        default=None,
+        help="Write an app-readable token here so the service can auth to OpenBAO.",
+    )
+    parser.add_argument(
+        "--app-token-owner",
+        default=None,
+        help="chown the app token file to this user/group (e.g. 'sysmanage').",
+    )
     args = parser.parse_args()
 
     if not _wait_for_listener(args.addr):
@@ -108,53 +198,21 @@ def main() -> int:
         )
         return 1
 
-    status, seal = _api(args.addr, "/v1/sys/seal-status")
-    if status != 200 or seal is None:
-        print(f"ERROR: unexpected seal-status response: {status}", file=sys.stderr)
-        return 1
+    rc = _ensure_unsealed(args.addr, args.keyfile)
+    if rc != 0:
+        return rc
 
-    # Already initialized + unsealed → nothing to do.
-    if seal.get("initialized") and not seal.get("sealed"):
-        print("OpenBAO already initialized and unsealed.")
-        return 0
-
-    if not seal.get("initialized"):
-        print("Initializing OpenBAO (single-node appliance, 1 key share)...")
-        status, init = _api(
-            args.addr,
-            "/v1/sys/init",
-            "PUT",
-            {"secret_shares": 1, "secret_threshold": 1},
-        )
-        if status != 200 or init is None:
-            print(f"ERROR: init failed: {status}", file=sys.stderr)
-            return 1
-        keys = init.get("keys_base64") or init.get("keys") or []
-        _write_keyfile(
-            args.keyfile,
-            {"root_token": init.get("root_token"), "unseal_keys": keys},
-        )
-        print(f"OpenBAO initialized; material written to {args.keyfile} (0600).")
-        if _unseal(args.addr, keys):
-            print("OpenBAO unsealed.")
-            return 0
-        print("ERROR: unseal after init failed", file=sys.stderr)
-        return 1
-
-    # Initialized but sealed → unseal from stored material.
-    if not os.path.exists(args.keyfile):
-        print(
-            f"ERROR: OpenBAO is sealed but no key material at {args.keyfile}",
-            file=sys.stderr,
-        )
-        return 1
-    with open(args.keyfile, encoding="utf-8") as handle:
-        material = json.load(handle)
-    if _unseal(args.addr, material.get("unseal_keys", [])):
-        print("OpenBAO unsealed.")
-        return 0
-    print("ERROR: unseal failed", file=sys.stderr)
-    return 1
+    # Deliver the app token (idempotent) once OpenBAO is unsealed.
+    if args.app_token_file:
+        token = _root_token(args.keyfile)
+        if token:
+            _write_app_token(args.app_token_file, args.app_token_owner, token)
+        else:
+            print(
+                f"WARNING: no root token in {args.keyfile}; app token not written",
+                file=sys.stderr,
+            )
+    return 0
 
 
 if __name__ == "__main__":

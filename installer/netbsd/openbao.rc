@@ -28,7 +28,9 @@ openbao_start()
 	# Idempotent init/unseal (the helper waits for the listener).
 	/usr/pkg/bin/python3.12 \
 		/usr/pkg/lib/sysmanage/scripts/openbao_init_unseal.py \
-		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json 2>/dev/null || \
+		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage \
+		2>/dev/null || \
 		echo "openbao: init/unseal did not complete; see /var/log/openbao.log"
 }
 

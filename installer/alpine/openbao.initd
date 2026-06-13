@@ -33,6 +33,7 @@ start_post() {
 	# Runs as root so it can write the root-owned 0600 init material.
 	/usr/bin/python3 /usr/libexec/sysmanage/scripts/openbao_init_unseal.py \
 		--addr http://127.0.0.1:8200 \
-		--keyfile /var/lib/openbao/init.json || \
+		--keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage || \
 		ewarn "OpenBAO init/unseal did not complete; check /var/log/openbao.log"
 }

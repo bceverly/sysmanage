@@ -84,6 +84,18 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         enforce_deployment_invariants()
         logger.info("Deployment invariants satisfied")
 
+        # Startup: overlay secrets from OpenBAO onto the in-memory config +
+        # auth globals (jwt_secret / password_salt / admin_password / DB
+        # password).  No-op when OpenBAO is disabled/empty — the YAML values
+        # loaded at import remain in force.  See
+        # docs/planning/config-classification.md (Phase 13.1.H).
+        logger.info("=== SECRETS OVERLAY (OpenBAO) ===")
+        from backend.config.secrets_bootstrap import (  # noqa: PLC0415
+            refresh_secrets_from_openbao,
+        )
+
+        refresh_secrets_from_openbao()
+
         # Startup: Initialize Pro+ license service
         logger.info("=== LICENSE SERVICE INITIALIZATION ===")
         logger.info("About to initialize license service")

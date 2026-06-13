@@ -14,6 +14,7 @@ row.  Future server-wide knobs add columns here rather than new tables.
 from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, String
+from sqlalchemy.dialects.postgresql import JSON
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -59,6 +60,12 @@ class ServerConfiguration(Base):
     federation_role = Column(
         String(40), nullable=False, default=DEFAULT_FEDERATION_ROLE
     )
+    # Phase 13.1.H (config classification): a key/value bag of server-scoped
+    # runtime settings that migrated out of sysmanage.yaml (jwt timeouts,
+    # message-queue tunables, monitoring, etc.).  Edited via Settings → the
+    # config layer reads here first, then falls back to YAML.  See
+    # docs/planning/config-classification.md and backend/config/settings_service.py.
+    settings = Column(JSON, nullable=True)
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

@@ -13,7 +13,8 @@ RemainAfterExit=yes
 # /var/lib/openbao.  The script is idempotent — initializes once, then just
 # unseals on subsequent boots.
 ExecStart=/usr/bin/python3 /opt/sysmanage/scripts/openbao_init_unseal.py \
-    --addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json
+    --addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json \
+    --app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage
 
 [Install]
 WantedBy=multi-user.target

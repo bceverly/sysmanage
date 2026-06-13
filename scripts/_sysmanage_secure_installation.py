@@ -1576,6 +1576,23 @@ def main():
         # Create admin user with new salt
         create_admin_user(user_data, salt)
 
+        # Phase 13.1.H (config classification): prime OpenBAO with the
+        # generated secrets so they become the source of truth — the app's
+        # startup overlay then reads them from OpenBAO instead of YAML.
+        # Best-effort: if vault isn't reachable the YAML values still work via
+        # the fallback.  (At this point the vault root token is in config, set
+        # by update_config_with_vault above, so the write authenticates.)
+        try:
+            from backend.config import secrets_service as _secrets_service
+            _secret_bag = {"jwt_secret": jwt_secret, "password_salt": salt}
+            if _secrets_service.store_config_secrets(_secret_bag):
+                print("  Primed jwt_secret + password_salt into OpenBAO")
+        except Exception as _prime_exc:  # noqa: BLE001
+            print(
+                f"  Note: could not prime OpenBAO secrets ({_prime_exc}); "
+                "YAML fallback remains in effect"
+            )
+
         # Fix ownership of all created files (important for macOS/Linux when running under sudo)
         print("\n--- Fixing file ownership ---")
         files_to_fix = [

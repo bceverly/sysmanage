@@ -996,6 +996,7 @@ jobs:
           # Copy installer files
           cp /workspace/installer/alpine/APKBUILD /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.initd /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/openbao.initd /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.confd /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.post-install /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage-nginx.conf /home/builder/aports/sysutils/sysmanage/

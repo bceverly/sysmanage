@@ -263,25 +263,54 @@ def get_config():
     return config
 
 
+def _server_setting(key, yaml_getter, default=None):
+    """Resolve a server-scoped operational setting (Phase 13.1.H).
+
+    Reads the DB-backed Settings table first (via settings_service), falling
+    back to the legacy ``sysmanage.yaml`` value with a one-time deprecation
+    warning.  Late import keeps config.py free of a DB dependency at import
+    time and avoids a cycle.  Best-effort: any failure yields the YAML value.
+    """
+    try:
+        from backend.config import settings_service  # noqa: PLC0415
+
+        return settings_service.get_setting(key, yaml_getter, default=default)
+    except Exception:  # noqa: BLE001
+        try:
+            return yaml_getter()
+        except Exception:  # noqa: BLE001
+            return default
+
+
 def get_heartbeat_timeout_minutes():
     """
     Get the heartbeat timeout in minutes after which a host is considered down.
     """
-    return config["monitoring"]["heartbeat_timeout"]
+    return _server_setting(
+        "heartbeat_timeout",
+        lambda: config["monitoring"]["heartbeat_timeout"],
+        default=5,
+    )
 
 
 def get_max_failed_logins():
     """
     Get the maximum number of failed login attempts before account lockout.
     """
-    return config["security"]["max_failed_logins"]
+    return _server_setting(
+        "max_failed_logins", lambda: config["security"]["max_failed_logins"], default=5
+    )
 
 
 def get_account_lockout_duration():
     """
     Get the account lockout duration in minutes.
     """
-    return config["security"]["account_lockout_duration"]
+    return _server_setting(
+        "account_lockout_duration",
+        lambda: config["security"]["account_lockout_duration"],
+        default=15,
+    )
 
 
 def get_log_levels():
@@ -305,25 +334,60 @@ def get_log_file():
     return config["logging"].get("file")
 
 
+def _smtp_password():
+    """Resolve the SMTP password from OpenBAO, falling back to YAML.
+
+    Phase 13.1.H: the SMTP password is a secret (B-bucket) and a per-tenant
+    concern; it moves to OpenBAO.  Best-effort with YAML fallback.
+    """
+    try:
+        from backend.config import secrets_service  # noqa: PLC0415
+
+        return secrets_service.get_secret(
+            "smtp_password",
+            lambda: config.get("email", {}).get("smtp", {}).get("password", ""),
+            default="",
+        )
+    except Exception:  # noqa: BLE001
+        return config.get("email", {}).get("smtp", {}).get("password", "")
+
+
 def get_email_config():
     """
-    Get the complete email configuration.
+    Get the complete email configuration (SMTP password resolved from OpenBAO).
     """
-    return config["email"]
+    cfg = dict(config["email"])
+    smtp = dict(cfg.get("smtp", {}))
+    password = _smtp_password()
+    if password:
+        smtp["password"] = password
+        cfg["smtp"] = smtp
+    return cfg
 
 
 def is_email_enabled():
     """
     Check if email functionality is enabled.
+
+    Phase 13.1.H: email config is operational/tenant-scoped — read the Settings
+    DB first, then fall back to ``sysmanage.yaml``.
     """
-    return config["email"]["enabled"]
+    return bool(
+        _server_setting(
+            "email_enabled", lambda: config["email"]["enabled"], default=False
+        )
+    )
 
 
 def get_smtp_config():
     """
-    Get SMTP server configuration.
+    Get SMTP server configuration (password resolved from OpenBAO, not YAML).
     """
-    return config["email"]["smtp"]
+    smtp = dict(config["email"]["smtp"])
+    password = _smtp_password()
+    if password:
+        smtp["password"] = password
+    return smtp
 
 
 def get_registry_config():

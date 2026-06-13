@@ -73,7 +73,8 @@ if command -v bao >/dev/null 2>&1 || [ -x /usr/local/bin/bao ]; then
 	chown -R root:wheel /var/lib/openbao
 	launchctl load /Library/LaunchDaemons/com.sysmanage.openbao.plist 2>/dev/null || true
 	/usr/bin/python3 /usr/local/lib/sysmanage/scripts/openbao_init_unseal.py \
-		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json 2>/dev/null \
+		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token 2>/dev/null \
 		|| echo "[WARNING] OpenBAO init/unseal did not complete; check /var/log/openbao.log"
 else
 	echo "[WARNING] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
