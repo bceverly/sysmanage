@@ -25,15 +25,24 @@ def token_response(token: str):
     return {"Authorization": token}
 
 
-def sign_jwt(user_id: str):
+def sign_jwt(user_id: str, tenant_id: Optional[str] = None):
     """
-    This function signs/encodes a JWT token
+    This function signs/encodes a JWT token.
+
+    Phase 13.1.B: when ``tenant_id`` is provided the token carries the
+    user's **active tenant** (the basis for tenant routing + account
+    switching).  When it is ``None`` — the single-tenant default and every
+    pre-13.1 caller — no ``tenant_id`` claim is added and the token shape
+    is byte-for-byte identical to before, so existing behavior is
+    unchanged.
     """
     # Create the payload
     payload = {
         "user_id": user_id,
         "expires": time.time() + int(the_config["security"]["jwt_auth_timeout"]),
     }
+    if tenant_id is not None:
+        payload["tenant_id"] = str(tenant_id)
 
     # Encode the token
     the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -41,15 +50,20 @@ def sign_jwt(user_id: str):
     return the_token
 
 
-def sign_refresh_token(user_id: str):
+def sign_refresh_token(user_id: str, tenant_id: Optional[str] = None):
     """
-    This function signs/encodes a JWT refresh token
+    This function signs/encodes a JWT refresh token.
+
+    Carries the active ``tenant_id`` (when supplied) so a refresh preserves
+    the user's selected tenant; omitted entirely in single-tenant mode.
     """
     # Create the payload
     payload = {
         "user_id": user_id,
         "expires": time.time() + int(the_config["security"]["jwt_refresh_timeout"]),
     }
+    if tenant_id is not None:
+        payload["tenant_id"] = str(tenant_id)
 
     # Encode the token
     the_token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)

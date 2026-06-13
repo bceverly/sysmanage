@@ -231,6 +231,78 @@ try {
     Write-Host ""
 }
 
+# ---------------------------------------------------------------
+# OpenBAO secrets broker (best-effort; never blocks the MSI).
+# Provisions bao.exe, writes a Windows-path config, registers an NSSM
+# service, and runs the init/unseal helper.  Wrapped so any failure is
+# logged but never fails the install.
+# ---------------------------------------------------------------
+try {
+    $BaoExe = Join-Path $InstallDir "bao.exe"
+    if (-not (Test-Path $BaoExe)) {
+        $OpenBaoVersion = "2.5.4"
+        $Arch = if ([Environment]::Is64BitOperatingSystem) { "x86_64" } else { "386" }
+        $BaoUrl = "https://github.com/openbao/openbao/releases/download/v$OpenBaoVersion/bao_${OpenBaoVersion}_Windows_${Arch}.zip"
+        $BaoZip = Join-Path $env:TEMP "bao.zip"
+        try {
+            Invoke-WebRequest -Uri $BaoUrl -OutFile $BaoZip -UseBasicParsing -ErrorAction Stop
+            Expand-Archive -Path $BaoZip -DestinationPath $InstallDir -Force
+            Remove-Item $BaoZip -ErrorAction SilentlyContinue
+        } catch {
+            Write-Log "WARNING: could not download OpenBAO: $_"
+        }
+    }
+
+    if (Test-Path $BaoExe) {
+        $OpenBaoData = "C:\ProgramData\SysManage\openbao"
+        $OpenBaoConfig = Join-Path $OpenBaoData "openbao.hcl"
+        New-Item -ItemType Directory -Force -Path (Join-Path $OpenBaoData "data") | Out-Null
+
+        # Windows-path config (the shared *.hcl uses Unix paths).
+        $dataPath = (Join-Path $OpenBaoData "data").Replace('\','\\')
+        @"
+storage "file" {
+  path = "$dataPath"
+}
+listener "tcp" {
+  address     = "127.0.0.1:8200"
+  tls_disable = "true"
+}
+api_addr      = "http://127.0.0.1:8200"
+disable_mlock = true
+ui            = false
+"@ | Out-File -FilePath $OpenBaoConfig -Encoding ascii -Force
+
+        $nssmPath = Join-Path $InstallDir "nssm.exe"
+        if (Test-Path $nssmPath) {
+            if (Get-Service -Name "SysManageOpenBAO" -ErrorAction SilentlyContinue) {
+                & $nssmPath remove "SysManageOpenBAO" confirm | Out-Null
+            }
+            & $nssmPath install "SysManageOpenBAO" $BaoExe server "-config=$OpenBaoConfig" | Out-Null
+            & $nssmPath set "SysManageOpenBAO" DisplayName "SysManage OpenBAO" | Out-Null
+            & $nssmPath set "SysManageOpenBAO" Start SERVICE_AUTO_START | Out-Null
+            & $nssmPath set "SysManageOpenBAO" AppStdout (Join-Path $LogPath "openbao.log") | Out-Null
+            & $nssmPath set "SysManageOpenBAO" AppStderr (Join-Path $LogPath "openbao.log") | Out-Null
+            Start-Service -Name "SysManageOpenBAO" -ErrorAction SilentlyContinue
+            Write-Log "OpenBAO service registered."
+
+            # Init/unseal (helper waits for the listener); needs the venv python.
+            $VenvPython = Join-Path $InstallDir ".venv\Scripts\python.exe"
+            $InitScript = Join-Path $InstallDir "scripts\openbao_init_unseal.py"
+            if ((Test-Path $VenvPython) -and (Test-Path $InitScript)) {
+                $KeyFile = Join-Path $OpenBaoData "init.json"
+                & $VenvPython $InitScript --addr "http://127.0.0.1:8200" --keyfile $KeyFile 2>&1 | Out-File -FilePath $LogFile -Append
+            }
+        } else {
+            Write-Log "WARNING: NSSM not found; OpenBAO service not registered."
+        }
+    } else {
+        Write-Log "WARNING: OpenBAO (bao.exe) not available; set vault.enabled=false."
+    }
+} catch {
+    Write-Log "WARNING: OpenBAO provisioning failed (non-fatal): $_"
+}
+
 if ($ServiceCreated) {
     Write-Host "Windows Service creation complete"
 } else {

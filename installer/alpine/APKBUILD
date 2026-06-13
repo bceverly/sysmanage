@@ -34,6 +34,7 @@ source="
 	sysmanage.initd
 	sysmanage.confd
 	sysmanage-nginx.conf
+	openbao.initd
 "
 options="!check !tracedeps"  # No test suite; skip tracing pip-installed binary deps
 
@@ -125,6 +126,22 @@ package() {
 	install -d "$pkgdir"/etc/nginx/http.d
 	install -m 644 "$srcdir"/sysmanage-nginx.conf \
 		"$pkgdir"/etc/nginx/http.d/sysmanage.conf
+
+	# Install OpenBAO (secrets broker) OpenRC service, shared config, and the
+	# init/unseal helper.  Alpine has no .apk for OpenBAO, so the static musl-
+	# compatible `bao` binary is provisioned by the post-install hook.
+	install -m 755 "$srcdir"/openbao.initd "$pkgdir"/etc/init.d/openbao
+	install -d "$pkgdir"/etc/openbao
+	if [ -f installer/openbao/openbao.hcl ]; then
+		install -m 640 installer/openbao/openbao.hcl \
+			"$pkgdir"/etc/openbao/openbao.hcl
+	fi
+	install -d "$pkgdir"/usr/libexec/sysmanage/scripts
+	if [ -f scripts/openbao_init_unseal.py ]; then
+		install -m 755 scripts/openbao_init_unseal.py \
+			"$pkgdir"/usr/libexec/sysmanage/scripts/openbao_init_unseal.py
+	fi
+	install -d -m 750 "$pkgdir"/var/lib/openbao
 }
 
 sha512sums=""

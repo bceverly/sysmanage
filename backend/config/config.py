@@ -92,6 +92,43 @@ try:
         if "dev_mode" not in config["vault"]:
             config["vault"]["dev_mode"] = False
 
+        # Multi-tenancy (Phase 13.1) + registry config alias.
+        #
+        # Two normalizations, both designed so existing single-tenant /
+        # homelab configs keep working untouched:
+        #
+        #   1. ``registry:`` is the new name for the ``database:`` block
+        #      (it now means "how do I reach the registry / bootstrap
+        #      DB?", not "the one app database").  v3.0 accepts BOTH:
+        #      whichever the operator wrote, we mirror it onto the other
+        #      key so callers reading either see the same connection.
+        #      An old ``database:``-only config gets a deprecation
+        #      warning nudging the rename; the alias is dropped in a
+        #      later major.  In collapsed (homelab) mode they are the
+        #      same connection anyway.
+        #   2. ``multitenancy.enabled`` (default False) gates the whole
+        #      feature.  When false the control-plane API does not mount,
+        #      the partition resolver is hardwired to the one engine, and
+        #      behavior is identical to today.
+        if "registry" in config and "database" not in config:
+            # New-style config: back-fill ``database`` so the existing
+            # db.py / tooling that reads ``config["database"]`` keeps
+            # working with zero changes.
+            config["database"] = config["registry"]
+        elif "database" in config and "registry" not in config:
+            # Legacy config: honor it, mirror onto ``registry``, warn.
+            config["registry"] = config["database"]
+            print(
+                "WARNING: the 'database:' config key is deprecated; rename it to "
+                "'registry:' (the registry/bootstrap database). 'database:' is "
+                "still honored for now and will be removed in a future major."
+            )
+
+        if "multitenancy" not in config:
+            config["multitenancy"] = {}
+        if "enabled" not in config["multitenancy"]:
+            config["multitenancy"]["enabled"] = False
+
         # Email settings
         if "email" not in config:
             config["email"] = {}
@@ -287,6 +324,33 @@ def get_smtp_config():
     Get SMTP server configuration.
     """
     return config["email"]["smtp"]
+
+
+def get_registry_config():
+    """Return the registry / bootstrap database connection config.
+
+    Phase 13.1: prefers the ``registry:`` block, falling back to the
+    deprecated ``database:`` alias.  In collapsed (homelab) mode these
+    are the same connection.  This is the single bootstrap pointer — all
+    per-tenant placement lives in the registry database as data, never
+    in YAML.
+    """
+    return config.get("registry") or config.get("database")
+
+
+def is_multitenancy_enabled() -> bool:
+    """True when the multi-tenancy control plane is enabled (default False).
+
+    When False (the default for homelab / on-prem / federated installs),
+    the control-plane API does not mount and the partition resolver is
+    hardwired to the single engine — behavior is identical to today.
+    """
+    return bool(config.get("multitenancy", {}).get("enabled", False))
+
+
+def get_multitenancy_config():
+    """Return the complete multitenancy configuration dict."""
+    return config.get("multitenancy", {})
 
 
 def get_vault_config():

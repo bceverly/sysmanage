@@ -40,8 +40,11 @@ start_pre() {
 			ewarn "  2. TLS certificates (if using HTTPS)"
 			ewarn "  3. Admin user credentials"
 			ewarn ""
-			ewarn "Then initialize the database with:"
-			ewarn "  cd /usr/libexec/sysmanage && python3 -m alembic upgrade head"
+			ewarn "Then initialize the database (all three partition chains):"
+			ewarn "  cd /usr/libexec/sysmanage"
+			ewarn "  python3 -m alembic --name registry upgrade head"
+			ewarn "  python3 -m alembic --name shared upgrade head"
+			ewarn "  python3 -m alembic upgrade head"
 			return 1
 		fi
 	fi

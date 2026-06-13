@@ -4177,14 +4177,27 @@ plan-builder + UI integration.
 > - **Customer-owned SSO** (per-tenant Entra/Okta/OIDC/SAML + JIT/SCIM) and
 >   **enforced, time-boxed vendor-support grants** tied to credential issuance (no
 >   grant → no DB lease).
+> - **Air-gap appliance invariant:** air-gapped (`repository`-role) deployments are
+>   **single-tenant + single local DB + local OpenBAO + no federation** — multi-tenancy
+>   (needs external SSO) and federation are not supported there, enforced by a startup
+>   guard + config builder. OpenBAO ships/starts on **every** OS/version (prebuilt
+>   static binary; native package on Linux/FreeBSD, pinned tarball elsewhere; bundled
+>   for air-gap). Full plan:
+>   [`docs/planning/openbao-deployment-and-airgap.md`](docs/planning/openbao-deployment-and-airgap.md).
 
-- [ ] **13.1.A** Registry foundation — `registry` Alembic chain + models (tenant,
+- [x] **13.1.A** Registry foundation — `registry` Alembic chain + models (tenant,
       user, grant, placement), partition resolver + tenant-aware session factory,
       `multitenancy.enabled` toggle (default off, no behavior change), control-plane
       API skeleton, homelab single-DB collapse working
-- [ ] **13.1.B** Tenant routing & identity — `get_current_tenant`, token carries
+      *(done June 2026: `make migrate` now runs all three chains; 20 tests; default
+      single-DB collapse verified.)*
+- [x] **13.1.B** Tenant routing & identity — `get_current_tenant`, token carries
       active `tenant_id`, `POST /auth/switch-account`, email→tenant grant CRUD,
       per-tenant email-domain allowlist ("account switching" + "account model")
+      *(done June 2026: registry `r2` adds the email-domain allowlist; JWT carries
+      optional tenant_id (unchanged in single-tenant mode); registry_service +
+      control-plane CRUD with domain enforcement; 35 new tests; 40 existing auth
+      tests still green.)*
 - [ ] **13.1.C** Credentials & placement — OpenBAO dynamic DB secrets, API-layer
       lease cache + per-tenant warm pools, `registry_tenant_placement` engine
       routing, per-tenant DB provisioning automation
@@ -4210,6 +4223,35 @@ plan-builder + UI integration.
       `2 + N` topology, OpenBAO dynamic creds, and per-tenant SSO/grants —
       explicitly noting multi-tenancy is opt-in and homelab/on-prem/federated
       installs are unaffected; i18n the new strings
+- [ ] **13.1.H** OpenBAO on every OS + config classification — install & cleanly start
+      OpenBAO in **every** OS installer (native package on Linux/FreeBSD, pinned
+      verified tarball elsewhere; bundled into the air-gap mega-ISO), with a shared
+      file-storage config + auto-init/unseal one-shot and a startup guard enforcing
+      the air-gap appliance invariants. Then reclassify every `sysmanage.yaml` option:
+      **bootstrap-only stays in YAML; secrets (userids/passwords/tokens/salts) move to
+      OpenBAO by default; operational/email/policy config moves to a Settings → DB
+      table** (email + password-policy + branding become **tenant-scoped**). Rewrite
+      `scripts/sysmanage_secure_installation*` to generate+store secrets in OpenBAO,
+      seed the admin user + sane default settings, and write a minimal pointer-only
+      YAML; update the `sysmanage-docs` config builder to match. Plans:
+      [`docs/planning/openbao-deployment-and-airgap.md`](docs/planning/openbao-deployment-and-airgap.md),
+      [`docs/planning/config-classification.md`](docs/planning/config-classification.md).
+      *(Started June 2026: backend startup guard + shared OpenBAO assets done; OpenBAO
+      install/start wired into ALL installers except OpenBSD — Ubuntu/Debian, CentOS/
+      RHEL, openSUSE, Alpine (OpenRC+musl tarball), FreeBSD (pkg/tarball+rc.d), NetBSD
+      (tarball+rc.d), macOS (tarball+launchd), Windows (zip+NSSM), Snap (bundled binary
+      +wrapper). All migrate hints fixed to run the 3 chains. Remaining: air-gap bundle
+      builder staging of the bao artifact per platform, OpenBSD (gated on 13.1.I), and
+      the config reclassification.)*
+- [ ] **13.1.I** OpenBSD OpenBAO prebuilt-binary verification — smoke-test the official
+      `bao_*_Openbsd_x86_64.tar.gz` binary on real **OpenBSD 7.7 and 7.8**
+      (`bao server -version`, init/unseal, basic KV round-trip). OpenBSD enforces
+      syscall-origin pinning + W^X, so a cross-compiled Go binary is version-sensitive
+      and may not run. **If it works:** make the prebuilt tarball the default for the
+      OpenBSD installer and retire the source-build path to a fallback. **If it fails:**
+      keep `scripts/build-openbao.sh` (source build) as the OpenBSD default. Until
+      verified, OpenBSD continues to use the source-build path. (Bryan to run on
+      real OpenBSD hardware.)
 
 #### 13.2 API Completeness
 

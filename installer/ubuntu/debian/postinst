@@ -55,9 +55,71 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		chmod 640 /etc/sysmanage.yaml
 	fi
 
+	# ---------------------------------------------------------------
+	# OpenBAO (secrets broker) — install + start + initialize/unseal.
+	#
+	# OpenBAO is central to SysManage.  We install the native package
+	# (it provides the `bao` binary, the `openbao` service user, and the
+	# stock openbao.service unit), drop our own minimal config, and run a
+	# one-shot init/unseal so a fresh box comes up with a working local
+	# secrets broker.  See docs/planning/openbao-deployment-and-airgap.md.
+	# ---------------------------------------------------------------
+	if ! command -v bao >/dev/null 2>&1; then
+		echo "Installing OpenBAO..."
+		# 1) Air-gap path: a bundled .deb staged next to the SysManage
+		#    package (the air-gap mega-ISO places it here).
+		BUNDLED_BAO="$(ls /opt/sysmanage/installer/openbao/*.deb 2>/dev/null | head -n1 || true)"
+		if [ -n "$BUNDLED_BAO" ]; then
+			apt-get install -y "$BUNDLED_BAO" >/dev/null 2>&1 \
+				|| dpkg -i "$BUNDLED_BAO" >/dev/null 2>&1 || true
+		# 2) Online path: configure the official OpenBAO apt repo, install.
+		elif command -v curl >/dev/null 2>&1; then
+			install -m0755 -d /etc/apt/keyrings 2>/dev/null || true
+			if curl -fsSL https://pkg.openbao.org/gpg.key 2>/dev/null \
+				| gpg --dearmor -o /etc/apt/keyrings/openbao.gpg 2>/dev/null; then
+				echo "deb [signed-by=/etc/apt/keyrings/openbao.gpg] https://pkg.openbao.org/deb/ubuntu stable main" \
+					> /etc/apt/sources.list.d/openbao.list
+				apt-get update >/dev/null 2>&1 || true
+				apt-get install -y openbao >/dev/null 2>&1 || true
+			fi
+		fi
+		if ! command -v bao >/dev/null 2>&1; then
+			echo "⚠ OpenBAO ('bao') could not be installed automatically."
+			echo "  Install it manually (https://openbao.org) or set vault.enabled=false."
+		fi
+	fi
+
+	# Provision OpenBAO directories + config when the binary is present.
+	if command -v bao >/dev/null 2>&1; then
+		# The openbao package creates the 'openbao' user; fall back to
+		# creating it if a tarball-based install didn't.
+		if ! getent passwd openbao >/dev/null; then
+			adduser --system --group --home /var/lib/openbao --no-create-home \
+				--disabled-password --disabled-login \
+				--gecos "OpenBAO" openbao >/dev/null 2>&1 || true
+		fi
+		mkdir -p /var/lib/openbao/data /etc/openbao
+		chown -R openbao:openbao /var/lib/openbao
+		# Our config ships to /etc/openbao/openbao.hcl via debian/install.
+		chown root:openbao /etc/openbao/openbao.hcl 2>/dev/null || true
+		chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
+	fi
+
 	# Reload systemd daemon
 	if [ -d /run/systemd/system ]; then
 		systemctl --system daemon-reload >/dev/null 2>&1 || true
+	fi
+
+	# Enable + start OpenBAO and run the init/unseal one-shot so the local
+	# secrets broker is ready before the operator starts SysManage.  Safe to
+	# run now (OpenBAO needs no external config); SysManage itself is still
+	# left stopped for the operator to configure.
+	if command -v bao >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+		systemctl enable openbao.service >/dev/null 2>&1 || true
+		systemctl enable sysmanage-openbao-init.service >/dev/null 2>&1 || true
+		systemctl restart openbao.service >/dev/null 2>&1 || true
+		systemctl start sysmanage-openbao-init.service >/dev/null 2>&1 \
+			|| echo "⚠ OpenBAO init/unseal did not complete; check 'systemctl status sysmanage-openbao-init'."
 	fi
 
 	# Enable but DON'T start the service (user needs to configure first)
@@ -94,9 +156,11 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "stopped for the upgrade.  It is NOT restarted automatically — two"
 	echo "manual steps remain:"
 	echo ""
-	echo "1. Apply database migrations"
+	echo "1. Apply database migrations (all three partition chains)"
 	echo "   ------------------------"
 	echo "     cd /opt/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name registry upgrade head"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name shared upgrade head"
 	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
 	echo ""
 	echo "2. Restart the service"
@@ -143,10 +207,12 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "     • Authentication settings"
 	echo "     • Logging configuration"
 	echo ""
-	echo "3. Database Migration"
+	echo "3. Database Migration (all three partition chains)"
 	echo "   ------------------"
 	echo "   After configuring the database connection, run:"
 	echo "     cd /opt/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name registry upgrade head"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name shared upgrade head"
 	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
 	echo ""
 	echo "4. Start the Service"

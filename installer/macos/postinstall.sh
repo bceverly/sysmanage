@@ -46,6 +46,39 @@ chown -R root:wheel /usr/local/lib/sysmanage
 chown -R root:wheel /var/lib/sysmanage
 chown -R root:wheel /var/log/sysmanage
 
+# OpenBAO secrets broker — provision the static prebuilt binary (or Homebrew
+# package), then load the LaunchDaemon and initialize/unseal.
+echo "Provisioning OpenBAO..."
+if ! command -v bao >/dev/null 2>&1 && [ ! -x /usr/local/bin/bao ]; then
+	if command -v brew >/dev/null 2>&1; then
+		brew install openbao >/dev/null 2>&1 || true
+	fi
+	if [ ! -x /usr/local/bin/bao ] && ! command -v bao >/dev/null 2>&1; then
+		OPENBAO_VERSION="2.5.4"
+		case "$(uname -m)" in
+			arm64) BAO_ARCH="arm64" ;;
+			x86_64) BAO_ARCH="x86_64" ;;
+			*) BAO_ARCH="" ;;
+		esac
+		if [ -n "$BAO_ARCH" ]; then
+			URL="https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Darwin_${BAO_ARCH}.tar.gz"
+			curl -fsSL "$URL" -o /tmp/bao.tgz 2>/dev/null \
+				&& tar -xzf /tmp/bao.tgz -C /usr/local/bin bao 2>/dev/null
+			rm -f /tmp/bao.tgz
+		fi
+	fi
+fi
+if command -v bao >/dev/null 2>&1 || [ -x /usr/local/bin/bao ]; then
+	mkdir -p /var/lib/openbao/data /usr/local/etc/openbao
+	chown -R root:wheel /var/lib/openbao
+	launchctl load /Library/LaunchDaemons/com.sysmanage.openbao.plist 2>/dev/null || true
+	/usr/bin/python3 /usr/local/lib/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json 2>/dev/null \
+		|| echo "[WARNING] OpenBAO init/unseal did not complete; check /var/log/openbao.log"
+else
+	echo "[WARNING] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
+fi
+
 echo "Checking for nginx..."
 if command -v nginx >/dev/null 2>&1; then
 	echo "✓ nginx found - configuring automatically"
@@ -72,7 +105,10 @@ if ! command -v psql >/dev/null 2>&1; then
 	echo "3. Create database: createdb sysmanage"
 fi
 echo "4. Copy and configure: cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml"
-echo "5. Run migrations: cd /usr/local/lib/sysmanage && .venv/bin/python -m alembic upgrade head"
+echo "5. Run migrations (all three chains): cd /usr/local/lib/sysmanage && \\"
+echo "     .venv/bin/python -m alembic --name registry upgrade head && \\"
+echo "     .venv/bin/python -m alembic --name shared upgrade head && \\"
+echo "     .venv/bin/python -m alembic upgrade head"
 echo "6. Load LaunchDaemon: sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist"
 if ! command -v nginx >/dev/null 2>&1; then
 	echo "7. Install nginx: brew install nginx"

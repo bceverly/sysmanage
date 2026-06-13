@@ -12,3 +12,5 @@ sbom/* usr/share/doc/sysmanage/sbom/
 installer/ubuntu/sysmanage.service lib/systemd/system/
 installer/ubuntu/sysmanage.yaml.example etc/sysmanage/
 installer/ubuntu/sysmanage-nginx.conf etc/nginx/sites-available/
+installer/openbao/openbao.hcl etc/openbao/
+installer/openbao/sysmanage-openbao-init.service lib/systemd/system/

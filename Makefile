@@ -739,10 +739,17 @@ endif
 #   * if migrate failed they'd want to investigate before restarting.
 migrate: stop
 	@echo "Running database migrations..."
+	@echo "  -> registry chain (registry_* control-plane tables)"
+	@$(PYTHON) -m alembic --name registry upgrade head
+	@echo "  -> shared chain (shared_* reference tables)"
+	@$(PYTHON) -m alembic --name shared upgrade head
+	@echo "  -> tenant chain (per-customer schema)"
 	@$(PYTHON) -m alembic upgrade head
-	@echo "[OK] Database migrations completed"
+	@echo "[OK] Database migrations completed (registry + shared + tenant)"
 	@echo ""
-	@echo "NOTE: backend / frontend / telemetry / OpenBAO were stopped before migrate."
+	@echo "NOTE: In the default single-database deployment all three chains"
+	@echo "      run against the SAME database (collapsed/homelab mode)."
+	@echo "      backend / frontend / telemetry / OpenBAO were stopped before migrate."
 	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
 
 # Clean trailing whitespace from Python files (cross-platform)
@@ -2247,6 +2254,7 @@ installer-freebsd: build
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/rc.d"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/openbao"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom"; \
 	echo "✓ Package directories created"; \
 	echo ""; \
@@ -2269,6 +2277,9 @@ installer-freebsd: build
 	cp installer/freebsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d/"; \
 	cp installer/freebsd/sysmanage.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
 	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	cp installer/freebsd/openbao.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
+	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/local/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \
@@ -2387,6 +2398,7 @@ installer-macos: build
 	rsync -a alembic/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/alembic/"; \
 	cp alembic.ini "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
 	cp requirements.txt "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' scripts/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/scripts/"; \
 	echo "✓ Backend files copied"; \
 	echo ""; \
 	echo "Copying frontend files..."; \
@@ -2397,6 +2409,8 @@ installer-macos: build
 	echo "Copying configuration files..."; \
 	cp installer/macos/sysmanage.yaml.example "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
 	cp installer/macos/sysmanage-nginx.conf "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/etc/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PAYLOAD_DIR/usr/local/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM files..."; \
@@ -2410,6 +2424,7 @@ installer-macos: build
 	echo ""; \
 	echo "Copying LaunchDaemon plist..."; \
 	cp installer/macos/com.sysmanage.server.plist "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.server.plist"; \
+	cp installer/macos/com.sysmanage.openbao.plist "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.openbao.plist"; \
 	echo "✓ LaunchDaemon plist copied"; \
 	echo ""; \
 	echo "Copying postinstall script..."; \
@@ -2510,6 +2525,10 @@ installer-netbsd: build
 	cp installer/netbsd/sysmanage.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
 	cp installer/netbsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage/"; \
 	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/etc/openbao"; \
+	cp installer/netbsd/openbao.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
+	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/pkg/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \

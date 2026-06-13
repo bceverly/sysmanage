@@ -27,6 +27,7 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
+    control_plane,
     cve_refresh_settings,
     default_repositories,
     diagnostics,
@@ -70,6 +71,7 @@ from backend.api import (
     user,
     user_preferences,
 )
+from backend.config import config as config_module
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.routes")
@@ -456,6 +458,16 @@ def register_routes(app: FastAPI):
         tags=["cve-refresh", "pro-plus"],
     )  # /api/cve-refresh/* (with auth)
     logger.debug("CVE Refresh Settings router added")
+
+    # Multi-tenancy control-plane API (Phase 13.1.A).  Mounted ONLY when
+    # multitenancy is enabled — in the default homelab / on-prem /
+    # federated deployment this management surface does not exist on the
+    # app at all (no new attack surface, no behavior change).
+    if config_module.is_multitenancy_enabled():
+        app.include_router(control_plane.router)
+        logger.debug("Control-plane router added (multitenancy enabled)")
+    else:
+        logger.debug("Control-plane router NOT added (multitenancy disabled)")
 
     logger.debug("=== ALL ROUTES REGISTERED ===")
 

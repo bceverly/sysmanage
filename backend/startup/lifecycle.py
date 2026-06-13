@@ -72,6 +72,18 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             "certificate_manager.ensure_server_certificate() completed successfully"
         )
 
+        # Startup: enforce air-gap appliance invariants (fail fast on an
+        # unsupported combination — e.g. multi-tenancy or federation on a
+        # repository-role / air-gapped deployment).  See
+        # docs/planning/openbao-deployment-and-airgap.md §5.
+        logger.info("=== DEPLOYMENT INVARIANT CHECK ===")
+        from backend.startup.deployment_guards import (  # noqa: PLC0415
+            enforce_deployment_invariants,
+        )
+
+        enforce_deployment_invariants()
+        logger.info("Deployment invariants satisfied")
+
         # Startup: Initialize Pro+ license service
         logger.info("=== LICENSE SERVICE INITIALIZATION ===")
         logger.info("About to initialize license service")

@@ -30,6 +30,7 @@ from .proplus import *
 from .secret import *
 from .server_configuration import *
 from .software import *
+from .tenancy import *
 
 __all__ = [
     # Core models
@@ -212,6 +213,19 @@ __all__ = [
     "LEASE_KIND_DATABASE",
     "LEASE_KIND_SSH",
     "LEASE_KIND_TOKEN",
+    # Multi-tenancy control-plane / registry (Phase 13.1.A)
+    "RegistryTenant",
+    "RegistryUser",
+    "RegistryUserTenantGrant",
+    "RegistryTenantPlacement",
+    "RegistryTenantEmailDomain",
+    "TENANT_TIER_SILO",
+    "TENANT_TIER_POOL",
+    "TENANT_TIERS",
+    "TENANT_STATUS_ACTIVE",
+    "TENANT_STATUS_SUSPENDED",
+    "TENANT_STATUS_PROVISIONING",
+    "TENANT_STATUSES",
 ]
 
 # Alias for Cython modules that reference ChildHost instead of HostChild

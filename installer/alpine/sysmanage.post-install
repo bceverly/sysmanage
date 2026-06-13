@@ -1,5 +1,60 @@
 #!/bin/sh
 
+# ---------------------------------------------------------------
+# OpenBAO (secrets broker) — provision the binary + service.
+#
+# Alpine is musl and OpenBAO ships no .apk, but `bao` is a static Go binary
+# that runs on musl.  We install it to /usr/local/bin/bao from (1) a binary
+# bundled for air-gap installs, or (2) the official release tarball.  The
+# OpenRC service (installed by the package) runs it and the init/unseal
+# helper.  See docs/planning/openbao-deployment-and-airgap.md.
+# ---------------------------------------------------------------
+OPENBAO_VERSION="2.5.4"
+
+if ! command -v bao >/dev/null 2>&1 && [ ! -x /usr/local/bin/bao ]; then
+	echo "Provisioning OpenBAO (bao)..."
+	BUNDLED_BAO="/usr/libexec/sysmanage/installer/openbao/bao"
+	if [ -x "$BUNDLED_BAO" ]; then
+		install -m 755 "$BUNDLED_BAO" /usr/local/bin/bao
+	else
+		case "$(uname -m)" in
+			x86_64) BAO_ARCH="x86_64" ;;
+			aarch64) BAO_ARCH="arm64" ;;
+			armv7l) BAO_ARCH="armv6" ;;
+			*) BAO_ARCH="" ;;
+		esac
+		if [ -n "$BAO_ARCH" ] && command -v wget >/dev/null 2>&1; then
+			URL="https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Linux_${BAO_ARCH}.tar.gz"
+			if wget -qO /tmp/bao.tgz "$URL" 2>/dev/null; then
+				tar -xzf /tmp/bao.tgz -C /tmp bao 2>/dev/null \
+					&& install -m 755 /tmp/bao /usr/local/bin/bao
+				rm -f /tmp/bao.tgz /tmp/bao
+			fi
+		fi
+	fi
+	if [ ! -x /usr/local/bin/bao ]; then
+		echo "[!] OpenBAO ('bao') could not be provisioned automatically."
+		echo "    Install it manually (https://openbao.org) or set vault.enabled=false."
+	fi
+fi
+
+# Create the openbao service user + data dir, then enable the service.
+if command -v bao >/dev/null 2>&1 || [ -x /usr/local/bin/bao ]; then
+	if ! getent group openbao >/dev/null 2>&1; then
+		addgroup -S openbao 2>/dev/null || true
+	fi
+	if ! getent passwd openbao >/dev/null 2>&1; then
+		adduser -S -D -H -h /var/lib/openbao -s /sbin/nologin -G openbao \
+			-g "OpenBAO" openbao 2>/dev/null || true
+	fi
+	mkdir -p /var/lib/openbao/data /etc/openbao
+	chown -R openbao:openbao /var/lib/openbao
+	chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
+	rc-update add openbao default 2>/dev/null || true
+	rc-service openbao start 2>/dev/null \
+		|| echo "[!] Could not start OpenBAO now; it will start on next boot."
+fi
+
 echo ""
 echo "=========================================="
 echo " SysManage Server installed successfully"
@@ -14,9 +69,11 @@ echo "     - Configure PostgreSQL database connection"
 echo "     - Configure TLS certificates (optional)"
 echo "     - Configure admin credentials"
 echo ""
-echo "To initialize the database:"
+echo "To initialize the database (all three partition chains):"
 echo "  cd /usr/libexec/sysmanage"
 echo "  export PYTHONPATH=/usr/libexec/sysmanage/pip-packages"
+echo "  python3 -m alembic --name registry upgrade head"
+echo "  python3 -m alembic --name shared upgrade head"
 echo "  python3 -m alembic upgrade head"
 echo ""
 echo "To enable and start the services:"
@@ -32,4 +89,5 @@ echo "  http://localhost:3000"
 echo ""
 echo "Note: nginx serves the frontend on port 3000 and proxies"
 echo "      API requests to the backend on port 8080."
+echo "      OpenBAO (secrets broker) runs locally on 127.0.0.1:8200."
 echo ""

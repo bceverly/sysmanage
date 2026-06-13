@@ -149,6 +149,12 @@ install -m 644 installer/centos/sysmanage.yaml.example %{buildroot}/etc/sysmanag
 install -d %{buildroot}/usr/lib/systemd/system
 install -m 644 installer/centos/sysmanage.service %{buildroot}/usr/lib/systemd/system/
 
+# Install OpenBAO config + init/unseal one-shot (secrets broker — central to
+# SysManage; see docs/planning/openbao-deployment-and-airgap.md)
+install -d %{buildroot}/etc/openbao
+install -m 640 installer/openbao/openbao.hcl %{buildroot}/etc/openbao/openbao.hcl
+install -m 644 installer/openbao/sysmanage-openbao-init.service %{buildroot}/usr/lib/systemd/system/
+
 # Install nginx configuration
 install -d %{buildroot}/etc/nginx/conf.d
 install -m 644 installer/centos/sysmanage-nginx.conf %{buildroot}/etc/nginx/conf.d/
@@ -213,6 +219,50 @@ if command -v nginx >/dev/null 2>&1; then
     nginx -t >/dev/null 2>&1 && systemctl reload nginx >/dev/null 2>&1 || echo "[!] nginx configuration may need manual review"
 fi
 
+# ---------------------------------------------------------------
+# OpenBAO (secrets broker) — install + start + initialize/unseal.
+# Native package provides the bao binary, the openbao user, and the
+# stock openbao.service; we drop our config + run an init/unseal one-shot.
+# ---------------------------------------------------------------
+if ! command -v bao >/dev/null 2>&1; then
+    echo "Installing OpenBAO..."
+    BUNDLED_BAO="$(ls /opt/sysmanage/installer/openbao/*.rpm 2>/dev/null | head -n1 || true)"
+    if [ -n "$BUNDLED_BAO" ]; then
+        dnf install -y "$BUNDLED_BAO" >/dev/null 2>&1 || rpm -i "$BUNDLED_BAO" >/dev/null 2>&1 || true
+    elif command -v dnf >/dev/null 2>&1; then
+        cat > /etc/yum.repos.d/openbao.repo <<'EOF'
+[openbao]
+name=OpenBAO
+baseurl=https://pkg.openbao.org/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://pkg.openbao.org/gpg.key
+EOF
+        dnf install -y openbao >/dev/null 2>&1 || true
+    fi
+    if ! command -v bao >/dev/null 2>&1; then
+        echo "[!] OpenBAO ('bao') could not be installed automatically."
+        echo "    Install it manually (https://openbao.org) or set vault.enabled=false."
+    fi
+fi
+
+if command -v bao >/dev/null 2>&1; then
+    if ! getent passwd openbao >/dev/null; then
+        useradd --system --user-group --home-dir /var/lib/openbao --no-create-home \
+            --shell /sbin/nologin --comment "OpenBAO" openbao >/dev/null 2>&1 || true
+    fi
+    mkdir -p /var/lib/openbao/data /etc/openbao
+    chown -R openbao:openbao /var/lib/openbao
+    chown root:openbao /etc/openbao/openbao.hcl 2>/dev/null || true
+    chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable openbao.service >/dev/null 2>&1 || true
+    systemctl enable sysmanage-openbao-init.service >/dev/null 2>&1 || true
+    systemctl restart openbao.service >/dev/null 2>&1 || true
+    systemctl start sysmanage-openbao-init.service >/dev/null 2>&1 \
+        || echo "[!] OpenBAO init/unseal did not complete; check 'systemctl status sysmanage-openbao-init'."
+fi
+
 # Enable the service (but don't start it yet - user needs to configure first)
 %systemd_post sysmanage.service
 
@@ -247,8 +297,10 @@ echo "   https://sysmanage.org/config-builder.html"
 echo ""
 echo "3. Database Initialization"
 echo "   -----------------------"
-echo "   Run database migrations:"
+echo "   Run database migrations (all three partition chains):"
 echo "     cd /opt/sysmanage"
+echo "     sudo -u sysmanage .venv/bin/python -m alembic --name registry upgrade head"
+echo "     sudo -u sysmanage .venv/bin/python -m alembic --name shared upgrade head"
 echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
 echo ""
 echo "4. Start the Services"
@@ -298,6 +350,9 @@ fi
 %dir /var/lib/sysmanage
 %dir /var/log/sysmanage
 /usr/lib/systemd/system/sysmanage.service
+/usr/lib/systemd/system/sysmanage-openbao-init.service
+%dir /etc/openbao
+%config(noreplace) /etc/openbao/openbao.hcl
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
 %doc /usr/share/doc/sysmanage/sbom/
 

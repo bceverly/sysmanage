@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# PROVIDE: openbao
+# REQUIRE: NETWORKING
+# BEFORE: sysmanage
+#
+# OpenBAO secrets broker for SysManage.  NetBSD has no OpenBAO package, so
+# the static prebuilt `bao` binary is provisioned by the package +INSTALL
+# script; this rc.d script runs it and then initializes + unseals it.
+
+. /etc/rc.subr
+
+name="openbao"
+rcvar=$name
+pidfile="/var/run/openbao.pid"
+command="/usr/pkg/bin/bao"
+start_cmd="openbao_start"
+stop_cmd="openbao_stop"
+
+openbao_start()
+{
+	[ -x "$command" ] || command="/usr/local/bin/bao"
+	install -d -o openbao -g openbao /var/lib/openbao /var/lib/openbao/data
+	echo "Starting openbao."
+	su -m openbao -c "$command server -config=/usr/pkg/etc/openbao/openbao.hcl >> /var/log/openbao.log 2>&1 &"
+	sleep 1
+	pgrep -f 'bao server' > "$pidfile" 2>/dev/null || true
+	# Idempotent init/unseal (the helper waits for the listener).
+	/usr/pkg/bin/python3.12 \
+		/usr/pkg/lib/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json 2>/dev/null || \
+		echo "openbao: init/unseal did not complete; see /var/log/openbao.log"
+}
+
+openbao_stop()
+{
+	if [ -f "$pidfile" ]; then
+		kill "$(cat "$pidfile")" 2>/dev/null || true
+		rm -f "$pidfile"
+	else
+		pkill -f 'bao server' 2>/dev/null || true
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"

@@ -425,6 +425,22 @@ everything is one 146-migration chain. Do **not** rewrite history:
     multi-tenancy is opt-in and that homelab/on-prem/federated deployments are
     unaffected. i18n the new strings across all supported locales.
 
+## 14a. Air-gap deployments are out of scope for multi-tenancy (decided)
+
+**Multi-tenancy is not supported on air-gapped deployments** (the `repository`
+role). Multi-tenancy is intrinsically internet-facing — its identity model is
+**customer-owned SSO** (Entra/Okta/OIDC/SAML), and reaching an external IdP is
+definitionally impossible offline, so a multi-tenant air-gapped deployment is
+self-contradictory at the identity layer. Air-gapped servers run the **collapsed
+single-DB mode** (`multitenancy.enabled=false`, the default) with everything in one
+local database, and a **local single-node OpenBAO** doing KV/secrets — *not* the
+dynamic per-tenant credential broker. A startup guard errors if
+`multitenancy.enabled` is true on a `repository`-role deployment, and the config
+builder does not offer multi-tenancy in that mode. (Bryan, June 2026.) Relatedly, a
+`repository`-role server does not participate in **federation** either — see the
+companion doc. Full rationale + the OpenBAO-on-every-OS install/bundle plan:
+[`openbao-deployment-and-airgap.md`](openbao-deployment-and-airgap.md).
+
 ## 14. Open decisions for Bryan
 
 1. ~~**Homelab simplest mode:** pure prefix-only single namespace vs. always-on

@@ -459,10 +459,104 @@ async def refresh(request: Request):
         token_dict = decode_jwt(refresh_token)
         if token_dict:
             the_userid = token_dict["user_id"]
-            new_token = sign_jwt(the_userid)
+            # Preserve the active tenant across a refresh (13.1.B); None in
+            # single-tenant mode, so the token shape is unchanged there.
+            the_tenant = token_dict.get("tenant_id")
+            new_token = sign_jwt(the_userid, tenant_id=the_tenant)
             return {"Authorization": new_token}
 
     raise HTTPException(status_code=403, detail=_("Invalid or missing refresh token"))
+
+
+class SwitchAccountRequest(BaseModel):
+    """Body for ``POST /api/auth/switch-account``."""
+
+    tenant_id: str
+
+
+def _open_registry_session():
+    """Open a session on the registry partition (late import avoids cycles)."""
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        PARTITION_REGISTRY,
+        get_sessionmaker,
+    )
+
+    return get_sessionmaker(partition=PARTITION_REGISTRY)()
+
+
+@router.get("/auth/accounts", dependencies=[Depends(JWTBearer())])
+async def list_accounts(current_user: str = Depends(get_current_user)):
+    """List the tenants the current user can switch to (their live grants).
+
+    Multi-tenancy only — returns 400 when the feature is disabled.
+    """
+    if not config.is_multitenancy_enabled():
+        raise HTTPException(status_code=400, detail=_("Multi-tenancy is not enabled."))
+
+    from backend.persistence.models.tenancy import RegistryTenant  # noqa: PLC0415
+    from backend.services import registry_service  # noqa: PLC0415
+
+    session = _open_registry_session()
+    try:
+        grants = registry_service.list_user_grants(session, current_user)
+        accounts = []
+        for grant in grants:
+            tenant = (
+                session.query(RegistryTenant)
+                .filter(RegistryTenant.id == grant.tenant_id)
+                .first()
+            )
+            if tenant:
+                accounts.append(
+                    {
+                        "tenant_id": str(tenant.id),
+                        "name": tenant.name,
+                        "slug": tenant.slug,
+                        "role": grant.role,
+                        "is_default": grant.is_default,
+                    }
+                )
+        return {"accounts": accounts, "total": len(accounts)}
+    finally:
+        session.close()
+
+
+@router.post("/auth/switch-account", dependencies=[Depends(JWTBearer())])
+async def switch_account(
+    payload: SwitchAccountRequest,
+    response: Response,
+    current_user: str = Depends(get_current_user),
+):
+    """Switch the active tenant and re-mint the token to carry it.
+
+    Verifies the caller holds a live grant to the requested tenant before
+    re-minting both the access token and the refresh cookie with the new
+    ``tenant_id``.  Multi-tenancy only (400 when disabled).
+    """
+    if not config.is_multitenancy_enabled():
+        raise HTTPException(status_code=400, detail=_("Multi-tenancy is not enabled."))
+
+    from backend.services import registry_service  # noqa: PLC0415
+
+    session = _open_registry_session()
+    try:
+        if not registry_service.has_active_grant(
+            session, current_user, payload.tenant_id
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail=_("You do not have access to the selected account."),
+            )
+    finally:
+        session.close()
+
+    the_config = config.get_config()
+    jwt_refresh_timeout = int(the_config["security"]["jwt_refresh_timeout"])
+    is_secure = _is_secure_cookie_enabled(the_config)
+
+    refresh_token = sign_refresh_token(current_user, tenant_id=payload.tenant_id)
+    _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
+    return {"Authorization": sign_jwt(current_user, tenant_id=payload.tenant_id)}
 
 
 @router.post("/logout", dependencies=[Depends(JWTBearer())])

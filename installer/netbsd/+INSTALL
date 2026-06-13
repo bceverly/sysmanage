@@ -46,6 +46,44 @@ POST-INSTALL)
 	.venv/bin/pip install --quiet --upgrade pip
 	.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 
+	# OpenBAO secrets broker — provision the static prebuilt binary (NetBSD
+	# has no OpenBAO package), install the rc.d service, create the user.
+	if [ ! -x /usr/pkg/bin/bao ] && [ ! -x /usr/local/bin/bao ]; then
+		OPENBAO_VERSION="2.5.4"
+		case "$(uname -m)" in
+			x86_64|amd64) BAO_ARCH="x86_64" ;;
+			aarch64|arm64) BAO_ARCH="arm64" ;;
+			*) BAO_ARCH="" ;;
+		esac
+		if [ -n "$BAO_ARCH" ]; then
+			URL="https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Netbsd_${BAO_ARCH}.tar.gz"
+			if command -v ftp >/dev/null 2>&1; then
+				ftp -o /tmp/bao.tgz "$URL" 2>/dev/null || true
+			fi
+			[ -f /tmp/bao.tgz ] && tar -xzf /tmp/bao.tgz -C /usr/pkg/bin bao 2>/dev/null
+			rm -f /tmp/bao.tgz
+		fi
+	fi
+	if [ -x /usr/pkg/bin/bao ] || [ -x /usr/local/bin/bao ]; then
+		if ! /usr/sbin/groupinfo openbao >/dev/null 2>&1; then
+			/usr/sbin/groupadd -g 9997 openbao
+		fi
+		if ! /usr/sbin/userinfo openbao >/dev/null 2>&1; then
+			/usr/sbin/useradd -u 9997 -g openbao -s /sbin/nologin \
+				-d /var/lib/openbao -c "OpenBAO" openbao
+		fi
+		mkdir -p /var/lib/openbao/data /usr/pkg/etc/openbao
+		chown -R openbao:openbao /var/lib/openbao
+		# Install the rc.d service so the operator can enable it.
+		if [ -f /usr/pkg/share/examples/rc.d/openbao ]; then
+			cp /usr/pkg/share/examples/rc.d/openbao /etc/rc.d/openbao
+			chmod +x /etc/rc.d/openbao
+		fi
+		echo "OpenBAO installed. Enable it with: echo 'openbao=YES' >> /etc/rc.conf && /etc/rc.d/openbao start"
+	else
+		echo "[!] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
+	fi
+
 	echo ""
 	echo "==========================================="
 	echo "SysManage Server installed successfully!"
@@ -78,8 +116,10 @@ POST-INSTALL)
 	echo ""
 	echo "3. Database Initialization"
 	echo "   -----------------------"
-	echo "   Run database migrations:"
+	echo "   Run database migrations (all three partition chains):"
 	echo "     cd /usr/pkg/lib/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name registry upgrade head"
+	echo "     sudo -u sysmanage .venv/bin/python -m alembic --name shared upgrade head"
 	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
 	echo ""
 	echo "4. Web Server Setup"
