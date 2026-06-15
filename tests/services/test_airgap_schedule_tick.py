@@ -232,33 +232,43 @@ class TestTickServiceLoop:
     @pytest.mark.asyncio
     async def test_service_calls_run_one_tick_repeatedly(self):
         call_count = 0
+        iterated = asyncio.Event()
 
         def _fake_tick():
             nonlocal call_count
             call_count += 1
+            if call_count >= 2:
+                iterated.set()
             return {"fired": 0, "errors": 0, "skipped_automation_absent": False}
 
         with patch.object(
             tick_module, "_run_one_tick", side_effect=_fake_tick
-        ), patch.object(tick_module, "TICK_INTERVAL_SECONDS", 0.01):
+        ), patch.object(tick_module, "TICK_INTERVAL_SECONDS", 0.005):
             task = asyncio.create_task(tick_module.airgap_schedule_tick_service())
-            # Yield long enough for several tick iterations.
-            await asyncio.sleep(0.05)
-            task.cancel()
-            with pytest.raises(asyncio.CancelledError):
-                _ = await task  # assignment placates py/ineffectual-statement
-        # At least 2 iterations should have completed in 50ms with a 10ms cadence.
+            # Wait until the loop has actually iterated twice rather than racing
+            # a fixed wall-clock sleep — coarse asyncio timer resolution on
+            # Windows (~15ms) made the fixed-sleep version flaky under CI load.
+            try:
+                await asyncio.wait_for(iterated.wait(), timeout=5)
+            finally:
+                task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    _ = await task  # assignment placates py/ineffectual-statement
+        # The loop kept calling _run_one_tick on its cadence.
         assert call_count >= 2
 
     @pytest.mark.asyncio
     async def test_service_survives_inner_exception(self):
         call_count = 0
+        recovered = asyncio.Event()
 
         def _flaky_tick():
             nonlocal call_count
             call_count += 1
             if call_count == 1:
                 raise RuntimeError("transient DB hiccup")
+            # A call after the raised one succeeded → the loop recovered.
+            recovered.set()
             return {"fired": 0, "errors": 0, "skipped_automation_absent": False}
 
         # Shorten both the happy-path and error-back-off intervals so
@@ -271,9 +281,15 @@ class TestTickServiceLoop:
             tick_module, "ERROR_BACKOFF_SECONDS", 0.005
         ):
             task = asyncio.create_task(tick_module.airgap_schedule_tick_service())
-            await asyncio.sleep(0.05)
-            task.cancel()
-            with pytest.raises(asyncio.CancelledError):
-                _ = await task  # assignment placates py/ineffectual-statement
-        # First call raised, subsequent calls succeeded — loop kept going.
+            # Wait for actual recovery (a successful call after the raised one)
+            # rather than racing a fixed wall-clock sleep.  Coarse asyncio timer
+            # resolution on Windows (~15ms) made the timed version flaky — the
+            # window could elapse after only the first (raising) call.
+            try:
+                await asyncio.wait_for(recovered.wait(), timeout=5)
+            finally:
+                task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    _ = await task  # assignment placates py/ineffectual-statement
+        # First call raised, a subsequent call succeeded — loop kept going.
         assert call_count >= 2
