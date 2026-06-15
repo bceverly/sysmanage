@@ -352,9 +352,22 @@ def request_email_otp(
         "If you did not request this code, you can ignore this email."
     )
     try:
-        sent = bool(
-            email_send_fn(to_addresses=[user_email], subject=subject, body=body)
+        # MFA is a pre-auth flow (no request-bound tenant): scope the send to
+        # the recipient's tenant by email domain so per-tenant email config
+        # applies.  None → server scope (single-tenant default).  Wrapping in
+        # the scope (rather than passing tenant_id) keeps the injected
+        # email_send_fn signature unchanged.
+        from backend.persistence.tenant_context import (  # noqa: PLC0415
+            tenant_scope,
         )
+        from backend.services.tenant_directory import (  # noqa: PLC0415
+            resolve_tenant_for_email,
+        )
+
+        with tenant_scope(resolve_tenant_for_email(user_email)):
+            sent = bool(
+                email_send_fn(to_addresses=[user_email], subject=subject, body=body)
+            )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         # Don't surface SMTP failure to the caller as an exception —
         # the user-facing endpoint should always return a generic

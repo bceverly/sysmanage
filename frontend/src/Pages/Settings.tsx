@@ -38,12 +38,12 @@ import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
-import EmailConfigCard from '../Components/EmailConfigCard';
 import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
 import GraylogIntegrationCard from '../Components/GraylogIntegrationCard';
 import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
+import ConfigurationSettings from '../Components/ConfigurationSettings';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
 import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
@@ -178,19 +178,28 @@ const Settings: React.FC = () => {
       moduleRequired?: string;
       requiresLicense?: boolean;
     }> = [
-      { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
-      { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
+      // Fixed leading order (Bryan): Configuration, Server Role, Host
+      // Defaults — the most-used settings, with Configuration as the default
+      // landing tab for the settings gear.
+      {
+        id: 'configuration',
+        labelKey: 'configuration.title',
+        labelDefault: 'Configuration',
+      },
       // Server Role (air-gap topology) — ungated: every deployment,
       // including standalone Community, can pick its role.  Replaces
-      // the old sysmanage.yaml ``role:`` key.
+      // the old sysmanage.yaml ``role:`` key.  The page hosts BOTH the
+      // air-gap and federation role cards, so the menu item is "Server
+      // Role" — distinct from ``serverRole.heading`` (the air-gap card's
+      // own "Air-Gap Role" title).
       {
         id: 'server-role',
-        // The page hosts BOTH the air-gap and federation role cards, so the
-        // menu item is "Server Role" — distinct from ``serverRole.heading``,
-        // which is the air-gap card's own "Air-Gap Role" title.
         labelKey: 'serverRole.menuTitle',
         labelDefault: 'Server Role',
       },
+      { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
+      { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
+      { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
       {
         id: 'integrations',
         labelKey: 'integrations.title',
@@ -209,7 +218,6 @@ const Settings: React.FC = () => {
         labelKey: 'availablePackages.title',
         labelDefault: 'Available Packages',
       },
-      { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
       {
         id: 'firewall-roles',
         labelKey: 'firewallRoles.title',
@@ -771,12 +779,14 @@ const Settings: React.FC = () => {
     }
   }, [packageSummary, loadPackageSummary]);
 
-  // Load package summary on mount if we're on the Available Packages tab
+  // Load package summary on mount if we're on the Available Packages tab.
+  // Keyed off the tab ID (not a hard-coded index) since the visible tab list
+  // shifts with license filtering and added tabs.
   useEffect(() => {
-    if (activeTab === 5) {
+    if (tabNames[activeTab] === 'available-packages') {
       loadPackageSummary();
     }
-  }, [activeTab, loadPackageSummary]);
+  }, [activeTab, tabNames, loadPackageSummary]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -998,9 +1008,7 @@ const Settings: React.FC = () => {
         {t('integrations.description', 'Configure external service integrations and settings.')}
       </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <EmailConfigCard />
-      </Box>
+      {/* Email configuration now lives on the Configuration tab (Phase 13.1.H). */}
 
       <Box sx={{ mb: 3 }}>
         <OpenBAOStatusCard />
@@ -1286,6 +1294,7 @@ const Settings: React.FC = () => {
           mapping is stable when a Pro+-gated tab is filtered out for
           unlicensed users. */}
       <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
+        {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
         {tabNames[activeTab] === 'queues' && renderQueuesTab()}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}

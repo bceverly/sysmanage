@@ -125,6 +125,13 @@ app.add_middleware(
 )
 startup_logger.info("CORS middleware added successfully")
 
+# Bind the active tenant (from the JWT) for per-tenant config resolution.
+# No-op when multi-tenancy is disabled (the default).
+from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E402
+
+app.add_middleware(ActiveTenantMiddleware)
+startup_logger.info("Active-tenant middleware added")
+
 # Add exception handlers to ensure CORS headers are always present
 register_exception_handlers(app, origins)
 

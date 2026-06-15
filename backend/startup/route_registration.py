@@ -62,6 +62,7 @@ from backend.api import (
     security,
     security_roles,
     server_info,
+    server_settings,
     tag,
     telemetry,
     third_party_repos,
@@ -105,6 +106,11 @@ def register_routes(app: FastAPI):
     # render the role chip + monitoring identify the box without login.
     app.include_router(server_info.router)
     logger.debug("Server-info router added")
+
+    # Phase 13.1.H — server-scoped configuration settings (Settings →
+    # Configuration UI).  Endpoints carry their own /api/settings prefix.
+    app.include_router(server_settings.router)
+    logger.debug("Server-settings router added")
 
     # Phase 11 B2 — air-gap collection schedules.  Routes are
     # license-gated (collector engine) at the handler level, so it's

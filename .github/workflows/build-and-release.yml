@@ -2164,6 +2164,12 @@ jobs:
           mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
           cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
 
+          # OpenBAO secrets-broker config + init unit — referenced by the
+          # spec's %install; without them %install dies on the builder.
+          mkdir -p /tmp/$TAR_NAME/installer/openbao
+          cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
+
           # Create tarball
           cd /tmp
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
@@ -2403,6 +2409,12 @@ jobs:
           # silently produce an SRPM that dies in %install on the COPR builder.
           mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
           cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
+
+          # OpenBAO secrets-broker config + init unit — referenced by the
+          # spec's %install; without them %install dies on the COPR builder.
+          mkdir -p /tmp/$TAR_NAME/installer/openbao
+          cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
 
           # Copy documentation
           cp $WORKSPACE/README.md /tmp/$TAR_NAME/ || touch /tmp/$TAR_NAME/README.md

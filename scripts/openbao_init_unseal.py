@@ -27,11 +27,14 @@ docs/planning/openbao-deployment-and-airgap.md §6.
 
 import argparse
 import json
+import logging
 import os
 import sys
 import time
 import urllib.error
 import urllib.request
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_ADDR = "http://127.0.0.1:8200"
 DEFAULT_KEYFILE = "/var/lib/openbao/init.json"
@@ -45,6 +48,8 @@ def _api(addr: str, path: str, method: str = "GET", payload=None, timeout: int =
     if data is not None:
         req.add_header("Content-Type", "application/json")
     try:
+        # URL is the local OpenBAO admin endpoint (loopback); not user input.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310
             body = resp.read().decode() or "{}"
             return resp.status, json.loads(body)
@@ -63,8 +68,9 @@ def _wait_for_listener(addr: str, attempts: int = 30, delay: float = 1.0) -> boo
             status, body = _api(addr, "/v1/sys/seal-status")
             if status == 200 and body is not None:
                 return True
-        except (urllib.error.URLError, OSError):
-            pass
+        except (urllib.error.URLError, OSError) as exc:
+            # Listener not up yet — retry after the sleep below.
+            logger.debug("OpenBAO listener not ready yet: %s", exc)
         time.sleep(delay)
     return False
 
@@ -82,8 +88,9 @@ def _write_keyfile(keyfile: str, payload: dict) -> None:
     finally:
         try:
             os.chmod(keyfile, 0o600)
-        except OSError:
-            pass
+        except OSError as exc:
+            # Best-effort: the file was already created with 0o600 above.
+            logger.debug("chmod on keyfile failed (already 0600): %s", exc)
 
 
 def _unseal(addr: str, keys) -> bool:
@@ -126,8 +133,10 @@ def _write_app_token(app_token_file: str, owner, token: str) -> None:
             uid = pwd.getpwnam(owner).pw_uid
             gid = grp.getgrnam(owner).gr_gid
             os.chown(app_token_file, uid, gid)
-        except (KeyError, OSError, ImportError):
-            pass
+        except (KeyError, OSError, ImportError) as exc:
+            # Best-effort chown (owner may not exist / not permitted); the file
+            # is still written 0640 and usable by root.
+            logger.debug("chown on app token file failed: %s", exc)
     print(f"App OpenBAO token written to {app_token_file} (0640).")
 
 

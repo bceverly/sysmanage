@@ -19,6 +19,7 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.email_service import email_service
+from backend.services.tenant_directory import resolve_tenant_for_email
 
 router = APIRouter()  # Public routes (no authentication)
 admin_router = APIRouter()  # Admin routes (require authentication)
@@ -189,7 +190,13 @@ SysManage System""",
     html_body = html_template.format(reset_url=reset_url)
 
     return email_service.send_email(
-        to_addresses=[user_email], subject=subject, body=body, html_body=html_body
+        to_addresses=[user_email],
+        subject=subject,
+        body=body,
+        html_body=html_body,
+        # Pre-auth send (no request tenant): scope to the recipient's tenant by
+        # email domain when multi-tenancy is on; None → server scope.
+        tenant_id=resolve_tenant_for_email(user_email),
     )
 
 
@@ -279,7 +286,11 @@ SysManage System""",
     html_body = html_template.format(setup_url=setup_url)
 
     return email_service.send_email(
-        to_addresses=[user_email], subject=subject, body=body, html_body=html_body
+        to_addresses=[user_email],
+        subject=subject,
+        body=body,
+        html_body=html_body,
+        tenant_id=resolve_tenant_for_email(user_email),
     )
 
 

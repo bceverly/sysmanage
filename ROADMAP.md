@@ -4198,12 +4198,29 @@ plan-builder + UI integration.
       optional tenant_id (unchanged in single-tenant mode); registry_service +
       control-plane CRUD with domain enforcement; 35 new tests; 40 existing auth
       tests still green.)*
-- [ ] **13.1.C** Credentials & placement — OpenBAO dynamic DB secrets, API-layer
+- [x] **13.1.C** Credentials & placement — OpenBAO dynamic DB secrets, API-layer
       lease cache + per-tenant warm pools, `registry_tenant_placement` engine
       routing, per-tenant DB provisioning automation
+      *(done June 2026: OpenBAO database-secrets broker + `TenantEngineManager`
+      (lease cache, proactive renewal, evict+re-lease on auth failure); resolver's
+      tenant path now routes through it; control-plane placement CRUD + provision
+      endpoint; registry `r3` adds `registry_tenant_db_version`; VaultService app-token
+      file fallback; 27 new tests. End-to-end needs a live OpenBAO DB-secrets engine.)*
 - [ ] **13.1.D** Shared-reference split — `shared` Alembic chain, relocate
       `shared_*` reference tables, convert cross-partition FKs to soft references,
       CI prefix guard
+      *(June 2026: **CI prefix guard done** — `tests/test_alembic_prefix_guard.py`
+      runs each chain on a scratch DB and asserts registry→`registry_*`,
+      shared→`shared_*`, tenant→neither; the `shared` chain is established. The
+      physical table relocation is **specified but deferred** as a careful staged
+      migration: the cleanest candidates are the mirror reference catalogs
+      `mirror_known_version` + `mirror_platform_config` → `shared_*`, which makes
+      `mirror_repository.{known_version_id,platform_config_id}` cross-partition →
+      convert those FKs to soft UUID refs (drop the constraint, keep the column,
+      make `MirrorRepository.known_version` a `viewonly` `foreign()`-annotated
+      relationship). Ordering: a rename-or-create migration in the `shared` chain +
+      a drop-if-exists cleanup at the `tenant` head. Cosmetic in collapsed mode, so
+      it's its own reviewed change rather than bundled here.)*
 - [ ] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
       JIT/SCIM provisioning, vendor-support grants tied to OpenBAO issuance,
       break-glass path

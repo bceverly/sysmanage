@@ -25,6 +25,23 @@ class TestMultitenancyToggle:
             assert config.is_multitenancy_enabled() is True
 
 
+class TestSelfServiceProvisioning:
+    def test_off_by_default(self):
+        with patch.object(config, "config", {"multitenancy": {"enabled": True}}):
+            assert config.is_self_service_provisioning_enabled() is False
+
+    def test_requires_multitenancy_enabled(self):
+        # Even with the flag set, it's meaningless without multi-tenancy.
+        cfg = {"multitenancy": {"enabled": False, "self_service_provisioning": True}}
+        with patch.object(config, "config", cfg):
+            assert config.is_self_service_provisioning_enabled() is False
+
+    def test_enabled_when_both_set(self):
+        cfg = {"multitenancy": {"enabled": True, "self_service_provisioning": True}}
+        with patch.object(config, "config", cfg):
+            assert config.is_self_service_provisioning_enabled() is True
+
+
 class TestRegistryAlias:
     def test_prefers_registry_block(self):
         cfg = {"registry": {"name": "reg"}, "database": {"name": "legacy"}}

@@ -4,6 +4,7 @@ server.
 """
 
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from argon2 import PasswordHasher
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -471,9 +472,13 @@ async def refresh(request: Request):
 
 
 class SwitchAccountRequest(BaseModel):
-    """Body for ``POST /api/auth/switch-account``."""
+    """Body for ``POST /api/auth/switch-account``.
 
-    tenant_id: str
+    ``tenant_id`` may be null/empty to clear the active tenant and return to
+    server scope ("No tenant").
+    """
+
+    tenant_id: Optional[str] = None
 
 
 def _open_registry_session():
@@ -500,7 +505,13 @@ async def list_accounts(current_user: str = Depends(get_current_user)):
 
     session = _open_registry_session()
     try:
-        grants = registry_service.list_user_grants(session, current_user)
+        # The JWT principal is the login email; grants key on registry_user.id.
+        registry_user_id = registry_service.resolve_registry_user_id(
+            session, current_user
+        )
+        if registry_user_id is None:
+            return {"accounts": [], "total": 0}
+        grants = registry_service.list_user_grants(session, registry_user_id)
         accounts = []
         for grant in grants:
             tenant = (
@@ -540,17 +551,24 @@ async def switch_account(
 
     from backend.services import registry_service  # noqa: PLC0415
 
-    session = _open_registry_session()
-    try:
-        if not registry_service.has_active_grant(
-            session, current_user, payload.tenant_id
-        ):
-            raise HTTPException(
-                status_code=403,
-                detail=_("You do not have access to the selected account."),
+    # Empty tenant_id → clear the active tenant (return to server scope).  No
+    # grant needed to *leave* a tenant.
+    target_tenant = payload.tenant_id or None
+    if target_tenant is not None:
+        session = _open_registry_session()
+        try:
+            registry_user_id = registry_service.resolve_registry_user_id(
+                session, current_user
             )
-    finally:
-        session.close()
+            if registry_user_id is None or not registry_service.has_active_grant(
+                session, registry_user_id, target_tenant
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("You do not have access to the selected account."),
+                )
+        finally:
+            session.close()
 
     the_config = config.get_config()
     jwt_refresh_timeout = int(
@@ -558,9 +576,9 @@ async def switch_account(
     )
     is_secure = _is_secure_cookie_enabled(the_config)
 
-    refresh_token = sign_refresh_token(current_user, tenant_id=payload.tenant_id)
+    refresh_token = sign_refresh_token(current_user, tenant_id=target_tenant)
     _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
-    return {"Authorization": sign_jwt(current_user, tenant_id=payload.tenant_id)}
+    return {"Authorization": sign_jwt(current_user, tenant_id=target_tenant)}
 
 
 @router.post("/logout", dependencies=[Depends(JWTBearer())])

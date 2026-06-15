@@ -44,6 +44,30 @@ def test_normalize_domain():
     assert registry_service.normalize_domain("  x@y.io ") == "y.io"
 
 
+def test_resolve_registry_user_id_by_email(db_session):
+    user = _user(db_session, email="bryan@theeverlys.com")
+    # Case-insensitive email match → registry_user.id (the login bridge).
+    assert (
+        registry_service.resolve_registry_user_id(db_session, "Bryan@Theeverlys.com")
+        == user.id
+    )
+
+
+def test_resolve_registry_user_id_by_uuid_fallback(db_session):
+    user = _user(db_session, email="x@y.com")
+    # A principal that is already a registry_user id (UUID) resolves too.
+    assert (
+        registry_service.resolve_registry_user_id(db_session, str(user.id)) == user.id
+    )
+
+
+def test_resolve_registry_user_id_misses(db_session):
+    # Non-UUID, non-email miss must NOT raise (no UUID cast) and return None.
+    assert registry_service.resolve_registry_user_id(db_session, "nobody@x.com") is None
+    assert registry_service.resolve_registry_user_id(db_session, "not-a-uuid") is None
+    assert registry_service.resolve_registry_user_id(db_session, None) is None
+
+
 def test_has_active_grant_true(db_session):
     user = _user(db_session)
     tenant = _tenant(db_session)

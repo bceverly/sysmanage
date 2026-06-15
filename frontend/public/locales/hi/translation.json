@@ -121,7 +121,8 @@
     "unknown": "अज्ञात",
     "update": "अपडेट करें",
     "selected": "चयनित",
-    "view": "देखें"
+    "view": "देखें",
+    "create": "[TODO] Create"
   },
   "connectionStatus": {
     "connected": "कनेक्टेड",
@@ -1014,7 +1015,8 @@
     "airgapCollections": "[TODO] Air-Gap Collections",
     "federationRole": {
       "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+    },
+    "tenants": "[TODO] Tenants"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -3121,6 +3123,100 @@
       "token": "[TODO] Enrollment token",
       "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
       "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+    }
+  },
+  "configuration": {
+    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
+    "loadError": "[TODO] Failed to load configuration settings.",
+    "save": "[TODO] Save",
+    "saveError": "[TODO] Failed to save configuration settings.",
+    "saved": "[TODO] Configuration saved.",
+    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
+    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
+    "secretUnset": "[TODO] Not set",
+    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
+    "title": "[TODO] Configuration"
+  },
+  "tenants": {
+    "createError": "[TODO] Failed to create tenant",
+    "created": "[TODO] Tenant created",
+    "disabledBody": "[TODO] This server runs in single-tenant mode — there is one implicit tenant (the server itself). Enable \"multitenancy.enabled\" in sysmanage.yaml and restart to manage multiple tenants here.",
+    "disabledTitle": "[TODO] Multi-tenancy is disabled",
+    "domains": {
+      "addError": "[TODO] Failed to add domain",
+      "added": "[TODO] Domain added",
+      "domain": "[TODO] Domain",
+      "help": "[TODO] Users whose email domain is on this list may be granted access to the tenant. An empty list means no domain restriction.",
+      "loadError": "[TODO] Failed to load domains",
+      "none": "[TODO] No domains — any domain is allowed.",
+      "removeError": "[TODO] Failed to remove domain",
+      "removed": "[TODO] Domain removed",
+      "title": "[TODO] Email-Domain Allowlist"
+    },
+    "loadError": "[TODO] Failed to load tenants",
+    "members": {
+      "addError": "[TODO] Failed to add member",
+      "added": "[TODO] Member added",
+      "email": "[TODO] Email",
+      "expires": "[TODO] Expires",
+      "loadError": "[TODO] Failed to load members",
+      "none": "[TODO] No members yet.",
+      "revoke": "[TODO] Revoke",
+      "revokeError": "[TODO] Failed to revoke member",
+      "revoked": "[TODO] Member revoked",
+      "role": "[TODO] Role",
+      "title": "[TODO] Members"
+    },
+    "name": "[TODO] Name",
+    "new": "[TODO] New Tenant",
+    "none": "[TODO] No tenants yet",
+    "placement": {
+      "dbname": "[TODO] Database",
+      "help": "[TODO] Database coordinates for this tenant. The password is never stored here — \"OpenBAO role\" names the dynamic-credentials role that brokers it.",
+      "host": "[TODO] Host",
+      "loadError": "[TODO] Failed to load placement",
+      "openbaoRole": "[TODO] OpenBAO role",
+      "port": "[TODO] Port",
+      "provision": "[TODO] Provision Database",
+      "provisionError": "[TODO] Provisioning failed",
+      "provisionHint": "[TODO] Set and save an OpenBAO role before provisioning.",
+      "provisioned": "[TODO] Provisioned",
+      "provisioning": "[TODO] Provisioning…",
+      "region": "[TODO] Region",
+      "saveError": "[TODO] Failed to save placement",
+      "saved": "[TODO] Placement saved",
+      "tier": "[TODO] Tier",
+      "title": "[TODO] Database Placement"
+    },
+    "selectPrompt": "[TODO] Select a tenant to manage its domains, members, and placement.",
+    "slug": "[TODO] Slug",
+    "slugHelp": "[TODO] Unique, URL-safe identifier (e.g. acme)",
+    "status": "[TODO] Status",
+    "title": "[TODO] Tenant Management",
+    "autoProvision": {
+      "done": "[TODO] Tenant provisioned",
+      "error": "[TODO] Auto-provisioning failed",
+      "help": "[TODO] Create this tenant’s database and OpenBAO credentials role, set placement, and run migrations — no command line needed.",
+      "notBootstrapped": "[TODO] The provisioner identity is not configured. Run \"make provision-bootstrap\" once before auto-provisioning.",
+      "run": "[TODO] Auto-Provision Tenant",
+      "running": "[TODO] Provisioning…",
+      "title": "[TODO] Auto-Provision"
+    },
+    "switcher": {
+      "noAccounts": "[TODO] No tenant grants",
+      "none": "[TODO] No tenant",
+      "tooltip": "[TODO] Active tenant — click to switch"
+    },
+    "delete": {
+      "button": "[TODO] Delete",
+      "confirmPrompt": "[TODO] Type the tenant slug to confirm:",
+      "deleting": "[TODO] Deleting…",
+      "done": "[TODO] Tenant deleted",
+      "dropDb": "[TODO] Also DROP the tenant database — irreversible data loss",
+      "dropDbWarn": "[TODO] The entire tenant database and all its data will be destroyed.",
+      "error": "[TODO] Failed to delete tenant",
+      "title": "[TODO] Delete tenant",
+      "warning": "[TODO] This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone."
     }
   }
 }

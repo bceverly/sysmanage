@@ -211,3 +211,31 @@ class RegistryTenantEmailDomain(Base):
         ),
         Index("ix_registry_email_domain_tenant", "tenant_id"),
     )
+
+
+class RegistryTenantDbVersion(Base):
+    """Each tenant DB's current Alembic revision (Phase 13.1.C, design §12).
+
+    The control plane records where each tenant database sits in the ``tenant``
+    migration chain so rollouts can be staged/canaried tenant-by-tenant and a
+    bad migration's blast radius is one tenant.  One row per tenant.
+    """
+
+    __tablename__ = "registry_tenant_db_version"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(
+        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+    )
+    # The Alembic chain this revision tracks ("tenant").  Stored explicitly so
+    # the table can later track the shared chain too if needed.
+    chain = Column(String(32), nullable=False, default="tenant")
+    revision = Column(String(64), nullable=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow, onupdate=_utcnow)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id", "chain", name="uq_registry_db_version_tenant_chain"
+        ),
+        Index("ix_registry_db_version_tenant", "tenant_id"),
+    )

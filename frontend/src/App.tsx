@@ -36,6 +36,7 @@ import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
+import TenantManagement from './Pages/TenantManagement';
 import AirgapRepositories from './Pages/AirgapRepositories';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
@@ -70,6 +71,7 @@ function AppRoutes() {
       <Route path="/reports/:reportId" element={<ReportViewer />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/tenants" element={<TenantManagement />} />
       <Route path="/airgap/repositories" element={<AirgapRepositories />} />
       <Route path="/airgap/collections" element={<AirgapCollections />} />
       <Route path="/map" element={<MapView />} />

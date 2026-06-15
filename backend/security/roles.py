@@ -119,6 +119,9 @@ class SecurityRoles(str, Enum):
     ADD_USER = "Add User"
     DELETE_USER = "Delete User"
     EDIT_USER = "Edit User"
+    # - Multi-Tenancy (Phase 13.1): provision / delete tenants from the
+    #   control plane.  Seeded + backfilled to admins by migration o12mgttenant.
+    MANAGE_TENANTS = "Manage Tenants"
     # - User Security Operations (alphabetical)
     LOCK_USER = "Lock User"
     RESET_USER_PASSWORD = (

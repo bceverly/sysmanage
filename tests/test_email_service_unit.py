@@ -10,17 +10,19 @@ class TestEmailServiceInit:
     """Tests for EmailService initialization."""
 
     @patch("backend.services.email_service.config")
-    def test_init_loads_configs(self, mock_config):
-        """Test initialization loads email and SMTP configs."""
+    def test_init_does_not_snapshot_config(self, mock_config):
+        """Config is resolved lazily at send time, not snapshotted in __init__.
+
+        Phase 13.1: snapshotting would freeze the server scope and ignore the
+        active tenant — so __init__ must not read config at all.
+        """
         from backend.services.email_service import EmailService
 
-        mock_config.get_email_config.return_value = {"from_address": "test@example.com"}
-        mock_config.get_smtp_config.return_value = {"host": "smtp.example.com"}
+        EmailService()
 
-        service = EmailService()
-
-        assert service.email_config == {"from_address": "test@example.com"}
-        assert service.smtp_config == {"host": "smtp.example.com"}
+        # Construction touches no config accessors.
+        mock_config.get_email_config.assert_not_called()
+        mock_config.get_smtp_config.assert_not_called()
 
 
 class TestEmailServiceIsEnabled:

@@ -37,8 +37,10 @@ def main() -> int:
         print("No secrets found in sysmanage.yaml to prime into OpenBAO.")
         return 0
 
+    count = len(bag)
     if secrets_service.store_config_secrets(bag):
-        print(f"Primed {len(bag)} secret(s) into OpenBAO: {', '.join(sorted(bag))}.")
+        # Never print secret names/values — just how many were primed.
+        print(f"Primed {count} secret(s) into OpenBAO.")
         print(
             "These are now read from OpenBAO at startup; you may remove them from "
             "sysmanage.yaml in a future config cleanup."

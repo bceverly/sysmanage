@@ -34,12 +34,13 @@ def test_registry_session_factory_yields_session(engine):
         gen.close()
 
 
-def test_tenant_routing_not_yet_available_when_enabled(engine, monkeypatch):
-    """When multitenancy is enabled, per-tenant routing raises until 13.1.C.
+def test_tenant_routing_when_enabled(engine, monkeypatch):
+    """When multitenancy is enabled, per-tenant routing leases via OpenBAO.
 
-    Registry/shared still collapse onto the bootstrap engine; only the
-    per-tenant engine path is deferred — and it fails loudly rather than
-    silently misrouting.
+    Registry/shared still collapse onto the bootstrap engine.  The tenant path
+    (13.1.C) routes through the engine manager; with no placement registered it
+    fails loudly (LookupError) rather than silently misrouting, and a missing
+    tenant_id is a clear ValueError.
     """
     monkeypatch.setattr(
         "backend.persistence.partitions.config.is_multitenancy_enabled",
@@ -49,8 +50,9 @@ def test_tenant_routing_not_yet_available_when_enabled(engine, monkeypatch):
     assert (
         partitions.resolve_engine(partition=partitions.PARTITION_REGISTRY) is not None
     )
-    # Tenant routing is explicitly not implemented yet.
-    with pytest.raises(NotImplementedError):
+    # Tenant routing now goes through the engine manager; an unregistered
+    # tenant (no placement) fails loudly.
+    with pytest.raises(LookupError):
         partitions.resolve_engine(
             partition=partitions.PARTITION_TENANT, tenant_id="some-id"
         )

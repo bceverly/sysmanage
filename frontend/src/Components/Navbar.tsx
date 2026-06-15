@@ -10,6 +10,7 @@ import ConnectionStatusIndicator from "./ConnectionStatusIndicator";
 import UserProfileDropdown from "./UserProfileDropdown";
 import { useFederationLicensed } from "../Services/federation";
 import NotificationBell from "./NotificationBell";
+import TenantSwitcher from "./TenantSwitcher";
 import ScrollableNavList from "./ScrollableNavList";
 import { refreshLicenseCache } from "../Services/license";
 import { usePlugins } from "../plugins";
@@ -35,6 +36,10 @@ const Navbar = () => {
   const [federationRole, setFederationRole] = useState<string>("none");
   const [federationEngineLoaded, setFederationEngineLoaded] =
     useState<boolean>(true);
+  // Phase 13.1 — surface the Tenants (control-plane) link only when
+  // multi-tenancy is enabled on this server.  Hidden on the single-tenant
+  // homelab default so the OSS UI stays uncluttered.
+  const [multitenancyEnabled, setMultitenancyEnabled] = useState<boolean>(false);
 
   // Refresh the license cache (shared with HostDetail / Hosts / Settings via
   // ``getCachedLicense``) and mirror the result into local state so this
@@ -85,6 +90,25 @@ const Navbar = () => {
         // to standard so we don't render a stale chip.
       });
     return () => { cancelled = true; };
+  }, []);
+
+  // Phase 13.1 — probe the control plane once authenticated to decide whether
+  // to show the Tenants link.  The endpoint requires auth, so only call it
+  // when a token is present.
+  useEffect(() => {
+    if (!localStorage.getItem('bearer_token')) return;
+    let cancelled = false;
+    import('../Services/controlPlane')
+      .then((m) => m.controlPlaneService.getStatus())
+      .then((status) => {
+        if (!cancelled) setMultitenancyEnabled(Boolean(status?.multitenancy_enabled));
+      })
+      .catch(() => {
+        // Control plane not mounted / unreachable → keep the link hidden.
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleMenu = () => {
@@ -235,6 +259,17 @@ const Navbar = () => {
                 {t('nav.users')}
               </NavLink>
             </li>
+            {multitenancyEnabled && (
+              <li className="nav__item">
+                <NavLink
+                  to="/tenants"
+                  className="nav__link"
+                  onClick={closeMenuOnMobile}
+                >
+                  {t('nav.tenants', 'Tenants')}
+                </NavLink>
+              </li>
+            )}
             <li className="nav__item">
               <NavLink
                 to="/updates"
@@ -333,6 +368,7 @@ const Navbar = () => {
         {/* Language selector, connection status, and notifications at toolbar level - only render when logged in */}
         {menuVisible === "visible" && (
           <div className="nav__language-toolbar">
+            {multitenancyEnabled && <TenantSwitcher />}
             <ConnectionStatusIndicator />
             <NotificationBell />
             <IconButton

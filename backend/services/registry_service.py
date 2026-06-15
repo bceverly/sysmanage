@@ -15,12 +15,14 @@ SSO assertion to a ``registry_user`` row is delivered in 13.1.E (JIT /
 SCIM); this layer operates on ``registry_user`` ids directly.
 """
 
+import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
 from backend.persistence.models.tenancy import (
     RegistryTenant,
     RegistryTenantEmailDomain,
+    RegistryUser,
     RegistryUserTenantGrant,
     TENANT_STATUS_ACTIVE,
 )
@@ -29,6 +31,32 @@ from backend.persistence.models.tenancy import (
 def _utcnow() -> datetime:
     """Naive-UTC now, matching how grant ``expires_at`` is stored."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def resolve_registry_user_id(session, principal: Optional[str]):
+    """Bridge an authenticated principal to its ``registry_user.id``, or None.
+
+    In production the JWT principal is the login userid (an email); grants
+    reference ``registry_user.id`` (a UUID).  This maps email → id.  As a
+    fallback it also accepts a principal that is *already* a registry_user id
+    (a valid UUID) — but only attempts that lookup when the principal parses as
+    a UUID, so we never feed a non-UUID string to a UUID column (which would
+    error on PostgreSQL).  (Interim bridge until full JIT/SCIM in 13.1.E.)
+    """
+    if not principal:
+        return None
+    value = str(principal).strip()
+    row = (
+        session.query(RegistryUser).filter(RegistryUser.email == value.lower()).first()
+    )
+    if row:
+        return row.id
+    try:
+        uuid.UUID(value)
+    except (ValueError, AttributeError, TypeError):
+        return None
+    row = session.query(RegistryUser).filter(RegistryUser.id == value).first()
+    return row.id if row else None
 
 
 def _grant_is_live(grant: RegistryUserTenantGrant, now: datetime) -> bool:

@@ -31,8 +31,11 @@ class TestEmailServiceInit:
                 "timeout": 30,
             }
             service = EmailService()
-            assert service.email_config is not None
-            assert service.smtp_config is not None
+            assert isinstance(service, EmailService)
+            # Phase 13.1: config is resolved lazily at send time, not in
+            # __init__, so the active tenant governs the scope.
+            mock_config.get_email_config.assert_not_called()
+            mock_config.get_smtp_config.assert_not_called()
 
     def test_global_email_service_instance_exists(self):
         """Test that a global email_service instance exists."""

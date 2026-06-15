@@ -173,3 +173,96 @@ def set_setting(key: str, value: Any) -> bool:
     except Exception as exc:  # noqa: BLE001
         logger.debug("could not persist server setting %r: %s", key, exc)
         return False
+
+
+# ---------------------------------------------------------------------------
+# Tenant-scoped settings (Phase 13.1) — per-tenant operational config (email,
+# password policy, …) stored in ``registry_tenant.settings``.  Only meaningful
+# when multi-tenancy is enabled; in single-tenant / collapsed mode callers use
+# the server-scoped accessors above.  Not cached: tenant reads are far less hot
+# than server reads, and a per-tenant cache would have to be keyed by tenant.
+# ---------------------------------------------------------------------------
+
+
+def _read_tenant_settings_bag(tenant_id: str) -> Optional[dict]:
+    """Return ``registry_tenant.settings`` for ``tenant_id``; None on failure."""
+    try:
+        from backend.persistence.models.tenancy import (  # noqa: PLC0415
+            RegistryTenant,
+        )
+        from backend.persistence.partitions import (  # noqa: PLC0415
+            PARTITION_REGISTRY,
+            partition_session,
+        )
+
+        with partition_session(partition=PARTITION_REGISTRY) as session:
+            row = (
+                session.query(RegistryTenant)
+                .filter(RegistryTenant.id == tenant_id)
+                .first()
+            )
+            if row is None:
+                return None
+            bag = getattr(row, "settings", None)
+            return bag if isinstance(bag, dict) else None
+    except Exception as exc:  # noqa: BLE001 - best-effort
+        logger.debug("tenant settings unavailable for %s: %s", tenant_id, exc)
+        return None
+
+
+def get_tenant_setting(
+    tenant_id: str,
+    key: str,
+    *,
+    default: Any = None,
+) -> Any:
+    """Return tenant-scoped setting ``key`` for ``tenant_id``, else ``default``.
+
+    No YAML fallback: per-tenant config has no YAML representation.  Callers
+    that want "tenant value, else server value, else YAML" compose this with
+    :func:`get_setting` (see ``config._db_setting``).
+    """
+    bag = _read_tenant_settings_bag(tenant_id)
+    if bag is not None and key in bag and bag[key] is not None:
+        return bag[key]
+    return default
+
+
+def set_tenant_setting(tenant_id: str, key: str, value: Any) -> bool:
+    """Upsert ``key`` into ``registry_tenant.settings`` for ``tenant_id``.
+
+    Returns True on success, False if the tenant row or registry isn't
+    available.  Unlike the server settings, the tenant row must already exist
+    (tenants are created via the control plane), so this never creates it.
+    """
+    try:
+        from backend.persistence.models.tenancy import (  # noqa: PLC0415
+            RegistryTenant,
+        )
+        from backend.persistence.partitions import (  # noqa: PLC0415
+            PARTITION_REGISTRY,
+            partition_session,
+        )
+
+        with partition_session(partition=PARTITION_REGISTRY) as session:
+            row = (
+                session.query(RegistryTenant)
+                .filter(RegistryTenant.id == tenant_id)
+                .first()
+            )
+            if row is None:
+                logger.debug(
+                    "cannot set tenant setting: tenant %s not found", tenant_id
+                )
+                return False
+            bag = dict(row.settings) if isinstance(row.settings, dict) else {}
+            bag[key] = value
+            # Reassign so SQLAlchemy detects the JSON-column change.
+            row.settings = bag
+            session.commit()
+            return True
+    except Exception as exc:  # noqa: BLE001
+        logger.debug(
+            "could not persist tenant setting %r for %s: %s", key, tenant_id, exc
+        )
+        return False

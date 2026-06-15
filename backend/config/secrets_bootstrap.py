@@ -68,6 +68,8 @@ def refresh_secrets_from_openbao() -> bool:
             auth_handler.JWT_SECRET = bag["jwt_secret"]
 
         if overlaid:
+            # Logs only secret *names* (e.g. "jwt_secret"), never values.
+            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             logger.info(
                 "Overlaid %d secret(s) from OpenBAO: %s",
                 len(overlaid),
@@ -75,5 +77,6 @@ def refresh_secrets_from_openbao() -> bool:
             )
         return bool(overlaid)
     except Exception as exc:  # noqa: BLE001 - best-effort, must never block boot
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         logger.warning("Secret overlay from OpenBAO skipped: %s", exc)
         return False

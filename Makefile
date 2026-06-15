@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
+.PHONY: provision-bootstrap migrate-tenants test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
 
 # Default target
 help:
@@ -682,8 +682,10 @@ else
 endif
 	@echo "Initializing MSW browser setup (for optional development use)..."
 	@cd frontend && npx msw init public/ --save
-	@echo "Running database migrations to ensure tables exist..."
-	@$(PYTHON) -m alembic upgrade head || echo "Database migration failed - you may need to configure the database first"
+	@echo "Running database migrations to ensure tables exist (registry + shared + tenant chains)..."
+	@$(PYTHON) -m alembic --name registry upgrade head || echo "Registry migration failed - you may need to configure the database first"
+	@$(PYTHON) -m alembic --name shared upgrade head || echo "Shared migration failed - you may need to configure the database first"
+	@$(PYTHON) -m alembic upgrade head || echo "Tenant migration failed - you may need to configure the database first"
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for grep installation on Windows..."
 	@where grep >nul 2>nul || echo "Note: grep not found. You may want to install it via chocolatey: choco install grep"
@@ -745,12 +747,30 @@ migrate: stop
 	@$(PYTHON) -m alembic --name shared upgrade head
 	@echo "  -> tenant chain (per-customer schema)"
 	@$(PYTHON) -m alembic upgrade head
-	@echo "[OK] Database migrations completed (registry + shared + tenant)"
+	@echo "  -> per-tenant databases (fan-out; no-op when multi-tenancy is off)"
+	@$(PYTHON) scripts/migrate_tenants.py
+	@echo "[OK] Database migrations completed (registry + shared + tenant + per-tenant)"
 	@echo ""
 	@echo "NOTE: In the default single-database deployment all three chains"
 	@echo "      run against the SAME database (collapsed/homelab mode)."
 	@echo "      backend / frontend / telemetry / OpenBAO were stopped before migrate."
 	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
+
+# Fan out the tenant chain to every provisioned tenant database (standalone).
+migrate-tenants: $(VENV_ACTIVATE)
+	@echo "=== Migrating per-tenant databases ==="
+	@$(PYTHON) scripts/migrate_tenants.py
+
+provision-bootstrap: $(VENV_ACTIVATE)
+	@echo "=== Multi-tenancy provisioning bootstrap (one-time, operator) ==="
+	@echo "Creates a least-privilege Postgres provisioner role + scoped OpenBAO"
+	@echo "policy so the server can self-provision tenants without holding root."
+	@echo "Requires an OpenBAO admin token. For Postgres it either uses a"
+	@echo "superuser password (--pg-superuser-password) OR, if none is given"
+	@echo "(peer auth — the Ubuntu default), emits a 0600 SQL file to apply via"
+	@echo "'sudo -u postgres psql -f <file>'.  Example:"
+	@echo "  make provision-bootstrap ARGS='--bao-token \$$BAO_TOKEN'"
+	@$(PYTHON) scripts/provision_bootstrap.py $(ARGS)
 
 # Clean trailing whitespace from Python files (cross-platform)
 clean-whitespace: $(VENV_ACTIVATE)

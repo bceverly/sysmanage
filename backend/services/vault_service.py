@@ -73,6 +73,17 @@ class VaultService:
         except OSError:
             return ""
 
+    def make_raw_request(
+        self, method: str, path: str, data: Optional[Dict] = None
+    ) -> Dict[str, Any]:
+        """Public wrapper over the raw vault API call (Phase 13.1.C).
+
+        Used by the database-secrets broker to hit engine/lease endpoints
+        (e.g. ``database/creds/<role>``, ``sys/leases/renew``) that aren't
+        modeled by the KV-oriented helpers.
+        """
+        return self._make_request(method, path, data)
+
     def _make_request(  # NOSONAR
         self, method: str, path: str, data: Optional[Dict] = None
     ) -> Dict[str, Any]:

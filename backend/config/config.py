@@ -91,6 +91,10 @@ try:
             config["vault"]["token"] = ""  # nosec B105
         if "mount_path" not in config["vault"]:
             config["vault"]["mount_path"] = "secret"
+        # Phase 13.1.C: mount of OpenBAO's database secrets engine, which
+        # brokers dynamic per-tenant DB credentials.
+        if "database_mount_path" not in config["vault"]:
+            config["vault"]["database_mount_path"] = "database"
         if "timeout" not in config["vault"]:
             config["vault"]["timeout"] = 30
         if "verify_ssl" not in config["vault"]:
@@ -134,6 +138,13 @@ try:
             config["multitenancy"] = {}
         if "enabled" not in config["multitenancy"]:
             config["multitenancy"]["enabled"] = False
+        # Self-service provisioning (Phase 13.1): lets the control-plane UI
+        # create the tenant database + OpenBAO role itself, instead of an
+        # operator running CLI steps.  OFF by default — it requires the server
+        # to hold a scoped provisioning identity (see scripts/provision_bootstrap.py),
+        # so security-strict deployments keep provisioning operator/CLI-only.
+        if "self_service_provisioning" not in config["multitenancy"]:
+            config["multitenancy"]["self_service_provisioning"] = False
 
         # Email settings
         if "email" not in config:
@@ -340,15 +351,40 @@ def get_log_file():
     return config["logging"].get("file")
 
 
+def _active_tenant():
+    """Return the active tenant id for this request/context, or None.
+
+    Set by the active-tenant middleware from the JWT when multi-tenancy is
+    enabled; ``None`` in single-tenant / collapsed mode (the default).
+    Best-effort: never raises.
+    """
+    try:
+        from backend.persistence.tenant_context import (  # noqa: PLC0415
+            get_active_tenant,
+        )
+
+        return get_active_tenant()
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _smtp_password():
     """Resolve the SMTP password from OpenBAO, falling back to YAML.
 
-    Phase 13.1.H: the SMTP password is a secret (B-bucket) and a per-tenant
-    concern; it moves to OpenBAO.  Best-effort with YAML fallback.
+    Phase 13.1.H / 13.1: the SMTP password is a secret (B-bucket) and a
+    per-tenant concern; it moves to OpenBAO.  When a tenant is active, the
+    tenant's secret takes precedence over the server/YAML fallback.
     """
     try:
         from backend.config import secrets_service  # noqa: PLC0415
 
+        tenant_id = _active_tenant()
+        if tenant_id:
+            value = secrets_service.get_tenant_secret(
+                tenant_id, "smtp_password", default=None
+            )
+            if value:
+                return value
         return secrets_service.get_secret(
             "smtp_password",
             lambda: config.get("email", {}).get("smtp", {}).get("password", ""),
@@ -358,16 +394,68 @@ def _smtp_password():
         return config.get("email", {}).get("smtp", {}).get("password", "")
 
 
-def get_email_config():
+def _db_setting(key):
+    """Return a setting's DB value, or None if unset/unavailable.
+
+    Phase 13.1: when a tenant is active, the tenant-scoped value (in
+    ``registry_tenant.settings``) takes precedence over the server-scoped
+    value.  DB-only (no YAML fallback) so callers overlay it onto the existing
+    config dict *only when an operator has set it* — leaving the structure
+    untouched otherwise.
     """
-    Get the complete email configuration (SMTP password resolved from OpenBAO).
-    """
-    cfg = dict(config["email"])
-    smtp = dict(cfg.get("smtp", {}))
+    try:
+        from backend.config import settings_service  # noqa: PLC0415
+
+        tenant_id = _active_tenant()
+        if tenant_id:
+            value = settings_service.get_tenant_setting(tenant_id, key, default=None)
+            if value is not None:
+                return value
+        return settings_service.get_setting(key, default=None)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+# (smtp key, settings key) pairs that the Configuration UI can override.
+_EMAIL_SMTP_OVERLAYS = (
+    ("host", "email_host"),
+    ("port", "email_port"),
+    ("use_tls", "email_use_tls"),
+    ("use_ssl", "email_use_ssl"),
+    ("username", "email_username"),
+)
+_EMAIL_TOP_OVERLAYS = (
+    ("from_address", "email_from_address"),
+    ("from_name", "email_from_name"),
+)
+
+
+def _overlay_smtp(smtp: dict) -> dict:
+    """Overlay DB-stored SMTP fields + the OpenBAO password onto ``smtp``."""
+    for smtp_key, db_key in _EMAIL_SMTP_OVERLAYS:
+        value = _db_setting(db_key)
+        if value is not None:
+            smtp[smtp_key] = value
     password = _smtp_password()
     if password:
         smtp["password"] = password
-        cfg["smtp"] = smtp
+    return smtp
+
+
+def get_email_config():
+    """
+    Get the complete email configuration.
+
+    Phase 13.1.H: SMTP server fields configured in Settings → Configuration
+    override ``sysmanage.yaml``; the SMTP password resolves from OpenBAO.
+    """
+    cfg = dict(config["email"])
+    smtp = _overlay_smtp(dict(cfg.get("smtp", {})))
+    cfg["smtp"] = smtp
+    for top_key, db_key in _EMAIL_TOP_OVERLAYS:
+        value = _db_setting(db_key)
+        if value is not None:
+            cfg[top_key] = value
     return cfg
 
 
@@ -375,9 +463,13 @@ def is_email_enabled():
     """
     Check if email functionality is enabled.
 
-    Phase 13.1.H: email config is operational/tenant-scoped — read the Settings
-    DB first, then fall back to ``sysmanage.yaml``.
+    Phase 13.1.H / 13.1: email config is operational/tenant-scoped.  When a
+    tenant is active its value wins; otherwise read the server Settings DB,
+    then fall back to ``sysmanage.yaml``.
     """
+    tenant_value = _db_setting("email_enabled")
+    if tenant_value is not None:
+        return bool(tenant_value)
     return bool(
         _server_setting(
             "email_enabled", lambda: config["email"]["enabled"], default=False
@@ -387,13 +479,12 @@ def is_email_enabled():
 
 def get_smtp_config():
     """
-    Get SMTP server configuration (password resolved from OpenBAO, not YAML).
+    Get SMTP server configuration.
+
+    Phase 13.1.H: server fields set in Settings → Configuration override
+    ``sysmanage.yaml``; the password resolves from OpenBAO.
     """
-    smtp = dict(config["email"]["smtp"])
-    password = _smtp_password()
-    if password:
-        smtp["password"] = password
-    return smtp
+    return _overlay_smtp(dict(config["email"]["smtp"]))
 
 
 def get_registry_config():
@@ -416,6 +507,17 @@ def is_multitenancy_enabled() -> bool:
     hardwired to the single engine — behavior is identical to today.
     """
     return bool(config.get("multitenancy", {}).get("enabled", False))
+
+
+def is_self_service_provisioning_enabled() -> bool:
+    """True when the control plane may provision tenant DBs itself (default False).
+
+    Requires multi-tenancy to be enabled too.  When False, the auto-provision
+    endpoint is refused and provisioning stays an operator/CLI task.
+    """
+    if not is_multitenancy_enabled():
+        return False
+    return bool(config.get("multitenancy", {}).get("self_service_provisioning", False))
 
 
 def get_multitenancy_config():
@@ -456,6 +558,13 @@ def get_vault_mount_path():
     Get the vault KV secrets engine mount path.
     """
     return config["vault"]["mount_path"]
+
+
+def get_vault_database_mount_path():
+    """
+    Get the OpenBAO database-secrets-engine mount path (Phase 13.1.C).
+    """
+    return config.get("vault", {}).get("database_mount_path", "database")
 
 
 def get_vault_timeout():

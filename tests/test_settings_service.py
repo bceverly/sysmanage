@@ -59,3 +59,50 @@ def test_never_raises_without_test_mode():
     _reset_warned()
     val = settings_service.get_setting("anything", lambda: "fallback", default="d")
     assert val in ("fallback", "d")
+
+
+# --- Tenant-scoped settings (Phase 13.1) -----------------------------------
+
+
+def _make_tenant(db_session):
+    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
+
+    tenant = RegistryTenant(
+        name="Acme", slug="acme-settings", status=TENANT_STATUS_ACTIVE
+    )
+    db_session.add(tenant)
+    db_session.commit()
+    return tenant
+
+
+def test_tenant_setting_roundtrip(db_session):
+    tenant = _make_tenant(db_session)
+    assert (
+        settings_service.set_tenant_setting(tenant.id, "email_host", "mx.acme") is True
+    )
+    assert settings_service.get_tenant_setting(tenant.id, "email_host") == "mx.acme"
+
+
+def test_tenant_setting_default_when_unset(db_session):
+    tenant = _make_tenant(db_session)
+    assert (
+        settings_service.get_tenant_setting(tenant.id, "email_host", default="d") == "d"
+    )
+
+
+def test_tenant_setting_isolated_from_server(db_session):
+    tenant = _make_tenant(db_session)
+    settings_service.set_setting("email_host", "server-mx")
+    settings_service.set_tenant_setting(tenant.id, "email_host", "tenant-mx")
+    # Tenant scope and server scope are independent stores.
+    assert settings_service.get_tenant_setting(tenant.id, "email_host") == "tenant-mx"
+    assert settings_service.get_setting("email_host") == "server-mx"
+
+
+def test_set_tenant_setting_unknown_tenant_returns_false(db_session):
+    assert settings_service.set_tenant_setting("does-not-exist", "k", "v") is False
+
+
+def test_get_tenant_setting_never_raises_without_db():
+    # No engine fixture → registry unavailable; must degrade to default.
+    assert settings_service.get_tenant_setting("any", "email_host", default="d") == "d"

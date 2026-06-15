@@ -102,10 +102,11 @@
     "vitest": "^4.1.8"
   },
   "optionalDependencies": {
-    "@esbuild/freebsd-x64": "^0.27.2",
-    "@esbuild/win32-x64": "^0.27.0"
+    "@esbuild/freebsd-x64": "^0.28.1",
+    "@esbuild/win32-x64": "^0.28.1"
   },
   "overrides": {
+    "esbuild": "^0.28.1",
     "nth-check": "^2.1.1",
     "postcss": "^8.4.47",
     "svgo": "^3.3.2",

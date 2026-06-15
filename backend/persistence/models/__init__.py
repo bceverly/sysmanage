@@ -219,6 +219,7 @@ __all__ = [
     "RegistryUserTenantGrant",
     "RegistryTenantPlacement",
     "RegistryTenantEmailDomain",
+    "RegistryTenantDbVersion",
     "TENANT_TIER_SILO",
     "TENANT_TIER_POOL",
     "TENANT_TIERS",

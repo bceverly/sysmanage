@@ -2,6 +2,7 @@
 Simple test for config path determination to achieve full coverage.
 """
 
+import importlib
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -53,11 +54,9 @@ def test_windows_config_path():
     with patch("backend.config.config.os.name", "nt"), patch(
         "backend.config.config.os.path.exists", return_value=True
     ), patch("builtins.open", mock_open(read_data=MOCK_CONFIG_DATA)):
-        # Import the module after patching
-        import importlib
-
-        import backend.config.config
-
+        # Reload to re-run the module's path determination under the patches
+        # (backend.config.config is already imported at module top; importlib
+        # is imported once at module scope to avoid duplicate-import findings).
         importlib.reload(backend.config.config)
 
         # Check that the Windows path is set
@@ -72,11 +71,9 @@ def test_unix_config_path():
     with patch("backend.config.config.os.name", "posix"), patch(
         "backend.config.config.os.path.exists", return_value=True
     ), patch("builtins.open", mock_open(read_data=MOCK_CONFIG_DATA)):
-        # Import the module after patching
-        import importlib
-
-        import backend.config.config
-
+        # Reload to re-run the module's path determination under the patches
+        # (backend.config.config is already imported at module top; importlib
+        # is imported once at module scope to avoid duplicate-import findings).
         importlib.reload(backend.config.config)
 
         # Check that the Unix path is set

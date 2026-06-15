@@ -26,14 +26,19 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config import config as config_module
 from backend.i18n import _
+from backend.security.roles import SecurityRoles
 from backend.persistence.models.tenancy import (
     RegistryTenant,
     RegistryTenantEmailDomain,
+    RegistryTenantPlacement,
     RegistryUser,
     RegistryUserTenantGrant,
     TENANT_STATUS_ACTIVE,
+    TENANT_TIER_SILO,
+    TENANT_TIERS,
 )
 from backend.persistence.partitions import get_registry_db
 from backend.services import registry_service
@@ -42,8 +47,14 @@ logger = logging.getLogger(__name__)
 
 # All control-plane routes live under a dedicated prefix so they are
 # trivially separable (reverse-proxy ACL, separate listener, etc.) from
-# the data-plane ``/api`` surface.
-router = APIRouter(prefix="/api/control-plane", tags=["control-plane"])
+# the data-plane ``/api`` surface.  Every route requires a valid bearer
+# token — these are highly privileged operations (create tenants, grant
+# cross-tenant access, set DB placement), so the whole router is gated.
+router = APIRouter(
+    prefix="/api/control-plane",
+    tags=["control-plane"],
+    dependencies=[Depends(JWTBearer())],
+)
 
 
 class ControlPlaneStatus(BaseModel):
@@ -51,6 +62,11 @@ class ControlPlaneStatus(BaseModel):
 
     multitenancy_enabled: bool
     tenant_count: int
+    # Phase 13.1 self-service provisioning posture.
+    self_service_provisioning: bool = False
+    # Whether the operator-run bootstrap has stored the provisioner credential
+    # in OpenBAO (so the UI knows whether auto-provision can succeed).
+    provisioner_configured: bool = False
 
 
 class TenantSummary(BaseModel):
@@ -75,9 +91,18 @@ class TenantListResponse(BaseModel):
 def get_status(db: Session = Depends(get_registry_db)) -> ControlPlaneStatus:
     """Report that the control plane is mounted and how many tenants exist."""
     tenant_count = db.query(RegistryTenant).count()
+    self_service = config_module.is_self_service_provisioning_enabled()
+    provisioner_configured = False
+    if self_service:
+        # Only probe OpenBAO when self-service is on (avoids a needless lookup).
+        from backend.services import tenant_orchestration  # noqa: PLC0415
+
+        provisioner_configured = tenant_orchestration.is_provisioner_configured()
     return ControlPlaneStatus(
         multitenancy_enabled=config_module.is_multitenancy_enabled(),
         tenant_count=tenant_count,
+        self_service_provisioning=self_service,
+        provisioner_configured=provisioner_configured,
     )
 
 
@@ -143,6 +168,25 @@ class UserSummary(BaseModel):
     id: str
     email: str
     is_active: bool
+
+
+@router.get("/users", response_model=List[UserSummary])
+def list_users(
+    email: Optional[str] = None,
+    db: Session = Depends(get_registry_db),
+) -> List[UserSummary]:
+    """List global identities, optionally filtered by exact (lowercased) email.
+
+    Backs the "add member" flow in the UI: look up a user's id by email so a
+    grant can be created without first knowing the id.
+    """
+    query = db.query(RegistryUser)
+    if email:
+        query = query.filter(RegistryUser.email == email.strip().lower())
+    rows = query.order_by(RegistryUser.email).all()
+    return [
+        UserSummary(id=str(r.id), email=r.email, is_active=r.is_active) for r in rows
+    ]
 
 
 @router.post("/users", response_model=UserSummary, status_code=201)
@@ -364,3 +408,371 @@ def delete_tenant_email_domain(
         raise HTTPException(status_code=404, detail=_("Email domain not found."))
     db.delete(row)
     db.commit()
+
+
+# ---------------------------------------------------------------------
+# Per-tenant placement (DB coordinates — NEVER credentials) + provisioning
+# ---------------------------------------------------------------------
+
+
+class PlacementRequest(BaseModel):
+    host: Optional[str] = None
+    port: Optional[int] = None
+    dbname: Optional[str] = None
+    region: Optional[str] = None
+    tier: str = TENANT_TIER_SILO
+    openbao_role: Optional[str] = None
+
+
+class PlacementSummary(BaseModel):
+    tenant_id: str
+    host: Optional[str] = None
+    port: Optional[int] = None
+    dbname: Optional[str] = None
+    region: Optional[str] = None
+    tier: str
+    openbao_role: Optional[str] = None
+
+
+def _placement_summary(p: RegistryTenantPlacement) -> PlacementSummary:
+    return PlacementSummary(
+        tenant_id=str(p.tenant_id),
+        host=p.host,
+        port=p.port,
+        dbname=p.dbname,
+        region=p.region,
+        tier=p.tier,
+        openbao_role=p.openbao_role,
+    )
+
+
+@router.put("/tenants/{tenant_id}/placement", response_model=PlacementSummary)
+def upsert_placement(
+    tenant_id: str,
+    payload: PlacementRequest,
+    db: Session = Depends(get_registry_db),
+) -> PlacementSummary:
+    """Set a tenant's DB coordinates (creates or updates).  No credentials.
+
+    The ``openbao_role`` names the OpenBAO database-secrets role that brokers
+    this tenant's dynamic credentials — the password itself is never stored.
+    """
+    if payload.tier not in TENANT_TIERS:
+        raise HTTPException(status_code=422, detail=_("Unknown placement tier."))
+    tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
+    if tenant is None:
+        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+
+    placement = (
+        db.query(RegistryTenantPlacement)
+        .filter(RegistryTenantPlacement.tenant_id == tenant_id)
+        .first()
+    )
+    if placement is None:
+        placement = RegistryTenantPlacement(tenant_id=tenant_id)
+        db.add(placement)
+    placement.host = payload.host
+    placement.port = payload.port
+    placement.dbname = payload.dbname
+    placement.region = payload.region
+    placement.tier = payload.tier
+    placement.openbao_role = payload.openbao_role
+    db.commit()
+    db.refresh(placement)
+    return _placement_summary(placement)
+
+
+@router.get("/tenants/{tenant_id}/placement", response_model=PlacementSummary)
+def get_placement(
+    tenant_id: str, db: Session = Depends(get_registry_db)
+) -> PlacementSummary:
+    """Read a tenant's DB coordinates (never credentials)."""
+    placement = (
+        db.query(RegistryTenantPlacement)
+        .filter(RegistryTenantPlacement.tenant_id == tenant_id)
+        .first()
+    )
+    if placement is None:
+        raise HTTPException(status_code=404, detail=_("Placement not found."))
+    return _placement_summary(placement)
+
+
+class ProvisionResponse(BaseModel):
+    tenant_id: str
+    revision: Optional[str] = None
+    status: str
+
+
+@router.post("/tenants/{tenant_id}/provision", response_model=ProvisionResponse)
+def provision_tenant(
+    tenant_id: str, db: Session = Depends(get_registry_db)
+) -> ProvisionResponse:
+    """Run the tenant Alembic chain against the tenant DB + record its revision.
+
+    Requires a placement with an ``openbao_role`` so the per-tenant engine can
+    lease credentials.  Staged tenant-by-tenant; a bad migration's blast radius
+    is one tenant.
+    """
+    placement = (
+        db.query(RegistryTenantPlacement)
+        .filter(RegistryTenantPlacement.tenant_id == tenant_id)
+        .first()
+    )
+    if placement is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Tenant has no placement; set one before provisioning."),
+        )
+
+    from backend.services import tenant_provisioning  # noqa: PLC0415
+
+    try:
+        revision = tenant_provisioning.provision_tenant_database(tenant_id)
+    except Exception as exc:  # noqa: BLE001
+        # Log the full traceback for operators (was previously a one-line
+        # message with no stack, which buried the real cause).
+        logger.error("Provisioning tenant %s failed: %s", tenant_id, exc, exc_info=True)
+        # Surface the underlying cause to the (authenticated, admin-only)
+        # caller so the UI shows *why* it failed instead of a generic message.
+        # Prefer the DB driver's ``orig`` error, whose message is just the
+        # database error (e.g. "permission denied for table alembic_version")
+        # without the SQL text or bound parameters — so we don't leak data.
+        cause = getattr(exc, "orig", None) or exc
+        detail = _("Tenant database provisioning failed.")
+        raise HTTPException(
+            status_code=502,
+            detail=f"{detail} {type(cause).__name__}: {cause}".strip(),
+        ) from exc
+
+    return ProvisionResponse(
+        tenant_id=str(tenant_id), revision=revision, status="provisioned"
+    )
+
+
+# ---------------------------------------------------------------------
+# Self-service provisioning (Phase 13.1) — create the tenant DB + OpenBAO
+# role from the UI.  Gated by the self_service_provisioning flag + an admin
+# role, and audited.
+# ---------------------------------------------------------------------
+
+# Tenant provisioning/deletion is an administrative super-power, gated on the
+# dedicated MANAGE_TENANTS role (seeded + backfilled to admins by migration
+# o12mgttenant).
+_PROVISION_ROLE = SecurityRoles.MANAGE_TENANTS
+
+
+def _require_provision_admin(current_user: str):
+    """Load the caller and require the admin-tier provisioning role.
+
+    Users/roles live in the main application DB (not the registry), so this
+    opens its own session.  Raises 401 if unknown, 403 if not authorized.
+    """
+    from backend.persistence import db as app_db  # noqa: PLC0415
+    from backend.persistence import models as models_module  # noqa: PLC0415
+
+    session_local = app_db.get_session_local()
+    with session_local() as session:
+        user = (
+            session.query(models_module.User)
+            .filter(models_module.User.userid == current_user)
+            .first()
+        )
+        if user is None:
+            raise HTTPException(status_code=401, detail=_("User not found."))
+        if getattr(user, "_role_cache", None) is None:
+            user.load_role_cache(session)
+        if not user.has_role(_PROVISION_ROLE):
+            raise HTTPException(
+                status_code=403,
+                detail=_("You are not authorized to provision tenants."),
+            )
+        return user
+
+
+class AutoProvisionRequest(BaseModel):
+    host: Optional[str] = None
+    port: Optional[int] = None
+    region: Optional[str] = None
+    tier: str = TENANT_TIER_SILO
+
+
+class AutoProvisionResponse(BaseModel):
+    tenant_id: str
+    dbname: str
+    openbao_role: str
+    revision: Optional[str] = None
+    status: str
+
+
+@router.post(
+    "/tenants/{tenant_id}/auto-provision", response_model=AutoProvisionResponse
+)
+def auto_provision_tenant(
+    tenant_id: str,
+    payload: AutoProvisionRequest,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_registry_db),
+) -> AutoProvisionResponse:
+    """Create the tenant DB + OpenBAO role, set placement, and run migrations.
+
+    Requires ``multitenancy.self_service_provisioning`` and an admin role.
+    Every attempt (success or failure) is audited.
+    """
+    if not config_module.is_self_service_provisioning_enabled():
+        raise HTTPException(
+            status_code=403,
+            detail=_("Self-service provisioning is disabled on this server."),
+        )
+    _require_provision_admin(current_user)
+
+    tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
+    if tenant is None:
+        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+
+    from backend.services import tenant_orchestration  # noqa: PLC0415
+
+    try:
+        result = tenant_orchestration.auto_provision_tenant(
+            tenant_id,
+            slug=tenant.slug,
+            host=payload.host,
+            port=payload.port,
+            region=payload.region,
+            tier=payload.tier,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.error(
+            "Auto-provisioning tenant %s failed: %s", tenant_id, exc, exc_info=True
+        )
+        _audit_provision(current_user, tenant, success=False, error=str(exc))
+        cause = getattr(exc, "orig", None) or exc
+        detail = _("Tenant provisioning failed.")
+        raise HTTPException(
+            status_code=502,
+            detail=f"{detail} {type(cause).__name__}: {cause}".strip(),
+        ) from exc
+
+    _audit_provision(current_user, tenant, success=True, detail=result)
+    return AutoProvisionResponse(**result)
+
+
+def _audit_provision(current_user, tenant, *, success, detail=None, error=None):
+    """Write an audit-log entry for a provisioning attempt (best-effort)."""
+    try:
+        from backend.persistence import db as app_db  # noqa: PLC0415
+        from backend.services.audit_service import (  # noqa: PLC0415
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        session_local = app_db.get_session_local()
+        with session_local() as session:
+            AuditService.log(
+                session,
+                action_type=ActionType.CREATE,
+                entity_type=EntityType.TENANT,
+                description=(
+                    f"Self-service provisioning of tenant '{tenant.slug}' "
+                    f"{'succeeded' if success else 'failed'}"
+                ),
+                result=Result.SUCCESS if success else Result.FAILURE,
+                username=current_user,
+                entity_id=str(tenant.id),
+                entity_name=tenant.slug,
+                details=detail if success else None,
+                error_message=error,
+            )
+    except Exception as exc:  # noqa: BLE001 - auditing must never break the op
+        logger.warning("Could not write provisioning audit entry: %s", exc)
+
+
+# ---------------------------------------------------------------------
+# Delete a tenant — destructive teardown (registry rows always; OpenBAO
+# role/config always; the database only on explicit opt-in).  Admin-gated,
+# requires typed confirmation, and audited.
+# ---------------------------------------------------------------------
+
+
+class DeleteTenantRequest(BaseModel):
+    # The caller must echo the tenant's slug to confirm — guards against
+    # deleting the wrong tenant.
+    confirm: str
+    # Opt-in to also DROP the tenant's database (irreversible data loss).
+    drop_database: bool = False
+
+
+@router.delete("/tenants/{tenant_id}", response_model=dict)
+def delete_tenant(
+    tenant_id: str,
+    payload: DeleteTenantRequest,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_registry_db),
+) -> dict:
+    """Delete a tenant and tear down its OpenBAO role/config (+ optionally DB).
+
+    Requires an admin role and a typed slug confirmation.  Audited.
+    """
+    _require_provision_admin(current_user)
+
+    tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
+    if tenant is None:
+        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+    if payload.confirm != tenant.slug:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Confirmation does not match the tenant slug."),
+        )
+
+    slug = tenant.slug
+    from backend.services import tenant_orchestration  # noqa: PLC0415
+
+    try:
+        result = tenant_orchestration.deprovision_tenant(
+            tenant_id, slug=slug, drop_database=payload.drop_database
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Deleting tenant %s failed: %s", tenant_id, exc, exc_info=True)
+        _audit_delete(current_user, tenant_id, slug, success=False, error=str(exc))
+        cause = getattr(exc, "orig", None) or exc
+        detail = _("Tenant deletion failed.")
+        raise HTTPException(
+            status_code=502,
+            detail=f"{detail} {type(cause).__name__}: {cause}".strip(),
+        ) from exc
+
+    _audit_delete(current_user, tenant_id, slug, success=True, detail=result)
+    return result
+
+
+def _audit_delete(current_user, tenant_id, slug, *, success, detail=None, error=None):
+    """Write an audit-log entry for a tenant deletion (best-effort)."""
+    try:
+        from backend.persistence import db as app_db  # noqa: PLC0415
+        from backend.services.audit_service import (  # noqa: PLC0415
+            ActionType,
+            AuditService,
+            EntityType,
+            Result,
+        )
+
+        session_local = app_db.get_session_local()
+        with session_local() as session:
+            AuditService.log(
+                session,
+                action_type=ActionType.DELETE,
+                entity_type=EntityType.TENANT,
+                description=(
+                    f"Deletion of tenant '{slug}' "
+                    f"{'succeeded' if success else 'failed'}"
+                ),
+                result=Result.SUCCESS if success else Result.FAILURE,
+                username=current_user,
+                entity_id=str(tenant_id),
+                entity_name=slug,
+                details=detail if success else None,
+                error_message=error,
+            )
+    except Exception as exc:  # noqa: BLE001 - auditing must never break the op
+        logger.warning("Could not write deletion audit entry: %s", exc)

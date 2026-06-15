@@ -73,11 +73,12 @@ def resolve_engine(partition: str = PARTITION_TENANT, tenant_id=None):
     # partition == PARTITION_TENANT
     if tenant_id is None:
         raise ValueError("tenant_id is required to resolve a tenant engine")
-    raise NotImplementedError(
-        "Per-tenant engine routing is not available yet — it is delivered in "
-        "Phase 13.1.C (OpenBAO dynamic credentials + per-tenant warm pools). "
-        "Until then, run with multitenancy.enabled=false (collapsed mode)."
-    )
+    # Phase 13.1.C: route to the per-tenant engine backed by an OpenBAO
+    # dynamic-credential lease + warm pool.  Late import avoids an import cycle
+    # (tenant_engine looks up placement via this module).
+    from backend.persistence.tenant_engine import get_manager  # noqa: PLC0415
+
+    return get_manager().get_engine(tenant_id)
 
 
 def get_sessionmaker(partition: str = PARTITION_TENANT, tenant_id=None):
