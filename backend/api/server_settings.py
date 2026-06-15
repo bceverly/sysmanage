@@ -168,7 +168,7 @@ _SETTINGS: List[dict] = [
         "key": "email_password",
         "type": "secret",
         "group": "email",
-        "secret_name": "smtp_password",
+        "secret_name": "smtp_password",  # nosec B105 - OpenBAO key name, not a secret
         "yaml": ["email", "smtp", "password"],
         "default": "",
     },
