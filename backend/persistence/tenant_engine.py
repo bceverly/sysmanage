@@ -29,6 +29,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
 from backend.services import openbao_db_secrets
+from backend.utils.log_sanitize import scrub
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +132,9 @@ class TenantEngineManager:
             renew_at=now + ttl * _RENEW_FRACTION,
             hard_expiry=now + ttl,
         )
-        logger.info("Leased DB credentials for tenant %s (ttl=%ss)", key, ttl)
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        # Logs the tenant id + TTL only — never the leased credential itself.
+        logger.info("Leased DB credentials for tenant %s (ttl=%ss)", scrub(key), ttl)
         return entry
 
     def _try_renew(self, entry: _Entry) -> None:

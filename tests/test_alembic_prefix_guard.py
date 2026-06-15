@@ -97,4 +97,6 @@ def _safe_unlink(path):
     try:
         os.unlink(path)
     except OSError:
+        # Best-effort cleanup of a temp file; a missing/locked file is fine to
+        # ignore (the OS reclaims it), so don't fail the test over it.
         pass

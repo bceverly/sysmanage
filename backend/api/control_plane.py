@@ -42,6 +42,7 @@ from backend.persistence.models.tenancy import (
 )
 from backend.persistence.partitions import get_registry_db
 from backend.services import registry_service
+from backend.utils.log_sanitize import scrub
 
 logger = logging.getLogger(__name__)
 
@@ -659,7 +660,7 @@ def provision_tenant(
     except Exception as exc:  # noqa: BLE001
         # Log the full traceback for operators (was previously a one-line
         # message with no stack, which buried the real cause).
-        logger.exception("Provisioning tenant %s failed: %s", tenant_id, exc)
+        logger.exception("Provisioning tenant %s failed: %s", scrub(tenant_id), exc)
         # Surface the underlying cause to the (authenticated, admin-only)
         # caller so the UI shows *why* it failed instead of a generic message.
         # Prefer the DB driver's ``orig`` error, whose message is just the
@@ -767,7 +768,9 @@ def auto_provision_tenant(
             tier=payload.tier,
         )
     except Exception as exc:  # noqa: BLE001
-        logger.exception("Auto-provisioning tenant %s failed: %s", tenant_id, exc)
+        logger.exception(
+            "Auto-provisioning tenant %s failed: %s", scrub(tenant_id), exc
+        )
         _audit_provision(current_user, tenant, success=False, error=str(exc))
         cause = getattr(exc, "orig", None) or exc
         detail = _("Tenant provisioning failed.")
@@ -857,7 +860,7 @@ def delete_tenant(
             tenant_id, slug=slug, drop_database=payload.drop_database
         )
     except Exception as exc:  # noqa: BLE001
-        logger.exception("Deleting tenant %s failed: %s", tenant_id, exc)
+        logger.exception("Deleting tenant %s failed: %s", scrub(tenant_id), exc)
         _audit_delete(current_user, tenant_id, slug, success=False, error=str(exc))
         cause = getattr(exc, "orig", None) or exc
         detail = _("Tenant deletion failed.")

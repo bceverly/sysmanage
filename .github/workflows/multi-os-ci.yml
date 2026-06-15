@@ -463,11 +463,10 @@ jobs:
       run: |
         cd frontend
         npm install --legacy-peer-deps
-        npx playwright install --with-deps chromium firefox
-        # Install WebKit only on macOS
-        if [ "${{ runner.os }}" == "macOS" ]; then
-          npx playwright install --with-deps webkit
-        fi
+        # Only the chromium project is enabled in playwright.config.ts
+        # (firefox/webkit are commented out), so install chromium only — skips
+        # a multi-hundred-MB firefox/webkit download + unzip on every run.
+        npx playwright install --with-deps chromium
       shell: bash
 
     - name: Install additional system dependencies (Linux)
@@ -633,10 +632,13 @@ jobs:
           cd frontend && npm install && cd ..
         fi
 
-        # Start frontend web UI server
-        echo "Starting frontend on port 7443..."
+        # Start frontend web UI server.
+        # Use `vite preview` (serves the pre-built dist/) NOT `npm start` (the
+        # dev server), which streamed hundreds of unbundled modules per page
+        # load and stalled Playwright's networkidle waits — slowest on Windows.
+        echo "Starting frontend (preview of built bundle) on port 7443..."
         cd frontend
-        FORCE_HTTP=true VITE_HOST=localhost VITE_PORT=7443 VITE_BACKEND_PORT=8001 npm start -- --host localhost --port 7443 &
+        FORCE_HTTP=true VITE_HOST=localhost VITE_PORT=7443 VITE_BACKEND_PORT=8001 npm run preview -- --host localhost --port 7443 &
         FRONTEND_PID=$!
         echo "FRONTEND_PID=$FRONTEND_PID" >> $GITHUB_ENV
         cd ..

@@ -79,7 +79,10 @@ def test_deprecation_warning_logged_once(caplog):
         with caplog.at_level(logging.WARNING):
             secrets_service.get_secret("jwt_secret", lambda: "y")
             secrets_service.get_secret("jwt_secret", lambda: "y")
-    warnings = [r for r in caplog.records if "jwt_secret" in r.message]
+    # The deprecation warning is key-agnostic (the secret name is treated as
+    # sensitive and not logged), but the ``_warned`` dedup set still emits it
+    # exactly once per distinct key across the two calls.
+    warnings = [r for r in caplog.records if "sysmanage.yaml" in r.message]
     assert len(warnings) == 1
 
 

@@ -44,6 +44,8 @@ def reset_active_tenant(token) -> None:
     try:
         _active_tenant.reset(token)
     except (ValueError, LookupError, TypeError):
+        # Stale/foreign token (the ContextVar was set in another context or
+        # already reset) — nothing to restore, so leave the active tenant as-is.
         pass
 
 

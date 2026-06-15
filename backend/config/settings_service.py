@@ -27,6 +27,8 @@ import threading
 import time
 from typing import Any, Callable, Optional
 
+from backend.utils.log_sanitize import scrub
+
 logger = logging.getLogger(__name__)
 
 # One-time deprecation warning per key.
@@ -171,7 +173,7 @@ def set_setting(key: str, value: Any) -> bool:
         finally:
             db_gen.close()
     except Exception as exc:  # noqa: BLE001
-        logger.debug("could not persist server setting %r: %s", key, exc)
+        logger.debug("could not persist server setting %r: %s", scrub(key), exc)
         return False
 
 
@@ -263,6 +265,9 @@ def set_tenant_setting(tenant_id: str, key: str, value: Any) -> bool:
             return True
     except Exception as exc:  # noqa: BLE001
         logger.debug(
-            "could not persist tenant setting %r for %s: %s", key, tenant_id, exc
+            "could not persist tenant setting %r for %s: %s",
+            scrub(key),
+            scrub(tenant_id),
+            exc,
         )
         return False

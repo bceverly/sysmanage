@@ -4364,6 +4364,50 @@ Extends the existing Ubuntu Pro integration + `compliance_engine`.
 
 **Estimated Size:** ~1,500 lines
 
+#### 14.5 Log Destination Routing (OSS file · Pro+ Professional syslog / Windows Event Log)
+
+Let operators route **SysManage's own diagnostic logs** — the server's and each
+agent's — to their existing log infrastructure instead of only local files.
+This is about *SysManage's own* logs (operability/integration), distinct from
+the Pro+ `observability_engine`'s syslog/Graylog forwarding, which configures
+logging on *managed hosts*.
+
+**Tiering:** local **file** logging is OSS (the default, always available).
+Routing to **anything other than a file** — syslog or Windows Event Log — is a
+**Pro+ Professional** capability, gated by a new `FeatureCode` (e.g.
+`LOG_ROUTING`) in the Professional tier's `TIER_FEATURES`. It's a thin
+handler-selection feature, so a license-gated feature flag (not a compiled
+engine) is the right mechanism.
+
+**Server**
+- [ ] Logging-destination control in the **Configuration Settings** UI (the
+  panel where former `sysmanage.yaml` operational settings now live), persisted
+  to the DB `Settings` table (operational config, per the config-classification
+  direction — not YAML, not a secret).
+- [ ] A **radio** with three choices: **Local file** (default, OSS) · **Syslog**
+  (Unix/Linux) · **Windows Event Log / Event Viewer**. The non-file options are
+  disabled with a "Professional feature" hint unless `LOG_ROUTING` is licensed;
+  the API also rejects a non-file destination when unlicensed (defence in depth).
+- [ ] Syslog parameters (host, port, facility, protocol udp/tcp) when syslog is
+  selected; map to a Python `logging.handlers.SysLogHandler`. Windows Event Log
+  maps to an `NTEventLogHandler`-style handler (relevant when the server itself
+  runs on Windows).
+- [ ] i18n/l10n for all 14 languages.
+
+**Agent**
+- [ ] Agent log destination is **auto-populated from the server config** — the
+  server pushes the logging settings to agents over the existing store-and-forward
+  config channel; the agent applies them on receipt (no per-agent hand-config).
+- [ ] Cross-platform handlers: Unix-family agents (Linux/BSD/macOS) use syslog;
+  **Windows** agents use the native **Windows Event Log** (Event Viewer). Define
+  the cross-OS mapping for a server-chosen destination (e.g. a "syslog" intent on
+  a Windows agent falls back to Event Log or file, logged as a warning) so a
+  heterogeneous fleet behaves predictably.
+- [ ] Agents on the free tier (unlicensed server) only ever log to file.
+
+**Estimated Size:** ~1,800 lines (server handler + config + UI radio/gating +
+agent Unix/Windows handlers + license gate + tests)
+
 ### Exit Criteria
 
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free

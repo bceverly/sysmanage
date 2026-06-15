@@ -14,6 +14,8 @@ schema up to head.
 import logging
 import os
 
+from backend.utils.log_sanitize import scrub
+
 logger = logging.getLogger(__name__)
 
 
@@ -82,5 +84,5 @@ def provision_tenant_database(tenant_id) -> str:
 
     head = ScriptDirectory.from_config(cfg).get_current_head()
     _record_db_version(tenant_id, "tenant", head)
-    logger.info("Provisioned tenant %s database to revision %s", tenant_id, head)
+    logger.info("Provisioned tenant %s database to revision %s", scrub(tenant_id), head)
     return head

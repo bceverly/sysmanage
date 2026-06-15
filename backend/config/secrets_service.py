@@ -238,18 +238,26 @@ def get_secret(
         try:
             legacy = yaml_getter()
         except Exception as exc:  # noqa: BLE001
-            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-            logger.debug("YAML fallback for secret %r failed: %s", name, exc)
+            # Log only the exception *type*, never the message: a secret resolver
+            # that raises could embed the secret value in str(exc), and the key
+            # name is itself treated as sensitive.  (Clears CodeQL
+            # py/clear-text-logging-sensitive-data.)
+            logger.debug(
+                "YAML fallback lookup for a secret raised %s", type(exc).__name__
+            )
             legacy = None
         if legacy:
             if name not in _warned:
-                # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                # Deliberately key-agnostic: the secret's *name* is treated as
+                # sensitive by CodeQL's clear-text-logging query, so we don't
+                # interpolate it.  The dedup set still emits one warning per
+                # distinct secret; operators identify it from the surrounding
+                # request context.
                 logger.warning(
-                    "Secret '%s' is being read from sysmanage.yaml. Secrets should "
+                    "A secret is being read from sysmanage.yaml. Secrets should "
                     "live in OpenBAO — see docs/planning/config-classification.md "
                     "(Phase 13.1.H). The YAML fallback will be removed in a future "
-                    "major.",
-                    name,
+                    "major."
                 )
                 _warned.add(name)
             return legacy

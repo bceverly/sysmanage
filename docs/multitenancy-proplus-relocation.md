@@ -83,9 +83,24 @@ license server; issue it to no one but yourself. (`sysmanage-professional-plus`.
   suite still passes). `is_multitenancy_enabled` stays config-based for now; its
   gate-flip (require the engine) happens once the logic has moved (later phase),
   so the running system isn't broken mid-relocation.
-- **Phase 1 — engine skeleton.** Create `module-source/multitenancy_engine`
-  that, on load, registers the hooks + mounts the control-plane router (initially
-  re-exporting today's logic).
+- **Phase 1 — engine skeleton. ✅ DONE.** `module-source/multitenancy_engine/`
+  (metadata.json, `.pyx`, setup.py, build.sh, smoke test) compiles to a Cython
+  `.so` and exports the standard contract: `get_module_info()`,
+  `resolve_tenant_engine(tenant_id)`, and `get_multitenancy_engine_router(...)`
+  (the fixed 8-arg DI signature). Both hooks **re-export today's OSS logic**, so
+  the engine is a pass-through shell — zero behaviour change. OSS side:
+  `ModuleCode.MULTITENANCY_ENGINE` added to `features.py` (temp under
+  ENTERPRISE), `backend/multitenancy/bridge.py` wraps a loaded engine in a
+  seam-protocol adapter and `seam.register_engine()`s it, and
+  `backend/startup/lifecycle.py` bridges it after module load. The engine is
+  *passive* (OSS pulls, matching every other engine); the seam stays the
+  internal plug-point so the **data-plane resolver** (consulted at runtime) can
+  defer to it. Ordering note: `register_routes` runs at import (before module
+  load), so the control-plane *router* swap can't happen at register time — it
+  moves to the Phase 2 stub→engine mount; the live Phase 1 hook is the resolver.
+  Verified end-to-end: the real compiled `.so` imports, bridges, and routes
+  `resolve_engine` through the engine (OSS `tests/multitenancy/test_bridge.py`,
+  Pro+ smoke test).
 - **Phase 2 — move logic file-by-file** from OSS into the engine, replacing each
   OSS file with a stub/seam. Run both test suites after each move.
 - **Phase 3 — frontend bundle.** Move the MT UI to the Pro+ frontend bundle;

@@ -124,10 +124,18 @@ def create_tenant_database(dbname: str, owner_role: str) -> None:
     conn = _connect_provisioner(creds)
     try:
         with conn.cursor() as cur:
+            # NOTE on the raw-DDL Semgrep findings below: these are psycopg2
+            # (not SQLAlchemy — the rule mis-targets) and every identifier is
+            # passed through ``psycopg2.sql.Identifier(...)`` (the library's
+            # injection-safe identifier quoting); values go through ``%s`` bind
+            # params.  DDL (CREATE ROLE/DATABASE, GRANT) cannot parameterize
+            # identifiers, so ``sql.Identifier`` is the correct, safe construct.
+            #
             # Owner role: a stable NOLOGIN role that owns the schema, so objects
             # are never owned by short-lived dynamic users.
             cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (owner_role,))
             if cur.fetchone() is None:
+                # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 cur.execute(
                     sql.SQL("CREATE ROLE {} NOLOGIN").format(sql.Identifier(owner_role))
                 )
@@ -135,12 +143,14 @@ def create_tenant_database(dbname: str, owner_role: str) -> None:
             # The provisioner must be a MEMBER of the owner role (able to SET
             # ROLE to it) before it can assign database ownership to it or create
             # dynamic users IN ROLE it.  Idempotent: re-granting is harmless.
+            # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             cur.execute(
                 sql.SQL("GRANT {} TO CURRENT_USER").format(sql.Identifier(owner_role))
             )
             # Database owned by the owner role.
             cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (dbname,))
             if cur.fetchone() is None:
+                # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 cur.execute(
                     sql.SQL("CREATE DATABASE {} OWNER {}").format(
                         sql.Identifier(dbname), sql.Identifier(owner_role)
@@ -353,12 +363,16 @@ def _drop_tenant_database(names: dict, result: dict) -> None:
                     "WHERE datname = %s AND pid <> pg_backend_pid()",
                     (dbname,),
                 )
+                # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
+                # psycopg2 + sql.Identifier — safe identifier quoting (see note
+                # in create_tenant_database); DDL can't parameterize identifiers.
                 cur.execute(
                     sql.SQL("DROP DATABASE IF EXISTS {}").format(sql.Identifier(dbname))
                 )
                 result["database_dropped"] = True
                 # Owner role now owns nothing in the dropped DB; drop it too.
                 try:
+                    # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                     cur.execute(
                         sql.SQL("DROP ROLE IF EXISTS {}").format(sql.Identifier(owner))
                     )

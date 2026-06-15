@@ -183,6 +183,31 @@ export default defineConfig({
       }
     }
   },
+  // Preview server — serves the pre-built ``dist/`` bundle (NOT the dev server
+  // that streams unbundled ESM modules one-per-request).  CI uses this for the
+  // Playwright UI tests: the dev server makes every page load fetch hundreds of
+  // module files, which never lets ``networkidle`` settle (so each wait burns
+  // its full timeout, worst on Windows).  ``vite preview`` serves the bundled
+  // build, so page loads are fast and deterministic.
+  //
+  // ``server.proxy`` does NOT apply to preview, so the ``/api`` proxy is
+  // repeated here with the same env -> yaml -> default resolution.
+  preview: {
+    host: finalHost,
+    port: finalPort,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: `http://${
+          process.env.VITE_BACKEND_HOST || config?.api?.host || 'localhost'
+        }:${
+          process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
+        }`,
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
   build: {
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,

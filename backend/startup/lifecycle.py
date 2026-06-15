@@ -148,6 +148,18 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                         "No Pro+ module routes were mounted despite modules being loaded"
                     )
 
+                # Bridge the multi-tenancy engine into the OSS seam if loaded.
+                # Unlike other engines (routes only), multi-tenancy also feeds
+                # the data-plane resolver in backend/persistence/partitions.py,
+                # which is consulted at runtime — so registering it here, after
+                # module load, is sufficient for per-tenant routing to take
+                # effect.  No-op (single-tenant) when the engine isn't licensed.
+                multitenancy_engine = module_loader.get_module("multitenancy_engine")
+                if multitenancy_engine:
+                    from backend.multitenancy import bridge  # noqa: PLC0415
+
+                    bridge.bridge_loaded_engine(multitenancy_engine)
+
                 # Start alerting background task if module is available
                 alerting_engine = module_loader.get_module("alerting_engine")
                 if alerting_engine:

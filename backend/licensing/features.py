@@ -198,6 +198,14 @@ class ModuleCode(str, Enum):
     FEDERATION_CONTROLLER_ENGINE = "federation_controller_engine"
     FEDERATION_SITE_ENGINE = "federation_site_engine"
 
+    # Phase 13 — Multi-Tenant SaaS.  Multi-tenancy is a commercial-only
+    # capability: the OSS build ships the schema (registry/shared/tenant tables
+    # + migrations) and an inert seam, while this engine supplies the licensed
+    # logic (per-tenant routing, control-plane orchestration, OpenBAO leasing,
+    # migration fan-out).  Slated for its own MULTITENANT_SAAS tier (Phase 4 of
+    # the relocation); temporarily mapped under Enterprise below until then.
+    MULTITENANCY_ENGINE = "multitenancy_engine"
+
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
@@ -370,5 +378,9 @@ TIER_MODULES = {
         # sysmanage.yaml picks which one this server loads)
         ModuleCode.FEDERATION_CONTROLLER_ENGINE,
         ModuleCode.FEDERATION_SITE_ENGINE,
+        # Phase 13 — Multi-Tenant SaaS.  TEMPORARY placement: multi-tenancy
+        # gets its own MULTITENANT_SAAS tier in Phase 4 of the relocation, at
+        # which point this moves out of Enterprise into that tier alone.
+        ModuleCode.MULTITENANCY_ENGINE,
     },
 }
