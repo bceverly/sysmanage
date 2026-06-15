@@ -20,6 +20,7 @@ import Navbar from "./Components/Navbar"
 import ConnectionProvider from './Components/ConnectionProvider';
 import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import MigrationCompatBanner from './Components/MigrationCompatBanner';
+import TenantMigrationBanner from './Components/TenantMigrationBanner';
 import Login from './Pages/Login';
 import ResetPassword from './Pages/ResetPassword';
 import Home from './Pages/Home';
@@ -153,6 +154,7 @@ function App() {
               <Router>
                 <Navbar />
                 <MigrationCompatBanner />
+                <TenantMigrationBanner />
                 <SecurityWarningBanner />
                   <main className="main-content">
                     <AppRoutes />

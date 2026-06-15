@@ -52,6 +52,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   controlPlaneService,
   EmailDomainSummary,
+  EnrollmentTokenSummary,
   GrantSummary,
   PlacementSummary,
   TenantSummary,
@@ -393,6 +394,7 @@ const TenantDetail: React.FC<TenantDetailProps> = ({
       )}
       <EmailDomainSection tenant={tenant} notify={notify} t={t} />
       <MembersSection tenant={tenant} notify={notify} t={t} />
+      <EnrollmentTokensSection tenant={tenant} notify={notify} t={t} />
       <PlacementSection
         key={`placement-${tenant.id}-${placementRefresh}`}
         tenant={tenant}
@@ -842,6 +844,175 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
               </Table>
             )}
           </>
+        )}
+      </AccordionDetails>
+    </Accordion>
+  );
+};
+
+const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
+  const [tokens, setTokens] = useState<EnrollmentTokenSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [label, setLabel] = useState('');
+  const [expiresInDays, setExpiresInDays] = useState('');
+  const [maxUses, setMaxUses] = useState('');
+  // The plaintext token, shown once after creation.
+  const [newToken, setNewToken] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setTokens(await controlPlaneService.listEnrollmentTokens(tenant.id));
+    } catch (err) {
+      notify(errMessage(err, t('tenants.tokens.loadError', 'Failed to load tokens')), 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [tenant.id, notify, t]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const generate = async () => {
+    try {
+      const res = await controlPlaneService.createEnrollmentToken(tenant.id, {
+        label: label || undefined,
+        expiresInDays: expiresInDays ? Number(expiresInDays) : null,
+        maxUses: maxUses ? Number(maxUses) : null,
+      });
+      setNewToken(res.token);
+      setLabel('');
+      setExpiresInDays('');
+      setMaxUses('');
+      await load();
+    } catch (err) {
+      notify(errMessage(err, t('tenants.tokens.createError', 'Failed to create token')), 'error');
+    }
+  };
+
+  const revoke = async (id: string) => {
+    try {
+      await controlPlaneService.revokeEnrollmentToken(tenant.id, id);
+      await load();
+      notify(t('tenants.tokens.revoked', 'Token revoked'), 'success');
+    } catch (err) {
+      notify(errMessage(err, t('tenants.tokens.revokeError', 'Failed to revoke token')), 'error');
+    }
+  };
+
+  return (
+    <Accordion>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography>{t('tenants.tokens.title', 'Enrollment Tokens')}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {t(
+            'tenants.tokens.help',
+            'Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.',
+          )}
+        </Typography>
+
+        {newToken && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setNewToken(null)}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {t(
+                'tenants.tokens.shownOnce',
+                'Copy this token now — it will not be shown again:',
+              )}
+            </Typography>
+            <TextField
+              value={newToken}
+              size="small"
+              fullWidth
+              InputProps={{ readOnly: true }}
+              onFocus={(e) => e.target.select()}
+            />
+          </Alert>
+        )}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+          <TextField
+            size="small"
+            label={t('tenants.tokens.label', 'Label')}
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            sx={{ flex: 1 }}
+          />
+          <TextField
+            size="small"
+            type="number"
+            label={t('tenants.tokens.expiresDays', 'Expires (days)')}
+            value={expiresInDays}
+            onChange={(e) => setExpiresInDays(e.target.value)}
+            sx={{ width: 140 }}
+          />
+          <TextField
+            size="small"
+            type="number"
+            label={t('tenants.tokens.maxUses', 'Max uses')}
+            value={maxUses}
+            onChange={(e) => setMaxUses(e.target.value)}
+            sx={{ width: 120 }}
+          />
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={generate}>
+            {t('tenants.tokens.generate', 'Generate')}
+          </Button>
+        </Stack>
+
+        {loading ? (
+          <CircularProgress size={20} />
+        ) : tokens.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            {t('tenants.tokens.none', 'No enrollment tokens.')}
+          </Typography>
+        ) : (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('tenants.tokens.label', 'Label')}</TableCell>
+                <TableCell>{t('tenants.tokens.uses', 'Uses')}</TableCell>
+                <TableCell>{t('tenants.tokens.expires', 'Expires')}</TableCell>
+                <TableCell>{t('tenants.tokens.status', 'Status')}</TableCell>
+                <TableCell align="right" />
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tokens.map((tok) => (
+                <TableRow key={tok.id}>
+                  <TableCell>{tok.label || '—'}</TableCell>
+                  <TableCell>
+                    {tok.use_count}
+                    {tok.max_uses != null ? ` / ${tok.max_uses}` : ''}
+                  </TableCell>
+                  <TableCell>{tok.expires_at ? tok.expires_at.slice(0, 10) : '—'}</TableCell>
+                  <TableCell>
+                    <Chip
+                      size="small"
+                      color={tok.revoked ? 'default' : 'success'}
+                      label={
+                        tok.revoked
+                          ? t('tenants.tokens.revokedLabel', 'revoked')
+                          : t('tenants.tokens.active', 'active')
+                      }
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    {!tok.revoked && (
+                      <IconButton
+                        size="small"
+                        aria-label={t('tenants.tokens.revoke', 'Revoke')}
+                        onClick={() => revoke(tok.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </AccordionDetails>
     </Accordion>

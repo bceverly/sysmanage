@@ -17,6 +17,23 @@ export interface ControlPlaneStatus {
   provisioner_configured?: boolean;
 }
 
+export interface EnrollmentTokenSummary {
+  id: string;
+  tenant_id: string;
+  label?: string | null;
+  created_at?: string | null;
+  expires_at?: string | null;
+  max_uses?: number | null;
+  use_count: number;
+  last_used_at?: string | null;
+  revoked: boolean;
+}
+
+export interface CreateEnrollmentTokenResponse {
+  token: string;
+  summary: EnrollmentTokenSummary;
+}
+
 export interface AutoProvisionResponse {
   tenant_id: string;
   dbname: string;
@@ -235,6 +252,37 @@ export const controlPlaneService = {
       { data: { confirm: opts.confirm, drop_database: opts.dropDatabase } },
     );
     return r.data;
+  },
+
+  // --- Enrollment tokens (agent→tenant binding) --------------------------
+  async listEnrollmentTokens(
+    tenantId: string,
+  ): Promise<EnrollmentTokenSummary[]> {
+    const r = await axiosInstance.get<EnrollmentTokenSummary[]>(
+      `/api/control-plane/tenants/${tenantId}/enrollment-tokens`,
+    );
+    return r.data;
+  },
+
+  async createEnrollmentToken(
+    tenantId: string,
+    opts: { label?: string; expiresInDays?: number | null; maxUses?: number | null },
+  ): Promise<CreateEnrollmentTokenResponse> {
+    const r = await axiosInstance.post<CreateEnrollmentTokenResponse>(
+      `/api/control-plane/tenants/${tenantId}/enrollment-tokens`,
+      {
+        label: opts.label || null,
+        expires_in_days: opts.expiresInDays ?? null,
+        max_uses: opts.maxUses ?? null,
+      },
+    );
+    return r.data;
+  },
+
+  async revokeEnrollmentToken(tenantId: string, tokenId: string): Promise<void> {
+    await axiosInstance.delete(
+      `/api/control-plane/tenants/${tenantId}/enrollment-tokens/${tokenId}`,
+    );
   },
 
   // Self-service: server creates the DB + OpenBAO role + placement + migrates.

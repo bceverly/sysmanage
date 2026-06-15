@@ -369,10 +369,14 @@ def _get_all_hosts_sync(tenant_id=None):
     """
     from backend.persistence.partitions import get_request_engine  # noqa: PLC0415
 
-    # Get the SQLAlchemy session (tenant-routed when a tenant is in scope).
-    # Keep the module-local ``sessionmaker`` so only the bound engine changes.
+    # Server scope (no active tenant) uses the module-local ``db.get_engine()``
+    # directly — identical to before, and it keeps the existing unit tests that
+    # mock ``host.db`` working.  Only when a tenant is actually in scope do we
+    # route through the seam to that tenant's engine.  Keep the module-local
+    # ``sessionmaker`` so only the bound engine changes.
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:

@@ -253,6 +253,68 @@ def test_delete_tenant_unknown_returns_404(db_session):
     assert resp.status_code == 404
 
 
+def test_migration_status_endpoint(db_session):
+    client = _client(db_session)
+    with patch(
+        "backend.services.migration_status.pending_tenant_migrations",
+        return_value={
+            "tenants_pending": 1,
+            "tenant_slugs": ["acme"],
+            "tenant_head": "rX",
+        },
+    ):
+        resp = client.get("/api/control-plane/migration-status")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["tenants_pending"] == 1
+    assert body["tenant_slugs"] == ["acme"]
+
+
+def test_enrollment_token_create_list_revoke(db_session):
+    client = _client(db_session)
+    _, tenant_id = _make_user_and_tenant(client)
+    with patch.object(control_plane, "_require_provision_admin"):
+        # Create — plaintext returned once.
+        created = client.post(
+            f"/api/control-plane/tenants/{tenant_id}/enrollment-tokens",
+            json={"label": "laptops", "max_uses": 5},
+        )
+        assert created.status_code == 201
+        body = created.json()
+        assert body["token"].startswith("sme_")
+        assert body["summary"]["label"] == "laptops"
+        token_id = body["summary"]["id"]
+
+        # List — never returns the plaintext.
+        listed = client.get(f"/api/control-plane/tenants/{tenant_id}/enrollment-tokens")
+        assert listed.status_code == 200
+        assert len(listed.json()) == 1
+        assert "token" not in listed.json()[0]
+
+        # Revoke.
+        revoked = client.delete(
+            f"/api/control-plane/tenants/{tenant_id}/enrollment-tokens/{token_id}"
+        )
+        assert revoked.status_code == 204
+        assert (
+            client.get(
+                f"/api/control-plane/tenants/{tenant_id}/enrollment-tokens"
+            ).json()[0]["revoked"]
+            is True
+        )
+
+
+def test_enrollment_token_create_unknown_tenant_404(db_session):
+    client = _client(db_session)
+    with patch.object(control_plane, "_require_provision_admin"):
+        resp = client.post(
+            "/api/control-plane/tenants/00000000-0000-0000-0000-000000000000/"
+            "enrollment-tokens",
+            json={},
+        )
+    assert resp.status_code == 404
+
+
 def _make_user_and_tenant(client):
     user_id = client.post(
         "/api/control-plane/users", json={"email": "u@example.com"}

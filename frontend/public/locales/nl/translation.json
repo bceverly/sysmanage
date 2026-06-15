@@ -3217,6 +3217,31 @@
       "error": "[TODO] Failed to delete tenant",
       "title": "[TODO] Delete tenant",
       "warning": "[TODO] This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone."
+    },
+    "tokens": {
+      "active": "[TODO] active",
+      "createError": "[TODO] Failed to create token",
+      "expires": "[TODO] Expires",
+      "expiresDays": "[TODO] Expires (days)",
+      "generate": "[TODO] Generate",
+      "help": "[TODO] Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.",
+      "label": "[TODO] Label",
+      "loadError": "[TODO] Failed to load tokens",
+      "maxUses": "[TODO] Max uses",
+      "none": "[TODO] No enrollment tokens.",
+      "revoke": "[TODO] Revoke",
+      "revokeError": "[TODO] Failed to revoke token",
+      "revoked": "[TODO] Token revoked",
+      "revokedLabel": "[TODO] revoked",
+      "shownOnce": "[TODO] Copy this token now — it will not be shown again:",
+      "status": "[TODO] Status",
+      "title": "[TODO] Enrollment Tokens",
+      "uses": "[TODO] Uses"
     }
+  },
+  "tenantMigration": {
+    "intro": "[TODO] These tenant databases are behind the current code. Run",
+    "outro": "[TODO] on the server (OpenBAO must be running):",
+    "title": "[TODO] Tenant database migration required"
   }
 }

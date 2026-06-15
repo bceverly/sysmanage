@@ -122,6 +122,30 @@ describe('controlPlaneService', () => {
     );
   });
 
+  test('createEnrollmentToken posts options and returns the plaintext once', async () => {
+    mockPost.mockResolvedValue({
+      data: { token: 'sme_abc', summary: { id: 'k1', label: 'laptops' } },
+    });
+    const res = await controlPlaneService.createEnrollmentToken('t1', {
+      label: 'laptops',
+      expiresInDays: 30,
+      maxUses: 5,
+    });
+    expect(mockPost).toHaveBeenCalledWith(
+      '/api/control-plane/tenants/t1/enrollment-tokens',
+      { label: 'laptops', expires_in_days: 30, max_uses: 5 },
+    );
+    expect(res.token).toBe('sme_abc');
+  });
+
+  test('revokeEnrollmentToken deletes the token path', async () => {
+    mockDelete.mockResolvedValue({ data: undefined });
+    await controlPlaneService.revokeEnrollmentToken('t1', 'k9');
+    expect(mockDelete).toHaveBeenCalledWith(
+      '/api/control-plane/tenants/t1/enrollment-tokens/k9',
+    );
+  });
+
   test('deleteTenant sends confirm + drop_database in the request body', async () => {
     mockDelete.mockResolvedValue({ data: { registry_removed: true } });
     await controlPlaneService.deleteTenant('t1', {

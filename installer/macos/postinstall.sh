@@ -106,10 +106,8 @@ if ! command -v psql >/dev/null 2>&1; then
 	echo "3. Create database: createdb sysmanage"
 fi
 echo "4. Copy and configure: cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml"
-echo "5. Run migrations (all three chains): cd /usr/local/lib/sysmanage && \\"
-echo "     .venv/bin/python -m alembic --name registry upgrade head && \\"
-echo "     .venv/bin/python -m alembic --name shared upgrade head && \\"
-echo "     .venv/bin/python -m alembic upgrade head"
+echo "5. Run migrations (chains + per-tenant): cd /usr/local/lib/sysmanage && \\"
+echo "     .venv/bin/python scripts/sysmanage_migrate.py"
 echo "6. Load LaunchDaemon: sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist"
 if ! command -v nginx >/dev/null 2>&1; then
 	echo "7. Install nginx: brew install nginx"

@@ -3217,6 +3217,31 @@
       "error": "Failed to delete tenant",
       "title": "Delete tenant",
       "warning": "This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone."
+    },
+    "tokens": {
+      "active": "active",
+      "createError": "Failed to create token",
+      "expires": "Expires",
+      "expiresDays": "Expires (days)",
+      "generate": "Generate",
+      "help": "Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.",
+      "label": "Label",
+      "loadError": "Failed to load tokens",
+      "maxUses": "Max uses",
+      "none": "No enrollment tokens.",
+      "revoke": "Revoke",
+      "revokeError": "Failed to revoke token",
+      "revoked": "Token revoked",
+      "revokedLabel": "revoked",
+      "shownOnce": "Copy this token now — it will not be shown again:",
+      "status": "Status",
+      "title": "Enrollment Tokens",
+      "uses": "Uses"
     }
+  },
+  "tenantMigration": {
+    "intro": "These tenant databases are behind the current code. Run",
+    "outro": "on the server (OpenBAO must be running):",
+    "title": "Tenant database migration required"
   }
 }

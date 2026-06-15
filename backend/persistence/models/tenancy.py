@@ -239,3 +239,40 @@ class RegistryTenantDbVersion(Base):
         ),
         Index("ix_registry_db_version_tenant", "tenant_id"),
     )
+
+
+class RegistryEnrollmentToken(Base):
+    """A tenant-scoped agent enrollment token (Phase 13.1 data plane).
+
+    An admin generates a token bound to a tenant; an agent presents it at
+    registration to be enrolled into that tenant (its host record is then
+    created in the tenant's database).  Only the SHA-256 ``token_hash`` is
+    stored — the plaintext is shown once at creation and never persisted.
+
+    Optional ``expires_at`` and ``max_uses`` bound a token's blast radius;
+    ``revoked`` disables it immediately.  ``use_count`` / ``last_used_at`` are
+    bumped on each successful enrollment for audit.
+    """
+
+    __tablename__ = "registry_enrollment_token"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(
+        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+    )
+    # SHA-256 hex of the plaintext token — looked up at enrollment.  Unique so
+    # a token maps to exactly one tenant.
+    token_hash = Column(String(64), nullable=False, unique=True)
+    label = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+    created_by = Column(String(255), nullable=True)
+    expires_at = Column(DateTime, nullable=True)
+    max_uses = Column(Integer, nullable=True)  # null = unlimited
+    use_count = Column(Integer, nullable=False, default=0)
+    last_used_at = Column(DateTime, nullable=True)
+    revoked = Column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        Index("ix_registry_enrollment_token_tenant", "tenant_id"),
+        Index("ix_registry_enrollment_token_hash", "token_hash"),
+    )

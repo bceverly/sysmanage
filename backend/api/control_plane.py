@@ -106,6 +106,23 @@ def get_status(db: Session = Depends(get_registry_db)) -> ControlPlaneStatus:
     )
 
 
+class MigrationStatus(BaseModel):
+    tenants_pending: int = 0
+    tenant_slugs: List[str] = []
+    tenant_head: Optional[str] = None
+
+
+@router.get("/migration-status", response_model=MigrationStatus)
+def migration_status() -> MigrationStatus:
+    """Tenant databases that are behind the code head (drives the UI banner).
+
+    Read-only status for any authenticated user — no admin gate.
+    """
+    from backend.services import migration_status as svc  # noqa: PLC0415
+
+    return MigrationStatus(**svc.pending_tenant_migrations())
+
+
 @router.get("/tenants", response_model=TenantListResponse)
 def list_tenants(
     status: Optional[str] = None,
@@ -408,6 +425,124 @@ def delete_tenant_email_domain(
         raise HTTPException(status_code=404, detail=_("Email domain not found."))
     db.delete(row)
     db.commit()
+
+
+# ---------------------------------------------------------------------
+# Tenant enrollment tokens (Phase 13.1 data plane) — admin-gated; agents
+# present a token at registration to enroll into the tenant.
+# ---------------------------------------------------------------------
+
+
+class CreateEnrollmentTokenRequest(BaseModel):
+    label: Optional[str] = None
+    expires_in_days: Optional[int] = None
+    max_uses: Optional[int] = None
+
+
+class EnrollmentTokenSummary(BaseModel):
+    id: str
+    tenant_id: str
+    label: Optional[str] = None
+    created_at: Optional[str] = None
+    expires_at: Optional[str] = None
+    max_uses: Optional[int] = None
+    use_count: int = 0
+    last_used_at: Optional[str] = None
+    revoked: bool = False
+
+
+class CreateEnrollmentTokenResponse(BaseModel):
+    # The plaintext token — shown ONCE, never retrievable again.
+    token: str
+    summary: EnrollmentTokenSummary
+
+
+def _iso(value):
+    return value.isoformat() if value else None
+
+
+def _token_summary(row) -> EnrollmentTokenSummary:
+    return EnrollmentTokenSummary(
+        id=str(row.id),
+        tenant_id=str(row.tenant_id),
+        label=row.label,
+        created_at=_iso(row.created_at),
+        expires_at=_iso(row.expires_at),
+        max_uses=row.max_uses,
+        use_count=row.use_count or 0,
+        last_used_at=_iso(row.last_used_at),
+        revoked=bool(row.revoked),
+    )
+
+
+@router.get(
+    "/tenants/{tenant_id}/enrollment-tokens",
+    response_model=List[EnrollmentTokenSummary],
+)
+def list_enrollment_tokens(
+    tenant_id: str,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_registry_db),
+) -> List[EnrollmentTokenSummary]:
+    """List a tenant's enrollment tokens (never the plaintext)."""
+    _require_provision_admin(current_user)
+    from backend.services import enrollment_service  # noqa: PLC0415
+
+    return [_token_summary(r) for r in enrollment_service.list_tokens(db, tenant_id)]
+
+
+@router.post(
+    "/tenants/{tenant_id}/enrollment-tokens",
+    response_model=CreateEnrollmentTokenResponse,
+    status_code=201,
+)
+def create_enrollment_token(
+    tenant_id: str,
+    payload: CreateEnrollmentTokenRequest,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_registry_db),
+) -> CreateEnrollmentTokenResponse:
+    """Generate a tenant enrollment token.  The plaintext is returned ONCE."""
+    _require_provision_admin(current_user)
+
+    tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
+    if tenant is None:
+        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+
+    expires_at = None
+    if payload.expires_in_days and payload.expires_in_days > 0:
+        from datetime import datetime, timedelta, timezone  # noqa: PLC0415
+
+        expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(
+            days=payload.expires_in_days
+        )
+
+    from backend.services import enrollment_service  # noqa: PLC0415
+
+    plaintext, row = enrollment_service.generate_token(
+        db,
+        tenant_id,
+        label=payload.label,
+        expires_at=expires_at,
+        max_uses=payload.max_uses,
+        created_by=current_user,
+    )
+    return CreateEnrollmentTokenResponse(token=plaintext, summary=_token_summary(row))
+
+
+@router.delete("/tenants/{tenant_id}/enrollment-tokens/{token_id}", status_code=204)
+def revoke_enrollment_token(
+    tenant_id: str,
+    token_id: str,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_registry_db),
+) -> None:
+    """Revoke an enrollment token (disables it immediately)."""
+    _require_provision_admin(current_user)
+    from backend.services import enrollment_service  # noqa: PLC0415
+
+    if not enrollment_service.revoke_token(db, tenant_id, token_id):
+        raise HTTPException(status_code=404, detail=_("Enrollment token not found."))
 
 
 # ---------------------------------------------------------------------

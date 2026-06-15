@@ -48,8 +48,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
@@ -101,89 +102,56 @@ TEST_CONFIG = {
 
 @pytest.fixture(scope="function")
 def engine():
-    """Create test database engine with fresh schema for each test."""
-    # Create a unique database file for each test
-    import uuid
+    """Create a test database engine with a fresh schema for each test.
 
-    test_db_fd, test_db_file = tempfile.mkstemp(suffix=f"_{uuid.uuid4().hex}.db")
-    os.close(test_db_fd)  # Close the file descriptor, we only need the path
-    test_db_url = f"sqlite:///{test_db_file}"
-
-    test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})
+    Uses an **in-memory** SQLite database shared across connections via
+    ``StaticPool`` (so separate sessions — e.g. the partition resolver's own
+    sessionmaker — see the same data).  In-memory avoids the per-test file
+    create/fsync/unlink that makes the suite crawl on Windows; the DB is
+    discarded when the engine is disposed at test teardown.
+    """
+    test_engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
     # Enter test mode to prevent production database access
     from backend.persistence.db import enter_test_mode
 
     enter_test_mode(test_engine)
 
-    # Import models to ensure metadata registration
+    # Import models to ensure metadata registration, then build the schema once.
     from backend.persistence import models  # noqa: F401
 
     Base.metadata.create_all(bind=test_engine)
 
     yield test_engine
 
-    # Properly dispose of the engine to close all connections
+    # Dispose closes the single pooled connection, discarding the in-memory DB.
     test_engine.dispose()
 
-    # Exit test mode after test
     from backend.persistence.db import exit_test_mode
 
     exit_test_mode()
 
-    # Clean up the temporary database file after test
-    try:
-        if os.path.exists(test_db_file):
-            os.unlink(test_db_file)
-    except OSError:
-        _ = None  # empty-except: failure here is non-fatal; see code above
-
 
 @pytest.fixture(scope="function")
 def db_session(engine):
-    """Create a test database session."""
-    # Ensure all models are imported before creating tables
-    from backend.persistence import models  # Import all models
-    from backend.persistence.db import Base
+    """Create a test database session.
 
-    # Drop and recreate all tables to ensure all models are included
-    Base.metadata.drop_all(bind=engine)
-
-    # For SQLite test databases, create tables directly using SQLAlchemy metadata
-    # This avoids Alembic migration timezone compatibility issues with SQLite
-    print("Creating SQLite test schema directly from models (skipping Alembic)")
-    from backend.persistence import models  # Import all models
-    from backend.persistence.db import Base
-
-    Base.metadata.create_all(bind=engine)
-
-    # Debug: Check what was actually created
-    from sqlalchemy import text
-
-    with engine.connect() as conn:
-        result = conn.execute(
-            text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='available_packages'"
-            )
-        )
-        table_exists = len(result.fetchall()) > 0
-        print(f"DEBUG: available_packages table created in test DB: {table_exists}")
-        print(f"DEBUG: Test database URL: {engine.url}")
-
+    The ``engine`` fixture already built the schema on a fresh per-test
+    in-memory database, so this just opens a session — no redundant
+    drop/create (which doubled the schema work on every test) and no
+    per-test debug output (slow on the Windows console).
+    """
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
-
-    # Commit the session to ensure any pending transactions are finalized
-    session.commit()
-
     try:
         yield session
     finally:
-        # Close session and clear connection pool
         session.rollback()
         session.close()
-        # Remove connection from the pool
-        session.get_bind().dispose()
 
 
 @pytest.fixture(scope="function")

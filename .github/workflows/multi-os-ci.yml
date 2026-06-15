@@ -273,13 +273,24 @@ jobs:
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db
 
     - name: Run backend tests
+      shell: bash
       run: |
-        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html --cov-report=xml
+        # The multi-OS matrix exists for cross-platform CORRECTNESS. Coverage
+        # is collected once on Linux (the dedicated postgres job + the Linux leg
+        # below), so Windows/macOS skip the coverage instrumentation and the
+        # per-test '-v' console output — both are slow, dramatically so on the
+        # Windows runner (its console + process spawn are expensive).
+        if [ "${{ runner.os }}" = "Linux" ]; then
+          python -m pytest tests/ --ignore=tests/ui/ --tb=short -n auto --dist=loadfile --cov=backend --cov-report=xml
+        else
+          python -m pytest tests/ --ignore=tests/ui/ --tb=short -n auto --dist=loadfile
+        fi
       env:
         PYTHONPATH: .
         DATABASE_URL: sqlite:///test_${{ runner.os }}.db
 
     - name: Upload coverage reports
+      if: runner.os == 'Linux'
       uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       with:
         files: ./coverage.xml

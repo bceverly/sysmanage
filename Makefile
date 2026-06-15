@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: provision-bootstrap migrate-tenants test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
+.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
 
 # Default target
 help:
@@ -740,26 +740,35 @@ endif
 #     ``make start-privileged``;
 #   * if migrate failed they'd want to investigate before restarting.
 migrate: stop
-	@echo "Running database migrations..."
-	@echo "  -> registry chain (registry_* control-plane tables)"
-	@$(PYTHON) -m alembic --name registry upgrade head
-	@echo "  -> shared chain (shared_* reference tables)"
-	@$(PYTHON) -m alembic --name shared upgrade head
-	@echo "  -> tenant chain (per-customer schema)"
-	@$(PYTHON) -m alembic upgrade head
-	@echo "  -> per-tenant databases (fan-out; no-op when multi-tenancy is off)"
-	@$(PYTHON) scripts/migrate_tenants.py
-	@echo "[OK] Database migrations completed (registry + shared + tenant + per-tenant)"
+	@echo "Running database migrations (via sysmanage-migrate — the same tool"
+	@echo "operators run in production)..."
+	@# Multi-tenancy: 'make stop' took OpenBAO down, but the per-tenant fan-out
+	@# inside sysmanage-migrate needs it up to lease credentials — so start it
+	@# just for the migration and stop it again, restoring the clean stopped
+	@# state. Single-tenant: no OpenBAO needed, run the tool directly.
+	@if $(PYTHON) -c "from backend.config import config; import sys; sys.exit(0 if config.is_multitenancy_enabled() else 1)" 2>/dev/null; then \
+		echo "multi-tenancy is ON — starting OpenBAO for the per-tenant fan-out..."; \
+		./scripts/start-openbao.sh >/dev/null 2>&1 || true; \
+		$(PYTHON) scripts/sysmanage_migrate.py; \
+		rc=$$?; \
+		echo "stopping OpenBAO (restoring the stopped state)..."; \
+		./scripts/stop-openbao.sh >/dev/null 2>&1 || true; \
+		if [ $$rc -ne 0 ]; then exit $$rc; fi; \
+	else \
+		$(PYTHON) scripts/sysmanage_migrate.py; \
+	fi
 	@echo ""
-	@echo "NOTE: In the default single-database deployment all three chains"
-	@echo "      run against the SAME database (collapsed/homelab mode)."
+	@echo "NOTE: In the default single-database deployment all chains run against"
+	@echo "      the SAME database (collapsed/homelab mode)."
 	@echo "      backend / frontend / telemetry / OpenBAO were stopped before migrate."
 	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
 
 # Fan out the tenant chain to every provisioned tenant database (standalone).
+# 'make migrate' already does this; use this target to re-run JUST the fan-out
+# (e.g. after adding a tenant) while the stack is up — OpenBAO must be running.
 migrate-tenants: $(VENV_ACTIVATE)
-	@echo "=== Migrating per-tenant databases ==="
-	@$(PYTHON) scripts/migrate_tenants.py
+	@echo "=== Migrating per-tenant databases (requires OpenBAO running) ==="
+	@$(PYTHON) scripts/sysmanage_migrate.py --tenants-only
 
 provision-bootstrap: $(VENV_ACTIVATE)
 	@echo "=== Multi-tenancy provisioning bootstrap (one-time, operator) ==="
@@ -850,8 +859,14 @@ lint-version-fix:
 	@$(PYTHON) scripts/check_version_drift.py --fix
 
 # Combined linting
-lint: lint-python lint-typescript i18n-validate i18n-placeholders lint-version
+lint: lint-python lint-typescript i18n-validate i18n-placeholders lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
+
+# Guard: migrations must be expand-contract (backward-compatible across the
+# incremental fleet migration). See docs/migration-expand-contract.md.
+check-migrations: $(VENV_ACTIVATE)
+	@echo "=== Migration expand-contract check ==="
+	@$(PYTHON) scripts/check_migrations.py
 
 # i18n: extract user-visible t('key', 'fallback') calls and verify every
 # referenced key exists in every locale's translation.json.  Missing keys
