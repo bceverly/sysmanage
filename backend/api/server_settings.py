@@ -188,11 +188,10 @@ def _yaml_value(path: List[str]) -> Any:
 def _secret_configured(desc: dict) -> bool:
     """True when a secret value exists (OpenBAO or the YAML fallback)."""
     tenant_id = _scoped_tenant(desc)
-    if tenant_id:
-        if secrets_service.get_tenant_secret(
-            tenant_id, desc["secret_name"], default=None
-        ):
-            return True
+    if tenant_id and secrets_service.get_tenant_secret(
+        tenant_id, desc["secret_name"], default=None
+    ):
+        return True
     value = secrets_service.get_secret(
         desc["secret_name"],
         lambda: _yaml_value(desc["yaml"]),
@@ -264,17 +263,37 @@ def _all_items() -> List[SettingItem]:
 @router.get(
     "/api/settings",
     dependencies=[Depends(JWTBearer())],
-    response_model=SettingsResponse,
 )
 async def get_settings(_user: str = Depends(get_current_user)) -> SettingsResponse:
     """Return the editable server settings with their current effective values."""
     return SettingsResponse(settings=_all_items())
 
 
+def _store_secret(desc: dict, tenant_id, value: str) -> None:
+    """Persist a secret setting to OpenBAO (tenant-scoped or server-global).
+
+    A blank value is a no-op so the stored secret is left unchanged.
+    """
+    if not value:
+        return
+    if tenant_id:
+        secrets_service.store_tenant_secrets(tenant_id, {desc["secret_name"]: value})
+    else:
+        secrets_service.store_config_secrets({desc["secret_name"]: value})
+
+
+def _store_setting(desc: dict, tenant_id, key: str, value) -> None:
+    """Persist a non-secret setting to the DB Settings table."""
+    coerced = _coerce(desc["type"], value)
+    if tenant_id:
+        settings_service.set_tenant_setting(tenant_id, key, coerced)
+    else:
+        settings_service.set_setting(key, coerced)
+
+
 @router.put(
     "/api/settings",
     dependencies=[Depends(JWTBearer())],
-    response_model=SettingsResponse,
 )
 async def update_settings(
     payload: UpdateSettingsRequest,
@@ -291,17 +310,7 @@ async def update_settings(
             continue
         tenant_id = _scoped_tenant(desc)
         if desc["type"] == "secret":
-            if value:  # only update when a new value is supplied
-                if tenant_id:
-                    secrets_service.store_tenant_secrets(
-                        tenant_id, {desc["secret_name"]: value}
-                    )
-                else:
-                    secrets_service.store_config_secrets({desc["secret_name"]: value})
+            _store_secret(desc, tenant_id, value)
         else:
-            coerced = _coerce(desc["type"], value)
-            if tenant_id:
-                settings_service.set_tenant_setting(tenant_id, key, coerced)
-            else:
-                settings_service.set_setting(key, coerced)
+            _store_setting(desc, tenant_id, key, value)
     return SettingsResponse(settings=_all_items())

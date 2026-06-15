@@ -32,6 +32,9 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
+# Alembic's config key for the target database URL.
+_SQLALCHEMY_URL = "sqlalchemy.url"
+
 
 def _resolve_database_url() -> str:
     """Resolve the target DB URL with the same priority as the tenant env."""
@@ -102,8 +105,8 @@ def run_migrations(
     target_metadata = Base.metadata
 
     # Set the URL unless one was already injected (tests pass a connection).
-    if not config.get_main_option("sqlalchemy.url"):
-        config.set_main_option("sqlalchemy.url", _resolve_database_url())
+    if not config.get_main_option(_SQLALCHEMY_URL):
+        config.set_main_option(_SQLALCHEMY_URL, _resolve_database_url())
 
     if config.config_file_name is not None:
         fileConfig(config.config_file_name)
@@ -119,7 +122,7 @@ def run_migrations(
 
     if context.is_offline_mode():
         context.configure(
-            url=config.get_main_option("sqlalchemy.url"),
+            url=config.get_main_option(_SQLALCHEMY_URL),
             literal_binds=True,
             dialect_opts={"paramstyle": "named"},
             **common,

@@ -73,9 +73,19 @@ def resolve_engine(partition: str = PARTITION_TENANT, tenant_id=None):
     # partition == PARTITION_TENANT
     if tenant_id is None:
         raise ValueError("tenant_id is required to resolve a tenant engine")
-    # Phase 13.1.C: route to the per-tenant engine backed by an OpenBAO
-    # dynamic-credential lease + warm pool.  Late import avoids an import cycle
-    # (tenant_engine looks up placement via this module).
+
+    # Per-tenant routing is licensed-engine territory (Pro+ relocation, Phase 0):
+    # defer to the multi-tenancy engine when one is loaded.  The OSS fallback
+    # below is the built-in implementation that moves into the engine in a later
+    # phase; until then it keeps the open-source build working as today.
+    from backend.multitenancy import seam  # noqa: PLC0415
+
+    engine = seam.active_engine()
+    if engine is not None:
+        return engine.resolve_tenant_engine(tenant_id)
+
+    # OSS fallback: the OpenBAO-leased per-tenant engine (moves to the engine
+    # in a later phase).  Late import avoids an import cycle.
     from backend.persistence.tenant_engine import get_manager  # noqa: PLC0415
 
     return get_manager().get_engine(tenant_id)

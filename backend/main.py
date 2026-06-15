@@ -114,6 +114,16 @@ startup_logger.info("First 10 origins: %s", origins[:10] if origins else [])
 if len(origins) > 10:
     startup_logger.info("... and %d more origins", len(origins) - 10)
 
+# Bind the active tenant (from the JWT) for per-tenant config resolution.
+# No-op when multi-tenancy is disabled (the default).  Added BEFORE CORS so that
+# CORSMiddleware is the last middleware in the chain (Starlette runs middleware
+# in reverse order of registration, so CORS must be registered last to remain
+# the outermost layer and tag every response — including error responses).
+from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E402
+
+app.add_middleware(ActiveTenantMiddleware)
+startup_logger.info("Active-tenant middleware added")
+
 startup_logger.info("Adding CORS middleware to FastAPI app")
 app.add_middleware(
     CORSMiddleware,
@@ -124,13 +134,6 @@ app.add_middleware(
     expose_headers=["Authorization"],
 )
 startup_logger.info("CORS middleware added successfully")
-
-# Bind the active tenant (from the JWT) for per-tenant config resolution.
-# No-op when multi-tenancy is disabled (the default).
-from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E402
-
-app.add_middleware(ActiveTenantMiddleware)
-startup_logger.info("Active-tenant middleware added")
 
 # Add exception handlers to ensure CORS headers are always present
 register_exception_handlers(app, origins)

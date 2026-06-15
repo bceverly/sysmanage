@@ -469,8 +469,20 @@ def register_routes(app: FastAPI):
     # multitenancy is enabled — in the default homelab / on-prem /
     # federated deployment this management surface does not exist on the
     # app at all (no new attack surface, no behavior change).
+    #
+    # Pro+ relocation (Phase 0): the control-plane router comes from the
+    # licensed multi-tenancy engine when it's loaded; the OSS fallback below is
+    # the built-in router that moves into the engine in a later phase.
     if config_module.is_multitenancy_enabled():
-        app.include_router(control_plane.router)
+        from backend.multitenancy import seam  # noqa: PLC0415
+
+        engine = seam.active_engine()
+        cp_router = (
+            engine.control_plane_router()
+            if engine is not None
+            else control_plane.router
+        )
+        app.include_router(cp_router)
         logger.debug("Control-plane router added (multitenancy enabled)")
     else:
         logger.debug("Control-plane router NOT added (multitenancy disabled)")

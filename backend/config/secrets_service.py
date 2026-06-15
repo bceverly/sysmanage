@@ -136,7 +136,7 @@ def store_config_secrets(secrets: dict) -> bool:
         return True
     except Exception as exc:  # noqa: BLE001
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-        logger.error("Failed to store config secrets in OpenBAO: %s", exc)
+        logger.exception("Failed to store config secrets in OpenBAO: %s", exc)
         return False
 
 
@@ -211,7 +211,7 @@ def store_tenant_secrets(tenant_id: str, secrets: dict) -> bool:
         return True
     except Exception as exc:  # noqa: BLE001
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-        logger.error("Failed to store tenant secrets in OpenBAO: %s", exc)
+        logger.exception("Failed to store tenant secrets in OpenBAO: %s", exc)
         return False
 
 

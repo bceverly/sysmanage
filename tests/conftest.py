@@ -3,7 +3,6 @@ Pytest configuration and shared fixtures for SysManage server tests.
 """
 
 import logging
-import os
 
 # Silence FastAPI startup-phase logger chatter BEFORE we import backend.main.
 # That import builds the app (CORS generation, route registration,
@@ -40,9 +39,6 @@ _orig_info = _verbosity_logger.FlexibleLogger.info
 _verbosity_logger.FlexibleLogger.debug = lambda *_a, **_k: None
 _verbosity_logger.FlexibleLogger.info = lambda *_a, **_k: None
 
-# Test database URL - using temporary SQLite file for tests
-import tempfile
-import time
 from typing import Generator
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -69,11 +65,6 @@ mount_proplus_stub_routes(app, {})
 # test_verbosity_logger_comprehensive) need the real methods.
 _verbosity_logger.FlexibleLogger.debug = _orig_debug
 _verbosity_logger.FlexibleLogger.info = _orig_info
-
-# Use secure temporary file for test database
-_test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")
-os.close(_test_db_fd)  # Close the file descriptor, we only need the path
-TEST_DATABASE_URL = f"sqlite:///{_test_db_file}"
 
 # Test configuration with different ports to avoid conflicts with dev server
 TEST_CONFIG = {

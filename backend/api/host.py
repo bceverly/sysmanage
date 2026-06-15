@@ -71,6 +71,10 @@ class HostRegistration(BaseModel):
     # access_group and (if the key has auto_approve=True) skips the
     # manual approval gate.
     registration_key: Optional[str] = None
+    # Phase 13.1: optional tenant enrollment token.  When supplied and valid,
+    # binds the host to the token's tenant (host→tenant index) so the data
+    # plane routes this host's data to that tenant's database.
+    enrollment_token: Optional[str] = None
 
 
 class HostRegistrationLegacy(BaseModel):
@@ -677,6 +681,36 @@ def _validate_registration_key(session, raw_key):
     return validated_key
 
 
+def _resolve_enrollment_tenant(raw_token):
+    """Validate + consume a tenant enrollment token; return its tenant id.
+
+    Returns ``None`` when no token was supplied or multi-tenancy is disabled.
+    Raises 403 for a supplied-but-invalid token (unknown / revoked / expired /
+    out of uses) — a bad token rejects the registration before any host row is
+    created.  Consumes one use on success (bumps use_count / last_used_at).
+    """
+    if not raw_token:
+        return None
+    from backend.config import config as _config  # noqa: PLC0415
+
+    if not _config.is_multitenancy_enabled():
+        return None
+
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        PARTITION_REGISTRY,
+        partition_session,
+    )
+    from backend.services import enrollment_service  # noqa: PLC0415
+
+    with partition_session(partition=PARTITION_REGISTRY) as session:
+        tenant_id = enrollment_service.validate_and_consume(session, raw_token)
+    if tenant_id is None:
+        raise HTTPException(
+            status_code=403, detail=_("Invalid or expired enrollment token")
+        )
+    return tenant_id
+
+
 @public_router.post("/host/register")
 async def register_host(registration_data: HostRegistration):
     """
@@ -737,6 +771,13 @@ async def register_host(registration_data: HostRegistration):
             session, registration_data.registration_key
         )
 
+        # Phase 13.1: validate the optional tenant enrollment token BEFORE
+        # creating the host (a bad token rejects the registration outright) and
+        # resolve which tenant this host enrolls into.
+        enrollment_tenant_id = _resolve_enrollment_tenant(
+            registration_data.enrollment_token
+        )
+
         # Create new host with pending approval status and minimal data
         host = models.Host(
             fqdn=registration_data.fqdn,
@@ -775,6 +816,25 @@ async def register_host(registration_data: HostRegistration):
 
         session.commit()
         session.refresh(host)
+
+        # Phase 13.1: record the host→tenant binding so the data plane routes
+        # this host's data to its tenant's database.  The token was already
+        # validated + consumed above; this writes the index + audits it.
+        if enrollment_tenant_id is not None:
+            from backend.services import host_tenant_index  # noqa: PLC0415
+
+            host_tenant_index.bind_host_to_tenant(host.id, enrollment_tenant_id)
+            AuditService.log(
+                db=session,
+                action_type=ActionType.CREATE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=host.fqdn,
+                description=_("Host '%s' enrolled into tenant %s via enrollment token")
+                % (host.fqdn, enrollment_tenant_id),
+                result=Result.SUCCESS,
+                details={"tenant_id": enrollment_tenant_id},
+            )
 
         # Audit log: enrollment via registration key carries enough
         # context that the operator can correlate to the matched key.

@@ -20,8 +20,6 @@ See README.md and TESTING.md for detailed guidelines.
 # pylint: disable=too-many-lines
 
 import hashlib
-import os
-import tempfile
 import uuid
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
@@ -44,6 +42,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 argon2_hasher = PasswordHasher()
 
@@ -56,10 +55,20 @@ from backend.persistence.models.core import GUID
 # Test database setup
 @pytest.fixture(scope="function")
 def test_db():
-    """Create a temporary test database for each test."""
-    # Create temporary database
-    db_fd, db_path = tempfile.mkstemp()
-    test_engine = create_engine(f"sqlite:///{db_path}")
+    """Create a fresh in-memory test database for each test.
+
+    Uses in-memory SQLite with a ``StaticPool`` (one shared connection) rather
+    than a temp file.  File-based SQLite is pathologically slow on Windows CI —
+    every test paid real file create/fsync/delete plus Windows Defender scanning
+    each op, which dominated the Windows backend test wall-clock.  In-memory
+    eliminates all of that; ``StaticPool`` keeps the single connection alive so
+    the schema created below persists across every session in the test.
+    """
+    test_engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
     # For SQLite, we need to modify BigInteger columns to Integer for autoincrement to work
     # Create a copy of metadata with modified column types
@@ -1757,27 +1766,10 @@ def test_db():
     models.FirewallRole = original_firewall_role
     models.FirewallRoleOpenPort = original_firewall_role_open_port
 
-    # Clean up database connections
-    test_engine.dispose()  # Close all connections in the connection pool
-
-    # Give Windows time to release file handles
-    import time
-
-    time.sleep(0.1)
-
-    # Cleanup
-    try:
-        os.close(db_fd)
-    except Exception:  # noqa: BLE001
-        pass  # File descriptor might already be closed
-
-    # Try to delete the file, but don't fail the test if it can't be deleted
-    try:
-        os.unlink(db_path)
-    except PermissionError:
-        # On Windows, the file might still be locked
-        # It will be cleaned up eventually by the OS
-        pass
+    # Clean up database connections.  In-memory DB: disposing the engine drops
+    # the StaticPool's single connection and the schema with it — no temp file
+    # to close/unlink, and no Windows file-handle-release wait needed.
+    test_engine.dispose()
 
     app.dependency_overrides.clear()
 

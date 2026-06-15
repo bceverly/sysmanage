@@ -7,21 +7,21 @@
  * ``tenant_id`` and reloads so every view refetches under the new scope.
  */
 
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import Chip from '@mui/material/Chip';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import Check from '@mui/icons-material/Check';
-import BusinessIcon from '@mui/icons-material/Business';
+import Chip from "@mui/material/Chip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemText from "@mui/material/ListItemText";
+import Check from "@mui/icons-material/Check";
+import BusinessIcon from "@mui/icons-material/Business";
 
 import {
   accountsService,
   getActiveTenantId,
   TenantAccount,
-} from '../Services/accounts';
+} from "../Services/accounts";
 
 const TenantSwitcher: React.FC = () => {
   const { t } = useTranslation();
@@ -48,11 +48,14 @@ const TenantSwitcher: React.FC = () => {
   const active = accounts.find((a) => a.tenant_id === activeId);
   // Show the tenant id (short) when we have an active tenant but its account
   // metadata hasn't loaded yet, so the chip is never blank.
-  const label = active
-    ? active.name
-    : activeId
-      ? `${activeId.slice(0, 8)}…`
-      : t('tenants.switcher.none', 'No tenant');
+  let label: string;
+  if (active) {
+    label = active.name;
+  } else if (activeId) {
+    label = `${activeId.slice(0, 8)}…`;
+  } else {
+    label = t("tenants.switcher.none", "No tenant");
+  }
 
   const handleSwitch = async (tenantId: string | null) => {
     setAnchorEl(null);
@@ -79,8 +82,11 @@ const TenantSwitcher: React.FC = () => {
         size="small"
         onClick={(e) => setAnchorEl(e.currentTarget)}
         sx={{ mr: 1, maxWidth: 200 }}
-        title={t('tenants.switcher.tooltip', 'Active tenant — click to switch')}
-        aria-label={t('tenants.switcher.tooltip', 'Active tenant — click to switch')}
+        title={t("tenants.switcher.tooltip", "Active tenant — click to switch")}
+        aria-label={t(
+          "tenants.switcher.tooltip",
+          "Active tenant — click to switch",
+        )}
       />
       <Menu
         anchorEl={anchorEl}
@@ -88,20 +94,17 @@ const TenantSwitcher: React.FC = () => {
         onClose={() => setAnchorEl(null)}
       >
         {/* Return to server scope (clear the active tenant). */}
-        <MenuItem
-          selected={!activeId}
-          onClick={() => handleSwitch(null)}
-        >
-          {!activeId ? (
-            <Check fontSize="small" sx={{ mr: 1 }} />
+        <MenuItem selected={!activeId} onClick={() => handleSwitch(null)}>
+          {activeId ? (
+            <span style={{ width: 24, display: "inline-block" }} />
           ) : (
-            <span style={{ width: 24, display: 'inline-block' }} />
+            <Check fontSize="small" sx={{ mr: 1 }} />
           )}
-          <ListItemText primary={t('tenants.switcher.none', 'No tenant')} />
+          <ListItemText primary={t("tenants.switcher.none", "No tenant")} />
         </MenuItem>
         {accounts.length === 0 && (
           <MenuItem disabled>
-            {t('tenants.switcher.noAccounts', 'No tenant grants')}
+            {t("tenants.switcher.noAccounts", "No tenant grants")}
           </MenuItem>
         )}
         {accounts.map((a) => (
@@ -113,7 +116,7 @@ const TenantSwitcher: React.FC = () => {
             {a.tenant_id === activeId ? (
               <Check fontSize="small" sx={{ mr: 1 }} />
             ) : (
-              <span style={{ width: 24, display: 'inline-block' }} />
+              <span style={{ width: 24, display: "inline-block" }} />
             )}
             <ListItemText primary={a.name} secondary={a.role} />
           </MenuItem>

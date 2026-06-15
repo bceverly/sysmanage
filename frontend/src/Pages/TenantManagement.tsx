@@ -14,40 +14,40 @@
  * the management surface — there's exactly one implicit tenant (the server).
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
+import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
-import Snackbar from '@mui/material/Snackbar';
-import Stack from '@mui/material/Stack';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import {
   controlPlaneService,
@@ -56,23 +56,25 @@ import {
   GrantSummary,
   PlacementSummary,
   TenantSummary,
-} from '../Services/controlPlane';
+} from "../Services/controlPlane";
 
-const PLACEMENT_TIERS = ['silo', 'pool'];
+const PLACEMENT_TIERS = ["silo", "pool"];
 
 interface Toast {
   message: string;
-  severity: 'success' | 'error' | 'info';
+  severity: "success" | "error" | "info";
 }
 
 function errMessage(err: unknown, fallback: string): string {
   if (
-    typeof err === 'object' &&
+    typeof err === "object" &&
     err !== null &&
-    'response' in err &&
-    (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+    "response" in err &&
+    (err as { response?: { data?: { detail?: string } } }).response?.data
+      ?.detail
   ) {
-    return (err as { response: { data: { detail: string } } }).response.data.detail;
+    return (err as { response: { data: { detail: string } } }).response.data
+      .detail;
   }
   return fallback;
 }
@@ -90,10 +92,10 @@ const TenantManagement: React.FC = () => {
 
   // New-tenant dialog
   const [newOpen, setNewOpen] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newSlug, setNewSlug] = useState('');
+  const [newName, setNewName] = useState("");
+  const [newSlug, setNewSlug] = useState("");
 
-  const notify = useCallback((message: string, severity: Toast['severity']) => {
+  const notify = useCallback((message: string, severity: Toast["severity"]) => {
     setToast({ message, severity });
   }, []);
 
@@ -120,17 +122,15 @@ const TenantManagement: React.FC = () => {
           // 404 → the control-plane router isn't mounted (multi-tenancy is
           // disabled); show the disabled panel rather than an error.
           const status =
-            typeof err === 'object' &&
-            err !== null &&
-            'response' in err
+            typeof err === "object" && err !== null && "response" in err
               ? (err as { response?: { status?: number } }).response?.status
               : undefined;
           if (status === 404) {
             setMtEnabled(false);
           } else {
             notify(
-              errMessage(err, t('tenants.loadError', 'Failed to load tenants')),
-              'error',
+              errMessage(err, t("tenants.loadError", "Failed to load tenants")),
+              "error",
             );
           }
         }
@@ -150,19 +150,22 @@ const TenantManagement: React.FC = () => {
         newSlug.trim(),
       );
       setNewOpen(false);
-      setNewName('');
-      setNewSlug('');
+      setNewName("");
+      setNewSlug("");
       const list = await loadTenants();
       setSelected(list.find((x) => x.id === created.id) ?? created);
-      notify(t('tenants.created', 'Tenant created'), 'success');
+      notify(t("tenants.created", "Tenant created"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.createError', 'Failed to create tenant')), 'error');
+      notify(
+        errMessage(err, t("tenants.createError", "Failed to create tenant")),
+        "error",
+      );
     }
   };
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
         <CircularProgress />
       </Box>
     );
@@ -172,14 +175,14 @@ const TenantManagement: React.FC = () => {
     return (
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          {t('tenants.title', 'Tenant Management')}
+          {t("tenants.title", "Tenant Management")}
         </Typography>
         <Alert severity="info">
           <Typography variant="subtitle1" component="div">
-            {t('tenants.disabledTitle', 'Multi-tenancy is disabled')}
+            {t("tenants.disabledTitle", "Multi-tenancy is disabled")}
           </Typography>
           {t(
-            'tenants.disabledBody',
+            "tenants.disabledBody",
             'This server runs in single-tenant mode — there is one implicit tenant (the server itself). Enable "multitenancy.enabled" in sysmanage.yaml and restart to manage multiple tenants here.',
           )}
         </Alert>
@@ -191,31 +194,37 @@ const TenantManagement: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 2,
         }}
       >
-        <Typography variant="h4">{t('tenants.title', 'Tenant Management')}</Typography>
+        <Typography variant="h4">
+          {t("tenants.title", "Tenant Management")}
+        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setNewOpen(true)}
         >
-          {t('tenants.new', 'New Tenant')}
+          {t("tenants.new", "New Tenant")}
         </Button>
       </Box>
 
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={2}
+        alignItems="flex-start"
+      >
         {/* Tenant list */}
-        <Paper sx={{ flex: '0 0 360px', width: { xs: '100%', md: 360 } }}>
+        <Paper sx={{ flex: "0 0 360px", width: { xs: "100%", md: 360 } }}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>{t('tenants.name', 'Name')}</TableCell>
-                <TableCell>{t('tenants.slug', 'Slug')}</TableCell>
-                <TableCell>{t('tenants.status', 'Status')}</TableCell>
+                <TableCell>{t("tenants.name", "Name")}</TableCell>
+                <TableCell>{t("tenants.slug", "Slug")}</TableCell>
+                <TableCell>{t("tenants.status", "Status")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -223,7 +232,7 @@ const TenantManagement: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={3}>
                     <Typography variant="body2" color="text.secondary">
-                      {t('tenants.none', 'No tenants yet')}
+                      {t("tenants.none", "No tenants yet")}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -234,7 +243,7 @@ const TenantManagement: React.FC = () => {
                   hover
                   selected={selected?.id === tenant.id}
                   onClick={() => setSelected(tenant)}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{ cursor: "pointer" }}
                 >
                   <TableCell>{tenant.name}</TableCell>
                   <TableCell>{tenant.slug}</TableCell>
@@ -248,7 +257,7 @@ const TenantManagement: React.FC = () => {
         </Paper>
 
         {/* Detail panel */}
-        <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
+        <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
           {selected ? (
             <TenantDetail
               tenant={selected}
@@ -264,7 +273,10 @@ const TenantManagement: React.FC = () => {
           ) : (
             <Paper sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary">
-                {t('tenants.selectPrompt', 'Select a tenant to manage its domains, members, and placement.')}
+                {t(
+                  "tenants.selectPrompt",
+                  "Select a tenant to manage its domains, members, and placement.",
+                )}
               </Typography>
             </Paper>
           )}
@@ -272,34 +284,44 @@ const TenantManagement: React.FC = () => {
       </Stack>
 
       {/* New tenant dialog */}
-      <Dialog open={newOpen} onClose={() => setNewOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{t('tenants.new', 'New Tenant')}</DialogTitle>
+      <Dialog
+        open={newOpen}
+        onClose={() => setNewOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{t("tenants.new", "New Tenant")}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField
-              label={t('tenants.name', 'Name')}
+              label={t("tenants.name", "Name")}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               fullWidth
               autoFocus
             />
             <TextField
-              label={t('tenants.slug', 'Slug')}
+              label={t("tenants.slug", "Slug")}
               value={newSlug}
               onChange={(e) => setNewSlug(e.target.value)}
-              helperText={t('tenants.slugHelp', 'Unique, URL-safe identifier (e.g. acme)')}
+              helperText={t(
+                "tenants.slugHelp",
+                "Unique, URL-safe identifier (e.g. acme)",
+              )}
               fullWidth
             />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNewOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+          <Button onClick={() => setNewOpen(false)}>
+            {t("common.cancel", "Cancel")}
+          </Button>
           <Button
             variant="contained"
             disabled={!newName.trim() || !newSlug.trim()}
             onClick={handleCreateTenant}
           >
-            {t('common.create', 'Create')}
+            {t("common.create", "Create")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -308,7 +330,7 @@ const TenantManagement: React.FC = () => {
         open={!!toast}
         autoHideDuration={5000}
         onClose={() => setToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         {toast ? (
           <Alert severity={toast.severity} onClose={() => setToast(null)}>
@@ -326,7 +348,7 @@ const TenantManagement: React.FC = () => {
 
 interface DetailProps {
   tenant: TenantSummary;
-  notify: (message: string, severity: Toast['severity']) => void;
+  notify: (message: string, severity: Toast["severity"]) => void;
   t: TFunction;
 }
 
@@ -353,9 +375,9 @@ const TenantDetail: React.FC<TenantDetailProps> = ({
       <Paper
         sx={{
           p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <div>
@@ -370,7 +392,7 @@ const TenantDetail: React.FC<TenantDetailProps> = ({
           startIcon={<DeleteIcon />}
           onClick={() => setDeleteOpen(true)}
         >
-          {t('tenants.delete.button', 'Delete')}
+          {t("tenants.delete.button", "Delete")}
         </Button>
       </Paper>
 
@@ -409,7 +431,7 @@ interface DeleteDialogProps {
   tenant: TenantSummary;
   open: boolean;
   onClose: () => void;
-  notify: (message: string, severity: Toast['severity']) => void;
+  notify: (message: string, severity: Toast["severity"]) => void;
   t: TFunction;
   onDeleted: () => void | Promise<void>;
 }
@@ -422,13 +444,13 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
   t,
   onDeleted,
 }) => {
-  const [confirm, setConfirm] = useState('');
+  const [confirm, setConfirm] = useState("");
   const [dropDatabase, setDropDatabase] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const close = () => {
     if (busy) return;
-    setConfirm('');
+    setConfirm("");
     setDropDatabase(false);
     onClose();
   };
@@ -441,15 +463,18 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
         dropDatabase,
       });
       notify(
-        t('tenants.delete.done', 'Tenant deleted') + ` — ${tenant.slug}`,
-        'success',
+        t("tenants.delete.done", "Tenant deleted") + ` — ${tenant.slug}`,
+        "success",
       );
-      setConfirm('');
+      setConfirm("");
       setDropDatabase(false);
       onClose();
       await onDeleted();
     } catch (err) {
-      notify(errMessage(err, t('tenants.delete.error', 'Failed to delete tenant')), 'error');
+      notify(
+        errMessage(err, t("tenants.delete.error", "Failed to delete tenant")),
+        "error",
+      );
     } finally {
       setBusy(false);
     }
@@ -457,14 +482,14 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={close} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ color: 'error.main' }}>
-        {t('tenants.delete.title', 'Delete tenant')} — {tenant.slug}
+      <DialogTitle sx={{ color: "error.main" }}>
+        {t("tenants.delete.title", "Delete tenant")} — {tenant.slug}
       </DialogTitle>
       <DialogContent>
         <Alert severity="error" sx={{ mb: 2 }}>
           {t(
-            'tenants.delete.warning',
-            'This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone.',
+            "tenants.delete.warning",
+            "This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone.",
           )}
         </Alert>
         <FormControlLabel
@@ -475,20 +500,23 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
             />
           }
           label={t(
-            'tenants.delete.dropDb',
-            'Also DROP the tenant database — irreversible data loss',
+            "tenants.delete.dropDb",
+            "Also DROP the tenant database — irreversible data loss",
           )}
         />
         {dropDatabase && (
           <Alert severity="warning" sx={{ my: 1 }}>
             {t(
-              'tenants.delete.dropDbWarn',
-              'The entire tenant database and all its data will be destroyed.',
+              "tenants.delete.dropDbWarn",
+              "The entire tenant database and all its data will be destroyed.",
             )}
           </Alert>
         )}
         <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-          {t('tenants.delete.confirmPrompt', 'Type the tenant slug to confirm:')}{' '}
+          {t(
+            "tenants.delete.confirmPrompt",
+            "Type the tenant slug to confirm:",
+          )}{" "}
           <strong>{tenant.slug}</strong>
         </Typography>
         <TextField
@@ -502,7 +530,7 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={close} disabled={busy}>
-          {t('common.cancel', 'Cancel')}
+          {t("common.cancel", "Cancel")}
         </Button>
         <Button
           color="error"
@@ -511,8 +539,8 @@ const DeleteTenantDialog: React.FC<DeleteDialogProps> = ({
           onClick={run}
         >
           {busy
-            ? t('tenants.delete.deleting', 'Deleting…')
-            : t('tenants.delete.button', 'Delete')}
+            ? t("tenants.delete.deleting", "Deleting…")
+            : t("tenants.delete.button", "Delete")}
         </Button>
       </DialogActions>
     </Dialog>
@@ -532,8 +560,8 @@ const AutoProvisionSection: React.FC<AutoProvisionProps> = ({
   onProvisioned,
 }) => {
   const [busy, setBusy] = useState(false);
-  const [host, setHost] = useState('localhost');
-  const [region, setRegion] = useState('');
+  const [host, setHost] = useState("localhost");
+  const [region, setRegion] = useState("");
 
   const run = async () => {
     setBusy(true);
@@ -541,19 +569,22 @@ const AutoProvisionSection: React.FC<AutoProvisionProps> = ({
       const res = await controlPlaneService.autoProvision(tenant.id, {
         host: host || null,
         region: region || null,
-        tier: 'silo',
+        tier: "silo",
       });
       notify(
-        t('tenants.autoProvision.done', 'Tenant provisioned') +
+        t("tenants.autoProvision.done", "Tenant provisioned") +
           ` — ${res.dbname}` +
-          (res.revision ? ` (rev ${res.revision})` : ''),
-        'success',
+          (res.revision ? ` (rev ${res.revision})` : ""),
+        "success",
       );
       onProvisioned();
     } catch (err) {
       notify(
-        errMessage(err, t('tenants.autoProvision.error', 'Auto-provisioning failed')),
-        'error',
+        errMessage(
+          err,
+          t("tenants.autoProvision.error", "Auto-provisioning failed"),
+        ),
+        "error",
       );
     } finally {
       setBusy(false);
@@ -563,34 +594,40 @@ const AutoProvisionSection: React.FC<AutoProvisionProps> = ({
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{t('tenants.autoProvision.title', 'Auto-Provision')}</Typography>
+        <Typography>
+          {t("tenants.autoProvision.title", "Auto-Provision")}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t(
-            'tenants.autoProvision.help',
-            'Create this tenant’s database and OpenBAO credentials role, set placement, and run migrations — no command line needed.',
+            "tenants.autoProvision.help",
+            "Create this tenant’s database and OpenBAO credentials role, set placement, and run migrations — no command line needed.",
           )}
         </Typography>
         {!provisionerConfigured && (
           <Alert severity="warning" sx={{ mb: 2 }}>
             {t(
-              'tenants.autoProvision.notBootstrapped',
+              "tenants.autoProvision.notBootstrapped",
               'The provisioner identity is not configured. Run "make provision-bootstrap" once before auto-provisioning.',
             )}
           </Alert>
         )}
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          sx={{ mb: 2 }}
+        >
           <TextField
             size="small"
-            label={t('tenants.placement.host', 'Host')}
+            label={t("tenants.placement.host", "Host")}
             value={host}
             onChange={(e) => setHost(e.target.value)}
             sx={{ flex: 2 }}
           />
           <TextField
             size="small"
-            label={t('tenants.placement.region', 'Region')}
+            label={t("tenants.placement.region", "Region")}
             value={region}
             onChange={(e) => setRegion(e.target.value)}
             sx={{ flex: 1 }}
@@ -602,8 +639,8 @@ const AutoProvisionSection: React.FC<AutoProvisionProps> = ({
           disabled={busy || !provisionerConfigured}
         >
           {busy
-            ? t('tenants.autoProvision.running', 'Provisioning…')
-            : t('tenants.autoProvision.run', 'Auto-Provision Tenant')}
+            ? t("tenants.autoProvision.running", "Provisioning…")
+            : t("tenants.autoProvision.run", "Auto-Provision Tenant")}
         </Button>
       </AccordionDetails>
     </Accordion>
@@ -612,7 +649,7 @@ const AutoProvisionSection: React.FC<AutoProvisionProps> = ({
 
 const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   const [domains, setDomains] = useState<EmailDomainSummary[]>([]);
-  const [newDomain, setNewDomain] = useState('');
+  const [newDomain, setNewDomain] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -620,7 +657,13 @@ const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
     try {
       setDomains(await controlPlaneService.listEmailDomains(tenant.id));
     } catch (err) {
-      notify(errMessage(err, t('tenants.domains.loadError', 'Failed to load domains')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.domains.loadError", "Failed to load domains"),
+        ),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -633,11 +676,14 @@ const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   const add = async () => {
     try {
       await controlPlaneService.addEmailDomain(tenant.id, newDomain.trim());
-      setNewDomain('');
+      setNewDomain("");
       await load();
-      notify(t('tenants.domains.added', 'Domain added'), 'success');
+      notify(t("tenants.domains.added", "Domain added"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.domains.addError', 'Failed to add domain')), 'error');
+      notify(
+        errMessage(err, t("tenants.domains.addError", "Failed to add domain")),
+        "error",
+      );
     }
   };
 
@@ -645,22 +691,30 @@ const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
     try {
       await controlPlaneService.deleteEmailDomain(tenant.id, id);
       await load();
-      notify(t('tenants.domains.removed', 'Domain removed'), 'success');
+      notify(t("tenants.domains.removed", "Domain removed"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.domains.removeError', 'Failed to remove domain')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.domains.removeError", "Failed to remove domain"),
+        ),
+        "error",
+      );
     }
   };
 
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{t('tenants.domains.title', 'Email-Domain Allowlist')}</Typography>
+        <Typography>
+          {t("tenants.domains.title", "Email-Domain Allowlist")}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t(
-            'tenants.domains.help',
-            'Users whose email domain is on this list may be granted access to the tenant. An empty list means no domain restriction.',
+            "tenants.domains.help",
+            "Users whose email domain is on this list may be granted access to the tenant. An empty list means no domain restriction.",
           )}
         </Typography>
         {loading ? (
@@ -670,12 +724,12 @@ const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
               <TextField
                 size="small"
-                label={t('tenants.domains.domain', 'Domain')}
+                label={t("tenants.domains.domain", "Domain")}
                 placeholder="acme.com"
                 value={newDomain}
                 onChange={(e) => setNewDomain(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newDomain.trim()) add();
+                  if (e.key === "Enter" && newDomain.trim()) add();
                 }}
               />
               <Button
@@ -684,12 +738,15 @@ const EmailDomainSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
                 disabled={!newDomain.trim()}
                 onClick={add}
               >
-                {t('common.add', 'Add')}
+                {t("common.add", "Add")}
               </Button>
             </Stack>
             {domains.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('tenants.domains.none', 'No domains — any domain is allowed.')}
+                {t(
+                  "tenants.domains.none",
+                  "No domains — any domain is allowed.",
+                )}
               </Typography>
             ) : (
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -714,13 +771,15 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   const [grants, setGrants] = useState<GrantSummary[]>([]);
   const [emails, setEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState('member');
+  const [newEmail, setNewEmail] = useState("");
+  const [newRole, setNewRole] = useState("member");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const list = await controlPlaneService.listGrants({ tenant_id: tenant.id });
+      const list = await controlPlaneService.listGrants({
+        tenant_id: tenant.id,
+      });
       setGrants(list);
       // Resolve user emails for display (best-effort, one lookup per user).
       const users = await controlPlaneService.listUsers();
@@ -730,7 +789,13 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
       });
       setEmails(map);
     } catch (err) {
-      notify(errMessage(err, t('tenants.members.loadError', 'Failed to load members')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.members.loadError", "Failed to load members"),
+        ),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -748,12 +813,15 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
         tenant_id: tenant.id,
         role: newRole,
       });
-      setNewEmail('');
-      setNewRole('member');
+      setNewEmail("");
+      setNewRole("member");
       await load();
-      notify(t('tenants.members.added', 'Member added'), 'success');
+      notify(t("tenants.members.added", "Member added"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.members.addError', 'Failed to add member')), 'error');
+      notify(
+        errMessage(err, t("tenants.members.addError", "Failed to add member")),
+        "error",
+      );
     }
   };
 
@@ -761,26 +829,36 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
     try {
       await controlPlaneService.deleteGrant(grantId);
       await load();
-      notify(t('tenants.members.revoked', 'Member revoked'), 'success');
+      notify(t("tenants.members.revoked", "Member revoked"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.members.revokeError', 'Failed to revoke member')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.members.revokeError", "Failed to revoke member"),
+        ),
+        "error",
+      );
     }
   };
 
   return (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{t('tenants.members.title', 'Members')}</Typography>
+        <Typography>{t("tenants.members.title", "Members")}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         {loading ? (
           <CircularProgress size={20} />
         ) : (
           <>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              sx={{ mb: 2 }}
+            >
               <TextField
                 size="small"
-                label={t('tenants.members.email', 'Email')}
+                label={t("tenants.members.email", "Email")}
                 placeholder="user@acme.com"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
@@ -789,7 +867,7 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
               <TextField
                 size="small"
                 select
-                label={t('tenants.members.role', 'Role')}
+                label={t("tenants.members.role", "Role")}
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 sx={{ minWidth: 140 }}
@@ -803,21 +881,23 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
                 disabled={!newEmail.trim()}
                 onClick={add}
               >
-                {t('common.add', 'Add')}
+                {t("common.add", "Add")}
               </Button>
             </Stack>
             <Divider sx={{ mb: 1 }} />
             {grants.length === 0 ? (
               <Typography variant="body2" color="text.secondary">
-                {t('tenants.members.none', 'No members yet.')}
+                {t("tenants.members.none", "No members yet.")}
               </Typography>
             ) : (
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>{t('tenants.members.email', 'Email')}</TableCell>
-                    <TableCell>{t('tenants.members.role', 'Role')}</TableCell>
-                    <TableCell>{t('tenants.members.expires', 'Expires')}</TableCell>
+                    <TableCell>{t("tenants.members.email", "Email")}</TableCell>
+                    <TableCell>{t("tenants.members.role", "Role")}</TableCell>
+                    <TableCell>
+                      {t("tenants.members.expires", "Expires")}
+                    </TableCell>
                     <TableCell align="right" />
                   </TableRow>
                 </TableHead>
@@ -828,11 +908,11 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
                       <TableCell>
                         <Chip size="small" label={g.role} />
                       </TableCell>
-                      <TableCell>{g.expires_at ?? '—'}</TableCell>
+                      <TableCell>{g.expires_at ?? "—"}</TableCell>
                       <TableCell align="right">
                         <IconButton
                           size="small"
-                          aria-label={t('tenants.members.revoke', 'Revoke')}
+                          aria-label={t("tenants.members.revoke", "Revoke")}
                           onClick={() => revoke(g.id)}
                         >
                           <DeleteIcon fontSize="small" />
@@ -850,12 +930,16 @@ const MembersSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   );
 };
 
-const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
+const EnrollmentTokensSection: React.FC<DetailProps> = ({
+  tenant,
+  notify,
+  t,
+}) => {
   const [tokens, setTokens] = useState<EnrollmentTokenSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [label, setLabel] = useState('');
-  const [expiresInDays, setExpiresInDays] = useState('');
-  const [maxUses, setMaxUses] = useState('');
+  const [label, setLabel] = useState("");
+  const [expiresInDays, setExpiresInDays] = useState("");
+  const [maxUses, setMaxUses] = useState("");
   // The plaintext token, shown once after creation.
   const [newToken, setNewToken] = useState<string | null>(null);
 
@@ -864,7 +948,10 @@ const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) =
     try {
       setTokens(await controlPlaneService.listEnrollmentTokens(tenant.id));
     } catch (err) {
-      notify(errMessage(err, t('tenants.tokens.loadError', 'Failed to load tokens')), 'error');
+      notify(
+        errMessage(err, t("tenants.tokens.loadError", "Failed to load tokens")),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -882,12 +969,18 @@ const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) =
         maxUses: maxUses ? Number(maxUses) : null,
       });
       setNewToken(res.token);
-      setLabel('');
-      setExpiresInDays('');
-      setMaxUses('');
+      setLabel("");
+      setExpiresInDays("");
+      setMaxUses("");
       await load();
     } catch (err) {
-      notify(errMessage(err, t('tenants.tokens.createError', 'Failed to create token')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.tokens.createError", "Failed to create token"),
+        ),
+        "error",
+      );
     }
   };
 
@@ -895,47 +988,63 @@ const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) =
     try {
       await controlPlaneService.revokeEnrollmentToken(tenant.id, id);
       await load();
-      notify(t('tenants.tokens.revoked', 'Token revoked'), 'success');
+      notify(t("tenants.tokens.revoked", "Token revoked"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.tokens.revokeError', 'Failed to revoke token')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.tokens.revokeError", "Failed to revoke token"),
+        ),
+        "error",
+      );
     }
   };
 
   return (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{t('tenants.tokens.title', 'Enrollment Tokens')}</Typography>
+        <Typography>
+          {t("tenants.tokens.title", "Enrollment Tokens")}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t(
-            'tenants.tokens.help',
-            'Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.',
+            "tenants.tokens.help",
+            "Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.",
           )}
         </Typography>
 
         {newToken && (
-          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setNewToken(null)}>
+          <Alert
+            severity="success"
+            sx={{ mb: 2 }}
+            onClose={() => setNewToken(null)}
+          >
             <Typography variant="body2" sx={{ mb: 1 }}>
               {t(
-                'tenants.tokens.shownOnce',
-                'Copy this token now — it will not be shown again:',
+                "tenants.tokens.shownOnce",
+                "Copy this token now — it will not be shown again:",
               )}
             </Typography>
             <TextField
               value={newToken}
               size="small"
               fullWidth
-              InputProps={{ readOnly: true }}
+              slotProps={{ input: { readOnly: true } }}
               onFocus={(e) => e.target.select()}
             />
           </Alert>
         )}
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1}
+          sx={{ mb: 2 }}
+        >
           <TextField
             size="small"
-            label={t('tenants.tokens.label', 'Label')}
+            label={t("tenants.tokens.label", "Label")}
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             sx={{ flex: 1 }}
@@ -943,7 +1052,7 @@ const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) =
           <TextField
             size="small"
             type="number"
-            label={t('tenants.tokens.expiresDays', 'Expires (days)')}
+            label={t("tenants.tokens.expiresDays", "Expires (days)")}
             value={expiresInDays}
             onChange={(e) => setExpiresInDays(e.target.value)}
             sx={{ width: 140 }}
@@ -951,69 +1060,79 @@ const EnrollmentTokensSection: React.FC<DetailProps> = ({ tenant, notify, t }) =
           <TextField
             size="small"
             type="number"
-            label={t('tenants.tokens.maxUses', 'Max uses')}
+            label={t("tenants.tokens.maxUses", "Max uses")}
             value={maxUses}
             onChange={(e) => setMaxUses(e.target.value)}
             sx={{ width: 120 }}
           />
           <Button variant="outlined" startIcon={<AddIcon />} onClick={generate}>
-            {t('tenants.tokens.generate', 'Generate')}
+            {t("tenants.tokens.generate", "Generate")}
           </Button>
         </Stack>
 
-        {loading ? (
-          <CircularProgress size={20} />
-        ) : tokens.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
-            {t('tenants.tokens.none', 'No enrollment tokens.')}
-          </Typography>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('tenants.tokens.label', 'Label')}</TableCell>
-                <TableCell>{t('tenants.tokens.uses', 'Uses')}</TableCell>
-                <TableCell>{t('tenants.tokens.expires', 'Expires')}</TableCell>
-                <TableCell>{t('tenants.tokens.status', 'Status')}</TableCell>
-                <TableCell align="right" />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tokens.map((tok) => (
-                <TableRow key={tok.id}>
-                  <TableCell>{tok.label || '—'}</TableCell>
+        {(() => {
+          if (loading) {
+            return <CircularProgress size={20} />;
+          }
+          if (tokens.length === 0) {
+            return (
+              <Typography variant="body2" color="text.secondary">
+                {t("tenants.tokens.none", "No enrollment tokens.")}
+              </Typography>
+            );
+          }
+          return (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t("tenants.tokens.label", "Label")}</TableCell>
+                  <TableCell>{t("tenants.tokens.uses", "Uses")}</TableCell>
                   <TableCell>
-                    {tok.use_count}
-                    {tok.max_uses != null ? ` / ${tok.max_uses}` : ''}
+                    {t("tenants.tokens.expires", "Expires")}
                   </TableCell>
-                  <TableCell>{tok.expires_at ? tok.expires_at.slice(0, 10) : '—'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      color={tok.revoked ? 'default' : 'success'}
-                      label={
-                        tok.revoked
-                          ? t('tenants.tokens.revokedLabel', 'revoked')
-                          : t('tenants.tokens.active', 'active')
-                      }
-                    />
-                  </TableCell>
-                  <TableCell align="right">
-                    {!tok.revoked && (
-                      <IconButton
-                        size="small"
-                        aria-label={t('tenants.tokens.revoke', 'Revoke')}
-                        onClick={() => revoke(tok.id)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </TableCell>
+                  <TableCell>{t("tenants.tokens.status", "Status")}</TableCell>
+                  <TableCell align="right" />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHead>
+              <TableBody>
+                {tokens.map((tok) => (
+                  <TableRow key={tok.id}>
+                    <TableCell>{tok.label || "—"}</TableCell>
+                    <TableCell>
+                      {tok.use_count}
+                      {tok.max_uses == null ? "" : ` / ${tok.max_uses}`}
+                    </TableCell>
+                    <TableCell>
+                      {tok.expires_at ? tok.expires_at.slice(0, 10) : "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        color={tok.revoked ? "default" : "success"}
+                        label={
+                          tok.revoked
+                            ? t("tenants.tokens.revokedLabel", "revoked")
+                            : t("tenants.tokens.active", "active")
+                        }
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      {!tok.revoked && (
+                        <IconButton
+                          size="small"
+                          aria-label={t("tenants.tokens.revoke", "Revoke")}
+                          onClick={() => revoke(tok.id)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          );
+        })()}
       </AccordionDetails>
     </Accordion>
   );
@@ -1025,12 +1144,12 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   const [saving, setSaving] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
   const [form, setForm] = useState({
-    host: '',
-    port: '',
-    dbname: '',
-    region: '',
-    tier: 'silo',
-    openbao_role: '',
+    host: "",
+    port: "",
+    dbname: "",
+    region: "",
+    tier: "silo",
+    openbao_role: "",
   });
 
   const load = useCallback(async () => {
@@ -1040,16 +1159,22 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
       setPlacement(p);
       if (p) {
         setForm({
-          host: p.host ?? '',
-          port: p.port != null ? String(p.port) : '',
-          dbname: p.dbname ?? '',
-          region: p.region ?? '',
-          tier: p.tier ?? 'silo',
-          openbao_role: p.openbao_role ?? '',
+          host: p.host ?? "",
+          port: p.port == null ? "" : String(p.port),
+          dbname: p.dbname ?? "",
+          region: p.region ?? "",
+          tier: p.tier ?? "silo",
+          openbao_role: p.openbao_role ?? "",
         });
       }
     } catch (err) {
-      notify(errMessage(err, t('tenants.placement.loadError', 'Failed to load placement')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.placement.loadError", "Failed to load placement"),
+        ),
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -1071,9 +1196,15 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
         openbao_role: form.openbao_role || null,
       });
       setPlacement(saved);
-      notify(t('tenants.placement.saved', 'Placement saved'), 'success');
+      notify(t("tenants.placement.saved", "Placement saved"), "success");
     } catch (err) {
-      notify(errMessage(err, t('tenants.placement.saveError', 'Failed to save placement')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.placement.saveError", "Failed to save placement"),
+        ),
+        "error",
+      );
     } finally {
       setSaving(false);
     }
@@ -1084,12 +1215,18 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
     try {
       const res = await controlPlaneService.provisionTenant(tenant.id);
       notify(
-        t('tenants.placement.provisioned', 'Provisioned') +
-          (res.revision ? ` (rev ${res.revision})` : ''),
-        'success',
+        t("tenants.placement.provisioned", "Provisioned") +
+          (res.revision ? ` (rev ${res.revision})` : ""),
+        "success",
       );
     } catch (err) {
-      notify(errMessage(err, t('tenants.placement.provisionError', 'Provisioning failed')), 'error');
+      notify(
+        errMessage(
+          err,
+          t("tenants.placement.provisionError", "Provisioning failed"),
+        ),
+        "error",
+      );
     } finally {
       setProvisioning(false);
     }
@@ -1108,12 +1245,14 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
   return (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{t('tenants.placement.title', 'Database Placement')}</Typography>
+        <Typography>
+          {t("tenants.placement.title", "Database Placement")}
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {t(
-            'tenants.placement.help',
+            "tenants.placement.help",
             'Database coordinates for this tenant. The password is never stored here — "OpenBAO role" names the dynamic-credentials role that brokers it.',
           )}
         </Typography>
@@ -1122,22 +1261,28 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
         ) : (
           <>
             <Stack spacing={2}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                {field('host', t('tenants.placement.host', 'Host'), { sx: { flex: 2 } })}
-                {field('port', t('tenants.placement.port', 'Port'), {
-                  type: 'number',
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                {field("host", t("tenants.placement.host", "Host"), {
+                  sx: { flex: 2 },
+                })}
+                {field("port", t("tenants.placement.port", "Port"), {
+                  type: "number",
                   sx: { flex: 1 },
                 })}
               </Stack>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                {field('dbname', t('tenants.placement.dbname', 'Database'), { sx: { flex: 1 } })}
-                {field('region', t('tenants.placement.region', 'Region'), { sx: { flex: 1 } })}
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                {field("dbname", t("tenants.placement.dbname", "Database"), {
+                  sx: { flex: 1 },
+                })}
+                {field("region", t("tenants.placement.region", "Region"), {
+                  sx: { flex: 1 },
+                })}
               </Stack>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                 <TextField
                   size="small"
                   select
-                  label={t('tenants.placement.tier', 'Tier')}
+                  label={t("tenants.placement.tier", "Tier")}
                   value={form.tier}
                   onChange={(e) => setForm({ ...form, tier: e.target.value })}
                   sx={{ minWidth: 140 }}
@@ -1148,14 +1293,20 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
                     </MenuItem>
                   ))}
                 </TextField>
-                {field('openbao_role', t('tenants.placement.openbaoRole', 'OpenBAO role'), {
-                  sx: { flex: 1 },
-                })}
+                {field(
+                  "openbao_role",
+                  t("tenants.placement.openbaoRole", "OpenBAO role"),
+                  {
+                    sx: { flex: 1 },
+                  },
+                )}
               </Stack>
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
               <Button variant="contained" onClick={save} disabled={saving}>
-                {saving ? t('common.saving', 'Saving…') : t('common.save', 'Save')}
+                {saving
+                  ? t("common.saving", "Saving…")
+                  : t("common.save", "Save")}
               </Button>
               <Button
                 variant="outlined"
@@ -1163,15 +1314,19 @@ const PlacementSection: React.FC<DetailProps> = ({ tenant, notify, t }) => {
                 disabled={provisioning || !placement?.openbao_role}
               >
                 {provisioning
-                  ? t('tenants.placement.provisioning', 'Provisioning…')
-                  : t('tenants.placement.provision', 'Provision Database')}
+                  ? t("tenants.placement.provisioning", "Provisioning…")
+                  : t("tenants.placement.provision", "Provision Database")}
               </Button>
             </Stack>
             {!placement?.openbao_role && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mt: 1 }}
+              >
                 {t(
-                  'tenants.placement.provisionHint',
-                  'Set and save an OpenBAO role before provisioning.',
+                  "tenants.placement.provisionHint",
+                  "Set and save an OpenBAO role before provisioning.",
                 )}
               </Typography>
             )}

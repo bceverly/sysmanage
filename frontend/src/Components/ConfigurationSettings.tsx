@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -12,47 +12,76 @@ import {
   Switch,
   TextField,
   Typography,
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import { useTranslation } from 'react-i18next';
+} from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import { useTranslation } from "react-i18next";
 
-import { ServerSetting, serverSettingsService } from '../Services/serverSettings';
+import {
+  ServerSetting,
+  serverSettingsService,
+} from "../Services/serverSettings";
 
 // Human-friendly labels + group order. Defaults double as the English copy
 // so the panel is usable before locale files are translated.
-const GROUP_ORDER = ['security', 'monitoring', 'message_queue', 'email'];
+const GROUP_ORDER = ["security", "monitoring", "message_queue", "email"];
 
 const GROUP_LABELS: Record<string, [string, string]> = {
-  security: ['configuration.group.security', 'Security & Sessions'],
-  monitoring: ['configuration.group.monitoring', 'Monitoring'],
-  message_queue: ['configuration.group.messageQueue', 'Message Queue'],
-  email: ['configuration.group.email', 'Email'],
+  security: ["configuration.group.security", "Security & Sessions"],
+  monitoring: ["configuration.group.monitoring", "Monitoring"],
+  message_queue: ["configuration.group.messageQueue", "Message Queue"],
+  email: ["configuration.group.email", "Email"],
 };
 
 const FIELD_LABELS: Record<string, [string, string]> = {
-  heartbeat_timeout: ['configuration.field.heartbeatTimeout', 'Heartbeat timeout (minutes)'],
-  max_failed_logins: ['configuration.field.maxFailedLogins', 'Max failed logins before lockout'],
-  account_lockout_duration: ['configuration.field.lockoutDuration', 'Account lockout duration (minutes)'],
-  jwt_auth_timeout: ['configuration.field.jwtAuthTimeout', 'Access token lifetime (seconds)'],
-  jwt_refresh_timeout: ['configuration.field.jwtRefreshTimeout', 'Refresh token lifetime (seconds)'],
-  cookie_domain: ['configuration.field.cookieDomain', 'Cookie domain (blank = host only)'],
-  mq_expiration_minutes: ['configuration.field.mqExpiration', 'Message expiration (minutes)'],
-  mq_cleanup_minutes: ['configuration.field.mqCleanup', 'Cleanup interval (minutes)'],
-  email_enabled: ['configuration.field.emailEnabled', 'Email enabled'],
-  email_host: ['configuration.field.emailHost', 'SMTP host'],
-  email_port: ['configuration.field.emailPort', 'SMTP port'],
-  email_use_tls: ['configuration.field.emailUseTls', 'Use STARTTLS'],
-  email_use_ssl: ['configuration.field.emailUseSsl', 'Use SSL/TLS'],
-  email_username: ['configuration.field.emailUsername', 'SMTP username'],
-  email_from_address: ['configuration.field.emailFromAddress', 'From address'],
-  email_from_name: ['configuration.field.emailFromName', 'From name'],
-  email_password: ['configuration.field.emailPassword', 'SMTP password'],
+  heartbeat_timeout: [
+    "configuration.field.heartbeatTimeout",
+    "Heartbeat timeout (minutes)",
+  ],
+  max_failed_logins: [
+    "configuration.field.maxFailedLogins",
+    "Max failed logins before lockout",
+  ],
+  account_lockout_duration: [
+    "configuration.field.lockoutDuration",
+    "Account lockout duration (minutes)",
+  ],
+  jwt_auth_timeout: [
+    "configuration.field.jwtAuthTimeout",
+    "Access token lifetime (seconds)",
+  ],
+  jwt_refresh_timeout: [
+    "configuration.field.jwtRefreshTimeout",
+    "Refresh token lifetime (seconds)",
+  ],
+  cookie_domain: [
+    "configuration.field.cookieDomain",
+    "Cookie domain (blank = host only)",
+  ],
+  mq_expiration_minutes: [
+    "configuration.field.mqExpiration",
+    "Message expiration (minutes)",
+  ],
+  mq_cleanup_minutes: [
+    "configuration.field.mqCleanup",
+    "Cleanup interval (minutes)",
+  ],
+  email_enabled: ["configuration.field.emailEnabled", "Email enabled"],
+  email_host: ["configuration.field.emailHost", "SMTP host"],
+  email_port: ["configuration.field.emailPort", "SMTP port"],
+  email_use_tls: ["configuration.field.emailUseTls", "Use STARTTLS"],
+  email_use_ssl: ["configuration.field.emailUseSsl", "Use SSL/TLS"],
+  email_username: ["configuration.field.emailUsername", "SMTP username"],
+  email_from_address: ["configuration.field.emailFromAddress", "From address"],
+  email_from_name: ["configuration.field.emailFromName", "From name"],
+  email_password: ["configuration.field.emailPassword", "SMTP password"],
 };
+
+type SettingValue = number | boolean | string;
 
 const ConfigurationSettings: React.FC = () => {
   const { t } = useTranslation();
   const [settings, setSettings] = useState<ServerSetting[]>([]);
-  const [values, setValues] = useState<Record<string, number | boolean | string>>({});
+  const [values, setValues] = useState<Record<string, SettingValue>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,13 +93,15 @@ const ConfigurationSettings: React.FC = () => {
     try {
       const data = await serverSettingsService.get();
       setSettings(data);
-      const v: Record<string, number | boolean | string> = {};
+      const v: Record<string, SettingValue> = {};
       data.forEach((s) => {
         v[s.key] = s.value;
       });
       setValues(v);
     } catch {
-      setError(t('configuration.loadError', 'Failed to load configuration settings.'));
+      setError(
+        t("configuration.loadError", "Failed to load configuration settings."),
+      );
     } finally {
       setLoading(false);
     }
@@ -83,12 +114,14 @@ const ConfigurationSettings: React.FC = () => {
   const grouped = useMemo(() => {
     const map: Record<string, ServerSetting[]> = {};
     settings.forEach((s) => {
-      (map[s.group] = map[s.group] || []).push(s);
+      const list = map[s.group] || [];
+      list.push(s);
+      map[s.group] = list;
     });
     return map;
   }, [settings]);
 
-  const setValue = (key: string, value: number | boolean | string) => {
+  const setValue = (key: string, value: SettingValue) => {
     setValues((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -100,7 +133,9 @@ const ConfigurationSettings: React.FC = () => {
       setSettings(updated);
       setSavedOpen(true);
     } catch {
-      setError(t('configuration.saveError', 'Failed to save configuration settings.'));
+      setError(
+        t("configuration.saveError", "Failed to save configuration settings."),
+      );
     } finally {
       setSaving(false);
     }
@@ -108,7 +143,7 @@ const ConfigurationSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -117,12 +152,12 @@ const ConfigurationSettings: React.FC = () => {
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        {t('configuration.title', 'Configuration')}
+        {t("configuration.title", "Configuration")}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         {t(
-          'configuration.description',
-          'Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.',
+          "configuration.description",
+          "Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
         )}
       </Typography>
 
@@ -141,11 +176,18 @@ const ConfigurationSettings: React.FC = () => {
                 {t(labelKey, labelDefault)}
               </Typography>
               <Divider sx={{ my: 1.5 }} />
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 480 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  maxWidth: 480,
+                }}
+              >
                 {grouped[group].map((s) => {
                   const [fk, fd] = FIELD_LABELS[s.key] || [s.key, s.key];
                   const label = t(fk, fd);
-                  if (s.type === 'secret') {
+                  if (s.type === "secret") {
                     // Write-only: the value is never sent from the server; a
                     // blank submission leaves the stored secret unchanged.
                     return (
@@ -155,24 +197,33 @@ const ConfigurationSettings: React.FC = () => {
                         type="password"
                         size="small"
                         autoComplete="new-password"
-                        value={String(values[s.key] ?? '')}
+                        value={String(values[s.key] ?? "")}
                         onChange={(e) => setValue(s.key, e.target.value)}
                         placeholder={
                           s.configured
-                            ? t('configuration.secretSet', '•••••••• (stored — leave blank to keep)')
-                            : t('configuration.secretUnset', 'Not set')
+                            ? t(
+                                "configuration.secretSet",
+                                "•••••••• (stored — leave blank to keep)",
+                              )
+                            : t("configuration.secretUnset", "Not set")
                         }
                         helperText={
                           s.configured
-                            ? t('configuration.secretSetHelp', 'A password is stored in OpenBAO. Type a new one to replace it.')
-                            : t('configuration.secretUnsetHelp', 'Stored securely in OpenBAO, not in the database.')
+                            ? t(
+                                "configuration.secretSetHelp",
+                                "A password is stored in OpenBAO. Type a new one to replace it.",
+                              )
+                            : t(
+                                "configuration.secretUnsetHelp",
+                                "Stored securely in OpenBAO, not in the database.",
+                              )
                         }
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                         fullWidth
                       />
                     );
                   }
-                  if (s.type === 'bool') {
+                  if (s.type === "bool") {
                     return (
                       <FormControlLabel
                         key={s.key}
@@ -190,13 +241,13 @@ const ConfigurationSettings: React.FC = () => {
                     <TextField
                       key={s.key}
                       label={label}
-                      type={s.type === 'int' ? 'number' : 'text'}
+                      type={s.type === "int" ? "number" : "text"}
                       size="small"
-                      value={values[s.key] ?? ''}
+                      value={values[s.key] ?? ""}
                       onChange={(e) =>
                         setValue(
                           s.key,
-                          s.type === 'int'
+                          s.type === "int"
                             ? Number(e.target.value)
                             : e.target.value,
                         )
@@ -218,7 +269,7 @@ const ConfigurationSettings: React.FC = () => {
           onClick={handleSave}
           disabled={saving}
         >
-          {t('configuration.save', 'Save')}
+          {t("configuration.save", "Save")}
         </Button>
       </Box>
 
@@ -226,7 +277,7 @@ const ConfigurationSettings: React.FC = () => {
         open={savedOpen}
         autoHideDuration={3000}
         onClose={() => setSavedOpen(false)}
-        message={t('configuration.saved', 'Configuration saved.')}
+        message={t("configuration.saved", "Configuration saved.")}
       />
     </Box>
   );

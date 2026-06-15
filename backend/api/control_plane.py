@@ -57,6 +57,12 @@ router = APIRouter(
 )
 
 
+def _tenant_not_found() -> HTTPException:
+    """The 404 raised when a tenant id does not resolve — single source of truth
+    so the (translated) message is defined once."""
+    return HTTPException(status_code=404, detail=_("Tenant not found."))
+
+
 class ControlPlaneStatus(BaseModel):
     """Liveness + posture of the control plane."""
 
@@ -87,7 +93,7 @@ class TenantListResponse(BaseModel):
     total: int
 
 
-@router.get("/status", response_model=ControlPlaneStatus)
+@router.get("/status")
 def get_status(db: Session = Depends(get_registry_db)) -> ControlPlaneStatus:
     """Report that the control plane is mounted and how many tenants exist."""
     tenant_count = db.query(RegistryTenant).count()
@@ -112,7 +118,7 @@ class MigrationStatus(BaseModel):
     tenant_head: Optional[str] = None
 
 
-@router.get("/migration-status", response_model=MigrationStatus)
+@router.get("/migration-status")
 def migration_status() -> MigrationStatus:
     """Tenant databases that are behind the code head (drives the UI banner).
 
@@ -123,7 +129,7 @@ def migration_status() -> MigrationStatus:
     return MigrationStatus(**svc.pending_tenant_migrations())
 
 
-@router.get("/tenants", response_model=TenantListResponse)
+@router.get("/tenants")
 def list_tenants(
     status: Optional[str] = None,
     db: Session = Depends(get_registry_db),
@@ -150,7 +156,7 @@ class CreateTenantRequest(BaseModel):
     slug: str
 
 
-@router.post("/tenants", response_model=TenantSummary, status_code=201)
+@router.post("/tenants", status_code=201)
 def create_tenant(
     payload: CreateTenantRequest, db: Session = Depends(get_registry_db)
 ) -> TenantSummary:
@@ -187,7 +193,7 @@ class UserSummary(BaseModel):
     is_active: bool
 
 
-@router.get("/users", response_model=List[UserSummary])
+@router.get("/users")
 def list_users(
     email: Optional[str] = None,
     db: Session = Depends(get_registry_db),
@@ -206,7 +212,7 @@ def list_users(
     ]
 
 
-@router.post("/users", response_model=UserSummary, status_code=201)
+@router.post("/users", status_code=201)
 def create_user(
     payload: CreateUserRequest, db: Session = Depends(get_registry_db)
 ) -> UserSummary:
@@ -259,7 +265,7 @@ def _grant_summary(grant: RegistryUserTenantGrant) -> GrantSummary:
     )
 
 
-@router.post("/grants", response_model=GrantSummary, status_code=201)
+@router.post("/grants", status_code=201)
 def create_grant(
     payload: CreateGrantRequest, db: Session = Depends(get_registry_db)
 ) -> GrantSummary:
@@ -276,7 +282,7 @@ def create_grant(
         db.query(RegistryTenant).filter(RegistryTenant.id == payload.tenant_id).first()
     )
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
 
     if not registry_service.is_email_domain_allowed(db, payload.tenant_id, user.email):
         raise HTTPException(
@@ -316,7 +322,7 @@ def create_grant(
     return _grant_summary(grant)
 
 
-@router.get("/grants", response_model=List[GrantSummary])
+@router.get("/grants")
 def list_grants(
     user_id: Optional[str] = None,
     tenant_id: Optional[str] = None,
@@ -360,9 +366,7 @@ class EmailDomainSummary(BaseModel):
     domain: str
 
 
-@router.get(
-    "/tenants/{tenant_id}/email-domains", response_model=List[EmailDomainSummary]
-)
+@router.get("/tenants/{tenant_id}/email-domains")
 def list_tenant_email_domains(
     tenant_id: str, db: Session = Depends(get_registry_db)
 ) -> List[EmailDomainSummary]:
@@ -374,11 +378,7 @@ def list_tenant_email_domains(
     ]
 
 
-@router.post(
-    "/tenants/{tenant_id}/email-domains",
-    response_model=EmailDomainSummary,
-    status_code=201,
-)
+@router.post("/tenants/{tenant_id}/email-domains", status_code=201)
 def add_tenant_email_domain(
     tenant_id: str,
     payload: CreateEmailDomainRequest,
@@ -387,7 +387,7 @@ def add_tenant_email_domain(
     """Add an allowed email domain to a tenant (stored bare + lowercased)."""
     tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
 
     domain = registry_service.normalize_domain(payload.domain)
     if not domain:
@@ -475,10 +475,7 @@ def _token_summary(row) -> EnrollmentTokenSummary:
     )
 
 
-@router.get(
-    "/tenants/{tenant_id}/enrollment-tokens",
-    response_model=List[EnrollmentTokenSummary],
-)
+@router.get("/tenants/{tenant_id}/enrollment-tokens")
 def list_enrollment_tokens(
     tenant_id: str,
     current_user: str = Depends(get_current_user),
@@ -491,11 +488,7 @@ def list_enrollment_tokens(
     return [_token_summary(r) for r in enrollment_service.list_tokens(db, tenant_id)]
 
 
-@router.post(
-    "/tenants/{tenant_id}/enrollment-tokens",
-    response_model=CreateEnrollmentTokenResponse,
-    status_code=201,
-)
+@router.post("/tenants/{tenant_id}/enrollment-tokens", status_code=201)
 def create_enrollment_token(
     tenant_id: str,
     payload: CreateEnrollmentTokenRequest,
@@ -507,7 +500,7 @@ def create_enrollment_token(
 
     tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
 
     expires_at = None
     if payload.expires_in_days and payload.expires_in_days > 0:
@@ -581,7 +574,7 @@ def _placement_summary(p: RegistryTenantPlacement) -> PlacementSummary:
     )
 
 
-@router.put("/tenants/{tenant_id}/placement", response_model=PlacementSummary)
+@router.put("/tenants/{tenant_id}/placement")
 def upsert_placement(
     tenant_id: str,
     payload: PlacementRequest,
@@ -596,7 +589,7 @@ def upsert_placement(
         raise HTTPException(status_code=422, detail=_("Unknown placement tier."))
     tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
 
     placement = (
         db.query(RegistryTenantPlacement)
@@ -617,7 +610,7 @@ def upsert_placement(
     return _placement_summary(placement)
 
 
-@router.get("/tenants/{tenant_id}/placement", response_model=PlacementSummary)
+@router.get("/tenants/{tenant_id}/placement")
 def get_placement(
     tenant_id: str, db: Session = Depends(get_registry_db)
 ) -> PlacementSummary:
@@ -638,7 +631,7 @@ class ProvisionResponse(BaseModel):
     status: str
 
 
-@router.post("/tenants/{tenant_id}/provision", response_model=ProvisionResponse)
+@router.post("/tenants/{tenant_id}/provision")
 def provision_tenant(
     tenant_id: str, db: Session = Depends(get_registry_db)
 ) -> ProvisionResponse:
@@ -666,7 +659,7 @@ def provision_tenant(
     except Exception as exc:  # noqa: BLE001
         # Log the full traceback for operators (was previously a one-line
         # message with no stack, which buried the real cause).
-        logger.error("Provisioning tenant %s failed: %s", tenant_id, exc, exc_info=True)
+        logger.exception("Provisioning tenant %s failed: %s", tenant_id, exc)
         # Surface the underlying cause to the (authenticated, admin-only)
         # caller so the UI shows *why* it failed instead of a generic message.
         # Prefer the DB driver's ``orig`` error, whose message is just the
@@ -739,9 +732,7 @@ class AutoProvisionResponse(BaseModel):
     status: str
 
 
-@router.post(
-    "/tenants/{tenant_id}/auto-provision", response_model=AutoProvisionResponse
-)
+@router.post("/tenants/{tenant_id}/auto-provision")
 def auto_provision_tenant(
     tenant_id: str,
     payload: AutoProvisionRequest,
@@ -762,7 +753,7 @@ def auto_provision_tenant(
 
     tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
 
     from backend.services import tenant_orchestration  # noqa: PLC0415
 
@@ -776,9 +767,7 @@ def auto_provision_tenant(
             tier=payload.tier,
         )
     except Exception as exc:  # noqa: BLE001
-        logger.error(
-            "Auto-provisioning tenant %s failed: %s", tenant_id, exc, exc_info=True
-        )
+        logger.exception("Auto-provisioning tenant %s failed: %s", tenant_id, exc)
         _audit_provision(current_user, tenant, success=False, error=str(exc))
         cause = getattr(exc, "orig", None) or exc
         detail = _("Tenant provisioning failed.")
@@ -838,7 +827,7 @@ class DeleteTenantRequest(BaseModel):
     drop_database: bool = False
 
 
-@router.delete("/tenants/{tenant_id}", response_model=dict)
+@router.delete("/tenants/{tenant_id}")
 def delete_tenant(
     tenant_id: str,
     payload: DeleteTenantRequest,
@@ -853,7 +842,7 @@ def delete_tenant(
 
     tenant = db.query(RegistryTenant).filter(RegistryTenant.id == tenant_id).first()
     if tenant is None:
-        raise HTTPException(status_code=404, detail=_("Tenant not found."))
+        raise _tenant_not_found()
     if payload.confirm != tenant.slug:
         raise HTTPException(
             status_code=400,
@@ -868,7 +857,7 @@ def delete_tenant(
             tenant_id, slug=slug, drop_database=payload.drop_database
         )
     except Exception as exc:  # noqa: BLE001
-        logger.error("Deleting tenant %s failed: %s", tenant_id, exc, exc_info=True)
+        logger.exception("Deleting tenant %s failed: %s", tenant_id, exc)
         _audit_delete(current_user, tenant_id, slug, success=False, error=str(exc))
         cause = getattr(exc, "orig", None) or exc
         detail = _("Tenant deletion failed.")

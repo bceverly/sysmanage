@@ -7,7 +7,7 @@
  * feature is disabled, so callers should gate on the control-plane status.
  */
 
-import axiosInstance from './api';
+import axiosInstance from "./api";
 
 export interface TenantAccount {
   tenant_id: string;
@@ -24,13 +24,13 @@ interface AccountsResponse {
 
 /** Decode the ``tenant_id`` claim from the stored bearer token, if any. */
 export function getActiveTenantId(): string | null {
-  const token = localStorage.getItem('bearer_token');
+  const token = localStorage.getItem("bearer_token");
   if (!token) return null;
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (parts.length !== 3) return null;
   try {
     const payload = JSON.parse(
-      globalThis.atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')),
+      globalThis.atob(parts[1].replaceAll("-", "+").replaceAll("_", "/")),
     );
     return payload?.tenant_id ?? null;
   } catch {
@@ -40,7 +40,7 @@ export function getActiveTenantId(): string | null {
 
 export const accountsService = {
   async list(): Promise<TenantAccount[]> {
-    const r = await axiosInstance.get<AccountsResponse>('/api/auth/accounts');
+    const r = await axiosInstance.get<AccountsResponse>("/api/auth/accounts");
     return r.data.accounts;
   },
 
@@ -51,11 +51,11 @@ export const accountsService = {
    */
   async switch(tenantId: string | null): Promise<void> {
     const r = await axiosInstance.post<{ Authorization: string }>(
-      '/api/auth/switch-account',
+      "/api/auth/switch-account",
       { tenant_id: tenantId },
     );
     if (r.data?.Authorization) {
-      localStorage.setItem('bearer_token', r.data.Authorization);
+      localStorage.setItem("bearer_token", r.data.Authorization);
     }
   },
 };

@@ -49,6 +49,10 @@ from sqlalchemy.dialects.postgresql import JSON
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+# FK target for the registry tenant primary key — referenced by every
+# tenant-scoped registry table (grant/placement/email-domain/etc.).
+_TENANT_FK = "registry_tenant.id"
+
 # ---------------------------------------------------------------------
 # Tenant tier values for registry_tenant_placement.tier.
 #
@@ -139,7 +143,7 @@ class RegistryUserTenantGrant(Base):
         GUID(), ForeignKey("registry_user.id", ondelete="CASCADE"), nullable=False
     )
     tenant_id = Column(
-        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     role = Column(String(64), nullable=False, default="member")
     is_default = Column(Boolean, nullable=False, default=False)
@@ -168,7 +172,7 @@ class RegistryTenantPlacement(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(
-        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     host = Column(String(255), nullable=True)
     port = Column(Integer, nullable=True)
@@ -200,7 +204,7 @@ class RegistryTenantEmailDomain(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(
-        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     domain = Column(String(255), nullable=False)
     created_at = Column(DateTime, nullable=False, default=_utcnow)
@@ -225,7 +229,7 @@ class RegistryTenantDbVersion(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(
-        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     # The Alembic chain this revision tracks ("tenant").  Stored explicitly so
     # the table can later track the shared chain too if needed.
@@ -258,7 +262,7 @@ class RegistryEnrollmentToken(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(
-        GUID(), ForeignKey("registry_tenant.id", ondelete="CASCADE"), nullable=False
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
     )
     # SHA-256 hex of the plaintext token — looked up at enrollment.  Unique so
     # a token maps to exactly one tenant.
@@ -275,4 +279,33 @@ class RegistryEnrollmentToken(Base):
     __table_args__ = (
         Index("ix_registry_enrollment_token_tenant", "tenant_id"),
         Index("ix_registry_enrollment_token_hash", "token_hash"),
+    )
+
+
+class RegistryHostTenant(Base):
+    """Server-global host→tenant index (Phase 13.1 data plane).
+
+    A host's data lives in its tenant's database, but the websocket / queue
+    processors only know a host by its id (or token) — they can't query the
+    per-tenant DBs to discover *which* tenant owns a host without first knowing
+    the tenant (chicken-and-egg).  This registry-level index resolves that:
+    populated at enrollment, read by the data plane to route a host's
+    operations to the right tenant database.
+
+    One row per host (``host_id`` unique).  ``host_id`` is a soft reference to
+    the host row (which lives in the tenant DB) — no cross-partition FK.
+    """
+
+    __tablename__ = "registry_host_tenant"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(GUID(), nullable=False, unique=True)
+    tenant_id = Column(
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
+    )
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_registry_host_tenant_host", "host_id"),
+        Index("ix_registry_host_tenant_tenant", "tenant_id"),
     )

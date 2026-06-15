@@ -221,6 +221,7 @@ __all__ = [
     "RegistryTenantEmailDomain",
     "RegistryTenantDbVersion",
     "RegistryEnrollmentToken",
+    "RegistryHostTenant",
     "TENANT_TIER_SILO",
     "TENANT_TIER_POOL",
     "TENANT_TIERS",

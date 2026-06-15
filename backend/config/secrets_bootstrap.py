@@ -76,7 +76,8 @@ def refresh_secrets_from_openbao() -> bool:
                 ", ".join(overlaid),
             )
         return bool(overlaid)
-    except Exception as exc:  # noqa: BLE001 - best-effort, must never block boot
+    # Best-effort overlay: a failure here must never block boot.
+    except Exception as exc:  # noqa: BLE001
         # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         logger.warning("Secret overlay from OpenBAO skipped: %s", exc)
         return False
