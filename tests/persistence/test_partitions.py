@@ -12,8 +12,13 @@ from backend.persistence import partitions
 from backend.persistence.db import get_engine
 
 
-def test_collapsed_mode_resolves_every_partition_to_single_engine(engine):
-    """With multitenancy off, all partitions map to the one (test) engine."""
+def test_collapsed_mode_resolves_every_partition_to_single_engine(engine, monkeypatch):
+    """With multitenancy off, all partitions map to the one (test) engine.
+
+    Patch the toggle explicitly so the assertion holds regardless of the
+    developer's local ``sysmanage.yaml`` (which may enable multi-tenancy).
+    """
+    monkeypatch.setattr(partitions.config, "is_multitenancy_enabled", lambda: False)
     single = get_engine()
     for partition in partitions.PARTITIONS:
         assert partitions.resolve_engine(partition=partition) is single

@@ -357,14 +357,22 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
         }
 
 
-def _get_all_hosts_sync():
+def _get_all_hosts_sync(tenant_id=None):
     """
     Synchronous helper function to retrieve all hosts.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database when multi-tenancy is
+    enabled.  ``tenant_id`` is captured by the async caller and passed in
+    because the active-tenant ContextVar does not cross the thread-pool
+    boundary.  In single-tenant / server scope this is the main engine.
     """
-    # Get the SQLAlchemy session
+    from backend.persistence.partitions import get_request_engine  # noqa: PLC0415
+
+    # Get the SQLAlchemy session (tenant-routed when a tenant is in scope).
+    # Keep the module-local ``sessionmaker`` so only the bound engine changes.
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
     )
 
     with session_local() as session:
@@ -469,9 +477,14 @@ async def get_all_hosts():
     This function retrieves all hosts in the system.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant HERE, in the request's async context — the
+    # ContextVar won't be visible inside the thread-pool worker below.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _get_all_hosts_sync)
+    return await loop.run_in_executor(None, _get_all_hosts_sync, tenant_id)
 
 
 def _get_host_geolocations_sync():

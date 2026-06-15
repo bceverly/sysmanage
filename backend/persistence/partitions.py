@@ -112,3 +112,61 @@ def get_registry_db():
         yield session
     finally:
         session.close()
+
+
+# ---------------------------------------------------------------------------
+# Data-plane request routing (Phase 13.1) — route a request's queries to the
+# active tenant's database.  This is the seam that turns multi-tenancy from a
+# control-plane concept into per-tenant *data* isolation: a data-plane endpoint
+# swaps ``db.get_engine()`` for ``get_request_engine()`` and is then
+# automatically tenant-scoped.  Server-global data (auth/users, registry,
+# server config) keeps using ``db.get_engine()`` and stays central.
+# ---------------------------------------------------------------------------
+
+
+def get_request_engine(tenant_id=None):
+    """Return the engine serving the current request's data.
+
+    The active tenant's engine when multi-tenancy is enabled and a tenant is
+    in scope; otherwise the single application engine — identical to
+    ``db.get_engine()`` in single-tenant / collapsed mode or server scope.
+
+    ``tenant_id`` may be passed explicitly.  This is REQUIRED when the caller
+    runs outside the request's async context — e.g. in a thread-pool executor
+    — because the active-tenant ContextVar does not propagate across threads.
+    Capture it in the request handler and pass it down.  When omitted, the
+    active-tenant ContextVar (bound by the middleware) is consulted.
+    """
+    if not config.is_multitenancy_enabled():
+        return db.get_engine()
+    if tenant_id is None:
+        from backend.persistence.tenant_context import (  # noqa: PLC0415
+            get_active_tenant,
+        )
+
+        tenant_id = get_active_tenant()
+    if not tenant_id:
+        return db.get_engine()
+    return resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
+
+
+def request_sessionmaker(tenant_id=None):
+    """A sessionmaker bound to the current request's engine (see above)."""
+    return sessionmaker(
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
+    )
+
+
+def get_tenant_db():
+    """FastAPI dependency yielding a session on the active tenant's engine.
+
+    Drop-in for ``Depends(get_db)`` on data-plane endpoints that should be
+    tenant-scoped.  Resolves from the active-tenant ContextVar, so it only
+    works for handlers that run in the request's async context (not thread-pool
+    offloads — those must capture the tenant and use ``request_sessionmaker``).
+    """
+    session = request_sessionmaker()()
+    try:
+        yield session
+    finally:
+        session.close()
