@@ -271,7 +271,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="A new tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -314,7 +314,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="production", description="Another production tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -347,7 +347,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="A new tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -377,7 +377,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="A new tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -409,7 +409,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="minimal-tag", description=None)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -458,7 +458,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-production")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -498,7 +498,7 @@ class TestUpdateTag:
         update_data = TagUpdate(description="Updated production description")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -533,7 +533,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -569,7 +569,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="development")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -608,7 +608,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -647,7 +647,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -682,7 +682,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -713,7 +713,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -743,7 +743,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -786,7 +786,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -831,7 +831,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -867,7 +867,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -906,7 +906,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -946,7 +946,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -990,7 +990,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1032,7 +1032,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1068,7 +1068,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1112,7 +1112,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1147,7 +1147,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1169,7 +1169,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1430,7 +1430,7 @@ class TestTagErrorHandling:
         tag_data = TagCreate(name="error-tag", description="Will cause error")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1464,7 +1464,7 @@ class TestTagErrorHandling:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1502,7 +1502,7 @@ class TestTagErrorHandling:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1534,7 +1534,7 @@ class TestTagErrorHandling:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1575,7 +1575,7 @@ class TestTagErrorHandling:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1623,7 +1623,7 @@ class TestTagAuditLogging:
         tag_data = TagCreate(name="audit-tag", description="Audit test")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1658,7 +1658,7 @@ class TestTagAuditLogging:
         update_data = TagUpdate(name="audit-updated")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1691,7 +1691,7 @@ class TestTagAuditLogging:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1721,7 +1721,7 @@ class TestTagAuditLogging:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1761,7 +1761,7 @@ class TestTagAuditLogging:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1808,7 +1808,7 @@ class TestBulkTagOperations:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1866,7 +1866,7 @@ class TestBulkTagOperations:
             hosts.append(host)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1961,7 +1961,7 @@ class TestTagEdgeCases:
         tag_data = TagCreate(name="concurrent-tag", description="Test")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 

@@ -82,6 +82,44 @@ async def get_current_user(  # NOSONAR
     raise HTTPException(status_code=401, detail=_("Could not validate credentials"))
 
 
+async def require_authenticated_user(current_user: str = Depends(get_current_user)):
+    """Resolve the authenticated ``User`` (with security roles) on the MAIN engine.
+
+    The data-plane authorization layer (Phase 13.1).  User identities and role
+    grants are **server-global** — they live with the registry, not in per-tenant
+    databases — so this dependency always loads the user from ``db.get_engine()``
+    regardless of the active tenant.  Data-plane handlers inject this for their
+    permission checks and pair it with a tenant-routed data session
+    (``get_tenant_db`` / ``request_sessionmaker``), so authz stays central while
+    entity data routes per tenant.
+
+    The returned ``User`` is **detached** with its role cache populated, so
+    ``user.has_role(...)``, ``user.id`` and ``user.userid`` keep working after the
+    session closes — making this a drop-in for the old in-handler
+    ``query(User) -> load_role_cache -> has_role`` pattern.
+    """
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    from backend.persistence import db as db_module  # noqa: PLC0415
+    from backend.persistence.models import User  # noqa: PLC0415
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+    session = session_local()
+    try:
+        user = session.query(User).filter(User.userid == current_user).first()
+        if user is None:
+            raise HTTPException(status_code=401, detail=_("User not found."))
+        # Populate the role cache while the session is live, then detach so the
+        # object is safe to use after the session closes (authz is read-only).
+        user.load_role_cache(session)
+        session.expunge(user)
+        return user
+    finally:
+        session.close()
+
+
 async def get_current_tenant(  # NOSONAR
     token: str = Depends(JWTBearer()),
 ) -> Optional[str]:

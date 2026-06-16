@@ -1289,7 +1289,7 @@ class TestHostTagging:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1340,7 +1340,7 @@ class TestHostTagging:
         mock_user.has_role = MagicMock(return_value=False)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1375,7 +1375,7 @@ class TestHostTagging:
         mock_host_tag = MagicMock()
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1417,7 +1417,7 @@ class TestHostTagging:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 

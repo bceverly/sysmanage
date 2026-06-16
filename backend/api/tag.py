@@ -22,8 +22,8 @@ from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db as db_module
 from backend.persistence import models
-from backend.persistence.db import get_db
 from backend.persistence.models import HostTag, Tag
+from backend.persistence.partitions import get_request_engine, get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.security.roles import SecurityRoles
 
@@ -79,14 +79,21 @@ class HostTagRequest(BaseModel):
     tag_id: str
 
 
-def _get_tags_sync():
+def _get_tags_sync(tenant_id=None):
     """
     Synchronous helper function to retrieve all tags.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database when multi-tenancy is
+    enabled.  ``tenant_id`` is captured by the async caller because the active-
+    tenant ContextVar does not cross the thread-pool boundary.  Server scope /
+    single-tenant (``tenant_id is None``) keeps using the main engine, so the
+    existing tests are unaffected.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -131,16 +138,21 @@ async def get_tags(current_user: str = Depends(get_current_user)):
     Get all tags.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant HERE, in the request's async context — the
+    # ContextVar won't be visible inside the thread-pool worker below.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    tag_dicts = await loop.run_in_executor(None, _get_tags_sync)
+    tag_dicts = await loop.run_in_executor(None, _get_tags_sync, tenant_id)
     return [TagResponse(**tag_dict) for tag_dict in tag_dicts]
 
 
 @router.post("/tags", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
 async def create_tag(
     tag_data: TagCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Create a new tag"""
@@ -227,7 +239,7 @@ async def create_tag(
 async def update_tag(
     tag_id: str,
     tag_data: TagUpdate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Update an existing tag"""
@@ -318,7 +330,7 @@ async def update_tag(
 @router.delete("/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_tag(
     tag_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Delete a tag"""
@@ -387,16 +399,20 @@ async def delete_tag(
         ) from e
 
 
-def _get_tag_hosts_sync(tag_id: str):
+def _get_tag_hosts_sync(tag_id: str, tenant_id=None):
     """
     Synchronous helper function to retrieve hosts for a tag.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database (see ``_get_tags_sync``);
+    server scope / single-tenant keeps using the main engine.
     """
     from sqlalchemy import text
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -462,9 +478,16 @@ async def get_tag_hosts(
     Get all hosts associated with a specific tag.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant before the thread-pool offload (ContextVar does
+    # not cross the thread boundary).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    tag_with_hosts = await loop.run_in_executor(None, _get_tag_hosts_sync, tag_id)
+    tag_with_hosts = await loop.run_in_executor(
+        None, _get_tag_hosts_sync, tag_id, tenant_id
+    )
     return TagWithHostsResponse(**tag_with_hosts)
 
 
@@ -472,7 +495,7 @@ async def get_tag_hosts(
 async def add_tag_to_host(
     host_id: str,
     tag_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Add a tag to a host"""
@@ -577,7 +600,7 @@ async def add_tag_to_host(
 async def remove_tag_from_host(
     host_id: str,
     tag_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Remove a tag from a host"""
@@ -657,7 +680,7 @@ async def remove_tag_from_host(
 @router.get("/hosts/{host_id}/tags", response_model=List[TagResponse])
 async def get_host_tags(
     host_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """Get all tags for a specific host"""
