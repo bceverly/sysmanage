@@ -4,8 +4,31 @@ Test heartbeat configuration functionality on the server.
 
 from unittest.mock import mock_open, patch
 
+import pytest
 
+import backend.config.config as _cfg
 from backend.config.config import get_heartbeat_timeout_minutes
+
+
+@pytest.fixture(autouse=True)
+def _isolate_config_from_db_and_vault(monkeypatch):
+    """Resolve config accessors from the (test-patched) YAML only.
+
+    The accessors prefer DB-backed Settings + OpenBAO over ``sysmanage.yaml``
+    (Phase 13.1.H).  Without neutralizing those overlays, a developer machine
+    with persisted operational settings / secrets leaks its real values in and
+    these YAML-resolution tests fail (they pass in CI only because its DB is
+    empty).  Force the YAML fallback so the tests are machine-independent.
+    """
+    monkeypatch.setattr(_cfg, "_db_setting", lambda key: None)
+    monkeypatch.setattr(_cfg, "_smtp_password", lambda: None)
+    monkeypatch.setattr(
+        _cfg,
+        "_server_setting",
+        lambda key, yaml_getter=None, default=None: (
+            yaml_getter() if yaml_getter else default
+        ),
+    )
 
 
 class TestHeartbeatConfiguration:

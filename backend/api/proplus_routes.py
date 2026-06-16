@@ -1172,6 +1172,47 @@ def mount_federation_controller_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_multitenancy_routes(app: FastAPI) -> bool:
+    """Mount the multi-tenancy control-plane router.
+
+    Unlike the other engines, the control plane is gated on the deployment-level
+    ``multitenancy.enabled`` flag — not a per-request license check — because it
+    only exists when the operator has turned multi-tenancy on.  When the licensed
+    ``multitenancy_engine`` is loaded, its router (the real logic) is mounted;
+    otherwise the built-in OSS router is the fallback, so a config-only
+    multi-tenant deployment keeps working without the engine.
+
+    Mounted here (at startup, after module load) rather than in
+    ``route_registration`` (import time) so the engine — which loads and is
+    bridged into the seam during startup — has a chance to take over the route.
+    """
+    from backend.config import config as config_module  # noqa: PLC0415
+
+    if not config_module.is_multitenancy_enabled():
+        logger.debug("Multi-tenancy disabled; control-plane router not mounted")
+        return False
+
+    try:
+        from backend.api import control_plane  # noqa: PLC0415
+        from backend.multitenancy import seam  # noqa: PLC0415
+
+        engine = seam.active_engine()
+        router = (
+            engine.control_plane_router()
+            if engine is not None
+            else control_plane.router
+        )
+        app.include_router(router)
+        logger.info(
+            "Mounted multi-tenancy control-plane router (%s)",
+            "licensed engine" if engine is not None else "OSS built-in",
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.exception("Failed to mount multi-tenancy control-plane routes: %s", exc)
+        return False
+
+
 def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
     """
     Mount stub routes for Pro+ modules that weren't loaded.
@@ -2167,6 +2208,7 @@ def mount_proplus_routes(app: FastAPI) -> dict:
         "observability_engine": mount_observability_routes(app),
         "federation_controller_engine": mount_federation_controller_routes(app),
         "federation_site_engine": mount_federation_site_routes(app),
+        "multitenancy_engine": mount_multitenancy_routes(app),
     }
 
     mounted_count = sum(1 for v in results.values() if v)

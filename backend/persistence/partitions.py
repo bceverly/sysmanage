@@ -74,21 +74,21 @@ def resolve_engine(partition: str = PARTITION_TENANT, tenant_id=None):
     if tenant_id is None:
         raise ValueError("tenant_id is required to resolve a tenant engine")
 
-    # Per-tenant routing is licensed-engine territory (Pro+ relocation, Phase 0):
-    # defer to the multi-tenancy engine when one is loaded.  The OSS fallback
-    # below is the built-in implementation that moves into the engine in a later
-    # phase; until then it keeps the open-source build working as today.
+    # Per-tenant routing is licensed-engine territory (Pro+ relocation, Phase 2):
+    # the per-tenant engine cache + OpenBAO dynamic-credential leasing live in
+    # the compiled ``multitenancy_engine`` — the OSS build has NO copy of that
+    # logic.  With no engine registered there is no fallback: resolving a tenant
+    # database is impossible without the licensed engine.  This is the moat.
     from backend.multitenancy import seam  # noqa: PLC0415
 
     engine = seam.active_engine()
-    if engine is not None:
-        return engine.resolve_tenant_engine(tenant_id)
-
-    # OSS fallback: the OpenBAO-leased per-tenant engine (moves to the engine
-    # in a later phase).  Late import avoids an import cycle.
-    from backend.persistence.tenant_engine import get_manager  # noqa: PLC0415
-
-    return get_manager().get_engine(tenant_id)
+    if engine is None:
+        raise RuntimeError(
+            "Per-tenant database routing requires the licensed multi-tenancy "
+            "engine, which is not loaded. Multi-tenancy is a Pro+ "
+            "MULTITENANT_SAAS capability."
+        )
+    return engine.resolve_tenant_engine(tenant_id)
 
 
 def get_sessionmaker(partition: str = PARTITION_TENANT, tenant_id=None):

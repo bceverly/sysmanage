@@ -45,33 +45,12 @@ class _EngineAdapter:
     def control_plane_router(self):
         """Build the control-plane router from the engine's factory.
 
-        Hands the engine the same dependency-injection arguments
-        ``proplus_routes`` passes every engine, so the wiring is uniform.  Not
-        used until the Phase 2 stub -> engine mount swap (this phase the OSS
-        server still mounts the control plane itself), but implemented so the
-        seam protocol is fully satisfied.
+        The engine owns the entire control-plane surface (routes, models, and
+        logic) and imports its own ``backend`` dependencies lazily, so no
+        dependency injection is needed here — it is mounted in place of the OSS
+        501 stub by ``mount_multitenancy_routes`` when the engine is loaded.
         """
-        # Late imports: only pulled in if/when the router is actually built.
-        from fastapi import Depends, HTTPException, status  # noqa: PLC0415
-
-        from backend.api.proplus_routes import (  # noqa: PLC0415
-            _feature_dependency,
-            _module_dependency,
-        )
-        from backend.auth.auth_bearer import get_current_user  # noqa: PLC0415
-        from backend.persistence import models  # noqa: PLC0415
-        from backend.persistence.db import get_db  # noqa: PLC0415
-
-        return self._module.get_multitenancy_engine_router(
-            db_dependency=Depends(get_db),
-            auth_dependency=Depends(get_current_user),
-            feature_gate=_feature_dependency,
-            module_gate=_module_dependency,
-            models=models,
-            http_exception=HTTPException,
-            status_codes=status,
-            logger=logger,
-        )
+        return self._module.get_multitenancy_engine_router()
 
 
 def bridge_loaded_engine(module) -> bool:
@@ -99,7 +78,7 @@ def bridge_loaded_engine(module) -> bool:
             )
             return False
 
-    seam.register_engine(_EngineAdapter(module))
+    seam.register_engine(_EngineAdapter(module), module=module)
     version = "unknown"
     try:
         version = module.get_module_info().get("version", "unknown")

@@ -20,7 +20,6 @@ import Navbar from "./Components/Navbar"
 import ConnectionProvider from './Components/ConnectionProvider';
 import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import MigrationCompatBanner from './Components/MigrationCompatBanner';
-import TenantMigrationBanner from './Components/TenantMigrationBanner';
 import Login from './Pages/Login';
 import ResetPassword from './Pages/ResetPassword';
 import Home from './Pages/Home';
@@ -37,7 +36,6 @@ import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
 import Settings from './Pages/Settings';
-import TenantManagement from './Pages/TenantManagement';
 import AirgapRepositories from './Pages/AirgapRepositories';
 import AirgapCollections from './Pages/AirgapCollections';
 import FederationAuditLog from './Pages/FederationAuditLog';
@@ -72,7 +70,6 @@ function AppRoutes() {
       <Route path="/reports/:reportId" element={<ReportViewer />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/tenants" element={<TenantManagement />} />
       <Route path="/airgap/repositories" element={<AirgapRepositories />} />
       <Route path="/airgap/collections" element={<AirgapCollections />} />
       <Route path="/map" element={<MapView />} />
@@ -95,6 +92,22 @@ function AppRoutes() {
       ))}
       {!pluginsLoaded && <Route path="*" element={null} />}
     </Routes>
+  );
+}
+
+/**
+ * Renders any app-shell banners contributed by plugins (e.g. the multi-tenancy
+ * tenant-migration banner).  Each banner component owns its own visibility.
+ */
+function PluginAppBanners() {
+  const { appBanners } = usePlugins();
+  return (
+    <>
+      {appBanners.map((b) => {
+        const Banner = b.component;
+        return <Banner key={b.id} />;
+      })}
+    </>
   );
 }
 
@@ -154,7 +167,7 @@ function App() {
               <Router>
                 <Navbar />
                 <MigrationCompatBanner />
-                <TenantMigrationBanner />
+                <PluginAppBanners />
                 <SecurityWarningBanner />
                   <main className="main-content">
                     <AppRoutes />

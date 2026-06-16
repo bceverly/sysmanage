@@ -227,6 +227,10 @@ class LicenseTier(str, Enum):
     COMMUNITY = "community"
     PROFESSIONAL = "professional"
     ENTERPRISE = "enterprise"
+    # Top commercial tier (Phase 13): a strict SUPERSET of Enterprise plus the
+    # multi-tenancy engine.  Multi-tenancy is exclusive to this tier — it never
+    # appears under Enterprise — which is the SaaS moat.
+    MULTITENANT_SAAS = "multitenant_saas"
 
 
 # Mapping of tiers to their included features
@@ -378,9 +382,17 @@ TIER_MODULES = {
         # sysmanage.yaml picks which one this server loads)
         ModuleCode.FEDERATION_CONTROLLER_ENGINE,
         ModuleCode.FEDERATION_SITE_ENGINE,
-        # Phase 13 — Multi-Tenant SaaS.  TEMPORARY placement: multi-tenancy
-        # gets its own MULTITENANT_SAAS tier in Phase 4 of the relocation, at
-        # which point this moves out of Enterprise into that tier alone.
-        ModuleCode.MULTITENANCY_ENGINE,
+        # NOTE: MULTITENANCY_ENGINE is intentionally NOT here — it is exclusive
+        # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
+        # superset).  That exclusivity is the moat.
     },
+}
+
+# Phase 13 — Multi-Tenant SaaS is the top tier: a strict SUPERSET of Enterprise
+# plus the multi-tenancy engine.  Derived from the Enterprise sets (rather than
+# re-listed) so it can never silently drift behind Enterprise as features/modules
+# are added there.
+TIER_FEATURES[LicenseTier.MULTITENANT_SAAS] = set(TIER_FEATURES[LicenseTier.ENTERPRISE])
+TIER_MODULES[LicenseTier.MULTITENANT_SAAS] = TIER_MODULES[LicenseTier.ENTERPRISE] | {
+    ModuleCode.MULTITENANCY_ENGINE
 }

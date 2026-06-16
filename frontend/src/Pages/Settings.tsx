@@ -310,13 +310,34 @@ const Settings: React.FC = () => {
     );
   }, [pluginSettingsTabs, licenseModules]);
 
-  // Tab IDs in display order (filtered by license + plugin tabs appended).
-  // Used for hash navigation (URL hash → activeTab index) and for ID-based
-  // dispatch in handleTabChange / tab content rendering.
-  const tabNames = useMemo(() => {
-    const pluginTabIds = visiblePluginSettingsTabs.map(pt => pt.id);
-    return [...tabDefs.map(d => d.id), ...pluginTabIds];
-  }, [tabDefs, visiblePluginSettingsTabs]);
+  // Tabs in display order: the hardcoded tabDefs, then plugin tabs — EXCEPT the
+  // SysManage License ('proplus') tab, which is surfaced right after
+  // Configuration so the license is easy to find.  This single ordered list
+  // drives both the tab bar and ``tabNames`` so they never desync.
+  const orderedSettingsTabs = useMemo(() => {
+    const hard = tabDefs.map(d => ({ id: d.id, label: t(d.labelKey, d.labelDefault) }));
+    const plugins = visiblePluginSettingsTabs.map(pt => ({
+      id: pt.id,
+      label: t(pt.labelKey),
+    }));
+    const proplusIdx = plugins.findIndex(p => p.id === 'proplus');
+    if (proplusIdx === -1) {
+      return [...hard, ...plugins];
+    }
+    const proplus = plugins[proplusIdx];
+    const restPlugins = plugins.filter((_, i) => i !== proplusIdx);
+    const cfgIdx = hard.findIndex(h => h.id === 'configuration');
+    const ordered = [...hard];
+    ordered.splice(cfgIdx === -1 ? 0 : cfgIdx + 1, 0, proplus);
+    return [...ordered, ...restPlugins];
+  }, [tabDefs, visiblePluginSettingsTabs, t]);
+
+  // Tab IDs in display order — used for hash navigation (URL hash → activeTab
+  // index) and ID-based dispatch in handleTabChange / tab content rendering.
+  const tabNames = useMemo(
+    () => orderedSettingsTabs.map(x => x.id),
+    [orderedSettingsTabs],
+  );
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -1281,11 +1302,8 @@ const Settings: React.FC = () => {
           scrollButtons="auto"
           allowScrollButtonsMobile
         >
-          {tabDefs.map(d => (
-            <Tab key={d.id} label={t(d.labelKey, d.labelDefault)} />
-          ))}
-          {visiblePluginSettingsTabs.map(pt => (
-            <Tab key={pt.id} label={t(pt.labelKey)} />
+          {orderedSettingsTabs.map(tab => (
+            <Tab key={tab.id} label={tab.label} />
           ))}
         </Tabs>
       </Box>

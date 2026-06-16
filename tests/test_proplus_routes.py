@@ -233,10 +233,13 @@ class TestMountRoutes:
 
 class TestMountProplusRoutes:
     def test_returns_dict_with_all_engine_keys(self):
-        # When no module is loaded, every key should be False and stubs get mounted.
+        # When no module is loaded, every key should be False and stubs get
+        # mounted.  Multi-tenancy is gated on the ``multitenancy.enabled`` config
+        # flag (not a loaded module), so pin it off here for the "all engines
+        # off" case.
         with patch.object(
             proplus_routes.module_loader, "get_module", return_value=None
-        ):
+        ), patch("backend.config.config.is_multitenancy_enabled", return_value=False):
             results = proplus_routes.mount_proplus_routes(FastAPI())
         expected_keys = {
             "vuln_engine",
@@ -255,6 +258,7 @@ class TestMountProplusRoutes:
             "observability_engine",
             "federation_controller_engine",
             "federation_site_engine",
+            "multitenancy_engine",
         }
         assert set(results.keys()) == expected_keys
         assert all(v is False for v in results.values())

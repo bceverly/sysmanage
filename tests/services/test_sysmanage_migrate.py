@@ -44,6 +44,8 @@ def test_fan_out_counts_failures_and_isolates():
     with patch(
         "backend.config.config.is_multitenancy_enabled", return_value=True
     ), patch.object(
+        mod, "_ensure_multitenancy_engine", return_value=True
+    ), patch.object(
         mod,
         "_placed_tenants",
         return_value=[
@@ -61,6 +63,28 @@ def test_fan_out_counts_failures_and_isolates():
     assert prov.call_count == 2
     # One of the two migratable tenants failed; the other still ran.
     assert failures == 1
+
+
+def test_fan_out_fails_loudly_when_engine_unavailable():
+    """If MT is on but the licensed engine can't be loaded, the fan-out reports
+    every placed tenant as failed (rather than emitting the shim's refusal per
+    tenant) and never calls provisioning."""
+    mod = _load()
+    with patch(
+        "backend.config.config.is_multitenancy_enabled", return_value=True
+    ), patch.object(
+        mod, "_ensure_multitenancy_engine", return_value=False
+    ), patch.object(
+        mod,
+        "_placed_tenants",
+        return_value=[("t-ok", "good", True), ("t-two", "two", True)],
+    ), patch(
+        "backend.services.tenant_provisioning.provision_tenant_database"
+    ) as prov:
+        failures = mod.fan_out_tenants(dry_run=False)
+
+    assert failures == 2  # both placed tenants counted as failed
+    prov.assert_not_called()
 
 
 def test_dry_run_does_not_provision():

@@ -121,11 +121,13 @@ def test_real_compiled_engine_bridges_into_seam():
     assert bridge.bridge_loaded_engine(engine_mod) is True
     assert seam.is_engine_present() is True
 
-    # The resolver hook delegates to the engine, which (in Phase 1) re-exports
-    # the OSS OpenBAO-leased manager.  Patch that downstream so we assert the
-    # delegation path without needing a live OpenBAO/tenant DB.
-    with patch("backend.persistence.tenant_engine.get_manager") as get_mgr:
-        get_mgr.return_value.get_engine.return_value = "leased-engine"
+    # The resolver hook delegates to the engine's OWN per-tenant manager (Phase 2
+    # relocated that logic into the compiled engine).  Patch the engine module's
+    # ``get_manager`` so we assert the delegation path without a live OpenBAO /
+    # tenant DB.
+    fake_manager = MagicMock()
+    fake_manager.get_engine.return_value = "leased-engine"
+    with patch.object(engine_mod, "get_manager", return_value=fake_manager):
         with patch.object(
             partitions.config, "is_multitenancy_enabled", return_value=True
         ):
@@ -133,4 +135,4 @@ def test_real_compiled_engine_bridges_into_seam():
                 partition=partitions.PARTITION_TENANT, tenant_id="t-1"
             )
     assert result == "leased-engine"
-    get_mgr.return_value.get_engine.assert_called_once_with("t-1")
+    fake_manager.get_engine.assert_called_once_with("t-1")

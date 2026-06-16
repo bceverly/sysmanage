@@ -1,13 +1,23 @@
 """
 Tests for tenant enrollment-token consumption at host registration (Phase 13.1).
+
+The enrollment logic moved into the licensed engine (Pro+ relocation, Phase 2);
+the OSS-side wiring (``host._resolve_enrollment_tenant``) is tested here.  The
+no-engine paths (no token / MT off / invalid → None or 403) run always; the
+valid-token path exercises the real compiled engine via the shim and skips when
+the ``.so`` isn't importable.
 """
 
-from unittest.mock import patch
+import importlib
+import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
 
 from backend.api import host as host_api
+from backend.multitenancy import seam
 from backend.services import enrollment_service
 
 
@@ -20,20 +30,52 @@ def _tenant(db_session, slug="enroll-reg"):
     return t
 
 
+def _import_real_engine():
+    path = (
+        Path(__file__).resolve().parents[3]
+        / "sysmanage-professional-plus"
+        / "module-source"
+        / "multitenancy_engine"
+    )
+    if path.is_dir() and str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+    try:
+        return importlib.import_module("multitenancy_engine")
+    except ImportError:
+        return None
+
+
+@pytest.fixture
+def real_engine():
+    mod = _import_real_engine()
+    if mod is None:
+        pytest.skip("compiled multitenancy_engine .so not importable here")
+    seam.register_engine(MagicMock(), module=mod)
+    yield mod
+    seam.unregister_engine()
+
+
+@pytest.fixture(autouse=True)
+def _clean_seam():
+    # Default to no engine; ``real_engine`` registers one where needed.
+    seam.unregister_engine()
+    yield
+    seam.unregister_engine()
+
+
 def test_resolve_returns_none_without_token(db_session):
     assert host_api._resolve_enrollment_tenant(None) is None
     assert host_api._resolve_enrollment_tenant("") is None
 
 
 def test_resolve_ignored_when_multitenancy_disabled(db_session):
-    tenant = _tenant(db_session)
-    plaintext, _row = enrollment_service.generate_token(db_session, tenant.id)
     with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
-        # Even a valid token is ignored when MT is off.
-        assert host_api._resolve_enrollment_tenant(plaintext) is None
+        # When MT is off, any token is ignored (returns None) — the engine is
+        # never consulted.
+        assert host_api._resolve_enrollment_tenant("sme_anything") is None
 
 
-def test_resolve_valid_token_returns_tenant_and_consumes(db_session):
+def test_resolve_valid_token_returns_tenant_and_consumes(real_engine, db_session):
     tenant = _tenant(db_session)
     plaintext, _row = enrollment_service.generate_token(db_session, tenant.id)
     with patch("backend.config.config.is_multitenancy_enabled", return_value=True):
@@ -46,6 +88,8 @@ def test_resolve_valid_token_returns_tenant_and_consumes(db_session):
 
 
 def test_resolve_invalid_token_rejects(db_session):
+    # Invalid token + MT on → the shim returns None (no engine needed) and the
+    # registration path rejects with 403.
     with patch("backend.config.config.is_multitenancy_enabled", return_value=True):
         with pytest.raises(HTTPException) as exc:
             host_api._resolve_enrollment_tenant("sme_bogus")

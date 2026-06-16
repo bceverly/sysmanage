@@ -8,13 +8,19 @@ separate per-tenant target engine (patched in for ``get_request_engine``).
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.persistence import models
 from backend.persistence.db import Base
 from backend.services import host_tenant_index, tenant_data_mover
+
+# Both the host→tenant index and the data-mover moved into the licensed engine
+# (Phase 2).  These integration tests exercise the real compiled engine through
+# the OSS shims via the shared ``real_engine`` fixture (skip-tolerant), so the
+# host→tenant bindings and the move actually run.  They request ``real_engine``
+# explicitly below.
 
 
 @pytest.fixture
@@ -44,7 +50,9 @@ def _host(db_session, fqdn="h1.example.com"):
     return h
 
 
-def test_move_copies_bound_host_to_tenant_and_deletes_source(db_session, target_engine):
+def test_move_copies_bound_host_to_tenant_and_deletes_source(
+    real_engine, db_session, target_engine
+):
     tenant = _tenant(db_session)
     host = _host(db_session)
     host_tenant_index.bind_host_to_tenant(host.id, tenant.id)
@@ -69,7 +77,7 @@ def test_move_copies_bound_host_to_tenant_and_deletes_source(db_session, target_
     )
 
 
-def test_unassigned_host_is_left_in_place(db_session, target_engine):
+def test_unassigned_host_is_left_in_place(real_engine, db_session, target_engine):
     _tenant(db_session)
     host = _host(db_session)  # NOT bound to a tenant
     host_id = host.id
@@ -91,7 +99,7 @@ def test_unassigned_host_is_left_in_place(db_session, target_engine):
     )
 
 
-def test_idempotent_rerun_skips_present(db_session, target_engine):
+def test_idempotent_rerun_skips_present(real_engine, db_session, target_engine):
     tenant = _tenant(db_session)
     host = _host(db_session)
     host_tenant_index.bind_host_to_tenant(host.id, tenant.id)
@@ -117,7 +125,9 @@ def test_noop_when_multitenancy_disabled(db_session):
     assert report == {"_enabled": False}
 
 
-def test_verify_source_drained_reports_remaining(db_session, target_engine):
+def test_verify_source_drained_reports_remaining(
+    real_engine, db_session, target_engine
+):
     tenant = _tenant(db_session)
     bound = _host(db_session, "bound.example.com")
     _host(db_session, "loose.example.com")  # unassigned

@@ -1,5 +1,10 @@
 """
-Tests for the tenant migration-status detector (Phase 13.1).
+Tests for the tenant migration-status detector (Pro+ relocation, Phase 2).
+
+The detection logic moved into the licensed engine; the OSS module is a thin
+shim.  No-engine returns the empty result (always run); behavioral tests run
+against the real compiled engine (skip-tolerant), patching the engine's chain
+head.
 """
 
 from unittest.mock import patch
@@ -25,23 +30,25 @@ def _set_version(db_session, tenant_id, revision):
     db_session.commit()
 
 
-def test_empty_when_multitenancy_disabled(db_session):
-    with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
-        res = migration_status.pending_tenant_migrations()
-    assert res["tenants_pending"] == 0
+# --- shim contract (no engine → empty) ---
 
 
-def test_flags_tenant_behind_head(db_session):
+def test_no_engine_returns_empty(db_session):
+    res = migration_status.pending_tenant_migrations()
+    assert res == {"tenants_pending": 0, "tenant_slugs": [], "tenant_head": None}
+
+
+# --- behavioral against the real compiled engine ---
+
+
+def test_flags_tenant_behind_head(real_engine, db_session):
     up = _tenant(db_session, "uptodate")
     behind = _tenant(db_session, "behind")
-    never = _tenant(db_session, "never")
+    _tenant(db_session, "never")  # no db_version row → also pending
     _set_version(db_session, up.id, "HEAD9")
     _set_version(db_session, behind.id, "OLD1")
-    # 'never' has no db_version row at all → also pending.
 
-    with patch(
-        "backend.config.config.is_multitenancy_enabled", return_value=True
-    ), patch.object(migration_status, "_tenant_chain_head", return_value="HEAD9"):
+    with patch.object(real_engine, "_tenant_chain_head", return_value="HEAD9"):
         res = migration_status.pending_tenant_migrations()
 
     assert res["tenant_head"] == "HEAD9"
@@ -49,12 +56,10 @@ def test_flags_tenant_behind_head(db_session):
     assert set(res["tenant_slugs"]) == {"behind", "never"}
 
 
-def test_no_false_alarm_when_head_unknown(db_session):
+def test_no_false_alarm_when_head_unknown(real_engine, db_session):
     t = _tenant(db_session, "acme")
     _set_version(db_session, t.id, "OLD1")
-    with patch(
-        "backend.config.config.is_multitenancy_enabled", return_value=True
-    ), patch.object(migration_status, "_tenant_chain_head", return_value=None):
+    with patch.object(real_engine, "_tenant_chain_head", return_value=None):
         res = migration_status.pending_tenant_migrations()
     # Head couldn't be resolved → don't cry wolf.
     assert res["tenants_pending"] == 0

@@ -221,9 +221,11 @@ def _try_admin_login(
             audit_session, None, str(login_data.userid), True, client_ip, user_agent
         )
 
-    refresh_token = sign_refresh_token(login_data.userid)
+    # Land the user in their default tenant (multi-tenancy); None = server scope.
+    default_tenant = _default_tenant_id_for_user(login_data.userid)
+    refresh_token = sign_refresh_token(login_data.userid, tenant_id=default_tenant)
     _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
-    return {"Authorization": sign_jwt(login_data.userid)}
+    return {"Authorization": sign_jwt(login_data.userid, tenant_id=default_tenant)}
 
 
 def _authenticate_db_user(  # NOSONAR
@@ -373,8 +375,10 @@ def _authenticate_db_user(  # NOSONAR
         session, user.id, str(login_data.userid), True, client_ip, user_agent
     )
 
-    auth_token = sign_jwt(login_data.userid)
-    refresh_token = sign_refresh_token(login_data.userid)
+    # Land the user in their default tenant (multi-tenancy); None = server scope.
+    default_tenant = _default_tenant_id_for_user(login_data.userid)
+    auth_token = sign_jwt(login_data.userid, tenant_id=default_tenant)
+    refresh_token = sign_refresh_token(login_data.userid, tenant_id=default_tenant)
     _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
     return {"Authorization": auth_token}
 
@@ -489,6 +493,39 @@ def _open_registry_session():
     )
 
     return get_sessionmaker(partition=PARTITION_REGISTRY)()
+
+
+def _default_tenant_id_for_user(userid: str) -> Optional[str]:
+    """Resolve the tenant a user should land in at login (multi-tenancy only).
+
+    Picks the grant flagged ``is_default``; if none is flagged, falls back to
+    the user's first grant, so a user with any tenant access lands *inside* a
+    tenant after login instead of the bare "no tenant" server scope.  Returns
+    ``None`` when multi-tenancy is off, the principal isn't a registry identity,
+    or has no grants (e.g. the control-plane operator) — those keep server
+    scope.  Best-effort: any failure yields ``None`` so login never breaks.
+    """
+    if not config.is_multitenancy_enabled():
+        return None
+    try:
+        from backend.services import registry_service  # noqa: PLC0415
+
+        session = _open_registry_session()
+        try:
+            registry_user_id = registry_service.resolve_registry_user_id(
+                session, userid
+            )
+            if registry_user_id is None:
+                return None
+            grants = registry_service.list_user_grants(session, registry_user_id)
+            if not grants:
+                return None
+            chosen = next((g for g in grants if g.is_default), grants[0])
+            return str(chosen.tenant_id)
+        finally:
+            session.close()
+    except Exception:  # noqa: BLE001 - login must never fail on tenant resolution
+        return None
 
 
 @router.get("/auth/accounts", dependencies=[Depends(JWTBearer())])

@@ -1,8 +1,11 @@
 """
-Tests for self-service tenant provisioning orchestration (Phase 13.1).
+Tests for self-service tenant provisioning orchestration (Pro+ relocation,
+Phase 2).
 
-The Postgres + OpenBAO calls are mocked — these verify the orchestration logic,
-identifier safety, idempotent DDL, and the OpenBAO config/role payloads.
+The orchestration logic moved into the licensed engine; the OSS module is a thin
+shim that keeps ``OrchestrationError``.  Shim-contract tests (always run) assert
+the no-engine behavior; behavioral tests run against the real compiled engine
+(skip-tolerant), with Postgres + OpenBAO mocked.
 """
 
 from unittest.mock import MagicMock, patch
@@ -11,32 +14,6 @@ import pytest
 
 from backend.services import tenant_orchestration as orch
 from backend.services.tenant_orchestration import OrchestrationError
-
-
-def test_safe_identifier_normalizes():
-    assert orch._safe_identifier("Acme Corp") == "acme_corp"
-    assert orch._safe_identifier("a-b.c") == "a_b_c"
-
-
-def test_safe_identifier_rejects_empty():
-    with pytest.raises(OrchestrationError):
-        orch._safe_identifier("!!!")
-
-
-def test_derive_names():
-    names = orch.derive_names("Acme")
-    assert names == {
-        "dbname": "tenant_acme",
-        "owner_role": "acme_owner",
-        "config_name": "acme",
-        "openbao_role": "acme-role",
-    }
-
-
-def test_is_provisioner_configured_false_when_vault_disabled():
-    with patch.object(orch.config, "is_vault_enabled", return_value=False):
-        assert orch.is_provisioner_configured() is False
-
 
 _CREDS = {
     "host": "localhost",
@@ -47,17 +24,70 @@ _CREDS = {
 }
 
 
-def test_create_tenant_database_idempotent_creates_both():
+# ---------------------------------------------------------------------------
+# Shim contract (always runs — no engine)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def _no_engine():
+    from backend.multitenancy import seam
+
+    seam.unregister_engine()
+    yield
+    seam.unregister_engine()
+
+
+def test_provisioning_requires_engine(_no_engine):
+    with pytest.raises(OrchestrationError):
+        orch.auto_provision_tenant("t-1", slug="acme")
+    with pytest.raises(OrchestrationError):
+        orch.deprovision_tenant("t-1", slug="acme")
+
+
+def test_is_provisioner_configured_false_without_engine(_no_engine):
+    assert orch.is_provisioner_configured() is False
+
+
+# ---------------------------------------------------------------------------
+# Behavioral against the real compiled engine (skips if the .so is absent)
+# ---------------------------------------------------------------------------
+
+
+def test_safe_identifier_normalizes(real_engine):
+    assert real_engine._safe_identifier("Acme Corp") == "acme_corp"
+    assert real_engine._safe_identifier("a-b.c") == "a_b_c"
+
+
+def test_safe_identifier_rejects_empty(real_engine):
+    with pytest.raises(OrchestrationError):
+        real_engine._safe_identifier("!!!")
+
+
+def test_derive_names(real_engine):
+    assert real_engine.derive_names("Acme") == {
+        "dbname": "tenant_acme",
+        "owner_role": "acme_owner",
+        "config_name": "acme",
+        "openbao_role": "acme-role",
+    }
+
+
+def test_is_provisioner_configured_false_when_vault_disabled(real_engine):
+    with patch("backend.config.config.is_vault_enabled", return_value=False):
+        assert orch.is_provisioner_configured() is False
+
+
+def test_create_tenant_database_idempotent_creates_both(real_engine):
     cur = MagicMock()
-    # pg_roles miss, then pg_database miss → create both.
-    cur.fetchone.side_effect = [None, None]
+    cur.fetchone.side_effect = [None, None]  # role miss, db miss → create both
     conn = MagicMock()
     conn.cursor.return_value.__enter__.return_value = cur
 
     with patch.object(
-        orch, "_provisioner_credentials", return_value=_CREDS
-    ), patch.object(orch, "_connect_provisioner", return_value=conn):
-        orch.create_tenant_database("tenant_acme", "acme_owner")
+        real_engine, "_provisioner_credentials", return_value=_CREDS
+    ), patch.object(real_engine, "_connect_provisioner", return_value=conn):
+        real_engine.create_tenant_database("tenant_acme", "acme_owner")
 
     executed = " ".join(str(c.args[0]) for c in cur.execute.call_args_list)
     assert "CREATE ROLE" in executed
@@ -65,32 +95,32 @@ def test_create_tenant_database_idempotent_creates_both():
     conn.close.assert_called_once()
 
 
-def test_create_tenant_database_skips_existing():
+def test_create_tenant_database_skips_existing(real_engine):
     cur = MagicMock()
     cur.fetchone.side_effect = [(1,), (1,)]  # both already exist
     conn = MagicMock()
     conn.cursor.return_value.__enter__.return_value = cur
 
     with patch.object(
-        orch, "_provisioner_credentials", return_value=_CREDS
-    ), patch.object(orch, "_connect_provisioner", return_value=conn):
-        orch.create_tenant_database("tenant_acme", "acme_owner")
+        real_engine, "_provisioner_credentials", return_value=_CREDS
+    ), patch.object(real_engine, "_connect_provisioner", return_value=conn):
+        real_engine.create_tenant_database("tenant_acme", "acme_owner")
 
     executed = " ".join(str(c.args[0]) for c in cur.execute.call_args_list)
     assert "CREATE ROLE" not in executed
     assert "CREATE DATABASE" not in executed
 
 
-def test_configure_openbao_role_writes_config_and_role():
+def test_configure_openbao_role_writes_config_and_role(real_engine):
     svc = MagicMock()
     with patch.object(
-        orch, "_provisioner_credentials", return_value=_CREDS
-    ), patch.object(
-        orch.config, "get_vault_database_mount_path", return_value="database"
+        real_engine, "_provisioner_credentials", return_value=_CREDS
+    ), patch(
+        "backend.config.config.get_vault_database_mount_path", return_value="database"
     ), patch(
         "backend.services.vault_service.VaultService", return_value=svc
     ):
-        orch.configure_openbao_role(
+        real_engine.configure_openbao_role(
             config_name="acme",
             role_name="acme-role",
             owner_role="acme_owner",
@@ -102,7 +132,6 @@ def test_configure_openbao_role_writes_config_and_role():
     paths = [c.args[1] for c in svc.make_raw_request.call_args_list]
     assert "database/config/acme" in paths
     assert "database/roles/acme-role" in paths
-    # Connection URL is templated (no plaintext password in the URL).
     config_call = next(
         c
         for c in svc.make_raw_request.call_args_list
@@ -110,8 +139,6 @@ def test_configure_openbao_role_writes_config_and_role():
     )
     assert "{{username}}" in config_call.args[2]["connection_url"]
     assert "{{password}}" in config_call.args[2]["connection_url"]
-    # Role creation makes dynamic users members of the owner role AND has every
-    # session SET ROLE to it, so created objects are owned by the stable owner.
     role_call = next(
         c
         for c in svc.make_raw_request.call_args_list
@@ -120,22 +147,22 @@ def test_configure_openbao_role_writes_config_and_role():
     statements = role_call.args[2]["creation_statements"]
     assert 'IN ROLE "acme_owner"' in statements
     assert "SET role TO 'acme_owner'" in statements
-    # Vault placeholders survive the f-string escaping.
     assert "{{name}}" in statements and "{{password}}" in statements
 
 
-def test_auto_provision_refused_when_disabled():
-    with patch.object(
-        orch.config, "is_self_service_provisioning_enabled", return_value=False
+def test_auto_provision_refused_when_disabled(real_engine):
+    with patch(
+        "backend.config.config.is_self_service_provisioning_enabled",
+        return_value=False,
     ):
         with pytest.raises(OrchestrationError):
             orch.auto_provision_tenant("t-1", slug="acme")
 
 
-def test_deprovision_skips_db_when_not_requested():
-    with patch.object(orch, "_teardown_openbao") as bao, patch.object(
-        orch, "_drop_tenant_database"
-    ) as drop, patch.object(orch, "_delete_registry_records") as registry:
+def test_deprovision_skips_db_when_not_requested(real_engine):
+    with patch.object(real_engine, "_teardown_openbao") as bao, patch.object(
+        real_engine, "_drop_tenant_database"
+    ) as drop, patch.object(real_engine, "_delete_registry_records") as registry:
         result = orch.deprovision_tenant("t-1", slug="acme", drop_database=False)
     bao.assert_called_once()
     registry.assert_called_once()
@@ -143,21 +170,21 @@ def test_deprovision_skips_db_when_not_requested():
     assert "errors" in result
 
 
-def test_deprovision_drops_db_when_requested():
-    with patch.object(orch, "_teardown_openbao"), patch.object(
-        orch, "_drop_tenant_database"
-    ) as drop, patch.object(orch, "_delete_registry_records"):
+def test_deprovision_drops_db_when_requested(real_engine):
+    with patch.object(real_engine, "_teardown_openbao"), patch.object(
+        real_engine, "_drop_tenant_database"
+    ) as drop, patch.object(real_engine, "_delete_registry_records"):
         orch.deprovision_tenant("t-1", slug="acme", drop_database=True)
     drop.assert_called_once()
 
 
-def test_teardown_openbao_revokes_then_deletes():
+def test_teardown_openbao_revokes_then_deletes(real_engine):
     svc = MagicMock()
     result = {"errors": []}
-    with patch.object(orch.config, "is_vault_enabled", return_value=True), patch.object(
-        orch.config, "get_vault_database_mount_path", return_value="database"
+    with patch("backend.config.config.is_vault_enabled", return_value=True), patch(
+        "backend.config.config.get_vault_database_mount_path", return_value="database"
     ), patch("backend.services.vault_service.VaultService", return_value=svc):
-        orch._teardown_openbao(orch.derive_names("acme"), result)
+        real_engine._teardown_openbao(real_engine.derive_names("acme"), result)
     calls = [(c.args[0], c.args[1]) for c in svc.make_raw_request.call_args_list]
     assert ("PUT", "sys/leases/revoke-prefix/database/creds/acme-role") in calls
     assert ("DELETE", "database/roles/acme-role") in calls
@@ -165,7 +192,7 @@ def test_teardown_openbao_revokes_then_deletes():
     assert result["openbao_removed"] is True
 
 
-def test_delete_registry_records_removes_all(db_session):
+def test_delete_registry_records_removes_all(real_engine, db_session):
     from backend.persistence.models import (
         RegistryTenant,
         RegistryTenantEmailDomain,
@@ -190,7 +217,7 @@ def test_delete_registry_records_removes_all(db_session):
     tenant_id = tenant.id
 
     result = {"errors": []}
-    orch._delete_registry_records(tenant_id, result)
+    real_engine._delete_registry_records(tenant_id, result)
 
     assert result["registry_removed"] is True
     assert (
@@ -205,16 +232,16 @@ def test_delete_registry_records_removes_all(db_session):
     )
 
 
-def test_auto_provision_happy_path_orchestrates_all_steps():
-    with patch.object(
-        orch.config, "is_self_service_provisioning_enabled", return_value=True
-    ), patch.object(orch, "create_tenant_database") as create_db, patch.object(
-        orch, "configure_openbao_role"
+def test_auto_provision_happy_path_orchestrates_all_steps(real_engine):
+    with patch(
+        "backend.config.config.is_self_service_provisioning_enabled",
+        return_value=True,
+    ), patch.object(real_engine, "create_tenant_database") as create_db, patch.object(
+        real_engine, "configure_openbao_role"
     ) as cfg_role, patch.object(
-        orch, "_upsert_placement"
-    ) as upsert, patch(
-        "backend.services.tenant_provisioning.provision_tenant_database",
-        return_value="rev123",
+        real_engine, "_upsert_placement"
+    ) as upsert, patch.object(
+        real_engine, "provision_tenant_database", return_value="rev123"
     ) as migrate:
         result = orch.auto_provision_tenant("t-1", slug="Acme", host="db", port=5433)
 

@@ -16,6 +16,7 @@ import {
     AccordionDetails,
     AccordionSummary,
     Alert,
+    AlertTitle,
     Box,
     Button,
     Card,
@@ -40,6 +41,7 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
+    Menu,
     MenuItem,
     Paper,
     Select,
@@ -69,6 +71,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import BusinessIcon from '@mui/icons-material/Business';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ComputerIcon from '@mui/icons-material/Computer';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -117,6 +120,7 @@ import { pluginManager } from './PluginManager';
         AccordionDetails,
         AccordionSummary,
         Alert,
+        AlertTitle,
         Box,
         Button,
         Card,
@@ -141,6 +145,7 @@ import { pluginManager } from './PluginManager';
         ListItem,
         ListItemIcon,
         ListItemText,
+        Menu,
         MenuItem,
         Paper,
         Select,
@@ -169,6 +174,7 @@ import { pluginManager } from './PluginManager';
         BugReportIcon,
         BusinessIcon,
         CalendarTodayIcon,
+        CheckIcon,
         CheckCircleIcon,
         ComputerIcon,
         ContentCopyIcon,

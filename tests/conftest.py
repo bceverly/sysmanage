@@ -672,3 +672,44 @@ def pytest_configure(config):
     else:
         # For older versions, ensure asyncio mode works
         config.option.asyncio_mode = "auto"
+
+
+# ---------------------------------------------------------------------------
+# Pro+ relocation (Phase 2): a fixture that registers the REAL compiled
+# multitenancy_engine into the seam, so behavioral tests of relocated logic run
+# against the actual artifact.  Skips when the .so isn't importable (pure OSS
+# CI), so the OSS suite never hard-depends on the Pro+ build.
+# ---------------------------------------------------------------------------
+def _import_multitenancy_engine():
+    import importlib
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    path = (
+        _Path(__file__).resolve().parents[1].parent
+        / "sysmanage-professional-plus"
+        / "module-source"
+        / "multitenancy_engine"
+    )
+    if path.is_dir() and str(path) not in _sys.path:
+        _sys.path.insert(0, str(path))
+    try:
+        return importlib.import_module("multitenancy_engine")
+    except ImportError:
+        return None
+
+
+@pytest.fixture
+def real_engine():
+    """Register the real compiled multitenancy_engine; skip if its .so is absent."""
+    import pytest as _pytest
+    from unittest.mock import MagicMock
+
+    from backend.multitenancy import seam
+
+    mod = _import_multitenancy_engine()
+    if mod is None:
+        _pytest.skip("compiled multitenancy_engine .so not importable here")
+    seam.register_engine(MagicMock(), module=mod)
+    yield mod
+    seam.unregister_engine()

@@ -27,7 +27,6 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
-    control_plane,
     cve_refresh_settings,
     default_repositories,
     diagnostics,
@@ -465,27 +464,13 @@ def register_routes(app: FastAPI):
     )  # /api/cve-refresh/* (with auth)
     logger.debug("CVE Refresh Settings router added")
 
-    # Multi-tenancy control-plane API (Phase 13.1.A).  Mounted ONLY when
-    # multitenancy is enabled — in the default homelab / on-prem /
-    # federated deployment this management surface does not exist on the
-    # app at all (no new attack surface, no behavior change).
-    #
-    # Pro+ relocation (Phase 0): the control-plane router comes from the
-    # licensed multi-tenancy engine when it's loaded; the OSS fallback below is
-    # the built-in router that moves into the engine in a later phase.
-    if config_module.is_multitenancy_enabled():
-        from backend.multitenancy import seam  # noqa: PLC0415
-
-        engine = seam.active_engine()
-        cp_router = (
-            engine.control_plane_router()
-            if engine is not None
-            else control_plane.router
-        )
-        app.include_router(cp_router)
-        logger.debug("Control-plane router added (multitenancy enabled)")
-    else:
-        logger.debug("Control-plane router NOT added (multitenancy disabled)")
+    # NOTE: the multi-tenancy control-plane router is NOT mounted here.  It is
+    # mounted at startup by ``mount_multitenancy_routes`` in
+    # ``backend/api/proplus_routes.py`` (Pro+ relocation, Phase 2) — after the
+    # licensed ``multitenancy_engine`` has loaded and been bridged into the seam,
+    # so the engine's router (when present) serves the control plane, with the
+    # built-in OSS router as the fallback.  Mounting here (import time) would be
+    # too early to ever pick up the engine.
 
     logger.debug("=== ALL ROUTES REGISTERED ===")
 

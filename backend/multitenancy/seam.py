@@ -33,23 +33,42 @@ class MultitenancyEngine(Protocol):
 
 
 _engine: Optional[MultitenancyEngine] = None
+# The raw loaded engine module, exposed for OSS *service shims* (modules whose
+# logic moved into the engine) that delegate to relocated functions by name —
+# e.g. ``seam.engine_module().tenant_for_host(...)``.  Kept separate from the
+# protocol adapter above so the growing set of relocated service functions
+# doesn't bloat ``MultitenancyEngine``.
+_engine_module = None
 
 
-def register_engine(engine: MultitenancyEngine) -> None:
-    """Register the licensed multi-tenancy engine (called on engine load)."""
-    global _engine  # pylint: disable=global-statement
+def register_engine(engine: MultitenancyEngine, module=None) -> None:
+    """Register the licensed multi-tenancy engine (called on engine load).
+
+    ``engine`` is the protocol adapter; ``module`` is the raw engine module that
+    backs it (used by service shims).  ``module`` is optional so existing tests
+    that register a bare stub keep working.
+    """
+    global _engine, _engine_module  # pylint: disable=global-statement
     _engine = engine
+    _engine_module = module
 
 
 def unregister_engine() -> None:
     """Clear the registered engine (engine unload / tests)."""
-    global _engine  # pylint: disable=global-statement
+    global _engine, _engine_module  # pylint: disable=global-statement
     _engine = None
+    _engine_module = None
 
 
 def active_engine() -> Optional[MultitenancyEngine]:
-    """Return the registered engine, or None when running open-source."""
+    """Return the registered engine adapter, or None when running open-source."""
     return _engine
+
+
+def engine_module():
+    """Return the raw loaded engine module (for service-shim delegation), or
+    None when running open-source."""
+    return _engine_module
 
 
 def is_engine_present() -> bool:

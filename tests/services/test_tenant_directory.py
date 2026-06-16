@@ -1,8 +1,10 @@
 """
-Tests for the tenant directory email→tenant resolver (Phase 13.1).
-"""
+Tests for the tenant directory email→tenant resolver (Pro+ relocation, Phase 2).
 
-from unittest.mock import patch
+The resolver logic moved into the licensed engine; the OSS module is a thin
+shim.  No-engine degrades to None (server scope, always run); behavioral tests
+run against the real compiled engine (skip-tolerant).
+"""
 
 from backend.services import tenant_directory
 
@@ -23,69 +25,46 @@ def _add_domain(db_session, tenant_id, domain):
     db_session.commit()
 
 
-def test_none_when_multitenancy_disabled(db_session):
+# --- shim contract (no engine → server scope) ---
+
+
+def test_no_engine_returns_none(db_session):
     tenant = _make_tenant(db_session)
     _add_domain(db_session, tenant.id, "acme.com")
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=False
-    ):
-        assert tenant_directory.resolve_tenant_for_email("user@acme.com") is None
+    # No engine registered → single-tenant / unlicensed → server scope.
+    assert tenant_directory.resolve_tenant_for_email("user@acme.com") is None
 
 
-def test_resolves_single_match(db_session):
+# --- behavioral against the real compiled engine ---
+
+
+def test_resolves_single_match(real_engine, db_session):
     tenant = _make_tenant(db_session)
     _add_domain(db_session, tenant.id, "acme.com")
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        assert tenant_directory.resolve_tenant_for_email("user@acme.com") == str(
-            tenant.id
-        )
+    assert tenant_directory.resolve_tenant_for_email("user@acme.com") == str(tenant.id)
 
 
-def test_case_insensitive_domain(db_session):
+def test_case_insensitive_domain(real_engine, db_session):
     tenant = _make_tenant(db_session)
     _add_domain(db_session, tenant.id, "acme.com")
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        assert tenant_directory.resolve_tenant_for_email("User@ACME.COM") == str(
-            tenant.id
-        )
+    assert tenant_directory.resolve_tenant_for_email("User@ACME.COM") == str(tenant.id)
 
 
-def test_none_when_no_match(db_session):
+def test_none_when_no_match(real_engine, db_session):
     _make_tenant(db_session)
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        assert tenant_directory.resolve_tenant_for_email("user@nobody.com") is None
+    assert tenant_directory.resolve_tenant_for_email("user@nobody.com") is None
 
 
-def test_none_when_ambiguous(db_session):
+def test_none_when_ambiguous(real_engine, db_session):
     t1 = _make_tenant(db_session, slug="t1-dir")
     t2 = _make_tenant(db_session, slug="t2-dir")
     _add_domain(db_session, t1.id, "shared.com")
     _add_domain(db_session, t2.id, "shared.com")
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        # Two tenants claim the domain → ambiguous → server scope (None).
-        assert tenant_directory.resolve_tenant_for_email("user@shared.com") is None
+    # Two tenants claim the domain → ambiguous → server scope (None).
+    assert tenant_directory.resolve_tenant_for_email("user@shared.com") is None
 
 
-def test_none_for_malformed_email(db_session):
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        assert tenant_directory.resolve_tenant_for_email("not-an-email") is None
-        assert tenant_directory.resolve_tenant_for_email("") is None
-        assert tenant_directory.resolve_tenant_for_email(None) is None
-
-
-def test_never_raises_without_db():
-    # No engine fixture → registry unavailable; must degrade to None.
-    with patch.object(
-        tenant_directory.config, "is_multitenancy_enabled", return_value=True
-    ):
-        assert tenant_directory.resolve_tenant_for_email("user@acme.com") is None
+def test_none_for_malformed_email(real_engine, db_session):
+    assert tenant_directory.resolve_tenant_for_email("not-an-email") is None
+    assert tenant_directory.resolve_tenant_for_email("") is None
+    assert tenant_directory.resolve_tenant_for_email(None) is None

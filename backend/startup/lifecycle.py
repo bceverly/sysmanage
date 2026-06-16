@@ -138,7 +138,19 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                             len(failed_modules),
                             ", ".join(failed_modules),
                         )
-                # Mount Pro+ routes now that modules are loaded
+                # Bridge the multi-tenancy engine into the OSS seam if loaded —
+                # BEFORE mounting Pro+ routes, so mount_multitenancy_routes sees
+                # the registered engine and mounts ITS control-plane router (not
+                # the OSS fallback).  The bridge also feeds the data-plane
+                # resolver in backend/persistence/partitions.py (a runtime hot
+                # path).  No-op (single-tenant) when the engine isn't licensed.
+                multitenancy_engine = module_loader.get_module("multitenancy_engine")
+                if multitenancy_engine:
+                    from backend.multitenancy import bridge  # noqa: PLC0415
+
+                    bridge.bridge_loaded_engine(multitenancy_engine)
+
+                # Mount Pro+ routes now that modules are loaded + bridged
                 logger.info("=== MOUNTING PRO+ MODULE ROUTES ===")
                 proplus_results = mount_proplus_routes(_fastapi_app)
                 if any(proplus_results.values()):
@@ -147,18 +159,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     logger.warning(
                         "No Pro+ module routes were mounted despite modules being loaded"
                     )
-
-                # Bridge the multi-tenancy engine into the OSS seam if loaded.
-                # Unlike other engines (routes only), multi-tenancy also feeds
-                # the data-plane resolver in backend/persistence/partitions.py,
-                # which is consulted at runtime — so registering it here, after
-                # module load, is sufficient for per-tenant routing to take
-                # effect.  No-op (single-tenant) when the engine isn't licensed.
-                multitenancy_engine = module_loader.get_module("multitenancy_engine")
-                if multitenancy_engine:
-                    from backend.multitenancy import bridge  # noqa: PLC0415
-
-                    bridge.bridge_loaded_engine(multitenancy_engine)
 
                 # Start alerting background task if module is available
                 alerting_engine = module_loader.get_module("alerting_engine")

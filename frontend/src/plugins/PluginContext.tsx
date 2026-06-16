@@ -22,6 +22,8 @@ import type {
     PluginRoute,
     PluginHostDetailTab,
     PluginSettingsTab,
+    PluginNavbarWidget,
+    PluginAppBanner,
 } from './types';
 
 interface PluginContextValue {
@@ -29,6 +31,8 @@ interface PluginContextValue {
     routes: PluginRoute[];
     hostDetailTabs: PluginHostDetailTab[];
     settingsTabs: PluginSettingsTab[];
+    navbarWidgets: PluginNavbarWidget[];
+    appBanners: PluginAppBanner[];
     pluginsLoaded: boolean;
 }
 
@@ -37,6 +41,8 @@ const PluginContext = createContext<PluginContextValue>({
     routes: [],
     hostDetailTabs: [],
     settingsTabs: [],
+    navbarWidgets: [],
+    appBanners: [],
     pluginsLoaded: false,
 });
 
@@ -118,6 +124,8 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             routes: pluginManager.getRoutes(),
             hostDetailTabs: pluginManager.getHostDetailTabs(),
             settingsTabs: pluginManager.getSettingsTabs(),
+            navbarWidgets: pluginManager.getNavbarWidgets(),
+            appBanners: pluginManager.getAppBanners(),
             pluginsLoaded,
         }),
         // ``revision`` IS the dependency that should trigger

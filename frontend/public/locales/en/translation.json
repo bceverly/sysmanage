@@ -121,8 +121,7 @@
     "unknown": "Unknown",
     "update": "Update",
     "selected": "Selected",
-    "view": "View",
-    "create": "Create"
+    "view": "View"
   },
   "connectionStatus": {
     "connected": "Connected",
@@ -1004,7 +1003,6 @@
     "secrets": "Secrets",
     "updates": "Updates",
     "users": "Users",
-    "tenants": "Tenants",
     "role": {
       "collector": "Air-Gap Collector",
       "engineMissing": "Required Pro+ engine not loaded; check license.",
@@ -3136,112 +3134,5 @@
     "secretUnset": "Not set",
     "secretUnsetHelp": "Stored securely in OpenBAO, not in the database.",
     "title": "Configuration"
-  },
-  "tenants": {
-    "createError": "Failed to create tenant",
-    "created": "Tenant created",
-    "disabledBody": "This server runs in single-tenant mode — there is one implicit tenant (the server itself). Enable \"multitenancy.enabled\" in sysmanage.yaml and restart to manage multiple tenants here.",
-    "disabledTitle": "Multi-tenancy is disabled",
-    "domains": {
-      "addError": "Failed to add domain",
-      "added": "Domain added",
-      "domain": "Domain",
-      "help": "Users whose email domain is on this list may be granted access to the tenant. An empty list means no domain restriction.",
-      "loadError": "Failed to load domains",
-      "none": "No domains — any domain is allowed.",
-      "removeError": "Failed to remove domain",
-      "removed": "Domain removed",
-      "title": "Email-Domain Allowlist"
-    },
-    "loadError": "Failed to load tenants",
-    "members": {
-      "addError": "Failed to add member",
-      "added": "Member added",
-      "email": "Email",
-      "expires": "Expires",
-      "loadError": "Failed to load members",
-      "none": "No members yet.",
-      "revoke": "Revoke",
-      "revokeError": "Failed to revoke member",
-      "revoked": "Member revoked",
-      "role": "Role",
-      "title": "Members"
-    },
-    "name": "Name",
-    "new": "New Tenant",
-    "none": "No tenants yet",
-    "placement": {
-      "dbname": "Database",
-      "help": "Database coordinates for this tenant. The password is never stored here — \"OpenBAO role\" names the dynamic-credentials role that brokers it.",
-      "host": "Host",
-      "loadError": "Failed to load placement",
-      "openbaoRole": "OpenBAO role",
-      "port": "Port",
-      "provision": "Provision Database",
-      "provisionError": "Provisioning failed",
-      "provisionHint": "Set and save an OpenBAO role before provisioning.",
-      "provisioned": "Provisioned",
-      "provisioning": "Provisioning…",
-      "region": "Region",
-      "saveError": "Failed to save placement",
-      "saved": "Placement saved",
-      "tier": "Tier",
-      "title": "Database Placement"
-    },
-    "selectPrompt": "Select a tenant to manage its domains, members, and placement.",
-    "slug": "Slug",
-    "slugHelp": "Unique, URL-safe identifier (e.g. acme)",
-    "status": "Status",
-    "title": "Tenant Management",
-    "autoProvision": {
-      "done": "Tenant provisioned",
-      "error": "Auto-provisioning failed",
-      "help": "Create this tenant’s database and OpenBAO credentials role, set placement, and run migrations — no command line needed.",
-      "notBootstrapped": "The provisioner identity is not configured. Run \"make provision-bootstrap\" once before auto-provisioning.",
-      "run": "Auto-Provision Tenant",
-      "running": "Provisioning…",
-      "title": "Auto-Provision"
-    },
-    "switcher": {
-      "noAccounts": "No tenant grants",
-      "none": "No tenant",
-      "tooltip": "Active tenant — click to switch"
-    },
-    "delete": {
-      "button": "Delete",
-      "confirmPrompt": "Type the tenant slug to confirm:",
-      "deleting": "Deleting…",
-      "done": "Tenant deleted",
-      "dropDb": "Also DROP the tenant database — irreversible data loss",
-      "dropDbWarn": "The entire tenant database and all its data will be destroyed.",
-      "error": "Failed to delete tenant",
-      "title": "Delete tenant",
-      "warning": "This permanently removes the tenant, its members, email-domain allowlist, placement, and its OpenBAO credentials role. This cannot be undone."
-    },
-    "tokens": {
-      "active": "active",
-      "createError": "Failed to create token",
-      "expires": "Expires",
-      "expiresDays": "Expires (days)",
-      "generate": "Generate",
-      "help": "Agents present an enrollment token at registration to join this tenant. The token is shown once at creation — copy it then.",
-      "label": "Label",
-      "loadError": "Failed to load tokens",
-      "maxUses": "Max uses",
-      "none": "No enrollment tokens.",
-      "revoke": "Revoke",
-      "revokeError": "Failed to revoke token",
-      "revoked": "Token revoked",
-      "revokedLabel": "revoked",
-      "shownOnce": "Copy this token now — it will not be shown again:",
-      "status": "Status",
-      "title": "Enrollment Tokens",
-      "uses": "Uses"
-    }
-  },
-  "tenantMigration": {
-    "intro": "These tenant databases are behind the current code. Run",
-    "outro": "on the server (OpenBAO must be running):",
-    "title": "Tenant database migration required"
   }
 }

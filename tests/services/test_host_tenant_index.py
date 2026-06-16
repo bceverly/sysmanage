@@ -1,54 +1,46 @@
 """
-Tests for the host→tenant index (Phase 13.1 data plane).
+Tests for the host→tenant index OSS shim (Pro+ relocation, Phase 2).
+
+The implementation moved into the licensed engine; the OSS module is now a thin
+delegator.  Here we verify its contract: it routes to the engine module when
+present, and degrades to the best-effort no-op (writes False, read None) when
+multi-tenancy isn't active.  The real DB logic is covered in the Pro+ engine.
 """
 
 import uuid
+from unittest.mock import MagicMock
 
+import pytest
+
+from backend.multitenancy import seam
 from backend.services import host_tenant_index
 
 
-def _tenant(db_session, slug="idx-co"):
-    from backend.persistence.models import RegistryTenant, TENANT_STATUS_ACTIVE
-
-    t = RegistryTenant(name="Idx Co", slug=slug, status=TENANT_STATUS_ACTIVE)
-    db_session.add(t)
-    db_session.commit()
-    return t
+@pytest.fixture(autouse=True)
+def _clean_seam():
+    seam.unregister_engine()
+    yield
+    seam.unregister_engine()
 
 
-def test_bind_and_lookup(db_session):
-    tenant = _tenant(db_session)
+def test_no_engine_degrades_gracefully():
     host_id = uuid.uuid4()
-    assert host_tenant_index.bind_host_to_tenant(host_id, tenant.id) is True
-    assert host_tenant_index.tenant_for_host(host_id) == str(tenant.id)
-
-
-def test_lookup_unknown_returns_none(db_session):
-    assert host_tenant_index.tenant_for_host(uuid.uuid4()) is None
-    assert host_tenant_index.tenant_for_host(None) is None
-
-
-def test_rebind_updates_tenant(db_session):
-    a = _tenant(db_session, "a-co")
-    b = _tenant(db_session, "b-co")
-    host_id = uuid.uuid4()
-    host_tenant_index.bind_host_to_tenant(host_id, a.id)
-    host_tenant_index.bind_host_to_tenant(host_id, b.id)
-    assert host_tenant_index.tenant_for_host(host_id) == str(b.id)
-    # Still exactly one row for the host.
-    from backend.persistence.models import RegistryHostTenant
-
-    assert (
-        db_session.query(RegistryHostTenant)
-        .filter(RegistryHostTenant.host_id == host_id)
-        .count()
-        == 1
-    )
-
-
-def test_unbind_removes_binding(db_session):
-    tenant = _tenant(db_session)
-    host_id = uuid.uuid4()
-    host_tenant_index.bind_host_to_tenant(host_id, tenant.id)
-    assert host_tenant_index.unbind_host(host_id) is True
+    assert host_tenant_index.bind_host_to_tenant(host_id, "t-1") is False
     assert host_tenant_index.tenant_for_host(host_id) is None
+    assert host_tenant_index.tenant_for_host(None) is None
+    assert host_tenant_index.unbind_host(host_id) is False
+
+
+def test_delegates_to_engine_when_present():
+    fake = MagicMock()
+    fake.bind_host_to_tenant.return_value = True
+    fake.tenant_for_host.return_value = "tenant-9"
+    fake.unbind_host.return_value = True
+    seam.register_engine(MagicMock(), module=fake)
+
+    assert host_tenant_index.bind_host_to_tenant("h-1", "t-1") is True
+    fake.bind_host_to_tenant.assert_called_once_with("h-1", "t-1")
+    assert host_tenant_index.tenant_for_host("h-1") == "tenant-9"
+    fake.tenant_for_host.assert_called_once_with("h-1")
+    assert host_tenant_index.unbind_host("h-1") is True
+    fake.unbind_host.assert_called_once_with("h-1")

@@ -40,13 +40,18 @@ def test_registry_session_factory_yields_session(engine):
 
 
 def test_tenant_routing_when_enabled(engine, monkeypatch):
-    """When multitenancy is enabled, per-tenant routing leases via OpenBAO.
+    """When multitenancy is enabled, per-tenant routing REQUIRES the licensed
+    engine (Phase 2 moat).
 
-    Registry/shared still collapse onto the bootstrap engine.  The tenant path
-    (13.1.C) routes through the engine manager; with no placement registered it
-    fails loudly (LookupError) rather than silently misrouting, and a missing
-    tenant_id is a clear ValueError.
+    Registry/shared still collapse onto the bootstrap engine.  The per-tenant
+    routing logic (engine cache + OpenBAO leasing) now lives only in the
+    compiled ``multitenancy_engine``, so with no engine registered the tenant
+    path raises a clear RuntimeError rather than silently misrouting.  A missing
+    tenant_id is still a clear ValueError, checked before the engine.
     """
+    from backend.multitenancy import seam  # noqa: PLC0415
+
+    seam.unregister_engine()  # ensure no engine leaked in from another test
     monkeypatch.setattr(
         "backend.persistence.partitions.config.is_multitenancy_enabled",
         lambda: True,
@@ -55,12 +60,11 @@ def test_tenant_routing_when_enabled(engine, monkeypatch):
     assert (
         partitions.resolve_engine(partition=partitions.PARTITION_REGISTRY) is not None
     )
-    # Tenant routing now goes through the engine manager; an unregistered
-    # tenant (no placement) fails loudly.
-    with pytest.raises(LookupError):
+    # Tenant routing without the licensed engine fails loudly — the moat.
+    with pytest.raises(RuntimeError, match="licensed multi-tenancy engine"):
         partitions.resolve_engine(
             partition=partitions.PARTITION_TENANT, tenant_id="some-id"
         )
-    # And a missing tenant_id is a clear error, not a silent fallback.
+    # And a missing tenant_id is a clear error, checked before the engine.
     with pytest.raises(ValueError):
         partitions.resolve_engine(partition=partitions.PARTITION_TENANT)
