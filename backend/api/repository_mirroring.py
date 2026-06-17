@@ -55,6 +55,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -215,7 +216,7 @@ class MirrorSettingsRequest(BaseModel):
 
 @router.get("/api/mirror-repositories", dependencies=[Depends(JWTBearer())])
 async def list_mirrors(
-    platform_config_id: Optional[str] = None, db: Session = Depends(get_db)
+    platform_config_id: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ):
     _check_mirror_module()
     q = db.query(models.MirrorRepository)
@@ -237,7 +238,7 @@ def _platform_for_pm(pm: str) -> str:
 @router.post("/api/mirror-repositories", dependencies=[Depends(JWTBearer())])
 async def create_mirror(
     request: MirrorCreateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     engine = _check_mirror_module()
@@ -300,7 +301,7 @@ async def create_mirror(
 
 
 @router.get("/api/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
-async def get_mirror(mirror_id: str, db: Session = Depends(get_db)):
+async def get_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
     row = (
@@ -317,7 +318,7 @@ async def get_mirror(mirror_id: str, db: Session = Depends(get_db)):
 async def update_mirror(
     mirror_id: str,
     request: MirrorUpdateRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -343,7 +344,7 @@ async def update_mirror(
 )
 async def delete_mirror(
     mirror_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -368,7 +369,7 @@ async def delete_mirror(
 @router.post(
     "/api/mirror-repositories/{mirror_id}/sync", dependencies=[Depends(JWTBearer())]
 )
-async def sync_mirror(mirror_id: str, db: Session = Depends(get_db)):
+async def sync_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
     row = (
@@ -411,7 +412,7 @@ async def sync_mirror(mirror_id: str, db: Session = Depends(get_db)):
 @router.post(
     "/api/mirror-repositories/{mirror_id}/snapshot", dependencies=[Depends(JWTBearer())]
 )
-async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_db)):
+async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
     row = (
@@ -453,7 +454,7 @@ async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_db)):
     dependencies=[Depends(JWTBearer())],
 )
 async def restore_mirror(
-    mirror_id: str, snapshot_id: str, db: Session = Depends(get_db)
+    mirror_id: str, snapshot_id: str, db: Session = Depends(get_tenant_db)
 ):
     engine = _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
@@ -484,7 +485,7 @@ async def restore_mirror(
     "/api/mirror-repositories/{mirror_id}/snapshots",
     dependencies=[Depends(JWTBearer())],
 )
-async def list_snapshots(mirror_id: str, db: Session = Depends(get_db)):
+async def list_snapshots(mirror_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
     rows = (
@@ -504,7 +505,12 @@ _MIRROR_MAX_SYNC_FAILURES = 5
 
 
 @router.post("/api/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
-async def tick_mirrors(db: Session = Depends(get_db)):
+async def tick_mirrors(
+    # Driver hook for an external scheduler — no logged-in user / active-tenant
+    # context, so this stays on the main engine until inbound queue tenant-routing
+    # lands.
+    db: Session = Depends(get_db),
+):
     """Driver hook for an external scheduler.  Selects every enabled
     mirror with ``next_sync_at <= now`` (or NULL) and dispatches a
     sync plan for it.  Recomputes ``next_sync_at`` from the cron.
@@ -596,7 +602,7 @@ async def tick_mirrors(db: Session = Depends(get_db)):
 
 
 @router.get("/api/settings/mirror", dependencies=[Depends(JWTBearer())])
-async def get_mirror_settings(db: Session = Depends(get_db)):
+async def get_mirror_settings(db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     return _get_settings(db).to_dict()
 
@@ -604,7 +610,7 @@ async def get_mirror_settings(db: Session = Depends(get_db)):
 @router.put("/api/settings/mirror", dependencies=[Depends(JWTBearer())])
 async def update_mirror_settings(
     request: MirrorSettingsRequest = Body(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -639,7 +645,7 @@ async def update_mirror_settings(
     "/api/mirror-repositories/setup-status/{host_id}",
     dependencies=[Depends(JWTBearer())],
 )
-async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_db)):
+async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(host_id, "host_id")
     row = (
@@ -675,7 +681,9 @@ async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_db)):
     "/api/mirror-repositories/setup-status/{host_id}/refresh",
     dependencies=[Depends(JWTBearer())],
 )
-async def refresh_mirror_setup_status(host_id: str, db: Session = Depends(get_db)):
+async def refresh_mirror_setup_status(
+    host_id: str, db: Session = Depends(get_tenant_db)
+):
     """Queue a tool-presence probe.  The probe's command_result lands
     asynchronously in the inbound queue handler and updates the row.
     """
@@ -712,7 +720,7 @@ class MirrorSetupInstallRequest(BaseModel):
 async def install_mirror_tools(
     host_id: str,
     request: MirrorSetupInstallRequest = Body(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
 ):
     """Queue an install plan for the named package manager's mirror tools.
     Result-routing flips ``install_status`` to succeeded / failed and
@@ -768,7 +776,7 @@ class PlatformConfigRequest(BaseModel):
 
 
 @router.get("/api/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
-async def list_platform_configs(db: Session = Depends(get_db)):
+async def list_platform_configs(db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     rows = (
         db.query(models.MirrorPlatformConfig)
@@ -781,7 +789,7 @@ async def list_platform_configs(db: Session = Depends(get_db)):
 @router.post("/api/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
 async def create_platform_config(
     request: PlatformConfigRequest = Body(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -821,7 +829,7 @@ async def create_platform_config(
 @router.get(
     "/api/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())]
 )
-async def get_platform_config(cfg_id: str, db: Session = Depends(get_db)):
+async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(cfg_id, "cfg_id")
     row = (
@@ -840,7 +848,7 @@ async def get_platform_config(cfg_id: str, db: Session = Depends(get_db)):
 async def update_platform_config(
     cfg_id: str,
     request: PlatformConfigRequest = Body(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -881,7 +889,7 @@ async def update_platform_config(
 )
 async def delete_platform_config(
     cfg_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     _check_mirror_module()
@@ -920,7 +928,7 @@ async def delete_platform_config(
 
 @router.get("/api/mirror-known-versions", dependencies=[Depends(JWTBearer())])
 async def list_known_versions(
-    platform: Optional[str] = None, db: Session = Depends(get_db)
+    platform: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ):
     _check_mirror_module()
     q = db.query(models.MirrorKnownVersion).filter(
@@ -1011,7 +1019,7 @@ def _assignment_row(kv, cur, eligible: list[dict]) -> dict:
 
 
 @router.get("/api/host-defaults/mirrors", dependencies=[Depends(JWTBearer())])
-async def list_default_mirror_assignments(db: Session = Depends(get_db)):
+async def list_default_mirror_assignments(db: Session = Depends(get_tenant_db)):
     """Return one row per (platform, version_key, os_family) tuple
     drawn from the known-versions catalog, with the currently-assigned
     mirror_id (or null = "Cloud") and the list of mirrors that are
@@ -1127,7 +1135,7 @@ async def set_default_mirror_assignment(
     version_key: str,
     os_family: str,
     request: HostDefaultMirrorRequest = Body(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     """Assign (or unassign) a default mirror for a known (platform,

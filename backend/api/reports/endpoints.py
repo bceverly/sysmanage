@@ -5,6 +5,7 @@ When the reporting_engine Pro+ module is loaded, these endpoints delegate
 to it directly. Otherwise, they return license-required errors.
 """
 
+import asyncio
 import html
 from datetime import datetime, timezone
 from enum import Enum
@@ -12,11 +13,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import HTMLResponse
+from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence.db import get_db
+from backend.persistence import db as db_module
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
@@ -69,7 +71,6 @@ async def view_report_html(
     report_type: ReportType,
     template_id: Optional[str] = Query(None),
     current_user=Depends(get_current_user),
-    db=Depends(get_db),
 ):
     """
     Generate and return HTML version of a report.
@@ -83,65 +84,88 @@ async def view_report_html(
     """
     reporting_engine = _check_reporting_module()
 
-    from backend.persistence import models
-
-    html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _, models=models)
-    selected_fields = _resolve_template_fields(
-        reporting_engine, db, models, template_id
+    # The DB queries + HTML render run in a worker thread so they don't stall
+    # the event loop (large host/audit fetches + template rendering would freeze
+    # every other request while the report builds).
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None, _build_report_html, reporting_engine, report_type, template_id
     )
 
-    if report_type in (ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS):
-        hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
-        report_title = (
-            _("Registered Hosts")
-            if report_type == ReportType.REGISTERED_HOSTS
-            else _("Hosts with Tags")
+
+def _build_report_html(reporting_engine, report_type, template_id):
+    """Render a report's HTML in a worker thread (see ``view_report_html``).
+    Opens its own session because the request session can't cross the thread
+    boundary."""
+    from backend.persistence import models
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+    with session_local() as db:
+        html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _, models=models)
+        selected_fields = _resolve_template_fields(
+            reporting_engine, db, models, template_id
         )
-        html_content = html_gen.generate_hosts_html(
-            hosts, report_type.value, report_title, selected_fields=selected_fields
-        )
-    elif report_type == ReportType.USERS_LIST:
-        users = db.query(models.User).order_by(models.User.userid).all()
-        html_content = html_gen.generate_users_html(
-            users, _("SysManage Users"), selected_fields=selected_fields
-        )
-    elif report_type == ReportType.FIREWALL_STATUS:
-        hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
-        html_content = html_gen.generate_firewall_html(
-            hosts, _("Host Firewall Status"), selected_fields=selected_fields
-        )
-    elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
-        hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
-        html_content = html_gen.generate_antivirus_opensource_html(
-            hosts, _("Open-Source Antivirus Status"), selected_fields=selected_fields
-        )
-    elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
-        hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
-        html_content = html_gen.generate_antivirus_commercial_html(
-            hosts, _("Commercial Antivirus Status"), selected_fields=selected_fields
-        )
-    elif report_type == ReportType.USER_RBAC:
-        users = db.query(models.User).order_by(models.User.userid).all()
-        role_groups = (
-            db.query(models.SecurityRoleGroup)
-            .order_by(models.SecurityRoleGroup.name)
-            .all()
-        )
-        html_content = html_gen.generate_user_rbac_html(
-            users,
-            role_groups,
-            _("User Security Roles (RBAC)"),
-            selected_fields=selected_fields,
-        )
-    elif report_type == ReportType.AUDIT_LOG:
-        audit_entries = (
-            db.query(models.AuditLog).order_by(models.AuditLog.timestamp.desc()).all()
-        )
-        html_content = html_gen.generate_audit_log_html(
-            audit_entries, _("Audit Log"), selected_fields=selected_fields
-        )
-    else:
-        raise HTTPException(status_code=400, detail=_("Unknown report type"))
+
+        if report_type in (ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS):
+            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            report_title = (
+                _("Registered Hosts")
+                if report_type == ReportType.REGISTERED_HOSTS
+                else _("Hosts with Tags")
+            )
+            html_content = html_gen.generate_hosts_html(
+                hosts, report_type.value, report_title, selected_fields=selected_fields
+            )
+        elif report_type == ReportType.USERS_LIST:
+            users = db.query(models.User).order_by(models.User.userid).all()
+            html_content = html_gen.generate_users_html(
+                users, _("SysManage Users"), selected_fields=selected_fields
+            )
+        elif report_type == ReportType.FIREWALL_STATUS:
+            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            html_content = html_gen.generate_firewall_html(
+                hosts, _("Host Firewall Status"), selected_fields=selected_fields
+            )
+        elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
+            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            html_content = html_gen.generate_antivirus_opensource_html(
+                hosts,
+                _("Open-Source Antivirus Status"),
+                selected_fields=selected_fields,
+            )
+        elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
+            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            html_content = html_gen.generate_antivirus_commercial_html(
+                hosts,
+                _("Commercial Antivirus Status"),
+                selected_fields=selected_fields,
+            )
+        elif report_type == ReportType.USER_RBAC:
+            users = db.query(models.User).order_by(models.User.userid).all()
+            role_groups = (
+                db.query(models.SecurityRoleGroup)
+                .order_by(models.SecurityRoleGroup.name)
+                .all()
+            )
+            html_content = html_gen.generate_user_rbac_html(
+                users,
+                role_groups,
+                _("User Security Roles (RBAC)"),
+                selected_fields=selected_fields,
+            )
+        elif report_type == ReportType.AUDIT_LOG:
+            audit_entries = (
+                db.query(models.AuditLog)
+                .order_by(models.AuditLog.timestamp.desc())
+                .all()
+            )
+            html_content = html_gen.generate_audit_log_html(
+                audit_entries, _("Audit Log"), selected_fields=selected_fields
+            )
+        else:
+            raise HTTPException(status_code=400, detail=_("Unknown report type"))
 
     # html_content is generated by a trusted Pro+ reporting module
     # from enum-validated report types and ORM-fetched data.  The
@@ -170,7 +194,6 @@ async def generate_report(
     report_type: ReportType,
     template_id: Optional[str] = Query(None),
     current_user=Depends(get_current_user),
-    db=Depends(get_db),
 ):
     """
     Generate and download a PDF report.
@@ -181,72 +204,90 @@ async def generate_report(
     """
     reporting_engine = _check_reporting_module()
 
+    # The DB queries + reportlab PDF build are blocking and run in a worker
+    # thread so they don't stall the event loop — a synchronous reportlab build
+    # in the loop freezes every other request, including the one downloading
+    # this PDF (the cause of the export "hang").
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None, _build_report_pdf, reporting_engine, report_type, template_id
+    )
+
+
+def _build_report_pdf(reporting_engine, report_type, template_id):
+    """Render a PDF report in a worker thread (see ``generate_report``).  Opens
+    its own session because the request session can't cross the thread boundary."""
     from backend.persistence import models
 
-    hosts_gen = reporting_engine.HostsReportGeneratorImpl(
-        db, i18n_func=_, models=models
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
-    users_gen = reporting_engine.UsersReportGeneratorImpl(
-        db, i18n_func=_, models=models
-    )
-    selected_fields = _resolve_template_fields(
-        reporting_engine, db, models, template_id
-    )
-
-    if not hosts_gen.reportlab_available:
-        raise HTTPException(
-            status_code=500,
-            detail=_(
-                "PDF generation is not available. Please install reportlab package."
-            ),
+    with session_local() as db:
+        hosts_gen = reporting_engine.HostsReportGeneratorImpl(
+            db, i18n_func=_, models=models
+        )
+        users_gen = reporting_engine.UsersReportGeneratorImpl(
+            db, i18n_func=_, models=models
+        )
+        selected_fields = _resolve_template_fields(
+            reporting_engine, db, models, template_id
         )
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        if not hosts_gen.reportlab_available:
+            raise HTTPException(
+                status_code=500,
+                detail=_(
+                    "PDF generation is not available. Please install reportlab package."
+                ),
+            )
 
-    if report_type == ReportType.REGISTERED_HOSTS:
-        pdf_buffer = hosts_gen.generate_hosts_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"registered_hosts_{ts}.pdf"
-    elif report_type == ReportType.HOSTS_WITH_TAGS:
-        pdf_buffer = hosts_gen.generate_hosts_with_tags_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"hosts_with_tags_{ts}.pdf"
-    elif report_type == ReportType.USERS_LIST:
-        pdf_buffer = users_gen.generate_users_list_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"users_list_{ts}.pdf"
-    elif report_type == ReportType.FIREWALL_STATUS:
-        pdf_buffer = hosts_gen.generate_firewall_status_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"firewall_status_{ts}.pdf"
-    elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
-        pdf_buffer = hosts_gen.generate_antivirus_opensource_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"antivirus_opensource_{ts}.pdf"
-    elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
-        pdf_buffer = hosts_gen.generate_antivirus_commercial_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"antivirus_commercial_{ts}.pdf"
-    elif report_type == ReportType.USER_RBAC:
-        pdf_buffer = users_gen.generate_user_rbac_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"user_rbac_{ts}.pdf"
-    elif report_type == ReportType.AUDIT_LOG:
-        pdf_buffer = users_gen.generate_audit_log_report(
-            models, selected_fields=selected_fields
-        )
-        filename = f"audit_log_{ts}.pdf"
-    else:
-        raise HTTPException(status_code=400, detail=_("Unknown report type"))
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-    pdf_bytes = pdf_buffer.getvalue()
+        if report_type == ReportType.REGISTERED_HOSTS:
+            pdf_buffer = hosts_gen.generate_hosts_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"registered_hosts_{ts}.pdf"
+        elif report_type == ReportType.HOSTS_WITH_TAGS:
+            pdf_buffer = hosts_gen.generate_hosts_with_tags_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"hosts_with_tags_{ts}.pdf"
+        elif report_type == ReportType.USERS_LIST:
+            pdf_buffer = users_gen.generate_users_list_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"users_list_{ts}.pdf"
+        elif report_type == ReportType.FIREWALL_STATUS:
+            pdf_buffer = hosts_gen.generate_firewall_status_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"firewall_status_{ts}.pdf"
+        elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
+            pdf_buffer = hosts_gen.generate_antivirus_opensource_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"antivirus_opensource_{ts}.pdf"
+        elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
+            pdf_buffer = hosts_gen.generate_antivirus_commercial_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"antivirus_commercial_{ts}.pdf"
+        elif report_type == ReportType.USER_RBAC:
+            pdf_buffer = users_gen.generate_user_rbac_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"user_rbac_{ts}.pdf"
+        elif report_type == ReportType.AUDIT_LOG:
+            pdf_buffer = users_gen.generate_audit_log_report(
+                models, selected_fields=selected_fields
+            )
+            filename = f"audit_log_{ts}.pdf"
+        else:
+            raise HTTPException(status_code=400, detail=_("Unknown report type"))
+
+        pdf_bytes = pdf_buffer.getvalue()
+
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

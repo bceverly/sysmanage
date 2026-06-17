@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class CommercialAntivirusStatusResponse(BaseModel):
 )
 async def get_commercial_antivirus_status(
     host_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Get commercial antivirus status for a specific host."""

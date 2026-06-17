@@ -79,7 +79,7 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
   // networkidle alone isn't enough — the SPA may fire the redirect AFTER
   // network goes idle (React checks localStorage, then navigates).
   try {
-    await page.waitForLoadState('networkidle', { timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 3000 });
   } catch {
     // networkidle may timeout on slow CI, continue
   }
@@ -113,7 +113,7 @@ export async function ensureAuthenticated(page: Page, targetPath: string): Promi
     }
   }
   try {
-    await page.waitForLoadState('networkidle', { timeout: 20000 });
+    await page.waitForLoadState('networkidle', { timeout: 3000 });
   } catch {
     // networkidle may timeout, continue
   }

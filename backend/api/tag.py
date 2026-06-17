@@ -16,12 +16,10 @@ from backend.api.error_constants import (
     error_edit_tags_required,
     error_tag_already_exists,
     error_tag_not_found,
-    error_user_not_found,
 )
-from backend.auth.auth_bearer import get_current_user
+from backend.auth.auth_bearer import get_current_user, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db as db_module
-from backend.persistence import models
 from backend.persistence.models import HostTag, Tag
 from backend.persistence.partitions import get_request_engine, get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -153,31 +151,22 @@ async def get_tags(current_user: str = Depends(get_current_user)):
 async def create_tag(
     tag_data: TagCreate,
     db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Create a new tag"""
     try:
-        # Check if user has permission to edit tags
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the tag data routes to the
+        # tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.EDIT_TAGS):
+            raise HTTPException(
+                status_code=403,
+                detail=error_edit_tags_required(),
+            )
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.EDIT_TAGS):
-                raise HTTPException(
-                    status_code=403,
-                    detail=error_edit_tags_required(),
-                )
 
         # Check if tag with same name already exists
         existing_tag = db.query(Tag).filter(Tag.name == tag_data.name).first()
@@ -203,8 +192,8 @@ async def create_tag(
         with session_local() as audit_session:
             AuditService.log_create(
                 db=audit_session,
-                user_id=user.id,
-                username=current_user,
+                user_id=current_user.id,
+                username=current_user.userid,
                 entity_type=EntityType.TAG,
                 entity_id=str(new_tag.id),
                 entity_name=new_tag.name,
@@ -240,31 +229,22 @@ async def update_tag(
     tag_id: str,
     tag_data: TagUpdate,
     db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Update an existing tag"""
     try:
-        # Check if user has permission to edit tags
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the tag data routes to the
+        # tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.EDIT_TAGS):
+            raise HTTPException(
+                status_code=403,
+                detail=error_edit_tags_required(),
+            )
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.EDIT_TAGS):
-                raise HTTPException(
-                    status_code=403,
-                    detail=error_edit_tags_required(),
-                )
 
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
@@ -295,8 +275,8 @@ async def update_tag(
         with session_local() as audit_session:
             AuditService.log_update(
                 db=audit_session,
-                user_id=user.id,
-                username=current_user,
+                user_id=current_user.id,
+                username=current_user.userid,
                 entity_type=EntityType.TAG,
                 entity_id=tag_id,
                 entity_name=tag.name,
@@ -331,31 +311,22 @@ async def update_tag(
 async def delete_tag(
     tag_id: str,
     db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Delete a tag"""
     try:
-        # Check if user has permission to edit tags
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the tag data routes to the
+        # tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.EDIT_TAGS):
+            raise HTTPException(
+                status_code=403,
+                detail=error_edit_tags_required(),
+            )
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.EDIT_TAGS):
-                raise HTTPException(
-                    status_code=403,
-                    detail=error_edit_tags_required(),
-                )
 
         # Find the tag
         tag = db.query(Tag).filter(Tag.id == tag_id).first()
@@ -383,8 +354,8 @@ async def delete_tag(
         with session_local() as audit_session:
             AuditService.log_delete(
                 db=audit_session,
-                user_id=user.id,
-                username=current_user,
+                user_id=current_user.id,
+                username=current_user.userid,
                 entity_type=EntityType.TAG,
                 entity_id=tag_id,
                 entity_name=tag_name,
@@ -496,31 +467,22 @@ async def add_tag_to_host(
     host_id: str,
     tag_id: str,
     db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Add a tag to a host"""
     try:
-        # Check if user has permission to edit tags
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the tag data routes to the
+        # tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.EDIT_TAGS):
+            raise HTTPException(
+                status_code=403,
+                detail=error_edit_tags_required(),
+            )
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.EDIT_TAGS):
-                raise HTTPException(
-                    status_code=403,
-                    detail=error_edit_tags_required(),
-                )
 
         from sqlalchemy import text
 
@@ -574,8 +536,8 @@ async def add_tag_to_host(
         with session_local() as audit_session:
             AuditService.log(
                 db=audit_session,
-                user_id=user.id,
-                username=current_user,
+                user_id=current_user.id,
+                username=current_user.userid,
                 action_type=ActionType.UPDATE,
                 entity_type=EntityType.TAG,
                 entity_id=tag_id,
@@ -601,31 +563,22 @@ async def remove_tag_from_host(
     host_id: str,
     tag_id: str,
     db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Remove a tag from a host"""
     try:
-        # Check if user has permission to edit tags
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the tag data routes to the
+        # tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.EDIT_TAGS):
+            raise HTTPException(
+                status_code=403,
+                detail=error_edit_tags_required(),
+            )
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.EDIT_TAGS):
-                raise HTTPException(
-                    status_code=403,
-                    detail=error_edit_tags_required(),
-                )
 
         # Find the association
         host_tag = (
@@ -657,8 +610,8 @@ async def remove_tag_from_host(
         with session_local() as audit_session:
             AuditService.log(
                 db=audit_session,
-                user_id=user.id,
-                username=current_user,
+                user_id=current_user.id,
+                username=current_user.userid,
                 action_type=ActionType.UPDATE,
                 entity_type=EntityType.TAG,
                 entity_id=tag_id,

@@ -13,14 +13,16 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.api.error_constants import (
     error_agent_privileged_required,
     error_host_not_found_or_not_active,
-    error_user_not_found,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import (
+    JWTBearer,
+    get_current_user,
+    require_authenticated_user,
+)
 from backend.i18n import _
 from backend.persistence import db as db_module
-from backend.persistence import models
-from backend.persistence.db import get_db
 from backend.persistence.models import Host
+from backend.persistence.partitions import get_request_engine, get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import create_command_message
@@ -93,15 +95,22 @@ class EnableDisableRepositoriesResponse(BaseModel):
     message: str
 
 
-def _list_third_party_repositories_sync(host_id: str):
+def _list_third_party_repositories_sync(host_id: str, tenant_id=None):
     """
     Synchronous helper function to retrieve third-party repositories.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database when multi-tenancy is
+    enabled.  ``tenant_id`` is captured by the async caller because the active-
+    tenant ContextVar does not cross the thread-pool boundary.  Server scope /
+    single-tenant (``tenant_id is None``) keeps using the main engine, so the
+    existing tests are unaffected.
     """
     # Get a fresh session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as db:
         # Validate host exists and is active
@@ -182,7 +191,6 @@ def _list_third_party_repositories_sync(host_id: str):
 @router.get("/hosts/{host_id}/third-party-repos", response_model=RepositoryListResponse)
 async def list_third_party_repositories(
     host_id: str,
-    db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
     """
@@ -191,11 +199,16 @@ async def list_third_party_repositories(
     Requires the host to be approved and active.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant HERE, in the request's async context — the
+    # ContextVar won't be visible inside the thread-pool worker below.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     try:
         # Run the synchronous database operation in a thread pool
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
-            None, _list_third_party_repositories_sync, host_id
+            None, _list_third_party_repositories_sync, host_id, tenant_id
         )
 
     except HTTPException:
@@ -211,8 +224,8 @@ async def list_third_party_repositories(
 async def add_third_party_repository(
     host_id: str,
     request: AddRepositoryRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Add a third-party repository to a specific host.
@@ -220,29 +233,15 @@ async def add_third_party_repository(
     Requires ADD_THIRD_PARTY_REPOSITORY permission and privileged agent mode.
     """
     try:
-        # Check if user has permission to add repositories
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=db_module.get_engine()
-        )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the repository data routes to
+        # the tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.ADD_THIRD_PARTY_REPOSITORY):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: ADD_THIRD_PARTY_REPOSITORY role required"),
             )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.ADD_THIRD_PARTY_REPOSITORY):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_(
-                        "Permission denied: ADD_THIRD_PARTY_REPOSITORY role required"
-                    ),
-                )
 
         # Validate host exists and is active
         host = (
@@ -300,31 +299,25 @@ async def add_third_party_repository(
         # Commit the session to persist the queued message
         db.commit()
 
-        # Get user for audit logging
+        # Audit logging stays on the MAIN engine.
         session_local = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
         with session_local() as session:
-            auth_user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
+            # Log audit entry for repository addition
+            AuditService.log_create(
+                db=session,
+                entity_type=EntityType.REPOSITORY,
+                entity_name=request.repository,
+                user_id=current_user.id,
+                username=current_user.userid,
+                details={
+                    "host_id": host_id,
+                    "host_name": host.fqdn,
+                    "repository": request.repository,
+                    "url": request.url,
+                },
             )
-            if auth_user:
-                # Log audit entry for repository addition
-                AuditService.log_create(
-                    db=session,
-                    entity_type=EntityType.REPOSITORY,
-                    entity_name=request.repository,
-                    user_id=auth_user.id,
-                    username=current_user,
-                    details={
-                        "host_id": host_id,
-                        "host_name": host.fqdn,
-                        "repository": request.repository,
-                        "url": request.url,
-                    },
-                )
 
         return AddRepositoryResponse(
             success=True,
@@ -346,8 +339,8 @@ async def add_third_party_repository(
 async def delete_third_party_repositories(  # NOSONAR
     host_id: str,
     request: DeleteRepositoriesRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Delete third-party repositories from a specific host.
@@ -356,29 +349,17 @@ async def delete_third_party_repositories(  # NOSONAR
     Supports batch deletion of multiple repositories.
     """
     try:
-        # Check if user has permission to delete repositories
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=db_module.get_engine()
-        )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the repository data routes to
+        # the tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.DELETE_THIRD_PARTY_REPOSITORY):
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Permission denied: DELETE_THIRD_PARTY_REPOSITORY role required"
+                ),
             )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.DELETE_THIRD_PARTY_REPOSITORY):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_(
-                        "Permission denied: DELETE_THIRD_PARTY_REPOSITORY role required"
-                    ),
-                )
 
         # Validate host exists and is active
         host = (
@@ -464,31 +445,25 @@ async def delete_third_party_repositories(  # NOSONAR
         # Commit both the database deletions and the queued message
         db.commit()
 
-        # Get user for audit logging
+        # Audit logging stays on the MAIN engine.
         session_local_audit = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
         with session_local_audit() as session:
-            auth_user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if auth_user:
-                # Log audit entry for repository deletion
-                for repo in request.repositories:
-                    AuditService.log_delete(
-                        db=session,
-                        entity_type=EntityType.REPOSITORY,
-                        entity_name=repo.get("name", "Unknown"),
-                        user_id=auth_user.id,
-                        username=current_user,
-                        details={
-                            "host_id": host_id,
-                            "host_name": host.fqdn,
-                            "repository": repo,
-                        },
-                    )
+            # Log audit entry for repository deletion
+            for repo in request.repositories:
+                AuditService.log_delete(
+                    db=session,
+                    entity_type=EntityType.REPOSITORY,
+                    entity_name=repo.get("name", "Unknown"),
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    details={
+                        "host_id": host_id,
+                        "host_name": host.fqdn,
+                        "repository": repo,
+                    },
+                )
 
         return DeleteRepositoriesResponse(
             success=True,
@@ -511,8 +486,8 @@ async def delete_third_party_repositories(  # NOSONAR
 async def enable_third_party_repositories(
     host_id: str,
     request: EnableDisableRepositoriesRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Enable third-party repositories on a specific host.
@@ -520,29 +495,17 @@ async def enable_third_party_repositories(
     Requires ENABLE_THIRD_PARTY_REPOSITORY permission and privileged agent mode.
     """
     try:
-        # Check if user has permission to enable repositories
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=db_module.get_engine()
-        )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the repository data routes to
+        # the tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.ENABLE_THIRD_PARTY_REPOSITORY):
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Permission denied: ENABLE_THIRD_PARTY_REPOSITORY role required"
+                ),
             )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.ENABLE_THIRD_PARTY_REPOSITORY):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_(
-                        "Permission denied: ENABLE_THIRD_PARTY_REPOSITORY role required"
-                    ),
-                )
 
         # Validate host exists and is active
         host = (
@@ -599,32 +562,26 @@ async def enable_third_party_repositories(
         # Commit the session to persist the queued message
         db.commit()
 
-        # Get user for audit logging
+        # Audit logging stays on the MAIN engine.
         session_local_audit = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
         with session_local_audit() as session:
-            auth_user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if auth_user:
-                # Log audit entry for repository enable
-                for repo in request.repositories:
-                    AuditService.log_update(
-                        db=session,
-                        entity_type=EntityType.REPOSITORY,
-                        entity_name=repo.get("name", "Unknown"),
-                        user_id=auth_user.id,
-                        username=current_user,
-                        details={
-                            "host_id": host_id,
-                            "host_name": host.fqdn,
-                            "repository": repo,
-                            "action": "enable",
-                        },
-                    )
+            # Log audit entry for repository enable
+            for repo in request.repositories:
+                AuditService.log_update(
+                    db=session,
+                    entity_type=EntityType.REPOSITORY,
+                    entity_name=repo.get("name", "Unknown"),
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    details={
+                        "host_id": host_id,
+                        "host_name": host.fqdn,
+                        "repository": repo,
+                        "action": "enable",
+                    },
+                )
 
         return EnableDisableRepositoriesResponse(
             success=True,
@@ -647,8 +604,8 @@ async def enable_third_party_repositories(
 async def disable_third_party_repositories(
     host_id: str,
     request: EnableDisableRepositoriesRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Disable third-party repositories on a specific host.
@@ -656,29 +613,17 @@ async def disable_third_party_repositories(
     Requires DISABLE_THIRD_PARTY_REPOSITORY permission and privileged agent mode.
     """
     try:
-        # Check if user has permission to disable repositories
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=db_module.get_engine()
-        )
-        with session_local() as session:
-            user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user (user/role data is server-global); the audit
+        # trail also stays on the main engine, while the repository data routes to
+        # the tenant engine via ``db``.
+        if not current_user.has_role(SecurityRoles.DISABLE_THIRD_PARTY_REPOSITORY):
+            raise HTTPException(
+                status_code=403,
+                detail=_(
+                    "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
+                ),
             )
-            if not user:
-                raise HTTPException(status_code=401, detail=error_user_not_found())
-
-            if user._role_cache is None:
-                user.load_role_cache(session)
-
-            if not user.has_role(SecurityRoles.DISABLE_THIRD_PARTY_REPOSITORY):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_(
-                        "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
-                    ),
-                )
 
         # Validate host exists and is active
         host = (
@@ -735,32 +680,26 @@ async def disable_third_party_repositories(
         # Commit the session to persist the queued message
         db.commit()
 
-        # Get user for audit logging
+        # Audit logging stays on the MAIN engine.
         session_local_audit = sessionmaker(
             autocommit=False, autoflush=False, bind=db_module.get_engine()
         )
         with session_local_audit() as session:
-            auth_user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-            if auth_user:
-                # Log audit entry for repository disable
-                for repo in request.repositories:
-                    AuditService.log_update(
-                        db=session,
-                        entity_type=EntityType.REPOSITORY,
-                        entity_name=repo.get("name", "Unknown"),
-                        user_id=auth_user.id,
-                        username=current_user,
-                        details={
-                            "host_id": host_id,
-                            "host_name": host.fqdn,
-                            "repository": repo,
-                            "action": "disable",
-                        },
-                    )
+            # Log audit entry for repository disable
+            for repo in request.repositories:
+                AuditService.log_update(
+                    db=session,
+                    entity_type=EntityType.REPOSITORY,
+                    entity_name=repo.get("name", "Unknown"),
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    details={
+                        "host_id": host_id,
+                        "host_name": host.fqdn,
+                        "repository": repo,
+                        "action": "disable",
+                    },
+                )
 
         return EnableDisableRepositoriesResponse(
             success=True,

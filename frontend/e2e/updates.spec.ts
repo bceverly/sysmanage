@@ -18,7 +18,7 @@ test.describe('Updates Page', () => {
 
     // Should have the updates content area
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -27,7 +27,7 @@ test.describe('Updates Page', () => {
 
   test('should display updates summary cards', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -55,7 +55,7 @@ test.describe('Updates Page', () => {
 
   test('should display update columns or fields', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -74,7 +74,7 @@ test.describe('Updates Page', () => {
 
   test('should have search or filter functionality', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -94,7 +94,7 @@ test.describe('Updates Page', () => {
 
   test('should display update data or empty state', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -151,7 +151,7 @@ test.describe('Updates Selection and Actions', () => {
 test.describe('Updates Host Filtering', () => {
   test('should have host filter or selector', async ({ page }) => {
     await page.goto('/updates');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for host selector dropdown or filter
     const hostSelector = page.locator('select[name*="host"], [class*="host-select"], [class*="host-filter"]');

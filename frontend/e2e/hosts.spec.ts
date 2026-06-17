@@ -96,7 +96,7 @@ test.describe('Host List Page', () => {
   test('should show host count or statistics', async ({ page }) => {
     // Look for any count/statistics display
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -112,7 +112,7 @@ test.describe('Host Detail Page', () => {
   test('should display host detail when navigating directly', async ({ page }) => {
     // First get a host ID from the hosts list
     await page.goto('/hosts');
-    try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // If we landed back on /login, auth setup broke — fail loudly.
     expect(page.url()).not.toContain('/login');
@@ -159,7 +159,7 @@ test.describe('Host Detail Page', () => {
 
     if (await navigateToFirstHostDetail(page)) {
       // Look for common action buttons
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // Page should have interactive elements
       const buttons = page.locator('button');
@@ -178,7 +178,7 @@ test.describe('Host Detail Page', () => {
         await softwareTab.click();
 
         // Wait for tab content to load
-        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -191,7 +191,7 @@ test.describe('Host Detail Page', () => {
       const certTab = page.getByRole('tab', { name: /certificate/i }).first();
       if (await certTab.isVisible()) {
         await certTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -204,7 +204,7 @@ test.describe('Host Detail Page', () => {
       const firewallTab = page.getByRole('tab', { name: /firewall/i }).first();
       if (await firewallTab.isVisible()) {
         await firewallTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -217,7 +217,7 @@ test.describe('Host Detail Page', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });

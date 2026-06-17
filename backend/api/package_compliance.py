@@ -23,15 +23,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db
 from backend.persistence.models.package_compliance import (
     CONSTRAINT_TYPES,
     VERSION_OPS,
 )
+from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.services.package_compliance import evaluate_host_against_profile
 from backend.websocket.messages import create_command_message
@@ -125,13 +125,6 @@ class PackageProfileUpdateRequest(BaseModel):
 # ----------------------------------------------------------------------
 
 
-def _get_user(db: Session, current_user: str) -> models.User:
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
-    return user
-
-
 def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
     if value is None:
         return None
@@ -169,7 +162,7 @@ def _replace_constraints(db: Session, profile, specs: List[ConstraintSpec]):
 
 
 @router.get("")
-async def list_profiles(db: Session = Depends(get_db)):
+async def list_profiles(db: Session = Depends(get_tenant_db)):
     _check_compliance_module()
     rows = db.query(models.PackageProfile).order_by(models.PackageProfile.name).all()
     return [r.to_dict() for r in rows]
@@ -178,16 +171,15 @@ async def list_profiles(db: Session = Depends(get_db)):
 @router.post("")
 async def create_profile(
     request: PackageProfileCreateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     _check_compliance_module()
-    user = _get_user(db, current_user)
     profile = models.PackageProfile(
         name=request.name,
         description=request.description,
         enabled=request.enabled,
-        created_by=user.id,
+        created_by=current_user.id,
     )
     db.add(profile)
     db.flush()  # need profile.id for constraint inserts
@@ -202,15 +194,15 @@ async def create_profile(
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Created package profile '%s'") % profile.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return profile.to_dict(include_constraints=True)
 
 
 @router.get("/{profile_id}")
-async def get_profile(profile_id: str, db: Session = Depends(get_db)):
+async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
     _check_compliance_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -225,11 +217,10 @@ async def get_profile(profile_id: str, db: Session = Depends(get_db)):
 async def update_profile(
     profile_id: str,
     request: PackageProfileUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     _check_compliance_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
@@ -255,8 +246,8 @@ async def update_profile(
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Updated package profile '%s'") % profile.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return profile.to_dict(include_constraints=True)
@@ -265,11 +256,10 @@ async def update_profile(
 @router.delete("/{profile_id}")
 async def delete_profile(
     profile_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     _check_compliance_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.PackageProfile).filter(models.PackageProfile.id == pid).first()
@@ -286,8 +276,8 @@ async def delete_profile(
         entity_id=str(pid),
         entity_name=name,
         description=_("Deleted package profile '%s'") % name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return {"message": _("Package profile deleted"), "id": str(pid)}
@@ -297,8 +287,8 @@ async def delete_profile(
 async def scan_host_against_profile(
     profile_id: str,
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Evaluate the host's installed-package inventory against the
     profile's constraints; persist the result in
@@ -308,7 +298,6 @@ async def scan_host_against_profile(
     so this endpoint works against the existing inventory pipeline; the
     agent does not need to do any extra work."""
     engine = _check_compliance_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     hid = _parse_uuid_or_400(host_id, "host_id")
 
@@ -379,8 +368,8 @@ async def scan_host_against_profile(
         entity_name=profile.name,
         description=_("Scanned host '%s' against profile '%s': %s (%d violation(s))")
         % (host.fqdn, profile.name, status, len(violations)),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=(Result.SUCCESS if status == "COMPLIANT" else Result.FAILURE),
         details={
             "violation_count": len(violations),
@@ -393,7 +382,7 @@ async def scan_host_against_profile(
 
 
 @router.get("/status/host/{host_id}")
-async def list_host_statuses(host_id: str, db: Session = Depends(get_db)):
+async def list_host_statuses(host_id: str, db: Session = Depends(get_tenant_db)):
     """Latest compliance status for one host across all profiles."""
     _check_compliance_module()
     hid = _parse_uuid_or_400(host_id, "host_id")
@@ -409,8 +398,8 @@ async def list_host_statuses(host_id: str, db: Session = Depends(get_db)):
 async def dispatch_compliance_check_to_agent(
     profile_id: str,
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Phase 8.3 wire-up:  ask the AGENT to evaluate compliance against
     its live local inventory and report back via the existing
@@ -427,7 +416,6 @@ async def dispatch_compliance_check_to_agent(
         inventory cycle.
     """
     _check_compliance_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     hid = _parse_uuid_or_400(host_id, "host_id")
 
@@ -498,8 +486,8 @@ async def dispatch_compliance_check_to_agent(
         entity_name=profile.name,
         description=_("Dispatched compliance check to agent '%s' for profile '%s'")
         % (host.fqdn, profile.name),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
         details={"host_id": str(hid), "profile_id": str(pid)},
     )

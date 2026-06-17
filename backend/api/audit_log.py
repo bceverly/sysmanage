@@ -6,6 +6,7 @@ Advanced audit features (CSV/JSON/CEF/LEEF export, retention policies, archival)
 are provided by the audit_engine Professional+ module.
 """
 
+import asyncio
 import logging
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -20,6 +21,7 @@ from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
+from backend.persistence import db as db_module
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.security.roles import SecurityRoles
@@ -332,8 +334,28 @@ async def export_audit_logs(
             detail=_("Unsupported export format: %s") % fmt,
         )
 
-    query = _apply_audit_filters(db_session.query(models.AuditLog), filters)
-    entries = query.order_by(models.AuditLog.timestamp.desc()).all()
+    # The unbounded query AND the PDF render (reportlab ``doc.build``) are
+    # blocking and can take many seconds on a large audit log.  Run them in a
+    # thread pool so the synchronous reportlab build does NOT stall the event
+    # loop — a blocking build here freezes EVERY other request (including the
+    # page waiting on this very download), which is what made the export hang.
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None, _build_audit_export, filters, fmt_lower, current_user
+    )
+
+
+def _build_audit_export(filters, fmt_lower, current_user):
+    """Materialize the filtered audit-log entries and render the export
+    (CSV or PDF).  Runs in a worker thread (see ``export_audit_logs``), so it
+    opens its OWN main-engine session — the request session can't cross the
+    thread boundary.  Audit logs are server-global (not tenant-partitioned)."""
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
+    with session_local() as session:
+        query = _apply_audit_filters(session.query(models.AuditLog), filters)
+        entries = query.order_by(models.AuditLog.timestamp.desc()).all()
     logger.info(
         "Audit log %s export by %s: %d entries",
         fmt_lower.upper(),

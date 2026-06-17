@@ -7,9 +7,10 @@ from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import get_host_by_id
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence.partitions import get_request_engine
+from backend.persistence.tenant_context import get_active_tenant
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_manager import (
@@ -45,34 +46,30 @@ class UbuntuProServiceRequest(BaseModel):
 async def attach_ubuntu_pro(
     host_id: str,
     request: UbuntuProAttachRequest,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Attach Ubuntu Pro subscription to a host using the provided token.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-    with session_local() as session:
-        # Check if user has permission to attach Ubuntu Pro
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the host command/queue data routes to
+    # the active tenant's engine via get_request_engine().
+    if not current_user.has_role(SecurityRoles.ATTACH_UBUNTU_PRO):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ATTACH_UBUNTU_PRO role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ATTACH_UBUNTU_PRO):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: ATTACH_UBUNTU_PRO role required"),
-            )
 
     token = request.token.strip()
     if not token:
         raise HTTPException(status_code=400, detail=_("Ubuntu Pro token is required"))
+
+    # Capture the active tenant in the request's async context so the data
+    # session routes to the right engine (inert in collapsed/single-tenant mode).
+    tenant_id = get_active_tenant()
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
+    )
 
     with session_local() as db_session:
         try:
@@ -115,30 +112,27 @@ async def attach_ubuntu_pro(
 
 
 @router.post("/host/{host_id}/ubuntu-pro/detach", dependencies=[Depends(JWTBearer())])
-async def detach_ubuntu_pro(host_id: str, current_user=Depends(get_current_user)):
+async def detach_ubuntu_pro(
+    host_id: str, current_user=Depends(require_authenticated_user)
+):
     """
     Detach Ubuntu Pro subscription from a host.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Check if user has permission to detach Ubuntu Pro
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the host command/queue data routes to
+    # the active tenant's engine via get_request_engine().
+    if not current_user.has_role(SecurityRoles.DETACH_UBUNTU_PRO):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: DETACH_UBUNTU_PRO role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.DETACH_UBUNTU_PRO):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: DETACH_UBUNTU_PRO role required"),
-            )
+
+    # Capture the active tenant in the request's async context so the data
+    # session routes to the right engine (inert in collapsed/single-tenant mode).
+    tenant_id = get_active_tenant()
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
+    )
 
     with session_local() as db_session:
         try:
@@ -193,8 +187,11 @@ async def enable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceReque
 
     from sqlalchemy.orm import sessionmaker
 
+    # Capture the active tenant in the request's async context so the data
+    # session routes to the right engine (inert in collapsed/single-tenant mode).
+    tenant_id = get_active_tenant()
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
     )
 
     with session_local() as db_session:
@@ -250,8 +247,11 @@ async def disable_ubuntu_pro_service(host_id: str, request: UbuntuProServiceRequ
 
     from sqlalchemy.orm import sessionmaker
 
+    # Capture the active tenant in the request's async context so the data
+    # session routes to the right engine (inert in collapsed/single-tenant mode).
+    tenant_id = get_active_tenant()
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine(tenant_id)
     )
 
     with session_local() as db_session:

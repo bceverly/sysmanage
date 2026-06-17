@@ -25,10 +25,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -164,13 +164,6 @@ class TemplateResponse(BaseModel):
     updated_at: Optional[str] = None
 
 
-def _get_user(db: Session, current_user: str) -> models.User:
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
-    return user
-
-
 def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
     try:
         return uuid.UUID(value)
@@ -205,7 +198,7 @@ def _validate_template_payload(
 
 
 @router.get("", response_model=List[TemplateResponse])
-async def list_templates(db: Session = Depends(get_db)):
+async def list_templates(db: Session = Depends(get_tenant_db)):
     rows = db.query(models.ReportTemplate).order_by(models.ReportTemplate.name).all()
     return [TemplateResponse(**r.to_dict()) for r in rows]
 
@@ -213,10 +206,12 @@ async def list_templates(db: Session = Depends(get_db)):
 @router.post("", response_model=TemplateResponse)
 async def create_template(
     request: TemplateCreateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
-    user = _get_user(db, current_user)
+    # Authorization (user identity) is resolved on the MAIN engine by
+    # require_authenticated_user; the template data routes to the tenant
+    # engine via ``db``.
     _validate_template_payload(request.base_report_type, request.selected_fields)
 
     template = models.ReportTemplate(
@@ -225,7 +220,7 @@ async def create_template(
         base_report_type=request.base_report_type,
         selected_fields=list(request.selected_fields or []),
         enabled=request.enabled,
-        created_by=user.id,
+        created_by=current_user.id,
     )
     db.add(template)
     db.commit()
@@ -237,8 +232,8 @@ async def create_template(
         entity_id=str(template.id),
         entity_name=template.name,
         description=_("Created report template '%s'") % template.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return TemplateResponse(**template.to_dict())
@@ -267,7 +262,7 @@ async def list_base_types():
 
 
 @router.get("/{template_id}", response_model=TemplateResponse)
-async def get_template(template_id: str, db: Session = Depends(get_db)):
+async def get_template(template_id: str, db: Session = Depends(get_tenant_db)):
     tid = _parse_uuid_or_400(template_id, "template_id")
     template = (
         db.query(models.ReportTemplate).filter(models.ReportTemplate.id == tid).first()
@@ -281,10 +276,12 @@ async def get_template(template_id: str, db: Session = Depends(get_db)):
 async def update_template(
     template_id: str,
     request: TemplateUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
-    user = _get_user(db, current_user)
+    # Authorization (user identity) is resolved on the MAIN engine by
+    # require_authenticated_user; the template data routes to the tenant
+    # engine via ``db``.
     tid = _parse_uuid_or_400(template_id, "template_id")
     template = (
         db.query(models.ReportTemplate).filter(models.ReportTemplate.id == tid).first()
@@ -325,8 +322,8 @@ async def update_template(
         entity_id=str(template.id),
         entity_name=template.name,
         description=_("Updated report template '%s'") % template.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return TemplateResponse(**template.to_dict())
@@ -335,10 +332,12 @@ async def update_template(
 @router.delete("/{template_id}")
 async def delete_template(
     template_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
-    user = _get_user(db, current_user)
+    # Authorization (user identity) is resolved on the MAIN engine by
+    # require_authenticated_user; the template data routes to the tenant
+    # engine via ``db``.
     tid = _parse_uuid_or_400(template_id, "template_id")
     template = (
         db.query(models.ReportTemplate).filter(models.ReportTemplate.id == tid).first()
@@ -356,8 +355,8 @@ async def delete_template(
         entity_id=str(tid),
         entity_name=name,
         description=_("Deleted report template '%s'") % name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return {"message": _("Report template deleted"), "id": str(tid)}

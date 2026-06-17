@@ -16,13 +16,12 @@ from backend.api.error_constants import (
     error_host_not_found,
     error_invalid_host_id,
     error_permission_denied,
-    error_user_not_found,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db as persistence_db
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import av_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -88,7 +87,7 @@ class AntivirusStatusResponse(BaseModel):
 )
 async def get_antivirus_status(
     host_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Get antivirus status for a specific host."""
@@ -151,39 +150,31 @@ class AntivirusDeployResponse(BaseModel):
 @router.post("/deploy", response_model=AntivirusDeployResponse)
 async def deploy_antivirus(  # NOSONAR
     deploy_request: AntivirusDeployRequest,
-    db_session: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db_session: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Deploy antivirus to one or more hosts."""
+    # Authorization is resolved on the MAIN engine by
+    # require_authenticated_user (user/role data is server-global); host and
+    # antivirus-default data route to the tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.DEPLOY_ANTIVIRUS):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: DEPLOY_ANTIVIRUS role required"),
+        )
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=persistence_db.get_engine()
     )
-
-    with session_local() as session:
-        # Check if user has permission to deploy antivirus
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        if user._role_cache is None:
-            user.load_role_cache(session)
-
-        if not user.has_role(SecurityRoles.DEPLOY_ANTIVIRUS):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: DEPLOY_ANTIVIRUS role required"),
-            )
 
     # Process each host
     success_count = 0
     failed_hosts = []
 
-    # Use a single session for all operations to ensure proper commit
-    with session_local() as session:
+    # Host and antivirus-default data live in the tenant database (``session``
+    # below = ``db_session``); the audit trail stays on the main engine
+    # (``audit_session``).
+    with session_local() as audit_session:
+        session = db_session
         # Bulk-fetch all hosts and all AntivirusDefaults upfront in two
         # queries instead of 2 per host (flagged in the Phase 6 N+1
         # audit).  AntivirusDefault is a tiny lookup table — load all
@@ -300,11 +291,11 @@ async def deploy_antivirus(  # NOSONAR
                     db=session,
                 )
 
-                # Audit log the antivirus deployment
+                # Audit log the antivirus deployment (main engine)
                 AuditService.log(
-                    db=session,
-                    user_id=user.id,
-                    username=current_user,
+                    db=audit_session,
+                    user_id=current_user.id,
+                    username=current_user.userid,
                     action_type=ActionType.EXECUTE,
                     entity_type=EntityType.HOST,
                     entity_id=str(host_id),
@@ -357,20 +348,18 @@ async def deploy_antivirus(  # NOSONAR
 )
 async def enable_antivirus(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Enable antivirus on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=error_user_not_found())
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.ENABLE_ANTIVIRUS):
+    # Authorization is resolved on the MAIN engine by
+    # require_authenticated_user; host/queue data routes to the tenant engine
+    # via ``db``, and the audit trail stays on the main engine.
+    if not current_user.has_role(SecurityRoles.ENABLE_ANTIVIRUS):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -395,21 +384,23 @@ async def enable_antivirus(
         db=db,
     )
 
-    # Audit log the antivirus enable command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested antivirus enable for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
-    # Commit the session to persist the queued message and audit log
+    # Commit the tenant session to persist the queued message.
     db.commit()
+
+    # Audit log the antivirus enable command (main engine).
+    with audit_session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested antivirus enable for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+        audit_session.commit()
 
     logger.info("Antivirus enable command sent to host %s", host.fqdn)
     return {"message": _("Antivirus enable command sent successfully")}
@@ -421,20 +412,18 @@ async def enable_antivirus(
 )
 async def disable_antivirus(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Disable antivirus on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=error_user_not_found())
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.DISABLE_ANTIVIRUS):
+    # Authorization is resolved on the MAIN engine by
+    # require_authenticated_user; host/queue data routes to the tenant engine
+    # via ``db``, and the audit trail stays on the main engine.
+    if not current_user.has_role(SecurityRoles.DISABLE_ANTIVIRUS):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -459,21 +448,23 @@ async def disable_antivirus(
         db=db,
     )
 
-    # Audit log the antivirus disable command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested antivirus disable for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
-    # Commit the session to persist the queued message and audit log
+    # Commit the tenant session to persist the queued message.
     db.commit()
+
+    # Audit log the antivirus disable command (main engine).
+    with audit_session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested antivirus disable for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
+        audit_session.commit()
 
     logger.info("Antivirus disable command sent to host %s", host.fqdn)
     return {"message": _("Antivirus disable command sent successfully")}
@@ -485,30 +476,28 @@ async def disable_antivirus(
 )
 async def remove_antivirus(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Remove antivirus from a specific host."""
     try:
-        # Check permission
+        # Authorization is resolved on the MAIN engine by
+        # require_authenticated_user; host/queue data routes to the tenant
+        # engine via ``db``, and the audit trail stays on the main engine.
         logger.info(
             "remove_antivirus called for host_id=%s by user=%s",
             sanitize_log(host_id),
-            sanitize_log(current_user),
+            sanitize_log(current_user.userid),
         )
-        user = db.query(models.User).filter(models.User.userid == current_user).first()
-        if not user:
-            logger.error("User not found: %s", sanitize_log(current_user))
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        if user._role_cache is None:
-            user.load_role_cache(db)
-
-        if not user.has_role(SecurityRoles.REMOVE_ANTIVIRUS):
+        if not current_user.has_role(SecurityRoles.REMOVE_ANTIVIRUS):
             logger.error(
-                "User %s lacks REMOVE_ANTIVIRUS role", sanitize_log(current_user)
+                "User %s lacks REMOVE_ANTIVIRUS role",
+                sanitize_log(current_user.userid),
             )
             raise HTTPException(status_code=403, detail=error_permission_denied())
+        audit_session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+        )
 
         # Get host
         host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -534,21 +523,23 @@ async def remove_antivirus(
             db=db,
         )
 
-        # Audit log the antivirus remove command
-        AuditService.log(
-            db=db,
-            user_id=user.id,
-            username=current_user,
-            action_type=ActionType.EXECUTE,
-            entity_type=EntityType.HOST,
-            entity_id=str(host.id),
-            entity_name=host.fqdn,
-            description=f"Requested antivirus removal for host {host.fqdn}",
-            result=Result.SUCCESS,
-        )
-
-        # Commit the session to persist the queued message and audit log
+        # Commit the tenant session to persist the queued message.
         db.commit()
+
+        # Audit log the antivirus remove command (main engine).
+        with audit_session_local() as audit_session:
+            AuditService.log(
+                db=audit_session,
+                user_id=current_user.id,
+                username=current_user.userid,
+                action_type=ActionType.EXECUTE,
+                entity_type=EntityType.HOST,
+                entity_id=str(host.id),
+                entity_name=host.fqdn,
+                description=f"Requested antivirus removal for host {host.fqdn}",
+                result=Result.SUCCESS,
+            )
+            audit_session.commit()
 
         logger.info("Antivirus remove command sent to host %s", host.fqdn)
         return {"message": _("Antivirus remove command sent successfully")}
@@ -575,7 +566,7 @@ class AntivirusCoverageResponse(BaseModel):
     response_model=AntivirusCoverageResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_antivirus_coverage(db: Session = Depends(get_db)):
+async def get_antivirus_coverage(db: Session = Depends(get_tenant_db)):
     """Get antivirus coverage statistics across all registered hosts."""
     try:
         total_hosts = db.query(models.Host).count()

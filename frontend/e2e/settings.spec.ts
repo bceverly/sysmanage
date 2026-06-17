@@ -24,7 +24,7 @@ test.describe('Settings Page', () => {
 
   test('should display settings tabs or sections', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -40,7 +40,7 @@ test.describe('Settings Page', () => {
   });
 
   test('should have general settings section', async ({ page }) => {
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for general settings tab or section
     const generalTab = page.getByRole('tab', { name: /general/i }).first();
@@ -55,7 +55,7 @@ test.describe('Settings Page', () => {
   });
 
   test('should have email settings section', async ({ page }) => {
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for email settings tab or section
     const emailTab = page.getByRole('tab', { name: /email|smtp/i }).first();
@@ -63,23 +63,23 @@ test.describe('Settings Page', () => {
       await emailTab.click();
 
       // Should show email configuration fields
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 
   test('should have security settings section', async ({ page }) => {
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for security settings
     const securityTab = page.getByRole('tab', { name: /security/i }).first();
     if (await securityTab.isVisible()) {
       await securityTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 
   test('should have save button', async ({ page }) => {
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for save button - may not exist on all settings tabs
     const saveButton = page.getByRole('button', { name: /save|apply|update/i }).first();
@@ -94,7 +94,7 @@ test.describe('Settings - System Configuration', () => {
   test('should display system information', async ({ page }) => {
     await page.goto('/settings');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 30000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -117,13 +117,13 @@ test.describe('Settings - System Configuration', () => {
 
   test('should display registration key management', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for registration key section
     const registrationTab = page.getByRole('tab', { name: /registration|key/i }).first();
     if (await registrationTab.isVisible()) {
       await registrationTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 });
@@ -131,13 +131,13 @@ test.describe('Settings - System Configuration', () => {
 test.describe('Settings - Automation', () => {
   test('should have automation settings', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for automation tab
     const automationTab = page.getByRole('tab', { name: /automation|schedule/i }).first();
     if (await automationTab.isVisible()) {
       await automationTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 });
@@ -146,13 +146,13 @@ test.describe('Settings - Integration', () => {
   test('should have integration settings', async ({ page }) => {
     test.slow(); // Integration checks involve async network probes that can be slow
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for integration tab
     const integrationTab = page.getByRole('tab', { name: /integration|api/i }).first();
     if (await integrationTab.isVisible()) {
       await integrationTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 });
@@ -160,13 +160,13 @@ test.describe('Settings - Integration', () => {
 test.describe('Settings - License', () => {
   test('should display license information', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for license tab
     const licenseTab = page.getByRole('tab', { name: /license/i }).first();
     if (await licenseTab.isVisible()) {
       await licenseTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // Should show license info
       const pageContent = await page.textContent('body');
@@ -178,37 +178,37 @@ test.describe('Settings - License', () => {
 test.describe('Settings - Pro+ Features', () => {
   test('should show Pro+ settings if licensed', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for Pro+ specific tabs (may not be visible without license)
     const proplusTab = page.getByRole('tab', { name: /pro|enterprise|professional/i }).first();
     if (await proplusTab.isVisible()) {
       await proplusTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 
   test('should have health analysis settings if licensed', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for health analysis settings
     const healthTab = page.getByRole('tab', { name: /health/i }).first();
     if (await healthTab.isVisible()) {
       await healthTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 
   test('should have CVE settings if licensed', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for CVE/vulnerability settings
     const cveTab = page.getByRole('tab', { name: /cve|vulnerability|vuln/i }).first();
     if (await cveTab.isVisible()) {
       await cveTab.click();
-      try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 });
@@ -216,7 +216,7 @@ test.describe('Settings - Pro+ Features', () => {
 test.describe('Settings Form Validation', () => {
   test('should validate settings before saving', async ({ page }) => {
     await page.goto('/settings');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Find any input field and clear it
     const inputs = page.locator('input[type="text"], input[type="email"], input[type="number"]');
@@ -231,7 +231,7 @@ test.describe('Settings Form Validation', () => {
   test('should show success message on save', async ({ page }) => {
     await page.goto('/settings');
     try {
-      await page.waitForLoadState('networkidle', { timeout: 20000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }

@@ -12,16 +12,18 @@ from sqlalchemy.sql.functions import count
 from backend.i18n import _
 from backend.persistence import db as db_module
 from backend.persistence.models import AvailablePackage, Host
+from backend.persistence.partitions import get_request_engine
 
 
-def get_packages_summary_sync() -> List[dict]:
+def get_packages_summary_sync(tenant_id=None) -> List[dict]:
     """
     Synchronous helper function to retrieve package summary.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -141,14 +143,16 @@ def search_packages_count_sync(
     os_name: Optional[str],
     os_version: Optional[str],
     package_manager: Optional[str],
+    tenant_id=None,
 ) -> dict:
     """
     Synchronous helper function to count packages matching search criteria.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -183,14 +187,16 @@ def search_packages_sync(
     package_manager: Optional[str],
     limit: int,
     offset: int,
+    tenant_id=None,
 ) -> List[dict]:
     """
     Synchronous helper function to search for packages.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:

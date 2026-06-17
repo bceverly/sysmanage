@@ -65,6 +65,7 @@ class TestMessageProcessor:
 
         assert processor.running is False
 
+    @patch("backend.websocket.message_processor.config")
     @patch(
         "backend.websocket.message_processor.process_outbound_messages",
         new_callable=AsyncMock,
@@ -75,9 +76,10 @@ class TestMessageProcessor:
     )
     @patch("backend.websocket.message_processor.get_db")
     async def test_process_pending_messages_success(
-        self, mock_get_db, mock_inbound, mock_outbound
+        self, mock_get_db, mock_inbound, mock_outbound, mock_config
     ):
-        """Test successful _process_pending_messages."""
+        """Test successful _process_pending_messages (collapsed → bootstrap only)."""
+        mock_config.is_multitenancy_enabled.return_value = False
         processor = MessageProcessor()
         mock_db = Mock()
         # Ensure commit and close are callable
@@ -96,13 +98,18 @@ class TestMessageProcessor:
         mock_inbound.assert_called_once_with(mock_db)
         mock_outbound.assert_called_once_with(mock_db)
 
+    @patch("backend.websocket.message_processor.config")
     @patch(
         "backend.websocket.message_processor.process_pending_messages",
         new_callable=AsyncMock,
     )
     @patch("backend.websocket.message_processor.get_db")
-    async def test_process_pending_messages_exception(self, mock_get_db, mock_inbound):
-        """Test _process_pending_messages with exception."""
+    async def test_process_pending_messages_exception(
+        self, mock_get_db, mock_inbound, mock_config
+    ):
+        """A drain error is ISOLATED (logged + rolled back), not re-raised —
+        Phase 13.1 #2 per-DB isolation."""
+        mock_config.is_multitenancy_enabled.return_value = False
         processor = MessageProcessor()
         mock_db = Mock()
         mock_db.rollback = Mock()
@@ -112,8 +119,8 @@ class TestMessageProcessor:
         # Make inbound processor raise an exception
         mock_inbound.side_effect = Exception("Database error")
 
-        with pytest.raises(Exception, match="Database error"):
-            await processor._process_pending_messages()
+        # Does NOT raise — contained to this DB.
+        await processor._process_pending_messages()
 
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()

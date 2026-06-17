@@ -26,12 +26,15 @@ this partition?", turning multi-tenancy on later is a config flip, not a
 code change at every call site.
 """
 
+import logging
 from contextlib import contextmanager
 
 from sqlalchemy.orm import sessionmaker
 
 from backend.config import config
 from backend.persistence import db
+
+logger = logging.getLogger(__name__)
 
 # Logical partition tokens.
 PARTITION_REGISTRY = "registry"
@@ -180,3 +183,63 @@ def get_tenant_db():
         yield session
     finally:
         session.close()
+
+
+def tenant_engine_for_host(host_id):
+    """Return the TENANT engine serving ``host_id``'s data, or ``None``.
+
+    ``None`` means "this host is not tenant-scoped here — use the default
+    application session" (single-tenant/collapsed mode, multi-tenancy disabled,
+    or a host not yet bound to a tenant).  A non-``None`` engine is returned only
+    when multi-tenancy is enabled AND the host has a tenant binding.
+
+    This is the resolver for the store-and-forward queue + background message
+    processors (Phase 13.1 #2 — per-tenant queues): they run OUTSIDE any
+    request's active-tenant context, so they must resolve the tenant from the
+    host→tenant binding rather than the ContextVar.  Returning ``None`` for the
+    common case keeps callers on their existing ``get_db()`` path, so the change
+    is fully inert until a host is actually bound to a tenant.
+    """
+    if host_id is None or not config.is_multitenancy_enabled():
+        return None
+    from backend.services import host_tenant_index  # noqa: PLC0415
+
+    try:
+        tenant_id = host_tenant_index.tenant_for_host(host_id)
+    except Exception:  # noqa: BLE001
+        # The host→tenant lookup itself failed (e.g. registry unreachable, or the
+        # licensed engine that backs the index isn't loaded).  Do NOT silently
+        # fall through to the bootstrap DB — that would route this host's data to
+        # the wrong database.  Log loudly with context and re-raise.
+        logger.error(
+            "tenant routing FAILED: host→tenant lookup errored for host %s; "
+            "cannot determine the tenant database (multi-tenancy is enabled)",
+            host_id,
+            exc_info=True,
+        )
+        raise
+    if not tenant_id:
+        # MT is on but this host has no tenant binding → its data goes to the
+        # bootstrap database, not a tenant DB.  Routine (server-scoped host or a
+        # not-yet-bound agent), but log at DEBUG so the fallback is never a black
+        # box when diagnosing "why is this host's data in the wrong place".
+        logger.debug(
+            "tenant routing: host %s has no tenant binding; using the bootstrap "
+            "database (multi-tenancy enabled)",
+            host_id,
+        )
+        return None
+    try:
+        engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
+    except Exception:  # noqa: BLE001
+        logger.error(
+            "tenant routing FAILED: could not resolve the database engine for "
+            "host %s → tenant %s; the message/data cannot reach the tenant "
+            "database (is the licensed engine loaded / the tenant provisioned?)",
+            host_id,
+            tenant_id,
+            exc_info=True,
+        )
+        raise
+    logger.debug("tenant routing: host %s → tenant %s", host_id, tenant_id)
+    return engine

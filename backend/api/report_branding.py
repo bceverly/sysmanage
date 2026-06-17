@@ -20,11 +20,11 @@ from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.db import get_db
 from backend.persistence.models.report_branding import SINGLETON_BRANDING_ID
+from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
 logger = logging.getLogger(__name__)
@@ -56,13 +56,6 @@ class BrandingResponse(BaseModel):
     updated_at: Optional[str] = None
 
 
-def _get_user(db: Session, current_user: str) -> models.User:
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
-    return user
-
-
 def _get_or_create_branding(db: Session) -> models.ReportBranding:
     """Return the singleton row, creating it on first read.
 
@@ -82,7 +75,7 @@ def _get_or_create_branding(db: Session) -> models.ReportBranding:
 
 
 @router.get("", response_model=BrandingResponse)
-async def get_branding(db: Session = Depends(get_db)):
+async def get_branding(db: Session = Depends(get_tenant_db)):
     """Return current branding (without logo bytes)."""
     row = _get_or_create_branding(db)
     return BrandingResponse(**row.to_dict())
@@ -91,20 +84,22 @@ async def get_branding(db: Session = Depends(get_db)):
 @router.put("", response_model=BrandingResponse)
 async def update_branding(
     request: BrandingUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Update company name / header text.  Logo is managed via the
     separate ``/logo`` endpoints because multipart bodies don't mix
     well with JSON request bodies."""
-    user = _get_user(db, current_user)
+    # Authorization (user identity) is resolved on the MAIN engine by
+    # require_authenticated_user; the branding data routes to the tenant
+    # engine via ``db``.
     row = _get_or_create_branding(db)
     if request.company_name is not None:
         row.company_name = request.company_name.strip() or None
     if request.header_text is not None:
         row.header_text = request.header_text.strip() or None
     row.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    row.updated_by = user.id
+    row.updated_by = current_user.id
     db.commit()
     db.refresh(row)
 
@@ -115,8 +110,8 @@ async def update_branding(
         entity_id=str(row.id),
         entity_name="report_branding",
         description=_("Updated report branding"),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return BrandingResponse(**row.to_dict())
@@ -125,11 +120,10 @@ async def update_branding(
 @router.post("/logo", response_model=BrandingResponse)
 async def upload_logo(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Upload (or replace) the org logo."""
-    user = _get_user(db, current_user)
 
     if not file:
         raise HTTPException(status_code=400, detail=_("No file provided"))
@@ -154,7 +148,7 @@ async def upload_logo(
     row.logo_data = contents
     row.logo_mime_type = mime
     row.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    row.updated_by = user.id
+    row.updated_by = current_user.id
     db.commit()
     db.refresh(row)
 
@@ -166,15 +160,15 @@ async def upload_logo(
         entity_name="report_branding_logo",
         description=_("Uploaded report branding logo (%d bytes, %s)")
         % (len(contents), mime),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return BrandingResponse(**row.to_dict())
 
 
 @router.get("/logo")
-async def get_logo(db: Session = Depends(get_db)):
+async def get_logo(db: Session = Depends(get_tenant_db)):
     """Stream the logo bytes.  Used by the frontend preview AND by the
     Pro+ reporting engine to embed the logo in PDFs/HTML."""
     row = (
@@ -193,16 +187,15 @@ async def get_logo(db: Session = Depends(get_db)):
 
 @router.delete("/logo", response_model=BrandingResponse)
 async def delete_logo(
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Remove the configured logo."""
-    user = _get_user(db, current_user)
     row = _get_or_create_branding(db)
     row.logo_data = None
     row.logo_mime_type = None
     row.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    row.updated_by = user.id
+    row.updated_by = current_user.id
     db.commit()
     db.refresh(row)
 
@@ -213,8 +206,8 @@ async def delete_logo(
         entity_id=str(row.id),
         entity_name="report_branding_logo",
         description=_("Removed report branding logo"),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return BrandingResponse(**row.to_dict())

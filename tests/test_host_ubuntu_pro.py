@@ -36,36 +36,28 @@ class MockHost:
         return True
 
 
-class MockRoleCache:
-    """Mock role cache that allows all roles."""
-
-    def has_role(self, role):
-        return True
-
-    def has_any_role(self, roles):
-        return True
-
-    def has_all_roles(self, roles):
-        return True
-
-
 class MockUser:
-    """Mock user object for RBAC checks."""
+    """Mock authenticated User object (as returned by require_authenticated_user).
 
-    def __init__(self, userid="test@example.com"):
+    has_role() returns True for all roles, modelling a user with permission.
+    """
+
+    def __init__(self, userid="test@example.com", user_id=1):
+        self.id = user_id
         self.userid = userid
         self.active = True
-        self._role_cache = None
-
-    def load_role_cache(self, session):
-        """Mock method to load role cache."""
-        self._role_cache = MockRoleCache()
 
     def has_role(self, role):
-        """Mock method that returns True for all roles (testing purposes)."""
-        if self._role_cache is None:
-            return False
-        return self._role_cache.has_role(role)
+        """Return True for all roles (permission granted)."""
+        return True
+
+
+class MockUserNoPerm(MockUser):
+    """Mock authenticated User that lacks every role (permission denied)."""
+
+    def has_role(self, role):
+        """Return False for all roles (permission denied)."""
+        return False
 
 
 class MockQuery:
@@ -149,27 +141,22 @@ class TestAttachUbuntuPro:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_attach_success(
         self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro attach."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()  # First session for RBAC check
-        work_session = MockDBSession()  # Second session for actual work
-
-        session_instances = [rbac_session, work_session]
-        session_index = [0]  # Use list to allow mutation in nested function
+        # Authz is resolved by require_authenticated_user (the injected
+        # current_user is the User object), so only ONE session is used: the
+        # tenant-routed work session.
+        work_session = MockDBSession()
 
         def create_context_manager():
             # Each call to session_local() returns a new context manager
-            session = session_instances[session_index[0]]
-            session_index[0] += 1
-
             context_mgr = Mock()
-            context_mgr.__enter__ = Mock(return_value=session)
+            context_mgr.__enter__ = Mock(return_value=work_session)
             context_mgr.__exit__ = Mock(return_value=None)
             return context_mgr
 
@@ -182,7 +169,7 @@ class TestAttachUbuntuPro:
         mock_queue_manager.enqueue_message.return_value = "queue-123"
 
         request = UbuntuProAttachRequest(token="C123456789abcdef")
-        result = await attach_ubuntu_pro(1, request, current_user="test@example.com")
+        result = await attach_ubuntu_pro(1, request, current_user=MockUser())
 
         # Verify result
         assert result["result"] is True
@@ -192,18 +179,15 @@ class TestAttachUbuntuPro:
         # Verify interactions
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
-        # Verify that the WORK session (second one) was committed
         assert work_session.committed is True
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     async def test_attach_empty_token(self, mock_get_engine, mock_sessionmaker):
         """Test attach with empty token."""
-        # Setup session for RBAC check
-        rbac_session = MockDBSession()
         mock_session_factory = Mock()
-        mock_session_factory.return_value.__enter__ = Mock(return_value=rbac_session)
+        mock_session_factory.return_value.__enter__ = Mock(return_value=MockDBSession())
         mock_session_factory.return_value.__exit__ = Mock(return_value=None)
         mock_sessionmaker.return_value = mock_session_factory
         mock_get_engine.return_value = Mock()
@@ -211,34 +195,31 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="   ")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(1, request, current_user="test@example.com")
+            await attach_ubuntu_pro(1, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 400
         assert "Ubuntu Pro token is required" in str(exc_info.value.detail)
 
     @pytest.mark.asyncio
+    async def test_attach_permission_denied(self):
+        """Test attach when user lacks the ATTACH_UBUNTU_PRO role."""
+        request = UbuntuProAttachRequest(token="C123456789abcdef")
+
+        with pytest.raises(HTTPException) as exc_info:
+            await attach_ubuntu_pro(1, request, current_user=MockUserNoPerm())
+
+        assert exc_info.value.status_code == 403
+
+    @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     async def test_attach_host_not_found(
         self, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test attach with non-existent host."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()
-        work_session = MockDBSession()
-
-        session_instances = [rbac_session, work_session]
-        session_index = 0
-
-        def get_next_session():
-            nonlocal session_index
-            session = session_instances[session_index]
-            session_index += 1
-            return session
-
         mock_session_factory = Mock()
-        mock_session_factory.return_value.__enter__ = Mock(side_effect=get_next_session)
+        mock_session_factory.return_value.__enter__ = Mock(return_value=MockDBSession())
         mock_session_factory.return_value.__exit__ = Mock(return_value=None)
         mock_sessionmaker.return_value = mock_session_factory
         mock_get_engine.return_value = Mock()
@@ -250,33 +231,24 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="C123456789abcdef")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(999, request, current_user="test@example.com")
+            await attach_ubuntu_pro(999, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_attach_queue_error(
         self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test attach with queue manager error."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()
         work_session = MockDBSession()
 
-        session_instances = [rbac_session, work_session]
-        session_index = [0]  # Use list to allow mutation in nested function
-
         def create_context_manager():
-            # Each call to session_local() returns a new context manager
-            session = session_instances[session_index[0]]
-            session_index[0] += 1
-
             context_mgr = Mock()
-            context_mgr.__enter__ = Mock(return_value=session)
+            context_mgr.__enter__ = Mock(return_value=work_session)
             context_mgr.__exit__ = Mock(return_value=None)
             return context_mgr
 
@@ -290,11 +262,10 @@ class TestAttachUbuntuPro:
         request = UbuntuProAttachRequest(token="C123456789abcdef")
 
         with pytest.raises(HTTPException) as exc_info:
-            await attach_ubuntu_pro(1, request, current_user="test@example.com")
+            await attach_ubuntu_pro(1, request, current_user=MockUser())
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro attach" in str(exc_info.value.detail)
-        # Verify that the WORK session (second one) was rolled back
         assert work_session.rolled_back is True
 
 
@@ -303,27 +274,20 @@ class TestDetachUbuntuPro:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_detach_success(
         self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test successful Ubuntu Pro detach."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()
+        # Authz is resolved by require_authenticated_user; only ONE (work)
+        # session is used.
         work_session = MockDBSession()
 
-        session_instances = [rbac_session, work_session]
-        session_index = [0]  # Use list to allow mutation in nested function
-
         def create_context_manager():
-            # Each call to session_local() returns a new context manager
-            session = session_instances[session_index[0]]
-            session_index[0] += 1
-
             context_mgr = Mock()
-            context_mgr.__enter__ = Mock(return_value=session)
+            context_mgr.__enter__ = Mock(return_value=work_session)
             context_mgr.__exit__ = Mock(return_value=None)
             return context_mgr
 
@@ -335,7 +299,7 @@ class TestDetachUbuntuPro:
         mock_get_host.return_value = mock_host
         mock_queue_manager.enqueue_message.return_value = "queue-456"
 
-        result = await detach_ubuntu_pro(1, current_user="test@example.com")
+        result = await detach_ubuntu_pro(1, current_user=MockUser())
 
         # Verify result
         assert result["result"] is True
@@ -345,32 +309,26 @@ class TestDetachUbuntuPro:
         # Verify interactions
         mock_get_host.assert_called_once_with(1)
         mock_queue_manager.enqueue_message.assert_called_once()
-        # Verify that the WORK session (second one) was committed
         assert work_session.committed is True
 
     @pytest.mark.asyncio
+    async def test_detach_permission_denied(self):
+        """Test detach when user lacks the DETACH_UBUNTU_PRO role."""
+        with pytest.raises(HTTPException) as exc_info:
+            await detach_ubuntu_pro(1, current_user=MockUserNoPerm())
+
+        assert exc_info.value.status_code == 403
+
+    @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     async def test_detach_host_not_found(
         self, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test detach with non-existent host."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()
-        work_session = MockDBSession()
-
-        session_instances = [rbac_session, work_session]
-        session_index = 0
-
-        def get_next_session():
-            nonlocal session_index
-            session = session_instances[session_index]
-            session_index += 1
-            return session
-
         mock_session_factory = Mock()
-        mock_session_factory.return_value.__enter__ = Mock(side_effect=get_next_session)
+        mock_session_factory.return_value.__enter__ = Mock(return_value=MockDBSession())
         mock_session_factory.return_value.__exit__ = Mock(return_value=None)
         mock_sessionmaker.return_value = mock_session_factory
         mock_get_engine.return_value = Mock()
@@ -380,33 +338,24 @@ class TestDetachUbuntuPro:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await detach_ubuntu_pro(999, current_user="test@example.com")
+            await detach_ubuntu_pro(999, current_user=MockUser())
 
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_detach_queue_error(
         self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test detach with queue manager error."""
-        # Setup TWO sessions: one for RBAC check, one for actual work
-        rbac_session = MockDBSession()
         work_session = MockDBSession()
 
-        session_instances = [rbac_session, work_session]
-        session_index = [0]  # Use list to allow mutation in nested function
-
         def create_context_manager():
-            # Each call to session_local() returns a new context manager
-            session = session_instances[session_index[0]]
-            session_index[0] += 1
-
             context_mgr = Mock()
-            context_mgr.__enter__ = Mock(return_value=session)
+            context_mgr.__enter__ = Mock(return_value=work_session)
             context_mgr.__exit__ = Mock(return_value=None)
             return context_mgr
 
@@ -418,11 +367,10 @@ class TestDetachUbuntuPro:
         mock_queue_manager.enqueue_message.side_effect = Exception("Queue error")
 
         with pytest.raises(HTTPException) as exc_info:
-            await detach_ubuntu_pro(1, current_user="test@example.com")
+            await detach_ubuntu_pro(1, current_user=MockUser())
 
         assert exc_info.value.status_code == 500
         assert "Failed to request Ubuntu Pro detach" in str(exc_info.value.detail)
-        # Verify that the WORK session (second one) was rolled back
         assert work_session.rolled_back is True
 
 
@@ -431,7 +379,7 @@ class TestEnableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_enable_service_success(
@@ -482,7 +430,7 @@ class TestEnableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     async def test_enable_service_host_not_found(
         self, mock_get_host, mock_get_engine, mock_sessionmaker
@@ -509,7 +457,7 @@ class TestEnableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_enable_service_queue_error(
@@ -550,7 +498,7 @@ class TestDisableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_disable_service_success(
@@ -601,7 +549,7 @@ class TestDisableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     async def test_disable_service_host_not_found(
         self, mock_get_host, mock_get_engine, mock_sessionmaker
@@ -628,7 +576,7 @@ class TestDisableUbuntuProService:
 
     @pytest.mark.asyncio
     @patch("sqlalchemy.orm.sessionmaker")  # Local import inside the function
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_disable_service_queue_error(
@@ -669,7 +617,7 @@ class TestUbuntuProIntegration:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_full_ubuntu_pro_workflow(
@@ -710,7 +658,7 @@ class TestUbuntuProIntegration:
         # Test attach
         attach_request = UbuntuProAttachRequest(token="C123456789abcdef")
         attach_result = await attach_ubuntu_pro(
-            1, attach_request, current_user="test@example.com"
+            1, attach_request, current_user=MockUser()
         )
         assert attach_result["result"] is True
         assert attach_result["queue_id"] == "attach-123"
@@ -728,7 +676,7 @@ class TestUbuntuProIntegration:
         assert disable_result["queue_id"] == "disable-789"
 
         # Test detach
-        detach_result = await detach_ubuntu_pro(1, current_user="test@example.com")
+        detach_result = await detach_ubuntu_pro(1, current_user=MockUser())
         assert detach_result["result"] is True
         assert detach_result["queue_id"] == "detach-012"
 
@@ -765,15 +713,15 @@ class TestUbuntuProIntegration:
 
     @pytest.mark.asyncio
     @patch("backend.api.host_ubuntu_pro.sessionmaker")
-    @patch("backend.api.host_ubuntu_pro.db.get_engine")
+    @patch("backend.api.host_ubuntu_pro.get_request_engine")
     @patch("backend.api.host_ubuntu_pro.get_host_by_id")
     @patch("backend.api.host_ubuntu_pro.server_queue_manager")
     async def test_command_data_structure(
         self, mock_queue_manager, mock_get_host, mock_get_engine, mock_sessionmaker
     ):
         """Test that command data is structured correctly."""
-        # Setup sessions: attach needs 2 (RBAC + work), enable needs 1 (no RBAC)
-        # Total: 3 sessions
+        # Authz is now resolved by require_authenticated_user, so each endpoint
+        # uses a single (work) session; provide a few to be safe.
         sessions = [MockDBSession() for _ in range(3)]
         session_index = 0
 
@@ -796,7 +744,7 @@ class TestUbuntuProIntegration:
 
         # Test attach command structure
         attach_request = UbuntuProAttachRequest(token="test-token")
-        await attach_ubuntu_pro(1, attach_request, current_user="test@example.com")
+        await attach_ubuntu_pro(1, attach_request, current_user=MockUser())
 
         # Verify attach command data
         attach_call = mock_queue_manager.enqueue_message.call_args

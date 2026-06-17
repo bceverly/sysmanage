@@ -18,12 +18,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import (
+    JWTBearer,
+    require_authenticated_user,
+)
 from backend.i18n import _
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.persistence.models.dynamic_secrets import (
     LEASE_KIND_DATABASE,
     LEASE_KIND_SSH,
@@ -94,13 +97,6 @@ class LeaseResponse(BaseModel):
     note: Optional[str] = None
 
 
-def _get_user(db: Session, current_user: str) -> models.User:
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
-    return user
-
-
 def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
     try:
         return uuid.UUID(value)
@@ -114,14 +110,18 @@ def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
 @router.post("/issue", response_model=IssueResponse)
 async def issue(
     request: IssueRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Issue a new short-lived credential.  The plaintext secret is
     returned EXACTLY ONCE in this response;  the server never logs it
     and the DB never stores it.  Once the operator has it, only
-    OpenBAO holds the value, and only until the TTL expires."""
-    user = _get_user(db, current_user)
+    OpenBAO holds the value, and only until the TTL expires.
+
+    Phase 13.1: lease data routes to the active tenant's database via
+    ``db`` (``get_tenant_db``); authorization is resolved on the MAIN engine
+    by ``require_authenticated_user`` (user identities are server-global).
+    """
     if request.kind not in LEASE_KINDS:
         raise HTTPException(
             status_code=400,
@@ -135,7 +135,7 @@ async def issue(
             backend_role=request.backend_role,
             name=request.name,
             ttl_seconds=request.ttl_seconds,
-            issued_by_user_id=user.id,
+            issued_by_user_id=current_user.id,
             note=request.note,
         )
     except DynamicSecretError as exc:
@@ -154,8 +154,8 @@ async def issue(
             request.backend_role,
             request.ttl_seconds,
         ),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
         details={
             "lease_id": result["lease"]["id"],
@@ -172,7 +172,7 @@ async def issue(
 async def list_leases(
     status: Optional[str] = Query(None, description="Filter by status"),
     kind: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
 ):
     """List leases, optionally filtered by status (ACTIVE / REVOKED /
     EXPIRED / FAILED) and / or kind (token / database / ssh)."""
@@ -198,7 +198,7 @@ async def list_leases(
 
 
 @router.get("/leases/{lease_id}", response_model=LeaseResponse)
-async def get_lease(lease_id: str, db: Session = Depends(get_db)):
+async def get_lease(lease_id: str, db: Session = Depends(get_tenant_db)):
     lid = _parse_uuid_or_400(lease_id, "lease_id")
     lease = (
         db.query(models.DynamicSecretLease)
@@ -213,10 +213,9 @@ async def get_lease(lease_id: str, db: Session = Depends(get_db)):
 @router.post("/leases/{lease_id}/revoke")
 async def revoke(
     lease_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
-    user = _get_user(db, current_user)
     lid = _parse_uuid_or_400(lease_id, "lease_id")
     try:
         result = revoke_lease(db, lease_id=lid)
@@ -230,8 +229,8 @@ async def revoke(
         entity_id=str(lid),
         entity_name=result["lease"]["name"],
         description=_("Revoked dynamic secret lease '%s'") % result["lease"]["name"],
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
         details={
             "lease_id": str(lid),
@@ -242,7 +241,7 @@ async def revoke(
 
 
 @router.post("/reconcile")
-async def reconcile(db: Session = Depends(get_db)):
+async def reconcile(db: Session = Depends(get_tenant_db)):
     """Mark any ACTIVE leases whose expiry has passed as EXPIRED.
     Safe to call repeatedly.  Intended for cron / scheduler hook."""
     transitioned = reconcile_expired(db)

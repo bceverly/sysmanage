@@ -59,6 +59,7 @@ class SecurityRoles(str, Enum):
     ADD_PACKAGE = "Add Package"
     APPLY_HOST_OS_UPGRADE = "Apply Host OS Upgrade"
     APPLY_SOFTWARE_UPDATE = "Apply Software Update"
+    REMOVE_PACKAGE = "Remove Package"
     # - Third-Party Repository Operations (alphabetical)
     ADD_THIRD_PARTY_REPOSITORY = "Add Third-Party Repository"
     DELETE_THIRD_PARTY_REPOSITORY = "Delete Third-Party Repository"

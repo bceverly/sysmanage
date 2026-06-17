@@ -14,7 +14,7 @@ from backend.api.error_constants import error_host_not_found
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import CommandMessage, CommandType, MessageType
 from backend.websocket.queue_enums import QueueDirection
@@ -98,7 +98,7 @@ async def get_agent(hostname: str, _dependencies=Depends(JWTBearer())):
 async def send_command_to_agent(
     hostname: str,
     command: CommandRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
 ):
     """Send a command to a specific agent by hostname."""
@@ -135,7 +135,7 @@ async def send_command_to_agent(
 async def execute_shell_command(
     hostname: str,
     shell_request: ShellCommandRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Execute a shell command on a specific agent."""
@@ -175,7 +175,7 @@ async def execute_shell_command(
 async def install_package(
     hostname: str,
     package_request: PackageRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Install a package on a specific agent."""
@@ -217,7 +217,7 @@ async def install_package(
 async def restart_service(
     hostname: str,
     service_request: ServiceRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Restart a service on a specific agent."""
@@ -254,7 +254,9 @@ async def restart_service(
 
 @router.post("/fleet/agent/{hostname}/update-system")
 async def update_system(
-    hostname: str, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    hostname: str,
+    db: Session = Depends(get_tenant_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Trigger system updates on a specific agent."""
     # Look up host by hostname
@@ -287,7 +289,9 @@ async def update_system(
 
 @router.post("/fleet/agent/{hostname}/reboot")
 async def reboot_system(
-    hostname: str, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    hostname: str,
+    db: Session = Depends(get_tenant_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Reboot a specific agent system."""
     # Look up host by hostname
@@ -355,7 +359,7 @@ def _enqueue_command_for_hosts(db: Session, host_ids: list, message_dict: dict) 
 @router.post("/fleet/broadcast/command")
 async def broadcast_command(
     command: CommandRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
 ):
     """Broadcast a command to every active host (queued; offline hosts
@@ -382,7 +386,7 @@ async def broadcast_command(
 @router.post("/fleet/broadcast/shell")
 async def broadcast_shell_command(
     shell_request: ShellCommandRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
 ):
     """Broadcast a shell command to every active host (queued)."""
@@ -415,7 +419,7 @@ async def broadcast_shell_command(
 async def send_command_to_platform(
     platform: str,
     command: CommandRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     _dependencies=Depends(JWTBearer()),
 ):
     """Queue a command for every active host on a specific platform

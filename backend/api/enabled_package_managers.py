@@ -13,13 +13,12 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, validator
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
-from backend.api.error_constants import error_user_not_found
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import create_command_message
@@ -228,32 +227,19 @@ async def get_os_options(
 
 @router.get("/", response_model=List[EnabledPackageManagerResponse])
 async def get_enabled_package_managers(
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get all enabled package managers."""
-    # Check if user has permission to view enabled package managers
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the enabled-package-manager data routes
+    # to the tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_ENABLED_PACKAGE_MANAGERS):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_ENABLED_PACKAGE_MANAGERS):
-            raise HTTPException(
-                status_code=403,
-                detail=_(
-                    "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
-                ),
-            )
 
     try:
         enabled_pms = (
@@ -278,33 +264,20 @@ async def get_enabled_package_managers(
 async def create_enabled_package_manager(
     pm_data: EnabledPackageManagerCreate,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Create a new enabled package manager."""
-    # Check if user has permission to add enabled package managers
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the enabled-package-manager data routes
+    # to the tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.ADD_ENABLED_PACKAGE_MANAGER):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ADD_ENABLED_PACKAGE_MANAGER):
-            raise HTTPException(
-                status_code=403,
-                detail=_(
-                    "Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"
-                ),
-            )
-        auth_user_id = auth_user.id
+    auth_user_id = current_user.id
 
     try:
         # Check if this combination already exists
@@ -347,7 +320,7 @@ async def create_enabled_package_manager(
             entity_type=EntityType.SETTING,
             entity_name=f"Enabled Package Manager: {pm_data.package_manager} for {pm_data.os_name}",
             user_id=auth_user_id,
-            username=current_user,
+            username=current_user.userid,
             entity_id=str(new_pm.id),
             details={
                 "os_name": pm_data.os_name,
@@ -398,33 +371,20 @@ async def create_enabled_package_manager(
 async def delete_enabled_package_manager(
     pm_id: str,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Delete an enabled package manager."""
-    # Check if user has permission to remove enabled package managers
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the enabled-package-manager data routes
+    # to the tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.REMOVE_ENABLED_PACKAGE_MANAGER):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: REMOVE_ENABLED_PACKAGE_MANAGER role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.REMOVE_ENABLED_PACKAGE_MANAGER):
-            raise HTTPException(
-                status_code=403,
-                detail=_(
-                    "Permission denied: REMOVE_ENABLED_PACKAGE_MANAGER role required"
-                ),
-            )
-        auth_user_id = auth_user.id
+    auth_user_id = current_user.id
 
     try:
         # Parse UUID
@@ -468,7 +428,7 @@ async def delete_enabled_package_manager(
             entity_type=EntityType.SETTING,
             entity_name=f"Enabled Package Manager: {pm_package_manager} for {pm_os_name}",
             user_id=auth_user_id,
-            username=current_user,
+            username=current_user.userid,
             entity_id=pm_id,
             details={
                 "os_name": pm_os_name,

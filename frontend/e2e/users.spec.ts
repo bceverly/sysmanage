@@ -58,7 +58,11 @@ test.describe('User List Page', () => {
     // actually polls for either control.
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
     const fabButton = page.locator('.MuiFab-root').first();
-    await expect(addButton.or(fabButton)).toBeVisible({ timeout: 20000 });
+    // 30s to match the sibling data-grid waits: the Add control renders only
+    // after the grid + the 93-role permission load complete, so it's strictly
+    // later than "page ready" — a 20s budget was tighter than the grid's own
+    // 30s and lost the race under parallel-worker load.
+    await expect(addButton.or(fabButton)).toBeVisible({ timeout: 30000 });
   });
 
   test('should open add user dialog when clicking add button', async ({ page }) => {
@@ -194,7 +198,7 @@ test.describe('User Detail Page', () => {
 
     if (await navigateToFirstUserDetail(page)) {
       // Wait for user detail content to fully load
-      try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // The delete/remove button may or may not be present depending on
       // which user we navigated to (e.g. admin users can't be self-deleted).
@@ -239,7 +243,7 @@ test.describe('User Create Flow', () => {
     try {
       // Navigate to users list to find and delete the test user
       await page.goto('/users');
-      try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // Use the API directly to find and delete the user
       const response = await page.request.get('/api/v1/users');
@@ -262,7 +266,7 @@ test.describe('User Create Flow', () => {
   test('should create a new user successfully', async ({ page }) => {
     await page.goto('/users');
     // Wait for page to fully load including permissions
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     await page.waitForTimeout(2000);
 
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
@@ -331,7 +335,7 @@ test.describe('User Permissions', () => {
     await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     // Profile page should show user's role
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     const pageContent = await page.textContent('body');
     const hasRoleInfo =
       pageContent?.toLowerCase().includes('role') ||
@@ -342,7 +346,7 @@ test.describe('User Permissions', () => {
 
   test('should allow role editing for admin users', async ({ page }) => {
     await page.goto('/users');
-    try { await page.waitForLoadState('networkidle', { timeout: 30000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     const firstRow = page.locator('.MuiDataGrid-row').first();
     if (await firstRow.isVisible({ timeout: 10000 }).catch(() => false)) {
@@ -361,7 +365,7 @@ test.describe('User Permissions', () => {
         }
 
         // Admin should see role editing options
-        try { await page.waitForLoadState('networkidle', { timeout: 20000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
         const buttons = page.locator('button');
         const buttonCount = await buttons.count();
         expect(buttonCount).toBeGreaterThan(0);

@@ -88,7 +88,7 @@ class MockUser:
     def has_role(self, role):
         """Mock method that returns True for all roles (testing purposes)."""
         if self._role_cache is None:
-            return False
+            return True
         return self._role_cache.has_role(role)
 
 
@@ -321,7 +321,7 @@ class TestCreateTag:
         mock_db.refresh = mock_refresh
 
         tag_data = TagCreate(name="new-tag", description="New test tag")
-        result = await create_tag(tag_data, mock_db, "test@example.com")
+        result = await create_tag(tag_data, mock_db, MockUser())
 
         assert result.name == "new-tag"
         assert result.description == "New test tag"
@@ -360,7 +360,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="existing-tag", description="Duplicate tag")
 
         with pytest.raises(HTTPException) as exc_info:
-            await create_tag(tag_data, mock_db, "test@example.com")
+            await create_tag(tag_data, mock_db, MockUser())
 
         assert exc_info.value.status_code == 400
 
@@ -395,7 +395,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="New test tag")
 
         with pytest.raises(HTTPException) as exc_info:
-            await create_tag(tag_data, mock_db, "test@example.com")
+            await create_tag(tag_data, mock_db, MockUser())
 
         assert exc_info.value.status_code == 400
         assert mock_db.rolled_back is True
@@ -431,7 +431,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="New test tag")
 
         with pytest.raises(HTTPException) as exc_info:
-            await create_tag(tag_data, mock_db, "test@example.com")
+            await create_tag(tag_data, mock_db, MockUser())
 
         assert exc_info.value.status_code == 500
         assert mock_db.rolled_back is True
@@ -483,7 +483,7 @@ class TestUpdateTag:
         mock_db.query = mock_query_calls
 
         tag_data = TagUpdate(name="new-name", description="New description")
-        result = await update_tag(1, tag_data, mock_db, "test@example.com")
+        result = await update_tag(1, tag_data, mock_db, MockUser())
 
         assert result.name == "new-name"
         assert result.description == "New description"
@@ -519,7 +519,7 @@ class TestUpdateTag:
         tag_data = TagUpdate(name="new-name")
 
         with pytest.raises(HTTPException) as exc_info:
-            await update_tag(999, tag_data, mock_db, "test@example.com")
+            await update_tag(999, tag_data, mock_db, MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -567,7 +567,7 @@ class TestUpdateTag:
         tag_data = TagUpdate(name="tag2")  # Try to rename to existing name
 
         with pytest.raises(HTTPException) as exc_info:
-            await update_tag(1, tag_data, mock_db, "test@example.com")
+            await update_tag(1, tag_data, mock_db, MockUser())
 
         assert exc_info.value.status_code == 400
 
@@ -606,7 +606,7 @@ class TestUpdateTag:
         mock_db.query = mock_query_calls
 
         tag_data = TagUpdate(description="New description only")
-        result = await update_tag(1, tag_data, mock_db, "test@example.com")
+        result = await update_tag(1, tag_data, mock_db, MockUser())
 
         assert result.name == "existing-tag"  # Name unchanged
         assert result.description == "New description only"
@@ -654,7 +654,7 @@ class TestUpdateTag:
         mock_db.query = mock_query_calls
 
         tag_data = TagUpdate(name="new-name")
-        result = await update_tag(1, tag_data, mock_db, "test@example.com")
+        result = await update_tag(1, tag_data, mock_db, MockUser())
 
         assert result.host_count == 0  # Should fallback to 0
 
@@ -690,7 +690,7 @@ class TestDeleteTag:
         existing_tag = MockTag(1, "test-tag")
         mock_db = MockDB([existing_tag])
 
-        await delete_tag(1, mock_db, "test@example.com")
+        await delete_tag(1, mock_db, MockUser())
 
         assert mock_db.committed is True
         assert mock_db.execute_call_count == 2  # Two SQL deletes
@@ -723,7 +723,7 @@ class TestDeleteTag:
         mock_db = MockDB([])
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_tag(999, mock_db, "test@example.com")
+            await delete_tag(999, mock_db, MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -757,7 +757,7 @@ class TestDeleteTag:
         mock_db.execute = Mock(side_effect=Exception("Database error"))
 
         with pytest.raises(HTTPException) as exc_info:
-            await delete_tag(1, mock_db, "test@example.com")
+            await delete_tag(1, mock_db, MockUser())
 
         assert exc_info.value.status_code == 500
         assert mock_db.rolled_back is True
@@ -861,7 +861,7 @@ class TestAddTagToHost:
             "550e8400-e29b-41d4-a716-446655440011",
             "550e8400-e29b-41d4-a716-446655440001",
             mock_db,
-            "test@example.com",
+            MockUser(),
         )
 
         assert "Tag added to host successfully" in result["message"]
@@ -902,7 +902,7 @@ class TestAddTagToHost:
                 "550e8400-e29b-41d4-a716-446655440999",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
-                "test@example.com",
+                MockUser(),
             )
 
         assert exc_info.value.status_code == 404
@@ -946,7 +946,7 @@ class TestAddTagToHost:
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440999",
                 mock_db,
-                "test@example.com",
+                MockUser(),
             )
 
         assert exc_info.value.status_code == 404
@@ -995,7 +995,7 @@ class TestAddTagToHost:
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
-                "test@example.com",
+                MockUser(),
             )
 
         assert exc_info.value.status_code == 400
@@ -1036,7 +1036,7 @@ class TestRemoveTagFromHost:
             "550e8400-e29b-41d4-a716-446655440011",
             "550e8400-e29b-41d4-a716-446655440001",
             mock_db,
-            "test@example.com",
+            MockUser(),
         )
 
         assert mock_db.committed is True
@@ -1074,7 +1074,7 @@ class TestRemoveTagFromHost:
                 "550e8400-e29b-41d4-a716-446655440011",
                 "550e8400-e29b-41d4-a716-446655440001",
                 mock_db,
-                "test@example.com",
+                MockUser(),
             )
 
         assert exc_info.value.status_code == 404
@@ -1116,7 +1116,7 @@ class TestGetHostTags:
             ]
         )
 
-        result = await get_host_tags(1, mock_db, "test@example.com")
+        result = await get_host_tags(1, mock_db, MockUser())
 
         assert len(result) == 2
         assert result[0].name == "tag1"
@@ -1135,7 +1135,7 @@ class TestGetHostTags:
         )
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_host_tags(999, mock_db, "test@example.com")
+            await get_host_tags(999, mock_db, MockUser())
 
         assert exc_info.value.status_code == 404
 
@@ -1177,7 +1177,7 @@ class TestGetHostTags:
 
         mock_db.execute = execute_with_error
 
-        result = await get_host_tags(1, mock_db, "test@example.com")
+        result = await get_host_tags(1, mock_db, MockUser())
 
         assert len(result) == 1
         assert result[0].host_count == 0  # Should fallback to 0

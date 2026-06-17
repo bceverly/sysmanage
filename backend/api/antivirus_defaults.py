@@ -11,10 +11,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.persistence import db as persistence_db
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
@@ -87,7 +88,7 @@ class AntivirusDefaultsBulkUpdate(BaseModel):
 
 @router.get("/", response_model=List[AntivirusDefaultResponse])
 async def get_antivirus_defaults(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get all antivirus defaults."""
     try:
@@ -105,7 +106,7 @@ async def get_antivirus_defaults(
 @router.get("/{os_name}", response_model=AntivirusDefaultResponse)
 async def get_antivirus_default_for_os(
     os_name: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Get antivirus default for a specific OS."""
@@ -139,30 +140,23 @@ async def get_antivirus_default_for_os(
 @router.put("/", response_model=List[AntivirusDefaultResponse])
 async def update_antivirus_defaults(  # NOSONAR
     bulk_update: AntivirusDefaultsBulkUpdate,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Update antivirus defaults (bulk operation)."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        # Check if user has permission to manage antivirus defaults
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the antivirus-default data routes to
+    # the tenant engine via ``db_session``, and the audit trail stays on the
+    # main engine.
+    if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
-            )
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
 
     try:
         updated_defaults = []
@@ -214,20 +208,22 @@ async def update_antivirus_defaults(  # NOSONAR
             len(updated_defaults),
         )
 
-        # Log audit entry for each updated default
-        for default in updated_defaults:
-            AuditService.log_update(
-                db=db_session,
-                entity_type=EntityType.SETTING,
-                entity_name=f"Antivirus Default for {default.os_name}",
-                user_id=auth_user.id,
-                username=current_user,
-                entity_id=str(default.id),
-                details={
-                    "os_name": default.os_name,
-                    "antivirus_package": default.antivirus_package,
-                },
-            )
+        # Log audit entry for each updated default (main engine).
+        with audit_session_local() as audit_session:
+            for default in updated_defaults:
+                AuditService.log_update(
+                    db=audit_session,
+                    entity_type=EntityType.SETTING,
+                    entity_name=f"Antivirus Default for {default.os_name}",
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    entity_id=str(default.id),
+                    details={
+                        "os_name": default.os_name,
+                        "antivirus_package": default.antivirus_package,
+                    },
+                )
+            audit_session.commit()
 
         return updated_defaults
 
@@ -244,41 +240,25 @@ async def update_antivirus_defaults(  # NOSONAR
 @router.delete("/{os_name}")
 async def delete_antivirus_default(
     os_name: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Delete antivirus default for a specific OS."""
-    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_bind())
-    with session_local() as session:
-        # Check if user has permission to manage antivirus defaults
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the antivirus-default data routes to
+    # the tenant engine via ``db``, and the audit trail stays on the main
+    # engine.
+    if not current_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"),
-            )
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=persistence_db.get_engine()
+    )
 
     try:
-        # Get user for audit logging
-        session_local_audit = sessionmaker(
-            autocommit=False, autoflush=False, bind=db.get_bind()
-        )
-        with session_local_audit() as session:
-            auth_user = (
-                session.query(models.User)
-                .filter(models.User.userid == current_user)
-                .first()
-            )
-
         default = (
             db.query(models.AntivirusDefault)
             .filter(models.AntivirusDefault.os_name == os_name)
@@ -293,16 +273,18 @@ async def delete_antivirus_default(
 
             logger.info("Antivirus default deleted for OS: %s", sanitize_log(os_name))
 
-            # Log audit entry for deletion
-            AuditService.log_delete(
-                db=db,
-                entity_type=EntityType.SETTING,
-                entity_name=f"Antivirus Default for {default_os_name}",
-                user_id=auth_user.id,
-                username=current_user,
-                entity_id=default_id,
-                details={"os_name": default_os_name},
-            )
+            # Log audit entry for deletion (main engine).
+            with audit_session_local() as audit_session:
+                AuditService.log_delete(
+                    db=audit_session,
+                    entity_type=EntityType.SETTING,
+                    entity_name=f"Antivirus Default for {default_os_name}",
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    entity_id=default_id,
+                    details={"os_name": default_os_name},
+                )
+                audit_session.commit()
 
             return {"message": _("Antivirus default deleted successfully")}
 

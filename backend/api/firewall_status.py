@@ -9,18 +9,18 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import (
     error_host_not_found,
     error_invalid_host_id,
     error_permission_denied,
-    error_user_not_found,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.persistence import db as db_module
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services import firewall_plan_builder
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -108,7 +108,7 @@ class FirewallStatusResponse(BaseModel):
 )
 async def get_firewall_status(
     host_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Get firewall status for a specific host."""
@@ -160,20 +160,19 @@ async def get_firewall_status(
 )
 async def enable_firewall(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Enable firewall on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=error_user_not_found())
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.ENABLE_FIREWALL):
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/queue data routes to the tenant engine via ``db``.
+    if not current_user.has_role(SecurityRoles.ENABLE_FIREWALL):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -184,21 +183,22 @@ async def enable_firewall(
     plan = firewall_plan_builder.build_enable_plan(_host_info_for_planner(host))
     _queue_apply_deployment_plan(db, host, plan)
 
-    # Audit log the firewall enable command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested firewall enable for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
-    # Commit the session to persist the queued message and audit log
+    # Commit the session to persist the queued message
     db.commit()
+
+    # Audit log the firewall enable command (on the main engine)
+    with session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested firewall enable for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
 
     logger.info("Firewall enable command sent to host %s", host.fqdn)
     return {"message": _("Firewall enable command sent successfully")}
@@ -210,20 +210,19 @@ async def enable_firewall(
 )
 async def disable_firewall(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Disable firewall on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=error_user_not_found())
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.DISABLE_FIREWALL):
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/queue data routes to the tenant engine via ``db``.
+    if not current_user.has_role(SecurityRoles.DISABLE_FIREWALL):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -233,20 +232,21 @@ async def disable_firewall(
     plan = firewall_plan_builder.build_disable_plan(_host_info_for_planner(host))
     _queue_apply_deployment_plan(db, host, plan)
 
-    # Audit log the firewall disable command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested firewall disable for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
     db.commit()
+
+    # Audit log the firewall disable command (on the main engine)
+    with session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested firewall disable for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
 
     logger.info("Firewall disable command sent to host %s", host.fqdn)
     return {"message": _("Firewall disable command sent successfully")}
@@ -258,20 +258,19 @@ async def disable_firewall(
 )
 async def restart_firewall(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Restart firewall on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=error_user_not_found())
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.RESTART_FIREWALL):
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/queue data routes to the tenant engine via ``db``.
+    if not current_user.has_role(SecurityRoles.RESTART_FIREWALL):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -281,20 +280,21 @@ async def restart_firewall(
     plan = firewall_plan_builder.build_restart_plan(_host_info_for_planner(host))
     _queue_apply_deployment_plan(db, host, plan)
 
-    # Audit log the firewall restart command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested firewall restart for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
     db.commit()
+
+    # Audit log the firewall restart command (on the main engine)
+    with session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested firewall restart for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
 
     logger.info("Firewall restart command sent to host %s", host.fqdn)
     return {"message": _("Firewall restart command sent successfully")}
@@ -306,20 +306,19 @@ async def restart_firewall(
 )
 async def deploy_firewall(
     host_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Deploy firewall on a specific host."""
-    # Check permission
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_(("User not found")))
-
-    if user._role_cache is None:
-        user.load_role_cache(db)
-
-    if not user.has_role(SecurityRoles.DEPLOY_FIREWALL):
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/queue data routes to the tenant engine via ``db``.
+    if not current_user.has_role(SecurityRoles.DEPLOY_FIREWALL):
         raise HTTPException(status_code=403, detail=error_permission_denied())
+
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     # Get host
     host = db.query(models.Host).filter(models.Host.id == host_id).first()
@@ -344,20 +343,21 @@ async def deploy_firewall(
         db=db,
     )
 
-    # Audit log the firewall deployment command
-    AuditService.log(
-        db=db,
-        user_id=user.id,
-        username=current_user,
-        action_type=ActionType.EXECUTE,
-        entity_type=EntityType.HOST,
-        entity_id=str(host.id),
-        entity_name=host.fqdn,
-        description=f"Requested firewall deployment for host {host.fqdn}",
-        result=Result.SUCCESS,
-    )
-
     db.commit()
+
+    # Audit log the firewall deployment command (on the main engine)
+    with session_local() as audit_session:
+        AuditService.log(
+            db=audit_session,
+            user_id=current_user.id,
+            username=current_user.userid,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=str(host.id),
+            entity_name=host.fqdn,
+            description=f"Requested firewall deployment for host {host.fqdn}",
+            result=Result.SUCCESS,
+        )
 
     logger.info("Firewall deploy command sent to host %s", host.fqdn)
     return {"message": _("Firewall deploy command sent successfully")}

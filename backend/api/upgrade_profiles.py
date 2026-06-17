@@ -26,11 +26,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.services import upgrade_scheduler
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
@@ -112,13 +113,6 @@ class UpgradeProfileResponse(BaseModel):
     updated_at: Optional[str] = None
 
 
-def _get_user(db: Session, current_user: str) -> models.User:
-    user = db.query(models.User).filter(models.User.userid == current_user).first()
-    if not user:
-        raise HTTPException(status_code=401, detail=_("User not found"))
-    return user
-
-
 def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
     if value is None:
         return None
@@ -150,7 +144,7 @@ def _validate_and_compute_next_run(cron: str) -> datetime:
 
 
 @router.get("", response_model=List[UpgradeProfileResponse])
-async def list_profiles(db: Session = Depends(get_db)):
+async def list_profiles(db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     rows = db.query(models.UpgradeProfile).order_by(models.UpgradeProfile.name).all()
     return [UpgradeProfileResponse(**r.to_dict()) for r in rows]
@@ -159,11 +153,13 @@ async def list_profiles(db: Session = Depends(get_db)):
 @router.post("", response_model=UpgradeProfileResponse)
 async def create_profile(
     request: UpgradeProfileCreateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
+    # Authorization/identity is resolved on the MAIN engine by
+    # require_authenticated_user (user data is server-global); the profile data
+    # and its audit trail route to the tenant engine via ``db``.
     _check_automation_module()
-    user = _get_user(db, current_user)
     tag_uuid = _parse_uuid_or_400(request.tag_id, "tag_id")
 
     next_run = _validate_and_compute_next_run(request.cron)
@@ -180,7 +176,7 @@ async def create_profile(
         staggered_window_min=request.staggered_window_min,
         tag_id=tag_uuid,
         next_run=next_run,
-        created_by=user.id,
+        created_by=current_user.id,
     )
     db.add(profile)
     db.commit()
@@ -192,15 +188,15 @@ async def create_profile(
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Created upgrade profile '%s'") % profile.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return UpgradeProfileResponse(**profile.to_dict())
 
 
 @router.get("/{profile_id}", response_model=UpgradeProfileResponse)
-async def get_profile(profile_id: str, db: Session = Depends(get_db)):
+async def get_profile(profile_id: str, db: Session = Depends(get_tenant_db)):
     _check_automation_module()
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
@@ -215,11 +211,12 @@ async def get_profile(profile_id: str, db: Session = Depends(get_db)):
 async def update_profile(
     profile_id: str,
     request: UpgradeProfileUpdateRequest,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
+    # Identity resolved on the MAIN engine; profile + audit data routes to the
+    # tenant engine via ``db``.
     _check_automation_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
@@ -258,8 +255,8 @@ async def update_profile(
         entity_id=str(profile.id),
         entity_name=profile.name,
         description=_("Updated upgrade profile '%s'") % profile.name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return UpgradeProfileResponse(**profile.to_dict())
@@ -268,11 +265,12 @@ async def update_profile(
 @router.delete("/{profile_id}")
 async def delete_profile(
     profile_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
+    # Identity resolved on the MAIN engine; profile + audit data routes to the
+    # tenant engine via ``db``.
     _check_automation_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
@@ -289,8 +287,8 @@ async def delete_profile(
         entity_id=str(pid),
         entity_name=name,
         description=_("Deleted upgrade profile '%s'") % name,
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
     )
     return {"message": _("Upgrade profile deleted"), "id": str(pid)}
@@ -352,15 +350,16 @@ def _dispatch_profile_to_hosts(profile, target_host_ids, db: Session) -> int:
 @router.post("/{profile_id}/trigger")
 async def trigger_profile(
     profile_id: str,
-    db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
 ):
     """Fire a profile NOW.  Resolves the target host set, enqueues an
     ``apply_updates`` command for each (with the profile's flags +
     staggered-window delay), updates last_run / next_run, and returns
     the count of hosts actually dispatched to."""
+    # Identity resolved on the MAIN engine; profile + audit data routes to the
+    # tenant engine via ``db``.
     _check_automation_module()
-    user = _get_user(db, current_user)
     pid = _parse_uuid_or_400(profile_id, "profile_id")
     profile = (
         db.query(models.UpgradeProfile).filter(models.UpgradeProfile.id == pid).first()
@@ -383,8 +382,8 @@ async def trigger_profile(
         entity_name=profile.name,
         description=_("Triggered upgrade profile '%s' against %d host(s)")
         % (profile.name, len(target_ids)),
-        user_id=user.id,
-        username=current_user,
+        user_id=current_user.id,
+        username=current_user.userid,
         result=Result.SUCCESS,
         details={
             "host_ids": [str(h) for h in target_ids],
@@ -403,6 +402,9 @@ async def trigger_profile(
 
 
 @router.post("/tick")
+# Driver-hook/inbound (external scheduler, no logged-in user → no active-tenant
+# context; scans every tenant's due profiles) — stays on main until inbound
+# queue tenant-routing lands.
 async def tick(db: Session = Depends(get_db)):
     """Driver hook for an external scheduler.  Selects every enabled
     profile where ``next_run <= now``, fires it (updates last_run /

@@ -16,9 +16,11 @@ from backend.api.error_constants import (
     error_diagnostic_not_found,
     error_invalid_diagnostic_id,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import db as db_module
+from backend.persistence import models
+from backend.persistence.partitions import get_request_engine
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, create_command_message
 from backend.websocket.queue_enums import QueueDirection
@@ -63,7 +65,7 @@ class DiagnosticResponse(BaseModel):
 async def collect_diagnostics(
     host_id: str,
     request: DiagnosticRequest = None,
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Request diagnostic collection from an agent.
@@ -81,21 +83,14 @@ async def collect_diagnostics(
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped, so the session routes to the active
+    # tenant's engine; authorization (the User object) is resolved on the MAIN
+    # engine by require_authenticated_user.
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
-        # Get user for audit logging
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -170,24 +165,29 @@ async def collect_diagnostics(
         diagnostic_report.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
         diagnostic_report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        # Audit log the diagnostics collection request
-        AuditService.log(
-            db=session,
-            user_id=user.id,
-            username=current_user,
-            action_type=ActionType.EXECUTE,
-            entity_type=EntityType.HOST,
-            entity_id=host_id,
-            entity_name=host.fqdn,
-            description=f"Requested diagnostic collection for host {host.fqdn}",
-            result=Result.SUCCESS,
-            details={
-                "collection_id": collection_id,
-                "collection_types": parameters["collection_types"],
-            },
-        )
-
         session.commit()
+
+        # Audit log the diagnostics collection request on the MAIN engine
+        # (the audit trail is server-global, like authorization).
+        audit_session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with audit_session_local() as audit_session:
+            AuditService.log(
+                db=audit_session,
+                user_id=current_user.id,
+                username=current_user.userid,
+                action_type=ActionType.EXECUTE,
+                entity_type=EntityType.HOST,
+                entity_id=host_id,
+                entity_name=host.fqdn,
+                description=f"Requested diagnostic collection for host {host.fqdn}",
+                result=Result.SUCCESS,
+                details={
+                    "collection_id": collection_id,
+                    "collection_types": parameters["collection_types"],
+                },
+            )
 
         return {
             "result": True,
@@ -218,9 +218,10 @@ async def get_host_diagnostics(
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -296,9 +297,10 @@ async def get_diagnostic_report(diagnostic_id: str):
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -371,9 +373,10 @@ async def get_diagnostic_status(diagnostic_id: str):
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -423,9 +426,10 @@ async def delete_diagnostic_report(  # NOSONAR
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -474,9 +478,9 @@ async def process_diagnostic_result(result_data: dict):  # NOSONAR
     Process diagnostic collection result from agent.
     This endpoint is called internally when we receive diagnostic results via WebSocket.
     """
-    # Get the SQLAlchemy session
+    # Agent-called/inbound — stays on main until inbound queue tenant-routing lands
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
 
     collection_id = result_data.get("collection_id")
