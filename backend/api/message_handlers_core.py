@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timezone
 
 from sqlalchemy import update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
@@ -97,6 +97,37 @@ async def validate_host_authentication(
 
 
 async def handle_system_info(db: Session, connection, message_data: dict):  # NOSONAR
+    """Handle a system-info message from an agent, routing it to the correct DB.
+
+    Phase 13.1 #2: when the agent identifies itself with a ``host_id`` that is
+    bound to a tenant, the host row and ALL its inventory writes must target
+    that tenant's database — the row was created there by ``/host/register``
+    (see ``backend.api.host.register_host``).  We resolve the tenant from the
+    agent-supplied ``host_id`` (NOT the inbound ``db``), because that's what
+    keeps ``update_or_create_host`` (which looks the host up by FQDN) from
+    failing to find the tenant-resident row and inserting a DUPLICATE host in
+    the bootstrap DB.
+
+    Fully inert when multi-tenancy is off, no ``host_id`` is supplied, or the
+    host has no tenant binding: ``tenant_engine_for_host`` returns ``None`` and
+    the passed ``db`` is used unchanged (the single-tenant behaviour)."""
+    from backend.persistence.partitions import tenant_engine_for_host
+
+    agent_host_id = message_data.get("host_id")
+    tenant_engine = tenant_engine_for_host(agent_host_id) if agent_host_id else None
+    if tenant_engine is None:
+        return await _handle_system_info_impl(db, connection, message_data)
+
+    # Bound host → run the whole handler on its tenant's database so the host
+    # upsert, approval, status, and software writes all land there.
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=tenant_engine)
+    with session_local() as tenant_db:
+        return await _handle_system_info_impl(tenant_db, connection, message_data)
+
+
+async def _handle_system_info_impl(
+    db: Session, connection, message_data: dict
+):  # NOSONAR
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
     from backend.persistence.models import HostChild

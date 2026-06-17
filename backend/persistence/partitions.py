@@ -33,6 +33,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.config import config
 from backend.persistence import db
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -211,11 +212,12 @@ def tenant_engine_for_host(host_id):
         # licensed engine that backs the index isn't loaded).  Do NOT silently
         # fall through to the bootstrap DB — that would route this host's data to
         # the wrong database.  Log loudly with context and re-raise.
-        logger.error(
+        # logger.exception (not error+exc_info) and sanitize the agent-supplied
+        # host_id before logging it (it is user-controlled → log-injection guard).
+        logger.exception(
             "tenant routing FAILED: host→tenant lookup errored for host %s; "
             "cannot determine the tenant database (multi-tenancy is enabled)",
-            host_id,
-            exc_info=True,
+            sanitize_log(host_id),
         )
         raise
     if not tenant_id:
@@ -226,20 +228,23 @@ def tenant_engine_for_host(host_id):
         logger.debug(
             "tenant routing: host %s has no tenant binding; using the bootstrap "
             "database (multi-tenancy enabled)",
-            host_id,
+            sanitize_log(host_id),
         )
         return None
     try:
         engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
     except Exception:  # noqa: BLE001
-        logger.error(
+        logger.exception(
             "tenant routing FAILED: could not resolve the database engine for "
             "host %s → tenant %s; the message/data cannot reach the tenant "
             "database (is the licensed engine loaded / the tenant provisioned?)",
-            host_id,
-            tenant_id,
-            exc_info=True,
+            sanitize_log(host_id),
+            sanitize_log(tenant_id),
         )
         raise
-    logger.debug("tenant routing: host %s → tenant %s", host_id, tenant_id)
+    logger.debug(
+        "tenant routing: host %s → tenant %s",
+        sanitize_log(host_id),
+        sanitize_log(tenant_id),
+    )
     return engine

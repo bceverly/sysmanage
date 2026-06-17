@@ -65,8 +65,10 @@ class TestProcessPendingMessages:
         mock_db.commit.assert_called()
 
     @pytest.mark.asyncio
-    async def test_deletes_messages_for_nonexistent_host(self):
-        """Test that messages for non-existent hosts are deleted."""
+    async def test_defers_messages_for_nonexistent_host(self):
+        """Phase 13.1 #2: messages for a host not found on this DB are DEFERRED
+        (mark_failed → retry-with-backoff), NOT hard-deleted, so a freshly
+        registered host's data survives the enrollment race window."""
         from backend.websocket.inbound_processor import process_pending_messages
 
         mock_db = MagicMock()
@@ -87,11 +89,11 @@ class TestProcessPendingMessages:
             "backend.websocket.inbound_processor.server_queue_manager"
         ) as mock_queue:
             mock_queue.expire_old_messages.return_value = 0
-            mock_queue.delete_messages_for_host.return_value = 3
 
             await process_pending_messages(mock_db)
 
-        mock_queue.delete_messages_for_host.assert_called()
+        # The data-loss guard: we must NOT delete a missing host's messages.
+        mock_queue.delete_messages_for_host.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_deletes_messages_for_unapproved_host(self):

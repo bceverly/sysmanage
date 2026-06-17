@@ -711,24 +711,61 @@ def _resolve_enrollment_tenant(raw_token):
     return tenant_id
 
 
+def _host_write_engine(enrollment_tenant_id):
+    """The engine the new host row (and its tenant-scoped enrollment side-effects)
+    is created on: the enrolling tenant's database when a token resolved a tenant,
+    otherwise the bootstrap engine.  Extracted from ``register_host`` to keep its
+    cognitive complexity under the cap."""
+    if enrollment_tenant_id is None:
+        return db.get_engine()
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        PARTITION_TENANT,
+        resolve_engine,
+    )
+
+    return resolve_engine(partition=PARTITION_TENANT, tenant_id=enrollment_tenant_id)
+
+
+def _apply_registration_key_enrollment(session, host, validated_key):
+    """Phase 8.1: enroll the host into the matched key's access group and bump the
+    key's ``use_count`` / ``last_used_at``.  No-op when no key matched.  Extracted
+    from ``register_host`` to keep its cognitive complexity under the cap; the
+    caller commits so "use_count reflects successful enrollments" stays atomic."""
+    if validated_key is None:
+        return
+    if validated_key.access_group_id is not None:
+        session.add(
+            models.HostAccessGroup(
+                host_id=host.id,
+                access_group_id=validated_key.access_group_id,
+            )
+        )
+    validated_key.use_count = (validated_key.use_count or 0) + 1
+    validated_key.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 @public_router.post("/host/register")
 async def register_host(registration_data: HostRegistration):
     """
     Register a new host (agent) with the system.
     This endpoint does not require authentication for initial registration.
     """
-    print("=== Minimal Host Registration Data Received ===")
-    print(f"FQDN: {registration_data.fqdn}")
-    print(f"Hostname: {registration_data.hostname}")
-    print(f"Active: {registration_data.active}")
-    print(f"IPv4: {registration_data.ipv4}")
-    print(f"IPv6: {registration_data.ipv6}")
-    print(f"Script Execution Enabled: {registration_data.script_execution_enabled}")
-    print("=== End Minimal Registration Data ===")
+    # Phase 13.1: resolve the enrollment token BEFORE opening the host session —
+    # it both rejects a bad registration (403) and selects which database the
+    # host lives in.  None when MT is off / no token → server-scoped (bootstrap).
+    # A token is consumed even if the host already exists in the target tenant DB.
+    enrollment_tenant_id = _resolve_enrollment_tenant(
+        registration_data.enrollment_token
+    )
 
-    # Get the SQLAlchemy session
+    # host + access-group join + reg-key bump + audit are all tenant-scoped
+    # (unprefixed) tables → one database: the enrolling tenant's when a token
+    # resolved a tenant (so the per-tenant queue processor finds the host and
+    # doesn't delete its messages), else bootstrap.  See ``_host_write_engine``.
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False,
+        autoflush=False,
+        bind=_host_write_engine(enrollment_tenant_id),
     )
 
     with session_local() as session:
@@ -771,13 +808,6 @@ async def register_host(registration_data: HostRegistration):
             session, registration_data.registration_key
         )
 
-        # Phase 13.1: validate the optional tenant enrollment token BEFORE
-        # creating the host (a bad token rejects the registration outright) and
-        # resolve which tenant this host enrolls into.
-        enrollment_tenant_id = _resolve_enrollment_tenant(
-            registration_data.enrollment_token
-        )
-
         # Create new host with pending approval status and minimal data
         host = models.Host(
             fqdn=registration_data.fqdn,
@@ -799,20 +829,9 @@ async def register_host(registration_data: HostRegistration):
         session.add(host)
         session.flush()  # need host.id for join-table inserts below
 
-        # Phase 8.1: enroll into the key's access group + bump the
-        # key's use_count + last_used_at.  All in one commit so the
-        # invariant "use_count reflects successful enrollments" holds
-        # even on a crash mid-registration.
-        if validated_key is not None:
-            if validated_key.access_group_id is not None:
-                session.add(
-                    models.HostAccessGroup(
-                        host_id=host.id,
-                        access_group_id=validated_key.access_group_id,
-                    )
-                )
-            validated_key.use_count = (validated_key.use_count or 0) + 1
-            validated_key.last_used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        # Phase 8.1: enroll into the key's access group + bump usage.  Atomic
+        # with the host create — one commit below.
+        _apply_registration_key_enrollment(session, host, validated_key)
 
         session.commit()
         session.refresh(host)

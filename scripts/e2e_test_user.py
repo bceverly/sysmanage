@@ -253,9 +253,9 @@ def _delete_user_by_id(session, user_id, email):
             # matcher picks it up.
             with session.begin_nested():
                 session.execute(
-                    text(
+                    text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                         f'DELETE FROM "{table}" WHERE user_id = :user_id'
-                    ),  # nosec B608  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                    ),  # nosec B608
                     {"user_id": user_id},
                 )
         except Exception:

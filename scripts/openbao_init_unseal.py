@@ -136,8 +136,8 @@ def _write_app_token(app_token_file: str, owner, token: str) -> None:
         except (KeyError, OSError, ImportError) as exc:
             # Best-effort chown (owner may not exist / not permitted); the file
             # is still written 0640 and usable by root.
-            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             # Logs only the chown failure (a filesystem error) — no token value.
+            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             logger.debug("chown on app token file failed: %s", exc)
     print(f"App OpenBAO token written to {app_token_file} (0640).")
 

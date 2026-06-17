@@ -1671,7 +1671,7 @@ class TestErrorHandling:
             mock_sessionmaker.return_value.return_value = mock_session
 
             with pytest.raises(HTTPException) as exc_info:
-                await require_authenticated_user("unknown@example.com")
+                require_authenticated_user("unknown@example.com")
 
             assert exc_info.value.status_code == 401
 
@@ -1691,7 +1691,7 @@ class TestErrorHandling:
             mock_sessionmaker.return_value.return_value = mock_session
 
             with pytest.raises(HTTPException) as exc_info:
-                await require_authenticated_user("unknown@example.com")
+                require_authenticated_user("unknown@example.com")
 
             assert exc_info.value.status_code == 401
 
@@ -1713,7 +1713,7 @@ class TestErrorHandling:
             mock_sessionmaker.return_value.return_value = mock_session
 
             with pytest.raises(HTTPException) as exc_info:
-                await require_authenticated_user("unknown@example.com")
+                require_authenticated_user("unknown@example.com")
 
             assert exc_info.value.status_code == 401
 

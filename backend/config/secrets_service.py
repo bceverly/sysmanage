@@ -241,8 +241,10 @@ def get_secret(
             # Log only the exception *type*, never the message: a secret resolver
             # that raises could embed the secret value in str(exc), and the key
             # name is itself treated as sensitive.  (Clears CodeQL
-            # py/clear-text-logging-sensitive-data.)
-            logger.debug(
+            # py/clear-text-logging-sensitive-data.)  Bare ``nosemgrep`` (the
+            # specific rule id would exceed the 100-char line cap) — this line
+            # logs only ``type(exc).__name__``, never a secret value.
+            logger.debug(  # nosemgrep
                 "YAML fallback lookup for a secret raised %s", type(exc).__name__
             )
             legacy = None

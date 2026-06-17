@@ -82,7 +82,7 @@ async def get_current_user(  # NOSONAR
     raise HTTPException(status_code=401, detail=_("Could not validate credentials"))
 
 
-async def require_authenticated_user(current_user: str = Depends(get_current_user)):
+def require_authenticated_user(current_user: str = Depends(get_current_user)):
     """Resolve the authenticated ``User`` (with security roles) on the MAIN engine.
 
     The data-plane authorization layer (Phase 13.1).  User identities and role

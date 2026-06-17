@@ -45,9 +45,9 @@ def _bao(addr, token, method, path, payload=None):
     req.add_header("X-Vault-Token", token)
     req.add_header("Content-Type", "application/json")
     try:
-        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         # URL is the operator-configured OpenBAO address (trusted config, not
         # user input) — no SSRF surface; this is an operator-run bootstrap CLI.
+        # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         with urllib.request.urlopen(req, timeout=15) as resp:  # nosec B310
             body = resp.read().decode() or "{}"
             return resp.status, json.loads(body) if body.strip() else None
@@ -99,10 +99,9 @@ def _create_pg_provisioner_direct(args, provisioner_password):
             exists = cur.fetchone() is not None
             role = sql.Identifier(args.provisioner_user)
             verb = "ALTER" if exists else "CREATE"
-            # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             # psycopg2: ``verb`` is a fixed literal, the role name goes through
             # sql.Identifier (safe quoting), and the password is a %s bind param.
-            cur.execute(
+            cur.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 sql.SQL(
                     verb + " ROLE {} WITH LOGIN CREATEDB CREATEROLE PASSWORD %s"
                 ).format(role),

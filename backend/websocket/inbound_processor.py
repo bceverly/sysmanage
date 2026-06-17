@@ -105,16 +105,41 @@ async def process_pending_messages(  # NOSONAR
         # Check if host exists and is still approved before processing its messages
         host = db.query(Host).filter(Host.id == host_id).first()
         if not host:
+            # Phase 13.1 #2 SAFETY: do NOT hard-delete on "host not found".
+            # Under per-tenant queues there is an enrollment race window where a
+            # freshly-registered host's row may not yet be visible on THIS
+            # (tenant) database even though its messages are already queued here —
+            # a bulk delete would destroy the agent's data permanently.  Instead
+            # defer each message via mark_failed(retry=True): it reschedules with
+            # backoff (so a transient miss is reprocessed once the host row lands)
+            # and only gives up after max_retries, leaving the row as FAILED and
+            # still inspectable rather than gone.  A genuinely-deleted host's
+            # messages therefore stop after a bounded number of attempts instead
+            # of vanishing silently.
+            pending = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.host_id == host_id,
+                    MessageQueue.direction == QueueDirection.INBOUND,
+                    MessageQueue.status == QueueStatus.PENDING,
+                )
+                .all()
+            )
             logger.warning(
-                _("Host %s no longer exists, deleting all its messages from queue"),
+                _(
+                    "Host %s not found on this database; deferring %d queued "
+                    "message(s) for retry (NOT deleting) — may be an in-flight "
+                    "enrollment or a deleted host"
+                ),
                 host_id,
+                len(pending),
             )
-            deleted = server_queue_manager.delete_messages_for_host(host_id, db=db)
-            logger.info(
-                _("Deleted %d messages for non-existent host %s"),
-                deleted,
-                host_id,
-            )
+            for message in pending:
+                server_queue_manager.mark_failed(
+                    message.message_id,
+                    f"Host {host_id} not found on this database (deferred for retry)",
+                    db=db,
+                )
             continue
 
         if host.approval_status != "approved":
