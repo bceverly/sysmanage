@@ -539,8 +539,8 @@ class TestRouteInboundMessage:
             )
 
         assert result is True
-        # Command result only takes connection and data, not db
-        mock_handler.assert_called_once_with(mock_connection, message_data)
+        # Command result is now tenant-routed: it takes the caller's db first.
+        mock_handler.assert_called_once_with(mock_db, mock_connection, message_data)
 
     @pytest.mark.asyncio
     async def test_routes_command_acknowledgment(self):

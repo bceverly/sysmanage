@@ -7,19 +7,17 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import error_host_not_found
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.utils.verbosity_logger import sanitize_log
 
 
 def get_host_by_id(host_id: str) -> Optional[models.Host]:
     """Get a host by ID, raising HTTPException if not found."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -30,9 +28,7 @@ def get_host_by_id(host_id: str) -> Optional[models.Host]:
 
 def get_host_by_fqdn(fqdn: str) -> Optional[models.Host]:
     """Get a host by FQDN, raising HTTPException if not found."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.fqdn == fqdn).first()
@@ -51,9 +47,7 @@ def get_host_storage_devices(  # NOSONAR
     host_id: str,
 ) -> List[Dict[str, Any]]:
     """Get storage devices for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -174,9 +168,7 @@ def get_host_storage_devices(  # NOSONAR
 
 def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
     """Get network interfaces for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -216,9 +208,7 @@ def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
 
 def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -302,9 +292,7 @@ def _format_user_with_groups(user, host, group_names) -> Dict[str, Any]:
 
 def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts with group memberships for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -349,9 +337,7 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
 
 def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user groups for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -420,9 +406,7 @@ def get_host_software_packages(
     host_id: str, page: int = 1, page_size: int = 100, search: Optional[str] = None
 ) -> Dict[str, Any]:
     """Get paginated software packages for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -499,9 +483,7 @@ def get_host_software_packages(
 
 def update_host_timestamp(host_id: str, field_name: str) -> None:
     """Update a timestamp field for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -593,9 +575,7 @@ async def update_or_create_host(  # NOSONAR
 
 def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
     """Get Ubuntu Pro information for a specific host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # First check if the host exists

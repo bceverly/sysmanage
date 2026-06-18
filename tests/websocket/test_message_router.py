@@ -272,7 +272,7 @@ class TestRouteInboundMessage:
             )
 
             assert result is True
-            mock_handler.assert_called_once_with(mock_connection, message_data)
+            mock_handler.assert_called_once_with(mock_db, mock_connection, message_data)
 
     @pytest.mark.asyncio
     async def test_route_command_acknowledgment(self, mock_db, mock_connection):

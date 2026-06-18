@@ -4,6 +4,7 @@ This module houses the API routes for diagnostic collection functionality in Sys
 
 import json
 import uuid
+from contextlib import nullcontext
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -473,21 +474,20 @@ async def delete_diagnostic_report(  # NOSONAR
 
 
 @router.post("/diagnostics/process-result")
-async def process_diagnostic_result(result_data: dict):  # NOSONAR
+async def process_diagnostic_result(db, result_data: dict):  # NOSONAR
     """
     Process diagnostic collection result from agent.
     This endpoint is called internally when we receive diagnostic results via WebSocket.
     """
-    # Agent-called/inbound — stays on main until inbound queue tenant-routing lands
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
-    )
-
     collection_id = result_data.get("collection_id")
     if not collection_id:
         raise HTTPException(status_code=400, detail=_("Missing collection_id"))
 
-    with session_local() as session:
+    # Use the caller's session — tenant-routed by the queue processor when
+    # multi-tenancy is on — so a bound host's diagnostic report lands in its
+    # tenant database.  ``nullcontext`` so the ``with`` doesn't close it; the
+    # caller owns the transaction.
+    with nullcontext(db) as session:
         # Find the diagnostic report
         diagnostic = (
             session.query(models.DiagnosticReport)

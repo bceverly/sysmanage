@@ -9,12 +9,12 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import desc
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import AD_HOC_SCRIPT, error_user_not_found
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.utils.verbosity_logger import sanitize_log
@@ -42,7 +42,7 @@ async def execute_script(  # NOSONAR
     current_user=Depends(get_current_user),
 ):
     """Execute a script on a remote host."""
-    session_factory = sessionmaker(bind=db.get_engine())
+    session_factory = request_sessionmaker()
     try:
         with session_factory() as db_session:
             # Check if user has permission to run scripts
@@ -244,7 +244,7 @@ async def get_script_executions(
     limit: int = Query(50, description="Maximum number of results per page"),
 ):
     """Get script execution logs with pagination."""
-    session_factory = sessionmaker(bind=db.get_engine())
+    session_factory = request_sessionmaker()
     try:
         with session_factory() as db_session:
             # Build base query
@@ -322,7 +322,7 @@ async def delete_script_execution(
     current_user=Depends(get_current_user),
 ):
     """Delete a specific script execution by execution ID."""
-    session_factory = sessionmaker(bind=db.get_engine())
+    session_factory = request_sessionmaker()
     try:
         with session_factory() as db_session:
             # Check if user has permission to delete script executions
@@ -400,7 +400,7 @@ async def delete_script_executions_bulk(
     current_user=Depends(get_current_user),
 ):
     """Delete multiple script executions by execution IDs."""
-    session_factory = sessionmaker(bind=db.get_engine())
+    session_factory = request_sessionmaker()
     try:
         with session_factory() as db_session:
             # Check if user has permission to delete script executions
@@ -476,7 +476,7 @@ async def get_script_execution(
     current_user=Depends(get_current_user),
 ):
     """Get a specific script execution by execution ID."""
-    session_factory = sessionmaker(bind=db.get_engine())
+    session_factory = request_sessionmaker()
     try:
         with session_factory() as db_session:
             execution = (

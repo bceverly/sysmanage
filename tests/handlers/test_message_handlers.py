@@ -40,7 +40,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -63,7 +63,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -88,7 +88,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -109,7 +109,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -130,7 +130,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -151,7 +151,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -172,7 +172,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -193,7 +193,7 @@ class TestHandleCommandResult:
                 mock_get_db.return_value = iter([mock_session])
                 mock_handler.return_value = {"status": "processed"}
 
-                await handle_command_result(mock_connection, message_data)
+                await handle_command_result(mock_session, mock_connection, message_data)
 
                 mock_handler.assert_called_once()
 
@@ -204,7 +204,7 @@ class TestHandleCommandResult:
             "result": {"status": "success"},
         }
 
-        result = await handle_command_result(mock_connection, message_data)
+        result = await handle_command_result(MagicMock(), mock_connection, message_data)
 
         assert result["message_type"] == "command_result_ack"
         assert "timestamp" in result
@@ -238,7 +238,9 @@ class TestHandleCommandResult:
             "backend.api.handlers.handle_package_collection",
             new_callable=MagicMock,
         ) as mock_handler:
-            result = await handle_command_result(mock_connection, message_data)
+            result = await handle_command_result(
+                MagicMock(), mock_connection, message_data
+            )
 
         mock_handler.assert_not_called()
         assert result["message_type"] == "command_result_ack"
@@ -285,7 +287,7 @@ class TestHandleDiagnosticResult:
                 session, mock_connection, message_data
             )
 
-            mock_process.assert_called_once_with(message_data)
+            mock_process.assert_called_once_with(session, message_data)
             assert result["message_type"] == "diagnostic_result_ack"
             assert result["status"] == "processed"
 

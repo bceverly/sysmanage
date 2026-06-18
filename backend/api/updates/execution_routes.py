@@ -6,11 +6,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc
-from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
@@ -34,7 +34,7 @@ async def execute_updates(  # NOSONAR
     """Execute package updates on specified hosts."""
     try:
         # Check if user has permission to apply software updates
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             user = (
                 session.query(models.User)
@@ -239,7 +239,7 @@ async def get_execution_log(
 ):
     """Get update execution log for a host."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()

@@ -211,7 +211,7 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.COMMAND_RESULT:
             print("About to call handle_command_result", flush=True)
-            await handle_command_result(mock_connection, message_data)
+            await handle_command_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed command result", flush=True)
 

@@ -208,6 +208,39 @@ async def agent_connect(websocket: WebSocket):
         db.close()
 
 
+async def _handle_time_sensitive_message(message, connection, db):
+    """Route a time-sensitive message (heartbeat / command-ack) to the host's
+    TENANT database when the host is bound, else the bootstrap ``db``.  These
+    touch host-scoped data (host status, the host's queue), so a bound host's
+    must hit its tenant DB.  SYSTEM_INFO self-routes from its own host_id and the
+    id isn't known on the first connection, so it stays on ``db`` here.  Inert
+    when MT is off / host unbound.  Commits the fresh tenant session — command-ack
+    doesn't self-commit (heartbeat does, so the extra commit no-ops)."""
+    from backend.persistence.partitions import tenant_engine_for_host  # noqa: PLC0415
+
+    host_id = getattr(connection, "host_id", None)
+    tenant_engine = (
+        None
+        if message.message_type == MessageType.SYSTEM_INFO or not host_id
+        else tenant_engine_for_host(host_id)
+    )
+    if tenant_engine is None:
+        await _handle_message_by_type(message, connection, db)
+        return
+
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    tenant_db = sessionmaker(bind=tenant_engine)()
+    try:
+        await _handle_message_by_type(message, connection, tenant_db)
+        tenant_db.commit()
+    except Exception:
+        tenant_db.rollback()
+        raise
+    finally:
+        tenant_db.close()
+
+
 async def _process_websocket_message(data, connection, db, connection_id):
     """Process a single WebSocket message from the agent."""
     try:
@@ -242,7 +275,7 @@ async def _process_websocket_message(data, connection, db, connection_id):
             MessageType.SYSTEM_INFO,
             MessageType.COMMAND_ACKNOWLEDGMENT,
         ]:
-            await _handle_message_by_type(message, connection, db)
+            await _handle_time_sensitive_message(message, connection, db)
         else:
             # Queue all other messages for background processing
             _enqueue_inbound_message(message, connection, db)
@@ -752,36 +785,6 @@ async def _process_inventory_message(message, connection, db):
         data_size,
         host.id,
     )
-
-    # Log specific data for different message types
-    if message.message_type == "hardware_update":
-        cpu_vendor = message.data.get("cpu_vendor", "N/A")
-        cpu_model = message.data.get("cpu_model", "N/A")
-        memory_mb = message.data.get("memory_total_mb", "N/A")
-        storage_count = len(message.data.get("storage_devices", []))
-        logger.info(
-            "SERVER_DEBUG: Hardware data - CPU: %s %s, Memory: %s MB, Storage devices: %d",
-            cpu_vendor,
-            cpu_model,
-            memory_mb,
-            storage_count,
-        )
-    elif message.message_type == "software_inventory_update":
-        total_packages = message.data.get("total_packages", 0)
-        software_packages = message.data.get("software_packages", [])
-        logger.info(
-            "SERVER_DEBUG: Software data - Total packages: %d, First package: %s",
-            total_packages,
-            software_packages[0] if software_packages else "None",
-        )
-    elif message.message_type == "user_access_update":
-        total_users = message.data.get("total_users", 0)
-        total_groups = message.data.get("total_groups", 0)
-        logger.info(
-            "SERVER_DEBUG: User access data - Users: %d, Groups: %d",
-            total_users,
-            total_groups,
-        )
 
     try:
         message_id = server_queue_manager.enqueue_message(

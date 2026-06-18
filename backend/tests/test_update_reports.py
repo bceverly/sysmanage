@@ -362,10 +362,9 @@ class TestReportUpdatesEndpoint:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -389,10 +388,9 @@ class TestReportUpdatesEndpoint:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -413,10 +411,9 @@ class TestReportUpdatesEndpoint:
 
         mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -450,10 +447,9 @@ class TestReportUpdatesEndpoint:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -477,10 +473,9 @@ class TestReportUpdatesEndpoint:
         mock_delete = mock_db_session.query.return_value.filter.return_value.delete
         mock_delete.return_value = 5  # 5 existing updates deleted
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -504,10 +499,9 @@ class TestReportUpdatesEndpoint:
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
         mock_db_session.commit.side_effect = Exception("Database connection lost")
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -555,10 +549,9 @@ class TestUpdateTypeClassification:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -600,10 +593,9 @@ class TestUpdateTypeClassification:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -644,10 +636,9 @@ class TestUpdateTypeClassification:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )
@@ -776,10 +767,9 @@ class TestUpdateMetadata:
         )
         mock_db_session.query.return_value.filter.return_value.delete.return_value = 0
 
-        with patch("backend.api.updates.report_routes.db") as mock_db, patch(
-            "backend.api.updates.report_routes.sessionmaker"
+        with patch(
+            "backend.api.updates.report_routes.request_sessionmaker"
         ) as mock_sessionmaker:
-            mock_db.get_engine.return_value = mock_db_engine
             mock_sessionmaker.return_value = create_mock_session_context(
                 mock_db_session
             )

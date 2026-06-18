@@ -6,12 +6,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import error_internal_server
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
@@ -34,7 +34,7 @@ async def get_os_upgrades(
 ):
     """Get available OS version upgrades for all hosts or a specific host."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Build query for OS upgrades
             query = session.query(models.PackageUpdate).filter(
@@ -99,7 +99,7 @@ async def get_os_upgrades(
 async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
     """Get summary of OS upgrades across all hosts."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Get OS upgrades by package manager (OS type)
             query = session.query(models.PackageUpdate).filter(
@@ -174,7 +174,7 @@ async def execute_os_upgrades(  # NOSONAR
     """
     try:
         # Check if user has permission to apply host OS upgrades
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             user = (
                 session.query(models.User)
@@ -212,7 +212,7 @@ async def execute_os_upgrades(  # NOSONAR
                     ),
                 )
 
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             results = []
 

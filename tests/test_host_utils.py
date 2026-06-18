@@ -210,9 +210,8 @@ class MockUbuntuProService:
 class TestGetHostById:
     """Test get_host_by_id function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_by_id_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_by_id_success(self, mock_sessionmaker):
         """Test successful host retrieval by ID."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -229,9 +228,8 @@ class TestGetHostById:
         assert result == mock_host
         mock_session.query.assert_called_once_with(models.Host)
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_by_id_not_found(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_by_id_not_found(self, mock_sessionmaker):
         """Test host not found by ID."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -250,9 +248,8 @@ class TestGetHostById:
 class TestGetHostByFqdn:
     """Test get_host_by_fqdn function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_by_fqdn_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_by_fqdn_success(self, mock_sessionmaker):
         """Test successful host retrieval by FQDN."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -269,9 +266,8 @@ class TestGetHostByFqdn:
         assert result == mock_host
         mock_session.query.assert_called_once_with(models.Host)
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_by_fqdn_not_found(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_by_fqdn_not_found(self, mock_sessionmaker):
         """Test host not found by FQDN."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -321,9 +317,8 @@ class TestValidateHostApprovalStatus:
 class TestGetHostStorageDevices:
     """Test get_host_storage_devices function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_storage_devices_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_storage_devices_success(self, mock_sessionmaker):
         """Test successful storage devices retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -358,11 +353,8 @@ class TestGetHostStorageDevices:
         assert device["available_gb"] == 465.66  # 500GB in GB
         assert device["usage_percent"] == 50.0
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_storage_devices_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_storage_devices_host_not_found(self, mock_sessionmaker):
         """Test storage devices retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -377,9 +369,8 @@ class TestGetHostStorageDevices:
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_storage_devices_empty(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_storage_devices_empty(self, mock_sessionmaker):
         """Test storage devices retrieval with no devices."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -396,11 +387,8 @@ class TestGetHostStorageDevices:
 
         assert result == []
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_storage_devices_none_values(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_storage_devices_none_values(self, mock_sessionmaker):
         """Test storage devices with None values."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -445,11 +433,8 @@ class TestGetHostStorageDevices:
 class TestGetHostNetworkInterfaces:
     """Test get_host_network_interfaces function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_network_interfaces_success(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_network_interfaces_success(self, mock_sessionmaker):
         """Test successful network interfaces retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -477,11 +462,8 @@ class TestGetHostNetworkInterfaces:
         assert interface["ipv4_address"] == mock_interface.ipv4_address
         assert interface["is_up"] == mock_interface.is_up
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_network_interfaces_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_network_interfaces_host_not_found(self, mock_sessionmaker):
         """Test network interfaces retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -500,9 +482,8 @@ class TestGetHostNetworkInterfaces:
 class TestGetHostUserAccounts:
     """Test get_host_user_accounts function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_user_accounts_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_user_accounts_success(self, mock_sessionmaker):
         """Test successful user accounts retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -529,11 +510,8 @@ class TestGetHostUserAccounts:
         assert user["home_directory"] == mock_user.home_directory
         assert user["is_system_user"] == mock_user.is_system_user
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_user_accounts_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_user_accounts_host_not_found(self, mock_sessionmaker):
         """Test user accounts retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -552,11 +530,8 @@ class TestGetHostUserAccounts:
 class TestGetHostUsersWithGroups:
     """Test get_host_users_with_groups function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_users_with_groups_success(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_users_with_groups_success(self, mock_sessionmaker):
         """Test successful users with groups retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -588,11 +563,8 @@ class TestGetHostUsersWithGroups:
         assert user["uid"] == mock_user.uid
         assert user["groups"] == [mock_group.group_name]
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_users_with_groups_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_users_with_groups_host_not_found(self, mock_sessionmaker):
         """Test users with groups retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -611,9 +583,8 @@ class TestGetHostUsersWithGroups:
 class TestGetHostUserGroups:
     """Test get_host_user_groups function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_user_groups_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_user_groups_success(self, mock_sessionmaker):
         """Test successful user groups retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -645,11 +616,8 @@ class TestGetHostUserGroups:
         assert group["gid"] == mock_group.gid
         assert group["users"] == [mock_user.username]
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_user_groups_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_user_groups_host_not_found(self, mock_sessionmaker):
         """Test user groups retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -668,11 +636,8 @@ class TestGetHostUserGroups:
 class TestGetHostSoftwarePackages:
     """Test get_host_software_packages function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_software_packages_success(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_software_packages_success(self, mock_sessionmaker):
         """Test successful software packages retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -709,11 +674,8 @@ class TestGetHostSoftwarePackages:
         assert package["is_system_package"] == mock_package.is_system_package
         assert result["pagination"]["total_items"] == 1
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_software_packages_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_software_packages_host_not_found(self, mock_sessionmaker):
         """Test software packages retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -732,9 +694,8 @@ class TestGetHostSoftwarePackages:
 class TestUpdateHostTimestamp:
     """Test update_host_timestamp function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_update_host_timestamp_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_update_host_timestamp_success(self, mock_sessionmaker):
         """Test successful timestamp update."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -751,11 +712,8 @@ class TestUpdateHostTimestamp:
 
         mock_session.commit.assert_called_once()
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_update_host_timestamp_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_update_host_timestamp_host_not_found(self, mock_sessionmaker):
         """Test timestamp update with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -825,9 +783,8 @@ class TestUpdateOrCreateHost:
 class TestGetHostUbuntuProInfo:
     """Test get_host_ubuntu_pro_info function."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_ubuntu_pro_info_success(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_ubuntu_pro_info_success(self, mock_sessionmaker):
         """Test successful Ubuntu Pro info retrieval."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -858,11 +815,8 @@ class TestGetHostUbuntuProInfo:
         assert result["services"][0]["name"] == mock_service.service_name
         assert result["services"][0]["status"] == mock_service.status
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_ubuntu_pro_info_host_not_found(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_ubuntu_pro_info_host_not_found(self, mock_sessionmaker):
         """Test Ubuntu Pro info retrieval with nonexistent host."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -877,9 +831,8 @@ class TestGetHostUbuntuProInfo:
         assert exc_info.value.status_code == 404
         assert "Host not found" in str(exc_info.value.detail)
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_ubuntu_pro_info_no_data(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_ubuntu_pro_info_no_data(self, mock_sessionmaker):
         """Test Ubuntu Pro info retrieval with no Pro data."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -903,11 +856,8 @@ class TestGetHostUbuntuProInfo:
         assert result["tech_support_level"] is None
         assert result["services"] == []
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_get_host_ubuntu_pro_info_no_services(
-        self, mock_get_engine, mock_sessionmaker
-    ):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_get_host_ubuntu_pro_info_no_services(self, mock_sessionmaker):
         """Test Ubuntu Pro info retrieval with no services."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -933,9 +883,8 @@ class TestGetHostUbuntuProInfo:
 class TestHostUtilsIntegration:
     """Integration tests for host utils functionality."""
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_storage_device_calculations(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_storage_device_calculations(self, mock_sessionmaker):
         """Test storage device size calculations are correct."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (
@@ -963,9 +912,8 @@ class TestHostUtilsIntegration:
         assert device["available_gb"] == 698.49  # 750GB in binary GB
         assert device["usage_percent"] == 25.0  # 25% usage
 
-    @patch("backend.api.host_utils.sessionmaker")
-    @patch("backend.api.host_utils.db.get_engine")
-    def test_multiple_storage_devices(self, mock_get_engine, mock_sessionmaker):
+    @patch("backend.api.host_utils.request_sessionmaker")
+    def test_multiple_storage_devices(self, mock_sessionmaker):
         """Test handling multiple storage devices."""
         mock_session = Mock()
         mock_sessionmaker.return_value.return_value.__enter__.return_value = (

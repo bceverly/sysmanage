@@ -159,9 +159,8 @@ class TestUpdateHostHardware:
     """Test update_host_hardware function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_success(self, mock_db, mock_sessionmaker):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_success(self, mock_sessionmaker):
         """Test successful hardware update."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
@@ -187,11 +186,8 @@ class TestUpdateHostHardware:
         assert mock_host.cpu_cores == 6
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_with_storage_devices(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_with_storage_devices(self, mock_sessionmaker):
         """Test hardware update with storage devices."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
@@ -229,10 +225,9 @@ class TestUpdateHostHardware:
         assert len(mock_session.added_objects) == 2  # Two storage devices added
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
+    @patch("backend.api.host_data_updates.request_sessionmaker")
     async def test_update_host_hardware_with_network_interfaces(
-        self, mock_db, mock_sessionmaker
+        self, mock_sessionmaker
     ):
         """Test hardware update with network interfaces."""
         mock_host = MockHost()
@@ -269,11 +264,8 @@ class TestUpdateHostHardware:
         assert len(mock_session.added_objects) == 2  # Two network interfaces added
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_skip_error_entries(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_skip_error_entries(self, mock_sessionmaker):
         """Test hardware update skips entries with errors."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
@@ -300,11 +292,8 @@ class TestUpdateHostHardware:
         assert len(mock_session.added_objects) == 2  # Only non-error entries added
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_backward_compatibility(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_backward_compatibility(self, mock_sessionmaker):
         """Test hardware update with legacy JSON fields."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
@@ -324,11 +313,8 @@ class TestUpdateHostHardware:
         assert mock_host.hardware_details == {"legacy": "hardware_data"}
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_host_not_found(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_host_not_found(self, mock_sessionmaker):
         """Test hardware update when host is not found."""
         mock_session = MockSession([])  # Empty hosts list
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
@@ -341,11 +327,8 @@ class TestUpdateHostHardware:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_update_host_hardware_partial_update(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_update_host_hardware_partial_update(self, mock_sessionmaker):
         """Test hardware update with only some fields."""
         mock_host = MockHost()
         mock_session = MockSession([mock_host])
@@ -401,13 +384,12 @@ class TestRequestHardwareUpdate:
     """Test request_hardware_update function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
+    @patch("backend.api.host_data_updates.request_sessionmaker")
     @patch("backend.api.host_data_updates.validate_host_approval_status")
     @patch("backend.api.host_data_updates.create_command_message")
     @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_hardware_update_success(
-        self, mock_queue_ops, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_validate, mock_sessionmaker
     ):
         """Test successful hardware update request."""
         mock_host = MockHost()
@@ -427,11 +409,8 @@ class TestRequestHardwareUpdate:
         mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_request_hardware_update_host_not_found(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_request_hardware_update_host_not_found(self, mock_sessionmaker):
         """Test hardware update request when host not found."""
         mock_session = MockSession([])  # Empty hosts list
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)
@@ -446,12 +425,11 @@ class TestRequestHardwareUpdateBulk:
     """Test request_hardware_update_bulk function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
+    @patch("backend.api.host_data_updates.request_sessionmaker")
     @patch("backend.api.host_data_updates.create_command_message")
     @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_hardware_update_bulk_success(
-        self, mock_queue_ops, mock_create_msg, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_sessionmaker
     ):
         """Test successful bulk hardware update request."""
         mock_hosts = [MockHost(1), MockHost(2)]
@@ -467,11 +445,8 @@ class TestRequestHardwareUpdateBulk:
         assert mock_queue_ops.enqueue_message.call_count == 2
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_request_hardware_update_bulk_host_not_found(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_request_hardware_update_bulk_host_not_found(self, mock_sessionmaker):
         """Test bulk hardware update request with non-existent host."""
         # Mock a session that returns no hosts
         mock_session = MockSession([])  # Empty host list
@@ -485,10 +460,9 @@ class TestRequestHardwareUpdateBulk:
         assert result["results"][0]["error"] == "Host not found"
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
+    @patch("backend.api.host_data_updates.request_sessionmaker")
     async def test_request_hardware_update_bulk_host_not_approved(
-        self, mock_db, mock_sessionmaker
+        self, mock_sessionmaker
     ):
         """Test bulk hardware update request with non-approved host."""
         # Mock a host that is not approved
@@ -540,13 +514,12 @@ class TestRequestUserAccessUpdate:
     """Test request_user_access_update function."""
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
+    @patch("backend.api.host_data_updates.request_sessionmaker")
     @patch("backend.api.host_data_updates.validate_host_approval_status")
     @patch("backend.api.host_data_updates.create_command_message")
     @patch("backend.api.host_data_updates.queue_ops")
     async def test_request_user_access_update_success(
-        self, mock_queue_ops, mock_create_msg, mock_validate, mock_db, mock_sessionmaker
+        self, mock_queue_ops, mock_create_msg, mock_validate, mock_sessionmaker
     ):
         """Test successful user access update request."""
         mock_host = MockHost()
@@ -566,11 +539,8 @@ class TestRequestUserAccessUpdate:
         mock_queue_ops.enqueue_message.assert_called_once()
 
     @pytest.mark.asyncio
-    @patch("backend.api.host_data_updates.sessionmaker")
-    @patch("backend.api.host_data_updates.db")
-    async def test_request_user_access_update_host_not_found(
-        self, mock_db, mock_sessionmaker
-    ):
+    @patch("backend.api.host_data_updates.request_sessionmaker")
+    async def test_request_user_access_update_host_not_found(self, mock_sessionmaker):
         """Test user access update request when host not found."""
         mock_session = MockSession([])
         mock_sessionmaker.return_value = MockSessionLocal(mock_session)

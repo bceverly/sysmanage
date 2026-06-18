@@ -357,7 +357,7 @@ class TestHandleCommandResult:
             "stderr": "",
         }
 
-        result = await handle_command_result(connection, message_data)
+        result = await handle_command_result(Mock(), connection, message_data)
 
         assert result["message_type"] == "command_result_ack"
         assert "timestamp" in result
@@ -381,12 +381,13 @@ class TestHandleCommandResult:
         mock_get_db.return_value = iter([mock_db_session])
         mock_script_handler.return_value = {"status": "completed"}
 
-        await handle_command_result(connection, message_data)
+        # db is now passed in by the caller (tenant-routed); the handler no
+        # longer opens or closes its own session.
+        await handle_command_result(mock_db_session, connection, message_data)
 
         mock_script_handler.assert_called_once_with(
             mock_db_session, connection, message_data
         )
-        mock_db_session.close.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_command_result_unknown_hostname(self):
@@ -394,7 +395,7 @@ class TestHandleCommandResult:
         connection = MockConnection()
         message_data = {"command": "test", "exit_code": 0}
 
-        result = await handle_command_result(connection, message_data)
+        result = await handle_command_result(Mock(), connection, message_data)
 
         assert result["message_type"] == "command_result_ack"
 
@@ -459,7 +460,7 @@ class TestHandleDiagnosticResult:
         assert "timestamp" in result
         assert mock_session.committed
         assert mock_session.executed_statements
-        mock_process_diagnostic.assert_called_once_with(message_data)
+        mock_process_diagnostic.assert_called_once_with(mock_session, message_data)
 
     @pytest.mark.asyncio
     @patch("backend.api.diagnostics.process_diagnostic_result")
@@ -539,7 +540,7 @@ class TestHandleDiagnosticResult:
         result = await handle_diagnostic_result(mock_session, connection, message_data)
 
         assert result["message_type"] == "diagnostic_result_ack"
-        mock_process_diagnostic.assert_called_once_with(message_data)
+        mock_process_diagnostic.assert_called_once_with(mock_session, message_data)
 
 
 class TestMessageHandlersIntegration:
@@ -549,7 +550,8 @@ class TestMessageHandlersIntegration:
     async def test_message_handlers_preserve_message_structure(self):
         """Test that all handlers return properly structured messages."""
         handlers_and_data = [
-            (handle_command_result, {"command": "test"}),
+            # handle_command_result takes the caller's (tenant-routed) db first.
+            (lambda c, d: handle_command_result(Mock(), c, d), {"command": "test"}),
             (handle_config_acknowledgment, {"status": "ok"}),
         ]
 
@@ -570,7 +572,7 @@ class TestMessageHandlersIntegration:
         connection = MockConnection()
         original_agent_id = connection.agent_id
 
-        await handle_command_result(connection, {"command": "test"})
+        await handle_command_result(Mock(), connection, {"command": "test"})
         await handle_config_acknowledgment(connection, {"status": "ok"})
 
         assert connection.agent_id == original_agent_id

@@ -40,8 +40,13 @@ __all__ = [
 ]
 
 
-async def handle_command_result(connection, message_data: dict):  # NOSONAR
-    """Handle command execution result from agent."""
+async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
+    """Handle command execution result from agent.
+
+    ``db`` is the caller's session — tenant-routed by the queue processor when
+    multi-tenancy is on — and is used for ALL downstream handlers so a bound
+    host's command results land in its tenant database.  The caller owns the
+    session lifecycle (we never open or close our own)."""
     logger.info(
         "Command result from %s: %s",
         getattr(connection, "hostname", "unknown"),
@@ -76,16 +81,8 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         logger.info("Detected script execution result, routing to script handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_script_execution_result
-        from backend.persistence.db import get_db
 
-        # Get database session and route to script handler
-        db_session = next(get_db())
-        try:
-            return await handle_script_execution_result(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_script_execution_result(db, connection, message_data)
 
     # Check if this is a virtualization support result
     result_data = message_data.get("result", {})
@@ -95,29 +92,15 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
     if "supported_types" in result_data or "capabilities" in result_data:
         logger.info("Detected virtualization support result, routing to handler")
         from backend.api.handlers import handle_virtualization_support_update
-        from backend.persistence.db import get_db
 
-        db_session = next(get_db())
-        try:
-            return await handle_virtualization_support_update(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_virtualization_support_update(db, connection, message_data)
 
     # Check if this is a child hosts list result
     if "child_hosts" in result_data:
         logger.info("Detected child hosts list result, routing to handler")
         from backend.api.handlers import handle_child_hosts_list_update
-        from backend.persistence.db import get_db
 
-        db_session = next(get_db())
-        try:
-            return await handle_child_hosts_list_update(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_child_hosts_list_update(db, connection, message_data)
 
     # Check if this is a child host control result (start/stop/restart/delete)
     # This must be checked BEFORE the creation result check since control results
@@ -140,7 +123,6 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
             handle_child_host_restart_result,
             handle_child_host_delete_result,
         )
-        from backend.persistence.db import get_db
 
         handler_map = {
             "start_child_host": handle_child_host_start_result,
@@ -149,11 +131,7 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
             "delete_child_host": handle_child_host_delete_result,
         }
 
-        db_session = next(get_db())
-        try:
-            return await handler_map[command_type](db_session, connection, message_data)
-        finally:
-            db_session.close()
+        return await handler_map[command_type](db, connection, message_data)
 
     # Check if this is a child host creation result
     # This must be checked AFTER control commands since they also have child_name/child_type
@@ -168,15 +146,8 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         ]:
             logger.info("Detected child host creation result, routing to handler")
             from backend.api.handlers import handle_child_host_created
-            from backend.persistence.db import get_db
 
-            db_session = next(get_db())
-            try:
-                return await handle_child_host_created(
-                    db_session, connection, message_data
-                )
-            finally:
-                db_session.close()
+            return await handle_child_host_created(db, connection, message_data)
 
     # Check if this is a WSL enable result
     if "reboot_required" in result_data and result_data.get("success") is not None:
@@ -184,57 +155,29 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         if command_type == "enable_wsl":
             logger.info("Detected WSL enable result, routing to handler")
             from backend.api.handlers import handle_wsl_enable_result
-            from backend.persistence.db import get_db
 
-            db_session = next(get_db())
-            try:
-                return await handle_wsl_enable_result(
-                    db_session, connection, message_data
-                )
-            finally:
-                db_session.close()
+            return await handle_wsl_enable_result(db, connection, message_data)
 
     # Check if this is a LXD initialize result
     if command_type == "initialize_lxd":
         logger.info("Detected LXD initialize result, routing to handler")
         from backend.api.handlers import handle_lxd_initialize_result
-        from backend.persistence.db import get_db
 
-        db_session = next(get_db())
-        try:
-            return await handle_lxd_initialize_result(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_lxd_initialize_result(db, connection, message_data)
 
     # Check if this is a VMM initialize result
     if command_type == "initialize_vmm":
         logger.info("Detected VMM initialize result, routing to handler")
         from backend.api.handlers import handle_vmm_initialize_result
-        from backend.persistence.db import get_db
 
-        db_session = next(get_db())
-        try:
-            return await handle_vmm_initialize_result(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_vmm_initialize_result(db, connection, message_data)
 
     # Check if this is a KVM initialize result
     if command_type == "initialize_kvm":
         logger.info("Detected KVM initialize result, routing to handler")
         from backend.api.handlers import handle_kvm_initialize_result
-        from backend.persistence.db import get_db
 
-        db_session = next(get_db())
-        try:
-            return await handle_kvm_initialize_result(
-                db_session, connection, message_data
-            )
-        finally:
-            db_session.close()
+        return await handle_kvm_initialize_result(db, connection, message_data)
 
     logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
     logger.info(
@@ -267,7 +210,6 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         logger.info("Detected package collection result, routing to package handler")
         # Import here to avoid circular imports
         from backend.api.handlers import handle_package_collection
-        from backend.persistence.db import get_db
 
         # For new message format, merge result data into message_data for backwards compatibility
         if result_data and (
@@ -277,12 +219,7 @@ async def handle_command_result(connection, message_data: dict):  # NOSONAR
         else:
             combined_data = message_data
 
-        # Get database session and route to package handler
-        db_session = next(get_db())
-        try:
-            return handle_package_collection(db_session, connection, combined_data)
-        finally:
-            db_session.close()
+        return handle_package_collection(db, connection, combined_data)
 
     # Regular command result - just acknowledge
     return {
@@ -318,8 +255,8 @@ async def handle_diagnostic_result(db: Session, connection, message_data: dict):
     )
 
     try:
-        # Process the diagnostic result
-        await process_diagnostic_result(message_data)
+        # Process the diagnostic result on the caller's (tenant-routed) session.
+        await process_diagnostic_result(db, message_data)
 
         # Update host diagnostics request status to completed if we have a host_id
         if hasattr(connection, "host_id") and connection.host_id:

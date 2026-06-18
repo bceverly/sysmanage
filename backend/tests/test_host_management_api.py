@@ -1122,25 +1122,20 @@ class TestHostDataUpdates:
             "memory_total_mb": 65536,
         }
 
-        with patch("backend.api.host_data_updates.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            mock_host
+        )
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
+        with patch(
+            "backend.api.host_data_updates.request_sessionmaker"
+        ) as mock_sessionmaker:
+            mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
-            with patch(
-                "backend.api.host_data_updates.sessionmaker"
-            ) as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            result = await update_host_hardware(str(mock_host.id), hardware_data)
 
-                result = await update_host_hardware(str(mock_host.id), hardware_data)
-
-                assert result["result"] is True
-                mock_session.commit.assert_called()
+            assert result["result"] is True
+            mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
     async def test_update_host_hardware_not_found(self, mock_config):
@@ -1149,35 +1144,25 @@ class TestHostDataUpdates:
 
         hardware_data = {"cpu_vendor": "Intel"}
 
-        with patch("backend.api.host_data_updates.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
+        with patch(
+            "backend.api.host_data_updates.request_sessionmaker"
+        ) as mock_sessionmaker:
+            mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
-            with patch(
-                "backend.api.host_data_updates.sessionmaker"
-            ) as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with pytest.raises(HTTPException) as exc_info:
+                await update_host_hardware(str(uuid.uuid4()), hardware_data)
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await update_host_hardware(str(uuid.uuid4()), hardware_data)
-
-                assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_request_hardware_update_success(self, mock_config, mock_host):
         """Test requesting hardware update successfully."""
         from backend.api.host_data_updates import request_hardware_update
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1185,7 +1170,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1201,10 +1186,7 @@ class TestHostDataUpdates:
         """Test requesting system info update successfully."""
         from backend.api.host_data_updates import request_system_info
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1212,7 +1194,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1229,10 +1211,7 @@ class TestHostDataUpdates:
         """Test requesting user access update successfully."""
         from backend.api.host_data_updates import request_user_access_update
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1240,7 +1219,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1258,10 +1237,7 @@ class TestHostDataUpdates:
 
         host_ids = [str(mock_host.id), str(uuid.uuid4())]
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             # Phase 6 N+1 audit refactored ``request_hardware_update_bulk``
             # to bulk-fetch via ``.filter(Host.id.in_(host_ids)).all()``
@@ -1275,7 +1251,7 @@ class TestHostDataUpdates:
             ]
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session

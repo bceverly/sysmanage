@@ -4,11 +4,11 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
 from .models import UpdateStatsSummary
@@ -21,7 +21,7 @@ router = APIRouter()
 async def get_update_summary(dependencies=Depends(JWTBearer())):
     """Get summary statistics for package updates across all hosts, including update results."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Count total hosts
             total_hosts = (
@@ -111,7 +111,7 @@ async def get_host_updates(
 ):
     """Get package updates for a specific host."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -207,7 +207,7 @@ async def get_all_updates(  # pylint: disable=too-many-positional-arguments
 ):
     """Get package updates across all hosts."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Build base query - exclude OS upgrades (they have their own page)
             query = (
