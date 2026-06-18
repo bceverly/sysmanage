@@ -478,6 +478,11 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
+  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
+  echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
+  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo
   echo "Federation network (${FED_NET_NAME}, static, no internet):"
   echo "  coordinator : ${COORD_IP}"
   echo "  site-a      : ${SITE_A_IP}"

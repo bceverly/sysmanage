@@ -20,6 +20,57 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
+def _resolve_host_via_index(host_id):
+    """Fast path: resolve a host straight from the host→tenant index.
+
+    Returns ``(host, session)`` with the tenant session left OPEN (caller must
+    close it), or ``(None, None)`` when there's no host_id, the index can't
+    resolve a tenant, or the host isn't in that tenant DB.
+    """
+    if not host_id:
+        return None, None
+
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    from backend.persistence.models import Host  # noqa: PLC0415
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        tenant_engine_for_host,
+    )
+
+    try:
+        engine = tenant_engine_for_host(host_id)
+    except Exception:  # noqa: BLE001 — fall through to the scan in the caller
+        engine = None
+    if engine is None:
+        return None, None
+
+    session = sessionmaker(bind=engine)()
+    host = session.query(Host).filter(Host.id == host_id).first()
+    if host is not None:
+        return host, session
+    session.close()
+    return None, None
+
+
+def _match_host_in_session(session, host_id, hostname):
+    """Return the host matching ``host_id`` (then case-insensitive fqdn) in
+    ``session``'s database, or ``None``."""
+    from sqlalchemy import func  # noqa: PLC0415
+
+    from backend.persistence.models import Host  # noqa: PLC0415
+
+    host = None
+    if host_id:
+        host = session.query(Host).filter(Host.id == host_id).first()
+    if not host and hostname:
+        host = (
+            session.query(Host)
+            .filter(func.lower(Host.fqdn) == hostname.lower())
+            .first()
+        )
+    return host
+
+
 def _find_host_in_tenant_dbs(host_id, hostname):
     """Search every provisioned TENANT database for a host (by id, then fqdn).
 
@@ -37,27 +88,14 @@ def _find_host_in_tenant_dbs(host_id, hostname):
     scanning the tenant databases by fqdn for hostname-only messages or when the
     index lags.
     """
-    from sqlalchemy import func  # noqa: PLC0415
-    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
-
-    from backend.persistence.models import Host  # noqa: PLC0415
     from backend.persistence.partitions import (  # noqa: PLC0415
         iter_host_databases,
-        tenant_engine_for_host,
     )
 
     # Authoritative fast path: the index resolves the owning tenant from host_id.
-    if host_id:
-        try:
-            engine = tenant_engine_for_host(host_id)
-        except Exception:  # noqa: BLE001 — fall through to the scan below
-            engine = None
-        if engine is not None:
-            session = sessionmaker(bind=engine)()
-            host = session.query(Host).filter(Host.id == host_id).first()
-            if host is not None:
-                return host, session
-            session.close()
+    host, session = _resolve_host_via_index(host_id)
+    if host is not None:
+        return host, session
 
     # Fallback: scan every tenant database (covers hostname-only messages and a
     # host whose index binding hasn't landed yet).
@@ -65,15 +103,7 @@ def _find_host_in_tenant_dbs(host_id, hostname):
         if tenant_id is None:  # bootstrap — already checked by the caller
             session.close()
             continue
-        host = None
-        if host_id:
-            host = session.query(Host).filter(Host.id == host_id).first()
-        if not host and hostname:
-            host = (
-                session.query(Host)
-                .filter(func.lower(Host.fqdn) == hostname.lower())
-                .first()
-            )
+        host = _match_host_in_session(session, host_id, hostname)
         if host is not None:
             return host, session
         session.close()

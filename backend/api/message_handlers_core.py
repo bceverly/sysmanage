@@ -172,7 +172,7 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
         )
 
         # Check for auto-approve token and perform auto-approval if valid
-        await _auto_approve_via_child_token(db, host, hostname, auto_approve_token)
+        _auto_approve_via_child_token(db, host, hostname, auto_approve_token)
 
         # Check approval status
         logger.info(
@@ -243,7 +243,7 @@ async def _handle_system_info_impl(db: Session, connection, message_data: dict):
     return None
 
 
-async def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
+def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
     """Auto-approve ``host`` when ``auto_approve_token`` matches a pending child
     host.  No-op when the token is absent, the host isn't pending, or no child
     matches.  Extracted from ``_handle_system_info_impl`` to keep that handler's

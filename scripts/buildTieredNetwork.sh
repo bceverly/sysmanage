@@ -486,6 +486,11 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
+  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
+  echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
+  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo
   echo "Re-check status :  $0 status"
   echo "Tear everything :  $0 stop"
 }

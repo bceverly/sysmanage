@@ -452,6 +452,11 @@ cmd_start() {
   echo "  user     = ${USERNAME}"
   echo "  password = ${PASSWORD}"
   echo
+  echo "sysmanage UI login — when you configure /etc/sysmanage.yaml on the server(s):"
+  echo "  - security.admin_userid MUST be a valid EMAIL (login validates EmailStr;"
+  echo "    a bare 'admin' -> HTTP 422, not 401). e.g. admin@example.com / admin"
+  echo "  - email.enabled: true  (just the flag — no SMTP server/password needed)."
+  echo
   echo "Mount an ISO into the air-gap server's virtual DVD:"
   echo "  virsh -c ${LIBVIRT_URI} domblklist ${AIRGAP_NAME}    # find empty cdrom target"
   echo "  virsh -c ${LIBVIRT_URI} change-media ${AIRGAP_NAME} <target> /path/to/your.iso --update --live"
