@@ -30,8 +30,7 @@ from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db
-from backend.persistence.partitions import get_tenant_db
+from backend.persistence.partitions import get_tenant_db, iter_host_databases
 from backend.services import upgrade_scheduler
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
@@ -401,25 +400,17 @@ async def trigger_profile(
     }
 
 
-@router.post("/tick")
-# Driver-hook/inbound (external scheduler, no logged-in user → no active-tenant
-# context; scans every tenant's due profiles) — stays on main until inbound
-# queue tenant-routing lands.
-async def tick(db: Session = Depends(get_db)):
-    """Driver hook for an external scheduler.  Selects every enabled
-    profile where ``next_run <= now``, fires it (updates last_run /
-    next_run / status), and returns the list of fired profiles.
+def _tick_profiles_one_db(session, now):
+    """Run the upgrade-profile tick against a SINGLE host database.
 
-    Phase 10.6: gated on the ``automation_engine`` Pro+ module — the
-    cron-recompute and per-host dispatch live there now.
-
-    Idempotent within a single tick — running the same tick twice in
-    quick succession will fire a profile only once because the FIRST
-    invocation pushes ``next_run`` forward."""
-    _check_automation_module()
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    Returns the list of fired profiles for this database.  Selecting due
+    profiles, resolving each profile's target hosts, and enqueuing the
+    ``apply_updates`` commands all run on ``session`` — so a tenant's profiles,
+    its hosts, and its outbound queue stay together in that tenant's DB.
+    Commits ``session`` on the way out.
+    """
     due = (
-        db.query(models.UpgradeProfile)
+        session.query(models.UpgradeProfile)
         .filter(
             models.UpgradeProfile.enabled.is_(True),
             models.UpgradeProfile.next_run.isnot(None),
@@ -430,8 +421,8 @@ async def tick(db: Session = Depends(get_db)):
     fired = []
     for profile in due:
         try:
-            target_ids = upgrade_scheduler.selectors_for_profile(profile, db)
-            enqueued = _dispatch_profile_to_hosts(profile, target_ids, db)
+            target_ids = upgrade_scheduler.selectors_for_profile(profile, session)
+            enqueued = _dispatch_profile_to_hosts(profile, target_ids, session)
             profile.last_run = now
             profile.last_status = "SUCCESS"
             # Phase 10.6: cron re-compute goes through automation_engine
@@ -451,5 +442,38 @@ async def tick(db: Session = Depends(get_db)):
             logger.exception("tick: failed firing profile %s: %s", profile.id, exc)
             profile.last_run = now
             profile.last_status = "FAILURE"
-    db.commit()
+    session.commit()
+    return fired
+
+
+@router.post("/tick")
+async def tick():
+    """Driver hook for an external scheduler.  Selects every enabled
+    profile where ``next_run <= now``, fires it (updates last_run /
+    next_run / status), and returns the list of fired profiles.
+
+    Phase 10.6: gated on the ``automation_engine`` Pro+ module — the
+    cron-recompute and per-host dispatch live there now.
+
+    Phase 13.1: no logged-in user / active-tenant context here (an external
+    scheduler drives this), so — like the heartbeat sweep — it fans out across
+    EVERY host database via ``iter_host_databases()`` (bootstrap + each
+    provisioned tenant DB).  A tenant's profiles and hosts live in its tenant
+    database, so the bootstrap pass alone would never see them.  One bad tenant
+    DB is logged and skipped without stalling the rest of the sweep.
+
+    Idempotent within a single tick — running the same tick twice in
+    quick succession will fire a profile only once because the FIRST
+    invocation pushes ``next_run`` forward."""
+    _check_automation_module()
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    fired = []
+    for label, _tenant_id, session in iter_host_databases():
+        try:
+            fired.extend(_tick_profiles_one_db(session, now))
+        except Exception:  # pylint: disable=broad-exception-caught
+            session.rollback()
+            logger.exception("tick: failed for database %s", label)
+        finally:
+            session.close()
     return {"fired_count": len(fired), "fired": fired}

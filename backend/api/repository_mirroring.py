@@ -54,8 +54,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.db import get_db
-from backend.persistence.partitions import get_tenant_db
+from backend.persistence.partitions import get_tenant_db, iter_host_databases
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -504,30 +503,18 @@ async def list_snapshots(mirror_id: str, db: Session = Depends(get_tenant_db)):
 _MIRROR_MAX_SYNC_FAILURES = 5
 
 
-@router.post("/api/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
-async def tick_mirrors(
-    # Driver hook for an external scheduler — no logged-in user / active-tenant
-    # context, so this stays on the main engine until inbound queue tenant-routing
-    # lands.
-    db: Session = Depends(get_db),
-):
-    """Driver hook for an external scheduler.  Selects every enabled
-    mirror with ``next_sync_at <= now`` (or NULL) and dispatches a
-    sync plan for it.  Recomputes ``next_sync_at`` from the cron.
-    Idempotent within a single tick — running twice is a no-op once
-    next_sync_at has been pushed forward.
+def _tick_mirrors_one_db(session, engine, automation, now):
+    """Run the mirror tick against a SINGLE host database.
+
+    Returns ``(fired, disabled)`` for this database.  Selecting due mirrors,
+    dispatching, and recomputing ``next_sync_at`` all happen on ``session`` so a
+    tenant host's mirror rows update in that tenant's DB and the sync plan is
+    enqueued into that tenant's queue (``_dispatch_plan`` → ``enqueue_apply_plan``
+    routes the outbound message by host_id).  Commits ``session`` on the way out.
     """
-    engine = _check_mirror_module()
-    automation = module_loader.get_module("automation_engine")
-    if automation is None:
-        raise HTTPException(
-            status_code=502,
-            detail=_("Mirror tick requires automation_engine for cron evaluation."),
-        )
-    settings = _get_settings(db)
-    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    settings = _get_settings(session)
     due = (
-        db.query(models.MirrorRepository)
+        session.query(models.MirrorRepository)
         .filter(models.MirrorRepository.enabled.is_(True))
         .all()
     )
@@ -587,7 +574,47 @@ async def tick_mirrors(
             logger.exception("Mirror tick failed for %s: %s", row.name, exc)
             row.last_sync_status = "FAILURE"
             row.last_sync_error = str(exc)
-    db.commit()
+    session.commit()
+    return fired, disabled
+
+
+@router.post("/api/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
+async def tick_mirrors():
+    """Driver hook for an external scheduler.  Selects every enabled
+    mirror with ``next_sync_at <= now`` (or NULL) and dispatches a
+    sync plan for it.  Recomputes ``next_sync_at`` from the cron.
+    Idempotent within a single tick — running twice is a no-op once
+    next_sync_at has been pushed forward.
+
+    Phase 13.1: there's no logged-in user / active-tenant context here (an
+    external scheduler drives this), so — like the heartbeat sweep — it fans
+    out across EVERY host database via ``iter_host_databases()``: the bootstrap
+    DB plus each provisioned tenant DB.  A tenant host's mirror rows live in its
+    tenant database, so the bootstrap pass alone would never see them.  One bad
+    tenant DB is logged and skipped without stalling the rest of the sweep.
+    """
+    engine = _check_mirror_module()
+    automation = module_loader.get_module("automation_engine")
+    if automation is None:
+        raise HTTPException(
+            status_code=502,
+            detail=_("Mirror tick requires automation_engine for cron evaluation."),
+        )
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    fired = []
+    disabled = []
+    for label, _tenant_id, session in iter_host_databases():
+        try:
+            db_fired, db_disabled = _tick_mirrors_one_db(
+                session, engine, automation, now
+            )
+            fired.extend(db_fired)
+            disabled.extend(db_disabled)
+        except Exception:  # pylint: disable=broad-exception-caught
+            session.rollback()
+            logger.exception("Mirror tick failed for database %s", label)
+        finally:
+            session.close()
     return {
         "fired_count": len(fired),
         "fired": fired,
