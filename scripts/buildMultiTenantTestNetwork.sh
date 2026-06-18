@@ -474,7 +474,7 @@ print_vm_summary() {
     control)
       echo "  ssh     : ssh ${USERNAME}@${mt_ip}      (password: ${PASSWORD})"
       echo "  install : sudo add-apt-repository -y ppa:bceverly/sysmanage \\"
-      echo "              && sudo apt update && sudo apt install -y sysmanage"
+      echo "              && sudo apt update && sudo apt install -y sysmanage postgresql-client"
       echo "  openbao : build/start via the repo scripts (build-openbao.sh / start-openbao.sh)"
       echo "  role    : this box runs the server + OpenBAO and routes across the DB VMs"
       ;;
@@ -579,6 +579,13 @@ with INCLUDE_CONTROL_PLANE=0):
      vault:               # OpenBAO — brokers per-tenant DB credentials
        url: http://localhost:8200
        ...
+     security:
+       # admin_userid MUST be a valid email — /api/login validates it as
+       # EmailStr, so a bare 'admin' is rejected with HTTP 422 (NOT 401).
+       admin_userid: admin@example.com
+       admin_password: admin
+     email:
+       enabled: true       # just the flag — no SMTP server/password needed for the test
 
    NOTE: per-tenant DB routing requires the licensed multitenancy_engine to be
    loaded (it owns the per-tenant engine cache + OpenBAO dynamic-credential
