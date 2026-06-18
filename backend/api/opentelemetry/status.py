@@ -11,6 +11,7 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db, request_sessionmaker
 
 from .models import OpenTelemetryCoverageResponse, OpenTelemetryStatusResponse
 
@@ -38,61 +39,65 @@ async def get_opentelemetry_status(
         OpenTelemetryStatusResponse with status details
     """
     try:
-        # Validate host exists and is active
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
+        # Host + software inventory + roles are tenant-scoped — route them to the
+        # active tenant's database.  Grafana settings (below) are a server-global
+        # singleton and stay on the bootstrap session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host exists and is active
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        # Check if Grafana is configured
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
+
+            # Check if OpenTelemetry is deployed
+            opentelemetry_installed = (
+                tenant_session.query(models.SoftwarePackage)
+                .filter(
+                    models.SoftwarePackage.host_id == host_id,
+                    models.SoftwarePackage.package_name.ilike("%otel%")
+                    | models.SoftwarePackage.package_name.ilike("%opentelemetry%"),
+                )
+                .first()
+            ) is not None
+
+            # Get service status from host_roles table
+            # The agent's collect_roles() automatically detects and reports status
+            service_status = "unknown"
+
+            if opentelemetry_installed:
+                # Query the host_roles table for otelcol service status
+                otel_role = (
+                    tenant_session.query(models.HostRole)
+                    .filter(
+                        models.HostRole.host_id == host_id,
+                        models.HostRole.package_name.ilike("%otelcol%"),
+                    )
+                    .first()
+                )
+
+                if otel_role and otel_role.service_status:
+                    service_status = otel_role.service_status
+                else:
+                    # If no role entry exists yet, default to stopped
+                    # The agent will update this on next collect_roles call
+                    service_status = "stopped"
+
+        # Check if Grafana is configured (server-global singleton).
         grafana_settings = (
             db.query(models.GrafanaIntegrationSettings).filter_by(enabled=True).first()
         )
         grafana_configured = grafana_settings is not None
         grafana_url = grafana_settings.grafana_url if grafana_settings else None
-
-        # Check if OpenTelemetry is deployed
-        opentelemetry_installed = (
-            db.query(models.SoftwarePackage)
-            .filter(
-                models.SoftwarePackage.host_id == host_id,
-                models.SoftwarePackage.package_name.ilike("%otel%")
-                | models.SoftwarePackage.package_name.ilike("%opentelemetry%"),
-            )
-            .first()
-        ) is not None
-
-        # Get service status from host_roles table
-        # The agent's collect_roles() automatically detects and reports service status
-        service_status = "unknown"
-
-        if opentelemetry_installed:
-            # Query the host_roles table for otelcol service status
-            otel_role = (
-                db.query(models.HostRole)
-                .filter(
-                    models.HostRole.host_id == host_id,
-                    models.HostRole.package_name.ilike("%otelcol%"),
-                )
-                .first()
-            )
-
-            if otel_role and otel_role.service_status:
-                service_status = otel_role.service_status
-            else:
-                # If no role entry exists yet, default to stopped
-                # The agent will update this on next collect_roles call
-                service_status = "stopped"
 
         return OpenTelemetryStatusResponse(
             deployed=opentelemetry_installed,
@@ -116,7 +121,7 @@ async def get_opentelemetry_status(
     response_model=OpenTelemetryCoverageResponse,
     dependencies=[Depends(JWTBearer())],
 )
-async def get_opentelemetry_coverage(db: Session = Depends(get_db)):
+async def get_opentelemetry_coverage(db: Session = Depends(get_tenant_db)):
     """
     Get OpenTelemetry coverage statistics across all registered hosts.
 

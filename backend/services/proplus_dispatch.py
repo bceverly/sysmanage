@@ -103,7 +103,51 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
             "timeout": timeout,
         },
     )
-    session_local = db.get_session_local()
+    # Route the OUTBOUND command to the host's TENANT database so (a) the
+    # per-tenant outbound processor delivers it and (b) enqueue_message's
+    # host-existence check runs against the database that actually holds the
+    # host.  Forcing the bootstrap session here (the old behaviour) raised
+    # "Host ID not found" for a tenant-bound host, which the engine-dispatch
+    # callers swallow into a 502.  Prefer the host→tenant index (works in any
+    # context, including background dispatch); fall back to the request's
+    # active-tenant engine (the middleware ContextVar) so a tenant-scoped UI
+    # request still routes correctly before the index is populated.  Both
+    # collapse to the bootstrap engine in single-tenant mode, so this is inert
+    # there.
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        get_request_engine,
+        tenant_engine_for_host,
+    )
+    from backend.persistence.tenant_context import (  # noqa: PLC0415
+        get_active_tenant,
+    )
+
+    # Resolve the database that actually holds this host so the OUTBOUND command
+    # lands in its per-tenant queue and enqueue_message's host-existence check
+    # passes:
+    #   * Request context (a tenant is active): route to the request's ACTIVE
+    #     tenant — the SAME database the handler read the host from (get_host
+    #     uses request_sessionmaker / get_request_engine, which honors this
+    #     ContextVar).  This is authoritative for "where the user is acting"; the
+    #     host→tenant index can lag or disagree with where the data actually is.
+    #   * Background context (no active tenant — scheduler/queue processor):
+    #     resolve via the host→tenant index, since there is no request tenant.
+    # Both collapse to the bootstrap engine in single-tenant mode, so this is
+    # inert there.
+    active_tenant = get_active_tenant()
+    if active_tenant:
+        engine = get_request_engine()
+    else:
+        engine = tenant_engine_for_host(host_id) or get_request_engine()
+    logger.info(
+        "proplus dispatch: routing OUTBOUND for host %s via %s (active_tenant=%s)",
+        host_id,
+        "active-tenant" if active_tenant else "host-index",
+        active_tenant,
+    )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     with session_local() as session:
         message_id = _queue_ops.enqueue_message(
             message_type="command",

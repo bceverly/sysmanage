@@ -186,6 +186,83 @@ def get_tenant_db():
         session.close()
 
 
+def _open_bootstrap_session():
+    """Open a session on the bootstrap / main database.
+
+    Kept as its own (non-generator) function so ``next(get_db())``'s
+    ``StopIteration`` can't leak into the ``iter_host_databases`` generator
+    frame and turn into a ``RuntimeError`` (PEP 479)."""
+    # Imported here to avoid a module-level import cycle (db imports models).
+    from backend.persistence.db import get_db  # noqa: PLC0415
+
+    return next(get_db())
+
+
+def iter_host_databases():
+    """Yield ``(label, tenant_id, session)`` for the bootstrap database and
+    every provisioned tenant database.
+
+    Once a host is bound to a tenant (Phase 13.1) its row lives in that tenant's
+    database, so any *server-wide* operation that must reach every host — the
+    heartbeat sweep, a fleet broadcast, fleet-role discovery — has to visit each
+    host-bearing database, not just the bootstrap one.  In single-tenant /
+    ``multitenancy.enabled`` false mode this yields ONLY the bootstrap database,
+    identical to the prior single-DB behaviour, so callers are inert until
+    multi-tenancy is actually turned on.
+
+    ``tenant_id`` is ``None`` for the bootstrap database and the tenant's id for
+    each tenant database.  The CALLER MUST ``close()`` every yielded session.
+    Each tenant is resolved independently: if the tenant list or one tenant's
+    engine can't be resolved it is logged and skipped, so one bad tenant (or an
+    unreachable registry) can't stall the whole sweep — the bootstrap database is
+    always visited.
+    """
+    try:
+        bootstrap = _open_bootstrap_session()
+    except Exception:  # noqa: BLE001
+        logger.exception("iter_host_databases: failed to open the bootstrap session")
+        return
+    yield ("bootstrap", None, bootstrap)
+
+    if not config.is_multitenancy_enabled():
+        return
+
+    from backend.persistence.models import RegistryTenantPlacement  # noqa: PLC0415
+
+    try:
+        with partition_session(partition=PARTITION_REGISTRY) as registry_session:
+            rows = (
+                registry_session.query(RegistryTenantPlacement.tenant_id)
+                .distinct()
+                .all()
+            )
+        tenant_ids = [str(tenant_id) for (tenant_id,) in rows]
+    except Exception:  # noqa: BLE001
+        logger.error(
+            "iter_host_databases: could not list provisioned tenants; visiting the "
+            "bootstrap database only this pass",
+            exc_info=True,
+        )
+        return
+
+    for tenant_id in tenant_ids:
+        try:
+            engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
+        except Exception:  # noqa: BLE001
+            logger.error(
+                "iter_host_databases: could not resolve the engine for tenant %s; "
+                "skipping its hosts this pass",
+                sanitize_log(tenant_id),
+                exc_info=True,
+            )
+            continue
+        yield (
+            f"tenant {tenant_id}",
+            tenant_id,
+            sessionmaker(autocommit=False, autoflush=False, bind=engine)(),
+        )
+
+
 def tenant_engine_for_host(host_id):
     """Return the TENANT engine serving ``host_id``'s data, or ``None``.
 

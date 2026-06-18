@@ -120,7 +120,7 @@ class TestConfigurationIntegration:
         mock_config = {"monitoring": {"heartbeat_timeout": 7}}
 
         with patch("backend.config.config.config", mock_config), patch(
-            "backend.monitoring.heartbeat_monitor.get_db"
+            "backend.persistence.db.get_db"
         ) as mock_get_db, patch(
             "backend.monitoring.heartbeat_monitor.datetime"
         ) as mock_datetime:

@@ -12,12 +12,11 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.observability_shim import try_engine_otel_grafana_connection
 from backend.utils.verbosity_logger import sanitize_log
-from backend.services.observability_shim import (
-    try_engine_otel_grafana_connection,
-)
 
 from .models import OpenTelemetryDeployResponse
 
@@ -65,57 +64,66 @@ async def connect_opentelemetry_to_grafana(
                 ),
             )
 
-        # Validate host
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above), Grafana settings, and the audit
+        # trail (below) are server-global and stay on the bootstrap ``db``.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
 
-        # Get Grafana configuration
-        grafana_settings = (
-            db.query(models.GrafanaIntegrationSettings).filter_by(enabled=True).first()
-        )
+            validate_host_approval_status(host)
 
-        if not grafana_settings:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Grafana integration is not configured"),
+            # Get Grafana configuration (server-global singleton — bootstrap db)
+            grafana_settings = (
+                db.query(models.GrafanaIntegrationSettings)
+                .filter_by(enabled=True)
+                .first()
             )
 
-        grafana_url = grafana_settings.grafana_url
-        if not grafana_url:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Grafana URL is not available"),
-            )
+            if not grafana_settings:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Grafana integration is not configured"),
+                )
 
-        # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
-        # Plan is restart-only (matches legacy semantics — config
-        # was pinned at deploy time, connect just triggers a service
-        # restart so any out-of-band edits take effect).
-        engine_msg_id = try_engine_otel_grafana_connection(
-            host, "connect", grafana_url, db
-        )
-        if engine_msg_id is None:
-            raise HTTPException(
-                status_code=503,
-                detail=_(
-                    "OpenTelemetry Grafana connection requires the Pro+ "
-                    "observability_engine to be loaded on the server."
-                ),
+            grafana_url = grafana_settings.grafana_url
+            if not grafana_url:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Grafana URL is not available"),
+                )
+
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
+            # Plan is restart-only (matches legacy semantics — config
+            # was pinned at deploy time, connect just triggers a service
+            # restart so any out-of-band edits take effect).
+            engine_msg_id = try_engine_otel_grafana_connection(
+                host, "connect", grafana_url, tenant_session
             )
+            if engine_msg_id is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail=_(
+                        "OpenTelemetry Grafana connection requires the Pro+ "
+                        "observability_engine to be loaded on the server."
+                    ),
+                )
 
         AuditService.log(
             db=db,
@@ -124,9 +132,9 @@ async def connect_opentelemetry_to_grafana(
             action_type=ActionType.EXECUTE,
             entity_type=EntityType.HOST,
             entity_id=host_id,
-            entity_name=host.fqdn,
+            entity_name=host_fqdn,
             description=(
-                f"Requested OpenTelemetry → Grafana connection for host {host.fqdn}"
+                f"Requested OpenTelemetry → Grafana connection for host {host_fqdn}"
             ),
             result=Result.SUCCESS,
             details={
@@ -140,7 +148,7 @@ async def connect_opentelemetry_to_grafana(
         logger.info(
             "Queued OpenTelemetry Grafana connection for host %s (FQDN: %s) via engine_plan",
             sanitize_log(host_id),
-            host.fqdn,
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(
@@ -199,34 +207,43 @@ async def disconnect_opentelemetry_from_grafana(
                 ),
             )
 
-        # Validate host
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above) and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
 
-        # Engine path only — see connect endpoint above for rationale.
-        engine_msg_id = try_engine_otel_grafana_connection(host, "disconnect", "", db)
-        if engine_msg_id is None:
-            raise HTTPException(
-                status_code=503,
-                detail=_(
-                    "OpenTelemetry Grafana disconnection requires the Pro+ "
-                    "observability_engine to be loaded on the server."
-                ),
+            validate_host_approval_status(host)
+
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only — see connect endpoint above for rationale.
+            engine_msg_id = try_engine_otel_grafana_connection(
+                host, "disconnect", "", tenant_session
             )
+            if engine_msg_id is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail=_(
+                        "OpenTelemetry Grafana disconnection requires the Pro+ "
+                        "observability_engine to be loaded on the server."
+                    ),
+                )
 
         AuditService.log(
             db=db,
@@ -235,9 +252,9 @@ async def disconnect_opentelemetry_from_grafana(
             action_type=ActionType.EXECUTE,
             entity_type=EntityType.HOST,
             entity_id=host_id,
-            entity_name=host.fqdn,
+            entity_name=host_fqdn,
             description=(
-                f"Requested OpenTelemetry → Grafana disconnection for host {host.fqdn}"
+                f"Requested OpenTelemetry → Grafana disconnection for host {host_fqdn}"
             ),
             result=Result.SUCCESS,
             details={"dispatch_path": "engine_plan", "grafana_action": "disconnect"},
@@ -248,7 +265,7 @@ async def disconnect_opentelemetry_from_grafana(
             "Queued OpenTelemetry Grafana disconnection for host %s "
             "(FQDN: %s) via engine_plan",
             sanitize_log(host_id),
-            host.fqdn,
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(

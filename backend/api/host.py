@@ -115,51 +115,58 @@ async def delete_host(host_id: str, current_user: str = Depends(get_current_user
     This function deletes a single host given an id
     """
 
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
+    from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
+
+    # Authorization on the MAIN engine — users/roles are server-global.
+    auth_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
-
-    with session_local() as session:
-        # Check if user has permission to delete hosts
+    with auth_local() as auth_session:
         user = (
-            session.query(models.User)
+            auth_session.query(models.User)
             .filter(models.User.userid == current_user)
             .first()
         )
         if not user:
             raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        # Load role cache if not already loaded
         if user._role_cache is None:
-            user.load_role_cache(session)
-
-        # Check for DELETE_HOST role
+            user.load_role_cache(auth_session)
         if not user.has_role(SecurityRoles.DELETE_HOST):
             raise HTTPException(
                 status_code=403,
                 detail=_("Permission denied: DELETE_HOST role required"),
             )
+        # Capture before the auth session closes — used for the audit below.
+        user_id = user.id
 
-        # See if we were passed a valid id
+    # Host data lives in the active tenant's database (Phase 13.1); a bound host
+    # isn't in the bootstrap DB, so route the delete to the request's tenant —
+    # the same database get_host reads it from.
+    session_local = request_sessionmaker()
+    with session_local() as session:
         hosts = session.query(models.Host).filter(models.Host.id == host_id).all()
-
-        # Check for failure
         if len(hosts) != 1:
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
-        deleted_host = hosts[0]
         # Extract values before deletion to avoid ObjectDeletedError
-        deleted_fqdn = deleted_host.fqdn
+        deleted_fqdn = hosts[0].fqdn
 
-        # Delete the record
         session.query(models.Host).filter(models.Host.id == host_id).delete()
         session.commit()
 
-        # Audit log host deletion
+    # Phase 13.1: drop the host→tenant index binding so no stale row lingers
+    # (background dispatch would otherwise keep routing a now-deleted host).
+    # Inert (no-op) in single-tenant mode / when the licensed engine isn't loaded.
+    from backend.services import host_tenant_index  # noqa: PLC0415
+
+    host_tenant_index.unbind_host(host_id)
+
+    # Audit on the MAIN engine — the audit trail is server-global.
+    audit_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+    with audit_local() as audit_session:
         AuditService.log_delete(
-            db=session,
-            user_id=user.id,
+            db=audit_session,
+            user_id=user_id,
             username=current_user,
             entity_type=EntityType.HOST,
             entity_id=host_id,
@@ -174,32 +181,30 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
     """
     This function retrieves a single host by its id
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    from backend.persistence.partitions import request_sessionmaker  # noqa: PLC0415
 
-    with session_local() as session:
-        # Check if user has permission to view host details
+    # Authorization on the MAIN engine — users/roles are server-global.
+    auth_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
+    with auth_local() as auth_session:
         user = (
-            session.query(models.User)
+            auth_session.query(models.User)
             .filter(models.User.userid == current_user)
             .first()
         )
         if not user:
             raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        # Load role cache if not already loaded
         if user._role_cache is None:
-            user.load_role_cache(session)
-
-        # Check for VIEW_HOST_DETAILS role
+            user.load_role_cache(auth_session)
         if not user.has_role(SecurityRoles.VIEW_HOST_DETAILS):
             raise HTTPException(
                 status_code=403,
                 detail=_("Permission denied: VIEW_HOST_DETAILS role required"),
             )
 
+    # Host data lives in the active tenant's database (Phase 13.1); a bound host
+    # isn't in the bootstrap DB, so route the host query to the request's tenant.
+    session_local = request_sessionmaker()
+    with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
         if not host:
             raise HTTPException(status_code=404, detail=error_host_not_found())

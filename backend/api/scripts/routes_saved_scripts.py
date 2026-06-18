@@ -15,6 +15,7 @@ from backend.api.error_constants import error_script_not_found, error_user_not_f
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
@@ -386,17 +387,24 @@ async def delete_saved_script(
             if not script:
                 raise HTTPException(status_code=404, detail=error_script_not_found())
 
-            # Check if script is being used in any pending/running executions
-            active_executions = (
-                db_session.query(models.ScriptExecutionLog)
-                .filter(
-                    and_(
-                        models.ScriptExecutionLog.saved_script_id == script_id,
-                        models.ScriptExecutionLog.status.in_(["pending", "running"]),
+            # Check if script is being used in any pending/running executions.
+            # ScriptExecutionLog is host-scoped (lives in the tenant database),
+            # so query it on the active tenant's engine — querying the bootstrap
+            # engine here returns a false negative for tenant hosts and would let
+            # a script that is actively executing be deleted.
+            with request_sessionmaker()() as exec_session:
+                active_executions = (
+                    exec_session.query(models.ScriptExecutionLog)
+                    .filter(
+                        and_(
+                            models.ScriptExecutionLog.saved_script_id == script_id,
+                            models.ScriptExecutionLog.status.in_(
+                                ["pending", "running"]
+                            ),
+                        )
                     )
+                    .count()
                 )
-                .count()
-            )
 
             if active_executions > 0:
                 raise HTTPException(

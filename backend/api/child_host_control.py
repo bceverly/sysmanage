@@ -13,8 +13,8 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
     raise_engine_declined,
     verify_host_active,
 )
@@ -23,6 +23,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import HostChild
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -266,15 +267,11 @@ async def start_child_host(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.START_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.START_CHILD_HOST
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -297,7 +294,6 @@ async def start_child_host(
             raise_engine_declined()
 
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -331,15 +327,11 @@ async def stop_child_host(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.STOP_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.STOP_CHILD_HOST
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -362,7 +354,6 @@ async def stop_child_host(
             raise_engine_declined()
 
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -396,15 +387,11 @@ async def restart_child_host(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.RESTART_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.RESTART_CHILD_HOST
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -427,7 +414,6 @@ async def restart_child_host(
             raise_engine_declined()
 
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -460,15 +446,15 @@ async def update_child_agent(
     that cannot exist in an OSS deployment).
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.UPDATE_AGENT)
+    session_local = request_sessionmaker()
+    # ChildHostDistribution is server-global reference data — its lookups (here
+    # and inside _try_update_agent_plan_dispatch) run on the bootstrap engine,
+    # not the tenant database, which carries no copy of the distribution rows.
+    ref_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.UPDATE_AGENT
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -483,39 +469,40 @@ async def update_child_agent(
         if not child:
             raise HTTPException(status_code=404, detail=_(MSG_CHILD_HOST_NOT_FOUND))
 
-        # Look up the distribution_id for the engine path (it needs the
-        # install commands stored on the distribution row).
-        distribution_id = None
-        if child.distribution and child.distribution_version:
-            from backend.persistence.models import ChildHostDistribution
+        # Resolve the distribution_id + install recipe on the server-global
+        # engine (the engine path needs the install commands stored on the
+        # distribution row).
+        with ref_local() as ref_session:
+            distribution_id = None
+            if child.distribution and child.distribution_version:
+                from backend.persistence.models import ChildHostDistribution
 
-            dist_row = (
-                session.query(ChildHostDistribution)
-                .filter(
-                    ChildHostDistribution.child_type == child.child_type,
-                    ChildHostDistribution.distribution_name == child.distribution,
-                    ChildHostDistribution.distribution_version
-                    == child.distribution_version,
+                dist_row = (
+                    ref_session.query(ChildHostDistribution)
+                    .filter(
+                        ChildHostDistribution.child_type == child.child_type,
+                        ChildHostDistribution.distribution_name == child.distribution,
+                        ChildHostDistribution.distribution_version
+                        == child.distribution_version,
+                    )
+                    .first()
                 )
-                .first()
-            )
-            if dist_row:
-                distribution_id = str(dist_row.id)
+                if dist_row:
+                    distribution_id = str(dist_row.id)
 
-        used_plan_path = _try_update_agent_plan_dispatch(
-            child.child_type,
-            child.child_name,
-            distribution_id or "",
-            host_id,
-            str(child.id),
-            session,
-        )
+            used_plan_path = _try_update_agent_plan_dispatch(
+                child.child_type,
+                child.child_name,
+                distribution_id or "",
+                host_id,
+                str(child.id),
+                ref_session,
+            )
 
         if not used_plan_path:
             raise_engine_declined()
 
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",

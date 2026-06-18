@@ -20,6 +20,66 @@ from backend.websocket.queue_manager import (
 logger = get_logger(__name__)
 
 
+def _find_host_in_tenant_dbs(host_id, hostname):
+    """Search every provisioned TENANT database for a host (by id, then fqdn).
+
+    Phase 13.1: inbound messages are enqueued to the bootstrap queue with no
+    host_id, but a tenant host's row lives in its tenant DB — so the bootstrap
+    pass can't find it.  This resolves the host in the tenant databases.
+
+    Returns ``(host, session)`` with the session left OPEN (the caller processes
+    the message against it, then MUST close it), or ``(None, None)`` when the
+    host isn't in any tenant DB / multi-tenancy is off.  The bootstrap database
+    is skipped here — the caller has already checked it.
+
+    Resolution mirrors ``handle_system_info``: the host→tenant INDEX is the
+    authoritative source (keyed by host_id), so try it first; fall back to
+    scanning the tenant databases by fqdn for hostname-only messages or when the
+    index lags.
+    """
+    from sqlalchemy import func  # noqa: PLC0415
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    from backend.persistence.models import Host  # noqa: PLC0415
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        iter_host_databases,
+        tenant_engine_for_host,
+    )
+
+    # Authoritative fast path: the index resolves the owning tenant from host_id.
+    if host_id:
+        try:
+            engine = tenant_engine_for_host(host_id)
+        except Exception:  # noqa: BLE001 — fall through to the scan below
+            engine = None
+        if engine is not None:
+            session = sessionmaker(bind=engine)()
+            host = session.query(Host).filter(Host.id == host_id).first()
+            if host is not None:
+                return host, session
+            session.close()
+
+    # Fallback: scan every tenant database (covers hostname-only messages and a
+    # host whose index binding hasn't landed yet).
+    for _label, tenant_id, session in iter_host_databases():
+        if tenant_id is None:  # bootstrap — already checked by the caller
+            session.close()
+            continue
+        host = None
+        if host_id:
+            host = session.query(Host).filter(Host.id == host_id).first()
+        if not host and hostname:
+            host = (
+                session.query(Host)
+                .filter(func.lower(Host.fqdn) == hostname.lower())
+                .first()
+            )
+        if host is not None:
+            return host, session
+        session.close()
+    return None, None
+
+
 async def process_pending_messages(  # NOSONAR
     db: Session,
 ) -> None:
@@ -231,44 +291,64 @@ async def process_pending_messages(  # NOSONAR
                 )
                 continue
 
-            # Look up host by host_id first (more reliable, especially for hostname_changed),
-            # then fall back to hostname lookup
+            # Look up host by host_id first (more reliable, especially for
+            # hostname_changed), then fall back to hostname lookup.
             host = None
             if host_id:
                 host = db.query(Host).filter(Host.id == host_id).first()
             if not host and hostname:
                 host = db.query(Host).filter(Host.fqdn == hostname).first()
 
+            # Phase 13.1: a tenant host's data lives in its tenant database, but
+            # this NULL-host_id message sits in the bootstrap queue (inbound
+            # messages are enqueued without a host_id and resolved here).  When
+            # the host isn't on THIS database, resolve it across the provisioned
+            # tenant databases and run the handler against the tenant DB it lives
+            # in (host_db), while the queue row stays on the bootstrap db.
+            tenant_session = None
             if not host:
-                logger.warning(
-                    _("Host %s not found for message %s, deleting"),
-                    hostname,
-                    message.message_id,
-                )
-                server_queue_manager.mark_failed(
-                    message.message_id, f"Host {hostname} not found", db=db
-                )
-                continue
+                host, tenant_session = _find_host_in_tenant_dbs(host_id, hostname)
 
-            if host.approval_status != "approved":
-                logger.warning(
-                    _("Host %s not approved (status: %s) for message %s, deleting"),
-                    hostname,
-                    host.approval_status,
-                    message.message_id,
-                )
-                server_queue_manager.mark_failed(
-                    message.message_id, f"Host {hostname} not approved", db=db
-                )
-                continue
+            try:
+                if not host:
+                    logger.warning(
+                        _("Host %s not found for message %s, deleting"),
+                        hostname,
+                        message.message_id,
+                    )
+                    server_queue_manager.mark_failed(
+                        message.message_id, f"Host {hostname} not found", db=db
+                    )
+                    continue
 
-            # Host is valid and approved - process the message
-            logger.info(
-                _("Processing NULL host_id message for approved host %s (ID: %s)"),
-                hostname,
-                host.id,
-            )
-            await process_validated_message(message, host, db)
+                if host.approval_status != "approved":
+                    logger.warning(
+                        _(
+                            "Host %s not approved (status: %s) for message %s, "
+                            "deleting"
+                        ),
+                        hostname,
+                        host.approval_status,
+                        message.message_id,
+                    )
+                    server_queue_manager.mark_failed(
+                        message.message_id, f"Host {hostname} not approved", db=db
+                    )
+                    continue
+
+                # Host is valid and approved - process the message.  Handler
+                # writes go to tenant_session when the host is in a tenant DB.
+                logger.info(
+                    _("Processing NULL host_id message for approved host %s (ID: %s)"),
+                    hostname,
+                    host.id,
+                )
+                await process_validated_message(
+                    message, host, db, host_db=tenant_session
+                )
+            finally:
+                if tenant_session is not None:
+                    tenant_session.close()
 
         except Exception as e:
             logger.exception(
@@ -281,15 +361,21 @@ async def process_pending_messages(  # NOSONAR
             )
 
 
-async def process_validated_message(message, host, db: Session) -> None:
+async def process_validated_message(message, host, db: Session, host_db=None) -> None:
     """
     Process a message with pre-validated host information.
 
     Args:
         message: The message queue entry to process
         host: The validated host object
-        db: Database session
+        db: Database session holding the QUEUE row (queue ops run here).
+        host_db: Database session holding the HOST's data (the handler's writes
+            run here).  Phase 13.1: a tenant host's data lives in its tenant DB
+            while its inbound message can sit in the bootstrap queue, so the two
+            differ.  Defaults to ``db`` (collapsed/single-tenant mode), where
+            they're the same database.
     """
+    handler_db = host_db if host_db is not None else db
     try:
         print(
             f"Starting to process message {message.message_id} of type {message.message_type}",
@@ -340,10 +426,17 @@ async def process_validated_message(message, host, db: Session) -> None:
         # Log specific data for different message types
         log_message_data(message.message_type, message_data)
 
-        # Route to appropriate handler based on message type
+        # Route to appropriate handler based on message type.  The handler's
+        # writes go to the HOST's database (handler_db) — the tenant DB for a
+        # tenant host — even when the queue row lives in the bootstrap queue.
         success = await route_inbound_message(
-            message.message_type, db, mock_connection, message_data
+            message.message_type, handler_db, mock_connection, message_data
         )
+
+        # Persist the handler's writes on the host DB when it's a separate
+        # (tenant) session — the caller only commits the queue DB.
+        if success and host_db is not None:
+            host_db.commit()
 
         if success:
             # Mark message as completed and remove from queue
@@ -388,7 +481,7 @@ async def process_validated_message(message, host, db: Session) -> None:
             airgap_repoint_service,
         )
 
-        airgap_repoint_service.maybe_repoint(db, host)
+        airgap_repoint_service.maybe_repoint(handler_db, host)
 
     except Exception as e:
         logger.exception(
@@ -407,6 +500,12 @@ async def process_system_info_message(message, db: Session) -> None:
     """
     Process a SYSTEM_INFO registration message.
     This is special because the host may not exist yet.
+
+    Phase 13.1: this stays on the bootstrap ``db`` deliberately — ``handle_system_info``
+    SELF-ROUTES.  It resolves the host's tenant from the agent-supplied host_id
+    (``tenant_engine_for_host``) and runs the whole handler on that tenant's
+    database, so a bound host's inventory updates land in its tenant DB and no
+    duplicate host row is created on bootstrap.  Untenanted hosts use ``db``.
     """
     try:
         logger.info("Processing SYSTEM_INFO message %s", message.message_id)
@@ -433,7 +532,9 @@ async def process_system_info_message(message, db: Session) -> None:
         mock_connection.ipv6 = connection_info.get("ipv6")
         mock_connection.platform = connection_info.get("platform")
 
-        # Call the system_info handler
+        # Call the system_info handler.  It self-routes to the host's tenant
+        # database from the agent-supplied host_id (see its docstring), so the
+        # bootstrap ``db`` passed here is only used for untenanted hosts.
         from backend.api.message_handlers import handle_system_info
 
         await handle_system_info(db, mock_connection, message_data)

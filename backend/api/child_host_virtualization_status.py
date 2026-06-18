@@ -7,18 +7,18 @@ import json
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_utils import (
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
     raise_engine_declined,
     verify_host_active,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -80,13 +80,12 @@ async def get_virtualization_support(
     Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global (User lives in the bootstrap DB); host data is
+    # tenant-scoped — route it to the active tenant's database.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -118,13 +117,11 @@ async def get_virtualization_status(
     Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         is_windows = host.platform and "Windows" in host.platform

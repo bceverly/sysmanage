@@ -6,13 +6,12 @@ Handles enabling and initializing virtualization platforms (WSL, LXD, VMM, KVM).
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_models import ConfigureKvmNetworkingRequest
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
     raise_engine_declined,
     verify_host_active,
 )
@@ -20,7 +19,7 @@ from backend.api.error_constants import error_kvm_linux_only
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -132,13 +131,11 @@ async def enable_wsl(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_WSL)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_WSL)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -163,7 +160,6 @@ async def enable_wsl(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -198,13 +194,11 @@ async def initialize_lxd(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_LXD)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_LXD)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -229,7 +223,6 @@ async def initialize_lxd(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -264,13 +257,11 @@ async def initialize_vmm(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_VMM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_VMM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -295,7 +286,6 @@ async def initialize_vmm(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -331,13 +321,11 @@ async def initialize_kvm(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -362,7 +350,6 @@ async def initialize_kvm(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -397,15 +384,11 @@ async def initialize_bhyve(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_BHYVE)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.ENABLE_BHYVE
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -430,7 +413,6 @@ async def initialize_bhyve(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -466,15 +448,11 @@ async def disable_bhyve(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_BHYVE)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.ENABLE_BHYVE
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -497,7 +475,6 @@ async def disable_bhyve(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -532,13 +509,11 @@ async def enable_kvm_modules(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -563,7 +538,6 @@ async def enable_kvm_modules(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -599,13 +573,11 @@ async def disable_kvm_modules(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -630,7 +602,6 @@ async def disable_kvm_modules(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -707,13 +678,11 @@ async def configure_kvm_networking(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -755,7 +724,6 @@ async def configure_kvm_networking(
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -791,13 +759,11 @@ async def list_kvm_networks(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOSTS)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOSTS)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 

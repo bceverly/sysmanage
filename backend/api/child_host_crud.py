@@ -22,6 +22,7 @@ from backend.api.child_host_models import (
 )
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
     get_user_with_role_check,
     raise_engine_declined,
@@ -33,6 +34,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import ChildHostDistribution, Host, HostChild
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 
 router = APIRouter()
@@ -81,13 +83,12 @@ async def list_child_hosts(
     Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global (User lives in the bootstrap DB); child-host data
+    # is tenant-scoped — route it to the active tenant's database.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         # Query child hosts for this parent
@@ -164,13 +165,11 @@ async def get_child_host(
     Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         child = (
@@ -340,15 +339,11 @@ async def delete_child_host(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.DELETE_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.DELETE_CHILD_HOST
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -404,7 +399,6 @@ async def delete_child_host(
                 session.delete(linked_host)
 
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -435,13 +429,11 @@ async def refresh_child_hosts(
     Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
     _check_container_module()
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         from backend.api.child_host_utils import verify_host_active

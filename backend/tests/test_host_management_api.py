@@ -218,14 +218,16 @@ class TestHostCRUD:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_user,  # User query
-                mock_host,  # Host query
+                mock_user,  # User query (auth, main engine)
+                mock_host,  # Host query (tenant-routed)
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            ctx = create_mock_session_context(mock_session)
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await get_host(str(mock_host.id), "test@example.com")
 
@@ -537,11 +539,11 @@ class TestHostCRUD:
             ]
 
             with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
-                "backend.api.host.AuditService"
-            ):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm, patch("backend.api.host.AuditService"):
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await delete_host(str(mock_host.id), "admin@example.com")
 
@@ -1718,10 +1720,12 @@ class TestHostResponseFormat:
                 mock_host,
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            ctx = create_mock_session_context(mock_session)
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await get_host(str(mock_host.id), "test@example.com")
 

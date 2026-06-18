@@ -20,6 +20,7 @@ from backend.api.error_constants import (
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import iter_host_databases
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.services.vault_service import VaultError, VaultService
@@ -71,38 +72,45 @@ class GraylogHealthStatus(BaseModel):
 async def get_graylog_servers():
     """
     Get list of hosts that have the Graylog server role.
+
+    A host bound to a tenant has its row (and HostRole) in that tenant's
+    database, so this fans out across the bootstrap DB and every provisioned
+    tenant DB and combines the results.  In single-tenant / multi-tenancy-off
+    mode ``iter_host_databases`` yields only the bootstrap DB, so this is
+    identical to the prior single-query behaviour.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Single query gets both the Host and its matching HostRole;
-        # the previous code re-queried HostRole inside the loop (1+N
-        # queries — flagged in the Phase 6 N+1 audit).
-        rows = (
-            session.query(models.Host, models.HostRole)
-            .join(models.HostRole)
-            .filter(
-                models.HostRole.role == LOG_AGGREGATION_SERVER,
-                models.HostRole.package_name == "graylog-server",
-                models.Host.active == True,
-                models.Host.approval_status == "approved",
+    servers = []
+    for label, _tenant_id, session in iter_host_databases():
+        try:
+            # Single query gets both the Host and its matching HostRole;
+            # the previous code re-queried HostRole inside the loop (1+N
+            # queries — flagged in the Phase 6 N+1 audit).
+            rows = (
+                session.query(models.Host, models.HostRole)
+                .join(models.HostRole)
+                .filter(
+                    models.HostRole.role == LOG_AGGREGATION_SERVER,
+                    models.HostRole.package_name == "graylog-server",
+                    models.Host.active == True,
+                    models.Host.approval_status == "approved",
+                )
+                .all()
             )
-            .all()
-        )
-
-        servers = [
-            GraylogServerInfo(
-                id=str(host.id),
-                fqdn=host.fqdn,
-                package_version=graylog_role.package_version,
-                is_active=graylog_role.is_active,
+            servers.extend(
+                GraylogServerInfo(
+                    id=str(host.id),
+                    fqdn=host.fqdn,
+                    package_version=graylog_role.package_version,
+                    is_active=graylog_role.is_active,
+                )
+                for host, graylog_role in rows
             )
-            for host, graylog_role in rows
-        ]
+        except Exception:  # noqa: BLE001 — one bad DB must not fail the list
+            logger.exception("graylog-servers: query failed on %s; skipping", label)
+        finally:
+            session.close()
 
-        return {"graylog_servers": servers}
+    return {"graylog_servers": servers}
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])

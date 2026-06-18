@@ -40,6 +40,7 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import iter_host_databases
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import MessageType
 from backend.websocket.queue_enums import QueueDirection
@@ -147,7 +148,6 @@ async def broadcast_to_fleet(
     # outbound processor delivers each row independently — offline
     # agents pick theirs up on reconnect.
     started = time.monotonic()
-    target_host_ids = _resolve_broadcast_targets(db, tag_uuid, request.platform)
     if tag_uuid is not None and request.platform:
         target_filter = f"tag:{tag_uuid}+platform:{request.platform}"
     elif tag_uuid is not None:
@@ -157,7 +157,32 @@ async def broadcast_to_fleet(
     else:
         target_filter = "all"
 
-    delivered = _enqueue_envelope_for_hosts(db, target_host_ids, envelope)
+    # Fan out across the bootstrap DB and every provisioned tenant DB: a
+    # tenant-bound host's row (and its OUTBOUND queue) lives in that tenant's
+    # database, so targets must be resolved AND enqueued there for the
+    # per-tenant outbound processor to deliver them.  ``HostTag`` (the host↔tag
+    # junction) also lives per-tenant, so the tag filter joins correctly in each
+    # database.  Single-tenant / multi-tenancy-off mode yields only the
+    # bootstrap DB, so this is inert.  Authorization, the (server-global) tag
+    # definition check, and the audit write stay on the request ``db``.
+    delivered = 0
+    for label, _tenant_id, host_session in iter_host_databases():
+        try:
+            target_host_ids = _resolve_broadcast_targets(
+                host_session, tag_uuid, request.platform
+            )
+            delivered += _enqueue_envelope_for_hosts(
+                host_session, target_host_ids, envelope
+            )
+        except Exception as broadcast_db_error:  # noqa: BLE001
+            logger.exception(
+                "Broadcast %s fan-out failed for %s: %s",
+                sanitize_log(broadcast_id),
+                label,
+                broadcast_db_error,
+            )
+        finally:
+            host_session.close()
     elapsed_ms = (time.monotonic() - started) * 1000.0
 
     logger.info(

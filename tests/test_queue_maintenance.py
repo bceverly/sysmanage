@@ -14,25 +14,22 @@ class TestQueueMaintenanceCleanupOldMessages:
         from backend.websocket.queue_maintenance import QueueMaintenance
 
         mock_db = MagicMock()
-        mock_messages = [MagicMock(), MagicMock()]
-        mock_db.query.return_value.filter.return_value.all.return_value = mock_messages
+        # Bulk delete returns the number of rows removed directly.
+        mock_db.query.return_value.filter.return_value.delete.return_value = 2
 
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(older_than_days=7, db=mock_db)
 
         assert result == 2
         mock_db.commit.assert_not_called()  # Caller manages commit
-        assert mock_db.delete.call_count == 2
+        mock_db.query.return_value.filter.return_value.delete.assert_called_once()
 
     def test_cleanup_old_messages_with_keep_failed_false(self):
-        """Test cleanup including failed messages."""
+        """Test cleanup including failed messages (bulk delete)."""
         from backend.websocket.queue_maintenance import QueueMaintenance
 
         mock_db = MagicMock()
-        mock_messages = [MagicMock()]
-        mock_db.query.return_value.filter.return_value.union.return_value.all.return_value = (
-            mock_messages
-        )
+        mock_db.query.return_value.filter.return_value.delete.return_value = 1
 
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(
@@ -48,7 +45,7 @@ class TestQueueMaintenanceCleanupOldMessages:
 
         mock_db = MagicMock()
         mock_get_db.return_value = iter([mock_db])
-        mock_db.query.return_value.filter.return_value.all.return_value = []
+        mock_db.query.return_value.filter.return_value.delete.return_value = 0
 
         maintenance = QueueMaintenance()
         result = maintenance.cleanup_old_messages(older_than_days=7)

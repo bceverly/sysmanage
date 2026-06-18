@@ -9,57 +9,8 @@ import pytest
 from fastapi import WebSocket
 
 from backend.api.agent import (
-    _handle_update_result_message,
     agent_connect,
 )
-
-
-class TestUpdateResultHandling:
-    """Test update result message handling."""
-
-    @pytest.fixture
-    def mock_connection(self):
-        connection = Mock()
-        connection.agent_id = "test-agent-123"
-        connection.send_message = AsyncMock()
-        return connection
-
-    @pytest.fixture
-    def mock_db(self):
-        return Mock()
-
-    @pytest.mark.asyncio
-    async def test_handle_update_result_message_success(self, mock_connection, mock_db):
-        """Test successful update result handling."""
-        message = Mock()
-        message.data = {
-            "update_id": "update-123",
-            "status": "completed",
-            "exit_code": 0,
-            "packages_updated": ["package1", "package2"],
-        }
-
-        with patch("backend.api.agent.handle_update_apply_result") as mock_handle:
-            await _handle_update_result_message(message, mock_connection, mock_db)
-
-            # Verify update handler was called
-            mock_handle.assert_called_once_with(mock_db, mock_connection, message.data)
-
-    @pytest.mark.asyncio
-    async def test_handle_update_result_message_exception(
-        self, mock_connection, mock_db
-    ):
-        """Test update result handling when exception occurs."""
-        message = Mock()
-        message.data = {"update_id": "update-123"}
-
-        with patch("backend.api.agent.handle_update_apply_result") as mock_handle:
-            # Mock exception
-            mock_handle.side_effect = Exception("Update processing error")
-
-            # Should re-raise the exception
-            with pytest.raises(Exception, match="Update processing error"):
-                await _handle_update_result_message(message, mock_connection, mock_db)
 
 
 class TestWebSocketConnect:
@@ -262,13 +213,6 @@ class TestConfigPushIntegration:
 
 class TestBasicWebSocketFunctionality:
     """Test basic WebSocket functionality that should work."""
-
-    @pytest.mark.asyncio
-    async def test_update_result_handling_basic(self):
-        """Test that update result handling function exists and is callable."""
-        # Import test
-        assert _handle_update_result_message is not None
-        assert callable(_handle_update_result_message)
 
     @pytest.mark.asyncio
     async def test_agent_connect_basic(self):

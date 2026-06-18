@@ -9,6 +9,7 @@ import logging
 import os
 import sys
 
+from backend.utils.log_rotation import GzipTimedRotatingFileHandler
 from backend.utils.logging_formatter import UTCTimestampFormatter
 from backend.utils.verbosity_logger import get_logger
 
@@ -42,7 +43,14 @@ def configure_logging():
         # Try to add file handler, but fallback gracefully if permission denied
         log_file = os.path.join(logs_dir, "backend.log")
         logger.debug("Attempting to create file handler for: %s", log_file)
-        file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
+        # Rotate daily, gzip the old log, keep 14 days (standard unix-style) so
+        # backend.log can't grow without bound.
+        file_handler = GzipTimedRotatingFileHandler(
+            log_file,
+            when="midnight",
+            backupCount=14,
+            encoding="utf-8",
+        )
         handlers.append(file_handler)
         logger.debug("File handler created successfully")
     except PermissionError as e:

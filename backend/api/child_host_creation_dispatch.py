@@ -32,9 +32,16 @@ def _load_network_details_payload(host_id: str):
         # pylint: disable=import-outside-toplevel
         from sqlalchemy.orm import sessionmaker
 
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=db_module.get_engine()
-        )
+        from backend.persistence.partitions import tenant_engine_for_host
+
+        # Phase 13.1: a tenant-bound host's row lives in its tenant database, not
+        # the bootstrap DB.  This helper runs deep in the create-child dispatch
+        # chain (possibly off the request thread), so the active-tenant ContextVar
+        # may not be in scope — resolve the engine from the host→tenant binding
+        # explicitly.  ``tenant_engine_for_host`` returns None when the host isn't
+        # tenant-bound / multi-tenancy is off, so we fall back to bootstrap.
+        engine = tenant_engine_for_host(host_id) or db_module.get_engine()
+        session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         with session_local() as session:
             host = session.query(models.Host).filter(models.Host.id == host_id).first()
             if not host or not host.network_details:

@@ -12,13 +12,14 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.utils.verbosity_logger import sanitize_log
 from backend.services.observability_shim import (
     try_engine_otel_deploy,
     try_engine_otel_remove,
 )
+from backend.utils.verbosity_logger import sanitize_log
 
 from .eligibility import check_opentelemetry_eligibility
 from .models import OpenTelemetryDeployResponse
@@ -71,70 +72,83 @@ async def deploy_opentelemetry(
                 detail=_("Permission denied: DEPLOY_OPENTELEMETRY role required"),
             )
 
-        # Validate host exists and is active
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
-            )
-
-        # Validate host approval status
-        validate_host_approval_status(host)
-
-        # Check eligibility
-        eligibility = await check_opentelemetry_eligibility(host_id, current_user, db)
-
-        if not eligibility.eligible:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Host is not eligible for OpenTelemetry deployment: %s")
-                % eligibility.error_message,
+        # Host data + the engine platform probe (which samples SoftwarePackage)
+        # are tenant-scoped — route them to the active tenant's database.  User
+        # RBAC (above), Grafana settings, and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host exists and is active
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        # Get Grafana configuration
-        grafana_settings = (
-            db.query(models.GrafanaIntegrationSettings).filter_by(enabled=True).first()
-        )
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
 
-        if not grafana_settings:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Grafana integration is not configured"),
+            # Validate host approval status
+            validate_host_approval_status(host)
+
+            # Check eligibility
+            eligibility = await check_opentelemetry_eligibility(
+                host_id, current_user, db
             )
 
-        grafana_url = grafana_settings.grafana_url
-        if not grafana_url:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Grafana URL is not available"),
+            if not eligibility.eligible:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Host is not eligible for OpenTelemetry deployment: %s")
+                    % eligibility.error_message,
+                )
+
+            # Get Grafana configuration (server-global singleton — bootstrap db)
+            grafana_settings = (
+                db.query(models.GrafanaIntegrationSettings)
+                .filter_by(enabled=True)
+                .first()
             )
 
-        # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
-        # The legacy ``deploy_opentelemetry`` WS-command branch was
-        # removed alongside the agent's ``opentelemetry_operations.py``
-        # / ``otel_deploy_*.py`` modules.  An unlicensed OSS instance
-        # (or one whose Pro+ engine .so isn't loaded) will see this
-        # endpoint return 503 with a clear "engine required" message,
-        # which is more honest than queuing a WS command the agent
-        # has no handler for.
-        engine_msg_id = try_engine_otel_deploy(host, grafana_url, db)
-        if engine_msg_id is None:
-            raise HTTPException(
-                status_code=503,
-                detail=_(
-                    "OpenTelemetry deployment requires the Pro+ "
-                    "observability_engine to be loaded on the server."
-                ),
-            )
+            if not grafana_settings:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Grafana integration is not configured"),
+                )
+
+            grafana_url = grafana_settings.grafana_url
+            if not grafana_url:
+                raise HTTPException(
+                    status_code=400,
+                    detail=_("Grafana URL is not available"),
+                )
+
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
+            # The legacy ``deploy_opentelemetry`` WS-command branch was
+            # removed alongside the agent's ``opentelemetry_operations.py``
+            # / ``otel_deploy_*.py`` modules.  An unlicensed OSS instance
+            # (or one whose Pro+ engine .so isn't loaded) will see this
+            # endpoint return 503 with a clear "engine required" message,
+            # which is more honest than queuing a WS command the agent
+            # has no handler for.  The platform probe samples SoftwarePackage,
+            # so it runs on the tenant session.
+            engine_msg_id = try_engine_otel_deploy(host, grafana_url, tenant_session)
+            if engine_msg_id is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail=_(
+                        "OpenTelemetry deployment requires the Pro+ "
+                        "observability_engine to be loaded on the server."
+                    ),
+                )
 
         AuditService.log(
             db=db,
@@ -143,8 +157,8 @@ async def deploy_opentelemetry(
             action_type=ActionType.EXECUTE,
             entity_type=EntityType.HOST,
             entity_id=host_id,
-            entity_name=host.fqdn,
-            description=f"Requested OpenTelemetry deployment for host {host.fqdn}",
+            entity_name=host_fqdn,
+            description=f"Requested OpenTelemetry deployment for host {host_fqdn}",
             result=Result.SUCCESS,
             details={"grafana_url": grafana_url, "dispatch_path": "engine_plan"},
         )
@@ -153,7 +167,7 @@ async def deploy_opentelemetry(
         logger.info(
             "Queued OpenTelemetry deployment for host %s (FQDN: %s) via engine_plan",
             sanitize_log(host_id),
-            host.fqdn,
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(
@@ -211,35 +225,42 @@ async def remove_opentelemetry(
                 detail=_("Permission denied: DEPLOY_OPENTELEMETRY role required"),
             )
 
-        # Validate host exists and is active
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above) and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host exists and is active
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        # Validate host approval status
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
 
-        # Engine path only — see deploy_opentelemetry above for rationale.
-        engine_msg_id = try_engine_otel_remove(host, db)
-        if engine_msg_id is None:
-            raise HTTPException(
-                status_code=503,
-                detail=_(
-                    "OpenTelemetry removal requires the Pro+ "
-                    "observability_engine to be loaded on the server."
-                ),
-            )
+            # Validate host approval status
+            validate_host_approval_status(host)
+
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only — see deploy_opentelemetry above for rationale.
+            engine_msg_id = try_engine_otel_remove(host, tenant_session)
+            if engine_msg_id is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail=_(
+                        "OpenTelemetry removal requires the Pro+ "
+                        "observability_engine to be loaded on the server."
+                    ),
+                )
 
         AuditService.log(
             db=db,
@@ -248,8 +269,8 @@ async def remove_opentelemetry(
             action_type=ActionType.EXECUTE,
             entity_type=EntityType.HOST,
             entity_id=host_id,
-            entity_name=host.fqdn,
-            description=f"Requested OpenTelemetry removal for host {host.fqdn}",
+            entity_name=host_fqdn,
+            description=f"Requested OpenTelemetry removal for host {host_fqdn}",
             result=Result.SUCCESS,
             details={"dispatch_path": "engine_plan"},
         )
@@ -258,7 +279,7 @@ async def remove_opentelemetry(
         logger.info(
             "Queued OpenTelemetry removal for host %s (FQDN: %s) via engine_plan",
             sanitize_log(host_id),
-            host.fqdn,
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(

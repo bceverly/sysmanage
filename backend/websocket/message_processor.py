@@ -4,6 +4,7 @@ Processes queued messages from agents asynchronously.
 """
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import sessionmaker
 
@@ -34,10 +35,16 @@ class MessageProcessor:
     agent data updates without blocking WebSocket connections.
     """
 
+    # How often to purge old completed/expired queue rows (they're otherwise
+    # never deleted, so message_queue grows unbounded — observed 21 GB on an
+    # agent).  Cheap delete-by-index; once a day is plenty.
+    _CLEANUP_INTERVAL = timedelta(hours=24)
+
     def __init__(self):
         """Initialize the message processor."""
         self.running = False
         self.process_interval = 1.0  # Process messages every second
+        self._last_cleanup = None  # last time old messages were purged
 
     async def start(self):
         """Start the background message processing loop."""
@@ -112,6 +119,12 @@ class MessageProcessor:
         cycle.  In collapsed/single-tenant mode this is exactly one pass over the
         bootstrap DB, identical to the prior behaviour.
         """
+        now = datetime.now(timezone.utc)
+        do_cleanup = (
+            self._last_cleanup is None
+            or (now - self._last_cleanup) >= self._CLEANUP_INTERVAL
+        )
+
         for label, db in self._queue_sessions():
             try:
                 # Inbound (agents→server), then outbound (server→agents).
@@ -131,6 +144,15 @@ class MessageProcessor:
                         label,
                     )
 
+                # Once a day, purge old completed rows so the queue doesn't grow
+                # unbounded (cleanup_old_messages keeps failed rows for debugging).
+                if do_cleanup:
+                    purged = server_queue_manager.cleanup_old_messages(db=db)
+                    if purged:
+                        logger.info(
+                            "Purged %d old completed messages (%s)", purged, label
+                        )
+
                 db.commit()
                 logger.debug("Committed message processing changes (%s)", label)
             except (
@@ -144,6 +166,9 @@ class MessageProcessor:
                 db.rollback()
             finally:
                 db.close()
+
+        if do_cleanup:
+            self._last_cleanup = now
 
     @staticmethod
     def _bootstrap_session():

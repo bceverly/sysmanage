@@ -16,7 +16,7 @@ from backend.monitoring.heartbeat_monitor import (
 class TestCheckHostHeartbeats:
     """Test cases for check_host_heartbeats function."""
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_no_stale_hosts(
@@ -38,7 +38,7 @@ class TestCheckHostHeartbeats:
         mock_db.commit.assert_not_called()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_with_stale_hosts(
@@ -76,7 +76,7 @@ class TestCheckHostHeartbeats:
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_single_stale_host(
@@ -106,7 +106,7 @@ class TestCheckHostHeartbeats:
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_db_connection_error(self, mock_get_db):
         """Test checking heartbeats when database connection fails."""
@@ -117,7 +117,7 @@ class TestCheckHostHeartbeats:
 
         mock_get_db.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_query_error(
@@ -136,7 +136,7 @@ class TestCheckHostHeartbeats:
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_commit_error(
@@ -167,7 +167,7 @@ class TestCheckHostHeartbeats:
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_timeout_calculation(
@@ -195,7 +195,7 @@ class TestCheckHostHeartbeats:
             # Verify the timeout calculation was used in the query
             mock_db.query.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_host_heartbeats_config_error(
@@ -226,7 +226,7 @@ class TestHeartbeatMonitorService:
 class TestHeartbeatMonitorIntegration:
     """Integration test cases."""
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_heartbeat_workflow_integration(self, mock_get_timeout, mock_get_db):
@@ -262,7 +262,7 @@ class TestHeartbeatMonitorIntegration:
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_empty_database(self, mock_get_timeout, mock_get_db):
@@ -286,7 +286,7 @@ class TestHeartbeatMonitorIntegration:
 class TestHeartbeatMonitorEdgeCases:
     """Test edge cases and error conditions."""
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_zero_timeout_config(self, mock_get_timeout, mock_get_db):
@@ -304,7 +304,7 @@ class TestHeartbeatMonitorEdgeCases:
         # Should complete without error even with zero timeout
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_negative_timeout_config(self, mock_get_timeout, mock_get_db):
@@ -322,7 +322,7 @@ class TestHeartbeatMonitorEdgeCases:
         # Should complete without error even with negative timeout
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_large_timeout_config(self, mock_get_timeout, mock_get_db):
@@ -340,7 +340,7 @@ class TestHeartbeatMonitorEdgeCases:
         # Should complete without error
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_host_without_fqdn(self, mock_get_timeout, mock_get_db):

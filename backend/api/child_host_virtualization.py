@@ -19,23 +19,20 @@ from backend.api.child_host_creation_dispatch import try_plan_based_creation
 from backend.api.child_host_models import CreateWslChildHostRequest
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
     raise_engine_declined,
     verify_host_active,
 )
-from backend.api.child_host_virtualization_enable import (
-    router as enable_router,
-)
-from backend.api.child_host_virtualization_status import (
-    router as status_router,
-)
+from backend.api.child_host_virtualization_enable import router as enable_router
+from backend.api.child_host_virtualization_status import router as status_router
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config import get_config
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.password_hash import hash_password_for_os
 
@@ -394,15 +391,15 @@ async def create_child_host_request(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.  The
+    # ref session serves ChildHostDistribution, which is server-global reference
+    # data with no copy in the tenant database; keep it open for the whole
+    # handler so the loaded distribution row stays attached.
+    user = authorize_on_main(current_user, SecurityRoles.CREATE_CHILD_HOST)
+    session_local = request_sessionmaker()
+    ref_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
 
-    with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.CREATE_CHILD_HOST
-        )
-
+    with session_local() as session, ref_local() as ref_session:
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -440,9 +437,10 @@ async def create_child_host_request(
                 % child_name,
             )
 
-        # Look up the distribution to get agent install commands
+        # Look up the distribution to get agent install commands (server-global
+        # reference data — read on the bootstrap engine via ref_session).
         distribution = (
-            session.query(ChildHostDistribution)
+            ref_session.query(ChildHostDistribution)
             .filter(
                 ChildHostDistribution.child_type == request.child_type,
                 ChildHostDistribution.install_identifier == request.distribution,
@@ -504,7 +502,6 @@ async def create_child_host_request(
             raise_engine_declined()
 
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",

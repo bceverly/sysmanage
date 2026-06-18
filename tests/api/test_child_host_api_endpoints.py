@@ -175,6 +175,7 @@ class TestChildHostUtils:
     def test_get_user_with_role_check_user_not_found(self, mock_db_session):
         """Test get_user_with_role_check when user not found."""
         from fastapi import HTTPException
+
         from backend.security.roles import SecurityRoles
 
         mock_db_session.query.return_value.filter.return_value.first.return_value = None
@@ -195,6 +196,7 @@ class TestChildHostUtils:
     def test_get_user_with_role_check_no_permission(self, mock_db_session, mock_user):
         """Test get_user_with_role_check when user lacks permission."""
         from fastapi import HTTPException
+
         from backend.security.roles import SecurityRoles
 
         mock_user.has_role.return_value = False
@@ -254,6 +256,7 @@ class TestChildHostUtils:
     def test_verify_host_active_inactive(self, mock_host):
         """Test verify_host_active with inactive host."""
         from fastapi import HTTPException
+
         from backend.api.child_host_utils import verify_host_active
 
         mock_host.active = False
@@ -346,9 +349,9 @@ class TestChildHostCrudEndpoints:
         mock_child_host.parent_host_id = mock_host.id
 
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host:
@@ -371,9 +374,9 @@ class TestChildHostCrudEndpoints:
     async def test_list_child_hosts_empty(self, mock_db_session, mock_user, mock_host):
         """Test listing child hosts when none exist."""
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host:
@@ -399,9 +402,9 @@ class TestChildHostCrudEndpoints:
         mock_child_host.parent_host_id = mock_host.id
 
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host:
@@ -430,9 +433,9 @@ class TestChildHostCrudEndpoints:
         from fastapi import HTTPException
 
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host:
@@ -460,9 +463,9 @@ class TestChildHostCrudEndpoints:
         # call; mock module_loader.get_module to return an engine whose
         # builder + enqueue path succeed so ``used_plan_path = True``.
         with patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch("backend.api.child_host_crud.db"), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host, patch(
@@ -531,11 +534,9 @@ class TestVirtualizationStatusEndpoints:
     ):
         """Test getting virtualization support — engine plan path accepted."""
         with patch(
-            "backend.api.child_host_virtualization_status.sessionmaker"
+            "backend.api.child_host_virtualization_status.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_status.db"
-        ), patch(
-            "backend.api.child_host_virtualization_status.get_user_with_role_check"
+            "backend.api.child_host_virtualization_status.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_status.get_host_or_404"
         ) as mock_get_host, patch(
@@ -565,11 +566,9 @@ class TestVirtualizationStatusEndpoints:
     ):
         """Test getting virtualization status for Windows host."""
         with patch(
-            "backend.api.child_host_virtualization_status.sessionmaker"
+            "backend.api.child_host_virtualization_status.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_status.db"
-        ), patch(
-            "backend.api.child_host_virtualization_status.get_user_with_role_check"
+            "backend.api.child_host_virtualization_status.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_status.get_host_or_404"
         ) as mock_get_host, patch(
@@ -602,11 +601,9 @@ class TestVirtualizationStatusEndpoints:
         mock_host.virtualization_types = None
 
         with patch(
-            "backend.api.child_host_virtualization_status.sessionmaker"
+            "backend.api.child_host_virtualization_status.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_status.db"
-        ), patch(
-            "backend.api.child_host_virtualization_status.get_user_with_role_check"
+            "backend.api.child_host_virtualization_status.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_status.get_host_or_404"
         ) as mock_get_host, patch(
@@ -640,11 +637,9 @@ class TestVirtualizationStatusEndpoints:
         mock_openbsd_host.virtualization_types = None
 
         with patch(
-            "backend.api.child_host_virtualization_status.sessionmaker"
+            "backend.api.child_host_virtualization_status.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_status.db"
-        ), patch(
-            "backend.api.child_host_virtualization_status.get_user_with_role_check"
+            "backend.api.child_host_virtualization_status.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_status.get_host_or_404"
         ) as mock_get_host, patch(
@@ -691,11 +686,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -727,11 +720,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_init_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -761,11 +752,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -798,11 +787,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -835,11 +822,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -872,11 +857,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -912,11 +895,9 @@ class TestVirtualizationEnableEndpoints:
             "backend.api.child_host_virtualization_enable._try_init_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1062,11 +1043,9 @@ class TestKvmNetworkingEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1107,11 +1086,9 @@ class TestKvmNetworkingEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1140,6 +1117,7 @@ class TestKvmNetworkingEndpoints:
     ):
         """Test configuring bridged networking without bridge interface."""
         from fastapi import HTTPException
+
         from backend.api.child_host_models import ConfigureKvmNetworkingRequest
 
         request = ConfigureKvmNetworkingRequest(mode="bridged")  # No bridge specified
@@ -1150,11 +1128,9 @@ class TestKvmNetworkingEndpoints:
             "backend.api.child_host_virtualization_enable._try_init_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1197,11 +1173,9 @@ class TestKvmModuleEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1232,11 +1206,9 @@ class TestKvmModuleEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1276,11 +1248,9 @@ class TestBhyveEndpoints:
             "backend.api.child_host_virtualization_enable._try_kvm_network_plan_path",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1314,11 +1284,9 @@ class TestBhyveEndpoints:
             "backend.api.child_host_virtualization_enable._try_init_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_virtualization_enable.sessionmaker"
+            "backend.api.child_host_virtualization_enable.request_sessionmaker"
         ) as mock_sessionmaker, patch(
-            "backend.api.child_host_virtualization_enable.db"
-        ), patch(
-            "backend.api.child_host_virtualization_enable.get_user_with_role_check"
+            "backend.api.child_host_virtualization_enable.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_virtualization_enable.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1359,11 +1327,11 @@ class TestChildHostControlWithModule:
             "backend.api.child_host_control._try_update_agent_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_control.sessionmaker"
+            "backend.api.child_host_control.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_control.db"
         ), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
+            "backend.api.child_host_control.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_control.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1400,11 +1368,11 @@ class TestChildHostControlWithModule:
             "backend.api.child_host_control._try_update_agent_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_control.sessionmaker"
+            "backend.api.child_host_control.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_control.db"
         ), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
+            "backend.api.child_host_control.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_control.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1441,11 +1409,11 @@ class TestChildHostControlWithModule:
             "backend.api.child_host_control._try_update_agent_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_control.sessionmaker"
+            "backend.api.child_host_control.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_control.db"
         ), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
+            "backend.api.child_host_control.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_control.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1482,11 +1450,11 @@ class TestChildHostControlWithModule:
             "backend.api.child_host_control._try_update_agent_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_control.sessionmaker"
+            "backend.api.child_host_control.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_control.db"
         ), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
+            "backend.api.child_host_control.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_control.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1524,11 +1492,11 @@ class TestChildHostControlWithModule:
             "backend.api.child_host_control._try_update_agent_plan_dispatch",
             return_value=True,
         ), patch(
-            "backend.api.child_host_control.sessionmaker"
+            "backend.api.child_host_control.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_control.db"
         ), patch(
-            "backend.api.child_host_control.get_user_with_role_check"
+            "backend.api.child_host_control.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_control.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1568,11 +1536,11 @@ class TestChildHostDeleteWithModule:
             "backend.api.child_host_crud._try_plan_based_deletion",
             return_value=True,
         ), patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_crud.db"
         ), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1608,11 +1576,11 @@ class TestChildHostDeleteWithModule:
             "backend.api.child_host_crud._try_plan_based_deletion",
             return_value=True,
         ), patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_crud.db"
         ), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1649,11 +1617,11 @@ class TestChildHostDeleteWithModule:
             "backend.api.child_host_crud._try_plan_based_deletion",
             return_value=True,
         ) as mock_try_plan, patch(
-            "backend.api.child_host_crud.sessionmaker"
+            "backend.api.child_host_crud.request_sessionmaker"
         ) as mock_sessionmaker, patch(
             "backend.api.child_host_crud.db"
         ), patch(
-            "backend.api.child_host_crud.get_user_with_role_check"
+            "backend.api.child_host_crud.authorize_on_main"
         ) as mock_role_check, patch(
             "backend.api.child_host_crud.get_host_or_404"
         ) as mock_get_host, patch(
@@ -1746,6 +1714,7 @@ class TestDistributionCrudWithModule:
     ):
         """Test creating a duplicate distribution."""
         from fastapi import HTTPException
+
         from backend.api.child_host_models import CreateDistributionRequest
 
         request = CreateDistributionRequest(
@@ -1818,6 +1787,7 @@ class TestDistributionCrudWithModule:
     async def test_update_distribution_not_found(self, mock_db_session, mock_user):
         """Test updating a non-existent distribution."""
         from fastapi import HTTPException
+
         from backend.api.child_host_models import UpdateDistributionRequest
 
         request = UpdateDistributionRequest(display_name="Updated")

@@ -19,6 +19,8 @@ from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
+from backend.persistence.partitions import request_sessionmaker
+from backend.persistence.tenant_context import get_active_tenant
 
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
@@ -35,6 +37,22 @@ class ReportType(str, Enum):
     ANTIVIRUS_COMMERCIAL = "antivirus-commercial"
     USER_RBAC = "user-rbac"
     AUDIT_LOG = "audit-log"
+
+
+# Report types whose data is HOST-SCOPED (tenant database) vs server-global.
+# Host-scoped types query ``models.Host`` and must run against the active
+# tenant's database; the rest (users / RBAC / audit) are server-global and stay
+# on the bootstrap engine.  Branding (``ReportBranding``) and report templates
+# are server-global too.
+_HOST_SCOPED_REPORTS = frozenset(
+    {
+        ReportType.REGISTERED_HOSTS,
+        ReportType.HOSTS_WITH_TAGS,
+        ReportType.FIREWALL_STATUS,
+        ReportType.ANTIVIRUS_OPENSOURCE,
+        ReportType.ANTIVIRUS_COMMERCIAL,
+    }
+)
 
 
 def _check_reporting_module():
@@ -84,32 +102,44 @@ async def view_report_html(
     """
     reporting_engine = _check_reporting_module()
 
+    # Capture the active tenant HERE, in the request's async context — the
+    # worker thread below has no active-tenant ContextVar, so it must be passed
+    # explicitly (otherwise host-scoped queries silently hit the bootstrap DB).
+    tenant_id = get_active_tenant()
+
     # The DB queries + HTML render run in a worker thread so they don't stall
     # the event loop (large host/audit fetches + template rendering would freeze
     # every other request while the report builds).
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
-        None, _build_report_html, reporting_engine, report_type, template_id
+        None, _build_report_html, reporting_engine, report_type, template_id, tenant_id
     )
 
 
-def _build_report_html(reporting_engine, report_type, template_id):
+def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     """Render a report's HTML in a worker thread (see ``view_report_html``).
-    Opens its own session because the request session can't cross the thread
-    boundary."""
+
+    Opens its own sessions because the request session can't cross the thread
+    boundary.  Host data is tenant-scoped, so it is fetched from the active
+    tenant's database (``tenant_id`` threaded in from the handler); users / RBAC
+    / audit / branding / templates are server-global and stay on bootstrap."""
     from backend.persistence import models
 
-    session_local = sessionmaker(
+    bootstrap_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
-    with session_local() as db:
+    tenant_local = request_sessionmaker(tenant_id=tenant_id)
+    with bootstrap_local() as db, tenant_local() as tenant_db:
+        # The generator's ``db`` resolves server-global branding (ReportBranding)
+        # at render time → bootstrap.  Host rows are fetched below on tenant_db
+        # and passed in as data.
         html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _, models=models)
         selected_fields = _resolve_template_fields(
             reporting_engine, db, models, template_id
         )
 
         if report_type in (ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS):
-            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            hosts = tenant_db.query(models.Host).order_by(models.Host.fqdn).all()
             report_title = (
                 _("Registered Hosts")
                 if report_type == ReportType.REGISTERED_HOSTS
@@ -124,19 +154,19 @@ def _build_report_html(reporting_engine, report_type, template_id):
                 users, _("SysManage Users"), selected_fields=selected_fields
             )
         elif report_type == ReportType.FIREWALL_STATUS:
-            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            hosts = tenant_db.query(models.Host).order_by(models.Host.fqdn).all()
             html_content = html_gen.generate_firewall_html(
                 hosts, _("Host Firewall Status"), selected_fields=selected_fields
             )
         elif report_type == ReportType.ANTIVIRUS_OPENSOURCE:
-            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            hosts = tenant_db.query(models.Host).order_by(models.Host.fqdn).all()
             html_content = html_gen.generate_antivirus_opensource_html(
                 hosts,
                 _("Open-Source Antivirus Status"),
                 selected_fields=selected_fields,
             )
         elif report_type == ReportType.ANTIVIRUS_COMMERCIAL:
-            hosts = db.query(models.Host).order_by(models.Host.fqdn).all()
+            hosts = tenant_db.query(models.Host).order_by(models.Host.fqdn).all()
             html_content = html_gen.generate_antivirus_commercial_html(
                 hosts,
                 _("Commercial Antivirus Status"),
@@ -204,27 +234,45 @@ async def generate_report(
     """
     reporting_engine = _check_reporting_module()
 
+    # Capture the active tenant in the request's async context (the worker
+    # thread has no active-tenant ContextVar — pass it down explicitly).
+    tenant_id = get_active_tenant()
+
     # The DB queries + reportlab PDF build are blocking and run in a worker
     # thread so they don't stall the event loop — a synchronous reportlab build
     # in the loop freezes every other request, including the one downloading
     # this PDF (the cause of the export "hang").
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
-        None, _build_report_pdf, reporting_engine, report_type, template_id
+        None, _build_report_pdf, reporting_engine, report_type, template_id, tenant_id
     )
 
 
-def _build_report_pdf(reporting_engine, report_type, template_id):
-    """Render a PDF report in a worker thread (see ``generate_report``).  Opens
-    its own session because the request session can't cross the thread boundary."""
+def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
+    """Render a PDF report in a worker thread (see ``generate_report``).
+
+    Opens its own sessions because the request session can't cross the thread
+    boundary.  The Pro+ host generator queries ``models.Host`` INTERNALLY from
+    its constructor session, so the host-report generator is constructed on the
+    active tenant's database (``tenant_id`` threaded in from the handler); the
+    users/RBAC/audit generator and report templates stay server-global on
+    bootstrap."""
     from backend.persistence import models
 
-    session_local = sessionmaker(
+    bootstrap_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db_module.get_engine()
     )
-    with session_local() as db:
+    tenant_local = request_sessionmaker(tenant_id=tenant_id)
+    with bootstrap_local() as db, tenant_local() as tenant_db:
+        # Host generator's internal Host queries must hit the tenant DB.
+        # NOTE: branding (ReportBranding, server-global) is also looked up via
+        # this generator's session, so for a tenant host report branding would
+        # resolve against the tenant DB — fully separating host-data from
+        # branding requires a reporting_engine change (the engine is being
+        # migrated separately to accept a distinct bootstrap session for
+        # branding).
         hosts_gen = reporting_engine.HostsReportGeneratorImpl(
-            db, i18n_func=_, models=models
+            tenant_db, i18n_func=_, models=models
         )
         users_gen = reporting_engine.UsersReportGeneratorImpl(
             db, i18n_func=_, models=models

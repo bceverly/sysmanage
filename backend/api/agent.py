@@ -18,16 +18,13 @@ from fastapi import (
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# pylint: disable=unused-import
 from backend.api.handlers import handle_os_version_update  # re-export for tests
 from backend.api.message_handlers import (
     handle_command_acknowledgment,
-    handle_diagnostic_result,
     handle_heartbeat,
     handle_system_info,
     validate_host_authentication,
 )
-from backend.api.update_handlers import handle_update_apply_result
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
@@ -37,14 +34,13 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
-from backend.websocket.queue_manager import QueueDirection, server_queue_manager
 
 # Set up logger with verbosity support
 logger = get_logger("websocket.agent")
 logger.info("Agent WebSocket module initialized")
 
 # Ensure config_push_manager is available for tests
-__all__ = ["config_push_manager"]
+__all__ = ["config_push_manager", "handle_os_version_update"]
 
 
 router = APIRouter()  # For authenticated endpoints (will get /api prefix)
@@ -364,6 +360,15 @@ def _enqueue_inbound_message(message, connection, db):
         message_id=message.message_id,
         db=db,
     )
+    # Commit the enqueue NOW.  ``enqueue_message`` only FLUSHES when handed a
+    # session — the commit is the caller's job.  We must not rely on a later
+    # handler committing this same ``db``: for a tenant-bound host the
+    # time-sensitive handlers (heartbeat/ack) route to and commit the host's
+    # TENANT session instead (see ``_handle_time_sensitive_message``), so this
+    # bootstrap session would otherwise never be committed and the queued
+    # message would be silently rolled back — losing the agent's inventory/OS
+    # updates entirely.
+    db.commit()
 
     logger.info(
         "Enqueued %s message from connection %s for background processing",
@@ -434,81 +439,6 @@ async def _handle_message_by_type(message, connection, db):
             "This function should only be called for HEARTBEAT and SYSTEM_INFO messages.",
             message.message_type,
         )
-
-
-async def _handle_script_execution_result(message, connection, db):
-    """Handle script execution result message."""
-    logger.debug("Processing script execution result message")
-    logger.debug(
-        "Script execution result data keys: %s",
-        list(message.data.keys()) if message.data else [],
-    )
-
-    # Queue script execution results for reliable processing
-    host, error_msg = await _validate_and_get_host(message.data, connection, db)
-    if error_msg:
-        logger.warning("Host validation failed for script execution result")
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    hostname = host.fqdn
-    logger.info("Enqueueing script execution result for host: %s", hostname)
-
-    # Enqueue the message for processing by message processor
-    from backend.websocket.queue_manager import Priority
-
-    try:
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db,
-        )
-        logger.info(
-            "Enqueued script execution result from host %s (message_id: %s)",
-            hostname,
-            queue_message_id,
-        )
-
-        # Send acknowledgment back to agent
-        ack_msg = {
-            "message_type": "script_execution_result_queued",
-            "message_id": queue_message_id,
-        }
-        await connection.send_message(ack_msg)
-
-    except Exception as e:
-        logger.exception("Error enqueueing script execution result: %s", e)
-        error_msg = ErrorMessage(
-            "queue_error", f"Failed to queue script result: {str(e)}"
-        )
-        await connection.send_message(error_msg.to_dict())
-
-
-async def _handle_diagnostic_result_msg(message, connection, db):
-    """Handle diagnostic collection result message."""
-    logger.info("Diagnostic collection result received")
-    logger.info(
-        "Diagnostic result data keys: %s",
-        list(message.data.keys()) if message.data else [],
-    )
-
-    # Handle diagnostic collection result directly (no queuing needed)
-    try:
-        response = await handle_diagnostic_result(db, connection, message.data)
-        logger.info("Diagnostic collection result processed successfully")
-        # Send acknowledgment back to agent
-        if response:
-            await connection.send_message(response)
-    except Exception as e:
-        logger.exception("Error processing diagnostic collection result: %s", e)
-        error_msg = ErrorMessage(
-            "diagnostic_error",
-            f"Failed to process diagnostic result: {str(e)}",
-        )
-        await connection.send_message(error_msg.to_dict())
 
 
 def _extract_host_identifier(message_data, connection, db):
@@ -745,151 +675,6 @@ async def _handle_system_info_message(message, connection, db):
     except Exception as e:
         logger.exception("Error in handle_system_info: %s", e, exc_info=True)
         raise
-
-
-async def _handle_update_result_message(message, connection, db):
-    """Handle update apply result message with error handling."""
-    logger.info("Received update apply result from agent")
-    try:
-        # Handle update application results from agent directly (time-sensitive)
-        await handle_update_apply_result(db, connection, message.data)
-        logger.info("Update apply result processed successfully")
-    except Exception as e:
-        logger.exception("Error processing update apply result: %s", e)
-        raise
-
-
-async def _process_inventory_message(message, connection, db):
-    """Process inventory message after host validation."""
-    # Validate host first
-    host, error_msg = await _validate_and_get_host(message.data, connection, db)
-    if error_msg:
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    hostname = host.fqdn
-    logger.info("Host %s registered and approved - enqueueing message", hostname)
-    logger.info(
-        "DEBUG: About to enqueue with host.id=%s, host object type=%s",
-        host.id,
-        type(host),
-    )
-
-    # Log detailed message information
-    data_keys = list(message.data.keys()) if message.data else []
-    data_size = len(str(message.data)) if message.data else 0
-    logger.info(
-        "SERVER_DEBUG: Enqueueing message type=%s, data_keys=%s, data_size=%d bytes, host_id=%s",
-        message.message_type,
-        data_keys,
-        data_size,
-        host.id,
-    )
-
-    try:
-        message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            db=db,
-        )
-        logger.info(
-            "SERVER_DEBUG: Message enqueued successfully with queue_id=%s for host %s (message_type=%s)",
-            message_id,
-            hostname,
-            message.message_type,
-        )
-
-        # Commit the database session to persist the enqueued message
-        db.commit()
-        logger.debug("Database committed for message %s", message_id)
-
-        # Send success acknowledgment to agent
-        ack_message = {
-            "message_type": "ack",
-            "message_id": message.data.get("message_id", "unknown"),
-            "queue_id": message_id,
-            "status": "queued",
-        }
-        await connection.send_message(ack_message)
-        logger.info(
-            "SERVER_DEBUG: Successfully processed and acknowledged message %s",
-            message.message_type,
-        )
-
-    except Exception as e:
-        logger.exception("Error enqueueing message %s: %s", message.message_type, e)
-        error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
-        await connection.send_message(error_msg.to_dict())
-
-
-async def _handle_packages_batch_message(message, connection, db):
-    """Handle packages batch messages by enqueueing them for ordered processing."""
-    # Get host information for validation
-    from backend.persistence.models import Host
-
-    # Try to get host from message data first (host_id), then from connection
-    host = None
-    host_id = message.data.get("host_id")
-    if host_id:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        logger.info(
-            "Enqueueing %s message for host_id: %s", message.message_type, host_id
-        )
-
-    if not host:
-        # Fall back to hostname from connection
-        hostname = getattr(connection, "hostname", "unknown")
-        logger.info(
-            "Enqueueing %s message for host: %s", message.message_type, hostname
-        )
-        host = db.query(Host).filter(Host.fqdn == hostname).first()
-
-    if not host:
-        logger.error(
-            "Host not found for batch message (host_id=%s, hostname=%s)",
-            host_id,
-            getattr(connection, "hostname", "unknown"),
-        )
-        error_msg = ErrorMessage("host_not_found", "Host not found")
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    # Enqueue the message for processing by message processor with HIGH priority
-    # to ensure batch messages are processed quickly and in order
-    from backend.websocket.queue_manager import Priority
-
-    try:
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db,
-        )
-        logger.info(
-            "Enqueued %s from host %s (queue_id: %s)",
-            message.message_type,
-            host.fqdn,
-            queue_message_id,
-        )
-
-        # Send acknowledgment back to agent
-        ack_msg = {
-            "message_type": f"{message.message_type}_queued",
-            "message_id": queue_message_id,
-            "status": "queued",
-        }
-        await connection.send_message(ack_msg)
-
-    except Exception as e:
-        logger.exception("Error enqueueing %s: %s", message.message_type, e)
-        error_msg = ErrorMessage(
-            "queue_error", f"Failed to queue {message.message_type}: {str(e)}"
-        )
-        await connection.send_message(error_msg.to_dict())
 
 
 class InstallationCompletionRequest(BaseModel):
