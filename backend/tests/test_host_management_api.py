@@ -248,10 +248,12 @@ class TestHostCRUD:
                 None,  # Host not found
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
                     await get_host(str(uuid.uuid4()), "test@example.com")
@@ -564,10 +566,12 @@ class TestHostCRUD:
             )
             mock_session.query.return_value.filter.return_value.all.return_value = []
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
                     await delete_host(str(uuid.uuid4()), "admin@example.com")

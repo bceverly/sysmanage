@@ -271,7 +271,7 @@ class RegistryEnrollmentToken(Base):
     created_at = Column(DateTime, nullable=False, default=_utcnow)
     created_by = Column(String(255), nullable=True)
     expires_at = Column(DateTime, nullable=True)
-    max_uses = Column(Integer, nullable=True)  # null = unlimited
+    max_uses = Column(Integer, nullable=True)  # unlimited uses when NULL
     use_count = Column(Integer, nullable=False, default=0)
     last_used_at = Column(DateTime, nullable=True)
     revoked = Column(Boolean, nullable=False, default=False)

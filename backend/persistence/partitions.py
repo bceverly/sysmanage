@@ -238,10 +238,9 @@ def iter_host_databases():
             )
         tenant_ids = [str(tenant_id) for (tenant_id,) in rows]
     except Exception:  # noqa: BLE001
-        logger.error(
+        logger.exception(
             "iter_host_databases: could not list provisioned tenants; visiting the "
             "bootstrap database only this pass",
-            exc_info=True,
         )
         return
 
@@ -249,11 +248,10 @@ def iter_host_databases():
         try:
             engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
         except Exception:  # noqa: BLE001
-            logger.error(
+            logger.exception(
                 "iter_host_databases: could not resolve the engine for tenant %s; "
                 "skipping its hosts this pass",
                 sanitize_log(tenant_id),
-                exc_info=True,
             )
             continue
         yield (
@@ -261,6 +259,68 @@ def iter_host_databases():
             tenant_id,
             sessionmaker(autocommit=False, autoflush=False, bind=engine)(),
         )
+
+
+def provisioned_tenant_ids():
+    """Return the ids of every tenant that has a provisioned database (a
+    placement row in the registry), or ``[]`` when multi-tenancy is off or the
+    registry can't be read (logged, never silently swallowed).
+
+    Use this to fan a *worker-thread / background* read out across tenants where
+    the active-tenant ContextVar isn't available (e.g. a report built in a
+    ``run_in_executor`` thread): the request handler decides the scope and
+    threads an explicit tenant-id list down, since
+    :func:`iter_request_host_databases` reads a ContextVar that doesn't cross the
+    thread boundary.
+    """
+    if not config.is_multitenancy_enabled():
+        return []
+    from backend.persistence.models import RegistryTenantPlacement  # noqa: PLC0415
+
+    try:
+        with partition_session(partition=PARTITION_REGISTRY) as registry_session:
+            rows = (
+                registry_session.query(RegistryTenantPlacement.tenant_id)
+                .distinct()
+                .all()
+            )
+        return [str(tenant_id) for (tenant_id,) in rows]
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            "provisioned_tenant_ids: could not list provisioned tenants from the "
+            "registry",
+        )
+        return []
+
+
+def iter_request_host_databases():
+    """Yield ``(label, tenant_id, session)`` for a fleet-wide READ, honouring the
+    request's tenant scope.
+
+    This is the read-side companion to :func:`iter_host_databases` (which always
+    visits every database — correct for server-wide *operations* like the
+    heartbeat sweep or a broadcast).  Fleet-wide *reads* (a fleet list, a
+    compliance/AV summary, a multi-host report) instead respect who is asking:
+
+      * **An active tenant is set** (a tenant-scoped view) → yields ONLY that
+        tenant's database, so a tenant user sees just their own fleet — tenant
+        isolation is preserved.
+      * **No active tenant** (a server-admin / all-tenants view, or multi-tenancy
+        disabled) → yields the bootstrap database AND every provisioned tenant
+        database, so an operator sees the whole fleet aggregated.
+
+    The CALLER MUST ``close()`` every yielded session (matches
+    :func:`iter_host_databases`).
+    """
+    from backend.persistence.tenant_context import (  # noqa: PLC0415
+        get_active_tenant,
+    )
+
+    active = get_active_tenant()
+    if active and config.is_multitenancy_enabled():
+        yield ("active-tenant", active, request_sessionmaker()())
+        return
+    yield from iter_host_databases()
 
 
 def tenant_engine_for_host(host_id):

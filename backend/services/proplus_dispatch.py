@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
+from backend.utils.verbosity_logger import sanitize_log
 
 # Re-exported here under the legacy private name so the sister test module
 # ``test_proplus_dispatch_parsers`` doesn't have to chase the rename.
@@ -141,11 +142,11 @@ def _enqueue_apply_plan(host_id: str, plan: dict, timeout: int = 300) -> str:
         engine = get_request_engine()
     else:
         engine = tenant_engine_for_host(host_id) or get_request_engine()
-    logger.info(
+    logger.debug(
         "proplus dispatch: routing OUTBOUND for host %s via %s (active_tenant=%s)",
-        host_id,
+        sanitize_log(host_id),
         "active-tenant" if active_tenant else "host-index",
-        active_tenant,
+        sanitize_log(active_tenant),
     )
     session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     with session_local() as session:

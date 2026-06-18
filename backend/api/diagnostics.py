@@ -4,7 +4,6 @@ This module houses the API routes for diagnostic collection functionality in Sys
 
 import json
 import uuid
-from contextlib import nullcontext
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -483,70 +482,67 @@ async def process_diagnostic_result(db, result_data: dict):  # NOSONAR
     if not collection_id:
         raise HTTPException(status_code=400, detail=_("Missing collection_id"))
 
-    # Use the caller's session — tenant-routed by the queue processor when
-    # multi-tenancy is on — so a bound host's diagnostic report lands in its
-    # tenant database.  ``nullcontext`` so the ``with`` doesn't close it; the
-    # caller owns the transaction.
-    with nullcontext(db) as session:
-        # Find the diagnostic report
-        diagnostic = (
-            session.query(models.DiagnosticReport)
-            .filter(models.DiagnosticReport.collection_id == collection_id)
-            .first()
+    # Use the caller's session directly — tenant-routed by the queue processor
+    # when multi-tenancy is on, so a bound host's diagnostic report lands in its
+    # tenant database.  The caller owns the transaction, so we don't close it.
+    session = db
+    # Find the diagnostic report
+    diagnostic = (
+        session.query(models.DiagnosticReport)
+        .filter(models.DiagnosticReport.collection_id == collection_id)
+        .first()
+    )
+
+    if not diagnostic:
+        raise HTTPException(status_code=404, detail=error_diagnostic_not_found())
+
+    # Update diagnostic report with results
+    diagnostic.collection_status = (
+        "completed" if result_data.get("success", False) else "failed"
+    )
+    diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    diagnostic.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if result_data.get("error"):
+        diagnostic.error_message = result_data["error"]
+
+    # Store diagnostic data as JSON
+    def safe_json_dumps(data):
+        if data is None:
+            return None
+        try:
+            return json.dumps(data) if not isinstance(data, str) else data
+        except (TypeError, ValueError):
+            return None
+
+    if "system_logs" in result_data:
+        diagnostic.system_logs = safe_json_dumps(result_data["system_logs"])
+    if "configuration_files" in result_data:
+        diagnostic.configuration_files = safe_json_dumps(
+            result_data["configuration_files"]
+        )
+    if "network_info" in result_data:
+        diagnostic.network_information = safe_json_dumps(result_data["network_info"])
+    if "process_info" in result_data:
+        diagnostic.process_list = safe_json_dumps(result_data["process_info"])
+    if "disk_usage" in result_data:
+        diagnostic.disk_usage = safe_json_dumps(result_data["disk_usage"])
+    if "environment_variables" in result_data:
+        diagnostic.environment_variables = safe_json_dumps(
+            result_data["environment_variables"]
+        )
+    if "agent_logs" in result_data:
+        diagnostic.agent_logs = safe_json_dumps(result_data["agent_logs"])
+    if "system_information" in result_data:
+        diagnostic.system_information = safe_json_dumps(
+            result_data["system_information"]
         )
 
-        if not diagnostic:
-            raise HTTPException(status_code=404, detail=error_diagnostic_not_found())
+    if "collection_size_bytes" in result_data:
+        diagnostic.collection_size_bytes = result_data["collection_size_bytes"]
+    if "files_collected" in result_data:
+        diagnostic.files_collected = result_data["files_collected"]
 
-        # Update diagnostic report with results
-        diagnostic.collection_status = (
-            "completed" if result_data.get("success", False) else "failed"
-        )
-        diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        diagnostic.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    session.commit()
 
-        if result_data.get("error"):
-            diagnostic.error_message = result_data["error"]
-
-        # Store diagnostic data as JSON
-        def safe_json_dumps(data):
-            if data is None:
-                return None
-            try:
-                return json.dumps(data) if not isinstance(data, str) else data
-            except (TypeError, ValueError):
-                return None
-
-        if "system_logs" in result_data:
-            diagnostic.system_logs = safe_json_dumps(result_data["system_logs"])
-        if "configuration_files" in result_data:
-            diagnostic.configuration_files = safe_json_dumps(
-                result_data["configuration_files"]
-            )
-        if "network_info" in result_data:
-            diagnostic.network_information = safe_json_dumps(
-                result_data["network_info"]
-            )
-        if "process_info" in result_data:
-            diagnostic.process_list = safe_json_dumps(result_data["process_info"])
-        if "disk_usage" in result_data:
-            diagnostic.disk_usage = safe_json_dumps(result_data["disk_usage"])
-        if "environment_variables" in result_data:
-            diagnostic.environment_variables = safe_json_dumps(
-                result_data["environment_variables"]
-            )
-        if "agent_logs" in result_data:
-            diagnostic.agent_logs = safe_json_dumps(result_data["agent_logs"])
-        if "system_information" in result_data:
-            diagnostic.system_information = safe_json_dumps(
-                result_data["system_information"]
-            )
-
-        if "collection_size_bytes" in result_data:
-            diagnostic.collection_size_bytes = result_data["collection_size_bytes"]
-        if "files_collected" in result_data:
-            diagnostic.files_collected = result_data["files_collected"]
-
-        session.commit()
-
-        return {"result": True, "message": "Diagnostic result processed"}
+    return {"result": True, "message": "Diagnostic result processed"}

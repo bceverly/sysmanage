@@ -80,6 +80,51 @@ def _find_host_in_tenant_dbs(host_id, hostname):
     return None, None
 
 
+async def _dispatch_null_host_message(message, host, db, hostname, tenant_session):
+    """Validate a resolved NULL-host message and process it, then close the
+    (optional) tenant session the host was resolved on.
+
+    Split out of ``process_pending_messages`` so the resolve/validate/dispatch
+    branches don't pile cognitive complexity onto the queue loop.  A ``continue``
+    in the caller's loop becomes a ``return`` here.
+    """
+    try:
+        if not host:
+            logger.warning(
+                _("Host %s not found for message %s, deleting"),
+                hostname,
+                message.message_id,
+            )
+            server_queue_manager.mark_failed(
+                message.message_id, f"Host {hostname} not found", db=db
+            )
+            return
+
+        if host.approval_status != "approved":
+            logger.warning(
+                _("Host %s not approved (status: %s) for message %s, deleting"),
+                hostname,
+                host.approval_status,
+                message.message_id,
+            )
+            server_queue_manager.mark_failed(
+                message.message_id, f"Host {hostname} not approved", db=db
+            )
+            return
+
+        # Host is valid and approved - process the message.  Handler writes go to
+        # tenant_session when the host is in a tenant DB.
+        logger.info(
+            _("Processing NULL host_id message for approved host %s (ID: %s)"),
+            hostname,
+            host.id,
+        )
+        await process_validated_message(message, host, db, host_db=tenant_session)
+    finally:
+        if tenant_session is not None:
+            tenant_session.close()
+
+
 async def process_pending_messages(  # NOSONAR
     db: Session,
 ) -> None:
@@ -309,46 +354,9 @@ async def process_pending_messages(  # NOSONAR
             if not host:
                 host, tenant_session = _find_host_in_tenant_dbs(host_id, hostname)
 
-            try:
-                if not host:
-                    logger.warning(
-                        _("Host %s not found for message %s, deleting"),
-                        hostname,
-                        message.message_id,
-                    )
-                    server_queue_manager.mark_failed(
-                        message.message_id, f"Host {hostname} not found", db=db
-                    )
-                    continue
-
-                if host.approval_status != "approved":
-                    logger.warning(
-                        _(
-                            "Host %s not approved (status: %s) for message %s, "
-                            "deleting"
-                        ),
-                        hostname,
-                        host.approval_status,
-                        message.message_id,
-                    )
-                    server_queue_manager.mark_failed(
-                        message.message_id, f"Host {hostname} not approved", db=db
-                    )
-                    continue
-
-                # Host is valid and approved - process the message.  Handler
-                # writes go to tenant_session when the host is in a tenant DB.
-                logger.info(
-                    _("Processing NULL host_id message for approved host %s (ID: %s)"),
-                    hostname,
-                    host.id,
-                )
-                await process_validated_message(
-                    message, host, db, host_db=tenant_session
-                )
-            finally:
-                if tenant_session is not None:
-                    tenant_session.close()
+            await _dispatch_null_host_message(
+                message, host, db, hostname, tenant_session
+            )
 
         except Exception as e:
             logger.exception(
