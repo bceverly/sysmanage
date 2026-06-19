@@ -804,6 +804,10 @@ const HostDetail = () => { // NOSONAR
     // Child hosts functions
     const fetchChildHosts = useCallback(async (showLoading: boolean = true) => {
         if (!hostId) return;
+        // Child-host management is a Professional+ feature (container_engine module).
+        // Without the license the endpoint returns 402, so don't probe it in
+        // Community Edition — avoids noisy console errors on every host-detail load.
+        if (!licenseModules.includes('container_engine')) return;
         try {
             if (showLoading) {
                 setChildHostsLoading(true);
@@ -821,11 +825,14 @@ const HostDetail = () => { // NOSONAR
                 setChildHostsLoading(false);
             }
         }
-    }, [hostId]);
+    }, [hostId, licenseModules]);
 
     // Fetch virtualization status
     const fetchVirtualizationStatus = useCallback(async () => {
         if (!hostId) return;
+        // Virtualization status rides the same container_engine Pro+ license; skip
+        // the call (it 402s) when the module isn't licensed.
+        if (!licenseModules.includes('container_engine')) return;
         try {
             setVirtualizationLoading(true);
             const response = await axiosInstance.get(`/api/host/${hostId}/virtualization/status`);
@@ -839,7 +846,7 @@ const HostDetail = () => { // NOSONAR
         } finally {
             setVirtualizationLoading(false);
         }
-    }, [hostId]);
+    }, [hostId, licenseModules]);
 
     const requestChildHostsRefresh = useCallback(async (showSnackbar: boolean = true) => {
         if (!hostId) return;

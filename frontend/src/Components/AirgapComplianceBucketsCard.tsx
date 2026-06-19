@@ -33,6 +33,8 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
+import { useModuleLicensed } from '../hooks/useModuleLicensed';
+
 interface NotAppliedEntry {
   package: string;
   installed: string;
@@ -68,6 +70,10 @@ const BUCKET_COLOR = {
 
 const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
   const { t } = useTranslation();
+  // Air-gap compliance buckets need the airgap_repository_engine (Enterprise);
+  // the endpoint 402s without it.  Gated on server role too (below), but the
+  // module check keeps a repository-role server without the license from probing.
+  const airgapLicensed = useModuleLicensed('airgap_repository_engine');
   const [data, setData] = useState<BucketsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +87,7 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
   }, []);
 
   useEffect(() => {
-    if (serverRole !== 'repository' || !hostId) {
+    if (serverRole !== 'repository' || !hostId || !airgapLicensed) {
       setLoading(false);
       return;
     }
@@ -107,9 +113,9 @@ const AirgapComplianceBucketsCard: React.FC<Props> = ({ hostId }) => {
     return () => {
       cancelled = true;
     };
-  }, [serverRole, hostId]);
+  }, [serverRole, hostId, airgapLicensed]);
 
-  if (serverRole !== 'repository') {
+  if (serverRole !== 'repository' || !airgapLicensed) {
     return null;
   }
 

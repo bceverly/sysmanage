@@ -608,6 +608,15 @@ Confirm it's reachable from the host:
           # …) with defaults; without 'enabled: true' email-dependent flows are
           # off.
           enabled: true
+        cors:
+          # The web UI auto-discovers allowed origins from the server's NICs, but
+          # on a dual-NIC box it can pick the NAT interface and miss the isolated
+          # ${SERVER_IP} that your browser actually uses — which blocks the few
+          # features the UI fetches from the API by absolute URL (e.g. Pro+ plugin
+          # bundles).  List the browser's origin(s) explicitly so they're allowed:
+          additional_origins:
+            - "http://${SERVER_IP}:${WEBUI_PORT}"
+            - "http://${SERVER_IP}:${API_PORT}"
 
       (Two random secrets were generated above — paste them in as shown, or
       run your own. Keep admin_password out of production configs.)

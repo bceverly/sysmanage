@@ -42,11 +42,16 @@ import {
   listDefaultMirrorAssignments,
   setDefaultMirrorAssignment,
 } from '../Services/repositoryMirroring';
+import { useModuleLicensed } from '../hooks/useModuleLicensed';
 
 const CLOUD_VALUE = '__cloud__';
 
 const DefaultPackageMirrorsCard: React.FC = () => {
   const { t } = useTranslation();
+  // Default package mirrors are part of the repository-mirroring (Enterprise)
+  // engine; /api/host-defaults/mirrors returns 402 without it, so don't fetch
+  // or render the card unless that module is licensed.
+  const mirrorsLicensed = useModuleLicensed('repository_mirroring_engine');
   const [rows, setRows] = useState<HostDefaultMirrorRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -66,8 +71,10 @@ const DefaultPackageMirrorsCard: React.FC = () => {
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    if (mirrorsLicensed) {
+      load();
+    }
+  }, [mirrorsLicensed]);
 
   const handleChange = async (row: HostDefaultMirrorRow, value: string) => {
     const key = `${row.platform}/${row.version_key}/${row.os_family}`;
@@ -96,6 +103,11 @@ const DefaultPackageMirrorsCard: React.FC = () => {
       setSaving(null);
     }
   };
+
+  // Not licensed for repository mirroring → hide the card entirely.
+  if (!mirrorsLicensed) {
+    return null;
+  }
 
   if (loading) {
     return (

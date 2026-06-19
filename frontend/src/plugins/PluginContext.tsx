@@ -73,9 +73,12 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
                 return;
             }
 
-            const currentHost = globalThis.location.hostname;
-            const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
-            const baseURL = `http://${currentHost}:${backendPort}`;
+            // Same-origin: the dev server / vite-preview proxy forwards /api to
+            // the backend, exactly like the main axios client (baseURL: '').
+            // A relative URL (rather than an absolute http://host:8080) means
+            // plugin discovery + bundle loading never make a cross-origin
+            // request, so no server-side CORS allow-list is needed for the UI.
+            const baseURL = '';
 
             const response = await fetch(`${baseURL}/api/plugins/bundles`, {
                 headers: { 'Authorization': `Bearer ${token}` },
