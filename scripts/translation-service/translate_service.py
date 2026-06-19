@@ -184,7 +184,7 @@ do not translate word-for-word.
 return it unchanged.
 
 OUTPUT: Return ONLY a JSON object of the exact form \
-{{"translations": ["...", "..."]}} where "translations" is an array with EXACTLY \
+{"translations": ["...", "..."]} where "translations" is an array with EXACTLY \
 the same number of elements as the input array, the i-th element being the \
 {language} translation of the i-th input string, in the same order. No prose, \
 no markdown fences, no extra keys."""
@@ -248,7 +248,7 @@ async def _ollama_translate_chunk(
         "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": {"temperature": 0, "num_ctx": NUM_CTX},
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT.format(language=language)},
+            {"role": "system", "content": SYSTEM_PROMPT.replace("{language}", language)},
             {"role": "user", "content": json.dumps(sources, ensure_ascii=False)},
         ],
     }
