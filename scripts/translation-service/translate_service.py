@@ -231,14 +231,38 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
     return [items[i : i + size] for i in range(0, len(items), size)]
 
 
-async def _ollama_translate_chunk(
+# Tokens that MUST appear verbatim in a translation: interpolation placeholders,
+# template vars, printf specifiers, HTML tags and entities.  Used to verify the
+# model didn't drop/alter one (a 14b model occasionally drops e.g. {{count}} in a
+# lower-resource language).  Ordered so the most specific form matches first.
+_PLACEHOLDER_RE = re.compile(
+    r"\{\{.*?\}\}"            # {{ name }}  (i18next / handlebars)
+    r"|\$\{[^}]+\}"          # ${VAR}
+    r"|\{[^{}]*\}"           # { name } { 0 }  (ICU / .NET / python)
+    r"|%\d+\$[sdfgex]"       # %1$s
+    r"|%\(\w+\)[sdfgexr]"    # %(name)s
+    r"|%[sdfgexr%]"          # %s %d %%
+    r"|\$[A-Za-z_]\w*"       # $VAR
+    r"|</?[A-Za-z][^>]*>"    # <tag ...>  </tag>  <br/>
+    r"|&[a-zA-Z]+;|&#\d+;"   # &mdash;  &#8212;
+)
+
+
+def _placeholders_ok(src: str, translated: str) -> bool:
+    """True iff every placeholder/tag/entity in ``src`` survived into
+    ``translated`` (substring check, order-independent)."""
+    return all(tok in translated for tok in _PLACEHOLDER_RE.findall(src))
+
+
+async def _raw_chunk(
     client: httpx.AsyncClient, lang_code: str, sources: List[str]
 ) -> List[str]:
-    """Translate one chunk of strings into one language via Ollama.
+    """One Ollama call for a chunk -> length-aligned translations.
 
-    Returns a list aligned with ``sources``.  On any failure or length
-    mismatch the un-translatable items fall back to the English source so the
-    caller always gets a complete, aligned result (never a crash mid-pass).
+    On any failure or length mismatch the items are retried one-at-a-time, and
+    anything still failing falls back to the English source, so the result is
+    always complete and aligned (never a crash mid-pass).  Placeholder integrity
+    is enforced by ``_ollama_translate_chunk`` on top of this.
     """
     language = LANGUAGES[lang_code]
     payload = {
@@ -270,10 +294,32 @@ async def _ollama_translate_chunk(
     if len(sources) > 1:
         results: List[str] = []
         for s in sources:
-            single = await _ollama_translate_chunk(client, lang_code, [s])
+            single = await _raw_chunk(client, lang_code, [s])
             results.append(single[0])
         return results
     return list(sources)  # give back the English source as a last resort
+
+
+async def _ollama_translate_chunk(
+    client: httpx.AsyncClient, lang_code: str, sources: List[str]
+) -> List[str]:
+    """Translate a chunk AND guarantee placeholder integrity.
+
+    Any translation that dropped a required placeholder/tag is retried once on
+    its own; if it is still broken the English source is kept.  A missing
+    translation a later pass can retry beats a placeholder-corrupted string that
+    would break interpolation at runtime.
+    """
+    out = await _raw_chunk(client, lang_code, sources)
+    repaired: List[str] = []
+    for src, txt in zip(sources, out):
+        if _placeholders_ok(src, txt):
+            repaired.append(txt)
+            continue
+        retry = await _raw_chunk(client, lang_code, [src])
+        cand = retry[0] if retry else src
+        repaired.append(cand if _placeholders_ok(src, cand) else src)
+    return repaired
 
 
 async def _translate_one_language(
