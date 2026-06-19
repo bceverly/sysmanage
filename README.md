@@ -16,7 +16,7 @@
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
 [![Performance Tests](https://img.shields.io/badge/performance%20tests-optimized-brightgreen.svg)]()
 [![Load Tests](https://github.com/bceverly/sysmanage/actions/workflows/load-tests.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/load-tests.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=bugs)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=bugs)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage)
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
