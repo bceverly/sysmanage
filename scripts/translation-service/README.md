@@ -25,16 +25,27 @@ enforces those rules.
    ```bash
    curl -fsSL https://ollama.com/install.sh | sh
    ```
-2. **Pull a translation-capable instruction model.** Pick by VRAM:
-   | VRAM        | Model (set as `TRANSLATION_MODEL`)     |
-   |-------------|----------------------------------------|
-   | 12–16 GB    | `qwen2.5:14b-instruct`                 |
-   | 24 GB       | `qwen2.5:32b-instruct`                 |
-   | 48 GB+      | `qwen2.5:72b-instruct`                 |
-   Qwen2.5 is strong across all 13 (incl. CJK, Arabic, Hindi). Gemma 2 / Llama 3.x
-   instruct models also work.
+2. **Pull the model the service picks.** By default the service is turnkey: it
+   detects your VRAM on startup and **auto-selects** the model (or a CPU model if
+   there's no GPU) — you do **not** set `TRANSLATION_MODEL` unless you want to pin
+   one. The startup banner prints the chosen tag and, if it isn't pulled yet, the
+   exact `ollama pull` line to run. Easiest path: start the service once, read the
+   banner, run the pull it prints, restart.
+
+   Auto-selection tiers (largest model that fits with headroom for KV-cache):
+   | Total VRAM   | Auto-selected model     |
+   |--------------|-------------------------|
+   | none (CPU)   | `qwen2.5:7b-instruct`   |
+   | < 6 GB       | `qwen2.5:3b-instruct`   |
+   | 6–10 GB      | `qwen2.5:7b-instruct`   |
+   | 11–21 GB     | `qwen2.5:14b-instruct`  |
+   | 22–45 GB     | `qwen2.5:32b-instruct`  |
+   | 46 GB+       | `qwen2.5:72b-instruct`  |
+   Qwen2.5 is strong across all 13 (incl. CJK, Arabic, Hindi). To pin a different
+   model — any Ollama tag, e.g. Gemma 2 / Llama 3.x — set `TRANSLATION_MODEL` and
+   pull that one instead:
    ```bash
-   ollama pull qwen2.5:14b-instruct
+   ollama pull qwen2.5:14b-instruct     # or whatever the banner tells you
    ```
 3. **Install the service deps** (a venv is fine):
    ```bash
@@ -47,10 +58,16 @@ enforces those rules.
 
 ```bash
 # Ollama is already running as a daemon after install; then:
-TRANSLATION_MODEL=qwen2.5:14b-instruct python3 translate_service.py
-# or, equivalently:
+python3 translate_service.py                       # auto-selects model from VRAM
+# pin a model instead of auto-selecting:
+TRANSLATION_MODEL=qwen2.5:32b-instruct python3 translate_service.py
+# or run via uvicorn:
 uvicorn translate_service:app --host 0.0.0.0 --port 8765
 ```
+
+The banner on startup prints the chosen model and why (e.g.
+`model : qwen2.5:14b-instruct [auto-selected for 16.0 GiB VRAM]`), plus the GPU
+and free VRAM.
 
 Bind `0.0.0.0` so the dev box can reach it over the LAN. Confirm it's healthy:
 
@@ -63,7 +80,7 @@ curl -s http://localhost:8765/health | python3 -m json.tool
 
 | Var                 | Default                  | Meaning                                   |
 |---------------------|--------------------------|-------------------------------------------|
-| `TRANSLATION_MODEL` | `qwen2.5:14b-instruct`   | Ollama model tag                          |
+| `TRANSLATION_MODEL` | *auto (from VRAM)*       | Pin an Ollama tag; unset = auto-select    |
 | `OLLAMA_URL`        | `http://localhost:11434` | Where Ollama listens                      |
 | `SERVICE_HOST`      | `0.0.0.0`                | Service bind address                      |
 | `SERVICE_PORT`      | `8765`                   | Service port                              |
@@ -86,12 +103,12 @@ The only time weights leave VRAM is Ollama's **idle auto-unload** (default 5 min
 `-1` to pin it for the box's lifetime. During an active pass requests are
 continuous, so it stays warm regardless.
 
-Sizing for a single resident model (rough Q4 footprints):
-`qwen2.5:14b` ≈ 9 GB, `:32b` ≈ 20 GB, `:72b` ≈ 47 GB. If the model is larger than
-VRAM, Ollama offloads layers to system RAM/CPU — **slower, but still no
-per-request reload.** Note an actual RTX 4060 is 8 GB (4060 Ti is 16 GB); 32 GB of
-VRAM is a bigger card (e.g. RTX 5090) or multi-GPU — confirm `nvidia-smi` and pick
-the model row that fits.
+**The service does this sizing for you** (see the auto-selection table above) —
+this is just the reasoning. Single-resident-model footprints (rough Q4):
+`qwen2.5:7b` ≈ 5 GB, `:14b` ≈ 9 GB, `:32b` ≈ 20 GB, `:72b` ≈ 47 GB. If a pinned
+model is larger than VRAM, Ollama offloads layers to system RAM/CPU — **slower,
+but still no per-request reload.** (For reference, an RTX 4060 is 8 GB, a 4060 Ti
+is 16 GB; bigger numbers mean a bigger card or multi-GPU — `nvidia-smi` confirms.)
 
 ## HTTP API
 

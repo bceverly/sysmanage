@@ -29,7 +29,9 @@ Run it:
 
 Configuration (env vars):
   OLLAMA_URL          default http://localhost:11434
-  TRANSLATION_MODEL   default qwen2.5:14b-instruct
+  TRANSLATION_MODEL   default: AUTO-SELECTED from detected VRAM (CPU model if no
+                      GPU).  Set this to pin a specific Ollama tag and skip
+                      auto-selection.
   SERVICE_HOST        default 0.0.0.0
   SERVICE_PORT        default 8765
   MAX_BATCH           default 40    (strings per LLM call; chunked above this)
@@ -57,7 +59,6 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434").rstrip("/")
-TRANSLATION_MODEL = os.getenv("TRANSLATION_MODEL", "qwen2.5:14b-instruct")
 SERVICE_HOST = os.getenv("SERVICE_HOST", "0.0.0.0")
 SERVICE_PORT = int(os.getenv("SERVICE_PORT", "8765"))
 MAX_BATCH = int(os.getenv("MAX_BATCH", "40"))
@@ -70,6 +71,69 @@ NUM_CTX = int(os.getenv("NUM_CTX", "8192"))
 # per-language model — switching target language is a prompt change on the same
 # resident weights, so this one value covers all 13 languages.
 OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
+
+
+# ---------------------------------------------------------------------------
+# Turnkey model selection
+# ---------------------------------------------------------------------------
+# One multilingual model serves all 13 languages, so the model is a single
+# choice sized to the hardware.  By default we DETECT total VRAM and pick the
+# largest qwen2.5 instruct model that fits with headroom; with no GPU we pick a
+# CPU-runnable model.  Set TRANSLATION_MODEL to pin a specific tag and skip all
+# of this.
+
+# Minimum TOTAL VRAM (GiB) -> Ollama model tag.  ~Q4 footprints: 3b≈2.5, 7b≈5,
+# 14b≈9, 32b≈20, 72b≈47 GiB; tiers leave room for KV-cache/context.
+_MODEL_TIERS = [
+    (46.0, "qwen2.5:72b-instruct"),
+    (22.0, "qwen2.5:32b-instruct"),
+    (11.0, "qwen2.5:14b-instruct"),
+    (6.0, "qwen2.5:7b-instruct"),
+    (0.0, "qwen2.5:3b-instruct"),
+]
+# No GPU: still gives usable translations, just slowly, on CPU.
+_CPU_MODEL = "qwen2.5:7b-instruct"
+
+
+def _detect_vram_gib() -> Optional[float]:
+    """Largest NVIDIA GPU's TOTAL VRAM in GiB via nvidia-smi, or None (no GPU)."""
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        ).stdout.strip()
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return None
+    totals = []
+    for line in out.splitlines():
+        try:
+            totals.append(int(line.strip()) / 1024)
+        except ValueError:
+            pass
+    return max(totals) if totals else None
+
+
+def _auto_select_model(vram_gib: Optional[float]) -> str:
+    if vram_gib is None:
+        return _CPU_MODEL
+    for floor, model in _MODEL_TIERS:
+        if vram_gib >= floor:
+            return model
+    return _MODEL_TIERS[-1][1]
+
+
+_VRAM_GIB = _detect_vram_gib()
+_MODEL_ENV = os.getenv("TRANSLATION_MODEL")
+TRANSLATION_MODEL = _MODEL_ENV or _auto_select_model(_VRAM_GIB)
+if _MODEL_ENV:
+    MODEL_SOURCE = "TRANSLATION_MODEL override"
+elif _VRAM_GIB is not None:
+    MODEL_SOURCE = f"auto-selected for {_VRAM_GIB:.1f} GiB VRAM"
+else:
+    MODEL_SOURCE = "auto-selected for CPU (no GPU detected)"
 
 # The 13 non-English locales SysManage ships (matches assets/locales and the
 # backend/agent gettext catalogs).  Keys are our locale codes; values are the
@@ -302,7 +366,7 @@ def _gpu_info() -> List[str]:
 def _print_startup_banner() -> None:
     print("=" * 64, flush=True)
     print("SysManage translation service", flush=True)
-    print(f"  model      : {TRANSLATION_MODEL}", flush=True)
+    print(f"  model      : {TRANSLATION_MODEL}  [{MODEL_SOURCE}]", flush=True)
     print(f"  ollama     : {OLLAMA_URL}  (keep_alive={OLLAMA_KEEP_ALIVE})", flush=True)
     print(f"  listening  : {SERVICE_HOST}:{SERVICE_PORT}", flush=True)
     for line in _gpu_info():
@@ -314,6 +378,28 @@ def _print_startup_banner() -> None:
 async def lifespan(_app: FastAPI):
     # Printed on startup whether launched via __main__ or `uvicorn translate_service:app`.
     _print_startup_banner()
+    # Turnkey nudge: since the model is auto-chosen, tell the operator if it
+    # still needs pulling (Ollama does not auto-pull on first request).
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+            r.raise_for_status()
+            names = [m["name"] for m in r.json().get("models", [])]
+        base = TRANSLATION_MODEL.split(":")[0]
+        if any(n == TRANSLATION_MODEL or n.split(":")[0] == base for n in names):
+            print(f"  ollama     : model '{TRANSLATION_MODEL}' present ✓", flush=True)
+        else:
+            print(
+                f"  ollama     : '{TRANSLATION_MODEL}' NOT pulled — run:  "
+                f"ollama pull {TRANSLATION_MODEL}",
+                flush=True,
+            )
+    except httpx.HTTPError:
+        print(
+            f"  ollama     : could not reach {OLLAMA_URL} to verify the model",
+            flush=True,
+        )
+    print("=" * 64, flush=True)
     yield
 
 
@@ -351,6 +437,7 @@ async def health() -> dict:
         "ollama_url": OLLAMA_URL,
         "ollama_reachable": ollama_ok,
         "model": TRANSLATION_MODEL,
+        "model_source": MODEL_SOURCE,
         "model_pulled": model_pulled,
         "available_models": models,
         "target_languages": list(LANGUAGES.keys()),
