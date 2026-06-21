@@ -5,6 +5,7 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
+import i18next from 'eslint-plugin-i18next';
 
 export default [
   js.configs.recommended,
@@ -41,7 +42,8 @@ export default [
       'react': react,
       'react-hooks': reactHooks,
       'security': security,
-      'no-unsanitized': noUnsanitized
+      'no-unsanitized': noUnsanitized,
+      'i18next': i18next
     },
     rules: {
       // Security-focused rules from eslint-plugin-security
@@ -72,7 +74,11 @@ export default [
       'react/no-unescaped-entities': 'off',
       // React hooks rules - off for security config, but plugin needed for disable comments
       'react-hooks/exhaustive-deps': 'off',
-      'react-hooks/rules-of-hooks': 'off'
+      'react-hooks/rules-of-hooks': 'off',
+      // i18n rule - off for the security config, but the plugin must be loaded so
+      // the inline `eslint-disable-next-line i18next/no-literal-string` comments
+      // in source resolve to a known rule (else: "Definition for rule ... not found").
+      'i18next/no-literal-string': 'off'
     },
     settings: {
       react: {

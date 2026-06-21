@@ -112,7 +112,8 @@ def _detect_vram_gib() -> Optional[float]:
         try:
             totals.append(int(line.strip()) / 1024)
         except ValueError:
-            pass
+            # Non-numeric nvidia-smi output line (header/blank) — skip it.
+            continue
     return max(totals) if totals else None
 
 
@@ -291,7 +292,9 @@ async def _raw_chunk(
         ],
     }
     try:
-        resp = await client.post(
+        # OLLAMA_URL is operator config (env/default localhost), NOT request
+        # input — not attacker-controllable, so this is not SSRF.
+        resp = await client.post(  # nosemgrep: tainted-fastapi-http-request-httpx
             f"{OLLAMA_URL}/api/chat", json=payload, timeout=OLLAMA_TIMEOUT
         )
         resp.raise_for_status()
@@ -303,6 +306,8 @@ async def _raw_chunk(
             # crash JSON serialization of the HTTP response.
             return [_strip_surrogates(str(x)) for x in out]
     except (httpx.HTTPError, KeyError, ValueError, TypeError):
+        # Transport/parse error or shape mismatch: fall through to the
+        # one-at-a-time retry below rather than failing the whole chunk.
         pass
 
     # Length mismatch or error: retry one-at-a-time so a single bad string
@@ -489,6 +494,8 @@ async def health() -> dict:
             models = [m["name"] for m in r.json().get("models", [])]
             ollama_ok = True
     except httpx.HTTPError:
+        # Ollama unreachable for the tags probe — report it as not-ready in the
+        # health payload rather than raising.
         pass
     model_pulled = any(
         m == TRANSLATION_MODEL or m.split(":")[0] == TRANSLATION_MODEL.split(":")[0]

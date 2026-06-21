@@ -42,7 +42,7 @@ geoip2>=4.8.0  # Phase 12.7: GeoLite2 city/country lookup (pulls maxminddb trans
 pycparser==2.23
 pydantic>=2.9.0,<2.13.0
 pydantic-extra-types==2.11.0
-pydantic-settings==2.13.0
+pydantic-settings==2.14.2
 PyJWT==2.13.0  # CVE-2026-32597 + JWK/HS256/JWKS advisories; bumped 2.12.0->2.13.0
 python-dotenv==1.2.2  # CVE-2026-28684 (symlink following in set_key)
 python-multipart>=0.0.27  # 0.0.20 has DoS + form-parser bypass CVEs

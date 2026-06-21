@@ -475,6 +475,11 @@ class ModuleLoader:
             os.makedirs(module_dir, exist_ok=True)
             dest_root = os.path.realpath(module_dir)
             with tarfile.open(bundle_path, "r:gz") as tar:
+                # Extract one validated member at a time (NOT extractall): each
+                # member's resolved path must stay inside dest_root, and the
+                # ``data`` filter independently rejects absolute paths, ``..``
+                # traversal, symlinks and device/special files.  Two independent
+                # guards against tar-slip / arbitrary-file-write.
                 for member in tar.getmembers():
                     target = os.path.realpath(os.path.join(dest_root, member.name))
                     if target != dest_root and not target.startswith(
@@ -486,7 +491,7 @@ class ModuleLoader:
                             module_code,
                         )
                         return None
-                tar.extractall(dest_root)  # nosec B202 - members verified above
+                    tar.extract(member, dest_root, filter="data")
             for name in sorted(os.listdir(module_dir)):
                 if name.endswith((".so", ".pyd")):
                     return os.path.join(module_dir, name)
