@@ -10,7 +10,9 @@ import hashlib
 import importlib.util
 import os
 import platform
+import shutil
 import sys
+import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -284,10 +286,6 @@ class ModuleLoader:
         modules_path = self._get_modules_path()
         Path(modules_path).mkdir(parents=True, exist_ok=True)
         temp_path = os.path.join(modules_path, f"{module_code}.tmp")
-        final_path = os.path.join(
-            modules_path,
-            f"{module_code}_{platform_info['python_version']}.so",
-        )
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -318,20 +316,30 @@ class ModuleLoader:
             if actual_hash is None:
                 return False
 
-            # Move to final location
-            os.rename(temp_path, final_path)
+            # The download is a single bundle tarball (<code>.so +
+            # locales/<lang>/LC_MESSAGES/<code>.mo + metadata.json).  Extract it
+            # so locales/ sits beside the .so — the loader binds each module's
+            # gettext catalog from <so_dir>/locales at load time.
+            so_path = self._extract_module_bundle(
+                temp_path,
+                modules_path,
+                module_code,
+                platform_info["python_version"],
+            )
+            if so_path is None:
+                return False
 
-            # Save to cache database
+            # Save to cache database (points at the extracted .so)
             self._save_module_to_cache(
                 module_code=module_code,
                 version=actual_version,
                 platform_info=platform_info,
-                file_path=final_path,
+                file_path=so_path,
                 file_hash=actual_hash,
             )
 
             logger.info(
-                "Module downloaded: %s v%s for %s/%s Python %s",
+                "Module downloaded + extracted: %s v%s for %s/%s Python %s",
                 module_code,
                 actual_version,
                 platform_info["platform"],
@@ -340,7 +348,7 @@ class ModuleLoader:
             )
 
             # Load the module
-            return self._load_module_from_path(module_code, final_path)
+            return self._load_module_from_path(module_code, so_path)
 
         except aiohttp.ClientError as e:
             logger.exception("Module download network error: %s", e)
@@ -421,6 +429,14 @@ class ModuleLoader:
             sys.modules[module_code] = module
             spec.loader.exec_module(module)
 
+            # Pro+ i18n: give the module a request-language-aware translator
+            # bound to its OWN bundled gettext catalog.  The plugin bundle ships
+            # locales/<lang>/LC_MESSAGES/<code>.mo alongside the .so, so its
+            # strings localise per-request just like core strings.  Opt-in: a
+            # module exposes set_translator(fn) only if it has translatable
+            # strings; engines without i18n are unaffected.
+            self._inject_module_translator(module_code, module, file_path)
+
             # Migration compatibility gate: if the module declares a minimum
             # OSS alembic revision and the current DB is below it, refuse to
             # expose the module so its plan builders / injected rows don't
@@ -441,6 +457,74 @@ class ModuleLoader:
         except Exception as e:
             logger.exception("Failed to load module %s: %s", module_code, e)
             return False
+
+    def _extract_module_bundle(
+        self, bundle_path: str, modules_path: str, module_code: str, pyver: str
+    ) -> Optional[str]:
+        """Extract a downloaded module bundle into a per-version dir and return
+        the path to the compiled module (.so/.pyd).
+
+        The bundle is a ``.tar.gz`` of ``<code>.so`` + ``locales/`` + metadata;
+        extracting it puts ``locales/`` next to the ``.so`` so the loader can
+        bind the module's gettext catalog.  Extraction is path-traversal-safe
+        (every member must resolve inside the target dir).  The tarball is
+        removed afterwards.  Returns None on any failure."""
+        module_dir = os.path.join(modules_path, f"{module_code}_{pyver}")
+        try:
+            shutil.rmtree(module_dir, ignore_errors=True)
+            os.makedirs(module_dir, exist_ok=True)
+            dest_root = os.path.realpath(module_dir)
+            with tarfile.open(bundle_path, "r:gz") as tar:
+                for member in tar.getmembers():
+                    target = os.path.realpath(os.path.join(dest_root, member.name))
+                    if target != dest_root and not target.startswith(
+                        dest_root + os.sep
+                    ):
+                        logger.error(
+                            "Refusing unsafe path %s in bundle for %s",
+                            member.name,
+                            module_code,
+                        )
+                        return None
+                tar.extractall(dest_root)  # nosec B202 - members verified above
+            for name in sorted(os.listdir(module_dir)):
+                if name.endswith((".so", ".pyd")):
+                    return os.path.join(module_dir, name)
+            logger.error("No compiled module (.so/.pyd) in bundle for %s", module_code)
+            return None
+        except (tarfile.TarError, OSError) as exc:
+            logger.exception("Failed to extract module bundle %s: %s", module_code, exc)
+            return None
+        finally:
+            if os.path.exists(bundle_path):
+                os.remove(bundle_path)
+
+    def _inject_module_translator(
+        self, module_code: str, module: Any, file_path: str
+    ) -> None:
+        """Bind a Pro+ module's ``_`` to its own bundled gettext catalog.
+
+        The plugin bundle places ``locales/`` next to the ``.so``; we point a
+        per-module, request-language-aware translator at it.  No-op (and never
+        raises) for modules without translatable strings (no ``set_translator``)
+        or without a bundled catalog (the translator falls back to English)."""
+        set_translator = getattr(module, "set_translator", None)
+        if not callable(set_translator):
+            return
+        try:
+            from backend.i18n import module_translation  # noqa: PLC0415
+
+            locales_dir = os.path.join(os.path.dirname(file_path), "locales")
+            set_translator(module_translation(module_code, locales_dir))
+            logger.debug(
+                "Bound i18n catalog for module %s (locales=%s)",
+                module_code,
+                locales_dir,
+            )
+        except Exception as exc:  # never let i18n wiring break module load
+            logger.warning(
+                "Could not bind i18n catalog for module %s: %s", module_code, exc
+            )
 
     def _check_migration_compatibility(self, module_code: str, module: Any) -> bool:
         """Return True if module is compatible with current OSS schema, False otherwise.

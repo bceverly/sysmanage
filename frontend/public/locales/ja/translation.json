@@ -143,7 +143,9 @@
       "checkAll": "すべて選択",
       "checkNone": "すべて解除",
       "description": "ダッシュボードに表示するカードを選択",
-      "title": "ダッシュボード設定"
+      "title": "ダッシュボード設定",
+      "loadError": "設定の読み込みに失敗しました",
+      "saveError": "設定の保存に失敗しました"
     },
     "updates": "アップデート"
   },
@@ -198,7 +200,7 @@
     "sendReset": "リセットリンクを送信",
     "sending": "送信中...",
     "title": "パスワードを忘れた場合",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "メールが届いていない場合は、スパムフォルダを確認するか、再度お試しください。"
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "GrafanaインスタンスのフルURLを入力してください",
-      "label": "Grafana URL"
+      "label": "Grafana URL",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "Grafanaサーバーが見つかりません",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Grafana連携",
     "useManagedServer": {
       "label": "管理サーバーを使用"
-    }
+    },
+    "healthCheckFailed": "ヘルスチェックが失敗しました",
+    "loadError": "Grafana設定の読み込みに失敗しました",
+    "saveError": "設定の保存に失敗しました"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "ユーザー名は必須です",
     "windowsDescription": "このWindowsホストに新しいローカルユーザーアカウントを作成します。",
     "passwordHelp": "最低8文字必要です",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "本当にユーザー アカウント \"{{username}}\" を削除しますか？この操作は取り消せません。",
+    "invalidUidPlatform": "UIDは{{minUid}}以上の数値である必要があります",
+    "uidHelpPlatform": "指定した場合、自動割り当てを希望する場合は空欄にします。指定された場合は >= {{minUid}} である必要があります。",
+    "shellBash": "Bash",
+    "shellBourne": "Bourne Shell",
+    "shellCsh": "Csh",
+    "shellFalse": "False",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "ログインなし",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "新しい有効なパッケージマネージャーを追加",
@@ -822,17 +837,23 @@
     "size": "サイズ",
     "softwarePackages": "ソフトウェアパッケージ",
     "vendor": "ベンダー",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "本当に \"{{name}}\" の作成をキャンセルしますか？",
+    "childHostHostnameHelp": "ホスト名（例：\"myhost\"）またはFQDN（例：\"myhost.example.com\"）を入力してください。",
+    "childHostsEmptyBhyveReady": "「Create Child Host」をクリックして新しいbhyve仮想マシンを作成します。",
+    "childHostsEmptyLxdReady": "「Create Child Host」をクリックして新しいLXDコンテナを作成します。",
+    "childHostsEmptyVmmReady": "「Create Child Host」をクリックして新しいVMM仮想マシンを作成します。",
+    "childHostsEmptyWslEnabled": "「Create Child Host」をクリックして新しいWSLインスタンスを作成します。",
+    "clickRequestData": "「Request Host Data」をクリックしてエージェントから診断情報を収集します。",
+    "deleteChildHostMessage": "本当に子ホスト \"{{name}}\" を削除しますか？",
+    "geoLocation": "地理的位置",
+    "publicIp": "パブリック IP",
+    "selectedServices": "{{count}} サービスを選択",
+    "deviceNumber": "デバイス {{number}}",
+    "errorUpdatingServices": "サービス更新エラー",
+    "graylogPort": "(ポート {{port}})",
+    "interfaceNumber": "インターフェース {{number}}",
+    "noChangesMade": "変更はありません",
+    "servicesUpdatedCount": "{{count}} サービスが更新されました"
   },
   "hostGroup": {
     "add": "追加",
@@ -854,7 +875,7 @@
     "invalidGroupName": "グループ名は英字で始まり、英字、数字、アンダースコア、ハイフンのみ使用できます",
     "unixDescription": "このホストに新しいグループを作成します。",
     "windowsDescription": "このWindowsホストに新しいローカルグループを作成します。",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "本当にグループ \"{{groupName}}\" を削除しますか？この操作は取り消せません。"
   },
   "hosts": {
     "agentVersion": "エージェントバージョン",
@@ -912,8 +933,8 @@
       "statusRestarting": "子ホストを再起動中...",
       "statusShuttingDown": "子ホストを停止中...",
       "ungracefulWarning": "このホストには{{count}}台の実行中の子ホストがあり、再起動時に強制終了されます。安全なオーケストレーション再起動を行うにはSysManage Professional+にアップグレードしてください。",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "「Reboot Anyway」をクリックして{{hostname}}を再起動します（子ホストの停止なし）。",
+      "proceedOrchestrated": "「Orchestrated Reboot」をクリックして{{hostname}}を安全に再起動します。"
     },
     "rebootRequested": "再起動要求が成功しました",
     "rebootSelected": "選択した項目を再起動",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "このホストではスクリプトが無効です",
     "scriptsEnabledTooltip": "このホストではスクリプトが有効です",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "すべてのホストでアンチウイルス展開に失敗しました:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。\\n\\n失敗したホスト:\\n{{hosts}}",
+    "antivirusDeploySuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。",
+    "approveSelected": "選択されたものを承認する",
+    "opentelemetryDeploySuccess": "OpenTelemetryデプロイメントが{{count}}ホスト(s)でキューに追加されました",
+    "diagnosticsRequestFailed": "診断収集要求に失敗しました。再度お試しください。",
+    "diagnosticsRequested": "ホスト {{hostId}} の診断収集が要求されました。結果を確認するには、ホスト詳細ページをご覧ください。",
+    "unknown": "不明"
   },
   "login": {
     "loggingIn": "ログイン中...",
@@ -975,8 +999,8 @@
     "submit": "サインイン",
     "title": "ログイン",
     "username": "ユーザー名またはメール",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "パスワードを忘れた？",
+    "remember": "ログイン情報を記憶する"
   },
   "logout": {
     "loading": "ログアウト中..."
@@ -1004,17 +1028,19 @@
     "updates": "アップデート",
     "users": "ユーザー",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "オフラインコレクター",
       "engineMissing": "必要なPro+エンジンが読み込まれていません。ライセンスを確認してください。",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "オフラインリポジトリ"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "マップ",
     "sites": "サイト",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "オフライン収集",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "必要な Pro+ 連携エンジンがロードされていません；ライセンスを確認してください。"
+    },
+    "scrollLeft": "左にスクロール",
+    "scrollRight": "右にスクロール"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -1137,10 +1163,65 @@
       "hosts": "ホスト",
       "security": "セキュリティ",
       "users": "ユーザー",
-      "federation": "[TODO] Federation"
+      "federation": "連合"
     },
     "title": "レポート",
-    "viewReport": "レポートを表示"
+    "viewReport": "レポートを表示",
+    "antivirusCommercial": {
+      "description": "商用アンチウイルス保護状況を含む製品名、バージョン、シグネチャーバージョン、リアルタイム保護状況、および全管理ホストのサービス状態。",
+      "name": "商用アンチウイルスステータス"
+    },
+    "antivirusOpensource": {
+      "description": "オープンソースアンチウイルスソフトウェアの状態をすべてのホストにわたって表示します。ソフトウェア名、バージョン、インストールパス、および有効/無効のステータスが含まれます。",
+      "name": "オープンソースアンチウイルスステータス"
+    },
+    "firewallStatus": {
+      "description": "すべての管理ホストの詳細なファイアウォール状況を表示します。有効/無効ステータス、開いているIPv4およびIPv6ポート、およびオペレーティングシステム情報も含みます。",
+      "name": "ホストファイアウォールステータス"
+    },
+    "generateError": "レポート生成エラー: {{message}}",
+    "hostsWithTags": {
+      "description": "すべての登録済みホストの一覧を表示します。タグで分類やフィルターが可能です。環境、目的、部署などでホストを整理するのに便利です。",
+      "name": "タグ付きのホスト"
+    },
+    "registeredHosts": {
+      "description": "登録されたすべてのホストの一覧表示。ホスト名、IPアドレス、OSバージョン、およびステータスを含む基本情報とオペレーティングシステムの詳細を示します。",
+      "name": "登録ホスト"
+    },
+    "tag": {
+      "accounts": "アカウント",
+      "antivirus": "アンチウイルス",
+      "audit": "監査",
+      "basic": "基本",
+      "commercial": "商用",
+      "compliance": "準拠",
+      "firewall": "ファイアウォール",
+      "hosts": "ホスト",
+      "network": "ネットワーク",
+      "opensource": "オープンソース",
+      "organization": "組織",
+      "permissions": "権限",
+      "rbac": "rbac",
+      "roles": "役割",
+      "security": "セキュリティ",
+      "systemInfo": "システム情報",
+      "tags": "タグ",
+      "tracking": "追跡",
+      "users": "ユーザー"
+    },
+    "unknownError": "未知のエラー",
+    "userRbac": {
+      "description": "セキュリティロールに基づくアクセス制御全体の細かい権限構造を示すすべてのユーザーの一覧表示。役割グループごとに組織化されています。",
+      "name": "ユーザーのセキュリティロール (RBAC)"
+    },
+    "usersList": {
+      "description": "SysManageユーザーの包括的なリスト。プロファイル、役割、権限、およびアカウントステータスが含まれます。ユーザー作成日と最終ログイン時間も含みます。",
+      "name": "SysManage ユーザー"
+    },
+    "auditLogReport": {
+      "description": "すべてのユーザー操作とシステム変更の完全な監査履歴。データベースの変更、エージェントメッセージ、および管理者作業を追跡します。",
+      "name": "監査ログ"
+    }
   },
   "resetPassword": {
     "backToLogin": "ログインに戻る",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "更新に成功",
     "updatedAt": "更新日時",
     "viewScript": "スクリプトを表示",
-    "waitingForResults": "結果を待機中"
+    "waitingForResults": "結果を待機中",
+    "adHocScript": "アドホックスクリプト",
+    "connected": "接続中",
+    "exitCodeLabel": "終了コード: {{code}}",
+    "offline": "オフライン"
   },
   "search": {
     "searchColumn": "検索対象",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "シークレットが正常に更新されました",
     "updatedAt": "更新日",
     "viewSecret": "シークレットを表示",
-    "subtypeRequired": "シークレットのサブタイプは必須です"
+    "subtypeRequired": "シークレットのサブタイプは必須です",
+    "filenamePlaceholder": "e.g., id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "ロールを追加",
@@ -1349,7 +1435,8 @@
       "title": "ウイルス対策カバレッジ",
       "totalHosts": "合計ホスト",
       "unprotected": "未保護",
-      "warningMessage": "{{count}}台のホストでウイルス対策保護が有効になっていません。"
+      "warningMessage": "{{count}}台のホストでウイルス対策保護が有効になっていません。",
+      "fetchError": "アンチウイルスカバレッジの取得に失敗しました"
     },
     "antivirusDisableFailed": "アンチウイルスの無効化に失敗しました",
     "antivirusDisableSuccess": "アンチウイルスの無効化を正常に開始しました",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "このインターフェースのユーザーページから新しい管理者ユーザーを作成",
     "step4LoginNewUser": "ログアウトして新しい管理者アカウントでログインしてください",
     "step5RemoveCredentials": "YAML設定ファイルからadmin_useridとadmin_passwordを削除してください",
-    "step6RestartServer": "./run.shでサーバーを再起動してください"
+    "step6RestartServer": "./run.shでサーバーを再起動してください",
+    "removeCredentialsHint": "admin_userid と admin_password を設定ファイルから削除し、サーバを再起動してください"
   },
   "serverDown": {
     "details": "接続詳細:",
@@ -1441,10 +1529,10 @@
     "retrying": "再試行中...",
     "title": "接続が中断されました",
     "titleFailed": "サーバーは利用できません",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "試行回数: {{count}}",
+    "lastConnected": "最終接続時刻: {{time}}",
+    "secondsRemaining": "{{seconds}}秒",
+    "timeRemaining": "{{minutes}}分 {{seconds}}秒"
   },
   "tags": {
     "addTag": "タグを追加",
@@ -1476,7 +1564,8 @@
       "statistics": "統計",
       "status": "ステータス",
       "title": "OpenTelemetryステータス",
-      "tracesCount": "トレース"
+      "tracesCount": "トレース",
+      "fetchError": "OpenTelemetryステータスの取得に失敗しました"
     },
     "prometheus": {
       "information": "情報",
@@ -1491,8 +1580,8 @@
       "title": "Prometheusステータス",
       "url": "URL",
       "version": "バージョン",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus はテレメトリースタックによって管理されています。開始するには \"make start-telemetry\" を、停止するには \"make stop-telemetry\" を使用します。",
+      "notRunningMessage": "Prometheus は実行されていません。\"make start-telemetry\" や \"make start\" を使用してテレメトリースタックを開始してください。"
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "検出OS",
+    "typeLabel": "タイプ",
+    "unknown": "不明",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "選択されたホスト",
       "title": "Ubuntu Pro登録",
       "useMasterKey": "設定済みマスターキーを使用",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "契約に基づくUbuntu Proキー（\"C\"で始まる）",
+      "errorLabel": "エラー",
+      "hostFallback": "ホスト {{id}}"
     },
     "errors": {
       "clearFailed": "マスターキーのクリアに失敗しました",
@@ -1603,7 +1700,7 @@
       "masterKey": "Ubuntu Proマスターキー",
       "organizationName": "組織名",
       "organizationNameHelp": "Ubuntu Pro登録用のオプションの組織名",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "契約に基づくUbuntu Proキー（\"C\"で始まる）。削除する場合は空欄にします。"
     },
     "messages": {
       "keyCleared": "マスターキーが正常にクリアされました",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "Ubuntu Proキーは\"C\"で始まり、24文字以上である必要があります"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "セキュリティ",
       "system": "システム"
     },
-    "unknown": "不明"
+    "unknown": "不明",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "confirmResetMessage": "{{email}}にパスワードリセットメールを送信してもよろしいですか？ユーザーは新しいパスワードを設定できるようになります。",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "無効な画像形式です。許可されている形式: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "プロフィール画像",
     "uploading": "アップロード中...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "パスワードには少なくとも {{count}} 種類の文字を含める必要があります",
+    "passwordTooLong": "パスワードは最大 {{count}} 文字以内である必要があります",
+    "passwordTooShort": "パスワードは少なくとも {{count}} 文字以上である必要があります",
+    "profileTabs": "プロファイルタブ"
   },
   "users": {
     "email": "メールアドレス",
@@ -1781,10 +1894,10 @@
     "noRows": "行なし",
     "unlockSelected": "選択項目のロック解除",
     "unlocked": "ロック解除済み",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "以下のユーザー情報を編集してください。",
+    "emailNotification": "ユーザーにセキュアなリンク付きメールが送信されます。初期パスワードを設定するためのリンクです。",
+    "emailUnique": "メールアドレスは一意でなければなりません",
+    "enterInfo": "以下の新しいユーザーの情報を入力してください。"
   },
   "emailConfig": {
     "title": "メール設定",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "レポートの内容"
+    "iframeTitle": "レポートの内容",
+    "loadError": "レポートの読み込みに失敗しました",
+    "pdfError": "PDF生成エラー: {{message}}",
+    "unknownError": "未知のエラー"
   },
   "upgradeProfiles": {
     "add": "プロファイルを追加",
@@ -1850,8 +1966,8 @@
     "window": "段階的ウィンドウ (分)",
     "windowHelp": "エージェント配信をこの分数にわたって分散 (0–720)",
     "windowRange": "段階的ウィンドウは 0 ～ 720 分の範囲である必要があります",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "アップデートプロファイル \"{{name}}\" を削除しますか？",
+    "confirmTrigger": "\"{{name}}\"トリガーを実行しますか？更新が一致するホストに配信されます。"
   },
   "packageProfiles": {
     "add": "コンプライアンスプロファイルを追加",
@@ -1882,7 +1998,7 @@
     "version": "バージョン",
     "versionOp": "演算子",
     "versionOpAny": "(任意)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "コンプライアンスプロファイル \"{{name}}\" を削除しますか？"
   },
   "compliance": {
     "compliant": "準拠",
@@ -1932,7 +2048,7 @@
     "title": "レポートのブランディング",
     "uploadError": "ロゴのアップロードに失敗しました",
     "uploadLogo": "ロゴをアップロード",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "レポートヘッダーにロゴの隣に表示されます（例：\"機密 — 内部使用専用\"）。"
   },
   "reportTemplates": {
     "add": "テンプレートを追加",
@@ -1956,7 +2072,7 @@
     "subtitle": "レンダラーが組み込みレポートタイプに適用するカスタムレイアウト",
     "title": "レポートテンプレート",
     "updated": "テンプレートを保存しました",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "レポートテンプレート \"{{name}}\" を削除しますか？"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "ID プロバイダー",
     "saveError": "プロバイダーを保存できませんでした — フォームを確認してください。",
     "settingsSaveError": "設定を保存できませんでした。",
-    "settingsTitle": "認証設定"
+    "settingsTitle": "認証設定",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "バックアップコード残り {{count}} 個",
@@ -2055,7 +2175,7 @@
     "disableWarning": "アカウントのパスワードで確認してください。TOTPシークレットとバックアップコードが削除されます。",
     "notEnrolledDescription": "アカウントに2つ目の要素を追加します。サインインのたびに認証アプリのワンタイムコードが求められます。",
     "regenPrompt": "現在のTOTPコードを入力してください。既存のバックアップコードは無効になります。",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "これらのコードを安全な場所に保存しました"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "アップストリームURL",
       "version": "バージョン",
       "upstreamHelp": "上記のバージョンから自動入力されています。地域固有のミラーを指定する場合のみ上書きしてください。",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "小文字、数字、ハイフン、下線。スペースとドットはハイフンになる。"
     },
     "listTitle": "リポジトリミラー",
     "loadError": "リポジトリミラーを読み込めませんでした。",
@@ -2128,7 +2248,7 @@
       "notReady": "{{pm}}に必要なツールが不足しています — 同期を実行する前にインストールしてください。",
       "ready": "{{pm}}リポジトリのミラーリングの準備ができています。",
       "subtitle": "このホストで{{pm}}ミラープランを実行するために必要なツール",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "エージェントが {{minutes}} 分以内に応答しませんでした。最も可能性の高い原因は次の通りです：プラン中にエージェントがクラッシュした、WebSocket が切断されて command_result の送信前に通信が失われた、またはエージェントがコマンドを静かにデュプリケートして結果を発行せずに処理しました。このホストのエージェントログを確認し、sysmanage-agent サービスを再起動することをお勧めします。リフレッシュ / ツールインストールを再度クリックしてやり直してください — 飛ばしているマークがクリアされ、新しい試行が開始されます。"
     },
     "configureSubtitle": "このプラットフォームのミラープランを実行するホストを選択してください。タブに一致するプラットフォームのホストのみが表示されます。",
     "deleteConfigInUse": "まずこのプラットフォーム配下の{{n}}個のミラーを削除してください。",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "アクター",
+      "details": "詳細",
+      "openSite": "開く",
+      "operation": "操作",
+      "site": "サイト",
+      "timestamp": "タイムスタンプ"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "まだ連携監査エントリーはありません。",
+    "emptyFiltered": "フィルターに一致する監査エントリーがありません。",
+    "errorLoad": "連合監査ログの読み込みに失敗しました。",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "アクター",
+      "apply": "適用",
+      "clear": "クリア",
+      "operation": "操作",
+      "siteId": "サイトID"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "調整役によって中央で記録されるすべてのサイト間操作。",
+    "title": "連邦監査ログ"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "ホスト位置情報の読み込みに失敗しました。",
+    "openHost": "ホストを開く",
+    "subtitle": "パブリックIP を報告したエージェントの地理的分布",
+    "title": "ホストマップ",
+    "status": "ステータス"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "割り当てる",
+      "deactivate": "無効化",
+      "edit": "編集",
+      "push": "プッシュする"
     },
-    "active": "[TODO] active",
+    "active": "アクティブ",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "割り当ての更新に失敗しました。",
+      "errorLoad": "サイトの一覧読み込みに失敗しました。",
+      "noSites": "連携サイトは登録されていません。サブオーディナートSysManageサーバーを最初に登録します。",
+      "statusLine": "プッシュ状態: {{status}}",
+      "submit": "割り当てを保存",
+      "success": "ポリシーアサインメントが更新されました。",
+      "title": "サイトへの割り当て",
+      "statusLineWithAttempts": "プッシュ状態: {{status}} ({{attempts}} 回の試行)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "アクション",
+      "active": "アクティブ",
+      "name": "名前",
+      "type": "タイプ",
+      "version": "バージョン"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "新しいポリシー",
+      "cancel": "キャンセル",
+      "customType": "カスタムポリシータイプ",
+      "definition": "(JSON)定義",
+      "description": "説明",
+      "engineUnavailable": "連携制御エンジンがロードされていません；ポリシーを作成できません。",
+      "error": "ポリシーを作成できませんでした。",
+      "invalidJson": "定義はJSONオブジェクトでなければなりません。",
+      "name": "名前",
+      "submit": "作成",
+      "success": "ポリシーを作成しました。",
+      "title": "ポリシーを作成",
+      "type": "ポリシータイプ",
+      "typeOther": "その他...",
+      "typeRequired": "ポリシータイプが必要です。"
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "ポリシーを無効化できませんでした。",
+      "success": "'{{name}}' を無効にしました。"
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "ポリシーの更新に失敗しました。",
+      "submit": "保存する",
+      "success": "ポリシーが更新されました。",
+      "title": "ポリシーを編集",
+      "versionNote": "保存するとポリシーのバージョンが更新されます — 次のプッシュサイクルでサイトが新しいバージョンを受け取ります。"
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "ポリシーはまだ定義されていません。'新しいポリシー'をクリックして作成します。",
+    "errorLoad": "連合ポリシーの読み込みに失敗しました。",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "アクティブのみ",
+      "allTypes": "すべてのタイプ",
+      "type": "ポリシータイプ"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "非アクティブな",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "ポリシーをプッシュできませんでした。",
+      "success": "Push が '{{name}}' のためにトリガーされました。"
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "中央で定義されたポリシーがサブオーダーのサイトにプッシュされます。",
+    "title": "連邦ポリシー",
+    "deadLetter": "デッドレター"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "削除する",
+      "resume": "再開する",
+      "suspend": "一時停止"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "サイトの登録",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "このサイト行は監査のために保持されますが、コordinatorはその同期を受け付けなくなります。このアクションはUIから元に戻せません。",
+      "cancel": "キャンセル",
+      "confirm": "サイトを削除",
+      "title": "連携サイトを削除しますか？"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "最小のエージェントバージョン",
+      "backToList": "サイトに戻る",
+      "connection": "接続",
+      "enrolledAt": "登録済み",
+      "errorLoad": "サイトの読み込みに失敗しました。",
+      "hostCount": "ホスト数",
+      "lastSyncAt": "最終同期時刻",
+      "lastSyncStatus": "最終同期状態",
+      "metadata": "メタデータ",
+      "notFound": "サイトが見つかりません。",
+      "seeHosts": "このサイトのホストを見る",
+      "syncInterval": "同期間隔",
+      "syncIntervalValue": "{{seconds}}秒",
+      "url": "URL",
+      "viewAuditLog": "監査ログを表示",
+      "activeCommands": "アクティブなコマンド",
+      "activeCommandsEmpty": "アクティブなコマンドはありません。",
+      "activeCommandsLoading": "読み込み中…",
+      "commandAttempts": "{{n}} 推送試行",
+      "commandDispatchedAt": "{{when}}に配信しました",
+      "dispatchCommand": "コマンドを配信",
+      "backlogDepth": "保留中のアップストリームキュー",
+      "backlogUnknown": "—",
+      "refresh": "更新する",
+      "syncHealthy": "正常",
+      "syncNever": "同期なし",
+      "syncOverdue": "期限切れ",
+      "syncStale": "古いデータ",
+      "rollupCompliance": "準拠性",
+      "rollupEmpty": "このサイトから同期されたコンプライアンスまたは脆弱性データはありません。",
+      "rollupTitle": "準拠性と脆弱性",
+      "rollupVulnerabilities": "脆弱性（影響を受けた{{hosts}}ホスト）",
+      "vulnCritical": "{{n}} 著しい",
+      "vulnHigh": "{{n}} 高度な",
+      "vulnLow": "{{n}} 低い",
+      "vulnMedium": "{{n}} 中程度の",
+      "alertAck": "確認",
+      "alertAcked": "確認済み",
+      "alertsTitle": "オープンアラート",
+      "autonomous": "独立して動作中",
+      "pushPolicies": "ポリシーをプッシュする",
+      "repushFailed": "ポリシー再プッシュのキューに追加できませんでした。",
+      "repushQueued": "{{n}} のポリシーのプッシュを再配信のためにキューに追加しました。",
+      "siteCapabilities": "機能",
+      "siteVersion": "報告されたバージョン",
+      "syncLatency": "アップストリーム同期遅延（最近）",
+      "syncPoints": "{{n}} 同期イベント",
+      "syncTimeline": "同期タイムライン",
+      "syncTimelineEmpty": "同期イベントの記録がありません。",
+      "pushPoliciesHint": "このサイトのすべてのポリシーをキューに再追加します — スタックまたはデッドレターされた配信も含む — 即座に再プッシュします。",
+      "syncHealthHistogram": "同期成功/失敗（最近のもの）"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "連携サイトはありません。サブオーディナートSysManageサーバーを最初に登録してください。",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "キャンセル",
+      "done": "完了",
+      "engineUnavailable": "連携制御エンジンがロードされていません；サイトの登録ができません。",
+      "error": "サイトの登録に失敗しました。",
+      "location": "場所ラベル（省略可）",
+      "name": "サイト名",
+      "submit": "トークンを生成する",
+      "successTitle": "サイトが登録済み",
+      "syncIntervalSeconds": "同期間隔（秒）",
+      "title": "連合サイトの登録",
+      "tokenInstructions": "以下の登録トークンをコピーして、新しいサイトサーバーに渡してください。これは表示される唯一の機会であり、失われた場合は復元できません。",
+      "url": "サイトURL",
+      "siteIdentityKey": "サイトの公開鍵（PEM）",
+      "siteIdentityKeyHelp": "必要です。外部から取得したサイトのアイデンティティ公開鍵（そのサイトのサーバーロールページ）を貼り付けます。調整者はこのキーに対してサイトの登録証明を検証します — これは登録時に中間者攻撃を防ぎます。"
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "Federation は、1 つの調整子から多くの SysManage サーバーを管理できるようにします。サブオドネートサイトの登録にはエンタープライズライセンスが必要です。",
+      "title": "マルチサイト連携にはEnterpriseが必要です"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "連合サイトの読み込みに失敗しました。",
+    "hostCount": "{{count}} ホスト",
+    "lastSync": "{{when}}に同期しました",
+    "mapView": "マップビュー",
+    "policiesLink": "ポリシー",
+    "subtitle": "このコordinatorによって登録された従属SysManageサーバー。",
+    "title": "連邦サイト",
+    "hostsLink": "ホスト",
+    "tilesView": "ダッシュボード"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "連合サイトの読み込みに失敗しました。",
+    "gridView": "グリッドビュー",
+    "openSite": "サイトを開く",
+    "subtitle": "サブオドネートサイトサーバーの地理的分布",
+    "title": "連邦サイトマップ",
+    "tilesView": "ダッシュボード",
+    "lastSyncLabel": "最後の同期:",
+    "statusLabel": "ステータス:"
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "ビルドエージェントバンドル",
+    "buildError": "ビルドキューに追加できませんでした。",
+    "buildProplus": "Build Pro+ Bundle",
+    "buildServer": "ビルドサーバーバンドル",
+    "bundle": "バンドル",
+    "completedAt": "完了済み",
+    "confirmDelete": "このバンドルとISOファイルを削除しますか？",
+    "copied": "コマンドをクリップボードにコピーしました",
+    "copy": "クリップボードにコピー",
+    "copyError": "クリップボードへのアクセスができませんでした",
+    "createdAt": "作成完了",
+    "delete": "削除",
+    "deleteError": "バンドルを削除できませんでした。",
+    "deleted": "バンドルが削除されました",
+    "dockerInstallHint": "sysmanage サーバーで sudo を持つユーザーとしてこのコマンドを実行:",
+    "dockerNoGroup": "{{user}}ユーザーはdockerグループに属していないため、ビルドサブプロセスがデーモンソケットにアクセスできません。",
+    "dockerNotInstalled": "このサーバーにはDockerがインストールされていません。バンドルビルドにはDockerが必要です。各ディストリビューションのLinuxパッケージを取得するためです。",
+    "dockerNotRunning": "Dockerはインストールされていますが、デーモンに接続できません。次のように起動してください: sudo systemctl enable --now docker.",
+    "dockerPermissionDenied": "Dockerデーモンは実行中ですが、{{user}}ユーザー（このsysmanageプロセスを実行しているユーザー）が/var/run/docker.sockを読み取ることができません。ユーザーをdockerグループに追加し、新しいグループ設定が有効になるようにsysmanageプロセスを再起動してください。",
+    "dockerReady": "Dockerは準備ができています",
+    "dockerReadyHint": "ビルドには通常5〜30分かかります。有効なプラットフォームの数によって異なります。",
+    "download": "ISOファイルをダウンロード",
+    "downloadError": "バンドルのダウンロードに失敗しました。",
+    "empty": "バンドルはまだありません。上部にあるビルドボタンをクリックして作成します。",
+    "loadError": "バンドルの読み込みに失敗しました。",
+    "queued": "バンドルビルドがキューに追加されました — リストを更新しています",
+    "recentFailures": "最近のビルド失敗:",
+    "recheckDocker": "Docker を再チェックする",
+    "requiresDocker": "バンドルビルドにはDockerのインストールと実行が必要です。Linuxパッケージを取得するためです。ビルドには通常5〜30分かかります。有効なプラットフォームの数によって異なります。",
+    "size": "サイズ",
+    "status": "ステータス",
+    "subtitle": "マルチOS ISO を生成します。sysmanage サーバーやエージェントとすべてのプラットフォーム依存関係が含まれており、空域ホストにマウントする準備ができています。",
+    "title": "オフラインインストールバンドル",
+    "version": "バージョン",
+    "recheckResources": "リソースを再チェックする",
+    "resourcesInsufficient": "このサーバーには、ServerまたはAgentバンドルを構築する十分な空きメモリやディスクがありません — これらのボタンはリソースが解放されるまで無効になります（スワップを追加するか、VMを拡張してください）。",
+    "resourcesLow": "リソースが不足しています — ビルドは実行できますが、スワップ領域に依存する可能性があり、速度が遅くなる可能性があります。"
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "削除",
+      "download": "ISOファイルをダウンロード"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "アクション",
+      "completed": "完了済み",
+      "created": "作成完了",
+      "isoLabel": "ISO ラベル",
+      "size": "サイズ",
+      "started": "開始",
+      "status": "ステータス"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "このコレクションランとマニフェストを削除しますか？",
+    "createError": "実行を作成できませんでした。",
+    "created": "コレクション実行がキューに追加されました",
+    "deleteError": "実行を削除できませんでした。",
+    "deleted": "コレクション実行が削除されました",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "キャンセル",
+      "includeCompliance": "コンプライアンスバンドルを含める",
+      "includeCve": "CVEフィードスナップショットを含める",
+      "isoLabel": "ISO ラベル",
+      "isoLabelHelper": "生成されるISO内に埋め込まれた短い識別子（例：\"monthly-2026-05\"）。",
+      "isoLabelRequired": "ISOラベルは必要です",
+      "mediaSizeHelper": "各ディスクの最大サイズ（MB）。デフォルトは4700（DVD-5）です。",
+      "mediaSizeMb": "メディアサイズ (MB)",
+      "submit": "キューに追加して実行",
+      "title": "新しいコレクション実行",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "ISOファイルのダウンロードに失敗しました。",
+    "empty": "まだコレクション実行がありません。\"新しいコレクション実行\"をクリックして開始します。",
+    "licenseRequired": "オフラインコレクターエンジンが読み込まれていません；Pro+ ライセンスが必要です。",
+    "loadError": "実行の読み込みに失敗しました。",
+    "newRun": "新しいコレクション実行",
+    "noManifestFound": "実行にはまだマニフェストがありません — 状態が COMPLETE のときに再度試してください。",
+    "notApplicable": "このページは収集役のデプロイメントでのみ意味があります。",
+    "refresh": "更新する",
+    "subtitle": "設定されたリポジトリをミラーリングし、署名付きISOを作成し、エアギャップ側でインジェスト可能なマニフェストを書き込む一発目収集ランをトリガーします。",
+    "title": "オフライン収集実行",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "サーバーロール"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "適格なドライブが見つかりません。メディアを挿入し、リスキャンを押してください。",
+    "help": "光学ドライブまたはUSBドライブを選択してください。このドライブに読み取り可能なISOが挿入されている場合、Air-Gap リポジトリページのインポートボタンが利用可能になります。インポート時にメディア署名が検証されます。",
+    "label": "ブロックデバイス",
+    "loadError": "ドライブの列挙に失敗しました。",
+    "none": "(なし)",
+    "rescan": "ドライブを再スキャンする",
+    "saveError": "デバイスの保存に失敗しました。",
+    "title": "ドライブのインポート",
+    "optical": "光学的",
+    "removable": "取り外し可能"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "ドライブ",
+    "import": "ISOをインポート",
+    "importError": "インポートの開始に失敗しました。",
+    "noDevice": "インポートドライブが選択されていません。設定 → サーバーロールで1つを選んでください。",
+    "notReady": "準備ができていません",
+    "ready": "準備完了{{label}}",
+    "rescan": "再スキャンする",
+    "statusError": "インポートデバイスのプローブに失敗しました。",
+    "title": "メディアからインポート",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "完了",
+      "copying": "パッケージをコピー中",
+      "failed": "失敗",
+      "queued": "キューに追加しました",
+      "verified": "確認済み",
+      "verifying": "署名を検証しています"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "インポート完了 — 以下のリポジトリリストが更新されました。",
+    "runStats": "{{files}} 個のファイル · {{size}}",
+    "runStatus": "インポート状態"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "公開鍵をコピー",
+      "help": "この公開鍵をコピーし、Air-Gap リポジトリ サーバーでインポートすることで、このコレクターが生成した署名付きメディアを信頼できるようにします。公開鍵のみが表示されます — 秘密鍵はこのサーバーから決して漏れません。",
+      "loadError": "コレクター公開鍵の読み込みに失敗しました。",
+      "title": "コレクタ公開キー"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "コピーしました！",
+    "copyError": "クリップボードにコピーできませんでした。",
+    "copyFingerprint": "フィンガープリントをコピー",
+    "fingerprint": "指紋",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(読み取り不能のキー)",
+      "count": "{{n}} 信頼された",
+      "empty": "信頼されたコレクターキーはまだありません。",
+      "help": "各Air-Gap Collectorのメディアから、このリポジトリが受け入れるべきメディアを署名した公開キーをインポートしてください。信頼されていないキーで署名されたメディアはインGEST時に拒否されます。",
+      "import": "インポートキー",
+      "importError": "キーのインポートに失敗しました。",
+      "imported": "キーをインポートしました {{fp}}",
+      "loadError": "信頼されたキーの読み込みに失敗しました。",
+      "nameLabel": "Collector名",
+      "pemLabel": "公開鍵 (PEM)",
+      "removeError": "キーを削除できませんでした。",
+      "required": "名前と公開キーの両方が必要です。",
+      "title": "信頼されたコレクタキー"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "詳細",
+      "openSite": "サイト"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "ホスト",
+      "ipv4": "IPv4",
+      "lastSeen": "最後に見えた",
+      "os": "OS",
+      "platform": "プラットフォーム",
+      "status": "ステータス"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "閉じる",
+      "ipv6": "IPv6",
+      "noLiveLink": "ライブ詳細リンクが利用できません（所有サイトにURLがないため）。",
+      "notFound": "このホストはディレクトリに含まれていません。",
+      "site": "所有サイト",
+      "theSite": "サイト",
+      "title": "ホスト詳細",
+      "viewLive": "{{site}}のライブ詳細を表示する →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "まだホストが同期されていません。",
+    "emptyFiltered": "現在のフィルターに一致するホストがありません。",
+    "errorLoad": "すべての登録サイト内のホストの読み込みに失敗しました。",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "適用",
+      "clear": "クリア",
+      "osFamily": "OSファミリー",
+      "search": "検索（名前/IP）",
+      "status": "ステータス"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "サイト内にスコープを設定",
+    "subtitle": "調整役が同期したディレクトリから、登録されたすべてのサイト内のホスト。",
+    "title": "クロスサイトホスト",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "クリア",
+      "dispatch": "コマンドを配信",
+      "selectAll": "このページのすべてを選択",
+      "selected": "{{n}} ホストを選択"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "キャンセル",
+    "commandType": "コマンド",
+    "dispatch": "配信",
+    "dispatching": "配信中…",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "コマンドの配信に失敗しました。",
+      "packagesRequired": "パッケージ名を少なくとも1つ入力してください。",
+      "scriptRequired": "実行するスクリプトを入力してください。",
+      "unlicensed": "Federation にはエンタープライズライセンスが必要です。",
+      "partial": "{{failed}} 件中 {{total}} のサイトの配信が失敗しました。"
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "ホストID",
+    "hostIdsHint": "コンマ区切りのホストID（Hostsページからのもの）",
+    "packages": "パッケージ名",
+    "packagesOptional": "パッケージ名（オプション — 空欄で全更新）",
+    "script": "スクリプト",
+    "subtitle": "{{site}}にコマンドをキューに追加します。サイトはホスト上でそのコマンドを実行し、結果を報告します——何も即座には実行されません。",
+    "targetAll": "このサイトのすべてのホスト",
+    "targetSpecific": "特定のホスト（IDで指定）",
+    "thisSite": "このサイト",
+    "title": "コマンドを配信",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "更新プログラムの適用",
+      "deployPackages": "パッケージのインストール",
+      "reboot": "再起動",
+      "runScript": "スクリプトを実行する"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "選択したホスト（{{hosts}}）とサイト（{{sites}}）に対してコマンドをキューに追加します。各サイトで実行し、結果を報告します — すぐに何も実行されません。"
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "調整者",
+    "coordinatorThisServer": "このサーバー",
+    "countEnrolled": "{{n}} 登録済み",
+    "countHosts": "{{n}} ホスト",
+    "countPending": "{{n}} 待機中",
+    "countSuspended": "{{n}} 暫定停止",
+    "empty": "連携サイトはありません。",
+    "errorLoad": "サイトの一覧読み込みに失敗しました。",
+    "gridView": "グリッドビュー",
+    "hostsLabel": "{{n}} ホスト",
+    "lastSync": "{{when}}に同期しました",
+    "mapView": "マップビュー",
+    "title": "連邦ダッシュボード"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "効果的な",
+    "save": "しきい値を保存",
+    "saveFailed": "しきい値の更新に失敗しました。",
+    "saved": "アラートしきい値を保存しました。",
+    "subtitle": "フィールドを空白のままにすると、デフォルト設定が使用されます。",
+    "title": "アラートしきい値"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "アクティブ",
+      "compliance": "最悪の準拠状況",
+      "critical": "重大なCVE",
+      "high": "高リスクのCVE",
+      "hosts": "ホスト",
+      "site": "サイト"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "レポートを作成する",
+    "sites": "サイト（選択されていない場合はすべて）",
+    "subtitle": "サイト全体のホスト、コンプライアンス、脆弱性のロールアップを集約します。",
+    "totals": "合計（{{n}}サイト）",
+    "upsell": "マルチサイト連携にはEnterpriseが必要です。"
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "多くの従属サイトサーバーからホストインベントリ、コンプライアンス、脆弱性の集約を収集し、それらにコマンドやポリシーを配信するハブ。連携ごとに1つだけ存在します。",
+      "title": "連邦調整子"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "コピーしました！",
+    "copyError": "クリップボードにコピーできませんでした。",
+    "copyFingerprint": "フィンガープリントをコピー",
+    "currentTag": "(現在)",
+    "heading": "連邦ロール",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "公開鍵をコピー",
+      "pending": "アイデンティティキーを生成しています…",
+      "title": "このサーバーのアイデンティティキー",
+      "help": "この公開鍵をコピーし、ピアの連携カードに貼り付けて、各側が相手のアイデンティティ フィンガープリントを記録し、外部で確認できるようにします。秘密鍵はこのサーバーから決して漏れません。"
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "キーのインポートに失敗しました。",
+    "intro": "このサーバーがマルチサイト連携にどのように参加するかを選択します。左側のエアギャップロールとは独立です — サーバーは両方を設定できます。次の再起動後に効果があります。",
+    "loadError": "連携ロールの読み込みに失敗しました。",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "デフォルト。このサーバーはマルチサイト連携の一環でないものです。コordinatorまたは従属サイトを実行していない限り、これを選択します。",
+      "title": "連携されていません"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "ピアキーのインポート",
+      "name": "ピア名",
+      "pem": "ピア公開鍵（PEM）",
+      "empty": "ピアアイデンティティキーはまだ記録されていません。",
+      "help": "ピアの公開鍵をここに入力して、そのアイデンティティ指紋を外部で確認します。連携接続自体は登録時にピン留めされた TLS 証明書によって保護されています — これらのキーは人間による検証用であり、アクセス制御には使用されません。",
+      "title": "ピアアイデンティティキー"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "キーを削除できませんでした。",
+    "save": "連携ロールを保存",
+    "saveError": "フェデレーションロールの保存に失敗しました。",
+    "saved": "連邦ロールが保存されました。完全な効果を得るためにはサーバーを再起動してください。",
+    "saving": "保存中…",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "自律的に動作し、コアディネーターに報告する下位サーバーです。コアディネーターが利用できない場合でも、自ホストの管理を継続します。再接続時にキューされたデータを再生します。",
+      "title": "連邦サイト"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "調整者 URL",
+      "enrolled": "調整役との登録済み",
+      "error": "調整者との登録に失敗しました。",
+      "help": "このサイトをその調整者に設定し、調整者が発行した一時的な登録トークン（調整者のサイトページから）を貼り付けます。このサイトはハンドシェイクを完了して同期を開始するために呼び戻されます。",
+      "notEnrolled": "コーディネーターとまだ登録されていません。",
+      "submit": "調整役との登録",
+      "submitting": "登録中…",
+      "title": "調整役との登録",
+      "token": "登録トークン",
+      "coordIdentityKey": "調整者アイデンティティ公開鍵 (PEM)",
+      "coordIdentityKeyHelp": "必要です。外部から取得した調整者のアイデンティティ公開鍵（そのサーバーロールページ）を貼り付けます。このサイトは、調整者がこの正確なキーを証明しない限り登録しません — これは登録時に中間者攻撃を防ぎます。"
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "サーバー全体の運用設定。保存された値はデータベースに保存され、sysmanage.yamlを上書きします。",
+    "loadError": "設定の読み込みに失敗しました。",
+    "save": "保存する",
+    "saveError": "設定の保存に失敗しました。",
+    "saved": "設定が保存されました。",
+    "secretSet": "•••••••• (保存済み — 空欄のままにしておく)",
+    "secretSetHelp": "OpenBAO にパスワードが保存されています。新しいパスワードを入力して置き換えてください。",
+    "secretUnset": "設定されていません",
+    "secretUnsetHelp": "OpenBAOに安全に保存されます。データベースには保存されません。",
+    "title": "設定"
+  },
+  "connection": {
+    "networkError": "ネットワークエラー: サーバに接続できません",
+    "serverError": "サーバーエラー: {{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "左にスクロール",
+    "scrollRight": "右にスクロール"
+  },
+  "settings": {
+    "tabsAriaLabel": "設定タブ"
   }
 }

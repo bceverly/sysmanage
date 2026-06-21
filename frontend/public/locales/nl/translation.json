@@ -143,7 +143,9 @@
       "checkAll": "Alles Selecteren",
       "checkNone": "Niets Selecteren",
       "description": "Selecteer welke kaarten op uw dashboard worden weergegeven",
-      "title": "Dashboard Instellingen"
+      "title": "Dashboard Instellingen",
+      "loadError": "Kan voorkeuren niet laden",
+      "saveError": "Kan voorkeuren niet opslaan"
     },
     "updates": "Updates"
   },
@@ -198,7 +200,7 @@
     "sendReset": "Resetlink verzenden",
     "sending": "Verzenden...",
     "title": "Wachtwoord vergeten",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "Geen e-mail ontvangen? Controleer uw spammappee of probeer het opnieuw."
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "Voer de volledige URL naar uw Grafana instantie in",
-      "label": "Grafana-URL"
+      "label": "Grafana-URL",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "Geen Grafana servers gevonden",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Grafana Integratie",
     "useManagedServer": {
       "label": "Beheerde server gebruiken"
-    }
+    },
+    "healthCheckFailed": "Health check mislukt",
+    "loadError": "Kan Grafana-configuratie niet laden",
+    "saveError": "Kan instellingen niet opslaan"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "Gebruikersnaam is vereist",
     "windowsDescription": "Maak een nieuw lokaal gebruikersaccount aan op deze Windows-host.",
     "passwordHelp": "Minimaal 8 tekens vereist",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "Weet u zeker dat u het gebruikersaccount \"{{username}}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "invalidUidPlatform": "UID moet een getal zijn >= {{minUid}}",
+    "uidHelpPlatform": "Laat leeg voor automatische toewijzing. Moet >= {{minUid}} zijn als opgegeven.",
+    "shellBash": "Bash",
+    "shellBourne": "Bourne Shell",
+    "shellCsh": "Csh",
+    "shellFalse": "False",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "Geen Inloggen",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "Nieuwe Ingeschakelde Pakketbeheerder Toevoegen",
@@ -822,17 +837,23 @@
     "size": "Grootte",
     "softwarePackages": "Softwarepakketten",
     "vendor": "Leverancier",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "Weet u zeker dat u wilt annuleren de aanmaak van \"{{name}}\"?",
+    "childHostHostnameHelp": "Voer de hostname (bijv., \"myhost\") of FQDN (bijv., \"myhost.example.com\") in.",
+    "childHostsEmptyBhyveReady": "Klik \"Child Host Aanmaken\" om een nieuwe bhyve virtuele machine te maken.",
+    "childHostsEmptyLxdReady": "Klik \"Child Host Aanmaken\" om een nieuwe LXD container te maken.",
+    "childHostsEmptyVmmReady": "Klik \"Child Host Aanmaken\" om een nieuwe VMM virtuele machine te maken.",
+    "childHostsEmptyWslEnabled": "Klik \"Child Host Aanmaken\" om een nieuwe WSL instantie te maken.",
+    "clickRequestData": "Klik \"Host Data Verzoeken\" om diagnostische informatie van het agent te verzamelen.",
+    "deleteChildHostMessage": "Weet u zeker dat u het kind-host \"{{name}}\" wilt verwijderen?",
+    "geoLocation": "Geografische Locatie",
+    "publicIp": "Publieke IP-adres",
+    "selectedServices": "{{count}} service(s) geselecteerd",
+    "deviceNumber": "Apparaat {{number}}",
+    "errorUpdatingServices": "Fout bij het bijwerken van services",
+    "graylogPort": "(poort {{port}})",
+    "interfaceNumber": "Interface {{number}}",
+    "noChangesMade": "Geen wijzigingen aangebracht",
+    "servicesUpdatedCount": "{{count}} dienst(en) bijgewerkt"
   },
   "hostGroup": {
     "add": "Toevoegen",
@@ -854,7 +875,7 @@
     "invalidGroupName": "Groepsnaam moet beginnen met een letter en mag alleen letters, cijfers, underscores en streepjes bevatten",
     "unixDescription": "Maak een nieuwe groep aan op deze host.",
     "windowsDescription": "Maak een nieuwe lokale groep aan op deze Windows-host.",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "Weet u zeker dat u de groep \"{{groupName}}\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt."
   },
   "hosts": {
     "agentVersion": "Agentversie",
@@ -912,8 +933,8 @@
       "statusRestarting": "Onderliggende hosts worden herstart...",
       "statusShuttingDown": "Onderliggende hosts worden gestopt...",
       "ungracefulWarning": "Deze host heeft {{count}} actieve onderliggende host(s) die onveilig worden beëindigd tijdens het herstarten. Upgrade naar SysManage Professional+ voor een georkestreerde veilige herstart.",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "Klik \"Herstart Ongeacht\" om {{hostname}} zonder eerst de child hosts te stoppen opnieuw op te starten.",
+      "proceedOrchestrated": "Klik \"Gecontroleerde Herstart\" om {{hostname}} veilig opnieuw op te starten."
     },
     "rebootRequested": "Herstart succesvol aangevraagd",
     "rebootSelected": "Geselecteerde Herstarten",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "Scripts zijn uitgeschakeld voor deze host",
     "scriptsEnabledTooltip": "Scripts zijn ingeschakeld voor deze host",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "Antivirus installatie mislukt voor alle hosts:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Antivirus installatie gestart voor {{count}} host(s).\\n\\nMislukte hosts:\\n{{hosts}}",
+    "antivirusDeploySuccess": "Antivirus installatie gestart voor {{count}} host(s)",
+    "approveSelected": "Goedkeuren geselecteerde",
+    "opentelemetryDeploySuccess": "OpenTelemetry-deployments in de wachtrij voor {{count}} host(s)",
+    "diagnosticsRequestFailed": "Kan verzameling diagnostics niet aanvragen. Probeer het later opnieuw.",
+    "diagnosticsRequested": "Diagnostics verzameling gevraagd voor host {{hostId}}. Controleer de hostdetailspagina om resultaten te bekijken wanneer beschikbaar.",
+    "unknown": "Onbekend"
   },
   "login": {
     "loggingIn": "Aanmelden...",
@@ -975,8 +999,8 @@
     "submit": "Aanmelden",
     "title": "Inloggen",
     "username": "Gebruikersnaam of e-mail",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "Wachtwoord vergeten?",
+    "remember": "Onthouden"
   },
   "logout": {
     "loading": "Uitloggen..."
@@ -1004,17 +1028,19 @@
     "updates": "Updates",
     "users": "Gebruikers",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "Luchtdichte collector",
       "engineMissing": "Vereiste Pro+ engine niet geladen; controleer licentie.",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "Luchtdichte opslagplaats"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "Kaart",
     "sites": "Sites",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "Luchtdichte collecties",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "Nodige Pro+ federatie-engine niet geladen; controleer licentie."
+    },
+    "scrollLeft": "Scroll naar links",
+    "scrollRight": "Scroll naar rechts"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -1123,7 +1149,7 @@
     "viewDetails": "Details bekijken"
   },
   "reports": {
-    "auditLog": "Auditlog",
+    "auditLog": "Audit Logboek",
     "generatePdf": "PDF genereren",
     "noResults": "Geen rapporten gevonden die overeenkomen met uw zoekopdracht",
     "search": {
@@ -1137,10 +1163,65 @@
       "hosts": "Hosts",
       "security": "Beveiliging",
       "users": "Gebruikers",
-      "federation": "[TODO] Federation"
+      "federation": "Federatie"
     },
     "title": "Rapporten",
-    "viewReport": "Rapport bekijken"
+    "viewReport": "Rapport bekijken",
+    "antivirusCommercial": {
+      "description": "Status van commerciële antivirusbescherming, waaronder productnaam, versie, signatuurversie, status van real-time bescherming en dienststatus over alle beheerde hosts.",
+      "name": "Status commerciële antivirussoftware"
+    },
+    "antivirusOpensource": {
+      "description": "Status van open-source antivirus software over alle hosts, tonend de naam van het programma, versie, installatiepad en ingeschakeld/uitgeschakeld status.",
+      "name": "Status van open-source antivirus software"
+    },
+    "firewallStatus": {
+      "description": "Details van firewall-status voor alle beheerde hosts, waaronder firewallsoftware, ingeschakeld/uitgeschakelde status, open IPv4 en IPv6-poorten en besturingssysteeminformatie.",
+      "name": "Host Firewall Status"
+    },
+    "generateError": "Fout bij het genereren van rapport: {{message}}",
+    "hostsWithTags": {
+      "description": "Toont alle geregistreerde hosts met hun toegewezen tags voor gemakkelijke categorisering en filteren. Nuttig om hosts te organiseren per omgeving, doel of afdeling.",
+      "name": "Hosts met Tags"
+    },
+    "registeredHosts": {
+      "description": "Volledige lijst van alle geregistreerde hosts met basisinformatie en besturingssysteemdetails, waaronder hostname, IP-adressen, OS-versie en status.",
+      "name": "Geregistreerde Hosts"
+    },
+    "tag": {
+      "accounts": "accounts",
+      "antivirus": "antivirus",
+      "audit": "audit",
+      "basic": "basic",
+      "commercial": "commercial",
+      "compliance": "compliance",
+      "firewall": "firewall",
+      "hosts": "hosts",
+      "network": "netwerk",
+      "opensource": "opensource",
+      "organization": "organisatie",
+      "permissions": "rechten",
+      "rbac": "rbac",
+      "roles": "rollen",
+      "security": "beveiliging",
+      "systemInfo": "systeem-informatie",
+      "tags": "tags",
+      "tracking": "volgen",
+      "users": "gebruikers"
+    },
+    "unknownError": "Onbekende fout",
+    "userRbac": {
+      "description": "Volledig overzicht van alle gebruikers met hun toegewezen beveiligingsrollen georganiseerd per rolgroep. Toont de granulaire rechtenstructuur voor rollen gebaseerde toegangscontrole over het systeem.",
+      "name": "Gebruikerseigen Security Rollen (RBAC)"
+    },
+    "usersList": {
+      "description": "Comprehensive lijst van alle SysManage-gebruikers met hun profielen, rollen, rechten en accountstatus. Bevat gebruikersaanmaakdatum en laatste inlogtijden.",
+      "name": "SysManage Gebruikers"
+    },
+    "auditLogReport": {
+      "description": "Volledige audittrail van alle gebruikersacties en systeemwijzigingen voor naleving en veiligheidsmonitoring. Volgt databaseaanpassingen, agentberichten en administratieve bewerkingen.",
+      "name": "Audit Logboek"
+    }
   },
   "resetPassword": {
     "backToLogin": "Terug naar inloggen",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "Succesvol bijgewerkt",
     "updatedAt": "Bijgewerkt op",
     "viewScript": "Script bekijken",
-    "waitingForResults": "Wachten op resultaten"
+    "waitingForResults": "Wachten op resultaten",
+    "adHocScript": "Ad-hoc Script",
+    "connected": "Gevolgd",
+    "exitCodeLabel": "Afsluitcode: {{code}}",
+    "offline": "Offline"
   },
   "search": {
     "searchColumn": "Zoeken in",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "Geheim succesvol bijgewerkt",
     "updatedAt": "Bijgewerkt op",
     "viewSecret": "Geheim Bekijken",
-    "subtypeRequired": "Subtype van geheim is vereist"
+    "subtypeRequired": "Subtype van geheim is vereist",
+    "filenamePlaceholder": "bijv., id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "Rol Toevoegen",
@@ -1349,7 +1435,8 @@
       "title": "Antivirus Dekking",
       "totalHosts": "Totaal Hosts",
       "unprotected": "Onbeschermd",
-      "warningMessage": "{{count}} host(s) hebben geen antivirusbescherming ingeschakeld."
+      "warningMessage": "{{count}} host(s) hebben geen antivirusbescherming ingeschakeld.",
+      "fetchError": "Kan antivirusdekking niet ophalen"
     },
     "antivirusDisableFailed": "Antivirus uitschakelen mislukt",
     "antivirusDisableSuccess": "Antivirus uitschakelen succesvol gestart",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "Maak een nieuwe admin-gebruiker aan via de Gebruikers-pagina in deze interface",
     "step4LoginNewUser": "Meld u af en aan met uw nieuwe admin-account",
     "step5RemoveCredentials": "Verwijder admin_userid en admin_password uit uw YAML-configuratiebestand",
-    "step6RestartServer": "Herstart de server met ./run.sh"
+    "step6RestartServer": "Herstart de server met ./run.sh",
+    "removeCredentialsHint": "Verwijder admin_userid en admin_password uit uw configuratiebestand en start de server opnieuw op"
   },
   "serverDown": {
     "details": "Verbindingsdetails:",
@@ -1441,10 +1529,10 @@
     "retrying": "Opnieuw proberen...",
     "title": "Verbinding Onderbroken",
     "titleFailed": "Server Niet Beschikbaar",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "Pogingen: {{count}}",
+    "lastConnected": "Laatst verbonden: {{time}}",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s"
   },
   "tags": {
     "addTag": "Tag toevoegen",
@@ -1476,7 +1564,8 @@
       "statistics": "Statistieken",
       "status": "Status",
       "title": "OpenTelemetry-status",
-      "tracesCount": "Traces"
+      "tracesCount": "Traces",
+      "fetchError": "Kan OpenTelemetry-status niet ophalen"
     },
     "prometheus": {
       "information": "Informatie",
@@ -1491,8 +1580,8 @@
       "title": "Prometheus-status",
       "url": "URL",
       "version": "Versie",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus wordt beheerd door de telemetry stack. Gebruik \"make start-telemetry\" om te starten of \"make stop-telemetry\" om te stoppen.",
+      "notRunningMessage": "Prometheus is niet actief. Start de telemetry stack met \"make start-telemetry\" of \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "Gedetecteerde OS",
+    "typeLabel": "Type",
+    "unknown": "Onbekend",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "Geselecteerde hosts",
       "title": "Ubuntu Pro Inschrijving",
       "useMasterKey": "Geconfigureerde hoofdsleutel gebruiken",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "Contract gebaseerde Ubuntu Pro sleutel die begint met \"C\"",
+      "errorLabel": "Fout",
+      "hostFallback": "Host {{id}}"
     },
     "errors": {
       "clearFailed": "Wissen van hoofdsleutel mislukt",
@@ -1603,7 +1700,7 @@
       "masterKey": "Ubuntu Pro Hoofdsleutel",
       "organizationName": "Organisatienaam",
       "organizationNameHelp": "Optionele organisatienaam voor Ubuntu Pro inschrijving",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "Contract gebaseerde Ubuntu Pro sleutel die begint met \"C\". Laat leeg om te verwijderen."
     },
     "messages": {
       "keyCleared": "Hoofdsleutel succesvol gewist",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "Ubuntu Pro sleutel moet beginnen met \"C\" en minstens 24 tekens lang zijn"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "Beveiliging",
       "system": "Systeem"
     },
-    "unknown": "Onbekend"
+    "unknown": "Onbekend",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "Actief",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "Ongeldig afbeeldingsformaat. Toegestane formaten: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "Profielafbeelding",
     "uploading": "Uploaden...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "Wachtwoord moet ten minste {{count}} verschillende karaktertypen bevatten",
+    "passwordTooLong": "Wachtwoord mag maximaal {{count}} karakters lang zijn",
+    "passwordTooShort": "Wachtwoord moet minstens {{count}} karakters lang zijn",
+    "profileTabs": "profiel-tabs"
   },
   "users": {
     "email": "E-mail",
@@ -1781,10 +1894,10 @@
     "noRows": "Geen rijen",
     "unlockSelected": "Geselecteerde ontgrendelen",
     "unlocked": "Ontgrendeld",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "De informatie van de gebruiker hieronder aanpassen.",
+    "emailNotification": "Een e-mail wordt verstuurd naar de gebruiker met een beveiligde link om hun initiële wachtwoord in te stellen.",
+    "emailUnique": "E-mailadres moet uniek zijn",
+    "enterInfo": "Voer hieronder de informatie van de nieuwe gebruiker in."
   },
   "emailConfig": {
     "title": "E-mailconfiguratie",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "Rapportinhoud"
+    "iframeTitle": "Rapportinhoud",
+    "loadError": "Kan rapport niet laden",
+    "pdfError": "Fout bij het genereren van PDF: {{message}}",
+    "unknownError": "Onbekende fout"
   },
   "upgradeProfiles": {
     "add": "Profiel toevoegen",
@@ -1850,8 +1966,8 @@
     "window": "Gespreid venster (minuten)",
     "windowHelp": "Agent-verzendingen over zoveel minuten verspreiden (0–720)",
     "windowRange": "Gespreid venster moet tussen 0 en 720 minuten liggen",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "Bevestig: Updateprofiel \"{{name}}\" verwijderen?",
+    "confirmTrigger": "Trigger \"{{name}}\" nu? Updates zullen worden verzonden naar overeenkomstige hosts."
   },
   "packageProfiles": {
     "add": "Nalevingsprofiel toevoegen",
@@ -1882,7 +1998,7 @@
     "version": "Versie",
     "versionOp": "Op",
     "versionOpAny": "(alle)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "Bevestig: Beleidsprofiel \"{{name}}\" verwijderen?"
   },
   "compliance": {
     "compliant": "Conform",
@@ -1932,7 +2048,7 @@
     "title": "Rapportbranding",
     "uploadError": "Logo-upload mislukt",
     "uploadLogo": "Logo uploaden",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "Verschijnt naast het logo in de rapportenkop (bijv. \"Vertrouwelijk - Interne Gebruik\")."
   },
   "reportTemplates": {
     "add": "Sjabloon toevoegen",
@@ -1956,7 +2072,7 @@
     "subtitle": "Aangepaste lay-outs die de rapport-renderer bovenop de ingebouwde rapporttypen toepast",
     "title": "Rapportsjablonen",
     "updated": "Sjabloon opgeslagen",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "Bevestig: Rapportensjabloon \"{{name}}\" verwijderen?"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "Identiteitsproviders",
     "saveError": "Provider kon niet worden opgeslagen — controleer het formulier.",
     "settingsSaveError": "Instellingen konden niet worden opgeslagen.",
-    "settingsTitle": "Authenticatie-instellingen"
+    "settingsTitle": "Authenticatie-instellingen",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} back-upcodes resterend",
@@ -2055,7 +2175,7 @@
     "disableWarning": "Bevestig met uw accountwachtwoord. Uw TOTP-geheim en back-upcodes worden verwijderd.",
     "notEnrolledDescription": "Voeg een tweede factor toe aan uw account. Bij elke aanmelding wordt om een eenmalige code uit een authenticator-app gevraagd.",
     "regenPrompt": "Voer een huidige TOTP-code in. Bestaande back-upcodes worden ongeldig gemaakt.",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "Ik heb deze codes veilig opgeslagen"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "Upstream-URL",
       "version": "Versie",
       "upstreamHelp": "Automatisch ingevuld vanuit de bovenstaande versie; overschrijf alleen als u een regio-specifieke mirror heeft om naar te wijzen.",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "Kleine letters, cijfers, streepjes en underscores. Spaties en punten worden omgezet naar streepjes."
     },
     "listTitle": "Repository-mirrors",
     "loadError": "Repository-mirrors konden niet worden geladen.",
@@ -2128,7 +2248,7 @@
       "notReady": "Vereiste tooling voor {{pm}} ontbreekt — installeer voordat u een synchronisatie start.",
       "ready": "Klaar om {{pm}}-repositories te spiegelen.",
       "subtitle": "Vereiste tooling om {{pm}}-mirrorplannen op deze host uit te voeren",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "De agent heeft niet binnen {{minutes}} minuten gereageerd. De meest waarschijnlijke oorzaken zijn: de agent is midden in een plan ingestort, het WebSocket is verbroken voordat het command_result werd verzonden, of de agent heeft het commando stilzwijgend gededuplicateerd zonder resultaat te produceren. Controleer de logboeken van de agent op deze host en overweeg om de sysmanage-agent-service opnieuw op te starten. Klik op Vernieuwen / Installatiehulpmiddelen om opnieuw te proberen - het in-ontvangst-nemende marker zal worden verwijderd en een nieuwe poging wordt gestart."
     },
     "configureSubtitle": "Kies de host die de mirrorplannen van dit platform zal uitvoeren. Alleen hosts waarvan het platform overeenkomt met het tabblad worden vermeld.",
     "deleteConfigInUse": "Verwijder eerst de {{n}} mirror(s) onder dit platform.",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "Actor",
+      "details": "Details",
+      "openSite": "Open",
+      "operation": "Handeling",
+      "site": "Site",
+      "timestamp": "Tijdstip"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "Geen federatie auditinformatie nog.",
+    "emptyFiltered": "Geen auditinformatie gevonden dat overeenkomt met de filters.",
+    "errorLoad": "Kan federaties-logboek niet laden.",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "Actor",
+      "apply": "Toepassen",
+      "clear": "Wissen",
+      "operation": "Handeling",
+      "siteId": "Site ID"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "Elke cross-site bewerking wordt centraal bijgehouden door de coördinator.",
+    "title": "Federatie Audit Logboek"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "Kan locaties van hosts niet laden.",
+    "openHost": "Host openen",
+    "subtitle": "Geografisch verspreide agenten die een publieke IP hebben gerapporteerd.",
+    "title": "Hostkaart",
+    "status": "Status"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "Toewijzen",
+      "deactivate": "Deactiveren",
+      "edit": "Bewerken",
+      "push": "Nu doorsturen"
     },
-    "active": "[TODO] active",
+    "active": "actief",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "Kan toewijzingen niet bijwerken.",
+      "errorLoad": "Kan sites niet laden.",
+      "noSites": "Geen federatiesites ingeschreven. Inschrijf eerst een site.",
+      "statusLine": "Doorstuurstatus: {{status}}",
+      "submit": "Toewijzingen opslaan",
+      "success": "Toegewezen beleidsregels bijgewerkt.",
+      "title": "Toewijzen aan locaties",
+      "statusLineWithAttempts": "Doorstuurstatus: {{status}} ({{attempts}} pogingen)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "Acties",
+      "active": "Actief",
+      "name": "Naam",
+      "type": "Type",
+      "version": "Versie"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "Nieuwe Beleid",
+      "cancel": "Annuleren",
+      "customType": "Aangepast beleidsmodel",
+      "definition": "Definitie (JSON)",
+      "description": "Omschrijving",
+      "engineUnavailable": "De federatiedetectorengine is niet geladen; het is niet mogelijk om beleidsregels te maken.",
+      "error": "Kan beleid niet aanmaken.",
+      "invalidJson": "Definitie moet een JSON-object zijn.",
+      "name": "Naam",
+      "submit": "Aanmaken",
+      "success": "Beleid gemaakt.",
+      "title": "Beleid aanmaken",
+      "type": "Soort beleid",
+      "typeOther": "Overige...",
+      "typeRequired": "Het veld Soort beleid is verplicht."
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "Kan beleid niet deactiveren.",
+      "success": "'{{name}}' is gedeactiveerd."
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "Kan beleid niet bijwerken.",
+      "submit": "Opslaan",
+      "success": "Beleid bijgewerkt.",
+      "title": "Beleid bewerken",
+      "versionNote": "Opgeslagen wijzigingen zullen de versienummer van het beleid verhogen; sites nemen de nieuwe versie over bij de volgende leveringcyclus."
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "Geen bepalingen voor beleid tot nu toe. Klik op 'Nieuwe Beleid' om deze te maken.",
+    "errorLoad": "Kan federatie-beleid niet laden.",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "Alleen actief",
+      "allTypes": "Alles types",
+      "type": "Soort beleid"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "inactief",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "Kan beleid niet doorsturen.",
+      "success": "Doorstuurtrigger voor '{{name}}'."
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "Centraal gedefinieerde beleidsregels worden gepusht naar ondergeschikte sites.",
+    "title": "Federatie Beleid",
+    "deadLetter": "dead-letter"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "Verwijderen",
+      "resume": "Hervatten",
+      "suspend": "Pauzeren"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "Site inschrijven",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "De rij met de site wordt bewaard voor audit maar de coördinator zal stoppen met het accepteren van synchronisaties van deze site. Deze actie kan niet worden ongedaan gemaakt via de UI.",
+      "cancel": "Annuleren",
+      "confirm": "Site verwijderen",
+      "title": "Federatiesite verwijderen?"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "Minimum agent versie",
+      "backToList": "Terug naar Sites",
+      "connection": "Verbinding",
+      "enrolledAt": "Geregistreerd bij",
+      "errorLoad": "Kan site niet laden.",
+      "hostCount": "Aantal hosts",
+      "lastSyncAt": "Laatste synchronisatie om",
+      "lastSyncStatus": "Status van laatste synchronisatie",
+      "metadata": "Metadata",
+      "notFound": "Site niet gevonden.",
+      "seeHosts": "Bekijk hosts op deze site",
+      "syncInterval": "Synchronisatieinterval",
+      "syncIntervalValue": "{{seconds}}s",
+      "url": "URL",
+      "viewAuditLog": "Bekijk audit logboek",
+      "activeCommands": "Actieve commando's",
+      "activeCommandsEmpty": "Geen actieve opdrachten.",
+      "activeCommandsLoading": "Bezig met laden…",
+      "commandAttempts": "{{n}} push pogingen",
+      "commandDispatchedAt": "Gezonden {{when}}",
+      "dispatchCommand": "Commando uitzenden",
+      "backlogDepth": "In afwachting van upstream wachtrij",
+      "backlogUnknown": "—",
+      "refresh": "Vernieuwen",
+      "syncHealthy": "Gesond",
+      "syncNever": "Nooit gesynchroniseerd",
+      "syncOverdue": "Verlopen",
+      "syncStale": "Verouderd",
+      "rollupCompliance": "Compliance",
+      "rollupEmpty": "Geen compatibiliteits- of kwetsbaarheidsgegevens gesynchroniseerd vanaf dit site tot nu toe.",
+      "rollupTitle": "Compliance & kwetsbaarheden",
+      "rollupVulnerabilities": "Vulnerabiliteiten ({{hosts}} hosts betroffen)",
+      "vulnCritical": "{{n}} critisch",
+      "vulnHigh": "{{n}} hoog",
+      "vulnLow": "{{n}} laag",
+      "vulnMedium": "{{n}} gemiddeld",
+      "alertAck": "Bevestigen",
+      "alertAcked": "Bevestigd",
+      "alertsTitle": "Open waarschuwingen",
+      "autonomous": "Onafhankelijk werken",
+      "pushPolicies": "Policies doorsturen",
+      "repushFailed": "Kan beleid niet opnieuw doorsturen.",
+      "repushQueued": "Nieuwe levering van {{n}} policy(ies) gepland.",
+      "siteCapabilities": "Functionaliteiten",
+      "siteVersion": "Gemeldde versie",
+      "syncLatency": "Upstream synchronisatie latentie (recent)",
+      "syncPoints": "{{n}} synchronisatie gebeurtenissen",
+      "syncTimeline": "Tijdslijn synchronisatie",
+      "syncTimelineEmpty": "Geen synchronisatiegebeurtenissen opgeslagen nog.",
+      "pushPoliciesHint": "Elke policy voor deze site opnieuw in de wachtrij zetten — inclusief eventuele vastgelopen of dead-lettered leveringen — voor directe herlevering.",
+      "syncHealthHistogram": "Succes / mislukking van synchronisatie (recentste)"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "Geen sites ingeschreven tot nu toe. Inschrijf eerst een ondergeschikte SysManage-server om aan de slag te gaan.",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "Annuleren",
+      "done": "Klaar",
+      "engineUnavailable": "De federatiedetectorengine is niet geladen; het is niet mogelijk om een site in te schrijven.",
+      "error": "Kan site niet registreren.",
+      "location": "Locatie-label (optioneel)",
+      "name": "Sitenamen",
+      "submit": "Token genereren",
+      "successTitle": "Site geïnscriveerd",
+      "syncIntervalSeconds": "Synchronisatieinterval (seconden)",
+      "title": "Registreer een federatiesite",
+      "tokenInstructions": "Kopiéer de inschrijftoken hieronder en lever het af bij de nieuwe site-server. Dit wordt slechts eenmaal weergegeven – er is geen herstel als het verloren gaat.",
+      "url": "Site URL",
+      "siteIdentityKey": "Openbaar sleutel van de site (PEM)",
+      "siteIdentityKeyHelp": "Nodig. Plak de identiteitsopenbare sleutel van de site, verkregen uit band (van de sites Server Role pagina). De coordinator verifieert de inschrijvingbewijs van de site tegen deze sleutel — het is wat een inschrijftijd man-in-the-middle aanval voorkomt."
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "Federatie laat je meerdere SysManage servers beheren vanaf één coördinator. Upgrade naar een Enterprise-licentie om ondergeschikte locaties hier in te schrijven.",
+      "title": "Multi-site federatie vereist Enterprise"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "Kan federatiesites niet laden.",
+    "hostCount": "{{count}} hosts",
+    "lastSync": "Gesynchroniseerd {{when}}",
+    "mapView": "Kaartweergave",
+    "policiesLink": "Beleid",
+    "subtitle": "Subordinante SysManage-servers die zijn geïnscriveerd bij deze coördinator.",
+    "title": "Federatie Lokaties",
+    "hostsLink": "Hosts",
+    "tilesView": "Dashboard"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "Kan federatiesites niet laden.",
+    "gridView": "Rasterweergave",
+    "openSite": "Site openen",
+    "subtitle": "Geografische verdeling van ondergeschikte site servers.",
+    "title": "Kaart van Federatie Lokaties",
+    "tilesView": "Dashboard",
+    "lastSyncLabel": "Laatste synchronisatie:",
+    "statusLabel": "Status:"
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "Build Agent Bundle",
+    "buildError": "Kan build niet aan de rij plaatsen.",
+    "buildProplus": "Build Pro+ Bundle",
+    "buildServer": "Build Server Bundle",
+    "bundle": "Bundle",
+    "completedAt": "Afgerond",
+    "confirmDelete": "Bevestig: Pakket en ISO-bestand verwijderen?",
+    "copied": "Commando gekopieerd naar klembord",
+    "copy": "Kopiéren naar klembord",
+    "copyError": "Kon het klembord niet benaderen",
+    "createdAt": "Gemaakt",
+    "delete": "Verwijderen",
+    "deleteError": "Kan bundel niet verwijderen.",
+    "deleted": "Bundle verwijderd",
+    "dockerInstallHint": "Voer dit uit op de sysmanage-server als een gebruiker met sudo:",
+    "dockerNoGroup": "Docker draait, maar de {{user}} gebruiker zit niet in de docker groep, dus het buildonderproces kan de daemon socket niet bereiken.",
+    "dockerNotInstalled": "Docker is niet geïnstalleerd op deze server. Pakketten bouwen vereist Docker om per-distributie Linux-pakketten te halen.",
+    "dockerNotRunning": "Docker is geïnstalleerd, maar de daemon kan niet bereikt worden. Start deze met: sudo systemctl enable --now docker.",
+    "dockerPermissionDenied": "De Docker-daemon is actief, maar de {{user}} gebruiker (deze die dit sysmanage-proces uitvoert) kan niet lezen van /var/run/docker.sock. Voeg de gebruiker toe aan de docker-groep en start het sysmanage-proces opnieuw om de nieuwe groepsinstellingen te activeren.",
+    "dockerReady": "Docker is gereed",
+    "dockerReadyHint": "Bouwen duurt meestal 5-30 minuten, afhankelijk van het aantal actieve platforms.",
+    "download": "ISO-bestand downloaden",
+    "downloadError": "Kan bundel niet downloaden.",
+    "empty": "Geen bundels nog. Klik op een buildknop hierboven om er een te maken.",
+    "loadError": "Kan bundles niet laden.",
+    "queued": "Bouw van bundle in wachtrij — lijst wordt vernieuwd",
+    "recentFailures": "Recente build-fouten:",
+    "recheckDocker": "Hercontroleer Docker",
+    "requiresDocker": "Om bundles te bouwen moet Docker geïnstalleerd en draaiend zijn op deze server. Bouwen duurt meestal 5-30 minuten, afhankelijk van het aantal actieve platforms.",
+    "size": "Grootte",
+    "status": "Status",
+    "subtitle": "Genereer een multi-OS ISO met sysmanage server of agent + alle platformafhankelijke afhankelijkheden, klaar om te mounten op een luchtdichte host.",
+    "title": "Luchtdichte installatiepakketten",
+    "version": "Versie",
+    "recheckResources": "Hercontroleer resources",
+    "resourcesInsufficient": "Deze server heeft niet voldoende beschikbare geheugen of schijfruimte om een Server of Agent bundel te bouwen — deze knoppen zijn uitgeschakeld totdat de resources worden vrijgemaakt (swap toevoegen of de VM vergroten).",
+    "resourcesLow": "Lage bronnen — de build kan worden uitgevoerd, maar zal afhankelijk zijn van het schuifgeheugen en kan traag zijn."
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "Verwijderen",
+      "download": "ISO-bestand downloaden"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "Acties",
+      "completed": "Afgerond",
+      "created": "Gemaakt",
+      "isoLabel": "ISO-label",
+      "size": "Grootte",
+      "started": "Gestart",
+      "status": "Status"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "Bevestig: Collectierun en manifesten verwijderen?",
+    "createError": "Kan uitvoering niet aanmaken.",
+    "created": "Collectierun in wachtrij",
+    "deleteError": "Kan uitvoering niet verwijderen.",
+    "deleted": "Collectierun verwijderd",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "Annuleren",
+      "includeCompliance": "Voeg compatibiliteitspakket toe",
+      "includeCve": "Voeg CVE-feed-snapshot toe",
+      "isoLabel": "ISO-label",
+      "isoLabelHelper": "Kort identificerend element dat is ingebed in het geproduceerde ISO (bijv. \"monthly-2026-05\").",
+      "isoLabelRequired": "Het ISO-label is vereist",
+      "mediaSizeHelper": "Maximale grootte per schijf in MB. Standaard 4700 (DVD-5).",
+      "mediaSizeMb": "Media-grootte (MB)",
+      "submit": "Queue uitvoeren",
+      "title": "Nieuwe Collectierun",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "Kan ISO niet downloaden.",
+    "empty": "Geen collectieruns nog. Klik op 'Nieuwe Collectierun' om deze te starten.",
+    "licenseRequired": "Luchtdichte collector engine niet geladen; Pro+ licentie vereist.",
+    "loadError": "Kan uitvoeringen niet laden.",
+    "newRun": "Nieuwe Collectierun",
+    "noManifestFound": "Run heeft nog geen manifest — probeer opnieuw wanneer status COMPLETE is.",
+    "notApplicable": "Deze pagina heeft alleen betekenis op collector-rol implementaties.",
+    "refresh": "Vernieuwen",
+    "subtitle": "Activeer éénmalige collectie uitvoeringen die gespiegelde geconfigureerde repositories weerspiegelen, een ondertekend ISO bouwen en een manifest genereren voor verwerking aan de luchtdichte kant.",
+    "title": "Luchtdichte collectie uitvoeringen",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "Serverrol"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "Geen geschikte schijven gevonden. Voeg media toe en klik op Rescan.",
+    "help": "Selecteer de optische/USB-uitzending die het verzamelingsmedia bevat. De Import-knop op de Air-Gap Repositories pagina wordt beschikbaar als er een leesbare ISO is ingevoerd. Tijdens de import wordt de mediahandtekening geverifieerd.",
+    "label": "Blokapparaat",
+    "loadError": "Kon schijven niet opmaken.",
+    "none": "(geen)",
+    "rescan": "Schijven opnieuw scannen",
+    "saveError": "Kan apparaat niet opslaan.",
+    "title": "Schijf importeren",
+    "optical": "optisch",
+    "removable": "verwijzelsbaar"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "Schijf",
+    "import": "ISO importeren",
+    "importError": "Kan importeren niet starten.",
+    "noDevice": "Geen importschijf geselecteerd. Kies er een in Instellingen → Serverrol.",
+    "notReady": "Niet gereed",
+    "ready": "Klaar{{label}}",
+    "rescan": "Nieuwe scan",
+    "statusError": "Kon de importapparaat niet testen.",
+    "title": "Media importeren",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "Voltooid",
+      "copying": "Pakketten kopiëren",
+      "failed": "Mislukt",
+      "queued": "In de wachtrij gezet",
+      "verified": "Gevalideerd",
+      "verifying": "Handtekening controleren"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "Import voltooid — de repositorylijst hieronder wordt vernieuwd.",
+    "runStats": "{{files}} bestanden · {{size}}",
+    "runStatus": "Importstatus"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "Openbare Sleutel Kopiëren",
+      "help": "Kopiéer dit openbare sleutel en importeer deze op de Air-Gap Repository server zodat deze de gesigneerde media van deze collector vertrouwt. Alleen het openbare sleutel wordt weergegeven – het privé-sleutel verlaat nooit deze server.",
+      "loadError": "Kon het openbare collector-sleutel niet laden.",
+      "title": "Collector Openbaar Sleutel"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "Gekopieerd!",
+    "copyError": "Kon niet kopiëren naar klembord.",
+    "copyFingerprint": "Vingerafdruk kopiëren",
+    "fingerprint": "Vingerafdruk",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(leesbaar sleutel)",
+      "count": "{{n}} vertrouwd",
+      "empty": "Geen vertrouwde collector-sleutels nog.",
+      "help": "Publice sleutels importeren van elke Air-Gap Collector waarvan de media deze repository moet accepteren. Media die onbekende sleutels heeft, wordt tijdens het inlezen afgewezen.",
+      "import": "Sleutel importeren",
+      "importError": "Kon sleutel niet importeren.",
+      "imported": "Geïmporteerd sleutel {{fp}}",
+      "loadError": "Kon vertrouwde sleutels niet laden.",
+      "nameLabel": "Collector naam",
+      "pemLabel": "Openbare sleutel (PEM)",
+      "removeError": "Kan sleutel niet verwijderen.",
+      "required": "Naam en openbaar sleutel zijn beide vereist.",
+      "title": "Geverifieerde Collector Sleutels"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "Details",
+      "openSite": "Site"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "Host",
+      "ipv4": "IPv4",
+      "lastSeen": "Laatst gezien",
+      "os": "OS",
+      "platform": "Platform",
+      "status": "Status"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "Sluiten",
+      "ipv6": "IPv6",
+      "noLiveLink": "Live-detail-link niet beschikbaar (eigen site heeft geen URL).",
+      "notFound": "Deze host is niet langer in het register.",
+      "site": "Eigen site",
+      "theSite": "de site",
+      "title": "Hostdetails",
+      "viewLive": "Bekijk live details voor {{site}} →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "Geen hosts gesynchroniseerd vanaf welke site tot nu toe.",
+    "emptyFiltered": "Geen hosts gevonden die overeenkomen met de huidige filters.",
+    "errorLoad": "Kan cross-site hosts niet laden.",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "Toepassen",
+      "clear": "Wissen",
+      "osFamily": "OS-familie",
+      "search": "Zoeken (naam / IP)",
+      "status": "Status"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "Gespecificeerd voor één site",
+    "subtitle": "Elke host over alle geregistreerde sites, vanuit de gesynchroniseerde map van de coördinator.",
+    "title": "Cross-Site Hosts",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "Wissen",
+      "dispatch": "Commando uitzenden",
+      "selectAll": "Selecteer alles op deze pagina",
+      "selected": "{{n}} hosts geselecteerd"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "Annuleren",
+    "commandType": "Commando",
+    "dispatch": "Uitzenden",
+    "dispatching": "Bezig met verzenden...",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "Kan opdracht niet afleveren.",
+      "packagesRequired": "Voer ten minste één pakketnaam in.",
+      "scriptRequired": "Voer het script in dat moet worden uitgevoerd.",
+      "unlicensed": "Federatie vereist een Enterprise-licentie.",
+      "partial": "{{failed}} van de {{total}} site-uitvoeringspogingen mislukt."
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "Host-ID's",
+    "hostIdsHint": "Door komma's gescheiden host-ID's (van de Hosts pagina)",
+    "packages": "Pakketnamen",
+    "packagesOptional": "Pakketnamen (optioneel — blanco = alle updates)",
+    "script": "Script",
+    "subtitle": "Een opdracht in de wachtrij zetten voor {{site}}. Het site voert het uit op zijn hosts en rapporteert de resultaten — er wordt niets direct uitgevoerd.",
+    "targetAll": "Alle hosts aan deze locatie",
+    "targetSpecific": "Specifieke hosts (door ID)",
+    "thisSite": "deze site",
+    "title": "Commando uitzenden",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "Update toepassen",
+      "deployPackages": "Pakketten installeren",
+      "reboot": "Reboot",
+      "runScript": "Script uitvoeren"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "Een opdracht in de wachtrij zetten voor {{hosts}} geselecteerde host(s) over {{sites}} site(s). Elk site voert het uit en rapporteert de resultaten — er wordt niets direct uitgevoerd."
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "Coördinator",
+    "coordinatorThisServer": "Deze server",
+    "countEnrolled": "{{n}} geïmplementeerd",
+    "countHosts": "{{n}} hosts",
+    "countPending": "{{n}} in afwachting",
+    "countSuspended": "{{n}} geschorst",
+    "empty": "Geen sites ingeschreven nog.",
+    "errorLoad": "Kan sites niet laden.",
+    "gridView": "Rasterweergave",
+    "hostsLabel": "{{n}} hosts",
+    "lastSync": "Gesynchroniseerd {{when}}",
+    "mapView": "Kaartweergave",
+    "title": "Federatie Dashboard"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "effectief",
+    "save": "Schwellgrenzen opslaan",
+    "saveFailed": "Kan drempels niet bijwerken.",
+    "saved": "Waarschuwingsdrempels opgeslagen.",
+    "subtitle": "Laat een veld leeg voor het gebruik van de standaardinstelling.",
+    "title": "Waarschuwingsdrempels"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "Actief",
+      "compliance": "Worst compliance",
+      "critical": "Critieke CVE's",
+      "high": "Hoog CVE's",
+      "hosts": "Hosts",
+      "site": "Site"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "Rapport genereren",
+    "sites": "Sites (alle indien geen is geselecteerd)",
+    "subtitle": "Samenvoegen van host, nalevingsstatus en kwetsbaarheidsoverzichten over meerdere locaties.",
+    "totals": "Totale waarden ({{n}} sites)",
+    "upsell": "Multi-site federatie vereist Enterprise."
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "Het hub dat host-inventaris, conformiteit en kwetsbaarheidsrollups verzamelt van veel subordinante siteservers en bevelen en beleid naar beneden stuurt. Een coördinator per federatie.",
+      "title": "Federatie Coördinator"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "Gekopieerd!",
+    "copyError": "Kon niet kopiëren naar klembord.",
+    "copyFingerprint": "Vingerafdruk kopiëren",
+    "currentTag": "(huidig)",
+    "heading": "Federatie Rol",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "Openbare Sleutel Kopiëren",
+      "pending": "Identiteits sleutel aanmaken...",
+      "title": "De identiteits sleutel van deze server",
+      "help": "Kopiéer dit openbare sleutel en plak deze in de federatiekaart van de peer zodat elke kant de identiteitsvingerafdruk van de andere kant kan vastleggen en buiten band kan bevestigen. Het privé-sleutel verlaat nooit deze server."
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "Kon sleutel niet importeren.",
+    "intro": "Kies hoe deze server deelt in een multi-site federatie. Dit is onafhankelijk van de air-gap rol aan de linkerkant — een server kan beide zijn. Het heeft effect na de volgende opstart.",
+    "loadError": "Kon federatie rol niet laden.",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "Standaard. Deze server is geen onderdeel van een multisite-federatie. Kies deze optie tenzij u een coördinator of een subordinante site uitvoert.",
+      "title": "Niet federatief"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "Peer-sleutel importeren",
+      "name": "Peer naam",
+      "pem": "Peer openbare sleutel (PEM)",
+      "empty": "Geen peeridentiteitssleutels opgeslagen nog.",
+      "help": "Plak hier een peer's openbare sleutel om zijn identiteitsvignet uit band te verifiëren. De federatieverbinding zelf wordt beveiligd door de TLS-certificaat dat tijdens het inschrijven is gepind — deze sleutels dienen voor menselijke verificatie, niet toegangscontrole.",
+      "title": "Peer identiteits sleutels"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "Kan de sleutel niet verwijderen.",
+    "save": "Federatie rol opslaan",
+    "saveError": "Kan federatie rol niet opslaan.",
+    "saved": "Federatie rol opgeslagen. Herstart de server voor het volledige effect ervan.",
+    "saving": "Opslaan...",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "Een ondergeschikte server die onafhankelijk draait en rapporteert naar een coördinator. Het blijft zelfstandig beheren van zijn eigen hosts, ook als de coördinator niet bereikbaar is, door opnieuw af te spelen van aangeroerde gegevens bij herstel.",
+      "title": "Federatie Locatie"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "Coördinator URL",
+      "enrolled": "Geregistreerd met coördinator",
+      "error": "Kon zich niet inschrijven bij de coördinator.",
+      "help": "Stel deze site in op zijn coördinator en plak het éénmalige inschrijftoken dat de coördinator heeft uitgebracht (vanaf de Sites pagina). Deze site roept terug om de handdruk af te ronden en het synchroniseren te beginnen.",
+      "notEnrolled": "Nog niet geregistreerd bij een coördinator.",
+      "submit": "Registreer met coördinator",
+      "submitting": "Wordt geregistreerd...",
+      "title": "Registreer met coördinator",
+      "token": "Registratie token",
+      "coordIdentityKey": "Coördinaat-identiteits openbaar sleutel (PEM)",
+      "coordIdentityKeyHelp": "Nodig. Plak de identiteitsopenbare sleutel van de coordinator, verkregen uit band (van zijn Server Role pagina). Deze site weigert zich te inschrijven tenzij de coordinator deze exacte sleutel bewijst — het is wat een inschrijftijd man-in-the-middle aanval voorkomt."
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "Algemene instellingen voor de server. Opgeslagen waarden worden opgeslagen in de database en overschrijven sysmanage.yaml.",
+    "loadError": "Kan configuratie-instellingen niet laden.",
+    "save": "Opslaan",
+    "saveError": "Kan configuratie-instellingen niet opslaan.",
+    "saved": "Configuratie opgeslagen.",
+    "secretSet": "•••••••• (opgeslagen — blanco laten om te behouden)",
+    "secretSetHelp": "Een wachtwoord is opgeslagen in OpenBAO. Typ een nieuw wachtwoord om het te vervangen.",
+    "secretUnset": "Niet ingesteld",
+    "secretUnsetHelp": "Veilig opgeslagen in OpenBAO, niet in de database.",
+    "title": "Configuratie"
+  },
+  "connection": {
+    "networkError": "Netwerkfout: Kan de server niet bereiken",
+    "serverError": "Serverfout: {{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "Scroll naar links",
+    "scrollRight": "Scroll naar rechts"
+  },
+  "settings": {
+    "tabsAriaLabel": "instellingen-tabs"
   }
 }

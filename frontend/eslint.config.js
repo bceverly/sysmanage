@@ -4,6 +4,7 @@ import typescriptParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
+import i18next from 'eslint-plugin-i18next';
 
 export default [
   {
@@ -86,7 +87,8 @@ export default [
       '@typescript-eslint': typescript,
       'react': react,
       'react-hooks': reactHooks,
-      'security': security
+      'security': security,
+      'i18next': i18next
     },
     rules: {
       ...typescript.configs.recommended.rules,
@@ -102,7 +104,13 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-wrapper-object-types': 'off',
       // Security plugin rule - disabled by default, but plugin needed for eslint-disable comments
-      'security/detect-possible-timing-attacks': 'off'
+      'security/detect-possible-timing-attacks': 'off',
+      // i18n guard: flag hardcoded user-facing text in JSX so it can't ship
+      // un-externalized.  jsx-text-only = literal text directly inside JSX
+      // elements (the common case), without the false positives of logic/value
+      // string literals.  Intentional non-translatable text (brand names, etc.)
+      // gets a `// eslint-disable-next-line i18next/no-literal-string`.
+      'i18next/no-literal-string': ['error', { mode: 'jsx-text-only' }]
     },
     settings: {
       react: {

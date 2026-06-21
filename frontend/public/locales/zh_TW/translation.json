@@ -143,7 +143,9 @@
       "checkAll": "全選",
       "checkNone": "全不選",
       "description": "選擇要在儀表板上顯示的卡片",
-      "title": "儀表板設定"
+      "title": "儀表板設定",
+      "loadError": "無法加載偏好設置",
+      "saveError": "無法保存偏好設置"
     },
     "updates": "更新"
   },
@@ -198,7 +200,7 @@
     "sendReset": "發送重設連結",
     "sending": "傳送中...",
     "title": "忘記密碼",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "沒有收到電子郵件？ 請檢查您的垃圾郵件匣或再試一次。"
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "輸入您的 Grafana 實例的完整 URL",
-      "label": "Grafana URL"
+      "label": "Grafana URL",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "找不到 Grafana 伺服器",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Grafana 整合",
     "useManagedServer": {
       "label": "使用託管伺服器"
-    }
+    },
+    "healthCheckFailed": "健康檢查失敗",
+    "loadError": "無法加載Grafana配置",
+    "saveError": "無法保存設置"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "需要使用者名稱",
     "windowsDescription": "在此Windows主機上建立新的本機使用者帳戶。",
     "passwordHelp": "至少需要 8 個字元",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "確定要刪除用戶帳戶 \"{{username}}\" 嗎？此操作無法撤銷。",
+    "invalidUidPlatform": "UID 必須是一個大於等於 {{minUid}} 的數字",
+    "uidHelpPlatform": "留空自動分配。如果指定，必須 >= {{minUid}}。",
+    "shellBash": "Bash",
+    "shellBourne": "Bourne Shell",
+    "shellCsh": "Csh",
+    "shellFalse": "錯誤",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "無登陸",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "新增已啟用的套件管理員",
@@ -822,17 +837,23 @@
     "size": "大小",
     "softwarePackages": "軟體套件",
     "vendor": "廠商",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "確定要取消創建 \"{{name}}\" 嗎？",
+    "childHostHostnameHelp": "請輸入主機名（例如，\"myhost\"）或完全限定域名（例如，\"myhost.example.com\"）",
+    "childHostsEmptyBhyveReady": "點擊\"創建子主機\"以建立新的bhyve虛擬機。",
+    "childHostsEmptyLxdReady": "點擊\"創建子主機\"以建立新的LXD容器。",
+    "childHostsEmptyVmmReady": "點擊\"創建子主機\"以建立新的VMM虛擬機。",
+    "childHostsEmptyWslEnabled": "點擊\"創建子主機\"以建立新的WSL實例。",
+    "clickRequestData": "點擊\"請求主機數據\"以從代理收集診斷信息。",
+    "deleteChildHostMessage": "確定要刪除子主機 \"{{name}}\" 嗎？",
+    "geoLocation": "地理位置",
+    "publicIp": "公共 IP",
+    "selectedServices": "{{count}} 選擇的服務(s)",
+    "deviceNumber": "設備 {{number}}",
+    "errorUpdatingServices": "更新服務失敗",
+    "graylogPort": "(埠口 {{port}})",
+    "interfaceNumber": "介面 {{number}}",
+    "noChangesMade": "未做任何更改",
+    "servicesUpdatedCount": "{{count}} 服務已更新"
   },
   "hostGroup": {
     "add": "新增",
@@ -854,7 +875,7 @@
     "invalidGroupName": "群組名稱必須以字母開頭，只能包含字母、數字、底線和破折號",
     "unixDescription": "在此主機上建立新群組。",
     "windowsDescription": "在此Windows主機上建立新的本機群組。",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "確定要刪除群組 \"{{groupName}}\" 嗎？此操作無法撤銷。"
   },
   "hosts": {
     "agentVersion": "代理版本",
@@ -912,8 +933,8 @@
       "statusRestarting": "正在重新啟動子主機...",
       "statusShuttingDown": "正在停止子主機...",
       "ungracefulWarning": "此主機有 {{count}} 個正在執行的子主機，在重新開機時將被強制終止。升級至 SysManage Professional+ 以使用協調式安全重新開機。",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "點擊\"無論如何重啟\"以在不先停止子主機的情況下重新啟動{{hostname}}。",
+      "proceedOrchestrated": "點擊\"協調重啟\"以安全地重新啟動{{hostname}}。"
     },
     "rebootRequested": "重新啟動請求成功",
     "rebootSelected": "重新啟動所選",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "此主機的指令稿已停用",
     "scriptsEnabledTooltip": "此主機的指令稿已啟用",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "所有主機的防病毒部署失敗：\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "啟動 {{count}} 主機的防病毒部署。\\n\\n失敗主機：\\n{{hosts}}",
+    "antivirusDeploySuccess": "啟動 {{count}} 主機的防病毒部署。",
+    "approveSelected": "批准選定項",
+    "opentelemetryDeploySuccess": "OpenTelemetry 部署已排隊 {{count}} 主機",
+    "diagnosticsRequestFailed": "無法請求診斷收集。請稍後再試。",
+    "diagnosticsRequested": "已為主機 {{hostId}} 請求診斷收集。請在主機詳細頁面查看結果。",
+    "unknown": "未知"
   },
   "login": {
     "loggingIn": "正在登入...",
@@ -975,8 +999,8 @@
     "submit": "登入",
     "title": "登入",
     "username": "使用者名稱或電子郵件",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "忘記密碼？",
+    "remember": "記住我"
   },
   "logout": {
     "loading": "正在登出..."
@@ -1004,17 +1028,19 @@
     "updates": "更新",
     "users": "使用者",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "隔離收集器",
       "engineMissing": "未載入所需的Pro+引擎；請檢查授權。",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "隔離存儲庫"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "地圖",
     "sites": "站點",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "隔離收集",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "需要 Pro+ 聯邦引擎但未加載；請檢查許可證。"
+    },
+    "scrollLeft": "向左捲動",
+    "scrollRight": "向右捲動"
   },
   "notifications": {
     "applicationUpdates": "應用程式更新",
@@ -1123,7 +1149,7 @@
     "viewDetails": "檢視詳細資訊"
   },
   "reports": {
-    "auditLog": "稽核日誌",
+    "auditLog": "審計日誌",
     "generatePdf": "產生PDF",
     "noResults": "找不到符合您搜尋條件的報告",
     "search": {
@@ -1137,10 +1163,65 @@
       "hosts": "主機",
       "security": "安全",
       "users": "使用者",
-      "federation": "[TODO] Federation"
+      "federation": "聯邦"
     },
     "title": "報告",
-    "viewReport": "檢視報告"
+    "viewReport": "檢視報告",
+    "antivirusCommercial": {
+      "description": "商業防毒保護狀態，包括產品名稱、版本、簽名版本、實時保護狀態和服務狀態等信息。",
+      "name": "商業防毒狀態"
+    },
+    "antivirusOpensource": {
+      "description": "開源防毒軟體在所有主機上的狀態，顯示軟件名稱、版本、安裝路徑以及啟用/禁用狀態。",
+      "name": "開源防毒軟體狀態"
+    },
+    "firewallStatus": {
+      "description": "所有管理主機的詳細防火牆狀態，包括防火牆軟件、啟用/禁用狀態、開放的IPv4和IPv6端口以及操作系統信息。",
+      "name": "主機防火牆狀態"
+    },
+    "generateError": "生成報告時發生錯誤：{{message}}",
+    "hostsWithTags": {
+      "description": "顯示所有已註冊的主機及其分配的標籤，以便於分類和篩選。對於按環境、目的或部門組織主機非常有用。",
+      "name": "帶有標籤的主機"
+    },
+    "registeredHosts": {
+      "description": "所有已註冊主機的完整列表，顯示基本信息和操作系統細節，包括主機名稱、IP地址、OS版本和狀態。",
+      "name": "已註冊主機"
+    },
+    "tag": {
+      "accounts": "帳戶",
+      "antivirus": "防毒",
+      "audit": "審計",
+      "basic": "基本",
+      "commercial": "商業",
+      "compliance": "符合規定",
+      "firewall": "防火牆",
+      "hosts": "主機",
+      "network": "網路",
+      "opensource": "開放原始碼",
+      "organization": "組織",
+      "permissions": "權限",
+      "rbac": "rbac",
+      "roles": "角色",
+      "security": "安全",
+      "systemInfo": "系統信息",
+      "tags": "標籤",
+      "tracking": "追蹤",
+      "users": "用戶"
+    },
+    "unknownError": "未知錯誤",
+    "userRbac": {
+      "description": "所有SysManage用戶的完整視圖，按角色組組織，顯示基於角色訪問控制的細粒度權限結構。",
+      "name": "用戶安全角色 (RBAC)"
+    },
+    "usersList": {
+      "description": "所有SysManage用戶的綜合清單，顯示他們的配置文件、角色、權限和帳戶狀態。包括用戶創建日期和最後登錄時間。",
+      "name": "SysManage 用戶"
+    },
+    "auditLogReport": {
+      "description": "完整的用戶操作和系統變更審計記錄，用於合規性和安全監控。跟蹤數據庫修改、代理消息和管理員操作。",
+      "name": "審計日誌"
+    }
   },
   "resetPassword": {
     "backToLogin": "返回登入",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "更新成功",
     "updatedAt": "更新時間",
     "viewScript": "檢視指令稿",
-    "waitingForResults": "等待結果"
+    "waitingForResults": "等待結果",
+    "adHocScript": "臨時腳本",
+    "connected": "已連接",
+    "exitCodeLabel": "退出代碼：{{code}}",
+    "offline": "離線"
   },
   "search": {
     "searchColumn": "搜尋範圍",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "機密更新成功",
     "updatedAt": "更新於",
     "viewSecret": "檢視機密",
-    "subtypeRequired": "需要密鑰子類型"
+    "subtypeRequired": "需要密鑰子類型",
+    "filenamePlaceholder": "例如：id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "新增角色",
@@ -1349,7 +1435,8 @@
       "title": "防毒軟體覆蓋率",
       "totalHosts": "主機總數",
       "unprotected": "未保護",
-      "warningMessage": "{{count}}台主機未啟用防毒軟體保護。"
+      "warningMessage": "{{count}}台主機未啟用防毒軟體保護。",
+      "fetchError": "無法獲取防毒覆蓋範圍"
     },
     "antivirusDisableFailed": "停用防毒軟體失敗",
     "antivirusDisableSuccess": "防毒軟體停用已成功開始",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "透過此介面中的「使用者」頁面建立新的管理員使用者",
     "step4LoginNewUser": "登出並使用您的新管理員帳戶登入",
     "step5RemoveCredentials": "從您的 YAML 組態檔中移除 admin_userid 和 admin_password",
-    "step6RestartServer": "使用 ./run.sh 重新啟動伺服器"
+    "step6RestartServer": "使用 ./run.sh 重新啟動伺服器",
+    "removeCredentialsHint": "從您的配置文件中移除 admin_userid 和 admin_password，然後重新啟動伺服器"
   },
   "serverDown": {
     "details": "連線詳情：",
@@ -1441,10 +1529,10 @@
     "retrying": "重試中...",
     "title": "連線中斷",
     "titleFailed": "伺服器無法使用",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "嘗試次數： {{count}}",
+    "lastConnected": "最後連接時間：{{time}}",
+    "secondsRemaining": "{{seconds}} 秒",
+    "timeRemaining": "{{minutes}} 分 {{seconds}} 秒"
   },
   "tags": {
     "addTag": "新增標籤",
@@ -1476,7 +1564,8 @@
       "statistics": "統計資料",
       "status": "狀態",
       "title": "OpenTelemetry 狀態",
-      "tracesCount": "追蹤"
+      "tracesCount": "追蹤",
+      "fetchError": "無法獲取OpenTelemetry狀態"
     },
     "prometheus": {
       "information": "資訊",
@@ -1491,8 +1580,8 @@
       "title": "Prometheus 狀態",
       "url": "URL",
       "version": "版本",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus 由監控堆疊管理。使用 \"make start-telemetry\" 啟動或使用 \"make stop-telemetry\" 停止。",
+      "notRunningMessage": "Prometheus 正在運行。使用 \"make start-telemetry\" 或 \"make start\" 啓動監控堆疊。"
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "檢測到的操作系統",
+    "typeLabel": "類型",
+    "unknown": "未知",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "選定的主機",
       "title": "Ubuntu Pro註冊",
       "useMasterKey": "使用設定的主密鑰",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "基於合同的Ubuntu Pro密鑰，以\"C\"開頭",
+      "errorLabel": "錯誤",
+      "hostFallback": "主機 {{id}}"
     },
     "errors": {
       "clearFailed": "清除主密鑰失敗",
@@ -1603,7 +1700,7 @@
       "masterKey": "Ubuntu Pro主密鑰",
       "organizationName": "組織名稱",
       "organizationNameHelp": "Ubuntu Pro註冊的可選組織名稱",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "基於合同的Ubuntu Pro密鑰，以\"C\"開頭。留空以刪除。"
     },
     "messages": {
       "keyCleared": "主密鑰清除成功",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "Ubuntu Pro 金鑰必須以 \"C\" 開頭，且至少為 24 個字符長"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "安全性",
       "system": "系統"
     },
-    "unknown": "未知"
+    "unknown": "未知",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "活躍",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "無效的影像格式。允許的格式:PNG、JPEG、JPG、GIF、WEBP",
     "profileImage": "個人資料圖片",
     "uploading": "正在上傳...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "密碼必須包含至少 {{count}} 種不同的字符類型",
+    "passwordTooLong": "密碼不得超過 {{count}} 個字符長",
+    "passwordTooShort": "密碼必須至少為 {{count}} 個字符長",
+    "profileTabs": "配置選項卡"
   },
   "users": {
     "email": "電子郵件",
@@ -1781,10 +1894,10 @@
     "noRows": "無資料列",
     "unlockSelected": "解除鎖定所選項目",
     "unlocked": "已解除鎖定",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "請編輯以下使用者資訊。",
+    "emailNotification": "將向用戶發送一封包含安全鏈接的電子郵件，以設置初始密碼。",
+    "emailUnique": "電子郵件地址必須唯一",
+    "enterInfo": "請在下方輸入新用戶的資訊。"
   },
   "emailConfig": {
     "title": "電子郵件設定",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "報告內容"
+    "iframeTitle": "報告內容",
+    "loadError": "無法加載報告",
+    "pdfError": "生成PDF時發生錯誤：{{message}}",
+    "unknownError": "未知錯誤"
   },
   "upgradeProfiles": {
     "add": "新增設定檔",
@@ -1850,8 +1966,8 @@
     "window": "分階段視窗 (分鐘)",
     "windowHelp": "將代理派送分散在這麼多分鐘內 (0–720)",
     "windowRange": "分階段視窗必須在 0 至 720 分鐘之間",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "是否要刪除更新配置檔 \"{{name}}\"？",
+    "confirmTrigger": "現在觸發「{{name}}」？更新將會分派到匹配的主機。"
   },
   "packageProfiles": {
     "add": "新增合規設定檔",
@@ -1882,7 +1998,7 @@
     "version": "版本",
     "versionOp": "運算子",
     "versionOpAny": "(任意)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "是否要刪除合規性配置檔 \"{{name}}\"？"
   },
   "compliance": {
     "compliant": "合規",
@@ -1932,7 +2048,7 @@
     "title": "報告品牌",
     "uploadError": "標誌上傳失敗",
     "uploadLogo": "上傳標誌",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "報告標題中與徽標並排顯示（例如 \"Confidential — Internal Use\"）。"
   },
   "reportTemplates": {
     "add": "新增範本",
@@ -1956,7 +2072,7 @@
     "subtitle": "渲染器在內建報告類型之上套用的自訂版面",
     "title": "報告範本",
     "updated": "範本已儲存",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "是否要刪除報告模板 \"{{name}}\"？"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "身分提供者",
     "saveError": "無法儲存提供者 — 請檢查表單。",
     "settingsSaveError": "無法儲存設定。",
-    "settingsTitle": "驗證設定"
+    "settingsTitle": "驗證設定",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "剩餘 {{count}} 個備用碼",
@@ -2055,7 +2175,7 @@
     "disableWarning": "用您的帳戶密碼確認。您的 TOTP 密鑰和備份代碼將被刪除。",
     "notEnrolledDescription": "為您的帳戶新增第二種驗證因素。每次登入時,系統都會要求您輸入驗證應用程式中的一次性代碼。",
     "regenPrompt": "輸入目前的 TOTP 代碼。現有的備份代碼將失效。",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "我已將這些代碼保存在安全的地方"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "上游 URL",
       "version": "版本",
       "upstreamHelp": "從上面的版本自動填寫;僅當您有區域特定的鏡像可指向時才覆寫。",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "小寫字母、數字、連字符和下劃線。空格和點變為連字符。"
     },
     "listTitle": "倉庫鏡像",
     "loadError": "無法載入倉庫鏡像。",
@@ -2128,7 +2248,7 @@
       "notReady": "缺少 {{pm}} 所需的工具 — 觸發同步前請安裝。",
       "ready": "已準備好鏡像 {{pm}} 儲存庫。",
       "subtitle": "在此主機上執行 {{pm}} 鏡像計劃所需的工具",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "代理未在 {{minutes}} 分鐘內響應。最可能的原因是：代理在計劃過程中崩潰，WebSocket 在發送 command_result 之前斷開連接，或者代理靜默去重了命令而沒有發出結果。請檢查此主機上的代理日誌並考慮重新啟動 sysmanage-agent 服務。點擊刷新 / 安裝工具以重試——在途標記將被清除並重新嘗試。"
     },
     "configureSubtitle": "選擇將執行此平台鏡像計劃的主機。僅列出平台與標籤頁相符的主機。",
     "deleteConfigInUse": "請先刪除此平台下的 {{n}} 個鏡像。",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "執行者",
+      "details": "詳細資料",
+      "openSite": "打開",
+      "operation": "操作",
+      "site": "網站",
+      "timestamp": "時間戳記"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "尚無聯邦審計條目。",
+    "emptyFiltered": "沒有符合篩選器的審計條目。",
+    "errorLoad": "無法加載聯邦審計日誌。",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "執行者",
+      "apply": "應用",
+      "clear": "清除",
+      "operation": "操作",
+      "siteId": "網站 ID"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "每個跨網站操作均由協調器集中記錄。",
+    "title": "聯邦稽核日誌"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "無法加載主機位置。",
+    "openHost": "打開主機",
+    "subtitle": "報告公共IP的代理程式的地理分布。",
+    "title": "主機地圖",
+    "status": "狀態"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "分配",
+      "deactivate": "停用",
+      "edit": "編輯",
+      "push": "推送現在"
     },
-    "active": "[TODO] active",
+    "active": "活動",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "無法更新分配。",
+      "errorLoad": "無法加載網站列表。",
+      "noSites": "尚無已註冊的聯邦站點。首先註冊一個站點。",
+      "statusLine": "推送狀態：{{status}}",
+      "submit": "保存分配",
+      "success": "策略分配已更新。",
+      "title": "分配到站點",
+      "statusLineWithAttempts": "推送狀態：{{status}}（{{attempts}} 次嘗試）"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "操作",
+      "active": "活動中",
+      "name": "名稱",
+      "type": "類型",
+      "version": "版本"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "新策略",
+      "cancel": "取消",
+      "customType": "自定義策略類型",
+      "definition": "定義 (JSON)",
+      "description": "描述",
+      "engineUnavailable": "聯邦控制器引擎未加載；無法建立策略。",
+      "error": "無法建立策略。",
+      "invalidJson": "定義必須是 JSON 物件。",
+      "name": "名稱",
+      "submit": "建立",
+      "success": "策略已建立。",
+      "title": "建立策略",
+      "type": "策略類型",
+      "typeOther": "其他...",
+      "typeRequired": "策略類型是必需的。"
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "無法停用策略。",
+      "success": "'{{name}}' 已停用。"
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "無法更新策略。",
+      "submit": "保存",
+      "success": "策略已更新。",
+      "title": "編輯策略",
+      "versionNote": "保存將會增加策略版本；網站在下次推送週期時獲取新版本。"
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "尚未定義策略。點擊“新策略”來創建一個。",
+    "errorLoad": "無法加載聯邦策略。",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "僅限活動",
+      "allTypes": "所有類型",
+      "type": "策略類型"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "無效",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "無法推送策略。",
+      "success": "已觸發推送 {{name}}。"
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "中央定義的策略推送到下屬網站。",
+    "title": "聯邦政策",
+    "deadLetter": "死信"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "移除",
+      "resume": "恢復",
+      "suspend": "暫停"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "註冊網站",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "網站行將被保留以供審計，但協調器將停止接受來自它的同步。此操作無法從UI中撤消。",
+      "cancel": "取消",
+      "confirm": "移除網站",
+      "title": "是否要移除聯邦網站？"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "最低代理版本",
+      "backToList": "回到網站",
+      "connection": "連接",
+      "enrolledAt": "已註冊於",
+      "errorLoad": "無法加載網站。",
+      "hostCount": "主機計數",
+      "lastSyncAt": "上次同步時間",
+      "lastSyncStatus": "上次同步狀態",
+      "metadata": "元數據",
+      "notFound": "網站未找到。",
+      "seeHosts": "查看此站點的主機",
+      "syncInterval": "同步間隔",
+      "syncIntervalValue": "{{seconds}} 秒",
+      "url": "URL",
+      "viewAuditLog": "查看審核日誌",
+      "activeCommands": "活動命令",
+      "activeCommandsEmpty": "沒有活動命令。",
+      "activeCommandsLoading": "加載中……",
+      "commandAttempts": "{{n}} 發送嘗試",
+      "commandDispatchedAt": "已發送 {{when}}",
+      "dispatchCommand": "發送命令",
+      "backlogDepth": "待處理的上游佇列",
+      "backlogUnknown": "—",
+      "refresh": "刷新",
+      "syncHealthy": "健康",
+      "syncNever": "從未同步",
+      "syncOverdue": "逾期",
+      "syncStale": "過期",
+      "rollupCompliance": "合規性",
+      "rollupEmpty": "從此站點尚未同步任何合規性或漏洞數據。",
+      "rollupTitle": "合規性和漏洞",
+      "rollupVulnerabilities": "漏洞（{{hosts}} 受影響的主機）",
+      "vulnCritical": "{{n}} 個關鍵事項",
+      "vulnHigh": "{{n}} 高級",
+      "vulnLow": "{{n}} 低級",
+      "vulnMedium": "{{n}} 中級",
+      "alertAck": "確認",
+      "alertAcked": "已確認",
+      "alertsTitle": "打開警報",
+      "autonomous": "獨立運行",
+      "pushPolicies": "推送策略",
+      "repushFailed": "無法重新推送策略",
+      "repushQueued": "已排隊 {{n}} 個策略推送以重新發送。",
+      "siteCapabilities": "功能",
+      "siteVersion": "報告的版本",
+      "syncLatency": "上遊同步延遲（最近）",
+      "syncPoints": "{{n}} 同步事件",
+      "syncTimeline": "同步時間線",
+      "syncTimelineEmpty": "尚無同步事件記錄。",
+      "pushPoliciesHint": "將此網站的所有策略重新排隊，包括任何卡住或死信的交付，以便立即重新推送。",
+      "syncHealthHistogram": "同步成功 / 失敗（最近）"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "還沒有註冊站點。註冊一個下屬 SysManage 伺服器開始使用。",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "取消",
+      "done": "完成",
+      "engineUnavailable": "聯邦控制器引擎未加載；無法註冊一個網站。",
+      "error": "無法註冊網站。",
+      "location": "位置標籤（可選）",
+      "name": "網站名稱",
+      "submit": "生成令牌",
+      "successTitle": "網站已註冊",
+      "syncIntervalSeconds": "同步間隔（秒）",
+      "title": "加入聯邦網站",
+      "tokenInstructions": "複製下方的入網令牌，並將其交付給新站點伺服器。這是唯一一次顯示該令牌的機會——如果遺失則無法恢復。",
+      "url": "網站 URL",
+      "siteIdentityKey": "網站身份公鑰 (PEM)",
+      "siteIdentityKeyHelp": "必填。粘貼從該網站的 Server Role 頁面獲取的身份公開金鑰。協調器將驗證網站的入網憑據，以對抗入網時的中間人攻擊。"
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "聯邦功能允許您從一個協調器管理多個SysManage伺服器。升級到企業版許可證以在此處註冊下屬網站。",
+      "title": "多站聯邦需要 Enterprise 版本"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "無法加載聯邦網站。",
+    "hostCount": "{{count}} 主機",
+    "lastSync": "同步於 {{when}}",
+    "mapView": "地圖視圖",
+    "policiesLink": "策略",
+    "subtitle": "從屬的 SysManage 伺服器已註冊到此協調器。",
+    "title": "聯邦網站",
+    "hostsLink": "主機",
+    "tilesView": "儀表板"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "無法加載聯邦網站。",
+    "gridView": "格狀視圖",
+    "openSite": "打開站點",
+    "subtitle": "下屬網站伺服器的地理分布。",
+    "title": "聯邦地圖",
+    "tilesView": "儀表板",
+    "lastSyncLabel": "上次同步：",
+    "statusLabel": "狀態："
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "建立代理組件包",
+    "buildError": "無法排隊構建",
+    "buildProplus": "建立Pro+組件包",
+    "buildServer": "建立伺服器組件包",
+    "bundle": "組件包",
+    "completedAt": "已完成",
+    "confirmDelete": "是否要刪除此捆綁及其 ISO 檔案？",
+    "copied": "命令已複製到剪貼板",
+    "copy": "複製到剪貼板",
+    "copyError": "無法訪問剪貼板",
+    "createdAt": "已建立",
+    "delete": "刪除",
+    "deleteError": "無法刪除捆綁包",
+    "deleted": "組件包已刪除",
+    "dockerInstallHint": "在具有 sudo 權限的用戶下在此 sysmanage 服務器上運行：",
+    "dockerNoGroup": "Docker 正在運行，但 {{user}} 使用者不在 docker 群組中，因此建立子程序無法連接到 daemon socket。",
+    "dockerNotInstalled": "此伺服器上未安裝 Docker。捆綁建立需要 Docker 以取得特定分發版的 Linux 套件。",
+    "dockerNotRunning": "Docker 已安裝，但 daemon 不可達。請使用：sudo systemctl enable --now docker 來啟動它。",
+    "dockerPermissionDenied": "Docker 守護程序正在運行，但 {{user}} 用戶（執行此 SysManage 进程的用户）無法讀取 /var/run/docker.sock。將用戶添加到 docker 群組，然後重新啟動 SysManage 进程以使新的群組設置生效。",
+    "dockerReady": "Docker 已準備好",
+    "dockerReadyHint": "構建通常需要5-30分鐘，具體取決於啟用的平台數量。",
+    "download": "下載 ISO 檔案",
+    "downloadError": "無法下載捆綁包",
+    "empty": "還沒有捆綁包。點擊上方的構建按鈕來創建一個。",
+    "loadError": "無法加載捆綁包",
+    "queued": "組件包構建已排隊 — 清單正在刷新",
+    "recentFailures": "最近的構建失敗：",
+    "recheckDocker": "重新檢查 Docker",
+    "requiresDocker": "組件包構建需要在本機安裝並運行Docker — 這是為了獲取每個發行版的Linux套件。構建通常需要5-30分鐘，具體取決於啟用的平台數量。",
+    "size": "大小",
+    "status": "狀態",
+    "subtitle": "生成一個跨操作系統的ISO，包含sysmanage伺服器或代理程式以及所有平台依賴項，準備在隔離環境中掛載。",
+    "title": "隔離安裝包",
+    "version": "版本",
+    "recheckResources": "重新檢查資源",
+    "resourcesInsufficient": "此伺服器沒有足夠的空閒記憶體或磁碟空間來建立伺服器或代理程式套件 — 這些按鈕在資源釋放之前（增加交換空間或擴大虛擬機）會被禁用。",
+    "resourcesLow": "資源不足 — 建構可以運行但會依賴於交換空間並可能變慢。"
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "刪除",
+      "download": "下載 ISO 檔案"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "操作",
+      "completed": "已完成",
+      "created": "已建立",
+      "isoLabel": "ISO標籤",
+      "size": "大小",
+      "started": "開始",
+      "status": "狀態"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "是否要刪除此集合運行及其清單？",
+    "createError": "無法建立運行",
+    "created": "集合運行已排隊",
+    "deleteError": "無法刪除運行",
+    "deleted": "集合運行已刪除",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "取消",
+      "includeCompliance": "包含合規性套件",
+      "includeCve": "包含CVE feed快照",
+      "isoLabel": "ISO標籤",
+      "isoLabelHelper": "短標識符，嵌入生成的ISO中（例如\"monthly-2026-05\"）。",
+      "isoLabelRequired": "ISO標籤是必填的",
+      "mediaSizeHelper": "每個磁碟的最大大小（MB）。默認為4700（DVD-5）。",
+      "mediaSizeMb": "媒體大小（MB）",
+      "submit": "排隊運行",
+      "title": "新收集運行",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "無法下載ISO",
+    "empty": "還沒有收集運行。點擊“新收集運行”開始一個。",
+    "licenseRequired": "隔離收集器引擎未加載；需要 Pro+ 許可證。",
+    "loadError": "無法加載運行",
+    "newRun": "新收集運行",
+    "noManifestFound": "運行尚未有清單 — 狀態為 COMPLETE 時再試一次。",
+    "notApplicable": "此頁面僅在收集器角色部署中才有意義。",
+    "refresh": "刷新",
+    "subtitle": "觸發一次性收集運行，這些運行會鏡像配置的倉庫、建立一個簽名 ISO，並為空氣隔離側寫入一個清單以供攝取。",
+    "title": "隔離收集運行",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "伺服器角色"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "未找到符合條件的磁盤。插入媒體並按下 Rescan。",
+    "help": "選擇持有收集器媒體的光碟/USB驅動器。在Air-Gap存儲庫頁面上的導入按鈕在插入可讀取的ISO時可用。在導入期間會驗證媒體簽名。",
+    "label": "區塊設備",
+    "loadError": "無法枚舉磁碟機。",
+    "none": "(無)",
+    "rescan": "重新掃描磁盤",
+    "saveError": "無法儲存裝置。",
+    "title": "導入磁碟",
+    "optical": "光學",
+    "removable": "可移除"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "磁碟機",
+    "import": "導入ISO",
+    "importError": "無法開始匯入。",
+    "noDevice": "未選擇導入磁盤。在設置 → 伺服器角色中選擇一個。",
+    "notReady": "尚未準備好",
+    "ready": "準備{{label}}",
+    "rescan": "重新掃描",
+    "statusError": "無法探測導入裝置。",
+    "title": "從媒體導入",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "完成",
+      "copying": "複製套件",
+      "failed": "失敗",
+      "queued": "已排隊",
+      "verified": "已驗證",
+      "verifying": "驗證簽名"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "導入完成 — 以下的存儲庫列表已刷新。",
+    "runStats": "{{files}} 個檔案 · {{size}}",
+    "runStatus": "導入狀態"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "複製公開金鑰",
+      "help": "複製此公開金鑰並在隔離倉庫伺服器上導入它，以便它可以信任此收集器生成的簽名媒體。僅顯示公開金鑰——私鑰永遠不會離開此伺服器。",
+      "loadError": "無法加載收集器公開金鑰。",
+      "title": "收集器公鑰"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "已複製！",
+    "copyError": "無法複製到剪貼板。",
+    "copyFingerprint": "複製指紋",
+    "fingerprint": "指紋",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(無法讀取的金鑰)",
+      "count": "{{n}} 可信賴",
+      "empty": "還沒有可信收集器金鑰。",
+      "help": "從每個空氣隔離收集器導入公開金鑰，該存儲庫應接受其媒體。由不受信任的金鑰簽名的媒體在傳入時將被拒絕。",
+      "import": "導入金鑰",
+      "importError": "無法導入金鑰。",
+      "imported": "導入金鑰 {{fp}}",
+      "loadError": "無法加載可信金鑰。",
+      "nameLabel": "收集器名稱",
+      "pemLabel": "公開金鑰 (PEM)",
+      "removeError": "無法移除金鑰。",
+      "required": "名稱和公開金鑰都是必填項。",
+      "title": "可信收集中金鑰"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "詳細資料",
+      "openSite": "網站"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "主機",
+      "ipv4": "IPv4",
+      "lastSeen": "最後一次看到",
+      "os": "作業系統",
+      "platform": "平台",
+      "status": "狀態"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "關閉",
+      "ipv6": "IPv6",
+      "noLiveLink": "實時詳細連結不可用（擁有網站沒有URL）。",
+      "notFound": "此主機已不再於目錄中。",
+      "site": "擁有網站",
+      "theSite": "該網站",
+      "title": "主機詳細資訊",
+      "viewLive": "在 {{site}} 查看實時詳情 →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "還沒有從任何站點同步主機。",
+    "emptyFiltered": "沒有與當前篩選器匹配的主機。",
+    "errorLoad": "無法加載跨站主機。",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "應用",
+      "clear": "清除",
+      "osFamily": "作業系統家族",
+      "search": "搜尋 （姓名 / IP）",
+      "status": "狀態"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "針對一個網站範圍",
+    "subtitle": "所有已註冊網站中的每台主機，從協調器同步的目錄中。",
+    "title": "跨站點主機",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "清除",
+      "dispatch": "發送命令",
+      "selectAll": "在此頁面選取所有",
+      "selected": "{{n}} 選擇的主機"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "取消",
+    "commandType": "命令",
+    "dispatch": "發送",
+    "dispatching": "正在發送……",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "無法發送命令。",
+      "packagesRequired": "請至少輸入一個套件名稱。",
+      "scriptRequired": "請輸入要執行的腳本。",
+      "unlicensed": "聯邦需要企業版許可證。",
+      "partial": "{{failed}} 組合中的 {{total}} 個網站發送失敗。"
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "主機ID",
+    "hostIdsHint": "逗號分隔的主機ID（來自主機頁面）",
+    "packages": "套件名稱",
+    "packagesOptional": "套件名稱（可選 — 空白表示所有更新）",
+    "script": "腳本",
+    "subtitle": "為 {{site}} 排隊命令。該網站在其主機上執行並報告結果 — 並無立即執行的內容。",
+    "targetAll": "此站點上的所有主機",
+    "targetSpecific": "特定主機（按ID）",
+    "thisSite": "此網站",
+    "title": "發送命令",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "更新應用",
+      "deployPackages": "安裝包",
+      "reboot": "重啟",
+      "runScript": "運行腳本"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "為 {{hosts}} 個選定主機和 {{sites}} 個網站排隊命令。每個網站在其主機上執行並報告結果 — 並無立即執行的內容。"
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "協調員",
+    "coordinatorThisServer": "此伺服器",
+    "countEnrolled": "{{n}} 已註冊",
+    "countHosts": "{{n}} 主機",
+    "countPending": "{{n}} 待處理",
+    "countSuspended": "{{n}} 暫停",
+    "empty": "還沒有註冊站點。",
+    "errorLoad": "無法加載網站列表。",
+    "gridView": "格狀視圖",
+    "hostsLabel": "{{n}} 主機",
+    "lastSync": "同步於 {{when}}",
+    "mapView": "地圖視圖",
+    "title": "聯邦儀表板"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "有效",
+    "save": "保存閾值",
+    "saveFailed": "無法更新閾值。",
+    "saved": "警報閾值已保存。",
+    "subtitle": "留空以使用內置默認值。",
+    "title": "警報閾值"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "活動中",
+      "compliance": "最差合規性",
+      "critical": "關鍵的 CVEs",
+      "high": "高CVE數量",
+      "hosts": "主機",
+      "site": "網站"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "生成報告",
+    "sites": "網站（若未選取則為所有）",
+    "subtitle": "聚合主機、合規性和漏洞滾動報告跨站點。",
+    "totals": "總計（{{n}} 個網站）",
+    "upsell": "多站聯邦需要 Enterprise 版本。"
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "匯聚主機存貨、合規性和脆弱性摘要的樞紐，從許多下屬網站伺服器收集這些信息並向下分派命令和政策。每個聯邦一個協調器。",
+      "title": "聯邦協調器"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "已複製！",
+    "copyError": "無法複製到剪貼板。",
+    "copyFingerprint": "複製指紋",
+    "currentTag": "(目前)",
+    "heading": "聯邦角色",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "複製公開金鑰",
+      "pending": "生成身分金鑰……",
+      "title": "此伺服器的身份金鑰",
+      "help": "複製此公開金鑰並將其粘貼到對等方的聯邦卡中，以便每邊可以記錄對方的身份指紋並進行離線驗證。私鑰永遠不會離開此伺服器。"
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "無法導入金鑰。",
+    "intro": "選擇此伺服器如何參與多網站聯邦。這與左側的空氣隔離角色獨立運作 — 一台伺服器可以同時具備兩種角色。在下次重新啟動後生效。",
+    "loadError": "無法加載聯邦角色。",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "預設值。此伺服器不是多站點聯邦的一部分。除非您正在運行協調器或下屬站點，否則請選擇此選項。",
+      "title": "未聯邦化"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "導入對等金鑰",
+      "name": "對等名稱",
+      "pem": "對等公開金鑰（PEM）",
+      "empty": "尚無記錄的對等身份金鑰。",
+      "help": "在此處記錄對等體的公開金鑰以驗證其身份指紋（通過其他途徑）。聯邦連接本身由在入網期間固定的 TLS 憑證保護 — 這些金鑰僅供人為驗證，而非訪問控制。",
+      "title": "對等身分金鑰"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "無法移除該金鑰。",
+    "save": "保存聯邦角色",
+    "saveError": "無法儲存聯邦角色。",
+    "saved": "聯邦角色已保存。重新啟動伺服器使其生效。",
+    "saving": "保存中…",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "一個自主運行並向上報告至協調器的下屬伺服器。即使協調器不可達，它仍會管理自己的主機，並在重新連接時重播隊列中的數據。",
+      "title": "聯邦網站"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "協調器 URL",
+      "enrolled": "已與協調器註冊",
+      "error": "無法與協調器入網。",
+      "help": "將此網站指向其協調員並粘貼協調員發行的一次性註冊令牌（來自其網站頁面）。此網站呼叫回以完成握手並開始同步。",
+      "notEnrolled": "尚未與協調員註冊。",
+      "submit": "與協調器註冊",
+      "submitting": "正在註冊…",
+      "title": "與協調器註冊",
+      "token": "註冊令牌",
+      "coordIdentityKey": "協調器身分公開金鑰（PEM）",
+      "coordIdentityKeyHelp": "必填。粘貼從協調器的 Server Role 頁面獲取的身份公開金鑰。此網站拒絕入網，除非協調器證明了這個確切的金鑰 — 這就是防止入網時的中間人攻擊的方法。"
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "伺服器範圍的操作設定。儲存的值會存儲在數據庫中，並覆蓋 sysmanage.yaml。",
+    "loadError": "無法加載配置設置。",
+    "save": "保存",
+    "saveError": "無法保存配置設置。",
+    "saved": "配置已保存。",
+    "secretSet": "•••••••• (已存儲 — 留空以保留)",
+    "secretSetHelp": "OpenBAO 中存儲了一個密碼。請輸入新的密碼來替換它。",
+    "secretUnset": "未設置",
+    "secretUnsetHelp": "安全地存儲在 OpenBAO 中，不在數據庫中。",
+    "title": "配置"
+  },
+  "connection": {
+    "networkError": "網路錯誤：無法連接到伺服器",
+    "serverError": "伺服器錯誤：{{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "向左捲動",
+    "scrollRight": "向右捲動"
+  },
+  "settings": {
+    "tabsAriaLabel": "設置選項卡"
   }
 }

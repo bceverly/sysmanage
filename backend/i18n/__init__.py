@@ -53,3 +53,40 @@ def ngettext(
     """Translate a message with plural forms."""
     translation = get_translation(language)
     return translation.ngettext(singular, plural, count)
+
+
+def module_translation(domain: str, localedir: str):
+    """Return a ``_``-style translator bound to a Pro+ module's OWN catalog.
+
+    Pro+ engine modules are compiled ``.so`` files downloaded from the license
+    server; their translatable strings live in a gettext catalog that ships in
+    the plugin bundle at ``<localedir>/<lang>/LC_MESSAGES/<domain>.mo`` — NOT in
+    the OSS ``messages`` domain compiled into this server.  The returned callable
+    resolves each string against THAT catalog using the server's current request
+    language (the same ``set_language`` state the core ``_()`` uses), so a module
+    string is localised per-request exactly like a core string.  Translations are
+    cached per language.  Missing catalog/locale falls back to the English
+    source, so an un-translated or absent module catalog is safe (never raises).
+
+    The module loader injects the result after import (see ModuleLoader); a
+    module declares an English-identity default so it also works standalone::
+
+        _ = lambda s: s                     # default in the module
+        def set_translator(fn): global _; _ = fn
+        ...
+        _("Apply security updates immediately")
+    """
+    cache: dict = {}
+
+    def _translate(message: str, language: Optional[str] = None) -> str:
+        lang = language if language is not None else CURRENT_LANGUAGE
+        translation = cache.get(lang)
+        if translation is None:
+            try:
+                translation = gettext.translation(domain, localedir, [lang])
+            except (FileNotFoundError, OSError):
+                translation = gettext.NullTranslations()
+            cache[lang] = translation
+        return translation.gettext(message)
+
+    return _translate

@@ -631,7 +631,7 @@ const Secrets: React.FC = () => {
               value={secretFilename}
               onChange={(e) => setSecretFilename(e.target.value)}
               margin="normal"
-              placeholder="e.g., id_rsa.pub, server.crt, database.conf"
+              placeholder={t('secrets.filenamePlaceholder', 'e.g., id_rsa.pub, server.crt, database.conf')}
             />
 
             <FormControl fullWidth margin="normal">

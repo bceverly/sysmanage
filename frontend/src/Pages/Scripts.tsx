@@ -571,7 +571,7 @@ const Scripts: React.FC = () => {
         showNotification(t('scripts.scriptContentRequired'), 'error');
         return;
       }
-      executeRequest.script_name = scriptName || 'Ad-hoc Script';
+      executeRequest.script_name = scriptName || t('scripts.adHocScript', 'Ad-hoc Script');
       executeRequest.script_content = scriptContent;
       executeRequest.shell_type = selectedShell;
     }
@@ -1283,8 +1283,8 @@ const Scripts: React.FC = () => {
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                           <Typography>{host.fqdn}</Typography>
                           <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Chip 
-                              label={isHostConnected(host) ? 'Connected' : 'Offline'} 
+                            <Chip
+                              label={isHostConnected(host) ? t('scripts.connected', 'Connected') : t('scripts.offline', 'Offline')}
                               size="small" 
                               color={isHostConnected(host) ? 'success' : 'warning'}
                               variant="outlined"
@@ -1406,7 +1406,7 @@ const Scripts: React.FC = () => {
                         />
                         {executionResult.exit_code !== undefined && (
                           <Chip 
-                            label={`Exit Code: ${executionResult.exit_code}`}
+                            label={t('scripts.exitCodeLabel', 'Exit Code: {{code}}', { code: executionResult.exit_code })}
                             size="small"
                             variant="outlined"
                           />
@@ -1435,6 +1435,7 @@ const Scripts: React.FC = () => {
                     }}>
                       {executionResult.stdout_output && (
                         <Box>
+                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
                           <Typography sx={{ color: '#4ec9b0', fontFamily: 'monospace', fontSize: '0.875rem' }}>
                             === STDOUT ===
                           </Typography>
@@ -1445,6 +1446,7 @@ const Scripts: React.FC = () => {
                       )}
                       {executionResult.stderr_output && (
                         <Box sx={{ mt: executionResult.stdout_output ? 2 : 0 }}>
+                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
                           <Typography sx={{ color: '#f48771', fontFamily: 'monospace', fontSize: '0.875rem' }}>
                             === STDERR ===
                           </Typography>
@@ -1455,6 +1457,7 @@ const Scripts: React.FC = () => {
                       )}
                       {executionResult.error_message && (
                         <Box sx={{ mt: 2 }}>
+                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
                           <Typography sx={{ color: '#ff6b6b', fontFamily: 'monospace', fontSize: '0.875rem' }}>
                             === ERROR ===
                           </Typography>
@@ -1690,6 +1693,7 @@ const Scripts: React.FC = () => {
                   {viewingExecution.execution_time && (
                     <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" gutterBottom>
+                        {/* eslint-disable-next-line i18next/no-literal-string -- seconds unit suffix */}
                         <strong>{t('scripts.executionTime')}:</strong> {viewingExecution.execution_time}s
                       </Typography>
                     </Grid>

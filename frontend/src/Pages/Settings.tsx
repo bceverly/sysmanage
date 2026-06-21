@@ -1185,6 +1185,7 @@ const Settings: React.FC = () => {
                 <MenuItem value="">
                   <em>{t('updates.filters.allManagers', 'All Package Managers')}</em>
                 </MenuItem>
+                {/* eslint-disable i18next/no-literal-string -- package manager brand names */}
                 <MenuItem value="apt">APT</MenuItem>
                 <MenuItem value="snap">Snap</MenuItem>
                 <MenuItem value="flatpak">Flatpak</MenuItem>
@@ -1197,6 +1198,7 @@ const Settings: React.FC = () => {
                 <MenuItem value="dnf">DNF</MenuItem>
                 <MenuItem value="zypper">Zypper</MenuItem>
                 <MenuItem value="pacman">Pacman</MenuItem>
+                {/* eslint-enable i18next/no-literal-string */}
               </Select>
             </FormControl>
           </Grid>
@@ -1219,7 +1221,9 @@ const Settings: React.FC = () => {
       {packages.length > 0 && (
         <Box>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {t('availablePackages.results', 'Search Results')} ({packageTotalCount.toLocaleString()} total, showing {packages.length})
+            {t('availablePackages.results', 'Search Results')}{' '}
+            {/* eslint-disable-next-line i18next/no-literal-string -- result count summary uses interpolated values */}
+            ({packageTotalCount.toLocaleString()} total, showing {packages.length})
           </Typography>
           <div style={{ height: 400 }}>
             <DataGrid
@@ -1297,7 +1301,7 @@ const Settings: React.FC = () => {
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
-          aria-label="settings tabs"
+          aria-label={t('settings.tabsAriaLabel', 'settings tabs')}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -1449,13 +1453,13 @@ const Settings: React.FC = () => {
                 <strong>{t('queues.priority', 'Priority')}:</strong> {selectedMessage.priority}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || 'N/A'}
+                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || t('common.notAvailable', 'N/A')}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, 'N/A')}
+                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, t('common.notAvailable', 'N/A'))}
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, 'N/A')}
+                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, t('common.notAvailable', 'N/A'))}
               </Typography>
               
               <Typography variant="h6" sx={{ mb: 1 }}>

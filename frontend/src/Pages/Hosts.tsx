@@ -326,7 +326,7 @@ const Hosts = () => {
                 }
                 const isPrivileged = params.value;
                 if (isPrivileged === undefined || isPrivileged === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
                 }
                 return (
                     <Chip
@@ -355,7 +355,7 @@ const Hosts = () => {
                 }
                 const scriptsEnabled = params.value;
                 if (scriptsEnabled === undefined || scriptsEnabled === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
                 }
                 return (
                     <Chip
@@ -732,13 +732,13 @@ const Hosts = () => {
             console.log('Diagnostics collection requested successfully');
 
             // Show success message
-            alert(`Diagnostics collection requested for host ${hostId}. Check the host details page to view results when available.`);
+            alert(t('hosts.diagnosticsRequested', 'Diagnostics collection requested for host {{hostId}}. Check the host details page to view results when available.', { hostId }));
 
             // Clear selection
             setSelection([]);
         } catch (error) {
             console.error('Error requesting diagnostics:', error);
-            alert('Failed to request diagnostics collection. Please try again.');
+            alert(t('hosts.diagnosticsRequestFailed', 'Failed to request diagnostics collection. Please try again.'));
             setSelection([]);
         }
     }
@@ -751,7 +751,7 @@ const Hosts = () => {
             await Promise.all(deploymentPromises);
 
             // Show success message
-            alert(t('hosts.opentelemetryDeploySuccess', `OpenTelemetry deployment queued for ${selection.length} host(s)`));
+            alert(t('hosts.opentelemetryDeploySuccess', `OpenTelemetry deployment queued for ${selection.length} host(s)`, { count: selection.length }));
 
             // Refresh hosts
             await refreshHosts();
@@ -792,13 +792,13 @@ const Hosts = () => {
                     .join('\n');
 
                 if (response.data.success_count > 0) {
-                    alert(t('hosts.antivirusDeployPartialSuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s).\n\nFailed hosts:\n${failedHostsList}`));
+                    alert(t('hosts.antivirusDeployPartialSuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s).\n\nFailed hosts:\n${failedHostsList}`, { count: response.data.success_count, hosts: failedHostsList }));
                 } else {
-                    alert(t('hosts.antivirusDeployAllFailed', `Antivirus deployment failed for all hosts:\n\n${failedHostsList}`));
+                    alert(t('hosts.antivirusDeployAllFailed', `Antivirus deployment failed for all hosts:\n\n${failedHostsList}`, { hosts: failedHostsList }));
                 }
             } else {
                 // Show success message
-                alert(t('hosts.antivirusDeploySuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s)`));
+                alert(t('hosts.antivirusDeploySuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s)`, { count: response.data.success_count }));
             }
 
             // Refresh hosts

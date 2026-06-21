@@ -157,9 +157,47 @@ Always batch from the clients — one round-trip per chunk instead of per string
   result is complete and index-aligned. The clients then simply re-run later to
   pick up anything that fell back — the pass is resumable.
 
-## How the clients use it (idempotent by design)
+## The backfill client (`i18n_backfill.py`)
 
-The backfill clients only ever send **untranslated** strings — `[TODO]`
-placeholders (docs/frontend JSON), empty `msgstr` (backend/agent gettext `.po`),
-or values still identical to English. Already-translated strings are never
-re-sent, so re-running a pass is cheap and only fills genuine gaps.
+One tool backfills every project's locale store. Run it **from your dev box**
+(where all the repos are checked out as siblings), pointed at the service:
+
+```bash
+pip install polib          # only needed for the .po projects (backend, agent)
+
+python3 i18n_backfill.py --project docs     --service http://beast:8765
+python3 i18n_backfill.py --project frontend --service http://beast:8765
+python3 i18n_backfill.py --project proplus  --service http://beast:8765
+python3 i18n_backfill.py --project backend  --service http://beast:8765
+python3 i18n_backfill.py --project agent    --service http://beast:8765
+```
+
+| `--project` | Store | Format | Gap |
+|-------------|-------|--------|-----|
+| `docs`      | `sysmanage-docs/assets/locales/<lang>.json` | JSON | `[TODO] …` |
+| `frontend`  | `sysmanage/frontend/public/locales/<lang>/translation.json` | JSON | `[TODO] …` |
+| `proplus`   | `sysmanage-professional-plus/frontend/public/locales/<lang>/translation.json` | JSON | `[TODO] …` |
+| `backend`   | `sysmanage/backend/i18n/locales/<lang>/LC_MESSAGES/messages.po` | gettext | empty `msgstr` |
+| `agent`     | `sysmanage-agent/src/i18n/locales/<lang>/LC_MESSAGES/messages.po` | gettext | empty `msgstr` |
+
+Useful flags: `--dry-run` (report gap counts, no service/writes), `--langs de,ja`
+(subset), `--limit 20` (cap per language for a smoke test), `--root <dir>` (where
+the repos live; defaults to the parent of the `sysmanage` repo),
+`--client-batch N` (strings per request, default 100). Service URL also reads
+`TRANSLATION_SERVICE_URL`.
+
+**Idempotent by design** — it only ever sends **untranslated** strings (`[TODO]`
+placeholders or empty `msgstr`). Already-translated entries are never re-sent, so
+re-running is cheap and only fills genuine gaps.
+
+**Conservative** — if the service returns the English source for a string (its
+placeholder guard couldn't translate it safely), the client **leaves that entry a
+gap** rather than writing English, so a later run retries it. Pure-placeholder
+strings (no letters) are written through unchanged as normal.
+
+### Going forward (new English strings)
+The normal i18n flow already seeds new strings as `[TODO] …` (JSON, via each
+project's `i18n_autotag`/`i18n_validate`) or empty `msgstr` (gettext, via
+`xgettext`/`msgmerge`). So after adding English UI/doc/log strings, run the
+relevant `--project` backfill and the new strings get translated automatically —
+nothing else to wire up.

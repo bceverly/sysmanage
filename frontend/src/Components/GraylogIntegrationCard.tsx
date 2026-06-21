@@ -401,6 +401,7 @@ const GraylogIntegrationCard: React.FC = () => {
                   </FormControl>
                   {selectedServer && (
                     <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- URL scheme/port are not translatable */}
                       {t('graylog.serverUrl.label', 'URL')}: http://{selectedServer.fqdn}:9000
                     </Typography>
                   )}

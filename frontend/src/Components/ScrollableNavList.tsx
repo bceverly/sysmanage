@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import { useTranslation } from 'react-i18next';
 import './css/ScrollableNavList.css';
 
 interface ScrollableNavListProps {
@@ -27,6 +28,7 @@ const ScrollableNavList: React.FC<ScrollableNavListProps> = ({
   children,
   listClassName = '',
 }) => {
+  const { t } = useTranslation();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -72,7 +74,7 @@ const ScrollableNavList: React.FC<ScrollableNavListProps> = ({
         type="button"
         className={`scrollnav__btn scrollnav__btn--left ${canLeft ? '' : 'scrollnav__btn--hidden'}`}
         onClick={() => scrollBy(-200)}
-        aria-label="Scroll left"
+        aria-label={t('nav.scrollLeft', 'Scroll left')}
         tabIndex={canLeft ? 0 : -1}
       >
         <IoChevronBack />
@@ -84,7 +86,7 @@ const ScrollableNavList: React.FC<ScrollableNavListProps> = ({
         type="button"
         className={`scrollnav__btn scrollnav__btn--right ${canRight ? '' : 'scrollnav__btn--hidden'}`}
         onClick={() => scrollBy(200)}
-        aria-label="Scroll right"
+        aria-label={t('nav.scrollRight', 'Scroll right')}
         tabIndex={canRight ? 0 : -1}
       >
         <IoChevronForward />

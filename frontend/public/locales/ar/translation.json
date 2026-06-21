@@ -143,7 +143,9 @@
       "checkAll": "تحديد الكل",
       "checkNone": "إلغاء تحديد الكل",
       "description": "اختر البطاقات التي تريد عرضها على لوحة المعلومات",
-      "title": "إعدادات لوحة المعلومات"
+      "title": "إعدادات لوحة المعلومات",
+      "loadError": "无法加载偏好设置",
+      "saveError": "保存偏好设置失败"
     },
     "updates": "التحديثات"
   },
@@ -198,7 +200,7 @@
     "sendReset": "إرسال رابط إعادة التعيين",
     "sending": "جاري الإرسال...",
     "title": "نسيت كلمة المرور",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "لم تتلقى بريدًا إلكترونيًا؟ تحقق من مجلد البريد العشوائي أو حاول مرة أخرى."
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "أدخل الرابط الكامل لمثيل Grafana الخاص بك",
-      "label": "رابط Grafana"
+      "label": "رابط Grafana",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "لم يتم العثور على خوادم Grafana",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "تكامل Grafana",
     "useManagedServer": {
       "label": "استخدام الخادم المُدار"
-    }
+    },
+    "healthCheckFailed": "健康检查失败",
+    "loadError": "无法加载Grafana配置",
+    "saveError": "保存设置失败"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "اسم المستخدم مطلوب",
     "windowsDescription": "إنشاء حساب مستخدم محلي جديد على مضيف Windows هذا.",
     "passwordHelp": "الحد الأدنى 8 أحرف مطلوبة",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "هل أنت متأكد من أنك تريد حذف حساب المستخدم \"{{username}}\"؟ لا يمكن إلغاء هذا الإجراء.",
+    "invalidUidPlatform": "يجب أن يكون UID رقمًا >= {{minUid}}",
+    "uidHelpPlatform": "اترك فارغًا لتعيين تلقائي. يجب أن يكون >= {{minUid}} إذا تم تحديده.",
+    "shellBash": "Bash",
+    "shellBourne": "Shell Bourne",
+    "shellCsh": "Csh",
+    "shellFalse": "错误",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "لا تسجيل دخول",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "إضافة مدير حزم جديد مُفعّل",
@@ -822,17 +837,23 @@
     "size": "الحجم",
     "softwarePackages": "حزم البرامج",
     "vendor": "البائع",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "هل أنت متأكد من أنك تريد إلغاء خلق \"{{name}}\"؟",
+    "childHostHostnameHelp": "أدخل اسم العضو (مثل \"myhost\") أو FQDN (مثل \"myhost.example.com\")",
+    "childHostsEmptyBhyveReady": "انقر فوق \"إنشاء مضيف فرعي\" لإنشاء جهاز افتراضي bhyve جديد.",
+    "childHostsEmptyLxdReady": "انقر فوق \"إنشاء مضيف فرعي\" لإنشاء وحدة حاوية LXD جديدة.",
+    "childHostsEmptyVmmReady": "انقر فوق \"إنشاء مضيف فرعي\" لإنشاء جهاز افتراضي VMM جديد.",
+    "childHostsEmptyWslEnabled": "انقر فوق \"إنشاء مضيف فرعي\" لإنشاء مثيل WSL جديد.",
+    "clickRequestData": "انقر فوق \"طلب بيانات المضيف\" لجمع معلومات التحقيق من الوكيل.",
+    "deleteChildHostMessage": "هل أنت متأكد من أنك تريد حذف المضيف الفرعي \"{{name}}\"؟",
+    "geoLocation": "الموقع الجغرافي",
+    "publicIp": "عنوان IP العام",
+    "selectedServices": "{{count}} خدمة(س) محددة",
+    "deviceNumber": "设备 {{number}}",
+    "errorUpdatingServices": "更新服务失败",
+    "graylogPort": "(منفذ {{port}})",
+    "interfaceNumber": "واجهة {{number}}",
+    "noChangesMade": "لم يتم إجراء أي تغييرات",
+    "servicesUpdatedCount": "{{count}} خدمة تم تحديثها"
   },
   "hostGroup": {
     "add": "إضافة",
@@ -854,7 +875,7 @@
     "invalidGroupName": "يجب أن يبدأ اسم المجموعة بحرف ويحتوي فقط على أحرف وأرقام وشرطات سفلية وشرطات",
     "unixDescription": "إنشاء مجموعة جديدة على هذا المضيف.",
     "windowsDescription": "إنشاء مجموعة محلية جديدة على مضيف Windows هذا.",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "هل أنت متأكد من أنك تريد حذف المجموعة \"{{groupName}}\"؟ لا يمكن إلغاء هذا الإجراء."
   },
   "hosts": {
     "agentVersion": "إصدار الوكيل",
@@ -912,8 +933,8 @@
       "statusRestarting": "جارٍ إعادة تشغيل المضيفات الفرعية...",
       "statusShuttingDown": "جارٍ إيقاف المضيفات الفرعية...",
       "ungracefulWarning": "يحتوي هذا المضيف على {{count}} مضيف(مضيفات) فرعي قيد التشغيل سيتم إنهاؤها بشكل غير آمن أثناء إعادة التشغيل. قم بالترقية إلى SysManage Professional+ لإعادة التشغيل المنسقة الآمنة.",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "انقر فوق \"إعادة التشغيل الآن\" لإعادة تشغيل {{hostname}} بدون إيقاف المضيفين الفرعيين أولاً.",
+      "proceedOrchestrated": "انقر فوق \"إعادة تشغيل منسقة\" لإعادة تشغيل {{hostname}} بأمان."
     },
     "rebootRequested": "تم طلب إعادة التشغيل بنجاح",
     "rebootSelected": "إعادة تشغيل المحدد",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "السكريبتات معطلة لهذا المضيف",
     "scriptsEnabledTooltip": "السكريبتات ممكنة لهذا المضيف",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\\n\\nالعُقد التي فشلت:\\n{{hosts}}",
+    "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقدة(ات)",
+    "approveSelected": "افتح الم 선택",
+    "opentelemetryDeploySuccess": "تم ترتيب نشر OpenTelemetry لـ {{count}} مستضياف (س)",
+    "diagnosticsRequestFailed": "请求收集诊断数据失败。请重试。",
+    "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请访问主机详情页面查看结果（如有）。",
+    "unknown": "غير معروف"
   },
   "login": {
     "loggingIn": "جاري تسجيل الدخول...",
@@ -975,8 +999,8 @@
     "submit": "تسجيل الدخول",
     "title": "تسجيل الدخول",
     "username": "اسم المستخدم أو البريد الإلكتروني",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "remember": "تذكرني"
   },
   "logout": {
     "loading": "جاري تسجيل الخروج..."
@@ -1004,17 +1028,19 @@
     "updates": "التحديثات",
     "users": "المستخدمون",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "مجمِّع الفجوة الهوائية",
       "engineMissing": "محرك Pro+ المطلوب غير محمل؛ تحقق من الترخيص.",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "المخزن المغلق"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "الخريطة",
     "sites": "المواقع",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "جمعات الفجوة الهوائية",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "محرك التحالف Pro+ المطلوب لم يتم تحميله؛ تحقق من الرخصة."
+    },
+    "scrollLeft": "انقل يميناً",
+    "scrollRight": "انقل يساراً"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -1123,7 +1149,7 @@
     "viewDetails": "عرض التفاصيل"
   },
   "reports": {
-    "auditLog": "سجل التدقيق",
+    "auditLog": "سجل التفتيش الأمني",
     "generatePdf": "إنشاء PDF",
     "noResults": "لم يتم العثور على تقارير تطابق البحث",
     "search": {
@@ -1137,10 +1163,65 @@
       "hosts": "المضيفين",
       "security": "الأمان",
       "users": "المستخدمين",
-      "federation": "[TODO] Federation"
+      "federation": "اتحاد"
     },
     "title": "التقارير",
-    "viewReport": "عرض التقرير"
+    "viewReport": "عرض التقرير",
+    "antivirusCommercial": {
+      "description": "حالة حماية برنامج مضاد الفيروسات التجاري بما في ذلك اسم البرنامج، النسخة، نسخة التوقيع، حالة الحماية الفعلية، وحالة الخدمة على جميع الأجهزة المدارة.",
+      "name": "حالة برنامج مضاد الفيروسات التجاري"
+    },
+    "antivirusOpensource": {
+      "description": "حالة برنامج مكافحة الفيروسات المفتوح المصدر عبر جميع المضيفات، يعرض اسم البرنامج ورقم الإصدار وموقع التثبيت والوضع (مفعل/معطل).",
+      "name": "حالة برنامج مكافحة الفيروسات المفتوح المصدر"
+    },
+    "firewallStatus": {
+      "description": "所有托管主机的详细防火墙状态，包括防火墙软件、启用/禁用状态、开放的IPv4和IPv6端口以及操作系统信息。",
+      "name": "主机防火墙状态"
+    },
+    "generateError": "生成报告时出错：{{message}}",
+    "hostsWithTags": {
+      "description": "يعرض جميع المضيفات المسجلة مع العلامات المرتبطة بها لتسهيل الفرز والتصنيف. مفيد لتجميع المضيفات حسب البيئة أو الغرض أو القسم.",
+      "name": "المضيفات ذات العلامات"
+    },
+    "registeredHosts": {
+      "description": "所有已注册主机的完整列表，显示基本信息和操作系统详细信息，包括主机名、IP地址、操作系统版本和状态。",
+      "name": "المضيفات المسجلة"
+    },
+    "tag": {
+      "accounts": "الحسابات",
+      "antivirus": "المضاد للفيروسات",
+      "audit": "التقصي",
+      "basic": "أساسي",
+      "commercial": "تجاري",
+      "compliance": "التوافق",
+      "firewall": "حاجز ناري",
+      "hosts": "المرتبطين",
+      "network": " الشبكة",
+      "opensource": "مصدر مفتوح المصدر",
+      "organization": "المنظمة",
+      "permissions": "الأذونات",
+      "rbac": "rbac",
+      "roles": "ال ролы",
+      "security": "الأمان",
+      "systemInfo": "معلومات النظام",
+      "tags": "الرموز",
+      "tracking": "تتبع",
+      "users": "المستخدمين"
+    },
+    "unknownError": "خطأ غير معروف",
+    "userRbac": {
+      "description": "所有用户的完整视图及其分配的安全角色按角色组组织。展示了基于角色访问控制系统的细粒度权限结构。",
+      "name": "أدوار الأمان للمستخدمين (RBAC)"
+    },
+    "usersList": {
+      "description": "SysManage用户综合名单，展示其个人资料、角色、权限和账户状态。包含用户创建日期和上次登录时间。",
+      "name": "مستخدمي SysManage"
+    },
+    "auditLogReport": {
+      "description": "سجل مراجعة شامل لكل أنشطة المستخدمين والتغييرات في النظام لأغراض الامتثال والرقابة الأمنية. ي跟踪数据库修改、代理消息和管理操作。",
+      "name": "سجل التفتيش الأمني"
+    }
   },
   "resetPassword": {
     "backToLogin": "العودة إلى تسجيل الدخول",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "تم التحديث بنجاح",
     "updatedAt": "محدّث في",
     "viewScript": "عرض السكريبت",
-    "waitingForResults": "في انتظار النتائج"
+    "waitingForResults": "في انتظار النتائج",
+    "adHocScript": "دُرج سكربت عشوائي",
+    "connected": "已连接",
+    "exitCodeLabel": "退出代码：{{code}}",
+    "offline": "غير متصل"
   },
   "search": {
     "searchColumn": "البحث في",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "تم تحديث السر بنجاح",
     "updatedAt": "تم التحديث في",
     "viewSecret": "عرض السر",
-    "subtypeRequired": "النوع الفرعي للسر مطلوب"
+    "subtypeRequired": "النوع الفرعي للسر مطلوب",
+    "filenamePlaceholder": "مثل: id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "إضافة دور",
@@ -1349,7 +1435,8 @@
       "title": "تغطية مكافحة الفيروسات",
       "totalHosts": "إجمالي الأجهزة",
       "unprotected": "غير محمي",
-      "warningMessage": "{{count}} جهاز (أجهزة) ليس لديها حماية من الفيروسات مفعلة."
+      "warningMessage": "{{count}} جهاز (أجهزة) ليس لديها حماية من الفيروسات مفعلة.",
+      "fetchError": "无法获取防病毒覆盖范围"
     },
     "antivirusDisableFailed": "فشل تعطيل برنامج مكافحة الفيروسات",
     "antivirusDisableSuccess": "تم بدء تعطيل برنامج مكافحة الفيروسات بنجاح",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "أنشئ مستخدم مسؤول جديد عبر صفحة المستخدمين في هذه الواجهة",
     "step4LoginNewUser": "سجل الخروج وسجل الدخول بحساب المسؤول الجديد",
     "step5RemoveCredentials": "أزل admin_userid و admin_password من ملف تكوين YAML الخاص بك",
-    "step6RestartServer": "أعد تشغيل الخادم باستخدام ./run.sh"
+    "step6RestartServer": "أعد تشغيل الخادم باستخدام ./run.sh",
+    "removeCredentialsHint": "قم بإزالة admin_userid و admin_password من ملف التكوين الخاص بك وإعادة تشغيل الخادم"
   },
   "serverDown": {
     "details": "تفاصيل الاتصال:",
@@ -1441,10 +1529,10 @@
     "retrying": "جاري المحاولة...",
     "title": "انقطع الاتصال",
     "titleFailed": "الخادم غير متاح",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "محاولات: {{count}}",
+    "lastConnected": "آخر اتصال: {{time}}",
+    "secondsRemaining": "{{seconds}} ثانية(ات)",
+    "timeRemaining": "{{minutes}} دقيقة(ت) {{seconds}} ثانية(ات)"
   },
   "tags": {
     "addTag": "إضافة علامة",
@@ -1476,7 +1564,8 @@
       "statistics": "الإحصائيات",
       "status": "الحالة",
       "title": "حالة OpenTelemetry",
-      "tracesCount": "التتبعات"
+      "tracesCount": "التتبعات",
+      "fetchError": "无法获取OpenTelemetry状态"
     },
     "prometheus": {
       "information": "المعلومات",
@@ -1491,8 +1580,8 @@
       "title": "حالة Prometheus",
       "url": "عنوان URL",
       "version": "الإصدار",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "يتم إدارة Prometheus بواسطة مكدس التيلميتري. استخدم \"make start-telemetry\" لبدء التشغيل أو \"make stop-telemetry\" لإيقاف التشغيل.",
+      "notRunningMessage": "لم يتم تشغيل Prometheus. قم بتشغيل مكدمة التlemetry باستخدام الأمر \"make start-telemetry\" أو \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "检测到的操作系统",
+    "typeLabel": "نوع",
+    "unknown": "غير معروف",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "المضيفات المحددة",
       "title": "تسجيل Ubuntu Pro",
       "useMasterKey": "استخدام المفتاح الرئيسي المكون",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "مفتاح Ubuntu Pro القائم على العقد يبدأ بـ \"C\"",
+      "errorLabel": "错误",
+      "hostFallback": "مُضْمِن {{id}}"
     },
     "errors": {
       "clearFailed": "فشل في مسح المفتاح الرئيسي",
@@ -1603,7 +1700,7 @@
       "masterKey": "المفتاح الرئيسي لـ Ubuntu Pro",
       "organizationName": "اسم المؤسسة",
       "organizationNameHelp": "اسم المؤسسة الاختياري لتسجيل Ubuntu Pro",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "مفتاح Ubuntu Pro القائم على العقد يبدأ بـ \"C\". اتركه فارغاً لإزالته."
     },
     "messages": {
       "keyCleared": "تم مسح المفتاح الرئيسي بنجاح",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "يجب أن يبدأ مفتاح Ubuntu Pro بـ \"C\" ويكون على الأقل 24 حرفًا"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "أمان",
       "system": "نظام"
     },
-    "unknown": "غير معروف"
+    "unknown": "غير معروف",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "نشط",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "تنسيق صورة غير صالح. التنسيقات المسموح بها: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "صورة الملف الشخصي",
     "uploading": "جاري الرفع...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "يجب أن يحتوي كلمة المرور على至少包含 {{count}} 不同类型的字符",
+    "passwordTooLong": "يجب أن لا يزيد密碼必須不超過 {{count}} 個字符",
+    "passwordTooShort": "يجب أن يكون كلمة المرور على الأقل {{count}} حروف طويلة",
+    "profileTabs": "صفحات الملف الشخصي"
   },
   "users": {
     "email": "البريد الإلكتروني",
@@ -1781,10 +1894,10 @@
     "noRows": "لا توجد صفوف",
     "unlockSelected": "إلغاء قفل المحدد",
     "unlocked": "غير مقفل",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "قم بتحرير المعلومات الخاصة بالمستخدم أدناه.",
+    "emailNotification": "سيتم إرسال بريد إلكتروني إلى المستخدم يحتوي على رابط آمن لتعيين كلمة المرور الأولية.",
+    "emailUnique": "يجب أن يكون عنوان البريد الإلكتروني فريدًا",
+    "enterInfo": "أدخل معلومات المستخدم الجديد أدناه."
   },
   "emailConfig": {
     "title": "تكوين البريد الإلكتروني",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "محتوى التقرير"
+    "iframeTitle": "محتوى التقرير",
+    "loadError": "无法加载报告",
+    "pdfError": "生成PDF时出错：{{message}}",
+    "unknownError": "خطأ غير معروف"
   },
   "upgradeProfiles": {
     "add": "إضافة ملف",
@@ -1850,8 +1966,8 @@
     "window": "نافذة متدرجة (بالدقائق)",
     "windowHelp": "نشر إرسال الوكلاء على مدى هذا العدد من الدقائق (0–720)",
     "windowRange": "يجب أن تكون النافذة المتدرجة بين 0 و 720 دقيقة",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "هل تريد حذف ملف تعليمات التحديث \"{{name}}\"؟",
+    "confirmTrigger": " kích hoạt \"{{name}}\" الآن؟ سيتم إرسال التحديثات إلى المضيفين المناسبين."
   },
   "packageProfiles": {
     "add": "إضافة ملف امتثال",
@@ -1882,7 +1998,7 @@
     "version": "الإصدار",
     "versionOp": "عملية",
     "versionOpAny": "(أي)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "هل تريد حذف ملف تعليمات الامتثال \"{{name}}\"؟"
   },
   "compliance": {
     "compliant": "متوافق",
@@ -1932,7 +2048,7 @@
     "title": "علامة التقارير",
     "uploadError": "فشل تحميل الشعار",
     "uploadLogo": "تحميل الشعار",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "يظهر بجانب الشعار في عنوان التقرير (مثل \"مُعَلَّق - للاستخدام الداخلي فقط\")"
   },
   "reportTemplates": {
     "add": "إضافة قالب",
@@ -1956,7 +2072,7 @@
     "subtitle": "تخطيطات مخصصة يطبقها المُولد على أنواع التقارير المضمنة",
     "title": "قوالب التقارير",
     "updated": "تم حفظ القالب",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "هل تريد حذف قالب التقرير \"{{name}}\"؟"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "موفرو الهوية",
     "saveError": "تعذر حفظ الموفر — تحقق من النموذج.",
     "settingsSaveError": "تعذر حفظ الإعدادات.",
-    "settingsTitle": "إعدادات المصادقة"
+    "settingsTitle": "إعدادات المصادقة",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} رموز احتياطية متبقية",
@@ -2055,7 +2175,7 @@
     "disableWarning": "أكد بكلمة مرور حسابك. سيتم حذف سر TOTP ورموز النسخ الاحتياطي الخاصة بك.",
     "notEnrolledDescription": "أضف عاملاً ثانياً إلى حسابك. سيُطلب منك رمز مؤقت من تطبيق المصادقة في كل مرة تقوم فيها بتسجيل الدخول.",
     "regenPrompt": "أدخل رمز TOTP حالي. سيتم إبطال رموز النسخ الاحتياطي الموجودة.",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "قمت بحفظ هذه الأكواد في مكان آمن"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "URL Upstream",
       "version": "الإصدار",
       "upstreamHelp": "تم تعبئتها تلقائياً من الإصدار أعلاه؛ استبدلها فقط إذا كان لديك مرآة خاصة بمنطقة معينة للإشارة إليها.",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "حروف صغيرة، أرقام، شرطة، خطي أفقي. الفواصل والنقاط تصبح شرطة"
     },
     "listTitle": "مرايا المستودعات",
     "loadError": "تعذر تحميل مرايا المستودعات.",
@@ -2128,7 +2248,7 @@
       "notReady": "الأدوات المطلوبة لـ {{pm}} مفقودة — قم بالتثبيت قبل بدء المزامنة.",
       "ready": "جاهز لمرآة مستودعات {{pm}}.",
       "subtitle": "الأدوات المطلوبة لتشغيل خطط مرآة {{pm}} على هذا المضيف",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "لم يستجب وكيل النظام خلال {{minutes}} دقيقة. أبرز الأسباب المحتملة هي: تعطل الوكيل أثناء تنفيذ الخطة، انقطاع WebSocket قبل إرسال نتائج الأمر، أو أن الوكيل قام بتخزين النتيجة بدون إصدارها. تحقق من سجل الوكيل على هذا الجهاز وفكر في إعادة تشغيل خدمة sysmanage-agent. انقر فوق تحديث / تثبيت الأدوات مرة أخرى لتجربة العملية مرة أخرى - سيتم حذف العلامة المعلقة وإرسال محاولة جديدة."
     },
     "configureSubtitle": "اختر المضيف الذي سيقوم بتشغيل خطط المرآة لهذه المنصة. يتم إدراج المضيفين الذين تتطابق منصتهم مع علامة التبويب فقط.",
     "deleteConfigInUse": "احذف {{n}} مرآة (مرايا) ضمن هذه المنصة أولاً.",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "ممثل",
+      "details": "تفاصيل",
+      "openSite": "مفتوح",
+      "operation": "عملية",
+      "site": "الموقع",
+      "timestamp": " метка времени"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "لا يوجد سجلات مراجعة تعدد المواقع حتى الآن.",
+    "emptyFiltered": "لا تطابق أي سجلات مراجعة.",
+    "errorLoad": "فشل في تحميل سجل مراجعة الاتحاد.",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "ممثل",
+      "apply": "تطبيق",
+      "clear": "مسح",
+      "operation": "عملية",
+      "siteId": "معرف الموقع"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "تسجيل كل عملية عبر المواقع بواسطة المنسق.",
+    "title": " nhật ký مراجعة الفيدرالية "
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "فشل في تحميل مواقع العُقد.",
+    "openHost": "مستضياف مفتوح",
+    "subtitle": "التوزيع الجغرافي للوكلاء الذين قدمو عنوان IP علني.",
+    "title": "خريطة المضيف",
+    "status": "الحالة"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "تعيين",
+      "deactivate": "تعطيل",
+      "edit": "تحرير",
+      "push": "إرسال الآن"
     },
-    "active": "[TODO] active",
+    "active": "نشطة",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "فشل في تحديث التعيينات.",
+      "errorLoad": "فشل في تحميل المواقع.",
+      "noSites": "لم يتم تسجيل مواقع تعدد المواقع حتى الآن. انضم إلى موقع أولًا.",
+      "statusLine": "حالة الإرسال: {{status}}",
+      "submit": "حفظ التعيينات",
+      "success": "تم تحديث تعيينات السياسة",
+      "title": " ASSIGN TO SITES",
+      "statusLineWithAttempts": "حالة الإرسال: {{status}} ({{attempts}} محاولة)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "إجراءات",
+      "active": "م激活状态",
+      "name": "الاسم",
+      "type": "نوع",
+      "version": "الإصدار"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "سياسة جديدة",
+      "cancel": "إلغاء",
+      "customType": "نوع السياسة المخصص",
+      "definition": "(JSON) التعريف",
+      "description": "الوصف",
+      "engineUnavailable": "…محرك التحكم في الاتحاد غير مُحمّل؛ لا يمكن إنشاء سياسات.",
+      "error": "فشل في إنشاء سياسة.",
+      "invalidJson": "يجب أن يكون التعريف كائن JSON.",
+      "name": "الاسم",
+      "submit": "إنشاء",
+      "success": "تم إنشاء السياسة.",
+      "title": "إنشاء سياسة",
+      "type": "نوع السياسة",
+      "typeOther": "آخر...",
+      "typeRequired": "يجب تحديد نوع السياسة."
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "فشل في تعطيل السياسة.",
+      "success": "'{{name}}' تمت إلغاء تنشيطه."
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "فشل في تحديث السياسة.",
+      "submit": "حفظ",
+      "success": "تم تحديث السياسة.",
+      "title": "تحرير السياسة",
+      "versionNote": "سيتم تحديث رقم الإصدار عند حفظ السياسة؛ سيقوم المواقع بالحصول على الإصدار الجديد في الدورة التالية لإرسال السياسة."
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "لم يتم تعريف سياسات حتى الآن. انقر فوق 'سياسة جديدة' لإنشائها.",
+    "errorLoad": "فشل في تحميل سياسات الاتحاد.",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "مفعّل فقط",
+      "allTypes": "جميع الأنواع",
+      "type": "نوع السياسة"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "غير نشط",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "فشل في نشر السياسة.",
+      "success": "تم تنشيط إرسال '{{name}}'."
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "سياسات محددة مركزياً تم دفعها إلى المواقع الفرعية.",
+    "title": "سياسات الفيدرالية",
+    "deadLetter": "رسائل الرفض"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "إزالة",
+      "resume": "استئناف",
+      "suspend": "تعليق"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "تسجيل الموقع",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "…سيتم الحفاظ على صف الموقع لغرض التدقيق ولكن المنسق سيتوقف عن قبول الالتزامن منه. لا يمكن إلغاء هذا الإجراء من واجهة المستخدم.",
+      "cancel": "إلغاء",
+      "confirm": "إزالة الموقع",
+      "title": "هل تريد إزالة موقع التحالف؟"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "الإصدار الأدنى لوكيل النظام",
+      "backToList": "العودة إلى المواقع",
+      "connection": "الاتصال",
+      "enrolledAt": "تم التسجيل عند",
+      "errorLoad": "فشل في تحميل الموقع.",
+      "hostCount": "عدد المضيفين",
+      "lastSyncAt": " última ا đồng步時間",
+      "lastSyncStatus": "حالة التزامن الأخيرة",
+      "metadata": " метادанныة",
+      "notFound": "الموقع غير موجود.",
+      "seeHosts": "انظر المضيفين في هذا الموقع",
+      "syncInterval": "فترة التزامن",
+      "syncIntervalValue": "{{seconds}} ثوانٍ",
+      "url": "URL",
+      "viewAuditLog": "عرض سجل المراجعة",
+      "activeCommands": "ال lệnhات النشطة",
+      "activeCommandsEmpty": "لا يوجد أوامر نشطة.",
+      "activeCommandsLoading": "جار التحميل…",
+      "commandAttempts": "{{n}} محاولات إرسال",
+      "commandDispatchedAt": "تم الإرسال {{when}}",
+      "dispatchCommand": "إرسال الأمر",
+      "backlogDepth": " очередь المعلقة في المصدر",
+      "backlogUnknown": "—",
+      "refresh": "تحديث",
+      "syncHealthy": "سليم",
+      "syncNever": "لم يتم تزامنها من قبل",
+      "syncOverdue": "متأخر",
+      "syncStale": "منتهي الصلاحية",
+      "rollupCompliance": "التوافق",
+      "rollupEmpty": "لا تمتزج بيانات التوافق أو الثغرات من هذا الموقع حتى الآن.",
+      "rollupTitle": "التوافق والثغرات الأمنية",
+      "rollupVulnerabilities": "الثغرات ({{hosts}} مضيفات تأثرت)",
+      "vulnCritical": "{{n}} حرجة",
+      "vulnHigh": "{{n}} عالية",
+      "vulnLow": "{{n}} منخفضة",
+      "vulnMedium": "{{n}} متوسطة",
+      "alertAck": "اعترف",
+      "alertAcked": "مقبول",
+      "alertsTitle": "إشعارات مفتوحة",
+      "autonomous": "يعمل بشكل مستقل",
+      "pushPolicies": "سياسات الإرسال",
+      "repushFailed": "فشل في إدراج إعادة نشر السياسة.",
+      "repushQueued": "تم وضع {{n}} سياسة إرسال لإعادة التسليم.",
+      "siteCapabilities": "القدرات",
+      "siteVersion": "الإصدار المعتمد",
+      "syncLatency": "تأخير التزامن الرئيسي (مؤخرًا)",
+      "syncPoints": "{{n}} أحداث تزامن",
+      "syncTimeline": "جدول التزامن",
+      "syncTimelineEmpty": "لا يوجد أحداث تزامن تم تسجيلها حتى الآن.",
+      "pushPoliciesHint": "إعادة وضع كل السياسات لهذا الموقع — بما في ذلك أي توصيلات عالقة أو ملغاة — للتنفيذ فورًا.",
+      "syncHealthHistogram": "نجاح / فشل الالتزامن (Recent)"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "لم يتم تسجيل مواقع حتى الآن. انضم إلى خادم SysManage فرعي للبدء.",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "إلغاء",
+      "done": "انتهى",
+      "engineUnavailable": "…محرك التحكم في الاتحاد غير مُحمّل؛ لا يمكن تسجيل موقع.",
+      "error": "فشل في تسجيل الموقع.",
+      "location": ".etiqat al-makaan (mustaqdama)",
+      "name": "اسم الموقع",
+      "submit": "إنشاء توكن",
+      "successTitle": "الموقع مسجل",
+      "syncIntervalSeconds": "فترة التزامن (ثوان)",
+      "title": "تسجيل موقع اتحاد",
+      "tokenInstructions": "انسخ الرمز التسجيلي أدناه وقدمه إلى خادم الموقع الجديد. هذه هي المرة الوحيدة التي يتم فيها عرضها — لا يمكن استرجاعها إذا ضاعت.",
+      "url": "URL الموقع",
+      "siteIdentityKey": "مفتاح الهوية العام للموقع (PEM)",
+      "siteIdentityKeyHelp": "مطلوب. قم بلصق مفتاح الهوية العام للموقع، الذي تم الحصول عليه خارج الشبكة (من صفحة دور الخادم الخاصة بالموقع). يقوم المنسق بتأكيد دليل تسجيل الموقع ضد هذا المفتاح — وهو ما يDefeat التسلل في وقت التسجيل."
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "الفيدرالية تتيح لك إدارة العديد من خوادم SysManage من منسق واحد. قم بالترقية إلى رخصة Enterprise لتسجيل المواقع التابعة هنا.",
+      "title": "تعدد المواقع يتطلب Enterprise"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "فشل في تحميل مواقع الاتحاد.",
+    "hostCount": "{{count}} مضيفات",
+    "lastSync": "…تم الالتزامن {{when}}",
+    "mapView": "MapView",
+    "policiesLink": "سياسات",
+    "subtitle": "…خوادم SysManage الفرعية المسجلة مع هذا المنسق.",
+    "title": "مواقع الفيدرالية",
+    "hostsLink": "المضيفين",
+    "tilesView": "لوحة التحكم"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "فشل في تحميل مواقع الاتحاد.",
+    "gridView": "عرض الشبكة",
+    "openSite": "موقع مفتوح",
+    "subtitle": "التوزيع الجغرافي للمواقع التابعة.",
+    "title": "خريطة مواقع الفيدرالية",
+    "tilesView": "لوحة التحكم",
+    "lastSyncLabel": "الсинك الأخير:",
+    "statusLabel": "الحالة:"
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "إنشاء حزمة وكيل البناء",
+    "buildError": "فشل في إدراج بناء.",
+    "buildProplus": "إنشاء حزمة Pro+ ",
+    "buildServer": "إنشاء حزمة خادم البناء",
+    "bundle": "حزمة",
+    "completedAt": "تم الانتهاء منه",
+    "confirmDelete": "هل تريد حذف هذا الحزمة وملف ISO الخاص به؟",
+    "copied": "تم نسخ الأمر إلى لوحة الصلاحيات",
+    "copy": "نسخ إلىClipboard",
+    "copyError": "لا يمكن الوصول إلىclipboard",
+    "createdAt": "تم إنشاء",
+    "delete": "حذف",
+    "deleteError": "فشل في حذف الحزمة.",
+    "deleted": "تم حذف الحزمة",
+    "dockerInstallHint": "قم بتنفيذ الأمر التالي على خادم sysmanage كمستخدم لديه سلطة sudo:",
+    "dockerNoGroup": "يتم تشغيل Docker ولكن المستخدم {{user}} ليس في مجموعة docker، لذا لا يمكن للم subprocess الوصول إلى مقبس الشيط.",
+    "dockerNotInstalled": "لم يتم تثبيت Docker على هذا الخادم. تحتاج عمليات بناء الحزمة إلى Docker للحصول على حزم Linux لكل نظام تشغيل.",
+    "dockerNotRunning": "تمت تثبيت Docker ولكن لم يتمكن الوصول إلى الشيط. قم بتشغيله باستخدام: sudo systemctl enable --now docker.",
+    "dockerPermissionDenied": "يقوم دايمون Docker بالعمل ولكن المستخدم {{user}} (المستخدم الذي يقوم بتشغيل عملية sysmanage) لا يمكنه قراءة /var/run/docker.sock. أضف المستخدم إلى مجموعة docker، ثم اعد تشغيل عملية sysmanage حتى تصبح المجموعة الجديدة سارية.",
+    "dockerReady": "جاهز Docker",
+    "dockerReadyHint": "تتراوح عمليات البناء عادة بين 5 و30 دقيقة اعتمادًا على عدد المنصات المفعلة.",
+    "download": "تنزيل ISO",
+    "downloadError": "فشل في تنزيل الحزمة.",
+    "empty": "لم يتم إنشاء حزم حتى الآن. انقر فوق زر البناء أعلاه لإنشائها.",
+    "loadError": "فشل في تحميل الحزم.",
+    "queued": "تم إرسال بناء الحزمة إلى قائمة الانتظار — يتم تحديث القائمة تلقائيًا",
+    "recentFailures": "فشل البناء الأخير:",
+    "recheckDocker": "إعادة الفحص لـ Docker",
+    "requiresDocker": "يحتاج بناء الحزم إلى وجود Docker مثبت ومُعد للعمل على هذا الخادم — لاستلام حزم Linux لكل نظام تشغيل. تتراوح عمليات البناء عادة بين 5 و30 دقيقة اعتمادًا على عدد المنصات المفعلة.",
+    "size": "الحجم",
+    "status": "الحالة",
+    "subtitle": "إنشاء ملف ISO متعدد أنظمة التشغيل يحتوي على خادم sysmanage أو وكيل + جميع الاعتمادات حسب النظام، جاهز لتركيبه على نظام مغلق.",
+    "title": "حزمة التثبيت في وضع الفراغ",
+    "version": "الإصدار",
+    "recheckResources": "إعادة الفحص للموارد",
+    "resourcesInsufficient": "此服务器没有足够的空闲内存或磁盘空间来构建Server或Agent包——这些按钮将被禁用，直到释放资源（添加交换分区或将虚拟机扩容）。",
+    "resourcesLow": "موارد قليلة - يمكن تشغيل البناء ولكن سيتم الاعتماد على التبادل وقد يكون بطيئاً."
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "حذف",
+      "download": "تنزيل ISO"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "إجراءات",
+      "completed": "تم الانتهاء منه",
+      "created": "تم إنشاء",
+      "isoLabel": "étiquette ISO",
+      "size": "الحجم",
+      "started": "بدأ",
+      "status": "الحالة"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "هل تريد حذف هذه الدورة التشغيلية ومаниفيستاتها؟",
+    "createError": "فشل في إنشاء تشغيل.",
+    "created": "تم إرسال عملية الجمع إلى قائمة الانتظار",
+    "deleteError": "فشل في حذف التشغيل.",
+    "deleted": "تم حذف عملية الجمع",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "إلغاء",
+      "includeCompliance": "أدخل حزمة التوافق",
+      "includeCve": "أدخل نسخة لقطةCVE",
+      "isoLabel": "étiquette ISO",
+      "isoLabelHelper": "…مرجع قصير مدمج في ISO الناتجة (مثل \"monthly-2026-05\").",
+      "isoLabelRequired": "الحقل ISO مطلوب",
+      "mediaSizeHelper": "الحجم الأقصى لكل قرص بالmegabytes. القيمة الافتراضية هي 4700 (DVD-5).",
+      "mediaSizeMb": "حجم الوسائط (ميجابايت)",
+      "submit": "تشغيل في الانتظار",
+      "title": "تشغيل جمع جديد",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "فشل في تنزيل ISO.",
+    "empty": "لم يتم تنفيذ عمليات جمع حتى الآن. انقر فوق \"تشغيل جمع جديد\" لبدء واحدة.",
+    "licenseRequired": "لم يتم تحميل محرك جمع الهواء الفاصل ؛ требуется лицензия Pro+",
+    "loadError": "فشل في تحميل التشغيلات.",
+    "newRun": "تشغيل جمع جديد",
+    "noManifestFound": "لا يوجد مانيفست بعد لتشغيل هذا — حاول مرة أخرى عندما يكون الحالة COMPLETE.",
+    "notApplicable": "此页面仅在收集器角色部署中具有意义。",
+    "refresh": "تحديث",
+    "subtitle": " kích hoạt các دورة جمع فورية تشبه المستودعات المحددة، وبناء ISO ký hiệu và viết một biểu đồ cho việc tiếp nhận trên phía không kết nối.",
+    "title": "تشغيل جمع الفجوة الهوائية",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "دور الخادم"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "لم يتم العثور على محركات قابلة لل использования. أدخل وسائط وأعد المسح.",
+    "help": "اختر القرص الضوئي/USB الذي يحتوي على وسائط المجموعة. يتم تفعيل زر استيراد على صفحة مخازن الهواء الفاصلة عندما يكون في هذا القرص قرص ISO قابل للقراءة. يتم التحقق من توقيع الوسائط أثناء الاستيراد.",
+    "label": "جهاز موصول بالشبكة",
+    "loadError": "لم يتم تعداد الأقراص.",
+    "none": "(none)",
+    "rescan": "إعادة فحص الأقراص",
+    "saveError": "لا يمكن حفظ الجهاز.",
+    "title": "استيرادDrv",
+    "optical": "ضوئي",
+    "removable": "قابل للإزالة"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "المحرك",
+    "import": "استيراد ISO",
+    "importError": "لا يمكن بدء الاستيراد.",
+    "noDevice": "لم يتم اختيار محرك الوارد بعد. حدد واحدًا في الإعدادات → دور الخادم.",
+    "notReady": "غير مستعد",
+    "ready": "جاهز{{label}}",
+    "rescan": "إعادة الفحص",
+    "statusError": "لم يتم اختبار جهاز الاستيراد.",
+    "title": "استيراد من الوسائط",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "تامٌّ",
+      "copying": "نسخ الحزم",
+      "failed": "فشل",
+      "queued": "تم وضعه في الانتظار",
+      "verified": "تم التحقق منه",
+      "verifying": "تحقق من توقيع"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "تمported completely — القائمة التالية للRepositories تم تحديثها.",
+    "runStats": "{{files}} ملفات · {{size}}",
+    "runStatus": "حالة الاستيراد"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "نسخ المفتاح العام",
+      "help": "انسخ هذا المفتاح العام واستوردته على خادم مستودع الفراغ حتى يثق بالمEDIA الموقعة التي ينتجها هذا المجمع. يتم عرض المفتاح العام فقط — لم يغادر مفتاح التوقيع الخاص الخادم أبداً.",
+      "loadError": "لم يتم تحميل مفتاح المجمع العام.",
+      "title": "مفتاح العلامة العامة للCollector"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "تم النسخ!",
+    "copyError": "لم يتم نسخclipboard.",
+    "copyFingerprint": "نسخ البصمة",
+    "fingerprint": "بصمة",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(unreadable key)",
+      "count": "{{n}} معتمدة",
+      "empty": "لا يوجد مفاتيح جمع موثوقة حتى الآن.",
+      "help": "أدخل المفتاح العام من كل جامع مغلق (Air-Gap Collector) الذي يجب أن يقبله هذا المستودع. يتم رفض الوسائط الموقعة بواسطة مفتاح غير موثوق به أثناء عملية الاستيراد.",
+      "import": "استيراد المفتاح",
+      "importError": "لم يتم استيراد المفتاح.",
+      "imported": " ключ المستورد {{fp}}",
+      "loadError": "لم يتم تحميل المفاتيح المرتبطة بها.",
+      "nameLabel": "اسم Collector",
+      "pemLabel": "الключ العام (PEM)",
+      "removeError": "не يمكن حذف المفتاح.",
+      "required": "يجب توفير الاسم والключ العام.",
+      "title": "مفاتيح مجمّع موثوق"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "تفاصيل",
+      "openSite": "الموقع"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "مضيف",
+      "ipv4": "IPv4",
+      "lastSeen": "آخر ظهور",
+      "os": "نظام التشغيل",
+      "platform": "منصة",
+      "status": "الحالة"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "غلق",
+      "ipv6": "IPv6",
+      "noLiveLink": "رابط التفاصيل الحية غير متاح (الموقع المالك ليس لديه عنوان URL).",
+      "notFound": "هذا المضيف不再是目录中的条目。",
+      "site": "الموقع المالك",
+      "theSite": "الไซت",
+      "title": "تفاصيل المضيف",
+      "viewLive": "عرض التفاصيل المباشرة على {{site}} →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "لم يتم تزامن أي مستضياف من أي موقع حتى الآن.",
+    "emptyFiltered": "لا يوجد مستضياف يتطابق مع الفلتر الحالي.",
+    "errorLoad": "فشل في تحميل العُقد عبر المواقع.",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "تطبيق",
+      "clear": "مسح",
+      "osFamily": "عائلة نظام التشغيل",
+      "search": "بحث (اسم / IP)",
+      "status": "الحالة"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "…محدد لموقع واحد",
+    "subtitle": "كل العُقد عبر جميع مواقع التسجيل، من دليل المنسق المتزامن.",
+    "title": "المضيفين عبر الموقع",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "مسح",
+      "dispatch": "إرسال الأمر",
+      "selectAll": "اختر الكل على هذه الصفحة",
+      "selected": "{{n}} مضيفات محددة"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "إلغاء",
+    "commandType": " lệnh",
+    "dispatch": "إرسال",
+    "dispatching": "في طور الإرسال...",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "فشل في توزيع الأمر.",
+      "packagesRequired": "أدخل اسم حزمة واحد على الأقل.",
+      "scriptRequired": "أدخل النص البرمجي للتنفيذ.",
+      "unlicensed": "تحتاج الفيدرالية إلى رخصة Enterprise.",
+      "partial": "{{failed}} من {{total}} محاولة إرسال للไซت فشلت."
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "IDs المضيف",
+    "hostIdsHint": "IDs للمضيفين (من صفحة المضيفات) مقسمة بفاصلة",
+    "packages": "أسماء الحزم",
+    "packagesOptional": "أسماء الحزم (اختياري — ترك الفراغ للتحديثات الكلية)",
+    "script": "سクリプトRIPT",
+    "subtitle": "قم بتقديم الأمر للتنفيذ في الموقع {{site}}. يتم تنفيذ الأمر على الخوادم الخاصة بالموقع وإبلاغ النتائج — لا يوجد شيء يُنفَّذ فورًا.",
+    "targetAll": "جميع المضيفات في هذا الموقع",
+    "targetSpecific": "المضيفين المحددين (بواسطة ID)",
+    "thisSite": "هذا الไซت",
+    "title": "إرسال الأمر",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "تطبيق التحديثات",
+      "deployPackages": "قم بتثبيت الحزم",
+      "reboot": "اعادة التشغيل",
+      "runScript": "تنفيذ النموذج"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "قم بتقديم أمر للتنفيذ على {{hosts}} خادمًا مختارًا عبر {{sites}} موقعًا. يتم تنفيذ الأمر من قبل كل موقع وإبلاغ النتائج — لا يوجد شيء يُنفَّذ فورًا."
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "المنسق",
+    "coordinatorThisServer": "此服务器",
+    "countEnrolled": "{{n}} مسجلة",
+    "countHosts": "{{n}} مضيفات",
+    "countPending": "{{n}} قيد الانتظار",
+    "countSuspended": "{{n}} متوقفة",
+    "empty": "لم يتم تسجيل مواقع حتى الآن.",
+    "errorLoad": "فشل في تحميل المواقع.",
+    "gridView": "عرض الشبكة",
+    "hostsLabel": "{{n}} مضيفات",
+    "lastSync": "…تم الالتزامن {{when}}",
+    "mapView": "MapView",
+    "title": "لوحة تحكم الفيدرالية"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "فعال",
+    "save": "حفظ العتبات",
+    "saveFailed": "فشل في تحديث العتبات.",
+    "saved": "تم حفظ阙值警报。",
+    "subtitle": "اترك حقل فارغاً لاستخدام القيمة الافتراضية المدمجة.",
+    "title": "阙值 التنبيهات"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "م激活状态",
+      "compliance": "أسوأ الامتثال",
+      "critical": " CVEs الحرجة",
+      "high": " CVEات عالية",
+      "hosts": "المضيفين",
+      "site": "الموقع"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "إنشاء تقرير",
+    "sites": "…المواقع (جميعها إذا لم يتم تحديد أي منها)",
+    "subtitle": "تجميع ملخصات المضيف والتوافق والتعرض عبر المواقع",
+    "totals": "المجاميع ({{n}} مواقع)",
+    "upsell": "تعدد المواقع يتطلب Enterprise."
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "المركز الذي يجمع مخزون المضيفين، والتوافق، والتعرض من خوادم الفرعية ويرسل أوامر وسياسات إلى الأسفل. منسق واحد لكل اتحاد.",
+      "title": "منسق الفيدرالية"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "تم النسخ!",
+    "copyError": "لم يتم نسخclipboard.",
+    "copyFingerprint": "نسخ البصمة",
+    "currentTag": "(حالية)",
+    "heading": "دور الفيدرالية",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "نسخ المفتاح العام",
+      "pending": "إنشاء مفتاح الهوية…",
+      "title": "مفتاح هوية هذا الخادم",
+      "help": "انسخ هذا المفتاح العام ولصقه في بطاقة الاتحاد الخاصة بالطرف الآخر حتى يمكن لكل جانب تسجيل بصمة الهوية الأخرى وتأكيد صحتها خارج الشبكة. لم يغادر مفتاح التوقيع الخاص الخادم أبداً."
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "لم يتم استيراد المفتاح.",
+    "intro": "اختر كيف يشارك هذا الخادم في اتحاد متعدد المواقع. هذا مستقل عن الدور المغلق على اليسار — يمكن للخادم أن يكون كلا الدورين. يتم تطبيق التغييرات بعد إعادة التشغيل التالية.",
+    "loadError": "لم يتم تحميل دور الاتحاد.",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "الافتراضي. هذا الخادم ليس جزءًا من اتحاد متعدد المواقع. اختر هذا الخيار ما لم تكون تقوم بتشغيل منسق أو موقع فرعي.",
+      "title": "غير متعدد المواقع"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "استيراد مفتاح الزميل",
+      "name": "اسم الشريك",
+      "pem": "مفتاح عام الشريك (PEM)",
+      "empty": "لم يتم تسجيل مفاتيح الهوية المشتركة حتى الآن.",
+      "help": "قم بتسجيل مفتاح العموم لPeer هنا لتأكيد بصمة الهوية خارج الشبكة. يتم تأمين اتصال التحالف بواسطة شهادة TLS المرتبطة خلال التسجيل — هذه المفاتيح هي للتحقق البشري وليس التحكم في الوصول.",
+      "title": "مفاتيح هوية الشريك"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "لا يمكن حذف المفتاح.",
+    "save": "حفظ دور التحالف",
+    "saveError": "لا يمكن حفظ دور الفيدرالية.",
+    "saved": "تم حفظ دور الفيدرالية. أعد تشغيل الخادم للحصول على التأثير الكامل.",
+    "saving": "حفظ...",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "خادم فرعي يشغل نفسه تلقائيًا وي.report إلى منسق. إنه يستمر في إدارة مستضRIES الفي_guests حتى عندما يكون المنسق غير متصل، ب재연결 시 대기열 데이터 재생",
+      "title": "موقع الفيدرالية"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "رابط المنسق",
+      "enrolled": "تم التسجيل مع المنسق",
+      "error": "لم يتم تسجيل المجمع مع المنسق.",
+      "help": "أشر إلى هذا الموقع بموقع الإحداثيات وصق الرمز المؤقت الذي أصدره موقِّع الإحداثيات (من صفحة المواقع الخاصة به). سيقوم هذا الموقع بالاتصال لإكمال عملية التبادل وإتمام عمليات الсинك.",
+      "notEnrolled": "لم ينضم بعد إلى منسق.",
+      "submit": "تسجيل مع المنسق",
+      "submitting": "جاري التسجيل...",
+      "title": "تسجيل مع المنسق",
+      "token": "رمز التسجيل",
+      "coordIdentityKey": "مفتاح الهوية العام للمنسق (PEM)",
+      "coordIdentityKeyHelp": "مطلوب. قم بلصق مفتاح الهوية العام للمنسق، الذي تم الحصول عليه خارج الشبكة (من صفحة دور الخادم). لن يقوم هذا الموقع بالتسجيل ما لم يثبت المنسق هذا المفتاح الدقيق — وهو ما يDefeat التسلل في وقت التسجيل."
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "إعدادات تشغيلية عامة للخادم. يتم حفظ القيم في قاعدة البيانات وتغلب عليها sysmanage.yaml.",
+    "loadError": "فشل في تحميل إعدادات التكوين.",
+    "save": "حفظ",
+    "saveError": "فشل في حفظ إعدادات التكوين.",
+    "saved": "تم حفظ التكوين.",
+    "secretSet": "•••••••• (موجودة — اتركها فارغة للاحتفاظ بها)",
+    "secretSetHelp": "كلمة المرور مخزنة في OpenBAO. أدخل كلمة مرور جديدة لاستبدالها.",
+    "secretUnset": "غير محدد",
+    "secretUnsetHelp": "…محمية بشكل آمن في OpenBAO وليس في قاعدة البيانات.",
+    "title": "التكوين"
+  },
+  "connection": {
+    "networkError": "خطأ الشبكة: لا يمكن الوصول إلى الخادم",
+    "serverError": "خطأ الخادم: {{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "انقل يميناً",
+    "scrollRight": "انقل يساراً"
+  },
+  "settings": {
+    "tabsAriaLabel": "صفحات الإعدادات"
   }
 }

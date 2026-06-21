@@ -206,7 +206,8 @@ async def update_user_roles(
             role_uuids.append(UUID(role_id_str))
         except ValueError as exc:
             raise HTTPException(
-                status_code=400, detail=f"Invalid UUID format: {role_id_str}"
+                status_code=400,
+                detail=_("Invalid UUID format: %s") % role_id_str,
             ) from exc
 
     if role_uuids:
@@ -220,7 +221,7 @@ async def update_user_roles(
             if role_uuid not in existing_role_ids:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Role with ID {role_uuid} does not exist",
+                    detail=_("Role with ID %s does not exist") % role_uuid,
                 )
 
     # Delete existing user roles

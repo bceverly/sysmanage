@@ -89,7 +89,11 @@ function makeHostIcon(status: string | null): L.DivIcon {
  * rather than rendering a React component into the popup (which
  * react-leaflet supports but adds complexity we don't need here).
  */
-function popupHtml(host: HostGeolocation, openLabel: string): string {
+function popupHtml(
+  host: HostGeolocation,
+  openLabel: string,
+  statusLabel: string,
+): string {
   const safeFqdn = escapeHtml(host.fqdn);
   const cityLine = (() => {
     if (host.city) {
@@ -107,7 +111,7 @@ function popupHtml(host: HostGeolocation, openLabel: string): string {
     return "";
   })();
   const statusLine = host.status
-    ? `<div><b>Status:</b> ${escapeHtml(host.status)}</div>`
+    ? `<div><b>${escapeHtml(statusLabel)}:</b> ${escapeHtml(host.status)}</div>`
     : "";
   return `
     <div style="min-width: 200px;">
@@ -260,6 +264,10 @@ const MapView: React.FC = () => {
     () => t("map.openHost", "Open host"),
     [t],
   );
+  const statusLabel = useMemo(
+    () => t("map.status", "Status"),
+    [t],
+  );
   useEffect(() => {
     const map = mapRef.current;
     const group = clusterGroupRef.current;
@@ -286,7 +294,7 @@ const MapView: React.FC = () => {
         icon: makeHostIcon(host.status),
         title: host.fqdn,
       });
-      marker.bindPopup(popupHtml(host, openHostLabel));
+      marker.bindPopup(popupHtml(host, openHostLabel, statusLabel));
       group.addLayer(marker);
       latLngs.push([host.latitude, host.longitude]);
     }
@@ -295,7 +303,7 @@ const MapView: React.FC = () => {
       const bounds = L.latLngBounds(latLngs);
       map.fitBounds(bounds.pad(0.2), { maxZoom: 10 });
     }
-  }, [hosts, openHostLabel]);
+  }, [hosts, openHostLabel, statusLabel]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>

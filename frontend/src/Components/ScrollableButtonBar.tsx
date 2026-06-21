@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 interface ScrollableButtonBarProps {
   /**
@@ -25,6 +26,7 @@ const ScrollableButtonBar: React.FC<ScrollableButtonBarProps> = ({
   sx,
   scrollStep = 240,
 }) => {
+  const { t } = useTranslation();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -66,7 +68,7 @@ const ScrollableButtonBar: React.FC<ScrollableButtonBarProps> = ({
       <IconButton
         size="small"
         onClick={() => scrollBy(-scrollStep)}
-        aria-label="Scroll left"
+        aria-label={t('scrollableButtonBar.scrollLeft', 'Scroll left')}
         sx={{
           visibility: canLeft ? 'visible' : 'hidden',
           flex: '0 0 auto',
@@ -105,7 +107,7 @@ const ScrollableButtonBar: React.FC<ScrollableButtonBarProps> = ({
       <IconButton
         size="small"
         onClick={() => scrollBy(scrollStep)}
-        aria-label="Scroll right"
+        aria-label={t('scrollableButtonBar.scrollRight', 'Scroll right')}
         sx={{
           visibility: canRight ? 'visible' : 'hidden',
           flex: '0 0 auto',

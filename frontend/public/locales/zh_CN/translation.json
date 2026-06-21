@@ -143,7 +143,9 @@
       "checkAll": "全选",
       "checkNone": "全不选",
       "description": "选择要在仪表板上显示的卡片",
-      "title": "仪表板设置"
+      "title": "仪表板设置",
+      "loadError": "无法加载偏好设置",
+      "saveError": "保存偏好设置失败"
     },
     "updates": "更新"
   },
@@ -198,7 +200,7 @@
     "sendReset": "发送重置链接",
     "sending": "发送中...",
     "title": "忘记密码",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "没有收到电子邮件吗？请检查垃圾邮件文件夹或重试。"
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "输入您的 Grafana 实例的完整 URL",
-      "label": "Grafana URL"
+      "label": "Grafana URL",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "未找到 Grafana 服务器",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Grafana 集成",
     "useManagedServer": {
       "label": "使用托管服务器"
-    }
+    },
+    "healthCheckFailed": "健康检查失败",
+    "loadError": "无法加载Grafana配置",
+    "saveError": "保存设置失败"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "需要用户名",
     "windowsDescription": "在此Windows主机上创建新的本地用户账户。",
     "passwordHelp": "至少需要 8 个字符",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "您确定要删除用户账户“{{username}}”吗？此操作无法撤销。",
+    "invalidUidPlatform": "UID 必须是一个大于等于 {{minUid}} 的数字",
+    "uidHelpPlatform": "留空以自动分配。如果指定，则必须大于等于 {{minUid}}。",
+    "shellBash": "Bash",
+    "shellBourne": "Bourne Shell",
+    "shellCsh": "Csh",
+    "shellFalse": "假的",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "无登录",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "添加新的已启用包管理器",
@@ -822,17 +837,23 @@
     "size": "大小",
     "softwarePackages": "软件包",
     "vendor": "供应商",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "您确定要取消创建“{{name}}”吗？",
+    "childHostHostnameHelp": "输入主机名（例如，\"myhost\"）或完全限定域名（例如，\"myhost.example.com\"）",
+    "childHostsEmptyBhyveReady": "点击“创建子主机”以创建新的bhyve虚拟机。",
+    "childHostsEmptyLxdReady": "点击“创建子主机”以创建新的LXD容器。",
+    "childHostsEmptyVmmReady": "点击“创建子主机”以创建新的VMM虚拟机。",
+    "childHostsEmptyWslEnabled": "点击“创建子主机”以创建新的WSL实例。",
+    "clickRequestData": "点击“请求主机数据”以从代理收集诊断信息。",
+    "deleteChildHostMessage": "您确定要删除子主机“{{name}}”吗？",
+    "geoLocation": "地理位置",
+    "publicIp": "公共 IP",
+    "selectedServices": "{{count}} 服务已选中",
+    "deviceNumber": "设备 {{number}}",
+    "errorUpdatingServices": "更新服务失败",
+    "graylogPort": "(端口 {{port}})",
+    "interfaceNumber": "接口 {{number}}",
+    "noChangesMade": "未做任何更改",
+    "servicesUpdatedCount": "{{count}} 服务已更新"
   },
   "hostGroup": {
     "add": "添加",
@@ -854,7 +875,7 @@
     "invalidGroupName": "组名必须以字母开头，只能包含字母、数字、下划线和破折号",
     "unixDescription": "在此主机上创建新组。",
     "windowsDescription": "在此Windows主机上创建新的本地组。",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "您确定要删除组“{{groupName}}”吗？此操作无法撤销。"
   },
   "hosts": {
     "agentVersion": "代理版本",
@@ -912,8 +933,8 @@
       "statusRestarting": "正在重启子主机...",
       "statusShuttingDown": "正在停止子主机...",
       "ungracefulWarning": "此主机有 {{count}} 个正在运行的子主机，在重启期间将被强制终止。升级到 SysManage Professional+ 以使用编排安全重启。",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "点击“无论如何重启”以不先停止子主机的情况下重启{{hostname}}。",
+      "proceedOrchestrated": "点击“有序重启”以安全地重启{{hostname}}。"
     },
     "rebootRequested": "重启请求成功",
     "rebootSelected": "重启所选",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "此主机的脚本已禁用",
     "scriptsEnabledTooltip": "此主机的脚本已启用",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\\n\\n失败的主机：\\n{{hosts}}",
+    "antivirusDeploySuccess": "防病毒部署已启动，涉及{{count}}个主机",
+    "approveSelected": "批准选中的",
+    "opentelemetryDeploySuccess": "OpenTelemetry部署已排队，等待在{{count}}个主机上执行",
+    "diagnosticsRequestFailed": "请求诊断数据收集失败。请重试。",
+    "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请在主机详情页面查看结果。",
+    "unknown": "未知"
   },
   "login": {
     "loggingIn": "正在登录...",
@@ -975,8 +999,8 @@
     "submit": "登录",
     "title": "登录",
     "username": "用户名或邮箱",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "忘记密码？",
+    "remember": "记住我"
   },
   "logout": {
     "loading": "退出中..."
@@ -1004,17 +1028,19 @@
     "updates": "更新",
     "users": "用户",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "空气隔断收集器",
       "engineMissing": "未加载所需的Pro+引擎；请检查许可证。",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "离网仓库"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "地图",
     "sites": "站点",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "空气隙收集",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "需要 Pro+ 联邦引擎未加载；检查许可证。"
+    },
+    "scrollLeft": "向左滚动",
+    "scrollRight": "向右滚动"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -1137,10 +1163,65 @@
       "hosts": "主机",
       "security": "安全",
       "users": "用户",
-      "federation": "[TODO] Federation"
+      "federation": "联邦"
     },
     "title": "报告",
-    "viewReport": "查看报告"
+    "viewReport": "查看报告",
+    "antivirusCommercial": {
+      "description": "商业防病毒保护状态，包括产品名称、版本、签名版本、实时防护状态和服务状态等信息。",
+      "name": "商业防病毒状态"
+    },
+    "antivirusOpensource": {
+      "description": "开源防病毒软件的状态，包括所有主机上的软件名称、版本、安装路径以及启用/禁用状态。",
+      "name": "开源防病毒软件状态"
+    },
+    "firewallStatus": {
+      "description": "所有托管主机的详细防火墙状态，包括防火墙软件、启用/禁用状态、开放的IPv4和IPv6端口以及操作系统信息。",
+      "name": "主机防火墙状态"
+    },
+    "generateError": "生成报告时出错：{{message}}",
+    "hostsWithTags": {
+      "description": "显示所有已注册的主机及其分配的标签，便于分类和筛选。有助于按环境、用途或部门组织主机。",
+      "name": "带有标签的主机"
+    },
+    "registeredHosts": {
+      "description": "所有已注册主机的完整列表，显示基本信息和操作系统详情，包括主机名、IP地址、OS版本和状态。",
+      "name": "已注册主机"
+    },
+    "tag": {
+      "accounts": "帐户",
+      "antivirus": "防病毒软件",
+      "audit": "审计",
+      "basic": "基本",
+      "commercial": "商业版",
+      "compliance": "合规",
+      "firewall": "防火墙",
+      "hosts": "主机文件",
+      "network": "网络",
+      "opensource": "开源",
+      "organization": "组织",
+      "permissions": "权限",
+      "rbac": "rbac",
+      "roles": "角色",
+      "security": "安全",
+      "systemInfo": "系统信息",
+      "tags": "标签",
+      "tracking": "跟踪",
+      "users": "用户"
+    },
+    "unknownError": "未知错误",
+    "userRbac": {
+      "description": "所有用户的完整视图及其分配的安全角色按角色组组织。展示基于角色访问控制系统的细粒度权限结构。",
+      "name": "用户安全角色 (RBAC)"
+    },
+    "usersList": {
+      "description": "SysManage用户全面清单，显示其配置文件、角色、权限和账户状态。包含用户创建日期和最后登录时间。",
+      "name": "SysManage 用户"
+    },
+    "auditLogReport": {
+      "description": "完整的用户操作和系统变更记录，用于合规性和安全监控。跟踪数据库修改、代理消息和管理操作。",
+      "name": "审计日志"
+    }
   },
   "resetPassword": {
     "backToLogin": "返回登录",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "更新成功",
     "updatedAt": "更新于",
     "viewScript": "查看脚本",
-    "waitingForResults": "等待结果"
+    "waitingForResults": "等待结果",
+    "adHocScript": "临时脚本",
+    "connected": "已连接",
+    "exitCodeLabel": "退出代码：{{code}}",
+    "offline": "离线"
   },
   "search": {
     "searchColumn": "搜索范围",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "机密更新成功",
     "updatedAt": "更新于",
     "viewSecret": "查看机密",
-    "subtypeRequired": "需要密钥子类型"
+    "subtypeRequired": "需要密钥子类型",
+    "filenamePlaceholder": "例如：id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "添加角色",
@@ -1349,7 +1435,8 @@
       "title": "杀毒软件覆盖率",
       "totalHosts": "主机总数",
       "unprotected": "未保护",
-      "warningMessage": "{{count}}台主机未启用杀毒软件保护。"
+      "warningMessage": "{{count}}台主机未启用杀毒软件保护。",
+      "fetchError": "无法获取防病毒覆盖范围"
     },
     "antivirusDisableFailed": "禁用防病毒软件失败",
     "antivirusDisableSuccess": "防病毒软件禁用已成功开始",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "通过此界面中的「用户」页面创建一个新的管理员用户",
     "step4LoginNewUser": "注销并使用新的管理员账户登录",
     "step5RemoveCredentials": "从您的 YAML 配置文件中删除 admin_userid 和 admin_password",
-    "step6RestartServer": "使用 ./run.sh 重启服务器"
+    "step6RestartServer": "使用 ./run.sh 重启服务器",
+    "removeCredentialsHint": "从配置文件中移除 admin_userid 和 admin_password 并重启服务端"
   },
   "serverDown": {
     "details": "连接详情：",
@@ -1441,10 +1529,10 @@
     "retrying": "重试中...",
     "title": "连接中断",
     "titleFailed": "服务器不可用",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "尝试次数：{{count}}",
+    "lastConnected": "最后连接时间：{{time}}",
+    "secondsRemaining": "{{seconds}} 秒",
+    "timeRemaining": "{{minutes}} 分 {{seconds}} 秒"
   },
   "tags": {
     "addTag": "添加标签",
@@ -1476,7 +1564,8 @@
       "statistics": "统计信息",
       "status": "状态",
       "title": "OpenTelemetry 状态",
-      "tracesCount": "追踪"
+      "tracesCount": "追踪",
+      "fetchError": "无法获取OpenTelemetry状态"
     },
     "prometheus": {
       "information": "信息",
@@ -1491,8 +1580,8 @@
       "title": "Prometheus 状态",
       "url": "URL",
       "version": "版本",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus 由遥测堆栈管理。使用 \"make start-telemetry\" 启动或使用 \"make stop-telemetry\" 停止。",
+      "notRunningMessage": "Prometheus 未运行。使用 \"make start-telemetry\" 或 \"make start\" 启动监控堆栈。"
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "检测到的操作系统",
+    "typeLabel": "类型",
+    "unknown": "未知",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "选定的主机",
       "title": "Ubuntu Pro注册",
       "useMasterKey": "使用配置的主密钥",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "基于合同的Ubuntu Pro密钥，以\"C\"开头",
+      "errorLabel": "错误",
+      "hostFallback": "主机 {{id}}"
     },
     "errors": {
       "clearFailed": "清除主密钥失败",
@@ -1603,7 +1700,7 @@
       "masterKey": "Ubuntu Pro主密钥",
       "organizationName": "组织名称",
       "organizationNameHelp": "Ubuntu Pro注册的可选组织名称",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "基于合同的Ubuntu Pro密钥，以\"C\"开头。留空以删除。"
     },
     "messages": {
       "keyCleared": "主密钥清除成功",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "Ubuntu Pro 密钥必须以 \"C\" 开头且至少 24 个字符长"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "安全",
       "system": "系统"
     },
-    "unknown": "未知"
+    "unknown": "未知",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "活跃",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "无效的图像格式。允许的格式:PNG、JPEG、JPG、GIF、WEBP",
     "profileImage": "个人资料图像",
     "uploading": "正在上传...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "密码必须包含至少 {{count}} 种不同的字符类型",
+    "passwordTooLong": "密码不得超过 {{count}} 个字符",
+    "passwordTooShort": "密码必须至少包含 {{count}} 个字符",
+    "profileTabs": "配置选项卡"
   },
   "users": {
     "email": "邮箱",
@@ -1781,10 +1894,10 @@
     "noRows": "无行",
     "unlockSelected": "解锁所选项",
     "unlocked": "已解锁",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "请在下方编辑该用户的资料。",
+    "emailNotification": "一封包含设置初始密码的安全链接的电子邮件将发送给用户。",
+    "emailUnique": "电子邮件地址必须唯一",
+    "enterInfo": "请在下方输入新用户的资料。"
   },
   "emailConfig": {
     "title": "电子邮件配置",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "报告内容"
+    "iframeTitle": "报告内容",
+    "loadError": "无法加载报告",
+    "pdfError": "生成PDF时出错：{{message}}",
+    "unknownError": "未知错误"
   },
   "upgradeProfiles": {
     "add": "添加配置文件",
@@ -1850,8 +1966,8 @@
     "window": "分阶段窗口 (分钟)",
     "windowHelp": "将代理调度分散在这么多分钟内 (0–720)",
     "windowRange": "分阶段窗口必须在 0 至 720 分钟之间",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "是否要删除更新配置文件“{{name}}”？",
+    "confirmTrigger": "触发“{{name}}”？更新将分发到匹配的主机。"
   },
   "packageProfiles": {
     "add": "添加合规配置文件",
@@ -1882,7 +1998,7 @@
     "version": "版本",
     "versionOp": "运算符",
     "versionOpAny": "(任意)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "是否要删除合规配置文件“{{name}}”？"
   },
   "compliance": {
     "compliant": "合规",
@@ -1932,7 +2048,7 @@
     "title": "报告品牌",
     "uploadError": "徽标上传失败",
     "uploadLogo": "上传徽标",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "与徽标一起出现在报告标题中（例如“机密——仅供内部使用”）。"
   },
   "reportTemplates": {
     "add": "添加模板",
@@ -1956,7 +2072,7 @@
     "subtitle": "渲染器在内置报告类型之上应用的自定义布局",
     "title": "报告模板",
     "updated": "模板已保存",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "是否要删除报告模板“{{name}}”？"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "身份提供程序",
     "saveError": "无法保存提供程序 — 请检查表单。",
     "settingsSaveError": "无法保存设置。",
-    "settingsTitle": "身份验证设置"
+    "settingsTitle": "身份验证设置",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "剩余 {{count}} 个备用代码",
@@ -2055,7 +2175,7 @@
     "disableWarning": "用您的账户密码确认。您的 TOTP 密钥和备份代码将被删除。",
     "notEnrolledDescription": "为您的账户添加第二种身份验证因素。每次登录时,系统都会要求您输入身份验证应用程序中的一次性代码。",
     "regenPrompt": "输入当前的 TOTP 代码。现有的备份代码将失效。",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "我已经将这些代码保存在安全的地方"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "上游 URL",
       "version": "版本",
       "upstreamHelp": "从上面的版本自动填充;仅当您有区域特定的镜像可指向时才覆盖。",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "小写字母、数字、短横线和下划线。空格和点号变为短横线。"
     },
     "listTitle": "仓库镜像",
     "loadError": "无法加载仓库镜像。",
@@ -2128,7 +2248,7 @@
       "notReady": "缺少 {{pm}} 所需的工具 — 触发同步前请安装。",
       "ready": "已准备好镜像 {{pm}} 仓库。",
       "subtitle": "在此主机上运行 {{pm}} 镜像计划所需的工具",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "代理在{{minutes}}分钟内没有响应。最可能的原因是：代理在执行计划时崩溃了，WebSocket 在发送 command_result 之前断开了连接，或者代理默默地去重了命令而没有发出结果。请检查此主机上的代理日志，并考虑重启 sysmanage-agent 服务。再次点击刷新 / 安装工具以重试 —— 飞行中的标记将被清除并重新尝试。"
     },
     "configureSubtitle": "选择将运行此平台镜像计划的主机。仅列出平台与选项卡匹配的主机。",
     "deleteConfigInUse": "请先删除此平台下的 {{n}} 个镜像。",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "参与者",
+      "details": "详情",
+      "openSite": "打开",
+      "operation": "操作",
+      "site": "站点",
+      "timestamp": "时间戳"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "没有联邦审核条目。",
+    "emptyFiltered": "没有符合筛选条件的审核条目。",
+    "errorLoad": "加载联邦审计日志失败。",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "参与者",
+      "apply": "应用",
+      "clear": "清除",
+      "operation": "操作",
+      "siteId": "站点 ID"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "每个跨站点操作由协调器集中记录。",
+    "title": "联邦审计日志"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "加载主机位置失败。",
+    "openHost": "打开主机",
+    "subtitle": "具有公共IP的代理的地理分布。",
+    "title": "主机映射",
+    "status": "状态"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "分配",
+      "deactivate": "停用",
+      "edit": "编辑",
+      "push": "推送现在"
     },
-    "active": "[TODO] active",
+    "active": "活动",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "更新分配失败。",
+      "errorLoad": "加载站点列表失败。",
+      "noSites": "没有注册的联邦站点。先注册一个站点。",
+      "statusLine": "推送状态：{{status}}",
+      "submit": "保存分配",
+      "success": "策略分配已更新。",
+      "title": "分配到站点",
+      "statusLineWithAttempts": "推送状态：{{status}} ({{attempts}} 次尝试)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "操作",
+      "active": "活动",
+      "name": "名称",
+      "type": "类型",
+      "version": "版本"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "新策略",
+      "cancel": "取消",
+      "customType": "自定义策略类型",
+      "definition": "定义（JSON）",
+      "description": "描述",
+      "engineUnavailable": "联邦控制器引擎未加载；无法创建策略。",
+      "error": "创建策略失败。",
+      "invalidJson": "定义必须是一个JSON对象。",
+      "name": "名称",
+      "submit": "创建",
+      "success": "策略创建成功。",
+      "title": "创建策略",
+      "type": "策略类型",
+      "typeOther": "其他...",
+      "typeRequired": "必须指定策略类型。"
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "停用策略失败。",
+      "success": "'{{name}}' 停用。"
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "更新策略失败。",
+      "submit": "保存",
+      "success": "策略已更新。",
+      "title": "编辑策略",
+      "versionNote": "保存将增加策略版本；站点将在下次推送周期中获取新版本。"
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "还没有定义策略。点击'新建策略'创建一个。",
+    "errorLoad": "加载联邦策略失败。",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "仅活跃",
+      "allTypes": "所有类型",
+      "type": "策略类型"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "无效的",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "推送策略失败。",
+      "success": "触发了对 '{{name}}' 的推送。"
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "集中定义的策略推送到下级站点。",
+    "title": "联邦策略",
+    "deadLetter": "死信"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "移除",
+      "resume": "恢复",
+      "suspend": "暂停"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "注册站点",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "该站点行将保留以供审核，但协调器将停止接受来自它的同步。此操作不能通过 UI 撤销。",
+      "cancel": "取消",
+      "confirm": "删除站点",
+      "title": "删除联邦站点？"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "最低代理版本",
+      "backToList": "返回站点",
+      "connection": "连接",
+      "enrolledAt": "已注册于",
+      "errorLoad": "加载站点失败。",
+      "hostCount": "主机计数",
+      "lastSyncAt": "上次同步时间",
+      "lastSyncStatus": "上次同步状态",
+      "metadata": "元数据",
+      "notFound": "未找到站点。",
+      "seeHosts": "查看此站点的主机",
+      "syncInterval": "同步间隔",
+      "syncIntervalValue": "{{seconds}} 秒",
+      "url": "URL",
+      "viewAuditLog": "查看审计日志",
+      "activeCommands": "活动命令",
+      "activeCommandsEmpty": "没有活动命令。",
+      "activeCommandsLoading": "加载中……",
+      "commandAttempts": "{{n}} 推送尝试",
+      "commandDispatchedAt": "已分发 {{when}}",
+      "dispatchCommand": "分发命令",
+      "backlogDepth": "待处理的上游队列",
+      "backlogUnknown": "—",
+      "refresh": "刷新",
+      "syncHealthy": "健康",
+      "syncNever": "从未同步过",
+      "syncOverdue": "逾期",
+      "syncStale": "过期",
+      "rollupCompliance": "合规性",
+      "rollupEmpty": "从该站点尚未同步任何合规性或漏洞数据。",
+      "rollupTitle": "合规性和漏洞",
+      "rollupVulnerabilities": "漏洞（{{hosts}} 台主机受影响）",
+      "vulnCritical": "{{n}} 个关键项",
+      "vulnHigh": "{{n}} 高优先级",
+      "vulnLow": "{{n}} 低优先级",
+      "vulnMedium": "{{n}} 中等优先级",
+      "alertAck": "确认",
+      "alertAcked": "已确认",
+      "alertsTitle": "查看警报",
+      "autonomous": "独立运行",
+      "pushPolicies": "推送策略",
+      "repushFailed": "重新推送策略失败。",
+      "repushQueued": "重新排队 {{n}} 个策略推送以重新交付。",
+      "siteCapabilities": "功能",
+      "siteVersion": "报告版本",
+      "syncLatency": "上游同步延迟（最近）",
+      "syncPoints": "{{n}} 同步事件",
+      "syncTimeline": "同步时间线",
+      "syncTimelineEmpty": "没有同步事件记录。",
+      "pushPoliciesHint": "将此站点的所有策略重新排队，包括任何卡住或死信的交付，以便立即重新推送。",
+      "syncHealthHistogram": "最近的成功/失败同步"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "还没有注册站点。先注册一个下属SysManage服务器开始使用。",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "取消",
+      "done": "完成",
+      "engineUnavailable": "联邦控制器引擎未加载；无法注册站点。",
+      "error": "注册站点失败。",
+      "location": "位置标签（可选）",
+      "name": "站点名称",
+      "submit": "生成令牌",
+      "successTitle": "已加入的站点",
+      "syncIntervalSeconds": "同步间隔（秒）",
+      "title": "加入一个联邦站点",
+      "tokenInstructions": "复制下面的注册令牌并将其交付给新站点服务器。这是唯一一次显示 — 如果丢失则无法恢复。",
+      "url": "站点 URL",
+      "siteIdentityKey": "站点身份公钥（PEM）",
+      "siteIdentityKeyHelp": "必填项。粘贴从该站点的服务器角色页面获取的身份公钥。协调器验证站点的注册证明与此密钥匹配 —— 这是防止注册时间中间人攻击的方法。"
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "联邦允许您从一个协调器管理多个SysManage服务器。升级到企业许可证以在此处注册下属站点。",
+      "title": "多站点联邦需要Enterprise版"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "加载联邦站点失败。",
+    "hostCount": "{{count}} 主机",
+    "lastSync": "已同步 {{when}}",
+    "mapView": "地图视图",
+    "policiesLink": "策略",
+    "subtitle": "与该协调器注册的从属 SysManage 服务器。",
+    "title": "联邦站点",
+    "hostsLink": "主机",
+    "tilesView": "仪表板"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "加载联邦站点失败。",
+    "gridView": "网格视图",
+    "openSite": "打开站点",
+    "subtitle": "下属站点服务器的地理分布。",
+    "title": "联邦站点地图",
+    "tilesView": "仪表板",
+    "lastSyncLabel": "上次同步：",
+    "statusLabel": "状态："
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "构建代理包",
+    "buildError": "排队构建失败。",
+    "buildProplus": "构建Pro+包",
+    "buildServer": "构建服务器包",
+    "bundle": "包",
+    "completedAt": "已完成",
+    "confirmDelete": "是否要删除此捆绑包及其ISO文件？",
+    "copied": "命令已复制到剪贴板",
+    "copy": "复制到剪贴板",
+    "copyError": "无法访问剪贴板",
+    "createdAt": "已创建",
+    "delete": "删除",
+    "deleteError": "删除包失败。",
+    "deleted": "包已删除",
+    "dockerInstallHint": "以具有 sudo 权限的用户身份在此 sysmanage 服务器上运行：",
+    "dockerNoGroup": "Docker正在运行，但{{user}}用户不在docker组中，因此构建子进程无法访问守护进程套接字。",
+    "dockerNotInstalled": "此服务器上未安装Docker。捆绑包构建需要Docker来获取特定发行版的Linux软件包。",
+    "dockerNotRunning": "Docker已安装，但守护进程不可达。使用以下命令启动它：sudo systemctl enable --now docker。",
+    "dockerPermissionDenied": "Docker 守护进程正在运行，但 {{user}} 用户（运行此 sysmanage 进程的用户）无法读取 /var/run/docker.sock。将该用户添加到 docker 组，然后重启 sysmanage 进程以使新的组设置生效。",
+    "dockerReady": "Docker就绪",
+    "dockerReadyHint": "构建通常需要5-30分钟，具体取决于启用的平台数量。",
+    "download": "下载ISO文件",
+    "downloadError": "下载包失败。",
+    "empty": "还没有包。点击上方的构建按钮创建一个。",
+    "loadError": "加载包失败。",
+    "queued": "包构建已排队 — 刷新列表",
+    "recentFailures": "最近的构建失败：",
+    "recheckDocker": "重新检查 Docker",
+    "requiresDocker": "包构建需要在该服务器上安装并运行Docker — 用于获取每个发行版的Linux软件包。构建通常需要5-30分钟，具体取决于启用的平台数量。",
+    "size": "大小",
+    "status": "状态",
+    "subtitle": "生成包含sysmanage服务器或代理+所有平台依赖项的多操作系统ISO，准备在隔离主机上挂载。",
+    "title": "离网安装包",
+    "version": "版本",
+    "recheckResources": "重新检查资源",
+    "resourcesInsufficient": "此服务器没有足够的空闲内存或磁盘空间来构建 Server 或 Agent 包 — 直到释放资源（添加交换分区或扩大虚拟机）之前，这些按钮将被禁用。",
+    "resourcesLow": "资源不足 — 构建可以运行，但会依赖于交换空间，并且可能会变慢。"
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "删除",
+      "download": "下载ISO文件"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "操作",
+      "completed": "已完成",
+      "created": "已创建",
+      "isoLabel": "ISO标签",
+      "size": "大小",
+      "started": "开始",
+      "status": "状态"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "是否要删除此次集合运行及其清单？",
+    "createError": "创建运行失败。",
+    "created": "集合运行已排队",
+    "deleteError": "删除运行失败。",
+    "deleted": "集合运行已删除",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "取消",
+      "includeCompliance": "包含合规性包",
+      "includeCve": "包含CVE源快照",
+      "isoLabel": "ISO标签",
+      "isoLabelHelper": "嵌入到生成 ISO 中的简短标识符（例如 \"monthly-2026-05\"）。",
+      "isoLabelRequired": "ISO标签是必需的",
+      "mediaSizeHelper": "每个磁盘的最大大小（MB）。默认为4700（DVD-5）。",
+      "mediaSizeMb": "介质大小（MB）",
+      "submit": "加入队列运行",
+      "title": "新建集合运行",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "下载ISO文件失败。",
+    "empty": "还没有集合运行。点击“新建集合运行”开始一个新的。",
+    "licenseRequired": "空气隔断收集引擎未加载；需要Pro+许可证。",
+    "loadError": "加载运行失败。",
+    "newRun": "新建集合运行",
+    "noManifestFound": "运行尚未有清单 — 请在状态为 COMPLETE 后再试一次。",
+    "notApplicable": "只有在收集器角色部署时才有意义的页面。",
+    "refresh": "刷新",
+    "subtitle": "启动一次性收集运行，以镜像配置的存储库，构建签名ISO，并为隔离网络侧生成一个清单文件。",
+    "title": "空气隙收集运行",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "服务器角色"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "未找到符合条件的磁盘。插入介质并按重扫描键。",
+    "help": "选择持有收集器介质的光盘/USB驱动器。在Air-Gap存储库页面上的导入按钮会在插入可读取的ISO时可用，并且在此过程中会验证介质签名。",
+    "label": "块设备",
+    "loadError": "无法枚举驱动器。",
+    "none": "(none)",
+    "rescan": "重新扫描磁盘",
+    "saveError": "无法保存设备。",
+    "title": "导入磁盘",
+    "optical": "光学",
+    "removable": "可移动的"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "驱动器",
+    "import": "导入ISO",
+    "importError": "无法启动导入。",
+    "noDevice": "没有选择导入磁盘。在设置 → 服务器角色中选择一个。",
+    "notReady": "尚未就绪",
+    "ready": "就绪{{label}}",
+    "rescan": "重新扫描",
+    "statusError": "无法探测导入设备。",
+    "title": "从介质导入",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "完成",
+      "copying": "正在复制软件包",
+      "failed": "失败",
+      "queued": "已加入队列",
+      "verified": "已验证",
+      "verifying": "正在验证签名"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "导入完成 — 以下仓库列表已刷新。",
+    "runStats": "{{files}} 个文件 · {{size}}",
+    "runStatus": "导入状态"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "复制公钥",
+      "help": "复制此公钥并在空气隔断仓库服务器上导入它，以便它可以信任该收集器生成的签名媒体。仅显示公钥 — 私钥永远不会离开此服务器。",
+      "loadError": "无法加载收集器公钥。",
+      "title": "采集器公钥"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "已复制！",
+    "copyError": "无法复制到剪贴板。",
+    "copyFingerprint": "复制指纹",
+    "fingerprint": "指纹",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(无法读取的密钥)",
+      "count": "{{n}} 可信",
+      "empty": "还没有受信任的收集器密钥。",
+      "help": "从每个Air-Gap Collector中导入公钥，该仓库应接受这些媒体上的内容。由不受信任的密钥签名的媒体在导入时将被拒绝。",
+      "import": "导入密钥",
+      "importError": "无法导入密钥。",
+      "imported": "导入密钥 {{fp}}",
+      "loadError": "无法加载受信任的密钥。",
+      "nameLabel": "采集器名称",
+      "pemLabel": "公钥（PEM）",
+      "removeError": "无法移除密钥。",
+      "required": "名称和公钥都是必需的。",
+      "title": "受信任的采集密钥"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "详情",
+      "openSite": "站点"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "主机",
+      "ipv4": "IPv4",
+      "lastSeen": "最后出现时间",
+      "os": "操作系统",
+      "platform": "平台",
+      "status": "状态"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "关闭",
+      "ipv6": "IPv6",
+      "noLiveLink": "实时详情链接不可用（拥有站点没有URL）。",
+      "notFound": "此主机不再在目录中。",
+      "site": "所属站点",
+      "theSite": "该站点",
+      "title": "主机详情",
+      "viewLive": "在 {{site}} 查看实时详情 →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "还没有从任何站点同步主机。",
+    "emptyFiltered": "没有符合当前筛选条件的主机。",
+    "errorLoad": "加载跨站点主机失败。",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "应用",
+      "clear": "清除",
+      "osFamily": "操作系统家族",
+      "search": "搜索（名称/IP）",
+      "status": "状态"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "限定于一个站点",
+    "subtitle": "所有已注册站点中的每台主机，从协调器同步的目录中获取。",
+    "title": "跨站主机",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "清除",
+      "dispatch": "分发命令",
+      "selectAll": "在此页面上全选",
+      "selected": "{{n}} 选定主机"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "取消",
+    "commandType": "命令",
+    "dispatch": "分发",
+    "dispatching": "正在分发……",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "调度命令失败。",
+      "packagesRequired": "请输入至少一个包名。",
+      "scriptRequired": "请输入要运行的脚本。",
+      "unlicensed": "联邦需要企业许可证。",
+      "partial": "{{failed}} 个 {{total}} 站点调度失败。"
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "主机ID",
+    "hostIdsHint": "逗号分隔的主机ID（来自主机页面）",
+    "packages": "包名",
+    "packagesOptional": "包名（可选 — 空白表示所有更新）",
+    "script": "脚本",
+    "subtitle": "为 {{site}} 排队命令。该站点在其中的主机上执行并报告结果 —— 不会立即执行任何操作。",
+    "targetAll": "该站点上的所有主机",
+    "targetSpecific": "特定主机（通过ID）",
+    "thisSite": "此站点",
+    "title": "分发命令",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "应用更新",
+      "deployPackages": "安装软件包",
+      "reboot": "重启",
+      "runScript": "运行脚本"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "为 {{hosts}} 个选定主机和 {{sites}} 个站点排队命令。每个站点在其主机上执行并报告结果 —— 不会立即执行任何操作。"
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "协调器",
+    "coordinatorThisServer": "此服务器",
+    "countEnrolled": "{{n}} 已注册",
+    "countHosts": "{{n}} 主机",
+    "countPending": "{{n}} 待处理",
+    "countSuspended": "{{n}} 暂停",
+    "empty": "还没有注册的站点。",
+    "errorLoad": "加载站点列表失败。",
+    "gridView": "网格视图",
+    "hostsLabel": "{{n}} 主机",
+    "lastSync": "已同步 {{when}}",
+    "mapView": "地图视图",
+    "title": "联邦仪表板"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "生效的",
+    "save": "保存阈值",
+    "saveFailed": "保存阈值失败。",
+    "saved": "警报阈值已保存。",
+    "subtitle": "留空以使用内置默认值。",
+    "title": "警报阈值"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "活动",
+      "compliance": "最差合规性",
+      "critical": "关键的CVE漏洞",
+      "high": "高CVE数量",
+      "hosts": "主机",
+      "site": "站点"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "生成报告",
+    "sites": "所有站点（如果没有选择则为全部站点）",
+    "subtitle": "聚合主机、合规性和漏洞汇总信息跨站点。",
+    "totals": "总计（{{n}}个站点）",
+    "upsell": "多站点联邦需要Enterprise版。"
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "聚合来自许多从属站点服务器的主机清单、合规性和漏洞汇总，并向它们分发命令和策略的核心枢纽。每个联邦一个协调器。",
+      "title": "联邦协调器"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "已复制！",
+    "copyError": "无法复制到剪贴板。",
+    "copyFingerprint": "复制指纹",
+    "currentTag": "(当前)",
+    "heading": "联邦角色",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "复制公钥",
+      "pending": "生成身份密钥……",
+      "title": "此服务器的身份密钥",
+      "help": "复制此公钥并将其粘贴到对等方的联邦卡中，以便每一方都可以记录另一方的身份指纹并进行离线验证。私钥永远不会离开此服务器。"
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "无法导入密钥。",
+    "intro": "选择此服务器如何参与多站点联邦。这与左侧的离线角色独立 — 一台服务器可以同时具备这两种角色。在下次重启后生效。",
+    "loadError": "无法加载联邦角色。",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "默认值。此服务器不属于多站点联邦的一部分。除非您正在运行协调器或从属站点，否则请选择此项。",
+      "title": "未加入联邦"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "导入对等密钥",
+      "name": "对等名称",
+      "pem": "对等公钥 (PEM)",
+      "empty": "尚未记录对等身份密钥。",
+      "help": "在此处记录一个对等体的公钥以验证其身份指纹（通过其他方式）。联邦连接本身由在注册期间固定的 TLS 证书保护 —— 这些密钥用于人类验证，而不是访问控制。",
+      "title": "对等身份密钥"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "无法移除该密钥。",
+    "save": "保存联邦角色",
+    "saveError": "无法保存联邦角色。",
+    "saved": "联邦角色已保存。重启服务器使其生效。",
+    "saving": "保存中…",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "一个自主运行并向协调器报告的从属服务器。即使协调器不可达，它也会继续管理自己的主机，并在重新连接时重放队列中的数据。",
+      "title": "联邦站点"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "协调器 URL",
+      "enrolled": "已与协调器注册",
+      "error": "无法与协调器注册。",
+      "help": "将此站点指向其协调器并粘贴协调器发出的一次性注册令牌（来自其站点页面）。该站点会回调以完成握手并开始同步。",
+      "notEnrolled": "尚未与协调员注册。",
+      "submit": "与协调器注册",
+      "submitting": "正在注册…",
+      "title": "与协调器注册",
+      "token": "注册令牌",
+      "coordIdentityKey": "协调器身份公钥（PEM）",
+      "coordIdentityKeyHelp": "必填项。粘贴从协调器的服务器角色页面获取的身份公钥。此站点拒绝注册，除非协调器证明了这个确切密钥 —— 这就是如何在注册时间击败中间人攻击。"
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "全局操作设置。保存的值将存储在数据库中，并覆盖 sysmanage.yaml 中的配置。",
+    "loadError": "加载配置设置失败。",
+    "save": "保存",
+    "saveError": "保存配置设置失败。",
+    "saved": "配置已保存。",
+    "secretSet": "•••••••• (存储 — 留空以保留)",
+    "secretSetHelp": "密码存储在OpenBAO中。请输入一个新的来替换它。",
+    "secretUnset": "未设置",
+    "secretUnsetHelp": "安全存储在 OpenBAO 中，不在数据库中。",
+    "title": "配置"
+  },
+  "connection": {
+    "networkError": "网络错误：无法连接到服务器",
+    "serverError": "服务器错误：{{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "向左滚动",
+    "scrollRight": "向右滚动"
+  },
+  "settings": {
+    "tabsAriaLabel": "设置选项卡"
   }
 }

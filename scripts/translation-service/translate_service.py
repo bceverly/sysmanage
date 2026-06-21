@@ -254,6 +254,20 @@ def _placeholders_ok(src: str, translated: str) -> bool:
     return all(tok in translated for tok in _PLACEHOLDER_RE.findall(src))
 
 
+# Lone/unpaired UTF-16 surrogate code points (U+D800–U+DFFF).  The LLM
+# occasionally emits one (e.g. a half-formed character or a broken \uDXXX JSON
+# escape); ``json.loads`` accepts it into a Python str, but it CANNOT be UTF-8
+# encoded, so FastAPI/pydantic crashes serializing the response
+# (PydanticSerializationError: surrogates not allowed).  Strip them so the
+# string is always valid UTF-8 — any resulting degradation is caught by the
+# placeholder guard / English fallback downstream.
+_SURROGATE_RE = re.compile(r"[\ud800-\udfff]")
+
+
+def _strip_surrogates(text: str) -> str:
+    return _SURROGATE_RE.sub("", text) if text else text
+
+
 async def _raw_chunk(
     client: httpx.AsyncClient, lang_code: str, sources: List[str]
 ) -> List[str]:
@@ -285,7 +299,9 @@ async def _raw_chunk(
         parsed = json.loads(content)
         out = parsed["translations"] if isinstance(parsed, dict) else parsed
         if isinstance(out, list) and len(out) == len(sources):
-            return [str(x) for x in out]
+            # Strip lone surrogates the model may emit — they'd be valid here but
+            # crash JSON serialization of the HTTP response.
+            return [_strip_surrogates(str(x)) for x in out]
     except (httpx.HTTPError, KeyError, ValueError, TypeError):
         pass
 

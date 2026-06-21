@@ -88,17 +88,23 @@ function escapeHtml(value: string): string {
   return Array.from(value, (ch) => HTML_ESCAPES[ch] ?? ch).join("");
 }
 
-function popupHtml(site: FederationSiteSummary, openLabel: string): string {
+interface PopupLabels {
+  open: string;
+  status: string;
+  lastSync: string;
+}
+
+function popupHtml(site: FederationSiteSummary, labels: PopupLabels): string {
   const lines: string[] = [
     `<div style="font-weight:600;margin-bottom:4px;">${escapeHtml(site.name)}</div>`,
-    `<div><b>Status:</b> ${escapeHtml(site.status)}</div>`,
+    `<div><b>${escapeHtml(labels.status)}</b> ${escapeHtml(site.status)}</div>`,
   ];
   if (site.location_label) {
     lines.push(`<div>${escapeHtml(site.location_label)}</div>`);
   }
   if (site.last_sync_at) {
     lines.push(
-      `<div><b>Last sync:</b> ${escapeHtml(
+      `<div><b>${escapeHtml(labels.lastSync)}</b> ${escapeHtml(
         new Date(site.last_sync_at).toLocaleString(),
       )}</div>`,
     );
@@ -108,7 +114,7 @@ function popupHtml(site: FederationSiteSummary, openLabel: string): string {
       `<a href="#" data-site-id="${escapeHtml(site.id)}" ` +
       `class="sysmanage-site-popup-link" ` +
       `style="color:#1976d2;text-decoration:underline;cursor:pointer;">` +
-      `${escapeHtml(openLabel)}</a>` +
+      `${escapeHtml(labels.open)}</a>` +
       `</div>`,
   );
   return `<div style="min-width:200px;">${lines.join("")}</div>`;
@@ -217,8 +223,12 @@ const SitesMap: React.FC = () => {
   }, [navigate]);
 
   // ---- Plot markers when both the map and the data are ready ----
-  const openLabel = useMemo(
-    () => t("sitesMap.openSite", "Open site"),
+  const popupLabels = useMemo<PopupLabels>(
+    () => ({
+      open: t("sitesMap.openSite", "Open site"),
+      status: t("sitesMap.statusLabel", "Status:"),
+      lastSync: t("sitesMap.lastSyncLabel", "Last sync:"),
+    }),
     [t],
   );
   useEffect(() => {
@@ -239,7 +249,7 @@ const SitesMap: React.FC = () => {
         icon: makeSiteIcon(site.status),
         title: site.name,
       });
-      marker.bindPopup(popupHtml(site, openLabel));
+      marker.bindPopup(popupHtml(site, popupLabels));
       group.addLayer(marker);
       latLngs.push([site.geo_latitude, site.geo_longitude]);
     }
@@ -249,7 +259,7 @@ const SitesMap: React.FC = () => {
     } else {
       map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     }
-  }, [state.sites, openLabel]);
+  }, [state.sites, popupLabels]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "calc(100vh - 64px)" }}>

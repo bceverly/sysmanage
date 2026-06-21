@@ -143,7 +143,9 @@
       "checkAll": "सभी चुनें",
       "checkNone": "कोई नहीं",
       "description": "अपने डैशबोर्ड पर कौन से कार्ड प्रदर्शित करने हैं चुनें",
-      "title": "डैशबोर्ड सेटिंग्स"
+      "title": "डैशबोर्ड सेटिंग्स",
+      "loadError": "पसंदीदा लोड करने में त्रुटि",
+      "saveError": "पसंदीदा सहेजने में विफल हुई"
     },
     "updates": "अपडेट"
   },
@@ -198,7 +200,7 @@
     "sendReset": "रीसेट लिंक भेजें",
     "sending": "भेजा जा रहा है...",
     "title": "पासवर्ड भूल गए",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "ईमेल नहीं मिला? स्पैम फोल्डर में देखें या पुनः करें।"
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "अपने Grafana इंस्टेंस का पूरा URL दर्ज करें",
-      "label": "Grafana URL"
+      "label": "Grafana URL",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "कोई Grafana सर्वर नहीं मिला",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Grafana एकीकरण",
     "useManagedServer": {
       "label": "प्रबंधित सर्वर का उपयोग करें"
-    }
+    },
+    "healthCheckFailed": "हेलथ चेक की विफलता",
+    "loadError": "ग्राफाना संरचना लोड करने में विफल हुई",
+    "saveError": "सेटिंग्स सहेजने में त्रुटि"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "उपयोगकर्ता नाम आवश्यक है",
     "windowsDescription": "इस Windows होस्ट पर एक नया स्थानीय उपयोगकर्ता खाता बनाएं।",
     "passwordHelp": "न्यूनतम 8 अक्षर आवश्यक",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "क्या आप हमेशा के लिए उपयोगकर्ता खाता \"{{username}}\" को हटाना चाहते हैं? इस क्रिया को पुन: प्रदर्शित नहीं किया जा सकता।",
+    "invalidUidPlatform": "UID \\u091c\\u0948 \\u0925\\u094b\\u0902 {{minUid}} \\u0946\\u0902 \\u0938\\u094d\\u092e\\u0947\\u091c\\u094b",
+    "uidHelpPlatform": "खाली छोड़ें ऑटो-असाइन करने के लिए। यदि निर्दिष्ट किया गया हो तो >= {{minUid}} होना आवश्यक है।",
+    "shellBash": "बश",
+    "shellBourne": "बोर्न शेल",
+    "shellCsh": "क्सह",
+    "shellFalse": "कालून",
+    "shellFish": "फिश",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "लॉगिन नहीं",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "नया सक्षम पैकेज मैनेजर जोड़ें",
@@ -822,17 +837,23 @@
     "size": "आकार",
     "softwarePackages": "सॉफ़्टवेयर पैकेज",
     "vendor": "विक्रेता",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "क्या आप \\\"{{name}}\\\" की निर्माण प्रक्रिया को रद्द करना चाहते हैं?",
+    "childHostHostnameHelp": "होस्टनेम (उदाहरण के लिए, \\\"myhost\\\") या पूर्ण FQDN (उदाहरण के लिए, \\\"myhost.example.com\\\") दर्ज करें",
+    "childHostsEmptyBhyveReady": "\"चाइल्ड होस्ट बनाएं\" क्लिक करके नई bhyve वर्चुअल मशीन बनाएँ।",
+    "childHostsEmptyLxdReady": "\"चाइल्ड होस्ट बनाएं\" क्लिक करके नई LXD कंटेनर बनाएँ।",
+    "childHostsEmptyVmmReady": "\"चाइल्ड होस्ट बनाएं\" क्लिक करके नई VMM वर्चुअल मशीन बनाएँ।",
+    "childHostsEmptyWslEnabled": "\"चाइल्ड होस्ट बनाएं\" क्लिक करके नई WSL अवस्था बनाएँ।",
+    "clickRequestData": "एजेंट से डीगनोस्टिक इनफ़ॉर्मेशन का मानक प्राप्त करने के लिए \"होस्ट डेटा रिक्वेस्ट\" क्लिक करें।",
+    "deleteChildHostMessage": "क्या आप हीरो \"{{name}}\" को हटाने में निश्चित हैं?",
+    "geoLocation": "जैग्रहिक स्थान",
+    "publicIp": "공용 IP",
+    "selectedServices": "{{count}} सेवा(सेवाएँ) चुनी गई",
+    "deviceNumber": "डिवाइस {{number}}",
+    "errorUpdatingServices": "सेवा अद्ययन करने में त्रुटि",
+    "graylogPort": "(पोर्ट {{port}})",
+    "interfaceNumber": "इंटरफेस {{number}}",
+    "noChangesMade": "कोई परिवर्तन नहीं किया गया",
+    "servicesUpdatedCount": "{{count}} सेवा(ओं) अपडेट की"
   },
   "hostGroup": {
     "add": "जोड़ें",
@@ -854,7 +875,7 @@
     "invalidGroupName": "समूह नाम अक्षर से शुरू होना चाहिए और केवल अक्षर, संख्याएं, अंडरस्कोर और डैश हो सकते हैं",
     "unixDescription": "इस होस्ट पर एक नया समूह बनाएं।",
     "windowsDescription": "इस Windows होस्ट पर एक नया स्थानीय समूह बनाएं।",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "क्या आप हमेशा के लिए समूह \"{{groupName}}\" को हटाना चाहते हैं? इस क्रिया को पुनरावृत्ति नहीं किया जा सकता।"
   },
   "hosts": {
     "agentVersion": "एजेंट संस्करण",
@@ -912,8 +933,8 @@
       "statusRestarting": "चाइल्ड होस्ट पुनः शुरू हो रहे हैं...",
       "statusShuttingDown": "चाइल्ड होस्ट रोके जा रहे हैं...",
       "ungracefulWarning": "इस होस्ट में {{count}} चल रहे चाइल्ड होस्ट हैं जो रीबूट के दौरान अचानक बंद कर दिए जाएँगे। व्यवस्थित सुरक्षित रीबूट के लिए SysManage Professional+ में अपग्रेड करें।",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "बिना चाइल्ड होस्ट को स्थापित करे {{hostname}} को रिस्टार्ट करने के लिए \"फिर से रिस्टार्ट\" क्लिक करें।",
+      "proceedOrchestrated": "सुरक्षित रूप से {{hostname}} को रिस्टार्ट करने के लिए \"ओर्केस्ट्रेटेड रिस्टार्ट\" क्लिक करें।"
     },
     "rebootRequested": "पुनः प्रारंभ अनुरोध सफल",
     "rebootSelected": "चयनित को पुनः आरंभ करें",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "इस होस्ट के लिए स्क्रिप्ट अक्षम हैं",
     "scriptsEnabledTooltip": "इस होस्ट के लिए स्क्रिप्ट सक्षम हैं",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
+    "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
+    "approveSelected": "निवड़ित को पारदर्शी बनाएं",
+    "opentelemetryDeploySuccess": "OpenTelemetry डिप्लोइमेंट की पंजीकृत {{count}} होस्ट(स) के लिए",
+    "diagnosticsRequestFailed": "सेटिंग्स सेवा अद्ययन करने में विफल हुए",
+    "diagnosticsRequested": "डायएगनोसिक कलेक्शन के लिए होस्ट {{hostId}} प्राप्त करना। जब उपलब्ध हों, होस्ट विवरण पृष्ठ पर परिणाम देखें।",
+    "unknown": "अज्ञात"
   },
   "login": {
     "loggingIn": "लॉग इन हो रहा है...",
@@ -975,8 +999,8 @@
     "submit": "साइन इन",
     "title": "लॉगिन",
     "username": "उपयोगकर्ता नाम या ईमेल",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "remember": "मुझे याद करो"
   },
   "logout": {
     "loading": "लॉगआउट हो रहा है..."
@@ -1004,17 +1028,19 @@
     "updates": "अपडेट",
     "users": "उपयोगकर्ता",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "वायु-गेप कल्लौंड",
       "engineMissing": "आवश्यक Pro+ इंजन लोड नहीं है; लाइसेंस जांचें।",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "वायु-अलग संस्थान"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "मानचित्र",
     "sites": "साइटें",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "वायु-गेप कॉलेक्शन्स",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "अपवर्जित Pro+ फ़ेडरेशन इंजीन लोड नहीं हुई; लाइसेंस की проверка."
+    },
+    "scrollLeft": "बाएं लॉन्ग",
+    "scrollRight": "दाईं ओर लॉन्ग"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -1123,7 +1149,7 @@
     "viewDetails": "विवरण देखें"
   },
   "reports": {
-    "auditLog": "ऑडिट लॉग",
+    "auditLog": "वरिचा लॉग",
     "generatePdf": "PDF जेनरेट करें",
     "noResults": "आपकी खोज से मेल खाने वाली कोई रिपोर्ट नहीं मिली",
     "search": {
@@ -1137,10 +1163,65 @@
       "hosts": "होस्ट्स",
       "security": "सुरक्षा",
       "users": "उपयोगकर्ता",
-      "federation": "[TODO] Federation"
+      "federation": "फेडरेशन"
     },
     "title": "रिपोर्ट्स",
-    "viewReport": "रिपोर्ट देखें"
+    "viewReport": "रिपोर्ट देखें",
+    "antivirusCommercial": {
+      "description": "कार्यक्रमिक एन्टीवायरस सुरक्षा संतुलन जोड़े में उत्पाद का नाम, संस्करण, पहचान संस्करण, वास्तविक-समय संरक्षण संतुलन और सेवा संतुलन के माध्यम से सभी प्रबंधित होस्टों के लिए।",
+      "name": "कार्यक्रमिक एन्टीवायरस संतुलन"
+    },
+    "antivirusOpensource": {
+      "description": "ओपन-सोर्स एंटीवायरस सॉफ़्टवेअर के स्थिति प्रदर्शन, सभी होस्ट्स में सॉफ़्टवेअर नाम, संस्करण, इनस्टैलेशन पथ और एनबलड/डिसएबलड स्थिति को दिखाता है।",
+      "name": "ओपन-सोर्स एंटीवायरस स्टेटस"
+    },
+    "firewallStatus": {
+      "description": "प्रबंधित होस्टों के लिए सभी पैरामीटरों में फायरवॉल संतुलन जो फाइरवॉल सॉफ़्टवेअर, वापस दिखाए गए/बंद होने की स्थिति, खुले IPv4 और IPv6 पोर्ट्स और प्रणाली जानकारी में।",
+      "name": "होस्ट फाइरवॉल संतुलन"
+    },
+    "generateError": "पहचान करने में त्रुटि: {{message}}",
+    "hostsWithTags": {
+      "description": "सभी रजिस्टर्ड होस्ट्स को दिखाता है, जिनके साथ अनुबंधित टैग शामिल हैं। इससे एज़र वर्गीकरण और प्रवर्द्धन करना संभव होता है।",
+      "name": "टैग सहित होस्ट्स"
+    },
+    "registeredHosts": {
+      "description": "सभी पंजीकृत होस्टों की पूरी सूची जो मूल जानकारी और प्रणाली विवरणों के साथ।",
+      "name": "रजिस्टर्ड होस्ट्स"
+    },
+    "tag": {
+      "accounts": "अकाउंट्स",
+      "antivirus": "एंटीवायरस",
+      "audit": "ऑडिट",
+      "basic": "बेसिक",
+      "commercial": "कॉमर्शियल",
+      "compliance": "कॉम्पलाइअंस",
+      "firewall": "बारिएर",
+      "hosts": "होस्ट्स",
+      "network": "संचार",
+      "opensource": "オープンソース",
+      "organization": "प्रस्तुति",
+      "permissions": "परमिशन्स",
+      "rbac": "RBAC",
+      "roles": "प्रवेश कwalities",
+      "security": "सुरक्षा",
+      "systemInfo": "सिस्टम जानकारी",
+      "tags": "tags",
+      "tracking": "अनुसरण",
+      "users": "उपयोगकर्ताओं"
+    },
+    "unknownError": "अज्ञात त्रुटि",
+    "userRbac": {
+      "description": "सभी उपयोगकर्ता के पूरे दृश्य जो उनके निर्णय, भूमिकाओं, अनुमतियों और खाता संस्थापन के लिए।",
+      "name": "यूज़र सीकरिटी रोल्स (RBAC)"
+    },
+    "usersList": {
+      "description": "सभी SysManage उपयोगकर्ता की पूरी सूची जो उनके प्रोफाइल, भूमिकाओं, अनुमतियों और खाता संस्थापन के साथ।",
+      "name": "SysManage यूज़र्स"
+    },
+    "auditLogReport": {
+      "description": "पूर्ण अडिट ट्रेल जो उपयोगकर्ता के कार्यों और प्रणाली में परिवर्तनों का पहचान, एजेंट संदेश और प्रबंधन संक्रमणों के लिए।",
+      "name": "वरिचा लॉग"
+    }
   },
   "resetPassword": {
     "backToLogin": "लॉगिन पर वापस जाएं",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "अपडेट सफल",
     "updatedAt": "अपडेट किया गया",
     "viewScript": "स्क्रिप्ट देखें",
-    "waitingForResults": "परिणामों की प्रतीक्षा"
+    "waitingForResults": "परिणामों की प्रतीक्षा",
+    "adHocScript": "अधकारी श्रेणी का स्क्रिप्ट",
+    "connected": "जुड़ा हुआ",
+    "exitCodeLabel": "आउट कोड़: {{code}}",
+    "offline": "ऑफ़्लाइन"
   },
   "search": {
     "searchColumn": "में खोजें",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "गुप्त सफलतापूर्वक अपडेट किया गया",
     "updatedAt": "अपडेट किया गया",
     "viewSecret": "गुप्त देखें",
-    "subtypeRequired": "रहस्य का उपप्रकार आवश्यक है"
+    "subtypeRequired": "रहस्य का उपप्रकार आवश्यक है",
+    "filenamePlaceholder": "उदाहरण के लिए, id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "भूमिका जोड़ें",
@@ -1349,7 +1435,8 @@
       "title": "एंटीवायरस कवरेज",
       "totalHosts": "कुल होस्ट",
       "unprotected": "असुरक्षित",
-      "warningMessage": "{{count}} होस्ट(स) में एंटीवायरस सुरक्षा सक्षम नहीं है।"
+      "warningMessage": "{{count}} होस्ट(स) में एंटीवायरस सुरक्षा सक्षम नहीं है।",
+      "fetchError": "एन्टीवायरस कवरेज प्राप्त करने में विफल हुए"
     },
     "antivirusDisableFailed": "एंटीवायरस अक्षम करने में विफल",
     "antivirusDisableSuccess": "एंटीवायरस अक्षम करना सफलतापूर्वक शुरू किया गया",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "इस इंटरफ़ेस के उपयोगकर्ता पृष्ठ के माध्यम से एक नया एडमिन उपयोगकर्ता बनाएँ",
     "step4LoginNewUser": "लॉग आउट करें और अपने नए एडमिन खाते से लॉग इन करें",
     "step5RemoveCredentials": "अपनी YAML कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएँ",
-    "step6RestartServer": "./run.sh के साथ सर्वर पुनः आरंभ करें"
+    "step6RestartServer": "./run.sh के साथ सर्वर पुनः आरंभ करें",
+    "removeCredentialsHint": "अपने कॉन्फ़िगरेशन फाइल से admin_userid और admin_password को हटा दें और सर्वर को पुन: रिस्टार्ट करें"
   },
   "serverDown": {
     "details": "कनेक्शन विवरण:",
@@ -1441,10 +1529,10 @@
     "retrying": "पुनः प्रयास कर रहा है...",
     "title": "कनेक्शन बाधित",
     "titleFailed": "सर्वर अनुपलब्ध",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "प्रयास: {{count}}",
+    "lastConnected": "शहरी तारीख में पिछले संपर्क का समय: {{time}}",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}} मिनट {{seconds}} सेकंड"
   },
   "tags": {
     "addTag": "टैग जोड़ें",
@@ -1476,7 +1564,8 @@
       "statistics": "आँकड़े",
       "status": "स्थिति",
       "title": "OpenTelemetry स्थिति",
-      "tracesCount": "ट्रेसेस"
+      "tracesCount": "ट्रेसेस",
+      "fetchError": "ओपनटेलीमेट्री संतुलन प्राप्त करने में विफल हुए"
     },
     "prometheus": {
       "information": "जानकारी",
@@ -1491,8 +1580,8 @@
       "title": "Prometheus स्थिति",
       "url": "URL",
       "version": "संस्करण",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus \\u0926ेव्याल सोजे पादोज्देके \\u0938ेयास पोलान. \"make start-telemetry\" \\u0915्र\\u092cे देव्याल सोजे \\u0964 \"make stop-telemetry\" \\u0915्र\\u092cे पोलान.",
+      "notRunningMessage": "Prometheus चलाने के लिए प्रतीक्षा करें। टेलीमेट्री स्टैक को \\\"make start-telemetry\\\" या \\\"make start\\\" कमांड के साथ शुरू करें।"
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "चॉकलेटी",
+    "detectedOs": "पहचानित OS",
+    "typeLabel": "प्रकार",
+    "unknown": "अज्ञात",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "चयनित होस्ट्स",
       "title": "Ubuntu Pro नामांकन",
       "useMasterKey": "कॉन्फ़िगर की गई मास्टर की का उपयोग करें",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "कॉन्ट्रैक्ट-बेहिन्ड यूबीटुडो प्रो की, \"C\" से शुरू होने वाला",
+      "errorLabel": "त्रुटि",
+      "hostFallback": "सर्किट {{id}}"
     },
     "errors": {
       "clearFailed": "मास्टर की साफ़ करने में विफल",
@@ -1603,7 +1700,7 @@
       "masterKey": "Ubuntu Pro मास्टर की",
       "organizationName": "संगठन का नाम",
       "organizationNameHelp": "Ubuntu Pro नामांकन के लिए वैकल्पिक संगठन नाम",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "कॉन्ट्रैक्ट-बेहिन्द यूबीटुडो प्रो की, \"C\" से शुरू होने वाला। खाली छोड़ें इसे हटाने के लिए।"
     },
     "messages": {
       "keyCleared": "मास्टर की सफलतापूर्वक साफ़ हो गई",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "\\u0905\\u092a\\u0928\\u094d\\u0936\\u0947 Pro \\u092e\\u0947\\u091c\\u094b \\u0915\\u094b \\u092a\\u0938\\u094d\\u0936\\u094d\\u0930\\u0947 \\u092c\\u093e\\u0932\\u094b \\u0915\\u0948 24 \\u091a\\u094d\\u0938\\u0947\\u0915 \\u0946\\u0902"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "सुरक्षा",
       "system": "सिस्टम"
     },
-    "unknown": "अज्ञात"
+    "unknown": "अज्ञात",
+    "managers": {
+      "apt": "APT (डिबियन/यूबंटू)",
+      "chocolatey": "चॉकलेटी (विंडोज)",
+      "dnf": "डीएनएफ (फेडोरा/रेली/सेंटोस 8+)",
+      "flatpak": "फ्लैटपैक",
+      "fwupd": "fwupd",
+      "homebrew": "होमब्र्यू (मैकओएस)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "सक्रिय",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "अमान्य छवि प्रारूप। अनुमत प्रारूप: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "प्रोफ़ाइल छवि",
     "uploading": "अपलोड हो रहा है...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "\\u0926ेव्याल \\u091cो {{count}} है च्रेके",
+    "passwordTooLong": "\\u0926ेव्याल \\u092a्सा जो {{count}} है ।",
+    "passwordTooShort": "\\u0926ेव्याल \\u092a्सा जो {{count}} है",
+    "profileTabs": "प्रोफाइल टैब्स"
   },
   "users": {
     "email": "ईमेल",
@@ -1781,10 +1894,10 @@
     "noRows": "कोई पंक्ति नहीं",
     "unlockSelected": "चयनित को अनलॉक करें",
     "unlocked": "अनलॉक",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "उपयोगकर्ता के जानकारी को नीचे संपादित करें।",
+    "emailNotification": "उपयोगकर्ते को एक सुरक्षित पासवर्ड सेट करने के लिंक वाली ईमेल भेजी जायेगी।",
+    "emailUnique": "ईमेल पता अद्वितीय होना चाहिए",
+    "enterInfo": "निचे नए उपयोगकर्ता की सूचनाएँ दर्ज करें।"
   },
   "emailConfig": {
     "title": "ईमेल कॉन्फ़िगरेशन",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "रिपोर्ट सामग्री"
+    "iframeTitle": "रिपोर्ट सामग्री",
+    "loadError": "रिपोर्ट लोड करने में विफल",
+    "pdfError": "PDF बनाने में त्रुटि: {{message}}",
+    "unknownError": "अज्ञात त्रुटि"
   },
   "upgradeProfiles": {
     "add": "प्रोफ़ाइल जोड़ें",
@@ -1850,8 +1966,8 @@
     "window": "चरणबद्ध विंडो (मिनट)",
     "windowHelp": "एजेंट डिस्पैच को इतने मिनटों में फैलाएं (0–720)",
     "windowRange": "चरणबद्ध विंडो 0 से 720 मिनट के बीच होनी चाहिए",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "पड़फ़िल प्रोफाइल \"{{name}}\" को हटाएं?",
+    "confirmTrigger": "\\u092a\\u092c\\u0947\\u0902 {{name}} \\u0926\\u093e\\u0930? \\u0928\\u094d\\u0915\\u093f\\u0932\\u0947\\u0902 \\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915 \\u092e\\u0947\\u0902 \\u0938\\u0947\\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915."
   },
   "packageProfiles": {
     "add": "अनुपालन प्रोफ़ाइल जोड़ें",
@@ -1882,7 +1998,7 @@
     "version": "संस्करण",
     "versionOp": "ऑप",
     "versionOpAny": "(कोई भी)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "प्रोफाइल \"{{name}}\" को हटाएं?"
   },
   "compliance": {
     "compliant": "अनुपालन",
@@ -1932,7 +2048,7 @@
     "title": "रिपोर्ट ब्रांडिंग",
     "uploadError": "लोगो अपलोड विफल",
     "uploadLogo": "लोगो अपलोड करें",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "रिपोर्ट हेडर में लॉगो के पास दिखाई देता है (जैसे, \\\"कन्फीडियल — इंटरनल यूज\\\")।"
   },
   "reportTemplates": {
     "add": "टेम्पलेट जोड़ें",
@@ -1956,7 +2072,7 @@
     "subtitle": "कस्टम लेआउट जो रिपोर्ट रेंडरर बिल्ट-इन रिपोर्ट प्रकारों पर लागू करता है",
     "title": "रिपोर्ट टेम्पलेट",
     "updated": "टेम्पलेट सहेजा गया",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "डिपॉजिशन मॉल्डल \"{{name}}\" को हटाएं?"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "पहचान प्रदाता",
     "saveError": "प्रदाता को सहेजा नहीं जा सका — फ़ॉर्म जांचें।",
     "settingsSaveError": "सेटिंग्स को सहेजा नहीं जा सका।",
-    "settingsTitle": "प्रमाणीकरण सेटिंग्स"
+    "settingsTitle": "प्रमाणीकरण सेटिंग्स",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} बैकअप कोड शेष",
@@ -2055,7 +2175,7 @@
     "disableWarning": "अपने खाते के पासवर्ड से पुष्टि करें। आपका TOTP रहस्य और बैकअप कोड हटा दिए जाएँगे।",
     "notEnrolledDescription": "अपने खाते में दूसरा कारक जोड़ें। हर बार साइन इन करने पर आपसे प्रमाणक ऐप से एक बार उपयोग होने वाला कोड मांगा जाएगा।",
     "regenPrompt": "एक वर्तमान TOTP कोड दर्ज करें। मौजूदा बैकअप कोड अमान्य कर दिए जाएँगे।",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "मैंने ये कोड सुरक्षित जगह में बचा है"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "अपस्ट्रीम URL",
       "version": "संस्करण",
       "upstreamHelp": "ऊपर के संस्करण से स्वतः भरा गया; केवल तभी ओवरराइड करें जब आपके पास क्षेत्र-विशिष्ट मिरर हो।",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "छोटे अक्षर, अंक, कांक्षिका, बड़े। स्पेस और दौरहरू मध्ये कांक्षिकाएँ बनती हैं।"
     },
     "listTitle": "रिपॉजिटरी मिरर",
     "loadError": "रिपॉजिटरी मिरर लोड नहीं किए जा सके।",
@@ -2128,7 +2248,7 @@
       "notReady": "{{pm}} के लिए आवश्यक टूलिंग गायब है — सिंक ट्रिगर करने से पहले इंस्टॉल करें।",
       "ready": "{{pm}} रिपॉजिटरी मिरर करने के लिए तैयार।",
       "subtitle": "इस होस्ट पर {{pm}} मिरर योजनाएँ चलाने के लिए आवश्यक टूलिंग",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "{{minutes}} मिनट के भीतर एजेंट अनसुरक्त हो गया। सबसे लIKलभ वास्तविक कारण यह हैं: एजेंट प्लान मध्य बीच ट्रायड हो गया, WebSocket आदर्श पहुंच से पहले command_result भेजने के बिना फ़ैल गया, या एजेंट अपने रिझल्ट इमिट करने के बिना आदर्श को चुपके से डी-डूपलिकेट कर दिया। इस होस्ट पर एजेंट लॉग को जाँचें और sysmanage-agent सेवा को फिर से शुरू करने की महत्ता दें। फ्रिश / टूल्स इनस्टॉल करके पुन: प्रयास करने के लिए Refresh / Install Tools पर क्लिक करें - यात्रा में बची हुई नोटेशन को सफलतापूर्वक संशोधित किया जाएगा और फ्रिश प्रयास डिपार्टिशन हो जाएगा।"
     },
     "configureSubtitle": "उस होस्ट को चुनें जो इस प्लेटफ़ॉर्म की मिरर योजनाएँ चलाएगा। केवल वे होस्ट सूचीबद्ध हैं जिनका प्लेटफ़ॉर्म टैब से मेल खाता है।",
     "deleteConfigInUse": "पहले इस प्लेटफ़ॉर्म के तहत {{n}} मिरर हटाएँ।",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "कैसियन",
+      "details": "विवरण",
+      "openSite": "खोलें",
+      "operation": "क्रिया",
+      "site": "साइट",
+      "timestamp": "\\u0926\\u0948\\u0930\\u094d\\u092f\\u093e\\u0928"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "अभी तक कोई फ़ेडरेशन ऑडिट प्रविष्टियाँ नहीं हैं।",
+    "emptyFiltered": "फ़िल्टर में मैच नहीं हुए कोई ऑडिट प्रविष्टियाँ।",
+    "errorLoad": "फेडरेशन ऑडिट लॉग को लोड करने में विफल हुए।",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "कैसियन",
+      "apply": "应用",
+      "clear": "सफेद करें",
+      "operation": "क्रिया",
+      "siteId": "साइट आईडी"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "प्रत्येक क्रॉस-साइट ऑपरेशन समन्वयक द्वारा केंद्रीय तौर पर लॉग किया जाता है।",
+    "title": "फेडरेशन ऑडिट लॉग"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "HostException: के स्थानों को लोड करने में विफल हुए।",
+    "openHost": "खुला होस्ट",
+    "subtitle": "जैग्रहिक वितरण जो पब्लिक IP रिपोर्ट करने वाले एजेंटों का है।",
+    "title": "होस्ट मैप",
+    "status": "स्टेटस"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "निर्धारित करें",
+      "deactivate": "देवाक्टिवेट करें",
+      "edit": "संपादित करें",
+      "push": "अभी प्रस्तुत करें"
     },
-    "active": "[TODO] active",
+    "active": "कार्यरत",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "साइन-अप अपडेट करने में विफल हुए।",
+      "errorLoad": "साइट्स लोड करने में विफल हुए।",
+      "noSites": "अभी तक कोई फ़ेडरेशन साइट एनरोल नहीं हुआ।  पहले एक सबऑर्डिनेट SysManage सर्वर एनरोल करें।",
+      "statusLine": "प्रस्तुति अवस्था: {{status}}",
+      "submit": "निर्देशनों को 저장하기",
+      "success": "पाबोज्दे वै येतार्रजो.",
+      "title": "साइट्स को अनुवादित करें",
+      "statusLineWithAttempts": "प्रस्तुति अवस्था: {{status}} ({{attempts}} प्रयास)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "क्रियाएं",
+      "active": "कार्यात्मक",
+      "name": "नाम",
+      "type": "\\u092a\\u093e\\u0930\\u094d\\u0926\\u0947",
+      "version": "\\u092a\\u0941\\u0935\\u0947"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "नया नीति",
+      "cancel": "रद्द करें",
+      "customType": "कस्टम पॉलिसी टाइप",
+      "definition": "(JSON) परिभाषा",
+      "description": "वर्णन",
+      "engineUnavailable": "फेडरेशन कंट्रोलर इंजाइन लोड नहीं हुआ; पॉलिसी बनाए जा सकते नहीं।",
+      "error": "कानून बनाने में विफल हुए।",
+      "invalidJson": "परिभाषा JSON ऑब्जेक्ट होनी चाहिए।",
+      "name": "नाम",
+      "submit": "बनाएँ",
+      "success": "पादोज्देके सेयास.",
+      "title": "पॉलिसी बनाएँ",
+      "type": "पाबोज्दे वै येतार्रजो.",
+      "typeOther": "अन्य...",
+      "typeRequired": "पादोज्दे वै येतार्रजो."
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "कैसे नीति को डिएक्टिव करने में विफल हुए।",
+      "success": "'{{name}}' को बंद कर दिया गया।"
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "कानून का अपडेट फ़ैल हो गया।",
+      "submit": "सहेजें",
+      "success": "पादोज्दे वै येतार्रजो.",
+      "title": "पॉलिसी संपादित करें",
+      "versionNote": "सेविंग करने से नीति का संस्करण बढ़ेगा; साइट्स अगले पश्चाग्रहण साइकल में नए संस्करण को ले लेंगी।"
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "अभी तक कोई नीति परिभाषित नहीं हुई है। \\\"नया नीति\\\" दबाकर एक बनाइए।",
+    "errorLoad": "फेडरेशन नीतियों को लोड करने में विफल हुए।",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "केवल गैर-निष्क्रिय",
+      "allTypes": "सभी प्रकार",
+      "type": "पाबोज्दे वै येतार्रजो."
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "निष्क्रिय",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "कानून को पुश करने में विफल हुए।",
+      "success": "{{name}} के लिए पुश स्ट्रिंग किया गया।"
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "केंद्रीकृत पाठ्य प्रोटोकॉल्स मुख्य साइटों पर फेरबदल किए जाते हैं।",
+    "title": "फेडरेशन पॉलिसीज़",
+    "deadLetter": "मृत-पत्र"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "हटाएं",
+      "resume": "पुनरारंभ करें",
+      "suspend": "रोक देना"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "साइट में शामिल करें",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "साइट रो के लिए ऐडीयूट के लिए संरक्षण किया जाएगा, लेकिन कन्ट्रीनियर को इस से सिंक्स प्राप्त करने में रोक दिया जाएगा। इस कदम को UI से उठाना असंभव है।",
+      "cancel": "रद्द करें",
+      "confirm": "साइट हटाएं",
+      "title": "संघीयकरण साइट हटाएं?"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "न्यूनतम एजेंट संस्करण",
+      "backToList": "साइट्स पर वापस जाएँ",
+      "connection": "संपर्क",
+      "enrolledAt": "साइबर सिस्टम में पंजीकृत",
+      "errorLoad": "साइट लोड करने में विफल हुए।",
+      "hostCount": "होस्ट संख्या",
+      "lastSyncAt": "अंतिम सिंक तारीख",
+      "lastSyncStatus": "अंतिम सिंक रिकार्डस्थिति",
+      "metadata": "मेटाडाटा",
+      "notFound": "साइट नहीं मिला।",
+      "seeHosts": "इस साइट पर होस्ट्स देखें",
+      "syncInterval": "संकरण अन्तराल",
+      "syncIntervalValue": "{{seconds}}स",
+      "url": "URL",
+      "viewAuditLog": "\\u0915\\u0948 audit log \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915",
+      "activeCommands": "कार्य कर रहे कमांड",
+      "activeCommandsEmpty": "कोई गतिवर्धक कमांड नहीं।",
+      "activeCommandsLoading": "लोडिंग...",
+      "commandAttempts": "{{n}} प्रबिष्ट कोशिशें",
+      "commandDispatchedAt": "डिसपाच {{when}}",
+      "dispatchCommand": "कमांड डिसपाच",
+      "backlogDepth": "\\प्शाब केयास",
+      "backlogUnknown": "—",
+      "refresh": "अद्यतन करें",
+      "syncHealthy": "स्वास्थ्य अच्छा",
+      "syncNever": "कभी सिंक नहीं हुआ",
+      "syncOverdue": "वहम",
+      "syncStale": "पुराना",
+      "rollupCompliance": "संतुलन",
+      "rollupEmpty": "इस साइट से अभी तक कोई पारिता या गतिवर्धक डेटा सिंक नहीं हुआ।",
+      "rollupTitle": "संतुलन और संवेदनाएँ",
+      "rollupVulnerabilities": "संवेदनशीलताएँ ({{hosts}} होस्ट(s) प्रभावित)",
+      "vulnCritical": "{{n}} कार्यक्षमता",
+      "vulnHigh": "{{n}} उच्च",
+      "vulnLow": "{{n}} कम",
+      "vulnMedium": "{{n}} मध्यम",
+      "alertAck": "स्वीकार करें",
+      "alertAcked": "प्रतीक्षा कर रहा",
+      "alertsTitle": "खुले अलर्ट",
+      "autonomous": "अपने आप में संचालित",
+      "pushPolicies": "कानून प्रस्तुत करें",
+      "repushFailed": "कानून का पुनर्प्रसारण टीका करने में विफल हो गया।",
+      "repushQueued": "{{n}} नीति पुश को पुनर्भेजन के लिए संपीड़ित किया गया है।",
+      "siteCapabilities": "कैपेबिलिटीज़",
+      "siteVersion": "प्रत्यक्षित संस्करण",
+      "syncLatency": "\\u092c\\u094b\\u0932\\u094d\\u092f\\u0947 sync latency (recent)",
+      "syncPoints": "{{n}} संकेतन घटनाएँ",
+      "syncTimeline": "सिंक टाइमलाइन",
+      "syncTimelineEmpty": "अभी तक कोई सिंक घटनाओं का रिकार्ड नहीं हुआ है।",
+      "pushPoliciesHint": "इस साइट के प्रत्येक नीति को फिर से आयावना करें — जल्दबाज़ या मृत-पत्र डिलीवरी भी शामिल हैं — ताहत अमुक समय पर फिर से प्रोस करें।",
+      "syncHealthHistogram": "संकर की सफलता / विफलता (व्युत्पन्न)"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "अभी तक कोई साइट एनरोल नहीं हुई है। एक प्रतिगमन SysManage सर्वर एनरोल करें।",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "रद्द करें",
+      "done": "कर चुके हैं",
+      "engineUnavailable": "फेडरेशन कंट्रोलर इंजाइन लोड नहीं हुआ है; साइट पंजीकरण नहीं किया जा सकता।",
+      "error": "साइट पंजीकरण विफल हो गई।",
+      "location": "स्थान टैग (वैकल्पिक)",
+      "name": "साइट नाम",
+      "submit": "टॉकन जनरेट करें",
+      "successTitle": "साइट रजिस्टर कराई गई",
+      "syncIntervalSeconds": "संकर की अन्तराल (सेकंड)",
+      "title": "संघ साइट पंजीकरण",
+      "tokenInstructions": "नीचे दिए गए पंजीकरण टोकन को कॉपी करें और नई साइट सर्वर में भेजें। यह इसका अगला दिखाई देने वाला समय है — यदि गुंजाइश की आवश्यकता हो तो उपलब्ध नहीं होगा।",
+      "url": "साइट यूआरएल",
+      "siteIdentityKey": "साइट पहचान वेब प्रकाशन मुख्य संवर्द्धन (PEM)",
+      "siteIdentityKeyHelp": "आवश्यक। साइट के ऑब्जेक्ट पब्लिक की, जो आउट ऑफ़ बैंड (साइट के सर्वर रोल पेज से) हासिल की गई है, यहाँ पेस्ट करें। नियमदाता इस की के माध्यम से साइट के एनरोलमेंट प्रूफ की जांच करता है — यह एनरोलमेंट-वक्त मेन-इन-द-मिडल से बचने के लिए है।"
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "फेडरेशन आपको कई SysManage सर्वरों की प्रबंधन करने की अनुमति देता है। एक इन्टरप्राइज लाइसेंस परिष्करण करें जो उप-साइट्स को यहाँ संबोधित करता है।",
+      "title": "बहु-साइट प्रोत्साहकीकरण के लिए Enterprise आवश्यक है"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "फेडरेशन साइट्स लोड करने में विफल हुए।",
+    "hostCount": "{{count}} कॉन्फिगरेशन",
+    "lastSync": "{{when}} को सिंक कर दिया",
+    "mapView": "आरेख दृश्य",
+    "policiesLink": "पादोज्देके सेयास.",
+    "subtitle": "इस समन्वयक के द्वारा पंजीकृत उप-सिस्टमेनेज सर्वर।",
+    "title": "फेडरेशन साइटस",
+    "hostsLink": "होस्ट",
+    "tilesView": "डैशबोर्ड"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "फेडरेशन साइट्स लोड करने में विफल हुए।",
+    "gridView": "ग्रिड दृश्य",
+    "openSite": "खुला साइट",
+    "subtitle": "उप-साइट सर्वरों की जैग्रहिक वितरण।",
+    "title": "फेडरेशन साइट्स मैप",
+    "tilesView": "डैशबोर्ड",
+    "lastSyncLabel": "अंतिम सिंक:",
+    "statusLabel": "स्टेटस:"
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "बिल्ड एजेंट बंडल",
+    "buildError": "बिल्ड कิュー करने में विफल हुए",
+    "buildProplus": "बिल्ड प्रो+ बंडल",
+    "buildServer": "बिल्ड सर्वर बंडल",
+    "bundle": "बंडल",
+    "completedAt": "पूरा हुआ",
+    "confirmDelete": "यह बंडल और इसकी ISO फ़ाइल को हटाएं?",
+    "copied": "कमांड कॉपी किया गया है, क्लिपबोर्ड में",
+    "copy": "क्लिपबोर्ड पर कॉपी करें",
+    "copyError": "क्लिपबोर्ड के साथ संपर्क नहीं हुआ",
+    "createdAt": "बनाया गया",
+    "delete": "हटाएँ",
+    "deleteError": "बंडल डिलीट करने में विफल हुए",
+    "deleted": "बंडल मिटा दिया गया",
+    "dockerInstallHint": "इसे sysmanage सर्वर पर जोड़ का अधिकार वाले उपयोक्ता के रूप में चलाएं:",
+    "dockerNoGroup": "डॉकर संचालित है, लेकिन {{user}} वर्ड डॉकर में नहीं है, इसलिए बिल्ड सबप्रोग्राम डेमन सॉकेट को पहुंचा नहीं जा सकता।",
+    "dockerNotInstalled": "डॉकर इस सर्वर पर स्थापित नहीं है। बंडल बिल्ड करने में डॉकर की आवश्यकता होती है।",
+    "dockerNotRunning": "डॉकर स्थापित है, लेकिन डेमन पहुंचा नहीं जा सकता। इसे यहाँ से शुरू करें: sudo systemctl enable --now docker.",
+    "dockerPermissionDenied": "डॉकर डेमन चल रहा है लेकिन {{user}} यूज़र (यह स्वचालित रूप से इस sysmanage प्रोसेस को चलाने वाला) /var/run/docker.sock को पढ़ने में असमर्थ है। यूज़र को docker समूह में जोड़ें, फिर sysmanage प्रोसेस को फिर से शुरू करें ताकि नई समूह सेटिंग्स प्रभावी हों।",
+    "dockerReady": "डॉकर तैयार है",
+    "dockerReadyHint": "बिल्ड का सामान्य समय 5-30 मिनट होता है, इसकी दर्जन प्रभावित होने वाले प्लेटफ़ोर्म की संख्या पर भी निर्भर करता है।",
+    "download": "ISO डाउनलोड करें",
+    "downloadError": "बंडल डाउनलोड करने में विफल हुए",
+    "empty": "अभी तक कोई बन्डल नहीं है। ऊपर से एक बटन दबाकर एक बनाइए।",
+    "loadError": "बंडल लोड करने में विफल हुए",
+    "queued": "बंडल बिल्ड क्वीयूड — सूची को अपडेट करने में पुनः प्रयास कर रहा है",
+    "recentFailures": "नवीनतम बिल्ड के विफलारों:",
+    "recheckDocker": "Docker पुनः जाँच करें",
+    "requiresDocker": "बंडल बिल्ड डॉकर के इनस्तॉल किया गया होने और सर्वर पर चलने वाले होने की आवश्यकता है — फेटच करने के लिए प्रति-डिस्त्री Linux पैकेज। बिल्ड का सामान्य समय 5-30 मिनट होता है, इसकी दर्जन प्रभावित होने वाले प्लेटफ़ोर्म की संख्या पर भी निर्भर करता है।",
+    "size": "आकार",
+    "status": "विस्तार",
+    "subtitle": "एक मल्टी-ओएस ISO जनरेट करें जो sysmanage सर्वर या एजेंट + सभी प्रतिप्ल्यूम परिष्करणों को शामिल करता है, तैयार होकर एक एयर-गेप्स्ड होस्ट पर माउंट करने के लिए।",
+    "title": "विशेष अनुकरण (Air-Gap) संस्थापन कंपोजिट",
+    "version": "\\u092a\\u0941\\u0935\\u0947",
+    "recheckResources": "संसाधनों की पुनर्तत्कालिक जांच",
+    "resourcesInsufficient": "यह सर्वर किसी भी Server या Agent बंडल बनाने के लिए पर्याप्त खالي मेमोरी या डिस्क नहीं है — उन बटनों को अक्टिव करने से पहले संसाधित रिसोर्सेज़ (स्वैप डिस्क या VM को बढ़ाए) होते हुए उनकी अवस्था डिसबल है।",
+    "resourcesLow": "कम संसाधन - बिल्ड चला सकता है लेकिन स्वैप पर भरोसा करेगा और धीमी गति से चल सकता है।"
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "हटाएँ",
+      "download": "ISO डाउनलोड करें"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "क्रियाएं",
+      "completed": "पूरा हुआ",
+      "created": "बनाया गया",
+      "isoLabel": "ISO लेबल",
+      "size": "आकार",
+      "started": "शुरू हो गया",
+      "status": "विस्तार"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "यह संग्रहण चलने और इसके मैनिफेस्ट्स को हटाएं?",
+    "createError": "चलाने को बनाने में विफलता",
+    "created": "संग्रहण चलानी क्वीयूड",
+    "deleteError": "चलानी को इनकार करने में विफलता",
+    "deleted": "संग्रहण चलानी मिटा दी गई है",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "रद्द करें",
+      "includeCompliance": "संतुलन बंडल शामिल करें",
+      "includeCve": "सीवीई फीड स्नैपशॉट शामिल करें",
+      "isoLabel": "ISO लेबल",
+      "isoLabelHelper": "संश्लेषित ISO में शामिल किए गए संक्षिप्त पहचान (उदाहरण के लिए \"monthly-2026-05\").",
+      "isoLabelRequired": "ISO लेबल आवश्यक है",
+      "mediaSizeHelper": "डिस्क प्रति की अधिकतम आकार (एमबी)। सूची में 4700 (डीवीडी-5) होता है।",
+      "mediaSizeMb": "मीडिया का आकार (एमबी)",
+      "submit": "कार्यक्रम चलाओ",
+      "title": "नई संकलन चलानी",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "ISO डाउनलोड करने में विफल हुए",
+    "empty": "अभी तक कोई संकलन चलानी नहीं है। \\\"नई संकलन चलानी\\\" दबाकर शुरू करें।",
+    "licenseRequired": "Air-gap collector engine लोड नहीं हुआ; Pro+ प्राइस की आवश्यकता है।",
+    "loadError": "प्ररूप लोड करने में विफल हुए",
+    "newRun": "नई संकलन चलानी",
+    "noManifestFound": "run को अभी तक manifest मिल नहीं चुका है — status COMPLETE होने पर पुनः प्रयास करें।",
+    "notApplicable": "यह पृष्ठ केवल संग्राहक-रोल इनस्टॉलेशन पर महत्वपूर्ण है।",
+    "refresh": "अद्यतन करें",
+    "subtitle": "एक बारी के लिए संग्रहण चलाने का त्रुटि, संस्थापित प्रतिष्ठानों को मिडर करने के लिए बनाया हुआ अपनी ISO और वहीं लैंडलॉक साइड पर आगमन के लिए एक मैनिफेस्ट लिखने का त्रुटि।",
+    "title": "वायु-गेप कलेक्शन चलने",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "सर्वर भूमिका"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "कोई लाभार्थी द्रव्यमय नहीं पाया गया। मीडिया इन्सर्ट करें और रिस्कैन दबाएँ।",
+    "help": "देव्याल \\u0938जार/पाद गो भुविन साबे पादोज्देके सोजे पादोज्देके सेयास पोलान. \\u0926ुव्बे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।. \\u0915्र\\u092cे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।.",
+    "label": "ब्लॉक डिवाइस",
+    "loadError": "ड्राइव को गिनने में विफलता",
+    "none": "(none)",
+    "rescan": "ड्राइव फिर से स्कैन करें",
+    "saveError": "डिवाइस सेभ करने में असफलता हुई।",
+    "title": "ड्राइव आयम्प트",
+    "optical": "किरणीय",
+    "removable": "किनारे वाला"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "ड्राइव",
+    "import": "ISO इम्पोर्ट",
+    "importError": "आयम्प्टर प्रारंभ करने में असफलता हुई।",
+    "noDevice": "कोई आयम प्रविष्टिकरण ड्राइव नहीं चुना गया है। सेटिंग्स → सर्वर भूमिका में एक चुनें।",
+    "notReady": "तैयार नहीं है",
+    "ready": "तैयार{{label}}",
+    "rescan": "पुनर्अनुसरण करें",
+    "statusError": "इम्पोर्ट डिवाइस को प्रोब नहीं कर सका।",
+    "title": "मीडिया से इम्पोर्ट",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "पूरा करें",
+      "copying": "पैकेज को कॉपी करना",
+      "failed": "असफल",
+      "queued": "कิュー कर दिया",
+      "verified": "\\u092a\\u0941\\u0935\\u0947",
+      "verifying": "\\u0926\\u094b\\u0938\\u094d\\u092f\\u0947 signature \\u092e\\u0947\\u091c\\u094b"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "प्रविष्ट करना पूरा — नीचे की संस्थान सूची को ताज़ा किया गया है।",
+    "runStats": "{{files}} फ़ाइलें · {{size}}",
+    "runStatus": "आयात स्थिति"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "पब्लिक कुंजी कॉपी करें",
+      "help": "इस पब्लिक कुंजी को कॉपी करें और Air-Gap रिपोज़िट्री सर्वर में इम्पोर्ट करें ताकि यह इस कलेक्टर द्वारा उत्पन्न किए गए हस्ताक्षरित मीडिया को संबोधित करे। केवल पब्लिक कुंजी ही दिखाई देती है — गोपनीय हस्ताक्षरण कुंजी कभी भी इस सर्वर से बाहर नहीं आती।",
+      "loadError": "कलेक्टर पब्लिक कुंजी को लोड नहीं कर सका।",
+      "title": "कोलेक्टर पब्लिक की"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "कॉपी किया!",
+    "copyError": "क्लिपबोर्ड पर कॉपी करने में विफलता",
+    "copyFingerprint": "फ़िंगरप्रिंट कॉपी करें",
+    "fingerprint": "फिंगरप्रिन्ट",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(unreadable key)",
+      "count": "{{n}} संबोधन",
+      "empty": "कोई ट्रस्टेड कलेक्टर कुंजी नहीं है।",
+      "help": "प्रत्येक एयर-गैप कलेक्टर (Air-Gap Collector) से जिनमें इस गिट हब (repository) को मीडिया (media) पहुंचाना चाहिए, उनके लिए बाहरी सक्रियता के साथ पब्लिक की (public key) को इम्पोर्ट करें। असंबद्ध कुंजी द्वारा हस्ताक्षरित मीडिया (media signed by an untrusted key) को आयनग (ingest) के समय नकारात्मक जब्त किए जाते हैं।",
+      "import": "कुंजी इम्पोर्ट",
+      "importError": "कुंजी को इम्पोर्ट नहीं कर सका।",
+      "imported": "प्रविष्ट की गई सकारात्मक {{fp}}",
+      "loadError": "विश्वसनीय कुंजी को लोड नहीं कर सका।",
+      "nameLabel": "कोलेक्टर नाम",
+      "pemLabel": "公然鍵 (PEM)",
+      "removeError": "कुंजी हटा नहीं पाई।",
+      "required": "नाम और सार्वजनिक कुंजी दोनों आवश्यक हैं।",
+      "title": "\\u0926\\u094b\\u0932\\u094d\\u092f\\u0947 \\u0915\\u094b Collector Keys"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "विवरण",
+      "openSite": "साइट"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "होस्ट",
+      "ipv4": "IPv4",
+      "lastSeen": "अंतिम देखी गई",
+      "os": "ओएस",
+      "platform": "क्रारे",
+      "status": "विस्तार"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "बंद करें",
+      "ipv6": "IPv6",
+      "noLiveLink": "\\u092c\\u0947 \\u0938\\u094d\\u0915\\u094b \\u091a\\u093e\\u0930 \\u0926\\u0940 \\u092a\\u092c\\u0938\\u0947 (\\u0926\\u0940 \\u0915\\u094b \\u092e\\u094d\\u0936\\u0947 \\u091a\\u093e\\u0930 URL \\u0928\\u0947\\u0902 \\u0915\\u094b).",
+      "notFound": "यह होस्ट अब डिरेक्टरी में नहीं है।",
+      "site": "प्सात विते",
+      "theSite": "साइट",
+      "title": "होस्ट विवरण",
+      "viewLive": "\\u092e\\u0947\\u091c\\u094b live detail \\u0946 {{site}} \\u2192"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "अभी तक कोई होस्ट साइट से सिंक नहीं हुआ।",
+    "emptyFiltered": "फ़िल्टर में मैच नहीं हुए कोई होस्ट।",
+    "errorLoad": "क्रॉस-साइट होस्ट्स लोड करने में विफल हुए।",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "应用",
+      "clear": "सफेद करें",
+      "osFamily": "ओएस परिवार",
+      "search": "योगा१ (অকেিন /\nIP)",
+      "status": "विस्तार"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "एक साइट के लिए स्कोप",
+    "subtitle": "सार्वभौम नोड के सभी पंजीकृत साइटों से समन्वित डायरेक्टरी, कoodinator के द्वारा।",
+    "title": "क्रॉस-साइट होस्ट्स",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "सफेद करें",
+      "dispatch": "कमांड डिसपाच",
+      "selectAll": "इस पेज पर सभी को चुनें",
+      "selected": "{{n}} होस्ट्स सेलेक्टेड"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "रद्द करें",
+    "commandType": "कमांड",
+    "dispatch": "डिसपाच",
+    "dispatching": "डिसपाचिंग…",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "कमांड डिस्पैच करने में विफल हुए।",
+      "packagesRequired": "कम से कम एक पैकेज नाम दर्ज करें।",
+      "scriptRequired": "सर्किट लकीर को सेट करने के लिए स्क्रिप्ट दर्ज करें।",
+      "unlicensed": "फेडरेशन एक इन्टरप्राइज लाइसेंस की आवश्यकता है।",
+      "partial": "{{failed}} आये {{total}} साइट डिपचेस्ट में से विफल हुए।"
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "होस्ट आयडी",
+    "hostIdsHint": "होस्ट ID (होस्ट्स पेज से)",
+    "packages": "काशोजे च्रैनित",
+    "packagesOptional": "काशोजे च्रैनित (\\u092a्शाब \\u092bुव में = नेपार स्योज)",
+    "script": "स्क्रिप्ट",
+    "subtitle": "{{site}} के लिए एक कमांड कोई क्वीयू में पंजीकरण करें। साइट अपने होस्ट्स पर इसे चलाती और परिणाम बताती है — कुछ भी तुरंत नहीं लचीकरण होता।",
+    "targetAll": "इस साइट पर सभी होस्ट",
+    "targetSpecific": "विशेष होस्ट्स (आयडी द्वारा)",
+    "thisSite": "यह साइट",
+    "title": "कमांड डिसपाच",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "अपडेट लागू करें",
+      "deployPackages": "पैकेज इनस्टल करें",
+      "reboot": "पुनर्राम चलाओ",
+      "runScript": "स्क्रिप्ट चलाएं"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "चयनित {{hosts}} होस्ट(s) पर और {{sites}} साइट(s) पर एक कमांड के लिए काउंटर क्रम में अग्रणी बुलेट का विनिर्देश। हर साइट इसे चलाती है और परिणामों को लौकिक रूप से बताती है — कुछ भी अमन नहीं चला जाता है।"
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "कोऑर्डिनेटर",
+    "coordinatorThisServer": "यह सर्वर",
+    "countEnrolled": "{{n}} पंजीकृत",
+    "countHosts": "{{n}} कैसिन्ग",
+    "countPending": "{{n}} पेंडिंग",
+    "countSuspended": "{{n}} रोकड़",
+    "empty": "अभी तक कोई साइट एनरोल नहीं हुई है।",
+    "errorLoad": "साइट्स लोड करने में विफल हुए।",
+    "gridView": "ग्रिड दृश्य",
+    "hostsLabel": "{{n}} कैसिन्ग",
+    "lastSync": "{{when}} को सिंक कर दिया",
+    "mapView": "आरेख दृश्य",
+    "title": "फेडरेशन डैशबोर्ड"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "कार्यकारी",
+    "save": "सीमाओं को बचवा",
+    "saveFailed": "सीमाओं को बचाने में विफल हुए।",
+    "saved": "प्रतीक्षा सीमाएँ बचीं हैं।",
+    "subtitle": "एक फील्ड खाली छोड़ें बिल्ट-इन प्रतिस्थापन का उपयोग करने के लिए।",
+    "title": "प्रत्यावर्तन सीमाएँ"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "कार्यात्मक",
+      "compliance": "\\u0938\\u094d\\u092e\\u0947\\u091c\\u094b compliance",
+      "critical": "क्रिटिकल CVEs",
+      "high": "उच्च CVE",
+      "hosts": "होस्ट",
+      "site": "साइट"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "प्रतिक्रिया जनरेट करें",
+    "sites": "साइट्स (कोई भी नहीं चुने गया हो तो सभी)",
+    "subtitle": "साइटों के आग्नेय, समर्थन, और प्रतिबंधक्षमता रोलअप्स की सामन्वयन।",
+    "totals": "Total ({{n}} \\u0915\\u094b)",
+    "upsell": "बहु-साइट प्रोत्साहकीकरण के लिए Enterprise आवश्यक है।"
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "उस हब को जो कई उप-साइट सर्वरों से होस्ट इन्वेंट्री, पारिता और संवेदनशीलता रोलअप्स को एग्रीगेट करता है और उनसे नीचे कमांड्स और पॉलिसीज़ डिपाच्ट करता है। फेडरेशन प्रति एक कोऑर्डिनेटर।",
+      "title": "फेडरेशन कोऑर्डिनेटर"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "कॉपी किया!",
+    "copyError": "क्लिपबोर्ड पर कॉपी करने में विफलता",
+    "copyFingerprint": "फ़िंगरप्रिंट कॉपी करें",
+    "currentTag": "(वर्तमान)",
+    "heading": "फेडरेशन रोल",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "पब्लिक कुंजी कॉपी करें",
+      "pending": "आयडेंटिटी कुंजी जनरेट करने में…",
+      "title": "\\u092c\\u0947 \\u0938\\u094d\\u0915\\u094b \\u092e\\u0947\\u0902\\u091a\\u093e\\u0930",
+      "help": "इस पब्लिक कुंजी को कॉपी करें और पीयर के फ़ेडरेशन कार्ड में पेस्ट करें ताकि हर ओर दूसरे का अभिव्यक्ति फ़िंगरप्रिंट और इसकी बाहर से पुष्टि कर सके। गोपनीय कुंजी कभी भी इस सर्वर से बाहर नहीं आती।"
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "कुंजी को इम्पोर्ट नहीं कर सका।",
+    "intro": "यह सर्वर का भूमिका चयन करें जो बहुसाइट फ़ेडरेशन में भाग लेता है। यह एक प्रकार की विधि है — एक सर्वर दोनों ही हो सकता है। अगले रिस्टार्ट के बाद प्रभावी हो जाता है।",
+    "loadError": "फ़ेडरेशन रूल को लोड नहीं कर सका।",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "डिफ़ॉल्ट। यह सर्वर कोई बहुसाइट फ़ेडरेशन का हिस्सा नहीं है। आपको एक कoodinator या उपसाइट चलाते हुए नहीं होते तो इसे चुनें।",
+      "title": "फ़ेडरेशन नहीं है"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "पीयर कुंजी इम्पोर्ट करें",
+      "name": "देव्याल चोलान",
+      "pem": "देव्याल सोजे (PEM)",
+      "empty": "अभी तक कोई पीयर आइडेंटिटी कुंजी नहीं रिकार्ड हुई हैं।",
+      "help": "यहाँ पीयर के इंपबल्क की पब्लिक की सारणी को निर्धारित करें ताकि उसका आइडेंटिटी फ़िनगरप्रिंट ऑउट ऑफ़ बैंड सत्यापित किया जा सके। फ़ेडरेशन कनेक्शन खुद ही TLS सर्टिफ़िकेट पिन्निंग के माध्यम से सुरक्षित होता है - इन की सारणी लोगों के सत्यापन, न कि एक्सेस कंट्रोल के लिए हैं।",
+      "title": "देव्याल सोजे च्रैनित"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "कुंजी हटा नहीं पाई।",
+    "save": "फेडरेशन रोल सहेजें",
+    "saveError": "फ़ेडरेशन रोल सेभ करने में असफलता हुई।",
+    "saved": "फेडरेशन रोल सहेजा गया है। सर्वर को पुनः सुरु करें ताकि इसे पूरी तरह से प्रभावित करें।",
+    "saving": "保存中...",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "एक उप-सर्वर जो स्वतंत्र रूप से काम करता है और एक समन्वयक तक अपडेट भेजता है। यह इस प्रकार संचालित होता है कि यदि समन्वयक अपहरण हो गया हो, तो भी आत्म-नियंत्रित प्रवर्द्धित मेंसेज के रूप में संचित डेटा को फिर से पुनरावलोकित करता है।",
+      "title": "फेडरेशन साइट"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "समन्वयक URL",
+      "enrolled": "कoodinator के साथ पंजीकृत",
+      "error": "समन्वयक के साथ पंजीकरण नहीं हो सका।",
+      "help": "पाबोज्दे वै येतार्रजो देव्याल सोजे पादोज्देके \\u0938ेयास पोलान. \\u0926ुव्बे येतार्रजो देव्याल \\u0938ोजे.",
+      "notEnrolled": "कोई कुशलजनक से प्रोटिक्यूटर एनरोल नहीं हुआ।",
+      "submit": "सहकर्मी के साथ पंजीकरण करें",
+      "submitting": "पंजीकरण चल रहा है...",
+      "title": "सहकर्मी के साथ पंजीकरण करें",
+      "token": "पंजीकरण टोकन",
+      "coordIdentityKey": "समन्वयक पहचान इबादती सारणी (PEM)",
+      "coordIdentityKeyHelp": "आवश्यक। सहायक के डी-इनरिटी पब्लिक की, ऑटोमेटिकली (उसकी Server Role पृष्ठ से) पेस्ट करें। इस साइट नियमित होने का इजाज़त देगी अगर सहायक इस विशिष्ट की को प्रमाणित करे — यह एक नियमित-समय मध्य-दूषक को हरा देने का है।"
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "सर्वर-वार ऑपरेशनल सेटिंग्स। सही की गई मूल्यों को डेब्स के में संग्रहीत किया जाता है और sysmanage.yaml के मूल्यों को प्रतिस्थापित करता है।",
+    "loadError": "निर्देशक सेटिंग्स लोड करने में विफल हुए।",
+    "save": "सहेजें",
+    "saveError": "कॉन्फिगरेशन सेटिंग्स बचाने में विफल हो गया।",
+    "saved": "सेटिंग्स सहेजे गए।",
+    "secretSet": "•••••••• (संग्रहीत — खाली छोड़ें कि पुराना रखना हो)",
+    "secretSetHelp": "OpenBAO में एक पासवर्ड संग्रहीत है। इसे बदलने के लिए नए पासवर्ड को टाइप करें।",
+    "secretUnset": "सेट नहीं है",
+    "secretUnsetHelp": "OpenBAO में सुरक्षित रूप से संग्रहीत, डाटाबेस में नहीं।",
+    "title": "सेटिंग्स"
+  },
+  "connection": {
+    "networkError": "नेटवर्क त्रुटि: सर्वर को पहुंच नहीं पाया",
+    "serverError": "सर्वर त्रुटि: {{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "बाएं लॉन्ग",
+    "scrollRight": "दाईं ओर लॉन्ग"
+  },
+  "settings": {
+    "tabsAriaLabel": "सेटिंग्स टैब"
   }
 }

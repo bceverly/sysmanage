@@ -75,6 +75,7 @@ const MigrationCompatBanner: React.FC = () => {
           'migrationCompat.intro',
           'One or more Pro+ modules cannot load because the database schema is older than they require. Run',
         )}{' '}
+        {/* eslint-disable-next-line i18next/no-literal-string -- CLI command is not translatable */}
         <code>alembic upgrade head</code>{' '}
         {t(
           'migrationCompat.outro',

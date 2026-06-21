@@ -362,8 +362,8 @@ const AuthenticationProvidersSettings: React.FC = () => {
                 }
                 disabled={!!editingId}
               >
-                <MenuItem value="ldap">LDAP / Active Directory</MenuItem>
-                <MenuItem value="oidc">OIDC</MenuItem>
+                <MenuItem value="ldap">{t('idp.type.ldap', 'LDAP / Active Directory')}</MenuItem>
+                <MenuItem value="oidc">{t('idp.type.oidc', 'OIDC')}</MenuItem>
               </Select>
             </FormControl>
             <FormControlLabel

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { connectionMonitor, ConnectionStatus } from '../Services/connectionMonitor';
 import ServerDownModal from './ServerDownModal';
 
@@ -32,6 +33,7 @@ interface ConnectionProviderProps {
 }
 
 const ConnectionProvider: React.FC<ConnectionProviderProps> = ({ children }) => {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<ConnectionStatus>({
     isConnected: true,
     lastConnected: new Date(),
@@ -56,14 +58,14 @@ const ConnectionProvider: React.FC<ConnectionProviderProps> = ({ children }) => 
         
         // If request fails with network/server error, mark connection as failed
         if (!response.ok && response.status >= 500) {
-          connectionMonitor.markConnectionFailed(`Server error: ${response.status}`);
+          connectionMonitor.markConnectionFailed(t('connection.serverError', 'Server error: {{status}}', { status: response.status }));
         }
         
         return response;
       } catch (error) {
         // Network errors (server down, no internet, etc.)
         if (error instanceof TypeError && error.message.includes('fetch')) {
-          connectionMonitor.markConnectionFailed('Network error: Unable to reach server');
+          connectionMonitor.markConnectionFailed(t('connection.networkError', 'Network error: Unable to reach server'));
         }
         throw error;
       }
@@ -75,7 +77,7 @@ const ConnectionProvider: React.FC<ConnectionProviderProps> = ({ children }) => 
       globalThis.fetch = originalFetch;
       connectionMonitor.destroy();
     };
-  }, []);
+  }, [t]);
 
   const contextValue: ConnectionContextType = useMemo(() => ({
     status,

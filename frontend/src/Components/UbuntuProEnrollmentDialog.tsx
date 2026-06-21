@@ -142,7 +142,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
       // Show error as a result
       setEnrollmentResults([{
         host_id: '',
-        hostname: 'Error',
+        hostname: t('ubuntuPro.enrollment.errorLabel', 'Error'),
         success: false,
         error: errorMessage,
       }]);
@@ -289,7 +289,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
           severity={result.success ? 'success' : 'error'}
         >
           <Typography variant="subtitle2">
-            {result.hostname || `Host ${result.host_id}`}
+            {result.hostname || t('ubuntuPro.enrollment.hostFallback', 'Host {{id}}', { id: result.host_id })}
           </Typography>
           <Typography variant="body2">
             {result.success ? result.message : result.error}

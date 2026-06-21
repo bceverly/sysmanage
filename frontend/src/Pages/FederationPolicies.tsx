@@ -589,6 +589,7 @@ const FederationPolicies: React.FC = () => {
                       variant="outlined"
                     />
                   </TableCell>
+                  {/* eslint-disable-next-line i18next/no-literal-string -- version prefix is not translatable */}
                   <TableCell>v{policy.version}</TableCell>
                   <TableCell>
                     {policy.is_active ? (

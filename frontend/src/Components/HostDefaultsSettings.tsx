@@ -766,8 +766,10 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
                         label={t('thirdPartyRepos.windowsRepoType', 'Repository Type')}
                         onChange={(e) => setWindowsRepoType(e.target.value)}
                       >
+                        {/* eslint-disable i18next/no-literal-string -- package manager brand names */}
                         <MenuItem value="chocolatey">Chocolatey</MenuItem>
                         <MenuItem value="scoop">Scoop</MenuItem>
+                        {/* eslint-enable i18next/no-literal-string */}
                       </Select>
                     </FormControl>
                     <TextField

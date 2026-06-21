@@ -405,8 +405,8 @@ export const ImportDeviceCard: React.FC = () => {
   };
 
   const deviceKind = (d: { is_optical?: boolean; removable?: boolean }) => {
-    if (d.is_optical) return ' · optical';
-    if (d.removable) return ' · removable';
+    if (d.is_optical) return ` · ${t('airgapDevices.optical', 'optical')}`;
+    if (d.removable) return ` · ${t('airgapDevices.removable', 'removable')}`;
     return '';
   };
 

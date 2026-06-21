@@ -3733,7 +3733,7 @@ const HostDetail = () => { // NOSONAR
     // Get service status label for Ubuntu Pro services (extracted for SonarQube compliance)
     const getServiceStatusLabel = (status: string): string => {
         if (status === 'n/a') {
-            return 'N/A';
+            return t('common.notAvailable', 'N/A');
         } else if (status === 'enabled') {
             return t('hostDetail.enabled', 'Enabled');
         } else {
@@ -3818,12 +3818,12 @@ const HostDetail = () => { // NOSONAR
             }
 
             if (servicesToChange.length > 0) {
-                setServicesMessage(`${servicesToChange.length} service(s) updated`);
+                setServicesMessage(t('hostDetail.servicesUpdatedCount', '{{count}} service(s) updated', { count: servicesToChange.length }));
                 setSnackbarMessage(t('hostDetail.servicesUpdateRequested', 'Ubuntu Pro services update requested'));
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
             } else {
-                setServicesMessage('No changes made');
+                setServicesMessage(t('hostDetail.noChangesMade', 'No changes made'));
             }
 
             setServicesEditMode(false);
@@ -3831,7 +3831,7 @@ const HostDetail = () => { // NOSONAR
 
         } catch (error) {
             console.error('Error updating Ubuntu Pro services:', error);
-            setServicesMessage('Error updating services');
+            setServicesMessage(t('hostDetail.errorUpdatingServices', 'Error updating services'));
             setSnackbarMessage(t('hostDetail.servicesUpdateError', 'Error updating Ubuntu Pro services'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
@@ -4250,7 +4250,7 @@ const HostDetail = () => { // NOSONAR
                                     </Typography>
                                     {host.script_execution_enabled === undefined || host.script_execution_enabled === null ? (
                                         <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                            Unknown
+                                            {t('common.unknown', 'Unknown')}
                                         </Typography>
                                     ) : (
                                         <Chip
@@ -4268,7 +4268,7 @@ const HostDetail = () => { // NOSONAR
                                     </Typography>
                                     {host.is_agent_privileged === undefined || host.is_agent_privileged === null ? (
                                         <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                            Unknown
+                                            {t('common.unknown', 'Unknown')}
                                         </Typography>
                                     ) : (
                                         <Chip
@@ -4306,7 +4306,7 @@ const HostDetail = () => { // NOSONAR
                                             />
                                         )) : (
                                             <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                                None
+                                                {t('common.none', 'None')}
                                             </Typography>
                                         )}
                                     </Box>
@@ -4564,7 +4564,7 @@ const HostDetail = () => { // NOSONAR
                                                         {graylogMechanism === 'syslog_udp' && t('graylog.mechanism.syslogUdp', 'Syslog UDP')}
                                                         {graylogMechanism === 'gelf_tcp' && t('graylog.mechanism.gelfTcp', 'GELF TCP')}
                                                         {graylogMechanism === 'windows_sidecar' && t('graylog.mechanism.windowsSidecar', 'Windows Sidecar')}
-                                                        {graylogPort && ` (port ${graylogPort})`}
+                                                        {graylogPort && ` ${t('hostDetail.graylogPort', '(port {{port}})', { port: graylogPort })}`}
                                                     </Typography>
                                                 </Grid>
                                             )}
@@ -4775,7 +4775,7 @@ const HostDetail = () => { // NOSONAR
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
-                                                            {device.name || device.device_path || device.mount_point || `Device ${index + 1}`}
+                                                            {device.name || device.device_path || device.mount_point || t('hostDetail.deviceNumber', 'Device {{number}}', { number: index + 1 })}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid size={{ xs: 12, md: 8 }}>
@@ -4888,7 +4888,7 @@ const HostDetail = () => { // NOSONAR
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
-                                                            {iface.name || `Interface ${index + 1}`}
+                                                            {iface.name || t('hostDetail.interfaceNumber', 'Interface {{number}}', { number: index + 1 })}
                                                         </Typography>
                                                         {iface.is_active && (
                                                             <Chip label={t('hostDetail.active', 'Active')} size="small" color="success" sx={{ mt: 1 }} />
@@ -4942,6 +4942,7 @@ const HostDetail = () => { // NOSONAR
                                                                         <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                                             {t('hostDetail.speed', 'Speed')}
                                                                         </TableCell>
+                                                                        {/* eslint-disable-next-line i18next/no-literal-string -- network speed unit */}
                                                                         <TableCell>{iface.speed_mbps} Mbps</TableCell>
                                                                     </TableRow>
                                                                 )}
@@ -4970,7 +4971,7 @@ const HostDetail = () => { // NOSONAR
                                             {t('hostDetail.additionalHardware', 'Additional Hardware Details')}
                                             <IconButton
                                                 size="small"
-                                                onClick={() => handleShowDialog('Additional Hardware Details', host.hardware_details || '')}
+                                                onClick={() => handleShowDialog(t('hostDetail.additionalHardware', 'Additional Hardware Details'), host.hardware_details || '')}
                                                 sx={{ color: 'textSecondary' }}
                                             >
                                                 <HelpOutlineIcon fontSize="small" />
@@ -6029,7 +6030,7 @@ const HostDetail = () => { // NOSONAR
                                         )}
                                         {selectedRoles.length > 0 && (
                                             <Typography variant="caption" sx={{ color: 'primary.main', ml: 2 }}>
-                                                {t('hostDetail.selectedServices', `${selectedRoles.length} service(s) selected`)}
+                                                {t('hostDetail.selectedServices', `${selectedRoles.length} service(s) selected`, { count: selectedRoles.length })}
                                             </Typography>
                                         )}
                                     </Box>
@@ -6744,7 +6745,7 @@ const HostDetail = () => { // NOSONAR
                                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                                             <Box>
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.collection_id?.substring(0, 8) || 'Unknown'}
+                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.collection_id?.substring(0, 8) || t('common.unknown', 'Unknown')}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="textSecondary">
                                                                     {t('hostDetail.collectedAt', 'Collected')}: {formatDate(diagnostic.completed_at)}
@@ -7128,7 +7129,7 @@ const HostDetail = () => { // NOSONAR
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
                         {t('hostDetail.diagnosticDetailTitle', 'Diagnostic Report Details')}
-                        {selectedDiagnostic && ` #${selectedDiagnostic.collection_id?.substring(0, 8) || 'Unknown'}`}
+                        {selectedDiagnostic && ` #${selectedDiagnostic.collection_id?.substring(0, 8) || t('common.unknown', 'Unknown')}`}
                     </Typography>
                     <IconButton onClick={() => setDiagnosticDetailOpen(false)} size="small">
                         <CloseIcon />
@@ -7343,7 +7344,7 @@ const HostDetail = () => { // NOSONAR
                                 }}
                                 sx={{ height: '56px', minWidth: '100px' }}
                             >
-                                {isSearching ? <CircularProgress size={20} /> : 'Search'}
+                                {isSearching ? <CircularProgress size={20} /> : t('common.search', 'Search')}
                             </Button>
                         </Box>
                     </Box>

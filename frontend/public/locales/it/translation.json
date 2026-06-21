@@ -143,7 +143,9 @@
       "checkAll": "Seleziona Tutto",
       "checkNone": "Deseleziona Tutto",
       "description": "Seleziona quali schede visualizzare sulla dashboard",
-      "title": "Impostazioni Dashboard"
+      "title": "Impostazioni Dashboard",
+      "loadError": "Impossibile caricare le preferenze",
+      "saveError": "Impossibile salvare le preferenze"
     },
     "updates": "Aggiornamenti"
   },
@@ -198,7 +200,7 @@
     "sendReset": "Invia link di reimpostazione",
     "sending": "Invio in corso...",
     "title": "Password dimenticata",
-    "didntReceive": "[TODO] Didn't receive an email? Check your spam folder or try again."
+    "didntReceive": "Non hai ricevuto la email? Controlla la cartella spam o riprova."
   },
   "grafana": {
     "apiKey": {
@@ -214,7 +216,8 @@
     },
     "manualUrl": {
       "help": "Inserisci l'URL completo della tua istanza Grafana",
-      "label": "URL Grafana"
+      "label": "URL Grafana",
+      "placeholder": "https://grafana.example.com"
     },
     "noServers": "Nessun server Grafana trovato",
     "selectServer": {
@@ -234,7 +237,10 @@
     "title": "Integrazione Grafana",
     "useManagedServer": {
       "label": "Usa server gestito"
-    }
+    },
+    "healthCheckFailed": "Controllo della salute non riuscito",
+    "loadError": "Impossibile caricare la configurazione Grafana",
+    "saveError": "Impossibile salvare le impostazioni"
   },
   "graylog": {
     "apiToken": {
@@ -325,9 +331,18 @@
     "usernameRequired": "Il nome utente è richiesto",
     "windowsDescription": "Crea un nuovo account utente locale su questo host Windows.",
     "passwordHelp": "Sono richiesti almeno 8 caratteri",
-    "confirmDelete": "[TODO] Are you sure you want to delete the user account \"{{username}}\"? This action cannot be undone.",
-    "invalidUidPlatform": "[TODO] UID must be a number >= {{}}",
-    "uidHelpPlatform": "[TODO] Leave empty to auto-assign. Must be >= {{}} if specified."
+    "confirmDelete": "Sei sicuro di voler eliminare l'account utente \"{{username}}\"? Questa azione non può essere annullata.",
+    "invalidUidPlatform": "UID deve essere un numero >= {{minUid}}",
+    "uidHelpPlatform": "Lasciare vuoto per assegnazione automatica. Se specificato, deve essere >= {{minUid}}.",
+    "shellBash": "Bash",
+    "shellBourne": "Shell di Bourne",
+    "shellCsh": "Csh",
+    "shellFalse": "Falso",
+    "shellFish": "Fish",
+    "shellKsh": "Ksh",
+    "shellNoLogin": "Nessun accesso",
+    "shellTcsh": "Tcsh",
+    "shellZsh": "Zsh"
   },
   "hostDefaults": {
     "addNewPackageManager": "Aggiungi Nuovo Gestore Pacchetti Abilitato",
@@ -822,17 +837,23 @@
     "size": "Dimensione",
     "softwarePackages": "Pacchetti software",
     "vendor": "Fornitore",
-    "cancelChildHostMessage": "[TODO] Are you sure you want to cancel the creation of \"{{name}}\"?",
-    "childHostHostnameHelp": "[TODO] Enter hostname (e.g., \"myhost\") or FQDN (e.g., \"myhost.example.com\")",
-    "childHostsEmptyBhyveReady": "[TODO] Click \"Create Child Host\" to create a new bhyve virtual machine.",
-    "childHostsEmptyLxdReady": "[TODO] Click \"Create Child Host\" to create a new LXD container.",
-    "childHostsEmptyVmmReady": "[TODO] Click \"Create Child Host\" to create a new VMM virtual machine.",
-    "childHostsEmptyWslEnabled": "[TODO] Click \"Create Child Host\" to create a new WSL instance.",
-    "clickRequestData": "[TODO] Click \"Request Host Data\" to collect diagnostic information from the agent.",
-    "deleteChildHostMessage": "[TODO] Are you sure you want to delete the child host \"{{name}}\"?",
-    "geoLocation": "[TODO] Geographic Location",
-    "publicIp": "[TODO] Public IP",
-    "selectedServices": "[TODO] {{}} service(s) selected"
+    "cancelChildHostMessage": "Sei sicuro di voler annullare la creazione di \"{{name}}\"?",
+    "childHostHostnameHelp": "Inserisci il nome del server (ad esempio, \"myhost\") o il FQDN (ad esempio, \"myhost.example.com\").",
+    "childHostsEmptyBhyveReady": "Fai clic su \"Crea Host Figlio\" per creare una nuova macchina virtuale bhyve.",
+    "childHostsEmptyLxdReady": "Fai clic su \"Crea Host Figlio\" per creare un nuovo contenitore LXD.",
+    "childHostsEmptyVmmReady": "Fai clic su \"Crea Host Figlio\" per creare una nuova macchina virtuale VMM.",
+    "childHostsEmptyWslEnabled": "Fai clic su \"Crea Host Figlio\" per creare una nuova istanza WSL.",
+    "clickRequestData": "Fai clic su \"Richiedi Dati Host\" per raccogliere informazioni diagnostiche dall'agente.",
+    "deleteChildHostMessage": "Sei sicuro di voler eliminare il host figlio \"{{name}}\"?",
+    "geoLocation": "Posizione_geografica",
+    "publicIp": "IP pubblico",
+    "selectedServices": "{{count}} servizio(i) selezionati",
+    "deviceNumber": "Dispositivo {{number}}",
+    "errorUpdatingServices": "Errore nell'aggiornamento dei servizi",
+    "graylogPort": "(porta {{port}})",
+    "interfaceNumber": "Interfaccia {{number}}",
+    "noChangesMade": "Nessuna modifica apportata",
+    "servicesUpdatedCount": "{{count}} servizio(i) aggiornato"
   },
   "hostGroup": {
     "add": "Aggiungi",
@@ -854,7 +875,7 @@
     "invalidGroupName": "Il nome del gruppo deve iniziare con una lettera e contenere solo lettere, numeri, trattini bassi e trattini",
     "unixDescription": "Crea un nuovo gruppo su questo host.",
     "windowsDescription": "Crea un nuovo gruppo locale su questo host Windows.",
-    "confirmDelete": "[TODO] Are you sure you want to delete the group \"{{groupName}}\"? This action cannot be undone."
+    "confirmDelete": "Sei sicuro di voler eliminare il gruppo \"{{groupName}}\"? Questa azione non può essere annullata."
   },
   "hosts": {
     "agentVersion": "Versione Agente",
@@ -912,8 +933,8 @@
       "statusRestarting": "Riavvio degli host figli in corso...",
       "statusShuttingDown": "Arresto degli host figli in corso...",
       "ungracefulWarning": "Questo host ha {{count}} host figlio/i in esecuzione che verranno terminati in modo non controllato durante il riavvio. Passa a SysManage Professional+ per il riavvio orchestrato sicuro.",
-      "proceedAnyway": "[TODO] Click \"Reboot Anyway\" to reboot {{hostname}} without stopping child hosts first.",
-      "proceedOrchestrated": "[TODO] Click \"Orchestrated Reboot\" to safely reboot {{hostname}}."
+      "proceedAnyway": "Fai clic su \"Riavvia Comunque\" per riavviare {{hostname}} senza interrompere prima i child hosts.",
+      "proceedOrchestrated": "Fai clic su \"Riavvio Orchestrazione\" per riavviare in modo sicuro {{hostname}}."
     },
     "rebootRequested": "Riavvio richiesto con successo",
     "rebootSelected": "Riavvia Selezionati",
@@ -954,11 +975,14 @@
     "scriptsDisabledTooltip": "Gli script sono disabilitati per questo host",
     "scriptsEnabledTooltip": "Gli script sono abilitati per questo host",
     "up": "Up",
-    "antivirusDeployAllFailed": "[TODO] Antivirus deployment failed for all hosts:\\n\\n{{}}",
-    "antivirusDeployPartialSuccess": "[TODO] Antivirus deployment initiated for {{}} host(s).\\n\\nFailed hosts:\\n{{}}",
-    "antivirusDeploySuccess": "[TODO] Antivirus deployment initiated for {{}} host(s)",
-    "approveSelected": "[TODO] Approve Selected",
-    "opentelemetryDeploySuccess": "[TODO] OpenTelemetry deployment queued for {{}} host(s)"
+    "antivirusDeployAllFailed": "La distribuzione dell'applicazione antivirus ha fallito su tutti i host:\\n\\n{{hosts}}",
+    "antivirusDeployPartialSuccess": "Inizio della distribuzione dell'applicazione antivirus per {{count}} host(s).\\n\\nHost non riusciti:\\n{{hosts}}",
+    "antivirusDeploySuccess": "Inizio della distribuzione dell'applicazione antivirus per {{count}} host(s)",
+    "approveSelected": "Approva Selezionati",
+    "opentelemetryDeploySuccess": "La distribuzione OpenTelemetry è in coda per {{count}} host(s)",
+    "diagnosticsRequestFailed": "Impossibile richiedere la raccolta diagnostica. Riprova.",
+    "diagnosticsRequested": "Raccolta diagnostica richiesta per l'host {{hostId}}. Controlla la pagina dei dettagli dell'host per visualizzare i risultati quando disponibili.",
+    "unknown": "Sconosciuto"
   },
   "login": {
     "loggingIn": "Accesso in corso...",
@@ -975,8 +999,8 @@
     "submit": "Accedi",
     "title": "Accesso",
     "username": "Nome utente o email",
-    "forgotPassword": "[TODO] Forgot password?",
-    "remember": "[TODO] Remember me"
+    "forgotPassword": "Hai_dimenticato_la_password?",
+    "remember": "Ricorda me"
   },
   "logout": {
     "loading": "Disconnessione in corso..."
@@ -1004,17 +1028,19 @@
     "updates": "Aggiornamenti",
     "users": "Utenti",
     "role": {
-      "collector": "[TODO] Air-Gap Collector",
+      "collector": "Collectore a Isolamento",
       "engineMissing": "Motore Pro+ richiesto non caricato; verifica la licenza.",
-      "repository": "[TODO] Air-Gapped Repository"
+      "repository": "Repository a Isolamento"
     },
     "airgapRepositories": "Air-Gap Repos",
     "map": "Mappa",
     "sites": "Siti",
-    "airgapCollections": "[TODO] Air-Gap Collections",
+    "airgapCollections": "Collezioni a Isolamento",
     "federationRole": {
-      "engineMissing": "[TODO] Required Pro+ federation engine not loaded; check license."
-    }
+      "engineMissing": "Il motore di federazione Pro+ richiesto non è caricato; verifica la licenza."
+    },
+    "scrollLeft": "Scorri a sinistra",
+    "scrollRight": "Scorri a destra"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",
@@ -1137,10 +1163,65 @@
       "hosts": "Host",
       "security": "Sicurezza",
       "users": "Utenti",
-      "federation": "[TODO] Federation"
+      "federation": "Federazione"
     },
     "title": "Report",
-    "viewReport": "Visualizza Report"
+    "viewReport": "Visualizza Report",
+    "antivirusCommercial": {
+      "description": "Stato della protezione antivirus commerciale, incluso il nome del prodotto, la versione, la versione delle firme, lo stato della protezione in tempo reale e lo stato del servizio su tutti i sistemi gestiti.",
+      "name": "Stato antivirus commerciale"
+    },
+    "antivirusOpensource": {
+      "description": "Stato del software antivirus open-source su tutti gli host mostrando il nome del software, la versione, il percorso di installazione e lo stato (abilitato/disabilitato).",
+      "name": "Stato del software antivirus open-source"
+    },
+    "firewallStatus": {
+      "description": "Stato dettagliato del firewall per tutti gli host gestiti, incluso il software firewall, lo stato attivo/disattivato, porte IPv4 e IPv6 aperte e informazioni sul sistema operativo.",
+      "name": "Stato firewall host"
+    },
+    "generateError": "Errore nella generazione del rapporto: {{message}}",
+    "hostsWithTags": {
+      "description": "Mostra tutti gli host registrati insieme alle loro etichette assegnate per una facile categorizzazione e filtraggio. Utile per organizzare gli host in base all'ambiente, allo scopo o al dipartimento.",
+      "name": "Hosts with Tags"
+    },
+    "registeredHosts": {
+      "description": "Elenco completo di tutti gli host registrati con informazioni di base e dettagli del sistema operativo, inclusi nome host, indirizzi IP, versione OS e stato.",
+      "name": "Host registrati"
+    },
+    "tag": {
+      "accounts": "accounts",
+      "antivirus": "antivirus",
+      "audit": "audit",
+      "basic": "basic",
+      "commercial": "commercial",
+      "compliance": "conformità",
+      "firewall": "firewall",
+      "hosts": "hosts",
+      "network": "rete",
+      "opensource": "open source",
+      "organization": "organizzazione",
+      "permissions": "permessi",
+      "rbac": "rbac",
+      "roles": "ruoli",
+      "security": "sicurezza",
+      "systemInfo": "informazioni sul sistema",
+      "tags": "etichette",
+      "tracking": "seguimento",
+      "users": "utenti"
+    },
+    "unknownError": "Errore sconosciuto",
+    "userRbac": {
+      "description": "Vista completa di tutti gli utenti con i ruoli assegnati organizzati per gruppi di ruolo. Mostra la struttura delle autorizzazioni granulari per il controllo degli accessi basato sui ruoli nel sistema.",
+      "name": "Ruoli di sicurezza utente (RBAC)"
+    },
+    "usersList": {
+      "description": "Elenco completo di tutti gli utenti SysManage con i loro profili, ruoli, permessi e stato dell'account. Include date di creazione utente e ultime connessioni.",
+      "name": "Utenti SysManage"
+    },
+    "auditLogReport": {
+      "description": "Traccia completa di tutte le azioni utente e modifiche al sistema per conformità e monitoraggio della sicurezza. Traccia modifiche al database, messaggi dell'agente e operazioni amministrative.",
+      "name": "Registro di controllo"
+    }
   },
   "resetPassword": {
     "backToLogin": "Torna all'accesso",
@@ -1258,7 +1339,11 @@
     "updateSuccess": "Aggiornato correttamente",
     "updatedAt": "Aggiornato il",
     "viewScript": "Visualizza script",
-    "waitingForResults": "In attesa di risultati"
+    "waitingForResults": "In attesa di risultati",
+    "adHocScript": "Script ad hoc",
+    "connected": "Connesso",
+    "exitCodeLabel": "Codice di uscita: {{code}}",
+    "offline": "Offline"
   },
   "search": {
     "searchColumn": "Cerca in",
@@ -1334,7 +1419,8 @@
     "updateSuccess": "Segreto aggiornato con successo",
     "updatedAt": "Aggiornato il",
     "viewSecret": "Visualizza Segreto",
-    "subtypeRequired": "Il sottotipo del segreto è richiesto"
+    "subtypeRequired": "Il sottotipo del segreto è richiesto",
+    "filenamePlaceholder": "e.g., id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "Aggiungi Ruolo",
@@ -1349,7 +1435,8 @@
       "title": "Copertura Antivirus",
       "totalHosts": "Totale Host",
       "unprotected": "Non Protetti",
-      "warningMessage": "{{count}} host non hanno la protezione antivirus abilitata."
+      "warningMessage": "{{count}} host non hanno la protezione antivirus abilitata.",
+      "fetchError": "Impossibile ottenere la copertura antivirus"
     },
     "antivirusDisableFailed": "Errore nella disabilitazione dell'antivirus",
     "antivirusDisableSuccess": "Disabilitazione antivirus avviata con successo",
@@ -1428,7 +1515,8 @@
     "step3CreateUser": "Crea un nuovo utente amministratore tramite la pagina Utenti di questa interfaccia",
     "step4LoginNewUser": "Esci e accedi con il tuo nuovo account amministratore",
     "step5RemoveCredentials": "Rimuovi admin_userid e admin_password dal tuo file di configurazione YAML",
-    "step6RestartServer": "Riavvia il server con ./run.sh"
+    "step6RestartServer": "Riavvia il server con ./run.sh",
+    "removeCredentialsHint": "Rimuovi admin_userid e admin_password dal file di configurazione e riavvia il server"
   },
   "serverDown": {
     "details": "Dettagli Connessione:",
@@ -1441,10 +1529,10 @@
     "retrying": "Nuovo tentativo...",
     "title": "Connessione Interrotta",
     "titleFailed": "Server Non Disponibile",
-    "attempts": "[TODO] Attempts: {{}}",
-    "lastConnected": "[MISSING:serverDown.lastConnected]",
-    "secondsRemaining": "[TODO] {{}}s",
-    "timeRemaining": "[TODO] {{}}m {{}}s"
+    "attempts": "Tentativi: {{count}}",
+    "lastConnected": "Ultima connessione: {{time}}",
+    "secondsRemaining": "{{seconds}}s",
+    "timeRemaining": "{{minutes}}m {{seconds}}s"
   },
   "tags": {
     "addTag": "Aggiungi tag",
@@ -1476,7 +1564,8 @@
       "statistics": "Statistiche",
       "status": "Stato",
       "title": "Stato di OpenTelemetry",
-      "tracesCount": "Tracce"
+      "tracesCount": "Tracce",
+      "fetchError": "Impossibile ottenere lo stato OpenTelemetry"
     },
     "prometheus": {
       "information": "Informazioni",
@@ -1491,8 +1580,8 @@
       "title": "Stato di Prometheus",
       "url": "URL",
       "version": "Versione",
-      "manageHint": "[TODO] Prometheus is managed by the telemetry stack. Use \"make start-telemetry\" to start or \"make stop-telemetry\" to stop.",
-      "notRunningMessage": "[TODO] Prometheus is not running. Start the telemetry stack with \"make start-telemetry\" or \"make start\"."
+      "manageHint": "Prometheus è gestito dalla pila di telemetria. Usa \"make start-telemetry\" per avviare o \"make stop-telemetry\" per arrestare.",
+      "notRunningMessage": "Prometheus non è in esecuzione. Avvia la stack di telemetria con \"make start-telemetry\" o \"make start\"."
     }
   },
   "thirdPartyRepos": {
@@ -1569,7 +1658,13 @@
     "url": "Url",
     "deleteSelected": "[MISSING:thirdPartyRepos.deleteSelected]",
     "disableSelected": "[MISSING:thirdPartyRepos.disableSelected]",
-    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]"
+    "enableSelected": "[MISSING:thirdPartyRepos.enableSelected]",
+    "chocolatey": "Chocolatey",
+    "detectedOs": "Sistema operativo rilevato",
+    "typeLabel": "Tipo",
+    "unknown": "Sconosciuto",
+    "urlLabel": "URL",
+    "winget": "winget"
   },
   "ubuntuPro": {
     "actions": {
@@ -1589,7 +1684,9 @@
       "selectedHosts": "Host selezionati",
       "title": "Iscrizione Ubuntu Pro",
       "useMasterKey": "Usa la chiave master configurata",
-      "customKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\""
+      "customKeyHelp": "Chiave di Ubuntu Pro basata su contratto che inizia con \"C\"",
+      "errorLabel": "Errore",
+      "hostFallback": "Host {{id}}"
     },
     "errors": {
       "clearFailed": "Cancellazione della chiave master fallita",
@@ -1603,7 +1700,7 @@
       "masterKey": "Chiave master Ubuntu Pro",
       "organizationName": "Nome organizzazione",
       "organizationNameHelp": "Nome organizzazione opzionale per l'iscrizione Ubuntu Pro",
-      "masterKeyHelp": "[TODO] Contract-based Ubuntu Pro key starting with \"C\". Leave empty to remove."
+      "masterKeyHelp": "Chiave di Ubuntu Pro basata su contratto che inizia con \"C\". Lascia vuoto per rimuovere."
     },
     "messages": {
       "keyCleared": "Chiave master cancellata con successo",
@@ -1619,7 +1716,7 @@
     },
     "title": "Ubuntu Pro",
     "validation": {
-      "invalidKey": "[TODO] Ubuntu Pro key must start with \"C\" and be at least 24 characters long"
+      "invalidKey": "La chiave Ubuntu Pro deve iniziare con \"C\" e avere almeno 24 caratteri"
     }
   },
   "updates": {
@@ -1660,7 +1757,22 @@
       "security": "Sicurezza",
       "system": "Sistema"
     },
-    "unknown": "Sconosciuto"
+    "unknown": "Sconosciuto",
+    "managers": {
+      "apt": "APT (Debian/Ubuntu)",
+      "chocolatey": "Chocolatey (Windows)",
+      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "flatpak": "Flatpak",
+      "fwupd": "fwupd",
+      "homebrew": "Homebrew (macOS)",
+      "pacman": "Pacman (Arch Linux)",
+      "pkg": "PKG (FreeBSD)",
+      "pkgin": "pkgin (NetBSD)",
+      "snap": "Snap",
+      "winget": "Winget (Windows)",
+      "yum": "YUM (RHEL/CentOS 7)",
+      "zypper": "Zypper (openSUSE/SUSE)"
+    }
   },
   "userDetail": {
     "active": "Attivo",
@@ -1763,9 +1875,10 @@
     "invalidImageType": "Formato immagine non valido. Formati consentiti: PNG, JPEG, JPG, GIF, WEBP",
     "profileImage": "Immagine profilo",
     "uploading": "Caricamento in corso...",
-    "passwordNeedsCharTypes": "[TODO] Password must contain at least {{}} different character types",
-    "passwordTooLong": "[TODO] Password must be no more than {{}} characters long",
-    "passwordTooShort": "[TODO] Password must be at least {{}} characters long"
+    "passwordNeedsCharTypes": "La password deve contenere almeno {{count}} tipi diversi di caratteri",
+    "passwordTooLong": "La password non può superare i {{count}} caratteri",
+    "passwordTooShort": "La password deve essere almeno di {{count}} caratteri",
+    "profileTabs": "schede profilo"
   },
   "users": {
     "email": "Email",
@@ -1781,10 +1894,10 @@
     "noRows": "Nessuna riga",
     "unlockSelected": "Sblocca selezionati",
     "unlocked": "Sbloccato",
-    "editInfo": "[TODO] Edit the user's information below.",
-    "emailNotification": "[TODO] An email will be sent to the user with a secure link to set their initial password.",
-    "emailUnique": "[TODO] Email address must be unique",
-    "enterInfo": "[TODO] Enter the new user's information below."
+    "editInfo": "Modifica le informazioni dell'utente qui sotto.",
+    "emailNotification": "Un'email sarà inviata all'utente con un collegamento sicuro per impostare la propria password iniziale.",
+    "emailUnique": "L'indirizzo email deve essere univoco",
+    "enterInfo": "Inserisci le informazioni per l'utente nuovo qui sotto."
   },
   "emailConfig": {
     "title": "Configurazione email",
@@ -1816,7 +1929,10 @@
     }
   },
   "reportViewer": {
-    "iframeTitle": "Contenuto del rapporto"
+    "iframeTitle": "Contenuto del rapporto",
+    "loadError": "Impossibile caricare il rapporto",
+    "pdfError": "Errore nella generazione del PDF: {{message}}",
+    "unknownError": "Errore sconosciuto"
   },
   "upgradeProfiles": {
     "add": "Aggiungi profilo",
@@ -1850,8 +1966,8 @@
     "window": "Finestra scaglionata (minuti)",
     "windowHelp": "Distribuisci i dispatch dell'agente su questi minuti (0–720)",
     "windowRange": "La finestra scaglionata deve essere compresa tra 0 e 720 minuti",
-    "confirmDelete": "[TODO] Delete update profile \"{{name}}\"?",
-    "confirmTrigger": "[TODO] Trigger \"{{name}}\" now? Updates will dispatch to matching hosts."
+    "confirmDelete": "Vuoi eliminare il profilo di aggiornamento \"{{name}}\"?",
+    "confirmTrigger": "Attivare \"{{name}}\" ora? Le aggiornamenti verranno inviati ai host corrispondenti."
   },
   "packageProfiles": {
     "add": "Aggiungi profilo di conformità",
@@ -1882,7 +1998,7 @@
     "version": "Versione",
     "versionOp": "Op",
     "versionOpAny": "(qualsiasi)",
-    "confirmDelete": "[TODO] Delete compliance profile \"{{name}}\"?"
+    "confirmDelete": "Vuoi eliminare il profilo di conformità \"{{name}}\"?"
   },
   "compliance": {
     "compliant": "Conforme",
@@ -1932,7 +2048,7 @@
     "title": "Branding dei report",
     "uploadError": "Caricamento logo non riuscito",
     "uploadLogo": "Carica logo",
-    "headerTextHelp": "[TODO] Appears alongside the logo in the report header (e.g. \"Confidential — Internal Use\")."
+    "headerTextHelp": "Appare accanto al logo nella intestazione del report (ad esempio \"Confidenziale — Uso Interno\")."
   },
   "reportTemplates": {
     "add": "Aggiungi modello",
@@ -1956,7 +2072,7 @@
     "subtitle": "Layout personalizzati che il renderer applica sopra i tipi di report integrati",
     "title": "Modelli di report",
     "updated": "Modello salvato",
-    "confirmDelete": "[TODO] Delete report template \"{{name}}\"?"
+    "confirmDelete": "Vuoi eliminare il modello di report \"{{name}}\"?"
   },
   "idp": {
     "action": {
@@ -2022,7 +2138,11 @@
     "providersTitle": "Provider di identità",
     "saveError": "Impossibile salvare il provider — controllare il modulo.",
     "settingsSaveError": "Impossibile salvare le impostazioni.",
-    "settingsTitle": "Impostazioni di autenticazione"
+    "settingsTitle": "Impostazioni di autenticazione",
+    "type": {
+      "ldap": "LDAP / Active Directory",
+      "oidc": "OIDC"
+    }
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} codici di backup rimanenti",
@@ -2055,7 +2175,7 @@
     "disableWarning": "Conferma con la password del tuo account. Il tuo segreto TOTP e i codici di backup verranno eliminati.",
     "notEnrolledDescription": "Aggiungi un secondo fattore al tuo account. Ti verrà richiesto un codice monouso da un'app di autenticazione ogni volta che accedi.",
     "regenPrompt": "Inserisci un codice TOTP corrente. I codici di backup esistenti saranno invalidati.",
-    "backupCodesConfirm": "[TODO] I've saved these codes in a safe place"
+    "backupCodesConfirm": "Ho salvato questi codici in un luogo sicuro"
   },
   "mirror": {
     "action": {
@@ -2100,7 +2220,7 @@
       "upstream": "URL upstream",
       "version": "Versione",
       "upstreamHelp": "Compilato automaticamente dalla versione precedente; sovrascrivi solo se hai un mirror specifico per regione a cui puntare.",
-      "name_helper": "[TODO] Lowercase letters, digits, hyphens, underscores. Spaces and dots become hyphens."
+      "name_helper": "Lettere minuscole, cifre, trattini, underscore. Spazi e punti diventano trattini."
     },
     "listTitle": "Mirror di repository",
     "loadError": "Impossibile caricare i mirror di repository.",
@@ -2128,7 +2248,7 @@
       "notReady": "Strumenti richiesti per {{pm}} mancanti — installa prima di avviare una sincronizzazione.",
       "ready": "Pronto a fare il mirror dei repository {{pm}}.",
       "subtitle": "Strumenti richiesti per eseguire i piani mirror {{pm}} su questo host",
-      "timedOut": "[TODO] Agent did not respond within {{minutes}} minutes. The most likely causes are: the agent crashed mid-plan, the WebSocket dropped before the command_result was sent, or the agent silently de-duplicated the command without emitting a result. Check the agent log on this host and consider restarting the sysmanage-agent service. Click Refresh / Install Tools again to retry — the in-flight marker will be cleared and a fresh attempt dispatched."
+      "timedOut": "L'agente non ha risposto entro {{minutes}} minuti. Le cause più probabili sono: l'agente si è interrotto durante il piano, la WebSocket è caduta prima che fosse inviato command_result o l'agente ha silenziosamente deduplicato il comando senza emettere un risultato. Controlla i log dell'agente su questo host e considera di riavviare il servizio sysmanage-agent. Fai clic su Aggiorna / Installa Strumenti per riprovare — la marca in transito verrà cancellata e si effettuerà una nuova tentativa."
     },
     "configureSubtitle": "Scegli l'host che eseguirà i piani mirror di questa piattaforma. Vengono elencati solo gli host la cui piattaforma corrisponde alla scheda.",
     "deleteConfigInUse": "Elimina prima i {{n}} mirror sotto questa piattaforma.",
@@ -2578,275 +2698,278 @@
   },
   "audit": {
     "columns": {
-      "actor": "[TODO] Actor",
-      "details": "[TODO] Details",
-      "openSite": "[TODO] Open",
-      "operation": "[TODO] Operation",
-      "site": "[TODO] Site",
-      "timestamp": "[TODO] Timestamp"
+      "actor": "Azione",
+      "details": "Dettagli",
+      "openSite": "Aperto",
+      "operation": "Operazione",
+      "site": "Sito",
+      "timestamp": "Timestamp"
     },
-    "empty": "[TODO] No federation audit entries yet.",
-    "emptyFiltered": "[TODO] No audit entries match the filters.",
-    "errorLoad": "[TODO] Failed to load federation audit log.",
+    "empty": "Non ci sono ancora voci di audit federazione.",
+    "emptyFiltered": "Nessuna voce di audit corrispondente ai filtri.",
+    "errorLoad": "Impossibile caricare il registro federato.",
     "filters": {
-      "actor": "[TODO] Actor",
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "operation": "[TODO] Operation",
-      "siteId": "[TODO] Site ID"
+      "actor": "Azione",
+      "apply": "Applica",
+      "clear": "Cancella",
+      "operation": "Operazione",
+      "siteId": "ID sito"
     },
-    "subtitle": "[TODO] Every cross-site operation logged centrally by the coordinator.",
-    "title": "[TODO] Federation Audit Log"
+    "subtitle": "Ogni operazione trans-sito viene registrata centralmente dal coordinatore.",
+    "title": "Registro di_audit_federativo"
   },
   "map": {
-    "errorLoadHosts": "[TODO] Failed to load host locations.",
-    "openHost": "[TODO] Open host",
-    "subtitle": "[TODO] Geographic distribution of agents that have reported a public IP.",
-    "title": "[TODO] Host Map"
+    "errorLoadHosts": "Impossibile caricare le posizioni degli host.",
+    "openHost": "Host aperto",
+    "subtitle": "Distribuzione_geografica_degli_agenti_che_hanno_rapporto_con_un_IP_pubblico.",
+    "title": "Mappa host",
+    "status": "Stato"
   },
   "policies": {
     "actions": {
-      "assign": "[TODO] Assign",
-      "deactivate": "[TODO] Deactivate",
-      "edit": "[TODO] Edit",
-      "push": "[TODO] Push now"
+      "assign": "Assegna",
+      "deactivate": "Disattiva",
+      "edit": "Modifica",
+      "push": "Invia ora"
     },
-    "active": "[TODO] active",
+    "active": "attivo",
     "assign": {
-      "error": "[TODO] Failed to update assignments.",
-      "errorLoad": "[TODO] Failed to load sites.",
-      "noSites": "[TODO] No federation sites are enrolled.  Enroll a site first.",
-      "statusLine": "[TODO] Push status: {{status}}",
-      "submit": "[TODO] Save assignments",
-      "success": "[TODO] Policy assignments updated.",
-      "title": "[TODO] Assign to sites",
-      "statusLineWithAttempts": "[TODO] Push status: {{status}} ({{attempts}} attempts)"
+      "error": "Impossibile aggiornare gli assegnamenti.",
+      "errorLoad": "Impossibile caricare i siti.",
+      "noSites": "Ancora non ci sono siti federati. Enrolla un sito per iniziare.",
+      "statusLine": "Stato push: {{status}}",
+      "submit": "Salva assegnazioni",
+      "success": "Assegnazioni delle politiche aggiornate.",
+      "title": "Assegna a siti",
+      "statusLineWithAttempts": "Stato push: {{status}} ({{attempts}} tentativi)"
     },
     "columns": {
-      "actions": "[TODO] Actions",
-      "active": "[TODO] Active",
-      "name": "[TODO] Name",
-      "type": "[TODO] Type",
-      "version": "[TODO] Version"
+      "actions": "Azioni",
+      "active": "Attivo",
+      "name": "Nome",
+      "type": "Tipo",
+      "version": "Versione"
     },
     "create": {
-      "button": "[TODO] New Policy",
-      "cancel": "[TODO] Cancel",
-      "customType": "[TODO] Custom policy type",
-      "definition": "[TODO] Definition (JSON)",
-      "description": "[TODO] Description",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot create policies.",
-      "error": "[TODO] Failed to create policy.",
-      "invalidJson": "[TODO] Definition must be a JSON object.",
-      "name": "[TODO] Name",
-      "submit": "[TODO] Create",
-      "success": "[TODO] Policy created.",
-      "title": "[TODO] Create policy",
-      "type": "[TODO] Policy type",
-      "typeOther": "[TODO] Other...",
-      "typeRequired": "[TODO] Policy type is required."
+      "button": "Nuova Politica",
+      "cancel": "Annulla",
+      "customType": "Tipo di policy personalizzato",
+      "definition": "Definizione (JSON)",
+      "description": "Descrizione",
+      "engineUnavailable": "Il motore del controller federativo non è caricato; impossibile creare politiche.",
+      "error": "Impossibile creare la politica.",
+      "invalidJson": "La definizione deve essere un oggetto JSON.",
+      "name": "Nome",
+      "submit": "Crea",
+      "success": "Politica creata.",
+      "title": "Crea policy",
+      "type": "Tipo di politica",
+      "typeOther": "Altro...",
+      "typeRequired": "Il tipo di politica è obbligatorio."
     },
     "deactivate": {
-      "error": "[TODO] Failed to deactivate policy.",
-      "success": "[TODO] '{{name}}' deactivated."
+      "error": "Impossibile disattivare la politica.",
+      "success": "'{{name}}' disattivato."
     },
     "edit": {
-      "error": "[TODO] Failed to update policy.",
-      "submit": "[TODO] Save",
-      "success": "[TODO] Policy updated.",
-      "title": "[TODO] Edit policy",
-      "versionNote": "[TODO] Saving will bump the policy's version; sites pick up the new version on the next push cycle."
+      "error": "Impossibile aggiornare la politica.",
+      "submit": "Salva",
+      "success": "Politica aggiornata.",
+      "title": "Modifica policy",
+      "versionNote": "Il salvataggio incrementerà la versione della politica; i siti ne prenderanno visione durante il prossimo ciclo di push."
     },
-    "empty": "[TODO] No policies have been defined yet. Click 'New Policy' to create one.",
-    "errorLoad": "[TODO] Failed to load federation policies.",
+    "empty": "Ancora non è stata definita alcuna politica. Fai clic su 'Nuova Politica' per crearne una.",
+    "errorLoad": "Impossibile caricare le politiche federate.",
     "filters": {
-      "activeOnly": "[TODO] Active only",
-      "allTypes": "[TODO] All types",
-      "type": "[TODO] Policy type"
+      "activeOnly": "Solo attivi",
+      "allTypes": "Tutti i tipi",
+      "type": "Tipo di politica"
     },
-    "inactive": "[TODO] inactive",
+    "inactive": "inattivo",
     "push": {
-      "error": "[TODO] Failed to push policy.",
-      "success": "[TODO] Push triggered for '{{name}}'."
+      "error": "Impossibile inviare la politica.",
+      "success": "Trigger di push per '{{name}}'."
     },
-    "subtitle": "[TODO] Centrally-defined policies pushed to subordinate sites.",
-    "title": "[TODO] Federation Policies",
-    "deadLetter": "[TODO] dead-letter"
+    "subtitle": "Politiche centralmente definite spinte ai siti subordinati.",
+    "title": "Politiche_federative",
+    "deadLetter": "dead-letter"
   },
   "sites": {
     "actions": {
-      "remove": "[TODO] Remove",
-      "resume": "[TODO] Resume",
-      "suspend": "[TODO] Suspend"
+      "remove": "Elimina",
+      "resume": "Riprendi",
+      "suspend": "Sospendi"
     },
-    "addSite": "[TODO] Enroll Site",
+    "addSite": "Registra sito",
     "confirmRemove": {
-      "body": "[TODO] The site row will be preserved for audit but the coordinator will stop accepting syncs from it. This action cannot be undone from the UI.",
-      "cancel": "[TODO] Cancel",
-      "confirm": "[TODO] Remove site",
-      "title": "[TODO] Remove federation site?"
+      "body": "La riga del sito sarà mantenuta per i controlli di audit ma il coordinatore smetterà di accettare sincronizzazioni da parte di esso. Quest'azione non può essere annullata dall'interfaccia utente.",
+      "cancel": "Annulla",
+      "confirm": "Elimina sito",
+      "title": "Vuoi eliminare il sito federativo?"
     },
     "detail": {
-      "agentVersionMin": "[TODO] Minimum agent version",
-      "backToList": "[TODO] Back to Sites",
-      "connection": "[TODO] Connection",
-      "enrolledAt": "[TODO] Enrolled at",
-      "errorLoad": "[TODO] Failed to load site.",
-      "hostCount": "[TODO] Host count",
-      "lastSyncAt": "[TODO] Last sync at",
-      "lastSyncStatus": "[TODO] Last sync status",
-      "metadata": "[TODO] Metadata",
-      "notFound": "[TODO] Site not found.",
-      "seeHosts": "[TODO] See hosts at this site",
-      "syncInterval": "[TODO] Sync interval",
-      "syncIntervalValue": "[TODO] {{seconds}}s",
-      "url": "[TODO] URL",
-      "viewAuditLog": "[TODO] View audit log",
-      "activeCommands": "[TODO] Active commands",
-      "activeCommandsEmpty": "[TODO] No active commands.",
-      "activeCommandsLoading": "[TODO] Loading…",
-      "commandAttempts": "[TODO] {{n}} push attempts",
-      "commandDispatchedAt": "[TODO] Dispatched {{when}}",
-      "dispatchCommand": "[TODO] Dispatch command",
-      "backlogDepth": "[TODO] Pending upstream queue",
-      "backlogUnknown": "[TODO] —",
-      "refresh": "[TODO] Refresh",
-      "syncHealthy": "[TODO] Healthy",
-      "syncNever": "[TODO] Never synced",
-      "syncOverdue": "[TODO] Overdue",
-      "syncStale": "[TODO] Stale",
-      "rollupCompliance": "[TODO] Compliance",
-      "rollupEmpty": "[TODO] No compliance or vulnerability data synced from this site yet.",
-      "rollupTitle": "[TODO] Compliance & vulnerabilities",
-      "rollupVulnerabilities": "[TODO] Vulnerabilities ({{hosts}} hosts affected)",
-      "vulnCritical": "[TODO] {{n}} critical",
-      "vulnHigh": "[TODO] {{n}} high",
-      "vulnLow": "[TODO] {{n}} low",
-      "vulnMedium": "[TODO] {{n}} medium",
-      "alertAck": "[TODO] Acknowledge",
-      "alertAcked": "[TODO] Acknowledged",
-      "alertsTitle": "[TODO] Open alerts",
-      "autonomous": "[TODO] Operating independently",
-      "pushPolicies": "[TODO] Push policies",
-      "repushFailed": "[TODO] Failed to queue policy re-push.",
-      "repushQueued": "[TODO] Queued {{n}} policy push(es) for re-delivery.",
-      "siteCapabilities": "[TODO] Capabilities",
-      "siteVersion": "[TODO] Reported version",
-      "syncLatency": "[TODO] Upstream sync latency (recent)",
-      "syncPoints": "[TODO] {{n}} sync events",
-      "syncTimeline": "[TODO] Sync timeline",
-      "syncTimelineEmpty": "[TODO] No sync events recorded yet.",
-      "pushPoliciesHint": "[TODO] Re-queue every policy for this site — including any stuck or dead-lettered deliveries — for immediate re-push.",
-      "syncHealthHistogram": "[TODO] Sync success / failure (recent)"
+      "agentVersionMin": "Versione agente minima",
+      "backToList": "Torna ai siti",
+      "connection": "Connessione",
+      "enrolledAt": "Iscrizione effettuata in",
+      "errorLoad": "Impossibile caricare il sito.",
+      "hostCount": "Conteggio host",
+      "lastSyncAt": "Ultima sincronizzazione",
+      "lastSyncStatus": "Stato dell'ultima sincronizzazione",
+      "metadata": "Metadati",
+      "notFound": "Sito non trovato.",
+      "seeHosts": "Visualizza host in questo sito",
+      "syncInterval": "Intervallo di sincronizzazione",
+      "syncIntervalValue": "{{seconds}}s",
+      "url": "URL",
+      "viewAuditLog": "Visualizza registro delle modifiche",
+      "activeCommands": "Comandi attivi",
+      "activeCommandsEmpty": "Nessun comando attivo.",
+      "activeCommandsLoading": "Caricamento…",
+      "commandAttempts": "{{n}} tentativi di invio",
+      "commandDispatchedAt": "Inviato {{when}}",
+      "dispatchCommand": "Invia comando",
+      "backlogDepth": "Coda in attesa per l'upstream",
+      "backlogUnknown": "—",
+      "refresh": "Aggiorna",
+      "syncHealthy": "Sano",
+      "syncNever": "Non sincronizzato mai",
+      "syncOverdue": "Scaduto",
+      "syncStale": "Scaduto",
+      "rollupCompliance": "Conformità",
+      "rollupEmpty": "Ancora non è stato sincronizzato alcun dato di conformità o vulnerabilità da questo sito.",
+      "rollupTitle": "Conformità e vulnerabilità",
+      "rollupVulnerabilities": "Vulnerabilità ({{hosts}} host interessati)",
+      "vulnCritical": "{{n}} critici",
+      "vulnHigh": "{{n}} elevati",
+      "vulnLow": "{{n}} bassi",
+      "vulnMedium": "{{n}} medi",
+      "alertAck": "Conferma",
+      "alertAcked": "Confermato",
+      "alertsTitle": "Allerta aperta",
+      "autonomous": "Operazione indipendente",
+      "pushPolicies": "PUSH delle politiche",
+      "repushFailed": "Impossibile inserire nella coda il riinvio della politica.",
+      "repushQueued": "In coda {{n}} push di politica(i) per ridistribuzione.",
+      "siteCapabilities": "Capacità",
+      "siteVersion": "Versione segnalata",
+      "syncLatency": "Ritardo di sincronizzazione upstream (recente)",
+      "syncPoints": "{{n}} eventi di sincronizzazione",
+      "syncTimeline": "Timeline di sincronizzazione",
+      "syncTimelineEmpty": "Non ci sono eventi di sincronizzazione registrati.",
+      "pushPoliciesHint": "Reinserisci ogni politica per questo sito — incluso qualsiasi invio bloccato o in stato di errore — per un ripush immediato.",
+      "syncHealthHistogram": "Sincronizzazione riuscita / fallita (recente)"
     },
-    "empty": "[TODO] No sites are enrolled yet. Enroll a subordinate SysManage server to get started.",
+    "empty": "Ancora non ci sono siti federati. Enrolla un server sottordinato SysManage per iniziare.",
     "enroll": {
-      "cancel": "[TODO] Cancel",
-      "done": "[TODO] Done",
-      "engineUnavailable": "[TODO] The federation controller engine is not loaded; cannot enroll a site.",
-      "error": "[TODO] Failed to enroll site.",
-      "location": "[TODO] Location label (optional)",
-      "name": "[TODO] Site name",
-      "submit": "[TODO] Generate token",
-      "successTitle": "[TODO] Site enrolled",
-      "syncIntervalSeconds": "[TODO] Sync interval (seconds)",
-      "title": "[TODO] Enroll a federation site",
-      "tokenInstructions": "[TODO] Copy the enrollment token below and deliver it to the new site server. This is the only time it will be displayed — there is no recovery if lost.",
-      "url": "[TODO] Site URL",
-      "siteIdentityKey": "[TODO] Site identity public key (PEM)",
-      "siteIdentityKeyHelp": "[TODO] Required. Paste the site's identity public key, obtained out of band (from the site's Server Role page). The coordinator verifies the site's enrollment proof against this key — it is what defeats an enrollment-time man-in-the-middle."
+      "cancel": "Annulla",
+      "done": "Completato",
+      "engineUnavailable": "Il motore del controller federativo non è caricato; impossibile iscrivere un sito.",
+      "error": "Impossibile iscrivere il sito.",
+      "location": "Etichetta della localizzazione (opzionale)",
+      "name": "Nome del sito",
+      "submit": "Genera_token",
+      "successTitle": "Sito iscritto",
+      "syncIntervalSeconds": "Intervallo di sincronizzazione (secondi)",
+      "title": "Iscriviti a un sito federato",
+      "tokenInstructions": "Copia il token di registrazione riportato di seguito e consegnalo al server del nuovo sito. Questo è l'unico momento in cui verrà visualizzato — non esiste un recupero se perde.",
+      "url": "URL del sito",
+      "siteIdentityKey": "Chiave pubblica di identità del sito (PEM)",
+      "siteIdentityKeyHelp": "Obbligatorio. Incolla la chiave pubblica dell'identità del sito, ottenuta fuori banda (dalla pagina Ruolo Server del sito). Il coordinatore verifica il certificato di iscrizione del sito contro questa chiave — è ciò che sconfigge un attacco man-in-the-middle durante l'iscrizione."
     },
     "enterpriseRequired": {
-      "body": "[TODO] Federation lets you manage many SysManage servers from one coordinator. Upgrade to an Enterprise license to enroll subordinate sites here.",
-      "title": "[TODO] Multi-site federation requires Enterprise"
+      "body": "La_federazione_ti_permette_di_gestire_varie_server_SysManage_da_un_singolo_coordinatore. Aggiorna_la_tua_licenza_a_Enterprise_per_iscrivere_i_siti_subordinati_quì.",
+      "title": "La federazione multi-sito richiede Enterprise"
     },
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "hostCount": "[TODO] {{count}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "policiesLink": "[TODO] Policies",
-    "subtitle": "[TODO] Subordinate SysManage servers enrolled with this coordinator.",
-    "title": "[TODO] Federation Sites",
-    "hostsLink": "[TODO] Hosts",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "Impossibile caricare i siti federati.",
+    "hostCount": "{{count}} host",
+    "lastSync": "Sincronizzato {{when}}",
+    "mapView": "Vista mappa",
+    "policiesLink": "Politiche",
+    "subtitle": "Server subordinate SysManage iscritti con questo coordinatore.",
+    "title": "Siti_federativi",
+    "hostsLink": "Hosts",
+    "tilesView": "Dashboard"
   },
   "sitesMap": {
-    "errorLoad": "[TODO] Failed to load federation sites.",
-    "gridView": "[TODO] Grid view",
-    "openSite": "[TODO] Open site",
-    "subtitle": "[TODO] Geographic distribution of subordinate site servers.",
-    "title": "[TODO] Federation Sites Map",
-    "tilesView": "[TODO] Dashboard"
+    "errorLoad": "Impossibile caricare i siti federati.",
+    "gridView": "Vista a griglia",
+    "openSite": "Sito aperto",
+    "subtitle": "Distribuzione_geografica_dei_server_siti_subordinati.",
+    "title": "Mappa_siti_federativi",
+    "tilesView": "Dashboard",
+    "lastSyncLabel": "Ultima sincronizzazione:",
+    "statusLabel": "Stato:"
   },
   "airgapBundles": {
-    "buildAgent": "[TODO] Build Agent Bundle",
-    "buildError": "[TODO] Failed to queue build",
-    "buildProplus": "[TODO] Build Pro+ Bundle",
-    "buildServer": "[TODO] Build Server Bundle",
-    "bundle": "[TODO] Bundle",
-    "completedAt": "[TODO] Completed",
-    "confirmDelete": "[TODO] Delete this bundle and its ISO file?",
-    "copied": "[TODO] Command copied to clipboard",
-    "copy": "[TODO] Copy to clipboard",
-    "copyError": "[TODO] Could not access the clipboard",
-    "createdAt": "[TODO] Created",
-    "delete": "[TODO] Delete",
-    "deleteError": "[TODO] Failed to delete bundle",
-    "deleted": "[TODO] Bundle deleted",
-    "dockerInstallHint": "[TODO] Run this on the sysmanage server as a user with sudo:",
-    "dockerNoGroup": "[TODO] Docker is running but the {{user}} user is not in the docker group, so the build subprocess cannot reach the daemon socket.",
-    "dockerNotInstalled": "[TODO] Docker is not installed on this server. Bundle builds need Docker to fetch per-distro Linux packages.",
-    "dockerNotRunning": "[TODO] Docker is installed but the daemon is not reachable. Start it with: sudo systemctl enable --now docker.",
-    "dockerPermissionDenied": "[TODO] The Docker daemon is running but the {{user}} user (the one running this sysmanage process) cannot read /var/run/docker.sock. Add the user to the docker group, then restart the sysmanage process so the new group set takes effect.",
-    "dockerReady": "[TODO] Docker is ready",
-    "dockerReadyHint": "[TODO] Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "download": "[TODO] Download ISO",
-    "downloadError": "[TODO] Failed to download bundle",
-    "empty": "[TODO] No bundles yet. Click a build button above to create one.",
-    "loadError": "[TODO] Failed to load bundles",
-    "queued": "[TODO] Bundle build queued — refreshing list",
-    "recentFailures": "[TODO] Recent build failures:",
-    "recheckDocker": "[TODO] Re-check Docker",
-    "requiresDocker": "[TODO] Bundle builds require Docker to be installed and running on this server — needed to fetch per-distro Linux packages. Builds typically take 5-30 minutes depending on how many platforms are enabled.",
-    "size": "[TODO] Size",
-    "status": "[TODO] Status",
-    "subtitle": "[TODO] Generate a multi-OS ISO containing sysmanage server or agent + all per-platform dependencies, ready to mount on an air-gapped host.",
-    "title": "[TODO] Air-Gap Install Bundles",
-    "version": "[TODO] Version",
-    "recheckResources": "[TODO] Re-check resources",
-    "resourcesInsufficient": "[TODO] This server does not have enough free memory or disk to build a Server or Agent bundle — those buttons are disabled until resources are freed (add swap or grow the VM).",
-    "resourcesLow": "[TODO] Low resources — the build can run but will lean on swap and may be slow."
+    "buildAgent": "Compila l'aggeggio Build Agent",
+    "buildError": "Impossibile inserire nella coda la compilazione.",
+    "buildProplus": "Compila l'aggeggio Build Pro+",
+    "buildServer": "Compila l'aggeggio Build Server",
+    "bundle": "Aggeggio",
+    "completedAt": "Compilato",
+    "confirmDelete": "Vuoi eliminare questo pacchetto e il file ISO associato?",
+    "copied": "Comando copiato negli appunti",
+    "copy": "Copia negli appunti",
+    "copyError": "Impossibile accedere agli appunti",
+    "createdAt": "Creato",
+    "delete": "Elimina",
+    "deleteError": "Impossibile eliminare il bundle.",
+    "deleted": "Aggeggio eliminato",
+    "dockerInstallHint": "Esegui questo comando sul server sysmanage come utente con sudo:",
+    "dockerNoGroup": "Docker sta eseguendo ma l'utente {{user}} non fa parte del gruppo docker, quindi il sottoprocesso di compilazione non può raggiungere la socket del demone.",
+    "dockerNotInstalled": "Docker non è installato su questo server. Le compilazioni dei pacchetti hanno bisogno di Docker per recuperare i pacchetti Linux specifici della distribuzione.",
+    "dockerNotRunning": "Docker è installato ma il demone non è raggiungibile. Avviarlo con: sudo systemctl enable --now docker.",
+    "dockerPermissionDenied": "Il daemon Docker è in esecuzione ma l'utente {{user}} (quello che sta eseguendo questo processo sysmanage) non può leggere /var/run/docker.sock. Aggiungi l'utente al gruppo docker, quindi riavvia il processo sysmanage per far sì che la nuova impostazione del gruppo venga applicata.",
+    "dockerReady": "Docker è pronto",
+    "dockerReadyHint": "Le compilazioni tipicamente richiedono 5-30 minuti a seconda del numero di piattaforme abilitate.",
+    "download": "Scarica ISO",
+    "downloadError": "Impossibile scaricare il bundle.",
+    "empty": "Ancora non ci sono bundle. Fai clic su un pulsante di build sopra per crearne uno.",
+    "loadError": "Impossibile caricare i bundle.",
+    "queued": "Compilazione dell'aggeggio in coda — aggiornamento della lista",
+    "recentFailures": "Ultimi fallimenti di build:",
+    "recheckDocker": "Ricarica Docker",
+    "requiresDocker": "Per eseguire la compilazione dell'aggeggio è necessario che Docker sia installato e in esecuzione su questo server, per poter recuperare i pacchetti Linux specifici di ogni distribuzione. Le compilazioni tipicamente richiedono 5-30 minuti a seconda del numero di piattaforme abilitate.",
+    "size": "Dimensione",
+    "status": "Stato",
+    "subtitle": "Genera_un_ISO_multios_sistema_contenente_server_o_agente_sysmanage + tutte_le_dipendenze_per_platfoma, pronto_per_essere_montato_su_un_host_a_vuoto.",
+    "title": "Pacchetti di Installazione per Isolamento",
+    "version": "Versione",
+    "recheckResources": "Ricarica risorse",
+    "resourcesInsufficient": "Questo server non dispone di abbastanza memoria libera o spazio su disco per costruire un pacchetto Server o Agent — questi pulsanti sono disabilitati fino a quando le risorse non saranno liberate (aggiungi swap o espandi la VM).",
+    "resourcesLow": "Risorse basse — il build può eseguire ma si appoggia alla swap e potrebbe essere lento."
   },
   "airgapCollections": {
     "actions": {
-      "delete": "[TODO] Delete",
-      "download": "[TODO] Download ISO"
+      "delete": "Elimina",
+      "download": "Scarica ISO"
     },
     "column": {
-      "actions": "[TODO] Actions",
-      "completed": "[TODO] Completed",
-      "created": "[TODO] Created",
-      "isoLabel": "[TODO] ISO Label",
-      "size": "[TODO] Size",
-      "started": "[TODO] Started",
-      "status": "[TODO] Status"
+      "actions": "Azioni",
+      "completed": "Compilato",
+      "created": "Creato",
+      "isoLabel": "Etichetta ISO",
+      "size": "Dimensione",
+      "started": "Avviato",
+      "status": "Stato"
     },
-    "confirmDelete": "[TODO] Delete this collection run and its manifests?",
-    "createError": "[TODO] Failed to create run",
-    "created": "[TODO] Collection run queued",
-    "deleteError": "[TODO] Failed to delete run",
-    "deleted": "[TODO] Collection run deleted",
+    "confirmDelete": "Vuoi eliminare questa esecuzione della raccolta e i manifesti associati?",
+    "createError": "Impossibile creare l'esecuzione.",
+    "created": "Esecuzione della raccolta in coda",
+    "deleteError": "Impossibile eliminare l'esecuzione.",
+    "deleted": "Esecuzione della raccolta eliminata",
     "dialog": {
-      "cancel": "[TODO] Cancel",
-      "includeCompliance": "[TODO] Include compliance bundle",
-      "includeCve": "[TODO] Include CVE feed snapshot",
-      "isoLabel": "[TODO] ISO Label",
-      "isoLabelHelper": "[TODO] Short identifier embedded in the produced ISO (e.g. \"monthly-2026-05\").",
-      "isoLabelRequired": "[TODO] ISO label is required",
-      "mediaSizeHelper": "[TODO] Maximum size per disc in MB. Defaults to 4700 (DVD-5).",
-      "mediaSizeMb": "[TODO] Media Size (MB)",
-      "submit": "[TODO] Queue Run",
-      "title": "[TODO] New Collection Run",
+      "cancel": "Annulla",
+      "includeCompliance": "Includi pacchetto di conformità",
+      "includeCve": "Includi snapshot del feed CVE",
+      "isoLabel": "Etichetta ISO",
+      "isoLabelHelper": "Identificatore breve incorporato nell'ISO prodotto (ad esempio \"monthly-2026-05\").",
+      "isoLabelRequired": "L'etichetta ISO è richiesta",
+      "mediaSizeHelper": "Dimensione massima per disco in MB. Il valore predefinito è 4700 (DVD-5).",
+      "mediaSizeMb": "Dimensione del supporto (MB)",
+      "submit": "Esegui in coda",
+      "title": "Nuova Raccolta",
       "mirrorsRequired": "At least one mirror target is required.",
       "hostMismatch": "All picked mirrors must live on the same host.",
       "mirrorsTitle": "Mirrors",
@@ -2857,16 +2980,16 @@
       "burnDevice": "Optical burn device (optional)",
       "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
     },
-    "downloadError": "[TODO] Failed to download ISO",
-    "empty": "[TODO] No collection runs yet. Click \"New Collection Run\" to start one.",
-    "licenseRequired": "[TODO] Air-gap collector engine not loaded; Pro+ license required.",
-    "loadError": "[TODO] Failed to load runs",
-    "newRun": "[TODO] New Collection Run",
-    "noManifestFound": "[TODO] Run has no manifest yet — try again once status is COMPLETE.",
-    "notApplicable": "[TODO] This page is only meaningful on collector-role deployments.",
-    "refresh": "[TODO] Refresh",
-    "subtitle": "[TODO] Trigger one-shot collection runs that mirror configured repositories, build a signed ISO, and write a manifest for ingestion on the air-gapped side.",
-    "title": "[TODO] Air-Gap Collection Runs",
+    "downloadError": "Impossibile scaricare l'ISO",
+    "empty": "Non ci sono ancora raccolte. Fai clic su \"Nuova Raccolta\" per iniziare una nuova raccolta.",
+    "licenseRequired": "Motore del collectore a isolamento non caricato; richiesto licenza Pro+",
+    "loadError": "Impossibile caricare le esecuzioni.",
+    "newRun": "Nuova Raccolta",
+    "noManifestFound": "L'esecuzione non ha ancora un manifesto — riprova una volta che lo stato sarà COMPLETO.",
+    "notApplicable": "Questa pagina ha significato solo nelle distribuzioni con ruolo collector.",
+    "refresh": "Aggiorna",
+    "subtitle": "Avvia esecuzioni uniche delle raccolte che riflettono i repository configurati, costruisce un ISO firmato e scrive una manifestazione per l'ingestione dalla parte isolata.",
+    "title": "Raccolte a Isolamento",
     "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
     "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
     "discPicker": {
@@ -2897,242 +3020,255 @@
     "save": "Save Role",
     "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
     "saved": "Server role saved. Restart the server for it to take full effect.",
-    "menuTitle": "[TODO] Server Role"
+    "menuTitle": "Ruolo del server"
   },
   "airgapDevices": {
-    "empty": "[TODO] No eligible drives found. Insert media and press Rescan.",
-    "help": "[TODO] Pick the optical/USB drive that holds the collector media. The Import button on the Air-Gap Repositories page becomes available when this drive has a readable ISO inserted. The media signature is verified during import.",
-    "label": "[TODO] Block device",
-    "loadError": "[TODO] Could not enumerate drives.",
-    "none": "[TODO] (none)",
-    "rescan": "[TODO] Rescan drives",
-    "saveError": "[TODO] Could not save device.",
-    "title": "[TODO] Import Drive"
+    "empty": "Nessuno dei dischi eleggibili trovati. Inserisci il supporto e premi Rescan.",
+    "help": "Seleziona la unità ottica/USB che contiene i media del collector. Il pulsante Importa sulla pagina Repository aerea diventa disponibile quando viene inserito un ISO leggibile su questa unità. La firma dei media viene verificata durante l'importazione.",
+    "label": "Dispositivo di blocco",
+    "loadError": "Impossibile elencare i dischi.",
+    "none": "(nessuno)",
+    "rescan": "Riscan dischi",
+    "saveError": "Impossibile salvare il dispositivo.",
+    "title": "Importa disco",
+    "optical": "ottico",
+    "removable": "rimovibili"
   },
   "airgapImport": {
-    "device": "[TODO] Drive",
-    "import": "[TODO] Import ISO",
-    "importError": "[TODO] Could not start import.",
-    "noDevice": "[TODO] No import drive selected. Choose one in Settings → Server Role.",
-    "notReady": "[TODO] Not ready",
-    "ready": "[TODO] Ready{{label}}",
-    "rescan": "[TODO] Rescan",
-    "statusError": "[TODO] Could not probe the import device.",
-    "title": "[TODO] Import from Media",
+    "device": "Unità",
+    "import": "Importa ISO",
+    "importError": "Impossibile avviare l'importazione.",
+    "noDevice": "Nessuna chiavetta di import scelta. Seleziona una nel menu Impostazioni → Ruolo del server.",
+    "notReady": "Non pronto",
+    "ready": "Pronto{{label}}",
+    "rescan": "Riscan",
+    "statusError": "Impossibile esplorare l'import device.",
+    "title": "Importa da supporto",
     "run": {
-      "complete": "[TODO] Complete",
-      "copying": "[TODO] Copying packages",
-      "failed": "[TODO] Failed",
-      "queued": "[TODO] Queued",
-      "verified": "[TODO] Verified",
-      "verifying": "[TODO] Verifying signature"
+      "complete": "Completo",
+      "copying": "Copio i pacchetti",
+      "failed": "Fallito",
+      "queued": "In coda",
+      "verified": "Verificato",
+      "verifying": "Verifica firma"
     },
-    "runDone": "[TODO] Import complete — the repository list below is refreshed.",
-    "runStats": "[TODO] {{files}} files · {{size}}",
-    "runStatus": "[TODO] Import status"
+    "runDone": "Operazione di importazione completata — la lista dei repository qui sotto è stata aggiornata.",
+    "runStats": "{{files}} file · {{size}}",
+    "runStatus": "Stato dell'importazione"
   },
   "airgapKeys": {
     "collector": {
-      "copyKey": "[TODO] Copy Public Key",
-      "help": "[TODO] Copy this public key and import it on the Air-Gap Repository server so it will trust the signed media this collector produces. Only the public key is shown — the private signing key never leaves this server.",
-      "loadError": "[TODO] Could not load the collector public key.",
-      "title": "[TODO] Collector Public Key"
+      "copyKey": "Copia Chiave Pubblica",
+      "help": "Copia questa chiave pubblica e importala sul server dell'Air-Gap Repository in modo che possa fidarsi della media firmata da questo collector. Viene mostrata solo la chiave pubblica — la chiave privata di firma non lascia mai questo server.",
+      "loadError": "Impossibile caricare la chiave pubblica del collector.",
+      "title": "Pubblica chiave del collector"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "fingerprint": "[TODO] Fingerprint",
+    "copied": "Copiato!",
+    "copyError": "Impossibile copiare negli appunti.",
+    "copyFingerprint": "Copia impronta digitale",
+    "fingerprint": "Impressione_digitale",
     "trusted": {
-      "badKey": "[TODO] (unreadable key)",
-      "count": "[TODO] {{n}} trusted",
-      "empty": "[TODO] No trusted collector keys yet.",
-      "help": "[TODO] Import the public key from each Air-Gap Collector whose media this repository should accept. Media signed by an untrusted key is rejected during ingest.",
-      "import": "[TODO] Import Key",
-      "importError": "[TODO] Could not import key.",
-      "imported": "[TODO] Imported key {{fp}}",
-      "loadError": "[TODO] Could not load trusted keys.",
-      "nameLabel": "[TODO] Collector name",
-      "pemLabel": "[TODO] Public key (PEM)",
-      "removeError": "[TODO] Could not remove key.",
-      "required": "[TODO] Name and public key are both required.",
-      "title": "[TODO] Trusted Collector Keys"
+      "badKey": "(chiave non leggibile)",
+      "count": "{{n}} attendibili",
+      "empty": "Ancora non ci sono chiavi di raccolta affidate.",
+      "help": "Importa la chiave pubblica da ogni Air-Gap Collector il cui supporto questo repository dovrebbe accettare. I media firmati da una chiave non attendibile vengono rifiutati durante l'ingestione.",
+      "import": "Importa chiave",
+      "importError": "Impossibile importare la chiave.",
+      "imported": "Chiave importata {{fp}}",
+      "loadError": "Impossibile caricare le chiavi fidate.",
+      "nameLabel": "Nome del collector",
+      "pemLabel": "Chiave pubblica (PEM)",
+      "removeError": "Impossibile rimuovere la chiave.",
+      "required": "Sono necessari il nome e la chiave pubblica.",
+      "title": "Chiavi dei Collectors affidabili"
     }
   },
   "federationHosts": {
     "actions": {
-      "detail": "[TODO] Details",
-      "openSite": "[TODO] Site"
+      "detail": "Dettagli",
+      "openSite": "Sito"
     },
     "columns": {
-      "fqdn": "[TODO] Host",
-      "ipv4": "[TODO] IPv4",
-      "lastSeen": "[TODO] Last seen",
-      "os": "[TODO] OS",
-      "platform": "[TODO] Platform",
-      "status": "[TODO] Status"
+      "fqdn": "Host",
+      "ipv4": "IPv4",
+      "lastSeen": "Ultimo accesso",
+      "os": "Sistema operativo",
+      "platform": "Piattaforma",
+      "status": "Stato"
     },
     "detail": {
-      "close": "[TODO] Close",
-      "ipv6": "[TODO] IPv6",
-      "noLiveLink": "[TODO] Live detail link unavailable (owning site has no URL).",
-      "notFound": "[TODO] This host is no longer in the directory.",
-      "site": "[TODO] Owning site",
-      "theSite": "[TODO] the site",
-      "title": "[TODO] Host detail",
-      "viewLive": "[TODO] View live detail on {{site}} →"
+      "close": "Chiudi",
+      "ipv6": "IPv6",
+      "noLiveLink": "Collegamento di dettaglio in tempo reale non disponibile (il sito proprietario non ha URL).",
+      "notFound": "Questo host non è più nella directory.",
+      "site": "Sito proprietario",
+      "theSite": "il sito",
+      "title": "Dettagli host",
+      "viewLive": "Visualizza dettagli live su {{site}} →"
     },
-    "empty": "[TODO] No hosts have been synced from any site yet.",
-    "emptyFiltered": "[TODO] No hosts match the current filters.",
-    "errorLoad": "[TODO] Failed to load cross-site hosts.",
+    "empty": "Ancora non è stato sincronizzato alcun host da nessun sito.",
+    "emptyFiltered": "Nessuno dei host corrisponde ai filtri attuali.",
+    "errorLoad": "Impossibile caricare gli host trans-sito.",
     "filters": {
-      "apply": "[TODO] Apply",
-      "clear": "[TODO] Clear",
-      "osFamily": "[TODO] OS family",
-      "search": "[TODO] Search (name / IP)",
-      "status": "[TODO] Status"
+      "apply": "Applica",
+      "clear": "Cancella",
+      "osFamily": "Famiglia del sistema operativo",
+      "search": "Cerca (nome / IP)",
+      "status": "Stato"
     },
-    "scopedToSite": "[TODO] Scoped to one site",
-    "subtitle": "[TODO] Every host across all enrolled sites, from the coordinator's synced directory.",
-    "title": "[TODO] Cross-Site Hosts",
+    "scopedToSite": "Limitato a un sito",
+    "subtitle": "Ogni host in tutti i siti iscritti, dalla directory sincronizzata del coordinatore.",
+    "title": "Hosts cross-site",
     "bulk": {
-      "clear": "[TODO] Clear",
-      "dispatch": "[TODO] Dispatch command",
-      "selectAll": "[TODO] Select all on this page",
-      "selected": "[TODO] {{n}} hosts selected"
+      "clear": "Cancella",
+      "dispatch": "Invia comando",
+      "selectAll": "Seleziona tutto su questa pagina",
+      "selected": "{{n}} host selezionati"
     }
   },
   "federationDispatch": {
-    "cancel": "[TODO] Cancel",
-    "commandType": "[TODO] Command",
-    "dispatch": "[TODO] Dispatch",
-    "dispatching": "[TODO] Dispatching…",
+    "cancel": "Annulla",
+    "commandType": "Comando",
+    "dispatch": "Invia",
+    "dispatching": "Invio in corso...",
     "errors": {
-      "failed": "[TODO] Failed to dispatch command.",
-      "packagesRequired": "[TODO] Enter at least one package name.",
-      "scriptRequired": "[TODO] Enter the script to run.",
-      "unlicensed": "[TODO] Federation requires an Enterprise license.",
-      "partial": "[TODO] {{failed}} of {{total}} site dispatches failed."
+      "failed": "Impossibile inviare il comando.",
+      "packagesRequired": "Inserisci almeno un nome del pacchetto.",
+      "scriptRequired": "Inserisci lo script da eseguire.",
+      "unlicensed": "La_federazione_richiede_una_licenza_Enterprise.",
+      "partial": "{{failed}} di {{total}} invii del sito sono falliti."
     },
-    "hostIds": "[TODO] Host IDs",
-    "hostIdsHint": "[TODO] Comma-separated host IDs (from the Hosts page)",
-    "packages": "[TODO] Package names",
-    "packagesOptional": "[TODO] Package names (optional — blank = all updates)",
-    "script": "[TODO] Script",
-    "subtitle": "[TODO] Queue a command for {{site}}. The site runs it on its hosts and reports results back — nothing executes immediately.",
-    "targetAll": "[TODO] All hosts at this site",
-    "targetSpecific": "[TODO] Specific hosts (by ID)",
-    "thisSite": "[TODO] this site",
-    "title": "[TODO] Dispatch command",
+    "hostIds": "ID host",
+    "hostIdsHint": "ID host separati da virgole (dalla pagina Host)",
+    "packages": "Nomi dei pacchetti",
+    "packagesOptional": "Nomi dei pacchetti (opzionale — vuoto = tutte le aggiornamenti)",
+    "script": "Script",
+    "subtitle": "Inserisci un comando in coda per {{site}}. Il sito esegue il comando sui suoi host e invia i risultati — nulla viene eseguito immediatamente.",
+    "targetAll": "Tutti i host in questo sito",
+    "targetSpecific": "Host specifici (per ID)",
+    "thisSite": "questo sito",
+    "title": "Invia comando",
     "types": {
-      "applyUpdates": "[TODO] Apply updates",
-      "deployPackages": "[TODO] Install packages",
-      "reboot": "[TODO] Reboot",
-      "runScript": "[TODO] Run script"
+      "applyUpdates": "Aggiorna aggiornamenti",
+      "deployPackages": "Installa pacchetti",
+      "reboot": "Riavvia",
+      "runScript": "Esegui script"
     },
-    "subtitleMulti": "[TODO] Queue a command for {{hosts}} selected host(s) across {{sites}} site(s). Each site runs it and reports results back — nothing executes immediately."
+    "subtitleMulti": "Inserisci un comando in coda per {{hosts}} host selezionati su {{sites}} siti. Ogni sito esegue il comando e invia i risultati — nulla viene eseguito immediatamente."
   },
   "sitesTiles": {
-    "coordinator": "[TODO] Coordinator",
-    "coordinatorThisServer": "[TODO] This server",
-    "countEnrolled": "[TODO] {{n}} enrolled",
-    "countHosts": "[TODO] {{n}} hosts",
-    "countPending": "[TODO] {{n}} pending",
-    "countSuspended": "[TODO] {{n}} suspended",
-    "empty": "[TODO] No sites enrolled yet.",
-    "errorLoad": "[TODO] Failed to load sites.",
-    "gridView": "[TODO] Grid view",
-    "hostsLabel": "[TODO] {{n}} hosts",
-    "lastSync": "[TODO] Synced {{when}}",
-    "mapView": "[TODO] Map view",
-    "title": "[TODO] Federation Dashboard"
+    "coordinator": "Coordinatore",
+    "coordinatorThisServer": "Questo server",
+    "countEnrolled": "{{n}} iscritti",
+    "countHosts": "{{n}} host",
+    "countPending": "{{n}} in sospeso",
+    "countSuspended": "{{n}} sospesi",
+    "empty": "Ancora non ci sono siti federati.",
+    "errorLoad": "Impossibile caricare i siti.",
+    "gridView": "Vista a griglia",
+    "hostsLabel": "{{n}} host",
+    "lastSync": "Sincronizzato {{when}}",
+    "mapView": "Vista mappa",
+    "title": "Dashboard_federativa"
   },
   "federationAlertConfig": {
-    "effective": "[TODO] effective",
-    "save": "[TODO] Save thresholds",
-    "saveFailed": "[TODO] Failed to save thresholds.",
-    "saved": "[TODO] Alert thresholds saved.",
-    "subtitle": "[TODO] Leave a field blank to use the built-in default.",
-    "title": "[TODO] Alert thresholds"
+    "effective": "effettivo",
+    "save": "Salva soglie",
+    "saveFailed": "Impossibile aggiornare i limiti.",
+    "saved": "Soglie di allarme salvate.",
+    "subtitle": "Lascia vuoto un campo per utilizzare il valore predefinito incorporato.",
+    "title": "Soglie di allarme"
   },
   "federationReport": {
     "col": {
-      "active": "[TODO] Active",
-      "compliance": "[TODO] Worst compliance",
-      "critical": "[TODO] Critical CVEs",
-      "high": "[TODO] High CVEs",
-      "hosts": "[TODO] Hosts",
-      "site": "[TODO] Site"
+      "active": "Attivo",
+      "compliance": "Peggior conformità",
+      "critical": "CVE critici",
+      "high": "Alte CVE",
+      "hosts": "Hosts",
+      "site": "Sito"
     },
-    "generate": "[TODO] Generate report",
-    "sites": "[TODO] Sites (all if none selected)",
-    "subtitle": "[TODO] Aggregate host, compliance, and vulnerability rollups across sites.",
-    "totals": "[TODO] Totals ({{n}} sites)",
-    "upsell": "[TODO] Multi-site federation requires Enterprise."
+    "generate": "Genera_report",
+    "sites": "Siti (tutti se nessuno selezionato)",
+    "subtitle": "Aggrega rollup di host, conformità e vulnerabilità tra siti.",
+    "totals": "Totale ({{n}} siti)",
+    "upsell": "La federazione multi-sito richiede Enterprise."
   },
   "federationRole": {
     "coordinator": {
-      "description": "[TODO] The hub that aggregates host inventory, compliance, and vulnerability rollups from many subordinate site servers and dispatches commands and policies down to them. One coordinator per federation.",
-      "title": "[TODO] Federation Coordinator"
+      "description": "Il hub che aggrega l'inventario degli host, la conformità e le valutazioni della vulnerabilità da molti server subordinate e invia comandi e politiche ai server inferiori. Un coordinatore per federazione.",
+      "title": "Coordinatore_federativo"
     },
-    "copied": "[TODO] Copied!",
-    "copyError": "[TODO] Could not copy to clipboard.",
-    "copyFingerprint": "[TODO] Copy fingerprint",
-    "currentTag": "[TODO] (current)",
-    "heading": "[TODO] Federation Role",
+    "copied": "Copiato!",
+    "copyError": "Impossibile copiare negli appunti.",
+    "copyFingerprint": "Copia impronta digitale",
+    "currentTag": "(corrente)",
+    "heading": "Ruolo_federativo",
     "identity": {
-      "copyKey": "[TODO] Copy Public Key",
-      "pending": "[TODO] Generating identity key…",
-      "title": "[TODO] This server's identity key",
-      "help": "[TODO] Copy this public key and paste it into the peer's federation card so each side can record the other's identity fingerprint and verify it out of band. The private key never leaves this server."
+      "copyKey": "Copia Chiave Pubblica",
+      "pending": "Creazione_chiave_identità…",
+      "title": "Chiave di identità del server",
+      "help": "Copia questa chiave pubblica e incollala nella scheda federativa del peer in modo che ogni lato possa registrare l'impronta digitale dell'identità dell'altro e verificarla fuori banda. La chiave privata non lascia mai questo server."
     },
-    "importError": "[TODO] Could not import the key.",
-    "intro": "[TODO] Choose how this server participates in a multi-site federation. This is independent of the air-gap role on the left — a server can be both. Takes effect after the next restart.",
-    "loadError": "[TODO] Could not load the federation role.",
+    "importError": "Impossibile importare la chiave.",
+    "intro": "Seleziona come questo server partecipa in una federazione multi-sito. Questo è indipendente dal ruolo air-gap sulla sinistra — un server può essere entrambi. Ha effetto dopo il prossimo riavvio.",
+    "loadError": "Impossibile caricare il ruolo federativo.",
     "none": {
-      "description": "[TODO] The default. This server is not part of a multi-site federation. Choose this unless you are running a coordinator or a subordinate site.",
-      "title": "[TODO] Not federated"
+      "description": "Predefinito. Questo server non fa parte di una federazione multi-sito. Seleziona questo opzione a meno che tu non stia eseguendo un coordinatore o un sito subordinato.",
+      "title": "Non federato"
     },
     "peers": {
-      "import": "[TODO] Import Peer Key",
-      "name": "[TODO] Peer name",
-      "pem": "[TODO] Peer public key (PEM)",
-      "empty": "[TODO] No peer identity keys recorded yet.",
-      "help": "[TODO] Record a peer's public key here to verify its identity fingerprint out of band. The federation connection itself is secured by the TLS certificate pinned during enrollment — these keys are for human verification, not access control.",
-      "title": "[TODO] Peer identity keys"
+      "import": "Importa chiave peer",
+      "name": "Nome del peer",
+      "pem": "Chiave pubblica del peer (PEM)",
+      "empty": "Non ci sono ancora chiavi di identità peer registrate.",
+      "help": "Registra la chiave pubblica di un peer qui per verificare l'impronta digitale della sua identità fuori banda. La connessione federativa è sicura grazie al certificato TLS fissato durante l'iscrizione — queste chiavi sono per la verifica umana, non per il controllo dell'accesso.",
+      "title": "Chiavi d'identità peer"
     },
-    "removeError": "[TODO] Could not remove the key.",
-    "save": "[TODO] Save Role",
-    "saveError": "[TODO] Could not save the federation role.",
-    "saved": "[TODO] Federation role saved. Restart the server for it to take full effect.",
-    "saving": "[TODO] Saving…",
+    "removeError": "Impossibile rimuovere la chiave.",
+    "save": "Salva ruolo federativo",
+    "saveError": "Impossibile salvare il ruolo di federazione.",
+    "saved": "Ruolo_federativo_salvato. Riavvia_il_server_per_farlo_integrare_completamente.",
+    "saving": "Salvataggio...",
     "site": {
-      "description": "[TODO] A subordinate server that runs autonomously and reports up to a coordinator. It keeps managing its own hosts even when the coordinator is unreachable, replaying queued data on reconnect.",
-      "title": "[TODO] Federation Site"
+      "description": "Un server subordinato che funziona autonomamente e segnala al coordinatore. Continua a gestire i propri host anche quando il coordinatore non è raggiungibile, riproducendo i dati in coda alla ricomposizione della connessione.",
+      "title": "Sito_federativo"
     },
     "enroll": {
-      "coordUrl": "[TODO] Coordinator URL",
-      "enrolled": "[TODO] Enrolled with coordinator",
-      "error": "[TODO] Could not enroll with the coordinator.",
-      "help": "[TODO] Point this site at its coordinator and paste the one-time enrollment token the coordinator issued (from its Sites page). This site calls back to complete the handshake and begin syncing.",
-      "notEnrolled": "[TODO] Not yet enrolled with a coordinator.",
-      "submit": "[TODO] Enroll with coordinator",
-      "submitting": "[TODO] Enrolling…",
-      "title": "[TODO] Enroll with coordinator",
-      "token": "[TODO] Enrollment token",
-      "coordIdentityKey": "[TODO] Coordinator identity public key (PEM)",
-      "coordIdentityKeyHelp": "[TODO] Required. Paste the coordinator's identity public key, obtained out of band (from its Server Role page). This site refuses to enroll unless the coordinator proves this exact key — it is what defeats an enrollment-time man-in-the-middle."
+      "coordUrl": "URL del coordinatore",
+      "enrolled": "Iscrizione effettuata con il coordinatore",
+      "error": "Impossibile registrarsi con il coordinatore.",
+      "help": "Puntare questo sito al suo coordinatore e incollare il token di registrazione temporaneo emesso dal coordinatore (dalla sua pagina Siti). Questo sito chiama indietro per completare la mano a mano e iniziare la sincronizzazione.",
+      "notEnrolled": "Ancora non è stato enrollato con un coordinatore.",
+      "submit": "Iscriviti con il coordinatore",
+      "submitting": "Iscrizione in corso…",
+      "title": "Iscriviti con il coordinatore",
+      "token": "Token di iscrizione",
+      "coordIdentityKey": "Chiave pubblica di identità del coordinatore (PEM)",
+      "coordIdentityKeyHelp": "Obbligatorio. Incolla la chiave pubblica dell'identità del coordinatore, ottenuta fuori banda (dalla pagina Ruolo Server). Questo sito rifiuterà l'iscrizione a meno che il coordinatore non dimostri esattamente questa chiave — è ciò che sconfigge un attacco man-in-the-middle durante l'iscrizione."
     }
   },
   "configuration": {
-    "description": "[TODO] Server-wide operational settings. Saved values are stored in the database and override sysmanage.yaml.",
-    "loadError": "[TODO] Failed to load configuration settings.",
-    "save": "[TODO] Save",
-    "saveError": "[TODO] Failed to save configuration settings.",
-    "saved": "[TODO] Configuration saved.",
-    "secretSet": "[TODO] •••••••• (stored — leave blank to keep)",
-    "secretSetHelp": "[TODO] A password is stored in OpenBAO. Type a new one to replace it.",
-    "secretUnset": "[TODO] Not set",
-    "secretUnsetHelp": "[TODO] Stored securely in OpenBAO, not in the database.",
-    "title": "[TODO] Configuration"
+    "description": "Impostazioni operative globali del server. I valori salvati vengono memorizzati nel database e sovrintendono a sysmanage.yaml.",
+    "loadError": "Impossibile caricare le impostazioni di configurazione.",
+    "save": "Salva",
+    "saveError": "Impossibile salvare le impostazioni di configurazione.",
+    "saved": "Configurazione salvata.",
+    "secretSet": "•••••••• (memorizzato — lasciare vuoto per mantenere)",
+    "secretSetHelp": "Una password è memorizzata in OpenBAO. Immetti una nuova per sostituirla.",
+    "secretUnset": "Non impostato",
+    "secretUnsetHelp": "Memorizzato in modo sicuro in OpenBAO, non nel database.",
+    "title": "Configurazione"
+  },
+  "connection": {
+    "networkError": "Errore di rete: Impossibile raggiungere il server",
+    "serverError": "Errore del server: {{status}}"
+  },
+  "scrollableButtonBar": {
+    "scrollLeft": "Scorri a sinistra",
+    "scrollRight": "Scorri a destra"
+  },
+  "settings": {
+    "tabsAriaLabel": "schede impostazioni"
   }
 }

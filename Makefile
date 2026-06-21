@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
+.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -770,6 +770,58 @@ migrate-tenants: $(VENV_ACTIVATE)
 	@echo "=== Migrating per-tenant databases (requires OpenBAO running) ==="
 	@$(PYTHON) scripts/sysmanage_migrate.py --tenants-only
 
+# ---------------------------------------------------------------------------
+# i18n translation backfill via the GPU translation service (scripts/translation-
+# service).  IDEMPOTENT: only untranslated strings are sent, so re-run any time
+# to pick up new English.  Point it at your running service with either:
+#     export TRANSLATION_SERVICE_URL=http://beast:8765
+#   or:  make translate SERVICE=http://beast:8765
+#
+# SCOPE: ``make translate`` here does THIS repo's own stores only — frontend
+# (JSON) + backend (gettext).  Every other repo's ``make translate`` does its
+# own locales; nothing reaches across repository boundaries.
+# ---------------------------------------------------------------------------
+SERVICE ?= $(or $(TRANSLATION_SERVICE_URL),http://localhost:8765)
+TRANSLATE_PROJECTS ?= frontend backend
+TRANSLATE := scripts/translation-service/i18n_backfill.py
+
+translate: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@rc=0; for p in $(TRANSLATE_PROJECTS); do \
+		echo ""; echo "=== make translate: $$p  (service $(SERVICE)) ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --service "$(SERVICE)" --fail-on-gaps || rc=$$?; \
+	done; \
+	if [ $$rc -ne 0 ]; then \
+		echo ""; \
+		echo "########################################################################"; \
+		echo "# make translate FAILED — one or more projects have untranslated locales"; \
+		echo "# (see the per-project banners above).  Locales must be 100%.";  \
+		echo "########################################################################"; \
+		exit $$rc; \
+	fi; \
+	echo ""; echo "[OK] translation backfill complete — frontend + backend at 100%."
+
+translate-dry: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@for p in $(TRANSLATE_PROJECTS); do \
+		echo ""; echo "=== translate (dry-run): $$p ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --dry-run || exit $$?; \
+	done
+
+# Offline translation-completeness GATE — no service, no writes, no network.
+# Scans THIS repo's own locale stores (frontend JSON + backend gettext) and
+# fails loudly (non-zero) if any string is still untranslated.  Safe for CI /
+# release hooks; see the i18n-gate job in build-and-release.yml.  Sibling repos
+# (docs / proplus / agent) gate themselves via their own `make translate-check`.
+TRANSLATE_CHECK_PROJECTS ?= frontend backend
+translate-check: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@rc=0; for p in $(TRANSLATE_CHECK_PROJECTS); do \
+		echo ""; echo "=== translate-check (offline): $$p ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --check || rc=$$?; \
+	done; \
+	[ $$rc -eq 0 ] || exit $$rc
+
 provision-bootstrap: $(VENV_ACTIVATE)
 	@echo "=== Multi-tenancy provisioning bootstrap (one-time, operator) ==="
 	@echo "Creates a least-privilege Postgres provisioner role + scoped OpenBAO"
@@ -859,7 +911,7 @@ lint-version-fix:
 	@$(PYTHON) scripts/check_version_drift.py --fix
 
 # Combined linting
-lint: lint-python lint-typescript i18n-validate i18n-placeholders lint-version check-migrations
+lint: lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the
@@ -920,6 +972,75 @@ i18n-translate: $(VENV_ACTIVATE)
 # flag semantic drift for human review.  Local model only; not a CI gate.
 i18n-backtranslate: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/i18n_backtranslate.py --lang $(LANG) --sample 25
+
+# ---- Backend (gettext) i18n cycle -------------------------------------------
+# The backend translates via gettext: user-facing strings are wrapped in _( ),
+# extracted into per-language .po catalogs, and compiled to runtime .mo.  UNLIKE
+# the frontend (where t('key','English') carries its own inline fallback), a
+# backend string that is NOT in the catalog silently renders English in EVERY
+# locale — so the catalog MUST be kept in sync with the code.  Workflow after
+# adding or changing any _("..."):
+#     make i18n-extract-backend                                  # code _() -> .po (new msgids = gaps)
+#     make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765   # fill the gaps
+#     make i18n-compile-backend                                  # .po -> runtime .mo
+BACKEND_I18N       := backend/i18n/locales
+BACKEND_I18N_LANGS := en ar de es fr hi it ja ko nl pt ru zh_CN zh_TW
+BACKEND_I18N_SRC    = $(shell find backend -name '*.py' -not -path '*/test*' -not -path '*/__pycache__/*')
+
+i18n-extract-backend:
+	@command -v xgettext msgmerge msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
+	@echo "=== extracting backend _() strings -> messages.pot ==="
+	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		--package-name=SysManage --msgid-bugs-address=" " \
+		-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC)
+	@# --no-fuzzy-matching: never guess a translation onto a changed string.
+	@# An unmatched/changed string becomes an EMPTY gap (which `make translate`
+	@# fills accurately) rather than a fuzzy guess that msgfmt would drop from the
+	@# .mo (silently rendering English) — the exact bug this whole cycle prevents.
+	@for l in $(BACKEND_I18N_LANGS); do \
+		msgmerge --update --backup=none --quiet --no-fuzzy-matching \
+			$(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po $(BACKEND_I18N)/messages.pot; \
+	done
+	@msgen $(BACKEND_I18N)/en/LC_MESSAGES/messages.po -o $(BACKEND_I18N)/en/LC_MESSAGES/messages.po
+	@echo "[OK] backend msgids extracted + merged into all $(words $(BACKEND_I18N_LANGS)) catalogs."
+	@echo "     Next: make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765 && make i18n-compile-backend"
+
+i18n-compile-backend:
+	@if command -v msgfmt >/dev/null 2>&1; then \
+		for l in $(BACKEND_I18N_LANGS); do \
+			msgfmt -o $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.mo $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po; \
+		done; \
+		echo "[OK] compiled backend .mo for all locales (msgfmt)."; \
+	else \
+		PYB=$$(command -v python3 || command -v python); \
+		[ -n "$$PYB" ] || { echo "ERROR: need msgfmt OR python3+polib to compile .mo"; exit 1; }; \
+		$$PYB -c "import polib" 2>/dev/null || $$PYB -m pip install --quiet --disable-pip-version-check polib; \
+		for l in $(BACKEND_I18N_LANGS); do \
+			$$PYB -c "import polib,sys; polib.pofile(sys.argv[1]).save_as_mofile(sys.argv[2])" \
+				$(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.mo; \
+		done; \
+		echo "[OK] compiled backend .mo for all locales (polib fallback)."; \
+	fi
+
+# Compile backend .mo from the committed .po BEFORE any package is built — every
+# installer payload copies backend/i18n/locales/, and .mo is gitignored (never
+# committed).  Declared as an EXTRA prerequisite on each installer (Make merges
+# prerequisites across rules; the recipes live at their definitions below), so a
+# single line protects every packaging path without touching their bodies.
+.PHONY: i18n-extract-backend i18n-compile-backend i18n-check-backend
+installer installer-deb installer-rpm-centos installer-rpm-opensuse installer-alpine installer-openbsd installer-freebsd installer-macos installer-netbsd installer-msi-x64 installer-msi-arm64: i18n-compile-backend
+
+# CI gate: every _() string in the code must already be in the catalog.  If a
+# contributor adds a string without running i18n-extract-backend, it would ship
+# untranslated — so fail the build.  Network-free.  Pairs with `translate-check`
+# (which fails on any empty msgstr, i.e. extracted-but-not-translated).
+i18n-check-backend:
+	@command -v xgettext msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
+	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
+	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
+		|| { echo "FAIL: backend code has _() strings missing from the catalog — run 'make i18n-extract-backend'"; exit 1; }
+	@echo "[OK] backend catalog is in sync with code."
 
 # Comprehensive security analysis (default)
 security: security-full

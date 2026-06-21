@@ -13,12 +13,30 @@ the ``ClientSession`` boundary so we exercise the orchestration code without
 booting a real HTTP stack.
 """
 
+import io
 import os
+import tarfile
 import tempfile
 from contextlib import contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+
+def _make_bundle_bytes(so_name="m.so", so_data=b"so-bytes", locales=None):
+    """Build an in-memory module bundle .tar.gz (the lockstep download format):
+    the compiled engine plus optional locales/<lang>/LC_MESSAGES/<code>.mo."""
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        info = tarfile.TarInfo(so_name)
+        info.size = len(so_data)
+        tar.addfile(info, io.BytesIO(so_data))
+        for arcname, data in (locales or {}).items():
+            li = tarfile.TarInfo(arcname)
+            li.size = len(data)
+            tar.addfile(li, io.BytesIO(data))
+    return buf.getvalue()
+
 
 # ---------------------------------------------------------------------------
 # helpers
@@ -386,11 +404,19 @@ class TestDownloadAndCacheModule:
 
         loader = ModuleLoader()
         modules_path = tmp_path / "mods"
+        # The download is a single bundle tarball (.so + locales/ + metadata);
+        # the loader extracts it and loads the contained .so.  Ship a catalog
+        # too so the extracted layout matches production.
+        bundle = _make_bundle_bytes(
+            so_name="m.cpython-314-x86_64-linux-gnu.so",
+            so_data=b"so-bytes",
+            locales={"locales/de/LC_MESSAGES/m.mo": b"\xde\x12\x04\x95mo"},
+        )
         # No expected hash → loader skips verification.
         response = _FakeAioResponse(
             status=200,
             headers={"X-Module-Version": "1.2.3"},
-            chunks=(b"so-bytes",),
+            chunks=(bundle,),
         )
         with patch(
             "backend.licensing.module_loader.get_config",
@@ -407,10 +433,19 @@ class TestDownloadAndCacheModule:
         assert result is True
         save_cache.assert_called_once()
         load_module.assert_called_once()
-        # .so file should exist at the final path.
+        # The extracted .so should exist, with its locales/ catalog beside it.
         kwargs = save_cache.call_args.kwargs
-        assert os.path.exists(kwargs["file_path"])
+        so_path = kwargs["file_path"]
+        assert os.path.exists(so_path)
+        assert so_path.endswith((".so", ".pyd"))
+        assert os.path.exists(
+            os.path.join(
+                os.path.dirname(so_path), "locales", "de", "LC_MESSAGES", "m.mo"
+            )
+        )
         assert kwargs["version"] == "1.2.3"
+        # The downloaded tarball is removed after extraction (sole artifact = .so dir).
+        assert not (modules_path / "m.tmp").exists()
 
     @pytest.mark.asyncio
     async def test_network_error_returns_false_and_cleans_temp(self, tmp_path):

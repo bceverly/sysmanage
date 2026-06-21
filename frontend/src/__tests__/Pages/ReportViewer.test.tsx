@@ -27,12 +27,27 @@ vi.mock('../../Services/api', () => ({
   },
 }));
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, fallback?: string) => fallback || key,
-  }),
-}));
+// Mock react-i18next.  ``t`` MUST be a stable reference across renders (as the
+// real react-i18next ``t`` is) — ReportViewer puts ``t`` in a useCallback dep
+// that an effect depends on, so a fresh ``t`` per render would loop the effect.
+vi.mock('react-i18next', () => {
+  const t = (
+    key: string,
+    fallback?: string,
+    opts?: Record<string, unknown>,
+  ) => {
+    let out = fallback || key;
+    if (opts) {
+      for (const [name, value] of Object.entries(opts)) {
+        out = out.replace(`{{${name}}}`, String(value));
+      }
+    }
+    return out;
+  };
+  return {
+    useTranslation: () => ({ t }),
+  };
+});
 
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {

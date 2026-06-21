@@ -72,7 +72,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
     } catch (err) {
       console.error('Error loading dashboard preferences:', err);
       const error = err as { response?: { data?: { detail?: string } } };
-      setError(error.response?.data?.detail || 'Failed to load preferences');
+      setError(error.response?.data?.detail || t('dashboard.settings.loadError', 'Failed to load preferences'));
       // Default to all visible on error
       setCards(
         availableCards.map((card) => ({
@@ -124,7 +124,7 @@ const DashboardSettingsDialog: React.FC<DashboardSettingsDialogProps> = ({
     } catch (err) {
       console.error('Error saving dashboard preferences:', err);
       const error = err as { response?: { data?: { detail?: string } } };
-      setError(error.response?.data?.detail || 'Failed to save preferences');
+      setError(error.response?.data?.detail || t('dashboard.settings.saveError', 'Failed to save preferences'));
     } finally {
       setSaving(false);
     }
