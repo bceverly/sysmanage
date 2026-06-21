@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -78,10 +78,12 @@ VENV := .venv
 ifeq ($(OS),Windows_NT)
     PYTHON := python
     PIP := pip
+    SEMGREP := semgrep
     VENV_ACTIVATE := $(VENV)/Scripts/activate
 else
     PYTHON := $(VENV)/bin/python
     PIP := $(VENV)/bin/pip
+    SEMGREP := $(VENV)/bin/semgrep
     VENV_ACTIVATE := $(VENV)/bin/activate
 endif
 
@@ -1061,6 +1063,37 @@ security-upgrades: $(VENV_ACTIVATE)
 security-full: security-python security-frontend security-secrets
 	@echo "[OK] Comprehensive security analysis completed!"
 
+# Semgrep registry packs run locally.  These mirror the CI Semgrep finding set
+# closely enough to self-verify before pushing — crucially including
+# ``p/trailofbits`` (e.g. tarfile-extractall-traversal), which the basic packs
+# omit and which the cloud Pro scan flags.  The dynamic-urllib / tainted-* rules
+# live in p/default + p/security-audit.  Exact-rule parity with the cloud Pro
+# engine (interfile taint) still needs SEMGREP_APP_TOKEN, handled below.
+SEMGREP_CONFIGS := --config=p/default --config=p/security-audit --config=p/trailofbits \
+	--config=p/python --config=p/javascript --config=p/typescript --config=p/react \
+	--config=p/django --config=p/flask --config=p/owasp-top-ten
+
+# Run Semgrep LOCALLY from the venv (auto-installs it if missing), so the
+# pre-push self-check matches what the cloud scan reports — no round-trip.
+# With SEMGREP_APP_TOKEN set it runs ``semgrep ci`` (Pro engine, same as CI);
+# without, it runs the registry packs above.  Informational (never aborts the
+# security chain); honors inline ``# nosemgrep`` either way.
+security-semgrep: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import semgrep" 2>/dev/null || $(PIP) install --quiet semgrep
+	@echo "Running Semgrep static analysis (local venv)..."
+	@echo "Tip: export SEMGREP_APP_TOKEN to run the same Pro engine as CI."
+ifeq ($(OS),Windows_NT)
+	-@if defined SEMGREP_APP_TOKEN ($(SEMGREP) ci) else ($(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) .) || echo "Semgrep scan completed"
+else
+	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
+		echo "Using Semgrep CI (Pro rules + supply chain)..."; \
+		$(SEMGREP) ci || true; \
+	else \
+		echo "Using local registry packs (set SEMGREP_APP_TOKEN for Pro parity)..."; \
+		$(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) . || true; \
+	fi
+endif
+
 # Python security analysis (Bandit + Safety)
 security-python: $(VENV_ACTIVATE)
 	@echo "=== Python Security Analysis ==="
@@ -1071,19 +1104,7 @@ else
 	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ || true
 endif
 	@echo ""
-	@echo "Running Semgrep static analysis..."
-	@echo "Tip: Export SEMGREP_APP_TOKEN for access to Pro rules and supply chain analysis"
-ifeq ($(OS),Windows_NT)
-	-@if defined SEMGREP_APP_TOKEN (semgrep ci) else (semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten") || echo "Semgrep scan completed"
-else
-	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
-		echo "Using Semgrep CI with supply chain analysis..."; \
-		semgrep ci || true; \
-	else \
-		echo "Using basic Semgrep scan (set SEMGREP_APP_TOKEN for supply chain analysis)..."; \
-		semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || true; \
-	fi
-endif
+	@$(MAKE) security-semgrep
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
