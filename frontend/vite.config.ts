@@ -138,7 +138,13 @@ export default defineConfig({
   // Development-specific settings
   define: {
     // Suppress some common development warnings
-    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production')
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
+    // Build-time stamp appended to /locales fetch URLs as a cache-buster.
+    // Without it the browser serves a stale /locales/<lng>/translation.json
+    // (identical URL) after `make translate` + redeploy, so updated strings
+    // never appear until a manual hard-refresh.  A fresh value each build
+    // forces i18next-http-backend to re-fetch the current catalog.
+    __LOCALE_BUILD_ID__: JSON.stringify(String(Date.now()))
   },
   server: {
     // Use config-driven host and port with environment variable overrides
