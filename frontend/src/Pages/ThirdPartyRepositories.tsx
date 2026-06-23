@@ -636,7 +636,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleEnableSelected}
                     disabled={!canEnable || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.enableSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.enableSelected', 'Enable Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
                 <Button
                     variant="contained"
@@ -645,7 +645,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleDisableSelected}
                     disabled={!canDisable || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.disableSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.disableSelected', 'Disable Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
                 <Button
                     variant="contained"
@@ -654,7 +654,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleDeleteSelected}
                     disabled={!canDelete || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.deleteSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.deleteSelected', 'Delete Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
             </Box>
 

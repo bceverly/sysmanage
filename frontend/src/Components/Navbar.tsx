@@ -299,17 +299,18 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
-            {serverRole === 'repository' && (
-              <li className="nav__item">
-                <NavLink
-                  to="/airgap/repositories"
-                  className="nav__link"
-                  onClick={closeMenuOnMobile}
-                >
-                  {t('nav.airgapRepositories', 'Air-Gap Repos')}
-                </NavLink>
-              </li>
-            )}
+            {serverRole === 'repository' &&
+              activeLicenseModules.includes('airgap_repository_engine') && (
+                <li className="nav__item">
+                  <NavLink
+                    to="/airgap/repositories"
+                    className="nav__link"
+                    onClick={closeMenuOnMobile}
+                  >
+                    {t('nav.airgapRepositories', 'Air-Gap Repos')}
+                  </NavLink>
+                </li>
+              )}
             {serverRole === 'collector' &&
               activeLicenseModules.includes('airgap_collector_engine') && (
                 <li className="nav__item">

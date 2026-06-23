@@ -270,10 +270,11 @@ const Settings: React.FC = () => {
         id: 'airgap-bundles',
         labelKey: 'airgapBundles.tabLabel',
         labelDefault: 'Air-Gap Bundles',
-        // Multi-OS bundle generation is a Pro+ feature.  Hides on
-        // Community edition since the Docker-per-distro workflow is
-        // explicitly part of the Pro+ value proposition.
-        requiresLicense: true,
+        // Air-gap is an ENTERPRISE feature (features.py: AIRGAP_* live in the
+        // Enterprise tier, paired with the airgap_collector_engine). Gate on
+        // that engine so the tab hides on Community AND Professional — a bare
+        // ``requiresLicense`` leaked it onto Professional, which has no air-gap.
+        moduleRequired: 'airgap_collector_engine',
       },
       {
         id: 'repository-mirroring',

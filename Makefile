@@ -1540,8 +1540,8 @@ test-vite: test-typescript
 test-e2e: $(VENV_ACTIVATE)
 	@echo "=== Running Frontend E2E Tests (Playwright) ==="
 ifeq ($(OS),Windows_NT)
-	@echo "[INFO] Starting backend API server..."
-	@start /B $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1
+	@echo "[INFO] Starting backend API server (single-tenant for e2e)..."
+	@start /B cmd /c "set SYSMANAGE_MULTITENANCY=false && $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1"
 	@echo "[INFO] Waiting for backend to be ready..."
 	@powershell -Command "Start-Sleep -Seconds 5"
 	@echo "[INFO] Starting frontend dev server on port 5173..."
@@ -1560,7 +1560,7 @@ else
 	else \
 		mkdir -p logs; \
 		echo "[INFO] Creating E2E test user..."; \
-		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
+		. $(VENV_ACTIVATE) && SYSMANAGE_MULTITENANCY=false $(PYTHON) scripts/e2e_test_user.py create; \
 		echo "[INFO] Checking for port conflicts..."; \
 		if lsof -ti:8080 >/dev/null 2>&1; then \
 			echo "[INFO] Killing process on port 8080..."; \
@@ -1572,15 +1572,15 @@ else
 			lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
 			sleep 1; \
 		fi; \
-		echo "[INFO] Starting backend API server (email disabled for e2e)..."; \
-		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
+		echo "[INFO] Starting backend API server (email disabled, single-tenant for e2e)..."; \
+		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true SYSMANAGE_MULTITENANCY=false nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
 		BACKEND_PID=$$!; \
 		echo "[INFO] Backend PID: $$BACKEND_PID"; \
 		echo "$$BACKEND_PID" > logs/backend-e2e.pid; \
 		echo "[INFO] Waiting for backend to be ready on port 8080 (may take up to 2 minutes)..."; \
 		BACKEND_READY=0; \
 		for i in $$(seq 1 45); do \
-			if curl -s http://localhost:8080/api/health > /dev/null 2>&1; then \
+			if curl -s http://127.0.0.1:8080/api/health > /dev/null 2>&1; then \
 				echo "[INFO] Backend is ready!"; \
 				BACKEND_READY=1; \
 				break; \
@@ -1594,13 +1594,13 @@ else
 			exit 1; \
 		fi; \
 		echo "[INFO] Starting frontend dev server on port 3000..."; \
-		cd frontend && FORCE_HTTP=true npm start > ../logs/frontend-e2e.log 2>&1 & \
+		cd frontend && FORCE_HTTP=true VITE_HOST=127.0.0.1 npm start > ../logs/frontend-e2e.log 2>&1 & \
 		VITE_PID=$$!; \
 		echo "[INFO] Frontend dev server PID: $$VITE_PID"; \
 		echo "$$VITE_PID" > logs/frontend-e2e.pid; \
 		echo "[INFO] Waiting for frontend to be ready on port 3000..."; \
 		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do \
-			if curl -s http://localhost:3000 > /dev/null 2>&1; then \
+			if curl -s http://127.0.0.1:3000 > /dev/null 2>&1; then \
 				echo "[INFO] Frontend is ready!"; \
 				break; \
 			fi; \
@@ -1609,7 +1609,7 @@ else
 		done; \
 		echo "[INFO] Running E2E tests..."; \
 		E2E_EXIT=0; \
-		(cd frontend && PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e) || E2E_EXIT=$$?; \
+		(cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e) || E2E_EXIT=$$?; \
 		echo "[INFO] Stopping frontend dev server (PID: $$VITE_PID)..."; \
 		kill $$VITE_PID 2>/dev/null || true; \
 		if [ -f logs/frontend-e2e.pid ]; then kill $$(cat logs/frontend-e2e.pid) 2>/dev/null || true; fi; \

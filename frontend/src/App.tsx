@@ -47,6 +47,7 @@ import SiteDetail from './Pages/SiteDetail';
 import SitesMap from './Pages/SitesMap';
 import SitesTiles from './Pages/SitesTiles';
 import Logout from './Pages/Logout';
+import LicensedRoute from './Components/LicensedRoute';
 import { PluginProvider, usePlugins } from './plugins';
 
 function AppRoutes() {
@@ -70,18 +71,21 @@ function AppRoutes() {
       <Route path="/reports/:reportId" element={<ReportViewer />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/airgap/repositories" element={<AirgapRepositories />} />
-      <Route path="/airgap/collections" element={<AirgapCollections />} />
+      {/* Air-gap and federation pages are ENTERPRISE-only — guard the routes so
+          they're unreachable by direct URL on a license that lacks the engine
+          (defence-in-depth on top of the nav-level gating). */}
+      <Route path="/airgap/repositories" element={<LicensedRoute module="airgap_repository_engine"><AirgapRepositories /></LicensedRoute>} />
+      <Route path="/airgap/collections" element={<LicensedRoute module="airgap_collector_engine"><AirgapCollections /></LicensedRoute>} />
       <Route path="/map" element={<MapView />} />
-      <Route path="/sites" element={<Sites />} />
+      <Route path="/sites" element={<LicensedRoute module="federation_controller_engine"><Sites /></LicensedRoute>} />
       {/* ``/sites/map`` is listed BEFORE the dynamic ``:siteId``
           variant so react-router prefers the literal match. */}
-      <Route path="/sites/map" element={<SitesMap />} />
-      <Route path="/sites/tiles" element={<SitesTiles />} />
-      <Route path="/sites/:siteId" element={<SiteDetail />} />
-      <Route path="/audit/federation" element={<FederationAuditLog />} />
-      <Route path="/federation/hosts" element={<FederationHosts />} />
-      <Route path="/federation/policies" element={<FederationPolicies />} />
+      <Route path="/sites/map" element={<LicensedRoute module="federation_controller_engine"><SitesMap /></LicensedRoute>} />
+      <Route path="/sites/tiles" element={<LicensedRoute module="federation_controller_engine"><SitesTiles /></LicensedRoute>} />
+      <Route path="/sites/:siteId" element={<LicensedRoute module="federation_controller_engine"><SiteDetail /></LicensedRoute>} />
+      <Route path="/audit/federation" element={<LicensedRoute module="federation_controller_engine"><FederationAuditLog /></LicensedRoute>} />
+      <Route path="/federation/hosts" element={<LicensedRoute module="federation_controller_engine"><FederationHosts /></LicensedRoute>} />
+      <Route path="/federation/policies" element={<LicensedRoute module="federation_controller_engine"><FederationPolicies /></LicensedRoute>} />
       <Route path="/logout" element={<Logout />} />
       {routes.map(route => (
         <Route
@@ -153,6 +157,21 @@ function App() {
         styleOverrides: (themeParam) => ({
           body: themeParam.palette.mode === 'dark' ? darkScrollbar() : null,
         }),
+      },
+      MuiButton: {
+        styleOverrides: {
+          // i18n: translated labels run 30-50% longer than English
+          // (German/French/Spanish), so a fixed/nowrap button clips the text
+          // or pushes past its container.  Let the button grow to its content
+          // and wrap onto a second line instead, capped at the container width
+          // so it can never overflow horizontally.
+          root: {
+            whiteSpace: 'normal',
+            overflowWrap: 'anywhere',
+            maxWidth: '100%',
+            lineHeight: 1.3,
+          },
+        },
       },
     },
   });

@@ -32,6 +32,7 @@ import {
   TrustedCollectorsCard,
 } from './AirgapKeyManagement';
 import FederationRoleCard from './FederationRoleCard';
+import { refreshLicenseCache, isModuleLicensed } from '../Services/license';
 
 type ServerRole = 'standard' | 'collector' | 'repository';
 
@@ -51,6 +52,31 @@ const ServerRoleSettings: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<ServerRole>('standard');
   const [error, setError] = useState<string | null>(null);
   const [snackOpen, setSnackOpen] = useState(false);
+
+  // Air-gap (collector/repository) and federation are ENTERPRISE features.
+  // Resolve their licensing so we never offer a role — or render the federation
+  // card — that this license can't actually use.  Default false: a Professional
+  // box sees only the always-applicable "Standard" role and no federation card.
+  const [airgapCollectorLicensed, setAirgapCollectorLicensed] = useState(false);
+  const [airgapRepositoryLicensed, setAirgapRepositoryLicensed] = useState(false);
+  const [federationLicensed, setFederationLicensed] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    refreshLicenseCache()
+      .then(() => {
+        if (cancelled) return;
+        setAirgapCollectorLicensed(isModuleLicensed('airgap_collector_engine'));
+        setAirgapRepositoryLicensed(isModuleLicensed('airgap_repository_engine'));
+        setFederationLicensed(isModuleLicensed('federation_controller_engine'));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAirgapCollectorLicensed(false);
+        setAirgapRepositoryLicensed(false);
+        setFederationLicensed(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const fetchRole = useCallback(async () => {
     setLoading(true);
@@ -126,6 +152,16 @@ const ServerRoleSettings: React.FC = () => {
     },
   ];
 
+  // Standard is always offered; the air-gap roles only appear when their
+  // (Enterprise) engine is licensed — we don't show a role the operator
+  // can't actually run.
+  const visibleRoleOptions = roleOptions.filter(
+    (opt) =>
+      opt.value === 'standard' ||
+      (opt.value === 'collector' && airgapCollectorLicensed) ||
+      (opt.value === 'repository' && airgapRepositoryLicensed),
+  );
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -168,7 +204,7 @@ const ServerRoleSettings: React.FC = () => {
           value={selectedRole}
           onChange={(e) => setSelectedRole(e.target.value as ServerRole)}
         >
-          {roleOptions.map((opt) => (
+          {visibleRoleOptions.map((opt) => (
             <Box
               key={opt.value}
               sx={{
@@ -246,10 +282,14 @@ const ServerRoleSettings: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* Right card: federation role (independent axis). */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FederationRoleCard />
-        </Grid>
+        {/* Right card: federation role (independent axis). Federation is an
+            ENTERPRISE feature, so the card only appears when its engine is
+            licensed — a Professional user is never offered Coordinator/Site. */}
+        {federationLicensed && (
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FederationRoleCard />
+          </Grid>
+        )}
       </Grid>
 
       <Snackbar

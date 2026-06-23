@@ -78,6 +78,24 @@ function loadConfig(): any {
 // Load configuration
 const config = loadConfig();
 
+// A backend may *bind* to a wildcard address (0.0.0.0 / ::) to listen on every
+// interface, but those are NOT valid *connect* targets for the dev-proxy client
+// — connecting to http://0.0.0.0:PORT is refused on Linux. Normalize wildcard
+// hosts to localhost so `/api` proxy requests actually reach the backend.
+// (Without this, an ``api.host: 0.0.0.0`` config silently breaks every proxied
+// request — e.g. the login POST fails with a network error and the UI just
+// sits on /login.)
+const proxyConnectHost = (h?: string): string => {
+  const v = (h || '').trim();
+  // IPv4 wildcard (and empty/default) -> IPv4 loopback; IPv6 wildcard -> IPv6
+  // loopback. Using a loopback that matches the bind family avoids the case
+  // where ``localhost`` resolves to ::1 while the backend bound 0.0.0.0 (IPv4
+  // only) and the proxy connection is refused.
+  if (v === '' || v === '0.0.0.0' || v === '0') return '127.0.0.1';
+  if (v === '::' || v === '[::]') return '::1';
+  return v;
+};
+
 // Determine SSL/HTTPS configuration dynamically
 const forceHTTP = process.env.FORCE_HTTP === 'true';
 const certPath = path.resolve(process.env.HOME || '', 'dev/certs/sysmanage.org');
@@ -180,7 +198,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: `http://${
-          process.env.VITE_BACKEND_HOST || config?.api?.host || 'localhost'
+          proxyConnectHost(process.env.VITE_BACKEND_HOST || config?.api?.host)
         }:${
           process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
         }`,
@@ -205,7 +223,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: `http://${
-          process.env.VITE_BACKEND_HOST || config?.api?.host || 'localhost'
+          proxyConnectHost(process.env.VITE_BACKEND_HOST || config?.api?.host)
         }:${
           process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
         }`,

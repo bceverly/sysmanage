@@ -467,13 +467,24 @@ class ModuleLoader:
         The bundle is a ``.tar.gz`` of ``<code>.so`` + ``locales/`` + metadata;
         extracting it puts ``locales/`` next to the ``.so`` so the loader can
         bind the module's gettext catalog.  Extraction is path-traversal-safe
-        (every member must resolve inside the target dir).  The tarball is
-        removed afterwards.  Returns None on any failure."""
+        (every member must resolve inside the target dir).
+
+        The bundle is staged into a sibling ``<dir>.incoming`` directory and
+        only swapped into the live per-version dir once it is fully extracted
+        AND proven to contain a compiled module.  A corrupt, truncated or
+        wrong-format download (e.g. the server handing back a bare ``.so``
+        instead of a gzip bundle) therefore leaves any previously-working
+        install intact instead of wiping it — a failed update must never
+        degrade a module that was already loading.  The tarball and any staging
+        dir are removed afterwards.  Returns None on any failure."""
         module_dir = os.path.join(modules_path, f"{module_code}_{pyver}")
+        staging_dir = module_dir + ".incoming"
         try:
-            shutil.rmtree(module_dir, ignore_errors=True)
-            os.makedirs(module_dir, exist_ok=True)
-            dest_root = os.path.realpath(module_dir)
+            # Stage into a sibling dir; the live module_dir is not touched until
+            # the new bundle is proven good (see the swap below).
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            os.makedirs(staging_dir, exist_ok=True)
+            dest_root = os.path.realpath(staging_dir)
             with tarfile.open(bundle_path, "r:gz") as tar:
                 # Extract one validated member at a time (NOT extractall): each
                 # member's resolved path must stay inside dest_root, and the
@@ -492,15 +503,43 @@ class ModuleLoader:
                         )
                         return None
                     tar.extract(member, dest_root, filter="data")
-            for name in sorted(os.listdir(module_dir)):
-                if name.endswith((".so", ".pyd")):
-                    return os.path.join(module_dir, name)
-            logger.error("No compiled module (.so/.pyd) in bundle for %s", module_code)
-            return None
+
+            so_name = next(
+                (
+                    n
+                    for n in sorted(os.listdir(staging_dir))
+                    if n.endswith((".so", ".pyd"))
+                ),
+                None,
+            )
+            if so_name is None:
+                logger.error(
+                    "No compiled module (.so/.pyd) in bundle for %s", module_code
+                )
+                return None
+
+            # The new bundle is good — atomically swap it into place.  Renaming
+            # onto a non-empty dir fails on POSIX, so move the live dir aside
+            # first, slot the new one in, then drop the old.  If the swap-in
+            # fails, restore the old dir so we never leave a missing install.
+            backup_dir = module_dir + ".old"
+            shutil.rmtree(backup_dir, ignore_errors=True)
+            had_existing = os.path.exists(module_dir)
+            if had_existing:
+                os.rename(module_dir, backup_dir)
+            try:
+                os.rename(staging_dir, module_dir)
+            except OSError:
+                if had_existing:
+                    os.rename(backup_dir, module_dir)
+                raise
+            shutil.rmtree(backup_dir, ignore_errors=True)
+            return os.path.join(module_dir, so_name)
         except (tarfile.TarError, OSError) as exc:
             logger.exception("Failed to extract module bundle %s: %s", module_code, exc)
             return None
         finally:
+            shutil.rmtree(staging_dir, ignore_errors=True)
             if os.path.exists(bundle_path):
                 os.remove(bundle_path)
 

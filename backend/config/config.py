@@ -505,7 +505,17 @@ def is_multitenancy_enabled() -> bool:
     When False (the default for homelab / on-prem / federated installs),
     the control-plane API does not mount and the partition resolver is
     hardwired to the single engine — behavior is identical to today.
+
+    The ``SYSMANAGE_MULTITENANCY`` env var, when set, overrides
+    ``sysmanage.yaml`` entirely — any explicit value wins. This is the escape
+    hatch the e2e harness uses to force single-tenant mode
+    (``SYSMANAGE_MULTITENANCY=false``) regardless of the box's config, so the
+    Playwright suite never needs OpenBAO or provisioned tenant DBs. Mirrors the
+    ``SYSMANAGE_DISABLE_EMAIL`` override used by the same harness.
     """
+    override = os.environ.get("SYSMANAGE_MULTITENANCY")
+    if override is not None:
+        return override.strip().lower() in ("1", "true", "yes", "on")
     return bool(config.get("multitenancy", {}).get("enabled", False))
 
 

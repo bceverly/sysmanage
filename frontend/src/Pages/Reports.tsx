@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import FederationReportPanel from '../Components/FederationReportPanel';
+import { refreshLicenseCache, isModuleLicensed } from '../Services/license';
 
 import {
   Box,
@@ -170,10 +171,29 @@ const Reports: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // Tab names for URL hash
+  // Federation is an ENTERPRISE feature (features.py: FEDERATION_* live in the
+  // Enterprise tier, owned by federation_controller_engine). The Federation
+  // reports tab must NOT show to a Professional/Community user — we shouldn't
+  // surface a feature they aren't licensed for. Gate on that engine being
+  // licensed; default hidden until the license cache resolves.
+  const [federationLicensed, setFederationLicensed] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    refreshLicenseCache()
+      .then(() => {
+        if (!cancelled) setFederationLicensed(isModuleLicensed('federation_controller_engine'));
+      })
+      .catch(() => {
+        if (!cancelled) setFederationLicensed(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Tab names for URL hash — federation only present when licensed, so its
+  // hash/index stay consistent with what's actually rendered.
   const tabNames = useMemo(
-    () => ['hosts', 'users', 'security', 'federation'],
-    [],
+    () => ['hosts', 'users', 'security', ...(federationLicensed ? ['federation'] : [])],
+    [federationLicensed],
   );
 
   // Initialize tab from URL hash
@@ -393,7 +413,9 @@ const Reports: React.FC = () => {
             <Tab label={t('reports.tabs.hosts', 'Hosts')} />
             <Tab label={t('reports.tabs.users', 'Users')} />
             <Tab label={t('reports.tabs.security', 'Security')} />
-            <Tab label={t('reports.tabs.federation', 'Federation')} />
+            {federationLicensed && (
+              <Tab label={t('reports.tabs.federation', 'Federation')} />
+            )}
           </Tabs>
         </Box>
 
@@ -559,9 +581,11 @@ const Reports: React.FC = () => {
           )}
         </TabPanel>
 
-        <TabPanel value={tabValue} index={3}>
-          <FederationReportPanel />
-        </TabPanel>
+        {federationLicensed && (
+          <TabPanel value={tabValue} index={3}>
+            <FederationReportPanel />
+          </TabPanel>
+        )}
       </Box>
     </div>
   );

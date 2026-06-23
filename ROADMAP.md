@@ -3238,23 +3238,21 @@ cannot grow; this phase pays the residual down to zero.
      non-English users see English plan descriptions in command
      logs.
 
-     **Pattern landed on ``airgap_collector_engine``:** every
-     emitted command now carries both the legacy English
-     ``description`` (back-compat) and a
-     ``{description_key, description_params}`` envelope.  The
-     frontend resolver does
-     ``t(cmd.description_key, cmd.description_params)`` and falls
-     back to ``cmd.description`` when the key isn't yet in the
-     locale catalog — which means engines can be migrated one at a
-     time without coordinating a flag-day cutover.
+     **SUPERSEDED (2026-06-22) — the ``{key, params}`` envelope below
+     was retired in favour of Model A gettext.**  The envelope approach
+     (engine emits ``{description_key, description_params}``; frontend
+     resolves via ``t(...)``) was built on ``airgap_collector_engine`` but
+     its frontend resolver was never wired into any page, so the keys
+     never rendered.  Because command-plan descriptions only ever display
+     to the operator who built the plan (never cross-language), they're
+     now translated server-side at plan-build time via each engine's own
+     gettext catalog (``_()`` + ``set_translator`` injected by the module
+     loader).  See the §12.8 acceptance item for the conversion details.
 
-     ``engine.`` is in ``DYNAMIC_KEY_PREFIXES`` so the validator
-     accepts any engine adopting the same
-     ``engine.<engine_name>.cmd.<verb>`` namespace.  15 collector
-     engine command-description keys are seeded across all 14
-     locales as the reference implementation; the remaining ~345
-     strings across 16 engines follow the same pattern
-     incrementally.
+     (Historical: the ``engine.<engine_name>.cmd.<verb>`` keys lived in
+     OSS ``translation.json`` under the ``engine.`` ``DYNAMIC_KEY_PREFIXES``
+     entry.  All 253 such keys were removed when the envelope was retired;
+     the strings now live in each engine's bundled gettext catalog.)
 
 **Local-model translation tooling — ✅ Landed (June 2026).**  Rather
 than a paid SaaS translator, the pipeline runs against a **local,
@@ -3328,29 +3326,48 @@ above for cost/sovereignty; retained as the fallback option):**
 
 **Acceptance criteria:**
 
-- [ ] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
-      all 14 locales. *(NOT done — a 2026-06 code audit found ~461
-      ``[TODO]`` placeholders per non-English frontend locale (~6k strings)
-      still pending.  The translate tooling exists but the drain pass was
-      never run; the earlier ``[x]`` (autonomous pass 2026-05-08) was an
-      over-claim.  This is the main outstanding 12.8 work.)*
+- [x] OSS: zero ``[TODO] ``/``[MISSING:]`` prefixed values across
+      all 14 locales. *(Done 2026-06-22 — drained via the local GPU
+      translation service (``make translate``).  Frontend: full hardcoded-string
+      audit (~110 strings wrapped) + drain → **0 ``[TODO]`` / 0 ``[MISSING:]``**
+      across all 13 non-en locales; the final 39 were 3 ``thirdPartyRepos.*Selected``
+      bulk-action keys called with no fallback — given inline English +
+      ``{{count}}`` and translated.  Backend ``.po``: 0 gaps.  Verified by
+      ``translate-check`` + ``i18n_validate`` + placeholder-integrity check.
+      Supersedes the reverted 2026-05-08 over-claim.)*
 - [x] Agent: empty msgstrs filled across all 14 locales with
       format-spec safety.  ``_strip_fuzzy_block`` guard prevents
       regression. *(autonomous pass, sub-agent B)*
 - [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
       attribute (10,700+ elements to tag).
-- [ ] Docs: long-form-paragraph passthrough closed via translation
-      service (Crowdin/Weblate/DeepL/GCT pipeline).
+- [x] Docs: long-form-paragraph passthrough closed via the **local GPU
+      translation service** (June 2026; replaced the SaaS Crowdin/DeepL/GCT
+      plan).  All 13 non-en docs locales at **0 gaps** (``make translate-check``),
+      including the federation & air-gap long-form bodies that were English
+      passthroughs.  Token/HTML-tag-preserving acceptance (accepts identical
+      results for pure markup/code/path strings; re-translates anything that
+      drops a ``<tag>``/``{placeholder}``).
 - [ ] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
       triaged for debug-breadcrumb removal.
-- [~] Pro+ engines: plan descriptions converted to ``{key, params}``
-      envelope form; key catalog populated in OSS + Pro+ locales.
-      Pattern landed on ``airgap_collector_engine`` (15 keys in
-      all 14 locales, 5 envelope tests pass).  Remaining 16
-      engines are an incremental migration — engines adopt the
-      envelope when next touched; OSS frontend already resolves
-      keys when present, falls back to legacy ``description``
-      when not.
+- [x] Pro+ engines: plan descriptions localized via **Model A
+      gettext** (server-side, at plan-build time), NOT the
+      ``{key, params}`` envelope.  *(Decision 2026-06-22 — command-plan
+      descriptions never cross languages: they render in the language of
+      the operator who built the plan, so deferring translation to the
+      frontend bought nothing.  The envelope was dead scaffolding — its
+      frontend resolver (`resolveCommandDescription`) was never wired into
+      any page in ~a year, and its 253 ``engine.*.cmd.*`` keys sat
+      unrendered in OSS ``translation.json``.)  Retired the envelope and
+      collapsed onto Model A: deleted the dead resolver + 253 OSS keys;
+      converted all **373 command-description sites across 10 engines** to
+      ``_()`` (f-strings rewritten to ``_("... {x} ...").format(x=...)`` so
+      xgettext sees stable msgids); 3 formerly envelope-only engines
+      (airgap_collector / airgap_repository / repository_mirroring) now
+      ship gettext catalogs.  Source code-complete + validated (cython
+      exit-0 on all 10, catalogs extract/compile clean, all 10 versions
+      bumped).  **Pending:** ``make translate-modules`` (GPU) to fill the
+      13 non-en catalogs, then build/package/register/update.  Strings now
+      live in the licensed bundle, not OSS (moat-aligned).*
 - [ ] Native-speaker QA pass on the autonomous LLM translations to
       tighten domain-specific terminology (sysmanage / child host /
       Pro+ / mirror / hypervisor lexicon).
@@ -4177,6 +4194,14 @@ plan-builder + UI integration.
 > - **Customer-owned SSO** (per-tenant Entra/Okta/OIDC/SAML + JIT/SCIM) and
 >   **enforced, time-boxed vendor-support grants** tied to credential issuance (no
 >   grant → no DB lease).
+> - **Per-tenant edition** — each tenant is independently assigned a **Community /
+>   Professional / Enterprise** feature surface *from the control plane*; module &
+>   feature gating resolves against the **tenant's** edition (via the active-tenant
+>   context), not one global license tier. A central **Platform Operator** role
+>   ("master of tenants") at the registry level owns tenant lifecycle (create/destroy
+>   as customers join/leave) and edition up/down-grades. Resolution + operator
+>   authorization live in the licensed `multitenancy_engine` (moat); the
+>   `edition`/`status` columns live in the OSS registry schema.
 > - **Air-gap appliance invariant:** air-gapped (`repository`-role) deployments are
 >   **single-tenant + single local DB + local OpenBAO + no federation** — multi-tenancy
 >   (needs external SSO) and federation are not supported there, enforced by a startup
@@ -4269,6 +4294,28 @@ plan-builder + UI integration.
       keep `scripts/build-openbao.sh` (source build) as the OpenBSD default. Until
       verified, OpenBSD continues to use the source-build path. (Bryan to run on
       real OpenBSD hardware.)
+- [ ] **13.1.J** Per-tenant edition & central tenant administration ("master of
+      tenants") — **corrects the GA assumption that every tenant runs Enterprise.**
+      Each tenant is operator-assigned an independent **Community / Professional /
+      Enterprise** feature surface.
+      - **Registry schema (OSS):** `registry_tenant` gains `edition`
+        (`community`|`professional`|`enterprise`) + lifecycle `status`
+        (`active`|`suspended`|`deprovisioning`) columns (registry Alembic migration;
+        default `enterprise` so existing SaaS tenants are unchanged on upgrade).
+      - **Per-tenant gating:** drive `get_modules_for_tier` / `get_features_for_tier`
+        from the **active tenant's** edition rather than the single global license
+        tier — downgraded engines 402-clean and hide their UI for that tenant;
+        upgrades light up without redeploy (the cache-first module loader stays
+        per-tenant-edition aware).
+      - **Platform Operator role (control-plane):** a central identity *above* any
+        single tenant (distinct from tenant admins) authorized to CRUD tenants,
+        assign/change a tenant's edition (up/down-grade), suspend/resume, and
+        provision/deprovision the tenant DB + OpenBAO (extends **13.1.C**
+        self-service provisioning), with data export/retention on destroy.
+      - **Moat:** edition-resolution + Platform-Operator authorization logic lives in
+        the licensed `multitenancy_engine`; only the schema/columns stay OSS.
+      - **Frontend:** extend the `/tenants` control-plane page with an edition
+        selector + lifecycle actions, gated to Platform Operator; i18n the new strings.
 
 #### 13.2 API Completeness
 
@@ -4572,6 +4619,29 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 **Estimated Size:** ~3,000 lines
 
+#### 20.3 Endpoint Fact Substrate — osquery (Community substrate · Professional management)
+
+osquery embedded as the agent-side fact/state collection substrate — **the one
+EDR-adjacent tool we embed rather than integrate** (Apache-2.0, so it's clean to
+ship inside a proprietary product). It's a force-multiplier for engines we already
+have: collection breadth without writing per-OS collectors. Consistent with the
+governing principle — **we are the management/remediation plane; raw collection is
+not the moat.**
+
+- [ ] Agent embeds + lifecycle-manages `osqueryd`; results flow up the existing
+      store-and-forward queue (opt-in; air-gap-clean, no phone-home) —
+      **Community Edition** (better inventory drives adoption funnel)
+- [ ] Curated, versioned **query packs** distributed as multi-tenant policy
+      (per host/tag/site); scheduled collection + ad-hoc fleet-wide live query —
+      **Professional** (this management plane is the value)
+- [ ] Wire osquery tables into the consuming engines — `compliance_engine` (CIS),
+      `vuln_engine` (installed packages / listening ports), `fleet_engine`, and the
+      **20.2** drift baselines — each following its own tier (**Professional /
+      Enterprise**)
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,500 lines
+
 ### Exit Criteria
 
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
@@ -4603,6 +4673,41 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 - [ ] i18n/l10n
 
 **Estimated Size:** ~2,500 lines
+
+#### 21.3 Incident Response & Threat Hunting — Velociraptor integration (Enterprise)
+
+The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
+`alerting_engine` findings. SysManage stays the management/orchestration plane;
+Velociraptor provides the DFIR/live-hunt capability it does not. **Integrate over
+its API — do NOT embed** (AGPLv3, and API integration avoids the second-agent burden
+being ours).
+
+- [ ] Orchestrate Velociraptor hunts / artifact collections from a SysManage finding
+      via `automation_engine`, gated behind operator approval + maintenance windows
+- [ ] Surface hunt/collection results in the host-detail UI + alert feed
+- [ ] Customer-run Velociraptor server (connection + credentials managed per tenant);
+      air-gap-compatible
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+#### 21.4 Security Tooling Coexistence — Wazuh ingestion (Enterprise)
+
+Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
+alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
+feed — a "coexist with your incumbent HIDS/SIEM, no rip-and-replace" play. We do
+**not** build detection on Wazuh (it overlaps `vuln_engine` / `compliance_engine` /
+`av_management_engine`, is GPLv2, and is a heavy Elastic-based stack) — it is a
+one-way ingestion connector only.
+
+- [ ] Ingest Wazuh alerts / FIM events / SCA (CIS) results via the Wazuh API/indexer;
+      map to SysManage hosts (host→tenant index)
+- [ ] Feed ingested signals into `advisor_engine` correlation + `alerting_engine`;
+      surface in host detail
+- [ ] Per-tenant Wazuh endpoint config; air-gap-compatible
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,000 lines
 
 ### Exit Criteria
 
@@ -4645,15 +4750,15 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 | 10 | v2.2.0.0 | Pro+ Enterprise 3 | virtualization, observability, MFA + ~24,489 lines agent migration |
 | 11 | v2.3.0.0 | Air-Gapped Support | Dual-server architecture, optical media transfer, offline CVE |
 | 12 | v2.4.0.0 | Multi-Site Federation | Coordinator + site servers, rollup reporting, command dispatch |
-| 13 | **v3.0.0.0** | Enterprise GA | Multi-tenancy, API complete, full feature set |
+| 13 | **v3.0.0.0** | Enterprise GA | Multi-tenancy (+ per-tenant editions / "master of tenants"), API complete, full feature set |
 | 14 | v3.1.0.0 | Patch & Maintenance Lifecycle | Errata/advisory mgmt, maintenance windows, OS release-upgrade + EOL, FIPS mode |
 | 15 | v3.1.x | Stabilization | Advisory/window/release-upgrade integration testing |
 | 16 | v3.2.0.0 | Content Lifecycle Management | Content Views + Lifecycle Environments + gated promotion |
 | 17 | v3.3.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
 | 18 | v3.4.0.0 | Provisioning & Discovery | PXE/kickstart bare-metal + cloud compute provisioning, host discovery |
 | 19 | v3.4.x | Stabilization | Content lifecycle + provisioning hardening |
-| 20 | v3.5.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation |
-| 21 | v3.6.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection |
+| 20 | v3.5.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
+| 21 | v3.6.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
 | 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
 
 ---
@@ -4749,6 +4854,8 @@ of new generic deployment handlers.
 | Cloud-init | Image compatibility | Validate per distribution |
 | SonarCloud | Service availability | Local SonarQube backup |
 | Translation services | Quality variance | Professional review phase |
+| osquery (embedded) | Footprint / CVE surface inside the agent | Apache-2.0 (safe to embed); pin version, resource caps, track upstream advisories |
+| Velociraptor / Wazuh (integrated) | API/version drift; AGPL/GPL license boundary | Integrate over API only — never embed/redistribute; version-pin the connectors |
 
 ### Technical Risks
 
@@ -4827,7 +4934,7 @@ dependency the postinst needs, ready to mount on an air-gapped target.
 
 ---
 
-*Document Version: 1.2*
+*Document Version: 1.3*
 *Last Updated: June 2026*
 *Current Product Version: v1.1.0.0*
 *Based on: docs/planning/FEATURES-TODO.md, docs/planning/FEATURE-TIERING-ANALYSIS.md, docs/planning/VMM-VMD.md, docs/planning/BHYVE.md, docs/planning/KVM-QEMU.md*
