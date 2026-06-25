@@ -1333,7 +1333,7 @@
     "startedAt": "Запущено",
     "stderrOutput": "Вывод Stderr",
     "stdoutOutput": "Вывод Stdout",
-    "title": "Заголовок",
+    "title": "Скрипты",
     "update": "Обновить",
     "updateError": "Ошибка обновления",
     "updateSuccess": "Успешно обновлено",

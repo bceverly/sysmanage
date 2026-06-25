@@ -4231,6 +4231,21 @@ plan-builder + UI integration.
       tenant path now routes through it; control-plane placement CRUD + provision
       endpoint; registry `r3` adds `registry_tenant_db_version`; VaultService app-token
       file fallback; 27 new tests. End-to-end needs a live OpenBAO DB-secrets engine.)*
+- [x] **13.1.C.2** Data plane — agent→tenant binding & per-tenant queues
+      *(done June 2026: the server-side data plane that makes a provisioned tenant
+      actually own hosts and traffic. Hosts bind to a tenant at registration via a
+      tenant-scoped enrollment token (`host.py` `_resolve_enrollment_tenant` →
+      `enrollment_service.validate_and_consume`); a server-global host→tenant index
+      (`RegistryHostTenant` / `registry_host_tenant` + `host_tenant_index.bind_host_to_tenant`)
+      records ownership for the websocket/queue layer, which runs **outside** any tenant
+      request context. Host-targeted outbound messages route to the owning host's
+      **tenant** store-and-forward queue (`queue_operations.tenant_engine_for_host`), and
+      the inbound/outbound processors iterate every provisioned tenant DB
+      (`message_processor` / `inbound_processor`). Read/write API endpoints route through
+      `get_request_engine(get_active_tenant())`, collapsing to the main engine in
+      single-tenant mode. Enrollment e2e test landed (`test_tenant_enrollment_e2e.py`).
+      Agent-side token supply (config/UI) and a dedicated cross-tenant data-isolation
+      harness (13.1.F) are the remaining gaps.)*
 - [ ] **13.1.D** Shared-reference split — `shared` Alembic chain, relocate
       `shared_*` reference tables, convert cross-partition FKs to soft references,
       CI prefix guard
@@ -4253,6 +4268,17 @@ plan-builder + UI integration.
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement
       *(GA ships silo-only; pool+RLS SMB tier deferred past v3.0)*
+      *(June 2026: **data-isolation verification DONE** —
+      `tests/test_tenant_isolation.py` provisions two tenant DBs behind the real
+      routing seam and asserts no read path returns the other tenant's rows:
+      through `get_request_engine`/`request_sessionmaker`, through the real
+      `_get_all_hosts_sync` endpoint helper, through the active-tenant ContextVar,
+      through the host→tenant index (`tenant_engine_for_host`), and even when both
+      tenants hold a row with the SAME fqdn — plus a regression guard that MT-off
+      collapses to the bootstrap engine. Registration routes each host to its own
+      tenant and nothing lands in the bootstrap DB. 7 tests, OSS-CI (licensed seam
+      monkeypatched). **Remaining for F:** per-tenant backup/RPO orchestration +
+      automated restore tests, and per-account settings/limits enforcement.)*
 - [ ] **13.1.G** Config builder & deployment docs — update the installer config
       builder (`scripts/_sysmanage_secure_installation.py`) to emit the new
       `registry:` / `multitenancy:` / `secrets:` config shape with a deployment-mode
@@ -4316,6 +4342,18 @@ plan-builder + UI integration.
         the licensed `multitenancy_engine`; only the schema/columns stay OSS.
       - **Frontend:** extend the `/tenants` control-plane page with an edition
         selector + lifecycle actions, gated to Platform Operator; i18n the new strings.
+
+      *(June 2026: **OSS foundation started.** Registry schema (OSS) landed —
+      `registry_tenant.edition` (`community`|`professional`|`enterprise`, defaults
+      `enterprise` so existing tenants are unchanged) via registry migration
+      `r6registry`; `TENANT_EDITION_*` + `TENANT_STATUS_DEPROVISIONING` constants
+      added; prefix guard green. The edition-resolution **seam**
+      `backend/services/tenant_edition.edition_for_active_tenant()` is in place,
+      degrading to `None` (→ global tier) when the licensed engine is absent.
+      **Remaining:** the engine-side resolver + Platform-Operator authorization
+      (moat, in `multitenancy_engine`); wiring `feature_gate`/`get_*_for_tier` to
+      consult the active tenant's edition; control-plane edition-CRUD + lifecycle
+      endpoints; and the `/tenants` UI edition selector.)*
 
 #### 13.2 API Completeness
 
@@ -4466,11 +4504,28 @@ agent Unix/Windows handlers + license gate + tests)
 **Target Release:** v3.1.x
 **Focus:** Integration-test the advisory/window/release-upgrade paths; verify license gating on the new surfaces; i18n audit; docs.
 
+### 15.1 PostgreSQL High-Availability Support
+
+**Market gap addressed:** running the server against an HA Postgres cluster (Patroni / pg_auto_failover / Stolon) and surviving a primary failover without manual intervention.
+
+Deliberately scoped as *survive failover*, not *orchestrate it*: leader election, promotion, and split-brain protection stay in the cluster manager + a connection router (HAProxy/PgBouncer or libpq multi-host). The server must never reimplement primary discovery — that is a known anti-pattern. The work is therefore a handful of small, correct changes, not a subsystem.
+
+- [ ] **`pool_pre_ping=True` + sane `pool_recycle` on every engine** — the single most important change. After a failover the pooled connections are dead; pre-ping discards and reconnects transparently instead of handing a stale socket to the next request. Must be applied uniformly across **all** engines (registry / shared / tenant and the per-request engines from `get_request_engine()`), set once in the engine-factory helper.
+- [ ] **Stable endpoint strategy, documented not hard-coded** — support pointing the DSN at a proxy/VIP, or a libpq multi-host DSN (`host=n1,n2,n3 target_session_attrs=read-write`) so psycopg2 walks to the current primary with zero code changes. Pick one as the documented default.
+- [ ] **Bounded retry/backoff for transient `OperationalError`** at the request/unit-of-work boundary, for the few-second window during promotion when there is no primary. Idempotent/uncommitted operations only — never blindly replay a partially-applied transaction.
+- [ ] **OpenBAO DB secrets backend points at the cluster endpoint** (proxy/VIP), with the leased role present on all nodes via replication; verify a connection opened *after* failover leases fresh creds cleanly.
+- [ ] **`/api/health` reports DB connectivity** so an external LB / orchestrator can route around a server that has lost its database.
+- [ ] **Failover test** — kill the primary mid-load in CI/integration; assert the pool recovers and the retry path holds; document expected client-visible behavior during the gap.
+- [ ] Docs: reference HA topology (cluster manager + router), and state explicitly that the server does **not** do leader election. (Note: the federation coordinator already name-checks "HA via standard replication + a load balancer" — this makes the single-server case match.)
+
+**Estimated Size:** ~1,200 lines (mostly the retry wrapper, engine-factory wiring, and failover tests).
+
 ### Exit Criteria
 
 - [ ] Advisory computation validated against real USN/RHSA data per distro family
 - [ ] Maintenance-window gating verified end-to-end (queue → window open → execute)
 - [ ] All new endpoints return 402 cleanly when the gating engine is unlicensed
+- [ ] **PostgreSQL HA (15.1):** pre-ping/recycle on all engines, transient-failover retry, and a passing kill-the-primary failover test
 - [ ] Docs + 14-language i18n complete for Phase 14 surfaces
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** backend
       ≥ prior floor +5%; frontend floors raised to **OSS 30% /

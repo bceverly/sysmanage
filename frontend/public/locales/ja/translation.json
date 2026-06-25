@@ -1333,7 +1333,7 @@
     "startedAt": "開始日時",
     "stderrOutput": "Stderr出力",
     "stdoutOutput": "Stdout出力",
-    "title": "タイトル",
+    "title": "スクリプト",
     "update": "更新",
     "updateError": "更新エラー",
     "updateSuccess": "更新に成功",

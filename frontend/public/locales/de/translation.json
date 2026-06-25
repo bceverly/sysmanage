@@ -1333,7 +1333,7 @@
     "startedAt": "Gestartet am",
     "stderrOutput": "Stderr-Ausgabe",
     "stdoutOutput": "Stdout-Ausgabe",
-    "title": "Titel",
+    "title": "Skripte",
     "update": "Aktualisieren",
     "updateError": "Fehler beim Aktualisieren",
     "updateSuccess": "Erfolgreich aktualisiert",

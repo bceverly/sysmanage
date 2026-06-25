@@ -165,8 +165,12 @@ async def broadcast_to_fleet(
     # database.  Single-tenant / multi-tenancy-off mode yields only the
     # bootstrap DB, so this is inert.  Authorization, the (server-global) tag
     # definition check, and the audit write stay on the request ``db``.
+    # Run the bootstrap leg on the request's own ``db`` session (the one the
+    # dependency injected — and the one a test overrides) instead of letting
+    # iter_host_databases open a second, module-global session; only the extra
+    # per-tenant sessions are opened (and closed) here.
     delivered = 0
-    for label, _tenant_id, host_session in iter_host_databases():
+    for label, _tenant_id, host_session in iter_host_databases(bootstrap_session=db):
         try:
             target_host_ids = _resolve_broadcast_targets(
                 host_session, tag_uuid, request.platform
@@ -182,7 +186,10 @@ async def broadcast_to_fleet(
                 broadcast_db_error,
             )
         finally:
-            host_session.close()
+            # The request ``db`` is owned by the dependency — never close it here
+            # (the audit write below still needs it). Tenant sessions are ours.
+            if host_session is not db:
+                host_session.close()
     elapsed_ms = (time.monotonic() - started) * 1000.0
 
     logger.info(

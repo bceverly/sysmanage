@@ -1333,7 +1333,7 @@
     "startedAt": "시작 시각",
     "stderrOutput": "Stderr 출력",
     "stdoutOutput": "Stdout 출력",
-    "title": "제목",
+    "title": "스크립트",
     "update": "업데이트",
     "updateError": "업데이트 오류",
     "updateSuccess": "업데이트 성공",

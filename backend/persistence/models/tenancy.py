@@ -69,10 +69,27 @@ TENANT_TIERS = (TENANT_TIER_SILO, TENANT_TIER_POOL)
 TENANT_STATUS_ACTIVE = "active"
 TENANT_STATUS_SUSPENDED = "suspended"
 TENANT_STATUS_PROVISIONING = "provisioning"
+TENANT_STATUS_DEPROVISIONING = "deprovisioning"
 TENANT_STATUSES = (
     TENANT_STATUS_ACTIVE,
     TENANT_STATUS_SUSPENDED,
     TENANT_STATUS_PROVISIONING,
+    TENANT_STATUS_DEPROVISIONING,
+)
+
+# Phase 13.1.J — per-tenant edition. Each tenant is independently assigned a
+# feature surface from the control plane; module/feature gating resolves against
+# the TENANT's edition (via the active-tenant context), not one global license
+# tier. The resolution + Platform-Operator authorization logic lives in the
+# licensed ``multitenancy_engine`` (the moat); only these columns/constants are
+# OSS. Default ``enterprise`` so existing SaaS tenants are unchanged on upgrade.
+TENANT_EDITION_COMMUNITY = "community"
+TENANT_EDITION_PROFESSIONAL = "professional"
+TENANT_EDITION_ENTERPRISE = "enterprise"
+TENANT_EDITIONS = (
+    TENANT_EDITION_COMMUNITY,
+    TENANT_EDITION_PROFESSIONAL,
+    TENANT_EDITION_ENTERPRISE,
 )
 
 
@@ -99,6 +116,15 @@ class RegistryTenant(Base):
     name = Column(String(255), nullable=False)
     slug = Column(String(100), nullable=False, unique=True)
     status = Column(String(32), nullable=False, default=TENANT_STATUS_ACTIVE)
+    # Per-tenant feature surface (Phase 13.1.J). Defaults to enterprise so tenants
+    # created before this column behave exactly as before. Resolution logic is in
+    # the licensed multitenancy_engine; this column is the OSS source of truth.
+    edition = Column(
+        String(32),
+        nullable=False,
+        default=TENANT_EDITION_ENTERPRISE,
+        server_default=TENANT_EDITION_ENTERPRISE,
+    )
     settings = Column(JSON, nullable=True)
     limits = Column(JSON, nullable=True)
     created_at = Column(DateTime, nullable=False, default=_utcnow)

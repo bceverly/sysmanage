@@ -1333,7 +1333,7 @@
     "startedAt": "开始于",
     "stderrOutput": "Stderr 输出",
     "stdoutOutput": "Stdout 输出",
-    "title": "标题",
+    "title": "脚本",
     "update": "更新",
     "updateError": "更新错误",
     "updateSuccess": "更新成功",

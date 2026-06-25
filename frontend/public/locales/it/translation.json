@@ -1333,7 +1333,7 @@
     "startedAt": "Avviato il",
     "stderrOutput": "Output Stderr",
     "stdoutOutput": "Output Stdout",
-    "title": "Titolo",
+    "title": "Script",
     "update": "Aggiorna",
     "updateError": "Errore di aggiornamento",
     "updateSuccess": "Aggiornato correttamente",

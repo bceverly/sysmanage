@@ -1333,7 +1333,7 @@
     "startedAt": "開始時間",
     "stderrOutput": "Stderr 輸出",
     "stdoutOutput": "Stdout 輸出",
-    "title": "標題",
+    "title": "指令稿",
     "update": "更新",
     "updateError": "更新錯誤",
     "updateSuccess": "更新成功",

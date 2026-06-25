@@ -198,7 +198,7 @@ def _open_bootstrap_session():
     return next(get_db())
 
 
-def iter_host_databases():
+def iter_host_databases(bootstrap_session=None):
     """Yield ``(label, tenant_id, session)`` for the bootstrap database and
     every provisioned tenant database.
 
@@ -211,18 +211,32 @@ def iter_host_databases():
     multi-tenancy is actually turned on.
 
     ``tenant_id`` is ``None`` for the bootstrap database and the tenant's id for
-    each tenant database.  The CALLER MUST ``close()`` every yielded session.
-    Each tenant is resolved independently: if the tenant list or one tenant's
-    engine can't be resolved it is logged and skipped, so one bad tenant (or an
-    unreachable registry) can't stall the whole sweep — the bootstrap database is
-    always visited.
+    each tenant database.  Each tenant is resolved independently: if the tenant
+    list or one tenant's engine can't be resolved it is logged and skipped, so
+    one bad tenant (or an unreachable registry) can't stall the whole sweep — the
+    bootstrap database is always visited.
+
+    ``bootstrap_session``: a request-context caller (e.g. the broadcast endpoint)
+    that already holds the request's ``Depends(get_db)`` session should pass it
+    here so the bootstrap leg runs on the SAME session — both to avoid opening a
+    second connection and, critically, so the request's database (including a
+    test's dependency-injected one) is the one visited rather than a freshly
+    opened module-global session.  When passed, the caller owns it and must NOT
+    close it (it is closed by the dependency); compare yielded sessions by
+    identity to skip closing it.  Background sweeps that have no request session
+    omit it and ``iter_host_databases`` opens (and the caller closes) its own.
     """
-    try:
-        bootstrap = _open_bootstrap_session()
-    except Exception:  # noqa: BLE001
-        logger.exception("iter_host_databases: failed to open the bootstrap session")
-        return
-    yield ("bootstrap", None, bootstrap)
+    if bootstrap_session is not None:
+        yield ("bootstrap", None, bootstrap_session)
+    else:
+        try:
+            bootstrap = _open_bootstrap_session()
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "iter_host_databases: failed to open the bootstrap session"
+            )
+            return
+        yield ("bootstrap", None, bootstrap)
 
     if not config.is_multitenancy_enabled():
         return
