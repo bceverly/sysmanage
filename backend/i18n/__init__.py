@@ -84,7 +84,7 @@ def module_translation(domain: str, localedir: str):
         if translation is None:
             try:
                 translation = gettext.translation(domain, localedir, [lang])
-            except (FileNotFoundError, OSError):
+            except OSError:  # FileNotFoundError is an OSError subclass
                 translation = gettext.NullTranslations()
             cache[lang] = translation
         return translation.gettext(message)

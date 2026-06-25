@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-06-19 14:43-0400\n"
+"POT-Creation-Date: 2026-06-25 09:39-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1010,6 +1010,10 @@ msgstr ""
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr ""
 
+#: backend/api/host_utils.py:662
+msgid "Host limit reached for this tenant."
+msgstr ""
+
 #: backend/api/broadcast.py:106
 #, python-format
 msgid "Invalid tag_id: %s"
@@ -1019,7 +1023,7 @@ msgstr ""
 msgid "Tag not found"
 msgstr ""
 
-#: backend/api/broadcast.py:203
+#: backend/api/broadcast.py:210
 #, python-format
 msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
 msgstr ""
@@ -2333,36 +2337,36 @@ msgstr ""
 msgid "Failed to search packages: %s"
 msgstr ""
 
-#: backend/api/host.py:137
+#: backend/api/host.py:142
 msgid "Permission denied: DELETE_HOST role required"
 msgstr ""
 
-#: backend/api/host.py:201
+#: backend/api/host.py:206
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr ""
 
-#: backend/api/host.py:598
+#: backend/api/host.py:603
 msgid "Host already exists"
 msgstr ""
 
-#: backend/api/host.py:684
+#: backend/api/host.py:689
 msgid "Invalid or expired registration key"
 msgstr ""
 
-#: backend/api/host.py:714
+#: backend/api/host.py:719
 msgid "Invalid or expired enrollment token"
 msgstr ""
 
-#: backend/api/host.py:806
+#: backend/api/host.py:809
 msgid "Registration absorbed: host was recently deleted"
 msgstr ""
 
-#: backend/api/host.py:857
+#: backend/api/host.py:867
 #, python-format
 msgid "Host '%s' enrolled into tenant %s via enrollment token"
 msgstr ""
 
-#: backend/api/host.py:873
+#: backend/api/host.py:883
 #, python-format
 msgid "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
 msgstr ""

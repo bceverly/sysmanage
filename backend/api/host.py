@@ -2,6 +2,10 @@
 This module houses the API routes for the host object in SysManage.
 """
 
+# host.py is the host-API aggregator; it is intentionally large (mirrors the
+# pattern in proplus_routes / repository_mirroring).
+# pylint: disable=too-many-lines
+
 import asyncio
 import logging
 from datetime import datetime, timezone
@@ -20,6 +24,7 @@ from backend.api import (
     host_monitoring,
     host_operations,
     host_ubuntu_pro,
+    host_utils,
 )
 from backend.api.error_constants import error_host_not_found, error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
@@ -27,8 +32,8 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.queue_operations import QueueOperations
 from backend.utils.verbosity_logger import sanitize_log
+from backend.websocket.queue_operations import QueueOperations
 
 # Split into separate routers for different authentication requirements
 public_router = APIRouter()  # Unauthenticated endpoints (no /api prefix)
@@ -788,9 +793,7 @@ async def register_host(registration_data: HostRegistration):
         # recreating a ghost Host row — the agent is about to die so
         # the response doesn't matter.  See
         # backend.api.recent_host_deletions for the full rationale.
-        from backend.api.recent_host_deletions import (
-            is_recent_child_host_deletion,
-        )
+        from backend.api.recent_host_deletions import is_recent_child_host_deletion
 
         if is_recent_child_host_deletion(
             registration_data.fqdn, registration_data.ipv4
@@ -806,6 +809,13 @@ async def register_host(registration_data: HostRegistration):
                 "message": _("Registration absorbed: host was recently deleted"),
                 "absorbed": True,
             }
+
+        # Phase 13.1.F: enforce the enrolling tenant's host quota BEFORE creating
+        # the row (no-op single-tenant / when no limit is set).  Only new hosts
+        # reach here, so a tenant at its cap can still refresh its current fleet.
+        host_utils.enforce_tenant_host_quota(
+            session, enrollment_tenant_id, registration_data.fqdn
+        )
 
         # Phase 8.1: validate optional registration_key BEFORE creating
         # the host row, so a bad key never even creates a pending host.

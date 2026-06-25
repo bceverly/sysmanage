@@ -77,9 +77,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # repository-role / air-gapped deployment).  See
         # docs/planning/openbao-deployment-and-airgap.md §5.
         logger.info("=== DEPLOYMENT INVARIANT CHECK ===")
-        from backend.startup.deployment_guards import (  # noqa: PLC0415
+        from backend.startup.deployment_guards import (
             enforce_deployment_invariants,
-        )
+        )  # noqa: PLC0415
 
         enforce_deployment_invariants()
         logger.info("Deployment invariants satisfied")
@@ -90,9 +90,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # loaded at import remain in force.  See
         # docs/planning/config-classification.md (Phase 13.1.H).
         logger.info("=== SECRETS OVERLAY (OpenBAO) ===")
-        from backend.config.secrets_bootstrap import (  # noqa: PLC0415
+        from backend.config.secrets_bootstrap import (
             refresh_secrets_from_openbao,
-        )
+        )  # noqa: PLC0415
 
         refresh_secrets_from_openbao()
 
@@ -149,6 +149,40 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                     from backend.multitenancy import bridge  # noqa: PLC0415
 
                     bridge.bridge_loaded_engine(multitenancy_engine)
+
+                    # Phase 13.1.F — start the per-tenant backup/RPO orchestrator
+                    # if the engine provides it AND backups are configured.  No-op
+                    # otherwise (single-tenant, or no backup command in config), so
+                    # we never spin an idle loop.
+                    try:
+                        mt_info = multitenancy_engine.get_module_info()
+                        if mt_info.get("provides_background_task", False):
+                            from backend.services.tenant_backup import (
+                                get_backup_config,
+                            )  # noqa: PLC0415
+
+                            if get_backup_config().enabled:
+                                logger.info(
+                                    "=== MULTITENANCY BACKUP ORCHESTRATOR STARTUP ==="
+                                )
+                                _track_background_task(
+                                    asyncio.create_task(
+                                        multitenancy_engine.start_backup_orchestrator(
+                                            db_maker=get_db,
+                                            logger=logger,
+                                        )
+                                    )
+                                )
+                                logger.info("Multi-tenant backup orchestrator started")
+                            else:
+                                logger.info(
+                                    "Backup orchestrator idle: no backup command "
+                                    "configured (set backup.command in sysmanage.yaml)"
+                                )
+                    except Exception as backup_e:  # noqa: BLE001
+                        logger.warning(
+                            "Failed to start backup orchestrator: %s", backup_e
+                        )
 
                 # Mount Pro+ routes now that modules are loaded + bridged
                 logger.info("=== MOUNTING PRO+ MODULE ROUTES ===")
@@ -314,9 +348,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 # runs the sync worker, and a server with role 'none' runs
                 # neither even when an engine is licensed/loaded.  Read once.
                 try:
-                    from backend.config import (  # pylint: disable=import-outside-toplevel
+                    from backend.config import (
                         config as _fed_config,
-                    )
+                    )  # pylint: disable=import-outside-toplevel
 
                     _federation_role = _fed_config.get_federation_role()
                 except Exception:  # pylint: disable=broad-exception-caught
@@ -530,9 +564,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # the refresh + ipapi.co fallback logic.
         try:
             logger.info("=== GEOLITE2 REFRESH STARTUP ===")
-            from backend.services.geolocation_service import (  # noqa: PLC0415
+            from backend.services.geolocation_service import (
                 geolite_refresh_service,
-            )
+            )  # noqa: PLC0415
 
             geolite_refresh_task = asyncio.create_task(geolite_refresh_service())
             logger.info("GeoLite2 refresh task created: %s", geolite_refresh_task)

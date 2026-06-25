@@ -6,8 +6,14 @@ import Backend from 'i18next-http-backend';
 // Injected by Vite at build time (see vite.config.ts ``define``).  Falls back
 // to a constant so unit tests / non-Vite contexts don't break.
 declare const __LOCALE_BUILD_ID__: string;
-const localeBuildId =
-  typeof __LOCALE_BUILD_ID__ !== 'undefined' ? __LOCALE_BUILD_ID__ : 'dev';
+let localeBuildId: string;
+try {
+  // Vite's `define` replaces this identifier with a string literal; a non-Vite
+  // context (e.g. a bare ts-node import) leaves it undeclared, which throws.
+  localeBuildId = __LOCALE_BUILD_ID__;
+} catch {
+  localeBuildId = 'dev';
+}
 
 i18n
   .use(Backend)

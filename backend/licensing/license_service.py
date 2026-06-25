@@ -18,7 +18,13 @@ import aiohttp
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
-from backend.licensing.features import FeatureCode, ModuleCode
+from backend.licensing.features import (
+    TIER_FEATURES,
+    TIER_MODULES,
+    FeatureCode,
+    LicenseTier,
+    ModuleCode,
+)
 from backend.licensing.module_loader import module_loader
 from backend.licensing.public_key import get_public_key_pem
 from backend.licensing.validator import (
@@ -480,6 +486,40 @@ class LicenseService:
         self._license_key = None
         logger.warning("License deactivated")
 
+    @staticmethod
+    def _allowed_for_active_tenant_edition(item, tier_map: dict) -> bool:
+        """Phase 13.1.J — gate ``item`` (a FeatureCode/ModuleCode) down to the
+        ACTIVE tenant's edition when one is in scope.
+
+        With multi-tenancy the server may be licensed at the top SaaS tier (so it
+        physically hosts every engine), but each tenant is independently assigned
+        a Community / Professional / Enterprise edition.  When a tenant is in
+        scope, an item is only available if it also belongs to that edition's
+        tier — so a Community tenant on an Enterprise-licensed server 402s on
+        Pro+ surfaces, and an edition up/down-grade takes effect without a
+        redeploy.  Resolution of *which* tenant is active (and its edition) lives
+        in the licensed multitenancy_engine; this consults the OSS seam, which
+        returns ``None`` (→ the global license governs, unchanged) for server
+        scope / single-tenant / unlicensed.
+        """
+        # Local import keeps the licensing layer free of a hard dependency on the
+        # tenant-edition seam (and any import cycle through the engine seam).
+        from backend.services.tenant_edition import (  # noqa: PLC0415
+            edition_for_active_tenant,
+        )
+
+        edition = edition_for_active_tenant()
+        if edition is None:
+            return True
+        try:
+            tier = LicenseTier(edition)
+        except ValueError:
+            logger.warning(
+                "Unknown active-tenant edition %r; not restricting gating", edition
+            )
+            return True
+        return item in tier_map.get(tier, set())
+
     def has_feature(self, feature: FeatureCode) -> bool:
         """
         Check if the current license includes a feature.
@@ -492,7 +532,9 @@ class LicenseService:
         """
         if not self._cached_license:
             return False
-        return feature.value in self._cached_license.features
+        if feature.value not in self._cached_license.features:
+            return False
+        return self._allowed_for_active_tenant_edition(feature, TIER_FEATURES)
 
     def has_module(self, module: ModuleCode) -> bool:
         """
@@ -506,7 +548,9 @@ class LicenseService:
         """
         if not self._cached_license:
             return False
-        return module.value in self._cached_license.modules
+        if module.value not in self._cached_license.modules:
+            return False
+        return self._allowed_for_active_tenant_edition(module, TIER_MODULES)
 
     def get_license_info(self) -> Optional[dict]:
         """

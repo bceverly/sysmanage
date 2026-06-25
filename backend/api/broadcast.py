@@ -182,8 +182,8 @@ async def broadcast_to_fleet(
             logger.exception(
                 "Broadcast %s fan-out failed for %s: %s",
                 sanitize_log(broadcast_id),
-                label,
-                broadcast_db_error,
+                sanitize_log(label),
+                sanitize_log(str(broadcast_db_error)),
             )
         finally:
             # The request ``db`` is owned by the dependency — never close it here

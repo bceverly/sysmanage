@@ -634,3 +634,30 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
             "tech_support_level": ubuntu_pro_info.tech_support_level,
             "services": services_data,
         }
+
+
+def enforce_tenant_host_quota(session, tenant_id, fqdn) -> None:
+    """Phase 13.1.F — reject a new-host registration past the tenant's quota.
+
+    ``session`` is bound to the enrolling tenant's database, so the host count is
+    naturally tenant-scoped.  ``tenant_id`` of ``None`` (single-tenant /
+    unlicensed) or an unset ``max_hosts`` means unlimited.  Raises HTTP 429 when
+    the tenant is already at its cap.  Call only for genuinely new hosts —
+    re-registrations of existing hosts must still be able to refresh.
+    """
+    import logging  # noqa: PLC0415
+
+    from backend.services import tenant_limits  # noqa: PLC0415
+
+    max_hosts = tenant_limits.limit_for_tenant(tenant_id, "max_hosts")
+    if max_hosts is not None and session.query(models.Host).count() >= max_hosts:
+        logging.getLogger(__name__).warning(
+            "Host registration rejected: tenant %s at host limit %s (fqdn=%s)",
+            sanitize_log(str(tenant_id)),
+            max_hosts,
+            sanitize_log(fqdn),
+        )
+        raise HTTPException(
+            status_code=429,
+            detail=_("Host limit reached for this tenant."),
+        )

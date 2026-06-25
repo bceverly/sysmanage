@@ -654,6 +654,44 @@ class TestHostRegistration:
                 mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
+    async def test_register_new_host_rejected_at_tenant_limit(self, mock_config):
+        """Phase 13.1.F: a tenant at its ``max_hosts`` quota gets 429 and no row
+        is created."""
+        from fastapi import HTTPException
+
+        from backend.api.host import HostRegistration, register_host
+
+        registration_data = HostRegistration(
+            active=True,
+            fqdn="over-quota.example.com",
+            hostname="over-quota",
+            ipv4="192.168.1.151",
+            ipv6="::1",
+        )
+
+        with patch("backend.api.host.db") as mock_db:
+            mock_db.get_engine.return_value = MagicMock()
+
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                None  # No existing host with this fqdn
+            )
+            mock_session.query.return_value.count.return_value = 5  # at the cap
+
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.services.tenant_limits.limit_for_tenant", return_value=5
+            ):
+                mock_sessionmaker.return_value = create_mock_session_context(
+                    mock_session
+                )
+
+                with pytest.raises(HTTPException) as exc:
+                    await register_host(registration_data)
+
+                assert exc.value.status_code == 429
+                mock_session.add.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_register_existing_host_updates(self, mock_config, mock_host):
         """Test registering an existing host updates the record."""
         from backend.api.host import HostRegistration, register_host

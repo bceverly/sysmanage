@@ -35,6 +35,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Column,
     DateTime,
@@ -42,6 +43,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSON
@@ -90,6 +92,30 @@ TENANT_EDITIONS = (
     TENANT_EDITION_COMMUNITY,
     TENANT_EDITION_PROFESSIONAL,
     TENANT_EDITION_ENTERPRISE,
+)
+
+# Phase 13.1.F — per-tenant backup/RPO orchestration. SysManage tracks each
+# tenant's backup schedule (RPO) and verification status; the actual bytes are
+# produced by an operator-configured external command (orchestrate-only). The
+# orchestration logic lives in the licensed ``multitenancy_engine``; only this
+# run-history table + constants are OSS.
+BACKUP_KIND_BACKUP = "backup"
+BACKUP_KIND_VERIFY = "verify"
+BACKUP_KINDS = (BACKUP_KIND_BACKUP, BACKUP_KIND_VERIFY)
+
+# A verify run is either a cheap dump-integrity check (after every backup) or a
+# scheduled full restore into a scratch database.
+BACKUP_VERIFY_INTEGRITY = "integrity"
+BACKUP_VERIFY_FULL = "full"
+BACKUP_VERIFY_KINDS = (BACKUP_VERIFY_INTEGRITY, BACKUP_VERIFY_FULL)
+
+BACKUP_STATUS_RUNNING = "running"
+BACKUP_STATUS_SUCCESS = "success"
+BACKUP_STATUS_FAILED = "failed"
+BACKUP_STATUSES = (
+    BACKUP_STATUS_RUNNING,
+    BACKUP_STATUS_SUCCESS,
+    BACKUP_STATUS_FAILED,
 )
 
 
@@ -268,6 +294,54 @@ class RegistryTenantDbVersion(Base):
             "tenant_id", "chain", name="uq_registry_db_version_tenant_chain"
         ),
         Index("ix_registry_db_version_tenant", "tenant_id"),
+    )
+
+
+class RegistryTenantBackup(Base):
+    """One per-tenant backup or restore-verification *run* (Phase 13.1.F).
+
+    The control plane records every backup attempt and every verification so it
+    can report RPO compliance ("how long since the last good backup?") and prove
+    restorability.  SysManage orchestrates the schedule and runs an
+    operator-configured external command (pgBackRest/wal-g/pg_dump); it does not
+    itself store the backup bytes — ``artifact_ref`` is whatever opaque handle
+    that command reports (a stanza label, object key, file path).
+
+    ``kind`` distinguishes a backup run from a verify run; for verify runs,
+    ``verify_kind`` is the cheap ``integrity`` check (run after each backup) or
+    the scheduled ``full`` scratch-restore.  ``rpo_seconds`` snapshots the
+    tenant's target at run time so history stays meaningful if the target later
+    changes.
+    """
+
+    __tablename__ = "registry_tenant_backup"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    tenant_id = Column(
+        GUID(), ForeignKey(_TENANT_FK, ondelete="CASCADE"), nullable=False
+    )
+    kind = Column(String(16), nullable=False, default=BACKUP_KIND_BACKUP)
+    # Only set for kind == "verify": "integrity" | "full".
+    verify_kind = Column(String(16), nullable=True)
+    status = Column(String(16), nullable=False, default=BACKUP_STATUS_RUNNING)
+    started_at = Column(DateTime, nullable=False, default=_utcnow)
+    finished_at = Column(DateTime, nullable=True)
+    # The tenant's RPO target (seconds) at the time of this run, for history.
+    rpo_seconds = Column(Integer, nullable=True)
+    # Opaque handle the external backup tool reports (stanza/object key/path).
+    artifact_ref = Column(String(1024), nullable=True)
+    size_bytes = Column(BigInteger, nullable=True)
+    # Captured stderr / failure reason when status == "failed".
+    error = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+
+    __table_args__ = (
+        Index("ix_registry_tenant_backup_tenant", "tenant_id"),
+        Index(
+            "ix_registry_tenant_backup_tenant_started",
+            "tenant_id",
+            "started_at",
+        ),
     )
 
 

@@ -45,7 +45,7 @@ interface AxiosError {
 // virtualization_engine, so it is hidden unless that engine is licensed — a
 // Professional user must not be offered (or shown) VM distributions they
 // cannot create.
-const CONTAINER_CHILD_TYPES = ['wsl', 'lxd'];
+const CONTAINER_CHILD_TYPES = new Set(['wsl', 'lxd']);
 
 const DistributionsSettings: React.FC = () => {
     const [tableData, setTableData] = useState<Distribution[]>([]);
@@ -198,7 +198,7 @@ const DistributionsSettings: React.FC = () => {
     ];
     const childTypeOptions = virtEnabled
         ? allChildTypeOptions
-        : allChildTypeOptions.filter((o) => CONTAINER_CHILD_TYPES.includes(o.value));
+        : allChildTypeOptions.filter((o) => CONTAINER_CHILD_TYPES.has(o.value));
 
     const installMethodOptions = [
         { value: 'apt_launchpad', label: 'APT (Launchpad PPA)' },
@@ -238,7 +238,7 @@ const DistributionsSettings: React.FC = () => {
             const data = await distributionService.getAll();
             const visible = virtEnabled
                 ? data
-                : data.filter((d) => CONTAINER_CHILD_TYPES.includes(d.child_type));
+                : data.filter((d) => CONTAINER_CHILD_TYPES.has(d.child_type));
             setTableData(visible);
             setFilteredData(visible);
         } catch (error) {

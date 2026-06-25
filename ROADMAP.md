@@ -4264,7 +4264,7 @@ plan-builder + UI integration.
 - [ ] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
       JIT/SCIM provisioning, vendor-support grants tied to OpenBAO issuance,
       break-glass path
-- [ ] **13.1.F** Backup orchestration & **data isolation verification** —
+- [x] **13.1.F** Backup orchestration & **data isolation verification** —
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement
       *(GA ships silo-only; pool+RLS SMB tier deferred past v3.0)*
@@ -4277,8 +4277,27 @@ plan-builder + UI integration.
       tenants hold a row with the SAME fqdn — plus a regression guard that MT-off
       collapses to the bootstrap engine. Registration routes each host to its own
       tenant and nothing lands in the bootstrap DB. 7 tests, OSS-CI (licensed seam
-      monkeypatched). **Remaining for F:** per-tenant backup/RPO orchestration +
-      automated restore tests, and per-account settings/limits enforcement.)*
+      monkeypatched).
+      **Per-account limits + backup/RPO DONE (June 2026):** *Limits* — the
+      `registry_tenant.limits` JSON bag is now enforced: a `max_hosts` quota
+      rejects enrollment (HTTP 429) past the cap via the OSS
+      `backend.services.tenant_limits` seam (→ engine `tenant_limit`, fail-open to
+      unlimited when single-tenant/unlicensed); Platform-Operator
+      `PATCH /tenants/{id}/limits` sets it and the `/tenants` UI gained a Quotas
+      editor. *Backup/RPO* — orchestrate-only: SysManage owns each tenant's RPO
+      schedule and runs an operator-configured external backup command
+      (pgBackRest/wal-g/pg_dump templates from `sysmanage.yaml`, injection-safe
+      per-token rendering) on cadence, recording every run + an integrity verify
+      (and a scheduled full restore-verify) in the new `registry_tenant_backup`
+      table (registry migration `r7registry`). The orchestrator loop lives in
+      `multitenancy_engine` v0.4.0 (`start_backup_orchestrator`, started by OSS
+      lifecycle only when a backup command is configured); the pure RPO read model
+      + config + templating are OSS (`backend.services.tenant_backup`, 14 tests).
+      Control-plane gained `GET/POST /tenants/{id}/backups`,
+      `PATCH /tenants/{id}/backup-config`, and a fleet `GET /backups/status`; the
+      `/tenants` UI gained a Backups & RPO panel (status chip, RPO target,
+      back-up-now, run history). All limits/backup strings i18n'd (OSS gettext +
+      plugin catalogs).)*
 - [ ] **13.1.G** Config builder & deployment docs — update the installer config
       builder (`scripts/_sysmanage_secure_installation.py`) to emit the new
       `registry:` / `multitenancy:` / `secrets:` config shape with a deployment-mode
@@ -4320,7 +4339,7 @@ plan-builder + UI integration.
       keep `scripts/build-openbao.sh` (source build) as the OpenBSD default. Until
       verified, OpenBSD continues to use the source-build path. (Bryan to run on
       real OpenBSD hardware.)
-- [ ] **13.1.J** Per-tenant edition & central tenant administration ("master of
+- [x] **13.1.J** Per-tenant edition & central tenant administration ("master of
       tenants") — **corrects the GA assumption that every tenant runs Enterprise.**
       Each tenant is operator-assigned an independent **Community / Professional /
       Enterprise** feature surface.
@@ -4350,10 +4369,29 @@ plan-builder + UI integration.
       added; prefix guard green. The edition-resolution **seam**
       `backend/services/tenant_edition.edition_for_active_tenant()` is in place,
       degrading to `None` (→ global tier) when the licensed engine is absent.
-      **Remaining:** the engine-side resolver + Platform-Operator authorization
-      (moat, in `multitenancy_engine`); wiring `feature_gate`/`get_*_for_tier` to
-      consult the active tenant's edition; control-plane edition-CRUD + lifecycle
-      endpoints; and the `/tenants` UI edition selector.)*
+      **Per-tenant gating wired:** `LicenseService.has_feature` / `has_module`
+      now narrow to the active tenant's edition tier (intersection of the global
+      license and the edition's `TIER_FEATURES`/`TIER_MODULES`), so a Community
+      tenant 402s on Pro+ surfaces on an Enterprise-licensed server and an
+      edition up/down-grade takes effect without redeploy; gating only ever
+      narrows (never exceeds the global license) and fails open on an unknown
+      edition string. Inert for server scope / single-tenant (seam → `None`). 6
+      tests in `backend/tests/test_per_tenant_edition_gating.py`; no regression in
+      the 705 existing licensing tests.
+      **Engine + frontend complete (June 2026):** the moat landed in
+      `multitenancy_engine` v0.3.3 — `edition_for_active_tenant()` reads the
+      active-tenant ContextVar and resolves `registry_tenant.edition` via the
+      registry partition session (the OSS seam delegates to it), and the
+      control-plane router gained Platform-Operator-gated edition-CRUD +
+      lifecycle endpoints: `PATCH /tenants/{id}/edition` (validates against
+      `TENANT_EDITIONS`), `POST /tenants/{id}/suspend`, `POST /tenants/{id}/resume`
+      (suspend/resume flip `status` and invalidate the tenant-manager cache);
+      `create_tenant` now accepts + validates an `edition`. The `/tenants` UI
+      (pro-plus `multitenancy` plugin bundle) extends the detail header with an
+      edition selector + Suspend/Resume + Delete, adds an Edition column and
+      status chip to the list, and offers an edition picker in the New-Tenant
+      dialog; new `tenants.edition.*` / `tenants.lifecycle.*` strings are i18n'd
+      (English seed; `make translate` propagates).)*
 
 #### 13.2 API Completeness
 

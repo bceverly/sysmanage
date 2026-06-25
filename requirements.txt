@@ -66,7 +66,7 @@ SQLAlchemy==2.0.43
 starlette>=1.0.1
 tomlkit==0.14.0
 typing_extensions>=4.12.2
-ujson==5.12.1  # patch covers prior CVEs (memory-leak DoS / integer overflow) + Dependabot #115 (ujson.dump() write-failure memory leak)
+ujson==5.13.0  # 5.13.0 fixes CVE-2026-54911 (reject_bytes=False UTF-8 validation bypass); 5.12.1 covered prior memory-leak DoS / integer-overflow CVEs + Dependabot #115
 uvicorn==0.40.0
 watchfiles==1.1.0
 websockets==16.0
