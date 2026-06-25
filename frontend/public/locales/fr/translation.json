@@ -2117,7 +2117,12 @@
       "type": "Type",
       "userBase": "Base de recherche des utilisateurs",
       "userFilterHelp": "Doit contenir %s pour le nom d'utilisateur, ex. (sAMAccountName=%s)",
-      "userFilter": "Filtre de recherche des utilisateurs"
+      "userFilter": "Filtre de recherche des utilisateurs",
+      "tenant": "ID de locataire (facultatif)",
+      "tenantHelp": "Limiter ce fournisseur à un seul locataire (son UUID). Laisser vide pour un fournisseur global du serveur.",
+      "jit": "Provisionnement à la volée (création automatique des utilisateurs à la première connexion SSO)",
+      "jitRole": "Rôle par défaut JIT",
+      "jitRoleHelp": "Rôle attribué aux membres créés automatiquement. Nécessite un ID de locataire et une liste blanche de domaines de messagerie correspondante pour ce locataire."
     },
     "loadError": "Impossible de charger les fournisseurs d'identité.",
     "mapAddError": "Impossible d'ajouter la correspondance.",

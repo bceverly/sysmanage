@@ -12,6 +12,10 @@ export interface IdpProvider {
   name: string;
   type: 'ldap' | 'oidc';
   enabled: boolean;
+  // Phase 13.1.E — per-tenant IdP + JIT. tenant_id null = server-global provider.
+  tenant_id?: string | null;
+  jit_provisioning?: boolean;
+  jit_default_role?: string;
   ldap_server_url?: string | null;
   ldap_bind_dn?: string | null;
   ldap_bind_password_secret_id?: string | null;
@@ -34,6 +38,10 @@ export interface IdpProviderCreate {
   name: string;
   type: 'ldap' | 'oidc';
   enabled?: boolean;
+  // Phase 13.1.E — per-tenant IdP + JIT.
+  tenant_id?: string | null;
+  jit_provisioning?: boolean;
+  jit_default_role?: string;
   ldap_server_url?: string;
   ldap_bind_dn?: string;
   ldap_bind_password_secret_id?: string;

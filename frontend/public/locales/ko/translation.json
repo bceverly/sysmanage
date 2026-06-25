@@ -2117,7 +2117,12 @@
       "type": "유형",
       "userBase": "사용자 검색 기준",
       "userFilterHelp": "사용자 이름을 위해 %s를 포함해야 합니다, 예: (sAMAccountName=%s)",
-      "userFilter": "사용자 검색 필터"
+      "userFilter": "사용자 검색 필터",
+      "tenant": "테넌트 ID(선택 사항)",
+      "tenantHelp": "이 공급자를 하나의 테넌트(해당 UUID)로 제한합니다. 서버 전역 공급자로 사용하려면 비워 두세요.",
+      "jit": "JIT 프로비저닝(첫 SSO 로그인 시 사용자 자동 생성)",
+      "jitRole": "JIT 기본 역할",
+      "jitRoleHelp": "자동 생성된 구성원에게 부여되는 역할입니다. 테넌트 ID와 해당 테넌트의 일치하는 이메일 도메인 허용 목록이 필요합니다."
     },
     "loadError": "ID 공급자를 불러올 수 없습니다.",
     "mapAddError": "매핑을 추가할 수 없습니다.",

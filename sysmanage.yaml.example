@@ -33,6 +33,44 @@ logging:
   level: "INFO|WARNING|ERROR|CRITICAL"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
+# Multi-tenancy (Phase 13.1) — OPT-IN. Leave disabled for homelab / on-prem /
+# single-tenant installs: that is the default (one implicit tenant, no behaviour
+# change). Enable ONLY to run SysManage as a SaaS control plane that hosts
+# isolated tenants (one database per tenant). Federated and air-gapped
+# deployments are unaffected by this setting and are mutually exclusive with
+# multi-tenancy.
+multitenancy:
+  enabled: false
+  # When enabled, allow operators to provision tenant databases from the UI via a
+  # least-privilege provisioner identity. Off by default even in SaaS mode.
+  self_service_provisioning: false
+
+# Control-plane registry (Phase 13.1) — only meaningful when multitenancy.enabled
+# is true. The registry records which tenants exist, who may reach them, and
+# where each tenant database lives. Tenant database placements are stored in the
+# registry, NEVER in this file. If omitted, the registry falls back to the
+# `database` block above (the single-box default); point it at a dedicated
+# database only when scaling the control plane out to its own server.
+# registry:
+#   user: "sysmanage_registry"
+#   password: "CHANGE_ME_IN_PRODUCTION"
+#   host: "localhost"
+#   port: 5432
+#   name: "sysmanage_registry"
+
+# Per-tenant backup / RPO orchestration (Phase 13.1.F) — OPT-IN, multi-tenant
+# only. SysManage runs `command` on each tenant's RPO cadence; it does NOT store
+# the backup bytes — your backup tool does (pgBackRest / wal-g / a pg_dump
+# wrapper). Templated placeholders: {tenant_id} {slug} {host} {port} {dbname}
+# {region}. Leave `command` empty (or omit this block) to disable orchestration.
+# backup:
+#   command: "pgbackrest --stanza={slug} backup"
+#   verify_command: "pgbackrest --stanza={slug} verify"
+#   full_restore_command: ""              # scheduled full restore-verify (optional)
+#   default_rpo_seconds: 86400            # 24h target RPO when a tenant sets none
+#   full_verify_interval_seconds: 604800  # 7d between full restore-verifies
+#   tick_interval_seconds: 300            # orchestrator poll cadence
+
 # Pro+ License Configuration (optional)
 # Obtain a license key from https://sysmanage.io/pro-plus
 license:

@@ -2117,7 +2117,12 @@
       "type": "Type",
       "userBase": "User search base",
       "userFilterHelp": "Must contain %s for the username, e.g. (sAMAccountName=%s)",
-      "userFilter": "User search filter"
+      "userFilter": "User search filter",
+      "tenant": "Tenant ID (optional)",
+      "tenantHelp": "Scope this provider to one tenant (its UUID). Leave blank for a server-global provider.",
+      "jit": "Just-in-time provisioning (auto-create users on first SSO login)",
+      "jitRole": "JIT default role",
+      "jitRoleHelp": "Grant role assigned to auto-created members. Requires a tenant ID and a matching email-domain allowlist on that tenant."
     },
     "loadError": "Could not load Identity Providers.",
     "mapAddError": "Could not add mapping.",

@@ -29,6 +29,7 @@ from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -136,6 +137,10 @@ class ProviderCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     type: str = Field(..., pattern="^(ldap|oidc)$")
     enabled: bool = True
+    # Phase 13.1.E — per-tenant scoping + JIT. ``tenant_id`` None = server-global.
+    tenant_id: Optional[str] = None
+    jit_provisioning: bool = False
+    jit_default_role: str = Field(default="member", max_length=64)
     # LDAP fields.
     ldap_server_url: Optional[str] = None
     ldap_bind_dn: Optional[str] = None
@@ -159,6 +164,10 @@ class ProviderCreateRequest(BaseModel):
 class ProviderUpdateRequest(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=120)
     enabled: Optional[bool] = None
+    # Phase 13.1.E — per-tenant scoping + JIT.
+    tenant_id: Optional[str] = None
+    jit_provisioning: Optional[bool] = None
+    jit_default_role: Optional[str] = Field(None, max_length=64)
     ldap_server_url: Optional[str] = None
     ldap_bind_dn: Optional[str] = None
     ldap_bind_password_secret_id: Optional[str] = None
@@ -445,6 +454,11 @@ async def oidc_callback(
         .first()
     )
     if not user:
+        # Phase 13.1.E — JIT: auto-provision on first SSO login when the provider
+        # is tenant-scoped with JIT enabled and the email domain is on the
+        # tenant's allowlist.  Returns None when JIT doesn't apply / isn't allowed.
+        user = _jit_provision_user(db, provider, result.get("email"), result["subject"])
+    if not user:
         raise HTTPException(
             status_code=403,
             detail=_(
@@ -467,6 +481,65 @@ async def oidc_callback(
     db.commit()
 
     return {"Authorization": sign_jwt(user.userid)}
+
+
+def _jit_provision_user(db: Session, provider, email: Optional[str], subject: str):
+    """Phase 13.1.E — just-in-time provision an SSO user on first login.
+
+    Applies only when the provider is tenant-scoped (``tenant_id`` set) with
+    ``jit_provisioning`` enabled and the email's domain is on the tenant's
+    (non-empty) allowlist — a fail-closed gate (see
+    ``registry_service.jit_domain_permitted``).  Creates the global registry
+    identity + a grant into the provider's tenant, then the local account linked
+    to this IdP identity (or links an existing local account with the same
+    email).  Returns the ``User`` on success, or ``None`` when JIT does not apply
+    / is not permitted (the caller then 403s as before).
+    """
+    if not getattr(provider, "jit_provisioning", False) or not provider.tenant_id:
+        return None
+    if not email:
+        logger.warning("JIT declined: provider %s returned no email claim", provider.id)
+        return None
+
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        PARTITION_REGISTRY,
+        partition_session,
+    )
+    from backend.services import registry_service  # noqa: PLC0415
+
+    # Registry partition: allowlist gate + global identity + grant.
+    with partition_session(partition=PARTITION_REGISTRY) as reg:
+        if not registry_service.jit_domain_permitted(reg, provider.tenant_id, email):
+            logger.warning(
+                "JIT declined: %s not on the allowlist for tenant %s",
+                sanitize_log(email),
+                sanitize_log(str(provider.tenant_id)),
+            )
+            return None
+        ruser = registry_service.ensure_registry_user(reg, email)
+        registry_service.ensure_grant(
+            reg, ruser.id, provider.tenant_id, provider.jit_default_role
+        )
+        reg.commit()
+
+    # Local account (server-global), linked to this IdP identity.  Re-link an
+    # existing local account with the same email rather than colliding on userid.
+    normalized = email.strip().lower()
+    user = db.query(models.User).filter(models.User.userid == normalized).first()
+    if user is None:
+        user = models.User(userid=normalized, active=True, is_admin=False)
+        db.add(user)
+    user.external_idp_provider_id = provider.id
+    user.external_subject = subject
+    user.active = True
+    db.commit()
+    db.refresh(user)
+    logger.info(
+        "JIT-provisioned SSO user %s into tenant %s",
+        sanitize_log(normalized),
+        sanitize_log(str(provider.tenant_id)),
+    )
+    return user
 
 
 def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) -> None:

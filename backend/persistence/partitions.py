@@ -186,6 +186,35 @@ def get_tenant_db():
         session.close()
 
 
+def shared_sessionmaker():
+    """A sessionmaker bound to the ``shared`` partition's engine.
+
+    Use this to read/write canonical reference data (``shared_*`` tables, e.g.
+    the mirror version catalog) regardless of which tenant is active.  In
+    collapsed / single-tenant mode this resolves to the one application engine,
+    so it is behaviourally identical to a normal session; in multi-tenant mode it
+    routes to the shared engine rather than the active tenant's database, where
+    the shared tables do not live.
+    """
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=resolve_engine(partition=PARTITION_SHARED),
+    )
+
+
+def get_shared_db():
+    """FastAPI dependency yielding a session on the ``shared`` partition.
+
+    Drop-in for endpoints that read shared reference data (the version catalog).
+    """
+    session = shared_sessionmaker()()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
 def _open_bootstrap_session():
     """Open a session on the bootstrap / main database.
 

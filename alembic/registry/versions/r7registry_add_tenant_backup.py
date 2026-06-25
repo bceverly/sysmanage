@@ -21,6 +21,7 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 
 from alembic import op
+from backend.persistence.models.core import GUID
 
 # revision identifiers, used by Alembic.
 revision: str = "r7registry"
@@ -44,8 +45,8 @@ def upgrade() -> None:
         return
     op.create_table(
         _TABLE,
-        sa.Column("id", sa.CHAR(36), primary_key=True, nullable=False),
-        sa.Column("tenant_id", sa.CHAR(36), nullable=False),
+        sa.Column("id", GUID(), primary_key=True, nullable=False),
+        sa.Column("tenant_id", GUID(), nullable=False),
         sa.Column("kind", sa.String(16), nullable=False, server_default="backup"),
         sa.Column("verify_kind", sa.String(16), nullable=True),
         sa.Column("status", sa.String(16), nullable=False, server_default="running"),

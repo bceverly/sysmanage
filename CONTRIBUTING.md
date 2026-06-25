@@ -101,16 +101,25 @@ The tooling keeps every locale in sync:
 - `make i18n-backtranslate` — local round-trip QA: samples translated
   strings, back-translates them, and flags semantic drift for human review.
 
-CI enforces two deterministic, network-free gates (no model needed):
+`make lint` enforces three deterministic, **network-free** i18n gates (no
+model / translation service needed) — so a missing or untranslated string
+fails locally at `pre-push`, not in CI:
 
 - `make i18n-validate` — every code-referenced key exists in every locale.
 - `make i18n-placeholders` — every translated value preserves the exact
   interpolation tokens (`{{var}}`, `%s`, `<tags>`, …) of its English source.
-  This is part of `make lint`.
+- `make i18n-complete` — **completeness**: every locale is fully translated
+  (frontend JSON + backend `.po`), the same offline `i18n_backfill --check`
+  CI runs. A new `t('key', 'English')` or `_("English")` with no translation
+  is a hard failure.
 
-Once a locale is fully translated, `make i18n-check` adds a completeness
-gate (no `[TODO]` strings remain); flip `lint` from `i18n-placeholders` to
-`i18n-check` to make untranslated strings a hard failure.
+So the workflow when you add a user-facing string is: write it → `make
+i18n-seed` (frontend) or extract (backend) → `make i18n-translate` on your
+local model rig → `make i18n-compile-backend` (backend only) → `make lint`
+goes green. Every sibling repo (`sysmanage-agent`,
+`sysmanage-professional-plus`, `sysmanage-docs`) wires the equivalent
+offline completeness check into its own `make lint` (`translate-check`),
+caught by the same shared `pre-push` hook.
 
 ---
 

@@ -54,7 +54,12 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.partitions import get_tenant_db, iter_host_databases
+from backend.persistence.partitions import (
+    get_shared_db,
+    get_tenant_db,
+    iter_host_databases,
+    shared_sessionmaker,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -955,8 +960,10 @@ async def delete_platform_config(
 
 @router.get("/api/mirror-known-versions", dependencies=[Depends(JWTBearer())])
 async def list_known_versions(
-    platform: Optional[str] = None, db: Session = Depends(get_tenant_db)
+    platform: Optional[str] = None, db: Session = Depends(get_shared_db)
 ):
+    # Phase 13.1.D: the catalog is shared reference data, so read it from the
+    # shared partition rather than the active tenant's database.
     _check_mirror_module()
     q = db.query(models.MirrorKnownVersion).filter(
         models.MirrorKnownVersion.is_active.is_(True)
@@ -1046,15 +1053,20 @@ def _assignment_row(kv, cur, eligible: list[dict]) -> dict:
 
 
 @router.get("/api/host-defaults/mirrors", dependencies=[Depends(JWTBearer())])
-async def list_default_mirror_assignments(db: Session = Depends(get_tenant_db)):
+async def list_default_mirror_assignments(
+    db: Session = Depends(get_tenant_db),
+    shared_db: Session = Depends(get_shared_db),
+):
     """Return one row per (platform, version_key, os_family) tuple
     drawn from the known-versions catalog, with the currently-assigned
     mirror_id (or null = "Cloud") and the list of mirrors that are
     eligible to be assigned (right PM + matching default values +
     last_sync_status == 'SUCCESS')."""
     _check_mirror_module()
+    # Phase 13.1.D: the catalog is shared reference data; the assignments and
+    # eligible mirrors are tenant data. Read each from its own partition.
     versions = (
-        db.query(models.MirrorKnownVersion)
+        shared_db.query(models.MirrorKnownVersion)
         .filter(models.MirrorKnownVersion.is_active.is_(True))
         .order_by(
             models.MirrorKnownVersion.platform,
@@ -1163,6 +1175,7 @@ async def set_default_mirror_assignment(
     os_family: str,
     request: HostDefaultMirrorRequest = Body(...),
     db: Session = Depends(get_tenant_db),
+    shared_db: Session = Depends(get_shared_db),
     current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
 ):
     """Assign (or unassign) a default mirror for a known (platform,
@@ -1172,8 +1185,10 @@ async def set_default_mirror_assignment(
     regex — simultaneous rollout, no staggered windows.  Returns the
     list of dispatched message_ids so the UI can poll completion."""
     engine = _check_mirror_module()
+    # Phase 13.1.D: catalog row from the shared partition; everything else
+    # (assignment row, mirror, matching hosts) is tenant data on ``db``.
     kv = (
-        db.query(models.MirrorKnownVersion)
+        shared_db.query(models.MirrorKnownVersion)
         .filter(
             models.MirrorKnownVersion.platform == platform,
             models.MirrorKnownVersion.version_key == version_key,
@@ -1296,26 +1311,29 @@ def apply_default_mirrors_for_new_host(host_id: str) -> List[dict]:
         if engine is None:
             return []
         text = (host.platform_release or "") + " " + (host.platform_version or "")
-        rows = (
-            session.query(models.HostDefaultMirror, models.MirrorKnownVersion)
-            .join(
-                models.MirrorKnownVersion,
-                (
-                    models.MirrorKnownVersion.platform
-                    == models.HostDefaultMirror.platform
-                )
-                & (
-                    models.MirrorKnownVersion.version_key
-                    == models.HostDefaultMirror.version_key
-                )
-                & (
-                    models.MirrorKnownVersion.os_family
-                    == models.HostDefaultMirror.os_family
-                ),
-            )
+        # Phase 13.1.D: the assignments are tenant data but the catalog is shared
+        # reference data in a different partition, so this can no longer be a SQL
+        # join. Pull the assignments from the tenant session and the catalog from
+        # a shared session, then join them in Python on
+        # (platform, version_key, os_family).
+        assignments = (
+            session.query(models.HostDefaultMirror)
             .filter(models.HostDefaultMirror.mirror_id.isnot(None))
             .all()
         )
+        with shared_sessionmaker()() as shared_session:
+            catalog = {
+                (kv.platform, kv.version_key, kv.os_family): kv
+                for kv in shared_session.query(models.MirrorKnownVersion).all()
+            }
+        rows = [
+            (assignment, catalog[key])
+            for assignment in assignments
+            for key in [
+                (assignment.platform, assignment.version_key, assignment.os_family)
+            ]
+            if key in catalog
+        ]
         for assignment, kv in rows:
             try:
                 rx = re.compile(kv.match_regex, re.IGNORECASE)

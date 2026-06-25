@@ -38,7 +38,6 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import relationship
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -94,20 +93,19 @@ class MirrorRepository(Base):
         ForeignKey("mirror_platform_config.id", ondelete=_FK_SET_NULL),
         nullable=True,
     )
-    # Phase 10.4.4 — picked from the dropdown (mirror_known_version).
+    # Phase 10.4.4 — picked from the dropdown (shared_mirror_known_version).
     # Free-text suite/repoid/etc. on this row are still authoritative
     # for plan emission, but ``known_version_id`` lets us know which
     # catalog entry the operator selected so default-mirror matching
     # can use the catalog's match_regex instead of guessing.
-    known_version_id = Column(
-        GUID(),
-        ForeignKey("mirror_known_version.id", ondelete=_FK_SET_NULL),
-        nullable=True,
-    )
-    # Lazy-loaded relationship so the airgap-collector code can resolve
-    # the catalog row (os_family, version_key, default_suite) when it
-    # derives target metadata from a picked mirror.
-    known_version = relationship("MirrorKnownVersion", lazy="joined")
+    #
+    # Phase 13.1.D: SOFT reference — no ForeignKey. The catalog lives in the
+    # ``shared`` partition (``shared_mirror_known_version``); this mirror row
+    # lives in the tenant partition. A hard cross-partition FK is unsatisfiable
+    # once they are in different databases, so we store the bare UUID and resolve
+    # the catalog row through a shared-partition session in app code (see
+    # backend/api/repository_mirroring.py shared_known_version helpers).
+    known_version_id = Column(GUID(), nullable=True)
     # Execution state — one (at, status, error, message_id) group per
     # action.  Each group is written by the result handler in
     # backend/services/proplus_dispatch.py::_apply_mirror_sync_status.
@@ -289,7 +287,11 @@ class MirrorKnownVersion(Base):
     (no auto-discovery), so the catalog is auditable in code.
     """
 
-    __tablename__ = "mirror_known_version"
+    # Phase 13.1.D: relocated to the ``shared`` partition. This is canonical
+    # reference data (the version dropdown catalog) that is identical for every
+    # tenant, so it lives once in the shared database rather than being copied
+    # into each tenant database. Seeded by the shared Alembic chain.
+    __tablename__ = "shared_mirror_known_version"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     platform = Column(String(20), nullable=False)

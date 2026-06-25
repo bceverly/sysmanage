@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-25 09:39-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -165,7 +165,8 @@ msgstr "Узел не одобрен"
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
 #: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64 backend/api/packages_operations.py:238
+#: backend/api/packages_operations.py:64
+#: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
 #: backend/api/updates/execution_routes.py:45
@@ -529,8 +530,8 @@ msgstr "Не удалось добавить отключение репозит
 
 #: backend/api/reports/endpoints.py:65
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 "Генерация отчётов требует лицензии SysManage Professional+. Обновите для "
 "доступа к этой функции."
@@ -1021,7 +1022,7 @@ msgstr "Не удалось запросить отключение услуги
 
 #: backend/api/host_utils.py:662
 msgid "Host limit reached for this tenant."
-msgstr ""
+msgstr "Достигнут лимит хостов для этого арендатора."
 
 #: backend/api/broadcast.py:106
 #, python-format
@@ -1136,8 +1137,8 @@ msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr ""
-"Запрошенное удаление учетной записи пользователя. Список пользователей будет "
-"автоматически обновлен после удаления."
+"Запрошенное удаление учетной записи пользователя. Список пользователей будет"
+" автоматически обновлен после удаления."
 
 #: backend/api/host_account_management.py:406
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1205,8 +1206,8 @@ msgstr ""
 #: backend/api/repository_mirroring.py:1104
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
 msgstr ""
 "Зеркало %s еще не завершило успешную синхронизацию — подождите до тех пор, "
 "пока синхронизация не будет выполнена успешно перед назначением его "
@@ -1234,8 +1235,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:220
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Коллекция в изолированном режиме требует загрузки модуля "
@@ -1248,8 +1249,8 @@ msgid ""
 "Configure mirror settings before creating a collection run."
 msgstr ""
 "Отсутствуют глобальные параметры зеркалирования или не настроен "
-"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска "
-"коллекции."
+"mirror_root_path. Настройте параметры зеркалирования перед созданием запуска"
+" коллекции."
 
 #: backend/api/airgap_collector_runs.py:291
 #, python-format
@@ -1326,8 +1327,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:657
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 "Файловая система ISO больше не находится на диске; возможно, стадия сборки "
 "была очищена. Повторите сборку."
@@ -1362,11 +1363,11 @@ msgstr "Файл ISO больше не находится на диске: %s"
 
 #: backend/api/package_compliance.py:71
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:196
 #, python-format
@@ -1530,8 +1531,8 @@ msgstr "Ошибка входа OIDC: %s"
 
 #: backend/api/external_idp.py:451
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
 "Связанного аккаунта SysManage с этим идентификатором IdP не существует. "
 "Обратитесь к администратору для создания вашего аккаунта."
@@ -1592,8 +1593,8 @@ msgstr "Неожиданная ошибка при проверке состоя
 #: backend/api/opentelemetry/eligibility.py:107
 #: backend/api/opentelemetry/grafana_connection.py:84
 #: backend/api/opentelemetry/grafana_connection.py:227
-#: backend/api/packages_operations.py:93 backend/api/packages_operations.py:267
-#: backend/api/error_constants.py:115
+#: backend/api/packages_operations.py:93
+#: backend/api/packages_operations.py:267 backend/api/error_constants.py:115
 msgid "Host not found or not active"
 msgstr "Узел не найден или не активен"
 
@@ -1630,11 +1631,11 @@ msgstr "URL Grafana недоступен"
 
 #: backend/api/opentelemetry/deployment.py:148
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
-"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на "
-"сервере."
+"Для развертки OpenTelemetry требуется загрузить Pro+ observability_engine на"
+" сервере."
 
 #: backend/api/opentelemetry/deployment.py:175
 msgid "OpenTelemetry deployment queued successfully"
@@ -1647,8 +1648,8 @@ msgstr "Не удалось развернуть OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:260
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 "Для удаления OpenTelemetry требуется загрузить набор инструментов "
 "observability_engine Pro+ на сервере."
@@ -1845,7 +1846,8 @@ msgstr "Команда перезапуска сетевого экрана от
 msgid "Firewall deploy command sent successfully"
 msgstr "Команда развертывания сетевого экрана отправлена успешно"
 
-#: backend/api/default_repositories.py:269 backend/api/antivirus_defaults.py:62
+#: backend/api/default_repositories.py:269
+#: backend/api/antivirus_defaults.py:62
 #: backend/api/enabled_package_managers.py:109
 msgid "OS name is required"
 msgstr "Требуется имя операционной системы"
@@ -2048,7 +2050,8 @@ msgstr ""
 
 #: backend/api/child_host_virtualization.py:538
 msgid "Child host creation requested. This may take several minutes."
-msgstr "Запрошенная создание дочернего узла. Это может занять несколько минут."
+msgstr ""
+"Запрошенная создание дочернего узла. Это может занять несколько минут."
 
 #: backend/api/host_operations.py:77
 msgid "Software inventory update requested"
@@ -2125,7 +2128,8 @@ msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr ""
-"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым паролем."
+"Ваш пароль успешно сброшен. Теперь вы можете войти в систему с новым "
+"паролем."
 
 #: backend/api/password_reset.py:409
 msgid "Token is valid"
@@ -2306,8 +2310,8 @@ msgid ""
 "instructions and will be unable to log in."
 msgstr ""
 "Включите электронную почту в файле конфигурации YAML и настройте параметры "
-"SMTP. Без интеграции электронной почты новые пользователи не смогут получить "
-"инструкции по установке пароля и не смогут войти в систему."
+"SMTP. Без интеграции электронной почты новые пользователи не смогут получить"
+" инструкции по установке пароля и не смогут войти в систему."
 
 #: backend/api/security.py:121
 msgid "Default admin credentials are configured in your YAML file"
@@ -2362,9 +2366,11 @@ msgstr ""
 "Соль пароля использует значение по умолчанию, но JWT-секрет был изменён. "
 "Запуск: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:72 backend/api/ubuntu_pro_settings.py:314
+#: backend/api/ubuntu_pro_settings.py:72
+#: backend/api/ubuntu_pro_settings.py:314
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
-msgstr "Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
+msgstr ""
+"Ключ Ubuntu Pro должен начинаться с 'C' для ключей на основе контракта"
 
 #: backend/api/ubuntu_pro_settings.py:76
 msgid "Ubuntu Pro key appears to be too short"
@@ -2419,8 +2425,8 @@ msgstr ""
 #: backend/api/ubuntu_pro_settings.py:346
 msgid "No master key configured. Please configure a master key first."
 msgstr ""
-"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ "
-"в первую очередь."
+"Конфигурация главного ключа не настроена. Пожалуйста, настройте главный ключ"
+" в первую очередь."
 
 #: backend/api/ubuntu_pro_settings.py:377
 #: backend/api/updates/os_upgrade_routes.py:260
@@ -2831,8 +2837,8 @@ msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
 msgstr ""
-"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения "
-"установки."
+"Запрошенное включение WSL. Возможно, потребуется перезагрузка для завершения"
+" установки."
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization_enable.py:209
@@ -2868,7 +2874,8 @@ msgstr "Запрошена инициализация VMM"
 
 #: backend/api/child_host_virtualization_enable.py:302
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr "Запрошена инициализация VMM. Агент включит и запустит демон vmd."
 
 #: backend/api/child_host_virtualization_enable.py:344
@@ -2902,8 +2909,8 @@ msgstr "Запрошенная инициализация bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:429
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
 "Запрошенная инициализация bhyve. Агент загрузит vmm.ko и настроит систему "
 "для работы с виртуальными машинами bhyve."
@@ -2922,7 +2929,8 @@ msgid ""
 "configuration. This will fail if any VMs are running."
 msgstr ""
 "Запрошенное отключение bhyve. Агент выгрузит vmm.ko и обновит конфигурацию "
-"системы. Это завершится ошибкой, если какие-либо виртуальные машины работают."
+"системы. Это завершится ошибкой, если какие-либо виртуальные машины "
+"работают."
 
 #: backend/api/child_host_virtualization_enable.py:532
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -2934,8 +2942,8 @@ msgstr "Модули KVM разрешены"
 
 #: backend/api/child_host_virtualization_enable.py:554
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 "Модули KVM включены по запросу. Агент загрузит модули ядра KVM с помощью "
 "команды modprobe."
@@ -3091,10 +3099,11 @@ msgstr ""
 "Обновите для доступа к этой функции."
 
 #: backend/api/reboot_orchestration.py:131
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
-"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку "
-"перезагрузки."
+"Запущенные дочерние хосты не найдены. Используйте стандартную конечную точку"
+" перезагрузки."
 
 #: backend/api/reboot_orchestration.py:200
 #, python-format
@@ -3109,11 +3118,11 @@ msgstr "Оркестрация перезагрузки не найдена"
 
 #: backend/api/upgrade_profiles.py:69
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Запланированные профили обновлений требуют лицензии SysManage Professional+. "
-"Выполните обновление для доступа к этой функции."
+"Запланированные профили обновлений требуют лицензии SysManage Professional+."
+" Выполните обновление для доступа к этой функции."
 
 #: backend/api/upgrade_profiles.py:189
 #, python-format
@@ -3588,8 +3597,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает "
-"экспорт в формате CSV."
+"Экспорт %s требует лицензии SysManage Professional+. Термин OSS поддерживает"
+" экспорт в формате CSV."
 
 #: backend/api/audit_log.py:302
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -3876,11 +3885,12 @@ msgstr "Обработка NULL сообщения для утвержденно
 #: backend/websocket/inbound_processor.py:265
 #, python-format
 msgid ""
-"Host %s not found on this database; deferring %d queued message(s) for retry "
-"(NOT deleting) — may be an in-flight enrollment or a deleted host"
+"Host %s not found on this database; deferring %d queued message(s) for retry"
+" (NOT deleting) — may be an in-flight enrollment or a deleted host"
 msgstr ""
 "Узел '%s' не найден в этой базе данных; откладываются %d сообщения из "
-"очереди (НЕ УДАЛЯЮТСЯ) — возможно, это процесс регистрации или удаленный хост"
+"очереди (НЕ УДАЛЯЮТСЯ) — возможно, это процесс регистрации или удаленный "
+"хост"
 
 #: backend/websocket/inbound_processor.py:283
 #, python-format
@@ -4306,11 +4316,11 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "Подтвердить Обновление ОС"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr ""
-#~ "Это действие обновит операционную систему и потребует перезагрузки "
-#~ "системы. Продолжить?"
+#~ "Это действие обновит операционную систему и потребует перезагрузки системы. "
+#~ "Продолжить?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "Обновления ОС всегда являются обновлениями безопасности"
@@ -4424,8 +4434,8 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirt успешно инициализирован"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
 #~ "Экспорт журнала аудита требует лицензии SysManage Professional+. Обновите "
 #~ "для доступа к форматам экспорта CSV, JSON, CEF и LEEF."

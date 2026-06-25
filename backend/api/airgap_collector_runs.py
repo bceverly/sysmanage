@@ -296,7 +296,22 @@ def _derive_target_meta(
             )
             % mirror.name,
         )
-    known = mirror.known_version  # SQLAlchemy lazy-load via relationship
+    # Phase 13.1.D: the catalog lives in the shared partition
+    # (shared_mirror_known_version), not the tenant database this mirror is in,
+    # so resolve it through a shared-partition session by its soft-ref id rather
+    # than an ORM relationship (a cross-partition relationship cannot eager-load
+    # across databases).  The loaded row's columns stay readable after the
+    # session closes.
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        shared_sessionmaker,
+    )
+
+    with shared_sessionmaker()() as _shared:
+        known = (
+            _shared.query(models.MirrorKnownVersion)
+            .filter(models.MirrorKnownVersion.id == mirror.known_version_id)
+            .first()
+        )
     if known is None:
         # known_version_id non-NULL but the row was deleted out from
         # under us — extremely rare.  Still a 400 since the operator

@@ -4246,24 +4246,51 @@ plan-builder + UI integration.
       single-tenant mode. Enrollment e2e test landed (`test_tenant_enrollment_e2e.py`).
       Agent-side token supply (config/UI) and a dedicated cross-tenant data-isolation
       harness (13.1.F) are the remaining gaps.)*
-- [ ] **13.1.D** Shared-reference split — `shared` Alembic chain, relocate
+- [x] **13.1.D** Shared-reference split — `shared` Alembic chain, relocate
       `shared_*` reference tables, convert cross-partition FKs to soft references,
       CI prefix guard
       *(June 2026: **CI prefix guard done** — `tests/test_alembic_prefix_guard.py`
       runs each chain on a scratch DB and asserts registry→`registry_*`,
-      shared→`shared_*`, tenant→neither; the `shared` chain is established. The
-      physical table relocation is **specified but deferred** as a careful staged
-      migration: the cleanest candidates are the mirror reference catalogs
-      `mirror_known_version` + `mirror_platform_config` → `shared_*`, which makes
-      `mirror_repository.{known_version_id,platform_config_id}` cross-partition →
-      convert those FKs to soft UUID refs (drop the constraint, keep the column,
-      make `MirrorRepository.known_version` a `viewonly` `foreign()`-annotated
-      relationship). Ordering: a rename-or-create migration in the `shared` chain +
-      a drop-if-exists cleanup at the `tenant` head. Cosmetic in collapsed mode, so
-      it's its own reviewed change rather than bundled here.)*
+      shared→`shared_*`, tenant→neither; the `shared` chain is established.
+      **Relocation DONE:** the mirror version catalog `mirror_known_version`
+      (canonical, migration-seeded reference data identical for every tenant)
+      moved to the shared partition as `shared_mirror_known_version` — created +
+      seeded by the new shared-chain migration `s1shared` (17 canonical rows,
+      post-`u1mirror60` state), and dropped from the tenant chain by `d1sharedmkv`,
+      which also drops the now-cross-partition FK on
+      `mirror_repository.known_version_id` while keeping the column as a soft UUID
+      reference (no constraint). The `known_version` ORM relationship (which could
+      not eager-load across databases) was removed; the ~4 catalog read sites in
+      `backend/api/repository_mirroring.py` + the air-gap collector's
+      `_derive_target_meta` now resolve the catalog through a new shared-partition
+      session seam (`partitions.shared_sessionmaker` / `get_shared_db`), and the
+      one cross-partition SQL join (`host_default_mirror ⋈ mirror_known_version`)
+      is split into an app-level join. Behaviourally transparent in collapsed mode
+      (shared collapses onto the application engine); correct in MT mode where the
+      catalog lives once in the shared database. `mirror_platform_config` is NOT
+      relocated — it carries a per-host `host_id` and is genuinely tenant-scoped,
+      not shared reference data. Verified end-to-end on scratch SQLite +
+      `tests/test_shared_reference_relocation.py`; prefix guard green.)*
 - [ ] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
       JIT/SCIM provisioning, vendor-support grants tied to OpenBAO issuance,
       break-glass path
+      *(June 2026: **enforced grants already done** (13.1.B) — request-time
+      enforcement in `auth_bearer.get_current_tenant` → `has_active_grant`
+      (strict 403, expiry-checked). **Per-tenant IdP + JIT slice DONE:**
+      `external_idp_provider` gains `tenant_id` (soft ref, NULL = server-global),
+      `jit_provisioning`, and `jit_default_role` (tenant-chain migration
+      `e1idptenancy`); provider CRUD + the Authentication-Providers settings UI
+      expose them. The `external_idp_engine` (v0.2.0) now returns the verified
+      `email` claim from the OIDC exchange, and the OIDC callback JIT-provisions
+      on first SSO login: fail-closed `registry_service.jit_domain_permitted`
+      (refuses unless the tenant has an explicit email-domain allowlist the
+      address matches — stricter than the admin-facing `is_email_domain_allowed`),
+      then `ensure_registry_user` + `ensure_grant` into the provider's tenant and
+      a linked local account. 6 JIT tests + migration verified; black/pylint/tsc
+      clean. **Remaining for E:** SAML 2.0 (only LDAP/OIDC today), SCIM
+      provisioning, vendor-support grants bound to OpenBAO lease TTL, and the
+      break-glass flow (the `local_account_fallback` setting exists; the
+      grant-tied break-glass path is greenfield).)*
 - [x] **13.1.F** Backup orchestration & **data isolation verification** —
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement

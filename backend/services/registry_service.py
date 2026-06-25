@@ -151,3 +151,67 @@ def list_email_domains(session, tenant_id) -> List[RegistryTenantEmailDomain]:
         .order_by(RegistryTenantEmailDomain.domain)
         .all()
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 13.1.E — JIT (just-in-time) provisioning support.
+#
+# These are deliberately FAIL-CLOSED and stricter than the general
+# ``is_email_domain_allowed`` check: auto-creating an account from an SSO login
+# is far more sensitive than letting an admin grant an existing user, so JIT
+# refuses unless the tenant has an EXPLICIT allowlist that the email matches.
+# ---------------------------------------------------------------------------
+
+
+def jit_domain_permitted(session, tenant_id, email: str) -> bool:
+    """True only when the tenant has a NON-EMPTY allowlist that ``email`` matches.
+
+    Unlike :func:`is_email_domain_allowed` (which treats an empty allowlist as
+    "no restriction"), JIT fails closed: with no allowlist configured, no SSO
+    identity may self-provision into the tenant.
+    """
+    domain = normalize_domain(email)
+    if not domain:
+        return False
+    rows = (
+        session.query(RegistryTenantEmailDomain)
+        .filter(RegistryTenantEmailDomain.tenant_id == tenant_id)
+        .all()
+    )
+    if not rows:
+        return False
+    return domain in {r.domain for r in rows}
+
+
+def ensure_registry_user(session, email: str) -> RegistryUser:
+    """Find-or-create the global identity for ``email`` (lower-cased)."""
+    normalized = (email or "").strip().lower()
+    user = session.query(RegistryUser).filter(RegistryUser.email == normalized).first()
+    if user is None:
+        user = RegistryUser(email=normalized)
+        session.add(user)
+        session.flush()  # populate user.id
+    return user
+
+
+def ensure_grant(session, user_id, tenant_id, role: str = "member"):
+    """Find-or-create a (user, tenant) grant; returns the grant row.
+
+    Idempotent on the unique (user_id, tenant_id) constraint — a returning SSO
+    user keeps their existing grant rather than duplicating it.
+    """
+    grant = (
+        session.query(RegistryUserTenantGrant)
+        .filter(
+            RegistryUserTenantGrant.user_id == user_id,
+            RegistryUserTenantGrant.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if grant is None:
+        grant = RegistryUserTenantGrant(
+            user_id=user_id, tenant_id=tenant_id, role=role or "member"
+        )
+        session.add(grant)
+        session.flush()
+    return grant

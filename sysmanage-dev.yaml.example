@@ -35,6 +35,12 @@ logging:
 message_queue:
   expiration_timeout_minutes: 60
   cleanup_interval_minutes: 30
+# Multi-tenancy (Phase 13.1) — opt-in; disabled for the standard dev/single-tenant
+# setup. Set enabled: true to exercise the SaaS control plane locally. See
+# sysmanage.yaml.example for the registry/backup blocks that accompany SaaS mode.
+multitenancy:
+  enabled: false
+  self_service_provisioning: false
 vault:
   enabled: true
   url: http://localhost:8200

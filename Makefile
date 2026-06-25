@@ -913,7 +913,7 @@ lint-version-fix:
 	@$(PYTHON) scripts/check_version_drift.py --fix
 
 # Combined linting
-lint: lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend lint-version check-migrations
+lint: lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-complete lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the
@@ -959,6 +959,17 @@ i18n-check: $(VENV_ACTIVATE)
 	@echo "=== i18n completeness + placeholder check ==="
 	@$(PYTHON) scripts/i18n_check_translations.py
 	@echo "[OK] i18n translations complete and consistent"
+
+# Offline i18n COMPLETENESS gate — the SAME check CI runs (i18n_backfill --check),
+# but with no translation service required (polib only; frontend JSON + backend
+# .po).  Wired into ``lint`` so ``make lint`` and the pre-push hook catch
+# untranslated strings BEFORE a push, instead of failing in GitHub Actions.
+# A new ``_()`` / ``t()`` string with no translation now fails locally.
+i18n-complete: $(VENV_ACTIVATE)
+	@echo "=== i18n completeness (offline — no translation service) ==="
+	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project frontend --check
+	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project backend --check
+	@echo "[OK] i18n complete — every locale fully translated"
 
 # Machine-translate the [TODO]-seeded strings via a LOCAL OpenAI-compatible
 # endpoint (vLLM/Ollama/llama.cpp).  Runs on the operator's GPU rig, not

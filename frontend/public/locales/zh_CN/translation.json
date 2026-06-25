@@ -2117,7 +2117,12 @@
       "type": "类型",
       "userBase": "用户搜索基础",
       "userFilterHelp": "必须包含 %s 表示用户名，如 (sAMAccountName=%s)",
-      "userFilter": "用户搜索过滤器"
+      "userFilter": "用户搜索过滤器",
+      "tenant": "租户 ID（可选）",
+      "tenantHelp": "将此提供程序限定为单个租户（其 UUID）。留空表示服务器级全局提供程序。",
+      "jit": "即时预配（首次 SSO 登录时自动创建用户）",
+      "jitRole": "JIT 默认角色",
+      "jitRoleHelp": "授予自动创建成员的角色。需要租户 ID 以及该租户上匹配的电子邮件域名白名单。"
     },
     "loadError": "无法加载身份提供程序。",
     "mapAddError": "无法添加映射。",

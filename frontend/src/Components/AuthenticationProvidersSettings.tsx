@@ -64,6 +64,9 @@ const DEFAULT_DRAFT: IdpProviderCreate = {
   name: '',
   type: 'ldap',
   enabled: true,
+  tenant_id: '',
+  jit_provisioning: false,
+  jit_default_role: 'member',
   ldap_connection_timeout: 10,
   oidc_scopes: 'openid profile email',
   oidc_group_claim: 'groups',
@@ -120,6 +123,9 @@ const AuthenticationProvidersSettings: React.FC = () => {
       name: p.name,
       type: p.type,
       enabled: p.enabled,
+      tenant_id: p.tenant_id ?? '',
+      jit_provisioning: p.jit_provisioning ?? false,
+      jit_default_role: p.jit_default_role ?? 'member',
       ldap_server_url: coerce(p.ldap_server_url),
       ldap_bind_dn: coerce(p.ldap_bind_dn),
       ldap_bind_password_secret_id: coerce(p.ldap_bind_password_secret_id),
@@ -145,10 +151,15 @@ const AuthenticationProvidersSettings: React.FC = () => {
     setSaving(true);
     setError(null);
     try {
+      // An empty tenant id means "server-global" — send null, not "".
+      const payload = {
+        ...draft,
+        tenant_id: draft.tenant_id ? draft.tenant_id : null,
+      };
       if (editingId) {
-        await updateProvider(editingId, draft);
+        await updateProvider(editingId, payload);
       } else {
-        await createProvider(draft);
+        await createProvider(payload);
       }
       setDialogOpen(false);
       await refresh();
@@ -375,6 +386,45 @@ const AuthenticationProvidersSettings: React.FC = () => {
               }
               label={t('idp.field.enabled', 'Enabled')}
             />
+
+            <TextField
+              label={t('idp.field.tenant', 'Tenant ID (optional)')}
+              helperText={t(
+                'idp.field.tenantHelp',
+                'Scope this provider to one tenant (its UUID). Leave blank for a server-global provider.',
+              )}
+              value={draft.tenant_id ?? ''}
+              onChange={(e) => setDraft({ ...draft, tenant_id: e.target.value })}
+              fullWidth
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!draft.jit_provisioning}
+                  onChange={(e) =>
+                    setDraft({ ...draft, jit_provisioning: e.target.checked })
+                  }
+                />
+              }
+              label={t(
+                'idp.field.jit',
+                'Just-in-time provisioning (auto-create users on first SSO login)',
+              )}
+            />
+            {draft.jit_provisioning && (
+              <TextField
+                label={t('idp.field.jitRole', 'JIT default role')}
+                helperText={t(
+                  'idp.field.jitRoleHelp',
+                  'Grant role assigned to auto-created members. Requires a tenant ID and a matching email-domain allowlist on that tenant.',
+                )}
+                value={draft.jit_default_role ?? 'member'}
+                onChange={(e) =>
+                  setDraft({ ...draft, jit_default_role: e.target.value })
+                }
+                fullWidth
+              />
+            )}
 
             {draft.type === 'ldap' && (
               <>

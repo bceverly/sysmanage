@@ -2117,7 +2117,12 @@
       "type": "Tipo",
       "userBase": "Base de búsqueda de usuarios",
       "userFilterHelp": "Debe contener %s para el nombre de usuario, p. ej. (sAMAccountName=%s)",
-      "userFilter": "Filtro de búsqueda de usuarios"
+      "userFilter": "Filtro de búsqueda de usuarios",
+      "tenant": "ID de inquilino (opcional)",
+      "tenantHelp": "Limitar este proveedor a un inquilino (su UUID). Déjelo en blanco para un proveedor global del servidor.",
+      "jit": "Aprovisionamiento JIT (crear usuarios automáticamente en el primer inicio de sesión SSO)",
+      "jitRole": "Rol predeterminado de JIT",
+      "jitRoleHelp": "Rol concedido a los miembros creados automáticamente. Requiere un ID de inquilino y una lista de dominios de correo permitidos coincidente en ese inquilino."
     },
     "loadError": "No se pudieron cargar los proveedores de identidad.",
     "mapAddError": "No se pudo agregar la asignación.",

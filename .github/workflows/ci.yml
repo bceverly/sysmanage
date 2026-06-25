@@ -101,8 +101,17 @@ jobs:
         EOF
 
     - name: Run backend database migrations
+      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
+      # tenant (the default section) — not just the tenant chain.  The
+      # registry/shared chains were previously never exercised on PG in CI,
+      # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
+      # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
+      # runs them against an isolated scratch DB with assertions.
       run: |
-        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        for chain in registry shared; do
+          python -m alembic --name "$chain" upgrade head
+        done
+        python -m alembic upgrade head   # tenant chain (default section)
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -657,8 +666,17 @@ jobs:
         EOF
 
     - name: Run backend database migrations
+      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
+      # tenant (the default section) — not just the tenant chain.  The
+      # registry/shared chains were previously never exercised on PG in CI,
+      # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
+      # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
+      # runs them against an isolated scratch DB with assertions.
       run: |
-        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        for chain in registry shared; do
+          python -m alembic --name "$chain" upgrade head
+        done
+        python -m alembic upgrade head   # tenant chain (default section)
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
@@ -1096,8 +1114,17 @@ jobs:
         EOF
 
     - name: Run backend database migrations
+      # Run ALL THREE partition chains on PostgreSQL — registry, shared, and
+      # tenant (the default section) — not just the tenant chain.  The
+      # registry/shared chains were previously never exercised on PG in CI,
+      # which let dialect-specific migration bugs (CHAR-vs-UUID, FK naming)
+      # reach ``make migrate``.  tests/test_alembic_postgres.py additionally
+      # runs them against an isolated scratch DB with assertions.
       run: |
-        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        for chain in registry shared; do
+          python -m alembic --name "$chain" upgrade head
+        done
+        python -m alembic upgrade head   # tenant chain (default section)
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage

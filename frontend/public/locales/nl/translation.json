@@ -2117,7 +2117,12 @@
       "type": "Type",
       "userBase": "Zoekbasis voor gebruikers",
       "userFilterHelp": "Moet %s bevatten voor de gebruikersnaam, bijv. (sAMAccountName=%s)",
-      "userFilter": "Zoekfilter voor gebruikers"
+      "userFilter": "Zoekfilter voor gebruikers",
+      "tenant": "Tenant-ID (optioneel)",
+      "tenantHelp": "Beperk deze provider tot één tenant (de UUID). Laat leeg voor een serverbrede provider.",
+      "jit": "Just-in-time-provisioning (gebruikers automatisch aanmaken bij eerste SSO-aanmelding)",
+      "jitRole": "JIT-standaardrol",
+      "jitRoleHelp": "Rol die wordt toegekend aan automatisch aangemaakte leden. Vereist een tenant-ID en een overeenkomende lijst met toegestane e-maildomeinen voor die tenant."
     },
     "loadError": "Identiteitsproviders konden niet worden geladen.",
     "mapAddError": "Toewijzing kon niet worden toegevoegd.",

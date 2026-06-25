@@ -48,6 +48,17 @@ class ExternalIdpProvider(Base):
     name = Column(String(120), unique=True, nullable=False)
     type = Column(String(20), nullable=False)  # 'ldap' | 'oidc'
     enabled = Column(Boolean, nullable=False, default=True)
+    # Phase 13.1.E — per-tenant IdP. SOFT reference to ``registry_tenant.id``
+    # (no FK: the registry is a different partition). NULL means a server-global
+    # provider (the pre-13.1.E behaviour); a value scopes this provider to one
+    # tenant, so a SaaS tenant brings its own Entra/Okta/OIDC directory.
+    tenant_id = Column(GUID(), nullable=True)
+    # Phase 13.1.E — JIT provisioning. When True, a successful SSO login for a
+    # subject with no linked sysmanage account auto-creates the account + a grant
+    # into this provider's tenant (gated by that tenant's email-domain allowlist).
+    jit_provisioning = Column(Boolean, nullable=False, default=False)
+    # Role granted to a JIT-created membership (grant role on registry).
+    jit_default_role = Column(String(64), nullable=False, default="member")
     # LDAP/AD parameters.
     ldap_server_url = Column(String(500), nullable=True)  # ldaps://...
     ldap_bind_dn = Column(String(500), nullable=True)
@@ -81,6 +92,9 @@ class ExternalIdpProvider(Base):
             "name": self.name,
             "type": self.type,
             "enabled": self.enabled,
+            "tenant_id": str(self.tenant_id) if self.tenant_id else None,
+            "jit_provisioning": self.jit_provisioning,
+            "jit_default_role": self.jit_default_role,
             "ldap_server_url": self.ldap_server_url,
             "ldap_bind_dn": self.ldap_bind_dn,
             "ldap_bind_password_secret_id": self.ldap_bind_password_secret_id,

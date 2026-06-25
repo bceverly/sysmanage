@@ -2117,7 +2117,12 @@
       "type": "Tipo",
       "userBase": "Base de busca de usuários",
       "userFilterHelp": "Deve conter %s para o nome de usuário, ex. (sAMAccountName=%s)",
-      "userFilter": "Filtro de busca de usuários"
+      "userFilter": "Filtro de busca de usuários",
+      "tenant": "ID do inquilino (opcional)",
+      "tenantHelp": "Restringir este fornecedor a um inquilino (o respetivo UUID). Deixe em branco para um fornecedor global do servidor.",
+      "jit": "Aprovisionamento just-in-time (criar utilizadores automaticamente no primeiro início de sessão SSO)",
+      "jitRole": "Função predefinida do JIT",
+      "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de inquilino e uma lista de domínios de e-mail permitidos correspondente nesse inquilino."
     },
     "loadError": "Não foi possível carregar provedores de identidade.",
     "mapAddError": "Não foi possível adicionar o mapeamento.",

@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-25 09:39-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -165,7 +165,8 @@ msgstr "Il sistema host non è approvato"
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
 #: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64 backend/api/packages_operations.py:238
+#: backend/api/packages_operations.py:64
+#: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
 #: backend/api/updates/execution_routes.py:45
@@ -194,7 +195,8 @@ msgstr "Il ruolo con ID %s non esiste"
 
 #: backend/api/handlers/hostname_handler.py:33
 msgid "Hostname changed message received without host_id"
-msgstr "Messaggio di modifica del nome host ricevuto senza ID del sistema host"
+msgstr ""
+"Messaggio di modifica del nome host ricevuto senza ID del sistema host"
 
 #: backend/api/handlers/hostname_handler.py:44
 #, python-format
@@ -340,7 +342,8 @@ msgstr "Impossibile elaborare il risultato della raccolta dei pacchetti: %s"
 #: backend/api/handlers/software_package_handlers.py:497
 #, python-format
 msgid "Failed to process third-party repository update: %s"
-msgstr "Impossibile elaborare l'aggiornamento dell'archivio di terze parti: %s"
+msgstr ""
+"Impossibile elaborare l'aggiornamento dell'archivio di terze parti: %s"
 
 #: backend/api/handlers/software_package_handlers.py:580
 #, python-format
@@ -538,8 +541,8 @@ msgstr ""
 
 #: backend/api/reports/endpoints.py:65
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
 "La generazione di report richiede una licenza SysManage Professional+. "
 "Effettuare l'upgrade per accedere a questa funzionalità."
@@ -679,7 +682,8 @@ msgstr "L'URL Graylog non è configurato"
 #: backend/api/graylog_integration.py:539
 msgid "Connection timeout - Graylog server may be unreachable"
 msgstr ""
-"Timeout della connessione - Il server Graylog potrebbe essere irraggiungibile"
+"Timeout della connessione - Il server Graylog potrebbe essere "
+"irraggiungibile"
 
 #: backend/api/graylog_integration.py:548
 msgid "Connection failed - Graylog server may be down or unreachable"
@@ -807,7 +811,8 @@ msgstr "Impossibile aggiornare le preferenze della colonna: %s"
 
 #: backend/api/user_preferences.py:248
 msgid "Column preferences reset to defaults"
-msgstr "Le preferenze delle colonne sono state resettate ai valori predefiniti"
+msgstr ""
+"Le preferenze delle colonne sono state resettate ai valori predefiniti"
 
 #: backend/api/user_preferences.py:250
 msgid "No preferences found to delete"
@@ -1034,7 +1039,7 @@ msgstr "Impossibile richiedere la disabilitazione del servizio Ubuntu Pro: %s"
 
 #: backend/api/host_utils.py:662
 msgid "Host limit reached for this tenant."
-msgstr ""
+msgstr "Limite di host raggiunto per questo tenant."
 
 #: backend/api/broadcast.py:106
 #, python-format
@@ -1217,14 +1222,14 @@ msgstr "Una configurazione di piattaforma per %s su questo host esiste già"
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr ""
-"La configurazione della piattaforma possiede ancora %d specchio/i; eliminare "
-"quelli prima"
+"La configurazione della piattaforma possiede ancora %d specchio/i; eliminare"
+" quelli prima"
 
 #: backend/api/repository_mirroring.py:1104
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
 msgstr ""
 "Lo specchio %s non ha completato ancora una sincronizzazione corretta — "
 "attendi che la sincronizzazione riesca prima di assegnarlo come predefinito."
@@ -1243,14 +1248,14 @@ msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"Le raccolte di air-gap richiedono una licenza SysManage Professional+ con il "
-"motore del collector air-gap. Si prega di aggiornare per accedere a questa "
+"Le raccolte di air-gap richiedono una licenza SysManage Professional+ con il"
+" motore del collector air-gap. Si prega di aggiornare per accedere a questa "
 "funzionalità."
 
 #: backend/api/airgap_collector_runs.py:220
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
 "Le raccolte di air-gap richiedono che il modulo repository_mirroring_engine "
@@ -1274,8 +1279,8 @@ msgid ""
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
 "Lo specchio %r non ha un known_version_id impostato; le esecuzioni di "
-"raccolta Opzione-B necessitano che lo specchio sia legato a una versione del "
-"catalogo in modo da poter derivare distribuzione / versione. Modifica lo "
+"raccolta Opzione-B necessitano che lo specchio sia legato a una versione del"
+" catalogo in modo da poter derivare distribuzione / versione. Modifica lo "
 "specchio e seleziona una versione dalla lista a discesa."
 
 #: backend/api/airgap_collector_runs.py:307
@@ -1340,8 +1345,8 @@ msgstr ""
 
 #: backend/api/airgap_collector_runs.py:657
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
 "Il file ISO non è più presente sul disco; il volume di staging potrebbe "
 "essere stato pulito. Eseguire nuovamente la raccolta per ricostruirlo."
@@ -1376,11 +1381,11 @@ msgstr "Il file ISO non è più presente sul disco: %s"
 
 #: backend/api/package_compliance.py:71
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:196
 #, python-format
@@ -1542,8 +1547,8 @@ msgstr "Accesso OIDC fallito: %s"
 
 #: backend/api/external_idp.py:451
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
 "Nessun account SysManage è collegato a questa identità IdP. Chiedi "
 "all'amministratore di configurare il tuo account prima."
@@ -1607,8 +1612,8 @@ msgstr "Errore imprevisto durante il controllo della salute di Grafana"
 #: backend/api/opentelemetry/eligibility.py:107
 #: backend/api/opentelemetry/grafana_connection.py:84
 #: backend/api/opentelemetry/grafana_connection.py:227
-#: backend/api/packages_operations.py:93 backend/api/packages_operations.py:267
-#: backend/api/error_constants.py:115
+#: backend/api/packages_operations.py:93
+#: backend/api/packages_operations.py:267 backend/api/error_constants.py:115
 msgid "Host not found or not active"
 msgstr "Sistema host non trovato o non attivo"
 
@@ -1645,8 +1650,8 @@ msgstr "URL Grafana non disponibile"
 
 #: backend/api/opentelemetry/deployment.py:148
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
 "La distribuzione OpenTelemetry richiede che l'engine observability_engine "
 "Pro+ sia caricato sul server."
@@ -1662,8 +1667,8 @@ msgstr "Impossibile distribuire OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/deployment.py:260
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
 "La rimozione di OpenTelemetry richiede che l'engine observability_engine "
 "Pro+ sia caricato sul server."
@@ -1860,7 +1865,8 @@ msgstr "Comando di riavvio del firewall inviato con successo"
 msgid "Firewall deploy command sent successfully"
 msgstr "Comando di distribuzione firewall inviato con successo"
 
-#: backend/api/default_repositories.py:269 backend/api/antivirus_defaults.py:62
+#: backend/api/default_repositories.py:269
+#: backend/api/antivirus_defaults.py:62
 #: backend/api/enabled_package_managers.py:109
 msgid "OS name is required"
 msgstr "È richiesto un nome di sistema operativo"
@@ -1994,8 +2000,8 @@ msgstr "Iscrizione del sistema host in sospeso per approvazione"
 #: backend/api/message_handlers_core.py:355
 msgid "Host auto-approved via child host creation"
 msgstr ""
-"Il sistema host è stato approvato automaticamente tramite la creazione di un "
-"sistema figlio"
+"Il sistema host è stato approvato automaticamente tramite la creazione di un"
+" sistema figlio"
 
 #: backend/api/message_handlers_core.py:438
 msgid "Agent registered and connected successfully"
@@ -2056,8 +2062,8 @@ msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr ""
-"Creazione del host figlio richiesta. Il host verrà automaticamente approvato "
-"al momento della connessione."
+"Creazione del host figlio richiesta. Il host verrà automaticamente approvato"
+" al momento della connessione."
 
 #: backend/api/child_host_virtualization.py:538
 msgid "Child host creation requested. This may take several minutes."
@@ -2168,7 +2174,8 @@ msgstr "Il nome del sistema operativo deve essere lungo 100 caratteri o meno"
 
 #: backend/api/antivirus_defaults.py:77
 msgid "Antivirus package name must be 255 characters or less"
-msgstr "Il nome del pacchetto antivirus deve essere lungo 255 caratteri o meno"
+msgstr ""
+"Il nome del pacchetto antivirus deve essere lungo 255 caratteri o meno"
 
 #: backend/api/antivirus_defaults.py:102
 #, python-format
@@ -2320,8 +2327,8 @@ msgid ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
-"Abilita le email nel file di configurazione YAML e configura le impostazioni "
-"SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le "
+"Abilita le email nel file di configurazione YAML e configura le impostazioni"
+" SMTP. Senza integrazione email, i nuovi utenti non possono ricevere le "
 "istruzioni per l'impostazione della password e non potranno accedere."
 
 #: backend/api/security.py:121
@@ -2377,10 +2384,12 @@ msgstr ""
 "Il salt della password utilizza il valore predefinito ma il segreto JWT è "
 "stato modificato. Esegui: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:72 backend/api/ubuntu_pro_settings.py:314
+#: backend/api/ubuntu_pro_settings.py:72
+#: backend/api/ubuntu_pro_settings.py:314
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr ""
-"Per le chiavi basate su contratto, la chiave Ubuntu Pro deve iniziare con 'C'"
+"Per le chiavi basate su contratto, la chiave Ubuntu Pro deve iniziare con "
+"'C'"
 
 #: backend/api/ubuntu_pro_settings.py:76
 msgid "Ubuntu Pro key appears to be too short"
@@ -2584,8 +2593,8 @@ msgstr "In coda %d pacchetti per l'installazione con successo"
 #, python-format
 msgid "Failed to queue package installation: %s"
 msgstr ""
-"Impossibile inserire la richiesta di installazione del pacchetto nella coda: "
-"%s"
+"Impossibile inserire la richiesta di installazione del pacchetto nella coda:"
+" %s"
 
 #: backend/api/packages_operations.py:246
 msgid "Permission denied: REMOVE_PACKAGE role required"
@@ -2894,7 +2903,8 @@ msgstr "Inizializzazione VMM richiesta"
 
 #: backend/api/child_host_virtualization_enable.py:302
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr ""
 "Inizializzazione VMM richiesta. L'agente abiliterà e avvierà il daemon vmd."
 
@@ -2923,7 +2933,8 @@ msgstr "bhyve è supportato solo su sistemi FreeBSD"
 #: backend/api/child_host_virtualization_enable.py:407
 msgid "Agent must be running with root privileges to initialize bhyve"
 msgstr ""
-"L'agente deve essere in esecuzione con privilegi root per inizializzare bhyve"
+"L'agente deve essere in esecuzione con privilegi root per inizializzare "
+"bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:421
 msgid "bhyve initialization requested"
@@ -2931,11 +2942,11 @@ msgstr "Inizializzazione bhyve richiesta"
 
 #: backend/api/child_host_virtualization_enable.py:429
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
-"Inizializzazione bhyve richiesta. L'agente caricherà vmm.ko e configurerà il "
-"sistema per le macchine virtuali bhyve."
+"Inizializzazione bhyve richiesta. L'agente caricherà vmm.ko e configurerà il"
+" sistema per le macchine virtuali bhyve."
 
 #: backend/api/child_host_virtualization_enable.py:470
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -2952,14 +2963,14 @@ msgid ""
 "configuration. This will fail if any VMs are running."
 msgstr ""
 "Disabilitazione bhyve richiesta. L'agente discaricherà vmm.ko e aggiusterà "
-"la configurazione del sistema. Questa operazione fallirà se ci sono macchine "
-"virtuali in esecuzione."
+"la configurazione del sistema. Questa operazione fallirà se ci sono macchine"
+" virtuali in esecuzione."
 
 #: backend/api/child_host_virtualization_enable.py:532
 msgid "Agent must be running with root privileges to enable KVM modules"
 msgstr ""
-"L'agente deve essere in esecuzione con privilegi root per abilitare i moduli "
-"KVM"
+"L'agente deve essere in esecuzione con privilegi root per abilitare i moduli"
+" KVM"
 
 #: backend/api/child_host_virtualization_enable.py:546
 msgid "KVM modules enable requested"
@@ -2967,8 +2978,8 @@ msgstr "Moduli KVM abilitano richiesti"
 
 #: backend/api/child_host_virtualization_enable.py:554
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
 "I moduli KVM sono abilitati. L'agente caricherà i moduli del nucleo KVM "
 "tramite modprobe."
@@ -2988,8 +2999,8 @@ msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr ""
-"Disabilitazione dei moduli KVM richiesta. L'agente discaricherà i moduli del "
-"kernel KVM tramite modprobe -r. Questo fallirá se sono in esecuzione "
+"Disabilitazione dei moduli KVM richiesta. L'agente discaricherà i moduli del"
+" kernel KVM tramite modprobe -r. Questo fallirá se sono in esecuzione "
 "qualsiasi VM."
 
 # KVM Networking Configuration strings
@@ -3018,7 +3029,8 @@ msgstr "Configurazione di rete KVM richiesta: modalità %s"
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
-msgstr "Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
+msgstr ""
+"Configurazione di rete KVM richiesta. L'agente configurerà la rete %s."
 
 #: backend/api/child_host_virtualization_enable.py:774
 msgid "KVM networks are only available on Linux hosts"
@@ -3031,8 +3043,8 @@ msgstr "Elenco reti KVM richiesto. I risultati verranno visualizzati a breve."
 #: backend/api/firewall_roles_helpers.py:133
 msgid "Port number must be between 0 and 65535 (0 means any port)"
 msgstr ""
-"Il numero di porta deve essere compreso tra 0 e 65535 (0 significa qualsiasi "
-"porta)"
+"Il numero di porta deve essere compreso tra 0 e 65535 (0 significa qualsiasi"
+" porta)"
 
 #: backend/api/firewall_roles_helpers.py:144
 msgid "At least one protocol (TCP or UDP) must be selected"
@@ -3130,7 +3142,8 @@ msgstr ""
 "Aggiorna per accedere a questa funzionalità."
 
 #: backend/api/reboot_orchestration.py:131
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr ""
 "Nessun host figlio in esecuzione trovato. Utilizzare l'endpoint di riavvio "
 "standard."
@@ -3146,8 +3159,8 @@ msgstr "Orchestrazione di riavvio non trovata"
 
 #: backend/api/upgrade_profiles.py:69
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
 "I profili di aggiornamento pianificati richiedono una licenza SysManage "
 "Professional+. Esegui l'upgrade per accedere a questa funzionalità."
@@ -3919,8 +3932,8 @@ msgstr "Elaborando il messaggio NULL host_id per l'host approvato %s (ID: %s)"
 #: backend/websocket/inbound_processor.py:265
 #, python-format
 msgid ""
-"Host %s not found on this database; deferring %d queued message(s) for retry "
-"(NOT deleting) — may be an in-flight enrollment or a deleted host"
+"Host %s not found on this database; deferring %d queued message(s) for retry"
+" (NOT deleting) — may be an in-flight enrollment or a deleted host"
 msgstr ""
 "Il sistema host '%s' non è presente in questo database; differendo %d "
 "messaggio(i) in coda (NON eliminando) - potrebbe essere un'iscrizione in "
@@ -3994,7 +4007,8 @@ msgstr "Errore nell'elaborazione del messaggio %s per l'host %s: %s"
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr ""
-"Impossibile contrassegnare il messaggio SYSTEM_INFO '%s' come in elaborazione"
+"Impossibile contrassegnare il messaggio SYSTEM_INFO '%s' come in "
+"elaborazione"
 
 #: backend/websocket/inbound_processor.py:586
 #, python-format
@@ -4348,8 +4362,8 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "Conferma Aggiornamento OS"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr ""
 #~ "Questa azione aggiornerà il sistema operativo e richiederà un riavvio "
 #~ "sistema. Continuare?"
@@ -4466,12 +4480,12 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirt inizializzato con successo"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
 #~ "L'esportazione del registro di audit richiede una licenza SysManage "
-#~ "Professional+. Effettuare l'upgrade per accedere ai formati di "
-#~ "esportazione CSV, JSON, CEF e LEEF."
+#~ "Professional+. Effettuare l'upgrade per accedere ai formati di esportazione "
+#~ "CSV, JSON, CEF e LEEF."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

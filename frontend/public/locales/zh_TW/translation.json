@@ -2117,7 +2117,12 @@
       "type": "類型",
       "userBase": "使用者搜尋基礎",
       "userFilterHelp": "必須包含 %s 代表使用者名稱，如 (sAMAccountName=%s)",
-      "userFilter": "使用者搜尋篩選"
+      "userFilter": "使用者搜尋篩選",
+      "tenant": "租戶 ID（選用）",
+      "tenantHelp": "將此提供者限定為單一租戶（其 UUID）。留空表示伺服器層級的全域提供者。",
+      "jit": "即時佈建（首次 SSO 登入時自動建立使用者）",
+      "jitRole": "JIT 預設角色",
+      "jitRoleHelp": "授予自動建立成員的角色。需要租戶 ID 以及該租戶上相符的電子郵件網域允許清單。"
     },
     "loadError": "無法載入身分提供者。",
     "mapAddError": "無法新增對應。",

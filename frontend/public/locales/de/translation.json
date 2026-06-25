@@ -2117,7 +2117,12 @@
       "type": "Typ",
       "userBase": "Benutzer-Suchbasis",
       "userFilterHelp": "Muss %s für den Benutzernamen enthalten, z. B. (sAMAccountName=%s)",
-      "userFilter": "Benutzer-Suchfilter"
+      "userFilter": "Benutzer-Suchfilter",
+      "tenant": "Mandanten-ID (optional)",
+      "tenantHelp": "Diesen Anbieter auf einen Mandanten beschränken (dessen UUID). Leer lassen für einen serverweiten Anbieter.",
+      "jit": "Just-in-Time-Bereitstellung (Benutzer bei der ersten SSO-Anmeldung automatisch anlegen)",
+      "jitRole": "JIT-Standardrolle",
+      "jitRoleHelp": "Rolle, die automatisch angelegten Mitgliedern zugewiesen wird. Erfordert eine Mandanten-ID und eine passende E-Mail-Domain-Zulassungsliste für diesen Mandanten."
     },
     "loadError": "Identitätsanbieter konnten nicht geladen werden.",
     "mapAddError": "Zuordnung konnte nicht hinzugefügt werden.",

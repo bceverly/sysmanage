@@ -2117,7 +2117,12 @@
       "type": "Tipo",
       "userBase": "Base ricerca utenti",
       "userFilterHelp": "Deve contenere %s per il nome utente, es. (sAMAccountName=%s)",
-      "userFilter": "Filtro ricerca utenti"
+      "userFilter": "Filtro ricerca utenti",
+      "tenant": "ID tenant (facoltativo)",
+      "tenantHelp": "Limita questo provider a un solo tenant (il suo UUID). Lascia vuoto per un provider globale del server.",
+      "jit": "Provisioning just-in-time (crea automaticamente gli utenti al primo accesso SSO)",
+      "jitRole": "Ruolo predefinito JIT",
+      "jitRoleHelp": "Ruolo assegnato ai membri creati automaticamente. Richiede un ID tenant e un elenco di domini email consentiti corrispondente per quel tenant."
     },
     "loadError": "Impossibile caricare i provider di identità.",
     "mapAddError": "Impossibile aggiungere la mappatura.",

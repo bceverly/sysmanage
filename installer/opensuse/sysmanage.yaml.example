@@ -25,6 +25,12 @@ logging:
   max_bytes: 10485760  # 10MB
   backup_count: 5
 
+# Multi-tenancy (Phase 13.1) — opt-in; disabled by default (single tenant).
+# Enable only to run a SaaS control plane; see the canonical sysmanage.yaml.example.
+multitenancy:
+  enabled: false
+  self_service_provisioning: false
+
 security:
   # Session secret key (change this!)
   secret_key: "CHANGE-THIS-TO-A-RANDOM-STRING"
