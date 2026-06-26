@@ -3,13 +3,9 @@ Tests for hardware inventory API endpoints.
 """
 
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
-
-from backend.main import app
-from backend.persistence import models
 
 # Test fixtures are automatically imported from conftest.py
 

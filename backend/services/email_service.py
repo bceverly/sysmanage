@@ -11,16 +11,27 @@ from email.mime.text import MIMEText
 from typing import List, Optional
 
 from backend.config import config
+from backend.persistence.tenant_context import tenant_scope
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Service for sending emails via SMTP."""
+    """Service for sending emails via SMTP.
+
+    Configuration (SMTP server + sender) is resolved **lazily at send time**,
+    never snapshotted at construction.  This matters for per-tenant email
+    (Phase 13.1): the active tenant — bound from the request JWT, or passed
+    explicitly via ``send_email(tenant_id=...)`` for background/pre-auth sends
+    — governs which tenant's email config is used.  Snapshotting in
+    ``__init__`` (especially for the module-level singleton, built at import
+    time) would freeze the server scope forever.
+    """
 
     def __init__(self):
-        self.email_config = config.get_email_config()
-        self.smtp_config = config.get_smtp_config()
+        # No config snapshot here — see class docstring.
+        pass
 
     def is_enabled(self) -> bool:
         """Check if email service is enabled.
@@ -40,6 +51,7 @@ class EmailService:
         html_body: Optional[str] = None,
         from_address: Optional[str] = None,
         from_name: Optional[str] = None,
+        tenant_id: Optional[str] = None,
     ) -> bool:
         """
         Send an email via SMTP.
@@ -51,10 +63,33 @@ class EmailService:
             html_body: Optional HTML email body
             from_address: Optional sender address (defaults to config)
             from_name: Optional sender name (defaults to config)
+            tenant_id: Optional tenant whose email config to use (Phase 13.1).
+                Pass this for background/pre-auth sends that run outside a
+                request (where no tenant is bound from the JWT).  ``None`` uses
+                the request-bound active tenant if any, else the server scope —
+                the single-tenant default.
 
         Returns:
             True if email was sent successfully, False otherwise
         """
+        # Bind the explicit tenant (no-op when None) so config resolves to the
+        # right scope even outside a request — closing the gap where background
+        # sends would silently use the server scope.
+        with tenant_scope(tenant_id):
+            return self._send_email_in_scope(
+                to_addresses, subject, body, html_body, from_address, from_name
+            )
+
+    def _send_email_in_scope(  # pylint: disable=too-many-positional-arguments
+        self,
+        to_addresses: List[str],
+        subject: str,
+        body: str,
+        html_body: Optional[str] = None,
+        from_address: Optional[str] = None,
+        from_name: Optional[str] = None,
+    ) -> bool:
+        """Resolve config under the current tenant scope and send."""
         if not self.is_enabled():
             logger.warning("Email service is disabled")
             return False
@@ -63,14 +98,16 @@ class EmailService:
             logger.error("No recipient addresses provided")
             return False
 
+        # Resolve config lazily under the active tenant scope (never snapshot).
+        email_config = config.get_email_config()
+        smtp_config = config.get_smtp_config()
+
         # Use configured values or override
-        sender_address = from_address or self.email_config["from_address"]
-        sender_name = from_name or self.email_config["from_name"]
+        sender_address = from_address or email_config["from_address"]
+        sender_name = from_name or email_config["from_name"]
 
         # Add subject prefix if configured
-        subject_prefix = self.email_config.get("templates", {}).get(
-            "subject_prefix", ""
-        )
+        subject_prefix = email_config.get("templates", {}).get("subject_prefix", "")
         if subject_prefix and not subject.startswith(subject_prefix):
             subject = f"{subject_prefix} {subject}"
 
@@ -91,13 +128,13 @@ class EmailService:
                 msg.attach(html_part)
 
             # Connect to SMTP server and send
-            smtp_host = self.smtp_config["host"]
-            smtp_port = self.smtp_config["port"]
-            smtp_username = self.smtp_config["username"]
-            smtp_password = self.smtp_config["password"]
-            use_tls = self.smtp_config["use_tls"]
-            use_ssl = self.smtp_config["use_ssl"]
-            timeout = self.smtp_config["timeout"]
+            smtp_host = smtp_config["host"]
+            smtp_port = smtp_config["port"]
+            smtp_username = smtp_config["username"]
+            smtp_password = smtp_config["password"]
+            use_tls = smtp_config["use_tls"]
+            use_ssl = smtp_config["use_ssl"]
+            timeout = smtp_config["timeout"]
 
             # Create SMTP connection
             if use_ssl:
@@ -114,22 +151,26 @@ class EmailService:
 
                 # Send the email
                 server.send_message(msg, sender_address, to_addresses)
-                logger.info("Email sent successfully to %s", ", ".join(to_addresses))
+                logger.info(
+                    "Email sent successfully to %s",
+                    sanitize_log(", ".join(to_addresses)),
+                )
                 return True
 
             finally:
                 server.quit()
 
         except Exception as e:
-            logger.error("Failed to send email: %s", e)
+            logger.exception("Failed to send email: %s", e)
             return False
 
-    def send_test_email(self, to_address: str) -> bool:
+    def send_test_email(self, to_address: str, tenant_id: Optional[str] = None) -> bool:
         """
         Send a test email to verify SMTP configuration.
 
         Args:
             to_address: Email address to send test email to
+            tenant_id: Optional tenant whose email config to test (Phase 13.1).
 
         Returns:
             True if test email was sent successfully, False otherwise
@@ -154,7 +195,11 @@ SysManage System"""
 </html>"""
 
         return self.send_email(
-            to_addresses=[to_address], subject=subject, body=body, html_body=html_body
+            to_addresses=[to_address],
+            subject=subject,
+            body=body,
+            html_body=html_body,
+            tenant_id=tenant_id,
         )
 
 

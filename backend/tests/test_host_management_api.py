@@ -218,14 +218,16 @@ class TestHostCRUD:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_user,  # User query
-                mock_host,  # Host query
+                mock_user,  # User query (auth, main engine)
+                mock_host,  # Host query (tenant-routed)
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            ctx = create_mock_session_context(mock_session)
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await get_host(str(mock_host.id), "test@example.com")
 
@@ -246,10 +248,12 @@ class TestHostCRUD:
                 None,  # Host not found
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
                     await get_host(str(uuid.uuid4()), "test@example.com")
@@ -537,11 +541,11 @@ class TestHostCRUD:
             ]
 
             with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
-                "backend.api.host.AuditService"
-            ):
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm, patch("backend.api.host.AuditService"):
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await delete_host(str(mock_host.id), "admin@example.com")
 
@@ -562,10 +566,12 @@ class TestHostCRUD:
             )
             mock_session.query.return_value.filter.return_value.all.return_value = []
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                ctx = create_mock_session_context(mock_session)
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 with pytest.raises(HTTPException) as exc_info:
                     await delete_host(str(uuid.uuid4()), "admin@example.com")
@@ -648,6 +654,44 @@ class TestHostRegistration:
                 mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
+    async def test_register_new_host_rejected_at_tenant_limit(self, mock_config):
+        """Phase 13.1.F: a tenant at its ``max_hosts`` quota gets 429 and no row
+        is created."""
+        from fastapi import HTTPException
+
+        from backend.api.host import HostRegistration, register_host
+
+        registration_data = HostRegistration(
+            active=True,
+            fqdn="over-quota.example.com",
+            hostname="over-quota",
+            ipv4="192.168.1.151",
+            ipv6="::1",
+        )
+
+        with patch("backend.api.host.db") as mock_db:
+            mock_db.get_engine.return_value = MagicMock()
+
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                None  # No existing host with this fqdn
+            )
+            mock_session.query.return_value.count.return_value = 5  # at the cap
+
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.services.tenant_limits.limit_for_tenant", return_value=5
+            ):
+                mock_sessionmaker.return_value = create_mock_session_context(
+                    mock_session
+                )
+
+                with pytest.raises(HTTPException) as exc:
+                    await register_host(registration_data)
+
+                assert exc.value.status_code == 429
+                mock_session.add.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_register_existing_host_updates(self, mock_config, mock_host):
         """Test registering an existing host updates the record."""
         from backend.api.host import HostRegistration, register_host
@@ -714,8 +758,7 @@ class TestHostApproval:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,  # User query
-                mock_pending_host,  # Host query
+                mock_pending_host,  # Host query (authz now resolved by dependency)
             ]
 
             # Mock HostChild query for child host linking
@@ -735,9 +778,7 @@ class TestHostApproval:
                 mock_cert_obj.serial_number = 12345
                 mock_x509.load_pem_x509_certificate.return_value = mock_cert_obj
 
-                result = await approve_host(
-                    str(mock_pending_host.id), "admin@example.com"
-                )
+                result = await approve_host(str(mock_pending_host.id), mock_admin_user)
 
                 assert mock_pending_host.approval_status == "approved"
                 mock_session.commit.assert_called()
@@ -756,7 +797,6 @@ class TestHostApproval:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
                 mock_host,
             ]
 
@@ -766,7 +806,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(mock_host.id), "admin@example.com")
+                    await approve_host(str(mock_host.id), mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -793,7 +833,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(mock_pending_host.id), "test@example.com")
+                    await approve_host(str(mock_pending_host.id), mock_user)
 
                 assert exc_info.value.status_code == 403
 
@@ -811,7 +851,6 @@ class TestHostApproval:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
                 mock_pending_host,
             ]
 
@@ -820,9 +859,7 @@ class TestHostApproval:
                     mock_session
                 )
 
-                result = await reject_host(
-                    str(mock_pending_host.id), "admin@example.com"
-                )
+                result = await reject_host(str(mock_pending_host.id), mock_admin_user)
 
                 assert mock_pending_host.approval_status == "rejected"
                 mock_session.commit.assert_called()
@@ -841,7 +878,6 @@ class TestHostApproval:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
                 mock_host,
             ]
 
@@ -851,7 +887,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await reject_host(str(mock_host.id), "admin@example.com")
+                    await reject_host(str(mock_host.id), mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -865,8 +901,7 @@ class TestHostApproval:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                None,  # Host not found
+                None,  # Host not found (authz now resolved by dependency)
             ]
 
             with patch("backend.api.host_approval.sessionmaker") as mock_sessionmaker:
@@ -875,7 +910,7 @@ class TestHostApproval:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(uuid.uuid4()), "admin@example.com")
+                    await approve_host(str(uuid.uuid4()), mock_admin_user)
 
                 assert exc_info.value.status_code == 404
 
@@ -893,16 +928,18 @@ class TestHostOperations:
         """Test requesting host reboot successfully."""
         from backend.api.host_operations import reboot_host
 
-        with patch("backend.api.host_operations.db") as mock_db, patch(
+        with patch("backend.api.host_operations.db_module") as mock_db, patch(
             "backend.api.host_operations.queue_ops"
         ) as mock_queue:
             mock_db.get_engine.return_value = MagicMock()
 
+            # Tenant-routed session returns the host.
+            tenant_db = MagicMock()
+            tenant_db.query.return_value.filter.return_value.first.return_value = (
+                mock_host
+            )
+
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                mock_host,
-            ]
 
             with patch(
                 "backend.api.host_operations.sessionmaker"
@@ -911,7 +948,11 @@ class TestHostOperations:
                     mock_session
                 )
 
-                result = await reboot_host(str(mock_host.id), "admin@example.com")
+                result = await reboot_host(
+                    str(mock_host.id),
+                    tenant_db=tenant_db,
+                    current_user=mock_admin_user,
+                )
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -925,21 +966,22 @@ class TestHostOperations:
 
         mock_user.has_role = MagicMock(return_value=False)
 
-        with patch("backend.api.host_operations.db") as mock_db:
+        with patch("backend.api.host_operations.db_module") as mock_db:
             mock_db.get_engine.return_value = MagicMock()
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                mock_user
-            )
+            tenant_db = MagicMock()
 
             with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
+                    MagicMock()
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await reboot_host(str(mock_host.id), "test@example.com")
+                    await reboot_host(
+                        str(mock_host.id),
+                        tenant_db=tenant_db,
+                        current_user=mock_user,
+                    )
 
                 assert exc_info.value.status_code == 403
 
@@ -948,16 +990,17 @@ class TestHostOperations:
         """Test requesting host shutdown successfully."""
         from backend.api.host_operations import shutdown_host
 
-        with patch("backend.api.host_operations.db") as mock_db, patch(
+        with patch("backend.api.host_operations.db_module") as mock_db, patch(
             "backend.api.host_operations.queue_ops"
         ) as mock_queue:
             mock_db.get_engine.return_value = MagicMock()
 
+            tenant_db = MagicMock()
+            tenant_db.query.return_value.filter.return_value.first.return_value = (
+                mock_host
+            )
+
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                mock_host,
-            ]
 
             with patch(
                 "backend.api.host_operations.sessionmaker"
@@ -966,7 +1009,11 @@ class TestHostOperations:
                     mock_session
                 )
 
-                result = await shutdown_host(str(mock_host.id), "admin@example.com")
+                result = await shutdown_host(
+                    str(mock_host.id),
+                    tenant_db=tenant_db,
+                    current_user=mock_admin_user,
+                )
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -980,21 +1027,22 @@ class TestHostOperations:
 
         mock_user.has_role = MagicMock(return_value=False)
 
-        with patch("backend.api.host_operations.db") as mock_db:
+        with patch("backend.api.host_operations.db_module") as mock_db:
             mock_db.get_engine.return_value = MagicMock()
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                mock_user
-            )
+            tenant_db = MagicMock()
 
             with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
+                    MagicMock()
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await shutdown_host(str(mock_host.id), "test@example.com")
+                    await shutdown_host(
+                        str(mock_host.id),
+                        tenant_db=tenant_db,
+                        current_user=mock_user,
+                    )
 
                 assert exc_info.value.status_code == 403
 
@@ -1005,16 +1053,17 @@ class TestHostOperations:
         """Test requesting software inventory refresh successfully."""
         from backend.api.host_operations import refresh_host_software
 
-        with patch("backend.api.host_operations.db") as mock_db, patch(
+        with patch("backend.api.host_operations.db_module") as mock_db, patch(
             "backend.api.host_operations.queue_ops"
         ) as mock_queue:
             mock_db.get_engine.return_value = MagicMock()
 
+            tenant_db = MagicMock()
+            tenant_db.query.return_value.filter.return_value.first.return_value = (
+                mock_host
+            )
+
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                mock_host,
-            ]
 
             with patch(
                 "backend.api.host_operations.sessionmaker"
@@ -1024,7 +1073,9 @@ class TestHostOperations:
                 )
 
                 result = await refresh_host_software(
-                    str(mock_host.id), "admin@example.com"
+                    str(mock_host.id),
+                    tenant_db=tenant_db,
+                    current_user=mock_admin_user,
                 )
 
                 assert result["result"] is True
@@ -1037,16 +1088,17 @@ class TestHostOperations:
         """Test requesting package collection successfully."""
         from backend.api.host_operations import request_packages
 
-        with patch("backend.api.host_operations.db") as mock_db, patch(
+        with patch("backend.api.host_operations.db_module") as mock_db, patch(
             "backend.api.host_operations.queue_ops"
         ) as mock_queue:
             mock_db.get_engine.return_value = MagicMock()
 
+            tenant_db = MagicMock()
+            tenant_db.query.return_value.filter.return_value.first.return_value = (
+                mock_host
+            )
+
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                mock_host,
-            ]
 
             with patch(
                 "backend.api.host_operations.sessionmaker"
@@ -1055,7 +1107,11 @@ class TestHostOperations:
                     mock_session
                 )
 
-                result = await request_packages(str(mock_host.id), "admin@example.com")
+                result = await request_packages(
+                    str(mock_host.id),
+                    tenant_db=tenant_db,
+                    current_user=mock_admin_user,
+                )
 
                 assert result["result"] is True
                 mock_queue.enqueue_message.assert_called_once()
@@ -1065,22 +1121,25 @@ class TestHostOperations:
         """Test operations on non-existent host."""
         from backend.api.host_operations import reboot_host
 
-        with patch("backend.api.host_operations.db") as mock_db:
+        with patch("backend.api.host_operations.db_module") as mock_db:
             mock_db.get_engine.return_value = MagicMock()
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
-                mock_admin_user,
-                None,  # Host not found
-            ]
+            tenant_db = MagicMock()
+            tenant_db.query.return_value.filter.return_value.first.return_value = (
+                None  # Host not found
+            )
 
             with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
+                    MagicMock()
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await reboot_host(str(uuid.uuid4()), "admin@example.com")
+                    await reboot_host(
+                        str(uuid.uuid4()),
+                        tenant_db=tenant_db,
+                        current_user=mock_admin_user,
+                    )
 
                 assert exc_info.value.status_code == 404
 
@@ -1107,25 +1166,20 @@ class TestHostDataUpdates:
             "memory_total_mb": 65536,
         }
 
-        with patch("backend.api.host_data_updates.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            mock_host
+        )
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                mock_host
-            )
+        with patch(
+            "backend.api.host_data_updates.request_sessionmaker"
+        ) as mock_sessionmaker:
+            mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
-            with patch(
-                "backend.api.host_data_updates.sessionmaker"
-            ) as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            result = await update_host_hardware(str(mock_host.id), hardware_data)
 
-                result = await update_host_hardware(str(mock_host.id), hardware_data)
-
-                assert result["result"] is True
-                mock_session.commit.assert_called()
+            assert result["result"] is True
+            mock_session.commit.assert_called()
 
     @pytest.mark.asyncio
     async def test_update_host_hardware_not_found(self, mock_config):
@@ -1134,35 +1188,25 @@ class TestHostDataUpdates:
 
         hardware_data = {"cpu_vendor": "Intel"}
 
-        with patch("backend.api.host_data_updates.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
+        with patch(
+            "backend.api.host_data_updates.request_sessionmaker"
+        ) as mock_sessionmaker:
+            mock_sessionmaker.return_value = create_mock_session_context(mock_session)
 
-            with patch(
-                "backend.api.host_data_updates.sessionmaker"
-            ) as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with pytest.raises(HTTPException) as exc_info:
+                await update_host_hardware(str(uuid.uuid4()), hardware_data)
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await update_host_hardware(str(uuid.uuid4()), hardware_data)
-
-                assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_request_hardware_update_success(self, mock_config, mock_host):
         """Test requesting hardware update successfully."""
         from backend.api.host_data_updates import request_hardware_update
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1170,7 +1214,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1186,10 +1230,7 @@ class TestHostDataUpdates:
         """Test requesting system info update successfully."""
         from backend.api.host_data_updates import request_system_info
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1197,7 +1238,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1214,10 +1255,7 @@ class TestHostDataUpdates:
         """Test requesting user access update successfully."""
         from backend.api.host_data_updates import request_user_access_update
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
             mock_session = MagicMock()
             mock_session.query.return_value.filter.return_value.first.return_value = (
@@ -1225,7 +1263,7 @@ class TestHostDataUpdates:
             )
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1243,20 +1281,21 @@ class TestHostDataUpdates:
 
         host_ids = [str(mock_host.id), str(uuid.uuid4())]
 
-        with patch("backend.api.host_data_updates.db") as mock_db, patch(
-            "backend.api.host_data_updates.queue_ops"
-        ) as mock_queue:
-            mock_db.get_engine.return_value = MagicMock()
+        with patch("backend.api.host_data_updates.queue_ops") as mock_queue:
 
-            # First host exists, second doesn't
+            # Phase 6 N+1 audit refactored ``request_hardware_update_bulk``
+            # to bulk-fetch via ``.filter(Host.id.in_(host_ids)).all()``
+            # and dict-lookup per id, instead of one ``.first()`` per
+            # host.  Mock ``.all()`` with only the host that "exists" —
+            # the missing id is reported as not-found by the dict
+            # ``.get()`` returning ``None``.
             mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.side_effect = [
+            mock_session.query.return_value.filter.return_value.all.return_value = [
                 mock_host,
-                None,
             ]
 
             with patch(
-                "backend.api.host_data_updates.sessionmaker"
+                "backend.api.host_data_updates.request_sessionmaker"
             ) as mock_sessionmaker:
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_session
@@ -1285,7 +1324,7 @@ class TestHostTagging:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1319,7 +1358,7 @@ class TestHostTagging:
                 )
 
                 result = await add_tag_to_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 assert "message" in result
@@ -1336,7 +1375,7 @@ class TestHostTagging:
         mock_user.has_role = MagicMock(return_value=False)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1355,7 +1394,7 @@ class TestHostTagging:
 
                 with pytest.raises(HTTPException) as exc_info:
                     await add_tag_to_host(
-                        str(mock_host.id), str(mock_tag.id), mock_db, "test@example.com"
+                        str(mock_host.id), str(mock_tag.id), mock_db, mock_user
                     )
 
                 assert exc_info.value.status_code == 403
@@ -1371,7 +1410,7 @@ class TestHostTagging:
         mock_host_tag = MagicMock()
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1399,7 +1438,7 @@ class TestHostTagging:
 
                 # Should return None (204 No Content)
                 result = await remove_tag_from_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 mock_db.delete.assert_called_once_with(mock_host_tag)
@@ -1413,7 +1452,7 @@ class TestHostTagging:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1436,7 +1475,7 @@ class TestHostTagging:
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 404
@@ -1638,72 +1677,65 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_approve_host_user_not_found(self, mock_config):
-        """Test approve host fails when authenticated user not found."""
-        from backend.api.host_approval import approve_host
+        """The user-not-found path moved out of approve_host into the shared
+        ``require_authenticated_user`` dependency (authz is resolved on the MAIN
+        engine, server-global); it raises 401 when the user does not exist."""
+        from backend.auth.auth_bearer import require_authenticated_user
 
-        with patch("backend.api.host_approval.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
+        with patch(
+            "backend.persistence.db.get_engine", return_value=MagicMock()
+        ), patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker:
+            mock_sessionmaker.return_value.return_value = mock_session
 
-            with patch("backend.api.host_approval.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with pytest.raises(HTTPException) as exc_info:
+                require_authenticated_user("unknown@example.com")
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await approve_host(str(uuid.uuid4()), "unknown@example.com")
-
-                assert exc_info.value.status_code == 401
+            assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
     async def test_reject_host_user_not_found(self, mock_config):
-        """Test reject host fails when authenticated user not found."""
-        from backend.api.host_approval import reject_host
+        """The user-not-found path moved out of reject_host into the shared
+        ``require_authenticated_user`` dependency (authz is resolved on the MAIN
+        engine, server-global); it raises 401 when the user does not exist."""
+        from backend.auth.auth_bearer import require_authenticated_user
 
-        with patch("backend.api.host_approval.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
+        with patch(
+            "backend.persistence.db.get_engine", return_value=MagicMock()
+        ), patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker:
+            mock_sessionmaker.return_value.return_value = mock_session
 
-            with patch("backend.api.host_approval.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with pytest.raises(HTTPException) as exc_info:
+                require_authenticated_user("unknown@example.com")
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await reject_host(str(uuid.uuid4()), "unknown@example.com")
-
-                assert exc_info.value.status_code == 401
+            assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
     async def test_reboot_host_user_not_found(self, mock_config):
-        """Test reboot host fails when authenticated user not found."""
-        from backend.api.host_operations import reboot_host
+        """The user-not-found path moved out of the host-operation handlers into
+        the shared ``require_authenticated_user`` dependency (authz is resolved on
+        the MAIN engine, server-global); it raises 401 when the user does not
+        exist."""
+        from backend.auth.auth_bearer import require_authenticated_user
 
-        with patch("backend.api.host_operations.db") as mock_db:
-            mock_db.get_engine.return_value = MagicMock()
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-            mock_session = MagicMock()
-            mock_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
+        with patch(
+            "backend.persistence.db.get_engine", return_value=MagicMock()
+        ), patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker:
+            # session_local = sessionmaker(...); session = session_local()
+            mock_sessionmaker.return_value.return_value = mock_session
 
-            with patch("backend.api.host_operations.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            with pytest.raises(HTTPException) as exc_info:
+                require_authenticated_user("unknown@example.com")
 
-                with pytest.raises(HTTPException) as exc_info:
-                    await reboot_host(str(uuid.uuid4()), "unknown@example.com")
-
-                assert exc_info.value.status_code == 401
+            assert exc_info.value.status_code == 401
 
 
 # =============================================================================
@@ -1730,10 +1762,12 @@ class TestHostResponseFormat:
                 mock_host,
             ]
 
-            with patch("backend.api.host.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_session
-                )
+            ctx = create_mock_session_context(mock_session)
+            with patch("backend.api.host.sessionmaker") as mock_sessionmaker, patch(
+                "backend.persistence.partitions.request_sessionmaker"
+            ) as mock_rsm:
+                mock_sessionmaker.return_value = ctx
+                mock_rsm.return_value = ctx
 
                 result = await get_host(str(mock_host.id), "test@example.com")
 

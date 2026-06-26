@@ -1,0 +1,14 @@
+#!/bin/ksh
+#
+# $OpenBSD$
+
+daemon="${TRUEPREFIX}/bin/python3 -m uvicorn backend.main:app"
+daemon_user="_sysmanage"
+daemon_flags="--host 0.0.0.0 --port 8080 --app-dir ${TRUEPREFIX}/libexec/sysmanage"
+
+. /etc/rc.d/rc.subr
+
+rc_bg=YES
+rc_reload=NO
+
+rc_cmd $1

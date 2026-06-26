@@ -14,9 +14,10 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
 from backend.api.error_constants import error_host_not_found
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import get_request_engine
 from backend.security.roles import SecurityRoles
 from backend.utils.verbosity_logger import sanitize_log
 from backend.websocket.messages import create_command_message
@@ -37,14 +38,20 @@ class ServiceControlRequest(BaseModel):
     services: List[str]  # List of service names to control
 
 
-def _get_host_certificates_sync(host_id: str):
+def _get_host_certificates_sync(host_id: str, tenant_id=None):
     """
     Synchronous helper function to retrieve host certificates.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database when multi-tenancy is
+    enabled.  ``tenant_id`` is captured by the async caller because the active-
+    tenant ContextVar does not cross the thread-pool boundary.  Server scope /
+    single-tenant (``tenant_id is None``) keeps using the main engine.
     """
     # Get the SQLAlchemy session
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
@@ -115,9 +122,16 @@ async def get_host_certificates(host_id: str):
     Get SSL certificates collected from a host.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant HERE (the ContextVar won't be visible inside the
+    # thread-pool worker below).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _get_host_certificates_sync, host_id)
+    return await loop.run_in_executor(
+        None, _get_host_certificates_sync, host_id, tenant_id
+    )
 
 
 @router.post(
@@ -133,9 +147,14 @@ async def request_certificates_collection(host_id: str):
         "CERTIFICATE COLLECTION: Endpoint called for host_id: %s", sanitize_log(host_id)
     )
 
-    # Get the SQLAlchemy session
+    # Phase 13.1: host data + outbound command queue route to the active tenant's
+    # database when multi-tenancy is enabled (collapsed/OSS mode == main engine).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
@@ -143,11 +162,15 @@ async def request_certificates_collection(host_id: str):
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
-            logger.warning("CERTIFICATE COLLECTION: Host not found: %s", host_id)
+            logger.warning(
+                "CERTIFICATE COLLECTION: Host not found: %s", sanitize_log(host_id)
+            )
             raise HTTPException(status_code=404, detail=error_host_not_found())
 
         logger.info(
-            "CERTIFICATE COLLECTION: Found host %s (fqdn: %s)", host_id, host.fqdn
+            "CERTIFICATE COLLECTION: Found host %s (fqdn: %s)",
+            sanitize_log(host_id),
+            host.fqdn,
         )
 
         validate_host_approval_status(host)
@@ -174,19 +197,24 @@ async def request_certificates_collection(host_id: str):
 
         logger.info(
             "CERTIFICATE COLLECTION: Successfully requested certificate collection for host: %s",
-            host_id,
+            sanitize_log(host_id),
         )
         return {"result": True, "message": _("Certificate collection requested")}
 
 
-def _get_host_roles_sync(host_id: str):
+def _get_host_roles_sync(host_id: str, tenant_id=None):
     """
     Synchronous helper function to retrieve host roles.
     This runs in a thread pool to avoid blocking the event loop.
+
+    Phase 13.1: routes to the active tenant's database (see
+    ``_get_host_certificates_sync``); server scope / single-tenant keeps using
+    the main engine.
     """
     # Get the SQLAlchemy session
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
@@ -245,9 +273,14 @@ async def get_host_roles(host_id: str):
     Get server roles detected on a host.
     Runs the database query in a thread pool to avoid blocking the event loop.
     """
+    # Capture the active tenant HERE (the ContextVar won't be visible inside the
+    # thread-pool worker below).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, _get_host_roles_sync, host_id)
+    return await loop.run_in_executor(None, _get_host_roles_sync, host_id, tenant_id)
 
 
 @router.post(
@@ -263,9 +296,14 @@ async def request_roles_collection(host_id: str):
         "ROLE COLLECTION: Endpoint called for host_id: %s", sanitize_log(host_id)
     )
 
-    # Get the SQLAlchemy session
+    # Phase 13.1: host data + outbound command queue route to the active tenant's
+    # database when multi-tenancy is enabled (collapsed/OSS mode == main engine).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
@@ -297,7 +335,7 @@ async def request_roles_collection(host_id: str):
 
         logger.info(
             "ROLE COLLECTION: Successfully requested role collection for host: %s",
-            host_id,
+            sanitize_log(host_id),
         )
 
         return {"result": True, "message": _("Role collection requested")}
@@ -307,7 +345,7 @@ async def request_roles_collection(host_id: str):
 async def control_services(
     host_id: str,
     request: ServiceControlRequest,
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Control services on a host (start, stop, restart).
@@ -331,44 +369,38 @@ async def control_services(
     if not request.services:
         raise HTTPException(status_code=400, detail=_("No services specified"))
 
-    # Get the SQLAlchemy session
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global).  Check the specific role for the action.
+    if request.action == "start":
+        if not current_user.has_role(SecurityRoles.START_HOST_SERVICE):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: START_HOST_SERVICE role required"),
+            )
+    elif request.action == "stop":
+        if not current_user.has_role(SecurityRoles.STOP_HOST_SERVICE):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: STOP_HOST_SERVICE role required"),
+            )
+    elif request.action == "restart":
+        if not current_user.has_role(SecurityRoles.RESTART_HOST_SERVICE):
+            raise HTTPException(
+                status_code=403,
+                detail=_("Permission denied: RESTART_HOST_SERVICE role required"),
+            )
+
+    # Phase 13.1: host data + outbound command queue route to the active tenant's
+    # database when multi-tenancy is enabled (collapsed/OSS mode == main engine).
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
-        # Check if user has permission for the requested action
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-
-        if user._role_cache is None:
-            user.load_role_cache(session)
-
-        # Check specific role based on action
-        if request.action == "start":
-            if not user.has_role(SecurityRoles.START_HOST_SERVICE):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_("Permission denied: START_HOST_SERVICE role required"),
-                )
-        elif request.action == "stop":
-            if not user.has_role(SecurityRoles.STOP_HOST_SERVICE):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_("Permission denied: STOP_HOST_SERVICE role required"),
-                )
-        elif request.action == "restart":
-            if not user.has_role(SecurityRoles.RESTART_HOST_SERVICE):
-                raise HTTPException(
-                    status_code=403,
-                    detail=_("Permission denied: RESTART_HOST_SERVICE role required"),
-                )
-
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -390,7 +422,10 @@ async def control_services(
             parameters={"action": request.action, "services": request.services},
         )
 
-        logger.info("SERVICE CONTROL: Created command message: %s", command_message)
+        logger.info(
+            "SERVICE CONTROL: Created command message: %s",
+            sanitize_log(command_message),
+        )
 
         # Send command to agent via message queue
         queue_ops.enqueue_message(

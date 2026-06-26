@@ -45,6 +45,12 @@ SUBST_VARS +=		SYSCONFDIR LOCALSTATEDIR
 SYSMANAGE_USER =	_sysmanage
 SYSMANAGE_GROUP =	_sysmanage
 
+# Stamp the package version into backend/__init__.py so backend.__version__
+# resolves at runtime (server-info + federation "Reported version" show it
+# instead of "unknown"); the GitHub source tarball ships it empty.
+post-extract:
+	printf '__version__ = "%s"\n' "${GH_TAGNAME:S/^v//}" > ${WRKSRC}/backend/__init__.py
+
 do-install:
 	# Backend Python application
 	${INSTALL_DATA_DIR} ${PREFIX}/libexec/sysmanage/backend

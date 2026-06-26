@@ -1,0 +1,124 @@
+digraph DC03_Network_Architecture {
+    graph [
+        label = "DC-03: SysManage Network Architecture\n(Zones, Ports, Protocols, and Trust Boundaries)\n",
+        labelloc = "t",
+        fontname = "Helvetica-Bold",
+        fontsize = 18,
+        rankdir = "TB",
+        compound = true,
+        nodesep = 0.45,
+        ranksep = 0.7,
+        bgcolor = "white",
+        pad = "0.5"
+    ];
+    node [fontname = "Helvetica", fontsize = 11, shape = "box", style = "filled,rounded", color = "#333333"];
+    edge [fontname = "Helvetica", fontsize = 9, color = "#333333"];
+
+    // =========== ZONE 1: ADMIN / INTERNET ===========
+    subgraph cluster_admin {
+        label = "Zone 1 — Administrator / Corporate LAN (untrusted from server perspective)";
+        style = "filled,rounded";
+        fillcolor = "#E8F1FB";
+        color = "#1F4E79";
+        fontname = "Helvetica-Bold";
+        fontsize = 12;
+
+        admin [label = "Administrator Workstation\nModern Browser\n(TLS 1.2+ required)", fillcolor = "#BBD6F2", shape = "oval"];
+        sso   [label = "Corporate SSO / IdP\n(SAML / OIDC — Pro+)\nLDAP 636", fillcolor = "#BBD6F2"];
+    }
+
+    // =========== ZONE 2: MANAGED ENDPOINTS ===========
+    subgraph cluster_endpoints {
+        label = "Zone 2 — Managed Endpoint Networks (customer LAN/WAN, branches, cloud VPC)";
+        style = "filled,rounded";
+        fillcolor = "#E5F2E8";
+        color = "#214E34";
+        fontname = "Helvetica-Bold";
+        fontsize = 12;
+
+        ep_lin  [label = "Linux Hosts\n(Ubuntu, RHEL, Debian,\nRocky, Alma, Oracle, Fedora)\nAgent: outbound only", fillcolor = "#B8DCC2"];
+        ep_win  [label = "Windows Hosts\n(10/11, Server 2019/22)\nAgent: outbound only", fillcolor = "#B8DCC2"];
+        ep_mac  [label = "macOS Hosts\n(Intel + Apple Silicon)\nAgent: outbound only", fillcolor = "#B8DCC2"];
+        ep_bsd  [label = "FreeBSD / OpenBSD\nAgent: outbound only", fillcolor = "#B8DCC2"];
+    }
+
+    // =========== ZONE 3: PERIMETER / DMZ ===========
+    subgraph cluster_dmz {
+        label = "Zone 3 — Perimeter / DMZ (public-facing services, hardened)";
+        style = "filled,rounded";
+        fillcolor = "#FBF3E2";
+        color = "#7F5A0F";
+        fontname = "Helvetica-Bold";
+        fontsize = 12;
+
+        fw_edge [label = "Edge Firewall / WAF\n(allow-list ingress)", fillcolor = "#F4D58A", shape = "octagon"];
+        rp      [label = "Reverse Proxy / TLS Term.\n(nginx — optional)\nTLS 1.2+ ciphers,\nHSTS, OCSP stapling", fillcolor = "#F4D58A"];
+
+        api_srv [label = "SysManage API Server\nFastAPI / Uvicorn\nINBOUND: TCP 6443 (HTTPS + WSS)", fillcolor = "#F4C97D"];
+        web_srv [label = "SysManage WebUI\nINBOUND: TCP 8080 (HTTPS)", fillcolor = "#F4C97D"];
+    }
+
+    // =========== ZONE 4: INTERNAL / TRUSTED ===========
+    subgraph cluster_internal {
+        label = "Zone 4 — Internal / Trusted Services (private subnet, no direct ingress from Internet)";
+        style = "filled,rounded";
+        fillcolor = "#F4E9DC";
+        color = "#7F5A0F";
+        fontname = "Helvetica-Bold";
+        fontsize = 12;
+
+        db [label = "PostgreSQL 14+\nTCP 5432\nTLS in transit\nencryption at rest (LUKS/disk)", fillcolor = "#F4D58A", shape = "cylinder"];
+        otel [label = "OpenTelemetry / Prometheus\nTCP 9090 (scrape)", fillcolor = "#F4D58A"];
+        graylog [label = "Graylog / Syslog\nUDP 514 / TCP 6514 (TLS)", fillcolor = "#F4D58A"];
+        smtp [label = "SMTP Relay\nTCP 587 (STARTTLS) /\nTCP 465 (TLS)", fillcolor = "#F4D58A"];
+        vault [label = "OpenBao / Vault\nTCP 8200 (HTTPS)", fillcolor = "#F4D58A"];
+    }
+
+    // =========== ZONE 5: PRO+ LICENSE SERVER (vendor-hosted) ===========
+    subgraph cluster_lic {
+        label = "Zone 5 — Professional+ License Server (vendor-hosted SaaS, optional)";
+        style = "filled,rounded";
+        fillcolor = "#EDE3F4";
+        color = "#5B2A8C";
+        fontname = "Helvetica-Bold";
+        fontsize = 12;
+
+        fw_lic [label = "Vendor Edge Firewall", fillcolor = "#D5BFE9", shape = "octagon"];
+        lic    [label = "License & Module API\nFastAPI\nINBOUND: TCP 8400 (HTTPS)\nECDSA P-521 signing\nAES-256-GCM at rest", fillcolor = "#D5BFE9"];
+        lic_db [label = "License DB +\nModule/Plugin Store\n(SHA-512 manifest)", fillcolor = "#C5A8DE", shape = "cylinder"];
+    }
+
+    // =========== EDGES — INGRESS FROM ADMIN ===========
+    admin -> fw_edge [label = "HTTPS / WSS\nTCP 6443, 8080\n(TLS 1.2+, JWT)", color = "#1F4E79", penwidth = 2];
+    fw_edge -> rp;
+    rp -> api_srv [label = "loopback /\nprivate VLAN"];
+    rp -> web_srv;
+
+    // =========== EDGES — AGENT INGRESS (outbound from endpoint, ingress to server) ===========
+    ep_lin -> fw_edge [label = "WSS outbound\nTCP 6443 (TLS 1.2+, mTLS,\nJWT host_token)", color = "#214E34", penwidth = 2];
+    ep_win -> fw_edge [color = "#214E34", penwidth = 2];
+    ep_mac -> fw_edge [color = "#214E34", penwidth = 2];
+    ep_bsd -> fw_edge [color = "#214E34", penwidth = 2];
+
+    // =========== EDGES — DMZ → INTERNAL ===========
+    api_srv -> db      [label = "TCP 5432 (TLS)"];
+    api_srv -> otel    [label = "TCP 9090 (mTLS)", style = "dashed"];
+    api_srv -> graylog [label = "TCP 6514 (TLS)", style = "dashed"];
+    api_srv -> smtp    [label = "TCP 587 STARTTLS", style = "dashed"];
+    api_srv -> vault   [label = "TCP 8200 (HTTPS,\ntoken auth)", style = "dashed"];
+    api_srv -> sso     [label = "LDAPS 636 / OIDC 443\n(Pro+ tier)", style = "dashed"];
+
+    // =========== EDGES — DMZ → LICENSE SERVER (egress) ===========
+    api_srv -> fw_lic [label = "egress only\nHTTPS TCP 8400\nX-License-Key header", color = "#5B2A8C", style = "dashed"];
+    fw_lic -> lic;
+    lic -> lic_db;
+
+    // =========== TRUST BOUNDARY NOTES ===========
+    note_tls [
+        label = "Trust Boundaries / Controls:\n• All in-transit data: TLS 1.2+ (TLS 1.3 preferred)\n• Agent → Server: WSS + JWT host_token + optional mTLS, agent-initiated only\n• Admin → Server: HTTPS + Bearer JWT (Argon2 password hashing)\n• Server → DB: TLS, network-restricted to internal VLAN\n• Server → License: HTTPS, license key in header (never URL/log)\n• Data at rest: PostgreSQL on encrypted volume; license keys AES-256-GCM\n• No inbound connection to managed endpoints — agents are pull/poll over WSS\n• Default deny inbound on edge firewall except 6443 / 8080",
+        shape = "note",
+        fillcolor = "#FFF8DC",
+        fontsize = 10,
+        style = "filled"
+    ];
+}

@@ -18,18 +18,13 @@ from fastapi import (
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# pylint: disable=unused-import
-from backend.api.handlers import handle_os_version_update
+from backend.api.handlers import handle_os_version_update  # re-export for tests
 from backend.api.message_handlers import (
-    handle_command_result,
-    handle_config_acknowledgment,
-    handle_diagnostic_result,
+    handle_command_acknowledgment,
     handle_heartbeat,
-    handle_installation_status,
     handle_system_info,
     validate_host_authentication,
 )
-from backend.api.update_handlers import handle_update_apply_result
 from backend.config.config_push import config_push_manager
 from backend.i18n import _
 from backend.persistence.db import get_db
@@ -39,14 +34,13 @@ from backend.services.audit_service import ActionType, AuditService, EntityType,
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import ErrorMessage, MessageType, create_message
-from backend.websocket.queue_manager import QueueDirection, server_queue_manager
 
 # Set up logger with verbosity support
 logger = get_logger("websocket.agent")
 logger.info("Agent WebSocket module initialized")
 
 # Ensure config_push_manager is available for tests
-__all__ = ["config_push_manager"]
+__all__ = ["config_push_manager", "handle_os_version_update"]
 
 
 router = APIRouter()  # For authenticated endpoints (will get /api prefix)
@@ -191,14 +185,14 @@ async def agent_connect(websocket: WebSocket):
                 e,
             )
         else:
-            logger.error(
+            logger.exception(
                 "WEBSOCKET_UNKNOWN_ERROR: Unexpected RuntimeError in WebSocket handler: %s",
                 e,
                 exc_info=True,
             )
             raise
     except Exception as e:
-        logger.error(
+        logger.exception(
             "WEBSOCKET_UNKNOWN_ERROR: Unexpected exception in WebSocket handler: %s",
             e,
             exc_info=True,
@@ -208,6 +202,39 @@ async def agent_connect(websocket: WebSocket):
         # Clean up
         connection_manager.disconnect(connection.agent_id)
         db.close()
+
+
+async def _handle_time_sensitive_message(message, connection, db):
+    """Route a time-sensitive message (heartbeat / command-ack) to the host's
+    TENANT database when the host is bound, else the bootstrap ``db``.  These
+    touch host-scoped data (host status, the host's queue), so a bound host's
+    must hit its tenant DB.  SYSTEM_INFO self-routes from its own host_id and the
+    id isn't known on the first connection, so it stays on ``db`` here.  Inert
+    when MT is off / host unbound.  Commits the fresh tenant session — command-ack
+    doesn't self-commit (heartbeat does, so the extra commit no-ops)."""
+    from backend.persistence.partitions import tenant_engine_for_host  # noqa: PLC0415
+
+    host_id = getattr(connection, "host_id", None)
+    tenant_engine = (
+        None
+        if message.message_type == MessageType.SYSTEM_INFO or not host_id
+        else tenant_engine_for_host(host_id)
+    )
+    if tenant_engine is None:
+        await _handle_message_by_type(message, connection, db)
+        return
+
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+    tenant_db = sessionmaker(bind=tenant_engine)()
+    try:
+        await _handle_message_by_type(message, connection, tenant_db)
+        tenant_db.commit()
+    except Exception:
+        tenant_db.rollback()
+        raise
+    finally:
+        tenant_db.close()
 
 
 async def _process_websocket_message(data, connection, db, connection_id):
@@ -235,10 +262,16 @@ async def _process_websocket_message(data, connection, db, connection_id):
             message_size,
         )
 
-        # Handle time-sensitive messages immediately (heartbeats, system_info)
-        # These should not be queued as they need immediate processing
-        if message.message_type in [MessageType.HEARTBEAT, MessageType.SYSTEM_INFO]:
-            await _handle_message_by_type(message, connection, db)
+        # Handle time-sensitive messages immediately (heartbeats, system_info,
+        # command_acknowledgment). These should not be queued as they need
+        # immediate processing. Command acks are especially time-sensitive
+        # because the server has a 60-second ack timeout window.
+        if message.message_type in [
+            MessageType.HEARTBEAT,
+            MessageType.SYSTEM_INFO,
+            MessageType.COMMAND_ACKNOWLEDGMENT,
+        ]:
+            await _handle_time_sensitive_message(message, connection, db)
         else:
             # Queue all other messages for background processing
             _enqueue_inbound_message(message, connection, db)
@@ -250,19 +283,54 @@ async def _process_websocket_message(data, connection, db, connection_id):
 
     except Exception as exc:
         # Error processing message from agent
-        logger.error("Error processing message: %s", exc, exc_info=True)
+        logger.exception("Error processing message: %s", exc, exc_info=True)
         error_msg = ErrorMessage("processing_error", str(exc))
         try:
             await connection.send_message(error_msg.to_dict())
         except Exception as send_exc:
-            logger.error("Failed to send error message: %s", send_exc)
+            logger.exception("Failed to send error message: %s", send_exc)
 
 
 def _enqueue_inbound_message(message, connection, db):
     """
     Enqueue an inbound message for background processing.
     WebSocket thread should ONLY queue messages, not process them.
+
+    If the WebSocket connection has not yet completed SYSTEM_INFO
+    registration (``connection.hostname`` still ``None``), non-handshake
+    messages are buffered on the connection instead of enqueued.
+    Without this, messages that race ahead of registration end up
+    persisted with ``_connection_info.hostname=null`` and the inbound
+    processor's NULL-host_id path discards them as "Missing hostname
+    and host_id" — losing data entirely (the OS section of theol9
+    surfaced this: every ``os_version_update`` was dropped because the
+    agent fired it ~340 ms before the SYSTEM_INFO handler set
+    ``connection.hostname``).  Buffered messages are flushed by
+    ``flush_pending_inbound_messages`` once registration completes.
+
+    SYSTEM_INFO messages are exempt from buffering — they ARE the
+    registration handshake, and buffering them would deadlock the
+    connection.  In production they take a separate immediate-handler
+    path (``_handle_message_by_type``) and never arrive here, but this
+    function is also exercised directly by unit tests, so the guard
+    keeps the behaviour correct in both call paths.
     """
+    if not connection.hostname and message.message_type != MessageType.SYSTEM_INFO:
+        existing = getattr(connection, "_pending_inbound_messages", None)
+        if not isinstance(existing, list):
+            existing = []
+            connection._pending_inbound_messages = (  # pylint: disable=protected-access
+                existing
+            )
+        existing.append(message)
+        logger.info(
+            "Buffered %s message from connection %s — registration not "
+            "yet complete (connection.hostname is None)",
+            message.message_type,
+            connection.agent_id,
+        )
+        return
+
     from backend.websocket.queue_enums import Priority, QueueDirection
     from backend.websocket.queue_operations import QueueOperations
 
@@ -292,6 +360,15 @@ def _enqueue_inbound_message(message, connection, db):
         message_id=message.message_id,
         db=db,
     )
+    # Commit the enqueue NOW.  ``enqueue_message`` only FLUSHES when handed a
+    # session — the commit is the caller's job.  We must not rely on a later
+    # handler committing this same ``db``: for a tenant-bound host the
+    # time-sensitive handlers (heartbeat/ack) route to and commit the host's
+    # TENANT session instead (see ``_handle_time_sensitive_message``), so this
+    # bootstrap session would otherwise never be committed and the queued
+    # message would be silently rolled back — losing the agent's inventory/OS
+    # updates entirely.
+    db.commit()
 
     logger.info(
         "Enqueued %s message from connection %s for background processing",
@@ -300,11 +377,37 @@ def _enqueue_inbound_message(message, connection, db):
     )
 
 
+def flush_pending_inbound_messages(connection, db):
+    """Drain any pre-registration buffered messages on the connection.
+
+    Called from the SYSTEM_INFO handler once ``connection.hostname`` and
+    ``connection.host_id`` have been populated, so the messages can be
+    re-enqueued with a complete ``_connection_info`` snapshot.
+
+    Type-check the buffer with ``isinstance(..., list)`` instead of
+    relying on ``getattr(..., None)`` — Mock-based connection fixtures
+    in the unit tests auto-create attributes on access and would return
+    a Mock instead of None, which then fails ``len()``.
+    """
+    pending = getattr(connection, "_pending_inbound_messages", None)
+    if not isinstance(pending, list) or not pending:
+        return
+    connection._pending_inbound_messages = []  # pylint: disable=protected-access
+    logger.info(
+        "Flushing %d buffered inbound messages for connection %s (host=%s)",
+        len(pending),
+        connection.agent_id,
+        connection.hostname,
+    )
+    for buffered in pending:
+        _enqueue_inbound_message(buffered, connection, db)
+
+
 async def _handle_message_by_type(message, connection, db):
     """
     Handle time-sensitive messages that need immediate processing.
 
-    Note: This function is ONLY called for HEARTBEAT and SYSTEM_INFO messages.
+    Called for HEARTBEAT, SYSTEM_INFO, and COMMAND_ACKNOWLEDGMENT messages.
     All other message types are queued and processed by the inbound processor.
     """
     if message.message_type == MessageType.SYSTEM_INFO:
@@ -317,6 +420,18 @@ async def _handle_message_by_type(message, connection, db):
         heartbeat_data["message_id"] = message.message_id
         await handle_heartbeat(db, connection, heartbeat_data)
 
+    elif message.message_type == MessageType.COMMAND_ACKNOWLEDGMENT:
+        # Process acks immediately - they are time-sensitive (60-second window)
+        # and the message_id (which references the outbound message to acknowledge)
+        # is at the top level, not inside message.data, so it would be lost
+        # if enqueued through the normal background processing pipeline.
+        ack_data = {"message_id": message.message_id}
+        await handle_command_acknowledgment(db, connection, ack_data)
+        # Commit the ack status change - mark_acknowledged() skips commit when
+        # a session is provided, and the WebSocket handler uses a long-lived
+        # session, so we must commit explicitly (same pattern as handle_heartbeat).
+        db.commit()
+
     else:
         # This should never happen - log a warning
         logger.warning(
@@ -324,81 +439,6 @@ async def _handle_message_by_type(message, connection, db):
             "This function should only be called for HEARTBEAT and SYSTEM_INFO messages.",
             message.message_type,
         )
-
-
-async def _handle_script_execution_result(message, connection, db):
-    """Handle script execution result message."""
-    logger.debug("Processing script execution result message")
-    logger.debug(
-        "Script execution result data keys: %s",
-        list(message.data.keys()) if message.data else [],
-    )
-
-    # Queue script execution results for reliable processing
-    host, error_msg = await _validate_and_get_host(message.data, connection, db)
-    if error_msg:
-        logger.warning("Host validation failed for script execution result")
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    hostname = host.fqdn
-    logger.info("Enqueueing script execution result for host: %s", hostname)
-
-    # Enqueue the message for processing by message processor
-    from backend.websocket.queue_manager import Priority
-
-    try:
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db,
-        )
-        logger.info(
-            "Enqueued script execution result from host %s (message_id: %s)",
-            hostname,
-            queue_message_id,
-        )
-
-        # Send acknowledgment back to agent
-        ack_msg = {
-            "message_type": "script_execution_result_queued",
-            "message_id": queue_message_id,
-        }
-        await connection.send_message(ack_msg)
-
-    except Exception as e:
-        logger.error("Error enqueueing script execution result: %s", e)
-        error_msg = ErrorMessage(
-            "queue_error", f"Failed to queue script result: {str(e)}"
-        )
-        await connection.send_message(error_msg.to_dict())
-
-
-async def _handle_diagnostic_result_msg(message, connection, db):
-    """Handle diagnostic collection result message."""
-    logger.info("Diagnostic collection result received")
-    logger.info(
-        "Diagnostic result data keys: %s",
-        list(message.data.keys()) if message.data else [],
-    )
-
-    # Handle diagnostic collection result directly (no queuing needed)
-    try:
-        response = await handle_diagnostic_result(db, connection, message.data)
-        logger.info("Diagnostic collection result processed successfully")
-        # Send acknowledgment back to agent
-        if response:
-            await connection.send_message(response)
-    except Exception as e:
-        logger.error("Error processing diagnostic collection result: %s", e)
-        error_msg = ErrorMessage(
-            "diagnostic_error",
-            f"Failed to process diagnostic result: {str(e)}",
-        )
-        await connection.send_message(error_msg.to_dict())
 
 
 def _extract_host_identifier(message_data, connection, db):
@@ -633,183 +673,8 @@ async def _handle_system_info_message(message, connection, db):
                 )
         logger.info("handle_system_info completed successfully")
     except Exception as e:
-        logger.error("Error in handle_system_info: %s", e, exc_info=True)
+        logger.exception("Error in handle_system_info: %s", e, exc_info=True)
         raise
-
-
-async def _handle_update_result_message(message, connection, db):
-    """Handle update apply result message with error handling."""
-    logger.info("Received update apply result from agent")
-    try:
-        # Handle update application results from agent directly (time-sensitive)
-        await handle_update_apply_result(db, connection, message.data)
-        logger.info("Update apply result processed successfully")
-    except Exception as e:
-        logger.error("Error processing update apply result: %s", e)
-        raise
-
-
-async def _process_inventory_message(message, connection, db):
-    """Process inventory message after host validation."""
-    # Validate host first
-    host, error_msg = await _validate_and_get_host(message.data, connection, db)
-    if error_msg:
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    hostname = host.fqdn
-    logger.info("Host %s registered and approved - enqueueing message", hostname)
-    logger.info(
-        "DEBUG: About to enqueue with host.id=%s, host object type=%s",
-        host.id,
-        type(host),
-    )
-
-    # Log detailed message information
-    data_keys = list(message.data.keys()) if message.data else []
-    data_size = len(str(message.data)) if message.data else 0
-    logger.info(
-        "SERVER_DEBUG: Enqueueing message type=%s, data_keys=%s, data_size=%d bytes, host_id=%s",
-        message.message_type,
-        data_keys,
-        data_size,
-        host.id,
-    )
-
-    # Log specific data for different message types
-    if message.message_type == "hardware_update":
-        cpu_vendor = message.data.get("cpu_vendor", "N/A")
-        cpu_model = message.data.get("cpu_model", "N/A")
-        memory_mb = message.data.get("memory_total_mb", "N/A")
-        storage_count = len(message.data.get("storage_devices", []))
-        logger.info(
-            "SERVER_DEBUG: Hardware data - CPU: %s %s, Memory: %s MB, Storage devices: %d",
-            cpu_vendor,
-            cpu_model,
-            memory_mb,
-            storage_count,
-        )
-    elif message.message_type == "software_inventory_update":
-        total_packages = message.data.get("total_packages", 0)
-        software_packages = message.data.get("software_packages", [])
-        logger.info(
-            "SERVER_DEBUG: Software data - Total packages: %d, First package: %s",
-            total_packages,
-            software_packages[0] if software_packages else "None",
-        )
-    elif message.message_type == "user_access_update":
-        total_users = message.data.get("total_users", 0)
-        total_groups = message.data.get("total_groups", 0)
-        logger.info(
-            "SERVER_DEBUG: User access data - Users: %d, Groups: %d",
-            total_users,
-            total_groups,
-        )
-
-    try:
-        message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            db=db,
-        )
-        logger.info(
-            "SERVER_DEBUG: Message enqueued successfully with queue_id=%s for host %s (message_type=%s)",
-            message_id,
-            hostname,
-            message.message_type,
-        )
-
-        # Commit the database session to persist the enqueued message
-        db.commit()
-        logger.debug("Database committed for message %s", message_id)
-
-        # Send success acknowledgment to agent
-        ack_message = {
-            "message_type": "ack",
-            "message_id": message.data.get("message_id", "unknown"),
-            "queue_id": message_id,
-            "status": "queued",
-        }
-        await connection.send_message(ack_message)
-        logger.info(
-            "SERVER_DEBUG: Successfully processed and acknowledged message %s",
-            message.message_type,
-        )
-
-    except Exception as e:
-        logger.error("Error enqueueing message %s: %s", message.message_type, e)
-        error_msg = ErrorMessage("queue_error", f"Failed to queue message: {str(e)}")
-        await connection.send_message(error_msg.to_dict())
-
-
-async def _handle_packages_batch_message(message, connection, db):
-    """Handle packages batch messages by enqueueing them for ordered processing."""
-    # Get host information for validation
-    from backend.persistence.models import Host
-
-    # Try to get host from message data first (host_id), then from connection
-    host = None
-    host_id = message.data.get("host_id")
-    if host_id:
-        host = db.query(Host).filter(Host.id == host_id).first()
-        logger.info(
-            "Enqueueing %s message for host_id: %s", message.message_type, host_id
-        )
-
-    if not host:
-        # Fall back to hostname from connection
-        hostname = getattr(connection, "hostname", "unknown")
-        logger.info(
-            "Enqueueing %s message for host: %s", message.message_type, hostname
-        )
-        host = db.query(Host).filter(Host.fqdn == hostname).first()
-
-    if not host:
-        logger.error(
-            "Host not found for batch message (host_id=%s, hostname=%s)",
-            host_id,
-            getattr(connection, "hostname", "unknown"),
-        )
-        error_msg = ErrorMessage("host_not_found", "Host not found")
-        await connection.send_message(error_msg.to_dict())
-        return
-
-    # Enqueue the message for processing by message processor with HIGH priority
-    # to ensure batch messages are processed quickly and in order
-    from backend.websocket.queue_manager import Priority
-
-    try:
-        queue_message_id = server_queue_manager.enqueue_message(
-            message_type=message.message_type,
-            message_data=message.data,
-            direction=QueueDirection.INBOUND,
-            host_id=host.id,
-            priority=Priority.HIGH,
-            db=db,
-        )
-        logger.info(
-            "Enqueued %s from host %s (queue_id: %s)",
-            message.message_type,
-            host.fqdn,
-            queue_message_id,
-        )
-
-        # Send acknowledgment back to agent
-        ack_msg = {
-            "message_type": f"{message.message_type}_queued",
-            "message_id": queue_message_id,
-            "status": "queued",
-        }
-        await connection.send_message(ack_msg)
-
-    except Exception as e:
-        logger.error("Error enqueueing %s: %s", message.message_type, e)
-        error_msg = ErrorMessage(
-            "queue_error", f"Failed to queue {message.message_type}: {str(e)}"
-        )
-        await connection.send_message(error_msg.to_dict())
 
 
 class InstallationCompletionRequest(BaseModel):
@@ -908,5 +773,5 @@ async def handle_installation_completion(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error processing installation completion: %s", e)
+        logger.exception("Error processing installation completion: %s", e)
         raise HTTPException(status_code=500, detail=_("Internal server error")) from e

@@ -13,11 +13,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.api.error_constants import error_user_not_found
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.persistence import db, models
-from backend.persistence.db import get_db
+from backend.persistence import db as db_module
+from backend.persistence import models
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
@@ -86,7 +86,7 @@ def apply_repository_to_host(
         )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Failed to queue %s repository command for host %s: %s",
             action,
             host.fqdn,
@@ -124,7 +124,7 @@ async def apply_repository_to_matching_hosts(
         logger.info(
             "Found %d hosts matching OS '%s' for repository %s",
             len(hosts),
-            os_name,
+            sanitize_log(os_name),
             action,
         )
 
@@ -133,8 +133,10 @@ async def apply_repository_to_matching_hosts(
             await apply_repository_to_host(db_session, host, repository_url, action)
 
     except Exception as e:
-        logger.error(
-            "Error applying repository to matching hosts for OS '%s': %s", os_name, e
+        logger.exception(
+            "Error applying repository to matching hosts for OS '%s': %s",
+            sanitize_log(os_name),
+            e,
         )
 
 
@@ -198,7 +200,9 @@ async def apply_default_repositories_to_host(db_session: Session, host: models.H
             )
 
     except Exception as e:
-        logger.error("Error applying default repositories to host %s: %s", host.fqdn, e)
+        logger.exception(
+            "Error applying default repositories to host %s: %s", host.fqdn, e
+        )
 
 
 # Supported operating systems grouped by type
@@ -237,7 +241,9 @@ class DefaultRepositoryResponse(BaseModel):
     created_by: Optional[str] = None
 
     @validator("id", "created_by", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -255,7 +261,9 @@ class DefaultRepositoryCreate(BaseModel):
     repository_url: str
 
     @validator("os_name")
-    def validate_os_name(cls, os_name):  # pylint: disable=no-self-argument
+    def validate_os_name(
+        cls, os_name
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate OS name."""
         if not os_name or os_name.strip() == "":
             raise ValueError(_("OS name is required"))
@@ -266,7 +274,7 @@ class DefaultRepositoryCreate(BaseModel):
     @validator("package_manager")
     def validate_package_manager(
         cls, package_manager, values
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate package manager."""
         if not package_manager or package_manager.strip() == "":
             raise ValueError(_("Package manager is required"))
@@ -283,7 +291,7 @@ class DefaultRepositoryCreate(BaseModel):
     @validator("repository_url")
     def validate_repository_url(
         cls, repository_url
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate repository URL."""
         if not repository_url or repository_url.strip() == "":
             raise ValueError(_("Repository URL is required"))
@@ -313,30 +321,19 @@ async def get_os_options(
 @router.get("/by-os/{os_name}", response_model=List[DefaultRepositoryResponse])
 async def get_default_repositories_by_os(
     os_name: str,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get default repositories for a specific operating system."""
-    # Check if user has permission to view default repositories
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the default-repository data routes to
+    # the active tenant's engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: VIEW_DEFAULT_REPOSITORIES role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: VIEW_DEFAULT_REPOSITORIES role required"),
-            )
 
     try:
         repositories = (
@@ -348,7 +345,9 @@ async def get_default_repositories_by_os(
         return repositories
 
     except Exception as e:
-        logger.error("Error getting default repositories for OS %s: %s", os_name, e)
+        logger.exception(
+            "Error getting default repositories for OS %s: %s", sanitize_log(os_name), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve default repositories: %s") % str(e),
@@ -357,30 +356,19 @@ async def get_default_repositories_by_os(
 
 @router.get("/", response_model=List[DefaultRepositoryResponse])
 async def get_default_repositories(
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get all default repositories."""
-    # Check if user has permission to view default repositories
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the default-repository data routes to
+    # the active tenant's engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: VIEW_DEFAULT_REPOSITORIES role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_DEFAULT_REPOSITORIES):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: VIEW_DEFAULT_REPOSITORIES role required"),
-            )
 
     try:
         repositories = (
@@ -394,7 +382,7 @@ async def get_default_repositories(
         return repositories
 
     except Exception as e:
-        logger.error("Error getting default repositories: %s", e)
+        logger.exception("Error getting default repositories: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve default repositories: %s") % str(e),
@@ -405,31 +393,24 @@ async def get_default_repositories(
 async def create_default_repository(
     repo_data: DefaultRepositoryCreate,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Create a new default repository."""
-    # Check if user has permission to add default repositories
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the default-repository data routes to
+    # the active tenant's engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.ADD_DEFAULT_REPOSITORY):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ADD_DEFAULT_REPOSITORY role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ADD_DEFAULT_REPOSITORY):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: ADD_DEFAULT_REPOSITORY role required"),
-            )
-        auth_user_id = auth_user.id
+    auth_user_id = current_user.id
+    # Audit trail is server-global; route it to the MAIN engine.
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         # Create new default repository
@@ -453,20 +434,21 @@ async def create_default_repository(
         )
 
         # Log audit entry
-        AuditService.log_create(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name=f"Default Repository for {repo_data.os_name}/{repo_data.package_manager}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=str(new_repo.id),
-            details={
-                "os_name": repo_data.os_name,
-                "package_manager": repo_data.package_manager,
-                "repository_url": repo_data.repository_url,
-            },
-            ip_address=request.client.host if request.client else None,
-        )
+        with audit_session_local() as audit_session:
+            AuditService.log_create(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Default Repository for {repo_data.os_name}/{repo_data.package_manager}",
+                user_id=auth_user_id,
+                username=current_user.userid,
+                entity_id=str(new_repo.id),
+                details={
+                    "os_name": repo_data.os_name,
+                    "package_manager": repo_data.package_manager,
+                    "repository_url": repo_data.repository_url,
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         # Apply this repository to all existing hosts with matching OS
         await apply_repository_to_matching_hosts(
@@ -481,7 +463,7 @@ async def create_default_repository(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error creating default repository: %s", e)
+        logger.exception("Error creating default repository: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to create default repository: %s") % str(e),
@@ -492,31 +474,24 @@ async def create_default_repository(
 async def delete_default_repository(
     repo_id: str,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Delete a default repository."""
-    # Check if user has permission to remove default repositories
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the default-repository data routes to
+    # the active tenant's engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.REMOVE_DEFAULT_REPOSITORY):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: REMOVE_DEFAULT_REPOSITORY role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.REMOVE_DEFAULT_REPOSITORY):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: REMOVE_DEFAULT_REPOSITORY role required"),
-            )
-        auth_user_id = auth_user.id
+    auth_user_id = current_user.id
+    # Audit trail is server-global; route it to the MAIN engine.
+    audit_session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         # Parse UUID
@@ -557,20 +532,21 @@ async def delete_default_repository(
         )
 
         # Log audit entry
-        AuditService.log_delete(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name=f"Default Repository for {repo_os_name}/{repo_package_manager}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=repo_id,
-            details={
-                "os_name": repo_os_name,
-                "package_manager": repo_package_manager,
-                "repository_url": repo_url,
-            },
-            ip_address=request.client.host if request.client else None,
-        )
+        with audit_session_local() as audit_session:
+            AuditService.log_delete(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Default Repository for {repo_os_name}/{repo_package_manager}",
+                user_id=auth_user_id,
+                username=current_user.userid,
+                entity_id=repo_id,
+                details={
+                    "os_name": repo_os_name,
+                    "package_manager": repo_package_manager,
+                    "repository_url": repo_url,
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         # Remove this repository from all existing hosts with matching OS
         await apply_repository_to_matching_hosts(
@@ -585,7 +561,9 @@ async def delete_default_repository(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting default repository %s: %s", repo_id, e)
+        logger.exception(
+            "Error deleting default repository %s: %s", sanitize_log(repo_id), e
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete default repository: %s") % str(e),

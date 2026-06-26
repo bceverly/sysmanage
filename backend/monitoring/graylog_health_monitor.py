@@ -23,7 +23,7 @@ async def check_graylog_health():  # NOSONAR
     try:
         db = next(get_db())
     except Exception as e:
-        logger.error("Failed to get database connection: %s", e)
+        logger.exception("Failed to get database connection: %s", e)
         return
 
     try:
@@ -141,7 +141,7 @@ async def check_graylog_health():  # NOSONAR
         )
 
     except Exception as e:
-        logger.error("Error checking Graylog health: %s", e)
+        logger.exception("Error checking Graylog health: %s", e)
         db.rollback()
     finally:
         db.close()
@@ -159,6 +159,6 @@ async def graylog_health_monitor_service():
             # Check every 5 minutes (300 seconds)
             await asyncio.sleep(300)
         except Exception as e:
-            logger.error("Error in Graylog health monitor service: %s", e)
+            logger.exception("Error in Graylog health monitor service: %s", e)
             # Wait a bit before retrying
             await asyncio.sleep(60)

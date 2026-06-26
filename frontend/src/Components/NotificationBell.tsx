@@ -13,7 +13,6 @@ const NotificationBell: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
-  // eslint-disable-next-line no-undef
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const { registerRefresh, unregisterRefresh } = useNotificationRefresh();
 
@@ -85,9 +84,9 @@ const NotificationBell: React.FC = () => {
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleClickOutside = (event: any) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (dropdownRef.current && target && !dropdownRef.current.contains(target)) {
         setShowDropdown(false);
       }
     };

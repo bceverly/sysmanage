@@ -53,14 +53,30 @@ setup('authenticate', async ({ page }) => {
       break;
     }
 
-    // Also check if nav menu became visible (backup check)
-    const navMenu = page.locator('#nav-menu');
-    if (await navMenu.count() > 0) {
-      const visibility = await navMenu.evaluate(el => getComputedStyle(el).visibility);
-      if (visibility === 'visible') {
-        loginSucceeded = true;
-        break;
+    // Also check if nav menu became visible (backup check).
+    //
+    // Wrap the evaluate in try/catch: if the page navigates between
+    // ``locator.count()`` and ``locator.evaluate()`` (common in the post-
+    // login transition window — the navbar mounts while the router is
+    // still in flight, and Playwright tears down the execution context
+    // mid-evaluate), the throw itself indicates login is in progress.
+    // Swallow it and let the loop poll again; the next iteration will
+    // see the URL change or a stable navbar.
+    try {
+      const navMenu = page.locator('#nav-menu');
+      if (await navMenu.count() > 0) {
+        const visibility = await navMenu.evaluate(el => getComputedStyle(el).visibility);
+        if (visibility === 'visible') {
+          loginSucceeded = true;
+          break;
+        }
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (!message.includes('Execution context was destroyed')) {
+        throw err;
+      }
+      // Navigation race — try again next tick.
     }
   }
 

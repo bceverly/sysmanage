@@ -1,0 +1,359 @@
+name: Integration Tests (Linux/Windows/macOS)
+
+# Two triggers:
+#   1. workflow_dispatch — run on demand from the Actions UI; inputs
+#      let you pick Python version, marker, and OS subset.
+#   2. push of a release tag (v*.*.* or v*.*.*.*) — automatic per-
+#      release integration sweep, mirroring build-and-release.yml.
+#      Tag-push runs use the dispatch defaults below since
+#      `workflow_dispatch.inputs.*` are empty on push events.
+on:
+  workflow_dispatch:
+    inputs:
+      python_version:
+        description: "Python version to test against"
+        required: false
+        default: "3.12"
+        type: choice
+        options: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+      pytest_marker:
+        description: "Marker filter (default: 'integration'). Use 'integration or e2e' to widen."
+        required: false
+        default: "integration"
+        type: string
+      platforms:
+        description: "Which OS jobs to run"
+        required: false
+        default: "all"
+        type: choice
+        options: ["all", "linux-only", "linux+macos", "linux+windows"]
+  push:
+    # Mirror build-and-release.yml's tag pattern.
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*.*'
+
+permissions:
+  contents: read
+
+# ---------------------------------------------------------------------------
+# Conventions established by this workflow:
+#
+# 1. Server-side integration tests run on Linux only — they need the real
+#    Postgres service container.  Mark them with @pytest.mark.integration
+#    and put them under tests/integration/ (or anywhere with the marker).
+#
+# 2. Agent-side integration tests run on the full OS matrix.  Use the same
+#    @pytest.mark.integration marker; put platform-specific tests under
+#    tests/integration/agent/ and skipif() on platform.system() if needed.
+#
+# 3. Pro+ engine integration tests live in the sysmanage-professional-plus
+#    repo (separate).  This workflow scaffolds the OSS side; trigger the
+#    Pro+ workflow from there independently.
+# ---------------------------------------------------------------------------
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Server-side integration: real Postgres, real FastAPI app, real server
+  # endpoints exercised end-to-end.  This is where automation_engine /
+  # fleet_engine route tests, container_engine LXD tests on Linux, and
+  # av_management_engine + firewall_orchestration_engine tests live.
+  # -----------------------------------------------------------------------
+  integration-server:
+    name: "Server integration (Linux + Postgres)"
+    if: ${{ (inputs.platforms || 'all') != 'linux+macos' && (inputs.platforms || 'all') != 'linux+windows' || (inputs.platforms || 'all') == 'all' || (inputs.platforms || 'all') == 'linux-only' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ inputs.python_version || '3.12' }}
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # pytest, pytest-cov, pytest-asyncio are already in requirements.txt;
+          # the existing CI re-installs them here to be defensive.  Mirror that.
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Install LXD (for container_engine integration tests)
+        run: |
+          sudo snap install lxd
+          sudo lxd init --auto
+          sudo usermod -aG lxd $USER
+          # Run lxc as root via sudo in tests; group change won't take effect here.
+
+      - name: Install ClamAV (for av_management_engine integration tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clamav clamav-daemon
+          # Don't start clamd — tests should treat it as installable-but-not-running.
+
+      - name: Create test config
+        run: |
+          sudo mkdir -p /etc
+          sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+          api:
+            host: "localhost"
+            port: 8000
+            certFile: ""
+            chainFile: ""
+            keyFile: ""
+          database:
+            user: "sysmanage"
+            password: "abc123"
+            host: "localhost"
+            port: 5432
+            name: "sysmanage"
+          security:
+            password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+            admin_userid: "admin@sysmanage.org"
+            admin_password: "TEST_AdminPass123!"
+            jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+            jwt_algorithm: "HS256"
+            jwt_auth_timeout: 6000
+            jwt_refresh_timeout: 60000
+          webui:
+            host: "localhost"
+            port: 7443
+          EOF
+
+      - name: Run database migrations
+        run: |
+          python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+      - name: Run integration tests
+        env:
+          # Bound to env vars so the run: script can reference
+          # "$PYTEST_MARKER" instead of interpolating ${{ ... }} into
+          # shell — closes the run-shell-injection semgrep finding.
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+        run: |
+          # Collect tests with the requested marker.  If none are tagged yet,
+          # pytest exits 5 ("no tests collected") — we treat that as a soft
+          # success and emit a clear scaffolding message.
+          set +e
+          python -m pytest tests/ \
+            --ignore=tests/ui/ \
+            -m "$PYTEST_MARKER" \
+            -v --tb=short \
+            --junit-xml=integration-server-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "::warning::No tests matched marker '$PYTEST_MARKER'. Tag tests with @pytest.mark.$PYTEST_MARKER to populate this run."
+            exit 0
+          fi
+          exit $rc
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: integration-server-junit-py${{ inputs.python_version || '3.12' }}
+          path: integration-server-junit.xml
+
+  # -----------------------------------------------------------------------
+  # Migration round-trip job.  Catches non-reversible Alembic migrations
+  # before they can ship — the script `scripts/migration_roundtrip.py`
+  # captures the schema at head, runs `downgrade -1` then `upgrade head`,
+  # captures again, and fails on any schema drift.  Phase 8 ships several
+  # new tables; this job protects every one of them.
+  # -----------------------------------------------------------------------
+  migration-roundtrip:
+    name: "Migration round-trip (Postgres)"
+    if: ${{ (inputs.platforms || 'all') != 'linux+macos' && (inputs.platforms || 'all') != 'linux+windows' || (inputs.platforms || 'all') == 'all' || (inputs.platforms || 'all') == 'linux-only' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ inputs.python_version || '3.12' }}
+          cache: pip
+
+      - name: Install backend deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install postgres-client (for pg_dump)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run migration round-trip
+        run: python scripts/migration_roundtrip.py
+        env:
+          PYTHONPATH: .
+          DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+  # -----------------------------------------------------------------------
+  # Agent-side integration matrix: native OS coverage.  BSDs are handled by
+  # bsd-tests.yml (QEMU) — they don't fit in this workflow because the
+  # GitHub-hosted runner pool doesn't include them.
+  # -----------------------------------------------------------------------
+  integration-agent:
+    name: "Agent integration (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Skip non-Linux on linux-only runs
+        if: ${{ (inputs.platforms || 'all') == 'linux-only' && matrix.os != 'ubuntu-latest' }}
+        run: |
+          echo "Skipping ${{ matrix.os }} per platforms=linux-only input."
+          exit 0
+
+      - name: Skip macOS on linux+windows runs
+        if: ${{ (inputs.platforms || 'all') == 'linux+windows' && matrix.os == 'macos-latest' }}
+        run: |
+          echo "Skipping ${{ matrix.os }} per platforms=linux+windows input."
+          exit 0
+
+      - name: Skip Windows on linux+macos runs
+        if: ${{ (inputs.platforms || 'all') == 'linux+macos' && matrix.os == 'windows-latest' }}
+        run: |
+          echo "Skipping ${{ matrix.os }} per platforms=linux+macos input."
+          exit 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: ${{ inputs.python_version || '3.12' }}
+          cache: pip
+
+      - name: Checkout sysmanage-agent into a sibling directory
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          repository: bceverly/sysmanage-agent
+          path: sysmanage-agent
+          # The workflow runs in a public repo, no token needed for public clones.
+
+      - name: Install agent deps
+        working-directory: sysmanage-agent
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          # Best-effort: agent's requirements.txt has heavy native deps
+          # (cryptography w/ Rust+maturin) that don't always wheel-install
+          # cleanly on every (OS, Python) combo.  Soft-fail so the rest of
+          # the job still runs against whatever did install.
+          pip install -r requirements.txt || true
+          pip install pytest pytest-asyncio || true
+
+      - name: Run agent integration tests
+        working-directory: sysmanage-agent
+        shell: bash
+        env:
+          # Bound to env vars so the run: script never interpolates
+          # ${{ ... }} directly into shell — closes run-shell-injection.
+          PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
+          MATRIX_OS: ${{ matrix.os }}
+        run: |
+          # Several agent test modules unconditionally import POSIX-only
+          # stdlib modules (pty/termios/pwd) or call os.getuid().  On
+          # Windows these crash at COLLECTION time, before pytest can
+          # apply --markers filtering.  Skip them on Windows; let macOS
+          # collect the full set (POSIX modules are present there).
+          #
+          # CUTOVER-CLEANUP: most of the entries below are legacy
+          # child-host test files preserved verbatim under
+          # sysmanage-professional-plus/legacy_reference/agent/tests/.
+          # When the agent's legacy ``child_host_*`` cluster is removed
+          # from sysmanage-agent in the cutover commit, the
+          # corresponding tests/test_child_host_*.py entries (and the
+          # tests/test_kvm_operations.py, tests/test_lxd_operations.py,
+          # tests/integration/test_lxd_lifecycle.py entries) will
+          # reference non-existent files.  ``--ignore`` for missing
+          # paths is silent, so this won't break CI, but the list
+          # should be trimmed to just ``tests/test_generic_deployment.py``
+          # in the same commit that does the legacy ``rm``.
+          IGNORES=()
+          if [ "$MATRIX_OS" = "windows-latest" ]; then
+            for f in \
+              tests/test_child_host_alpine_console.py \
+              tests/test_child_host_alpine_vm_creator.py \
+              tests/test_child_host_debian_console.py \
+              tests/test_child_host_debian_vm_creator.py \
+              tests/test_child_host_kvm_creation.py \
+              tests/test_child_host_kvm_freebsd.py \
+              tests/test_child_host_vmm.py \
+              tests/test_generic_deployment.py \
+              tests/test_kvm_operations.py \
+              tests/test_lxd_operations.py \
+              tests/integration/test_lxd_lifecycle.py
+            do
+              IGNORES+=( --ignore="$f" )
+            done
+          fi
+          set +e
+          python -m pytest tests/ \
+            "${IGNORES[@]}" \
+            -m "$PYTEST_MARKER" \
+            -v --tb=short \
+            --junit-xml=integration-agent-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "::warning::No agent tests matched marker '$PYTEST_MARKER' on $MATRIX_OS."
+            exit 0
+          fi
+          exit $rc
+
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: integration-agent-${{ matrix.os }}-py${{ inputs.python_version || '3.12' }}-junit
+          path: sysmanage-agent/integration-agent-junit.xml

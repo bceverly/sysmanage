@@ -11,7 +11,9 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import OpenTelemetryEligibilityResponse
 
@@ -60,7 +62,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
 
             logger.info(
                 "User %s has roles: %s",
-                current_user,
+                sanitize_log(current_user),
                 user._role_cache.get_role_names() if user._role_cache else "None",
             )
             logger.info(
@@ -73,7 +75,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
             if not has_permission:
                 logger.warning(
                     "User %s lacks DEPLOY_OPENTELEMETRY role for eligibility check",
-                    current_user,
+                    sanitize_log(current_user),
                 )
                 return OpenTelemetryEligibilityResponse(
                     eligible=False,
@@ -86,50 +88,53 @@ async def check_opentelemetry_eligibility(  # NOSONAR
                     ),
                 )
 
-        # Validate host exists and is active
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=_("Host not found or not active"),
+        # Host + software inventory are tenant-scoped — route them to the active
+        # tenant's database.  (User RBAC above and Grafana settings below are
+        # server-global and stay on the bootstrap session.)
+        with request_sessionmaker()() as tenant_session:
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        # Check Grafana integration settings
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=_("Host not found or not active"),
+                )
+
+            # Check if agent is privileged
+            agent_privileged = host.is_agent_privileged or False
+
+            # Check if OS is supported (exclude OpenBSD and NetBSD)
+            os_supported = True
+            platform = (host.platform or "").lower()
+            if "openbsd" in platform or "netbsd" in platform:
+                os_supported = False
+
+            # Check if OpenTelemetry is already installed
+            # We check the software packages table for opentelemetry-related packages
+            opentelemetry_installed = (
+                tenant_session.query(models.SoftwarePackage)
+                .filter(
+                    models.SoftwarePackage.host_id == host_id,
+                    models.SoftwarePackage.package_name.ilike("%otel%")
+                    | models.SoftwarePackage.package_name.ilike("%opentelemetry%")
+                    | models.SoftwarePackage.package_name.ilike("%alloy%"),
+                )
+                .first()
+            ) is not None
+
+        # Check Grafana integration settings (server-global singleton).
         grafana_settings = (
             db.query(models.GrafanaIntegrationSettings).filter_by(enabled=True).first()
         )
 
         grafana_enabled = grafana_settings is not None
-
-        # Check if agent is privileged
-        agent_privileged = host.is_agent_privileged or False
-
-        # Check if OS is supported (exclude OpenBSD and NetBSD)
-        os_supported = True
-        platform = (host.platform or "").lower()
-        if "openbsd" in platform or "netbsd" in platform:
-            os_supported = False
-
-        # Check if OpenTelemetry is already installed
-        # We check the software packages table for opentelemetry-related packages
-        opentelemetry_installed = (
-            db.query(models.SoftwarePackage)
-            .filter(
-                models.SoftwarePackage.host_id == host_id,
-                models.SoftwarePackage.package_name.ilike("%otel%")
-                | models.SoftwarePackage.package_name.ilike("%opentelemetry%")
-                | models.SoftwarePackage.package_name.ilike("%alloy%"),
-            )
-            .first()
-        ) is not None
 
         # Determine overall eligibility
         eligible = (
@@ -141,7 +146,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
 
         logger.info(
             "OpenTelemetry eligibility for host %s: grafana_enabled=%s, opentelemetry_installed=%s, agent_privileged=%s, eligible=%s",
-            host_id,
+            sanitize_log(host_id),
             grafana_enabled,
             opentelemetry_installed,
             agent_privileged,
@@ -175,7 +180,7 @@ async def check_opentelemetry_eligibility(  # NOSONAR
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error checking OpenTelemetry eligibility: %s", e)
+        logger.exception("Error checking OpenTelemetry eligibility: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to check OpenTelemetry eligibility: %s") % str(e),

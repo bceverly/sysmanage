@@ -33,6 +33,7 @@ def upgrade() -> None:
 
     if 'api_key' in columns and 'api_key_vault_token' not in columns:
         # Rename api_key column to api_key_vault_token in grafana_integration_settings table
+        # expand-contract-ok: historical migration, applied fleet-wide pre-policy
         op.alter_column('grafana_integration_settings', 'api_key', new_column_name='api_key_vault_token')
     elif 'api_key_vault_token' in columns:
         # Column already has the new name, migration already applied

@@ -122,9 +122,9 @@ const AuditLogViewer: React.FC = () => {
     setPage(0);
   };
 
-  const handleExportCSV = async () => {
+  const handleExport = async (fmt: 'csv' | 'pdf') => {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string> = { fmt };
       if (search) params.search = search;
       if (userId) params.user_id = userId;
       if (actionType) params.action_type = actionType;
@@ -139,11 +139,12 @@ const AuditLogViewer: React.FC = () => {
         responseType: 'blob',
       });
 
-      const blob = new Blob([response.data], { type: 'text/csv' });
+      const mime = fmt === 'pdf' ? 'application/pdf' : 'text/csv';
+      const blob = new Blob([response.data], { type: mime });
       const url = globalThis.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `audit_log_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `audit_log_${new Date().toISOString().slice(0, 10)}.${fmt}`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -157,6 +158,9 @@ const AuditLogViewer: React.FC = () => {
       }
     }
   };
+
+  const handleExportCSV = () => handleExport('csv');
+  const handleExportPDF = () => handleExport('pdf');
 
   const handleGoBack = () => {
     navigate('/reports#security');
@@ -206,6 +210,13 @@ const AuditLogViewer: React.FC = () => {
             >
               {t('common.exportCSV', 'Export CSV')}
             </Button>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={handleExportPDF}
+            >
+              {t('common.exportPDF', 'Export PDF')}
+            </Button>
           </Box>
         </Box>
 
@@ -235,70 +246,70 @@ const AuditLogViewer: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.actionType', 'Action Type')}</InputLabel>
+                <InputLabel>{t('auditLog.actionTypeLabel', 'Action Type')}</InputLabel>
                 <Select
                   value={actionType}
-                  label={t('auditLog.actionType', 'Action Type')}
+                  label={t('auditLog.actionTypeLabel', 'Action Type')}
                   onChange={(e) => setActionType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="CREATE">Create</MenuItem>
-                  <MenuItem value="READ">Read</MenuItem>
-                  <MenuItem value="UPDATE">Update</MenuItem>
-                  <MenuItem value="DELETE">Delete</MenuItem>
-                  <MenuItem value="EXECUTE">Execute</MenuItem>
+                  <MenuItem value="CREATE">{t('auditLog.actionType.create', 'Create')}</MenuItem>
+                  <MenuItem value="READ">{t('auditLog.actionType.read', 'Read')}</MenuItem>
+                  <MenuItem value="UPDATE">{t('auditLog.actionType.update', 'Update')}</MenuItem>
+                  <MenuItem value="DELETE">{t('auditLog.actionType.delete', 'Delete')}</MenuItem>
+                  <MenuItem value="EXECUTE">{t('auditLog.actionType.execute', 'Execute')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.entityType', 'Entity Type')}</InputLabel>
+                <InputLabel>{t('auditLog.entityTypeLabel', 'Entity Type')}</InputLabel>
                 <Select
                   value={entityType}
-                  label={t('auditLog.entityType', 'Entity Type')}
+                  label={t('auditLog.entityTypeLabel', 'Entity Type')}
                   onChange={(e) => setEntityType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="HOST">Host</MenuItem>
-                  <MenuItem value="USER">User</MenuItem>
-                  <MenuItem value="PACKAGE">Package</MenuItem>
-                  <MenuItem value="SCRIPT">Script</MenuItem>
-                  <MenuItem value="SECRET">Secret</MenuItem>
-                  <MenuItem value="CERTIFICATE">Certificate</MenuItem>
-                  <MenuItem value="TAG">Tag</MenuItem>
-                  <MenuItem value="USER_ROLE">User Role</MenuItem>
+                  <MenuItem value="HOST">{t('auditLog.entityType.host', 'Host')}</MenuItem>
+                  <MenuItem value="USER">{t('auditLog.entityType.user', 'User')}</MenuItem>
+                  <MenuItem value="PACKAGE">{t('auditLog.entityType.package', 'Package')}</MenuItem>
+                  <MenuItem value="SCRIPT">{t('auditLog.entityType.script', 'Script')}</MenuItem>
+                  <MenuItem value="SECRET">{t('auditLog.entityType.secret', 'Secret')}</MenuItem>
+                  <MenuItem value="CERTIFICATE">{t('auditLog.entityType.certificate', 'Certificate')}</MenuItem>
+                  <MenuItem value="TAG">{t('auditLog.entityType.tag', 'Tag')}</MenuItem>
+                  <MenuItem value="USER_ROLE">{t('auditLog.entityType.userRole', 'User Role')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.category', 'Category')}</InputLabel>
+                <InputLabel>{t('auditLog.categoryLabel', 'Category')}</InputLabel>
                 <Select
                   value={category}
-                  label={t('auditLog.category', 'Category')}
+                  label={t('auditLog.categoryLabel', 'Category')}
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="database">Database</MenuItem>
-                  <MenuItem value="agent">Agent</MenuItem>
-                  <MenuItem value="authentication">Authentication</MenuItem>
-                  <MenuItem value="system">System</MenuItem>
+                  <MenuItem value="database">{t('auditLog.category.database', 'Database')}</MenuItem>
+                  <MenuItem value="agent">{t('auditLog.category.agent', 'Agent')}</MenuItem>
+                  <MenuItem value="authentication">{t('auditLog.category.authentication', 'Authentication')}</MenuItem>
+                  <MenuItem value="system">{t('auditLog.category.system', 'System')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <FormControl fullWidth size="small">
-                <InputLabel>{t('auditLog.entryType', 'Entry Type')}</InputLabel>
+                <InputLabel>{t('auditLog.entryTypeLabel', 'Entry Type')}</InputLabel>
                 <Select
                   value={entryType}
-                  label={t('auditLog.entryType', 'Entry Type')}
+                  label={t('auditLog.entryTypeLabel', 'Entry Type')}
                   onChange={(e) => setEntryType(e.target.value)}
                 >
                   <MenuItem value="">{t('common.all', 'All')}</MenuItem>
-                  <MenuItem value="user_action">User Action</MenuItem>
-                  <MenuItem value="system_event">System Event</MenuItem>
-                  <MenuItem value="security_event">Security Event</MenuItem>
-                  <MenuItem value="data_change">Data Change</MenuItem>
+                  <MenuItem value="user_action">{t('auditLog.entryType.userAction', 'User Action')}</MenuItem>
+                  <MenuItem value="system_event">{t('auditLog.entryType.systemEvent', 'System Event')}</MenuItem>
+                  <MenuItem value="security_event">{t('auditLog.entryType.securityEvent', 'Security Event')}</MenuItem>
+                  <MenuItem value="data_change">{t('auditLog.entryType.dataChange', 'Data Change')}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -358,7 +369,7 @@ const AuditLogViewer: React.FC = () => {
                       <TableCell>{t('auditLog.action', 'Action')}</TableCell>
                       <TableCell>{t('auditLog.entity', 'Entity')}</TableCell>
                       <TableCell>{t('auditLog.description', 'Description')}</TableCell>
-                      <TableCell>{t('auditLog.result', 'Result')}</TableCell>
+                      <TableCell>{t('auditLog.resultLabel', 'Result')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

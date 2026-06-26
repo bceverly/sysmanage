@@ -20,6 +20,7 @@ from backend.api.handlers import (
     handle_host_certificates_update,
     handle_host_role_data_update,
     handle_hostname_changed,
+    handle_installation_complete,
     handle_kvm_initialize_result,
     handle_kvm_modules_disable_result,
     handle_kvm_modules_enable_result,
@@ -210,7 +211,7 @@ async def route_inbound_message(  # NOSONAR
 
         elif message_type == MessageType.COMMAND_RESULT:
             print("About to call handle_command_result", flush=True)
-            await handle_command_result(mock_connection, message_data)
+            await handle_command_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed command result", flush=True)
 
@@ -225,6 +226,12 @@ async def route_inbound_message(  # NOSONAR
             await handle_update_apply_result(db, mock_connection, message_data)
             success = True
             print("Successfully processed update apply result", flush=True)
+
+        elif message_type == MessageType.INSTALLATION_COMPLETE:
+            print("About to call handle_installation_complete", flush=True)
+            await handle_installation_complete(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed installation_complete", flush=True)
 
         elif message_type == MessageType.VMM_INITIALIZED:
             print("About to call handle_vmm_initialize_result", flush=True)
@@ -262,7 +269,7 @@ async def route_inbound_message(  # NOSONAR
             success = False
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             _("Error routing message type %s: %s"), message_type, str(e), exc_info=True
         )
         print(f"ERROR in routing message type {message_type}: {e}", flush=True)

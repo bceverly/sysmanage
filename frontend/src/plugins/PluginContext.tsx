@@ -22,6 +22,8 @@ import type {
     PluginRoute,
     PluginHostDetailTab,
     PluginSettingsTab,
+    PluginNavbarWidget,
+    PluginAppBanner,
 } from './types';
 
 interface PluginContextValue {
@@ -29,6 +31,8 @@ interface PluginContextValue {
     routes: PluginRoute[];
     hostDetailTabs: PluginHostDetailTab[];
     settingsTabs: PluginSettingsTab[];
+    navbarWidgets: PluginNavbarWidget[];
+    appBanners: PluginAppBanner[];
     pluginsLoaded: boolean;
 }
 
@@ -37,6 +41,8 @@ const PluginContext = createContext<PluginContextValue>({
     routes: [],
     hostDetailTabs: [],
     settingsTabs: [],
+    navbarWidgets: [],
+    appBanners: [],
     pluginsLoaded: false,
 });
 
@@ -67,9 +73,12 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
                 return;
             }
 
-            const currentHost = globalThis.location.hostname;
-            const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
-            const baseURL = `http://${currentHost}:${backendPort}`;
+            // Same-origin: the dev server / vite-preview proxy forwards /api to
+            // the backend, exactly like the main axios client (baseURL: '').
+            // A relative URL (rather than an absolute http://host:8080) means
+            // plugin discovery + bundle loading never make a cross-origin
+            // request, so no server-side CORS allow-list is needed for the UI.
+            const baseURL = '';
 
             const response = await fetch(`${baseURL}/api/plugins/bundles`, {
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -118,9 +127,16 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             routes: pluginManager.getRoutes(),
             hostDetailTabs: pluginManager.getHostDetailTabs(),
             settingsTabs: pluginManager.getSettingsTabs(),
+            navbarWidgets: pluginManager.getNavbarWidgets(),
+            appBanners: pluginManager.getAppBanners(),
             pluginsLoaded,
         }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- revision is intentionally used to trigger re-computation when plugins change
+        // ``revision`` IS the dependency that should trigger
+        // re-computation here — pluginManager's getters are not pure
+        // (they read from internal registries that ``revision`` tracks
+        // changes to), so the linter's "unnecessary dependency"
+        // detection is wrong about this case.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [revision, pluginsLoaded]
     );
 

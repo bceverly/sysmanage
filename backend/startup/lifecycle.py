@@ -25,6 +25,19 @@ from backend.websocket.message_processor import message_processor
 
 logger = get_logger("backend.startup.lifecycle")
 
+# Strong references to fire-and-forget background tasks.  ``asyncio`` only
+# keeps a WEAK reference to a task, so a task whose handle isn't retained
+# can be garbage-collected mid-flight; the done-callback discards it once
+# it finishes.  (Tasks held in lifespan locals are kept alive by the
+# suspended frame; the ones started here use this set instead.)
+_BACKGROUND_TASKS: set = set()
+
+
+def _track_background_task(task) -> None:
+    """Retain a strong ref to ``task`` until it completes (GC-safe)."""
+    _BACKGROUND_TASKS.add(task)
+    task.add_done_callback(_BACKGROUND_TASKS.discard)
+
 
 @asynccontextmanager
 async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
@@ -43,6 +56,8 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     audit_retention_task = None
     secrets_rotation_task = None
     cve_refresh_task = None
+    automation_sched_task = None
+    fleet_sched_task = None
 
     try:
         # Startup: Ensure server certificates are generated
@@ -57,6 +72,30 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             "certificate_manager.ensure_server_certificate() completed successfully"
         )
 
+        # Startup: enforce air-gap appliance invariants (fail fast on an
+        # unsupported combination — e.g. multi-tenancy or federation on a
+        # repository-role / air-gapped deployment).  See
+        # docs/planning/openbao-deployment-and-airgap.md §5.
+        logger.info("=== DEPLOYMENT INVARIANT CHECK ===")
+        from backend.startup.deployment_guards import (
+            enforce_deployment_invariants,
+        )  # noqa: PLC0415
+
+        enforce_deployment_invariants()
+        logger.info("Deployment invariants satisfied")
+
+        # Startup: overlay secrets from OpenBAO onto the in-memory config +
+        # auth globals (jwt_secret / password_salt / admin_password / DB
+        # password).  No-op when OpenBAO is disabled/empty — the YAML values
+        # loaded at import remain in force.  See
+        # docs/planning/config-classification.md (Phase 13.1.H).
+        logger.info("=== SECRETS OVERLAY (OpenBAO) ===")
+        from backend.config.secrets_bootstrap import (
+            refresh_secrets_from_openbao,
+        )  # noqa: PLC0415
+
+        refresh_secrets_from_openbao()
+
         # Startup: Initialize Pro+ license service
         logger.info("=== LICENSE SERVICE INITIALIZATION ===")
         logger.info("About to initialize license service")
@@ -70,15 +109,82 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("=== PRO+ MODULE LOADING ===")
                 module_loader.initialize()
                 if license_service.cached_license:
+                    failed_modules = []
                     for module_code in license_service.cached_license.modules:
                         logger.info("Loading Pro+ module: %s", module_code)
                         try:
-                            await module_loader.ensure_module_available(module_code)
+                            ok = await module_loader.ensure_module_available(
+                                module_code
+                            )
+                            if ok is False:
+                                failed_modules.append(module_code)
                         except Exception as mod_e:
                             logger.warning(
                                 "Failed to load module %s: %s", module_code, mod_e
                             )
-                # Mount Pro+ routes now that modules are loaded
+                            failed_modules.append(module_code)
+                    # Surface licensed-but-unavailable engines as ONE loud
+                    # summary instead of leaving the operator to find the
+                    # individual 404 lines.  Most common cause: the license
+                    # server has no build of the engine for this host's
+                    # Python version (see module_loader's "ENGINE UNAVAILABLE"
+                    # log).  Anything gated on these engines stays disabled.
+                    if failed_modules:
+                        logger.error(
+                            "Pro+ ENGINES LICENSED BUT UNAVAILABLE (%d): %s — these "
+                            "did not load (typically: no build for this platform/"
+                            "Python on the license server); their features and any "
+                            "orchestrators/ticks gated on them are DISABLED.",
+                            len(failed_modules),
+                            ", ".join(failed_modules),
+                        )
+                # Bridge the multi-tenancy engine into the OSS seam if loaded —
+                # BEFORE mounting Pro+ routes, so mount_multitenancy_routes sees
+                # the registered engine and mounts ITS control-plane router (not
+                # the OSS fallback).  The bridge also feeds the data-plane
+                # resolver in backend/persistence/partitions.py (a runtime hot
+                # path).  No-op (single-tenant) when the engine isn't licensed.
+                multitenancy_engine = module_loader.get_module("multitenancy_engine")
+                if multitenancy_engine:
+                    from backend.multitenancy import bridge  # noqa: PLC0415
+
+                    bridge.bridge_loaded_engine(multitenancy_engine)
+
+                    # Phase 13.1.F — start the per-tenant backup/RPO orchestrator
+                    # if the engine provides it AND backups are configured.  No-op
+                    # otherwise (single-tenant, or no backup command in config), so
+                    # we never spin an idle loop.
+                    try:
+                        mt_info = multitenancy_engine.get_module_info()
+                        if mt_info.get("provides_background_task", False):
+                            from backend.services.tenant_backup import (
+                                get_backup_config,
+                            )  # noqa: PLC0415
+
+                            if get_backup_config().enabled:
+                                logger.info(
+                                    "=== MULTITENANCY BACKUP ORCHESTRATOR STARTUP ==="
+                                )
+                                _track_background_task(
+                                    asyncio.create_task(
+                                        multitenancy_engine.start_backup_orchestrator(
+                                            db_maker=get_db,
+                                            logger=logger,
+                                        )
+                                    )
+                                )
+                                logger.info("Multi-tenant backup orchestrator started")
+                            else:
+                                logger.info(
+                                    "Backup orchestrator idle: no backup command "
+                                    "configured (set backup.command in sysmanage.yaml)"
+                                )
+                    except Exception as backup_e:  # noqa: BLE001
+                        logger.warning(
+                            "Failed to start backup orchestrator: %s", backup_e
+                        )
+
+                # Mount Pro+ routes now that modules are loaded + bridged
                 logger.info("=== MOUNTING PRO+ MODULE ROUTES ===")
                 proplus_results = mount_proplus_routes(_fastapi_app)
                 if any(proplus_results.values()):
@@ -185,6 +291,224 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                                 sec_e,
                             )
 
+                # Start automation_engine schedule dispatcher (Phase 5)
+                automation_engine = module_loader.get_module("automation_engine")
+                if automation_engine:
+                    auto_info = automation_engine.get_module_info()
+                    if auto_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== AUTOMATION ENGINE SCHEDULE DISPATCHER STARTUP ==="
+                        )
+                        try:
+                            from backend.services.proplus_dispatch import (
+                                queue_automation_execution,
+                            )
+
+                            automation_sched_task = asyncio.create_task(
+                                automation_engine.start_schedule_dispatcher(
+                                    dispatch_fn=queue_automation_execution,
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Automation engine schedule dispatcher started")
+                        except Exception as auto_e:
+                            logger.warning(
+                                "Failed to start automation schedule dispatcher: %s",
+                                auto_e,
+                            )
+
+                # Start fleet_engine schedule dispatcher (Phase 5)
+                fleet_engine = module_loader.get_module("fleet_engine")
+                if fleet_engine:
+                    fleet_info = fleet_engine.get_module_info()
+                    if fleet_info.get("provides_background_task", False):
+                        logger.info("=== FLEET ENGINE SCHEDULE DISPATCHER STARTUP ===")
+                        try:
+                            from backend.services.proplus_dispatch import (
+                                build_host_provider,
+                                queue_fleet_bulk_op,
+                            )
+
+                            fleet_sched_task = asyncio.create_task(
+                                fleet_engine.start_schedule_dispatcher(
+                                    dispatch_fn=queue_fleet_bulk_op,
+                                    host_provider=build_host_provider(get_db),
+                                    logger=logger,
+                                )
+                            )
+                            logger.info("Fleet engine schedule dispatcher started")
+                        except Exception as fleet_e:
+                            logger.warning(
+                                "Failed to start fleet schedule dispatcher: %s",
+                                fleet_e,
+                            )
+
+                # The federation role (Settings → Server Role) gates which
+                # worker runs: a coordinator runs the push worker, a site
+                # runs the sync worker, and a server with role 'none' runs
+                # neither even when an engine is licensed/loaded.  Read once.
+                try:
+                    from backend.config import (
+                        config as _fed_config,
+                    )  # pylint: disable=import-outside-toplevel
+
+                    _federation_role = _fed_config.get_federation_role()
+                except Exception:  # pylint: disable=broad-exception-caught
+                    _federation_role = "none"
+
+                # Start federation_controller_engine outbound push
+                # worker (Phase 12.10 Slice 3).  Walks pending policy
+                # assignments + queued dispatched commands and posts
+                # them to subordinate sites' ``/site/policies`` and
+                # ``/site/commands`` endpoints using each site's
+                # ``coordinator_outbound_bearer_token``.  Idles on any
+                # tick where no work is pending.  Only runs when this server's
+                # federation role is 'coordinator'.
+                federation_controller_engine = module_loader.get_module(
+                    "federation_controller_engine"
+                )
+                if federation_controller_engine and _federation_role == "coordinator":
+                    fed_ctl_info = federation_controller_engine.get_module_info()
+                    if fed_ctl_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== FEDERATION CONTROLLER ENGINE PUSH WORKER STARTUP ==="
+                        )
+                        try:
+                            _track_background_task(
+                                asyncio.create_task(
+                                    federation_controller_engine.start_federation_push_worker(
+                                        db_maker=get_db,
+                                        logger=logger,
+                                    )
+                                )
+                            )
+                            logger.info(
+                                "Federation controller engine push worker started"
+                            )
+                        except Exception as fed_ctl_e:
+                            logger.warning(
+                                "Failed to start federation push worker: %s",
+                                fed_ctl_e,
+                            )
+
+                # Start federation_site_engine outbound sync worker
+                # (Phase 12.10 Slice 2).  Drains
+                # ``federation_sync_queue`` to the coordinator's
+                # ingest endpoints on the interval configured in the
+                # singleton ``federation_coordinator`` row.  Only
+                # makes outbound HTTP calls when the row is in
+                # ``enrolled`` state with a bearer token; idles
+                # otherwise.  Only runs when this server's federation role
+                # is 'site'.
+                federation_site_engine = module_loader.get_module(
+                    "federation_site_engine"
+                )
+                if federation_site_engine and _federation_role == "site":
+                    fed_site_info = federation_site_engine.get_module_info()
+                    if fed_site_info.get("provides_background_task", False):
+                        logger.info(
+                            "=== FEDERATION SITE ENGINE SYNC WORKER STARTUP ==="
+                        )
+                        try:
+                            _track_background_task(
+                                asyncio.create_task(
+                                    federation_site_engine.start_federation_sync_worker(
+                                        db_maker=get_db,
+                                        logger=logger,
+                                    )
+                                )
+                            )
+                            logger.info("Federation site engine sync worker started")
+                        except Exception as fed_e:
+                            logger.warning(
+                                "Failed to start federation sync worker: %s",
+                                fed_e,
+                            )
+
+                # Start air-gap collection schedule tick service if the
+                # collector engine is loaded.  The /tick endpoint and
+                # DB model are always available (OSS-side), but the
+                # background tick driver only runs when the engine
+                # whose plans the tick produces is actually present —
+                # otherwise scheduled runs would queue forever with no
+                # consumer.
+                collector_engine_for_tick = module_loader.get_module(
+                    "airgap_collector_engine"
+                )
+                if collector_engine_for_tick is not None:
+                    logger.info("=== AIRGAP SCHEDULE TICK STARTUP ===")
+                    try:
+                        from backend.services.airgap_schedule_tick import (
+                            airgap_schedule_tick_service,
+                        )
+
+                        airgap_tick_task = asyncio.create_task(
+                            airgap_schedule_tick_service()
+                        )
+                        logger.info(
+                            "Air-gap schedule tick task started: %s",
+                            airgap_tick_task,
+                        )
+                    except Exception as tick_e:
+                        logger.warning(
+                            "Failed to start air-gap schedule tick task: %s",
+                            tick_e,
+                        )
+
+                    # And the run-lifecycle orchestrator.  The
+                    # schedule-tick above CREATES QUEUED runs but
+                    # nothing else advances them — the run-tick is
+                    # what actually walks a run through MIRRORING ->
+                    # STAGING_COMPLETE -> BUILDING_ISO -> ISO_BUILT ->
+                    # COMPLETE.  Same gate (collector engine present);
+                    # same blast-radius treatment if it fails to start.
+                    logger.info("=== AIRGAP RUN ORCHESTRATOR STARTUP ===")
+                    try:
+                        from backend.services.airgap_run_tick import (
+                            airgap_run_tick_service,
+                        )
+
+                        airgap_run_task = asyncio.create_task(airgap_run_tick_service())
+                        logger.info(
+                            "Air-gap run orchestrator started: %s",
+                            airgap_run_task,
+                        )
+                    except Exception as run_e:
+                        logger.warning(
+                            "Failed to start air-gap run orchestrator: %s",
+                            run_e,
+                        )
+
+                # Repository-side ingestion orchestrator.  Gated on the
+                # repository engine (the other half of the air gap):
+                # walks an AirgapIngestionRun through mount -> keyring
+                # verify -> copy -> COMPLETE.  Without it, a transferred
+                # ISO POSTed to /ingest queues forever with no consumer —
+                # the exact gap the collector run-tick above closed for
+                # the collector side.
+                repository_engine_for_tick = module_loader.get_module(
+                    "airgap_repository_engine"
+                )
+                if repository_engine_for_tick is not None:
+                    logger.info("=== AIRGAP INGEST ORCHESTRATOR STARTUP ===")
+                    try:
+                        from backend.services.airgap_ingest_tick import (
+                            airgap_ingest_tick_service,
+                        )
+
+                        airgap_ingest_task = asyncio.create_task(
+                            airgap_ingest_tick_service()
+                        )
+                        logger.info(
+                            "Air-gap ingest orchestrator started: %s",
+                            airgap_ingest_task,
+                        )
+                    except Exception as ingest_e:
+                        logger.warning(
+                            "Failed to start air-gap ingest orchestrator: %s",
+                            ingest_e,
+                        )
+
                 # Start vuln_engine CVE refresh scheduler and staleness check
                 vuln_engine = module_loader.get_module("vuln_engine")
                 if vuln_engine:
@@ -232,6 +556,23 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("Heartbeat monitor task created: %s", heartbeat_task)
         logger.info("Heartbeat monitor service started successfully")
 
+        # Phase 12.7: Start the GeoLite2 weekly-refresh background task.
+        # Self-skipping when geo_lookup is disabled or no MaxMind license
+        # key is configured — operators who don't want geo-IP just leave
+        # the config defaults and the task sleeps forever without doing
+        # any work.  See backend/services/geolocation_service.py for
+        # the refresh + ipapi.co fallback logic.
+        try:
+            logger.info("=== GEOLITE2 REFRESH STARTUP ===")
+            from backend.services.geolocation_service import (
+                geolite_refresh_service,
+            )  # noqa: PLC0415
+
+            geolite_refresh_task = asyncio.create_task(geolite_refresh_service())
+            logger.info("GeoLite2 refresh task created: %s", geolite_refresh_task)
+        except Exception as geo_exc:  # pylint: disable=broad-exception-caught
+            logger.warning("Failed to start GeoLite2 refresh task: %s", geo_exc)
+
         # Startup: Start the Graylog health monitor service
         logger.info("=== GRAYLOG HEALTH MONITOR STARTUP ===")
         logger.info("About to start Graylog health monitor service")
@@ -276,7 +617,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 logger.info("Task result: %s", result)
                 print(f"Task result: {result}")
             except Exception as task_e:
-                logger.error(
+                logger.exception(
                     "Message processor startup failed: %s", task_e, exc_info=True
                 )
                 print(f"Task exception: {task_e}")
@@ -298,10 +639,10 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         logger.info("=== FASTAPI LIFESPAN SHUTDOWN BEGIN ===")
 
     except Exception as e:
-        logger.error("=== EXCEPTION IN LIFESPAN STARTUP ===")
-        logger.error("Exception in lifespan startup: %s", e, exc_info=True)
-        logger.error("Exception type: %s", type(e).__name__)
-        logger.error("Exception args: %s", e.args)
+        logger.exception("=== EXCEPTION IN LIFESPAN STARTUP ===")
+        logger.exception("Exception in lifespan startup: %s", e, exc_info=True)
+        logger.exception("Exception type: %s", type(e).__name__)
+        logger.exception("Exception args: %s", e.args)
         raise
 
     # Shutdown: Stop the license service
@@ -310,7 +651,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await license_service.shutdown()
         logger.info("License service stopped")
     except Exception as e:
-        logger.error("Error stopping license service: %s", e)
+        logger.exception("Error stopping license service: %s", e)
 
     # Shutdown: Stop the discovery beacon service
     logger.info("Stopping discovery beacon service")
@@ -318,7 +659,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await discovery_beacon.stop_beacon_service()
         logger.info("Discovery beacon service stopped")
     except Exception as e:
-        logger.error("Error stopping discovery beacon: %s", e)
+        logger.exception("Error stopping discovery beacon: %s", e)
 
     # Shutdown: Stop the message processor service
     logger.info("Stopping message processor service")
@@ -333,7 +674,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Message processor service stopped")
     except Exception as e:
-        logger.error("Error stopping message processor: %s", e)
+        logger.exception("Error stopping message processor: %s", e)
 
     # Shutdown: Cancel the Graylog health monitor service
     logger.info("Stopping Graylog health monitor service")
@@ -347,7 +688,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Graylog health monitor service stopped")
     except Exception as e:
-        logger.error("Error stopping Graylog health monitor: %s", e)
+        logger.exception("Error stopping Graylog health monitor: %s", e)
 
     # Shutdown: Cancel the alerting engine background task
     if alerting_task:
@@ -361,7 +702,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Alerting engine background task stopped")
         except Exception as e:
-            logger.error("Error stopping alerting engine task: %s", e)
+            logger.exception("Error stopping alerting engine task: %s", e)
 
     # Shutdown: Cancel the reporting engine background task
     if reporting_task:
@@ -375,7 +716,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Reporting engine background task stopped")
         except Exception as e:
-            logger.error("Error stopping reporting engine task: %s", e)
+            logger.exception("Error stopping reporting engine task: %s", e)
 
     # Shutdown: Cancel the audit engine retention background task
     if audit_retention_task:
@@ -389,7 +730,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Audit engine retention background task stopped")
         except Exception as e:
-            logger.error("Error stopping audit engine retention task: %s", e)
+            logger.exception("Error stopping audit engine retention task: %s", e)
 
     # Shutdown: Cancel the secrets engine rotation background task
     if secrets_rotation_task:
@@ -403,7 +744,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("Secrets engine rotation background task stopped")
         except Exception as e:
-            logger.error("Error stopping secrets engine rotation task: %s", e)
+            logger.exception(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+                "Error stopping secrets engine rotation task (%s)", type(e).__name__
+            )
 
     # Shutdown: Cancel the CVE refresh background task
     if cve_refresh_task:
@@ -417,7 +760,33 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
             logger.info("CVE refresh background task stopped")
         except Exception as e:
-            logger.error("Error stopping CVE refresh task: %s", e)
+            logger.exception("Error stopping CVE refresh task: %s", e)
+
+    # Shutdown: Cancel the automation engine schedule dispatcher (Phase 5)
+    if automation_sched_task:
+        logger.info("Stopping automation engine schedule dispatcher")
+        try:
+            automation_sched_task.cancel()
+            try:
+                await automation_sched_task
+            except asyncio.CancelledError:
+                logger.info("Automation schedule dispatcher cancelled successfully")
+                raise
+        except Exception as e:
+            logger.exception("Error stopping automation schedule dispatcher: %s", e)
+
+    # Shutdown: Cancel the fleet engine schedule dispatcher (Phase 5)
+    if fleet_sched_task:
+        logger.info("Stopping fleet engine schedule dispatcher")
+        try:
+            fleet_sched_task.cancel()
+            try:
+                await fleet_sched_task
+            except asyncio.CancelledError:
+                logger.info("Fleet schedule dispatcher cancelled successfully")
+                raise
+        except Exception as e:
+            logger.exception("Error stopping fleet schedule dispatcher: %s", e)
 
     # Shutdown: Stop the CVE refresh scheduler
     try:
@@ -426,7 +795,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         await cve_refresh_service.stop_scheduler()
         logger.info("CVE refresh scheduler stopped")
     except Exception as e:
-        logger.error("Error stopping CVE refresh scheduler: %s", e)
+        logger.exception("Error stopping CVE refresh scheduler: %s", e)
 
     # Shutdown: Cancel the heartbeat monitor service
     logger.info("Stopping heartbeat monitor service")
@@ -440,6 +809,6 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
                 raise
         logger.info("Heartbeat monitor service stopped")
     except Exception as e:
-        logger.error("Error stopping heartbeat monitor: %s", e)
+        logger.exception("Error stopping heartbeat monitor: %s", e)
 
     logger.info("=== FASTAPI LIFESPAN SHUTDOWN COMPLETE ===")

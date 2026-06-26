@@ -16,10 +16,12 @@ import {
     AccordionDetails,
     AccordionSummary,
     Alert,
+    AlertTitle,
     Box,
     Button,
     Card,
     CardContent,
+    CardHeader,
     Checkbox,
     Chip,
     CircularProgress,
@@ -39,9 +41,11 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
+    Menu,
     MenuItem,
     Paper,
     Select,
+    Snackbar,
     Stack,
     Switch,
     Tab,
@@ -61,13 +65,18 @@ import {
 import { DataGrid } from '@mui/x-data-grid';
 
 // MUI Icons used by plugins
+import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BlockIcon from '@mui/icons-material/Block';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import BusinessIcon from '@mui/icons-material/Business';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ComputerIcon from '@mui/icons-material/Computer';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import ErrorIcon from '@mui/icons-material/Error';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExtensionIcon from '@mui/icons-material/Extension';
@@ -76,6 +85,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyIcon from '@mui/icons-material/Key';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import LockIcon from '@mui/icons-material/Lock';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SaveIcon from '@mui/icons-material/Save';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -93,7 +103,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 // Application-specific shared utilities
 import axiosInstance from '../Services/api';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { getLicenseInfo } from '../Services/license';
@@ -110,10 +120,12 @@ import { pluginManager } from './PluginManager';
         AccordionDetails,
         AccordionSummary,
         Alert,
+        AlertTitle,
         Box,
         Button,
         Card,
         CardContent,
+        CardHeader,
         Checkbox,
         Chip,
         CircularProgress,
@@ -133,9 +145,11 @@ import { pluginManager } from './PluginManager';
         ListItem,
         ListItemIcon,
         ListItemText,
+        Menu,
         MenuItem,
         Paper,
         Select,
+        Snackbar,
         Stack,
         Switch,
         Tab,
@@ -154,13 +168,18 @@ import { pluginManager } from './PluginManager';
         DataGrid,
     },
     MuiIcons: {
+        AddIcon,
         ArrowBackIcon,
+        BlockIcon,
         BugReportIcon,
         BusinessIcon,
         CalendarTodayIcon,
+        CheckIcon,
         CheckCircleIcon,
         ComputerIcon,
+        ContentCopyIcon,
         DeleteIcon,
+        EditIcon,
         ErrorIcon,
         ExpandMoreIcon,
         ExtensionIcon,
@@ -169,6 +188,7 @@ import { pluginManager } from './PluginManager';
         InfoIcon,
         KeyIcon,
         LightbulbIcon,
+        LockIcon,
         RefreshIcon,
         SaveIcon,
         ScheduleIcon,

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import api from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import FederationReportPanel from '../Components/FederationReportPanel';
+import { refreshLicenseCache, isModuleLicensed } from '../Services/license';
 
 import {
   Box,
@@ -169,8 +171,30 @@ const Reports: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // Tab names for URL hash
-  const tabNames = useMemo(() => ['hosts', 'users', 'security'], []);
+  // Federation is an ENTERPRISE feature (features.py: FEDERATION_* live in the
+  // Enterprise tier, owned by federation_controller_engine). The Federation
+  // reports tab must NOT show to a Professional/Community user — we shouldn't
+  // surface a feature they aren't licensed for. Gate on that engine being
+  // licensed; default hidden until the license cache resolves.
+  const [federationLicensed, setFederationLicensed] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    refreshLicenseCache()
+      .then(() => {
+        if (!cancelled) setFederationLicensed(isModuleLicensed('federation_controller_engine'));
+      })
+      .catch(() => {
+        if (!cancelled) setFederationLicensed(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Tab names for URL hash — federation only present when licensed, so its
+  // hash/index stay consistent with what's actually rendered.
+  const tabNames = useMemo(
+    () => ['hosts', 'users', 'security', ...(federationLicensed ? ['federation'] : [])],
+    [federationLicensed],
+  );
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -241,67 +265,67 @@ const Reports: React.FC = () => {
     const availableReports: ReportCardData[] = [
       {
         id: 'registered-hosts',
-        name: 'Registered Hosts',
-        description: 'Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.',
+        name: t('reports.registeredHosts.name', 'Registered Hosts'),
+        description: t('reports.registeredHosts.description', 'Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.'),
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/registered-hosts.png`,
-        tags: ['hosts', 'system info', 'basic']
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.systemInfo', 'system info'), t('reports.tag.basic', 'basic')]
       },
       {
         id: 'hosts-with-tags',
-        name: 'Hosts with Tags',
-        description: 'Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.',
+        name: t('reports.hostsWithTags.name', 'Hosts with Tags'),
+        description: t('reports.hostsWithTags.description', 'Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.'),
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/hosts-with-tags.png`,
-        tags: ['hosts', 'tags', 'organization']
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.tags', 'tags'), t('reports.tag.organization', 'organization')]
       },
       {
         id: 'users-list',
-        name: 'SysManage Users',
-        description: 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.',
+        name: t('reports.usersList.name', 'SysManage Users'),
+        description: t('reports.usersList.description', 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.'),
         category: 'users',
         screenshot: `${baseURL}/api/reports/screenshots/users-list.png`,
-        tags: ['users', 'accounts', 'permissions']
+        tags: [t('reports.tag.users', 'users'), t('reports.tag.accounts', 'accounts'), t('reports.tag.permissions', 'permissions')]
       },
       {
         id: 'user-rbac',
-        name: 'User Security Roles (RBAC)',
-        description: 'Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.',
+        name: t('reports.userRbac.name', 'User Security Roles (RBAC)'),
+        description: t('reports.userRbac.description', 'Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.'),
         category: 'security',
         screenshot: `${baseURL}/api/reports/screenshots/user-rbac.png`,
-        tags: ['users', 'security', 'rbac', 'permissions', 'roles']
+        tags: [t('reports.tag.users', 'users'), t('reports.tag.security', 'security'), t('reports.tag.rbac', 'rbac'), t('reports.tag.permissions', 'permissions'), t('reports.tag.roles', 'roles')]
       },
       {
         id: 'firewall-status',
-        name: 'Host Firewall Status',
-        description: 'Detailed firewall status for all managed hosts including firewall software, enabled/disabled status, open IPv4 and IPv6 ports, and operating system information.',
+        name: t('reports.firewallStatus.name', 'Host Firewall Status'),
+        description: t('reports.firewallStatus.description', 'Detailed firewall status for all managed hosts including firewall software, enabled/disabled status, open IPv4 and IPv6 ports, and operating system information.'),
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/firewall-status.png`,
-        tags: ['hosts', 'security', 'firewall', 'network']
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.firewall', 'firewall'), t('reports.tag.network', 'network')]
       },
       {
         id: 'antivirus-opensource',
-        name: 'Open-Source Antivirus Status',
-        description: 'Status of open-source antivirus software across all hosts showing software name, version, installation path, and enabled/disabled status.',
+        name: t('reports.antivirusOpensource.name', 'Open-Source Antivirus Status'),
+        description: t('reports.antivirusOpensource.description', 'Status of open-source antivirus software across all hosts showing software name, version, installation path, and enabled/disabled status.'),
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/antivirus-opensource.png`,
-        tags: ['hosts', 'security', 'antivirus', 'opensource']
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.antivirus', 'antivirus'), t('reports.tag.opensource', 'opensource')]
       },
       {
         id: 'antivirus-commercial',
-        name: 'Commercial Antivirus Status',
-        description: 'Commercial antivirus protection status including product name, version, signature version, real-time protection status, and service status across all managed hosts.',
+        name: t('reports.antivirusCommercial.name', 'Commercial Antivirus Status'),
+        description: t('reports.antivirusCommercial.description', 'Commercial antivirus protection status including product name, version, signature version, real-time protection status, and service status across all managed hosts.'),
         category: 'hosts',
         screenshot: `${baseURL}/api/reports/screenshots/antivirus-commercial.png`,
-        tags: ['hosts', 'security', 'antivirus', 'commercial']
+        tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.antivirus', 'antivirus'), t('reports.tag.commercial', 'commercial')]
       },
       {
         id: 'audit-log',
-        name: 'Audit Log',
-        description: 'Complete audit trail of all user actions and system changes for compliance and security monitoring. Tracks database modifications, agent messages, and administrative operations.',
+        name: t('reports.auditLogReport.name', 'Audit Log'),
+        description: t('reports.auditLogReport.description', 'Complete audit trail of all user actions and system changes for compliance and security monitoring. Tracks database modifications, agent messages, and administrative operations.'),
         category: 'security',
         screenshot: `${baseURL}/api/reports/screenshots/audit-log.png`,
-        tags: ['users', 'security', 'audit', 'compliance', 'tracking']
+        tags: [t('reports.tag.users', 'users'), t('reports.tag.security', 'security'), t('reports.tag.audit', 'audit'), t('reports.tag.compliance', 'compliance'), t('reports.tag.tracking', 'tracking')]
       }
     ];
 
@@ -326,7 +350,7 @@ const Reports: React.FC = () => {
         const searchValue = searchField === 'name' ? report.name : report.description;
         return searchValue.toLowerCase().includes(searchTerm.toLowerCase());
       });
-  }, [tabValue, searchTerm, searchField, canViewAuditLog]);
+  }, [tabValue, searchTerm, searchField, canViewAuditLog, t]);
 
   const handleViewReport = (reportId: string) => {
     // Audit log has its own dedicated viewer component
@@ -363,7 +387,11 @@ const Reports: React.FC = () => {
     } catch (error) {
       console.error('Error generating report:', error);
       // You might want to show a user-friendly error message here
-      alert(`Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        t('reports.generateError', 'Error generating report: {{message}}', {
+          message: error instanceof Error ? error.message : t('reports.unknownError', 'Unknown error'),
+        }),
+      );
     }
   };
 
@@ -385,6 +413,9 @@ const Reports: React.FC = () => {
             <Tab label={t('reports.tabs.hosts', 'Hosts')} />
             <Tab label={t('reports.tabs.users', 'Users')} />
             <Tab label={t('reports.tabs.security', 'Security')} />
+            {federationLicensed && (
+              <Tab label={t('reports.tabs.federation', 'Federation')} />
+            )}
           </Tabs>
         </Box>
 
@@ -549,6 +580,12 @@ const Reports: React.FC = () => {
             </Box>
           )}
         </TabPanel>
+
+        {federationLicensed && (
+          <TabPanel value={tabValue} index={3}>
+            <FederationReportPanel />
+          </TabPanel>
+        )}
       </Box>
     </div>
   );

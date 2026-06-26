@@ -1,7 +1,5 @@
 """Tests for script execution delete endpoints."""
 
-import pytest
-
 from backend.persistence import models
 
 
@@ -13,7 +11,6 @@ class TestScriptExecutionDelete:
         from unittest.mock import patch
 
         # Force creation of script_execution_log table if it doesn't exist
-        from backend.persistence.db import Base
 
         models.ScriptExecutionLog.__table__.create(session.get_bind(), checkfirst=True)
 

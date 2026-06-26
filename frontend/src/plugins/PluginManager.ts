@@ -11,6 +11,8 @@ import type {
     PluginRoute,
     PluginHostDetailTab,
     PluginSettingsTab,
+    PluginNavbarWidget,
+    PluginAppBanner,
 } from './types';
 
 type Listener = () => void;
@@ -71,6 +73,26 @@ class PluginManager {
             }
         }
         return tabs;
+    }
+
+    getNavbarWidgets(): PluginNavbarWidget[] {
+        const widgets: PluginNavbarWidget[] = [];
+        for (const plugin of Array.from(this.plugins.values())) {
+            if (plugin.navbarWidgets) {
+                widgets.push(...plugin.navbarWidgets);
+            }
+        }
+        return widgets;
+    }
+
+    getAppBanners(): PluginAppBanner[] {
+        const banners: PluginAppBanner[] = [];
+        for (const plugin of Array.from(this.plugins.values())) {
+            if (plugin.appBanners) {
+                banners.push(...plugin.appBanners);
+            }
+        }
+        return banners;
     }
 
     subscribe(listener: Listener): () => void {

@@ -1,0 +1,91 @@
+# sysmanage server winget manifest — Phase 11.8 server-side stub.
+#
+# Mirrors the agent's stub at sysmanage-agent/packaging/winget/
+# sysmanage.sysmanage-agent.yaml.  Singleton-form manifest for early
+# submissions; switch to the three-file form (Version + Installer +
+# Locale) once we ship multi-architecture builds we want to keep
+# distinct in the catalog.
+#
+# Home-lab / dev usage:  ``winget install --id sysmanage.sysmanage``
+# installs the SysManage server on Windows for evaluation.  Production
+# SysManage server deployments are typically Linux (PPA/Copr/OBS/Snap);
+# this channel exists for completeness so Windows-only home labs can
+# stand up the server alongside the agent without leaving the package
+# manager.
+#
+# *** USER ACTION REQUIRED ***
+#
+# Per-release publish workflow:
+#   1. Bump ``PackageVersion`` to match the release tag.
+#   2. Update ``InstallerUrl`` to point at the GitHub release MSI for
+#      this version (x64 first; ARM64 follow-up entry below).
+#   3. Re-compute ``InstallerSha256``:
+#         certutil -hashfile sysmanage-X.Y.Z-windows-x64.msi SHA256
+#      (PowerShell:  Get-FileHash <msi> -Algorithm SHA256)
+#   4. One-time:  fork https://github.com/microsoft/winget-pkgs.
+#   5. Drop this manifest at:
+#         manifests/s/sysmanage/sysmanage/<PackageVersion>/
+#         sysmanage.sysmanage.yaml
+#   6. Open a PR against ``microsoft/winget-pkgs``.  ``wingetbot``
+#      validates within minutes; human reviewer merges within 24h
+#      typically.
+#   7. After merge:  ``winget install --id sysmanage.sysmanage``.
+#
+# Manual workflow until build-and-release.yml gets a server-side
+# ``winget-manifest`` job mirroring the agent's DRY-RUN-only stub.
+PackageIdentifier: sysmanage.sysmanage
+PackageVersion: 0.0.0
+PackageLocale: en-US
+# ``Publisher`` and ``PackageName`` MUST match the MSI's ARP metadata
+# (``Manufacturer`` and ``ProductName`` in the WiX source) — winget's
+# post-install Installation Verification step compares the manifest
+# against the Add/Remove Programs entry and rejects mismatches.  The
+# WiX source declares ``Manufacturer="SysManage"`` and
+# ``Name="SysManage Server"`` at ``installer/windows/sysmanage.wxs:8-9``;
+# the manifest mirrors those exactly.  Changing either name requires
+# changing both places.
+Publisher: SysManage
+PublisherUrl: https://github.com/bceverly/sysmanage
+PublisherSupportUrl: https://github.com/bceverly/sysmanage/issues
+PackageName: SysManage Server
+PackageUrl: https://github.com/bceverly/sysmanage
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/bceverly/sysmanage/blob/main/LICENSE
+Copyright: Copyright (c) Bryan Everly
+ShortDescription: Open-source endpoint management platform (server).
+Description: |-
+  SysManage is an open-source fleet management platform.  The server
+  component receives agent registrations, surfaces inventory + health
+  dashboards, applies declarative deployment plans across the fleet,
+  and integrates compliance, vulnerability, and patch management
+  pipelines.  The matching ``sysmanage.sysmanage-agent`` package
+  installs the host-side daemon on managed endpoints.
+Moniker: sysmanage
+Tags:
+  - sysmanage
+  - fleet-management
+  - server
+  - endpoint-management
+  - patch-management
+  - compliance
+Installers:
+  - Architecture: x64
+    InstallerType: msi
+    Scope: machine
+    InstallerUrl: https://github.com/bceverly/sysmanage/releases/download/v0.0.0/sysmanage-0.0.0-windows-x64.msi
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    InstallerSwitches:
+      Silent: /quiet /norestart
+      SilentWithProgress: /passive /norestart
+    UpgradeBehavior: install
+  - Architecture: arm64
+    InstallerType: msi
+    Scope: machine
+    InstallerUrl: https://github.com/bceverly/sysmanage/releases/download/v0.0.0/sysmanage-0.0.0-windows-arm64.msi
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    InstallerSwitches:
+      Silent: /quiet /norestart
+      SilentWithProgress: /passive /norestart
+    UpgradeBehavior: install
+ManifestType: singleton
+ManifestVersion: 1.6.0

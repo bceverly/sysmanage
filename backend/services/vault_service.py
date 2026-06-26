@@ -31,7 +31,7 @@ class VaultService:
     def __init__(self):
         self.vault_config = config.get_vault_config()
         self.base_url = self.vault_config.get("url", "http://localhost:8200")
-        self.token = self.vault_config.get("token", "")
+        self.token = self.vault_config.get("token", "") or self._load_token_file()
         self.mount_path = self.vault_config.get("mount_path", "secret")
         self.timeout = self.vault_config.get("timeout", 30)
         self.verify_ssl = self.vault_config.get("verify_ssl", True)
@@ -51,6 +51,38 @@ class VaultService:
         self.session.headers.update(
             {"X-Vault-Token": self.token, "Content-Type": "application/json"}
         )
+
+    @staticmethod
+    def _load_token_file() -> str:
+        """Read the app's OpenBAO token from disk when not set in config.
+
+        Phase 13.1.H bootstrap: ``sysmanage.yaml`` no longer carries the vault
+        token.  The OpenBAO init/unseal one-shot writes an app-readable token
+        file (default ``/etc/sysmanage/openbao-token``, owned by the service
+        user, 0640); we read it here so the data plane can authenticate to the
+        local OpenBAO without a secret in YAML.  Best-effort: returns "" if the
+        file is absent/unreadable, and the existing YAML ``vault.token`` (if
+        any) still wins.
+        """
+        token_file = config.get_vault_config().get(
+            "token_file", "/etc/sysmanage/openbao-token"
+        )
+        try:
+            with open(token_file, "r", encoding="utf-8") as handle:
+                return handle.read().strip()
+        except OSError:
+            return ""
+
+    def make_raw_request(
+        self, method: str, path: str, data: Optional[Dict] = None
+    ) -> Dict[str, Any]:
+        """Public wrapper over the raw vault API call (Phase 13.1.C).
+
+        Used by the database-secrets broker to hit engine/lease endpoints
+        (e.g. ``database/creds/<role>``, ``sys/leases/renew``) that aren't
+        modeled by the KV-oriented helpers.
+        """
+        return self._make_request(method, path, data)
 
     def _make_request(  # NOSONAR
         self, method: str, path: str, data: Optional[Dict] = None
@@ -134,14 +166,14 @@ class VaultService:
         secret_id = str(uuid.uuid4())
 
         # Create subpath based on secret type and visibility
-        if secret_type == "ssh_key":
+        if secret_type == "ssh_key":  # nosec B105
             # SSH keys: ssh/public, ssh/private, ssh/ca
             base_path = "ssh"
             if secret_subtype in ["public", "private", "ca"]:
                 subpath = secret_subtype
             else:
                 subpath = "private"  # Default fallback
-        elif secret_type == "ssl_certificate":
+        elif secret_type == "ssl_certificate":  # nosec B105
             # SSL certificates: pki/root, pki/intermediate, pki/chain, pki/key_file, pki/certificate
             base_path = "pki"
             if secret_subtype in [
@@ -154,7 +186,7 @@ class VaultService:
                 subpath = secret_subtype
             else:
                 subpath = "certificate"  # Default fallback
-        elif secret_type == "database_credentials":
+        elif secret_type == "database_credentials":  # nosec B105
             # Database credentials: db/postgresql, db/mysql, db/oracle, db/sqlserver, db/sqlite
             base_path = "db"
             if secret_subtype in [
@@ -167,14 +199,14 @@ class VaultService:
                 subpath = secret_subtype
             else:
                 subpath = "postgresql"  # Default fallback
-        elif secret_type == "api_keys":
+        elif secret_type == "api_keys":  # nosec B105
             # API keys: api/github, api/salesforce
             base_path = "api"
             if secret_subtype in ["github", "salesforce"]:
                 subpath = secret_subtype
             else:
                 subpath = "github"  # Default fallback
-        elif secret_type == "API Key":
+        elif secret_type == "API Key":  # nosec B105
             # API Keys: api/grafana, api/github, api/salesforce
             base_path = "api"
             if secret_subtype in ["grafana", "github", "salesforce"]:
@@ -322,7 +354,7 @@ class VaultService:
                 if "not found" in str(e).lower():
                     logger.info("Secret not found during destroy - considering deleted")
                     return True
-                logger.error("Destroy failed: %s", str(e))
+                logger.exception("Destroy failed: %s", str(e))
                 raise
 
             # Finally, delete the metadata to completely remove all traces

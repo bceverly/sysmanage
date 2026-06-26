@@ -4,7 +4,7 @@ Grafana integration API endpoints for managing Grafana server connections.
 
 import logging
 import os
-from typing import List, Optional
+from typing import Optional
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -20,9 +20,11 @@ from backend.api.error_constants import (
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import iter_host_databases
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.services.vault_service import VaultError, VaultService
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -105,7 +107,7 @@ async def configure_prometheus_datasource(  # NOSONAR
             return
 
     except Exception as e:  # pylint: disable=broad-except
-        logger.error("Failed to retrieve API key from vault: %s", e)
+        logger.exception("Failed to retrieve API key from vault: %s", e)
         return
 
     # Configure Prometheus data source in Grafana
@@ -212,50 +214,45 @@ class GrafanaHealthStatus(BaseModel):
 async def get_grafana_servers():
     """
     Get list of hosts that have the Grafana server role.
+
+    A host bound to a tenant has its row (and HostRole) in that tenant's
+    database, so this fans out across the bootstrap DB and every provisioned
+    tenant DB and combines the results.  In single-tenant / multi-tenancy-off
+    mode ``iter_host_databases`` yields only the bootstrap DB, so this is
+    identical to the prior single-query behaviour.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
-    with session_local() as session:
-        # Find all hosts with Grafana role
-        grafana_hosts = (
-            session.query(models.Host)
-            .join(models.HostRole)
-            .filter(
-                models.HostRole.role == MONITORING_SERVER,
-                models.HostRole.package_name == "grafana",
-                models.Host.active == True,
-                models.Host.approval_status == "approved",
-            )
-            .all()
-        )
-
-        servers = []
-        for host in grafana_hosts:
-            # Get the Grafana role details
-            grafana_role = (
-                session.query(models.HostRole)
+    servers = []
+    for label, _tenant_id, session in iter_host_databases():
+        try:
+            # Single query gets both the Host and its matching HostRole;
+            # the previous code re-queried HostRole inside the loop (1+N
+            # queries — flagged in the Phase 6 N+1 audit).
+            rows = (
+                session.query(models.Host, models.HostRole)
+                .join(models.HostRole)
                 .filter(
-                    models.HostRole.host_id == host.id,
                     models.HostRole.role == MONITORING_SERVER,
                     models.HostRole.package_name == "grafana",
+                    models.Host.active == True,
+                    models.Host.approval_status == "approved",
                 )
-                .first()
+                .all()
             )
-
-            servers.append(
+            servers.extend(
                 GrafanaServerInfo(
                     id=str(host.id),
                     fqdn=host.fqdn,
-                    package_version=(
-                        grafana_role.package_version if grafana_role else None
-                    ),
-                    is_active=grafana_role.is_active if grafana_role else False,
+                    package_version=grafana_role.package_version,
+                    is_active=grafana_role.is_active,
                 )
+                for host, grafana_role in rows
             )
+        except Exception:  # noqa: BLE001 — one bad DB must not fail the list
+            logger.exception("grafana-servers: query failed on %s; skipping", label)
+        finally:
+            session.close()
 
-        return {"grafana_servers": servers}
+    return {"grafana_servers": servers}
 
 
 @router.get("/settings", dependencies=[Depends(JWTBearer())])
@@ -398,7 +395,7 @@ async def update_grafana_integration_settings(  # NOSONAR
                 session.add(secret_entry)
 
             except VaultError as e:
-                logger.error("Failed to store Grafana API key in vault: %s", e)
+                logger.exception("Failed to store Grafana API key in vault: %s", e)
                 raise HTTPException(
                     status_code=500, detail=_("Failed to securely store API key")
                 ) from e
@@ -420,7 +417,7 @@ async def update_grafana_integration_settings(  # NOSONAR
         # If enabled and we have an API key, configure Prometheus data source
         logger.info(
             "Checking if should configure Prometheus: enabled=%s, has_api_key=%s",
-            settings.enabled,
+            sanitize_log(settings.enabled),
             bool(settings.api_key_vault_token),
         )
         if settings.enabled and settings.api_key_vault_token:
@@ -486,7 +483,7 @@ async def check_grafana_health():  # NOSONAR
         try:
             grafana_url = settings.grafana_url
         except Exception as e:
-            logger.error("Error accessing grafana_url property: %s", e)
+            logger.exception("Error accessing grafana_url property: %s", e)
             raise HTTPException(
                 status_code=500, detail=_("Error retrieving Grafana URL: %s") % str(e)
             ) from e
@@ -571,13 +568,13 @@ async def check_grafana_health():  # NOSONAR
             httpx.WriteTimeout,
             httpx.PoolTimeout,
         ) as e:
-            logger.error("Grafana health check timeout for %s: %s", grafana_url, e)
+            logger.exception("Grafana health check timeout for %s: %s", grafana_url, e)
             return GrafanaHealthStatus(
                 healthy=False,
                 error=_("Connection timeout - Grafana server may be unreachable"),
             )
         except httpx.ConnectError as e:
-            logger.error(
+            logger.exception(
                 "Grafana health check connection failed for %s: %s", grafana_url, e
             )
             return GrafanaHealthStatus(
@@ -587,7 +584,7 @@ async def check_grafana_health():  # NOSONAR
                 ),
             )
         except Exception as e:  # pylint: disable=broad-except
-            logger.error("Error checking Grafana health: %s", e)
+            logger.exception("Error checking Grafana health: %s", e)
             return GrafanaHealthStatus(
                 healthy=False, error=_("Unexpected error checking Grafana health")
             )

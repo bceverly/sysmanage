@@ -161,7 +161,7 @@ def verify_signature(
             return False
 
     except Exception as e:
-        logger.error("Error during signature verification: %s", e)
+        logger.exception("Error during signature verification: %s", e)
         return False
 
 
@@ -338,7 +338,7 @@ def validate_license(license_key: str, public_key_pem: str = None) -> Validation
         logger.warning("License validation failed: %s", e)
         return ValidationResult(valid=False, error=str(e))
     except Exception as e:
-        logger.error("Unexpected error during license validation: %s", e)
+        logger.exception("Unexpected error during license validation: %s", e)
         return ValidationResult(valid=False, error=f"Validation error: {e}")
 
 

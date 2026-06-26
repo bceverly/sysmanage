@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { parseUTCTimestamp } from '../utils/dateUtils';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
@@ -18,16 +17,68 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { Chip, IconButton, Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doRequestHostDiagnostics } from '../Services/hosts'
+import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRequestHostDiagnostics } from '../Services/hosts'
 import { doDeployOpenTelemetry } from '../Services/opentelemetry'
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { getLicenseInfo } from '../Services/license';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import { broadcastService } from '../Services/broadcast';
+import ScrollableButtonBar from '../Components/ScrollableButtonBar';
+
+/** Check whether a host qualifies as a virtualization parent. */
+function isParentHost(host: SysManageHost): boolean {
+    if (host.parent_host_id) return false;
+    if (!host.virtualization_capabilities) return false;
+    try {
+        const caps = JSON.parse(host.virtualization_capabilities);
+        return !!(caps.lxd?.initialized || caps.wsl?.enabled || caps.vmm?.running);
+    } catch {
+        return false;
+    }
+}
+
+/** Sort hosts so children are grouped directly below their parent. */
+function sortHostsGrouped(hosts: SysManageHost[]): SysManageHost[] {
+    const topLevelHosts = hosts
+        .filter(h => !h.parent_host_id)
+        .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+
+    const childrenByParent = new Map<string, SysManageHost[]>();
+    for (const child of hosts.filter(h => !!h.parent_host_id)) {
+        const parentId = child.parent_host_id!;
+        if (!childrenByParent.has(parentId)) {
+            childrenByParent.set(parentId, []);
+        }
+        childrenByParent.get(parentId)!.push(child);
+    }
+
+    childrenByParent.forEach(children => {
+        children.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
+    });
+
+    const sorted: SysManageHost[] = [];
+    for (const parent of topLevelHosts) {
+        sorted.push(parent);
+        const children = childrenByParent.get(parent.id);
+        if (children) {
+            sorted.push(...children);
+            childrenByParent.delete(parent.id);
+        }
+    }
+
+    childrenByParent.forEach(children => {
+        sorted.push(...children);
+    });
+
+    return sorted;
+}
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -52,11 +103,28 @@ const Hosts = () => {
 
     // Child host filter: 'all' = show all, 'parents' = hide child hosts, 'children' = child hosts only
     const [childHostFilter, setChildHostFilter] = useState<'all' | 'parents' | 'children'>(getFilterFromHash);
+
+    // Pro+ license module list — used to gate child-host UI (filter,
+    // badges).  Without ``container_engine`` loaded, the OSS server
+    // refuses child-host operations entirely; the UI follows suit.
+    const [licenseModules, setLicenseModules] = useState<string[]>([]);
+    useEffect(() => {
+        (async () => {
+            try {
+                const licenseInfo = await getLicenseInfo();
+                setLicenseModules(licenseInfo.modules || []);
+            } catch {
+                setLicenseModules([]);
+            }
+        })();
+    }, []);
+    const childHostsLicensed = licenseModules.includes('container_engine');
     const [canApproveHosts, setCanApproveHosts] = useState<boolean>(false);
     const [canDeleteHost, setCanDeleteHost] = useState<boolean>(false);
     const [canViewHostDetails, setCanViewHostDetails] = useState<boolean>(false);
     const [canRebootHost, setCanRebootHost] = useState<boolean>(false);
     const [canShutdownHost, setCanShutdownHost] = useState<boolean>(false);
+    const [canUpdateAgent, setCanUpdateAgent] = useState<boolean>(false);
     const [canDeployAntivirus, setCanDeployAntivirus] = useState<boolean>(false);
     const [hasHealthData, setHasHealthData] = useState<boolean>(false);
     const { triggerRefresh } = useNotificationRefresh();
@@ -71,12 +139,17 @@ const Hosts = () => {
     // Controlled pagination state for v7
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
+    // Controlled sort model - empty for "all" mode (custom sort), fqdn asc for other modes
+    const [sortModel, setSortModel] = useState<GridSortModel>(
+        getFilterFromHash() === 'all' ? [] : [{ field: 'fqdn', sort: 'asc' }]
+    );
+
     // Update pagination when pageSize from hook changes
     useEffect(() => {
         setPaginationModel(prev => ({ ...prev, pageSize }));
     }, [pageSize]);
 
-    // Sync child host filter with URL hash
+    // Sync child host filter with URL hash and sort model
     useEffect(() => {
         // Update URL hash when filter changes (without adding to browser history for 'all')
         const newHash = childHostFilter === 'all' ? '' : `#${childHostFilter}`;
@@ -84,6 +157,13 @@ const Hosts = () => {
         if (newHash !== currentHash) {
             // Use replaceState to avoid polluting browser history
             globalThis.history.replaceState(null, '', `${globalThis.location.pathname}${globalThis.location.search}${newHash}`);
+        }
+        // In "all" mode, clear DataGrid sort so our custom parent-child grouping is preserved.
+        // In other modes, sort by fqdn ascending.
+        if (childHostFilter === 'all') {
+            setSortModel([]);
+        } else {
+            setSortModel([{ field: 'fqdn', sort: 'asc' }]);
         }
     }, [childHostFilter]);
 
@@ -246,7 +326,7 @@ const Hosts = () => {
                 }
                 const isPrivileged = params.value;
                 if (isPrivileged === undefined || isPrivileged === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
                 }
                 return (
                     <Chip
@@ -260,6 +340,11 @@ const Hosts = () => {
             }
         },
         {
+            field: 'agent_version',
+            headerName: t('hosts.agentVersion', 'Agent Version'),
+            width: 130,
+        },
+        {
             field: 'script_execution_enabled',
             headerName: t('hosts.scriptsEnabled'),
             width: 120,
@@ -270,7 +355,7 @@ const Hosts = () => {
                 }
                 const scriptsEnabled = params.value;
                 if (scriptsEnabled === undefined || scriptsEnabled === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
                 }
                 return (
                     <Chip
@@ -563,6 +648,36 @@ const Hosts = () => {
         }
     }
 
+    const handleUpdateAgentSelected = async () => {
+        try {
+            // Only update agents on hosts that are active and have privileged agents
+            const activePrivilegedSelections = selection.filter(id => {
+                const host = filteredData.find(h => h.id.toString() === id.toString());
+                return host && host.active && host.is_agent_privileged;
+            });
+
+            if (activePrivilegedSelections.length === 0) {
+                console.log('No active hosts with privileged agents selected');
+                return;
+            }
+
+            // Call the API to update agents on the selected active hosts with privileged agents
+            const updatePromises = activePrivilegedSelections.map(id => {
+                return doUpdateAgent(String(id));
+            });
+
+            await Promise.all(updatePromises);
+            console.log(`Agent update command sent to ${activePrivilegedSelections.length} hosts`);
+
+            // Clear selection
+            setSelection([]);
+        } catch (error) {
+            console.error('Error updating agents:', error);
+            // Still clear selection even if there was an error
+            setSelection([]);
+        }
+    }
+
     // Helper function to check if any selected hosts can be rebooted/shutdown - memoized
     const hasActivePrivilegedSelection = useMemo(() =>
         selection.some(id => {
@@ -587,6 +702,24 @@ const Hosts = () => {
         }
     }
 
+    const handleBroadcastRefresh = async () => {
+        if (!globalThis.confirm(t('broadcast.confirm', 'Send a refresh-inventory broadcast to all connected agents?'))) {
+            return;
+        }
+        try {
+            const r = await broadcastService.send({ broadcast_action: 'refresh_inventory' });
+            alert(
+                t('broadcast.success', 'Broadcast delivered to {{count}} host(s) in {{ms}}ms', {
+                    count: r.delivered_count,
+                    ms: Math.round(r.elapsed_ms),
+                }),
+            );
+        } catch (error) {
+            console.error('Broadcast failed:', error);
+            alert(t('broadcast.error', 'Broadcast failed'));
+        }
+    }
+
     const handleGetDiagnostics = async () => {
         try {
             if (selection.length === 0) return;
@@ -599,13 +732,13 @@ const Hosts = () => {
             console.log('Diagnostics collection requested successfully');
 
             // Show success message
-            alert(`Diagnostics collection requested for host ${hostId}. Check the host details page to view results when available.`);
+            alert(t('hosts.diagnosticsRequested', 'Diagnostics collection requested for host {{hostId}}. Check the host details page to view results when available.', { hostId }));
 
             // Clear selection
             setSelection([]);
         } catch (error) {
             console.error('Error requesting diagnostics:', error);
-            alert('Failed to request diagnostics collection. Please try again.');
+            alert(t('hosts.diagnosticsRequestFailed', 'Failed to request diagnostics collection. Please try again.'));
             setSelection([]);
         }
     }
@@ -618,7 +751,7 @@ const Hosts = () => {
             await Promise.all(deploymentPromises);
 
             // Show success message
-            alert(t('hosts.opentelemetryDeploySuccess', `OpenTelemetry deployment queued for ${selection.length} host(s)`));
+            alert(t('hosts.opentelemetryDeploySuccess', `OpenTelemetry deployment queued for ${selection.length} host(s)`, { count: selection.length }));
 
             // Refresh hosts
             await refreshHosts();
@@ -659,13 +792,13 @@ const Hosts = () => {
                     .join('\n');
 
                 if (response.data.success_count > 0) {
-                    alert(t('hosts.antivirusDeployPartialSuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s).\n\nFailed hosts:\n${failedHostsList}`));
+                    alert(t('hosts.antivirusDeployPartialSuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s).\n\nFailed hosts:\n${failedHostsList}`, { count: response.data.success_count, hosts: failedHostsList }));
                 } else {
-                    alert(t('hosts.antivirusDeployAllFailed', `Antivirus deployment failed for all hosts:\n\n${failedHostsList}`));
+                    alert(t('hosts.antivirusDeployAllFailed', `Antivirus deployment failed for all hosts:\n\n${failedHostsList}`, { hosts: failedHostsList }));
                 }
             } else {
                 // Show success message
-                alert(t('hosts.antivirusDeploySuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s)`));
+                alert(t('hosts.antivirusDeploySuccess', `Antivirus deployment initiated for ${response.data.success_count} host(s)`, { count: response.data.success_count }));
             }
 
             // Refresh hosts
@@ -714,12 +847,13 @@ const Hosts = () => {
     // Check permissions
     useEffect(() => {
         const checkPermissions = async () => {
-            const [approve, deleteHost, viewDetails, reboot, shutdown, deployAntivirus] = await Promise.all([
+            const [approve, deleteHost, viewDetails, reboot, shutdown, updateAgent, deployAntivirus] = await Promise.all([
                 hasPermission(SecurityRoles.APPROVE_HOST_REGISTRATION),
                 hasPermission(SecurityRoles.DELETE_HOST),
                 hasPermission(SecurityRoles.VIEW_HOST_DETAILS),
                 hasPermission(SecurityRoles.REBOOT_HOST),
                 hasPermission(SecurityRoles.SHUTDOWN_HOST),
+                hasPermission(SecurityRoles.UPDATE_AGENT),
                 hasPermission(SecurityRoles.DEPLOY_ANTIVIRUS)
             ]);
             setCanApproveHosts(approve);
@@ -727,6 +861,7 @@ const Hosts = () => {
             setCanViewHostDetails(viewDetails);
             setCanRebootHost(reboot);
             setCanShutdownHost(shutdown);
+            setCanUpdateAgent(updateAgent);
             setCanDeployAntivirus(deployAntivirus);
         };
         checkPermissions();
@@ -766,27 +901,7 @@ const Hosts = () => {
 
         // Apply child host filter
         if (childHostFilter === 'parents') {
-            // Show only hosts that can be parents (have virtualization ready)
-            filtered = filtered.filter(host => {
-                // Must not be a child host itself
-                if (host.parent_host_id) return false;
-
-                // Check if virtualization is ready (LXD initialized, WSL enabled, or VMM running)
-                if (!host.virtualization_capabilities) return false;
-
-                try {
-                    const caps = JSON.parse(host.virtualization_capabilities);
-                    // Check LXD - must be initialized
-                    if (caps.lxd?.initialized) return true;
-                    // Check WSL - must be enabled (not just available)
-                    if (caps.wsl?.enabled) return true;
-                    // Check VMM (OpenBSD) - must be running
-                    if (caps.vmm?.running) return true;
-                    return false;
-                } catch {
-                    return false;
-                }
-            });
+            filtered = filtered.filter(isParentHost);
         } else if (childHostFilter === 'children') {
             // Show only child hosts - hosts that have a parent
             filtered = filtered.filter(host => !!host.parent_host_id);
@@ -797,7 +912,7 @@ const Hosts = () => {
         if (searchTerm.trim()) {
             filtered = filtered.filter(host => {
                 const fieldValue = host[searchColumn as keyof SysManageHost];
-                if (fieldValue === null || fieldValue === undefined) {
+                if (fieldValue == null) {
                     return false;
                 }
                 // Handle object values by converting to JSON string, otherwise use String()
@@ -812,7 +927,7 @@ const Hosts = () => {
         if (selectedTags.length > 0) {
             filtered = filtered.filter(host => {
                 // Check if host has ALL of the selected tags (AND logic)
-                if (!host.tags || !Array.isArray(host.tags)) {
+                if (!Array.isArray(host.tags)) {
                     return false; // If host has no tags, it doesn't match
                 }
 
@@ -822,6 +937,13 @@ const Hosts = () => {
                     hostTagIds.has(selectedTagId)
                 );
             });
+        }
+
+        // Apply custom sorting based on filter mode
+        if (childHostFilter === 'all') {
+            filtered = sortHostsGrouped(filtered);
+        } else {
+            filtered.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
         }
 
         setFilteredData(filtered);
@@ -897,34 +1019,36 @@ const Hosts = () => {
                     sx={{ minWidth: 300, flexGrow: 1 }}
                 />
 
-                {/* Child Host Filter */}
-                <ToggleButtonGroup
-                    value={childHostFilter}
-                    exclusive
-                    onChange={(_event, newValue) => {
-                        if (newValue !== null) {
-                            setChildHostFilter(newValue);
-                        }
-                    }}
-                    size="small"
-                    aria-label={t('hosts.childHostFilter', 'Child host filter')}
-                >
-                    <ToggleButton value="all" aria-label={t('hosts.showAllHosts', 'Show all hosts')}>
-                        <Tooltip title={t('hosts.showAllHosts', 'Show all hosts')}>
-                            <span>{t('hosts.allHosts', 'All')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                    <ToggleButton value="parents" aria-label={t('hosts.hideChildHosts', 'Hide child hosts')}>
-                        <Tooltip title={t('hosts.hideChildHosts', 'Hide child hosts')}>
-                            <span>{t('hosts.parentsOnly', 'Parents')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                    <ToggleButton value="children" aria-label={t('hosts.childHostsOnly', 'Child hosts only')}>
-                        <Tooltip title={t('hosts.childHostsOnly', 'Child hosts only')}>
-                            <span>{t('hosts.childrenOnly', 'Children')}</span>
-                        </Tooltip>
-                    </ToggleButton>
-                </ToggleButtonGroup>
+                {/* Child Host Filter — Pro+ feature, hidden in OSS builds */}
+                {childHostsLicensed && (
+                    <ToggleButtonGroup
+                        value={childHostFilter}
+                        exclusive
+                        onChange={(_event, newValue) => {
+                            if (newValue !== null) {
+                                setChildHostFilter(newValue);
+                            }
+                        }}
+                        size="small"
+                        aria-label={t('hosts.childHostFilter', 'Child host filter')}
+                    >
+                        <ToggleButton value="all" aria-label={t('hosts.showAllHosts', 'Show all hosts')}>
+                            <Tooltip title={t('hosts.showAllHosts', 'Show all hosts')}>
+                                <span>{t('hosts.allHosts', 'All')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                        <ToggleButton value="parents" aria-label={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                            <Tooltip title={t('hosts.hideChildHosts', 'Hide child hosts')}>
+                                <span>{t('hosts.parentsOnly', 'Parents')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                        <ToggleButton value="children" aria-label={t('hosts.childHostsOnly', 'Child hosts only')}>
+                            <Tooltip title={t('hosts.childHostsOnly', 'Child hosts only')}>
+                                <span>{t('hosts.childrenOnly', 'Children')}</span>
+                            </Tooltip>
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                )}
             </Box>
 
             {/* Column Visibility Button */}
@@ -947,11 +1071,8 @@ const Hosts = () => {
                     loading={loading}
                     paginationModel={paginationModel || { page: 0, pageSize: 10 }}
                     onPaginationModelChange={setPaginationModel}
-                    initialState={{
-                        sorting: {
-                            sortModel: [{ field: 'fqdn', sort: 'asc'}],
-                        },
-                    }}
+                    sortModel={sortModel}
+                    onSortModelChange={setSortModel}
                     columnVisibilityModel={columnVisibilityModel || { id: false }}
                     pageSizeOptions={safePageSizeOptions}
                     checkboxSelection
@@ -975,8 +1096,10 @@ const Hosts = () => {
                 />
             </Box>
 
-            {/* Action Buttons - flexShrink: 0 to stay at bottom */}
-            <Stack direction="row" spacing={2} sx={{ flexShrink: 0, pb: 2 }}>
+            {/* Action Buttons - scrollable so labels never wrap and
+                a narrow viewport gets prev/next arrows.  Container
+                still flexShrink: 0 so it stays pinned to the bottom. */}
+            <ScrollableButtonBar sx={{ flexShrink: 0, pb: 2 }}>
                 {canApproveHosts && (
                     <Button
                         variant="outlined"
@@ -988,15 +1111,25 @@ const Hosts = () => {
                         {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
                     </Button>
                 )}
-                <Button 
-                    variant="outlined" 
-                    startIcon={<SyncIcon />} 
+                <Button
+                    variant="outlined"
+                    startIcon={<SyncIcon />}
                     disabled={selection.length === 0}
                     onClick={handleRefreshData}
                     color="info"
                 >
                     {t('hosts.refreshAllData', 'Refresh All Data')}
                 </Button>
+                <Tooltip title={t('broadcast.refreshTooltip', 'Send a refresh-inventory broadcast to every connected agent')}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<CampaignIcon />}
+                        onClick={handleBroadcastRefresh}
+                        color="info"
+                    >
+                        {t('broadcast.refresh', 'Broadcast Refresh')}
+                    </Button>
+                </Tooltip>
                 <Button
                     variant="outlined"
                     startIcon={<MedicalServicesIcon />}
@@ -1048,12 +1181,23 @@ const Hosts = () => {
                         {t('hosts.shutdownSelected', 'Shutdown Selected')}
                     </Button>
                 )}
+                {canUpdateAgent && (
+                    <Button
+                        variant="outlined"
+                        startIcon={<SystemUpdateAltIcon />}
+                        disabled={!hasActivePrivilegedSelection}
+                        onClick={handleUpdateAgentSelected}
+                        color="info"
+                    >
+                        {t('hosts.updateAgentSelected', 'Update Agent on Selected')}
+                    </Button>
+                )}
                 {canDeleteHost && (
                     <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
                         {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
                     </Button>
                 )}
-            </Stack>
+            </ScrollableButtonBar>
         </Box>
     );
 }

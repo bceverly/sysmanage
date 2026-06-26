@@ -6,8 +6,6 @@ This module tests the telemetry data endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestTelemetryEndpoint:
     """Test cases for the telemetry endpoint."""

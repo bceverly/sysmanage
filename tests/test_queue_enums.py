@@ -3,8 +3,6 @@ Tests for backend/websocket/queue_enums.py module.
 Tests message queue enumerations.
 """
 
-import pytest
-
 
 class TestQueueStatus:
     """Tests for QueueStatus class."""

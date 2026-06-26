@@ -91,6 +91,8 @@ type SysManageHost = {
     diagnostics_request_status?: string;
     // Agent privilege status
     is_agent_privileged?: boolean;
+    // Agent version
+    agent_version?: string;
     // Script execution status
     script_execution_enabled?: boolean;
     // Enabled shells for script execution
@@ -109,6 +111,14 @@ type SysManageHost = {
     virtualization_capabilities?: string;  // JSON string with detailed capabilities
     // Timezone
     timezone?: string;
+    // Phase 12.7: agent-reported public IP + GeoLite2 resolution
+    public_ip?: string | null;
+    public_ip_resolved_at?: string | null;
+    geo_country_code?: string | null;
+    geo_subdivision_code?: string | null;
+    geo_city?: string | null;
+    geo_latitude?: number | null;
+    geo_longitude?: number | null;
 }
 
 type StorageDevice = {
@@ -445,7 +455,6 @@ const doGetHostSoftware = async (
 ): Promise<PaginatedSoftwareResponse> => {
     let result = { items: [], pagination: { page: 1, page_size: 100, total_items: 0, total_pages: 0, has_next: false, has_prev: false } } as PaginatedSoftwareResponse;
 
-    // eslint-disable-next-line no-undef
     const params = new URLSearchParams({
         page: page.toString(),
         page_size: pageSize.toString()
@@ -556,6 +565,20 @@ const doShutdownHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
     await api.post("/api/host/shutdown/" + hostId)
+    .then((response) => {
+        result = response.data;
+    })
+    .catch((error) => {
+        processError(error);
+        throw error;
+    });
+    return result;
+};
+
+const doUpdateAgent = async (hostId: string) => {
+    let result = {} as SuccessResponse;
+
+    await api.post("/api/host/update-agent/" + hostId)
     .then((response) => {
         result = response.data;
     })
@@ -779,4 +802,4 @@ type UbuntuProInfo = {
 }
 
 export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
-export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };
+export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };

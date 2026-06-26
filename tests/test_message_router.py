@@ -306,7 +306,7 @@ class TestRouteInboundMessage:
             )
 
         assert result is False
-        mock_logger.error.assert_called_once()
+        mock_logger.exception.assert_called_once()
 
 
 class TestLogMessageData:

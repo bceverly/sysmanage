@@ -3,16 +3,13 @@ Unit tests for the profile API endpoints
 """
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from backend.main import app
-from backend.persistence import db, models
+from backend.persistence import models
 
 
 @pytest.fixture

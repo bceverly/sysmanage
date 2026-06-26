@@ -1,16 +1,11 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-// Dynamically determine the backend URL based on current host
-const getBackendBaseURL = () => {
-  const currentHost = globalThis.location.hostname;
-  // Use environment variable if available, otherwise default to 8080
-  const backendPort = import.meta.env.VITE_BACKEND_PORT || 8080;
-  return `http://${currentHost}:${backendPort}`;
-};
-
+// Same-origin baseURL — every backend route is now under /api, and both
+// nginx (production) and vite (dev) reverse-proxy /api/* to the backend.
+// Keeping requests relative means the browser never has to know what
+// host:port the backend bound to.
 const axiosInstance = axios.create({
-  baseURL: getBackendBaseURL(),
+  baseURL: "",
   headers: {
     "Content-Type": "application/json",
   },
@@ -32,59 +27,84 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (res) => {
+    // Successful response → mark connection healthy.  Dynamic import
+    // dodges the circular dep — connectionMonitor itself imports
+    // axiosInstance for /api/health pings, so a static top-level
+    // import here would deadlock module evaluation.
+    import('./connectionMonitor')
+      .then((m) => m.connectionMonitor?.markConnectionRestored?.())
+      .catch(() => { /* never block a real response on monitor wiring */ });
     return res;
   },
-  async (err) => {
-    const originalConfig = err.config;
+  async (err) => handleResponseError(err)
+);
 
-    if (originalConfig.url !== "/login" && err.response) {
-      // Access Token was expired
-      console.debug('Token expired? err.response = ' + err.response);
-      console.debug('retry = ' + originalConfig._retry);
+// Network-level failure (backend unreachable / DNS / TLS / etc.) — no
+// response object to branch on, so the only signal is the absence of
+// err.response.  Notify connectionMonitor so ServerDownModal renders
+// instead of the browser surfacing a raw error.
+function notifyNetworkFailure(err) {
+  import('./connectionMonitor')
+    .then((m) =>
+      m.connectionMonitor?.markConnectionFailed?.(
+        err.message || 'Network error: Unable to reach server'
+      )
+    )
+    .catch(() => { /* monitor unavailable; bubble the error anyway */ });
+}
 
-      // This is an attempt to log in with an expired refresh token
-      // But don't redirect if it's a Pro+ license check (pro_plus_required error)
-      if (err.response.status === 403) {
-        const errorData = err.response.data;
-        const isProPlusError = errorData?.error === 'pro_plus_required' ||
-                               errorData?.detail?.error === 'pro_plus_required';
-        if (!isProPlusError) {
-          globalThis.location.href = '/login';
-        }
-      }
+// Pro+ license checks and role-based permission denials must not
+// redirect — let the calling code show an error toast.  Only redirect
+// to login for auth-related 403s (expired refresh token).
+function handle403(response) {
+  const errorData = response.data;
+  const detail = errorData?.detail || '';
+  const isProPlusError = errorData?.error === 'pro_plus_required' ||
+                         errorData?.detail?.error === 'pro_plus_required';
+  const isPermissionDenied = typeof detail === 'string' &&
+                             detail.includes('Permission denied');
+  if (!isProPlusError && !isPermissionDenied) {
+    globalThis.location.href = '/login';
+  }
+}
 
-      // This is the "normal" case of an expired auth token where
-      // we want to use the refresh token to reauthenticate under
-      // the covers.
-      if (err.response.status === 401 && !originalConfig._retry) {
-        originalConfig._retry = true;
+// "Normal" expired-access-token path — try the refresh token, retry
+// the original request, or fall back to /login.
+async function handle401Refresh(originalConfig) {
+  originalConfig._retry = true;
+  console.log("Calling /refresh to get a new auth token...");
+  try {
+    const response = await axiosInstance.post("/api/refresh", {});
+    console.log('Received response:', response);
+    localStorage.setItem("bearer_token", response.data.Authorization);
+    return axiosInstance(originalConfig);
+  } catch (error) {
+    console.log(error);
+    localStorage.removeItem("userid");
+    localStorage.removeItem("bearer_token");
+    globalThis.location.href = '/login';
+    throw error;
+  }
+}
 
-        console.log("Calling /refresh to get a new auth token...");
-        await axiosInstance.post("/refresh", {
-        })
-        .then((response) => {
-          console.log('Received response:', response);
-          localStorage.setItem("bearer_token", response.data.Authorization);
-          return axiosInstance(originalConfig);
-        })
-        .catch((error) => {
-          // Error situation - clear out storage
-          console.log(error);
-          localStorage.removeItem("userid");
-          localStorage.removeItem("bearer_token");
-
-          const navigate = useNavigate();
-
-          navigate("/login")
-          throw error;
-        });
-
-        return axiosInstance(originalConfig);
-      }
-    }
-
+async function handleResponseError(err) {
+  if (!err.response) {
+    notifyNetworkFailure(err);
     throw err;
   }
-);
+  const originalConfig = err.config;
+  if (originalConfig.url === "/login") {
+    throw err;
+  }
+  console.debug('Token expired? err.response = ' + err.response);
+  console.debug('retry = ' + originalConfig._retry);
+  if (err.response.status === 403) {
+    handle403(err.response);
+  }
+  if (err.response.status === 401 && !originalConfig._retry) {
+    return handle401Refresh(originalConfig);
+  }
+  throw err;
+}
 
 export default axiosInstance;

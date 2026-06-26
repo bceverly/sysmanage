@@ -3,7 +3,7 @@ Tests for backend/api/certificates.py module.
 Tests certificate management API endpoints.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI
@@ -127,13 +127,13 @@ class TestGetClientCertificate:
             uuid.UUID(host_id)
             is_uuid = True
         except ValueError:
-            pass
+            _ = None  # empty-except: failure here is non-fatal; see code above
 
         try:
             int(host_id)
             is_int = True
         except ValueError:
-            pass
+            _ = None  # empty-except: failure here is non-fatal; see code above
 
         assert is_uuid is False
         assert is_int is False

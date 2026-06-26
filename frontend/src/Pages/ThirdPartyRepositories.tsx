@@ -19,7 +19,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -512,7 +512,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             renderCell: (params) => {
                 const isEnabled = params.value;
                 if (isEnabled === undefined || isEnabled === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>Unknown</span>;
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('thirdPartyRepos.unknown', 'Unknown')}</span>;
                 }
                 return (
                     <Chip
@@ -636,7 +636,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleEnableSelected}
                     disabled={!canEnable || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.enableSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.enableSelected', 'Enable Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
                 <Button
                     variant="contained"
@@ -645,7 +645,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleDisableSelected}
                     disabled={!canDisable || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.disableSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.disableSelected', 'Disable Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
                 <Button
                     variant="contained"
@@ -654,7 +654,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                     onClick={handleDeleteSelected}
                     disabled={!canDelete || !privilegedMode || selectedRows.length === 0 || loading}
                 >
-                    {t('thirdPartyRepos.deleteSelected', { count: selectedRows.length })}
+                    {t('thirdPartyRepos.deleteSelected', 'Delete Selected ({{count}})', { count: selectedRows.length })}
                 </Button>
             </Box>
 
@@ -670,7 +670,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                         {/* Debug: Show OS Name */}
                         {osName && (
                             <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                Detected OS: {osName}
+                                {t('thirdPartyRepos.detectedOs', 'Detected OS')}: {osName}
                             </Typography>
                         )}
 
@@ -851,7 +851,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                             {constructedRepo}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
-                                            URL:
+                                            {t('thirdPartyRepos.urlLabel', 'URL')}:
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
                                             {pkgRepoUrl}
@@ -890,7 +890,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                             {constructedRepo}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
-                                            URL:
+                                            {t('thirdPartyRepos.urlLabel', 'URL')}:
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
                                             {pkgsrcUrl}
@@ -915,8 +915,8 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                         select: { native: true },
                                     }}
                                 >
-                                    <option value="chocolatey">Chocolatey</option>
-                                    <option value="winget">winget</option>
+                                    <option value="chocolatey">{t('thirdPartyRepos.chocolatey', 'Chocolatey')}</option>
+                                    <option value="winget">{t('thirdPartyRepos.winget', 'winget')}</option>
                                 </TextField>
                                 <TextField
                                     fullWidth
@@ -943,13 +943,13 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                                             {constructedRepo}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
-                                            Type:
+                                            {t('thirdPartyRepos.typeLabel', 'Type')}:
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
                                             {windowsRepoType}
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 0.5 }}>
-                                            URL:
+                                            {t('thirdPartyRepos.urlLabel', 'URL')}:
                                         </Typography>
                                         <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500, wordBreak: 'break-all' }}>
                                             {windowsRepoUrl}

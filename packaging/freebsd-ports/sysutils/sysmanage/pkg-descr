@@ -1,0 +1,16 @@
+SysManage is a comprehensive centralized system management server with a
+modern web-based interface.  It accepts WebSocket registrations from
+SysManage agents deployed across an infrastructure and provides:
+
+  * Agent management and monitoring
+  * System metrics and health dashboards
+  * Comprehensive reporting with PDF generation
+  * JWT-based authentication with optional mTLS
+  * Multi-user management with RBAC
+  * Package inventory + update orchestration
+  * Certificate, firewall, and antivirus integration
+  * Real-time WebSocket communication
+  * Declarative deployment plans via the SysManage agent
+
+The server runs as an rc.d service backed by PostgreSQL and is fronted
+by nginx for both the React UI and the FastAPI backend.

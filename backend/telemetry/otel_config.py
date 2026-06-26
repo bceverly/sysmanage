@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 import os
-import platform
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -120,7 +119,7 @@ def setup_telemetry(
         logger.info("OpenTelemetry setup completed successfully")
 
     except Exception as e:  # pylint: disable=broad-except
-        logger.error("Failed to set up OpenTelemetry: %s", e, exc_info=True)
+        logger.exception("Failed to set up OpenTelemetry: %s", e, exc_info=True)
         # Don't fail the application if telemetry setup fails
         _telemetry_enabled = False
 

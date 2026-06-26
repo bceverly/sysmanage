@@ -83,6 +83,7 @@ parts:
       - libffi-dev
       - libssl-dev
       - rsync
+      - git
     override-build: |
       # $CRAFT_PROJECT_DIR is the project root when running snapcraft from root with path to snapcraft.yaml
       # Create temp build directory
@@ -92,6 +93,12 @@ parts:
       cp "$CRAFT_PROJECT_DIR/requirements.txt" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/scripts" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/backend" /tmp/build/
+      # Stamp the version into backend/__init__.py so backend.__version__
+      # resolves at runtime (server-info + federation "Reported version" show
+      # it instead of "unknown"); the checkout ships it empty.
+      VER="$(git -C "$CRAFT_PROJECT_DIR" describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')"
+      [ -n "$VER" ] || VER="${CRAFT_PROJECT_VERSION:-0.0.0}"
+      printf '__version__ = "%s"\n' "$VER" > /tmp/build/backend/__init__.py
       cp -r "$CRAFT_PROJECT_DIR/alembic" /tmp/build/
       cp "$CRAFT_PROJECT_DIR/alembic.ini" /tmp/build/
       cp -r "$CRAFT_PROJECT_DIR/config" /tmp/build/
@@ -288,11 +295,37 @@ parts:
         if [ ! -z "$NGINX_PID" ]; then
           kill $NGINX_PID 2>/dev/null || true
         fi
+        if [ ! -z "$OPENBAO_PID" ]; then
+          kill $OPENBAO_PID 2>/dev/null || true
+        fi
         exit 0
       }
 
       # Set up signal handlers
       trap cleanup SIGTERM SIGINT
+
+      # Start OpenBAO (local secrets broker) before the backend.
+      mkdir -p $SNAP_DATA/openbao/data
+      cat > $SNAP_DATA/openbao/openbao.hcl <<BAOCONF
+      storage "file" {
+        path = "$SNAP_DATA/openbao/data"
+      }
+      listener "tcp" {
+        address     = "127.0.0.1:8200"
+        tls_disable = "true"
+      }
+      api_addr      = "http://127.0.0.1:8200"
+      disable_mlock = true
+      ui            = false
+      BAOCONF
+      if [ -x "$SNAP/bin/bao" ]; then
+        $SNAP/bin/bao server -config=$SNAP_DATA/openbao/openbao.hcl &
+        OPENBAO_PID=$!
+        echo "OpenBAO started with PID $OPENBAO_PID"
+        $SNAP/usr/bin/python3.10 $SNAP/app/scripts/openbao_init_unseal.py \
+          --addr http://127.0.0.1:8200 --keyfile $SNAP_DATA/openbao/init.json || \
+          echo "OpenBAO init/unseal did not complete"
+      fi
 
       # Start the backend in the background
       cd $SNAP/app
@@ -314,6 +347,21 @@ parts:
       cleanup
       EOF
       chmod +x $CRAFT_PART_INSTALL/bin/sysmanage-wrapper
+
+  openbao:
+    plugin: nil
+    build-packages:
+      - wget
+    override-build: |
+      # Stage the static OpenBAO binary (secrets broker).  OpenBAO ships no
+      # snap; the static Linux binary runs fine inside the snap.
+      mkdir -p $CRAFT_PART_INSTALL/bin
+      OPENBAO_VERSION=2.5.4
+      wget -qO /tmp/bao.tgz \
+        "https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Linux_x86_64.tar.gz"
+      tar -xzf /tmp/bao.tgz -C $CRAFT_PART_INSTALL/bin bao
+      chmod +x $CRAFT_PART_INSTALL/bin/bao
+      rm -f /tmp/bao.tgz
 
   nginx:
     plugin: nil

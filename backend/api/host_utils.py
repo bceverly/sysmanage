@@ -7,18 +7,17 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import error_host_not_found
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
+from backend.utils.verbosity_logger import sanitize_log
 
 
 def get_host_by_id(host_id: str) -> Optional[models.Host]:
     """Get a host by ID, raising HTTPException if not found."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -29,9 +28,7 @@ def get_host_by_id(host_id: str) -> Optional[models.Host]:
 
 def get_host_by_fqdn(fqdn: str) -> Optional[models.Host]:
     """Get a host by FQDN, raising HTTPException if not found."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.fqdn == fqdn).first()
@@ -50,9 +47,7 @@ def get_host_storage_devices(  # NOSONAR
     host_id: str,
 ) -> List[Dict[str, Any]]:
     """Get storage devices for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -173,9 +168,7 @@ def get_host_storage_devices(  # NOSONAR
 
 def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
     """Get network interfaces for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -215,9 +208,7 @@ def get_host_network_interfaces(host_id: str) -> List[Dict[str, Any]]:
 
 def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -253,11 +244,55 @@ def get_host_user_accounts(host_id: str) -> List[Dict[str, Any]]:
         ]
 
 
+def _is_windows_host(host) -> bool:
+    """True iff the host's platform string indicates Windows.  Encapsulated
+    so the SID back-compat path stays a one-liner in the formatter below."""
+    return bool(getattr(host, "platform", None) and "windows" in host.platform.lower())
+
+
+def _resolve_windows_sid(user, security_id_value):
+    """Pre-migration Windows agents stored the SID in ``user.shell``
+    (legacy schema).  When we see that pattern on a Windows host with a
+    null UID and an empty security_id, lift the SID out of ``shell``
+    and clear ``shell`` so the response shape matches modern agents.
+
+    Returns ``(security_id, shell)``.  Caller stores both."""
+    if (
+        user.uid is None
+        and user.shell
+        and user.shell.startswith("S-1-")
+        and not security_id_value
+    ):
+        return user.shell, None
+    return security_id_value, user.shell
+
+
+def _format_user_with_groups(user, host, group_names) -> Dict[str, Any]:
+    """JSON-shape one UserAccount row with its group memberships.
+    Pulled out of ``get_host_users_with_groups`` to keep that function's
+    cognitive complexity under SonarQube's 15-branch threshold."""
+    security_id_value = getattr(user, "security_id", None)
+    shell_value = user.shell
+    if _is_windows_host(host):
+        security_id_value, shell_value = _resolve_windows_sid(user, security_id_value)
+
+    return {
+        "id": str(user.id),
+        "username": user.username,
+        "uid": user.uid,  # Unix UID (integer) or None for Windows
+        "security_id": security_id_value,  # Windows SID (string) or None for Unix
+        "home_directory": user.home_directory,
+        "shell": shell_value,
+        "is_system_user": user.is_system_user,
+        "groups": group_names,
+        "created_at": user.created_at.isoformat() if user.created_at else None,
+        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+    }
+
+
 def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user accounts with group memberships for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -272,72 +307,37 @@ def get_host_users_with_groups(host_id: str) -> List[Dict[str, Any]]:
             .all()
         )
 
-        # Convert to JSON-compatible format with group memberships
-        users = []
-        for user in user_accounts:
-            # Get group memberships for this user
-            group_memberships = (
+        # Bulk-fetch group memberships for all users in one query
+        # rather than per-user (flagged in the Phase 6 N+1 audit).
+        # Keep the ORM-shape query (Membership, Group) — extracting the
+        # FK column directly via ``query(Membership.user_account_id, ...)``
+        # would change the row shape and break callers that mock the
+        # Membership object.
+        user_ids = [u.id for u in user_accounts]
+        groups_by_user: dict = {}
+        if user_ids:
+            for membership, group in (
                 session.query(models.UserGroupMembership, models.UserGroup)
                 .join(
                     models.UserGroup,
                     models.UserGroupMembership.user_group_id == models.UserGroup.id,
                 )
-                .filter(models.UserGroupMembership.user_account_id == user.id)
+                .filter(models.UserGroupMembership.user_account_id.in_(user_ids))
                 .all()
-            )
-
-            group_names = [group.group_name for _, group in group_memberships]
-
-            # Handle both Unix UIDs and Windows SIDs
-            uid_value = user.uid  # Integer for Unix systems
-            security_id_value = getattr(
-                user, "security_id", None
-            )  # String for Windows SIDs
-            shell_value = user.shell
-
-            # For backwards compatibility: check if Windows SID was stored in shell field
-            if (
-                hasattr(host, "platform")
-                and host.platform
-                and "windows" in host.platform.lower()
             ):
-                if (
-                    user.uid is None
-                    and user.shell
-                    and user.shell.startswith("S-1-")
-                    and not security_id_value
-                ):
-                    # Legacy: Windows SID stored in shell field
-                    security_id_value = user.shell
-                    shell_value = None
+                groups_by_user.setdefault(membership.user_account_id, []).append(
+                    group.group_name
+                )
 
-            users.append(
-                {
-                    "id": str(user.id),
-                    "username": user.username,
-                    "uid": uid_value,  # Unix UID (integer) or None for Windows
-                    "security_id": security_id_value,  # Windows SID (string) or None for Unix
-                    "home_directory": user.home_directory,
-                    "shell": shell_value,
-                    "is_system_user": user.is_system_user,
-                    "groups": group_names,
-                    "created_at": (
-                        user.created_at.isoformat() if user.created_at else None
-                    ),
-                    "updated_at": (
-                        user.updated_at.isoformat() if user.updated_at else None
-                    ),
-                }
-            )
-
-        return users
+        return [
+            _format_user_with_groups(user, host, groups_by_user.get(user.id, []))
+            for user in user_accounts
+        ]
 
 
 def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
     """Get user groups for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -352,20 +352,29 @@ def get_host_user_groups(host_id: str) -> List[Dict[str, Any]]:
             .all()
         )
 
-        groups = []
-        for group in user_groups:
-            # Get user memberships for this group
-            user_memberships = (
+        # Bulk-fetch member names for all groups in one query rather
+        # than per-group (flagged in the Phase 6 N+1 audit).  Keep the
+        # ORM-shape query (Membership, UserAccount) for the same reason
+        # documented above on the get_host_users_with_groups variant.
+        group_ids = [g.id for g in user_groups]
+        users_by_group: dict = {}
+        if group_ids:
+            for membership, user in (
                 session.query(models.UserGroupMembership, models.UserAccount)
                 .join(
                     models.UserAccount,
                     models.UserGroupMembership.user_account_id == models.UserAccount.id,
                 )
-                .filter(models.UserGroupMembership.user_group_id == group.id)
+                .filter(models.UserGroupMembership.user_group_id.in_(group_ids))
                 .all()
-            )
+            ):
+                users_by_group.setdefault(membership.user_group_id, []).append(
+                    user.username
+                )
 
-            user_names = [user.username for _, user in user_memberships]
+        groups = []
+        for group in user_groups:
+            user_names = users_by_group.get(group.id, [])
 
             # Handle both Unix GIDs and Windows SIDs
             gid_value = group.gid  # Integer for Unix systems
@@ -397,9 +406,7 @@ def get_host_software_packages(
     host_id: str, page: int = 1, page_size: int = 100, search: Optional[str] = None
 ) -> Dict[str, Any]:
     """Get paginated software packages for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Verify host exists
@@ -476,9 +483,7 @@ def get_host_software_packages(
 
 def update_host_timestamp(host_id: str, field_name: str) -> None:
     """Update a timestamp field for a host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
@@ -501,8 +506,10 @@ async def update_or_create_host(  # NOSONAR
 
     logger = logging.getLogger(__name__)
     logger.info("=== HOST UTILS DEBUG ===")
-    logger.info("Hostname: %s", hostname)
-    logger.info("Script execution enabled parameter: %s", script_execution_enabled)
+    logger.info("Hostname: %s", sanitize_log(hostname))
+    logger.info(
+        "Script execution enabled parameter: %s", sanitize_log(script_execution_enabled)
+    )
 
     host = db_session.query(models.Host).filter(models.Host.fqdn == hostname).first()
     logger.info("Found existing host: %s", host is not None)
@@ -511,7 +518,7 @@ async def update_or_create_host(  # NOSONAR
         # Update existing host
         logger.info(
             "Updating existing host with script_execution_enabled=%s",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         host.ipv4 = ipv4
         host.ipv6 = ipv6
@@ -524,8 +531,8 @@ async def update_or_create_host(  # NOSONAR
         host.is_agent_privileged = script_execution_enabled
         logger.info(
             "Set is_agent_privileged=%s, script_execution_enabled=%s",
-            script_execution_enabled,
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
+            sanitize_log(script_execution_enabled),
         )
 
         # Generate host_token for existing hosts that don't have one (migration support)
@@ -540,7 +547,7 @@ async def update_or_create_host(  # NOSONAR
         # Create new host with pending approval status
         logger.info(
             "Creating new host with script_execution_enabled=%s",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         # Generate secure host token
         from backend.persistence.models import generate_secure_host_token
@@ -568,9 +575,7 @@ async def update_or_create_host(  # NOSONAR
 
 def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
     """Get Ubuntu Pro information for a specific host."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # First check if the host exists
@@ -629,3 +634,30 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
             "tech_support_level": ubuntu_pro_info.tech_support_level,
             "services": services_data,
         }
+
+
+def enforce_tenant_host_quota(session, tenant_id, fqdn) -> None:
+    """Phase 13.1.F — reject a new-host registration past the tenant's quota.
+
+    ``session`` is bound to the enrolling tenant's database, so the host count is
+    naturally tenant-scoped.  ``tenant_id`` of ``None`` (single-tenant /
+    unlicensed) or an unset ``max_hosts`` means unlimited.  Raises HTTP 429 when
+    the tenant is already at its cap.  Call only for genuinely new hosts —
+    re-registrations of existing hosts must still be able to refresh.
+    """
+    import logging  # noqa: PLC0415
+
+    from backend.services import tenant_limits  # noqa: PLC0415
+
+    max_hosts = tenant_limits.limit_for_tenant(tenant_id, "max_hosts")
+    if max_hosts is not None and session.query(models.Host).count() >= max_hosts:
+        logging.getLogger(__name__).warning(
+            "Host registration rejected: tenant %s at host limit %s (fqdn=%s)",
+            sanitize_log(str(tenant_id)),
+            max_hosts,
+            sanitize_log(fqdn),
+        )
+        raise HTTPException(
+            status_code=429,
+            detail=_("Host limit reached for this tenant."),
+        )

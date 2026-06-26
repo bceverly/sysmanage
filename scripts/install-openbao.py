@@ -12,7 +12,6 @@ import sys
 import tempfile
 import urllib.parse
 import zipfile
-from pathlib import Path
 
 import requests
 
@@ -73,7 +72,7 @@ def check_openbao_installed():
             print(f"OpenBAO already installed: {result.stdout.strip()}")
             return True
     except FileNotFoundError:
-        pass
+        _ = None  # empty-except: failure here is non-fatal
 
     # Check common installation locations based on platform
     system = platform.system().lower()
@@ -123,8 +122,8 @@ def check_openbao_at_path(install_path):
             if result.returncode == 0:
                 print(f"OpenBAO installed at {binary_path}: {result.stdout.strip()}")
                 return True
-        except:
-            pass
+        except Exception:  # noqa: BLE001
+            _ = None  # empty-except: failure here is non-fatal
     return False
 
 
@@ -181,7 +180,12 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, 'bao')
                         shutil.copy2(built_binary, target_path)
-                        os.chmod(target_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+                        # 0o755 — installed bao binary in ~/.local/bin.
+                        # CodeQL ``py/overly-permissive-file`` FP: an
+                        # executable that no other user can read is no
+                        # use to anyone on a multi-user box, and these
+                        # are user-bin installs (not setuid).
+                        os.chmod(target_path, 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                         print(f"OpenBAO installed to: {target_path}")
                         print("Add ~/.local/bin to your PATH if not already done")
                         return True
@@ -201,8 +205,8 @@ def install_via_package_manager():
                     subprocess.run(['sudo', 'ln', '-sf', '/usr/pkg/bin/vault', '/usr/pkg/bin/bao'],
                                  capture_output=True, text=True, check=False)
                     print("Created 'bao' symlink to vault for compatibility")
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal
                 return True
 
             # NetBSD doesn't have OpenBAO in packages - offer to build from source
@@ -296,7 +300,12 @@ def install_via_package_manager():
                         os.makedirs(install_path, exist_ok=True)
                         target_path = os.path.join(install_path, 'bao')
                         shutil.copy2(built_binary, target_path)
-                        os.chmod(target_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+                        # 0o755 — installed bao binary in ~/.local/bin.
+                        # CodeQL ``py/overly-permissive-file`` FP: an
+                        # executable that no other user can read is no
+                        # use to anyone on a multi-user box, and these
+                        # are user-bin installs (not setuid).
+                        os.chmod(target_path, 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
                         print(f"OpenBAO installed to: {target_path}")
                         print("Add ~/.local/bin to your PATH if not already done")
                         return True
@@ -317,7 +326,7 @@ def install_via_package_manager():
                         subprocess.run(['doas', 'ln', '-sf', '/usr/local/bin/vault', '/usr/local/bin/bao'],
                                      capture_output=True, text=True, check=False)
                         print("Created 'bao' symlink to vault for compatibility")
-                    except:
+                    except Exception:  # noqa: BLE001
                         pass
                 return True
 
@@ -439,38 +448,41 @@ def install_from_binary():
         # OpenBAO download URL pattern - try different naming conventions
         base_url = f"https://github.com/openbao/openbao/releases/download/{version}"
 
-        # Try different filename patterns based on actual releases
+        # Build filename candidates matching OpenBAO's actual release naming.
+        # Tarballs use capitalized OS (Linux/Darwin/Freebsd/Windows) and x86_64/armv6;
+        # .deb/.rpm packages use lowercase os and amd64/arm64.
+        ver_clean = version.lstrip('v')
+        arch = platform_str.split('_', 1)[1]  # e.g. amd64, arm64, arm, ppc64le
+
+        def to_tar_arch(a):
+            return {'amd64': 'x86_64', 'arm': 'armv6'}.get(a, a)
+
         possible_filenames = []
 
-        # Windows-specific patterns (capital W and x86_64 instead of amd64)
         if platform_str.startswith('windows'):
-            arch = platform_str.split('_')[1]  # extract amd64 from windows_amd64
-            # Map Windows amd64 to x86_64 for GitHub release naming
-            if arch == 'amd64':
-                github_arch = 'x86_64'
-            elif arch == 'arm64':
-                github_arch = 'arm64'
-            elif arch == 'arm':
-                github_arch = 'armv6'
-            else:
-                github_arch = arch
-            possible_filenames.append(f"bao_{version.lstrip('v')}_Windows_{github_arch}.zip")
-
-        # FreeBSD-specific tar.gz patterns (FreeBSD has capital F in filename)
+            possible_filenames.append(
+                f"bao_{ver_clean}_Windows_{to_tar_arch(arch)}.zip"
+            )
         elif platform_str.startswith('freebsd'):
-            arch = platform_str.split('_')[1]  # extract amd64 from freebsd_amd64
-            # Map FreeBSD amd64 to x86_64 for GitHub release naming
-            github_arch = 'x86_64' if arch == 'amd64' else arch
-            possible_filenames.append(f"bao_{version.lstrip('v')}_Freebsd_{github_arch}.tar.gz")
-
-        # Generic patterns for other platforms
-        possible_filenames.extend([
-            f"bao-hsm_{version.lstrip('v')}_{platform_str}.deb",  # Debian package
-            f"bao-hsm_{version.lstrip('v')}_{platform_str}.pkg.tar.zst",  # Arch package
-            f"bao_{platform_str}.zip",  # Generic zip
-            f"openbao_{version.lstrip('v')}_{platform_str}.zip",  # Alternative naming
-            f"openbao_{platform_str}.zip",  # Alternative naming
-        ])
+            possible_filenames.append(
+                f"bao_{ver_clean}_Freebsd_{to_tar_arch(arch)}.tar.gz"
+            )
+        elif platform_str.startswith('darwin'):
+            possible_filenames.append(
+                f"bao_{ver_clean}_Darwin_{to_tar_arch(arch)}.tar.gz"
+            )
+        elif platform_str.startswith('linux'):
+            # Prefer the static tarball first — works without sudo and on any distro.
+            possible_filenames.append(
+                f"bao_{ver_clean}_Linux_{to_tar_arch(arch)}.tar.gz"
+            )
+            # Fall back to distro packages if the tarball install fails.
+            possible_filenames.append(
+                f"openbao_{ver_clean}_linux_{arch}.deb"
+            )
+            possible_filenames.append(
+                f"openbao_{ver_clean}_linux_{arch}.rpm"
+            )
 
         downloaded_file = None
 
@@ -580,9 +592,13 @@ def install_from_binary():
                     print(f"Binary {binary_name} not found in downloaded archive")
                     return False
 
-                # Make binary executable (Unix-like systems)
+                # Make binary executable (Unix-like systems).  0o755 —
+                # standard executable permissions.  CodeQL flags this
+                # as ``py/overly-permissive-file`` (world-readable);
+                # see the ~/.local/bin chmod block earlier for the FP
+                # rationale.
                 if platform.system().lower() != 'windows':
-                    os.chmod(binary_path, 0o755)  # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
+                    os.chmod(binary_path, 0o755)  # lgtm[py/overly-permissive-file]  nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions
 
                 # Install to appropriate location
                 install_path = get_install_path()
@@ -723,7 +739,7 @@ def get_install_path():
                 os.makedirs(path, exist_ok=True)
                 if os.access(path, os.W_OK):
                     return path
-            except:
+            except Exception:  # noqa: BLE001
                 continue
 
     # Fallback to first path that we can create
@@ -731,7 +747,7 @@ def get_install_path():
         try:
             os.makedirs(path, exist_ok=True)
             return path
-        except:
+        except Exception:  # noqa: BLE001
             continue
 
     return None

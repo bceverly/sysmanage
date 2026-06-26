@@ -5,18 +5,18 @@
 # SysManage Server
 
 [![CI/CD Pipeline](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/ci.yml)
-[![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.10--3.14-blue.svg)](https://python.org)
 [![Node.js Version](https://img.shields.io/badge/node.js-20.x-green.svg)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting](https://img.shields.io/badge/pylint-10.00/10-brightgreen.svg)](https://github.com/PyCQA/pylint)
 [![TypeScript](https://img.shields.io/badge/eslint-0%20warnings-brightgreen.svg)]()
 [![Security: bandit](https://img.shields.io/badge/bandit-passing-brightgreen.svg)](https://github.com/PyCQA/bandit) [![Security: semgrep](https://img.shields.io/badge/semgrep-scan-brightgreen.svg)](https://semgrep.dev/) [![Security: safety](https://img.shields.io/badge/safety-passing-brightgreen.svg)](https://pypi.org/project/safety/) [![Security: snyk](https://img.shields.io/badge/snyk-monitored-brightgreen.svg)](https://snyk.io/) [![Security: trufflehog](https://img.shields.io/badge/trufflehog-clean-brightgreen.svg)](https://github.com/trufflesecurity/trufflehog)
-[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-65%25-yellow.svg)]()
+[![Backend Test Coverage](https://img.shields.io/badge/backend%20test%20coverage-78%25-yellowgreen.svg)]()
 [![UI Tests](https://img.shields.io/badge/ui%20tests-passing-brightgreen.svg)]()
 [![Performance Tests](https://img.shields.io/badge/performance%20tests-optimized-brightgreen.svg)]()
-[![Artillery Load Tests](https://img.shields.io/badge/artillery-0ms-brightgreen.svg)]()
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=bugs)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage)
+[![Load Tests](https://github.com/bceverly/sysmanage/actions/workflows/load-tests.yml/badge.svg)](https://github.com/bceverly/sysmanage/actions/workflows/load-tests.yml)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=bugs)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=bceverly_sysmanage&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=bceverly_sysmanage)
 
 A modern, cross-platform system monitoring and management platform with real-time WebSocket communication, built with FastAPI and React.
 
@@ -55,10 +55,12 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🌍 Multi-language support (14 languages including RTL support)
 - 🛡️ Enterprise-grade security scanning and monitoring
 - ⚡ Ubuntu Pro Master Key management for bulk enrollment
+- 🛰️ Air-gapped (offline) operation: key/device management, optical/USB media transfer, offline CVE & repository sync
+- 🌐 Multi-site federation: coordinator/site Server Roles with rollup reporting and command dispatch
 
 ## Prerequisites
 
-- **Python**: 3.11 or 3.12 (Python 3.13 not yet supported)
+- **Python**: 3.10–3.14 (tested across the full range in CI)
 - **Node.js**: 20.x or higher (22.13+ recommended for Artillery performance testing)
 - **PostgreSQL**: 14 or higher
 - **OS**: Linux, macOS, Windows, FreeBSD, or OpenBSD
@@ -75,7 +77,7 @@ git clone https://github.com/bceverly/sysmanage.git
 cd sysmanage
 
 # 2. Create virtual environment
-python3.11 -m venv .venv  # or python3.12
+python3.12 -m venv .venv  # any of Python 3.10–3.14
 source .venv/bin/activate
 # Note: On BSD systems (FreeBSD, OpenBSD, NetBSD), use: . .venv/bin/activate
 
@@ -131,7 +133,7 @@ make lint
 - **Backend**: Perfect 10.00/10 PyLint score, Black formatting, Bandit security scanning
 - **Frontend**: 0 ESLint warnings, TypeScript strict mode
 - **Security**: Comprehensive automated security scanning (Bandit, Semgrep, Safety, Snyk, TruffleHog)
-- **Testing**: 1,432 Python tests (pytest), 63 TypeScript tests (Vitest), optional E2E tests (Playwright) - 100% coverage both frontend and backend
+- **Testing**: Comprehensive pytest backend suite, Vitest frontend tests, and optional Playwright E2E. Coverage is enforced by a CI ratchet that only moves up — backend holds a ≥70% floor; the frontends climb toward backend parity per the ROADMAP coverage ladder
 
 ## Project Structure
 

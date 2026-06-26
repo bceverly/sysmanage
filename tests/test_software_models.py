@@ -4,10 +4,8 @@ Tests all software-related models and the CrossPlatformDateTime type.
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from unittest.mock import MagicMock
-
-import pytest
 
 
 class TestCrossPlatformDateTime:

@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.certificate_manager import certificate_manager
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 
@@ -79,10 +80,8 @@ async def get_client_certificate(host_id: str):  # pylint: disable=duplicate-cod
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Host certificate data is tenant-scoped — route to the active tenant's DB.
+    session_local = request_sessionmaker()  # pylint: disable=duplicate-code
 
     with session_local() as session:
         # Find the host
@@ -136,46 +135,51 @@ async def revoke_client_certificate(
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(  # pylint: disable=duplicate-code
+    # Authz + audit are server-global (bootstrap engine); the host certificate
+    # data is tenant-scoped (active tenant's database).
+    main_local = sessionmaker(  # pylint: disable=duplicate-code
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
-    with session_local() as session:
-        # Get user for audit logging
+    # Get user for audit logging (server-global).
+    with main_local() as auth_session:
         user = (
-            session.query(models.User)
+            auth_session.query(models.User)
             .filter(models.User.userid == current_user)
             .first()
         )
         if not user:
             raise HTTPException(status_code=401, detail=_("User not found"))
+        user_id = user.id
 
-        # Find the host
+    # Clear the certificate data on the tenant's host row.
+    session_local = request_sessionmaker()
+    with session_local() as session:
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
         if not host:
             raise HTTPException(status_code=404, detail=_("Host not found"))
 
-        # Clear certificate data
         host.client_certificate = None
         host.certificate_serial = None
         host.certificate_issued_at = None
         host.approval_status = "revoked"
+        host_fqdn = host.fqdn
 
-        # Audit log the certificate revocation
+        session.commit()
+
+    # Audit log the certificate revocation on the MAIN engine (server-global).
+    with main_local() as audit_session:
         AuditService.log(
-            db=session,
-            user_id=user.id,
+            db=audit_session,
+            user_id=user_id,
             username=current_user,
             action_type=ActionType.DELETE,
             entity_type=EntityType.CERTIFICATE,
             entity_id=host_id,
-            entity_name=host.fqdn,
-            description=f"Revoked certificate for host {host.fqdn}",
+            entity_name=host_fqdn,
+            description=f"Revoked certificate for host {host_fqdn}",
             result=Result.SUCCESS,
         )
 
-        session.commit()
-
-        return {"result": "Certificate revoked successfully"}
+    return {"result": "Certificate revoked successfully"}

@@ -84,10 +84,12 @@ import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import WarningIcon from '@mui/icons-material/Warning';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import RuleIcon from '@mui/icons-material/Rule';
+import HostCompliancePanel from '../Components/HostCompliancePanel';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axios from 'axios';
@@ -95,7 +97,7 @@ import axiosInstance from '../Services/api';
 import { distributionService } from '../Services/childHostDistributions';
 import { hasPermission, hasPermissionSync, SecurityRoles } from '../Services/permissions';
 
-import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, RebootPreCheckResponse, RebootOrchestrationStatus, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus } from '../Services/hosts';
+import { SysManageHost, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType, UserAccount, UserGroup, SoftwarePackage, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, RebootPreCheckResponse, RebootOrchestrationStatus, doGetHostByID, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doGetHostSoftware, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doRefreshUserAccessData, doRefreshSoftwareData, doRefreshUpdatesCheck, doRequestSystemInfo, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus } from '../Services/hosts';
 import { SysManageUser, doGetMe } from '../Services/users';
 import { SecretResponse } from '../Services/secrets';
 import { parseUTCTimestamp, formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
@@ -153,6 +155,8 @@ interface ChildHost {
     error_message: string | null;
     created_at: string | null;
     installed_at: string | null;
+    reboot_required?: boolean;
+    agent_version?: string | null;
 }
 
 // Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
@@ -210,15 +214,19 @@ const HostDetail = () => { // NOSONAR
                platformRelease.includes('openSUSE');
     }, [host]);
 
-    // Check if host supports child hosts (virtualization)
+    // Check if host supports child hosts (virtualization).
+    // Child host management is a Professional+ feature, gated by the
+    // ``container_engine`` license module — without it the tab and its
+    // panel must not render in OSS builds.
     const supportsChildHosts = useCallback(() => {
         if (!host?.platform) return false;
+        if (!licenseModules.includes('container_engine')) return false;
         // Child hosts (VMs, containers, WSL instances) cannot have their own child hosts
         if (host.parent_host_id) return false;
         const platform = host.platform || '';
         // Windows hosts support WSL, Linux hosts support LXD/KVM, OpenBSD hosts support VMM, FreeBSD hosts support bhyve
         return platform.includes('Windows') || platform.includes('Linux') || platform.includes('OpenBSD') || platform.includes('FreeBSD');
-    }, [host]);
+    }, [host, licenseModules]);
 
     // Check if host is running Ubuntu (for Ubuntu Pro feature)
     const isUbuntu = useCallback(() => {
@@ -318,6 +326,7 @@ const HostDetail = () => { // NOSONAR
     const [kvmModulesLoading, setKvmModulesLoading] = useState<boolean>(false);
 
     // Create child host modal state
+    const explicitChildTypeRef = useRef<string | null>(null);
     const [createChildHostOpen, setCreateChildHostOpen] = useState<boolean>(false);
     const [createChildHostLoading, setCreateChildHostLoading] = useState<boolean>(false);
     const [childHostFormData, setChildHostFormData] = useState({
@@ -383,25 +392,29 @@ const HostDetail = () => { // NOSONAR
         }
     }, []);
 
-    // Set child type based on platform and fetch distributions when dialog opens
+    // Auto-detect child type based on platform — ONLY when the dialog
+    // was opened without an explicit type via openCreateDialogWithType.
+    // We must NOT clear ``explicitChildTypeRef.current`` here: in React
+    // 18 dev StrictMode the effect fires twice on mount/open, and on the
+    // second fire a cleared ref would let the auto-detect block overwrite
+    // the explicit choice (e.g. clicking "Create Container" on the LXD
+    // card and ending up with childType='kvm').  Leave the ref alone;
+    // it gets overwritten on the next openCreateDialogWithType call.
     useEffect(() => {
         if (createChildHostOpen && host) {
+            if (explicitChildTypeRef.current) {
+                return;
+            }
             const platform = host.platform || '';
             const isLinux = platform.toLowerCase().includes('linux');
             const isOpenBSD = platform.includes('OpenBSD');
             const isFreeBSD = platform.includes('FreeBSD');
-            // Determine child type based on platform and available virtualization:
-            // - FreeBSD -> bhyve
-            // - OpenBSD -> vmm
-            // - Linux -> kvm (if initialized) or lxd (fallback)
-            // - Windows -> wsl
             let childType = 'wsl';
             if (isFreeBSD) {
                 childType = 'bhyve';
             } else if (isOpenBSD) {
                 childType = 'vmm';
             } else if (isLinux) {
-                // Prefer KVM if initialized, otherwise use LXD
                 if (virtualizationStatus?.capabilities?.kvm?.initialized) {
                     childType = 'kvm';
                 } else {
@@ -411,7 +424,7 @@ const HostDetail = () => { // NOSONAR
             setChildHostFormData(prev => ({
                 ...prev,
                 childType,
-                distribution: '',  // Reset distribution when type changes
+                distribution: '',
             }));
             fetchDistributions(childType);
         }
@@ -635,28 +648,45 @@ const HostDetail = () => { // NOSONAR
         });
     }, [pluginTabs, licenseModules]);
 
-    // Build ordered tab definitions array
+    // Build ordered tab definitions array.  Plugin-registered tabs whose
+    // ``id`` collides with a hardcoded OSS tab are dropped — otherwise
+    // React warns about duplicate keys and BOTH tabs render their panel
+    // content on click.  Pro+ plugins that want to provide a richer
+    // version of an OSS tab should pick a distinct id (e.g. ``compliance-pro``).
     const tabDefinitions = useMemo(() => {
+        const HARDCODED_IDS = new Set([
+            'info', 'hardware', 'software', 'software-changes',
+            'third-party-repos', 'access', 'security', 'compliance',
+            'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
+            'diagnostics',
+        ]);
+        const safePluginTabs = visiblePluginTabs.filter(
+            p => !HARDCODED_IDS.has(p.id),
+        );
         const tabs: Array<{ id: string; icon: React.ReactElement; label: string }> = [
             { id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') },
-            ...visiblePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...safePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
             { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },
             { id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') },
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
             { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
-            ...visiblePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            // Compliance is a Pro+ feature gated on the ``compliance_engine``
+            // module; the tab simply hides for OSS deployments rather than
+            // rendering an empty panel that 402s on every API call.
+            ...(licenseModules.includes('compliance_engine') ? [{ id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') }] : []),
+            ...safePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
             { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
-            ...visiblePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
+            ...safePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             ...(supportsChildHosts() ? [{ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') }] : []),
             ...((isUbuntu() && ubuntuProInfo?.available) ? [{ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') }] : []),
             { id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') },
         ];
 
         return tabs;
-    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, t]);
+    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, t]);
 
     // Get tab ID for current numeric index
     const currentTabId = tabDefinitions[currentTab]?.id || 'info';
@@ -774,6 +804,10 @@ const HostDetail = () => { // NOSONAR
     // Child hosts functions
     const fetchChildHosts = useCallback(async (showLoading: boolean = true) => {
         if (!hostId) return;
+        // Child-host management is a Professional+ feature (container_engine module).
+        // Without the license the endpoint returns 402, so don't probe it in
+        // Community Edition — avoids noisy console errors on every host-detail load.
+        if (!licenseModules.includes('container_engine')) return;
         try {
             if (showLoading) {
                 setChildHostsLoading(true);
@@ -791,11 +825,14 @@ const HostDetail = () => { // NOSONAR
                 setChildHostsLoading(false);
             }
         }
-    }, [hostId]);
+    }, [hostId, licenseModules]);
 
     // Fetch virtualization status
     const fetchVirtualizationStatus = useCallback(async () => {
         if (!hostId) return;
+        // Virtualization status rides the same container_engine Pro+ license; skip
+        // the call (it 402s) when the module isn't licensed.
+        if (!licenseModules.includes('container_engine')) return;
         try {
             setVirtualizationLoading(true);
             const response = await axiosInstance.get(`/api/host/${hostId}/virtualization/status`);
@@ -809,7 +846,7 @@ const HostDetail = () => { // NOSONAR
         } finally {
             setVirtualizationLoading(false);
         }
-    }, [hostId]);
+    }, [hostId, licenseModules]);
 
     const requestChildHostsRefresh = useCallback(async (showSnackbar: boolean = true) => {
         if (!hostId) return;
@@ -908,6 +945,28 @@ const HostDetail = () => { // NOSONAR
         } catch (error) {
             console.error('Error restarting child host:', error);
             setSnackbarMessage(t('hostDetail.childHostRestartError', 'Error restarting child host'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setChildHostOperationLoading(prev => ({ ...prev, [child.id]: null }));
+        }
+    }, [hostId, fetchChildHosts, t]);
+
+    const handleChildHostUpdateAgent = useCallback(async (child: ChildHost) => {
+        if (!hostId) return;
+        try {
+            setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'update-agent' }));
+            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/update-agent`);
+            setSnackbarMessage(t('hosts.updateAgentRequested', 'Agent update requested successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+            // Refresh after a short delay
+            setTimeout(() => {
+                fetchChildHosts(false);
+            }, 5000);
+        } catch (error) {
+            console.error('Error requesting child host agent update:', error);
+            setSnackbarMessage(t('hosts.updateAgentFailed', 'Failed to request agent update'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         } finally {
@@ -1171,6 +1230,7 @@ const HostDetail = () => { // NOSONAR
 
     // Open create dialog with a specific child type (called from HypervisorStatusCard)
     const openCreateDialogWithType = useCallback((childType: string) => {
+        explicitChildTypeRef.current = childType;
         setChildHostFormData(prev => ({
             ...prev,
             childType,
@@ -2979,6 +3039,21 @@ const HostDetail = () => { // NOSONAR
         setShutdownConfirmOpen(true);
     };
 
+    const handleUpdateAgent = async () => {
+        if (!host?.id) return;
+        try {
+            await doUpdateAgent(host.id);
+            setSnackbarMessage(t('hosts.updateAgentRequested', 'Agent update requested successfully'));
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+        } catch (error) {
+            console.error('Failed to request agent update:', error);
+            setSnackbarMessage(t('hosts.updateAgentFailed', 'Failed to request agent update'));
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
     const handleRebootConfirm = async () => {
         if (!host?.id) return;
 
@@ -3306,13 +3381,29 @@ const HostDetail = () => { // NOSONAR
             const response = await axiosInstance.get('/api/ubuntu-pro/');
             const masterKey = response.data.master_key;
             if (masterKey?.trim()) {
-                setUbuntuProToken(masterKey);
+                // Master key exists - attach directly without showing the token
+
+                setUbuntuProAttaching(true);
+                try {
+                    await doAttachUbuntuPro(hostId!, masterKey.trim());
+                    setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attach requested'));
+                    setSnackbarSeverity('success');
+                    setSnackbarOpen(true);
+                    // Start polling - attaching state stays active until attached
+                    startUbuntuProPolling();
+                } catch {
+                    setSnackbarMessage(t('hostDetail.ubuntuProAttachError', 'Failed to attach Ubuntu Pro'));
+                    setSnackbarSeverity('error');
+                    setSnackbarOpen(true);
+                    setUbuntuProAttaching(false);
+                }
+                return;
             }
         } catch (error) {
             console.log('No master Ubuntu Pro token configured or error loading:', error);
-            // Don't show error to user - this is optional functionality
         }
 
+        // No master key - show dialog for manual token entry
         setUbuntuProTokenDialog(true);
     };
 
@@ -3327,30 +3418,60 @@ const HostDetail = () => { // NOSONAR
         setUbuntuProDetaching(true);
         try {
             await doDetachUbuntuPro(hostId);
-            setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detached successfully'));
+            setSnackbarMessage(t('hostDetail.ubuntuProDetachSuccess', 'Ubuntu Pro detach requested'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
-
-            // Refresh Ubuntu Pro info after a short delay to allow agent to process
-            setTimeout(async () => {
+            // Poll until detached
+            let pollCount = 0;
+            const maxPolls = 30;
+            const pollInterval = setInterval(async () => {
+                pollCount++;
                 try {
                     const ubuntuProData = await doGetHostUbuntuPro(hostId);
                     setUbuntuProInfo(ubuntuProData);
-                } catch (refreshError) {
-                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
+                    if (!ubuntuProData.attached || pollCount >= maxPolls) {
+                        clearInterval(pollInterval);
+                        setUbuntuProDetaching(false);
+                    }
+                } catch {
+                    if (pollCount >= maxPolls) {
+                        clearInterval(pollInterval);
+                        setUbuntuProDetaching(false);
+                    }
                 }
             }, 2000);
         } catch {
             setSnackbarMessage(t('hostDetail.ubuntuProDetachError', 'Failed to detach Ubuntu Pro'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
-        } finally {
             setUbuntuProDetaching(false);
         }
     };
 
     const handleCancelUbuntuProDetach = () => {
         setUbuntuProDetachConfirmOpen(false);
+    };
+
+    const startUbuntuProPolling = () => {
+        if (!hostId) return;
+        let pollCount = 0;
+        const maxPolls = 30; // Poll for up to ~60 seconds
+        const pollInterval = setInterval(async () => {
+            pollCount++;
+            try {
+                const ubuntuProData = await doGetHostUbuntuPro(hostId);
+                setUbuntuProInfo(ubuntuProData);
+                if (ubuntuProData.attached || pollCount >= maxPolls) {
+                    clearInterval(pollInterval);
+                    setUbuntuProAttaching(false);
+                }
+            } catch {
+                if (pollCount >= maxPolls) {
+                    clearInterval(pollInterval);
+                    setUbuntuProAttaching(false);
+                }
+            }
+        }, 2000);
     };
 
     const handleUbuntuProTokenSubmit = async () => {
@@ -3361,24 +3482,16 @@ const HostDetail = () => { // NOSONAR
 
         try {
             await doAttachUbuntuPro(hostId, ubuntuProToken.trim());
-            setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attached successfully'));
+            setSnackbarMessage(t('hostDetail.ubuntuProAttachSuccess', 'Ubuntu Pro attach requested'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
-
-            // Refresh Ubuntu Pro info after a short delay to allow agent to process
-            setTimeout(async () => {
-                try {
-                    const ubuntuProData = await doGetHostUbuntuPro(hostId);
-                    setUbuntuProInfo(ubuntuProData);
-                } catch (refreshError) {
-                    console.log('Failed to refresh Ubuntu Pro data:', refreshError);
-                }
-            }, 3000); // Longer delay for attach since it may take more time
+            setUbuntuProToken('');
+            // Start polling - attaching state stays active until attached
+            startUbuntuProPolling();
         } catch {
             setSnackbarMessage(t('hostDetail.ubuntuProAttachError', 'Failed to attach Ubuntu Pro'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
-        } finally {
             setUbuntuProAttaching(false);
             setUbuntuProToken('');
         }
@@ -3620,7 +3733,7 @@ const HostDetail = () => { // NOSONAR
     // Get service status label for Ubuntu Pro services (extracted for SonarQube compliance)
     const getServiceStatusLabel = (status: string): string => {
         if (status === 'n/a') {
-            return 'N/A';
+            return t('common.notAvailable', 'N/A');
         } else if (status === 'enabled') {
             return t('hostDetail.enabled', 'Enabled');
         } else {
@@ -3705,12 +3818,12 @@ const HostDetail = () => { // NOSONAR
             }
 
             if (servicesToChange.length > 0) {
-                setServicesMessage(`${servicesToChange.length} service(s) updated`);
+                setServicesMessage(t('hostDetail.servicesUpdatedCount', '{{count}} service(s) updated', { count: servicesToChange.length }));
                 setSnackbarMessage(t('hostDetail.servicesUpdateRequested', 'Ubuntu Pro services update requested'));
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
             } else {
-                setServicesMessage('No changes made');
+                setServicesMessage(t('hostDetail.noChangesMade', 'No changes made'));
             }
 
             setServicesEditMode(false);
@@ -3718,7 +3831,7 @@ const HostDetail = () => { // NOSONAR
 
         } catch (error) {
             console.error('Error updating Ubuntu Pro services:', error);
-            setServicesMessage('Error updating services');
+            setServicesMessage(t('hostDetail.errorUpdatingServices', 'Error updating services'));
             setSnackbarMessage(t('hostDetail.servicesUpdateError', 'Error updating Ubuntu Pro services'));
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
@@ -4023,6 +4136,17 @@ const HostDetail = () => { // NOSONAR
                     >
                         {t('hosts.shutdown', 'Shutdown')}
                     </Button>
+                    {hasPermissionSync(SecurityRoles.UPDATE_AGENT) && (
+                    <Button
+                        variant="outlined"
+                        color="info"
+                        startIcon={<SystemUpdateAltIcon />}
+                        onClick={handleUpdateAgent}
+                        disabled={!host.active}
+                    >
+                        {t('hosts.updateAgent', 'Update Agent')}
+                    </Button>
+                    )}
                 </Box>
             </Box>
 
@@ -4074,6 +4198,28 @@ const HostDetail = () => { // NOSONAR
                                 </Grid>
                                 <Grid size={{ xs: 12, sm: 6 }}>
                                     <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.publicIp', 'Public IP')}
+                                    </Typography>
+                                    <Typography variant="body1">{host.public_ip || t('common.notAvailable')}</Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hostDetail.geoLocation', 'Geographic Location')}
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {host.geo_city || host.geo_country_code
+                                            ? [
+                                                host.geo_city,
+                                                host.geo_subdivision_code,
+                                                host.geo_country_code,
+                                              ]
+                                                  .filter(Boolean)
+                                                  .join(', ')
+                                            : t('common.notAvailable')}
+                                    </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
                                         {t('hosts.status', 'Status')}
                                     </Typography>
                                     <Chip
@@ -4104,7 +4250,7 @@ const HostDetail = () => { // NOSONAR
                                     </Typography>
                                     {host.script_execution_enabled === undefined || host.script_execution_enabled === null ? (
                                         <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                            Unknown
+                                            {t('common.unknown', 'Unknown')}
                                         </Typography>
                                     ) : (
                                         <Chip
@@ -4122,7 +4268,7 @@ const HostDetail = () => { // NOSONAR
                                     </Typography>
                                     {host.is_agent_privileged === undefined || host.is_agent_privileged === null ? (
                                         <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                            Unknown
+                                            {t('common.unknown', 'Unknown')}
                                         </Typography>
                                     ) : (
                                         <Chip
@@ -4160,10 +4306,16 @@ const HostDetail = () => { // NOSONAR
                                             />
                                         )) : (
                                             <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                                                None
+                                                {t('common.none', 'None')}
                                             </Typography>
                                         )}
                                     </Box>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                    <Typography variant="body2" color="textSecondary">
+                                        {t('hosts.agentVersion', 'Agent Version')}
+                                    </Typography>
+                                    <Typography variant="body1">{host.agent_version || t('common.notAvailable', 'N/A')}</Typography>
                                 </Grid>
                             </Grid>
                         </CardContent>
@@ -4239,7 +4391,8 @@ const HostDetail = () => { // NOSONAR
                     </Card>
                 </Grid>
 
-                {/* OpenTelemetry Status */}
+                {/* OpenTelemetry Status — Pro+ feature gated on observability_engine */}
+                {licenseModules.includes('observability_engine') && (
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
@@ -4374,8 +4527,10 @@ const HostDetail = () => { // NOSONAR
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
 
-                {/* Graylog Status */}
+                {/* Graylog Status — Pro+ feature gated on observability_engine */}
+                {licenseModules.includes('observability_engine') && (
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>
                         <CardContent>
@@ -4409,7 +4564,7 @@ const HostDetail = () => { // NOSONAR
                                                         {graylogMechanism === 'syslog_udp' && t('graylog.mechanism.syslogUdp', 'Syslog UDP')}
                                                         {graylogMechanism === 'gelf_tcp' && t('graylog.mechanism.gelfTcp', 'GELF TCP')}
                                                         {graylogMechanism === 'windows_sidecar' && t('graylog.mechanism.windowsSidecar', 'Windows Sidecar')}
-                                                        {graylogPort && ` (port ${graylogPort})`}
+                                                        {graylogPort && ` ${t('hostDetail.graylogPort', '(port {{port}})', { port: graylogPort })}`}
                                                     </Typography>
                                                 </Grid>
                                             )}
@@ -4457,6 +4612,7 @@ const HostDetail = () => { // NOSONAR
                         </CardContent>
                     </Card>
                 </Grid>
+                )}
 
                 {/* Tags */}
                 <Grid size={{ xs: 12, md: 6 }}>
@@ -4619,7 +4775,7 @@ const HostDetail = () => { // NOSONAR
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
-                                                            {device.name || device.device_path || device.mount_point || `Device ${index + 1}`}
+                                                            {device.name || device.device_path || device.mount_point || t('hostDetail.deviceNumber', 'Device {{number}}', { number: index + 1 })}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid size={{ xs: 12, md: 8 }}>
@@ -4732,7 +4888,7 @@ const HostDetail = () => { // NOSONAR
                                                 <Grid container spacing={2} alignItems="flex-start">
                                                     <Grid size={{ xs: 12, md: 3 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 'medium', mb: 1 }}>
-                                                            {iface.name || `Interface ${index + 1}`}
+                                                            {iface.name || t('hostDetail.interfaceNumber', 'Interface {{number}}', { number: index + 1 })}
                                                         </Typography>
                                                         {iface.is_active && (
                                                             <Chip label={t('hostDetail.active', 'Active')} size="small" color="success" sx={{ mt: 1 }} />
@@ -4786,6 +4942,7 @@ const HostDetail = () => { // NOSONAR
                                                                         <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
                                                                             {t('hostDetail.speed', 'Speed')}
                                                                         </TableCell>
+                                                                        {/* eslint-disable-next-line i18next/no-literal-string -- network speed unit */}
                                                                         <TableCell>{iface.speed_mbps} Mbps</TableCell>
                                                                     </TableRow>
                                                                 )}
@@ -4814,7 +4971,7 @@ const HostDetail = () => { // NOSONAR
                                             {t('hostDetail.additionalHardware', 'Additional Hardware Details')}
                                             <IconButton
                                                 size="small"
-                                                onClick={() => handleShowDialog('Additional Hardware Details', host.hardware_details || '')}
+                                                onClick={() => handleShowDialog(t('hostDetail.additionalHardware', 'Additional Hardware Details'), host.hardware_details || '')}
                                                 sx={{ color: 'textSecondary' }}
                                             >
                                                 <HelpOutlineIcon fontSize="small" />
@@ -4862,7 +5019,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('hostDetail.addPackage', 'Add Package')}
                                             </Button>
                                         )}
-                                        {canDeployOpenTelemetry && (
+                                        {canDeployOpenTelemetry && licenseModules.includes('observability_engine') && (
                                             <Button
                                                 variant="contained"
                                                 startIcon={openTelemetryDeploying ? <CircularProgress size={20} color="inherit" /> : <SystemUpdateAltIcon />}
@@ -4878,7 +5035,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('hostDetail.deployOpenTelemetry', 'Deploy OpenTelemetry')}
                                             </Button>
                                         )}
-                                        {canAttachGraylog && (
+                                        {canAttachGraylog && licenseModules.includes('observability_engine') && (
                                             <Button
                                                 variant="contained"
                                                 startIcon={<SystemUpdateAltIcon />}
@@ -5113,7 +5270,7 @@ const HostDetail = () => { // NOSONAR
                                                                 {user.username}
                                                             </Typography>
                                                             <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                                {canDeploySshKey && (
+                                                                {canDeploySshKey && licenseModules.includes('secrets_engine') && (
                                                                     <Button
                                                                         size="small"
                                                                         variant="outlined"
@@ -5426,14 +5583,30 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
             )}
 
-            {/* Plugin tabs content */}
-            {visiblePluginTabs.map(pt => (
-                currentTabId === pt.id && hostId && (
-                    <Box key={pt.id} sx={{ p: 2 }}>
-                        <pt.component hostId={hostId} />
-                    </Box>
-                )
-            ))}
+            {/* Plugin tabs content.  Drop any whose id collides with a
+                hardcoded OSS tab so the OSS panel stays authoritative — see
+                the matching filter in tabDefinitions above. */}
+            {visiblePluginTabs
+                .filter(pt => !new Set([
+                    'info', 'hardware', 'software', 'software-changes',
+                    'third-party-repos', 'access', 'security', 'compliance',
+                    'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
+                    'diagnostics',
+                ]).has(pt.id))
+                .map(pt => (
+                    currentTabId === pt.id && hostId && (
+                        <Box key={pt.id} sx={{ p: 2 }}>
+                            <pt.component hostId={hostId} />
+                        </Box>
+                    )
+                ))}
+
+            {/* Compliance Tab (Phase 8.3) */}
+            {currentTabId === 'compliance' && hostId && (
+                <Box sx={{ p: 2 }}>
+                    <HostCompliancePanel hostId={hostId} />
+                </Box>
+            )}
 
             {/* Certificates Tab */}
             {currentTabId === 'certificates' && (
@@ -5491,7 +5664,7 @@ const HostDetail = () => { // NOSONAR
                                                 {t('common.all', 'All')}
                                             </ToggleButton>
                                         </ToggleButtonGroup>
-                                        {canDeployCertificate && (
+                                        {canDeployCertificate && licenseModules.includes('secrets_engine') && (
                                             <Button
                                                 variant="outlined"
                                                 startIcon={<AddIcon />}
@@ -5857,7 +6030,7 @@ const HostDetail = () => { // NOSONAR
                                         )}
                                         {selectedRoles.length > 0 && (
                                             <Typography variant="caption" sx={{ color: 'primary.main', ml: 2 }}>
-                                                {t('hostDetail.selectedServices', `${selectedRoles.length} service(s) selected`)}
+                                                {t('hostDetail.selectedServices', `${selectedRoles.length} service(s) selected`, { count: selectedRoles.length })}
                                             </Typography>
                                         )}
                                     </Box>
@@ -5890,8 +6063,10 @@ const HostDetail = () => { // NOSONAR
 
                             {virtualizationStatus && (
                                 <Grid container spacing={2}>
-                                    {/* WSL Card - Windows hosts */}
-                                    {host?.platform?.includes('Windows') && (
+                                    {/* WSL Card — Windows + ``container_engine``.  The Initialize / Create
+                                        buttons inside the card invoke Pro+ engine plans; without the
+                                        engine licensed, the card simply hides per Phase 10.7. */}
+                                    {host?.platform?.includes('Windows') && licenseModules.includes('container_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="wsl"
@@ -5908,8 +6083,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* LXD Card - Linux hosts */}
-                                    {host?.platform?.includes('Linux') && (
+                                    {/* LXD Card — Linux + ``container_engine``. */}
+                                    {host?.platform?.includes('Linux') && licenseModules.includes('container_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="lxd"
@@ -5925,8 +6100,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* KVM Card - Linux hosts */}
-                                    {host?.platform?.includes('Linux') && (
+                                    {/* KVM Card — Linux + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('Linux') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="kvm"
@@ -5945,8 +6120,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* VMM Card - OpenBSD hosts */}
-                                    {host?.platform?.includes('OpenBSD') && (
+                                    {/* VMM Card — OpenBSD + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('OpenBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="vmm"
@@ -5962,8 +6137,8 @@ const HostDetail = () => { // NOSONAR
                                         </Grid>
                                     )}
 
-                                    {/* bhyve Card - FreeBSD hosts */}
-                                    {host?.platform?.includes('FreeBSD') && (
+                                    {/* bhyve Card — FreeBSD + ``virtualization_engine``. */}
+                                    {host?.platform?.includes('FreeBSD') && licenseModules.includes('virtualization_engine') && (
                                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                                             <HypervisorStatusCard
                                                 type="bhyve"
@@ -6043,6 +6218,7 @@ const HostDetail = () => { // NOSONAR
                                                     <TableCell>{t('hostDetail.childHostType', 'Type')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostDistribution', 'Distribution')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostHostname', 'Hostname')}</TableCell>
+                                                    <TableCell>{t('hosts.agentVersion', 'Agent Version')}</TableCell>
                                                     <TableCell>{t('hostDetail.childHostStatus', 'Status')}</TableCell>
                                                     <TableCell align="right">{t('hostDetail.childHostActions', 'Actions')}</TableCell>
                                                 </TableRow>
@@ -6072,6 +6248,9 @@ const HostDetail = () => { // NOSONAR
                                                         </TableCell>
                                                         <TableCell>
                                                             {child.hostname || (child.status === 'running' ? '-' : t('hostDetail.childHostNotRunning', 'Not running'))}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {child.agent_version || '-'}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
@@ -6127,9 +6306,32 @@ const HostDetail = () => { // NOSONAR
                                                                         variant="outlined"
                                                                     />
                                                                 )}
+                                                                {child.reboot_required && (
+                                                                    <Chip
+                                                                        label={t('hosts.rebootRequired')}
+                                                                        color="error"
+                                                                        size="small"
+                                                                        variant="outlined"
+                                                                    />
+                                                                )}
                                                             </Box>
                                                         </TableCell>
                                                         <TableCell align="right">
+                                                            {/* Phase 10.7 fine-grained gating: per-row action buttons
+                                                                require the right Pro+ engine.  WSL/LXD lifecycles run
+                                                                through ``container_engine``; KVM/bhyve/VMM through
+                                                                ``virtualization_engine``.  The read-only row stays
+                                                                visible for OSS deployments — only the action column
+                                                                hides. */}
+                                                            {(() => {
+                                                                const requiredEngine =
+                                                                    child.child_type === 'wsl' || child.child_type === 'lxd'
+                                                                        ? 'container_engine'
+                                                                        : 'virtualization_engine';
+                                                                if (!licenseModules.includes(requiredEngine)) {
+                                                                    return null;
+                                                                }
+                                                                return (
                                                             <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                                                                 {/* Start button - only show if stopped */}
                                                                 {child.status === 'stopped' && (
@@ -6167,6 +6369,18 @@ const HostDetail = () => { // NOSONAR
                                                                         {currentOperation === 'restart' ? <CircularProgress size={16} /> : <RestartAltIcon fontSize="small" />}
                                                                     </IconButton>
                                                                 )}
+                                                                {/* Update Agent button - show for children with linked agents and UPDATE_AGENT role */}
+                                                                {child.child_host_id && hasPermissionSync(SecurityRoles.UPDATE_AGENT) && (
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        color="info"
+                                                                        onClick={() => handleChildHostUpdateAgent(child)}
+                                                                        disabled={isOperationLoading}
+                                                                        title={t('hosts.updateAgent', 'Update Agent')}
+                                                                    >
+                                                                        {currentOperation === 'update-agent' ? <CircularProgress size={16} /> : <SystemUpdateAltIcon fontSize="small" />}
+                                                                    </IconButton>
+                                                                )}
                                                                 {/* Delete/Cancel button - show for all statuses */}
                                                                 <IconButton
                                                                     size="small"
@@ -6180,6 +6394,8 @@ const HostDetail = () => { // NOSONAR
                                                                     {currentOperation === 'delete' ? <CircularProgress size={16} /> : <DeleteIcon fontSize="small" />}
                                                                 </IconButton>
                                                             </Box>
+                                                                );
+                                                            })()}
                                                         </TableCell>
                                                     </TableRow>
                                                     );
@@ -6210,20 +6426,26 @@ const HostDetail = () => { // NOSONAR
                                     {host?.is_agent_privileged && (
                                         <Box>
                                             {ubuntuProAttaching && (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CircularProgress size={16} />
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.ubuntuProAttaching', 'Attaching...')}
-                                                    </Typography>
-                                                </Box>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    disabled
+                                                    startIcon={<CircularProgress size={16} />}
+                                                >
+                                                    {t('hostDetail.ubuntuProAttaching', 'Attaching...')}
+                                                </Button>
                                             )}
                                             {ubuntuProDetaching && (
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                    <CircularProgress size={16} />
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        {t('hostDetail.ubuntuProDetaching', 'Detaching...')}
-                                                    </Typography>
-                                                </Box>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="warning"
+                                                    size="small"
+                                                    disabled
+                                                    startIcon={<CircularProgress size={16} />}
+                                                >
+                                                    {t('hostDetail.ubuntuProDetaching', 'Detaching...')}
+                                                </Button>
                                             )}
                                             {!ubuntuProAttaching && !ubuntuProDetaching && (
                                                 <>
@@ -6487,6 +6709,7 @@ const HostDetail = () => { // NOSONAR
                                         onClick={handleRequestDiagnostics}
                                         disabled={diagnosticsLoading}
                                         color="primary"
+                                        data-testid="request-host-data-button"
                                     >
                                         {diagnosticsLoading
                                             ? t('hostDetail.requestingDiagnostics', 'Requesting...')
@@ -6522,7 +6745,7 @@ const HostDetail = () => { // NOSONAR
                                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                                                             <Box>
                                                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.collection_id?.substring(0, 8) || 'Unknown'}
+                                                                    {t('hostDetail.diagnosticReport', 'Diagnostic Report')} #{diagnostic.collection_id?.substring(0, 8) || t('common.unknown', 'Unknown')}
                                                                 </Typography>
                                                                 <Typography variant="body2" color="textSecondary">
                                                                     {t('hostDetail.collectedAt', 'Collected')}: {formatDate(diagnostic.completed_at)}
@@ -6906,7 +7129,7 @@ const HostDetail = () => { // NOSONAR
                 <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
                         {t('hostDetail.diagnosticDetailTitle', 'Diagnostic Report Details')}
-                        {selectedDiagnostic && ` #${selectedDiagnostic.collection_id?.substring(0, 8) || 'Unknown'}`}
+                        {selectedDiagnostic && ` #${selectedDiagnostic.collection_id?.substring(0, 8) || t('common.unknown', 'Unknown')}`}
                     </Typography>
                     <IconButton onClick={() => setDiagnosticDetailOpen(false)} size="small">
                         <CloseIcon />
@@ -7047,7 +7270,7 @@ const HostDetail = () => { // NOSONAR
                 </DialogActions>
             </Dialog>
 
-            {/* Ubuntu Pro Token Dialog */}
+            {/* Ubuntu Pro Token Dialog - only shown when no master key is configured */}
             <Dialog
                 open={ubuntuProTokenDialog}
                 onClose={handleUbuntuProTokenCancel}
@@ -7061,11 +7284,6 @@ const HostDetail = () => { // NOSONAR
                     <Typography variant="body2" sx={{ mb: 2 }}>
                         {t('hostDetail.ubuntuProAttachDescription', 'Enter your Ubuntu Pro token to attach this system to your subscription.')}
                     </Typography>
-                    {ubuntuProToken && (
-                        <Alert severity="info" sx={{ mb: 2 }}>
-                            {t('hostDetail.ubuntuProMasterTokenPreFilled', 'Master Ubuntu Pro token has been pre-filled from settings.')}
-                        </Alert>
-                    )}
                     <TextField
                         fullWidth
                         label={t('hostDetail.ubuntuProToken', 'Ubuntu Pro Token')}
@@ -7112,7 +7330,7 @@ const HostDetail = () => { // NOSONAR
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <TextField
                                 fullWidth
-                                placeholder="Enter package name to search..."
+                                placeholder={t('hostDetail.packageSearchPlaceholder', 'Enter package name to search...')}
                                 variant="outlined"
                                 inputRef={packageSearchInputRef}
                             />
@@ -7126,7 +7344,7 @@ const HostDetail = () => { // NOSONAR
                                 }}
                                 sx={{ height: '56px', minWidth: '100px' }}
                             >
-                                {isSearching ? <CircularProgress size={20} /> : 'Search'}
+                                {isSearching ? <CircularProgress size={20} /> : t('common.search', 'Search')}
                             </Button>
                         </Box>
                     </Box>
@@ -7844,34 +8062,24 @@ const HostDetail = () => { // NOSONAR
                             )}
                         </FormControl>
 
-                        {/* Container name field for LXD */}
-                        {childHostFormData.childType === 'lxd' && (
-                            <TextField
-                                fullWidth
-                                label={t('hostDetail.childHostContainerNameLabel', 'Container Name')}
-                                value={childHostFormData.containerName}
-                                onChange={(e) => setChildHostFormData({
-                                    ...childHostFormData,
-                                    containerName: e.target.value.toLowerCase().replaceAll(/[^a-z0-9-]/g, '')
-                                })}
-                                disabled={createChildHostLoading}
-                                sx={{ mb: 2 }}
-                                helperText={t('hostDetail.childHostContainerNameHelp', 'Name for the LXD container (lowercase, alphanumeric, hyphens)')}
-                            />
-                        )}
-
                         <TextField
                             fullWidth
                             label={t('hostDetail.childHostHostnameLabel', 'Hostname')}
                             value={childHostFormData.hostname}
                             onChange={(e) => {
                                 const newHostname = e.target.value;
-                                // For VMM, KVM, and bhyve, auto-compute vmName from short hostname
+                                // Auto-compute the short identifier (vmName for KVM/bhyve/VMM,
+                                // containerName for LXD) from the hostname's left label.
                                 const shortName = newHostname.split('.')[0].toLowerCase().replaceAll(/[^a-z0-9-]/g, '');
+                                const isVm = childHostFormData.childType === 'vmm'
+                                    || childHostFormData.childType === 'kvm'
+                                    || childHostFormData.childType === 'bhyve';
+                                const isLxd = childHostFormData.childType === 'lxd';
                                 setChildHostFormData({
                                     ...childHostFormData,
                                     hostname: newHostname,
-                                    vmName: (childHostFormData.childType === 'vmm' || childHostFormData.childType === 'kvm' || childHostFormData.childType === 'bhyve') ? shortName : childHostFormData.vmName
+                                    vmName: isVm ? shortName : childHostFormData.vmName,
+                                    containerName: isLxd ? shortName : childHostFormData.containerName,
                                 });
                             }}
                             disabled={createChildHostLoading}
@@ -7921,6 +8129,23 @@ const HostDetail = () => { // NOSONAR
                                     },
                                 }}
                                 helperText={t('hostDetail.childHostVmNameHelpReadonly', 'VM name is derived from the hostname')}
+                            />
+                        )}
+
+                        {/* Container name field for LXD - read-only, derived from hostname */}
+                        {childHostFormData.childType === 'lxd' && (
+                            <TextField
+                                fullWidth
+                                label={t('hostDetail.childHostContainerNameLabel', 'Container Name')}
+                                value={childHostFormData.containerName}
+                                disabled
+                                sx={{ mb: 2 }}
+                                slotProps={{
+                                    input: {
+                                        readOnly: true,
+                                    },
+                                }}
+                                helperText={t('hostDetail.childHostContainerNameHelpReadonly', 'Container name is derived from the hostname')}
                             />
                         )}
 

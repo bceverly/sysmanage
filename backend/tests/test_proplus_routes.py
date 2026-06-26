@@ -18,8 +18,11 @@ from fastapi import FastAPI
 from backend.api.proplus_routes import (
     mount_alerting_routes,
     mount_compliance_routes,
+    mount_federation_controller_routes,
+    mount_federation_site_routes,
     mount_health_routes,
     mount_proplus_routes,
+    mount_proplus_stub_routes,
     mount_vulnerability_routes,
 )
 
@@ -119,13 +122,13 @@ class TestMountHealthRoutes:
         mock_module, mock_router = mock_module_with_routes
         mock_module.get_health_router.return_value = mock_router
 
+        # ``proplus_routes`` no longer re-exports ``requires_feature`` /
+        # ``requires_module`` — the gates are inlined as
+        # ``_feature_dependency`` / ``_module_dependency``.  Patching
+        # only the symbols that actually exist on the module today.
         with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
             "backend.api.proplus_routes.get_db"
         ), patch("backend.api.proplus_routes.get_current_user"), patch(
-            "backend.api.proplus_routes.requires_feature"
-        ), patch(
-            "backend.api.proplus_routes.requires_module"
-        ), patch(
             "backend.api.proplus_routes.models"
         ):
             mock_loader.get_module.return_value = mock_module
@@ -350,6 +353,228 @@ class TestMountProPlusRoutes:
             assert "health_engine" in results
             assert "compliance_engine" in results
             assert "alerting_engine" in results
+            # Phase 12.1.A
+            assert "federation_controller_engine" in results
+
+
+# =============================================================================
+# mount_federation_controller_routes() TESTS  (Phase 12.1.A)
+# =============================================================================
+
+
+class TestMountFederationControllerRoutes:
+    """Mount-function tests mirror the health/vuln pattern.
+
+    The federation controller engine itself lives in the Pro+ source
+    repo, NOT this OSS one, so on every OSS install ``get_module``
+    returns ``None`` and the mount is a no-op.  The tests below pin
+    that no-op behaviour and verify the wiring is symmetric with the
+    other engines so a future engine-side route renderer plugs in
+    without OSS-side surgery.
+    """
+
+    def test_routes_module_not_loaded(self, mock_app):
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = None
+
+            result = mount_federation_controller_routes(mock_app)
+
+            assert result is False
+            mock_loader.get_module.assert_called_once_with(
+                "federation_controller_engine"
+            )
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_module_no_routes(self, mock_app, mock_module_without_routes):
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = mock_module_without_routes
+
+            result = mount_federation_controller_routes(mock_app)
+
+            assert result is False
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_success(self, mock_app, mock_module_with_routes):
+        mock_module, mock_router = mock_module_with_routes
+        mock_module.get_federation_controller_router.return_value = mock_router
+
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
+            mock_loader.get_module.return_value = mock_module
+
+            result = mount_federation_controller_routes(mock_app)
+
+            assert result is True
+            mock_module.get_federation_controller_router.assert_called_once()
+            mock_app.include_router.assert_called_once_with(mock_router, prefix="/api")
+
+    def test_routes_skipped_when_role_not_coordinator(
+        self, mock_app, mock_module_with_routes
+    ):
+        # Engine loaded, but the federation role isn't 'coordinator' → the
+        # real routes don't mount (the OSS stubs serve instead).
+        mock_module, _ = mock_module_with_routes
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
+            mock_loader.get_module.return_value = mock_module
+            result = mount_federation_controller_routes(mock_app)
+            assert result is False
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_exception(self, mock_app, mock_module_with_routes):
+        mock_module, _ = mock_module_with_routes
+        mock_module.get_federation_controller_router.side_effect = RuntimeError(
+            "engine boom"
+        )
+
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
+            mock_loader.get_module.return_value = mock_module
+
+            result = mount_federation_controller_routes(mock_app)
+
+            assert result is False
+            mock_app.include_router.assert_not_called()
+
+
+# =============================================================================
+# Federation stub-route surface (Phase 12.1.A)
+# =============================================================================
+
+
+class TestFederationControllerStubRoutes:
+    """End-to-end via FastAPI TestClient: every federation endpoint
+    must respond 200 with ``{"licensed": False, ...}`` when the
+    ``federation_controller_engine`` module is not loaded.  Frontend
+    (12.3) and 12.4's access-groups migration both depend on this
+    surface existing in OSS so they can probe for the engine without
+    having to handle 404s.
+    """
+
+    # All stub endpoints (method, path) — 22 in total.  When 12.1.B+
+    # lands real handlers in the engine, this list stays the same;
+    # only the response bodies change.
+    STUB_ENDPOINTS = [
+        ("GET", "/api/v1/federation/sites"),
+        ("POST", "/api/v1/federation/sites"),
+        ("POST", "/api/v1/federation/sites/enrollment/tok-abc/complete"),
+        ("GET", "/api/v1/federation/sites/site-1"),
+        ("PATCH", "/api/v1/federation/sites/site-1"),
+        ("POST", "/api/v1/federation/sites/site-1/suspend"),
+        ("POST", "/api/v1/federation/sites/site-1/resume"),
+        ("DELETE", "/api/v1/federation/sites/site-1"),
+        ("GET", "/api/v1/federation/sites/site-1/sync-status"),
+        ("GET", "/api/v1/federation/hosts"),
+        ("GET", "/api/v1/federation/hosts/host-1"),
+        ("GET", "/api/v1/federation/rollups/dashboard"),
+        ("GET", "/api/v1/federation/rollups/hosts"),
+        ("GET", "/api/v1/federation/rollups/compliance"),
+        ("GET", "/api/v1/federation/rollups/vulnerabilities"),
+        ("GET", "/api/v1/federation/policies"),
+        ("POST", "/api/v1/federation/policies"),
+        ("GET", "/api/v1/federation/policies/policy-1"),
+        ("PATCH", "/api/v1/federation/policies/policy-1"),
+        ("DELETE", "/api/v1/federation/policies/policy-1"),
+        ("POST", "/api/v1/federation/policies/policy-1/assign"),
+        ("POST", "/api/v1/federation/policies/policy-1/push"),
+        ("POST", "/api/v1/federation/commands/dispatch"),
+        ("GET", "/api/v1/federation/commands"),
+        ("GET", "/api/v1/federation/commands/cmd-1"),
+        ("GET", "/api/v1/federation/audit"),
+        ("GET", "/api/v1/federation/audit/entry-1"),
+        # Phase 12.2 — per-site sync timeline.
+        ("GET", "/api/v1/federation/sites/site-1/sync-timeline"),
+        # Phase 12.3 — per-site one-click policy re-push + federated report.
+        ("POST", "/api/v1/federation/sites/site-1/repush-policies"),
+        ("GET", "/api/v1/federation/reports/rollup"),
+        # Phase 12.1 — rollup alerts + configurable thresholds.
+        ("GET", "/api/v1/federation/alerts"),
+        ("POST", "/api/v1/federation/alerts/alert-1/acknowledge"),
+        ("GET", "/api/v1/federation/alert-config"),
+        ("PUT", "/api/v1/federation/alert-config"),
+        # Phase 12.5 — federation-aware dynamic-secret leases.
+        ("GET", "/api/v1/federation/secret-leases"),
+        ("POST", "/api/v1/federation/secret-leases/lease-1/revoke"),
+        # Phase 12.6 — sync ingest surface (site → coordinator).
+        # These return 401 in the engine (no bearer token) but the
+        # OSS stub layer returns 200 ``{licensed: false}`` uniformly
+        # so callers can detect "module not licensed" without auth.
+        ("POST", "/api/v1/federation/sites/site-1/rollups/hosts"),
+        ("POST", "/api/v1/federation/sites/site-1/rollups/compliance"),
+        ("POST", "/api/v1/federation/sites/site-1/rollups/vulnerabilities"),
+        ("POST", "/api/v1/federation/sites/site-1/host-directory"),
+        ("POST", "/api/v1/federation/sites/site-1/command-results"),
+        # Phase 12.2 — site metadata ingest.
+        ("POST", "/api/v1/federation/sites/site-1/metadata"),
+        # Phase 12.5 — site secret-lease request ingest.
+        ("POST", "/api/v1/federation/sites/site-1/secret-lease-requests"),
+    ]
+
+    @pytest.fixture
+    def stub_only_app(self):
+        """Build a fresh FastAPI app, mount federation stubs only.
+
+        We bypass ``mount_proplus_routes`` so other engine stubs
+        don't pollute the surface; this keeps the test focused on
+        the federation block.  ``get_current_user`` is overridden
+        with a no-op so the stubs don't need a real auth token.
+        """
+        from fastapi import FastAPI
+        from backend.auth.auth_bearer import get_current_user
+
+        app = FastAPI()
+        app.dependency_overrides[get_current_user] = lambda: "test-user"
+
+        # results dict says federation engine NOT loaded -> stubs mount
+        mount_proplus_stub_routes(app, {"federation_controller_engine": False})
+        return app
+
+    def test_all_federation_stubs_respond_licensed_false(self, stub_only_app):
+        """Every stub endpoint returns 200 with ``licensed: False``.
+
+        The shape is the contract for the frontend probe — if any
+        endpoint regresses to a different shape (e.g. 404 from a
+        prefix typo), the federation UI's "is this licensed?"
+        detection breaks."""
+        from fastapi.testclient import TestClient
+
+        client = TestClient(stub_only_app)
+        for method, path in self.STUB_ENDPOINTS:
+            response = client.request(method, path, json={})
+            assert response.status_code == 200, (
+                f"{method} {path} returned {response.status_code} "
+                f"(body={response.text[:200]})"
+            )
+            body = response.json()
+            assert (
+                body.get("licensed") is False
+            ), f"{method} {path} body missing licensed=False: {body}"
+
+    def test_federation_stub_count_locked(self, stub_only_app):
+        """A safety net: the federation stub surface matches
+        ``STUB_ENDPOINTS`` exactly — Phase 12.1/12.3 + 12.6 ingest stubs,
+        plus the Phase 12.2 sync-timeline, alert-config (GET/PUT) and
+        site-metadata ingest stubs.  If this count drifts unexpectedly,
+        either someone added an endpoint without updating the test, or
+        removed one — both should be a deliberate decision.
+
+        Filter excludes ``/api/v1/federation/site/`` because Phase 12.2
+        added a separate site-engine stub block at that prefix; those
+        are counted by ``TestFederationSiteStubRoutes`` instead.
+        """
+        federation_routes = [
+            r
+            for r in stub_only_app.routes
+            if hasattr(r, "path")
+            and r.path.startswith("/api/v1/federation/")
+            and not r.path.startswith("/api/v1/federation/site/")
+        ]
+        assert len(federation_routes) == len(self.STUB_ENDPOINTS)
 
 
 # =============================================================================
@@ -442,9 +667,16 @@ class TestRouterConfiguration:
 
             mount_proplus_routes(mock_app)
 
-            # All include_router calls should use /api prefix
+            # All include_router calls should land under /api.  Most engines are
+            # mounted with an explicit prefix="/api" kwarg; a few routers (e.g.
+            # the multi-tenancy control plane) bake their own full "/api/..."
+            # prefix into the APIRouter and are included without the kwarg.
             for call in mock_app.include_router.call_args_list:
-                assert call.kwargs.get("prefix") == "/api"
+                router_arg = call.args[0] if call.args else None
+                baked_prefix = getattr(router_arg, "prefix", "")
+                assert call.kwargs.get("prefix") == "/api" or (
+                    isinstance(baked_prefix, str) and baked_prefix.startswith("/api")
+                )
 
 
 # =============================================================================
@@ -488,3 +720,118 @@ class TestErrorScenarios:
 
             with pytest.raises(RuntimeError):
                 mount_health_routes(mock_app)
+
+
+# =============================================================================
+# mount_federation_site_routes() + stub surface (Phase 12.2)
+# =============================================================================
+
+
+class TestMountFederationSiteRoutes:
+    """Mount-function tests for the site engine, mirroring
+    ``TestMountFederationControllerRoutes``.  Site engine and
+    controller engine are mutually exclusive in production but both
+    mount paths exist on every binary."""
+
+    def test_routes_module_not_loaded(self, mock_app):
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = None
+            assert mount_federation_site_routes(mock_app) is False
+            mock_loader.get_module.assert_called_once_with("federation_site_engine")
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_module_no_routes(self, mock_app, mock_module_without_routes):
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = mock_module_without_routes
+            assert mount_federation_site_routes(mock_app) is False
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_success(self, mock_app, mock_module_with_routes):
+        mock_module, mock_router = mock_module_with_routes
+        mock_module.get_federation_site_router.return_value = mock_router
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
+            mock_loader.get_module.return_value = mock_module
+            assert mount_federation_site_routes(mock_app) is True
+            mock_app.include_router.assert_called_once_with(mock_router, prefix="/api")
+
+    def test_routes_skipped_when_role_not_site(self, mock_app, mock_module_with_routes):
+        mock_module, _ = mock_module_with_routes
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role",
+            return_value="coordinator",
+        ):
+            mock_loader.get_module.return_value = mock_module
+            assert mount_federation_site_routes(mock_app) is False
+            mock_app.include_router.assert_not_called()
+
+    def test_routes_exception(self, mock_app, mock_module_with_routes):
+        mock_module, _ = mock_module_with_routes
+        mock_module.get_federation_site_router.side_effect = RuntimeError("boom")
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader, patch(
+            "backend.api.proplus_routes._federation_role", return_value="site"
+        ):
+            mock_loader.get_module.return_value = mock_module
+            assert mount_federation_site_routes(mock_app) is False
+            mock_app.include_router.assert_not_called()
+
+
+class TestFederationSiteStubRoutes:
+    """Every site stub endpoint returns 200 with ``{licensed: false, ...}``.
+    Pinned so a future refactor that drops a stub gets caught."""
+
+    STUB_ENDPOINTS = [
+        ("POST", "/api/v1/federation/site/enroll"),
+        ("GET", "/api/v1/federation/site/enrollment-status"),
+        ("POST", "/api/v1/federation/site/policies"),
+        ("POST", "/api/v1/federation/site/commands"),
+        ("POST", "/api/v1/federation/site/secret-leases"),
+        ("GET", "/api/v1/federation/site/sync-status"),
+        ("GET", "/api/v1/federation/site/sync-queue/depth"),
+        ("GET", "/api/v1/federation/site/received-policies"),
+        ("GET", "/api/v1/federation/site/received-commands"),
+    ]
+
+    @pytest.fixture
+    def stub_only_app(self):
+        from fastapi import FastAPI
+        from backend.auth.auth_bearer import get_current_user
+
+        app = FastAPI()
+        app.dependency_overrides[get_current_user] = lambda: "test-user"
+        # Mount both engine stubs as "not loaded".  Assertions below
+        # focus on the site paths.
+        mount_proplus_stub_routes(
+            app,
+            {
+                "federation_site_engine": False,
+                "federation_controller_engine": False,
+            },
+        )
+        return app
+
+    def test_all_site_stubs_respond_licensed_false(self, stub_only_app):
+        from fastapi.testclient import TestClient
+
+        client = TestClient(stub_only_app)
+        for method, path in self.STUB_ENDPOINTS:
+            response = client.request(method, path, json={})
+            assert response.status_code == 200, (
+                f"{method} {path} returned {response.status_code} "
+                f"(body={response.text[:200]})"
+            )
+            assert response.json().get("licensed") is False
+
+    def test_site_stub_count_locked(self, stub_only_app):
+        """Trailing slash matters: the controller block's
+        ``/api/v1/federation/sites`` (plural, registry of sites)
+        would otherwise match ``startswith("/api/v1/federation/site")``
+        too.  Require the trailing slash so we only match the
+        site-engine prefix."""
+        site_routes = [
+            r
+            for r in stub_only_app.routes
+            if hasattr(r, "path") and r.path.startswith("/api/v1/federation/site/")
+        ]
+        assert len(site_routes) == len(self.STUB_ENDPOINTS)

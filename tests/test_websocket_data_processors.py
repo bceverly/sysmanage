@@ -6,7 +6,6 @@ Tests data processing utilities for WebSocket agent communication.
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
-import pytest
 
 from backend.persistence.models import (
     SoftwarePackage,

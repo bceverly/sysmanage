@@ -53,6 +53,7 @@ class EntityType(str, Enum):
     SETTING = "setting"
     SECURITY_ROLE = "security_role"
     AUTHENTICATION = "authentication"
+    TENANT = "tenant"
 
 
 class Result(str, Enum):

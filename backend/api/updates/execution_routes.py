@@ -6,16 +6,17 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc
-from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import UpdateExecutionRequest
 
@@ -33,7 +34,7 @@ async def execute_updates(  # NOSONAR
     """Execute package updates on specified hosts."""
     try:
         # Check if user has permission to apply software updates
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             user = (
                 session.query(models.User)
@@ -54,22 +55,41 @@ async def execute_updates(  # NOSONAR
 
         logger.info(
             "Received update execution request: host_ids=%s, package_names=%s, package_managers=%s",
-            request.host_ids,
-            request.package_names,
-            request.package_managers,
+            sanitize_log(request.host_ids),
+            sanitize_log(request.package_names),
+            sanitize_log(request.package_managers),
         )
         with session_factory() as session:
             results = []
 
-            for host_id in request.host_ids:
-                # Verify host exists and is active
-                host = (
-                    session.query(models.Host)
-                    .filter(
-                        and_(models.Host.id == host_id, models.Host.active.is_(True))
-                    )
-                    .first()
+            # Bulk-fetch active hosts and their pending PackageUpdates
+            # in two queries rather than 2 per host (flagged in the
+            # Phase 6 N+1 audit).  Dicts are keyed by str(id) so they
+            # match the request payload's UUID strings.
+            active_hosts_by_id = {
+                str(h.id): h
+                for h in session.query(models.Host)
+                .filter(
+                    models.Host.id.in_(request.host_ids),
+                    models.Host.active.is_(True),
                 )
+                .all()
+            }
+            updates_filter = and_(
+                models.PackageUpdate.host_id.in_(request.host_ids),
+                models.PackageUpdate.package_name.in_(request.package_names),
+            )
+            if request.package_managers:
+                updates_filter = and_(
+                    updates_filter,
+                    models.PackageUpdate.package_manager.in_(request.package_managers),
+                )
+            updates_by_host: dict = {}
+            for upd in session.query(models.PackageUpdate).filter(updates_filter).all():
+                updates_by_host.setdefault(str(upd.host_id), []).append(upd)
+
+            for host_id in request.host_ids:
+                host = active_hosts_by_id.get(str(host_id))
 
                 if not host:
                     results.append(
@@ -81,22 +101,7 @@ async def execute_updates(  # NOSONAR
                     )
                     continue
 
-                # Get available updates for the packages
-                updates_query = session.query(models.PackageUpdate).filter(
-                    and_(
-                        models.PackageUpdate.host_id == host_id,
-                        models.PackageUpdate.package_name.in_(request.package_names),
-                    )
-                )
-
-                if request.package_managers:
-                    updates_query = updates_query.filter(
-                        models.PackageUpdate.package_manager.in_(
-                            request.package_managers
-                        )
-                    )
-
-                updates = updates_query.all()
+                updates = updates_by_host.get(str(host_id), [])
 
                 if not updates:
                     results.append(
@@ -218,8 +223,8 @@ async def execute_updates(  # NOSONAR
         import traceback
 
         error_details = traceback.format_exc()
-        logger.error("Update execution failed: %s", str(e))
-        logger.error("Full traceback:\n%s", error_details)
+        logger.exception("Update execution failed: %s", str(e))
+        logger.exception("Full traceback:\n%s", error_details)
         raise HTTPException(
             status_code=500, detail=_("Failed to execute updates: %s") % str(e)
         ) from e
@@ -234,7 +239,7 @@ async def get_execution_log(
 ):
     """Get update execution log for a host."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()

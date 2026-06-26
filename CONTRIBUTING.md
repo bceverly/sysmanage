@@ -31,6 +31,13 @@ Clone the repo and create a feature branch:
 git checkout -b feature/meaningful-name
 ```
 
+After cloning, run **`make install-dev`** to install Python/Node
+dependencies AND activate the in-repo git hooks (see
+`.githooks/README.md`).  The `pre-push` hook runs `make lint`
+before allowing pushes; this catches the same things CI catches
+without burning a cycle to find out.  Skip the hook in genuine
+emergencies with `git push --no-verify`.
+
 ### 3. Development Notes
 - **Alembic migrations**: For database schema changes, run:
   ```bash
@@ -79,6 +86,40 @@ SysManage supports 14 languages. To add or update translations:
   ```
 
 Include a short note describing the translation changes in your PR.
+
+### Translation tooling (local-model assisted)
+
+Frontend strings are referenced in code as `t('key', 'English fallback')`.
+The tooling keeps every locale in sync:
+
+- `make i18n-seed` — copy any new keys into all 14 locales, prefixing the
+  non-English ones with `[TODO] ` so they're easy to find.
+- `make i18n-translate` — fill the `[TODO]` strings via a **local**
+  OpenAI-compatible endpoint (vLLM / Ollama / llama.cpp). Runs entirely on
+  your own hardware — no external API. Configure with `I18N_LLM_BASE_URL`,
+  `I18N_LLM_MODEL`, `I18N_LLM_API_KEY`; scope with `LANG=de` (default `all`).
+- `make i18n-backtranslate` — local round-trip QA: samples translated
+  strings, back-translates them, and flags semantic drift for human review.
+
+`make lint` enforces three deterministic, **network-free** i18n gates (no
+model / translation service needed) — so a missing or untranslated string
+fails locally at `pre-push`, not in CI:
+
+- `make i18n-validate` — every code-referenced key exists in every locale.
+- `make i18n-placeholders` — every translated value preserves the exact
+  interpolation tokens (`{{var}}`, `%s`, `<tags>`, …) of its English source.
+- `make i18n-complete` — **completeness**: every locale is fully translated
+  (frontend JSON + backend `.po`), the same offline `i18n_backfill --check`
+  CI runs. A new `t('key', 'English')` or `_("English")` with no translation
+  is a hard failure.
+
+So the workflow when you add a user-facing string is: write it → `make
+i18n-seed` (frontend) or extract (backend) → `make i18n-translate` on your
+local model rig → `make i18n-compile-backend` (backend only) → `make lint`
+goes green. Every sibling repo (`sysmanage-agent`,
+`sysmanage-professional-plus`, `sysmanage-docs`) wires the equivalent
+offline completeness check into its own `make lint` (`translate-check`),
+caught by the same shared `pre-push` hook.
 
 ---
 

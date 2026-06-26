@@ -234,7 +234,7 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
 
                 <FormControl component="fieldset" fullWidth>
                     <FormLabel component="legend">
-                        {t('graylog.mechanism', 'Mechanism')}
+                        {t('graylog.mechanismLabel', 'Mechanism')}
                     </FormLabel>
                     <RadioGroup
                         value={selectedMechanism}

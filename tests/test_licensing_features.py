@@ -13,7 +13,7 @@ class TestFeatureCode:
         """Test that all FeatureCode values are strings."""
         from backend.licensing.features import FeatureCode
 
-        for feature in FeatureCode:
+        for feature in FeatureCode:  # lgtm[py/non-iterable-in-for-loop]
             assert isinstance(feature.value, str)
             assert len(feature.value) > 0
 
@@ -97,7 +97,7 @@ class TestModuleCode:
         """Test that all ModuleCode values are strings."""
         from backend.licensing.features import ModuleCode
 
-        for module in ModuleCode:
+        for module in ModuleCode:  # lgtm[py/non-iterable-in-for-loop]
             assert isinstance(module.value, str)
             assert len(module.value) > 0
 

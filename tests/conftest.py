@@ -2,18 +2,51 @@
 Pytest configuration and shared fixtures for SysManage server tests.
 """
 
-import os
+import logging
 
-# Test database URL - using temporary SQLite file for tests
-import tempfile
-import time
+# Silence FastAPI startup-phase logger chatter BEFORE we import backend.main.
+# That import builds the app (CORS generation, route registration,
+# exception-handler setup, websocket queue init, lifespan probe), and each
+# of those phases emits ~5–15 INFO lines.  Setting the floor to WARNING for
+# the relevant package roots keeps test output focused on actual test
+# results.  The pytest.ini ``log_level = WARNING`` covers test-time capture;
+# this block covers import-time logging.
+for _noisy_logger in (
+    "backend.startup",
+    "backend.websocket",
+    "backend.api",
+    "backend.api.proplus_routes",
+    "websocket.agent",
+    "uvicorn",
+    "uvicorn.access",
+    "uvicorn.error",
+):
+    logging.getLogger(_noisy_logger).setLevel(logging.WARNING)
+
+# Silence FlexibleLogger.debug/info during the import of backend.main below.
+# FlexibleLogger (backend/utils/verbosity_logger.py) has its own gate that
+# bypasses the standard ``logging`` level system — it always installs a
+# DEBUG-level handler and decides per-call from a parsed config.  Both
+# behaviours mean backend.main's ~50 import-time INFO lines reach stderr
+# regardless of pytest.ini ``log_level``.  We swap the methods to no-ops
+# only for the duration of the import; tests that exercise
+# FlexibleLogger.debug/info directly (test_verbosity_logger_comprehensive)
+# get the originals back afterwards.
+import backend.utils.verbosity_logger as _verbosity_logger  # noqa: E402
+
+_orig_debug = _verbosity_logger.FlexibleLogger.debug
+_orig_info = _verbosity_logger.FlexibleLogger.info
+_verbosity_logger.FlexibleLogger.debug = lambda *_a, **_k: None
+_verbosity_logger.FlexibleLogger.info = lambda *_a, **_k: None
+
 from typing import Generator
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.main import app
@@ -22,14 +55,16 @@ from backend.persistence.db import Base, get_db
 from backend.persistence.models import *  # Import all models explicitly
 from backend.websocket.connection_manager import ConnectionManager
 
-# Register stub routes for Pro+ modules (no modules loaded in test environment)
-# This ensures /api/v1/* endpoints return {"licensed": false} instead of 404
+# Register stub routes for Pro+ modules (no modules loaded in test environment).
+# Done while FlexibleLogger.info is still no-op'd so the "Mounted 10 Pro+ stub
+# route group(s)" line doesn't trail the test summary.
 mount_proplus_stub_routes(app, {})
 
-# Use secure temporary file for test database
-_test_db_fd, _test_db_file = tempfile.mkstemp(suffix=f"_{int(time.time())}.db")
-os.close(_test_db_fd)  # Close the file descriptor, we only need the path
-TEST_DATABASE_URL = f"sqlite:///{_test_db_file}"
+# Restore FlexibleLogger.debug/info now that backend.main's import-time spam
+# has been suppressed.  Tests that exercise FlexibleLogger (e.g.
+# test_verbosity_logger_comprehensive) need the real methods.
+_verbosity_logger.FlexibleLogger.debug = _orig_debug
+_verbosity_logger.FlexibleLogger.info = _orig_info
 
 # Test configuration with different ports to avoid conflicts with dev server
 TEST_CONFIG = {
@@ -58,89 +93,56 @@ TEST_CONFIG = {
 
 @pytest.fixture(scope="function")
 def engine():
-    """Create test database engine with fresh schema for each test."""
-    # Create a unique database file for each test
-    import uuid
+    """Create a test database engine with a fresh schema for each test.
 
-    test_db_fd, test_db_file = tempfile.mkstemp(suffix=f"_{uuid.uuid4().hex}.db")
-    os.close(test_db_fd)  # Close the file descriptor, we only need the path
-    test_db_url = f"sqlite:///{test_db_file}"
-
-    test_engine = create_engine(test_db_url, connect_args={"check_same_thread": False})
+    Uses an **in-memory** SQLite database shared across connections via
+    ``StaticPool`` (so separate sessions — e.g. the partition resolver's own
+    sessionmaker — see the same data).  In-memory avoids the per-test file
+    create/fsync/unlink that makes the suite crawl on Windows; the DB is
+    discarded when the engine is disposed at test teardown.
+    """
+    test_engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
     # Enter test mode to prevent production database access
     from backend.persistence.db import enter_test_mode
 
     enter_test_mode(test_engine)
 
-    # Import models to ensure metadata registration
+    # Import models to ensure metadata registration, then build the schema once.
     from backend.persistence import models  # noqa: F401
 
     Base.metadata.create_all(bind=test_engine)
 
     yield test_engine
 
-    # Properly dispose of the engine to close all connections
+    # Dispose closes the single pooled connection, discarding the in-memory DB.
     test_engine.dispose()
 
-    # Exit test mode after test
     from backend.persistence.db import exit_test_mode
 
     exit_test_mode()
 
-    # Clean up the temporary database file after test
-    try:
-        if os.path.exists(test_db_file):
-            os.unlink(test_db_file)
-    except OSError:
-        pass
-
 
 @pytest.fixture(scope="function")
 def db_session(engine):
-    """Create a test database session."""
-    # Ensure all models are imported before creating tables
-    from backend.persistence import models  # Import all models
-    from backend.persistence.db import Base
+    """Create a test database session.
 
-    # Drop and recreate all tables to ensure all models are included
-    Base.metadata.drop_all(bind=engine)
-
-    # For SQLite test databases, create tables directly using SQLAlchemy metadata
-    # This avoids Alembic migration timezone compatibility issues with SQLite
-    print("Creating SQLite test schema directly from models (skipping Alembic)")
-    from backend.persistence import models  # Import all models
-    from backend.persistence.db import Base
-
-    Base.metadata.create_all(bind=engine)
-
-    # Debug: Check what was actually created
-    from sqlalchemy import text
-
-    with engine.connect() as conn:
-        result = conn.execute(
-            text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='available_packages'"
-            )
-        )
-        table_exists = len(result.fetchall()) > 0
-        print(f"DEBUG: available_packages table created in test DB: {table_exists}")
-        print(f"DEBUG: Test database URL: {engine.url}")
-
+    The ``engine`` fixture already built the schema on a fresh per-test
+    in-memory database, so this just opens a session — no redundant
+    drop/create (which doubled the schema work on every test) and no
+    per-test debug output (slow on the Windows console).
+    """
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = TestingSessionLocal()
-
-    # Commit the session to ensure any pending transactions are finalized
-    session.commit()
-
     try:
         yield session
     finally:
-        # Close session and clear connection pool
         session.rollback()
         session.close()
-        # Remove connection from the pool
-        session.get_bind().dispose()
 
 
 @pytest.fixture(scope="function")
@@ -288,7 +290,9 @@ def client(engine, db_session, mock_config):
     }
 
     for role_enum, group_id in role_to_group.items():
-        role_id = UUID(hashlib.md5(role_enum.value.encode()).hexdigest())
+        role_id = UUID(
+            hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest()
+        )
         role = SecurityRole(
             id=role_id,
             name=role_enum.value,
@@ -496,7 +500,9 @@ def authenticated_client(db_session, mock_config):
     }
 
     for role_enum, group_id in role_to_group.items():
-        role_id = UUID(hashlib.md5(role_enum.value.encode()).hexdigest())
+        role_id = UUID(
+            hashlib.blake2b(role_enum.value.encode(), digest_size=16).hexdigest()
+        )
         role = SecurityRole(
             id=role_id,
             name=role_enum.value,
@@ -650,9 +656,60 @@ def pytest_configure(config):
     """Configure pytest for async testing."""
     import sys
 
+    # Silence the chatty startup/route-registration narration during tests.
+    # Operational INFO from `backend.startup.*` is useful only at first
+    # boot of a real server; in pytest it just floods stderr with hundreds
+    # of "Adding X router" lines per worker.  Bumping `backend` to WARNING
+    # keeps real warnings/errors visible while suppressing the noise.
+    # Crank back up locally with: `pytest -o log_cli=true --log-cli-level=DEBUG`
+    logging.getLogger("backend").setLevel(logging.WARNING)
+    # httpx logs every test request at INFO; same treatment.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
     if sys.version_info >= (3, 7):
         # For Python 3.7+, use the built-in asyncio support
         pass
     else:
         # For older versions, ensure asyncio mode works
         config.option.asyncio_mode = "auto"
+
+
+# ---------------------------------------------------------------------------
+# Pro+ relocation (Phase 2): a fixture that registers the REAL compiled
+# multitenancy_engine into the seam, so behavioral tests of relocated logic run
+# against the actual artifact.  Skips when the .so isn't importable (pure OSS
+# CI), so the OSS suite never hard-depends on the Pro+ build.
+# ---------------------------------------------------------------------------
+def _import_multitenancy_engine():
+    import importlib
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    path = (
+        _Path(__file__).resolve().parents[1].parent
+        / "sysmanage-professional-plus"
+        / "module-source"
+        / "multitenancy_engine"
+    )
+    if path.is_dir() and str(path) not in _sys.path:
+        _sys.path.insert(0, str(path))
+    try:
+        return importlib.import_module("multitenancy_engine")
+    except ImportError:
+        return None
+
+
+@pytest.fixture
+def real_engine():
+    """Register the real compiled multitenancy_engine; skip if its .so is absent."""
+    import pytest as _pytest
+    from unittest.mock import MagicMock
+
+    from backend.multitenancy import seam
+
+    mod = _import_multitenancy_engine()
+    if mod is None:
+        _pytest.skip("compiled multitenancy_engine .so not importable here")
+    seam.register_engine(MagicMock(), module=mod)
+    yield mod
+    seam.unregister_engine()

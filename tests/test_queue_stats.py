@@ -5,7 +5,6 @@ Tests queue statistics and monitoring operations.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from backend.websocket.queue_enums import QueueDirection, QueueStatus
 

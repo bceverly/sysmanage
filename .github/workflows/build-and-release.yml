@@ -7,14 +7,79 @@ on:
       - 'v*.*.*'
       - 'v*.*.*.*'
 
+  # Manual dispatch — used to flip the Phase 11.8 upstream-publish jobs
+  # (winget-pkgs / homebrew-tap / AUR) from dry_run to publish without
+  # re-cutting a tag.  The BSD ports trees always render artifacts on
+  # release; ``bsd_ports_artifacts=no`` skips that for ad-hoc test
+  # dispatches.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version override (without leading v). Leave blank to use tag.'
+        required: false
+        type: string
+      winget_mode:
+        description: 'winget-pkgs submission mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      homebrew_mode:
+        description: 'Homebrew tap publish mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      aur_mode:
+        description: 'AUR publish mode'
+        required: false
+        type: choice
+        default: publish
+        options:
+          - dry_run
+          - publish
+      bsd_ports_artifacts:
+        description: 'Render BSD port-tree artifacts on this run'
+        required: false
+        type: choice
+        default: 'yes'
+        options:
+          - 'yes'
+          - 'no'
+
 permissions:
   contents: write  # Needed for creating releases and pushing to repos
 
 jobs:
+  # Hard release gate: every locale must be 100% translated.  Offline — no
+  # translation service, no network — so it runs fine in CI where the GPU box
+  # is unavailable.  Blocks the ENTIRE release on a single untranslated string.
+  i18n-gate:
+    name: i18n Completeness Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+      - name: Install polib (gettext .po parsing)
+        run: python -m pip install --quiet polib
+      - name: Verify all locales are 100% translated (frontend + backend, offline)
+        run: |
+          python scripts/translation-service/i18n_backfill.py --project frontend --check
+          python scripts/translation-service/i18n_backfill.py --project backend  --check
+
   # Wait for CI tests to pass before building
   wait-for-tests:
     name: Wait for CI Tests
     runs-on: ubuntu-latest
+    needs: i18n-gate
     steps:
       - name: Wait for Backend Tests (Python 3.10)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
@@ -108,11 +173,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('✓ cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -216,11 +283,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -300,11 +369,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -325,6 +396,88 @@ jobs:
           path: |
             installer/dist/sysmanage-*.rpm
             installer/dist/sysmanage-*.rpm.sha256
+
+  # EL9 (RHEL/Rocky/Alma 9) RPM Build
+  #
+  # Same spec as the CentOS/Fedora RPM, but built with the %el9 + %dist
+  # macros forced on so the dependency branch resolves to the python3.12
+  # AppStream packages.  Rocky/RHEL 9's DEFAULT python3 is 3.9, so the
+  # generic CentOS RPM's "Requires: python3 >= 3.12" is unsatisfiable
+  # there — and the same RPM can't also serve Fedora (which wants
+  # python3-pip, not EL9's python3.12-pip).  Publishing a distinct
+  # sysmanage-<ver>-1.el9.x86_64.rpm lets the air-gap builder select the
+  # right RPM per distro.
+  build-el9-rpm:
+    name: Build EL9 (RHEL/Rocky) RPM
+    runs-on: ubuntu-22.04
+    needs: wait-for-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: '20'
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.12'
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building EL9 RPM for version: $VERSION"
+
+      - name: Install RPM build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install SBOM generation tools
+        run: |
+          python3 -m pip install cyclonedx-bom
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: using project-local cyclonedx-npm via npx"
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Force EL9 dependency branch via rpm macros
+        run: |
+          # rpmbuild reads ~/.rpmmacros automatically.  Defining el9 + dist
+          # here makes the shared spec take its EL9 branch (python3.12 /
+          # python3.12-pip, present in Rocky/RHEL 9 AppStream) and tags the
+          # RPM filename with .el9 — no Makefile change needed.
+          printf '%%el9 1\n%%dist .el9\n' > "$HOME/.rpmmacros"
+          cat "$HOME/.rpmmacros"
+
+      - name: Build EL9 RPM package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "Building EL9 RPM for version: ${VERSION}"
+          make installer-rpm-centos
+          echo "Produced:"
+          ls -1 installer/dist/sysmanage-*.rpm
+
+      - name: Upload EL9 RPM as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-el9-rpm
+          path: |
+            installer/dist/sysmanage-*.el9*.rpm
+            installer/dist/sysmanage-*.el9*.rpm.sha256
 
   # OpenSUSE/SLES RPM Build
   build-opensuse-rpm:
@@ -370,11 +523,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -387,6 +542,24 @@ jobs:
         run: |
           echo "Building OpenSUSE RPM for version: ${VERSION}"
           make installer-rpm-opensuse
+          # The openSUSE spec emits the same sysmanage-<ver>-1.x86_64.rpm
+          # filename as the CentOS/RHEL/Fedora spec, so the two collide as
+          # GitHub release assets — the survivor (openSUSE, which Requires:
+          # python311-pip) then gets pulled by the Fedora/RHEL air-gap
+          # builders and fails with "nothing provides python311-pip".
+          # Tag the openSUSE RPM with a distinct, discoverable name so the
+          # air-gap builder selects the right RPM per distro: the
+          # Fedora/RHEL builders exclude *opensuse*; the openSUSE builder
+          # matches *opensuse-leap*.
+          cd installer/dist
+          for f in sysmanage-*.rpm; do
+            case "$f" in *opensuse*) continue ;; esac
+            new="${f%.rpm}.opensuse-leap.rpm"
+            mv "$f" "$new"
+            sha256sum "$new" > "$new.sha256"
+            rm -f "$f.sha256"
+            echo "Renamed openSUSE RPM: $f -> $new"
+          done
 
       - name: Upload OpenSUSE RPM as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -441,11 +614,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -510,11 +685,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -580,11 +757,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -636,7 +815,13 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          dotnet tool install --global wix
+          # Pinned to WiX 6.x. WiX 7 added an Open Source Maintenance Fee
+          # (OSMF) EULA that the CLI requires you to accept before running
+          # `wix build` (error WIX7015). WiX 6 has no such requirement and
+          # is API-compatible with our build script. To move to WiX 7 later,
+          # follow https://wixtoolset.org/osmf/ to add a non-interactive
+          # acceptance step before `wix build`.
+          dotnet tool install --global wix --version 6.0.1
           wix --version
 
       - name: Install frontend dependencies
@@ -650,11 +835,13 @@ jobs:
           python -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -706,7 +893,13 @@ jobs:
 
       - name: Install WiX Toolset
         run: |
-          dotnet tool install --global wix
+          # Pinned to WiX 6.x. WiX 7 added an Open Source Maintenance Fee
+          # (OSMF) EULA that the CLI requires you to accept before running
+          # `wix build` (error WIX7015). WiX 6 has no such requirement and
+          # is API-compatible with our build script. To move to WiX 7 later,
+          # follow https://wixtoolset.org/osmf/ to add a non-interactive
+          # acceptance step before `wix build`.
+          dotnet tool install --global wix --version 6.0.1
           wix --version
 
       - name: Install frontend dependencies
@@ -720,11 +913,13 @@ jobs:
           python -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          npm install -g @cyclonedx/cyclonedx-npm
+          npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python -c "import cyclonedx_py; print('[OK] cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         run: |
@@ -822,6 +1017,7 @@ jobs:
           # Copy installer files
           cp /workspace/installer/alpine/APKBUILD /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.initd /home/builder/aports/sysutils/sysmanage/
+          cp /workspace/installer/alpine/openbao.initd /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.confd /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage.post-install /home/builder/aports/sysutils/sysmanage/
           cp /workspace/installer/alpine/sysmanage-nginx.conf /home/builder/aports/sysutils/sysmanage/
@@ -934,13 +1130,18 @@ jobs:
         with:
           name: sysmanage-alpine-sbom-${{ matrix.alpine-version }}
           path: sbom/
-          if-no-files-found: warn
+          # `ignore` matches the already best-effort design of the
+          # generator step above (`cyclonedx-py ... || rm -f`, then a
+          # belt-and-braces `find -size -500c -delete`).  When that step
+          # legitimately produces nothing, this upload silently no-ops
+          # instead of emitting a workflow annotation.
+          if-no-files-found: ignore
 
   # Consolidated Release - Push to sysmanage-docs and create GitHub release
   release:
     name: Create Release and Push to Docs
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
+    needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
       - name: Checkout code
@@ -1096,9 +1297,16 @@ jobs:
         id: release_notes
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          # Bind github context to env vars so the run: script never
+          # interpolates ${{ ... }} directly into the shell — an
+          # attacker who could push a malicious tag name could
+          # otherwise inject commands.  See semgrep
+          # ``run-shell-injection``.
+          REF_NAME: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
         run: |
           # Get tag annotation message if it exists
-          TAG_MESSAGE=$(git tag -l --format='%(contents)' ${{ github.ref_name }} | sed '/^$/d')
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' "$REF_NAME" | sed '/^$/d')
 
           cat > release_notes.md << EOF
           # SysManage Server v$VERSION
@@ -1112,7 +1320,7 @@ jobs:
           ### Ubuntu/Debian
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage_${VERSION}-1_all.deb
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage_${VERSION}-1_all.deb
           sudo apt install ./sysmanage_${VERSION}-1_all.deb
 
           # Install nginx if not already installed
@@ -1132,7 +1340,7 @@ jobs:
           ### OpenBSD
           \`\`\`bash
           # Download the port tarball
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-openbsd-port-${VERSION}.tar.gz
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-openbsd-port-${VERSION}.tar.gz
 
           # Extract to OpenBSD ports tree
           cd /usr/ports/mystuff
@@ -1173,7 +1381,7 @@ jobs:
           ### FreeBSD
           \`\`\`bash
           # Download and install
-          fetch https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}.pkg
+          fetch https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}.pkg
           sudo pkg add ./sysmanage-${VERSION}.pkg
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1205,7 +1413,7 @@ jobs:
           ### macOS
           \`\`\`bash
           # Download and install
-          curl -L -O https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-macos.pkg
+          curl -L -O https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-macos.pkg
           sudo installer -pkg sysmanage-${VERSION}-macos.pkg -target /
 
           # The installer automatically creates the virtual environment and copies files
@@ -1237,8 +1445,8 @@ jobs:
           ### NetBSD
           \`\`\`bash
           # Download and verify
-          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz
-          ftp https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-netbsd.tgz.sha256
+          ftp https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-netbsd.tgz
+          ftp https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-netbsd.tgz.sha256
           sha256 -c sysmanage-${VERSION}-netbsd.tgz.sha256 sysmanage-${VERSION}-netbsd.tgz
 
           # Install package
@@ -1263,7 +1471,7 @@ jobs:
           # Initialize database schema
           cd /usr/pkg/lib/sysmanage
           python3.12 -m venv .venv
-          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install -r requirements-prod.txt
           .venv/bin/python -m alembic upgrade head
 
           # Configure nginx (optional)
@@ -1281,7 +1489,7 @@ jobs:
           ### CentOS/RHEL/Fedora/Rocky Linux/AlmaLinux
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.*.rpm
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-1.*.rpm
           sudo dnf install ./sysmanage-${VERSION}-1.*.rpm
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1310,7 +1518,7 @@ jobs:
           ### OpenSUSE/SLES
           \`\`\`bash
           # Download and install
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-1.noarch.rpm
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-1.noarch.rpm
           sudo zypper install ./sysmanage-${VERSION}-1.noarch.rpm
 
           # The package automatically installs nginx and PostgreSQL as dependencies
@@ -1338,7 +1546,7 @@ jobs:
           ### Alpine Linux (3.19, 3.20, 3.21)
           \`\`\`bash
           # Download the APK package for your Alpine version (e.g., alpine319, alpine320, alpine321)
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-alpine320.apk
+          wget https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-alpine320.apk
 
           # Allow installation of unsigned packages (required for GitHub releases)
           apk add --allow-untrusted ./sysmanage-${VERSION}-alpine320.apk
@@ -1374,10 +1582,10 @@ jobs:
           \`\`\`powershell
           # Download the MSI installer (choose your architecture)
           # For x64:
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-x64.msi" -OutFile "sysmanage-${VERSION}-windows-x64.msi"
+          Invoke-WebRequest -Uri "https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-windows-x64.msi" -OutFile "sysmanage-${VERSION}-windows-x64.msi"
 
           # For ARM64:
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/sysmanage-${VERSION}-windows-arm64.msi" -OutFile "sysmanage-${VERSION}-windows-arm64.msi"
+          Invoke-WebRequest -Uri "https://github.com/$REPO/releases/download/$REF_NAME/sysmanage-${VERSION}-windows-arm64.msi" -OutFile "sysmanage-${VERSION}-windows-arm64.msi"
 
           # Install the MSI package (run as Administrator)
           # The installer will:
@@ -1496,8 +1704,8 @@ jobs:
           **Download and inspect:**
           \`\`\`bash
           # Download SBOM files
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/backend-sbom.json
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/frontend-sbom.json
+          wget https://github.com/$REPO/releases/download/$REF_NAME/backend-sbom.json
+          wget https://github.com/$REPO/releases/download/$REF_NAME/frontend-sbom.json
 
           # View with jq (if installed)
           cat backend-sbom.json | jq .
@@ -1553,7 +1761,7 @@ jobs:
           EOF
 
       - name: Create consolidated GitHub Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           files: release-files/*
           body_path: release_notes.md
@@ -1570,10 +1778,10 @@ jobs:
     strategy:
       matrix:
         include:
+          - release: resolute
+            release_name: "26.04 Resolute"
           - release: questing
             release_name: "25.10 Questing"
-          - release: plucky
-            release_name: "25.04 Plucky"
           - release: noble
             release_name: "24.04 Noble"
           - release: jammy
@@ -1605,7 +1813,7 @@ jobs:
       - name: Install packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg
+          sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko
 
       - name: Import GPG key
         env:
@@ -1650,14 +1858,55 @@ jobs:
           echo "GPG_KEY_ID=$GPG_KEY_ID" >> $GITHUB_ENV
           echo "Using GPG key: $GPG_KEY_ID"
 
+      - name: Set up SSH key for Launchpad SFTP upload
+        env:
+          LAUNCHPAD_SSH_KEY: ${{ secrets.LAUNCHPAD_SSH_KEY }}
+        run: |
+          # Launchpad's anonymous FTP upload endpoint is unreliable from
+          # GitHub-hosted runners: dput opens the FTP control channel and
+          # reports SUCCESS, but the PASV data channel carrying the actual
+          # .tar.xz/.dsc bytes is silently dropped by the runner's egress
+          # firewall (Launchpad bug #1836059).  The files never reach
+          # Launchpad, so the upload is silently discarded with no
+          # acceptance/rejection email.  SFTP (authenticated by a
+          # Launchpad-registered SSH key) is Launchpad's recommended,
+          # firewall-friendly transport and gets real server-side feedback.
+          if [ -z "$LAUNCHPAD_SSH_KEY" ]; then
+            echo "ERROR: LAUNCHPAD_SSH_KEY secret is not set!"
+            echo "Generate a key, add the PUBLIC half to https://launchpad.net/~bceverly/+editsshkeys"
+            echo "and store the PRIVATE half as the LAUNCHPAD_SSH_KEY repo secret."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$LAUNCHPAD_SSH_KEY" > ~/.ssh/launchpad_sftp
+          chmod 600 ~/.ssh/launchpad_sftp
+
+          # Pre-seed known_hosts so the non-interactive sftp session does not
+          # block on the host-key trust prompt.  ssh-keyscan (TOFU) is the
+          # standard CI approach for this.
+          ssh-keyscan -t rsa,ecdsa,ed25519 ppa.launchpad.net >> ~/.ssh/known_hosts 2>/dev/null
+
+          # dput-ng's sftp uploader uses paramiko, which does NOT parse
+          # ~/.ssh/config and only auto-discovers keys at the default names.
+          # Load the key into an ssh-agent (paramiko honours allow_agent by
+          # default) and persist the agent socket into the job env so the
+          # later dput step in this same runner can reach it.
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/launchpad_sftp
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+
       - name: Configure dput for Launchpad
         run: |
           mkdir -p ~/.dput.d/profiles
           cat > ~/.dput.d/profiles/launchpad.json << 'DPUTEOF'
           {
             "fqdn": "ppa.launchpad.net",
-            "incoming": "~bceverly/ubuntu/sysmanage",
-            "method": "ftp",
+            "incoming": "~bceverly/ubuntu/sysmanage/",
+            "method": "sftp",
+            "login": "bceverly",
             "allow_unsigned_uploads": false
           }
           DPUTEOF
@@ -1673,11 +1922,13 @@ jobs:
           python3 -m pip install cyclonedx-bom
 
           # Install cyclonedx-npm globally for Node.js
-          sudo npm install -g @cyclonedx/cyclonedx-npm
+          sudo npm install -g @cyclonedx/cyclonedx-npm || echo "Note: Global cyclonedx-npm install failed (will use project-local version via npx)"
 
           # Verify installations
           python3 -c "import cyclonedx_py; print('cyclonedx-bom installed')"
-          cyclonedx-npm --version
+          cyclonedx-npm --version || echo "Note: cyclonedx-npm not available globally (expected when using project-local version)"
+        env:
+          NODE_AUTH_TOKEN: ''
 
       - name: Build frontend
         working-directory: frontend
@@ -1745,8 +1996,27 @@ jobs:
           # Clean up passphrase file
           rm -f /tmp/gpg-passphrase-${RELEASE}
 
-          # Upload to Launchpad PPA
-          dput launchpad "sysmanage_${VERSION}+ppa1~${RELEASE}1_source.changes"
+          # Upload to Launchpad PPA over SFTP (the launchpad dput profile
+          # uses method=sftp; see the SSH setup step above for why FTP was
+          # abandoned — it silently dropped the data channel from GitHub
+          # runners and Launchpad never received the files, Bug #1836059).
+          # An sftp session can still hiccup mid-transfer, so retry up to
+          # 3× with linear backoff before failing the workflow.  ``-f``
+          # (force) makes a retry re-send even if dput's local .upload log
+          # marks a prior partial attempt as done.
+          changes_file="sysmanage_${VERSION}+ppa1~${RELEASE}1_source.changes"
+          attempt=1
+          max_attempts=3
+          until dput -f launchpad "$changes_file"; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "::error::dput failed after $attempt attempts uploading $changes_file"
+              exit 1
+            fi
+            sleep_for=$(( 30 * attempt ))
+            echo "::warning::dput attempt $attempt failed; retrying in ${sleep_for}s"
+            sleep "$sleep_for"
+            attempt=$(( attempt + 1 ))
+          done
 
           echo "SUCCESS! Uploaded to Launchpad PPA for $RELEASE"
 
@@ -1817,8 +2087,14 @@ jobs:
           OBS_USERNAME: ${{ secrets.OBS_USERNAME }}
         run: |
           echo "Checking out OBS package home:${OBS_USERNAME}/sysmanage"
-          osc checkout home:${OBS_USERNAME}/sysmanage
+          if ! osc checkout home:${OBS_USERNAME}/sysmanage; then
+            echo "Checkout failed (possible stale cache), retrying with clean directory..."
+            rm -rf "home:${OBS_USERNAME}"
+            osc checkout home:${OBS_USERNAME}/sysmanage
+          fi
           cd home:${OBS_USERNAME}/sysmanage
+          # Remove old tarballs so only the new release is uploaded
+          rm -f sysmanage-*.tar.gz sysmanage-vendor-*.tar.gz
           echo "Current OBS package contents:"
           ls -la
 
@@ -1902,6 +2178,19 @@ jobs:
           cp $WORKSPACE/installer/opensuse/*.example /tmp/$TAR_NAME/installer/opensuse/ || true
           cp $WORKSPACE/installer/opensuse/sysmanage-nginx.conf /tmp/$TAR_NAME/installer/opensuse/ || true
 
+          # Air-gap bundle dispatcher template — referenced by the spec's
+          # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
+          # "|| true"): a missing file must fail the build here, not silently
+          # produce a tarball that dies in %install on the OBS builder.
+          mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
+          cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
+
+          # OpenBAO secrets-broker config + init unit — referenced by the
+          # spec's %install; without them %install dies on the builder.
+          mkdir -p /tmp/$TAR_NAME/installer/openbao
+          cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
+
           # Create tarball
           cd /tmp
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
@@ -1913,12 +2202,27 @@ jobs:
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Pass 1: Download Python 3.11 wheels for manylinux
+          # Download pip wheel (needed to upgrade old pip in build chroot)
+          echo "Downloading pip wheel..."
+          pip3 download pip -d /tmp/vendor --only-binary=:all:
+
+          # Pass 1: Download Python 3.11 wheels for manylinux (x86_64 + aarch64).
+          # We list the full ladder of manylinux tags wheel publishers may
+          # use — packages built more recently (e.g. ujson >=5.12) tag with
+          # manylinux_2_24/_2_28 instead of the older _2_17/2014, so missing
+          # those tags here causes a "No matching distribution" failure
+          # against an otherwise-compatible wheel.
           echo "Pass 1: Downloading Python 3.11 wheels for manylinux..."
           pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor \
             --python-version 311 \
             --platform manylinux2014_x86_64 \
             --platform manylinux_2_17_x86_64 \
+            --platform manylinux_2_24_x86_64 \
+            --platform manylinux_2_28_x86_64 \
+            --platform manylinux2014_aarch64 \
+            --platform manylinux_2_17_aarch64 \
+            --platform manylinux_2_24_aarch64 \
+            --platform manylinux_2_28_aarch64 \
             --only-binary=:all:
 
           # Pass 2: Download source distributions for pure Python packages without wheels
@@ -2023,8 +2327,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-pip rpm
 
-          # Install copr-cli via pip (not available in Ubuntu repos)
-          pip3 install copr-cli
+          # Install copr-cli via pip (not available in Ubuntu repos).
+          # `rich` is an undeclared runtime dep in copr-cli >= 1.115 — without
+          # it, `copr-cli whoami` (or any subcommand) crashes with
+          # `ModuleNotFoundError: No module named 'rich'` before sending a
+          # request. Install both to keep the workflow stable across releases.
+          pip3 install copr-cli rich
 
           # Add pip binaries to PATH
           echo "$HOME/.local/bin" >> $GITHUB_PATH
@@ -2116,6 +2424,19 @@ jobs:
           cp $WORKSPACE/installer/centos/*.conf /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
           cp $WORKSPACE/installer/centos/*.example /tmp/$TAR_NAME/installer/centos/ 2>/dev/null || true
 
+          # Air-gap bundle dispatcher template — referenced by the spec's
+          # %install (../installer/airgap-bundle/install.sh).  Hard copy (no
+          # "|| true"): if it's ever missing the build must fail here, not
+          # silently produce an SRPM that dies in %install on the COPR builder.
+          mkdir -p /tmp/$TAR_NAME/installer/airgap-bundle
+          cp $WORKSPACE/installer/airgap-bundle/install.sh /tmp/$TAR_NAME/installer/airgap-bundle/
+
+          # OpenBAO secrets-broker config + init unit — referenced by the
+          # spec's %install; without them %install dies on the COPR builder.
+          mkdir -p /tmp/$TAR_NAME/installer/openbao
+          cp $WORKSPACE/installer/openbao/openbao.hcl /tmp/$TAR_NAME/installer/openbao/
+          cp $WORKSPACE/installer/openbao/sysmanage-openbao-init.service /tmp/$TAR_NAME/installer/openbao/
+
           # Copy documentation
           cp $WORKSPACE/README.md /tmp/$TAR_NAME/ || touch /tmp/$TAR_NAME/README.md
           cp $WORKSPACE/LICENSE /tmp/$TAR_NAME/ || touch /tmp/$TAR_NAME/LICENSE
@@ -2130,20 +2451,38 @@ jobs:
           tar czf sysmanage-$VERSION.tar.gz $TAR_NAME/
           echo "Created tarball: sysmanage-$VERSION.tar.gz ($(du -h sysmanage-$VERSION.tar.gz | cut -f1))"
 
-          # Create vendor tarball with wheels for Python 3.12 and 3.13
+          # Create vendor tarball with wheels for Python 3.11, 3.12, and 3.13
           echo ""
           echo "Creating vendor tarball with pip dependencies..."
           mkdir -p /tmp/vendor
 
-          # Download wheels for Python 3.12 (EPEL 10)
-          echo "Downloading wheels for Python 3.12 (EPEL 10)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          # Download pip wheel (needed to upgrade old pip in EPEL 8 build chroot)
+          echo "Downloading pip wheel..."
+          pip3 download pip -d /tmp/vendor --only-binary=:all:
+
+          # IMPORTANT: x86_64 and aarch64 must be separate pip download calls because
+          # pip only downloads one matching wheel per package when multiple platforms are specified
+
+          # Download wheels for Python 3.11 (EPEL 8)
+          echo "Downloading wheels for Python 3.11 x86_64 (EPEL 8)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
+          echo "Downloading wheels for Python 3.11 aarch64..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.11.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
+          echo "Downloaded wheels for Python 3.11"
+
+          # Download wheels for Python 3.12 (EPEL 9 and EPEL 10)
+          echo "Downloading wheels for Python 3.12 x86_64 (EPEL 9 and EPEL 10)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
+          echo "Downloading wheels for Python 3.12 aarch64..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.12.11 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.12"
 
           # Download wheels for Python 3.13 (Fedora 41, 42)
           echo ""
-          echo "Downloading wheels for Python 3.13 (Fedora 41, 42)..."
-          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --only-binary=:all:
+          echo "Downloading wheels for Python 3.13 x86_64 (Fedora 41, 42)..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_24_x86_64 --platform manylinux_2_28_x86_64 --only-binary=:all:
+          echo "Downloading wheels for Python 3.13 aarch64..."
+          pip3 download -r $WORKSPACE/requirements-prod.txt -d /tmp/vendor --python-version 3.13.1 --platform manylinux2014_aarch64 --platform manylinux_2_17_aarch64 --platform manylinux_2_24_aarch64 --platform manylinux_2_28_aarch64 --only-binary=:all:
           echo "Downloaded wheels for Python 3.13"
 
           # Verify packages
@@ -2195,8 +2534,14 @@ jobs:
           echo "Project: $COPR_USERNAME/sysmanage"
           echo "SRPM: $SRPM_PATH"
 
-          # Upload and build
-          copr-cli build $COPR_USERNAME/sysmanage $SRPM_PATH
+          # Upload and build. Copr's API has transient connectivity blips
+          # ("Unable to connect to .../api_3/"), so retry before failing.
+          ok=0; n=0
+          until [ "$n" -ge 5 ]; do
+            if copr-cli build "$COPR_USERNAME/sysmanage" "$SRPM_PATH"; then ok=1; break; fi
+            n=$((n+1)); echo "copr-cli build attempt $n failed; retrying in 20s..."; sleep 20
+          done
+          [ "$ok" = 1 ] || { echo "::error::copr-cli build failed after 5 attempts"; exit 1; }
 
           echo ""
           echo "=========================================="
@@ -2207,9 +2552,10 @@ jobs:
           echo "https://copr.fedorainfracloud.org/coprs/$COPR_USERNAME/sysmanage/builds/"
           echo ""
           echo "Copr will now build for all configured chroots:"
-          echo "  - Fedora 41 (Python 3.13)"
-          echo "  - Fedora 42 (Python 3.13)"
-          echo "  - EPEL 10 (RHEL 10, CentOS Stream 10 - Python 3.12)"
+          echo "  - Fedora 41 x86_64 and aarch64 (Python 3.13)"
+          echo "  - Fedora 42 x86_64 and aarch64 (Python 3.13)"
+          echo "  - EPEL 9 x86_64 and aarch64 (RHEL 9, Oracle Linux 9, Rocky 9, Alma 9 - Python 3.12)"
+          echo "  - EPEL 10 x86_64 and aarch64 (RHEL 10, CentOS Stream 10 - Python 3.12)"
           echo ""
           echo "Installation instructions:"
           echo "  sudo dnf copr enable $COPR_USERNAME/sysmanage"
@@ -2221,6 +2567,14 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
+    env:
+      # snapcore/action-build@v1 and action-publish@v1 are pinned on
+      # Node.js 20, which GitHub removes from runners on 2026-09-16.
+      # This flag tells the runner to force-run JS actions on Node.js 24
+      # until snapcore ships a Node 24-native release.  Drop this env
+      # once we bump to a snapcore action SHA that targets Node 24.
+      # See: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
     steps:
       - name: Checkout code
@@ -2283,4 +2637,810 @@ jobs:
           echo ""
           echo "Users can install with:"
           echo "  sudo snap install sysmanage"
+          echo "=========================================="
+
+  # ============================================================================
+  # PHASE 11.8 — upstream-package publish jobs
+  # ============================================================================
+  #
+  # The jobs below publish each release to channels that need a per-
+  # release manifest / formula / port-tree bump:
+  #
+  #   homebrew-tap   -> bceverly/homebrew-tap     (Casks/sysmanage.rb)
+  #   winget-manifest-> microsoft/winget-pkgs     (via komac)
+  #   aur            -> aur.archlinux.org         (ssh push)
+  #   freebsd-ports  -> rendered port-tree artifact attached to release
+  #   openbsd-ports  -> rendered port-tree artifact attached to release
+  #   netbsd-pkgsrc  -> rendered port-tree artifact attached to release
+  #
+  # All three "publish" jobs (Homebrew / winget / AUR) default to
+  # DRY-RUN.  Flip via workflow_dispatch inputs once the one-time setup
+  # (creating the tap repo, generating AUR / winget-pkgs tokens, etc.) is
+  # done.  Missing-secret runs warn-and-pass so a release never fails
+  # over an unconfigured downstream channel.
+
+  homebrew-tap:
+    name: Homebrew tap (Casks/sysmanage.rb)
+    runs-on: ubuntu-latest
+    # Publish failures (transient network, upstream outage, missing
+    # secrets, first-time submission gates, etc.) must NOT mark the
+    # release workflow red or cancel sibling publish jobs.  The
+    # release page itself is created by the ``release`` job earlier
+    # in the chain; downstream publish jobs are best-effort fan-out.
+    continue-on-error: true
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render Homebrew cask
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          PKG_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-macos.pkg"
+
+          # Pull the .pkg to compute sha256.  Homebrew refuses to install
+          # a cask whose sha256 doesn't match the downloaded artifact, so
+          # this MUST be the exact bytes the release attached.
+          curl -sSfL -o /tmp/sysmanage.pkg "$PKG_URL" || {
+            echo "::warning::Could not download macOS .pkg from $PKG_URL"
+            SHA="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage.pkg ]; then
+            SHA=$(sha256sum /tmp/sysmanage.pkg | awk '{print $1}')
+          fi
+
+          # The cask stub uses Ruby ``#{version}`` interpolation in the
+          # URL, so we only need to bump version + sha256 per release.
+          mkdir -p /tmp/homebrew-out
+          sed \
+            -e "s|version \".*\"|version \"${VERSION}\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${SHA}\"|" \
+            packaging/homebrew/sysmanage.rb \
+            > /tmp/homebrew-out/sysmanage.rb
+
+          echo "=========================================="
+          echo "Rendered Homebrew cask (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/homebrew-out/sysmanage.rb
+
+      - name: Publish to bceverly/homebrew-tap
+        env:
+          MODE: ${{ github.event.inputs.homebrew_mode || 'publish' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered cask shown above; not pushing to bceverly/homebrew-tap."
+            echo "To go live: dispatch with homebrew_mode=publish AND ensure"
+            echo "HOMEBREW_TAP_DEPLOY_KEY is configured."
+            exit 0
+          fi
+
+          if [ -z "${DEPLOY_KEY:-}" ]; then
+            echo "::warning::homebrew_mode=publish requested but HOMEBREW_TAP_DEPLOY_KEY"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. gh repo create bceverly/homebrew-tap --public"
+            echo "::warning::  2. ssh-keygen -t ed25519 -f tap_deploy_key -N ''"
+            echo "::warning::  3. Add tap_deploy_key.pub to the tap repo as a"
+            echo "::warning::     deploy key WITH write access."
+            echo "::warning::  4. Paste tap_deploy_key into this repo's secrets"
+            echo "::warning::     as HOMEBREW_TAP_DEPLOY_KEY."
+            echo "::warning::Until then, manually copy /tmp/homebrew-out/sysmanage.rb"
+            echo "::warning::into the tap repo at Casks/sysmanage.rb."
+            exit 0
+          fi
+
+          # Write deploy key to a 0600 temp file and shred on cleanup.
+          KEYFILE=$(mktemp)
+          chmod 600 "$KEYFILE"
+          # nosec - deploy key is masked by Actions, written to 0600 file
+          printf '%s\n' "$DEPLOY_KEY" > "$KEYFILE"
+          trap 'shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"' EXIT
+
+          export GIT_SSH_COMMAND="ssh -i $KEYFILE -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null"
+
+          WORK=$(mktemp -d)
+          git clone git@github.com:bceverly/homebrew-tap.git "$WORK/tap"
+          mkdir -p "$WORK/tap/Casks"
+          cp /tmp/homebrew-out/sysmanage.rb "$WORK/tap/Casks/sysmanage.rb"
+
+          cd "$WORK/tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet Casks/sysmanage.rb; then
+            echo "No cask changes for v${VERSION}; nothing to push."
+            exit 0
+          fi
+
+          git add Casks/sysmanage.rb
+          git commit -m "sysmanage ${VERSION}"
+          git push origin HEAD
+
+          echo "=========================================="
+          echo "SUCCESS! Pushed cask v${VERSION} to bceverly/homebrew-tap"
+          echo "Install with: brew install --cask bceverly/tap/sysmanage"
+          echo "=========================================="
+
+  winget-manifest:
+    name: winget-pkgs manifest (komac)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render winget manifest (x64 + arm64)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          MSI_X64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-x64.msi"
+          MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
+
+          # Compute sha256 for each MSI — winget-pkgs validates both.
+          curl -sSfL -o /tmp/sysmanage-x64.msi "$MSI_X64_URL" || {
+            echo "::warning::Could not download x64 MSI from $MSI_X64_URL"
+            SHA_X64="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage-x64.msi ]; then
+            SHA_X64=$(sha256sum /tmp/sysmanage-x64.msi | awk '{print toupper($1)}')
+          fi
+          curl -sSfL -o /tmp/sysmanage-arm64.msi "$MSI_ARM64_URL" || {
+            echo "::warning::Could not download arm64 MSI from $MSI_ARM64_URL"
+            SHA_ARM64="0000000000000000000000000000000000000000000000000000000000000000"
+          }
+          if [ -f /tmp/sysmanage-arm64.msi ]; then
+            SHA_ARM64=$(sha256sum /tmp/sysmanage-arm64.msi | awk '{print toupper($1)}')
+          fi
+
+          # Render the singleton manifest for the dry-run preview.  In
+          # publish mode we hand the MSI URLs to ``komac``, which builds
+          # the v1.6 multi-file manifest on the fly — we only need this
+          # rendering for the dry-run echo.
+          mkdir -p /tmp/winget-out
+          export VERSION SHA_X64 SHA_ARM64
+          python3 <<'PY'
+          import re, os
+          path = "packaging/winget/sysmanage.sysmanage.yaml"
+          ver = os.environ["VERSION"]
+          sha_x64 = os.environ["SHA_X64"]
+          sha_arm64 = os.environ["SHA_ARM64"]
+          x64_url = f"https://github.com/bceverly/sysmanage/releases/download/v{ver}/sysmanage-{ver}-windows-x64.msi"
+          arm64_url = f"https://github.com/bceverly/sysmanage/releases/download/v{ver}/sysmanage-{ver}-windows-arm64.msi"
+          text = open(path).read()
+          text = re.sub(r"^PackageVersion: .*", f"PackageVersion: {ver}", text, count=1, flags=re.M)
+          # Walk the Installers: block; rewrite URL + sha256 per arch.
+          lines = text.splitlines()
+          out = []
+          arch = None
+          for ln in lines:
+              m = re.match(r"\s*- Architecture: (\S+)", ln)
+              if m:
+                  arch = m.group(1)
+              if "InstallerUrl:" in ln:
+                  url = x64_url if arch == "x64" else arm64_url
+                  ln = re.sub(r"InstallerUrl: .*", f"InstallerUrl: {url}", ln)
+              if "InstallerSha256:" in ln:
+                  sha = sha_x64 if arch == "x64" else sha_arm64
+                  ln = re.sub(r"InstallerSha256: .*", f"InstallerSha256: {sha}", ln)
+              out.append(ln)
+          open("/tmp/winget-out/sysmanage.sysmanage.yaml", "w").write("\n".join(out) + "\n")
+          PY
+
+          echo "=========================================="
+          echo "Rendered winget manifest (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/winget-out/sysmanage.sysmanage.yaml
+
+      - name: Submit to microsoft/winget-pkgs via komac
+        env:
+          MODE: ${{ github.event.inputs.winget_mode || 'publish' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          WINGET_PKGS_TOKEN: ${{ secrets.WINGET_PKGS_TOKEN }}
+          # Authenticates the api.github.com read below so it doesn't hit the
+          # 60-req/hr UNauthenticated rate limit (shared across Actions runner
+          # IPs), which returns 403 + an empty body and breaks the JSON parse.
+          GH_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered manifest shown above; not submitting."
+            echo "To go live: dispatch with winget_mode=publish AND ensure"
+            echo "WINGET_PKGS_TOKEN is configured."
+            exit 0
+          fi
+
+          if [ -z "${WINGET_PKGS_TOKEN:-}" ]; then
+            echo "::warning::winget_mode=publish requested but WINGET_PKGS_TOKEN"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. Fork https://github.com/microsoft/winget-pkgs"
+            echo "::warning::     (the fork must be on the same account whose"
+            echo "::warning::     PAT you create below)."
+            echo "::warning::  2. Create a classic GitHub PAT with 'public_repo'"
+            echo "::warning::     scope (or fine-grained PAT with PR write on"
+            echo "::warning::     the fork)."
+            echo "::warning::  3. Paste the PAT into this repo's secrets as"
+            echo "::warning::     WINGET_PKGS_TOKEN."
+            exit 0
+          fi
+
+          # Resolve the komac release asset for Linux x86_64.  komac
+          # v2.16+ dropped the musl build — current Linux assets ship
+          # as ``x86_64-unknown-linux-gnu.tar.gz`` (glibc) only.  Match
+          # by individual substrings rather than a hyphenated full
+          # name so renames in either direction (gnu→musl→…) keep
+          # working without further patches.
+          #
+          # The asset is a TARBALL, not a raw binary — extract it
+          # before invoking (an earlier version of this step
+          # ``chmod +x``'d the tarball and got "Exec format error").
+          # Fetch + parse in two steps so a 403/empty body surfaces as a
+          # clear error here rather than a downstream JSONDecodeError.  Send
+          # the GITHUB_TOKEN when present (authenticated => 1000 req/hr) and
+          # retry transient blips.
+          KOMAC_API="https://api.github.com/repos/russellbanks/Komac/releases/latest"
+          AUTH_HEADER=()
+          if [ -n "${GH_API_TOKEN:-}" ]; then
+            AUTH_HEADER=(-H "Authorization: Bearer ${GH_API_TOKEN}")
+          fi
+          if ! KOMAC_JSON=$(curl -sSfL --retry 3 --retry-delay 5 \
+              -H "Accept: application/vnd.github+json" \
+              "${AUTH_HEADER[@]}" "$KOMAC_API"); then
+            echo "::error::Could not query the komac latest-release API (HTTP error / rate limit)."
+            exit 1
+          fi
+          KOMAC_URL=$(printf '%s' "$KOMAC_JSON" \
+            | python3 -c "import sys, json; data=json.load(sys.stdin); name_ok = lambda n: 'linux' in n.lower() and 'x86_64' in n.lower() and n.endswith('.tar.gz') and 'setup' not in n.lower(); print(next(a['browser_download_url'] for a in data['assets'] if name_ok(a['name'])))")
+          echo "Downloading $KOMAC_URL"
+          curl -sSfL -o /tmp/komac.tar.gz "$KOMAC_URL"
+          mkdir -p /tmp/komac-bin
+          tar xzf /tmp/komac.tar.gz -C /tmp/komac-bin
+          KOMAC=$(find /tmp/komac-bin -type f -name komac | head -1)
+          if [ -z "$KOMAC" ]; then
+            echo "::error::komac binary not found inside extracted tarball"
+            ls -laR /tmp/komac-bin
+            exit 1
+          fi
+          chmod +x "$KOMAC"
+          "$KOMAC" --version
+
+          MSI_X64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-x64.msi"
+          MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
+
+          # komac splits "new package" and "version update" into
+          # separate subcommands (``komac new`` vs ``komac update``).
+          # ``update`` requires the package identifier to already
+          # exist in microsoft/winget-pkgs and fails with
+          # ``<id> does not exist in microsoft/winget-pkgs`` on first
+          # submission.  Try update first; if it fails specifically
+          # because the package isn't in the catalog yet, fall through
+          # to ``komac new`` for the first submission.  Subsequent
+          # releases succeed on the update path.
+          #
+          # komac v2.16 also dropped ``--identifier <id>`` — the
+          # identifier is the trailing positional now.
+          set +e
+          "$KOMAC" update \
+            --version "${VERSION}" \
+            --urls "${MSI_X64_URL}" "${MSI_ARM64_URL}" \
+            --submit \
+            --token "${WINGET_PKGS_TOKEN}" \
+            sysmanage.sysmanage 2>&1 | tee /tmp/komac.out
+          update_rc=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$update_rc" -ne 0 ]; then
+            if grep -q "does not exist in microsoft/winget-pkgs" /tmp/komac.out; then
+              # ``komac new`` is interactive — it prompts for Publisher,
+              # License, ShortDescription, etc. and fails in CI with
+              # "The input device is not a TTY".  This matches
+              # winget-pkgs's design: first-time submissions are
+              # manually reviewed by Microsoft as anti-squatting
+              # protection.  Emit a clear one-time-setup warning,
+              # exit 0 so the rest of the release pipeline keeps
+              # flowing, and document the one-shot manual command.
+              echo "::warning::sysmanage.sysmanage not in microsoft/winget-pkgs yet."
+              echo "::warning::CI can only auto-update EXISTING packages."
+              echo "::warning::One-time manual submission required (do this once):"
+              echo "::warning::"
+              echo "::warning::  # On any machine with a terminal:"
+              echo "::warning::  KOMAC_URL=\$(curl -sSfL https://api.github.com/repos/russellbanks/Komac/releases/latest \\"
+              echo "::warning::    | grep browser_download_url | grep linux | grep x86_64 | grep tar.gz | grep -v setup | head -1 | cut -d'\"' -f4)"
+              echo "::warning::  curl -sSfL -o /tmp/komac.tar.gz \"\$KOMAC_URL\""
+              echo "::warning::  tar xzf /tmp/komac.tar.gz -C /tmp"
+              echo "::warning::  /tmp/komac-*/komac new \\"
+              echo "::warning::    --version ${VERSION} \\"
+              echo "::warning::    --urls ${MSI_X64_URL} ${MSI_ARM64_URL} \\"
+              echo "::warning::    --submit \\"
+              echo "::warning::    --token <your WINGET_PKGS_TOKEN> \\"
+              echo "::warning::    sysmanage.sysmanage"
+              echo "::warning::"
+              echo "::warning::Answer the prompts (Publisher: Bryan Everly, License:"
+              echo "::warning::AGPL-3.0-or-later, etc.).  Microsoft will review the PR"
+              echo "::warning::within 24-72h.  After it merges, ALL future releases"
+              echo "::warning::auto-update via komac update in this workflow."
+              exit 0
+            else
+              echo "::error::komac update failed for non-first-submission reason"
+              exit "$update_rc"
+            fi
+          fi
+
+          echo "=========================================="
+          echo "SUCCESS! Submitted sysmanage v${VERSION} to microsoft/winget-pkgs"
+          echo "wingetbot validates within minutes; human reviewer merges within 24h."
+          echo "=========================================="
+
+  aur:
+    name: AUR (sysmanage)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render PKGBUILD + .SRCINFO
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          # Compute sha256 against the GitHub source tarball.  AUR users'
+          # makepkg will refuse to build if this doesn't match.
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            SHA="SKIP"
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+          fi
+
+          mkdir -p /tmp/aur-out
+          cp packaging/aur/PKGBUILD /tmp/aur-out/PKGBUILD
+          sed -i \
+            -e "s/^pkgver=.*/pkgver=${VERSION}/" \
+            -e "s/^sha256sums=.*/sha256sums=('${SHA}')/" \
+            /tmp/aur-out/PKGBUILD
+
+          # Regenerate .SRCINFO via makepkg in an Arch container.  AUR
+          # rejects pushes whose .SRCINFO doesn't match the PKGBUILD,
+          # so this MUST be regenerated by makepkg itself (sed isn't
+          # enough — package() output formatting can drift).
+          #
+          # Capture the host runner's UID/GID before chown'ing to
+          # builder so we can restore ownership on exit — otherwise
+          # the runner can't read /pkg back ("Permission denied" on
+          # the subsequent ``cp`` step) since container ``b`` has a
+          # UID that isn't a real user on the host.
+          docker run --rm -v /tmp/aur-out:/pkg archlinux:base-devel \
+            bash -c '
+              set -e
+              cd /pkg
+              HOST_UID=$(stat -c %u /pkg)
+              HOST_GID=$(stat -c %g /pkg)
+              useradd -m b
+              chown -R b:b /pkg
+              su b -c "makepkg --printsrcinfo" > /pkg/.SRCINFO
+              chown -R "$HOST_UID:$HOST_GID" /pkg
+            '
+
+          echo "=========================================="
+          echo "Rendered PKGBUILD (v${VERSION}):"
+          echo "=========================================="
+          cat /tmp/aur-out/PKGBUILD
+          echo ""
+          echo "=========================================="
+          echo "Rendered .SRCINFO:"
+          echo "=========================================="
+          cat /tmp/aur-out/.SRCINFO
+
+      - name: Publish to AUR
+        env:
+          MODE: ${{ github.event.inputs.aur_mode || 'publish' }}
+          VERSION: ${{ steps.version.outputs.version }}
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ "$MODE" != "publish" ]; then
+            echo "DRY-RUN mode: rendered PKGBUILD + .SRCINFO shown above; not pushing to AUR."
+            echo "To go live: dispatch with aur_mode=publish AND ensure"
+            echo "AUR_SSH_KEY is configured."
+            exit 0
+          fi
+
+          if [ -z "${AUR_SSH_KEY:-}" ]; then
+            echo "::warning::aur_mode=publish requested but AUR_SSH_KEY"
+            echo "::warning::secret is not configured.  One-time setup:"
+            echo "::warning::  1. Create an AUR account at https://aur.archlinux.org"
+            echo "::warning::  2. ssh-keygen -t ed25519 -f aur_key -N ''"
+            echo "::warning::  3. Paste aur_key.pub into AUR account settings."
+            echo "::warning::  4. aur-submit sysmanage  (or initial push from a clone"
+            echo "::warning::     of ssh://aur@aur.archlinux.org/sysmanage.git)."
+            echo "::warning::  5. Paste aur_key into this repo's secrets as AUR_SSH_KEY."
+            exit 0
+          fi
+
+          KEYFILE=$(mktemp)
+          chmod 600 "$KEYFILE"
+          # nosec - deploy key is masked by Actions, written to 0600 file
+          printf '%s\n' "$AUR_SSH_KEY" > "$KEYFILE"
+          trap 'shred -u "$KEYFILE" 2>/dev/null || rm -f "$KEYFILE"' EXIT
+
+          export GIT_SSH_COMMAND="ssh -i $KEYFILE -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null"
+
+          WORK=$(mktemp -d)
+          git clone ssh://aur@aur.archlinux.org/sysmanage.git "$WORK/aur"
+          cp /tmp/aur-out/PKGBUILD "$WORK/aur/PKGBUILD"
+          cp /tmp/aur-out/.SRCINFO "$WORK/aur/.SRCINFO"
+
+          cd "$WORK/aur"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet PKGBUILD .SRCINFO; then
+            echo "No PKGBUILD changes for v${VERSION}; nothing to push."
+            exit 0
+          fi
+
+          git add PKGBUILD .SRCINFO
+          git commit -m "sysmanage ${VERSION}"
+          git push origin HEAD:master
+
+          echo "=========================================="
+          echo "SUCCESS! Pushed sysmanage v${VERSION} to AUR"
+          echo "Install with: yay -S sysmanage  (or any AUR helper)"
+          echo "=========================================="
+
+  freebsd-ports:
+    name: FreeBSD ports tree (artifact)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render FreeBSD port tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          # FreeBSD distinfo expects SHA256 + SIZE.  TIMESTAMP is the
+          # epoch the port was last refreshed; we use ``date +%s``.
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            SHA="0000000000000000000000000000000000000000000000000000000000000000"
+            SIZE=0
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+          fi
+          TS=$(date +%s)
+
+          STAGE=/tmp/freebsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage/files"
+          cp -r packaging/freebsd-ports/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i "s/^DISTVERSION=.*/DISTVERSION=\t${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          TIMESTAMP = ${TS}
+          SHA256 (sysmanage/v${VERSION}.tar.gz) = ${SHA}
+          SIZE (sysmanage/v${VERSION}.tar.gz) = ${SIZE}
+          EOF
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered FreeBSD port tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz"
+
+      - name: Upload FreeBSD port-tree artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-freebsd-port
+          path: /tmp/sysmanage-v*-freebsd-port.tar.gz
+
+      - name: Attach FreeBSD port tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-freebsd-port.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "FreeBSD port tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-freebsd-port.tar.gz from the release."
+          echo "  2. Extract into a FreeBSD ports tree clone."
+          echo "  3. Run 'make makesum' to verify distinfo, 'make stage check-plist'."
+          echo "  4. Open a Bugzilla PR against ports/ with the diff."
+          echo "=========================================="
+
+  openbsd-ports:
+    name: OpenBSD ports tree (artifact)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Render OpenBSD port tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          STAGE=/tmp/openbsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage/pkg"
+          cp -r packaging/openbsd-ports/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i "s/^GH_TAGNAME =.*/GH_TAGNAME =\t\tv${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          # OpenBSD checksums (distinfo) are computed by ``make makesum``
+          # inside a real OpenBSD ports tree — we can't reproduce that
+          # SHA256-and-RMD160 dance reliably from Linux.  Leave a
+          # placeholder distinfo with the SHA256 of the GitHub tarball;
+          # the maintainer regenerates it on the OpenBSD build host.
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || true
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | base64 -w0)
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+            cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          SHA256 (sysmanage-${VERSION}.tar.gz) = ${SHA}
+          SIZE (sysmanage-${VERSION}.tar.gz) = ${SIZE}
+          EOF
+          fi
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-openbsd-port.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered OpenBSD port tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-openbsd-port.tar.gz"
+
+      - name: Upload OpenBSD port-tree artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-openbsd-port-phase11.8
+          path: /tmp/sysmanage-v*-openbsd-port.tar.gz
+
+      - name: Attach OpenBSD port tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-openbsd-port.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "OpenBSD port tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-openbsd-port.tar.gz."
+          echo "  2. Extract into your OpenBSD /usr/ports clone."
+          echo "  3. cd sysutils/sysmanage && make makesum (regenerate distinfo"
+          echo "     with the canonical OpenBSD digest format)."
+          echo "  4. make package && make port-lib-depends-check."
+          echo "  5. Email diff to ports@openbsd.org."
+          echo "=========================================="
+
+  netbsd-pkgsrc:
+    name: NetBSD pkgsrc tree (artifact)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    needs: [release]
+    if: |
+      (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
+      (github.event.inputs.bsd_ports_artifacts != 'no')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install BLAKE2s helper
+        run: |
+          # Python's hashlib ships BLAKE2s on every supported version
+          # (3.6+).  No extra package needed.
+          python3 -c "import hashlib; hashlib.blake2s()"
+
+      - name: Render NetBSD pkgsrc tree
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
+
+          curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
+            echo "::warning::Could not download source tarball from $TARBALL_URL"
+            BLAKE2S="0000000000000000000000000000000000000000000000000000000000000000"
+            SHA512="00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+            SIZE=0
+          }
+          if [ -f /tmp/sysmanage-src.tar.gz ]; then
+            BLAKE2S=$(python3 -c "import hashlib,sys;h=hashlib.blake2s();h.update(open('/tmp/sysmanage-src.tar.gz','rb').read());print(h.hexdigest())")
+            SHA512=$(sha512sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
+          fi
+
+          STAGE=/tmp/netbsd-stage
+          mkdir -p "$STAGE/sysutils/sysmanage"
+          cp -r packaging/netbsd-pkgsrc/sysutils/sysmanage/* "$STAGE/sysutils/sysmanage/"
+
+          sed -i \
+            -e "s/^DISTNAME=.*/DISTNAME=\tsysmanage-${VERSION}/" \
+            -e "s/^GITHUB_TAG=.*/GITHUB_TAG=\tv${VERSION}/" \
+            "$STAGE/sysutils/sysmanage/Makefile"
+
+          # pkgsrc distinfo: BLAKE2s + SHA512 + Size (modern pkgsrc,
+          # ~2023+).  Older formats (RMD160) were removed when pkgsrc-
+          # 2022Q4 switched to BLAKE2s as the primary checksum.
+          cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
+          \$NetBSD\$
+
+          BLAKE2s (sysmanage-${VERSION}.tar.gz) = ${BLAKE2S}
+          SHA512 (sysmanage-${VERSION}.tar.gz) = ${SHA512}
+          Size (sysmanage-${VERSION}.tar.gz) = ${SIZE} bytes
+          EOF
+
+          tar -czf "/tmp/sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz" -C "$STAGE" sysutils
+
+          echo "=========================================="
+          echo "Rendered NetBSD pkgsrc tree (v${VERSION}):"
+          echo "=========================================="
+          tar -tzf "/tmp/sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz"
+
+      - name: Upload NetBSD pkgsrc artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-netbsd-pkgsrc
+          path: /tmp/sysmanage-v*-netbsd-pkgsrc.tar.gz
+
+      - name: Attach NetBSD pkgsrc tree to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          files: /tmp/sysmanage-v*-netbsd-pkgsrc.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Manual submission instructions
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "=========================================="
+          echo "NetBSD pkgsrc tree rendered for v${VERSION}."
+          echo ""
+          echo "Manual upstream submission steps (per release):"
+          echo "  1. Download sysmanage-v${VERSION}-netbsd-pkgsrc.tar.gz."
+          echo "  2. Extract into a clone of github.com/NetBSD/pkgsrc-wip."
+          echo "  3. cd sysutils/sysmanage && make distinfo (verifies hashes)."
+          echo "  4. Open a PR against pkgsrc-wip; promote to main pkgsrc"
+          echo "     after maintainer review."
           echo "=========================================="

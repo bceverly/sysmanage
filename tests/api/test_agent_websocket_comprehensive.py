@@ -10,7 +10,6 @@ import pytest
 from backend.api.agent import (
     _process_websocket_message,
     _handle_message_by_type,
-    _handle_script_execution_result,
 )
 from backend.websocket.messages import MessageType
 
@@ -180,59 +179,6 @@ class TestMessageTypeHandling:
         await _handle_message_by_type(message, mock_connection, mock_db)
 
 
-class TestScriptExecutionResultHandling:
-    """Test script execution result handling."""
-
-    @pytest.fixture
-    def mock_connection(self):
-        connection = Mock()
-        connection.agent_id = "test-agent-123"
-        connection.send_message = AsyncMock()
-        return connection
-
-    @pytest.fixture
-    def mock_db(self):
-        return Mock()
-
-    @pytest.mark.asyncio
-    async def test_handle_script_execution_result_success(
-        self, mock_connection, mock_db
-    ):
-        """Test successful script execution result handling."""
-        message = Mock()
-        message.data = {
-            "execution_id": "exec-123",
-            "exit_code": 0,
-            "output": "Script completed successfully",
-        }
-
-        with patch("backend.api.agent._validate_and_get_host") as mock_validate:
-            mock_validate.return_value = (Mock(), None)
-
-            await _handle_script_execution_result(message, mock_connection, mock_db)
-
-            # Should handle without error
-
-    @pytest.mark.asyncio
-    async def test_handle_script_execution_result_queue_error(
-        self, mock_connection, mock_db
-    ):
-        """Test script execution result handling with queue error."""
-        message = Mock()
-        message.data = {
-            "execution_id": "exec-123",
-            "exit_code": 1,
-            "output": "Script failed",
-        }
-
-        with patch("backend.api.agent._validate_and_get_host") as mock_validate:
-            mock_validate.return_value = (Mock(), None)
-
-            await _handle_script_execution_result(message, mock_connection, mock_db)
-
-            # Should handle without error even with queue issues
-
-
 class TestBasicFunctionality:
     """Test basic functionality exists."""
 
@@ -240,7 +186,6 @@ class TestBasicFunctionality:
         """Test that all main functions exist and are callable."""
         assert callable(_process_websocket_message)
         assert callable(_handle_message_by_type)
-        assert callable(_handle_script_execution_result)
 
     @pytest.mark.asyncio
     async def test_message_processing_basic(self):

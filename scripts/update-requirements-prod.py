@@ -7,6 +7,7 @@ and generates requirements-prod.txt, excluding development/testing dependencies.
 """
 
 import re
+import sys
 from pathlib import Path
 
 
@@ -23,9 +24,10 @@ def parse_requirements(requirements_file: Path) -> tuple[list[str], list[str]]:
         # Code quality and linting
         "black", "isort", "pylint", "astroid", "mccabe", "dill", "tomlkit",
         # Testing frameworks and tools
-        "pytest", "pytest-asyncio", "pytest-cov", "coverage", "iniconfig", "pluggy",
+        "pytest", "pytest-asyncio", "pytest-cov", "pytest-xdist",
+        "coverage", "iniconfig", "pluggy",
         # Security scanning tools (used in CI/CD, not at runtime)
-        "bandit", "safety", "safety-schemas", "semgrep",
+        "bandit", "safety", "safety-schemas", "semgrep", "pip-audit",
         # UI testing and browser automation (used in tests, not at runtime)
         "playwright", "selenium", "webdriver-manager"
     }
@@ -143,4 +145,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

@@ -18,35 +18,64 @@ from backend.persistence import db, models
 
 @pytest.fixture
 def test_engine():
-    """Create a shared in-memory SQLite database for testing"""
+    """Create a shared in-memory SQLite database for testing.
+
+    ``engine.dispose()`` in the teardown closes the underlying
+    sqlite3 connections so they don't surface as ResourceWarnings
+    later when the GC catches them.
+    """
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     models.Base.metadata.create_all(bind=engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
 def test_session(test_engine):
-    """Create a test database session"""
+    """Create a test database session + a baseline ``test-user`` row.
+
+    The install/uninstall endpoints look up the operator via
+    ``session.query(User).filter(User.userid == current_user).first()``
+    and 401 if the row is missing.  Insert one here so the ``client``
+    fixture's ``get_current_user='test-user'`` override has a real
+    User to resolve to.
+    """
     TestingSessionLocal = sessionmaker(
         autocommit=False, autoflush=False, bind=test_engine
     )
     session = TestingSessionLocal()
+    user = models.User(
+        userid="test-user",
+        active=True,
+        hashed_password="not-checked-in-tests",
+    )
+    session.add(user)
+    session.commit()
     yield session
     session.close()
 
 
 @pytest.fixture
 def test_host(test_session, test_engine):
-    """Create a test host in the database"""
+    """Create a test host in the database.
+
+    ``Host.id`` is a ``GUID()`` column (UUID under the hood); the
+    fixture used to insert ``id=1`` and then ``filter(Host.id == 1)``
+    which round-trips as ``uuid.UUID("1")`` and raises ``ValueError:
+    badly formed hexadecimal UUID string`` on read.  Use a real UUID.
+    """
+    host_uuid = uuid.uuid4()
     connection = test_engine.connect()
     connection.execute(
         models.Host.__table__.insert(),
         {
-            "id": 1,
+            "id": host_uuid,
             "fqdn": "test-host.example.com",
             "ipv4": "192.168.1.100",
             "ipv6": "::1",
@@ -61,19 +90,61 @@ def test_host(test_session, test_engine):
     connection.close()
 
     # Retrieve the host from the session
-    host = test_session.query(models.Host).filter(models.Host.id == 1).first()
+    host = test_session.query(models.Host).filter(models.Host.id == host_uuid).first()
     yield host
 
 
 @pytest.fixture
 def client(test_session):
-    """Create a test client with database session override"""
+    """Create a test client with database session override + auth bypass.
+
+    The package install router uses ``Depends(JWTBearer())`` at the
+    router level + ``Depends(get_current_user)`` per-endpoint.  Tests
+    pass a fake ``Bearer test-token`` which would fail real JWT
+    decoding, so:
+
+      * Patch ``decode_jwt`` to return a valid payload for any token
+        — that lets ``JWTBearer.verify_jwt`` accept the fake header.
+      * Override ``get_current_user`` to return a fixed user id.
+
+    Both unmount on fixture teardown.
+    """
+    import time
+    from unittest.mock import patch as _patch
+
+    from backend.auth.auth_bearer import get_current_user
 
     def override_get_db():
         yield test_session
 
+    def override_get_current_user():
+        return "test-user"
+
     app.dependency_overrides[db.get_db] = override_get_db
-    with TestClient(app) as test_client:
+    app.dependency_overrides[get_current_user] = override_get_current_user
+
+    fake_payload = {"user_id": "test-user", "expires": time.time() + 3600}
+    # The install/uninstall endpoints build their OWN ``sessionmaker``
+    # via ``db_module.get_engine()`` for the RBAC + audit-log queries
+    # (rather than using the ``Depends(get_db)`` session).  Steer that
+    # call at the test engine so the queries hit the in-memory DB that
+    # has our test-user row.
+    test_engine_value = test_session.get_bind()
+    # ``User.has_role`` lazily walks the user_security_roles join.  The
+    # test DB has the User row but no role assignments, so any role
+    # check would return False.  Patch to always-true so the tests
+    # exercise the install/uninstall flow rather than RBAC plumbing.
+    with _patch(
+        "backend.auth.auth_bearer.decode_jwt", return_value=fake_payload
+    ), _patch.object(models.User, "has_role", return_value=True), _patch(
+        "backend.persistence.db.get_engine", return_value=test_engine_value
+    ):
+        # Don't use the TestClient context manager — that would run
+        # the FastAPI lifespan, which spins up background workers
+        # (federation sync/push, alerting, etc.) that then raise
+        # ``CancelledError`` on shutdown and show as teardown errors.
+        # The endpoints we exercise here don't need lifespan startup.
+        test_client = TestClient(app)
         yield test_client
     app.dependency_overrides = {}
 
@@ -87,7 +158,9 @@ def mock_auth_header():
 class TestPackageInstallationAPI:
     """Test cases for package installation API endpoints"""
 
-    def test_install_packages_success(self, client, test_host, mock_auth_header):
+    def test_install_packages_success(
+        self, client, test_session, test_host, mock_auth_header
+    ):
         """Test successful package installation request"""
         with patch(
             "backend.websocket.queue_manager.server_queue_manager.enqueue_message"
@@ -106,24 +179,48 @@ class TestPackageInstallationAPI:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        assert len(data["installation_ids"]) == 3
+        # Phase 8 API refactor: the response shape changed from a list
+        # of per-package ``installation_ids`` to a SINGLE ``request_id``
+        # — multiple packages now group under one UUID (the docstring
+        # on ``install_packages_operation`` calls this "UUID-based
+        # grouping").  The agent reports completion with that one ID.
+        assert data["request_id"]
         assert "Successfully queued 3 packages for installation" in data["message"]
 
-        # Verify that installation log entries were created
-        installation_logs = test_host.software_installation_logs
-        assert len(installation_logs) == 3
+        # Phase 8 schema: the endpoint writes ONE InstallationRequest
+        # (carrying the shared ``request_id``) plus one InstallationPackage
+        # per package, grouped by ``installation_request_id``.  The endpoint
+        # commits on its OWN sessionmaker (pointed at the same engine), so
+        # ``expire_all()`` drops the test session's identity map and forces
+        # a re-read of the rows the endpoint just committed.
+        test_session.expire_all()
+        requests = (
+            test_session.query(models.InstallationRequest)
+            .filter(models.InstallationRequest.host_id == test_host.id)
+            .all()
+        )
+        assert len(requests) == 1
+        request_row = requests[0]
+        assert str(request_row.id) == data["request_id"]
+        # Created "pending", then advanced to "in_progress" once the
+        # command message is queued to the agent.
+        assert request_row.status == "in_progress"
+        assert request_row.requested_by == "test-user"
+        assert request_row.operation_type == "install"
 
-        package_names = [log.package_name for log in installation_logs]
-        assert "vim" in package_names
-        assert "curl" in package_names
-        assert "htop" in package_names
-
-        # Verify all logs have correct initial status
-        for log in installation_logs:
-            assert log.status == "queued"
-            assert log.requested_by == "test-user"
-            assert log.package_manager == "auto"
-            assert log.installation_id in data["installation_ids"]
+        # One InstallationPackage row per package, all under the request.
+        packages = (
+            test_session.query(models.InstallationPackage)
+            .filter(
+                models.InstallationPackage.installation_request_id == request_row.id
+            )
+            .all()
+        )
+        assert len(packages) == 3
+        assert {pkg.package_name for pkg in packages} == {"vim", "curl", "htop"}
+        for pkg in packages:
+            # The agent picks the real manager; the request defaults to "auto".
+            assert pkg.package_manager == "auto"
 
     def test_install_packages_host_not_found(self, client, mock_auth_header):
         """Test package installation with non-existent host"""
@@ -233,14 +330,16 @@ class TestSoftwareInstallationLogModel:
         test_session.add(log_entry)
         test_session.commit()
 
-        # Update status to installing
+        # Update status to installing.  SQLite stores DateTimes as
+        # naive strings; the value we read back loses ``tzinfo``, so
+        # compare the naive form to avoid a tz-mismatch failure.
         new_now = datetime.now(timezone.utc)
         log_entry.status = "installing"
         log_entry.started_at = new_now
         test_session.commit()
 
         assert log_entry.status == "installing"
-        assert log_entry.started_at == new_now
+        assert log_entry.started_at == new_now.replace(tzinfo=None)
 
         # Update status to completed
         completion_time = datetime.now(timezone.utc)
@@ -252,7 +351,9 @@ class TestSoftwareInstallationLogModel:
 
         assert log_entry.status == "completed"
         assert log_entry.success is True
-        assert log_entry.completed_at == completion_time
+        # SQLite strips tzinfo on storage — compare naive (see comment
+        # above on ``started_at``).
+        assert log_entry.completed_at == completion_time.replace(tzinfo=None)
         assert log_entry.installed_version == "1.0.0"
 
     def test_installation_log_relationship(self, test_session, test_host):
@@ -288,7 +389,13 @@ class TestPackageInstallationMessageHandling:
 
     def test_handle_package_installation_status_success(self, test_session, test_host):
         """Test handling successful package installation status message"""
-        from backend.api.message_handlers import handle_package_installation_status
+        # Phase 8.x rename: the WS handler ``handle_package_installation_status``
+        # was generalised to ``handle_installation_status`` (now covers OS-level
+        # package installs AND binary installs).  Alias-imported here to keep
+        # the test body's call sites unchanged.
+        from backend.api.message_handlers import (
+            handle_installation_status as handle_package_installation_status,
+        )
 
         # Create an installation log entry
         installation_id = str(uuid.uuid4())
@@ -346,7 +453,13 @@ class TestPackageInstallationMessageHandling:
 
     def test_handle_package_installation_status_failed(self, test_session, test_host):
         """Test handling failed package installation status message"""
-        from backend.api.message_handlers import handle_package_installation_status
+        # Phase 8.x rename: the WS handler ``handle_package_installation_status``
+        # was generalised to ``handle_installation_status`` (now covers OS-level
+        # package installs AND binary installs).  Alias-imported here to keep
+        # the test body's call sites unchanged.
+        from backend.api.message_handlers import (
+            handle_installation_status as handle_package_installation_status,
+        )
 
         # Create an installation log entry
         installation_id = str(uuid.uuid4())
@@ -405,7 +518,13 @@ class TestPackageInstallationMessageHandling:
         self, test_session, test_host
     ):
         """Test handling package installation status with missing installation_id"""
-        from backend.api.message_handlers import handle_package_installation_status
+        # Phase 8.x rename: the WS handler ``handle_package_installation_status``
+        # was generalised to ``handle_installation_status`` (now covers OS-level
+        # package installs AND binary installs).  Alias-imported here to keep
+        # the test body's call sites unchanged.
+        from backend.api.message_handlers import (
+            handle_installation_status as handle_package_installation_status,
+        )
 
         # Mock connection object
         mock_connection = Mock()
@@ -429,4 +548,6 @@ class TestPackageInstallationMessageHandling:
         )
 
         assert result["message_type"] == "error"
-        assert "Missing installation_id" in result["error"]
+        # The error envelope is ``{message_type, error_type, message, data}``
+        # — the human-readable text lives under ``message``, not ``error``.
+        assert "Missing installation_id" in result["message"]

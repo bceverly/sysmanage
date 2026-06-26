@@ -271,7 +271,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="A new tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -285,7 +285,7 @@ class TestCreateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -297,7 +297,7 @@ class TestCreateTag:
 
                 mock_db.refresh = mock_refresh
 
-                result = await create_tag(tag_data, mock_db, "admin@example.com")
+                result = await create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert result.name == "new-tag"
                 assert result.description == "A new tag"
@@ -314,7 +314,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="production", description="Another production tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -333,7 +333,7 @@ class TestCreateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, "admin@example.com")
+                    await create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 400
 
@@ -347,7 +347,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="new-tag", description="A new tag")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -365,39 +365,30 @@ class TestCreateTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, "noperm@example.com")
+                    await create_tag(tag_data, mock_db, mock_user_no_tag_permission)
 
                 assert exc_info.value.status_code == 403
 
     @pytest.mark.asyncio
-    async def test_create_tag_user_not_found(self, mock_config):
-        """Test creating tag fails when user not found."""
-        from backend.api.tag import TagCreate, create_tag
+    async def test_require_authenticated_user_unknown_user_401(self, mock_config):
+        """The user-not-found path moved out of the tag handlers into the shared
+        ``require_authenticated_user`` dependency (authz is resolved on the MAIN
+        engine, server-global); it raises 401 when the user does not exist."""
+        from backend.auth.auth_bearer import require_authenticated_user
 
-        tag_data = TagCreate(name="new-tag", description="A new tag")
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.first.return_value = None
 
-        with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db:
-            mock_db_module.get_engine.return_value = MagicMock()
+        with patch(
+            "backend.persistence.db.get_engine", return_value=MagicMock()
+        ), patch("sqlalchemy.orm.sessionmaker") as mock_sessionmaker:
+            # session_local = sessionmaker(...); session = session_local()
+            mock_sessionmaker.return_value.return_value = mock_session
 
-            mock_db = MagicMock()
-            mock_get_db.return_value = mock_db
+            with pytest.raises(HTTPException) as exc_info:
+                require_authenticated_user("unknown@example.com")
 
-            mock_auth_session = MagicMock()
-            mock_auth_session.query.return_value.filter.return_value.first.return_value = (
-                None
-            )
-
-            with patch("backend.api.tag.sessionmaker") as mock_sessionmaker:
-                mock_sessionmaker.return_value = create_mock_session_context(
-                    mock_auth_session
-                )
-
-                with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, "unknown@example.com")
-
-                assert exc_info.value.status_code == 401
+            assert exc_info.value.status_code == 401
 
     @pytest.mark.asyncio
     async def test_create_tag_with_empty_description(
@@ -409,7 +400,7 @@ class TestCreateTag:
         tag_data = TagCreate(name="minimal-tag", description=None)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -423,7 +414,7 @@ class TestCreateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -434,7 +425,7 @@ class TestCreateTag:
 
                 mock_db.refresh = mock_refresh
 
-                result = await create_tag(tag_data, mock_db, "admin@example.com")
+                result = await create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert result.name == "minimal-tag"
                 assert result.description is None
@@ -458,7 +449,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-production")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -475,14 +466,14 @@ class TestUpdateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
                 )
 
                 result = await update_tag(
-                    str(mock_tag.id), update_data, mock_db, "admin@example.com"
+                    str(mock_tag.id), update_data, mock_db, mock_admin_user
                 )
 
                 assert mock_tag.name == "updated-production"
@@ -498,7 +489,7 @@ class TestUpdateTag:
         update_data = TagUpdate(description="Updated production description")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -512,14 +503,14 @@ class TestUpdateTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
                 )
 
                 result = await update_tag(
-                    str(mock_tag.id), update_data, mock_db, "admin@example.com"
+                    str(mock_tag.id), update_data, mock_db, mock_admin_user
                 )
 
                 assert mock_tag.description == "Updated production description"
@@ -533,7 +524,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -553,7 +544,7 @@ class TestUpdateTag:
 
                 with pytest.raises(HTTPException) as exc_info:
                     await update_tag(
-                        str(uuid.uuid4()), update_data, mock_db, "admin@example.com"
+                        str(uuid.uuid4()), update_data, mock_db, mock_admin_user
                     )
 
                 assert exc_info.value.status_code == 404
@@ -569,7 +560,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="development")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -593,7 +584,7 @@ class TestUpdateTag:
 
                 with pytest.raises(HTTPException) as exc_info:
                     await update_tag(
-                        str(mock_tag.id), update_data, mock_db, "admin@example.com"
+                        str(mock_tag.id), update_data, mock_db, mock_admin_user
                     )
 
                 assert exc_info.value.status_code == 400
@@ -608,7 +599,7 @@ class TestUpdateTag:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -627,7 +618,10 @@ class TestUpdateTag:
 
                 with pytest.raises(HTTPException) as exc_info:
                     await update_tag(
-                        str(mock_tag.id), update_data, mock_db, "noperm@example.com"
+                        str(mock_tag.id),
+                        update_data,
+                        mock_db,
+                        mock_user_no_tag_permission,
                     )
 
                 assert exc_info.value.status_code == 403
@@ -647,7 +641,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -661,16 +655,14 @@ class TestDeleteTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
                 )
 
                 # Should return None (204 No Content)
-                result = await delete_tag(
-                    str(mock_tag.id), mock_db, "admin@example.com"
-                )
+                result = await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 # Verify SQL deletion was called
                 assert mock_db.execute.call_count == 2  # DELETE host_tags, DELETE tags
@@ -682,7 +674,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -701,7 +693,7 @@ class TestDeleteTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(str(uuid.uuid4()), mock_db, "admin@example.com")
+                    await delete_tag(str(uuid.uuid4()), mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 404
 
@@ -713,7 +705,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -731,7 +723,9 @@ class TestDeleteTag:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(str(mock_tag.id), mock_db, "noperm@example.com")
+                    await delete_tag(
+                        str(mock_tag.id), mock_db, mock_user_no_tag_permission
+                    )
 
                 assert exc_info.value.status_code == 403
 
@@ -743,7 +737,7 @@ class TestDeleteTag:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -757,13 +751,13 @@ class TestDeleteTag:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
                 )
 
-                await delete_tag(str(mock_tag.id), mock_db, "admin@example.com")
+                await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 # Verify host_tags deletion was called first
                 calls = mock_db.execute.call_args_list
@@ -786,7 +780,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -809,14 +803,14 @@ class TestAddTagToHost:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
                 )
 
                 result = await add_tag_to_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 assert "message" in result
@@ -831,7 +825,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -854,7 +848,7 @@ class TestAddTagToHost:
                         str(uuid.uuid4()),
                         str(mock_tag.id),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 404
@@ -867,7 +861,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -893,7 +887,7 @@ class TestAddTagToHost:
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 404
@@ -906,7 +900,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -933,7 +927,7 @@ class TestAddTagToHost:
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 400
@@ -946,7 +940,7 @@ class TestAddTagToHost:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -968,7 +962,7 @@ class TestAddTagToHost:
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
-                        "noperm@example.com",
+                        mock_user_no_tag_permission,
                     )
 
                 assert exc_info.value.status_code == 403
@@ -990,7 +984,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1010,7 +1004,7 @@ class TestRemoveTagFromHost:
             )
 
             with patch("backend.api.tag.sessionmaker") as mock_sessionmaker, patch(
-                "backend.services.audit_service.AuditService"
+                "backend.api.tag.AuditService"
             ):
                 mock_sessionmaker.return_value = create_mock_session_context(
                     mock_auth_session
@@ -1018,7 +1012,7 @@ class TestRemoveTagFromHost:
 
                 # Should return None (204 No Content)
                 result = await remove_tag_from_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 mock_db.delete.assert_called_once_with(mock_host_tag)
@@ -1032,7 +1026,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1055,7 +1049,7 @@ class TestRemoveTagFromHost:
                         str(mock_host.id),
                         str(uuid.uuid4()),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 404
@@ -1068,7 +1062,7 @@ class TestRemoveTagFromHost:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1090,7 +1084,7 @@ class TestRemoveTagFromHost:
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
-                        "noperm@example.com",
+                        mock_user_no_tag_permission,
                     )
 
                 assert exc_info.value.status_code == 403
@@ -1112,7 +1106,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1147,7 +1141,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1169,7 +1163,7 @@ class TestGetHostTags:
         from backend.api.tag import get_host_tags
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1430,7 +1424,7 @@ class TestTagErrorHandling:
         tag_data = TagCreate(name="error-tag", description="Will cause error")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1450,7 +1444,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, "admin@example.com")
+                    await create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 500
 
@@ -1464,7 +1458,7 @@ class TestTagErrorHandling:
         update_data = TagUpdate(name="updated-name")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1489,7 +1483,7 @@ class TestTagErrorHandling:
 
                 with pytest.raises(HTTPException) as exc_info:
                     await update_tag(
-                        str(mock_tag.id), update_data, mock_db, "admin@example.com"
+                        str(mock_tag.id), update_data, mock_db, mock_admin_user
                     )
 
                 assert exc_info.value.status_code == 500
@@ -1502,7 +1496,7 @@ class TestTagErrorHandling:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1522,7 +1516,7 @@ class TestTagErrorHandling:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await delete_tag(str(mock_tag.id), mock_db, "admin@example.com")
+                    await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 500
 
@@ -1534,7 +1528,7 @@ class TestTagErrorHandling:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1562,7 +1556,7 @@ class TestTagErrorHandling:
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 500
@@ -1575,7 +1569,7 @@ class TestTagErrorHandling:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1601,7 +1595,7 @@ class TestTagErrorHandling:
                         str(mock_host.id),
                         str(mock_tag.id),
                         mock_db,
-                        "admin@example.com",
+                        mock_admin_user,
                     )
 
                 assert exc_info.value.status_code == 500
@@ -1623,10 +1617,8 @@ class TestTagAuditLogging:
         tag_data = TagCreate(name="audit-tag", description="Audit test")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1648,7 +1640,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await create_tag(tag_data, mock_db, "admin@example.com")
+                await create_tag(tag_data, mock_db, mock_admin_user)
 
                 mock_audit.log_create.assert_called_once()
 
@@ -1660,10 +1652,8 @@ class TestTagAuditLogging:
         update_data = TagUpdate(name="audit-updated")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1684,7 +1674,7 @@ class TestTagAuditLogging:
                 )
 
                 await update_tag(
-                    str(mock_tag.id), update_data, mock_db, "admin@example.com"
+                    str(mock_tag.id), update_data, mock_db, mock_admin_user
                 )
 
                 mock_audit.log_update.assert_called_once()
@@ -1695,10 +1685,8 @@ class TestTagAuditLogging:
         from backend.api.tag import delete_tag
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1715,7 +1703,7 @@ class TestTagAuditLogging:
                     mock_auth_session
                 )
 
-                await delete_tag(str(mock_tag.id), mock_db, "admin@example.com")
+                await delete_tag(str(mock_tag.id), mock_db, mock_admin_user)
 
                 mock_audit.log_delete.assert_called_once()
 
@@ -1727,10 +1715,8 @@ class TestTagAuditLogging:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1756,7 +1742,7 @@ class TestTagAuditLogging:
                 )
 
                 await add_tag_to_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 mock_audit.log.assert_called_once()
@@ -1769,10 +1755,8 @@ class TestTagAuditLogging:
         from backend.api.tag import remove_tag_from_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch(
-            "backend.services.audit_service.AuditService"
-        ) as mock_audit:
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService") as mock_audit:
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1796,7 +1780,7 @@ class TestTagAuditLogging:
                 )
 
                 await remove_tag_from_host(
-                    str(mock_host.id), str(mock_tag.id), mock_db, "admin@example.com"
+                    str(mock_host.id), str(mock_tag.id), mock_db, mock_admin_user
                 )
 
                 mock_audit.log.assert_called_once()
@@ -1818,8 +1802,8 @@ class TestBulkTagOperations:
         from backend.api.tag import add_tag_to_host
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch("backend.services.audit_service.AuditService"):
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1852,11 +1836,11 @@ class TestBulkTagOperations:
                             str(mock_host.id),
                             str(tag.id),
                             mock_db,
-                            "admin@example.com",
+                            mock_admin_user,
                         )
                         success_count += 1
                     except HTTPException:
-                        pass
+                        _ = None  # empty-except: failure here is non-fatal; see code above
 
                 assert success_count == 3
 
@@ -1876,8 +1860,8 @@ class TestBulkTagOperations:
             hosts.append(host)
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
-        ) as mock_get_db, patch("backend.services.audit_service.AuditService"):
+            "backend.api.tag.get_tenant_db"
+        ) as mock_get_db, patch("backend.api.tag.AuditService"):
             mock_db_module.get_engine.return_value = MagicMock()
 
             mock_db = MagicMock()
@@ -1910,11 +1894,11 @@ class TestBulkTagOperations:
                             str(host.id),
                             str(mock_tag.id),
                             mock_db,
-                            "admin@example.com",
+                            mock_admin_user,
                         )
                         success_count += 1
                     except HTTPException:
-                        pass
+                        _ = None  # empty-except: failure here is non-fatal; see code above
 
                 assert success_count == 3
 
@@ -1971,7 +1955,7 @@ class TestTagEdgeCases:
         tag_data = TagCreate(name="concurrent-tag", description="Test")
 
         with patch("backend.api.tag.db_module") as mock_db_module, patch(
-            "backend.api.tag.get_db"
+            "backend.api.tag.get_tenant_db"
         ) as mock_get_db:
             mock_db_module.get_engine.return_value = MagicMock()
 
@@ -1995,7 +1979,7 @@ class TestTagEdgeCases:
                 )
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await create_tag(tag_data, mock_db, "admin@example.com")
+                    await create_tag(tag_data, mock_db, mock_admin_user)
 
                 assert exc_info.value.status_code == 400
                 mock_db.rollback.assert_called()

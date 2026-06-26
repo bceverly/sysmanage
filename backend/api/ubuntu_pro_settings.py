@@ -11,14 +11,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session, sessionmaker
 
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.persistence import db, models
-from backend.persistence.db import get_db
+from backend.persistence import db as db_module
+from backend.persistence import models
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,9 @@ class UbuntuProSettingsResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -55,7 +59,9 @@ class UbuntuProSettingsUpdate(BaseModel):
     auto_attach_enabled: Optional[bool] = None
 
     @validator("master_key")
-    def validate_master_key(cls, master_key):  # pylint: disable=no-self-argument
+    def validate_master_key(
+        cls, master_key
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate the master key format if provided."""
         if master_key is not None and master_key.strip() == "":
             return None
@@ -73,7 +79,7 @@ class UbuntuProSettingsUpdate(BaseModel):
     @validator("organization_name")
     def validate_organization_name(
         cls, organization_name
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate organization name."""
         if organization_name is not None and organization_name.strip() == "":
             return None
@@ -84,10 +90,14 @@ class UbuntuProSettingsUpdate(BaseModel):
 
 @router.get("/", response_model=UbuntuProSettingsResponse)
 async def get_ubuntu_pro_settings(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get current Ubuntu Pro settings."""
     try:
+        # Phase 13.1: the Ubuntu Pro settings record is tenant-scoped, so the
+        # "get-or-create singleton" now routes to the active tenant's database
+        # via ``get_tenant_db`` — each tenant gets its own singleton (intended).
+        # Inert in collapsed/single-tenant mode (same engine as get_db).
         # Get or create the singleton settings record
         settings = db.query(models.UbuntuProSettings).first()
 
@@ -105,7 +115,7 @@ async def get_ubuntu_pro_settings(
         return settings
 
     except Exception as e:
-        logger.error("Error getting Ubuntu Pro settings: %s", e)
+        logger.exception("Error getting Ubuntu Pro settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve Ubuntu Pro settings: %s") % str(e),
@@ -115,32 +125,22 @@ async def get_ubuntu_pro_settings(
 @router.put("/", response_model=UbuntuProSettingsResponse)
 async def update_ubuntu_pro_settings(
     settings_update: UbuntuProSettingsUpdate,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Update Ubuntu Pro settings."""
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        # Check if user has permission to change Ubuntu Pro master key
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the settings data routes to the tenant engine via db_session.
+    if not current_user.has_role(SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY):
-            raise HTTPException(
-                status_code=403,
-                detail=_(
-                    "Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"
-                ),
-            )
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         # Get or create the singleton settings record
@@ -177,32 +177,34 @@ async def update_ubuntu_pro_settings(
 
         logger.info(
             "Ubuntu Pro settings updated: organization=%s, has_master_key=%s, auto_attach=%s",
-            settings.organization_name,
+            sanitize_log(settings.organization_name),
             settings.master_key is not None,
-            settings.auto_attach_enabled,
+            sanitize_log(settings.auto_attach_enabled),
         )
 
-        # Log audit entry for settings update
-        AuditService.log_update(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name="Ubuntu Pro Settings",
-            user_id=auth_user.id,
-            username=current_user,
-            entity_id=str(settings.id),
-            details={
-                "organization_name": settings.organization_name,
-                "has_master_key": settings.master_key is not None,
-                "auto_attach_enabled": settings.auto_attach_enabled,
-            },
-        )
+        # Log audit entry for settings update on the MAIN engine (audit trail
+        # is server-global).
+        with session_local() as audit_session:
+            AuditService.log_update(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name="Ubuntu Pro Settings",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=str(settings.id),
+                details={
+                    "organization_name": settings.organization_name,
+                    "has_master_key": settings.master_key is not None,
+                    "auto_attach_enabled": settings.auto_attach_enabled,
+                },
+            )
 
         return settings
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error updating Ubuntu Pro settings: %s", e)
+        logger.exception("Error updating Ubuntu Pro settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update Ubuntu Pro settings: %s") % str(e),
@@ -211,21 +213,18 @@ async def update_ubuntu_pro_settings(
 
 @router.delete("/master-key")
 async def clear_master_key(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Clear the stored Ubuntu Pro master key."""
-    session_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_bind())
-    with session_local() as session:
-        # Get user for audit logging
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
+    # Authorization/identity is resolved on the MAIN engine by
+    # require_authenticated_user (user data is server-global); the audit trail
+    # also stays on the main engine, while the settings data routes to the
+    # tenant engine via db.
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         settings = db.query(models.UbuntuProSettings).first()
@@ -237,22 +236,23 @@ async def clear_master_key(
 
             logger.info("Ubuntu Pro master key cleared")
 
-            # Log audit entry for master key deletion
-            AuditService.log_delete(
-                db=db,
-                entity_type=EntityType.SETTING,
-                entity_name="Ubuntu Pro Master Key",
-                user_id=auth_user.id,
-                username=current_user,
-                entity_id=str(settings.id),
-            )
+            # Log audit entry for master key deletion on the MAIN engine.
+            with session_local() as audit_session:
+                AuditService.log_delete(
+                    db=audit_session,
+                    entity_type=EntityType.SETTING,
+                    entity_name="Ubuntu Pro Master Key",
+                    user_id=current_user.id,
+                    username=current_user.userid,
+                    entity_id=str(settings.id),
+                )
 
             return {"message": _("Master key cleared successfully")}
 
         return {"message": _("No settings found to clear")}
 
     except Exception as e:
-        logger.error("Error clearing Ubuntu Pro master key: %s", e)
+        logger.exception("Error clearing Ubuntu Pro master key: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to clear master key: %s") % str(e),
@@ -261,7 +261,7 @@ async def clear_master_key(
 
 @router.get("/master-key/status")
 async def get_master_key_status(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_tenant_db), dependencies=Depends(JWTBearer())
 ):
     """Get the status of the master key (exists or not) without exposing the key."""
     try:
@@ -279,7 +279,7 @@ async def get_master_key_status(
         }
 
     except Exception as e:
-        logger.error("Error getting master key status: %s", e)
+        logger.exception("Error getting master key status: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to get master key status: %s") % str(e),
@@ -294,7 +294,9 @@ class UbuntuProEnrollmentRequest(BaseModel):
     custom_key: Optional[str] = None
 
     @validator("host_ids")
-    def validate_host_ids(cls, host_ids):  # pylint: disable=no-self-argument
+    def validate_host_ids(
+        cls, host_ids
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate host IDs list."""
         if not host_ids:
             raise ValueError(_("At least one host must be specified"))
@@ -303,7 +305,7 @@ class UbuntuProEnrollmentRequest(BaseModel):
     @validator("custom_key")
     def validate_custom_key(
         cls, custom_key, values
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate custom key if not using master key."""
         if not values.get("use_master_key", True) and not custom_key:
             raise ValueError(_("Custom key must be provided when not using master key"))
@@ -317,7 +319,7 @@ class UbuntuProEnrollmentRequest(BaseModel):
 @router.post("/enroll")
 async def enroll_hosts_in_ubuntu_pro(
     request: UbuntuProEnrollmentRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
 ):
     """Enroll specified hosts in Ubuntu Pro using master key or custom key."""
@@ -350,13 +352,22 @@ async def enroll_hosts_in_ubuntu_pro(
 
         results = []
 
-        for host_id in request.host_ids:
-            # Verify host exists and is active
-            host = (
-                db.query(models.Host)
-                .filter(models.Host.id == host_id, models.Host.active.is_(True))
-                .first()
+        # Bulk-fetch active hosts in one query rather than per-id
+        # ``.first()`` (flagged in the Phase 6 N+1 audit).  Key by
+        # str(id) so string host_ids from the request payload match
+        # the GUID column.
+        active_hosts_by_id = {
+            str(h.id): h
+            for h in db.query(models.Host)
+            .filter(
+                models.Host.id.in_(request.host_ids),
+                models.Host.active.is_(True),
             )
+            .all()
+        }
+
+        for host_id in request.host_ids:
+            host = active_hosts_by_id.get(str(host_id))
 
             if not host:
                 results.append(
@@ -415,7 +426,7 @@ async def enroll_hosts_in_ubuntu_pro(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error enrolling hosts in Ubuntu Pro: %s", e)
+        logger.exception("Error enrolling hosts in Ubuntu Pro: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to initiate Ubuntu Pro enrollment: %s") % str(e),

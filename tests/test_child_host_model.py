@@ -4,9 +4,6 @@ Tests HostChild and ChildHostDistribution models.
 """
 
 import uuid
-from datetime import datetime, timezone
-
-import pytest
 
 
 class TestHostChildModel:

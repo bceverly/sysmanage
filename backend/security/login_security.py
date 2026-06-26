@@ -18,6 +18,7 @@ from backend.config.config import (
     get_max_failed_logins,
 )
 from backend.persistence.models import User
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,9 @@ class LoginSecurityValidator:
 
         # Check user-specific rate limiting
         if self.is_user_rate_limited(username):
-            logger.warning("Rate limited login attempt for user: %s", username)
+            logger.warning(
+                "Rate limited login attempt for user: %s", sanitize_log(username)
+            )
             return False, "Too many failed attempts for this user"
 
         return True, "Login attempt allowed"
@@ -78,7 +81,7 @@ class LoginSecurityValidator:
         # Log security event
         logger.warning(
             "Failed login attempt - User: %s, IP: %s, User-Agent: %s, Time: %s",
-            username,
+            sanitize_log(username),
             client_ip,
             user_agent,
             current_time.isoformat(),
@@ -99,7 +102,7 @@ class LoginSecurityValidator:
 
         logger.info(
             "Successful login - User: %s, IP: %s, User-Agent: %s, Time: %s",
-            username,
+            sanitize_log(username),
             client_ip,
             user_agent,
             current_time.isoformat(),

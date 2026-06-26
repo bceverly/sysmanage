@@ -15,12 +15,18 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import aiohttp
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
-from backend.licensing.features import FeatureCode, ModuleCode
+from backend.licensing.features import (
+    TIER_FEATURES,
+    TIER_MODULES,
+    FeatureCode,
+    LicenseTier,
+    ModuleCode,
+)
 from backend.licensing.module_loader import module_loader
-from backend.licensing.public_key import fetch_public_key, get_public_key_pem
+from backend.licensing.public_key import get_public_key_pem
 from backend.licensing.validator import (
     LicensePayload,
     ValidationResult,
@@ -245,7 +251,7 @@ class LicenseService:
                 session.commit()
                 logger.debug("License saved to database")
             except Exception as e:
-                logger.error("Failed to save license to database: %s", e)
+                logger.exception("Failed to save license to database: %s", e)
                 session.rollback()
 
     def _log_validation(
@@ -277,7 +283,7 @@ class LicenseService:
                 session.add(log_entry)
                 session.commit()
             except Exception as e:
-                logger.error("Failed to log validation: %s", e)
+                logger.exception("Failed to log validation: %s", e)
                 session.rollback()
 
     async def _phone_home_loop(self) -> None:
@@ -292,7 +298,7 @@ class LicenseService:
             try:
                 await self._phone_home()
             except Exception as e:
-                logger.error("Phone-home error: %s", e)
+                logger.exception("Phone-home error: %s", e)
 
             await asyncio.sleep(interval_seconds)
 
@@ -309,7 +315,7 @@ class LicenseService:
                 logger.debug("Running periodic module update check")
                 await module_loader.check_and_update_on_startup()
             except Exception as e:
-                logger.error("Module update check error: %s", e)
+                logger.exception("Module update check error: %s", e)
 
             await asyncio.sleep(interval_seconds)
 
@@ -370,7 +376,7 @@ class LicenseService:
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
         except Exception as e:
-            logger.error("Phone-home unexpected error: %s", e)
+            logger.exception("Phone-home unexpected error: %s", e)
             self._log_validation("phone_home", "error", str(e))
             return self._check_offline_grace()
 
@@ -398,7 +404,7 @@ class LicenseService:
                     ).replace(tzinfo=None)
                     session.commit()
             except Exception as e:
-                logger.error("Failed to update phone-home timestamp: %s", e)
+                logger.exception("Failed to update phone-home timestamp: %s", e)
                 session.rollback()
 
     def _check_offline_grace(self) -> bool:
@@ -445,7 +451,7 @@ class LicenseService:
                     return False
 
             except Exception as e:
-                logger.error("Error checking offline grace: %s", e)
+                logger.exception("Error checking offline grace: %s", e)
                 return True  # Fail open during errors
 
     def _deactivate_license(self) -> None:
@@ -473,12 +479,46 @@ class LicenseService:
                     )
                     session.commit()
             except Exception as e:
-                logger.error("Failed to deactivate license: %s", e)
+                logger.exception("Failed to deactivate license: %s", e)
                 session.rollback()
 
         self._cached_license = None
         self._license_key = None
         logger.warning("License deactivated")
+
+    @staticmethod
+    def _allowed_for_active_tenant_edition(item, tier_map: dict) -> bool:
+        """Phase 13.1.J — gate ``item`` (a FeatureCode/ModuleCode) down to the
+        ACTIVE tenant's edition when one is in scope.
+
+        With multi-tenancy the server may be licensed at the top SaaS tier (so it
+        physically hosts every engine), but each tenant is independently assigned
+        a Community / Professional / Enterprise edition.  When a tenant is in
+        scope, an item is only available if it also belongs to that edition's
+        tier — so a Community tenant on an Enterprise-licensed server 402s on
+        Pro+ surfaces, and an edition up/down-grade takes effect without a
+        redeploy.  Resolution of *which* tenant is active (and its edition) lives
+        in the licensed multitenancy_engine; this consults the OSS seam, which
+        returns ``None`` (→ the global license governs, unchanged) for server
+        scope / single-tenant / unlicensed.
+        """
+        # Local import keeps the licensing layer free of a hard dependency on the
+        # tenant-edition seam (and any import cycle through the engine seam).
+        from backend.services.tenant_edition import (  # noqa: PLC0415
+            edition_for_active_tenant,
+        )
+
+        edition = edition_for_active_tenant()
+        if edition is None:
+            return True
+        try:
+            tier = LicenseTier(edition)
+        except ValueError:
+            logger.warning(
+                "Unknown active-tenant edition %r; not restricting gating", edition
+            )
+            return True
+        return item in tier_map.get(tier, set())
 
     def has_feature(self, feature: FeatureCode) -> bool:
         """
@@ -492,7 +532,9 @@ class LicenseService:
         """
         if not self._cached_license:
             return False
-        return feature.value in self._cached_license.features
+        if feature.value not in self._cached_license.features:
+            return False
+        return self._allowed_for_active_tenant_edition(feature, TIER_FEATURES)
 
     def has_module(self, module: ModuleCode) -> bool:
         """
@@ -506,7 +548,9 @@ class LicenseService:
         """
         if not self._cached_license:
             return False
-        return module.value in self._cached_license.modules
+        if module.value not in self._cached_license.modules:
+            return False
+        return self._allowed_for_active_tenant_edition(module, TIER_MODULES)
 
     def get_license_info(self) -> Optional[dict]:
         """

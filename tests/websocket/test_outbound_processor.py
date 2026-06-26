@@ -3,8 +3,7 @@ Comprehensive unit tests for WebSocket outbound message processor.
 Tests processing and sending of messages from server to agents.
 """
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -12,7 +11,7 @@ from backend.websocket.outbound_processor import (
     process_outbound_message,
     send_command_to_agent,
 )
-from backend.websocket.queue_manager import QueueDirection, QueueStatus
+from backend.websocket.queue_manager import QueueStatus
 
 
 class TestProcessOutboundMessage:

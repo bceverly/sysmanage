@@ -36,6 +36,12 @@ logging:
   max_size_mb: 100
   backup_count: 5
 
+# Multi-tenancy (Phase 13.1) — opt-in; disabled by default (single tenant).
+# Enable only to run a SaaS control plane; see the canonical sysmanage.yaml.example.
+multitenancy:
+  enabled: false
+  self_service_provisioning: false
+
 # OpenBAO/Vault Integration (optional)
 openbao:
   enabled: false

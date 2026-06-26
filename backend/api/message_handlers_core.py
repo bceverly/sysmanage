@@ -3,16 +3,18 @@ Core message handlers for SysManage agent WebSocket communication.
 Handles authentication, system info, and heartbeat messages from agents.
 """
 
+import asyncio
 import logging
 from datetime import datetime, timezone
 
 from sqlalchemy import update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_host_not_registered
 from backend.i18n import _
 from backend.persistence.models import Host
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.utils.verbosity_logger import sanitize_log
 
 # Use standard logger that respects /etc/sysmanage.yaml configuration
 logger = logging.getLogger(__name__)
@@ -95,9 +97,37 @@ async def validate_host_authentication(
 
 
 async def handle_system_info(db: Session, connection, message_data: dict):  # NOSONAR
+    """Handle a system-info message from an agent, routing it to the correct DB.
+
+    Phase 13.1 #2: when the agent identifies itself with a ``host_id`` that is
+    bound to a tenant, the host row and ALL its inventory writes must target
+    that tenant's database — the row was created there by ``/host/register``
+    (see ``backend.api.host.register_host``).  We resolve the tenant from the
+    agent-supplied ``host_id`` (NOT the inbound ``db``), because that's what
+    keeps ``update_or_create_host`` (which looks the host up by FQDN) from
+    failing to find the tenant-resident row and inserting a DUPLICATE host in
+    the bootstrap DB.
+
+    Fully inert when multi-tenancy is off, no ``host_id`` is supplied, or the
+    host has no tenant binding: ``tenant_engine_for_host`` returns ``None`` and
+    the passed ``db`` is used unchanged (the single-tenant behaviour)."""
+    from backend.persistence.partitions import tenant_engine_for_host
+
+    agent_host_id = message_data.get("host_id")
+    tenant_engine = tenant_engine_for_host(agent_host_id) if agent_host_id else None
+    if tenant_engine is None:
+        return await _handle_system_info_impl(db, connection, message_data)
+
+    # Bound host → run the whole handler on its tenant's database so the host
+    # upsert, approval, status, and software writes all land there.
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=tenant_engine)
+    with session_local() as tenant_db:
+        return await _handle_system_info_impl(tenant_db, connection, message_data)
+
+
+async def _handle_system_info_impl(db: Session, connection, message_data: dict):
     """Handle system info message from agent."""
     from backend.api.host_utils import update_or_create_host
-    from backend.persistence.models import HostChild
     from backend.utils.host_validation import validate_host_id
 
     hostname = message_data.get("hostname")
@@ -120,11 +150,13 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
     # System info received from agent
     logger.info("=== SYSTEM INFO DEBUG ===")
-    logger.info("Hostname: %s", hostname)
-    logger.info("Message data keys: %s", list(message_data.keys()))
+    logger.info("Hostname: %s", sanitize_log(hostname))
+    logger.info("Message data keys: %s", sanitize_log(list(message_data.keys())))
     logger.info(
         "Script execution enabled in message: %s",
-        message_data.get("script_execution_enabled"),
+        sanitize_log(
+            message_data.get("script_execution_enabled"),
+        ),
     )
     logger.info("========================")
 
@@ -133,102 +165,19 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
         script_execution_enabled = message_data.get("script_execution_enabled", False)
         logger.info(
             "Passing script_execution_enabled=%s to update_or_create_host",
-            script_execution_enabled,
+            sanitize_log(script_execution_enabled),
         )
         host = await update_or_create_host(
             db, hostname, ipv4, ipv6, script_execution_enabled
         )
 
         # Check for auto-approve token and perform auto-approval if valid
-        if auto_approve_token and host.approval_status == "pending":
-            matching_child = (
-                db.query(HostChild)
-                .filter(
-                    HostChild.auto_approve_token == auto_approve_token,
-                    HostChild.status.in_(["creating", "running", "pending"]),
-                )
-                .first()
-            )
-
-            if matching_child:
-                # False positive: logging hostname and child_name, not credentials
-                # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                logger.info(
-                    "Auto-approving host %s with matching token from child host %s",
-                    hostname,
-                    matching_child.child_name,
-                )
-
-                # Generate client certificate for the auto-approved host
-                from cryptography import x509
-                from backend.security.certificate_manager import certificate_manager
-
-                cert_pem, _unused = certificate_manager.generate_client_certificate(
-                    host.fqdn, host.id
-                )
-
-                # Store certificate information in host record
-                host.client_certificate = cert_pem.decode("utf-8")
-                host.certificate_issued_at = datetime.now(timezone.utc).replace(
-                    tzinfo=None
-                )
-
-                # Extract serial number for tracking
-                cert = x509.load_pem_x509_certificate(cert_pem)
-                host.certificate_serial = str(cert.serial_number)
-
-                # Update approval status
-                host.approval_status = "approved"
-                host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
-
-                # Link the child host to the approved host
-                matching_child.child_host_id = host.id
-                matching_child.installed_at = datetime.now(timezone.utc).replace(
-                    tzinfo=None
-                )
-                if matching_child.status == "creating":
-                    matching_child.status = "running"
-
-                # Set parent_host_id on the host record for easier filtering
-                host.parent_host_id = matching_child.parent_host_id
-
-                # Clear the auto_approve_token now that it's been used
-                matching_child.auto_approve_token = None
-
-                db.commit()
-
-                logger.info(
-                    "Auto-approved host %s, linked to child %s (parent=%s)",
-                    hostname,
-                    matching_child.child_name,
-                    matching_child.parent_host_id,
-                )
-
-                # Log auto-approval in audit
-                AuditService.log(
-                    db=db,
-                    action_type=ActionType.AGENT_MESSAGE,
-                    entity_type=EntityType.HOST,
-                    entity_id=str(host.id),
-                    entity_name=hostname,
-                    description=_("Host auto-approved via child host creation"),
-                    result=Result.SUCCESS,
-                    details={
-                        "child_host_id": str(matching_child.id),
-                        "child_name": matching_child.child_name,
-                        "parent_host_id": str(matching_child.parent_host_id),
-                    },
-                )
-            else:
-                # False positive: intentionally truncating token to first 8 chars for debugging
-                # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
-                logger.warning(
-                    "Auto-approve token provided but no matching child host found: %s",
-                    auto_approve_token[:8] + "..." if auto_approve_token else "None",
-                )
+        _auto_approve_via_child_token(db, host, hostname, auto_approve_token)
 
         # Check approval status
-        logger.info("Host %s approval status: %s", hostname, host.approval_status)
+        logger.info(
+            "Host %s approval status: %s", sanitize_log(hostname), host.approval_status
+        )
 
         # Always set hostname on connection so we can send approval messages
         connection.hostname = hostname
@@ -243,38 +192,22 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
         # Always set host_id so heartbeats work (even for unapproved hosts)
         connection.host_id = host.id
 
-        # Always update last_access so we know the host is actively connecting
-        # This prevents unapproved hosts from showing as "down" when they're actually up
-        update_values = {
-            "platform": platform,
-        }
+        # Drain any inbound messages the agent fired before this SYSTEM_INFO
+        # handshake landed — they were buffered on the connection because
+        # ``connection.hostname`` was still None at receive time.  Now that
+        # registration is complete, replay them through the normal enqueue
+        # path so they're persisted with proper ``_connection_info``.
+        from backend.api.agent import (  # pylint: disable=import-outside-toplevel
+            flush_pending_inbound_messages,
+        )
 
-        # Update privileged status if provided
-        is_privileged = message_data.get("is_privileged")
-        if is_privileged is not None:
-            update_values["is_agent_privileged"] = is_privileged
+        flush_pending_inbound_messages(connection, db)
 
-        # Update enabled shells if provided
-        enabled_shells = message_data.get("enabled_shells")
-        if enabled_shells is not None:
-            import json
-
-            update_values["enabled_shells"] = (
-                json.dumps(enabled_shells) if enabled_shells else None
-            )
-
-        # Always update last_access (for both approved and unapproved hosts)
-        if (
-            not hasattr(connection, "is_mock_connection")
-            or not connection.is_mock_connection
-        ):
-            update_values["last_access"] = datetime.now(timezone.utc).replace(
-                tzinfo=None
-            )
-
-        # Only set status to "up" for approved hosts
-        if host.approval_status == "approved":
-            update_values["status"] = "up"
+        # Build the host-update payload (privileged flag, shells, version,
+        # last_access, status) from the message and connection state.
+        update_values, is_privileged = _build_system_info_update_values(
+            message_data, connection, host, platform
+        )
 
         # NOTE: Script execution status should not be updated from system_info messages
         # This prevents agent registration from overwriting the server-configured setting
@@ -289,49 +222,17 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
 
         # Only process additional data for approved hosts
         if host.approval_status == "approved":
-
-            # Process software packages if included in SYSTEM_INFO message
-            software_packages = message_data.get("software_packages", [])
-            if software_packages:
-                logger.info(
-                    "Processing %d software packages from SYSTEM_INFO message",
-                    len(software_packages),
-                )
-                from backend.api.handlers import handle_software_update
-
-                # Create software update message data
-                software_message = {
-                    "host_id": str(host.id),
-                    "software_packages": software_packages,
-                }
-                # Call software update handler
-                await handle_software_update(db, connection, software_message)
-
-            # Log successful agent registration/connection
-            AuditService.log(
-                db=db,
-                action_type=ActionType.AGENT_MESSAGE,
-                entity_type=EntityType.HOST,
-                entity_id=str(host.id),
-                entity_name=hostname,
-                description=_("Agent registered and connected successfully"),
-                result=Result.SUCCESS,
-                details={
-                    "platform": platform,
-                    "ipv4": ipv4,
-                    "ipv6": ipv6,
-                    "is_privileged": is_privileged,
-                    "approval_status": "approved",
-                },
+            return await _process_approved_system_info(
+                db,
+                connection,
+                host,
+                hostname,
+                message_data,
+                platform,
+                ipv4,
+                ipv6,
+                is_privileged,
             )
-
-            return {
-                "message_type": "registration_success",
-                "approved": True,
-                "hostname": hostname,
-                "host_token": host.host_token,  # Send secure token instead of integer ID
-                "host_id": str(host.id),  # Send as UUID string
-            }
 
         return {
             "message_type": "registration_pending",
@@ -340,6 +241,218 @@ async def handle_system_info(db: Session, connection, message_data: dict):  # NO
             "message": _("Host registration pending approval"),
         }
     return None
+
+
+def _auto_approve_via_child_token(db, host, hostname, auto_approve_token):
+    """Auto-approve ``host`` when ``auto_approve_token`` matches a pending child
+    host.  No-op when the token is absent, the host isn't pending, or no child
+    matches.  Extracted from ``_handle_system_info_impl`` to keep that handler's
+    cognitive complexity in check.
+    """
+    from backend.persistence.models import HostChild  # noqa: PLC0415
+
+    if not (auto_approve_token and host.approval_status == "pending"):
+        return
+
+    matching_child = (
+        db.query(HostChild)
+        .filter(
+            HostChild.auto_approve_token == auto_approve_token,
+            HostChild.status.in_(["creating", "running", "pending"]),
+        )
+        .first()
+    )
+
+    if not matching_child:
+        # False positive: intentionally truncating token to first 8 chars for debugging
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+        logger.warning(
+            "Auto-approve token provided but no matching child host found: %s",
+            sanitize_log(
+                auto_approve_token[:8] + "..." if auto_approve_token else "None"
+            ),
+        )
+        return
+
+    # False positive: logging hostname and child_name, not credentials
+    # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+    logger.info(
+        "Auto-approving host %s with matching token from child host %s",
+        sanitize_log(hostname),
+        matching_child.child_name,
+    )
+
+    # Generate client certificate for the auto-approved host
+    from cryptography import x509  # noqa: PLC0415
+    from backend.security.certificate_manager import (
+        certificate_manager,
+    )  # noqa: PLC0415
+
+    cert_pem, _unused = certificate_manager.generate_client_certificate(
+        host.fqdn, host.id
+    )
+
+    # Store certificate information in host record
+    host.client_certificate = cert_pem.decode("utf-8")
+    host.certificate_issued_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Extract serial number for tracking
+    cert = x509.load_pem_x509_certificate(cert_pem)
+    host.certificate_serial = str(cert.serial_number)
+
+    # Update approval status
+    host.approval_status = "approved"
+    host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Link the child host to the approved host
+    matching_child.child_host_id = host.id
+    matching_child.installed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    if matching_child.status == "creating":
+        matching_child.status = "running"
+
+    # Set parent_host_id on the host record for easier filtering
+    host.parent_host_id = matching_child.parent_host_id
+
+    # Clear the auto_approve_token now that it's been used
+    matching_child.auto_approve_token = None
+
+    db.commit()
+
+    logger.info(
+        "Auto-approved host %s, linked to child %s (parent=%s)",
+        sanitize_log(hostname),
+        matching_child.child_name,
+        matching_child.parent_host_id,
+    )
+
+    # Phase 10.4.4 — auto-apply default mirror assignments for the freshly
+    # auto-approved host.  The HTTP /register and admin-approval paths do this
+    # too; this path (auto-approval via child-host token) was missing it, so
+    # child hosts created through the manage-children flow weren't picking up
+    # their default mirror.  Best-effort: any failure is logged and swallowed.
+    try:
+        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+            apply_default_mirrors_for_new_host,
+        )
+
+        apply_default_mirrors_for_new_host(str(host.id))
+    except (
+        Exception
+    ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+        logger.warning(
+            "Default-mirror auto-apply failed for auto-approved host %s: %s",
+            sanitize_log(hostname),
+            exc,
+        )
+
+    # Log auto-approval in audit
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=hostname,
+        description=_("Host auto-approved via child host creation"),
+        result=Result.SUCCESS,
+        details={
+            "child_host_id": str(matching_child.id),
+            "child_name": matching_child.child_name,
+            "parent_host_id": str(matching_child.parent_host_id),
+        },
+    )
+
+
+def _build_system_info_update_values(message_data, connection, host, platform):
+    """Assemble the ``Host`` update payload from a SYSTEM_INFO message.
+
+    Returns ``(update_values, is_privileged)`` — ``is_privileged`` is surfaced
+    because the approved-host audit log records it.
+    """
+    update_values = {
+        "platform": platform,
+    }
+
+    # Update privileged status if provided
+    is_privileged = message_data.get("is_privileged")
+    if is_privileged is not None:
+        update_values["is_agent_privileged"] = is_privileged
+
+    # Update enabled shells if provided
+    enabled_shells = message_data.get("enabled_shells")
+    if enabled_shells is not None:
+        import json  # noqa: PLC0415
+
+        update_values["enabled_shells"] = (
+            json.dumps(enabled_shells) if enabled_shells else None
+        )
+
+    # Update agent version if provided
+    agent_version = message_data.get("agent_version")
+    if agent_version:
+        update_values["agent_version"] = agent_version
+
+    # Always update last_access (for both approved and unapproved hosts), but
+    # never for mock connections (tests).
+    if (
+        not hasattr(connection, "is_mock_connection")
+        or not connection.is_mock_connection
+    ):
+        update_values["last_access"] = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Only set status to "up" for approved hosts
+    if host.approval_status == "approved":
+        update_values["status"] = "up"
+
+    return update_values, is_privileged
+
+
+async def _process_approved_system_info(
+    db, connection, host, hostname, message_data, platform, ipv4, ipv6, is_privileged
+):
+    """Post-approval SYSTEM_INFO work: ingest software packages, audit the
+    connection, and build the ``registration_success`` response."""
+    # Process software packages if included in SYSTEM_INFO message
+    software_packages = message_data.get("software_packages", [])
+    if software_packages:
+        logger.info(
+            "Processing %d software packages from SYSTEM_INFO message",
+            len(software_packages),
+        )
+        from backend.api.handlers import handle_software_update  # noqa: PLC0415
+
+        # Create software update message data
+        software_message = {
+            "host_id": str(host.id),
+            "software_packages": software_packages,
+        }
+        # Call software update handler
+        await handle_software_update(db, connection, software_message)
+
+    # Log successful agent registration/connection
+    AuditService.log(
+        db=db,
+        action_type=ActionType.AGENT_MESSAGE,
+        entity_type=EntityType.HOST,
+        entity_id=str(host.id),
+        entity_name=hostname,
+        description=_("Agent registered and connected successfully"),
+        result=Result.SUCCESS,
+        details={
+            "platform": platform,
+            "ipv4": ipv4,
+            "ipv6": ipv6,
+            "is_privileged": is_privileged,
+            "approval_status": "approved",
+        },
+    )
+
+    return {
+        "message_type": "registration_success",
+        "approved": True,
+        "hostname": hostname,
+        "host_token": host.host_token,  # Send secure token instead of integer ID
+        "host_id": str(host.id),  # Send as UUID string
+    }
 
 
 async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSONAR
@@ -375,8 +488,6 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
     if hasattr(connection, "host_id") and connection.host_id:
         try:
             # Get the host object for tests compatibility and also update it
-            import logging
-
             logger = logging.getLogger("backend.message_handlers.heartbeat")
             logger.info("Heartbeat: Looking up host with ID: %s", connection.host_id)
             host = db.query(Host).filter(Host.id == connection.host_id).first()
@@ -411,6 +522,77 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     host.enabled_shells = (
                         json.dumps(enabled_shells) if enabled_shells else None
                     )
+
+                # Update agent version if provided in heartbeat
+                agent_version = message_data.get("agent_version")
+                if agent_version:
+                    host.agent_version = agent_version
+
+                # Phase 12.7: resolve public-IP -> geo when the agent reports it.
+                # The agent fetches its public IP at startup + on the
+                # 24h heartbeat cadence; we only re-resolve via the
+                # GeoLite2 / ipapi.co chain when the IP actually
+                # changed (or the geo columns are NULL).  Saves both
+                # MaxMind DB reads and the ipapi.co rate-limit budget
+                # on steady-state hosts whose public IP doesn't move.
+                #
+                # Runs in a worker thread because geolocation_service
+                # is synchronous (memory-mapped MaxMind read + optional
+                # httpx.get to ipapi.co).  We don't block the heartbeat
+                # ack on geo failure — None result leaves the existing
+                # columns alone.
+                reported_public_ip = message_data.get("public_ip")
+                if reported_public_ip:
+                    # Phase 12.7 privacy opt-out: a host carrying the
+                    # ``no_geo_track`` tag is excluded from any
+                    # geo-resolution call — we don't persist the
+                    # public IP, don't call MaxMind / ipapi.co, and
+                    # don't touch the existing geo columns.  Operator-
+                    # facing contract: tag the host, the map forgets
+                    # about it.
+                    from backend.services.geolocation_service import (  # noqa: PLC0415
+                        NO_GEO_TRACK_TAG,
+                        lookup_ip,
+                    )
+
+                    opt_out = (
+                        host.tags.filter_by(name=NO_GEO_TRACK_TAG).first() is not None
+                    )
+                    if not opt_out:
+                        ip_changed = host.public_ip != reported_public_ip
+                        never_resolved = host.geo_country_code is None
+                        if ip_changed or never_resolved:
+                            host.public_ip = reported_public_ip
+                            host.public_ip_resolved_at = datetime.now(
+                                timezone.utc
+                            ).replace(tzinfo=None)
+                            try:
+                                geo = await asyncio.to_thread(
+                                    lookup_ip, reported_public_ip
+                                )
+                                if geo is not None:
+                                    host.geo_country_code = geo.country_code
+                                    host.geo_subdivision_code = geo.subdivision_code
+                                    host.geo_city = geo.city
+                                    host.geo_latitude = geo.latitude
+                                    host.geo_longitude = geo.longitude
+                            except (
+                                Exception
+                            ) as geo_err:  # pylint: disable=broad-exception-caught
+                                # Never let a geo lookup failure derail
+                                # the heartbeat write — the public_ip
+                                # is already persisted above, geo
+                                # columns just stay at their previous
+                                # values until the next heartbeat
+                                # resolves cleanly.
+                                # sanitize_log strips control chars / newlines
+                                # from the agent-reported IP so a crafted value
+                                # can't forge log lines (log injection).
+                                logger.debug(
+                                    "Heartbeat: geo lookup for %s failed: %s",
+                                    sanitize_log(reported_public_ip),
+                                    geo_err,
+                                )
 
                 # Check for pending reboot orchestration (Pro+ safe reboot)
                 try:
@@ -485,7 +667,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     result_rowcount = 1
                     logger.info(
                         "Created new host %s (ID: %s) from heartbeat",
-                        connection.hostname,
+                        sanitize_log(connection.hostname),
                         host.id,
                     )
                 else:
@@ -517,7 +699,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
             }
 
         except Exception as e:
-            logger.error("Error processing heartbeat: %s", e)
+            logger.exception("Error processing heartbeat: %s", e)
             return {
                 "message_type": "error",
                 "error_type": "operation_failed",

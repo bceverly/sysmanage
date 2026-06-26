@@ -3,11 +3,9 @@ Comprehensive tests for backend/security/login_security.py module.
 Tests security validation and enhancement for SysManage server.
 """
 
-import time
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-import pytest
 
 from backend.security.login_security import (
     LoginSecurityValidator,

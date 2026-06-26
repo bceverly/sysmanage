@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-upgrades sonarqube-scan install-sonar-scanner clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local
+.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "  make security-upgrades - Check for security package upgrades"
 	@echo "  make sonarqube-scan - Run SonarQube/SonarCloud analysis"
 	@echo "  make install-sonar-scanner - Install SonarQube scanner locally"
+	@echo "  make sonarqube-update-install - Update native local SonarQube server (systemd) + scanner CLI to latest"
 	@echo "  make setup         - Install development dependencies"
 	@echo "  make clean         - Clean test artifacts and cache"
 	@echo "  make build         - Build frontend for production"
@@ -77,10 +78,12 @@ VENV := .venv
 ifeq ($(OS),Windows_NT)
     PYTHON := python
     PIP := pip
+    SEMGREP := semgrep
     VENV_ACTIVATE := $(VENV)/Scripts/activate
 else
     PYTHON := $(VENV)/bin/python
     PIP := $(VENV)/bin/pip
+    SEMGREP := $(VENV)/bin/semgrep
     VENV_ACTIVATE := $(VENV)/bin/activate
 endif
 
@@ -111,11 +114,36 @@ endif
 
 setup-venv: $(VENV_ACTIVATE)
 
+# Activate the in-repo .githooks/ directory by pointing
+# core.hooksPath at it.  Idempotent and silently no-ops when run
+# outside a git working tree (e.g. from a tarball extract during
+# an offline build).  install-dev calls this as its final step,
+# so most contributors never invoke it directly.
+install-hooks:
+ifeq ($(OS),Windows_NT)
+	@if exist .git ( \
+		git config core.hooksPath .githooks && \
+		echo [OK] Git hooks installed ^(core.hooksPath = .githooks^) \
+	) else ( \
+		echo [INFO] Not in a git working tree -- skipping hook install. \
+	)
+else
+	@if git rev-parse --git-dir >/dev/null 2>&1; then \
+		git config core.hooksPath .githooks; \
+		chmod +x .githooks/* 2>/dev/null || true; \
+		echo "[OK] Git hooks installed (core.hooksPath = .githooks)"; \
+		echo "Active hooks:"; \
+		ls -1 .githooks/ 2>/dev/null | grep -v '^README' | sed 's/^/  /' || true; \
+	else \
+		echo "[INFO] Not in a git working tree — skipping hook install."; \
+	fi
+endif
+
 # Install development dependencies
-install-dev: setup-venv
+install-dev: setup-venv install-hooks
 	@echo "Installing Python development dependencies..."
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep
+	@$(PYTHON) -m pip install -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "[INFO] macOS detected - checking for packaging tools..."; \
@@ -128,11 +156,11 @@ else
 		if command -v pkgbuild >/dev/null 2>&1 && command -v productbuild >/dev/null 2>&1; then \
 			echo "✓ All macOS packaging tools available"; \
 		fi; \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
 		export TMPDIR=$$HOME/tmp && \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
 		export TMPDIR=/var/tmp && \
@@ -146,9 +174,9 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	else \
-		$(PYTHON) -m pip install pytest pytest-cov pytest-asyncio pylint black isort bandit safety semgrep; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	fi
 endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
@@ -483,6 +511,23 @@ else
 		else \
 			echo "✓ All packaging build tools already installed"; \
 		fi; \
+		echo "[INFO] Checking for KVM host tooling (only used when running an agent on this host that manages KVM child hosts)..."; \
+		MISSING_KVM=""; \
+		(command -v genisoimage >/dev/null 2>&1 || command -v mkisofs >/dev/null 2>&1 || command -v xorrisofs >/dev/null 2>&1) || MISSING_KVM="$$MISSING_KVM genisoimage"; \
+		command -v qemu-img >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM qemu-utils"; \
+		command -v virt-install >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM virtinst"; \
+		command -v virsh >/dev/null 2>&1 || MISSING_KVM="$$MISSING_KVM libvirt-clients"; \
+		if [ -n "$$MISSING_KVM" ]; then \
+			echo "Missing KVM host tools:$$MISSING_KVM"; \
+			echo "These are required on agent hosts that the server dispatches"; \
+			echo "Pro+ virtualization_engine create plans to.  Single-box"; \
+			echo "dev setups need them locally; pure-server hosts don't."; \
+			echo "Running: sudo apt-get install -y$$MISSING_KVM"; \
+			sudo apt-get install -y $$MISSING_KVM || \
+			echo "[WARNING] Could not install KVM host tools. Run manually: sudo apt-get install -y$$MISSING_KVM"; \
+		else \
+			echo "✓ All KVM host tools already installed"; \
+		fi; \
 		echo "[INFO] Checking for Snap build tools..."; \
 		if ! command -v snap >/dev/null 2>&1; then \
 			echo "snapd not found - installing..."; \
@@ -639,8 +684,10 @@ else
 endif
 	@echo "Initializing MSW browser setup (for optional development use)..."
 	@cd frontend && npx msw init public/ --save
-	@echo "Running database migrations to ensure tables exist..."
-	@$(PYTHON) -m alembic upgrade head || echo "Database migration failed - you may need to configure the database first"
+	@echo "Running database migrations to ensure tables exist (registry + shared + tenant chains)..."
+	@$(PYTHON) -m alembic --name registry upgrade head || echo "Registry migration failed - you may need to configure the database first"
+	@$(PYTHON) -m alembic --name shared upgrade head || echo "Shared migration failed - you may need to configure the database first"
+	@$(PYTHON) -m alembic upgrade head || echo "Tenant migration failed - you may need to configure the database first"
 ifeq ($(OS),Windows_NT)
 	@echo "Checking for grep installation on Windows..."
 	@where grep >nul 2>nul || echo "Note: grep not found. You may want to install it via chocolatey: choco install grep"
@@ -654,14 +701,12 @@ else
 	fi
 endif
 ifeq ($(OS),Windows_NT)
-	@echo "Installing Artillery for performance testing..."
-	@npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"
+	@echo "[INFO] Artillery (performance testing) is fetched on demand via npx during 'make test-performance' (no global install needed)"
 else
-	@if [ "$$(uname -s)" != "OpenBSD" ] && [ "$$(uname -s)" != "FreeBSD" ] && [ "$$(uname -s)" != "NetBSD" ]; then \
-		echo "Installing Artillery for performance testing..."; \
-		npm install -g artillery@latest || echo "[WARNING] Artillery installation failed - performance tests may not run"; \
+	@if [ "$$(uname -s)" = "OpenBSD" ] || [ "$$(uname -s)" = "FreeBSD" ] || [ "$$(uname -s)" = "NetBSD" ]; then \
+		echo "[SKIP] Artillery not supported on $$(uname -s) - performance tests will be skipped"; \
 	else \
-		echo "[SKIP] Artillery installation skipped on BSD systems - performance tests not supported"; \
+		echo "[INFO] Artillery (performance testing) is fetched on demand via npx during 'make test-performance' (no global install needed)"; \
 	fi
 endif
 	@echo "[OK] Development dependencies installation completed"
@@ -682,11 +727,113 @@ endif
 	@echo ""
 	@echo "Development environment setup complete!"
 
-# Database migration target
-migrate:
-	@echo "Running database migrations..."
-	@$(PYTHON) -m alembic upgrade head
-	@echo "[OK] Database migrations completed"
+# Database migration target.
+#
+# Depends on ``stop`` so the running backend releases its sessions on
+# the ``host`` table (and any other tables alembic might ALTER) before
+# we run DDL.  Without this, PostgreSQL's ``ALTER TABLE ... ADD COLUMN``
+# queues behind the backend's idle-in-transaction sessions and the
+# whole thing hangs indefinitely.  The ``stop`` target is a no-op when
+# nothing is running, so this is safe on fresh installs / CI.
+#
+# After migrate completes the user has to start the server back up
+# themselves — we don't auto-start because:
+#   * we don't know whether they wanted ``make start`` or
+#     ``make start-privileged``;
+#   * if migrate failed they'd want to investigate before restarting.
+migrate: stop
+	@echo "Running database migrations (via sysmanage-migrate — the same tool"
+	@echo "operators run in production)..."
+	@# Multi-tenancy: 'make stop' took OpenBAO down, but the per-tenant fan-out
+	@# inside sysmanage-migrate needs it up to lease credentials — so start it
+	@# just for the migration and stop it again, restoring the clean stopped
+	@# state. Single-tenant: no OpenBAO needed, run the tool directly.
+	@if $(PYTHON) -c "from backend.config import config; import sys; sys.exit(0 if config.is_multitenancy_enabled() else 1)" 2>/dev/null; then \
+		echo "multi-tenancy is ON — starting OpenBAO for the per-tenant fan-out..."; \
+		./scripts/start-openbao.sh >/dev/null 2>&1 || true; \
+		$(PYTHON) scripts/sysmanage_migrate.py; \
+		rc=$$?; \
+		echo "stopping OpenBAO (restoring the stopped state)..."; \
+		./scripts/stop-openbao.sh >/dev/null 2>&1 || true; \
+		if [ $$rc -ne 0 ]; then exit $$rc; fi; \
+	else \
+		$(PYTHON) scripts/sysmanage_migrate.py; \
+	fi
+	@echo ""
+	@echo "NOTE: In the default single-database deployment all chains run against"
+	@echo "      the SAME database (collapsed/homelab mode)."
+	@echo "      backend / frontend / telemetry / OpenBAO were stopped before migrate."
+	@echo "      Run 'make start' or 'make start-privileged' to bring everything back up."
+
+# Fan out the tenant chain to every provisioned tenant database (standalone).
+# 'make migrate' already does this; use this target to re-run JUST the fan-out
+# (e.g. after adding a tenant) while the stack is up — OpenBAO must be running.
+migrate-tenants: $(VENV_ACTIVATE)
+	@echo "=== Migrating per-tenant databases (requires OpenBAO running) ==="
+	@$(PYTHON) scripts/sysmanage_migrate.py --tenants-only
+
+# ---------------------------------------------------------------------------
+# i18n translation backfill via the GPU translation service (scripts/translation-
+# service).  IDEMPOTENT: only untranslated strings are sent, so re-run any time
+# to pick up new English.  Point it at your running service with either:
+#     export TRANSLATION_SERVICE_URL=http://beast:8765
+#   or:  make translate SERVICE=http://beast:8765
+#
+# SCOPE: ``make translate`` here does THIS repo's own stores only — frontend
+# (JSON) + backend (gettext).  Every other repo's ``make translate`` does its
+# own locales; nothing reaches across repository boundaries.
+# ---------------------------------------------------------------------------
+SERVICE ?= $(or $(TRANSLATION_SERVICE_URL),http://localhost:8765)
+TRANSLATE_PROJECTS ?= frontend backend
+TRANSLATE := scripts/translation-service/i18n_backfill.py
+
+translate: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@rc=0; for p in $(TRANSLATE_PROJECTS); do \
+		echo ""; echo "=== make translate: $$p  (service $(SERVICE)) ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --service "$(SERVICE)" --fail-on-gaps || rc=$$?; \
+	done; \
+	if [ $$rc -ne 0 ]; then \
+		echo ""; \
+		echo "########################################################################"; \
+		echo "# make translate FAILED — one or more projects have untranslated locales"; \
+		echo "# (see the per-project banners above).  Locales must be 100%.";  \
+		echo "########################################################################"; \
+		exit $$rc; \
+	fi; \
+	echo ""; echo "[OK] translation backfill complete — frontend + backend at 100%."
+
+translate-dry: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@for p in $(TRANSLATE_PROJECTS); do \
+		echo ""; echo "=== translate (dry-run): $$p ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --dry-run || exit $$?; \
+	done
+
+# Offline translation-completeness GATE — no service, no writes, no network.
+# Scans THIS repo's own locale stores (frontend JSON + backend gettext) and
+# fails loudly (non-zero) if any string is still untranslated.  Safe for CI /
+# release hooks; see the i18n-gate job in build-and-release.yml.  Sibling repos
+# (docs / proplus / agent) gate themselves via their own `make translate-check`.
+TRANSLATE_CHECK_PROJECTS ?= frontend backend
+translate-check: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
+	@rc=0; for p in $(TRANSLATE_CHECK_PROJECTS); do \
+		echo ""; echo "=== translate-check (offline): $$p ==="; \
+		$(PYTHON) $(TRANSLATE) --project $$p --check || rc=$$?; \
+	done; \
+	[ $$rc -eq 0 ] || exit $$rc
+
+provision-bootstrap: $(VENV_ACTIVATE)
+	@echo "=== Multi-tenancy provisioning bootstrap (one-time, operator) ==="
+	@echo "Creates a least-privilege Postgres provisioner role + scoped OpenBAO"
+	@echo "policy so the server can self-provision tenants without holding root."
+	@echo "Requires an OpenBAO admin token. For Postgres it either uses a"
+	@echo "superuser password (--pg-superuser-password) OR, if none is given"
+	@echo "(peer auth — the Ubuntu default), emits a 0600 SQL file to apply via"
+	@echo "'sudo -u postgres psql -f <file>'.  Example:"
+	@echo "  make provision-bootstrap ARGS='--bao-token \$$BAO_TOKEN'"
+	@$(PYTHON) scripts/provision_bootstrap.py $(ARGS)
 
 # Clean trailing whitespace from Python files (cross-platform)
 clean-whitespace: $(VENV_ACTIVATE)
@@ -694,8 +841,51 @@ clean-whitespace: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/clean_whitespace.py
 
 # Python linting
-lint-python: format-python
+#
+# Auto-fix-with-tripwire pattern: ``make lint`` keeps the convenient
+# "format my code while you're at it" behaviour, but if black actually
+# DID reformat anything we exit non-zero so the dev knows to ``git
+# add`` + re-commit before pushing.  Previously ``lint-python``
+# depended on ``format-python`` and never reported black drift — black
+# would silently rewrite the working tree, pylint would run against
+# the already-formatted code, and ``make lint`` reported "passed".
+# The dev then commit + pushed the un-formatted version that was
+# already staged, and CI's ``black --check`` would reject it.  This
+# target now closes that loop: black still runs (so ``make lint``
+# doubles as a fix-it command) but a pre-flight ``--check`` decides
+# whether to fail at the end.
+lint-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Python Linting ==="
+	@echo "Running black..."
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -m black --check backend/ tests/ >nul 2>&1 & if errorlevel 1 ( \
+		$(PYTHON) -m black backend/ tests/ & \
+		echo. & \
+		echo [FAIL] black reformatted files in your working tree. & \
+		echo        The fix was applied locally -- but CI runs & \
+		echo        'black --check' against committed code, so you & \
+		echo        MUST: git add ^<files^> ^&^& git commit --amend & \
+		echo        ^(or a fresh commit^) before pushing. & \
+		echo. & \
+		exit /b 1 \
+	) else ( \
+		$(PYTHON) -m black backend/ tests/ \
+	)
+else
+	@$(PYTHON) -m black --check backend/ tests/ >/dev/null 2>&1; \
+	black_drift=$$?; \
+	$(PYTHON) -m black backend/ tests/; \
+	if [ "$$black_drift" != "0" ]; then \
+		echo ""; \
+		echo "[FAIL] black reformatted files in your working tree."; \
+		echo "       The fix was applied locally — but CI runs"; \
+		echo "       'black --check' against committed code, so you"; \
+		echo "       MUST: git add <files> && git commit --amend"; \
+		echo "       (or a fresh commit) before pushing."; \
+		echo ""; \
+		exit 1; \
+	fi
+endif
 	@echo "Running pylint..."
 ifeq ($(OS),Windows_NT)
 	@$(PYTHON) -m pylint backend/ --rcfile=.pylintrc
@@ -710,9 +900,160 @@ lint-typescript:
 	@cd frontend && npm run lint
 	@echo "[OK] TypeScript linting completed"
 
+# Version-drift check: every on-disk version marker must equal the
+# highest GitHub release tag (queried via curl, never git).  Offline
+# runs soft-skip rather than fail so dev workflow isn't blocked.
+lint-version:
+	@echo "=== Version drift check ==="
+	@$(PYTHON) scripts/check_version_drift.py
+
+# Surgically update drifted version markers to the current GitHub
+# release tag.  Leaves changes unstaged.
+lint-version-fix:
+	@$(PYTHON) scripts/check_version_drift.py --fix
+
 # Combined linting
-lint: lint-python lint-typescript
+lint: lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-complete lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
+
+# Guard: migrations must be expand-contract (backward-compatible across the
+# incremental fleet migration). See docs/migration-expand-contract.md.
+check-migrations: $(VENV_ACTIVATE)
+	@echo "=== Migration expand-contract check ==="
+	@$(PYTHON) scripts/check_migrations.py
+
+# i18n: extract user-visible t('key', 'fallback') calls and verify every
+# referenced key exists in every locale's translation.json.  Missing keys
+# fail the build.  Run ``make i18n-seed`` to populate gaps with [TODO]-
+# prefixed placeholders before translating.
+i18n-validate: $(VENV_ACTIVATE)
+	@echo "=== i18n validation ==="
+	@$(PYTHON) scripts/i18n_validate.py --validate
+	@echo "[OK] i18n validation completed"
+
+i18n-seed: $(VENV_ACTIVATE)
+	@echo "=== i18n seeding ==="
+	@$(PYTHON) scripts/i18n_validate.py --seed
+	@echo "[OK] i18n seed completed"
+
+i18n-extract: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_validate.py --extract
+
+# Deterministic, network-free placeholder-integrity gate.  Every
+# translated value must carry the SAME interpolation tokens ({{var}},
+# {var}, %s, %(x)s, <tags>) as its English source.  Untranslated
+# ``[TODO]`` values still carry the source tokens, so this passes today
+# and is part of the default ``lint`` target — it catches a machine
+# translator mangling a placeholder, which would be a runtime bug.
+i18n-placeholders: $(VENV_ACTIVATE)
+	@echo "=== i18n placeholder integrity ==="
+	@$(PYTHON) scripts/i18n_check_translations.py --placeholders
+	@echo "[OK] i18n placeholder integrity verified"
+
+# Full translation-completeness gate: fails while any ``[TODO]`` string
+# remains.  NOT in ``lint`` yet (295 strings/locale still to translate).
+# Once ``make i18n-translate`` has populated the locales on the local
+# model rig, switch the ``lint`` line above from ``i18n-placeholders`` to
+# ``i18n-check`` to make untranslated strings a hard CI failure.
+i18n-check: $(VENV_ACTIVATE)
+	@echo "=== i18n completeness + placeholder check ==="
+	@$(PYTHON) scripts/i18n_check_translations.py
+	@echo "[OK] i18n translations complete and consistent"
+
+# Offline i18n COMPLETENESS gate — the SAME check CI runs (i18n_backfill --check),
+# but with no translation service required (polib only; frontend JSON + backend
+# .po).  Wired into ``lint`` so ``make lint`` and the pre-push hook catch
+# untranslated strings BEFORE a push, instead of failing in GitHub Actions.
+# A new ``_()`` / ``t()`` string with no translation now fails locally.
+i18n-complete: $(VENV_ACTIVATE)
+	@echo "=== i18n completeness (offline — no translation service) ==="
+	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project frontend --check
+	@$(PYTHON) scripts/translation-service/i18n_backfill.py --project backend --check
+	@echo "[OK] i18n complete — every locale fully translated"
+
+# Machine-translate the [TODO]-seeded strings via a LOCAL OpenAI-compatible
+# endpoint (vLLM/Ollama/llama.cpp).  Runs on the operator's GPU rig, not
+# in CI; zero external API tokens.  Override the endpoint with
+# I18N_LLM_BASE_URL / I18N_LLM_MODEL.  LANG=all (default) or LANG=<code>.
+LANG ?= all
+i18n-translate: $(VENV_ACTIVATE)
+	@echo "=== i18n machine translation (local model) ==="
+	@$(PYTHON) scripts/i18n_translate.py --lang $(LANG)
+	@$(MAKE) i18n-placeholders
+
+# Local round-trip QA: sample translated strings, back-translate, and
+# flag semantic drift for human review.  Local model only; not a CI gate.
+i18n-backtranslate: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_backtranslate.py --lang $(LANG) --sample 25
+
+# ---- Backend (gettext) i18n cycle -------------------------------------------
+# The backend translates via gettext: user-facing strings are wrapped in _( ),
+# extracted into per-language .po catalogs, and compiled to runtime .mo.  UNLIKE
+# the frontend (where t('key','English') carries its own inline fallback), a
+# backend string that is NOT in the catalog silently renders English in EVERY
+# locale — so the catalog MUST be kept in sync with the code.  Workflow after
+# adding or changing any _("..."):
+#     make i18n-extract-backend                                  # code _() -> .po (new msgids = gaps)
+#     make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765   # fill the gaps
+#     make i18n-compile-backend                                  # .po -> runtime .mo
+BACKEND_I18N       := backend/i18n/locales
+BACKEND_I18N_LANGS := en ar de es fr hi it ja ko nl pt ru zh_CN zh_TW
+BACKEND_I18N_SRC    = $(shell find backend -name '*.py' -not -path '*/test*' -not -path '*/__pycache__/*')
+
+i18n-extract-backend:
+	@command -v xgettext msgmerge msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
+	@echo "=== extracting backend _() strings -> messages.pot ==="
+	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		--package-name=SysManage --msgid-bugs-address=" " \
+		-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC)
+	@# --no-fuzzy-matching: never guess a translation onto a changed string.
+	@# An unmatched/changed string becomes an EMPTY gap (which `make translate`
+	@# fills accurately) rather than a fuzzy guess that msgfmt would drop from the
+	@# .mo (silently rendering English) — the exact bug this whole cycle prevents.
+	@for l in $(BACKEND_I18N_LANGS); do \
+		msgmerge --update --backup=none --quiet --no-fuzzy-matching \
+			$(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po $(BACKEND_I18N)/messages.pot; \
+	done
+	@msgen $(BACKEND_I18N)/en/LC_MESSAGES/messages.po -o $(BACKEND_I18N)/en/LC_MESSAGES/messages.po
+	@echo "[OK] backend msgids extracted + merged into all $(words $(BACKEND_I18N_LANGS)) catalogs."
+	@echo "     Next: make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765 && make i18n-compile-backend"
+
+i18n-compile-backend:
+	@if command -v msgfmt >/dev/null 2>&1; then \
+		for l in $(BACKEND_I18N_LANGS); do \
+			msgfmt -o $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.mo $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po; \
+		done; \
+		echo "[OK] compiled backend .mo for all locales (msgfmt)."; \
+	else \
+		PYB=$$(command -v python3 || command -v python); \
+		[ -n "$$PYB" ] || { echo "ERROR: need msgfmt OR python3+polib to compile .mo"; exit 1; }; \
+		$$PYB -c "import polib" 2>/dev/null || $$PYB -m pip install --quiet --disable-pip-version-check polib; \
+		for l in $(BACKEND_I18N_LANGS); do \
+			$$PYB -c "import polib,sys; polib.pofile(sys.argv[1]).save_as_mofile(sys.argv[2])" \
+				$(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.mo; \
+		done; \
+		echo "[OK] compiled backend .mo for all locales (polib fallback)."; \
+	fi
+
+# Compile backend .mo from the committed .po BEFORE any package is built — every
+# installer payload copies backend/i18n/locales/, and .mo is gitignored (never
+# committed).  Declared as an EXTRA prerequisite on each installer (Make merges
+# prerequisites across rules; the recipes live at their definitions below), so a
+# single line protects every packaging path without touching their bodies.
+.PHONY: i18n-extract-backend i18n-compile-backend i18n-check-backend
+installer installer-deb installer-rpm-centos installer-rpm-opensuse installer-alpine installer-openbsd installer-freebsd installer-macos installer-netbsd installer-msi-x64 installer-msi-arm64: i18n-compile-backend
+
+# CI gate: every _() string in the code must already be in the catalog.  If a
+# contributor adds a string without running i18n-extract-backend, it would ship
+# untranslated — so fail the build.  Network-free.  Pairs with `translate-check`
+# (which fails on any empty msgstr, i.e. extracted-but-not-translated).
+i18n-check-backend:
+	@command -v xgettext msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
+	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
+	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
+		|| { echo "FAIL: backend code has _() strings missing from the catalog — run 'make i18n-extract-backend'"; exit 1; }
+	@echo "[OK] backend catalog is in sync with code."
 
 # Comprehensive security analysis (default)
 security: security-full
@@ -733,6 +1074,37 @@ security-upgrades: $(VENV_ACTIVATE)
 security-full: security-python security-frontend security-secrets
 	@echo "[OK] Comprehensive security analysis completed!"
 
+# Semgrep registry packs run locally.  These mirror the CI Semgrep finding set
+# closely enough to self-verify before pushing — crucially including
+# ``p/trailofbits`` (e.g. tarfile-extractall-traversal), which the basic packs
+# omit and which the cloud Pro scan flags.  The dynamic-urllib / tainted-* rules
+# live in p/default + p/security-audit.  Exact-rule parity with the cloud Pro
+# engine (interfile taint) still needs SEMGREP_APP_TOKEN, handled below.
+SEMGREP_CONFIGS := --config=p/default --config=p/security-audit --config=p/trailofbits \
+	--config=p/python --config=p/javascript --config=p/typescript --config=p/react \
+	--config=p/django --config=p/flask --config=p/owasp-top-ten
+
+# Run Semgrep LOCALLY from the venv (auto-installs it if missing), so the
+# pre-push self-check matches what the cloud scan reports — no round-trip.
+# With SEMGREP_APP_TOKEN set it runs ``semgrep ci`` (Pro engine, same as CI);
+# without, it runs the registry packs above.  Informational (never aborts the
+# security chain); honors inline ``# nosemgrep`` either way.
+security-semgrep: $(VENV_ACTIVATE)
+	@$(PYTHON) -c "import semgrep" 2>/dev/null || $(PIP) install --quiet semgrep
+	@echo "Running Semgrep static analysis (local venv)..."
+	@echo "Tip: export SEMGREP_APP_TOKEN to run the same Pro engine as CI."
+ifeq ($(OS),Windows_NT)
+	-@if defined SEMGREP_APP_TOKEN ($(SEMGREP) ci) else ($(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) .) || echo "Semgrep scan completed"
+else
+	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
+		echo "Using Semgrep CI (Pro rules + supply chain)..."; \
+		$(SEMGREP) ci || true; \
+	else \
+		echo "Using local registry packs (set SEMGREP_APP_TOKEN for Pro parity)..."; \
+		$(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) . || true; \
+	fi
+endif
+
 # Python security analysis (Bandit + Safety)
 security-python: $(VENV_ACTIVATE)
 	@echo "=== Python Security Analysis ==="
@@ -743,19 +1115,7 @@ else
 	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ || true
 endif
 	@echo ""
-	@echo "Running Semgrep static analysis..."
-	@echo "Tip: Export SEMGREP_APP_TOKEN for access to Pro rules and supply chain analysis"
-ifeq ($(OS),Windows_NT)
-	-@if defined SEMGREP_APP_TOKEN (semgrep ci) else (semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten") || echo "Semgrep scan completed"
-else
-	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
-		echo "Using Semgrep CI with supply chain analysis..."; \
-		semgrep ci || true; \
-	else \
-		echo "Using basic Semgrep scan (set SEMGREP_APP_TOKEN for supply chain analysis)..."; \
-		semgrep scan --config="p/default" --config="p/security-audit" --config="p/javascript" --config="p/typescript" --config="p/react" --config="p/python" --config="p/django" --config="p/flask" --config="p/owasp-top-ten" || true; \
-	fi
-endif
+	@$(MAKE) security-semgrep
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
@@ -897,6 +1257,102 @@ install-sonar-scanner:
 	esac
 	@echo "[OK] SonarScanner installed"
 
+# Native SonarQube install location + systemd service.  Defaults match a manual
+# /opt install managed by systemd; override if yours differs, e.g.:
+#   make sonarqube-update-install SONARQUBE_HOME=/opt/sonarqube SONARQUBE_SERVICE=sonar
+SONARQUBE_HOME ?= /opt/sonarqube-home
+SONARQUBE_SERVICE ?= sonarqube
+# Fallback sonar-scanner-cli version (the step auto-resolves the latest; this is
+# only used if that lookup is unavailable).
+SONAR_SCANNER_VERSION ?= 6.2.1.4610
+
+# Update the LOCAL *native* SonarQube server to the latest Community Build, then
+# the sonar-scanner CLI.  The server step resolves the latest version at runtime
+# and ABORTS (never guesses) if it can't; it backs up the current install by
+# rename (no extra disk), preserves conf/ (DB connection) + custom plugins, and
+# restarts via systemd.  Needs sudo (systemctl + writes under SONARQUBE_HOME).
+sonarqube-update-install:
+	@echo "=== Update native SonarQube (server + scanner CLI) ==="
+	@echo ""
+	@echo "--- 1/2: SonarQube server (native install at $(SONARQUBE_HOME)) ---"
+	@set -e; \
+	if ! command -v systemctl >/dev/null 2>&1; then \
+		echo "No systemd (systemctl) found — skipping native server update."; \
+	elif [ ! -d "$(SONARQUBE_HOME)" ]; then \
+		echo "ERROR: $(SONARQUBE_HOME) not found. Set SONARQUBE_HOME=<your install dir>."; exit 1; \
+	else \
+		if ! command -v unzip >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then \
+			sudo apt-get update && sudo apt-get install -y unzip; \
+		fi; \
+		UC="https://downloads.sonarsource.com/sonarqube/update/update-center.properties"; \
+		PROPS=$$(curl -fsSL "$$UC" 2>/dev/null); \
+		if [ -z "$$PROPS" ]; then echo "ERROR: could not fetch SonarQube update-center.properties (network?). Aborting -- not guessing."; exit 1; fi; \
+		LATEST=$$(echo "$$PROPS" | grep 'description=Latest Community Build version' | sed 's/.description=.*//' | sort -V | tail -1); \
+		LATEST_FULL=$$(echo "$$PROPS" | grep "^$$LATEST.downloadUrl=" | grep -oE 'sonarqube-[0-9.]+\.zip' | head -1 | sed 's/sonarqube-//; s/\.zip$$//'); \
+		if [ -z "$$LATEST" ] || [ -z "$$LATEST_FULL" ]; then echo "ERROR: could not resolve latest version from update-center. Aborting -- not guessing."; exit 1; fi; \
+		URL="https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-$$LATEST_FULL.zip"; \
+		CURRENT=$$(curl -fsS http://localhost:9000/api/server/version 2>/dev/null || echo "unknown"); \
+		CURRENT_MM=$$(echo "$$CURRENT" | cut -d. -f1,2); \
+		echo "Running version:   $$CURRENT"; \
+		echo "Latest available:  $$LATEST_FULL"; \
+		if [ "$$CURRENT_MM" = "$$LATEST" ]; then echo "Already on the latest Community Build ($$LATEST). Nothing to do."; else \
+			printf "Stop %s, back up %s, and replace it with $$LATEST_FULL? [y/N] " "$(SONARQUBE_SERVICE)" "$(SONARQUBE_HOME)"; \
+			read ans; case "$$ans" in [yY]*) ;; *) echo "Server update declined."; exit 0;; esac; \
+			OWNER=$$(stat -c '%U:%G' "$(SONARQUBE_HOME)"); \
+			echo "Downloading sonarqube-$$LATEST_FULL.zip..."; \
+			curl -fSL -o /tmp/sonarqube-$$LATEST_FULL.zip "$$URL"; \
+			rm -rf /tmp/sonarqube-$$LATEST_FULL; unzip -q /tmp/sonarqube-$$LATEST_FULL.zip -d /tmp/; \
+			echo "Stopping $(SONARQUBE_SERVICE)..."; sudo systemctl stop $(SONARQUBE_SERVICE); \
+			BACKUP=$(SONARQUBE_HOME).bak-$$(date +%Y%m%d-%H%M%S); \
+			sudo mv "$(SONARQUBE_HOME)" "$$BACKUP"; echo "Backed up old install to $$BACKUP"; \
+			sudo mv /tmp/sonarqube-$$LATEST_FULL "$(SONARQUBE_HOME)"; \
+			sudo cp -f "$$BACKUP/conf/sonar.properties" "$(SONARQUBE_HOME)/conf/sonar.properties"; \
+			[ -f "$$BACKUP/conf/wrapper.conf" ] && sudo cp -f "$$BACKUP/conf/wrapper.conf" "$(SONARQUBE_HOME)/conf/wrapper.conf" || true; \
+			for p in "$$BACKUP"/extensions/plugins/*.jar; do [ -e "$$p" ] && sudo cp -f "$$p" "$(SONARQUBE_HOME)/extensions/plugins/"; done; \
+			sudo chown -R "$$OWNER" "$(SONARQUBE_HOME)"; rm -f /tmp/sonarqube-$$LATEST_FULL.zip; \
+			echo "Reloading systemd (unit files changed on disk)..."; sudo systemctl daemon-reload; \
+			echo "Starting $(SONARQUBE_SERVICE)..."; sudo systemctl start $(SONARQUBE_SERVICE); \
+			echo "Waiting for the SonarQube web API..."; \
+			i=0; while [ $$i -lt 60 ]; do ST=$$(curl -fsS http://localhost:9000/api/system/status 2>/dev/null | grep -oE '"status":"[A-Z_]+"' | cut -d'"' -f4); { [ -n "$$ST" ] && [ "$$ST" != "STARTING" ] && [ "$$ST" != "DOWN" ]; } && break; printf '.'; sleep 5; i=$$((i+1)); done; echo ""; \
+			if [ "$$ST" = "DB_MIGRATION_NEEDED" ]; then echo "Running one-time database migration (clears the 'under maintenance' screen)..."; curl -fsS -X POST http://localhost:9000/api/system/migrate_db >/dev/null 2>&1 || true; i=0; while [ $$i -lt 120 ]; do ST=$$(curl -fsS http://localhost:9000/api/system/status 2>/dev/null | grep -oE '"status":"[A-Z_]+"' | cut -d'"' -f4); { [ "$$ST" = "UP" ] || [ "$$ST" = "STATUS_ERROR" ]; } && break; printf '.'; sleep 5; i=$$((i+1)); done; echo ""; fi; \
+			if [ "$$ST" = "UP" ]; then echo "[OK] SonarQube $$LATEST_FULL is UP at http://localhost:9000"; else echo "SonarQube status='$$ST' - if not UP shortly: sudo tail -f $(SONARQUBE_HOME)/logs/sonar.log (or open http://localhost:9000/setup)"; fi; \
+			echo "Rollback: sudo systemctl stop $(SONARQUBE_SERVICE) && sudo rm -rf $(SONARQUBE_HOME) && sudo mv $$BACKUP $(SONARQUBE_HOME) && sudo systemctl daemon-reload && sudo systemctl start $(SONARQUBE_SERVICE)"; \
+			echo "Once verified: sudo rm -rf $$BACKUP"; \
+		fi; \
+	fi
+	@echo ""
+	@echo "--- 2/2: sonar-scanner CLI ---"
+	@case "$$(uname -s)" in \
+		Linux) \
+			if ! command -v unzip >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then \
+				sudo apt-get update && sudo apt-get install -y unzip; \
+			fi; \
+			echo "Resolving latest sonar-scanner-cli version..."; \
+			VER=$$(curl -fsSL "https://binaries.sonarsource.com/?prefix=Distribution/sonar-scanner-cli/" 2>/dev/null | grep -oE 'sonar-scanner-cli-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+-linux-x64\.zip' | sed -E 's/.*cli-(.*)-linux-x64\.zip/\1/' | sort -V | uniq | tail -1); \
+			if [ -z "$$VER" ]; then VER="$(SONAR_SCANNER_VERSION)"; echo "Auto-resolve failed; using pinned $$VER"; else echo "Latest is $$VER"; fi; \
+			echo "Downloading sonar-scanner-cli $$VER..."; \
+			curl -fSL -o /tmp/sonar-scanner.zip "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$$VER-linux-x64.zip"; \
+			unzip -o -q /tmp/sonar-scanner.zip -d /tmp/; \
+			sudo rm -rf /opt/sonar-scanner; \
+			sudo mv "/tmp/sonar-scanner-$$VER-linux-x64" /opt/sonar-scanner; \
+			sudo ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner; \
+			rm -f /tmp/sonar-scanner.zip; \
+			;; \
+		Darwin) \
+			if command -v brew >/dev/null 2>&1; then \
+				brew update && (brew upgrade sonar-scanner || brew install sonar-scanner); \
+			else \
+				echo "Install Homebrew first, then: brew install sonar-scanner"; exit 1; \
+			fi; \
+			;; \
+		*) \
+			echo "Please update sonar-scanner manually for this OS."; \
+			;; \
+	esac
+	@echo ""
+	@sonar-scanner --version 2>/dev/null | head -3 || echo "Run 'sonar-scanner --version' to verify."
+	@echo "[OK] SonarQube update complete"
+
 # Format Python code (helper target)
 format-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "Formatting Python code..."
@@ -915,10 +1371,19 @@ else
 	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
 	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
 endif
+# Backend tests run as TWO separate pytest processes accumulating into
+# one coverage dataset via --cov-append: tests/ (canonical) then
+# backend/tests/ (a second tree CI used to skip — proplus/federation/
+# management-API suites).  They CANNOT share one -n auto run (cross-tree
+# xdist worker crashes).  The --cov-fail-under ratchet on the final run
+# gates the COMBINED total so coverage can't silently decline; bump it
+# when the real number rises.
 ifeq ($(OS),Windows_NT)
-	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
 else
-	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=term-missing --cov-report=html
+	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
+	@OTEL_ENABLED=false $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
 endif
 	@echo "[OK] Python tests completed"
 
@@ -958,8 +1423,9 @@ ifeq ($(OS),Windows_NT)
 		echo "[ERROR] Artillery not found. Installing..." && \
 		npm install -g artillery@latest \
 	)
-	@echo "[INFO] Running Artillery load tests against http://localhost:8001..."
-	@echo "[NOTE] Ensure the SysManage server is running on port 8001"
+	@$(PYTHON) scripts/generate_artillery_config.py
+	@echo "[INFO] Running Artillery load tests (target read from artillery.yml)"
+	@echo "[NOTE] Ensure the SysManage backend is running and reachable on the configured port"
 	@artillery run artillery.yml --output artillery-report.json
 	@if exist artillery-report.json ( \
 		artillery report artillery-report.json --output artillery-report.html && \
@@ -968,31 +1434,113 @@ ifeq ($(OS),Windows_NT)
 	@echo "[INFO] Running performance regression analysis..."
 	@$(PYTHON) scripts/performance_regression_check.py
 else
-	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
+	@set -e; \
+	if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "[SKIP] Artillery not supported on $(shell uname -s) - performance tests skipped"; \
 	else \
+		if ! command -v npm >/dev/null 2>&1; then \
+			echo "[ERROR] npm not found. Please install Node.js and npm first."; \
+			exit 1; \
+		fi; \
 		echo "[INFO] Running Artillery load tests for backend API..."; \
-		command -v artillery >/dev/null 2>&1 || { \
-			echo "[ERROR] Artillery not found. Installing..."; \
-			if command -v npm >/dev/null 2>&1; then \
-				npm install -g artillery@latest; \
-			else \
-				echo "[ERROR] npm not found. Please install Node.js and npm first."; \
+		echo "[INFO] (Artillery is fetched on demand via npx — first run downloads to ~/.npm/_npx cache, no global install or sudo required)"; \
+		echo "[INFO] Regenerating artillery.yml from sysmanage.yaml to pick up the current api.port..."; \
+		$(PYTHON) scripts/generate_artillery_config.py; \
+		TARGET_URL=$$($(PYTHON) -c "import yaml; print(yaml.safe_load(open('artillery.yml'))['config']['target'])"); \
+		echo "[INFO] Artillery target: $$TARGET_URL"; \
+		echo "[INFO] Pre-flight: checking that the SysManage backend is reachable at $$TARGET_URL/api/health..."; \
+		BACKEND_STARTED_BY_US=0; \
+		if ! curl --silent --fail --max-time 5 --output /dev/null "$$TARGET_URL/api/health"; then \
+			echo "[INFO] Backend not running - starting one in the background for the load test."; \
+			mkdir -p logs; \
+			. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true nohup $(PYTHON) -m backend.main > logs/backend-perf.log 2>&1 & \
+			PERF_BACKEND_PID=$$!; \
+			echo "$$PERF_BACKEND_PID" > logs/backend-perf.pid; \
+			BACKEND_STARTED_BY_US=1; \
+			echo "[INFO] Backend PID: $$PERF_BACKEND_PID - waiting up to 90s for /api/health..."; \
+			BACKEND_READY=0; \
+			for i in $$(seq 1 45); do \
+				if curl --silent --fail --max-time 2 --output /dev/null "$$TARGET_URL/api/health"; then \
+					BACKEND_READY=1; \
+					echo "[INFO] Backend is ready."; \
+					break; \
+				fi; \
+				sleep 2; \
+			done; \
+			if [ $$BACKEND_READY -eq 0 ]; then \
+				echo "[ERROR] Backend failed to become healthy within 90s. See logs/backend-perf.log."; \
+				kill $$PERF_BACKEND_PID 2>/dev/null || true; \
+				rm -f logs/backend-perf.pid; \
 				exit 1; \
 			fi; \
-		}; \
-		echo "[INFO] Running Artillery load tests against http://localhost:8001..."; \
-		echo "[NOTE] Ensure the SysManage server is running on port 8001"; \
-		artillery run artillery.yml --output artillery-report.json; \
-		if [ -f artillery-report.json ]; then \
-			artillery report artillery-report.json --output artillery-report.html; \
-			echo "[INFO] Artillery report generated: artillery-report.html"; \
+		else \
+			echo "[INFO] Backend already running - using it."; \
 		fi; \
+		echo "[INFO] Pre-warming backend (10 health pings) so cold-start outliers do not skew p99..."; \
+		for i in 1 2 3 4 5 6 7 8 9 10; do \
+			curl --silent --fail --max-time 5 --output /dev/null "$$TARGET_URL/api/health" || true; \
+		done; \
+		echo "[INFO] Provisioning perf-test user (e2e-test@sysmanage.org)..."; \
+		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
+		# Ensure the test user is deleted AND any backend we started is \
+		# stopped, even if artillery or the report checks fail. Without \
+		# the trap, a failure between create and the end of the recipe \
+		# would leave the user in the database and the backend running. \
+		trap ' \
+			. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete >/dev/null 2>&1 || true; \
+			if [ "$$BACKEND_STARTED_BY_US" = "1" ] && [ -f logs/backend-perf.pid ]; then \
+				echo "[INFO] Stopping perf-test backend (PID $$(cat logs/backend-perf.pid))..."; \
+				kill $$(cat logs/backend-perf.pid) 2>/dev/null || true; \
+				lsof -ti:8080 | xargs kill -9 2>/dev/null || true; \
+				rm -f logs/backend-perf.pid; \
+			fi \
+		' EXIT; \
+		echo "[INFO] Running Artillery load tests against $$TARGET_URL..."; \
+		npx --yes artillery@latest run artillery.yml --output artillery-report.json; \
+		if [ ! -f artillery-report.json ]; then \
+			echo "[ERROR] Artillery did not produce a report (run failed silently?)"; \
+			exit 1; \
+		fi; \
+		# Sanity-check the report. A "successful" run requires at least one 2xx HTTP \
+		# response — anything else means we sent traffic but got nothing useful back \
+		# (wrong endpoints, broken auth, server returning errors, etc.). \
+		REPORT_SUMMARY=$$($(PYTHON) -c "\
+import json, sys; \
+d = json.load(open('artillery-report.json')); \
+c = d.get('aggregate', {}).get('counters', {}); \
+created = c.get('vusers.created', 0); \
+failed = c.get('vusers.failed', 0); \
+responses = c.get('http.responses', 0); \
+ok_2xx = sum(v for k, v in c.items() if k.startswith('http.codes.2')); \
+err_4xx = sum(v for k, v in c.items() if k.startswith('http.codes.4')); \
+err_5xx = sum(v for k, v in c.items() if k.startswith('http.codes.5')); \
+print(f'{created}|{failed}|{responses}|{ok_2xx}|{err_4xx}|{err_5xx}')"); \
+		CREATED=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f1); \
+		FAILED=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f2); \
+		RESPONSES=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f3); \
+		OK_2XX=$$(echo "$$REPORT_SUMMARY"   | cut -d'|' -f4); \
+		ERR_4XX=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f5); \
+		ERR_5XX=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f6); \
+		echo "[INFO] Result summary: created=$$CREATED failed=$$FAILED responses=$$RESPONSES 2xx=$$OK_2XX 4xx=$$ERR_4XX 5xx=$$ERR_5XX"; \
+		if [ "$$CREATED" -gt 0 ] && [ "$$FAILED" = "$$CREATED" ]; then \
+			echo "[ERROR] All $$CREATED virtual users failed (likely connection errors)."; \
+			exit 1; \
+		fi; \
+		if [ "$$RESPONSES" -gt 0 ] && [ "$$OK_2XX" = "0" ]; then \
+			echo "[ERROR] $$RESPONSES HTTP responses received, but ZERO were 2xx (4xx=$$ERR_4XX, 5xx=$$ERR_5XX)."; \
+			echo "[ERROR] The load test ran but every request was rejected by the server."; \
+			echo "[ERROR] Likely causes: artillery.yml scenarios hit endpoints that don't exist (404),"; \
+			echo "[ERROR] use auth credentials that don't work (401), or the server is misconfigured."; \
+			echo "[ERROR] Inspect artillery-report.json or artillery-report.html for detail."; \
+			exit 1; \
+		fi; \
+		npx --yes artillery@latest report artillery-report.json --output artillery-report.html; \
+		echo "[INFO] Artillery report generated: artillery-report.html"; \
 		echo "[INFO] Running performance regression analysis..."; \
 		$(PYTHON) scripts/performance_regression_check.py; \
+		echo "[OK] Performance tests completed successfully ($$CREATED virtual users, $$FAILED failed)"; \
 	fi
 endif
-	@echo "[OK] Performance testing completed"
 	@echo "[INFO] Browser performance tests are included in 'make test-e2e' (performance.spec.ts)"
 
 # Vite tests only (alias for test-typescript)
@@ -1003,8 +1551,8 @@ test-vite: test-typescript
 test-e2e: $(VENV_ACTIVATE)
 	@echo "=== Running Frontend E2E Tests (Playwright) ==="
 ifeq ($(OS),Windows_NT)
-	@echo "[INFO] Starting backend API server..."
-	@start /B $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1
+	@echo "[INFO] Starting backend API server (single-tenant for e2e)..."
+	@start /B cmd /c "set SYSMANAGE_MULTITENANCY=false && $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1"
 	@echo "[INFO] Waiting for backend to be ready..."
 	@powershell -Command "Start-Sleep -Seconds 5"
 	@echo "[INFO] Starting frontend dev server on port 5173..."
@@ -1023,7 +1571,7 @@ else
 	else \
 		mkdir -p logs; \
 		echo "[INFO] Creating E2E test user..."; \
-		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
+		. $(VENV_ACTIVATE) && SYSMANAGE_MULTITENANCY=false $(PYTHON) scripts/e2e_test_user.py create; \
 		echo "[INFO] Checking for port conflicts..."; \
 		if lsof -ti:8080 >/dev/null 2>&1; then \
 			echo "[INFO] Killing process on port 8080..."; \
@@ -1035,15 +1583,15 @@ else
 			lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
 			sleep 1; \
 		fi; \
-		echo "[INFO] Starting backend API server (email disabled for e2e)..."; \
-		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
+		echo "[INFO] Starting backend API server (email disabled, single-tenant for e2e)..."; \
+		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true SYSMANAGE_MULTITENANCY=false nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
 		BACKEND_PID=$$!; \
 		echo "[INFO] Backend PID: $$BACKEND_PID"; \
 		echo "$$BACKEND_PID" > logs/backend-e2e.pid; \
 		echo "[INFO] Waiting for backend to be ready on port 8080 (may take up to 2 minutes)..."; \
 		BACKEND_READY=0; \
 		for i in $$(seq 1 45); do \
-			if curl -s http://localhost:8080/api/health > /dev/null 2>&1; then \
+			if curl -s http://127.0.0.1:8080/api/health > /dev/null 2>&1; then \
 				echo "[INFO] Backend is ready!"; \
 				BACKEND_READY=1; \
 				break; \
@@ -1057,13 +1605,13 @@ else
 			exit 1; \
 		fi; \
 		echo "[INFO] Starting frontend dev server on port 3000..."; \
-		cd frontend && FORCE_HTTP=true npm start > ../logs/frontend-e2e.log 2>&1 & \
+		cd frontend && FORCE_HTTP=true VITE_HOST=127.0.0.1 npm start > ../logs/frontend-e2e.log 2>&1 & \
 		VITE_PID=$$!; \
 		echo "[INFO] Frontend dev server PID: $$VITE_PID"; \
 		echo "$$VITE_PID" > logs/frontend-e2e.pid; \
 		echo "[INFO] Waiting for frontend to be ready on port 3000..."; \
 		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do \
-			if curl -s http://localhost:3000 > /dev/null 2>&1; then \
+			if curl -s http://127.0.0.1:3000 > /dev/null 2>&1; then \
 				echo "[INFO] Frontend is ready!"; \
 				break; \
 			fi; \
@@ -1072,7 +1620,7 @@ else
 		done; \
 		echo "[INFO] Running E2E tests..."; \
 		E2E_EXIT=0; \
-		(cd frontend && PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e) || E2E_EXIT=$$?; \
+		(cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e) || E2E_EXIT=$$?; \
 		echo "[INFO] Stopping frontend dev server (PID: $$VITE_PID)..."; \
 		kill $$VITE_PID 2>/dev/null || true; \
 		if [ -f logs/frontend-e2e.pid ]; then kill $$(cat logs/frontend-e2e.pid) 2>/dev/null || true; fi; \
@@ -1471,6 +2019,7 @@ installer-deb:
 	rsync -a --exclude='node_modules' --exclude='coverage' frontend/public/ "$$BUILD_DIR/frontend/public/"; \
 	cp requirements.txt "$$BUILD_DIR/"; \
 	cp alembic.ini "$$BUILD_DIR/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' alembic/ "$$BUILD_DIR/alembic/"; \
 	cp -r config "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp -r scripts "$$BUILD_DIR/" 2>/dev/null || true; \
 	cp README.md "$$BUILD_DIR/" 2>/dev/null || touch "$$BUILD_DIR/README.md"; \
@@ -1484,6 +2033,11 @@ installer-deb:
 	cp installer/ubuntu/*.service "$$BUILD_DIR/installer/ubuntu/"; \
 	cp installer/ubuntu/*.example "$$BUILD_DIR/installer/ubuntu/"; \
 	cp installer/ubuntu/*.conf "$$BUILD_DIR/installer/ubuntu/" 2>/dev/null || true; \
+		mkdir -p "$$BUILD_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$BUILD_DIR/installer/airgap-bundle/"; \
+		mkdir -p "$$BUILD_DIR/installer/openbao"; \
+		cp installer/openbao/openbao.hcl "$$BUILD_DIR/installer/openbao/"; \
+		cp installer/openbao/sysmanage-openbao-init.service "$$BUILD_DIR/installer/openbao/"; \
 	echo "✓ Packaging files copied"; \
 	echo ""; \
 	echo "Building package..."; \
@@ -1518,13 +2072,17 @@ installer-openbsd: build
 	@CURRENT_DIR=$$(pwd); \
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	PORT_DIR="$$CURRENT_DIR/installer/openbsd"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.1.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
@@ -1638,6 +2196,11 @@ installer-rpm-centos:
 	cp installer/centos/*.service "$$TAR_DIR/installer/centos/"; \
 	cp installer/centos/*.conf "$$TAR_DIR/installer/centos/"; \
 	cp installer/centos/*.example "$$TAR_DIR/installer/centos/"; \
+		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
+	mkdir -p "$$TAR_DIR/installer/openbao"; \
+	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \
@@ -1771,6 +2334,11 @@ installer-rpm-opensuse:
 	cp installer/opensuse/*.service "$$TAR_DIR/installer/opensuse/"; \
 	cp installer/opensuse/*.conf "$$TAR_DIR/installer/opensuse/"; \
 	cp installer/opensuse/*.example "$$TAR_DIR/installer/opensuse/"; \
+		mkdir -p "$$TAR_DIR/installer/airgap-bundle"; \
+		cp installer/airgap-bundle/install.sh "$$TAR_DIR/installer/airgap-bundle/"; \
+	mkdir -p "$$TAR_DIR/installer/openbao"; \
+	cp installer/openbao/openbao.hcl "$$TAR_DIR/installer/openbao/"; \
+	cp installer/openbao/sysmanage-openbao-init.service "$$TAR_DIR/installer/openbao/"; \
 	cd "$$BUILD_TEMP/SOURCES" && tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	rm -rf "$$TAR_DIR"; \
 	echo "✓ Source tarball created"; \
@@ -1842,13 +2410,17 @@ installer-freebsd: build
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	BUILD_DIR="$$CURRENT_DIR/build/freebsd"; \
 	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.9.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.9.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Cleaning build directory..."; \
@@ -1879,6 +2451,7 @@ installer-freebsd: build
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/sysmanage"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/rc.d"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/local/etc/openbao"; \
 	mkdir -p "$$PACKAGE_ROOT/usr/local/share/doc/sysmanage/sbom"; \
 	echo "✓ Package directories created"; \
 	echo ""; \
@@ -1901,6 +2474,9 @@ installer-freebsd: build
 	cp installer/freebsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/local/etc/nginx/conf.d/"; \
 	cp installer/freebsd/sysmanage.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
 	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/sysmanage"; \
+	cp installer/freebsd/openbao.rc "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
+	chmod +x "$$PACKAGE_ROOT/usr/local/etc/rc.d/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/local/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \
@@ -1974,13 +2550,17 @@ installer-macos: build
 	BUILD_TEMP="$$OUTPUT_DIR/build-temp-macos"; \
 	PAYLOAD_DIR="$$BUILD_TEMP/payload"; \
 	SCRIPTS_DIR="$$BUILD_TEMP/scripts"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.9.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.9.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
@@ -2015,6 +2595,7 @@ installer-macos: build
 	rsync -a alembic/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/alembic/"; \
 	cp alembic.ini "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
 	cp requirements.txt "$$PAYLOAD_DIR/usr/local/lib/sysmanage/"; \
+	rsync -a --exclude='__pycache__' --exclude='*.pyc' scripts/ "$$PAYLOAD_DIR/usr/local/lib/sysmanage/scripts/"; \
 	echo "✓ Backend files copied"; \
 	echo ""; \
 	echo "Copying frontend files..."; \
@@ -2025,6 +2606,8 @@ installer-macos: build
 	echo "Copying configuration files..."; \
 	cp installer/macos/sysmanage.yaml.example "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
 	cp installer/macos/sysmanage-nginx.conf "$$PAYLOAD_DIR/usr/local/etc/sysmanage/"; \
+	mkdir -p "$$PAYLOAD_DIR/usr/local/etc/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PAYLOAD_DIR/usr/local/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM files..."; \
@@ -2038,6 +2621,7 @@ installer-macos: build
 	echo ""; \
 	echo "Copying LaunchDaemon plist..."; \
 	cp installer/macos/com.sysmanage.server.plist "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.server.plist"; \
+	cp installer/macos/com.sysmanage.openbao.plist "$$PAYLOAD_DIR/Library/LaunchDaemons/com.sysmanage.openbao.plist"; \
 	echo "✓ LaunchDaemon plist copied"; \
 	echo ""; \
 	echo "Copying postinstall script..."; \
@@ -2080,13 +2664,17 @@ installer-netbsd: build
 	OUTPUT_DIR="$$CURRENT_DIR/installer/dist"; \
 	BUILD_DIR="$$CURRENT_DIR/build/netbsd"; \
 	PACKAGE_ROOT="$$BUILD_DIR/package-root"; \
-	echo "Determining version from git..."; \
-	VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
-	if [ -z "$$VERSION" ]; then \
-		VERSION="0.1.0"; \
-		echo "WARNING: No git tags found, using default version: $$VERSION"; \
+	echo "Determining version..."; \
+	if [ -n "$$VERSION" ]; then \
+		echo "Using VERSION from environment: $$VERSION"; \
 	else \
-		echo "Building version: $$VERSION"; \
+		VERSION=$$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//'); \
+		if [ -z "$$VERSION" ]; then \
+			VERSION="0.1.0"; \
+			echo "WARNING: No VERSION env, no git tags found, using default: $$VERSION"; \
+		else \
+			echo "Building version from git tag: $$VERSION"; \
+		fi; \
 	fi; \
 	echo ""; \
 	echo "Checking prerequisites..."; \
@@ -2134,6 +2722,10 @@ installer-netbsd: build
 	cp installer/netbsd/sysmanage.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
 	cp installer/netbsd/sysmanage-nginx.conf "$$PACKAGE_ROOT/usr/pkg/share/examples/sysmanage/"; \
 	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/sysmanage"; \
+	mkdir -p "$$PACKAGE_ROOT/usr/pkg/etc/openbao"; \
+	cp installer/netbsd/openbao.rc "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
+	chmod +x "$$PACKAGE_ROOT/usr/pkg/share/examples/rc.d/openbao"; \
+	cp installer/openbao/openbao.hcl "$$PACKAGE_ROOT/usr/pkg/etc/openbao/openbao.hcl"; \
 	echo "✓ Configuration files copied"; \
 	echo ""; \
 	echo "Copying SBOM..."; \
@@ -2431,7 +3023,7 @@ sbom:
 	@echo "✓ Python SBOM generated: sbom/backend-sbom.json"
 	@echo ""
 	@echo "Generating Node.js SBOM from frontend/package.json..."
-	@cd frontend && npx --yes @cyclonedx/cyclonedx-npm \
+	@cd frontend && npx cyclonedx-npm \
 		--output-format JSON \
 		--output-file ../sbom/frontend-sbom.json \
 		--ignore-npm-errors
@@ -2867,7 +3459,7 @@ release-notes:
 
 # Deploy to Launchpad PPA
 # Usage: LAUNCHPAD_RELEASES="noble jammy" make deploy-launchpad
-# Default releases: questing plucky noble jammy
+# Default releases: resolute questing noble jammy
 deploy-launchpad:
 	@echo "=================================================="
 	@echo "Deploy to Launchpad PPA"
@@ -2886,7 +3478,7 @@ deploy-launchpad:
 		fi; \
 	fi; \
 	\
-	RELEASES="$${LAUNCHPAD_RELEASES:-questing plucky noble jammy}"; \
+	RELEASES="$${LAUNCHPAD_RELEASES:-resolute questing noble jammy}"; \
 	echo "Target releases: $$RELEASES"; \
 	echo "Version: $$VERSION"; \
 	echo ""; \
@@ -3095,6 +3687,8 @@ deploy-obs:
 	cp "$$WORKSPACE/installer/opensuse/"*.sudoers "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
 	cp "$$WORKSPACE/installer/opensuse/"*.example "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
 	cp "$$WORKSPACE/installer/opensuse/sysmanage-nginx.conf" "/tmp/$$TAR_NAME/installer/opensuse/" || true; \
+		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
+		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" || true; \
 	cd /tmp; \
 	tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	echo "Created source tarball: sysmanage-$$VERSION.tar.gz"; \
@@ -3102,10 +3696,17 @@ deploy-obs:
 	echo "Creating vendor tarball (Python 3.11 wheels)..."; \
 	rm -rf /tmp/vendor; \
 	mkdir -p /tmp/vendor; \
+	echo "Downloading pip wheel (needed to upgrade old pip in build chroot)..."; \
+	pip3 download pip -d /tmp/vendor --only-binary=:all:; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 311 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 311 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
 		--only-binary=:all:; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 311 \
@@ -3218,6 +3819,8 @@ deploy-copr:
 	cp "$$WORKSPACE/installer/centos/"*.service "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/installer/centos/"*.conf "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/installer/centos/"*.example "/tmp/$$TAR_NAME/installer/centos/" 2>/dev/null || true; \
+		mkdir -p "/tmp/$$TAR_NAME/installer/airgap-bundle"; \
+		cp "$$WORKSPACE/installer/airgap-bundle/install.sh" "/tmp/$$TAR_NAME/installer/airgap-bundle/" 2>/dev/null || true; \
 	cp "$$WORKSPACE/README.md" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/README.md"; \
 	cp "$$WORKSPACE/LICENSE" "/tmp/$$TAR_NAME/" || touch "/tmp/$$TAR_NAME/LICENSE"; \
 	if [ -d "$$WORKSPACE/sbom" ]; then \
@@ -3227,20 +3830,46 @@ deploy-copr:
 	tar czf "sysmanage-$$VERSION.tar.gz" "$$TAR_NAME/"; \
 	echo "Created source tarball: sysmanage-$$VERSION.tar.gz"; \
 	\
-	echo "Creating vendor tarball (Python 3.12 + 3.13 wheels)..."; \
+	echo "Creating vendor tarball (Python 3.11 + 3.12 + 3.13 wheels)..."; \
 	rm -rf /tmp/vendor; \
 	mkdir -p /tmp/vendor; \
-	echo "Downloading wheels for Python 3.12 (EPEL 10)..."; \
+	echo "Downloading pip wheel (needed to upgrade old pip in EPEL 8 build chroot)..."; \
+	pip3 download pip -d /tmp/vendor --only-binary=:all:; \
+	echo "Downloading wheels for Python 3.11 x86_64 (EPEL 8)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.11.11 \
+		--platform manylinux2014_x86_64 \
+		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.11 aarch64 (EPEL 8)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.11.11 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.12 x86_64 (EPEL 9, EPEL 10)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.12.11 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
 		--only-binary=:all:; \
-	echo "Downloading wheels for Python 3.13 (Fedora 41, 42)..."; \
+	echo "Downloading wheels for Python 3.12 aarch64 (EPEL 9, EPEL 10)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.12.11 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.13 x86_64 (Fedora 41, 42)..."; \
 	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
 		--python-version 3.13.1 \
 		--platform manylinux2014_x86_64 \
 		--platform manylinux_2_17_x86_64 \
+		--only-binary=:all:; \
+	echo "Downloading wheels for Python 3.13 aarch64 (Fedora 41, 42)..."; \
+	pip3 download -r "$$WORKSPACE/requirements-prod.txt" -d /tmp/vendor \
+		--python-version 3.13.1 \
+		--platform manylinux2014_aarch64 \
+		--platform manylinux_2_17_aarch64 \
 		--only-binary=:all:; \
 	echo "Total wheels: $$(ls -1 /tmp/vendor/*.whl 2>/dev/null | wc -l)"; \
 	cd /tmp; \

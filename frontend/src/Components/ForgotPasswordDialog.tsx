@@ -56,7 +56,7 @@ const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({ open, onClo
         setError(null);
 
         try {
-            await axiosInstance.post('/forgot-password', {
+            await axiosInstance.post('/api/forgot-password', {
                 email: email
             });
 

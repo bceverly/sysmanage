@@ -1,0 +1,153 @@
+digraph DC01_Application_Architecture {
+    graph [
+        label = "DC-01: SysManage Application Architecture\n(Tiered View — Open Source Server, Open Source Agent, Professional+ License Server)\n",
+        labelloc = "t",
+        fontname = "Helvetica-Bold",
+        fontsize = 18,
+        rankdir = "TB",
+        compound = true,
+        nodesep = 0.4,
+        ranksep = 0.6,
+        bgcolor = "white",
+        pad = "0.5"
+    ];
+    node [fontname = "Helvetica", fontsize = 11, shape = "box", style = "filled,rounded", color = "#333333"];
+    edge [fontname = "Helvetica", fontsize = 9, color = "#444444"];
+
+    // ---------- CLIENT / PRESENTATION TIER ----------
+    subgraph cluster_client {
+        label = "Client Tier (Presentation)";
+        style = "filled,rounded";
+        fillcolor = "#E8F1FB";
+        color = "#1F4E79";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        admin_browser [label = "Administrator\nBrowser (HTTPS)", fillcolor = "#FFFFFF", shape = "oval"];
+        spa [label = "React SPA\n(TypeScript / Vite)\ni18n: 14 languages\nDynamic Plugin Loader", fillcolor = "#BBD6F2"];
+    }
+
+    // ---------- SERVER WEB / API TIER ----------
+    subgraph cluster_server {
+        label = "SysManage Server (Open Source)";
+        style = "filled,rounded";
+        fillcolor = "#FBF3E2";
+        color = "#7F5A0F";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        webui [label = "WebUI Server\nNode/Vite\nTCP 8080 (HTTPS)", fillcolor = "#F4E1B5"];
+
+        subgraph cluster_api {
+            label = "API / Application Tier";
+            style = "rounded";
+            color = "#7F5A0F";
+            fontsize = 11;
+
+            fastapi [label = "FastAPI / Uvicorn (ASGI)\nPython 3.12\nTCP 6443 (HTTPS / WSS)", fillcolor = "#F4D58A"];
+            authz   [label = "Auth Layer\nJWT + Argon2\nRate Limiting / CORS", fillcolor = "#F4D58A"];
+            wsmgr   [label = "WebSocket Connection Mgr\nPersistent Message Queues\nHeartbeat / Ping-Pong", fillcolor = "#F4D58A"];
+            routers [label = "Module Routers\n(Hosts, Updates, Users,\nCerts, Scripts, Firewall)", fillcolor = "#F4D58A"];
+        }
+
+        subgraph cluster_bg {
+            label = "Background / Workers";
+            style = "rounded";
+            color = "#7F5A0F";
+            fontsize = 11;
+            scheduler [label = "Scheduler / Async Tasks\nasyncio Coroutines", fillcolor = "#F9E8C2"];
+            metrics   [label = "OpenTelemetry / Prometheus\nTCP 9090", fillcolor = "#F9E8C2"];
+        }
+
+        subgraph cluster_data {
+            label = "Data Tier";
+            style = "rounded";
+            color = "#7F5A0F";
+            fontsize = 11;
+            postgres [label = "PostgreSQL 14+\nTCP 5432\n(SQLAlchemy ORM, Alembic)", fillcolor = "#F4C97D", shape = "cylinder"];
+        }
+    }
+
+    // ---------- PRO+ LICENSE SERVER ----------
+    subgraph cluster_proplus {
+        label = "SysManage Professional+ (Proprietary)";
+        style = "filled,rounded";
+        fillcolor = "#EDE3F4";
+        color = "#5B2A8C";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        proapi   [label = "License & Module API\nFastAPI (Python)\nTCP 8400 (HTTPS)", fillcolor = "#D5BFE9"];
+        prodb    [label = "License DB\nSQLite / PostgreSQL", fillcolor = "#C5A8DE", shape = "cylinder"];
+        prostore [label = "Module Store\n.so (Cython) + .iife.js Plugins\nSHA-512 verified", fillcolor = "#C5A8DE", shape = "folder"];
+        prosign  [label = "Signing Service\nECDSA P-521\nAES-256-GCM at rest", fillcolor = "#D5BFE9"];
+    }
+
+    // ---------- AGENT TIER ----------
+    subgraph cluster_agent {
+        label = "SysManage Agent (Open Source) — runs on each managed endpoint";
+        style = "filled,rounded";
+        fillcolor = "#E5F2E8";
+        color = "#214E34";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        agent_main [label = "Agent Core\nPython 3.9+ / asyncio\nLinux / Windows / macOS / *BSD", fillcolor = "#B8DCC2"];
+        agent_db   [label = "Local State\nSQLite\n(persistent queues)", fillcolor = "#A4D2B0", shape = "cylinder"];
+        collectors [label = "Collectors\nHardware, OS, Software,\nCertificates, Users, Antivirus,\nFirewall, Diagnostics", fillcolor = "#B8DCC2"];
+        ops        [label = "Operations\nUpdates, Reboot, Scripts,\nFirewall, Child Hosts", fillcolor = "#B8DCC2"];
+        priv       [label = "Privileged Runner\n(run-privileged.sh / .ps1)", fillcolor = "#B8DCC2"];
+    }
+
+    // ---------- EXTERNAL ----------
+    subgraph cluster_ext {
+        label = "External Integrations (Optional)";
+        style = "filled,rounded";
+        fillcolor = "#F4E5E5";
+        color = "#7A1F1F";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        vault   [label = "OpenBao /\nHashiCorp Vault", fillcolor = "#E8C5C5"];
+        graylog [label = "Graylog\n(Syslog)", fillcolor = "#E8C5C5"];
+        ldap    [label = "LDAP / SSO\n(Pro+ tier)", fillcolor = "#E8C5C5"];
+        smtp    [label = "SMTP\n(Email Alerts)", fillcolor = "#E8C5C5"];
+        otlp    [label = "OTLP Collector\n(metrics / traces)", fillcolor = "#E8C5C5"];
+    }
+
+    // ---------- EDGES (CLIENT) ----------
+    admin_browser -> webui    [label = "HTTPS\nTCP 8080"];
+    admin_browser -> fastapi  [label = "HTTPS / REST\nTCP 6443"];
+    webui -> spa              [label = "serves bundle"];
+    spa -> fastapi            [label = "Bearer JWT\n/ REST + WSS"];
+    spa -> proapi             [label = "Plugin bundle\n(.iife.js) download", style = "dashed"];
+
+    // ---------- EDGES (SERVER) ----------
+    fastapi -> authz;
+    fastapi -> wsmgr;
+    fastapi -> routers;
+    routers -> postgres       [label = "SQL"];
+    wsmgr   -> postgres       [label = "queue persist"];
+    scheduler -> postgres;
+    fastapi -> metrics        [style = "dashed"];
+
+    // ---------- EDGES (PRO+) ----------
+    proapi -> prodb;
+    proapi -> prostore;
+    proapi -> prosign;
+    fastapi -> proapi         [label = "Phone-home\nlicense check\n+ module download\nHTTPS 8400", style = "dashed"];
+
+    // ---------- EDGES (AGENT) ----------
+    collectors -> agent_main;
+    ops        -> agent_main;
+    agent_main -> agent_db;
+    agent_main -> priv        [label = "elevated ops"];
+    agent_main -> wsmgr       [label = "WSS (TLS 1.2+)\nTCP 6443\nmTLS + JWT", color = "#1F4E79", penwidth = 2];
+
+    // ---------- EDGES (EXTERNAL) ----------
+    fastapi -> vault          [label = "secrets",  style = "dashed"];
+    fastapi -> graylog        [label = "syslog",   style = "dashed"];
+    fastapi -> ldap           [label = "auth/dir", style = "dashed"];
+    fastapi -> smtp           [label = "alerts",   style = "dashed"];
+    metrics -> otlp           [label = "OTLP",     style = "dashed"];
+}

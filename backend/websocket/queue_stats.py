@@ -116,7 +116,7 @@ class QueueStats:
             return messages
 
         except Exception as e:
-            logger.error(_("Failed to get failed messages: %s"), str(e))
+            logger.exception(_("Failed to get failed messages: %s"), str(e))
             return []
         finally:
             if not session_provided:

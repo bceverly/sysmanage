@@ -3,7 +3,6 @@ Tests for backend/api/auth.py module.
 Tests authentication API endpoints.
 """
 
-from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest

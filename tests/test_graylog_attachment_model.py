@@ -6,8 +6,6 @@ Tests GraylogAttachment model structure and methods.
 import uuid
 from datetime import datetime, timezone
 
-import pytest
-
 
 class TestGraylogAttachmentModel:
     """Tests for GraylogAttachment model."""

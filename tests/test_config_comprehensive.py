@@ -3,13 +3,51 @@ Comprehensive unit tests for backend.config.config module.
 Tests configuration loading and accessor functions.
 """
 
-import os
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
 import yaml
 
 from backend.config import config
+
+
+@pytest.fixture(autouse=True)
+def _restore_config_singleton():
+    """Protect the global ``config.config`` singleton across these tests.
+
+    Several tests here ``importlib.reload(config)`` with a mocked minimal
+    config (no database/registry/jwt timeouts) and never reload back, which
+    left the singleton polluted for every later test sharing the same
+    pytest-xdist worker — a latent cross-test flake that surfaced as missing
+    keys in unrelated tests (e.g. registry mirroring, switch-account). Saving
+    and restoring the singleton reference around each test contains it.
+    """
+    saved = config.config
+    try:
+        yield
+    finally:
+        config.config = saved
+
+
+@pytest.fixture(autouse=True)
+def _isolate_config_from_db_and_vault(monkeypatch):
+    """Resolve config accessors from the (test-patched) YAML only.
+
+    The accessors prefer DB-backed Settings + OpenBAO over ``sysmanage.yaml``
+    (Phase 13.1.H).  Without neutralizing those overlays, a developer machine
+    with persisted operational settings / secrets leaks its real values in and
+    these YAML-resolution tests fail (they pass in CI only because its DB is
+    empty).  Force the YAML fallback so the tests are machine-independent.
+    """
+    monkeypatch.setattr(config, "_db_setting", lambda key: None)
+    monkeypatch.setattr(config, "_smtp_password", lambda: None)
+    monkeypatch.setattr(
+        config,
+        "_server_setting",
+        lambda key, yaml_getter=None, default=None: (
+            yaml_getter() if yaml_getter else default
+        ),
+    )
 
 
 class TestConfigAccessors:
@@ -456,3 +494,30 @@ security:
             config_module.get_smtp_config()
         except Exception as e:
             pytest.fail(f"Config accessor function failed: {e}")
+
+
+class TestDevModeDetection:
+    """HTTP-vs-HTTPS auto-detection drives dev mode (no manual switch)."""
+
+    def test_https_enabled_when_both_cert_and_key_set(self):
+        with patch.object(
+            config,
+            "config",
+            {"api": {"certFile": "/etc/ssl/cert.pem", "keyFile": "/etc/ssl/key.pem"}},
+        ):
+            assert config.is_https_enabled() is True
+            assert config.is_dev_mode() is False
+            assert config.federation_enforce_cert_pinning() is True
+
+    def test_dev_mode_when_no_tls_configured(self):
+        with patch.object(config, "config", {"api": {"host": "0.0.0.0", "port": 8080}}):
+            assert config.is_https_enabled() is False
+            assert config.is_dev_mode() is True
+            # Pin enforcement auto-relaxes on plain HTTP.
+            assert config.federation_enforce_cert_pinning() is False
+
+    def test_dev_mode_when_only_one_of_cert_key_set(self):
+        # A half-configured TLS pair isn't HTTPS — stays dev (fail-safe).
+        with patch.object(config, "config", {"api": {"certFile": "/etc/ssl/cert.pem"}}):
+            assert config.is_https_enabled() is False
+            assert config.is_dev_mode() is True

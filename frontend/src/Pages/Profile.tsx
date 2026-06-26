@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { getProfile, updateProfile, changePassword, ProfileData, ProfileUpdateData, PasswordChangeData } from '../Services/profile';
 import axiosInstance from '../Services/api';
+import MfaEnrollmentCard from '../Components/MfaEnrollmentCard';
 
 const Profile: React.FC = () => {
     const { t } = useTranslation();
@@ -110,10 +111,10 @@ const Profile: React.FC = () => {
         errors: string[]
     ): void => {
         if (password.length < minLength) {
-            errors.push(t('userProfile.passwordTooShort', `Password must be at least ${minLength} characters long`));
+            errors.push(t('userProfile.passwordTooShort', `Password must be at least ${minLength} characters long`, { count: minLength }));
         }
         if (password.length > maxLength) {
-            errors.push(t('userProfile.passwordTooLong', `Password must be no more than ${maxLength} characters long`));
+            errors.push(t('userProfile.passwordTooLong', `Password must be no more than ${maxLength} characters long`, { count: maxLength }));
         }
     };
 
@@ -160,7 +161,7 @@ const Profile: React.FC = () => {
         }
 
         if (charTypes < config.min_character_types) {
-            errors.push(t('userProfile.passwordNeedsCharTypes', `Password must contain at least ${config.min_character_types} different character types`));
+            errors.push(t('userProfile.passwordNeedsCharTypes', `Password must contain at least ${config.min_character_types} different character types`, { count: config.min_character_types }));
         }
     };
 
@@ -650,6 +651,9 @@ const Profile: React.FC = () => {
 
     const renderSecurityInfo = () => (
         <Box sx={{ p: 3 }}>
+            {/* Phase 10.3 — MFA enrollment / status / disable card */}
+            <MfaEnrollmentCard />
+
             {/* Password Change Section */}
             <Typography variant="h6" gutterBottom>
                 {t('userProfile.changePassword', 'Change Password')}
@@ -860,7 +864,7 @@ const Profile: React.FC = () => {
                 <Tabs 
                     value={activeTab} 
                     onChange={handleTabChange} 
-                    aria-label="profile tabs"
+                    aria-label={t('userProfile.profileTabs', 'profile tabs')}
                     sx={{ borderBottom: 1, borderColor: 'divider' }}
                 >
                     <Tab label={t('userProfile.accountInfo', 'Account Information')} />

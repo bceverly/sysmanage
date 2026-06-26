@@ -5,7 +5,7 @@ Tests WebSocket connection handling, message processing, and authentication.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect

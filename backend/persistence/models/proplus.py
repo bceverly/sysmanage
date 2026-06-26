@@ -15,7 +15,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -151,7 +151,15 @@ class HostHealthAnalysis(Base):
     raw_metrics = Column(JSON, nullable=True)  # Raw metrics used for analysis
 
     # Relationship to host
-    host = relationship("Host", backref="health_analyses")
+    # ``passive_deletes=True`` defers child-row cleanup to the DB's
+    # ON DELETE CASCADE on ``host_id`` — without it, SQLAlchemy
+    # pre-emptively issues ``UPDATE host_health_analysis SET host_id=NULL``
+    # before the parent DELETE, which trips the NOT NULL constraint
+    # and surfaces as a 500 in the child-host-delete flow.
+    host = relationship(
+        "Host",
+        backref=backref("health_analyses", passive_deletes=True),
+    )
 
     def __repr__(self):
         return f"<HostHealthAnalysis(host_id={self.host_id}, score={self.score}, grade='{self.grade}')>"
@@ -285,7 +293,10 @@ class HostVulnerabilityScan(Base):
     )  # Version of security_scanner used
 
     # Relationship to host
-    host = relationship("Host", backref="vulnerability_scans")
+    host = relationship(
+        "Host",
+        backref=backref("vulnerability_scans", passive_deletes=True),
+    )
 
     # Relationship to individual findings
     findings = relationship(
@@ -596,7 +607,10 @@ class Alert(Base):
 
     # Relationships
     rule = relationship("AlertRule")
-    host = relationship("Host", backref="alerts")
+    host = relationship(
+        "Host",
+        backref=backref("alerts", passive_deletes=True),
+    )
 
     def __repr__(self):
         return f"<Alert(title='{self.title}', severity='{self.severity}', host_id={self.host_id})>"
@@ -869,7 +883,10 @@ class HostComplianceScan(Base):
     )  # Version of compliance_engine used
 
     # Relationships
-    host = relationship("Host", backref="compliance_scans")
+    host = relationship(
+        "Host",
+        backref=backref("compliance_scans", passive_deletes=True),
+    )
     profile = relationship("ComplianceProfile")
 
     def __repr__(self):

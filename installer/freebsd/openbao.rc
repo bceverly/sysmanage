@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# PROVIDE: openbao
+# REQUIRE: NETWORKING
+# BEFORE: sysmanage
+# KEYWORD: shutdown
+
+# OpenBAO secrets broker for SysManage.  Runs the local single-node `bao`
+# server and, once its listener is up, initializes + unseals it via the
+# shared helper.  See docs/planning/openbao-deployment-and-airgap.md.
+
+. /etc/rc.subr
+
+name="openbao"
+rcvar="openbao_enable"
+desc="OpenBAO secrets broker (SysManage)"
+
+load_rc_config $name
+
+: ${openbao_enable:="NO"}
+: ${openbao_config:="/usr/local/etc/openbao/openbao.hcl"}
+: ${openbao_user:="openbao"}
+: ${openbao_pidfile:="/var/run/openbao/openbao.pid"}
+: ${openbao_logfile:="/var/log/openbao.log"}
+: ${openbao_keyfile:="/var/lib/openbao/init.json"}
+
+command="/usr/sbin/daemon"
+command_args="-P ${openbao_pidfile} -r -t ${name} -o ${openbao_logfile} \
+    /usr/local/bin/bao server -config=${openbao_config}"
+pidfile="${openbao_pidfile}"
+required_files="${openbao_config}"
+
+start_precmd="openbao_prestart"
+start_postcmd="openbao_poststart"
+
+openbao_prestart()
+{
+	install -d -o ${openbao_user} -g ${openbao_user} \
+		/var/run/openbao /var/lib/openbao /var/lib/openbao/data
+}
+
+openbao_poststart()
+{
+	# Idempotent init/unseal; the helper waits for the listener.  stdlib-only,
+	# so the system python is fine.
+	/usr/local/bin/python3.11 \
+		/usr/local/lib/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 --keyfile ${openbao_keyfile} \
+		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage \
+		2>/dev/null || \
+		echo "openbao: init/unseal did not complete; see ${openbao_logfile}"
+}
+
+run_rc_command "$1"

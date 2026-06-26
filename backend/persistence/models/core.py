@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     LargeBinary,
@@ -155,6 +156,9 @@ class Host(Base):
     # Agent privilege status
     is_agent_privileged = Column(Boolean, nullable=True, default=False)
 
+    # Agent version (reported via heartbeat/registration)
+    agent_version = Column(String(50), nullable=True)
+
     # Script execution permission
     script_execution_enabled = Column(Boolean, nullable=False, default=False)
 
@@ -172,29 +176,72 @@ class Host(Base):
     # NULL for standalone hosts, populated for child hosts
     parent_host_id = Column(GUID(), nullable=True, index=True)
 
+    # Phase 12.7: Public IP + GeoLite2 geo-location.
+    #
+    # The agent fetches its public-facing IP at startup + on a 24h
+    # heartbeat cadence (configurable) from a small allowlist of
+    # public echo endpoints (api.ipify.org / ifconfig.co / icanhazip.com),
+    # silently skipping when none are reachable so air-gapped hosts
+    # stay air-gapped.  The server caches the result and only
+    # re-resolves via GeoLite2 when the IP changes.  See Phase 12.7 in
+    # ROADMAP.md for the full design (offline-first lookup, ipapi.co
+    # fallback only on cache miss, opt-out via ``no_geo_track`` tag).
+    public_ip = Column(String(45), nullable=True)
+    public_ip_resolved_at = Column(DateTime, nullable=True)
+    geo_country_code = Column(String(2), nullable=True)
+    geo_subdivision_code = Column(String(10), nullable=True)
+    geo_city = Column(String(200), nullable=True)
+    geo_latitude = Column(Float, nullable=True)
+    geo_longitude = Column(Float, nullable=True)
+
     # Relationships
     tags = relationship(
         "Tag", secondary="host_tags", back_populates="hosts", lazy="dynamic"
     )
-    package_updates = relationship("PackageUpdate", back_populates="host")
-    software_installation_logs = relationship(
-        "SoftwareInstallationLog", back_populates="host"
+    # All of these children have ``host_id`` declared ``nullable=False`` with
+    # ``ondelete=CASCADE`` at the FK level.  Without an ORM cascade, SQLAlchemy
+    # emits ``UPDATE ... SET host_id=NULL`` on the parent flush, which violates
+    # the NOT NULL constraint and rolls back the whole DELETE with a 500.
+    package_updates = relationship(
+        "PackageUpdate", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )
-    software_packages = relationship("SoftwarePackage", back_populates="host")
+    software_installation_logs = relationship(
+        "SoftwareInstallationLog",
+        back_populates="host",
+        cascade=CASCADE_DELETE_ORPHAN,
+    )
+    software_packages = relationship(
+        "SoftwarePackage", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
     third_party_repositories = relationship(
-        "ThirdPartyRepository", back_populates="host"
+        "ThirdPartyRepository",
+        back_populates="host",
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     antivirus_status = relationship(
-        "AntivirusStatus", back_populates="host", uselist=False
+        "AntivirusStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     commercial_antivirus_status = relationship(
-        "CommercialAntivirusStatus", back_populates="host", uselist=False
+        "CommercialAntivirusStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
     firewall_status = relationship(
-        "FirewallStatus", back_populates="host", uselist=False
+        "FirewallStatus",
+        back_populates="host",
+        uselist=False,
+        cascade=CASCADE_DELETE_ORPHAN,
     )
-    user_accounts = relationship("UserAccount", back_populates="host")
-    user_groups = relationship("UserGroup", back_populates="host")
+    user_accounts = relationship(
+        "UserAccount", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
+    user_groups = relationship(
+        "UserGroup", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
+    )
     certificates = relationship(
         "HostCertificate", back_populates="host", cascade=CASCADE_DELETE_ORPHAN
     )

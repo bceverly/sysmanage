@@ -4,7 +4,6 @@ Tests Graylog health monitoring and port detection functionality.
 """
 
 import asyncio
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest

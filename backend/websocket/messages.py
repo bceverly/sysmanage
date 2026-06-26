@@ -41,6 +41,10 @@ class MessageType(str, Enum):
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
     HOSTNAME_CHANGED = "hostname_changed"
+    # Agent reports completion of a server-initiated package install/uninstall.
+    # Replaces the legacy ``POST /agent/installation-complete`` HTTP path so the
+    # report is queued + delivered through the standard inbound pipeline.
+    INSTALLATION_COMPLETE = "installation_complete"
 
     # Generic deployment responses
     FILE_DEPLOYMENT_RESULT = "file_deployment_result"
@@ -77,6 +81,13 @@ class MessageType(str, Enum):
     PING = "ping"
     SHUTDOWN = "shutdown"
     HOST_APPROVED = "host_approved"
+    # Phase 8.5 — fleet-wide broadcast.  Server fans out one message
+    # to every connected agent (or every agent matching a tag).
+    BROADCAST = "broadcast"
+    # Configuration push — operator-initiated agent-config update.
+    # Always enqueued (never sent directly via connection_manager) so
+    # offline agents receive it on reconnect.
+    CONFIG_UPDATE = "config_update"
 
 
 class CommandType(str, Enum):
@@ -95,16 +106,13 @@ class CommandType(str, Enum):
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"
-    DEPLOY_ANTIVIRUS = "deploy_antivirus"
-    ENABLE_ANTIVIRUS = "enable_antivirus"
-    DISABLE_ANTIVIRUS = "disable_antivirus"
-    REMOVE_ANTIVIRUS = "remove_antivirus"
-    DEPLOY_FIREWALL = "deploy_firewall"
-    ENABLE_FIREWALL = "enable_firewall"
-    DISABLE_FIREWALL = "disable_firewall"
-    RESTART_FIREWALL = "restart_firewall"
-    APPLY_FIREWALL_ROLES = "apply_firewall_roles"
-    REMOVE_FIREWALL_PORTS = "remove_firewall_ports"
+    # NOTE: The legacy DEPLOY_ANTIVIRUS / ENABLE_ANTIVIRUS / DISABLE_ANTIVIRUS /
+    # REMOVE_ANTIVIRUS / DEPLOY_FIREWALL / ENABLE_FIREWALL / DISABLE_FIREWALL /
+    # RESTART_FIREWALL / APPLY_FIREWALL_ROLES / REMOVE_FIREWALL_PORTS commands
+    # were removed when Phase 3 shipped — the open-source server now builds
+    # a declarative plan via backend/services/{firewall,av}_plan_builder.py
+    # and dispatches it via APPLY_DEPLOYMENT_PLAN. Pro+ licensees get the
+    # richer Cython engines but use the same handler on the agent.
     ATTACH_TO_GRAYLOG = "attach_to_graylog"
     ENABLE_PACKAGE_MANAGER = "enable_package_manager"
     CREATE_HOST_USER = "create_host_user"
@@ -113,10 +121,13 @@ class CommandType(str, Enum):
     DELETE_HOST_GROUP = "delete_host_group"
     REFRESH_USER_ACCESS = "refresh_user_access"
     CHANGE_HOSTNAME = "change_hostname"
+    UPDATE_AGENT = "update_agent"
+    UPDATE_CHILD_AGENT = "update_child_agent"
 
     # Generic deployment commands
     DEPLOY_FILES = "deploy_files"
     EXECUTE_COMMAND_SEQUENCE = "execute_command_sequence"
+    APPLY_DEPLOYMENT_PLAN = "apply_deployment_plan"
 
     # Child Host / Virtualization Commands
     CHECK_VIRTUALIZATION_SUPPORT = "check_virtualization_support"

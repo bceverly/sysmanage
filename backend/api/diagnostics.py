@@ -16,9 +16,11 @@ from backend.api.error_constants import (
     error_diagnostic_not_found,
     error_invalid_diagnostic_id,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import db as db_module
+from backend.persistence import models
+from backend.persistence.partitions import get_request_engine
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
 from backend.websocket.messages import CommandType, create_command_message
 from backend.websocket.queue_enums import QueueDirection
@@ -63,7 +65,7 @@ class DiagnosticResponse(BaseModel):
 async def collect_diagnostics(
     host_id: str,
     request: DiagnosticRequest = None,
-    current_user: str = Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Request diagnostic collection from an agent.
@@ -81,21 +83,14 @@ async def collect_diagnostics(
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped, so the session routes to the active
+    # tenant's engine; authorization (the User object) is resolved on the MAIN
+    # engine by require_authenticated_user.
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
-        # Get user for audit logging
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=_("User not found"))
-
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -170,24 +165,29 @@ async def collect_diagnostics(
         diagnostic_report.started_at = datetime.now(timezone.utc).replace(tzinfo=None)
         diagnostic_report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        # Audit log the diagnostics collection request
-        AuditService.log(
-            db=session,
-            user_id=user.id,
-            username=current_user,
-            action_type=ActionType.EXECUTE,
-            entity_type=EntityType.HOST,
-            entity_id=host_id,
-            entity_name=host.fqdn,
-            description=f"Requested diagnostic collection for host {host.fqdn}",
-            result=Result.SUCCESS,
-            details={
-                "collection_id": collection_id,
-                "collection_types": parameters["collection_types"],
-            },
-        )
-
         session.commit()
+
+        # Audit log the diagnostics collection request on the MAIN engine
+        # (the audit trail is server-global, like authorization).
+        audit_session_local = sessionmaker(
+            autocommit=False, autoflush=False, bind=db_module.get_engine()
+        )
+        with audit_session_local() as audit_session:
+            AuditService.log(
+                db=audit_session,
+                user_id=current_user.id,
+                username=current_user.userid,
+                action_type=ActionType.EXECUTE,
+                entity_type=EntityType.HOST,
+                entity_id=host_id,
+                entity_name=host.fqdn,
+                description=f"Requested diagnostic collection for host {host.fqdn}",
+                result=Result.SUCCESS,
+                details={
+                    "collection_id": collection_id,
+                    "collection_types": parameters["collection_types"],
+                },
+            )
 
         return {
             "result": True,
@@ -218,9 +218,10 @@ async def get_host_diagnostics(
                 status_code=422, detail=_("Invalid host ID format")
             ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -296,9 +297,10 @@ async def get_diagnostic_report(diagnostic_id: str):
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -371,9 +373,10 @@ async def get_diagnostic_status(diagnostic_id: str):
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -423,9 +426,10 @@ async def delete_diagnostic_report(  # NOSONAR
             status_code=422, detail=error_invalid_diagnostic_id()
         ) from exc
 
-    # Get the SQLAlchemy session
+    # Diagnostic data is tenant-scoped; route the session to the active
+    # tenant's engine (identical to the main engine in collapsed/OSS mode).
     session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=get_request_engine()
     )
 
     with session_local() as session:
@@ -469,80 +473,76 @@ async def delete_diagnostic_report(  # NOSONAR
 
 
 @router.post("/diagnostics/process-result")
-async def process_diagnostic_result(result_data: dict):  # NOSONAR
+async def process_diagnostic_result(db, result_data: dict):  # NOSONAR
     """
     Process diagnostic collection result from agent.
     This endpoint is called internally when we receive diagnostic results via WebSocket.
     """
-    # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
-
     collection_id = result_data.get("collection_id")
     if not collection_id:
-        raise HTTPException(status_code=400, detail="Missing collection_id")
+        raise HTTPException(status_code=400, detail=_("Missing collection_id"))
 
-    with session_local() as session:
-        # Find the diagnostic report
-        diagnostic = (
-            session.query(models.DiagnosticReport)
-            .filter(models.DiagnosticReport.collection_id == collection_id)
-            .first()
+    # Use the caller's session directly — tenant-routed by the queue processor
+    # when multi-tenancy is on, so a bound host's diagnostic report lands in its
+    # tenant database.  The caller owns the transaction, so we don't close it.
+    session = db
+    # Find the diagnostic report
+    diagnostic = (
+        session.query(models.DiagnosticReport)
+        .filter(models.DiagnosticReport.collection_id == collection_id)
+        .first()
+    )
+
+    if not diagnostic:
+        raise HTTPException(status_code=404, detail=error_diagnostic_not_found())
+
+    # Update diagnostic report with results
+    diagnostic.collection_status = (
+        "completed" if result_data.get("success", False) else "failed"
+    )
+    diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    diagnostic.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if result_data.get("error"):
+        diagnostic.error_message = result_data["error"]
+
+    # Store diagnostic data as JSON
+    def safe_json_dumps(data):
+        if data is None:
+            return None
+        try:
+            return json.dumps(data) if not isinstance(data, str) else data
+        except (TypeError, ValueError):
+            return None
+
+    if "system_logs" in result_data:
+        diagnostic.system_logs = safe_json_dumps(result_data["system_logs"])
+    if "configuration_files" in result_data:
+        diagnostic.configuration_files = safe_json_dumps(
+            result_data["configuration_files"]
+        )
+    if "network_info" in result_data:
+        diagnostic.network_information = safe_json_dumps(result_data["network_info"])
+    if "process_info" in result_data:
+        diagnostic.process_list = safe_json_dumps(result_data["process_info"])
+    if "disk_usage" in result_data:
+        diagnostic.disk_usage = safe_json_dumps(result_data["disk_usage"])
+    if "environment_variables" in result_data:
+        diagnostic.environment_variables = safe_json_dumps(
+            result_data["environment_variables"]
+        )
+    if "agent_logs" in result_data:
+        diagnostic.agent_logs = safe_json_dumps(result_data["agent_logs"])
+    if "system_information" in result_data:
+        diagnostic.system_information = safe_json_dumps(
+            result_data["system_information"]
         )
 
-        if not diagnostic:
-            raise HTTPException(status_code=404, detail=error_diagnostic_not_found())
+    if "collection_size_bytes" in result_data:
+        diagnostic.collection_size_bytes = result_data["collection_size_bytes"]
+    if "files_collected" in result_data:
+        diagnostic.files_collected = result_data["files_collected"]
 
-        # Update diagnostic report with results
-        diagnostic.collection_status = (
-            "completed" if result_data.get("success", False) else "failed"
-        )
-        diagnostic.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        diagnostic.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    session.commit()
 
-        if result_data.get("error"):
-            diagnostic.error_message = result_data["error"]
-
-        # Store diagnostic data as JSON
-        def safe_json_dumps(data):
-            if data is None:
-                return None
-            try:
-                return json.dumps(data) if not isinstance(data, str) else data
-            except (TypeError, ValueError):
-                return None
-
-        if "system_logs" in result_data:
-            diagnostic.system_logs = safe_json_dumps(result_data["system_logs"])
-        if "configuration_files" in result_data:
-            diagnostic.configuration_files = safe_json_dumps(
-                result_data["configuration_files"]
-            )
-        if "network_info" in result_data:
-            diagnostic.network_information = safe_json_dumps(
-                result_data["network_info"]
-            )
-        if "process_info" in result_data:
-            diagnostic.process_list = safe_json_dumps(result_data["process_info"])
-        if "disk_usage" in result_data:
-            diagnostic.disk_usage = safe_json_dumps(result_data["disk_usage"])
-        if "environment_variables" in result_data:
-            diagnostic.environment_variables = safe_json_dumps(
-                result_data["environment_variables"]
-            )
-        if "agent_logs" in result_data:
-            diagnostic.agent_logs = safe_json_dumps(result_data["agent_logs"])
-        if "system_information" in result_data:
-            diagnostic.system_information = safe_json_dumps(
-                result_data["system_information"]
-            )
-
-        if "collection_size_bytes" in result_data:
-            diagnostic.collection_size_bytes = result_data["collection_size_bytes"]
-        if "files_collected" in result_data:
-            diagnostic.files_collected = result_data["files_collected"]
-
-        session.commit()
-
-        return {"result": True, "message": "Diagnostic result processed"}
+    return {"result": True, "message": "Diagnostic result processed"}

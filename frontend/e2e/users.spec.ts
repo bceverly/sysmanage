@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for User Management Flows
@@ -15,77 +16,58 @@ async function navigateToFirstUserDetail(page: Page): Promise<boolean> {
 
   // Click the View button in the Actions column
   const viewButton = firstRow.getByRole('button', { name: /view/i });
-  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await expect(viewButton).toBeVisible({ timeout: 20000 });
   await viewButton.click();
 
   // Wait for navigation to complete
-  await page.waitForURL(/\/users\/[a-f0-9-]+/, { timeout: 10000 });
+  await page.waitForURL(/\/users\/[a-f0-9-]+/, { timeout: 20000 });
   return true;
 }
 
 test.describe('User List Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/users');
-    // Wait for the page to fully load - data grid and permissions
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-    // Additional wait for auth redirect to complete if needed
-    await page.waitForTimeout(2000);
+    await ensureAuthenticated(page, '/users');
   });
 
   test('should display user list page', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    const currentUrl = page.url();
-    if (currentUrl.includes('/login')) {
-      test.skip();
-      return;
-    }
+    // ensureAuthenticated in beforeEach should land us on /users — if we're
+    // back on /login, that's a real auth bug and the test must surface it.
+    expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/users/);
 
     // Should have the Users nav item highlighted or data grid visible
     // The page doesn't have a separate heading - title is in the navigation
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
   });
 
   test('should display user data grid', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    expect(page.url()).not.toContain('/login');
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
   });
 
   test('should have add user button', async ({ page }) => {
-    // Wait for permissions API to complete - button appears after permissions are loaded
-    await page.waitForTimeout(2000);
-
-    // The add user functionality may be accessed via a FAB, toolbar, or actions menu
+    // The test user has all 93 security roles, so the Add User control
+    // (button or FAB) MUST be present once permissions have loaded.
+    //
+    // Locator.isVisible() is a one-shot synchronous check — it ignores
+    // the {timeout} option, so the previous version of this test was
+    // racing the React render and would flake on slow runs even when
+    // the button was about to appear.  Locator.or() + expect.toBeVisible
+    // actually polls for either control.
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
     const fabButton = page.locator('.MuiFab-root').first();
-
-    // Check if either button type exists
-    const hasAddButton = await addButton.isVisible().catch(() => false);
-    const hasFabButton = await fabButton.isVisible().catch(() => false);
-
-    // If no add button exists, this is a design choice - skip test
-    if (!hasAddButton && !hasFabButton) {
-      test.skip();
-    }
+    // 30s to match the sibling data-grid waits: the Add control renders only
+    // after the grid + the 93-role permission load complete, so it's strictly
+    // later than "page ready" — a 20s budget was tighter than the grid's own
+    // 30s and lost the race under parallel-worker load.
+    await expect(addButton.or(fabButton)).toBeVisible({ timeout: 30000 });
   });
 
   test('should open add user dialog when clicking add button', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
-      test.skip();
-      return;
-    }
+    await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 
@@ -99,17 +81,8 @@ test.describe('User List Page', () => {
   });
 
   test('should validate user form fields', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
-      test.skip();
-      return;
-    }
-
+    await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
     // Try to submit empty form
@@ -125,17 +98,8 @@ test.describe('User List Page', () => {
   });
 
   test('should close dialog on cancel', async ({ page }) => {
-    // Wait for permissions API to complete
-    await page.waitForTimeout(2000);
-
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists
-    if (!(await addButton.isVisible().catch(() => false))) {
-      test.skip();
-      return;
-    }
-
+    await expect(addButton).toBeVisible({ timeout: 20000 });
     await addButton.click();
 
     const dialog = page.locator('.MuiDialog-root');
@@ -150,22 +114,18 @@ test.describe('User List Page', () => {
   });
 
   test('should navigate to user detail on row click', async ({ page }) => {
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    expect(page.url()).not.toContain('/login');
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible({ timeout: 15000 });
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+    if (await firstRow.isVisible({ timeout: 10000 }).catch(() => false)) {
       // Users grid navigates via Actions column eye icon, not row click
       const viewButton = firstRow.getByRole('button').first();
-      if (await viewButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await viewButton.isVisible({ timeout: 6000 }).catch(() => false)) {
         await viewButton.click();
         try {
-          await expect(page).toHaveURL(/\/users\/[a-f0-9-]+/, { timeout: 5000 });
+          await expect(page).toHaveURL(/\/users\/[a-f0-9-]+/, { timeout: 10000 });
         } catch {
           // View may open a dialog instead of navigating
         }
@@ -213,7 +173,7 @@ test.describe('User Detail Page', () => {
     if (await navigateToFirstUserDetail(page)) {
       // Look for edit button or editable fields
       const editButton = page.getByRole('button', { name: /edit/i }).first();
-      const isVisible = await editButton.isVisible({ timeout: 3000 }).catch(() => false);
+      const isVisible = await editButton.isVisible({ timeout: 6000 }).catch(() => false);
       if (isVisible) {
         // Edit button exists on this page
         expect(isVisible).toBeTruthy();
@@ -237,9 +197,16 @@ test.describe('User Detail Page', () => {
     await page.goto('/users');
 
     if (await navigateToFirstUserDetail(page)) {
-      const deleteButton = page.getByRole('button', { name: /delete|remove/i }).first();
-      if (await deleteButton.isVisible()) {
-        await expect(deleteButton).toBeVisible();
+      // Wait for user detail content to fully load
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
+
+      // The delete/remove button may or may not be present depending on
+      // which user we navigated to (e.g. admin users can't be self-deleted).
+      // Use count() to avoid the isVisible/toBeVisible race condition.
+      const deleteButton = page.getByRole('button', { name: /delete|remove/i });
+      const count = await deleteButton.count();
+      if (count > 0) {
+        await expect(deleteButton.first()).toBeVisible();
       }
     }
   });
@@ -276,7 +243,7 @@ test.describe('User Create Flow', () => {
     try {
       // Navigate to users list to find and delete the test user
       await page.goto('/users');
-      try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // Use the API directly to find and delete the user
       const response = await page.request.get('/api/v1/users');
@@ -299,16 +266,13 @@ test.describe('User Create Flow', () => {
   test('should create a new user successfully', async ({ page }) => {
     await page.goto('/users');
     // Wait for page to fully load including permissions
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     await page.waitForTimeout(2000);
 
     const addButton = page.getByRole('button', { name: /add|create|new/i }).first();
-
-    // Skip if no add button exists on this page
-    if (!(await addButton.isVisible().catch(() => false))) {
-      test.skip();
-      return;
-    }
+    // The test user is provisioned with all 93 security roles, so the
+    // add-user control must be visible.  If it isn't, that's a real bug.
+    await expect(addButton).toBeVisible({ timeout: 20000 });
 
     await addButton.click();
 
@@ -363,10 +327,15 @@ test.describe('User Create Flow', () => {
 
 test.describe('User Permissions', () => {
   test('should display current user role', async ({ page }) => {
-    await page.goto('/profile');
+    // Use 'domcontentloaded' instead of the default 'load' so we don't
+    // block on plugin bundle fetches and other deferred network activity
+    // — the assertion below only needs the rendered DOM, not a fully
+    // idle network. This matches the intent expressed by the
+    // try/catch'd waitForLoadState('networkidle') below.
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     // Profile page should show user's role
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     const pageContent = await page.textContent('body');
     const hasRoleInfo =
       pageContent?.toLowerCase().includes('role') ||
@@ -377,16 +346,16 @@ test.describe('User Permissions', () => {
 
   test('should allow role editing for admin users', async ({ page }) => {
     await page.goto('/users');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     const firstRow = page.locator('.MuiDataGrid-row').first();
-    if (await firstRow.isVisible({ timeout: 5000 }).catch(() => false)) {
+    if (await firstRow.isVisible({ timeout: 10000 }).catch(() => false)) {
       // Users grid navigates via Actions column eye icon, not row click
       const viewButton = firstRow.getByRole('button').first();
-      if (await viewButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await viewButton.isVisible({ timeout: 6000 }).catch(() => false)) {
         await viewButton.click();
         try {
-          await page.waitForURL(/\/users\/[a-f0-9-]+/, { timeout: 5000 });
+          await page.waitForURL(/\/users\/[a-f0-9-]+/, { timeout: 10000 });
         } catch {
           // View may open a dialog instead of navigating - verify page has admin controls
           const buttons = page.locator('button');
@@ -396,7 +365,7 @@ test.describe('User Permissions', () => {
         }
 
         // Admin should see role editing options
-        try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
         const buttons = page.locator('button');
         const buttonCount = await buttons.count();
         expect(buttonCount).toBeGreaterThan(0);

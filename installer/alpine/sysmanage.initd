@@ -40,8 +40,9 @@ start_pre() {
 			ewarn "  2. TLS certificates (if using HTTPS)"
 			ewarn "  3. Admin user credentials"
 			ewarn ""
-			ewarn "Then initialize the database with:"
-			ewarn "  cd /usr/libexec/sysmanage && python3 -m alembic upgrade head"
+			ewarn "Then initialize the database (control-plane chains + every tenant database):"
+			ewarn "  cd /usr/libexec/sysmanage"
+			ewarn "  python3 scripts/sysmanage_migrate.py"
 			return 1
 		fi
 	fi

@@ -1,4 +1,3 @@
-/* global HTMLButtonElement */
 import React, { useState } from 'react';
 import {
   IconButton,

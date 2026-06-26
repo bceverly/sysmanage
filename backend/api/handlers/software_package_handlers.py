@@ -18,6 +18,8 @@ from backend.persistence.models import (
     FirewallStatus,
     GraylogAttachment,
     Host,
+    InstallationPackage,
+    InstallationRequest,
     PackageUpdate,
     SoftwarePackage,
     ThirdPartyRepository,
@@ -100,7 +102,7 @@ async def handle_software_update(db: Session, connection, message_data: dict):
         }
 
     except Exception as e:
-        debug_logger.error("Error updating software inventory: %s", e)
+        debug_logger.exception("Error updating software inventory: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -245,7 +247,7 @@ async def handle_package_updates_update(  # NOSONAR
                     update_type,
                 )
             except Exception as e:
-                debug_logger.error(
+                debug_logger.exception(
                     "Failed to add package update %s: %s",
                     package_update.get("package_name", "unknown"),
                     str(e),
@@ -278,7 +280,7 @@ async def handle_package_updates_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error storing package updates: %s", e)
+        debug_logger.exception("Error storing package updates: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -388,7 +390,7 @@ def handle_package_collection(db: Session, connection, message_data: dict):
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing package collection result from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -483,7 +485,7 @@ async def handle_third_party_repository_update(
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing third-party repository update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -566,7 +568,7 @@ async def handle_antivirus_status_update(db: Session, connection, message_data: 
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing antivirus status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -697,7 +699,7 @@ async def handle_commercial_antivirus_status_update(
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing commercial antivirus status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -799,7 +801,7 @@ async def handle_firewall_status_update(db: Session, connection, message_data: d
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing firewall status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -885,7 +887,7 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
         }
 
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing Graylog status update from %s: %s",
             getattr(connection, "hostname", "unknown"),
             e,
@@ -895,5 +897,95 @@ async def handle_graylog_status_update(db: Session, connection, message_data: di
             "message_type": "error",
             "error_type": "operation_failed",
             "message": _("Failed to process Graylog status update: %s") % str(e),
+            "data": {},
+        }
+
+
+async def handle_installation_complete(  # NOSONAR  # awaited by router
+    db: Session, connection, message_data: dict
+):
+    """Handle ``installation_complete`` message from agent.
+
+    The agent sends this once a server-initiated package install/uninstall
+    finishes (replaces the legacy ``POST /agent/installation-complete``
+    HTTP path so the report flows through the standard inbound queue).
+    Updates the matching ``InstallationRequest`` + per-package status.
+
+    NOSONAR: ``async def`` is required because the inbound message router
+    awaits every handler uniformly; the body is currently sync I/O against
+    a SQLAlchemy ``Session``.  Same pattern as ``handle_package_updates_update``
+    a few hundred lines above.
+    """
+    request_id = message_data.get("request_id")
+    success = bool(message_data.get("success"))
+    result_log = message_data.get("result_log") or ""
+
+    if not request_id:
+        debug_logger.error(
+            "installation_complete from %s missing request_id",
+            getattr(connection, "hostname", "unknown"),
+        )
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": _("Missing request_id in installation_complete"),
+            "data": {},
+        }
+
+    try:
+        installation_request = (
+            db.query(InstallationRequest)
+            .filter(InstallationRequest.id == request_id)
+            .first()
+        )
+        if not installation_request:
+            debug_logger.warning(
+                "installation_complete: request %s not found", request_id
+            )
+            return {
+                "message_type": "error",
+                "error_type": "not_found",
+                "message": _("Installation request not found: %s") % request_id,
+                "data": {},
+            }
+
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        installation_request.completed_at = now
+        installation_request.status = "completed" if success else "failed"
+        installation_request.result_log = result_log
+
+        packages = (
+            db.query(InstallationPackage)
+            .filter(InstallationPackage.installation_request_id == request_id)
+            .all()
+        )
+        for package in packages:
+            package.status = "completed" if success else "failed"
+            package.completed_at = now
+
+        db.commit()
+        debug_logger.info(
+            "Installation completion processed for request %s: %s",
+            request_id,
+            "success" if success else "failed",
+        )
+        return {
+            "message_type": "installation_complete_ack",
+            "timestamp": now.isoformat(),
+            "request_id": request_id,
+            "status": "recorded",
+        }
+
+    except Exception as e:
+        debug_logger.exception(
+            "Error processing installation_complete for request %s: %s",
+            request_id,
+            e,
+        )
+        db.rollback()
+        return {
+            "message_type": "error",
+            "error_type": "operation_failed",
+            "message": _("Failed to record installation completion: %s") % str(e),
             "data": {},
         }

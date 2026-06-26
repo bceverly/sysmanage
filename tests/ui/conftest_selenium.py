@@ -12,6 +12,7 @@ If either browser/driver is missing, tests will be skipped for that browser.
 """
 
 import os
+import contextlib
 import signal
 import subprocess
 import time
@@ -119,19 +120,18 @@ def _get_browser_params():
 
     system = platform.system()
 
-    # NetBSD: Both Chromium and Firefox crash in headless mode (GPU/graphics issues)
-    # Skip UI tests on NetBSD until browser headless mode is fixed upstream
+    # NetBSD: Both Chromium and Firefox crash in headless mode (GPU/graphics issues).
+    # If you need to run UI tests on NetBSD, fix the upstream browser issue first.
     if system == "NetBSD":
-        pytest.skip(
-            "UI tests skipped on NetBSD: Both Chromium and Firefox crash in headless mode. "
-            "This is a known NetBSD browser compatibility issue. "
-            "The backend and non-UI tests work correctly.",
-            allow_module_level=True,
+        pytest.fail(
+            "UI tests on NetBSD are not runnable: both Chromium and Firefox "
+            "crash in headless mode. Fix the upstream browser issue or run "
+            "the suite on a different OS.",
+            pytrace=False,
         )
-    elif system == "OpenBSD":
+    if system == "OpenBSD":
         return ["chrome"]
-    else:
-        return ["chrome", "firefox"]
+    return ["chrome", "firefox"]
 
 
 @pytest.fixture(scope="session", params=_get_browser_params())
@@ -203,7 +203,12 @@ def _create_chrome_driver():
             break
 
     if not chrome_binary:
-        pytest.skip("Chrome/Chromium binary not found")
+        pytest.fail(
+            "Chrome/Chromium binary not found in any of the standard "
+            "locations. Install chromium / google-chrome before running "
+            "the UI tests.",
+            pytrace=False,
+        )
 
     # Set ChromeDriver path based on platform
     chromedriver_paths = []
@@ -226,7 +231,11 @@ def _create_chrome_driver():
             break
 
     if not chromedriver_path:
-        pytest.skip("ChromeDriver not found")
+        pytest.fail(
+            "ChromeDriver not found. Install chromedriver matching your "
+            "Chrome version before running the UI tests.",
+            pytrace=False,
+        )
 
     # Create Chrome service with explicit driver path
     service = ChromeService(executable_path=chromedriver_path)
@@ -274,7 +283,10 @@ def _create_firefox_driver():
             break
 
     if not firefox_binary:
-        pytest.skip("Firefox binary not found")
+        pytest.fail(
+            "Firefox binary not found. Install firefox before running the " "UI tests.",
+            pytrace=False,
+        )
 
     # Set GeckoDriver path based on platform
     geckodriver_paths = []
@@ -297,7 +309,11 @@ def _create_firefox_driver():
             break
 
     if not geckodriver_path:
-        pytest.skip("GeckoDriver not found")
+        pytest.fail(
+            "GeckoDriver not found. Install geckodriver matching your "
+            "Firefox version before running the UI tests.",
+            pytrace=False,
+        )
 
     # Create Firefox service with explicit driver path and longer timeout
     service = FirefoxService(
@@ -314,17 +330,16 @@ def _create_firefox_driver():
         driver = webdriver.Firefox(service=service, options=options)
         yield driver
     except Exception as e:
-        print(f"Warning: Firefox failed to start: {e}")
-        print(
-            "This is a known issue on some OpenBSD systems with Firefox/geckodriver compatibility"
+        # Known issue on some OpenBSD systems with Firefox/geckodriver compatibility.
+        # Surface as a hard failure so the integration is fixed rather than masked.
+        pytest.fail(
+            f"Firefox/geckodriver failed to initialize: {e}",
+            pytrace=False,
         )
-        pytest.skip(f"Firefox/geckodriver failed to initialize: {e}")
     finally:
         if "driver" in locals():
-            try:
+            with contextlib.suppress(Exception):
                 driver.quit()
-            except:
-                pass
 
 
 @pytest.fixture(scope="session")
@@ -351,8 +366,8 @@ def start_server(ui_config):
                 print(
                     f"[OK] Server detected running at {ui_config.base_url} (via root endpoint)"
                 )
-        except:
-            pass
+        except Exception:  # noqa: BLE001
+            _ = None  # empty-except: failure here is non-fatal; see code above
 
     server_process = None
     if not server_running:
@@ -402,8 +417,8 @@ def start_server(ui_config):
                         print(f"   [OK] Backend API ready after {elapsed} seconds")
                         backend_ready = True
                         break
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
 
                 if elapsed % 10 == 0:  # Print every 10 seconds
                     print(f"   Waiting for backend... ({elapsed}/{max_wait}s)")
@@ -429,8 +444,8 @@ def start_server(ui_config):
                         frontend_ready = True
                         server_running = True
                         break
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
 
                 if elapsed % 10 == 0:  # Print every 10 seconds
                     print(f"   Waiting for frontend... ({elapsed}/{max_wait}s)")
@@ -456,8 +471,8 @@ def start_server(ui_config):
                         if os.name != "nt"
                         else server_process.terminate()
                     )
-                except:
-                    pass
+                except Exception:  # noqa: BLE001
+                    _ = None  # empty-except: failure here is non-fatal; see code above
             raise
 
     yield True
@@ -643,7 +658,7 @@ def selenium_page(browser_driver, ui_config):
                     if ready:
                         return True
                 except Exception:
-                    pass
+                    _ = None  # empty-except: failure here is non-fatal; see code above
                 time.sleep(0.5)
             return False
 

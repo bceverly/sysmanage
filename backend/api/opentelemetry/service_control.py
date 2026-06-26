@@ -16,20 +16,26 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
-from backend.websocket.queue_manager import (
-    Priority,
-    QueueDirection,
-    ServerMessageQueueManager,
-)
+from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.observability_shim import try_engine_otel_service_control
+from backend.utils.verbosity_logger import sanitize_log
 
 from .models import OpenTelemetryDeployResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Initialize queue manager
-server_queue_manager = ServerMessageQueueManager()
+
+# All three service-control endpoints (start/stop/restart) return
+# the same "engine required" detail when the Pro+ engine path
+# isn't available.  Hoisted to a module constant so we only have
+# one source-of-truth string to update if the wording ever changes.
+_ENGINE_REQUIRED_DETAIL = (
+    "OpenTelemetry service control requires the Pro+ "
+    "observability_engine to be loaded on the server."
+)
 
 
 @router.post(
@@ -72,46 +78,58 @@ async def start_opentelemetry(
                 ),
             )
 
-        # Validate host
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=error_host_not_found_or_not_active(),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above) and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=error_host_not_found_or_not_active(),
+                )
 
-        # Queue the start service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
-                "command_type": "start_opentelemetry_service",
-                "parameters": {},
-            },
-        }
+            validate_host_approval_status(host)
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=message_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only (Phase 10.2 step 7 close-out, 2026-05-14).
+            # The legacy ``start_opentelemetry_service`` WS path was
+            # removed alongside the agent's ``opentelemetry_operations.py``.
+            engine_msg_id = try_engine_otel_service_control(
+                host, "start", tenant_session
+            )
+            if engine_msg_id is None:
+                raise HTTPException(status_code=503, detail=_(_ENGINE_REQUIRED_DETAIL))
+
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host_fqdn,
+            description=f"Requested OpenTelemetry start for host {host_fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": "engine_plan", "service_action": "start"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry start for host %s (FQDN: %s)",
-            host_id,
-            host.fqdn,
+            "Queued OpenTelemetry start for host %s (FQDN: %s) via engine_plan",
+            sanitize_log(host_id),
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(
@@ -122,7 +140,7 @@ async def start_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error starting OpenTelemetry: %s", e)
+        logger.exception("Error starting OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -168,46 +186,56 @@ async def stop_opentelemetry(
                 detail=_("Permission denied: STOP_OPENTELEMETRY_SERVICE role required"),
             )
 
-        # Validate host
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=error_host_not_found_or_not_active(),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above) and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=error_host_not_found_or_not_active(),
+                )
 
-        # Queue the stop service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
-                "command_type": "stop_opentelemetry_service",
-                "parameters": {},
-            },
-        }
+            validate_host_approval_status(host)
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=message_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only — see start endpoint above for rationale.
+            engine_msg_id = try_engine_otel_service_control(
+                host, "stop", tenant_session
+            )
+            if engine_msg_id is None:
+                raise HTTPException(status_code=503, detail=_(_ENGINE_REQUIRED_DETAIL))
+
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host_fqdn,
+            description=f"Requested OpenTelemetry stop for host {host_fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": "engine_plan", "service_action": "stop"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry stop for host %s (FQDN: %s)",
-            host_id,
-            host.fqdn,
+            "Queued OpenTelemetry stop for host %s (FQDN: %s) via engine_plan",
+            sanitize_log(host_id),
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(
@@ -218,7 +246,7 @@ async def stop_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error stopping OpenTelemetry: %s", e)
+        logger.exception("Error stopping OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -266,46 +294,56 @@ async def restart_opentelemetry(
                 ),
             )
 
-        # Validate host
-        host = (
-            db.query(models.Host)
-            .filter(
-                models.Host.id == host_id,
-                models.Host.active.is_(True),
-            )
-            .first()
-        )
-
-        if not host:
-            raise HTTPException(
-                status_code=404,
-                detail=error_host_not_found_or_not_active(),
+        # Host data + the engine platform probe (SoftwarePackage) are
+        # tenant-scoped; User RBAC (above) and the audit trail (below) are
+        # server-global and stay on the bootstrap ``db`` session.
+        with request_sessionmaker()() as tenant_session:
+            # Validate host
+            host = (
+                tenant_session.query(models.Host)
+                .filter(
+                    models.Host.id == host_id,
+                    models.Host.active.is_(True),
+                )
+                .first()
             )
 
-        validate_host_approval_status(host)
+            if not host:
+                raise HTTPException(
+                    status_code=404,
+                    detail=error_host_not_found_or_not_active(),
+                )
 
-        # Queue the restart service message
-        message_data = {
-            "command_type": "generic_command",
-            "parameters": {
-                "command_type": "restart_opentelemetry_service",
-                "parameters": {},
-            },
-        }
+            validate_host_approval_status(host)
 
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=message_data,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            priority=Priority.NORMAL,
+            # Capture host scalars for audit/logging after the session closes.
+            host_fqdn = host.fqdn
+
+            # Engine path only — see start endpoint above for rationale.
+            engine_msg_id = try_engine_otel_service_control(
+                host, "restart", tenant_session
+            )
+            if engine_msg_id is None:
+                raise HTTPException(status_code=503, detail=_(_ENGINE_REQUIRED_DETAIL))
+
+        AuditService.log(
             db=db,
+            user_id=auth_user.id,
+            username=current_user,
+            action_type=ActionType.EXECUTE,
+            entity_type=EntityType.HOST,
+            entity_id=host_id,
+            entity_name=host_fqdn,
+            description=f"Requested OpenTelemetry restart for host {host_fqdn}",
+            result=Result.SUCCESS,
+            details={"dispatch_path": "engine_plan", "service_action": "restart"},
         )
+        db.commit()
 
         logger.info(
-            "Queued OpenTelemetry restart for host %s (FQDN: %s)",
-            host_id,
-            host.fqdn,
+            "Queued OpenTelemetry restart for host %s (FQDN: %s) via engine_plan",
+            sanitize_log(host_id),
+            host_fqdn,
         )
 
         return OpenTelemetryDeployResponse(
@@ -316,7 +354,7 @@ async def restart_opentelemetry(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error restarting OpenTelemetry: %s", e)
+        logger.exception("Error restarting OpenTelemetry: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

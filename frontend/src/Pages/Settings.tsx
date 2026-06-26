@@ -35,23 +35,32 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
-import EmailConfigCard from '../Components/EmailConfigCard';
 import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
 import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
 import GraylogIntegrationCard from '../Components/GraylogIntegrationCard';
 import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
 import PrometheusStatusCard from '../Components/PrometheusStatusCard';
+import ConfigurationSettings from '../Components/ConfigurationSettings';
 import UbuntuProSettings from '../Components/UbuntuProSettings';
 import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
 import DistributionsSettings from '../Components/DistributionsSettings';
+import UpgradeProfilesSettings from '../Components/UpgradeProfilesSettings';
+import PackageProfilesSettings from '../Components/PackageProfilesSettings';
+import ReportBrandingSettings from '../Components/ReportBrandingSettings';
+import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
+import AirGapBundlesSettings from '../Components/AirGapBundlesSettings';
+import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
+import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
+import ServerRoleSettings from '../Components/ServerRoleSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { refreshLicenseCache } from '../Services/license';
 import { usePlugins } from '../plugins';
 
 interface Tag {
@@ -138,12 +147,198 @@ const Settings: React.FC = () => {
   // Plugin system for dynamic settings tabs
   const { settingsTabs: pluginSettingsTabs } = usePlugins();
 
-  // Tab names for URL hash (dynamic based on plugin tabs)
-  const tabNames = useMemo(() => {
-    const baseTabs = ['tags', 'queues', 'integrations', 'ubuntu-pro', 'antivirus', 'available-packages', 'host-defaults', 'firewall-roles', 'distributions'];
-    const pluginTabIds = pluginSettingsTabs.map(pt => pt.id);
-    return [...baseTabs, ...pluginTabIds];
-  }, [pluginSettingsTabs]);
+  // Active license modules (for Pro+ tab gating).  ``licenseActive``
+  // means "any Pro+ tier is licensed at all" — used by tabs like
+  // ``airgap-bundles`` that aren't tied to a specific engine but
+  // still want to disappear on the Community edition.
+  const [licenseModules, setLicenseModules] = useState<string[]>([]);
+  const [licenseActive, setLicenseActive] = useState<boolean>(false);
+  useEffect(() => {
+    (async () => {
+      try {
+        const info = await refreshLicenseCache();
+        setLicenseModules(info?.modules ?? []);
+        setLicenseActive(!!info?.active);
+      } catch {
+        setLicenseModules([]);
+        setLicenseActive(false);
+      }
+    })();
+  }, []);
+
+  // Tab definitions — each entry declares its hash id, label key, and the
+  // module that must be licensed for the tab to be visible.  ``moduleRequired``
+  // is undefined for OSS-appropriate tabs.  The order here is the visible
+  // order in the UI.
+  const tabDefs = useMemo(() => {
+    const defs: Array<{
+      id: string;
+      labelKey: string;
+      labelDefault: string;
+      moduleRequired?: string;
+      requiresLicense?: boolean;
+    }> = [
+      // Fixed leading order (Bryan): Configuration, Server Role, Host
+      // Defaults — the most-used settings, with Configuration as the default
+      // landing tab for the settings gear.
+      {
+        id: 'configuration',
+        labelKey: 'configuration.title',
+        labelDefault: 'Configuration',
+      },
+      // Server Role (air-gap topology) — ungated: every deployment,
+      // including standalone Community, can pick its role.  Replaces
+      // the old sysmanage.yaml ``role:`` key.  The page hosts BOTH the
+      // air-gap and federation role cards, so the menu item is "Server
+      // Role" — distinct from ``serverRole.heading`` (the air-gap card's
+      // own "Air-Gap Role" title).
+      {
+        id: 'server-role',
+        labelKey: 'serverRole.menuTitle',
+        labelDefault: 'Server Role',
+      },
+      { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
+      { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
+      { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
+      {
+        id: 'integrations',
+        labelKey: 'integrations.title',
+        labelDefault: 'Integrations',
+        moduleRequired: 'observability_engine',
+      },
+      { id: 'ubuntu-pro', labelKey: 'ubuntuPro.title', labelDefault: 'Ubuntu Pro' },
+      {
+        id: 'antivirus',
+        labelKey: 'antivirus.title',
+        labelDefault: 'Antivirus',
+        moduleRequired: 'av_management_engine',
+      },
+      {
+        id: 'available-packages',
+        labelKey: 'availablePackages.title',
+        labelDefault: 'Available Packages',
+      },
+      {
+        id: 'firewall-roles',
+        labelKey: 'firewallRoles.title',
+        labelDefault: 'Firewall Roles',
+        moduleRequired: 'firewall_orchestration_engine',
+      },
+      { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
+      // Dynamic Secrets: visibility deferred until its Pro+ fold-in
+      // lands.  Stays visible (and OSS-functional) until then.
+      //
+      // Access Groups + Registration Keys (Phase 12.4): contributed at
+      // runtime via the federation controller plugin bundle (see
+      // ``sysmanage-professional-plus/frontend/plugin-src/entries/federation-controller-entry.ts``).
+      // Picked up by the ``pluginSettingsTabs`` loop further down with
+      // ``moduleRequired: 'federation_controller_engine'`` gating.
+      {
+        id: 'update-profiles',
+        labelKey: 'upgradeProfiles.tabLabel',
+        labelDefault: 'Update Profiles',
+        // Phase 10.6: scheduled upgrade profiles moved to the Pro+
+        // ``automation_engine`` (cron + per-host dispatch live there).
+        // The OSS server returns 402 from every /api/upgrade-profiles
+        // route without it, so the tab simply hides.
+        moduleRequired: 'automation_engine',
+      },
+      {
+        id: 'compliance-profiles',
+        labelKey: 'packageProfiles.tabLabel',
+        labelDefault: 'Compliance Profiles',
+        // Phase 11.5: package compliance profiles moved to the Pro+
+        // ``compliance_engine`` (evaluator + remediation-plan builder
+        // live there).  The OSS server returns 402 from every
+        // /api/package-profiles route without it, so the tab simply
+        // hides for unlicensed deployments.
+        moduleRequired: 'compliance_engine',
+      },
+      {
+        id: 'report-branding',
+        labelKey: 'reportBranding.tabLabel',
+        labelDefault: 'Report Branding',
+        moduleRequired: 'reporting_engine',
+      },
+      {
+        id: 'report-templates',
+        labelKey: 'reportTemplates.tabLabel',
+        labelDefault: 'Report Templates',
+        moduleRequired: 'reporting_engine',
+      },
+      {
+        id: 'airgap-bundles',
+        labelKey: 'airgapBundles.tabLabel',
+        labelDefault: 'Air-Gap Bundles',
+        // Air-gap is an ENTERPRISE feature (features.py: AIRGAP_* live in the
+        // Enterprise tier, paired with the airgap_collector_engine). Gate on
+        // that engine so the tab hides on Community AND Professional — a bare
+        // ``requiresLicense`` leaked it onto Professional, which has no air-gap.
+        moduleRequired: 'airgap_collector_engine',
+      },
+      {
+        id: 'repository-mirroring',
+        labelKey: 'mirror.tabLabel',
+        labelDefault: 'Repository Mirroring',
+        // Phase 10.4: gated on the Pro+ engine that owns the plan
+        // builders.  Without it loaded every /api/mirror-repositories
+        // route returns 402, so the tab simply hides.
+        moduleRequired: 'repository_mirroring_engine',
+      },
+      {
+        id: 'authentication',
+        labelKey: 'idp.tabLabel',
+        labelDefault: 'Authentication',
+        // Phase 10.5: external IdP integration (LDAP/AD + OIDC).
+        // Routes 402 without ``external_idp_engine`` loaded.
+        moduleRequired: 'external_idp_engine',
+      },
+    ];
+    return defs.filter(d => {
+      if (d.moduleRequired && !licenseModules.includes(d.moduleRequired)) return false;
+      if (d.requiresLicense && !licenseActive) return false;
+      return true;
+    });
+  }, [licenseModules, licenseActive]);
+
+  // Plugin-contributed Settings tabs honour the same ``moduleRequired``
+  // gate the hardcoded ``tabDefs`` use above (Phase 10.7 line 1822).
+  // Plugins that omit the field stay always-visible — pre-Phase-10.7
+  // behaviour.
+  const visiblePluginSettingsTabs = useMemo(() => {
+    return pluginSettingsTabs.filter(
+      pt => !pt.moduleRequired || licenseModules.includes(pt.moduleRequired),
+    );
+  }, [pluginSettingsTabs, licenseModules]);
+
+  // Tabs in display order: the hardcoded tabDefs, then plugin tabs — EXCEPT the
+  // SysManage License ('proplus') tab, which is surfaced right after
+  // Configuration so the license is easy to find.  This single ordered list
+  // drives both the tab bar and ``tabNames`` so they never desync.
+  const orderedSettingsTabs = useMemo(() => {
+    const hard = tabDefs.map(d => ({ id: d.id, label: t(d.labelKey, d.labelDefault) }));
+    const plugins = visiblePluginSettingsTabs.map(pt => ({
+      id: pt.id,
+      label: t(pt.labelKey),
+    }));
+    const proplusIdx = plugins.findIndex(p => p.id === 'proplus');
+    if (proplusIdx === -1) {
+      return [...hard, ...plugins];
+    }
+    const proplus = plugins[proplusIdx];
+    const restPlugins = plugins.filter((_, i) => i !== proplusIdx);
+    const cfgIdx = hard.findIndex(h => h.id === 'configuration');
+    const ordered = [...hard];
+    ordered.splice(cfgIdx === -1 ? 0 : cfgIdx + 1, 0, proplus);
+    return [...ordered, ...restPlugins];
+  }, [tabDefs, visiblePluginSettingsTabs, t]);
+
+  // Tab IDs in display order — used for hash navigation (URL hash → activeTab
+  // index) and ID-based dispatch in handleTabChange / tab content rendering.
+  const tabNames = useMemo(
+    () => orderedSettingsTabs.map(x => x.id),
+    [orderedSettingsTabs],
+  );
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -155,21 +350,25 @@ const Settings: React.FC = () => {
   // Tab state
   const [activeTab, setActiveTab] = useState(getInitialTab);
 
-  // Handle tab change and update URL hash
+  // Handle tab change and update URL hash.  Dispatch is keyed off the tab
+  // ID rather than the index — the visible tab list is filtered by license
+  // so indices are not stable across users.
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     // Safely access array element with bounds check
-    if (newValue >= 0 && newValue < tabNames.length) {
-      globalThis.location.hash = tabNames[newValue]; // nosemgrep: detect-object-injection
+    const newTabId = (newValue >= 0 && newValue < tabNames.length)
+      ? tabNames[newValue]  // nosemgrep: detect-object-injection
+      : '';
+    if (newTabId) {
+      globalThis.location.hash = newTabId;
     }
 
     // Load queue messages when switching to queue tab
-    if (newValue === 1) {
+    if (newTabId === 'queues') {
       loadQueueMessages();
     }
-    // Note: Available Packages tab is now at index 5 (was 4)
     // Load package data when switching to Available Packages tab
-    if (newValue === 5) {
+    if (newTabId === 'available-packages') {
       loadPackageSummary();
       // Start 30-second auto-refresh timer for package cards
       if (packageRefreshInterval) {
@@ -602,12 +801,14 @@ const Settings: React.FC = () => {
     }
   }, [packageSummary, loadPackageSummary]);
 
-  // Load package summary on mount if we're on the Available Packages tab
+  // Load package summary on mount if we're on the Available Packages tab.
+  // Keyed off the tab ID (not a hard-coded index) since the visible tab list
+  // shifts with license filtering and added tabs.
   useEffect(() => {
-    if (activeTab === 5) {
+    if (tabNames[activeTab] === 'available-packages') {
       loadPackageSummary();
     }
-  }, [activeTab, loadPackageSummary]);
+  }, [activeTab, tabNames, loadPackageSummary]);
 
   // DataGrid columns
   const columns: GridColDef[] = [
@@ -829,9 +1030,7 @@ const Settings: React.FC = () => {
         {t('integrations.description', 'Configure external service integrations and settings.')}
       </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <EmailConfigCard />
-      </Box>
+      {/* Email configuration now lives on the Configuration tab (Phase 13.1.H). */}
 
       <Box sx={{ mb: 3 }}>
         <OpenBAOStatusCard />
@@ -987,6 +1186,7 @@ const Settings: React.FC = () => {
                 <MenuItem value="">
                   <em>{t('updates.filters.allManagers', 'All Package Managers')}</em>
                 </MenuItem>
+                {/* eslint-disable i18next/no-literal-string -- package manager brand names */}
                 <MenuItem value="apt">APT</MenuItem>
                 <MenuItem value="snap">Snap</MenuItem>
                 <MenuItem value="flatpak">Flatpak</MenuItem>
@@ -999,6 +1199,7 @@ const Settings: React.FC = () => {
                 <MenuItem value="dnf">DNF</MenuItem>
                 <MenuItem value="zypper">Zypper</MenuItem>
                 <MenuItem value="pacman">Pacman</MenuItem>
+                {/* eslint-enable i18next/no-literal-string */}
               </Select>
             </FormControl>
           </Grid>
@@ -1021,7 +1222,9 @@ const Settings: React.FC = () => {
       {packages.length > 0 && (
         <Box>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {t('availablePackages.results', 'Search Results')} ({packageTotalCount.toLocaleString()} total, showing {packages.length})
+            {t('availablePackages.results', 'Search Results')}{' '}
+            {/* eslint-disable-next-line i18next/no-literal-string -- result count summary uses interpolated values */}
+            ({packageTotalCount.toLocaleString()} total, showing {packages.length})
           </Typography>
           <div style={{ height: 400 }}>
             <DataGrid
@@ -1093,37 +1296,47 @@ const Settings: React.FC = () => {
         {t('nav.settings', 'Settings')}
       </Typography>
 
-      {/* Tabs */}
+      {/* Tabs — scrollable so labels never wrap and a narrow viewport
+          gets the same prev/next arrows as MUI's HostDetail tabs. */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="settings tabs">
-          <Tab label={t('tags.title', 'Tags')} />
-          <Tab label={t('queues.title', 'Queues')} />
-          <Tab label={t('integrations.title', 'Integrations')} />
-          <Tab label={t('ubuntuPro.title', 'Ubuntu Pro')} />
-          <Tab label={t('antivirus.title', 'Antivirus')} />
-          <Tab label={t('availablePackages.title', 'Available Packages')} />
-          <Tab label={t('hostDefaults.title', 'Host Defaults')} />
-          <Tab label={t('firewallRoles.title', 'Firewall Roles')} />
-          <Tab label={t('distributions.title', 'Distributions')} />
-          {pluginSettingsTabs.map(pt => (
-            <Tab key={pt.id} label={t(pt.labelKey)} />
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label={t('settings.tabsAriaLabel', 'settings tabs')}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
+          {orderedSettingsTabs.map(tab => (
+            <Tab key={tab.id} label={tab.label} />
           ))}
         </Tabs>
       </Box>
 
-      {/* Tab content - flexGrow to fill available space */}
+      {/* Tab content — keyed off the tab ID at the active index so the
+          mapping is stable when a Pro+-gated tab is filtered out for
+          unlicensed users. */}
       <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
-        {activeTab === 0 && renderTagsTab()}
-        {activeTab === 1 && renderQueuesTab()}
-        {activeTab === 2 && renderIntegrationsTab()}
-        {activeTab === 3 && renderUbuntuProTab()}
-        {activeTab === 4 && <AntivirusDefaultsSettings />}
-        {activeTab === 5 && renderAvailablePackagesTab()}
-        {activeTab === 6 && <HostDefaultsSettings />}
-        {activeTab === 7 && <FirewallRolesSettings />}
-        {activeTab === 8 && <DistributionsSettings />}
-        {pluginSettingsTabs.map((pt, index) => (
-          activeTab === 9 + index && (
+        {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
+        {tabNames[activeTab] === 'tags' && renderTagsTab()}
+        {tabNames[activeTab] === 'queues' && renderQueuesTab()}
+        {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
+        {tabNames[activeTab] === 'integrations' && renderIntegrationsTab()}
+        {tabNames[activeTab] === 'ubuntu-pro' && renderUbuntuProTab()}
+        {tabNames[activeTab] === 'antivirus' && <AntivirusDefaultsSettings />}
+        {tabNames[activeTab] === 'available-packages' && renderAvailablePackagesTab()}
+        {tabNames[activeTab] === 'host-defaults' && <HostDefaultsSettings />}
+        {tabNames[activeTab] === 'firewall-roles' && <FirewallRolesSettings />}
+        {tabNames[activeTab] === 'distributions' && <DistributionsSettings />}
+        {tabNames[activeTab] === 'update-profiles' && <UpgradeProfilesSettings />}
+        {tabNames[activeTab] === 'compliance-profiles' && <PackageProfilesSettings />}
+        {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}
+        {tabNames[activeTab] === 'report-templates' && <ReportTemplatesSettings />}
+        {tabNames[activeTab] === 'airgap-bundles' && <AirGapBundlesSettings />}
+        {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
+        {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
+        {visiblePluginSettingsTabs.map(pt => (
+          tabNames[activeTab] === pt.id && (
             <Box key={pt.id}>
               <pt.component />
             </Box>
@@ -1241,13 +1454,13 @@ const Settings: React.FC = () => {
                 <strong>{t('queues.priority', 'Priority')}:</strong> {selectedMessage.priority}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || 'N/A'}
+                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || t('common.notAvailable', 'N/A')}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, 'N/A')}
+                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, t('common.notAvailable', 'N/A'))}
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, 'N/A')}
+                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, t('common.notAvailable', 'N/A'))}
               </Typography>
               
               <Typography variant="h6" sx={{ mb: 1 }}>

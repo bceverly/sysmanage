@@ -4,9 +4,6 @@ Tests StorageDevice and NetworkInterface models.
 """
 
 import uuid
-from datetime import datetime, timezone
-
-import pytest
 
 
 class TestStorageDeviceModel:

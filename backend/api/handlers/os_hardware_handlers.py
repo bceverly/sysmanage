@@ -149,6 +149,17 @@ async def handle_os_version_update(  # NOSONAR
             # Get the host object for tests compatibility
             host = db.query(Host).filter(Host.id == connection.host_id).first()
             if host:
+                # Capture whether platform_release was unknown BEFORE this
+                # message updates it.  Phase 10.4.4 default-mirror auto-
+                # apply at register/approve time needs platform_release
+                # to compare against MirrorKnownVersion.match_regex; if
+                # the host was registered before the agent reported its
+                # OS (the common cloud-init path), the apply call ran
+                # against an empty regex target and dispatched nothing.
+                # The NULL→non-NULL transition here is the right moment
+                # to retry exactly once.
+                platform_release_was_unknown = not host.platform_release
+
                 # Update host object attributes for test compatibility
                 for key, value in os_info.items():
                     if key != "os_details":  # Skip JSON field for direct assignment
@@ -167,6 +178,38 @@ async def handle_os_version_update(  # NOSONAR
                 # Commit changes
                 db.commit()
                 db.refresh(host)
+
+                # Phase 10.4.4 close-out — retry default-mirror auto-
+                # apply now that we finally know the host's OS.  Only
+                # on the first-learn transition; subsequent
+                # os_version_update messages do not re-trigger (the
+                # operator may have intentionally moved mirrors after
+                # the initial apply and we don't want to clobber that).
+                if (
+                    platform_release_was_unknown
+                    and host.platform_release
+                    and host.approval_status == "approved"
+                ):
+                    try:
+                        from backend.api.repository_mirroring import (  # pylint: disable=import-outside-toplevel
+                            apply_default_mirrors_for_new_host,
+                        )
+
+                        dispatched = apply_default_mirrors_for_new_host(str(host.id))
+                        if dispatched:
+                            debug_logger.info(
+                                "Default-mirror auto-apply retried for host %s after first OS learn — dispatched %d plan(s)",
+                                host.fqdn,
+                                len(dispatched),
+                            )
+                    except (
+                        Exception
+                    ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+                        debug_logger.warning(
+                            "Default-mirror auto-apply retry failed for host %s: %s",
+                            host.fqdn,
+                            exc,
+                        )
 
                 # Check if this is a new OS/version combination and trigger automatic package collection
                 # Use the same logic as package handlers to determine OS name from os_details JSON
@@ -222,7 +265,7 @@ async def handle_os_version_update(  # NOSONAR
                                 os_version,
                             )
                         except Exception as e:
-                            debug_logger.error(
+                            debug_logger.exception(
                                 "Error queueing automatic package collection command for host %s: %s",
                                 host.fqdn,
                                 str(e),
@@ -253,7 +296,7 @@ async def handle_os_version_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error updating OS version: %s", e)
+        debug_logger.exception("Error updating OS version: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -394,6 +437,9 @@ async def handle_hardware_update(  # NOSONAR
                     ipv4_address=ipv4_address or interface.get("ipv4_address"),
                     ipv6_address=ipv6_address or interface.get("ipv6_address"),
                     mac_address=interface.get("mac_address"),
+                    netmask=interface.get("subnet_mask"),
+                    mtu=interface.get("mtu"),
+                    speed_mbps=interface.get("speed_mbps"),
                     # Map agent's is_active field to database's is_up field
                     is_up=interface.get("is_active", False),
                     last_updated=now,
@@ -443,7 +489,7 @@ async def handle_hardware_update(  # NOSONAR
         }
 
     except Exception as e:
-        debug_logger.error("Error updating hardware: %s", e)
+        debug_logger.exception("Error updating hardware: %s", e)
         db.rollback()
         return {
             "message_type": "error",
@@ -543,7 +589,7 @@ async def handle_ubuntu_pro_update(  # NOSONAR
             len(services),
         )
     except Exception as e:
-        debug_logger.error(
+        debug_logger.exception(
             "Error processing Ubuntu Pro data for host %s: %s", host.id, e
         )
         # Don't re-raise - let the main OS update continue

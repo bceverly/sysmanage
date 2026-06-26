@@ -5,7 +5,7 @@ Tests core queue operations including enqueue, dequeue, and status updates.
 
 import json
 import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 

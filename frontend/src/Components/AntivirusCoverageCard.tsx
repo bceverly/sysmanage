@@ -39,14 +39,15 @@ const AntivirusCoverageCard: React.FC = () => {
       setCoverage(response.data);
     } catch (err: unknown) {
       console.error('Error fetching antivirus coverage:', err);
+      const fallbackMessage = t('security.antivirusCoverage.fetchError', 'Failed to fetch antivirus coverage');
       const errorMessage = err && typeof err === 'object' && 'response' in err ?
-        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || 'Failed to fetch antivirus coverage' :
-        'Failed to fetch antivirus coverage';
+        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || fallbackMessage :
+        fallbackMessage;
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchCoverage();

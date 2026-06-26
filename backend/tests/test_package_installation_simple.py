@@ -16,14 +16,21 @@ from backend.persistence import models
 
 @pytest.fixture
 def test_engine():
-    """Create a shared in-memory SQLite database for testing"""
+    """Create a shared in-memory SQLite database for testing.
+
+    ``engine.dispose()`` in teardown closes the underlying sqlite3
+    connections so they don't surface as ResourceWarnings later.
+    """
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     models.Base.metadata.create_all(bind=engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture
@@ -39,12 +46,19 @@ def test_session(test_engine):
 
 @pytest.fixture
 def test_host(test_session, test_engine):
-    """Create a test host in the database"""
+    """Create a test host in the database.
+
+    ``Host.id`` is a ``GUID()`` column (UUID under the hood); the
+    fixture used to insert ``id=1`` and then ``filter(Host.id == 1)``,
+    which round-trips as ``uuid.UUID("1")`` and raises ``ValueError:
+    badly formed hexadecimal UUID string`` on read.  Use a real UUID.
+    """
+    host_uuid = uuid.uuid4()
     connection = test_engine.connect()
     connection.execute(
         models.Host.__table__.insert(),
         {
-            "id": 1,
+            "id": host_uuid,
             "fqdn": "test-host.example.com",
             "ipv4": "192.168.1.100",
             "ipv6": "::1",
@@ -59,7 +73,7 @@ def test_host(test_session, test_engine):
     connection.close()
 
     # Retrieve the host from the session
-    host = test_session.query(models.Host).filter(models.Host.id == 1).first()
+    host = test_session.query(models.Host).filter(models.Host.id == host_uuid).first()
     yield host
 
 
@@ -176,12 +190,15 @@ class TestPackageInstallationLogic:
         assert test_host.active is True
         assert test_host.approval_status == "approved"
 
-        # Create inactive host using direct SQL insert like test_host fixture
+        # Create inactive host using direct SQL insert like test_host
+        # fixture.  ``Host.id`` is GUID(); use a real UUID to avoid the
+        # process_result_value crash on read-back.
+        inactive_uuid = uuid.uuid4()
         connection = test_engine.connect()
         connection.execute(
             models.Host.__table__.insert(),
             {
-                "id": 2,
+                "id": inactive_uuid,
                 "fqdn": "inactive.example.com",
                 "ipv4": "192.168.1.200",
                 "active": False,
@@ -194,7 +211,9 @@ class TestPackageInstallationLogic:
 
         # Retrieve the inactive host
         inactive_host = (
-            test_session.query(models.Host).filter(models.Host.id == 2).first()
+            test_session.query(models.Host)
+            .filter(models.Host.id == inactive_uuid)
+            .first()
         )
 
         # Test validation logic

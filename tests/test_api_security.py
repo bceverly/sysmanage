@@ -3,10 +3,7 @@ Tests for backend/api/security.py module.
 Tests security configuration checks and platform command generation.
 """
 
-import platform
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class TestGetPlatformCommand:

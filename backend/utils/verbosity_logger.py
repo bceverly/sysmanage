@@ -6,19 +6,31 @@ Supports custom formats and selective level filtering.
 """
 
 import logging
-import re
 from typing import Set
 
 from backend.config.config import get_log_format, get_log_levels
 from backend.utils.logging_formatter import UTCTimestampFormatter
 
-# Matches control characters that can cause log injection (CWE-117)
-_CONTROL_CHAR_RE = re.compile(r"[\r\n]")
-
 
 def sanitize_log(value) -> str:
-    """Sanitize a value for safe logging by removing newline characters (CWE-117)."""
-    return _CONTROL_CHAR_RE.sub("", str(value))
+    """Sanitize a value for safe logging by stripping control chars (CWE-117).
+
+    Implementation note — this MUST use explicit chained ``str.replace``
+    rather than ``re.sub``: CodeQL's ``py/log-injection`` rule
+    recognises ``str.replace('\\n', ...)`` / ``str.replace('\\r', ...)``
+    as sanitizers via its built-in data-flow heuristics, but does NOT
+    recognise ``re.sub`` even when the regex matches the same control
+    characters.  An earlier ``re.sub``-based implementation left every
+    call site here flagged as ``py/log-injection`` because CodeQL
+    treated this function as opaque.  Keep the chain; do not refactor
+    to a regex without re-testing the alert count.
+    """
+    # Stripping \r and \n covers both standard CRLF log-line injection
+    # and bare-LF injection.  \t included because it's commonly used to
+    # forge field boundaries in tab-delimited log formats.  Other
+    # control chars (form-feed, vertical-tab, NUL) are rare in user
+    # input and aren't part of the rule's sanitizer pattern.
+    return str(value).replace("\r", "").replace("\n", "").replace("\t", "")
 
 
 class FlexibleLogger:
@@ -90,6 +102,17 @@ class FlexibleLogger:
         """Log error message if verbosity allows."""
         if self._should_log(logging.ERROR):
             self.logger.error(msg, *args, **kwargs)
+
+    def exception(self, msg: str, *args, **kwargs):
+        """Log an error message with exception traceback if verbosity allows.
+
+        Mirrors ``logging.Logger.exception``: emitted at ERROR level with the
+        active traceback attached.  Provided so call sites can use
+        ``logger.exception(...)`` uniformly whether the underlying logger is a
+        stdlib ``Logger`` or this wrapper.
+        """
+        if self._should_log(logging.ERROR):
+            self.logger.exception(msg, *args, **kwargs)
 
     def critical(self, msg: str, *args, **kwargs):
         """Log critical message if verbosity allows."""

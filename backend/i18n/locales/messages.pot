@@ -1,0 +1,3971 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the SysManage package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: SysManage\n"
+"Report-Msgid-Bugs-To:  \n"
+"POT-Creation-Date: 2026-06-25 09:39-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: backend/security/communication_security.py:119
+msgid "Invalid token signature"
+msgstr ""
+
+#: backend/security/communication_security.py:125
+msgid "Token expired"
+msgstr ""
+
+#: backend/security/communication_security.py:147
+msgid "Malformed token"
+msgstr ""
+
+#: backend/security/communication_security.py:387
+msgid "Encrypted data expired"
+msgstr ""
+
+#: backend/security/communication_security.py:398
+msgid "Invalid signature"
+msgstr ""
+
+#: backend/security/communication_security.py:405
+msgid "Decryption failed"
+msgstr ""
+
+#: backend/auth/auth_bearer.py:36
+msgid "Invalid authentication scheme."
+msgstr ""
+
+#: backend/auth/auth_bearer.py:39
+msgid "Expired token."
+msgstr ""
+
+#: backend/auth/auth_bearer.py:43
+msgid "Invalid authorization code."
+msgstr ""
+
+#: backend/auth/auth_bearer.py:82
+msgid "Could not validate credentials"
+msgstr ""
+
+#: backend/auth/auth_bearer.py:113
+msgid "User not found."
+msgstr ""
+
+#: backend/auth/auth_bearer.py:168 backend/api/auth.py:605
+msgid "You do not have access to the selected account."
+msgstr ""
+
+#: backend/api/fleet.py:89
+#, python-format
+msgid "Agent with hostname %s not found"
+msgstr ""
+
+#: backend/api/fleet.py:128
+#, python-brace-format
+msgid "Command {command_type} sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:170
+#, python-brace-format
+msgid "Shell command sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:210
+#, python-brace-format
+msgid "Package installation command sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:249
+#, python-brace-format
+msgid "Service restart command sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:284
+#, python-brace-format
+msgid "System update command sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:319
+#, python-brace-format
+msgid "Reboot command sent to {hostname}"
+msgstr ""
+
+#: backend/api/fleet.py:380
+#, python-brace-format
+msgid "Command {command_type} broadcast to {sent_count} agents"
+msgstr ""
+
+#: backend/api/fleet.py:412
+#, python-brace-format
+msgid "Shell command broadcast to {sent_count} agents"
+msgstr ""
+
+#: backend/api/fleet.py:438
+#, python-format
+msgid "No agents found for platform %s"
+msgstr ""
+
+#: backend/api/fleet.py:448
+#, python-brace-format
+msgid "Command {command_type} sent to {sent_count} {platform} agents"
+msgstr ""
+
+#: backend/api/certificates.py:41
+#, python-format
+msgid "Failed to get server fingerprint: %s"
+msgstr ""
+
+#: backend/api/certificates.py:60
+#, python-format
+msgid "Failed to get CA certificate: %s"
+msgstr ""
+
+#: backend/api/certificates.py:80 backend/api/certificates.py:135
+#: backend/api/host_graylog.py:85 backend/api/diagnostics.py:83
+#: backend/api/diagnostics.py:218 backend/api/error_constants.py:44
+#: backend/api/antivirus_status.py:209 backend/api/firewall_roles.py:470
+#: backend/api/firewall_roles.py:541
+#: backend/api/commercial_antivirus_status.py:76
+msgid "Invalid host ID format"
+msgstr ""
+
+#: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
+#: backend/api/repository_mirroring.py:831
+#: backend/api/repository_mirroring.py:896
+#: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
+#: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
+#: backend/api/tag.py:495 backend/api/tag.py:649
+#: backend/api/airgap_repository_buckets.py:61
+#: backend/api/updates/report_routes.py:30
+#: backend/api/updates/os_upgrade_routes.py:50
+#: backend/api/updates/query_routes.py:119
+#: backend/api/updates/execution_routes.py:247 backend/api/diagnostics.py:98
+#: backend/api/diagnostics.py:231 backend/api/error_constants.py:29
+#: backend/api/antivirus_status.py:221 backend/api/child_host_utils.py:80
+#: backend/api/packages.py:386 backend/api/scripts/routes_executions.py:74
+#: backend/api/commercial_antivirus_status.py:84
+msgid "Host not found"
+msgstr ""
+
+#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+msgid "Host is not approved"
+msgstr ""
+
+#: backend/api/certificates.py:152 backend/api/security_roles.py:155
+#: backend/api/security_roles.py:198 backend/api/auth_mfa.py:153
+#: backend/api/airgap_collection_schedule.py:140
+#: backend/api/graylog_integration.py:168 backend/api/broadcast.py:124
+#: backend/api/queue.py:118 backend/api/airgap_collector_runs.py:90
+#: backend/api/access_groups.py:136 backend/api/grafana_integration.py:310
+#: backend/api/opentelemetry/deployment.py:63
+#: backend/api/opentelemetry/deployment.py:216
+#: backend/api/opentelemetry/eligibility.py:58
+#: backend/api/opentelemetry/grafana_connection.py:54
+#: backend/api/opentelemetry/grafana_connection.py:197
+#: backend/api/packages_operations.py:64 backend/api/packages_operations.py:238
+#: backend/api/license_management.py:112
+#: backend/api/updates/os_upgrade_routes.py:185
+#: backend/api/updates/execution_routes.py:45
+#: backend/api/secrets/permissions.py:35 backend/api/error_constants.py:18
+#: backend/api/child_host_utils.py:29
+msgid "User not found"
+msgstr ""
+
+#: backend/api/security_roles.py:88 backend/api/security_roles.py:149
+msgid "You do not have permission to view user security roles"
+msgstr ""
+
+#: backend/api/security_roles.py:192
+msgid "You do not have permission to edit user security roles"
+msgstr ""
+
+#: backend/api/security_roles.py:210
+#, python-format
+msgid "Invalid UUID format: %s"
+msgstr ""
+
+#: backend/api/security_roles.py:224
+#, python-format
+msgid "Role with ID %s does not exist"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:33
+msgid "Hostname changed message received without host_id"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:44
+#, python-format
+msgid "Hostname change failed for host %s: %s"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:52
+#, python-format
+msgid "Hostname changed message for host %s missing new_hostname"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:60
+#, python-format
+msgid "Host %s not found for hostname update"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:68
+#, python-format
+msgid "Updated hostname for host %s from %s to %s"
+msgstr ""
+
+#: backend/api/handlers/hostname_handler.py:76
+#, python-format
+msgid "Error handling hostname changed message: %s"
+msgstr ""
+
+#: backend/api/handlers/user_access_handlers.py:258
+#: backend/api/handlers/user_access_handlers.py:266
+#: backend/api/message_handlers.py:425 backend/api/update_handlers.py:35
+#: backend/api/update_handlers.py:43 backend/api/error_constants.py:34
+msgid "Host not registered"
+msgstr ""
+
+#: backend/api/handlers/user_access_handlers.py:329
+msgid "Failed to update user access information"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:49
+msgid "Execution ID is required"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:74
+#, python-format
+msgid "Script execution result with UUID %s already processed"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:94
+msgid "Hostname is required"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:105
+#, python-format
+msgid "Host not found: %s"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:202
+#, python-brace-format
+msgid "Script execution {status} on agent {hostname}"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:235
+#, python-format
+msgid "Failed to store script execution result: %s"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:282
+msgid "Host not found for reboot status update"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:348
+#, python-format
+msgid "Failed to update reboot status: %s"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:386
+#: backend/api/handlers/infrastructure_handlers.py:517
+msgid "Could not identify host"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:482
+#, python-format
+msgid "Failed to process certificates update: %s"
+msgstr ""
+
+#: backend/api/handlers/infrastructure_handlers.py:596
+#, python-format
+msgid "Failed to process role data update: %s"
+msgstr ""
+
+#: backend/api/handlers/child_host/listing.py:37
+#: backend/api/handlers/child_host/control.py:38
+#: backend/api/handlers/child_host/virtualization.py:37
+#: backend/api/handlers/child_host/creation.py:37
+msgid "Child host management requires a Professional+ license."
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:89
+msgid "No host identification available"
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:288
+msgid "os_version_updated"
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:294
+msgid "No OS information provided"
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:304
+msgid "Failed to update OS version"
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:488
+msgid "hardware_updated"
+msgstr ""
+
+#: backend/api/handlers/os_hardware_handlers.py:497
+msgid "Failed to update hardware information"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:101
+msgid "software_inventory_updated"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:110
+msgid "Failed to update software inventory"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:288
+#: backend/api/updates/report_routes.py:71
+#, python-format
+msgid "Failed to store updates: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:403
+#, python-format
+msgid "Failed to process package collection result: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:497
+#, python-format
+msgid "Failed to process third-party repository update: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:580
+#, python-format
+msgid "Failed to process antivirus status update: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:711
+#, python-format
+msgid "Failed to process commercial antivirus status update: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:813
+#, python-format
+msgid "Failed to process firewall status update: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:899
+#, python-format
+msgid "Failed to process Graylog status update: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:931
+msgid "Missing request_id in installation_complete"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:948
+#: backend/api/agent.py:743 backend/api/packages.py:462
+#, python-format
+msgid "Installation request not found: %s"
+msgstr ""
+
+#: backend/api/handlers/software_package_handlers.py:989
+#: backend/api/packages.py:482
+#, python-format
+msgid "Failed to record installation completion: %s"
+msgstr ""
+
+#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:156
+#: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
+#: backend/api/external_idp.py:61 backend/api/dynamic_secrets.py:106
+#: backend/api/upgrade_profiles.py:122
+#, python-format
+msgid "Invalid UUID for %s: %s"
+msgstr ""
+
+#: backend/api/report_templates.py:187 backend/api/report_templates.py:250
+#, python-format
+msgid "Unknown base_report_type: %s"
+msgstr ""
+
+#: backend/api/report_templates.py:195
+#, python-format
+msgid "Unknown field code(s) for %s: %s"
+msgstr ""
+
+#: backend/api/report_templates.py:234
+#, python-format
+msgid "Created report template '%s'"
+msgstr ""
+
+#: backend/api/report_templates.py:324
+#, python-format
+msgid "Updated report template '%s'"
+msgstr ""
+
+#: backend/api/report_templates.py:357
+#, python-format
+msgid "Deleted report template '%s'"
+msgstr ""
+
+#: backend/api/report_templates.py:362
+msgid "Report template deleted"
+msgstr ""
+
+#: backend/api/auth_mfa.py:250
+msgid "Call enroll/start before enroll/complete."
+msgstr ""
+
+#: backend/api/auth_mfa.py:262 backend/api/auth_mfa.py:503
+msgid "Invalid TOTP code."
+msgstr ""
+
+#: backend/api/auth_mfa.py:300 backend/api/auth_mfa.py:354
+msgid "MFA challenge expired — please log in again."
+msgstr ""
+
+#: backend/api/auth_mfa.py:305
+msgid "Invalid MFA challenge."
+msgstr ""
+
+#: backend/api/auth_mfa.py:317
+msgid "Invalid MFA code."
+msgstr ""
+
+#: backend/api/auth_mfa.py:400
+msgid ""
+"If your account has MFA configured, an email with a verification code has "
+"been dispatched."
+msgstr ""
+
+#: backend/api/auth_mfa.py:430
+msgid "Invalid password."
+msgstr ""
+
+#: backend/api/auth_mfa.py:436
+msgid "MFA disabled."
+msgstr ""
+
+#: backend/api/auth_mfa.py:491
+msgid "MFA is not enrolled for this account."
+msgstr ""
+
+#: backend/api/auth_mfa.py:553
+msgid "Editing MFA settings requires admin privileges."
+msgstr ""
+
+#: backend/api/third_party_repos.py:219
+#, python-format
+msgid "Failed to list third-party repositories: %s"
+msgstr ""
+
+#: backend/api/third_party_repos.py:243
+msgid "Permission denied: ADD_THIRD_PARTY_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/third_party_repos.py:274
+msgid "Repository identifier is required"
+msgstr ""
+
+#: backend/api/third_party_repos.py:324
+msgid "Repository add request queued successfully"
+msgstr ""
+
+#: backend/api/third_party_repos.py:332
+#, python-format
+msgid "Failed to queue repository addition: %s"
+msgstr ""
+
+#: backend/api/third_party_repos.py:360
+msgid "Permission denied: DELETE_THIRD_PARTY_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/third_party_repos.py:392
+msgid "No repositories specified for deletion"
+msgstr ""
+
+#: backend/api/third_party_repos.py:470
+msgid "Repository deletion request queued successfully"
+msgstr ""
+
+#: backend/api/third_party_repos.py:478
+#, python-format
+msgid "Failed to queue repository deletion: %s"
+msgstr ""
+
+#: backend/api/third_party_repos.py:506
+msgid "Permission denied: ENABLE_THIRD_PARTY_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/third_party_repos.py:538 backend/api/third_party_repos.py:656
+msgid "No repositories specified"
+msgstr ""
+
+#: backend/api/third_party_repos.py:588
+msgid "Repository enable request queued successfully"
+msgstr ""
+
+#: backend/api/third_party_repos.py:596
+#, python-format
+msgid "Failed to queue repository enable: %s"
+msgstr ""
+
+#: backend/api/third_party_repos.py:624
+msgid "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/third_party_repos.py:706
+msgid "Repository disable request queued successfully"
+msgstr ""
+
+#: backend/api/third_party_repos.py:714
+#, python-format
+msgid "Failed to queue repository disable: %s"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:65
+msgid ""
+"Report generation requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
+msgstr ""
+
+#: backend/api/reports/endpoints.py:144
+msgid "Registered Hosts"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:146
+msgid "Hosts with Tags"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:154
+msgid "SysManage Users"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:159
+msgid "Host Firewall Status"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:165
+msgid "Open-Source Antivirus Status"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:172
+msgid "Commercial Antivirus Status"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:185
+msgid "User Security Roles (RBAC)"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:195 backend/api/audit_log.py:526
+msgid "Audit Log"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:198 backend/api/reports/endpoints.py:335
+msgid "Unknown report type"
+msgstr ""
+
+#: backend/api/reports/endpoints.py:288
+msgid "PDF generation is not available. Please install reportlab package."
+msgstr ""
+
+#: backend/api/reports/endpoints.py:360
+msgid "Report"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:59
+msgid ""
+"Air-gap collection schedules require a SysManage Professional+ license with "
+"the air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:85
+msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:94
+#: backend/api/upgrade_profiles.py:141
+#, python-format
+msgid "Invalid cron expression: %s"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:172
+#: backend/api/airgap_collection_schedule.py:255
+#, python-format
+msgid "Invalid target_request: %s"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:190
+#, python-format
+msgid "Created air-gap collection schedule '%s'"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:266
+#, python-format
+msgid "Updated air-gap collection schedule '%s'"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:305
+#, python-format
+msgid "Deleted air-gap collection schedule '%s'"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:310
+msgid "Air-gap collection schedule deleted"
+msgstr ""
+
+#: backend/api/airgap_collection_schedule.py:374
+msgid ""
+"automation_engine not loaded; next_run timestamps not advanced. Schedules "
+"will fire only on the current tick window until the Pro+ license includes "
+"automation_engine."
+msgstr ""
+
+#: backend/api/graylog_integration.py:174
+msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
+msgstr ""
+
+#: backend/api/graylog_integration.py:201
+msgid "Selected host does not have Graylog server role"
+msgstr ""
+
+#: backend/api/graylog_integration.py:261
+msgid "Failed to securely store API token"
+msgstr ""
+
+#: backend/api/graylog_integration.py:297
+msgid "Graylog integration settings updated successfully"
+msgstr ""
+
+#: backend/api/graylog_integration.py:322
+msgid "Graylog integration has not been configured"
+msgstr ""
+
+#: backend/api/graylog_integration.py:326
+msgid "Graylog integration is not enabled"
+msgstr ""
+
+#: backend/api/graylog_integration.py:333
+#, python-format
+msgid "Error retrieving Graylog URL: %s"
+msgstr ""
+
+#: backend/api/graylog_integration.py:337
+msgid "Graylog URL is not configured"
+msgstr ""
+
+#: backend/api/graylog_integration.py:539
+msgid "Connection timeout - Graylog server may be unreachable"
+msgstr ""
+
+#: backend/api/graylog_integration.py:548
+msgid "Connection failed - Graylog server may be down or unreachable"
+msgstr ""
+
+#: backend/api/graylog_integration.py:554
+msgid "Unexpected error checking Graylog health"
+msgstr ""
+
+#: backend/api/openbao.py:59
+msgid "openbao.invalid_pid"
+msgstr ""
+
+#: backend/api/openbao.py:100
+msgid "openbao.process_not_found"
+msgstr ""
+
+#: backend/api/openbao.py:187
+msgid "openbao.running"
+msgstr ""
+
+#: backend/api/openbao.py:245
+msgid "openbao.already_running"
+msgstr ""
+
+#: backend/api/openbao.py:271 backend/api/openbao.py:462
+msgid "openbao.script_not_found"
+msgstr ""
+
+#: backend/api/openbao.py:366 backend/api/openbao.py:423
+msgid "openbao.start_error"
+msgstr ""
+
+#: backend/api/openbao.py:401
+msgid "openbao.started"
+msgstr ""
+
+#: backend/api/openbao.py:408 backend/api/openbao.py:766
+msgid "openbao.start_failed"
+msgstr ""
+
+#: backend/api/openbao.py:415
+msgid "openbao.start_timeout"
+msgstr ""
+
+#: backend/api/openbao.py:517
+msgid "openbao.stopped"
+msgstr ""
+
+#: backend/api/openbao.py:524 backend/api/openbao.py:792
+msgid "openbao.stop_failed"
+msgstr ""
+
+#: backend/api/openbao.py:531
+msgid "openbao.stop_timeout"
+msgstr ""
+
+#: backend/api/openbao.py:564
+msgid "openbao.already_sealed"
+msgstr ""
+
+#: backend/api/openbao.py:574 backend/api/openbao.py:680
+msgid "openbao.binary_not_found"
+msgstr ""
+
+#: backend/api/openbao.py:610
+msgid "openbao.sealed"
+msgstr ""
+
+#: backend/api/openbao.py:617 backend/api/openbao.py:839
+msgid "openbao.seal_failed"
+msgstr ""
+
+#: backend/api/openbao.py:625
+msgid "openbao.seal_timeout"
+msgstr ""
+
+#: backend/api/openbao.py:634
+msgid "openbao.seal_error"
+msgstr ""
+
+#: backend/api/openbao.py:657
+msgid "openbao.already_unsealed"
+msgstr ""
+
+#: backend/api/openbao.py:668
+msgid "openbao.unseal_prod_mode"
+msgstr ""
+
+#: backend/api/openbao.py:718
+msgid "openbao.unsealed"
+msgstr ""
+
+#: backend/api/openbao.py:725 backend/api/openbao.py:865
+msgid "openbao.unseal_failed"
+msgstr ""
+
+#: backend/api/openbao.py:734
+msgid "openbao.unseal_timeout"
+msgstr ""
+
+#: backend/api/openbao.py:742
+msgid "openbao.unseal_error"
+msgstr ""
+
+#: backend/api/user_preferences.py:39
+msgid "Grid identifier is required"
+msgstr ""
+
+#: backend/api/user_preferences.py:41
+msgid "Grid identifier must be 255 characters or less"
+msgstr ""
+
+#: backend/api/user_preferences.py:113
+#, python-format
+msgid "Failed to retrieve column preferences: %s"
+msgstr ""
+
+#: backend/api/user_preferences.py:198
+#, python-format
+msgid "Failed to update column preferences: %s"
+msgstr ""
+
+#: backend/api/user_preferences.py:248
+msgid "Column preferences reset to defaults"
+msgstr ""
+
+#: backend/api/user_preferences.py:250
+msgid "No preferences found to delete"
+msgstr ""
+
+#: backend/api/user_preferences.py:257
+#, python-format
+msgid "Failed to delete column preferences: %s"
+msgstr ""
+
+#: backend/api/user_preferences.py:319
+#, python-format
+msgid "Failed to retrieve dashboard card preferences: %s"
+msgstr ""
+
+#: backend/api/user_preferences.py:413
+#, python-format
+msgid "Failed to update dashboard card preferences: %s"
+msgstr ""
+
+#: backend/api/child_host_control.py:46
+msgid ""
+"Container lifecycle management requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+
+#: backend/api/child_host_control.py:302
+#, python-format
+msgid "Child host start requested: %s"
+msgstr ""
+
+#: backend/api/child_host_control.py:309
+msgid "Child host start requested"
+msgstr ""
+
+#: backend/api/child_host_control.py:362
+#, python-format
+msgid "Child host stop requested: %s"
+msgstr ""
+
+#: backend/api/child_host_control.py:369
+msgid "Child host stop requested"
+msgstr ""
+
+#: backend/api/child_host_control.py:422
+#, python-format
+msgid "Child host restart requested: %s"
+msgstr ""
+
+#: backend/api/child_host_control.py:429
+msgid "Child host restart requested"
+msgstr ""
+
+#: backend/api/child_host_control.py:511
+#, python-format
+msgid "Child agent update requested: %s"
+msgstr ""
+
+#: backend/api/child_host_control.py:518
+msgid "Child agent update requested"
+msgstr ""
+
+#: backend/api/airgap_keys.py:68
+msgid ""
+"No collector signing key found. Set this server's role to 'Air-Gap "
+"Collector' to generate one."
+msgstr ""
+
+#: backend/api/airgap_keys.py:92 backend/api/federation_identity.py:165
+#, python-format
+msgid "Invalid public key: %s"
+msgstr ""
+
+#: backend/api/airgap_keys.py:97 backend/api/federation_identity.py:170
+#, python-format
+msgid "Could not write key to keyring: %s"
+msgstr ""
+
+#: backend/api/airgap_keys.py:106 backend/api/federation_identity.py:179
+msgid "Trusted key not found"
+msgstr ""
+
+#: backend/api/user.py:73
+msgid "Permission denied: DELETE_USER role required"
+msgstr ""
+
+#: backend/api/user.py:354
+msgid "Permission denied: ADD_USER role required"
+msgstr ""
+
+#: backend/api/user.py:364 backend/api/user.py:502
+msgid "User already exists"
+msgstr ""
+
+#: backend/api/user.py:458
+msgid "Permission denied: EDIT_USER role required"
+msgstr ""
+
+#: backend/api/user.py:547
+msgid "Permission denied: UNLOCK_USER role required"
+msgstr ""
+
+#: backend/api/user.py:597
+msgid "Permission denied: LOCK_USER role required"
+msgstr ""
+
+#: backend/api/user.py:635 backend/api/profile.py:284
+#: backend/api/report_branding.py:129
+msgid "No file provided"
+msgstr ""
+
+#: backend/api/user.py:642 backend/api/profile.py:291
+msgid "Error reading uploaded file"
+msgstr ""
+
+#: backend/api/user.py:670 backend/api/profile.py:324
+msgid "Profile image uploaded successfully"
+msgstr ""
+
+#: backend/api/user.py:694 backend/api/profile.py:352
+msgid "No profile image found"
+msgstr ""
+
+#: backend/api/user.py:735 backend/api/profile.py:393
+msgid "No profile image to delete"
+msgstr ""
+
+#: backend/api/user.py:744 backend/api/profile.py:403
+msgid "Profile image deleted successfully"
+msgstr ""
+
+#: backend/api/host_hostname.py:48
+msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
+msgstr ""
+
+#: backend/api/host_hostname.py:71 backend/api/reboot_orchestration.py:115
+#: backend/api/error_constants.py:39 backend/api/child_host_utils.py:87
+#: backend/api/scripts/routes_executions.py:77
+msgid "Host is not active"
+msgstr ""
+
+#: backend/api/host_hostname.py:78
+msgid "Host agent is not running in privileged mode"
+msgstr ""
+
+#: backend/api/host_hostname.py:86
+msgid "Hostname cannot be empty"
+msgstr ""
+
+#: backend/api/host_hostname.py:97
+msgid "Invalid hostname format"
+msgstr ""
+
+#: backend/api/host_hostname.py:143
+msgid "Hostname change requested"
+msgstr ""
+
+#: backend/api/server_info.py:245
+#, python-format
+msgid "Set server role to '%s'"
+msgstr ""
+
+#: backend/api/server_info.py:331
+#, python-format
+msgid "Set federation role to '%s'"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:60
+msgid "Permission denied: ATTACH_UBUNTU_PRO role required"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:65
+msgid "Ubuntu Pro token is required"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:100
+msgid "Ubuntu Pro attach requested"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:110
+#, python-format
+msgid "Failed to request Ubuntu Pro attach: %s"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:127
+msgid "Permission denied: DETACH_UBUNTU_PRO role required"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:163
+msgid "Ubuntu Pro detach requested"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:173
+#, python-format
+msgid "Failed to request Ubuntu Pro detach: %s"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:186 backend/api/host_ubuntu_pro.py:246
+msgid "Service name is required"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:223
+msgid "Ubuntu Pro service enable requested"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:233
+#, python-format
+msgid "Failed to request Ubuntu Pro service enable: %s"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:283
+msgid "Ubuntu Pro service disable requested"
+msgstr ""
+
+#: backend/api/host_ubuntu_pro.py:293
+#, python-format
+msgid "Failed to request Ubuntu Pro service disable: %s"
+msgstr ""
+
+#: backend/api/host_utils.py:662
+msgid "Host limit reached for this tenant."
+msgstr ""
+
+#: backend/api/broadcast.py:106
+#, python-format
+msgid "Invalid tag_id: %s"
+msgstr ""
+
+#: backend/api/broadcast.py:133 backend/api/error_constants.py:132
+msgid "Tag not found"
+msgstr ""
+
+#: backend/api/broadcast.py:210
+#, python-format
+msgid "Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)"
+msgstr ""
+
+#: backend/api/package_handlers.py:66
+msgid "Missing batch_id"
+msgstr ""
+
+#: backend/api/package_handlers.py:80
+#, python-format
+msgid "Host %s (%s %s) attempted to report packages for %s %s"
+msgstr ""
+
+#: backend/api/package_handlers.py:142
+#, python-format
+msgid "Failed to start packages batch: %s"
+msgstr ""
+
+#: backend/api/package_handlers.py:175 backend/api/package_handlers.py:299
+msgid "Invalid or expired batch_id"
+msgstr ""
+
+#: backend/api/package_handlers.py:186 backend/api/package_handlers.py:310
+msgid "Batch belongs to different host"
+msgstr ""
+
+#: backend/api/package_handlers.py:266
+#, python-format
+msgid "Failed to process packages batch: %s"
+msgstr ""
+
+#: backend/api/package_handlers.py:344
+#, python-format
+msgid "Failed to end packages batch: %s"
+msgstr ""
+
+#: backend/api/queue.py:124
+msgid "Permission denied: DELETE_QUEUE_MESSAGE role required"
+msgstr ""
+
+#: backend/api/queue.py:130
+msgid "No message IDs provided"
+msgstr ""
+
+#: backend/api/queue.py:182
+msgid "Message not found or not expired"
+msgstr ""
+
+#: backend/api/queue.py:245
+msgid "Failed to fetch message details"
+msgstr ""
+
+#: backend/api/host_account_management.py:74
+msgid "Permission denied: ADD_HOST_ACCOUNT role required"
+msgstr ""
+
+#: backend/api/host_account_management.py:98
+msgid "Agent must be running in privileged mode to manage user accounts"
+msgstr ""
+
+#: backend/api/host_account_management.py:172
+msgid ""
+"User account creation requested. The user list will update automatically "
+"after creation."
+msgstr ""
+
+#: backend/api/host_account_management.py:196
+msgid "Permission denied: ADD_HOST_GROUP role required"
+msgstr ""
+
+#: backend/api/host_account_management.py:219
+msgid "Agent must be running in privileged mode to manage groups"
+msgstr ""
+
+#: backend/api/host_account_management.py:276
+msgid ""
+"Group creation requested. The group list will update automatically after "
+"creation."
+msgstr ""
+
+#: backend/api/host_account_management.py:303
+msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
+msgstr ""
+
+#: backend/api/host_account_management.py:327
+msgid "Agent must be running in privileged mode to delete user accounts"
+msgstr ""
+
+#: backend/api/host_account_management.py:380
+msgid ""
+"User account deletion requested. The user list will update automatically "
+"after deletion."
+msgstr ""
+
+#: backend/api/host_account_management.py:406
+msgid "Permission denied: DELETE_HOST_GROUP role required"
+msgstr ""
+
+#: backend/api/host_account_management.py:429
+msgid "Agent must be running in privileged mode to delete groups"
+msgstr ""
+
+#: backend/api/host_account_management.py:479
+msgid ""
+"Group deletion requested. The group list will update automatically after "
+"deletion."
+msgstr ""
+
+#: backend/api/repository_mirroring.py:81
+msgid ""
+"Repository mirroring requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/repository_mirroring.py:252
+msgid "Mirror host not found"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:360
+msgid "Mirror deleted"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:392
+#, python-format
+msgid "Unsupported package_manager: %s"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:405
+msgid "Mirror sync dispatched"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:601
+msgid "Mirror tick requires automation_engine for cron evaluation."
+msgstr ""
+
+#: backend/api/repository_mirroring.py:826
+#: backend/api/repository_mirroring.py:892
+#, python-format
+msgid "Invalid platform: %s"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:843
+#, python-format
+msgid "A platform config for %s on this host already exists"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:941
+#, python-format
+msgid "Platform config still owns %d mirror(s); delete those first"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:1104
+#, python-format
+msgid ""
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
+"before assigning it as a default."
+msgstr ""
+
+#: backend/api/repository_mirroring.py:1112
+#, python-format
+msgid "Mirror %s is for %s, can't assign to a %s default"
+msgstr ""
+
+#: backend/api/repository_mirroring.py:1186
+msgid "Unknown (platform, version, os_family) tuple"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:79
+msgid ""
+"Air-gap collection runs require a SysManage Professional+ license with the "
+"air-gap collector engine. Please upgrade to access this feature."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:220
+msgid ""
+"Air-gap collection runs require the repository_mirroring_engine module to be "
+"loaded — the collector reads each target's bundle from a snapshot of its "
+"mirror tree."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:231
+msgid ""
+"Global mirror settings missing or mirror_root_path not configured.  "
+"Configure mirror settings before creating a collection run."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:291
+#, python-format
+msgid ""
+"Mirror %r has no known_version_id set; Option-B collection runs need the "
+"mirror to be tied to a catalog version so distro / version can be derived.  "
+"Edit the mirror and pick a version from the dropdown."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:307
+#, python-format
+msgid ""
+"Mirror %r references a catalog version that no longer exists.  Re-pick a "
+"version on the mirror."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:391
+#: backend/api/airgap_collector_runs.py:470
+msgid "At least one target is required to create a collection run."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:401
+#, python-format
+msgid "Invalid UUID for mirror_id: %s"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:411
+#, python-format
+msgid "Mirror %s not found"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:417
+#, python-format
+msgid ""
+"Mirror %r is disabled; enable + sync it before using it in a collection run."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:428
+#, python-format
+msgid ""
+"All target mirrors must live on the same host (the collection plan "
+"dispatches to a single agent). Selected mirrors span %d hosts."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:524
+#, python-format
+msgid ""
+"Created one-shot air-gap collection run '%s' with %d target mirror(s); "
+"snapshots dispatched."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:647
+#, python-format
+msgid ""
+"ISO is not ready for download yet (status: %s). Wait until the run reaches "
+"ISO_BUILT."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:657
+msgid ""
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
+"the collection to rebuild."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:674
+msgid "ISO file not found."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:693
+#, python-format
+msgid "Disc %d not found for this run.  Available discs: %s"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:774
+msgid "Invalid or expired download token."
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:807
+#, python-format
+msgid "Deleted air-gap collection run '%s'"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:879
+#, python-format
+msgid "Run is not COMPLETE yet (status: %s)"
+msgstr ""
+
+#: backend/api/airgap_collector_runs.py:885
+#, python-format
+msgid "ISO file is no longer on disk: %s"
+msgstr ""
+
+#: backend/api/package_compliance.py:71
+msgid ""
+"Package compliance profiles require a SysManage Professional license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/package_compliance.py:196
+#, python-format
+msgid "Created package profile '%s'"
+msgstr ""
+
+#: backend/api/package_compliance.py:248
+#, python-format
+msgid "Updated package profile '%s'"
+msgstr ""
+
+#: backend/api/package_compliance.py:278
+#, python-format
+msgid "Deleted package profile '%s'"
+msgstr ""
+
+#: backend/api/package_compliance.py:283
+msgid "Package profile deleted"
+msgstr ""
+
+#: backend/api/package_compliance.py:369
+#, python-format
+msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
+msgstr ""
+
+#: backend/api/package_compliance.py:487
+#, python-format
+msgid "Dispatched compliance check to agent '%s' for profile '%s'"
+msgstr ""
+
+#: backend/api/federation_identity.py:86
+msgid "Could not load or generate the federation TLS certificate."
+msgstr ""
+
+#: backend/api/federation_identity.py:143
+msgid "Could not load or generate the federation identity key."
+msgstr ""
+
+#: backend/api/access_groups.py:153
+msgid "A group cannot be its own parent"
+msgstr ""
+
+#: backend/api/access_groups.py:163
+msgid "Cycle detected in access-group hierarchy"
+msgstr ""
+
+#: backend/api/access_groups.py:168
+msgid "Setting parent_id would create a cycle"
+msgstr ""
+
+#: backend/api/access_groups.py:175
+#, python-format
+msgid "Access-group hierarchy too deep (max %d levels)"
+msgstr ""
+
+#: backend/api/access_groups.py:228
+msgid "Parent group not found"
+msgstr ""
+
+#: backend/api/access_groups.py:248
+#, python-format
+msgid "Created access group '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:304
+#, python-format
+msgid "Updated access group '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:334
+#, python-format
+msgid "Deleted access group '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:339
+msgid "Access group deleted"
+msgstr ""
+
+#: backend/api/access_groups.py:388
+msgid "Federation site not found"
+msgstr ""
+
+#: backend/api/access_groups.py:413
+#, python-format
+msgid "Created registration key '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:447
+#, python-format
+msgid "Revoked registration key '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:452
+msgid "Registration key revoked"
+msgstr ""
+
+#: backend/api/access_groups.py:479
+#, python-format
+msgid "Deleted registration key '%s'"
+msgstr ""
+
+#: backend/api/access_groups.py:484
+msgid "Registration key deleted"
+msgstr ""
+
+#: backend/api/external_idp.py:47
+msgid ""
+"External Identity Provider integration requires a SysManage Professional+ "
+"license. Please upgrade to access this feature."
+msgstr ""
+
+#: backend/api/external_idp.py:73
+msgid "IdP provider not found"
+msgstr ""
+
+#: backend/api/external_idp.py:246
+msgid "IdP provider deleted"
+msgstr ""
+
+#: backend/api/external_idp.py:294
+msgid "A default-for-unmapped mapping already exists for this provider."
+msgstr ""
+
+#: backend/api/external_idp.py:328
+msgid "Role mapping not found"
+msgstr ""
+
+#: backend/api/external_idp.py:331
+msgid "Role mapping deleted"
+msgstr ""
+
+#: backend/api/external_idp.py:382
+msgid "Provider is not an OIDC provider."
+msgstr ""
+
+#: backend/api/external_idp.py:385
+msgid "OIDC provider is disabled."
+msgstr ""
+
+#: backend/api/external_idp.py:416
+msgid "Missing code or state in callback."
+msgstr ""
+
+#: backend/api/external_idp.py:420
+msgid "Invalid OIDC state."
+msgstr ""
+
+#: backend/api/external_idp.py:429
+msgid "OIDC client secret could not be resolved."
+msgstr ""
+
+#: backend/api/external_idp.py:436
+#, python-format
+msgid "OIDC sign-in failed: %s"
+msgstr ""
+
+#: backend/api/external_idp.py:451
+msgid ""
+"No sysmanage account is linked to this IdP identity. Ask an administrator to "
+"provision your account first."
+msgstr ""
+
+#: backend/api/external_idp.py:456
+msgid "Account is inactive."
+msgstr ""
+
+#: backend/api/grafana_integration.py:316
+msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
+msgstr ""
+
+#: backend/api/grafana_integration.py:343
+msgid "Selected host does not have Grafana server role"
+msgstr ""
+
+#: backend/api/grafana_integration.py:400
+msgid "Failed to securely store API key"
+msgstr ""
+
+#: backend/api/grafana_integration.py:451
+msgid "Grafana integration settings updated successfully"
+msgstr ""
+
+#: backend/api/grafana_integration.py:475
+msgid "Grafana integration has not been configured"
+msgstr ""
+
+#: backend/api/grafana_integration.py:480
+#: backend/api/opentelemetry/eligibility.py:160
+msgid "Grafana integration is not enabled"
+msgstr ""
+
+#: backend/api/grafana_integration.py:488
+#, python-format
+msgid "Error retrieving Grafana URL: %s"
+msgstr ""
+
+#: backend/api/grafana_integration.py:493
+msgid "Grafana URL is not configured"
+msgstr ""
+
+#: backend/api/grafana_integration.py:574
+msgid "Connection timeout - Grafana server may be unreachable"
+msgstr ""
+
+#: backend/api/grafana_integration.py:583
+msgid "Connection failed - Grafana server may be down or unreachable"
+msgstr ""
+
+#: backend/api/grafana_integration.py:589
+msgid "Unexpected error checking Grafana health"
+msgstr ""
+
+#: backend/api/opentelemetry/status.py:59
+#: backend/api/opentelemetry/deployment.py:93
+#: backend/api/opentelemetry/deployment.py:245
+#: backend/api/opentelemetry/eligibility.py:107
+#: backend/api/opentelemetry/grafana_connection.py:84
+#: backend/api/opentelemetry/grafana_connection.py:227
+#: backend/api/packages_operations.py:93 backend/api/packages_operations.py:267
+#: backend/api/error_constants.py:115
+msgid "Host not found or not active"
+msgstr ""
+
+#: backend/api/opentelemetry/status.py:115
+#, python-format
+msgid "Failed to get OpenTelemetry status: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/status.py:183
+#, python-format
+msgid "Failed to retrieve OpenTelemetry coverage: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:72
+#: backend/api/opentelemetry/deployment.py:225
+#: backend/api/opentelemetry/eligibility.py:87
+msgid "Permission denied: DEPLOY_OPENTELEMETRY role required"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:107
+#, python-format
+msgid "Host is not eligible for OpenTelemetry deployment: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:121
+#: backend/api/opentelemetry/grafana_connection.py:99
+msgid "Grafana integration is not configured"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:128
+#: backend/api/opentelemetry/grafana_connection.py:106
+msgid "Grafana URL is not available"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:148
+msgid ""
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
+"on the server."
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:175
+msgid "OpenTelemetry deployment queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:185
+#, python-format
+msgid "Failed to deploy OpenTelemetry: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:260
+msgid ""
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
+"the server."
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:287
+msgid "OpenTelemetry removal queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/deployment.py:297
+#, python-format
+msgid "Failed to remove OpenTelemetry: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/eligibility.py:162
+msgid "OpenTelemetry is already installed"
+msgstr ""
+
+#: backend/api/opentelemetry/eligibility.py:164
+msgid "Agent is not running in privileged mode"
+msgstr ""
+
+#: backend/api/opentelemetry/eligibility.py:166
+msgid "Operating system not supported (OpenBSD/NetBSD)"
+msgstr ""
+
+#: backend/api/opentelemetry/eligibility.py:186
+#, python-format
+msgid "Failed to check OpenTelemetry eligibility: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:77
+msgid "Permission denied: START_OPENTELEMETRY_SERVICE role required"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:137
+msgid "OpenTelemetry start command queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:147
+#, python-format
+msgid "Failed to start OpenTelemetry: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:186
+msgid "Permission denied: STOP_OPENTELEMETRY_SERVICE role required"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:243
+msgid "OpenTelemetry stop command queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:253
+#, python-format
+msgid "Failed to stop OpenTelemetry: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:293
+#: backend/api/opentelemetry/grafana_connection.py:63
+#: backend/api/opentelemetry/grafana_connection.py:206
+msgid "Permission denied: RESTART_OPENTELEMETRY_SERVICE role required"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:351
+msgid "OpenTelemetry restart command queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/service_control.py:361
+#, python-format
+msgid "Failed to restart OpenTelemetry: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:123
+msgid ""
+"OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
+"be loaded on the server."
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:156
+msgid "OpenTelemetry Grafana connection queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:166
+#, python-format
+msgid "Failed to connect OpenTelemetry to Grafana: %s"
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:243
+msgid ""
+"OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
+"to be loaded on the server."
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:273
+msgid "OpenTelemetry Grafana disconnection queued successfully"
+msgstr ""
+
+#: backend/api/opentelemetry/grafana_connection.py:283
+#, python-format
+msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:54
+msgid ""
+"CVE feed management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:118
+msgid "Refresh interval must be at least 1 hour"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:120
+msgid "Refresh interval cannot exceed 168 hours (1 week)"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:131
+#: backend/api/cve_refresh_settings.py:374
+#, python-format
+msgid "Invalid CVE source: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:222
+#, python-format
+msgid "Failed to retrieve CVE refresh settings: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:289
+#, python-format
+msgid "Failed to update CVE refresh settings: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:306
+#, python-format
+msgid "Failed to retrieve CVE database statistics: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:319
+msgid "Limit must be between 1 and 100"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:342
+#, python-format
+msgid "Failed to retrieve CVE ingestion history: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:415
+#, python-format
+msgid "Source %s failed: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:428
+#, python-format
+msgid "CVE refresh failed: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:433
+#, python-format
+msgid "Failed to trigger CVE refresh: %s"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:471
+msgid "NVD API key cleared successfully"
+msgstr ""
+
+#: backend/api/cve_refresh_settings.py:477
+msgid "Failed to clear NVD API key"
+msgstr ""
+
+#: backend/api/firewall_status.py:153
+#, python-format
+msgid "Failed to retrieve firewall status: %s"
+msgstr ""
+
+#: backend/api/firewall_status.py:204
+msgid "Firewall enable command sent successfully"
+msgstr ""
+
+#: backend/api/firewall_status.py:252
+msgid "Firewall disable command sent successfully"
+msgstr ""
+
+#: backend/api/firewall_status.py:300
+msgid "Firewall restart command sent successfully"
+msgstr ""
+
+#: backend/api/firewall_status.py:363
+msgid "Firewall deploy command sent successfully"
+msgstr ""
+
+#: backend/api/default_repositories.py:269 backend/api/antivirus_defaults.py:62
+#: backend/api/enabled_package_managers.py:109
+msgid "OS name is required"
+msgstr ""
+
+#: backend/api/default_repositories.py:271
+#: backend/api/enabled_package_managers.py:111
+#, python-format
+msgid "Unsupported operating system: %s"
+msgstr ""
+
+#: backend/api/default_repositories.py:280
+#: backend/api/enabled_package_managers.py:120
+msgid "Package manager is required"
+msgstr ""
+
+#: backend/api/default_repositories.py:286
+#: backend/api/enabled_package_managers.py:126
+#, python-format
+msgid "Invalid package manager '%s' for OS '%s'. Valid options: %s"
+msgstr ""
+
+#: backend/api/default_repositories.py:297
+msgid "Repository URL is required"
+msgstr ""
+
+#: backend/api/default_repositories.py:299
+msgid "Repository URL must be 1000 characters or less"
+msgstr ""
+
+#: backend/api/default_repositories.py:335
+#: backend/api/default_repositories.py:370
+msgid "Permission denied: VIEW_DEFAULT_REPOSITORIES role required"
+msgstr ""
+
+#: backend/api/default_repositories.py:353
+#: backend/api/default_repositories.py:388
+#, python-format
+msgid "Failed to retrieve default repositories: %s"
+msgstr ""
+
+#: backend/api/default_repositories.py:407
+msgid "Permission denied: ADD_DEFAULT_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/default_repositories.py:469
+#, python-format
+msgid "Failed to create default repository: %s"
+msgstr ""
+
+#: backend/api/default_repositories.py:488
+msgid "Permission denied: REMOVE_DEFAULT_REPOSITORY role required"
+msgstr ""
+
+#: backend/api/default_repositories.py:503
+msgid "Invalid repository ID format"
+msgstr ""
+
+#: backend/api/default_repositories.py:516
+msgid "Default repository not found"
+msgstr ""
+
+#: backend/api/default_repositories.py:559
+msgid "Default repository deleted successfully"
+msgstr ""
+
+#: backend/api/default_repositories.py:569
+#, python-format
+msgid "Failed to delete default repository: %s"
+msgstr ""
+
+#: backend/api/child_host_crud.py:66
+#: backend/api/child_host_virtualization.py:56
+#: backend/api/child_host_virtualization_status.py:34
+#: backend/api/child_host_virtualization_enable.py:36
+msgid ""
+"Container/VM management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/child_host_crud.py:185 backend/api/child_host_crud.py:359
+msgid "Child host not found"
+msgstr ""
+
+#: backend/api/child_host_crud.py:407
+#, python-format
+msgid "Child host deletion requested: %s"
+msgstr ""
+
+#: backend/api/child_host_crud.py:414
+msgid "Child host deletion requested"
+msgstr ""
+
+#: backend/api/child_host_crud.py:473
+msgid "Child host refresh requested"
+msgstr ""
+
+#: backend/api/child_host_crud.py:664
+#, python-format
+msgid "Distribution '%s %s' already exists for type '%s'"
+msgstr ""
+
+#: backend/api/child_host_crud.py:815
+msgid "Distribution deleted"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:52
+msgid "Agent authentication failed: invalid host token"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:61
+msgid "Host with token is not registered. Please re-register."
+msgstr ""
+
+#: backend/api/message_handlers_core.py:82
+msgid "Agent authentication failed: invalid host ID"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#, python-format
+msgid "Host with ID %s is not registered. Please re-register."
+msgstr ""
+
+#: backend/api/message_handlers_core.py:241 backend/api/agent.py:645
+msgid "Host registration pending approval"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:355
+msgid "Host auto-approved via child host creation"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:438
+msgid "Agent registered and connected successfully"
+msgstr ""
+
+#: backend/api/message_handlers_core.py:706
+msgid "Failed to process heartbeat"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:163
+#: backend/api/child_host_virtualization_enable.py:146
+msgid "WSL is only supported on Windows hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:169
+#: backend/api/error_constants.py:93
+msgid "KVM is only supported on Linux hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:178
+msgid "Container name is required for LXD containers"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:182
+msgid "VM name is required for VMM virtual machines"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:186
+msgid "VM name is required for KVM virtual machines"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:190
+msgid "VM name is required for bhyve virtual machines"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:414
+msgid ""
+"Agent must be running with administrator privileges to create child hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:436
+#, python-format
+msgid "A child host named '%s' already exists on this host"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:510
+#, python-format
+msgid "Child host creation requested: %s (%s)"
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:533
+msgid ""
+"Child host creation requested. This may take several minutes. The host will "
+"be automatically approved when it connects."
+msgstr ""
+
+#: backend/api/child_host_virtualization.py:538
+msgid "Child host creation requested. This may take several minutes."
+msgstr ""
+
+#: backend/api/host_operations.py:77
+msgid "Software inventory update requested"
+msgstr ""
+
+#: backend/api/host_operations.py:96
+msgid "Permission denied: REBOOT_HOST role required"
+msgstr ""
+
+#: backend/api/host_operations.py:139
+msgid "System reboot requested"
+msgstr ""
+
+#: backend/api/host_operations.py:158
+msgid "Permission denied: SHUTDOWN_HOST role required"
+msgstr ""
+
+#: backend/api/host_operations.py:201
+msgid "System shutdown requested"
+msgstr ""
+
+#: backend/api/host_operations.py:220
+msgid "Permission denied: UPDATE_AGENT role required"
+msgstr ""
+
+#: backend/api/host_operations.py:261
+msgid "Agent update requested"
+msgstr ""
+
+#: backend/api/host_operations.py:318
+msgid "Package collection requested"
+msgstr ""
+
+#: backend/api/host_graylog.py:147
+msgid ""
+"Graylog attach requires mechanism, graylog_server, and port in the request "
+"body."
+msgstr ""
+
+#: backend/api/host_graylog.py:171
+msgid ""
+"Graylog attach requires the Pro+ observability_engine to be loaded on the "
+"server."
+msgstr ""
+
+#: backend/api/host_graylog.py:184
+msgid "Graylog attachment command queued successfully"
+msgstr ""
+
+#: backend/api/password_reset.py:335
+msgid ""
+"If an account with that email exists, a password reset link has been sent."
+msgstr ""
+
+#: backend/api/password_reset.py:347
+msgid "Passwords do not match"
+msgstr ""
+
+#: backend/api/password_reset.py:352
+msgid "Password must be at least 8 characters long"
+msgstr ""
+
+#: backend/api/password_reset.py:365 backend/api/password_reset.py:406
+msgid "Invalid or expired password reset token"
+msgstr ""
+
+#: backend/api/password_reset.py:387
+msgid ""
+"Your password has been successfully reset. You can now log in with your new "
+"password."
+msgstr ""
+
+#: backend/api/password_reset.py:409
+msgid "Token is valid"
+msgstr ""
+
+#: backend/api/password_reset.py:442
+msgid "Permission denied: RESET_USER_PASSWORD role required"
+msgstr ""
+
+#: backend/api/password_reset.py:460
+msgid "Failed to send password reset email. Please check email configuration."
+msgstr ""
+
+#: backend/api/password_reset.py:466
+#, python-brace-format
+msgid "Password reset email has been sent to {email}"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:64
+msgid "OS name must be 100 characters or less"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:77
+msgid "Antivirus package name must be 255 characters or less"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:102
+#, python-format
+msgid "Failed to retrieve antivirus defaults: %s"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:123
+#, python-format
+msgid "No antivirus default found for OS: %s"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:136
+#, python-format
+msgid "Failed to retrieve antivirus default: %s"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:155 backend/api/antivirus_defaults.py:255
+msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:236
+#, python-format
+msgid "Failed to update antivirus defaults: %s"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:289
+msgid "Antivirus default deleted successfully"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:291
+msgid "No antivirus default found for this OS"
+msgstr ""
+
+#: backend/api/antivirus_defaults.py:299
+#, python-format
+msgid "Failed to delete antivirus default: %s"
+msgstr ""
+
+#: backend/api/email.py:82
+msgid "Failed to get email configuration"
+msgstr ""
+
+#: backend/api/email.py:98
+msgid "Email service is disabled. Enable it in the configuration file."
+msgstr ""
+
+#: backend/api/email.py:108
+#, python-brace-format
+msgid "Test email sent successfully to {address}"
+msgstr ""
+
+#: backend/api/email.py:115
+msgid "Failed to send test email. Please check your SMTP configuration."
+msgstr ""
+
+#: backend/api/email.py:123
+#, python-brace-format
+msgid "Error sending test email: {error}"
+msgstr ""
+
+#: backend/api/airgap_bundles.py:465
+msgid "product must be one of: "
+msgstr ""
+
+#: backend/api/airgap_bundles.py:479
+msgid "Insufficient host resources to build a bundle: "
+msgstr ""
+
+#: backend/api/airgap_bundles.py:574
+#, python-format
+msgid "Bundle is not ready yet (status: %s)"
+msgstr ""
+
+#: backend/api/airgap_bundles.py:578
+msgid "Bundle file is no longer on disk"
+msgstr ""
+
+#: backend/api/airgap_bundles.py:625
+msgid "Invalid or expired download token"
+msgstr ""
+
+#: backend/api/tag.py:129
+#, python-format
+msgid "Failed to fetch tags: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:215 backend/api/error_constants.py:137
+msgid "Tag with this name already exists"
+msgstr ""
+
+#: backend/api/tag.py:223
+#, python-format
+msgid "Failed to create tag: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:306
+#, python-format
+msgid "Failed to update tag: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:369
+#, python-format
+msgid "Failed to delete tag: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:439
+#, python-format
+msgid "Failed to fetch tag hosts: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:517
+msgid "Tag already associated with this host"
+msgstr ""
+
+#: backend/api/tag.py:550
+msgid "Tag added to host successfully"
+msgstr ""
+
+#: backend/api/tag.py:557
+#, python-format
+msgid "Failed to add tag to host: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:593
+msgid "Tag not associated with this host"
+msgstr ""
+
+#: backend/api/tag.py:629
+#, python-format
+msgid "Failed to remove tag from host: %(error)s"
+msgstr ""
+
+#: backend/api/tag.py:692
+#, python-format
+msgid "Failed to fetch host tags: %(error)s"
+msgstr ""
+
+#: backend/api/security.py:100
+msgid "Email integration must be configured before creating new users"
+msgstr ""
+
+#: backend/api/security.py:103
+msgid ""
+"Enable email in your YAML configuration file and configure SMTP settings. "
+"Without email integration, new users cannot receive password setup "
+"instructions and will be unable to log in."
+msgstr ""
+
+#: backend/api/security.py:121
+msgid "Default admin credentials are configured in your YAML file"
+msgstr ""
+
+#: backend/api/security.py:123
+msgid ""
+"Remove admin_userid and admin_password from your configuration file and "
+"restart the server"
+msgstr ""
+
+#: backend/api/security.py:138
+msgid "Default JWT secret is being used"
+msgstr ""
+
+#: backend/api/security.py:139 backend/api/security.py:169
+#, python-brace-format
+msgid "Run: {command}"
+msgstr ""
+
+#: backend/api/security.py:157 backend/api/security.py:168
+msgid "Default password salt is being used"
+msgstr ""
+
+#: backend/api/security.py:158
+#, python-brace-format
+msgid "Run: {command} ({count} users will be migrated)"
+msgstr ""
+
+#: backend/api/security.py:182 backend/api/security.py:196
+msgid "Inconsistent security configuration detected"
+msgstr ""
+
+#: backend/api/security.py:184
+#, python-brace-format
+msgid ""
+"JWT secret uses default value but password salt has been changed. Run: "
+"{command}"
+msgstr ""
+
+#: backend/api/security.py:198
+#, python-brace-format
+msgid ""
+"Password salt uses default value but JWT secret has been changed. Run: "
+"{command}"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:72 backend/api/ubuntu_pro_settings.py:314
+msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:76
+msgid "Ubuntu Pro key appears to be too short"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:87
+msgid "Organization name must be 255 characters or less"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:121
+#, python-format
+msgid "Failed to retrieve Ubuntu Pro settings: %s"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:139
+msgid "Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:210
+#, python-format
+msgid "Failed to update Ubuntu Pro settings: %s"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:250
+msgid "Master key cleared successfully"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:252
+msgid "No settings found to clear"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:258
+#, python-format
+msgid "Failed to clear master key: %s"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:285
+#, python-format
+msgid "Failed to get master key status: %s"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:302
+msgid "At least one host must be specified"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:311
+#: backend/api/ubuntu_pro_settings.py:333
+msgid "Custom key must be provided when not using master key"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:346
+msgid "No master key configured. Please configure a master key first."
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:377
+#: backend/api/updates/os_upgrade_routes.py:260
+#: backend/api/updates/execution_routes.py:99
+msgid "Host not found or inactive"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:407
+msgid "Ubuntu Pro enrollment initiated"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:417
+#, python-format
+msgid "Failed to send enrollment command: %s"
+msgstr ""
+
+#: backend/api/ubuntu_pro_settings.py:432
+#, python-format
+msgid "Failed to initiate Ubuntu Pro enrollment: %s"
+msgstr ""
+
+#: backend/api/packages_helpers.py:81
+#, python-format
+msgid "Failed to retrieve package summary: %s"
+msgstr ""
+
+#: backend/api/packages_helpers.py:179
+#, python-format
+msgid "Failed to count packages: %s"
+msgstr ""
+
+#: backend/api/packages_helpers.py:240
+#, python-format
+msgid "Failed to search packages: %s"
+msgstr ""
+
+#: backend/api/host.py:142
+msgid "Permission denied: DELETE_HOST role required"
+msgstr ""
+
+#: backend/api/host.py:206
+msgid "Permission denied: VIEW_HOST_DETAILS role required"
+msgstr ""
+
+#: backend/api/host.py:603
+msgid "Host already exists"
+msgstr ""
+
+#: backend/api/host.py:689
+msgid "Invalid or expired registration key"
+msgstr ""
+
+#: backend/api/host.py:719
+msgid "Invalid or expired enrollment token"
+msgstr ""
+
+#: backend/api/host.py:809
+msgid "Registration absorbed: host was recently deleted"
+msgstr ""
+
+#: backend/api/host.py:867
+#, python-format
+msgid "Host '%s' enrolled into tenant %s via enrollment token"
+msgstr ""
+
+#: backend/api/host.py:883
+#, python-format
+msgid "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
+msgstr ""
+
+#: backend/api/config_management.py:118
+msgid "Configuration pushed to all agents"
+msgstr ""
+
+#: backend/api/config_management.py:144
+msgid "Configuration pushed successfully"
+msgstr ""
+
+#: backend/api/config_management.py:148
+msgid "Agent not found or unreachable"
+msgstr ""
+
+#: backend/api/config_management.py:172
+msgid "Configuration pushed to platform agents"
+msgstr ""
+
+#: backend/api/config_management.py:180
+msgid "Must specify target_hostname, target_platform, or push_to_all"
+msgstr ""
+
+#: backend/api/config_management.py:272
+msgid "Configuration acknowledgment processed"
+msgstr ""
+
+#: backend/api/message_handlers.py:302
+#, python-format
+msgid "Failed to process diagnostic result: %s"
+msgstr ""
+
+#: backend/api/message_handlers.py:336
+msgid "Missing message_id in command acknowledgment"
+msgstr ""
+
+#: backend/api/message_handlers.py:449
+msgid "Missing installation_id in package installation status"
+msgstr ""
+
+#: backend/api/message_handlers.py:469
+#, python-format
+msgid "Installation log entry not found for ID: %s"
+msgstr ""
+
+#: backend/api/message_handlers.py:515
+#, python-brace-format
+msgid "Package installation {status} on agent {hostname}"
+msgstr ""
+
+#: backend/api/message_handlers.py:544
+#, python-format
+msgid "Failed to update package installation status: %s"
+msgstr ""
+
+#: backend/api/packages_operations.py:72
+msgid "Permission denied: ADD_PACKAGE role required"
+msgstr ""
+
+#: backend/api/packages_operations.py:100
+msgid "No packages specified for installation"
+msgstr ""
+
+#: backend/api/packages_operations.py:174
+#, python-format
+msgid "Queued installation of %d packages on host %s"
+msgstr ""
+
+#: backend/api/packages_operations.py:190
+#, python-format
+msgid "Successfully queued %d packages for installation"
+msgstr ""
+
+#: backend/api/packages_operations.py:201
+#, python-format
+msgid "Failed to queue package installation: %s"
+msgstr ""
+
+#: backend/api/packages_operations.py:246
+msgid "Permission denied: REMOVE_PACKAGE role required"
+msgstr ""
+
+#: backend/api/packages_operations.py:274
+msgid "No packages specified for uninstallation"
+msgstr ""
+
+#: backend/api/packages_operations.py:348
+#, python-format
+msgid "Queued uninstallation of %d packages on host %s"
+msgstr ""
+
+#: backend/api/packages_operations.py:364
+#, python-format
+msgid "Successfully queued %d packages for uninstallation"
+msgstr ""
+
+#: backend/api/packages_operations.py:375
+#, python-format
+msgid "Failed to queue package uninstallation: %s"
+msgstr ""
+
+#: backend/api/host_data_updates.py:124
+msgid "Hardware information updated successfully"
+msgstr ""
+
+#: backend/api/host_data_updates.py:181
+msgid "Hardware update requested"
+msgstr ""
+
+#: backend/api/host_data_updates.py:307
+msgid "User access update requested"
+msgstr ""
+
+#: backend/api/host_data_updates.py:361
+msgid "System info update requested"
+msgstr ""
+
+#: backend/api/airgap_devices.py:75
+#, python-format
+msgid "Device %s is not an available import drive"
+msgstr ""
+
+#: backend/api/airgap_devices.py:99
+msgid "no import device selected"
+msgstr ""
+
+#: backend/api/airgap_devices.py:119
+msgid "No import device selected"
+msgstr ""
+
+#: backend/api/airgap_devices.py:124
+#, python-format
+msgid "Import device not ready: %s"
+msgstr ""
+
+#: backend/api/license_management.py:117
+msgid "Administrator privileges required to install license"
+msgstr ""
+
+#: backend/api/license_management.py:127
+#, python-format
+msgid "License installation failed: %(error)s"
+msgstr ""
+
+#: backend/api/license_management.py:133
+msgid "License validation failed"
+msgstr ""
+
+#: backend/api/license_management.py:139
+msgid "License installed successfully"
+msgstr ""
+
+#: backend/api/child_host_virtualization_status.py:100
+msgid ""
+"Virtualization support check requested. Results will be available shortly."
+msgstr ""
+
+#: backend/api/update_handlers.py:203
+msgid "Failed to process update results"
+msgstr ""
+
+#: backend/api/auth.py:43
+msgid "Invalid username or password"
+msgstr ""
+
+#: backend/api/auth.py:271
+msgid "Account is locked due to too many failed login attempts"
+msgstr ""
+
+#: backend/api/auth.py:360
+msgid ""
+"Multi-factor authentication is required for this account. Please enrol from "
+"your profile page before signing in."
+msgstr ""
+
+#: backend/api/auth.py:449
+msgid "Account locked due to too many failed login attempts"
+msgstr ""
+
+#: backend/api/auth.py:475
+msgid "Invalid or missing refresh token"
+msgstr ""
+
+#: backend/api/auth.py:538 backend/api/auth.py:587
+msgid "Multi-tenancy is not enabled."
+msgstr ""
+
+#: backend/api/auth.py:660
+msgid "Logout successful"
+msgstr ""
+
+#: backend/api/profile.py:152
+msgid "New password and confirmation do not match"
+msgstr ""
+
+#: backend/api/profile.py:183
+msgid "Current password is incorrect"
+msgstr ""
+
+#: backend/api/profile.py:195
+msgid "Password changed successfully"
+msgstr ""
+
+#: backend/api/profile.py:222
+msgid "File size too large. Maximum allowed size is 5MB."
+msgstr ""
+
+#: backend/api/profile.py:234
+msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
+msgstr ""
+
+#: backend/api/profile.py:265
+msgid "Invalid image file. Please upload a valid image."
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:193
+msgid "Permission denied: APPLY_HOST_OS_UPGRADE role required"
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:210
+msgid "Invalid package managers for OS upgrades: {}"
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:272
+msgid "No OS upgrades available for this host"
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:334
+#, python-format
+msgid "Initiated OS upgrade on host %s with %d upgrade(s)"
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:362
+msgid "OS upgrade command queued for host"
+msgstr ""
+
+#: backend/api/updates/os_upgrade_routes.py:372
+msgid "Failed to queue OS upgrade command"
+msgstr ""
+
+#: backend/api/updates/query_routes.py:98
+#, python-format
+msgid "Failed to get update summary: %s"
+msgstr ""
+
+#: backend/api/updates/query_routes.py:194
+#, python-format
+msgid "Failed to get host updates: %s"
+msgstr ""
+
+#: backend/api/updates/query_routes.py:295
+#, python-format
+msgid "Failed to get updates: %s"
+msgstr ""
+
+#: backend/api/updates/query_routes.py:315
+#, python-format
+msgid "Failed to get update results: %s"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:53
+msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:113
+msgid "No matching updates found for specified packages"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:199
+msgid "Update execution started"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:208
+#, python-format
+msgid "Failed to send command: %s"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:216
+#, python-format
+msgid "Failed to send update command: %s"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:229
+#, python-format
+msgid "Failed to execute updates: %s"
+msgstr ""
+
+#: backend/api/updates/execution_routes.py:284
+#, python-format
+msgid "Failed to get execution log: %s"
+msgstr ""
+
+#: backend/api/dynamic_secrets.py:128 backend/api/dynamic_secrets.py:188
+#, python-format
+msgid "Unknown kind: %s (allowed: %s)"
+msgstr ""
+
+#: backend/api/dynamic_secrets.py:150
+#, python-format
+msgid "Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)"
+msgstr ""
+
+#: backend/api/dynamic_secrets.py:182
+#, python-format
+msgid "Unknown status: %s (allowed: %s)"
+msgstr ""
+
+#: backend/api/dynamic_secrets.py:209
+msgid "Lease not found"
+msgstr ""
+
+#: backend/api/dynamic_secrets.py:231
+#, python-format
+msgid "Revoked dynamic secret lease '%s'"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:154
+msgid "Agent must be running with administrator privileges to enable WSL"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:168
+msgid "WSL enablement requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:176
+msgid ""
+"WSL enablement requested. A reboot may be required to complete the "
+"installation."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:209
+msgid "LXD is only supported on Linux hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:217
+msgid "Agent must be running with root privileges to initialize LXD"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:231
+msgid "LXD initialization requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:239
+msgid ""
+"LXD initialization requested. The agent will install and configure LXD "
+"automatically."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:272
+msgid "VMM is only supported on OpenBSD hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:280
+msgid "Agent must be running with root privileges to initialize VMM"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:294
+msgid "VMM initialization requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:302
+msgid ""
+"VMM initialization requested. The agent will enable and start the vmd daemon."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:344
+msgid "Agent must be running with root privileges to initialize KVM"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:358
+msgid "KVM initialization requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:366
+msgid ""
+"KVM initialization requested. The agent will install libvirt and configure "
+"KVM for virtual machine management."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:399
+#: backend/api/child_host_virtualization_enable.py:463
+msgid "bhyve is only supported on FreeBSD hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:407
+msgid "Agent must be running with root privileges to initialize bhyve"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:421
+msgid "bhyve initialization requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:429
+msgid ""
+"bhyve initialization requested. The agent will load vmm.ko and configure the "
+"system for bhyve virtual machines."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:470
+msgid "Agent must be running with root privileges to disable bhyve"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:483
+msgid "bhyve disable requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:491
+msgid ""
+"bhyve disable requested. The agent will unload vmm.ko and update the system "
+"configuration. This will fail if any VMs are running."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:532
+msgid "Agent must be running with root privileges to enable KVM modules"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:546
+msgid "KVM modules enable requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:554
+msgid ""
+"KVM modules enable requested. The agent will load the KVM kernel modules via "
+"modprobe."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:596
+msgid "Agent must be running with root privileges to disable KVM modules"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:610
+msgid "KVM modules disable requested"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:618
+msgid ""
+"KVM modules disable requested. The agent will unload the KVM kernel modules "
+"via modprobe -r. This will fail if any VMs are running."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:693
+msgid "KVM networking is only supported on Linux hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:701
+msgid "Agent must be running with root privileges to configure KVM networking"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:710
+msgid "Bridge interface name is required for bridged networking mode"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:732
+#, python-format
+msgid "KVM networking configuration requested: %s mode"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:740
+#, python-format
+msgid ""
+"KVM networking configuration requested. The agent will configure the %s "
+"network."
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:774
+msgid "KVM networks are only available on Linux hosts"
+msgstr ""
+
+#: backend/api/child_host_virtualization_enable.py:807
+msgid "KVM network list requested. Results will be returned shortly."
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:133
+msgid "Port number must be between 0 and 65535 (0 means any port)"
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:144
+msgid "At least one protocol (TCP or UDP) must be selected"
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:155
+msgid "At least one IP version (IPv4 or IPv6) must be selected"
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:172
+msgid "Firewall role name is required"
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:174
+#: backend/api/firewall_roles_helpers.py:193
+msgid "Firewall role name must be 100 characters or less"
+msgstr ""
+
+#: backend/api/firewall_roles_helpers.py:191
+msgid "Firewall role name cannot be empty"
+msgstr ""
+
+#: backend/api/host_approval.py:50
+msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
+msgstr ""
+
+#: backend/api/host_approval.py:70 backend/api/host_approval.py:359
+msgid "Host is not in pending status"
+msgstr ""
+
+#: backend/api/host_approval.py:429
+msgid "OS version update requested"
+msgstr ""
+
+#: backend/api/host_approval.py:474
+msgid "Updates check requested"
+msgstr ""
+
+#: backend/api/secrets/crud.py:31 backend/api/error_constants.py:162
+msgid "Secret not found"
+msgstr ""
+
+#: backend/api/secrets/crud.py:42
+msgid ""
+"Secrets management requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/secrets/crud.py:124
+msgid "Failed to retrieve secret content from vault"
+msgstr ""
+
+#: backend/api/secrets/crud.py:158
+msgid "Failed to store secret in vault"
+msgstr ""
+
+#: backend/api/secrets/crud.py:221
+msgid "Failed to update secret in vault"
+msgstr ""
+
+#: backend/api/secrets/crud.py:264
+msgid "Secret deleted successfully"
+msgstr ""
+
+#: backend/api/secrets/crud.py:294
+#, python-brace-format
+msgid "Deleted {count} secrets"
+msgstr ""
+
+#: backend/api/secrets/deployment.py:31
+msgid ""
+"Secrets deployment requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/secrets/deployment.py:52
+msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
+msgstr ""
+
+#: backend/api/secrets/deployment.py:71
+msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
+msgstr ""
+
+#: backend/api/reboot_orchestration.py:39
+msgid ""
+"Orchestrated reboot requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/reboot_orchestration.py:131
+msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgstr ""
+
+#: backend/api/reboot_orchestration.py:200
+#, python-format
+msgid "Orchestrated reboot initiated with %d running child host(s)"
+msgstr ""
+
+#: backend/api/reboot_orchestration.py:246
+msgid "Reboot orchestration not found"
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:69
+msgid ""
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:189
+#, python-format
+msgid "Created upgrade profile '%s'"
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:256
+#, python-format
+msgid "Updated upgrade profile '%s'"
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:288
+#, python-format
+msgid "Deleted upgrade profile '%s'"
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:293
+msgid "Upgrade profile deleted"
+msgstr ""
+
+#: backend/api/upgrade_profiles.py:382
+#, python-format
+msgid "Triggered upgrade profile '%s' against %d host(s)"
+msgstr ""
+
+#: backend/api/agent.py:60
+msgid "Rate limit exceeded"
+msgstr ""
+
+#: backend/api/agent.py:120
+#, python-format
+msgid "Agent WebSocket authentication failed from %s"
+msgstr ""
+
+#: backend/api/agent.py:130
+#, python-format
+msgid "Authentication failed: %s"
+msgstr ""
+
+#: backend/api/agent.py:146
+#, python-format
+msgid "Agent WebSocket connection attempted without token from %s"
+msgstr ""
+
+#: backend/api/agent.py:155
+msgid "Authentication token required"
+msgstr ""
+
+#: backend/api/agent.py:252
+msgid "Message failed security validation"
+msgstr ""
+
+#: backend/api/agent.py:281
+msgid "Message must be valid JSON"
+msgstr ""
+
+#: backend/api/agent.py:518
+msgid "Agent message validation failed: missing hostname and host_id"
+msgstr ""
+
+#: backend/api/agent.py:537
+#, python-brace-format
+msgid "Agent message from unregistered host: {hostname}"
+msgstr ""
+
+#: backend/api/agent.py:554
+#, python-brace-format
+msgid "Agent message from unapproved host: {hostname}"
+msgstr ""
+
+#: backend/api/agent.py:587
+msgid "Message must include hostname or host_id for host validation"
+msgstr ""
+
+#: backend/api/agent.py:605
+msgid "Host ID no longer valid - please re-register"
+msgstr ""
+
+#: backend/api/agent.py:617
+msgid "Host ID and hostname mismatch - please re-register"
+msgstr ""
+
+#: backend/api/agent.py:634
+msgid "Host must register before sending inventory data"
+msgstr ""
+
+#: backend/api/agent.py:705
+msgid "Missing or invalid authorization header"
+msgstr ""
+
+#: backend/api/agent.py:730
+msgid "Invalid host authentication"
+msgstr ""
+
+#: backend/api/agent.py:771 backend/api/packages.py:474
+msgid "Installation completion recorded"
+msgstr ""
+
+#: backend/api/agent.py:777 backend/api/error_constants.py:189
+msgid "Internal server error"
+msgstr ""
+
+#: backend/api/diagnostics.py:194
+msgid "Diagnostic collection requested"
+msgstr ""
+
+#: backend/api/diagnostics.py:472
+msgid "Diagnostic report deleted"
+msgstr ""
+
+#: backend/api/diagnostics.py:483
+msgid "Missing collection_id"
+msgstr ""
+
+#: backend/api/error_constants.py:23
+msgid "Permission denied"
+msgstr ""
+
+#: backend/api/error_constants.py:50
+msgid "Distribution not found"
+msgstr ""
+
+#: backend/api/error_constants.py:56
+msgid "Invalid firewall role ID format"
+msgstr ""
+
+#: backend/api/error_constants.py:61
+msgid "Firewall role not found"
+msgstr ""
+
+#: backend/api/error_constants.py:66
+msgid "Permission denied: VIEW_FIREWALL_ROLES role required"
+msgstr ""
+
+#: backend/api/error_constants.py:72
+msgid "Invalid diagnostic ID format"
+msgstr ""
+
+#: backend/api/error_constants.py:77
+msgid "Diagnostic report not found"
+msgstr ""
+
+#: backend/api/error_constants.py:83
+msgid "Unknown error"
+msgstr ""
+
+#: backend/api/error_constants.py:88
+msgid "WSL feature enablement pending"
+msgstr ""
+
+#: backend/api/error_constants.py:120
+msgid "Repository management requires privileged agent mode"
+msgstr ""
+
+#: backend/api/error_constants.py:126
+msgid "Current user not found"
+msgstr ""
+
+#: backend/api/error_constants.py:142
+msgid "Permission denied: EDIT_TAGS role required"
+msgstr ""
+
+#: backend/api/error_constants.py:148
+msgid "Script not found"
+msgstr ""
+
+#: backend/api/error_constants.py:156
+msgid "Unsupported shell type: {}"
+msgstr ""
+
+#: backend/api/error_constants.py:167
+msgid "Invalid secret ID"
+msgstr ""
+
+#: backend/api/error_constants.py:177
+msgid "OpenBAO is not running"
+msgstr ""
+
+#: backend/api/antivirus_status.py:132
+#, python-format
+msgid "Failed to retrieve antivirus status: %s"
+msgstr ""
+
+#: backend/api/antivirus_status.py:163
+msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
+msgstr ""
+
+#: backend/api/antivirus_status.py:243
+msgid "Unable to determine host operating system"
+msgstr ""
+
+#: backend/api/antivirus_status.py:265
+#, python-format
+msgid "No antivirus default configured for OS: %s"
+msgstr ""
+
+#: backend/api/antivirus_status.py:331
+#, python-format
+msgid "Antivirus deployment initiated for all %d hosts"
+msgstr ""
+
+#: backend/api/antivirus_status.py:333
+#, python-format
+msgid "Antivirus deployment initiated for %d of %d hosts"
+msgstr ""
+
+#: backend/api/antivirus_status.py:338
+msgid "Antivirus deployment failed for all hosts"
+msgstr ""
+
+#: backend/api/antivirus_status.py:406
+msgid "Antivirus enable command sent successfully"
+msgstr ""
+
+#: backend/api/antivirus_status.py:470
+msgid "Antivirus disable command sent successfully"
+msgstr ""
+
+#: backend/api/antivirus_status.py:545
+msgid "Antivirus remove command sent successfully"
+msgstr ""
+
+#: backend/api/antivirus_status.py:614
+#, python-format
+msgid "Failed to retrieve antivirus coverage: %s"
+msgstr ""
+
+#: backend/api/child_host_utils.py:21
+msgid "Child host engine could not dispatch this request."
+msgstr ""
+
+#: backend/api/child_host_utils.py:37
+msgid "Permission denied: {} role required"
+msgstr ""
+
+#: backend/api/host_monitoring.py:202
+msgid "Certificate collection requested"
+msgstr ""
+
+#: backend/api/host_monitoring.py:341
+msgid "Role collection requested"
+msgstr ""
+
+#: backend/api/host_monitoring.py:365
+msgid "Invalid action. Must be 'start', 'stop', or 'restart'"
+msgstr ""
+
+#: backend/api/host_monitoring.py:370
+msgid "No services specified"
+msgstr ""
+
+#: backend/api/host_monitoring.py:378
+msgid "Permission denied: START_HOST_SERVICE role required"
+msgstr ""
+
+#: backend/api/host_monitoring.py:384
+msgid "Permission denied: STOP_HOST_SERVICE role required"
+msgstr ""
+
+#: backend/api/host_monitoring.py:390
+msgid "Permission denied: RESTART_HOST_SERVICE role required"
+msgstr ""
+
+#: backend/api/host_monitoring.py:416
+msgid "Host must be running in privileged mode for service control"
+msgstr ""
+
+#: backend/api/host_monitoring.py:450
+msgid "Service {} requested for {} services"
+msgstr ""
+
+#: backend/api/packages.py:105
+#, python-format
+msgid "Failed to retrieve package managers: %s"
+msgstr ""
+
+#: backend/api/packages.py:222
+#, python-format
+msgid "Failed to retrieve OS versions: %s"
+msgstr ""
+
+#: backend/api/packages.py:272
+#, python-format
+msgid "Failed to retrieve packages for manager %s: %s"
+msgstr ""
+
+#: backend/api/packages.py:294
+#, python-format
+msgid "No active hosts found for %s %s"
+msgstr ""
+
+#: backend/api/packages.py:317
+#, python-format
+msgid "Package collection requested from host %s"
+msgstr ""
+
+#: backend/api/packages.py:327
+#, python-format
+msgid "Failed to request package refresh: %s"
+msgstr ""
+
+#: backend/api/packages.py:434
+#, python-format
+msgid "Failed to retrieve installation history: %s"
+msgstr ""
+
+#: backend/api/packages.py:509
+msgid "Installation record not found"
+msgstr ""
+
+#: backend/api/packages.py:523
+msgid "Installation record deleted successfully"
+msgstr ""
+
+#: backend/api/packages.py:532
+#, python-format
+msgid "Failed to delete installation record: %s"
+msgstr ""
+
+#: backend/api/report_branding.py:112
+msgid "Updated report branding"
+msgstr ""
+
+#: backend/api/report_branding.py:135
+msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
+msgstr ""
+
+#: backend/api/report_branding.py:140
+msgid "Empty file"
+msgstr ""
+
+#: backend/api/report_branding.py:144
+msgid "Logo too large; max 1 MB"
+msgstr ""
+
+#: backend/api/report_branding.py:161
+#, python-format
+msgid "Uploaded report branding logo (%d bytes, %s)"
+msgstr ""
+
+#: backend/api/report_branding.py:180
+msgid "No logo configured"
+msgstr ""
+
+#: backend/api/report_branding.py:208
+msgid "Removed report branding logo"
+msgstr ""
+
+#: backend/api/firewall_roles.py:97
+#, python-format
+msgid "Failed to retrieve firewall roles: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:149
+#, python-format
+msgid "Failed to retrieve firewall role: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:169
+msgid "Permission denied: ADD_FIREWALL_ROLE role required"
+msgstr ""
+
+#: backend/api/firewall_roles.py:185 backend/api/firewall_roles.py:302
+#, python-format
+msgid "Firewall role '%s' already exists"
+msgstr ""
+
+#: backend/api/firewall_roles.py:241
+#, python-format
+msgid "Failed to create firewall role: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:262
+msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
+msgstr ""
+
+#: backend/api/firewall_roles.py:362
+#, python-format
+msgid "Failed to update firewall role: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:382
+msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
+msgstr ""
+
+#: backend/api/firewall_roles.py:429
+msgid "Firewall role deleted successfully"
+msgstr ""
+
+#: backend/api/firewall_roles.py:439
+#, python-format
+msgid "Failed to delete firewall role: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:510
+#, python-format
+msgid "Failed to retrieve host firewall roles: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:598
+#, python-format
+msgid "Failed to retrieve expected ports: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:623 backend/api/firewall_roles.py:750
+msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
+msgstr ""
+
+#: backend/api/firewall_roles.py:635 backend/api/firewall_roles.py:762
+msgid "Invalid ID format"
+msgstr ""
+
+#: backend/api/firewall_roles.py:671
+msgid "Firewall role already assigned to this host"
+msgstr ""
+
+#: backend/api/firewall_roles.py:729
+#, python-format
+msgid "Failed to assign firewall role: %s"
+msgstr ""
+
+#: backend/api/firewall_roles.py:778
+msgid "Firewall role assignment not found"
+msgstr ""
+
+#: backend/api/firewall_roles.py:828
+msgid "Firewall role removed from host successfully"
+msgstr ""
+
+#: backend/api/firewall_roles.py:840
+#, python-format
+msgid "Failed to remove firewall role: %s"
+msgstr ""
+
+#: backend/api/audit_log.py:131
+msgid "Invalid user ID format"
+msgstr ""
+
+#: backend/api/audit_log.py:194
+msgid "Number of entries to return"
+msgstr ""
+
+#: backend/api/audit_log.py:196
+msgid "Number of entries to skip"
+msgstr ""
+
+#: backend/api/audit_log.py:230
+#, python-format
+msgid "Failed to retrieve audit logs: %s"
+msgstr ""
+
+#: backend/api/audit_log.py:253
+msgid "Invalid audit log ID format"
+msgstr ""
+
+#: backend/api/audit_log.py:264
+msgid "Audit log entry not found"
+msgstr ""
+
+#: backend/api/audit_log.py:282
+#, python-format
+msgid "Failed to retrieve audit log entry: %s"
+msgstr ""
+
+#: backend/api/audit_log.py:295
+#, python-format
+msgid ""
+"%s export requires a SysManage Professional+ license. OSS tier supports CSV "
+"export."
+msgstr ""
+
+#: backend/api/audit_log.py:302
+msgid "Use /api/v1/audit/export with Pro+ license"
+msgstr ""
+
+#: backend/api/audit_log.py:311
+msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
+msgstr ""
+
+#: backend/api/audit_log.py:334
+#, python-format
+msgid "Unsupported export format: %s"
+msgstr ""
+
+#: backend/api/audit_log.py:528
+msgid "Generated"
+msgstr ""
+
+#: backend/api/audit_log.py:530
+msgid "Total Entries"
+msgstr ""
+
+#: backend/api/audit_log.py:537
+msgid "No audit log entries found."
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:241
+msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:259
+#, python-format
+msgid "Failed to retrieve enabled package managers: %s"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:278
+msgid "Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:295
+#, python-format
+msgid "Package manager '%s' is already enabled for OS '%s'"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:366
+#, python-format
+msgid "Failed to create enabled package manager: %s"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:385
+msgid "Permission denied: REMOVE_ENABLED_PACKAGE_MANAGER role required"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:396
+msgid "Invalid package manager ID format"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:409
+msgid "Enabled package manager not found"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:442
+msgid "Enabled package manager deleted successfully"
+msgstr ""
+
+#: backend/api/enabled_package_managers.py:452
+#, python-format
+msgid "Failed to delete enabled package manager: %s"
+msgstr ""
+
+#: backend/api/scripts/models.py:29 backend/api/scripts/models.py:68
+msgid "Script name cannot be empty"
+msgstr ""
+
+#: backend/api/scripts/models.py:31 backend/api/scripts/models.py:70
+msgid "Script name cannot exceed 255 characters"
+msgstr ""
+
+#: backend/api/scripts/models.py:48 backend/api/scripts/models.py:88
+msgid "Script content cannot be empty"
+msgstr ""
+
+#: backend/api/scripts/models.py:118
+msgid "Either saved_script_id or script_content must be provided"
+msgstr ""
+
+#: backend/api/scripts/models.py:128
+msgid "shell_type is required for ad-hoc scripts"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:63
+msgid "Permission denied: RUN_SCRIPT role required"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:96
+msgid "Saved script not found"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:101
+msgid "Script is not active"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:181
+#, python-brace-format
+msgid "Executed script '{script_name}' on host '{host_fqdn}'"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:203
+msgid "Failed to queue script execution: {}"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:213
+msgid "Failed to queue script execution"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:226
+msgid "Script execution queued for delivery"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:234
+msgid "Failed to execute script"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:315
+msgid "Failed to fetch script executions"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:344
+#: backend/api/scripts/routes_executions.py:422
+msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:356
+#: backend/api/scripts/routes_executions.py:491
+msgid "Script execution not found"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:384
+msgid "Script execution deleted successfully"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:393
+msgid "Failed to delete script execution"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:462
+msgid "Script executions deleted successfully"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:469
+msgid "Failed to delete script executions"
+msgstr ""
+
+#: backend/api/scripts/routes_executions.py:526
+msgid "Failed to fetch script execution"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:76
+msgid "Failed to fetch saved scripts"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:119
+msgid "Permission denied: ADD_SCRIPT role required"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:131
+#: backend/api/scripts/routes_saved_scripts.py:293
+msgid "A script with this name already exists"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:193
+msgid "Failed to create saved script"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:236
+msgid "Failed to fetch saved script"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:265
+msgid "Permission denied: EDIT_SCRIPT role required"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:350
+msgid "Failed to update saved script"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:378
+msgid "Permission denied: DELETE_SCRIPT role required"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:412
+msgid "Cannot delete script with active executions"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:440
+msgid "Script deleted successfully"
+msgstr ""
+
+#: backend/api/scripts/routes_saved_scripts.py:449
+msgid "Failed to delete saved script"
+msgstr ""
+
+#: backend/api/commercial_antivirus_status.py:109
+#, python-format
+msgid "Failed to retrieve commercial antivirus status: %s"
+msgstr ""
+
+#: backend/websocket/message_router.py:268
+#, python-format
+msgid "Unknown message type in queue: %s"
+msgstr ""
+
+#: backend/websocket/message_router.py:273
+#, python-format
+msgid "Error routing message type %s: %s"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:68
+#, python-format
+msgid "Cleaned up %d old messages"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:76
+#, python-format
+msgid "Failed to cleanup old messages: %s"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:111
+#, python-format
+msgid "Deleted %d messages for host %s"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:117
+#, python-format
+msgid "Failed to delete messages for host %s: %s"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:180
+#, python-format
+msgid "Marked %d old messages as expired (older than %d minutes)"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:190
+#, python-format
+msgid "Failed to expire old messages: %s"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:238
+#, python-format
+msgid "Deleted %d failed/expired messages"
+msgstr ""
+
+#: backend/websocket/queue_maintenance.py:245
+#, python-format
+msgid "Failed to delete failed messages: %s"
+msgstr ""
+
+#: backend/websocket/mock_connection.py:36
+#, python-format
+msgid "Mock connection: would send message %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:124
+#, python-format
+msgid "Host %s not found for message %s, deleting"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:135
+#, python-format
+msgid "Host %s not approved (status: %s) for message %s, deleting"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:148
+#, python-format
+msgid "Processing NULL host_id message for approved host %s (ID: %s)"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:265
+#, python-format
+msgid ""
+"Host %s not found on this database; deferring %d queued message(s) for retry "
+"(NOT deleting) — may be an in-flight enrollment or a deleted host"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:283
+#, python-format
+msgid ""
+"Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
+"messages from queue"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:291
+#, python-format
+msgid "Deleted %d messages for unapproved host %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:299
+#, python-format
+msgid "Processing messages for approved host %s (FQDN: %s)"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:325
+#, python-format
+msgid "Processing message with NULL host_id: %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:336
+#, python-format
+msgid "Processing SYSTEM_INFO registration message %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:359
+#, python-format
+msgid "Message %s missing hostname and host_id, deleting"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:393
+#, python-format
+msgid "Error processing NULL host_id message %s: %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:431
+#, python-format
+msgid "Could not mark message %s as processing"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:458
+#, python-format
+msgid "Processing queued message: %s (type: %s, host: %s)"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:487
+#, python-format
+msgid "Successfully processed and completed message: %s for host %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:505
+#, python-format
+msgid "Failed to process message %s: unknown message type"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:526
+#, python-format
+msgid "Error processing message %s for host %s: %s"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:554
+#, python-format
+msgid "Could not mark SYSTEM_INFO message %s as processing"
+msgstr ""
+
+#: backend/websocket/inbound_processor.py:586
+#, python-format
+msgid "Error processing SYSTEM_INFO message %s: %s"
+msgstr ""
+
+#: backend/websocket/queue_stats.py:119
+#, python-format
+msgid "Failed to get failed messages: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:102
+#, python-brace-format
+msgid "Host ID {host_id} not found"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:296
+#, python-format
+msgid "Enqueued message: id=%s, type=%s, direction=%s, host_id=%s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:475
+#, python-format
+msgid "Marked message as processing: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:482
+#, python-format
+msgid "Failed to mark message %s as processing: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:518
+#, python-format
+msgid "Marked message as completed: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:525
+#, python-format
+msgid "Failed to mark message %s as completed: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:564
+#, python-format
+msgid "Marked message as sent (awaiting ack): %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:571
+#, python-format
+msgid "Failed to mark message %s as sent: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:601
+#, python-format
+msgid "Cannot acknowledge unknown message: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:607
+#, python-format
+msgid "Message %s not in SENT status (is %s), skipping ack"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:620
+#, python-format
+msgid "Message acknowledged by agent: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:627
+#, python-format
+msgid "Failed to mark message %s as acknowledged: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:712
+#, python-format
+msgid "No acknowledgment received within %d seconds"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:724
+#, python-format
+msgid "Scheduled %d unacknowledged messages for retry"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:732
+#, python-format
+msgid "Error retrying unacknowledged messages: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:787
+#, python-format
+msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:800
+#, python-format
+msgid "Message %s permanently failed after %d attempts: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:815
+#, python-format
+msgid "Failed to mark message %s as failed: %s"
+msgstr ""
+
+#: backend/websocket/queue_operations.py:838
+#, python-format
+msgid "Failed to deserialize message %s: %s"
+msgstr ""
+
+#: backend/websocket/message_processor.py:63
+msgid "Message processor started"
+msgstr ""
+
+#: backend/websocket/message_processor.py:84
+#, python-format
+msgid "Error in message processing loop: %s"
+msgstr ""
+
+#: backend/websocket/message_processor.py:103
+msgid "Message processor cancelled"
+msgstr ""
+
+#: backend/websocket/message_processor.py:107
+msgid "Message processor stopped"
+msgstr ""
+
+#: backend/websocket/queue_manager.py:43
+msgid "Server message queue manager initialized"
+msgstr ""
+
+#: backend/services/reboot_orchestration_service.py:249
+#, python-format
+msgid "%d of %d child host(s) failed to restart"
+msgstr ""
+
+#: backend/services/airgap_device_service.py:145
+msgid "no device selected"
+msgstr ""
+
+#: backend/services/airgap_device_service.py:151
+msgid "device not found (was it removed?)"
+msgstr ""
+
+#: backend/services/airgap_device_service.py:158
+msgid "ISO filesystem present"
+msgstr ""
+
+#: backend/services/airgap_device_service.py:166
+msgid "drive present but no readable disc inserted"
+msgstr ""
+
+#: backend/services/airgap_device_service.py:171
+#, python-format
+msgid "no ISO filesystem on device (fstype=%s)"
+msgstr ""
+
+#: backend/services/audit_service.py:183
+#, python-brace-format
+msgid "Created {entity_type} '{entity_name}'"
+msgstr ""
+
+#: backend/services/audit_service.py:231
+#, python-brace-format
+msgid "Updated {entity_type} '{entity_name}'"
+msgstr ""
+
+#: backend/services/audit_service.py:279
+#, python-brace-format
+msgid "Deleted {entity_type} '{entity_name}'"
+msgstr ""
+
+#: backend/services/vault_service.py:92
+msgid "vault.not_enabled"
+msgstr ""
+
+#: backend/services/vault_service.py:95
+msgid "vault.no_token"
+msgstr ""
+
+#: backend/services/vault_service.py:123
+msgid "vault.permission_denied"
+msgstr ""
+
+#: backend/services/vault_service.py:135
+msgid "vault.connection_error"
+msgstr ""
+
+#: backend/services/vault_service.py:138
+msgid "vault.timeout"
+msgstr ""
+
+#: backend/services/vault_service.py:143
+msgid "vault.invalid_response"
+msgstr ""
+
+#: backend/services/vault_service.py:277
+msgid "vault.secret_not_found"
+msgstr ""
+
+#: backend/services/vault_service.py:283
+msgid "vault.invalid_secret_format"
+msgstr ""

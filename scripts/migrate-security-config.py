@@ -33,7 +33,6 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import yaml
-from argon2 import PasswordHasher
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -564,6 +563,37 @@ def main():
                 print(f"   User accounts: {len(migrations_needed)} would need password resets")
         return
 
+    # Short-circuit: --salt-only with no users in the database is a no-op
+    # (no user passwords to re-hash against the new salt).  Rotating the
+    # yaml-level salt anyway leaves an unnecessary backup file behind, so
+    # skip the write entirely.  --jwt-only / --all paths still proceed
+    # because the JWT secret rotation is meaningful even with no users.
+    #
+    # EXCEPTION: if the salt is still the literal placeholder string the
+    # .deb postinst drops in ("GENERATE_NEW_SALT_FOR_PRODUCTION"), the
+    # operator definitely wants it rotated — even with zero users, the
+    # placeholder is not a usable salt and leaving it in place causes
+    # the next account creation to silently use it.  Force the write
+    # through in that case.
+    placeholder_salts = {
+        "GENERATE_NEW_SALT_FOR_PRODUCTION",
+        "",
+        None,
+    }
+    salt_is_placeholder = current_salt in placeholder_salts
+    if (
+        update_salt
+        and not update_jwt
+        and not migrations_needed
+        and not salt_is_placeholder
+    ):
+        print(
+            "\n[INFO] Salt rotation is a no-op with zero users in the database; "
+            "skipping backup + write.  Re-run after creating users to actually "
+            "migrate them to a new salt."
+        )
+        return
+
     if debug:
         print("[DEBUG] DEBUG: About to create backup and save changes")
 
@@ -583,7 +613,15 @@ def main():
 
     print("\n[OK] Security migration completed successfully!")
     print("\n📋 Next steps:")
-    print("   1. Restart the SysManage server: ./run.sh")
+    # Detect packaged install (/opt/sysmanage) vs dev tree and print the
+    # correct restart hint.  In a dev checkout you re-run ./run.sh; in a
+    # PPA-installed deployment the service is managed by systemd.
+    if os.path.exists("/opt/sysmanage/.venv") and os.path.exists(
+        "/usr/lib/systemd/system/sysmanage.service"
+    ):
+        print("   1. Restart the SysManage server: sudo systemctl restart sysmanage")
+    else:
+        print("   1. Restart the SysManage server: ./run.sh")
     if update_salt and migrations_needed:
         print("   2. Share temporary passwords with affected users (shown above)")
         print("   3. Ensure users change their temporary passwords immediately")

@@ -39,7 +39,7 @@ try:
     startup_logger.info("WebUI config: %s", app_config.get("webui", "NOT FOUND"))
     startup_logger.info("API config: %s", app_config.get("api", "NOT FOUND"))
 except Exception as e:
-    startup_logger.error("Failed to load configuration: %s", e, exc_info=True)
+    startup_logger.exception("Failed to load configuration: %s", e, exc_info=True)
     raise
 
 # Configure logging with UTC timestamp formatter
@@ -114,12 +114,15 @@ startup_logger.info("First 10 origins: %s", origins[:10] if origins else [])
 if len(origins) > 10:
     startup_logger.info("... and %d more origins", len(origins) - 10)
 
-print(f"CORS Debug - WebUI Port: {webui_port}")
-print(f"CORS Debug - API Port: {api_port}")
-print(
-    f"CORS Debug - Generated origins: {origins[:10]}..."
-)  # Show first 10 to avoid log spam
-print(f"CORS Debug - Total origins count: {len(origins)}")
+# Bind the active tenant (from the JWT) for per-tenant config resolution.
+# No-op when multi-tenancy is disabled (the default).  Added BEFORE CORS so that
+# CORSMiddleware is the last middleware in the chain (Starlette runs middleware
+# in reverse order of registration, so CORS must be registered last to remain
+# the outermost layer and tag every response — including error responses).
+from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E402
+
+app.add_middleware(ActiveTenantMiddleware)
+startup_logger.info("Active-tenant middleware added")
 
 startup_logger.info("Adding CORS middleware to FastAPI app")
 app.add_middleware(
@@ -215,9 +218,9 @@ if __name__ == "__main__":
         test_sock.close()
         startup_logger.info("Network binding test successful")
     except Exception as e:
-        startup_logger.error("Network binding test FAILED: %s", e)
-        startup_logger.error("This indicates the server will not be able to start!")
-        startup_logger.error("Check if another process is using port %s", port)
+        startup_logger.exception("Network binding test FAILED: %s", e)
+        startup_logger.exception("This indicates the server will not be able to start!")
+        startup_logger.exception("Check if another process is using port %s", port)
         raise
 
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
@@ -235,10 +238,10 @@ if __name__ == "__main__":
             **ssl_config,
         )
     except Exception as e:
-        startup_logger.error("UVICORN SERVER STARTUP FAILED: %s", e, exc_info=True)
-        startup_logger.error("Server startup exception details:")
-        startup_logger.error("Exception type: %s", type(e).__name__)
-        startup_logger.error("Exception args: %s", e.args)
+        startup_logger.exception("UVICORN SERVER STARTUP FAILED: %s", e, exc_info=True)
+        startup_logger.exception("Server startup exception details:")
+        startup_logger.exception("Exception type: %s", type(e).__name__)
+        startup_logger.exception("Exception args: %s", e.args)
         raise
 
     startup_logger.info("Uvicorn.run() completed - this should not normally be reached")

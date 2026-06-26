@@ -10,7 +10,7 @@ Read-only listing operations remain open source.
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import joinedload, sessionmaker
 
 from backend.api.child_host_models import (
     ChildHostResponse,
@@ -22,8 +22,10 @@ from backend.api.child_host_models import (
 )
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
     get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.api.error_constants import error_distribution_not_found
@@ -31,13 +33,27 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
-from backend.persistence.models import ChildHostDistribution, HostChild
+from backend.persistence.models import ChildHostDistribution, Host, HostChild
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 router = APIRouter()
+
+
+def _effective_child_status(child) -> str:
+    """Return the effective status for a child host.
+
+    When a child host has a linked Host record (its own agent registered),
+    use the linked Host's connectivity state so the child hosts screen is
+    consistent with the main Hosts screen.  A bhyve VM process can be alive
+    while the agent inside it is unreachable — in that case the status
+    should reflect the agent state, not the hypervisor state.
+    """
+    if child.child_host_id and child.child_host:
+        linked_host = child.child_host
+        if not linked_host.active or linked_host.status == "down":
+            return "stopped"
+    return child.status
 
 
 def _check_container_module():
@@ -64,20 +80,21 @@ async def list_child_hosts(
 ):
     """
     List all child hosts on a parent host.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    _check_container_module()
+    # Authz is server-global (User lives in the bootstrap DB); child-host data
+    # is tenant-scoped — route it to the active tenant's database.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         # Query child hosts for this parent
         child_hosts = (
             session.query(HostChild)
+            .options(joinedload(HostChild.child_host))
             .filter(HostChild.parent_host_id == host.id)
             .order_by(HostChild.created_at.desc())
             .all()
@@ -93,12 +110,22 @@ async def list_child_hosts(
                 distribution=child.distribution,
                 distribution_version=child.distribution_version,
                 hostname=child.hostname,
-                status=child.status,
+                status=_effective_child_status(child),
                 installation_step=child.installation_step,
                 error_message=child.error_message,
                 created_at=child.created_at.isoformat() if child.created_at else None,
                 installed_at=(
                     child.installed_at.isoformat() if child.installed_at else None
+                ),
+                reboot_required=(
+                    child.child_host.reboot_required
+                    if child.child_host_id and child.child_host
+                    else False
+                ),
+                agent_version=(
+                    child.child_host.agent_version
+                    if child.child_host_id and child.child_host
+                    else None
                 ),
             )
             for child in child_hosts
@@ -135,19 +162,19 @@ async def get_child_host(
 ):
     """
     Get details of a specific child host.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    _check_container_module()
+    # Authz is server-global; child-host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         child = (
             session.query(HostChild)
+            .options(joinedload(HostChild.child_host))
             .filter(
                 HostChild.id == child_id,
                 HostChild.parent_host_id == host.id,
@@ -166,12 +193,133 @@ async def get_child_host(
             distribution=child.distribution,
             distribution_version=child.distribution_version,
             hostname=child.hostname,
-            status=child.status,
+            status=_effective_child_status(child),
             installation_step=child.installation_step,
             error_message=child.error_message,
             created_at=child.created_at.isoformat() if child.created_at else None,
             installed_at=child.installed_at.isoformat() if child.installed_at else None,
+            reboot_required=(
+                child.child_host.reboot_required
+                if child.child_host_id and child.child_host
+                else False
+            ),
+            agent_version=(
+                child.child_host.agent_version
+                if child.child_host_id and child.child_host
+                else None
+            ),
         )
+
+
+def _dispatch_delete_plan(plan, host_id: str, child_id: str, timeout: int) -> bool:
+    """Enqueue a delete plan and register a child_host_op correlation."""
+    from backend.services.proplus_dispatch import (
+        enqueue_apply_plan,
+        register_child_host_correlation,
+    )
+
+    message_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=timeout)
+    register_child_host_correlation(message_id, child_id, "delete", str(host_id))
+    return True
+
+
+def _try_bhyve_plan_based_deletion(vm_name: str, host_id: str, child_id: str) -> bool:
+    """Dispatch a bhyve `vm stop` + `vm destroy -f` plan via the engine."""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is None:
+        return False
+    try:
+        plan = virt_engine.build_bhyve_delete_plan(vm_name)
+        return _dispatch_delete_plan(plan, host_id, child_id, 300)
+    except Exception:  # nosec B110  pylint: disable=broad-exception-caught
+        return False
+
+
+def _try_vmm_plan_based_deletion(vm_name: str, host_id: str, child_id: str) -> bool:
+    """Dispatch an OpenBSD vmctl stop + vm.conf removal plan via engine."""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is None:
+        return False
+    try:
+        plan = virt_engine.build_vmm_delete_plan(vm_name)
+        return _dispatch_delete_plan(plan, host_id, child_id, 300)
+    except Exception:  # nosec B110  pylint: disable=broad-exception-caught
+        return False
+
+
+def _try_kvm_plan_based_deletion(vm_name: str, host_id: str, child_id: str) -> bool:
+    """Dispatch a KVM destroy/undefine plan via the virtualization_engine.
+
+    Returns True if the plan was dispatched, False if the engine isn't
+    loaded (caller surfaces a 502 to the user — the agent stub does not honour the
+    agent's native delete_child_host handler).
+    """
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is None:
+        return False
+    try:
+        delete_req = virt_engine.VmDeleteRequest(vm_name=vm_name, purge_storage=True)
+        plan = virt_engine.build_kvm_delete_plan(delete_req)
+        return _dispatch_delete_plan(plan, host_id, child_id, 300)
+    except Exception:  # nosec B110  pylint: disable=broad-exception-caught
+        return False
+
+
+def _try_lxd_plan_based_deletion(
+    container_name: str, host_id: str, child_id: str
+) -> bool:
+    """Dispatch an `lxc delete --force` plan via the container_engine."""
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        return False
+    try:
+        plan = container_engine.build_lxd_delete_plan(container_name)
+        return _dispatch_delete_plan(plan, host_id, child_id, 180)
+    except Exception:  # nosec B110  pylint: disable=broad-exception-caught
+        return False
+
+
+def _try_wsl_plan_based_deletion(distro_name: str, host_id: str, child_id: str) -> bool:
+    """Dispatch a `wsl --unregister` plan via the container_engine.
+
+    NOTE: the engine plan does NOT verify the registry GUID before
+    deleting (the legacy path does — see
+    ``child_host_wsl_control._get_wsl_guid``).  Until a
+    ``verify_guid`` step type is added to the apply_deployment_plan
+    schema, callers should treat this as best-effort.
+    """
+    container_engine = module_loader.get_module("container_engine")
+    if container_engine is None:
+        return False
+    try:
+        plan = container_engine.build_wsl_delete_plan(distro_name)
+        return _dispatch_delete_plan(plan, host_id, child_id, 180)
+    except Exception:  # nosec B110  pylint: disable=broad-exception-caught
+        return False
+
+
+def _try_plan_based_deletion(child, host_id):
+    """Dispatch ``child`` to the appropriate engine-path delete builder.
+
+    Returns ``True`` if a plan was enqueued, ``False`` if the caller
+    should surface a 502 to the user.  WSL with a recorded
+    ``wsl_guid`` stays on the legacy path: the engine plan schema
+    doesn't yet have a ``verify_guid`` step, and the legacy path's
+    GUID-verify safety net is meaningful for that case.
+    """
+    cid = str(child.id)
+    plan_dispatchers = {
+        "kvm": _try_kvm_plan_based_deletion,
+        "bhyve": _try_bhyve_plan_based_deletion,
+        "vmm": _try_vmm_plan_based_deletion,
+        "lxd": _try_lxd_plan_based_deletion,
+    }
+    dispatcher = plan_dispatchers.get(child.child_type)
+    if dispatcher is not None:
+        return dispatcher(child.child_name, host_id, cid)
+    if child.child_type == "wsl" and not child.wsl_guid:
+        return _try_wsl_plan_based_deletion(child.child_name, host_id, cid)
+    return False
 
 
 @router.delete(
@@ -191,15 +339,11 @@ async def delete_child_host(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.DELETE_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.DELETE_CHILD_HOST
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -223,26 +367,38 @@ async def delete_child_host(
         if child.child_type == "wsl" and child.wsl_guid:
             parameters["wsl_guid"] = child.wsl_guid
 
-        queue_ops = QueueOperations()
+        used_plan_path = _try_plan_based_deletion(child, host_id)
 
-        command_message = create_command_message(
-            command_type="delete_child_host",
-            parameters=parameters,
-        )
+        if not used_plan_path:
+            raise_engine_declined()
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        # Plan-based path returns its result via the generic
+        # ``apply_deployment_plan`` channel, not the delete-specific
+        # handler that prunes the row.  Remove the HostChild
+        # immediately so the UI reflects the delete; the plan still
+        # runs async on the agent to destroy + undefine + purge
+        # storage.  Cascade to the linked Host record (when the
+        # agent inside the VM registered itself) so the deleted VM
+        # also drops out of the main Hosts list.
+        linked_host_id = child.child_host_id
+        session.delete(child)
+        if linked_host_id:
+            linked_host = session.query(Host).filter(Host.id == linked_host_id).first()
+            if linked_host:
+                # Record a tombstone so any last-gasp /host/register
+                # from the soon-to-be-destroyed VM (the agent inside
+                # may still be alive for seconds after this cascade)
+                # is absorbed instead of recreating a ghost row.  See
+                # backend.api.recent_host_deletions for the race
+                # this guards against.
+                from backend.api.recent_host_deletions import (
+                    record_recent_child_host_deletion,
+                )
 
-        # Mark child as deleting
-        child.status = "deleting"
+                record_recent_child_host_deletion(linked_host.fqdn, linked_host.ipv4)
+                session.delete(linked_host)
 
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -270,39 +426,45 @@ async def refresh_child_hosts(
     """
     Request fresh child host status from the agent.
     This triggers the agent to run list_child_hosts and report current status.
-    Requires VIEW_CHILD_HOST permission.
+    Requires VIEW_CHILD_HOST permission and a Pro+ license.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    _check_container_module()
+    # Authz is server-global; child-host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOST)
-
         host = get_host_or_404(session, host_id)
 
         from backend.api.child_host_utils import verify_host_active
-        from backend.websocket.messages import create_command_message
-        from backend.websocket.queue_enums import QueueDirection
-        from backend.websocket.queue_operations import QueueOperations
 
         verify_host_active(host)
 
-        queue_ops = QueueOperations()
-
-        # Create command message to list child hosts
-        command_message = create_command_message(
-            command_type="list_child_hosts", parameters={}
+        # Try the engine plan path first.
+        used_plan_path = False
+        container_engine = module_loader.get_module("container_engine")
+        builder = (
+            getattr(container_engine, "build_list_child_hosts_plan", None)
+            if container_engine
+            else None
         )
+        if builder is not None:
+            try:
+                plan = builder()
+                # pylint: disable=import-outside-toplevel
+                from backend.services.proplus_dispatch import (
+                    enqueue_apply_plan,
+                    register_host_op_correlation,
+                )
 
-        # Queue the message for delivery to the agent
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+                msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
+                register_host_op_correlation(msg_id, "list_child_hosts", str(host_id))
+                used_plan_path = True
+            except Exception:  # nosec B110
+                pass
+
+        if not used_plan_path:
+            raise_engine_declined()
 
         session.commit()
 

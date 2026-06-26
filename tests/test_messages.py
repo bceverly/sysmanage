@@ -3,11 +3,6 @@ Tests for backend/websocket/messages.py module.
 Tests message protocol definitions for WebSocket communication.
 """
 
-from datetime import datetime
-from unittest.mock import patch
-
-import pytest
-
 from backend.websocket.messages import (
     CommandMessage,
     CommandResultMessage,

@@ -10,7 +10,6 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 
 from backend.api.default_repositories import (
     OS_PACKAGE_MANAGERS,

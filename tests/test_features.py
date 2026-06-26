@@ -283,6 +283,9 @@ class TestTierFeatures:
             FeatureCode.VULNERABILITY_SCANNING,
             FeatureCode.ADVANCED_MONITORING,
             FeatureCode.CUSTOM_REPORTS,
+            # Phase 11.4 — paired with VULN_ENGINE module which is already
+            # in the Professional tier.
+            FeatureCode.CVE_FEED_MANAGEMENT,
         }
         assert pro_features == expected
 
@@ -385,5 +388,5 @@ class TestTierModules:
         """Test all license tiers are in TIER_MODULES."""
         from backend.licensing.features import TIER_MODULES, LicenseTier
 
-        for tier in LicenseTier:
+        for tier in LicenseTier:  # lgtm[py/non-iterable-in-for-loop]
             assert tier in TIER_MODULES

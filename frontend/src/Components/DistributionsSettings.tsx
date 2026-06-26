@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -25,6 +25,7 @@ import Alert from '@mui/material/Alert';
 import SearchBox from './SearchBox';
 import ColumnVisibilityButton from './ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import { refreshLicenseCache, isModuleLicensed } from '../Services/license';
 import {
     Distribution,
     CreateDistributionRequest,
@@ -38,6 +39,13 @@ interface AxiosError {
         };
     };
 }
+
+// WSL + LXD/LXC are container child hosts (container_engine = Professional).
+// Every other distribution type is a VM owned by the Enterprise-only
+// virtualization_engine, so it is hidden unless that engine is licensed — a
+// Professional user must not be offered (or shown) VM distributions they
+// cannot create.
+const CONTAINER_CHILD_TYPES = new Set(['wsl', 'lxd']);
 
 const DistributionsSettings: React.FC = () => {
     const [tableData, setTableData] = useState<Distribution[]>([]);
@@ -68,6 +76,11 @@ const DistributionsSettings: React.FC = () => {
 
     // Permission states
     const [canConfigure, setCanConfigure] = useState<boolean>(false);
+
+    // Virtualization (KVM/bhyve/VMM/etc.) is an Enterprise feature. Default
+    // false so the catalog starts container-only and only expands to VM types
+    // if virtualization_engine turns out to be licensed.
+    const [virtEnabled, setVirtEnabled] = useState<boolean>(false);
 
     // Snackbar state
     const [snackbar, setSnackbar] = useState<{
@@ -174,7 +187,7 @@ const DistributionsSettings: React.FC = () => {
         { field: 'install_identifier', label: t('distributions.installIdentifier', 'Install ID') },
     ];
 
-    const childTypeOptions = [
+    const allChildTypeOptions = [
         { value: 'wsl', label: 'WSL' },
         { value: 'lxd', label: 'LXD/LXC' },
         { value: 'virtualbox', label: 'VirtualBox' },
@@ -183,6 +196,9 @@ const DistributionsSettings: React.FC = () => {
         { value: 'bhyve', label: 'bhyve (FreeBSD)' },
         { value: 'kvm', label: 'KVM/QEMU' },
     ];
+    const childTypeOptions = virtEnabled
+        ? allChildTypeOptions
+        : allChildTypeOptions.filter((o) => CONTAINER_CHILD_TYPES.has(o.value));
 
     const installMethodOptions = [
         { value: 'apt_launchpad', label: 'APT (Launchpad PPA)' },
@@ -200,13 +216,31 @@ const DistributionsSettings: React.FC = () => {
         checkPermissions();
     }, []);
 
-    // Load data on mount
+    // Resolve whether VM (virtualization_engine) distributions should be shown.
+    useEffect(() => {
+        let cancelled = false;
+        refreshLicenseCache()
+            .then(() => {
+                if (!cancelled) setVirtEnabled(isModuleLicensed('virtualization_engine'));
+            })
+            .catch(() => {
+                if (!cancelled) setVirtEnabled(false);
+            });
+        return () => { cancelled = true; };
+    }, []);
+
+    // Load data on mount.  When virtualization isn't licensed, drop VM-type
+    // distributions so the table shows only the container types the operator
+    // can actually use.
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const data = await distributionService.getAll();
-            setTableData(data);
-            setFilteredData(data);
+            const visible = virtEnabled
+                ? data
+                : data.filter((d) => CONTAINER_CHILD_TYPES.has(d.child_type));
+            setTableData(visible);
+            setFilteredData(visible);
         } catch (error) {
             console.error('Error loading distributions:', error);
             setSnackbar({
@@ -217,7 +251,7 @@ const DistributionsSettings: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [t]);
+    }, [t, virtEnabled]);
 
     useEffect(() => {
         loadData();

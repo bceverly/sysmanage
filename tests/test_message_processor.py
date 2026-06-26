@@ -103,7 +103,7 @@ class TestMessageProcessorStart:
             task.cancel()
 
             with pytest.raises(asyncio.CancelledError):
-                await task
+                _ = await task  # assignment placates py/ineffectual-statement
 
         assert processor.running is False
 
@@ -126,6 +126,7 @@ class TestMessageProcessorStop:
 class TestMessageProcessorProcessPendingMessages:
     """Tests for MessageProcessor._process_pending_messages method."""
 
+    @patch("backend.websocket.message_processor.config")
     @patch("backend.websocket.message_processor.server_queue_manager")
     @patch("backend.websocket.message_processor.process_outbound_messages")
     @patch("backend.websocket.message_processor.process_pending_messages")
@@ -137,10 +138,12 @@ class TestMessageProcessorProcessPendingMessages:
         mock_process_inbound,
         mock_process_outbound,
         mock_queue_manager,
+        mock_config,
     ):
-        """Test successful message processing."""
+        """Test successful message processing (collapsed mode → bootstrap DB only)."""
         from backend.websocket.message_processor import MessageProcessor
 
+        mock_config.is_multitenancy_enabled.return_value = False
         mock_db = MagicMock()
         mock_get_db.return_value = iter([mock_db])
         mock_process_inbound.return_value = None
@@ -155,6 +158,7 @@ class TestMessageProcessorProcessPendingMessages:
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
 
+    @patch("backend.websocket.message_processor.config")
     @patch("backend.websocket.message_processor.server_queue_manager")
     @patch("backend.websocket.message_processor.process_outbound_messages")
     @patch("backend.websocket.message_processor.process_pending_messages")
@@ -166,10 +170,12 @@ class TestMessageProcessorProcessPendingMessages:
         mock_process_inbound,
         mock_process_outbound,
         mock_queue_manager,
+        mock_config,
     ):
         """Test message processing with retry scheduling."""
         from backend.websocket.message_processor import MessageProcessor
 
+        mock_config.is_multitenancy_enabled.return_value = False
         mock_db = MagicMock()
         mock_get_db.return_value = iter([mock_db])
         mock_process_inbound.return_value = None
@@ -182,6 +188,7 @@ class TestMessageProcessorProcessPendingMessages:
         mock_queue_manager.retry_unacknowledged_messages.assert_called_once()
         mock_db.commit.assert_called_once()
 
+    @patch("backend.websocket.message_processor.config")
     @patch("backend.websocket.message_processor.server_queue_manager")
     @patch("backend.websocket.message_processor.process_outbound_messages")
     @patch("backend.websocket.message_processor.process_pending_messages")
@@ -193,22 +200,76 @@ class TestMessageProcessorProcessPendingMessages:
         mock_process_inbound,
         mock_process_outbound,
         mock_queue_manager,
+        mock_config,
     ):
-        """Test rollback on processing error."""
+        """A failure draining one DB is ISOLATED (logged + rolled back), NOT
+        re-raised — Phase 13.1 #2 per-DB isolation so one tenant can't stall the
+        others or the cycle."""
         from backend.websocket.message_processor import MessageProcessor
 
+        mock_config.is_multitenancy_enabled.return_value = False
         mock_db = MagicMock()
         mock_get_db.return_value = iter([mock_db])
         mock_process_inbound.side_effect = Exception("Processing error")
 
         processor = MessageProcessor()
 
-        with pytest.raises(Exception) as exc_info:
-            await processor._process_pending_messages()
+        # Does NOT raise — the error is contained to this DB.
+        await processor._process_pending_messages()
 
-        assert "Processing error" in str(exc_info.value)
         mock_db.rollback.assert_called_once()
         mock_db.close.assert_called_once()
+
+    @patch("backend.websocket.message_processor.resolve_engine")
+    @patch("backend.websocket.message_processor.sessionmaker")
+    @patch("backend.websocket.message_processor.config")
+    @patch("backend.websocket.message_processor.server_queue_manager")
+    @patch("backend.websocket.message_processor.process_outbound_messages")
+    @patch("backend.websocket.message_processor.process_pending_messages")
+    @patch("backend.websocket.message_processor.get_db")
+    @pytest.mark.asyncio
+    async def test_fans_out_over_bootstrap_plus_each_tenant(
+        self,
+        mock_get_db,
+        mock_process_inbound,
+        mock_process_outbound,
+        mock_queue_manager,
+        mock_config,
+        mock_sessionmaker,
+        mock_resolve_engine,
+    ):
+        """Phase 13.1 #2: with MT enabled and provisioned tenants, the processors
+        run once per DB — bootstrap + each tenant — each on its own session."""
+        from backend.websocket.message_processor import MessageProcessor
+
+        mock_config.is_multitenancy_enabled.return_value = True
+        bootstrap_db = MagicMock(name="bootstrap")
+        mock_get_db.return_value = iter([bootstrap_db])
+        mock_queue_manager.retry_unacknowledged_messages.return_value = 0
+
+        # Two provisioned tenants, each yielding a distinct session.
+        tenant_a, tenant_b = MagicMock(name="tenantA"), MagicMock(name="tenantB")
+        mock_resolve_engine.side_effect = [
+            MagicMock(name="engA"),
+            MagicMock(name="engB"),
+        ]
+        mock_sessionmaker.side_effect = [
+            MagicMock(return_value=tenant_a),
+            MagicMock(return_value=tenant_b),
+        ]
+
+        processor = MessageProcessor()
+        with patch.object(
+            processor, "_provisioned_tenant_ids", return_value=["t-a", "t-b"]
+        ):
+            await processor._process_pending_messages()
+
+        # Processed bootstrap + both tenant DBs (3 sessions), each committed/closed.
+        processed = {c.args[0] for c in mock_process_inbound.call_args_list}
+        assert processed == {bootstrap_db, tenant_a, tenant_b}
+        for db in (bootstrap_db, tenant_a, tenant_b):
+            db.commit.assert_called_once()
+            db.close.assert_called_once()
 
 
 class TestGlobalInstance:

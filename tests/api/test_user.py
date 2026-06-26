@@ -5,7 +5,6 @@ Tests all user CRUD operations and authentication-required endpoints.
 
 from unittest.mock import patch
 
-import pytest
 from argon2 import PasswordHasher
 
 argon2_hasher = PasswordHasher()

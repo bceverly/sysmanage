@@ -5,10 +5,9 @@ Tests update result handling functionality for SysManage server.
 
 import json
 from datetime import datetime, timezone
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 import pytest
-from sqlalchemy import and_, text, update
 
 from backend.api.update_handlers import handle_update_apply_result, update_results_cache
 
@@ -36,6 +35,10 @@ class MockDB:
         mock_query.order_by.return_value = mock_query
         mock_query.first.return_value = None
         mock_query.delete.return_value = 1
+        # Phase 6 N+1 sweep replaced per-package ``.first()`` lookups
+        # with a single bulk ``.all()`` query — return an empty list so
+        # the outer ``for log in ... .all():`` loop is a no-op.
+        mock_query.all.return_value = []
         # Don't add query to executed_statements - only track execute() calls
         return mock_query
 
@@ -494,7 +497,7 @@ class TestHandleUpdateApplyResult:
         assert mock_db.rolled_back is True
 
         # Should log the error
-        mock_logger.error.assert_called()
+        mock_logger.exception.assert_called()
 
     @pytest.mark.asyncio
     @patch("backend.api.update_handlers.logger")
@@ -632,7 +635,6 @@ class TestUpdateHandlersLogging:
     def test_logging_fallback_on_permission_error(self, mock_makedirs, mock_open):
         """Test logging falls back to console when file logging fails."""
         # Force module reload to trigger the logging initialization with mocked open
-        import importlib
         import sys
 
         # Remove module to force re-import and re-initialization
@@ -651,7 +653,6 @@ class TestUpdateHandlersLogging:
     def test_logging_fallback_on_os_error(self, mock_makedirs, mock_open):
         """Test logging falls back to console when file logging fails with OSError."""
         # Force module reload to trigger the logging initialization with mocked open
-        import importlib
         import sys
 
         # Remove module to force re-import and re-initialization

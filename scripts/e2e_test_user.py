@@ -8,6 +8,8 @@ Usage:
     python scripts/e2e_test_user.py delete
 """
 
+import os
+import re
 import sys
 import uuid
 from datetime import datetime, timezone
@@ -16,6 +18,11 @@ from argon2 import PasswordHasher
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+# Run as ``python scripts/e2e_test_user.py`` puts ``scripts/`` on sys.path[0],
+# not the repo root — add the repo root so the server's ``backend`` package
+# (used for canonical DB-URL resolution in get_database_url) is importable.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # Test user credentials - must match auth.setup.ts defaults
 TEST_USER_EMAIL = "e2e-test@sysmanage.org"
 TEST_USER_PASSWORD = "E2ETestPassword123!"
@@ -23,7 +30,28 @@ TEST_USER_ID = "e2e-test-user-id-00000000"  # Fixed ID for easy cleanup
 
 
 def get_database_url():
-    """Get database URL from config file."""
+    """Resolve the database URL the same way the running server does.
+
+    Prefer the app's canonical resolver (``backend.persistence.db``): it loads
+    the config through the server's loader, which overlays the DB password from
+    OpenBAO when secrets have been moved out of YAML (the config-classification
+    direction).  Reading the raw YAML directly (the fallback below) misses that
+    overlay and yields an empty password — which is why this script previously
+    failed with ``fe_sendauth: no password supplied`` even though the server
+    connects fine.
+    """
+    try:
+        from backend.persistence.db import get_database_url as _app_db_url
+
+        url = _app_db_url()
+        if url:
+            # Mirror the app's masking-free log, but don't print the URL (it
+            # carries the password).  The fallback below prints host/db only.
+            print("Using server-resolved database URL")
+            return url
+    except Exception as exc:  # noqa: BLE001 - fall back to the YAML reader below
+        print(f"Note: could not use the server DB resolver ({exc}); reading YAML.")
+
     import yaml
 
     config_paths = ["/etc/sysmanage.yaml", "sysmanage-dev.yaml"]
@@ -88,7 +116,9 @@ def create_test_user():
 
         if existing:
             user_id = existing[0]
-            print(f"Test user {TEST_USER_EMAIL} already exists, ensuring roles are assigned...")
+            print(
+                f"Test user {TEST_USER_EMAIL} already exists, ensuring roles are assigned..."
+            )
             # Ensure all security roles are assigned
             assign_all_security_roles(session, user_id)
             return True
@@ -130,7 +160,9 @@ def create_test_user():
         )
         session.commit()
         print(f"Created test user: {TEST_USER_EMAIL}")
-        print("Password: (see TEST_USER_PASSWORD constant)")  # nosec  # don't log actual password
+        print(
+            "Password: (see TEST_USER_PASSWORD constant)"
+        )  # nosec  # don't log actual password
 
         # Assign all security roles to the test user
         assign_all_security_roles(session, user_id)
@@ -149,7 +181,7 @@ def assign_all_security_roles(session, user_id):
     """Assign all security roles to the test user for full permissions."""
     try:
         # Get all security role IDs
-        result = session.execute(text('SELECT id, name FROM security_roles'))
+        result = session.execute(text("SELECT id, name FROM security_roles"))
         roles = result.fetchall()
 
         if not roles:
@@ -161,7 +193,7 @@ def assign_all_security_roles(session, user_id):
             # Check if user already has this role
             existing = session.execute(
                 text(
-                    'SELECT id FROM user_security_roles WHERE user_id = :user_id AND role_id = :role_id'
+                    "SELECT id FROM user_security_roles WHERE user_id = :user_id AND role_id = :role_id"
                 ),
                 {"user_id": user_id, "role_id": role_id},
             ).fetchone()
@@ -182,7 +214,9 @@ def assign_all_security_roles(session, user_id):
                 roles_assigned += 1
 
         session.commit()
-        print(f"Assigned {roles_assigned} security roles to test user (total roles: {len(roles)})")
+        print(
+            f"Assigned {roles_assigned} security roles to test user (total roles: {len(roles)})"
+        )
 
     except Exception as e:
         session.rollback()
@@ -197,16 +231,31 @@ def _delete_user_by_id(session, user_id, email):
         "user_data_grid_column_preference",
     ]
 
+    # Allowlist of acceptable identifier characters for table names.
+    # We validate every entry from ``related_tables`` against this
+    # regex before interpolating into the DELETE statement so even a
+    # future code change that adds an attacker-influenced table name
+    # cannot inject SQL.  Belt-and-suspenders on top of the
+    # hardcoded-list constraint above.
+    _TABLE_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
     for table in related_tables:
+        if not _TABLE_IDENT_RE.match(table):
+            # Should never happen given the hardcoded list, but
+            # defensive — keeps the validation visible to semgrep.
+            continue
         try:
             # Use a savepoint (context manager) so that a failure here
             # does not abort the outer transaction. PostgreSQL aborts
             # the whole transaction on error unless you use savepoints.
-            # Table names are from hardcoded list above, not user input
-            # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+            # Table names validated by ``_TABLE_IDENT_RE`` above;
+            # user_id is a bound parameter.  nosemgrep placed inline
+            # on the flagged line so Semgrep Pro's line-precision
+            # matcher picks it up.
             with session.begin_nested():
                 session.execute(
-                    text(f'DELETE FROM "{table}" WHERE user_id = :user_id'),  # nosec B608
+                    text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                        f'DELETE FROM "{table}" WHERE user_id = :user_id'
+                    ),  # nosec B608
                     {"user_id": user_id},
                 )
         except Exception:

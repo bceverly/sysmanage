@@ -72,7 +72,7 @@ async def handle_hostname_changed(  # NOSONAR
         )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             _("Error handling hostname changed message: %s"), str(e), exc_info=True
         )
         db.rollback()

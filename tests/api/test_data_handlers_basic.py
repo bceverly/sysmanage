@@ -4,7 +4,7 @@ Tests basic operations with correct function signatures and behavior.
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timezone
 
 from backend.api.handlers import (

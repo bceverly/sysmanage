@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Package Updates Page
@@ -7,15 +8,17 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Updates Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/updates');
+    await ensureAuthenticated(page, '/updates');
   });
 
   test('should display updates page', async ({ page }) => {
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     await expect(page).toHaveURL(/\/updates/);
 
     // Should have the updates content area
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -24,16 +27,13 @@ test.describe('Updates Page', () => {
 
   test('should display updates summary cards', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // The Updates page shows summary cards with counts
     // Look for the stats cards showing Total Updates, Security Updates, Packages, etc.
@@ -41,7 +41,7 @@ test.describe('Updates Page', () => {
     const securityUpdatesText = page.getByText(/security updates/i);
     const packagesText = page.getByText(/packages|available|pending/i).first();
 
-    const hasTotalUpdates = await totalUpdatesText.isVisible({ timeout: 5000 }).catch(() => false);
+    const hasTotalUpdates = await totalUpdatesText.isVisible({ timeout: 10000 }).catch(() => false);
     const hasSecurityUpdates = await securityUpdatesText.isVisible().catch(() => false);
     const hasPackagesText = await packagesText.isVisible().catch(() => false);
 
@@ -55,7 +55,7 @@ test.describe('Updates Page', () => {
 
   test('should display update columns or fields', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -74,7 +74,7 @@ test.describe('Updates Page', () => {
 
   test('should have search or filter functionality', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout with large update lists, continue anyway
     }
@@ -94,16 +94,13 @@ test.describe('Updates Page', () => {
 
   test('should display update data or empty state', async ({ page }) => {
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
 
-    // If redirected to login, auth isn't working - skip gracefully
-    if (page.url().includes('/login')) {
-      test.skip();
-      return;
-    }
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Either we have update rows or an empty state message
     const updateRows = page.locator('.MuiDataGrid-row, .updates__item, tbody tr');
@@ -127,8 +124,7 @@ test.describe('Updates Page', () => {
 
 test.describe('Updates Selection and Actions', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/updates');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    await ensureAuthenticated(page, '/updates');
   });
 
   test('should have selection checkboxes if updates exist', async ({ page }) => {
@@ -155,7 +151,7 @@ test.describe('Updates Selection and Actions', () => {
 test.describe('Updates Host Filtering', () => {
   test('should have host filter or selector', async ({ page }) => {
     await page.goto('/updates');
-    try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
     // Look for host selector dropdown or filter
     const hostSelector = page.locator('select[name*="host"], [class*="host-select"], [class*="host-filter"]');

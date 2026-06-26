@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# $FreeBSD$
+#
+# PROVIDE: sysmanage
+# REQUIRE: NETWORKING SERVERS DAEMON postgresql
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# sysmanage_enable (bool):     Set to NO by default.
+#               Set it to YES to enable sysmanage.
+# sysmanage_user (str):        Set to "sysmanage" by default.
+# sysmanage_config (str):      Set to "%%PREFIX%%/etc/sysmanage.yaml" by default.
+
+. /etc/rc.subr
+
+name=sysmanage
+rcvar=sysmanage_enable
+
+load_rc_config $name
+
+: ${sysmanage_enable:="NO"}
+: ${sysmanage_user:="sysmanage"}
+: ${sysmanage_config:="%%PREFIX%%/etc/sysmanage.yaml"}
+
+pidfile="/var/run/${name}.pid"
+command="/usr/sbin/daemon"
+command_args="-c -p ${pidfile} -u ${sysmanage_user} \
+    %%PYTHON_CMD%% -m uvicorn backend.main:app \
+    --host 0.0.0.0 --port 8080 \
+    --app-dir %%PREFIX%%/libexec/sysmanage"
+
+run_rc_command "$1"

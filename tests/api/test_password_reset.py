@@ -41,7 +41,9 @@ class TestForgotPassword:
         mock_create_token.return_value = "test-token-123"
         mock_send_email.return_value = True
 
-        response = client.post("/forgot-password", json={"email": "test@example.com"})
+        response = client.post(
+            "/api/forgot-password", json={"email": "test@example.com"}
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -62,7 +64,7 @@ class TestForgotPassword:
     ):
         """Test forgot password for non-existent user - should still return success for security."""
         response = client.post(
-            "/forgot-password", json={"email": "nonexistent@example.com"}
+            "/api/forgot-password", json={"email": "nonexistent@example.com"}
         )
 
         assert response.status_code == 200
@@ -93,7 +95,9 @@ class TestForgotPassword:
         mock_create_token.return_value = "test-token-123"
         mock_send_email.return_value = False
 
-        response = client.post("/forgot-password", json={"email": "test@example.com"})
+        response = client.post(
+            "/api/forgot-password", json={"email": "test@example.com"}
+        )
 
         # Should still return success for security (don't reveal email delivery status)
         assert response.status_code == 200
@@ -102,7 +106,7 @@ class TestForgotPassword:
 
     def test_forgot_password_invalid_email(self, client):
         """Test forgot password with invalid email format."""
-        response = client.post("/forgot-password", json={"email": "invalid-email"})
+        response = client.post("/api/forgot-password", json={"email": "invalid-email"})
 
         assert response.status_code == 422  # Validation error
 
@@ -133,7 +137,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "newpassword123",
@@ -157,7 +161,7 @@ class TestResetPassword:
     def test_reset_password_invalid_token(self, client):
         """Test password reset with invalid token."""
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "invalid-token",
                 "password": "newpassword123",
@@ -192,7 +196,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "expired-token-123",
                 "password": "newpassword123",
@@ -227,7 +231,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "used-token-123",
                 "password": "newpassword123",
@@ -261,7 +265,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "newpassword123",
@@ -295,7 +299,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "short",
@@ -322,7 +326,7 @@ class TestResetPassword:
 
         # Try to reset password using the orphaned token
         response = client.post(
-            "/reset-password",
+            "/api/reset-password",
             json={
                 "token": reset_token.token,
                 "password": "newpassword123",
@@ -359,7 +363,7 @@ class TestValidateResetToken:
         session.add(reset_token)
         session.commit()
 
-        response = client.get("/validate-reset-token/valid-token-123")
+        response = client.get("/api/validate-reset-token/valid-token-123")
 
         assert response.status_code == 200
         data = response.json()
@@ -368,7 +372,7 @@ class TestValidateResetToken:
 
     def test_validate_reset_token_invalid(self, client):
         """Test validating an invalid token."""
-        response = client.get("/validate-reset-token/invalid-token")
+        response = client.get("/api/validate-reset-token/invalid-token")
 
         assert response.status_code == 400
         data = response.json()
@@ -395,7 +399,7 @@ class TestValidateResetToken:
         session.add(reset_token)
         session.commit()
 
-        response = client.get("/validate-reset-token/expired-token-123")
+        response = client.get("/api/validate-reset-token/expired-token-123")
 
         assert response.status_code == 400
         data = response.json()

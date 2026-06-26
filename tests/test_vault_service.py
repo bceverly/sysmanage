@@ -18,7 +18,9 @@ class TestVaultErrorException:
         with pytest.raises(VaultError) as exc_info:
             raise VaultError("Test error message")
 
-        assert str(exc_info.value) == "Test error message"
+        assert (
+            str(exc_info.value) == "Test error message"
+        )  # lgtm[py/unreachable-statement]
 
     def test_vault_error_is_exception(self):
         """Test VaultError inherits from Exception."""

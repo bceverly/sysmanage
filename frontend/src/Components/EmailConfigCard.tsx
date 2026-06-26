@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -16,15 +17,16 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { 
-  Email as EmailIcon, 
-  CheckCircle as CheckCircleIcon, 
+import {
+  Email as EmailIcon,
+  CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
 import { emailService, EmailConfig } from '../Services/emailService';
 
 const EmailConfigCard: React.FC = () => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<EmailConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,28 +37,28 @@ const EmailConfigCard: React.FC = () => {
   const [testLoading, setTestLoading] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
-  // Load email configuration
-  const loadConfig = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const emailConfig = await emailService.getConfig();
-      setConfig(emailConfig);
-    } catch (err) {
-      console.error('Failed to load email configuration:', err);
-      setError('Failed to load email configuration');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load email configuration on mount.  Defining loadConfig inside the
+  // effect keeps `t` as the only dependency without requiring useCallback.
   useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const emailConfig = await emailService.getConfig();
+        setConfig(emailConfig);
+      } catch (err) {
+        console.error('Failed to load email configuration:', err);
+        setError(t('emailConfig.loadFailed', 'Failed to load email configuration'));
+      } finally {
+        setLoading(false);
+      }
+    };
     loadConfig();
-  }, []);
+  }, [t]);
 
   const handleTestEmail = async () => {
     if (!testEmail.trim()) {
-      setTestResult({ success: false, message: 'Please enter an email address' });
+      setTestResult({ success: false, message: t('emailConfig.enterEmail', 'Please enter an email address') });
       return;
     }
 
@@ -76,7 +78,7 @@ const EmailConfigCard: React.FC = () => {
       console.error('Failed to send test email:', err);
       setTestResult({
         success: false,
-        message: 'Failed to send test email. Please check your configuration.'
+        message: t('emailConfig.sendFailed', 'Failed to send test email. Please check your configuration.')
       });
     } finally {
       setTestLoading(false);
@@ -104,17 +106,17 @@ const EmailConfigCard: React.FC = () => {
   };
 
   const getStatusText = () => {
-    if (!config) return 'Unknown';
-    
+    if (!config) return t('emailConfig.status.unknown', 'Unknown');
+
     if (!config.enabled) {
-      return 'Disabled';
+      return t('emailConfig.status.disabled', 'Disabled');
     }
-    
+
     if (!config.configured) {
-      return 'Not Configured';
+      return t('emailConfig.status.notConfigured', 'Not Configured');
     }
-    
-    return 'Configured';
+
+    return t('emailConfig.status.configured', 'Configured');
   };
 
   const getStatusColor = (): 'default' | 'success' | 'warning' | 'error' => {
@@ -131,8 +133,8 @@ const EmailConfigCard: React.FC = () => {
       <Card>
         <CardHeader
           avatar={<EmailIcon />}
-          title="Email Configuration"
-          subheader="SMTP settings for notifications and password reset"
+          title={t('emailConfig.title', 'Email Configuration')}
+          subheader={t('emailConfig.subheader', 'SMTP settings for notifications and password reset')}
         />
         <CardContent>
           <Box display="flex" justifyContent="center" p={2}>
@@ -148,8 +150,8 @@ const EmailConfigCard: React.FC = () => {
       <Card>
         <CardHeader
           avatar={<EmailIcon />}
-          title="Email Configuration"
-          subheader="SMTP settings for notifications and password reset"
+          title={t('emailConfig.title', 'Email Configuration')}
+          subheader={t('emailConfig.subheader', 'SMTP settings for notifications and password reset')}
         />
         <CardContent>
           <Alert severity="error">{error}</Alert>
@@ -163,8 +165,8 @@ const EmailConfigCard: React.FC = () => {
       <Card>
         <CardHeader
           avatar={<EmailIcon />}
-          title="Email Configuration"
-          subheader="SMTP settings for notifications and password reset"
+          title={t('emailConfig.title', 'Email Configuration')}
+          subheader={t('emailConfig.subheader', 'SMTP settings for notifications and password reset')}
           action={
             <Box display="flex" alignItems="center" gap={1}>
               {getStatusIcon()}
@@ -181,7 +183,7 @@ const EmailConfigCard: React.FC = () => {
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  SMTP Server
+                  {t('emailConfig.smtpServer', 'SMTP Server')}
                 </Typography>
                 <Typography variant="body1">
                   {config.smtp_host}:{config.smtp_port}
@@ -190,7 +192,7 @@ const EmailConfigCard: React.FC = () => {
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  From Address
+                  {t('emailConfig.fromAddress', 'From Address')}
                 </Typography>
                 <Typography variant="body1">
                   {config.from_name} &lt;{config.from_address}&gt;
@@ -199,20 +201,23 @@ const EmailConfigCard: React.FC = () => {
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Subject Prefix
+                  {t('emailConfig.subjectPrefix', 'Subject Prefix')}
                 </Typography>
                 <Typography variant="body1">
-                  {config.subject_prefix || 'None'}
+                  {config.subject_prefix || t('common.none', 'None')}
                 </Typography>
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Status
+                  {t('emailConfig.statusLabel', 'Status')}
                 </Typography>
                 <Typography variant="body1">
-                  {config.enabled ? 'Enabled' : 'Disabled'}
-                  {config.enabled && !config.configured && ' (Not Configured)'}
+                  {config.enabled
+                    ? t('emailConfig.status.enabled', 'Enabled')
+                    : t('emailConfig.status.disabled', 'Disabled')}
+                  {config.enabled && !config.configured &&
+                    ' ' + t('emailConfig.statusSuffix.notConfigured', '(Not Configured)')}
                 </Typography>
               </Grid>
 
@@ -224,11 +229,11 @@ const EmailConfigCard: React.FC = () => {
                     disabled={!config.enabled || !config.configured}
                     startIcon={<EmailIcon />}
                   >
-                    Test Configuration
+                    {t('emailConfig.testConfiguration', 'Test Configuration')}
                   </Button>
                   {(!config.enabled || !config.configured) && (
                     <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
-                      Configure email settings in sysmanage.yaml to enable testing
+                      {t('emailConfig.configureHint', 'Configure email settings in sysmanage.yaml to enable testing')}
                     </Typography>
                   )}
                 </Box>
@@ -240,22 +245,22 @@ const EmailConfigCard: React.FC = () => {
 
       {/* Test Email Dialog */}
       <Dialog open={testDialogOpen} onClose={handleCloseTestDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Test Email Configuration</DialogTitle>
+        <DialogTitle>{t('emailConfig.testDialogTitle', 'Test Email Configuration')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 2 }}>
-            Send a test email to verify your SMTP configuration is working correctly.
+            {t('emailConfig.testDialogBody', 'Send a test email to verify your SMTP configuration is working correctly.')}
           </Typography>
-          
+
           <TextField
             autoFocus
             margin="dense"
-            label="Email Address"
+            label={t('emailConfig.emailAddressLabel', 'Email Address')}
             type="email"
             fullWidth
             variant="outlined"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
-            placeholder="Enter email address to send test message"
+            placeholder={t('emailConfig.emailAddressPlaceholder', 'Enter email address to send test message')}
             disabled={testLoading}
           />
           
@@ -270,7 +275,7 @@ const EmailConfigCard: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseTestDialog} disabled={testLoading}>
-            Cancel
+            {t('common.cancel', 'Cancel')}
           </Button>
           <Button
             onClick={handleTestEmail}
@@ -278,7 +283,9 @@ const EmailConfigCard: React.FC = () => {
             disabled={testLoading || !testEmail.trim()}
             startIcon={testLoading ? <CircularProgress size={16} /> : <EmailIcon />}
           >
-            {testLoading ? 'Sending...' : 'Send Test Email'}
+            {testLoading
+              ? t('emailConfig.sending', 'Sending...')
+              : t('emailConfig.sendTest', 'Send Test Email')}
           </Button>
         </DialogActions>
       </Dialog>

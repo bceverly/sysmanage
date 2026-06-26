@@ -4,8 +4,7 @@ Tests heartbeat monitoring service for tracking host status.
 """
 
 import asyncio
-from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -13,7 +12,7 @@ import pytest
 class TestCheckHostHeartbeats:
     """Tests for check_host_heartbeats function."""
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_heartbeats_no_stale_hosts(self, mock_timeout, mock_get_db):
@@ -32,7 +31,7 @@ class TestCheckHostHeartbeats:
         mock_db.commit.assert_not_called()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_heartbeats_with_stale_hosts(self, mock_timeout, mock_get_db):
@@ -67,7 +66,7 @@ class TestCheckHostHeartbeats:
         mock_db.commit.assert_called_once()
         mock_db.close.assert_called_once()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @pytest.mark.asyncio
     async def test_check_heartbeats_db_connection_error(self, mock_get_db):
         """Test handles database connection error gracefully."""
@@ -78,7 +77,7 @@ class TestCheckHostHeartbeats:
         # Should not raise
         await check_host_heartbeats()
 
-    @patch("backend.monitoring.heartbeat_monitor.get_db")
+    @patch("backend.persistence.db.get_db")
     @patch("backend.monitoring.heartbeat_monitor.get_heartbeat_timeout_minutes")
     @pytest.mark.asyncio
     async def test_check_heartbeats_query_error(self, mock_timeout, mock_get_db):

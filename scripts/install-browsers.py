@@ -59,7 +59,7 @@ def detect_system_browser():
                 browser_path = result.stdout.decode().strip()
                 print(f"[OK] Found system browser: {browser_path}")
                 return True
-        except:
+        except Exception:  # noqa: BLE001
             continue
 
     print("[ERROR] No suitable browser found")

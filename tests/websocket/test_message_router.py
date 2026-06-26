@@ -3,7 +3,7 @@ Comprehensive unit tests for WebSocket message routing.
 Tests message routing to appropriate handlers based on message type.
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -272,7 +272,7 @@ class TestRouteInboundMessage:
             )
 
             assert result is True
-            mock_handler.assert_called_once_with(mock_connection, message_data)
+            mock_handler.assert_called_once_with(mock_db, mock_connection, message_data)
 
     @pytest.mark.asyncio
     async def test_route_command_acknowledgment(self, mock_db, mock_connection):

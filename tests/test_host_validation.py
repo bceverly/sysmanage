@@ -3,7 +3,7 @@ Tests for backend/utils/host_validation.py module.
 Tests host validation utilities for SysManage server.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

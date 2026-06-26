@@ -2,8 +2,8 @@
 This module contains the API implementation for OpenBAO (Vault) management in the system.
 """
 
-import json
 import logging
+import contextlib
 import os
 import platform
 import subprocess  # nosec B404  # required for OpenBAO process management
@@ -13,7 +13,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.error_constants import (
     error_openbao_not_running,
-    OPENBAO_DEFAULT_URL,
     OPENBAO_GENERIC_ERROR_KEY,
     OPENBAO_NOT_RUNNING_KEY,
     SCHTASKS_PATH,
@@ -93,10 +92,8 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
 
     if not process_running:
         # Process not found, clean up stale PID file
-        try:
+        with contextlib.suppress(OSError):
             os.remove(pid_file)
-        except OSError:
-            pass
         return {
             "running": False,
             "status": "stopped",
@@ -122,10 +119,27 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
             env["BAO_ADDR"] = server_url
             env["BAO_TOKEN"] = vault_config.get("token", "")
 
-            # bao_cmd is validated by find_bao_binary, status is a safe fixed argument
-            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            # bao_cmd comes from find_bao_binary() which resolves an
+            # absolute path validated against an allowlist of system
+            # locations + the OPENBAO_BIN env var.  OPENBAO_BIN is
+            # operator-controlled (set in sysmanage.yaml or root-owned
+            # /etc/environment) — NOT request/user-controlled.  The
+            # subprocess argv is a fixed list of literal strings + the
+            # validated binary path; no user input reaches argv.
+            #
+            # Semgrep anchors ``dangerous-subprocess-use-tainted-env-args``
+            # on the FIRST POSITIONAL ARGUMENT line (the ``[`` opener
+            # below), NOT on the ``subprocess.run(`` call line.  Its
+            # nosemgrep matcher honours comments on the SAME line OR
+            # the line IMMEDIATELY before the anchor — so the
+            # suppression has to live on the ``subprocess.run(`` line
+            # right above the ``[``.  Earlier placements on the
+            # comment block two lines up were silently ignored.
             result = subprocess.run(  # nosec B603
-                [bao_cmd, "status"],
+                [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                    bao_cmd,
+                    "status",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -402,7 +416,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
             "status": get_openbao_status(),
         }
     except Exception:  # NOSONAR
-        logger.error("Exception occurred while starting OpenBAO", exc_info=True)
+        logger.exception("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
             "message": _(
@@ -518,7 +532,9 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
             "status": get_openbao_status(),
         }
     except Exception as e:
-        logger.error("Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True)
+        logger.exception(
+            "Exception occurred while stopping OpenBAO:\n%s", e, exc_info=True
+        )
         return {
             "success": False,
             "message": _(
@@ -564,10 +580,17 @@ def seal_openbao() -> Dict[str, Any]:
         env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
-        # bao_cmd is validated by find_bao_binary, operator seal is a safe fixed argument
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # bao_cmd is the operator-controlled OpenBAO binary path
+        # validated by find_bao_binary (see openbao.py:128 comment).
+        # No user input reaches argv.  See openbao.py:128 for why
+        # the nosemgrep marker has to live on the ``subprocess.run(``
+        # line — the rule anchors on the argv list opener below.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "seal"],
+            [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                bao_cmd,
+                "operator",
+                "seal",
+            ],
             capture_output=True,
             text=True,
             timeout=10,
@@ -662,11 +685,19 @@ def unseal_openbao() -> Dict[str, Any]:
         env["BAO_ADDR"] = vault_config.get("url", "OPENBAO_DEFAULT_URL")
         env["BAO_TOKEN"] = vault_config.get("token", "")
 
-        # In dev mode, try to use the dev token to unseal
-        # This works because dev mode typically uses a fixed unseal key
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # In dev mode, try to use the dev token to unseal.  bao_cmd
+        # is the operator-validated OpenBAO binary (see openbao.py:128
+        # comment); BAO_ADDR is operator-supplied via sysmanage.yaml.
+        # Neither is request/user-controlled.  See openbao.py:128 for
+        # why nosemgrep lives on the ``subprocess.run(`` line.
         result = subprocess.run(  # nosec B603
-            [bao_cmd, "operator", "unseal", "-address", env["BAO_ADDR"]],
+            [  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                bao_cmd,
+                "operator",
+                "unseal",
+                "-address",
+                env["BAO_ADDR"],
+            ],
             capture_output=True,
             text=True,
             timeout=10,

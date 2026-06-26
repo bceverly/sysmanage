@@ -4,11 +4,11 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 
 from .models import UpdatesReport
 
@@ -22,7 +22,7 @@ async def report_updates(
 ):
     """Receive and store update information from agents."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Verify host exists
             host = session.query(models.Host).filter(models.Host.id == host_id).first()

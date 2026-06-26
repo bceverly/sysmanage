@@ -8,11 +8,21 @@ authenticated and unauthenticated endpoints.
 from fastapi import FastAPI
 
 from backend.api import (
+    access_groups,
     agent,
+    airgap_bundles,
+    airgap_collection_schedule,
+    airgap_collector_runs,
+    airgap_devices,
+    airgap_keys,
+    airgap_repository_buckets,
+    airgap_repository_list,
     antivirus_defaults,
     antivirus_status,
     audit_log,
     auth,
+    auth_mfa,
+    broadcast,
     certificates,
     child_host,
     commercial_antivirus_status,
@@ -20,8 +30,11 @@ from backend.api import (
     cve_refresh_settings,
     default_repositories,
     diagnostics,
+    dynamic_secrets,
     email,
     enabled_package_managers,
+    external_idp,
+    federation_identity,
     firewall_roles,
     firewall_status,
     fleet,
@@ -32,25 +45,33 @@ from backend.api import (
     host_hostname,
     openbao,
     opentelemetry,
+    package_compliance,
     packages,
     password_reset,
     plugin_bundle,
     profile,
     queue,
     reboot_orchestration,
+    report_branding,
+    report_templates,
     reports,
+    repository_mirroring,
     scripts,
     secrets,
     security,
     security_roles,
+    server_info,
+    server_settings,
     tag,
     telemetry,
     third_party_repos,
     ubuntu_pro_settings,
     updates,
+    upgrade_profiles,
     user,
     user_preferences,
 )
+from backend.config import config as config_module
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.routes")
@@ -63,209 +84,315 @@ def register_routes(app: FastAPI):
     Args:
         app: The FastAPI application instance
     """
-    logger.info("=== REGISTERING ROUTES ===")
+    logger.debug("=== REGISTERING ROUTES ===")
 
     # Unauthenticated routes (no /api prefix)
-    logger.info("Registering unauthenticated routes:")
+    logger.debug("Registering unauthenticated routes:")
 
-    logger.info("Adding auth router (no prefix)")
-    app.include_router(auth.router)  # /login, /refresh
-    logger.info("Auth router added")
+    logger.debug("Adding auth router with /api prefix")
+    app.include_router(
+        auth.router, prefix="/api"
+    )  # /api/login, /api/refresh, /api/logout
+    logger.debug("Auth router added")
 
-    logger.info("Adding agent public router (no prefix)")
-    app.include_router(agent.public_router)  # /agent/auth (no auth required)
-    logger.info("Agent public router added")
+    logger.debug(
+        "Adding MFA router (no prefix — endpoints carry their own /api/auth prefix)"
+    )
+    app.include_router(auth_mfa.router)  # /api/auth/mfa/* + /api/settings/mfa
+    logger.debug("MFA router added")
 
-    logger.info("Adding agent authenticated router with /api prefix")
+    # Phase 11 server-info — public, unauthenticated.  Lets the frontend
+    # render the role chip + monitoring identify the box without login.
+    app.include_router(server_info.router)
+    logger.debug("Server-info router added")
+
+    # Phase 13.1.H — server-scoped configuration settings (Settings →
+    # Configuration UI).  Endpoints carry their own /api/settings prefix.
+    app.include_router(server_settings.router)
+    logger.debug("Server-settings router added")
+
+    # Phase 11 B2 — air-gap collection schedules.  Routes are
+    # license-gated (collector engine) at the handler level, so it's
+    # safe to mount on every server (the gate returns 402 on standard
+    # / repository roles).
+    app.include_router(airgap_collection_schedule.router)
+    logger.debug("Air-gap collection schedule router added")
+
+    # Phase 11 — one-shot collector runs (ad-hoc UI-triggered).  Same
+    # license-gate-at-handler pattern as the schedules router; safe to
+    # mount unconditionally because the handler returns 402 on non-
+    # collector deployments.
+    app.include_router(airgap_collector_runs.router)
+    # Token-authed streaming ISO download lives on a separate router
+    # (no blanket Authorization-header dependency) so the browser can
+    # download multi-GB bundles natively via a short-lived URL token.
+    app.include_router(airgap_collector_runs.download_router)
+    logger.debug("Air-gap collector runs router added")
+
+    # Phase 11 B5 — host-scoped compliance bucket endpoint that feeds
+    # the AirgapComplianceBucketsCard frontend component.
+    app.include_router(airgap_repository_buckets.router)
+    logger.debug("Air-gap repository buckets router added")
+
+    # Phase 11 B6 — list-all-repos + freshness endpoints feeding the
+    # AirgapRepositories dashboard and RepositoryFreshnessCard.
+    app.include_router(airgap_repository_list.router)
+    logger.debug("Air-gap repository list router added")
+
+    # Collector public-key display + repository trusted-key import,
+    # wired into Settings → Server Role.
+    app.include_router(airgap_keys.router)
+    logger.debug("Air-gap keys router added")
+
+    # Federation identity public-key display + trusted-peer import,
+    # wired into the federation card on Settings → Server Role.
+    app.include_router(federation_identity.router)
+    # Unauthenticated public-cert endpoint (a peer fetches it to pin our cert).
+    app.include_router(federation_identity.public_router)
+    logger.debug("Federation identity router added")
+
+    # Block-device enumeration + device-based ISO import (repository).
+    app.include_router(airgap_devices.router)
+    logger.debug("Air-gap devices router added")
+
+    logger.debug(
+        "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"
+    )
+    app.include_router(repository_mirroring.router)
+    logger.debug("Repository mirroring router added")
+
+    logger.debug(
+        "Adding external IdP router (no prefix — endpoints carry their own /api prefix)"
+    )
+    app.include_router(external_idp.router)
+    logger.debug("External IdP router added")
+
+    logger.debug("Adding agent public router with /api prefix")
+    app.include_router(
+        agent.public_router, prefix="/api"
+    )  # /api/agent/auth (no auth required)
+    logger.debug("Agent public router added")
+
+    logger.debug("Adding agent authenticated router with /api prefix")
     app.include_router(
         agent.router, prefix="/api"
     )  # /api/agent/connect, /api/agent/installation-complete
-    logger.info("Agent authenticated router added")
+    logger.debug("Agent authenticated router added")
 
-    logger.info("Adding host public router (no prefix)")
-    app.include_router(host.public_router)  # /host/register (no auth)
-    logger.info("Host public router added")
-
-    logger.info("Adding certificates public router (no prefix)")
+    logger.debug("Adding host public router with /api prefix")
     app.include_router(
-        certificates.public_router
-    )  # /certificates/server-fingerprint, /certificates/ca-certificate (no auth)
-    logger.info("Certificates public router added")
+        host.public_router, prefix="/api"
+    )  # /api/host/register (no auth)
+    logger.debug("Host public router added")
 
-    logger.info("Adding password reset router (no prefix)")
+    logger.debug("Adding certificates public router with /api prefix")
     app.include_router(
-        password_reset.router
-    )  # /forgot-password, /reset-password, /validate-reset-token (no auth)
-    logger.info("Password reset router added")
+        certificates.public_router, prefix="/api"
+    )  # /api/certificates/server-fingerprint, /api/certificates/ca-certificate (no auth)
+    logger.debug("Certificates public router added")
+
+    logger.debug("Adding password reset router with /api prefix")
+    app.include_router(
+        password_reset.router, prefix="/api"
+    )  # /api/forgot-password, /api/reset-password, /api/validate-reset-token (no auth)
+    logger.debug("Password reset router added")
 
     # Secure routes (with /api prefix and JWT authentication required)
-    logger.info("Registering authenticated routes with /api prefix:")
+    logger.debug("Registering authenticated routes with /api prefix:")
 
-    logger.info("Adding user router with /api prefix")
+    logger.debug("Adding user router with /api prefix")
     app.include_router(user.router, prefix="/api", tags=["users"])
-    logger.info("User router added")
+    logger.debug("User router added")
 
-    logger.info("Adding fleet router with /api prefix")
+    logger.debug("Adding fleet router with /api prefix")
     app.include_router(fleet.router, prefix="/api", tags=["fleet"])
-    logger.info("Fleet router added")
+    logger.debug("Fleet router added")
 
-    logger.info("Adding config management router with /api prefix")
+    logger.debug("Adding config management router with /api prefix")
     app.include_router(config_management.router, prefix="/api", tags=["config"])
-    logger.info("Config management router added")
+    logger.debug("Config management router added")
 
-    logger.info("Adding diagnostics router with /api prefix")
+    logger.debug("Adding diagnostics router with /api prefix")
     app.include_router(diagnostics.router, prefix="/api", tags=["diagnostics"])
-    logger.info("Diagnostics router added")
+    logger.debug("Diagnostics router added")
 
-    logger.info("Adding email router with /api prefix")
+    logger.debug("Adding email router with /api prefix")
     app.include_router(email.router, prefix="/api", tags=["email"])
-    logger.info("Email router added")
+    logger.debug("Email router added")
 
-    logger.info("Adding profile router with /api prefix")
+    logger.debug("Adding profile router with /api prefix")
     app.include_router(profile.router, prefix="/api", tags=["profile"])
-    logger.info("Profile router added")
+    logger.debug("Profile router added")
 
-    logger.info("Adding user preferences router with /api/user-preferences prefix")
+    logger.debug("Adding user preferences router with /api/user-preferences prefix")
     app.include_router(
         user_preferences.router,
         prefix="/api/user-preferences",
         tags=["user-preferences"],
     )
-    logger.info("User preferences router added")
+    logger.debug("User preferences router added")
 
-    logger.info("Adding updates router with /api/updates prefix")
+    logger.debug("Adding updates router with /api/updates prefix")
     app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
-    logger.info("Updates router added")
+    logger.debug("Updates router added")
 
-    logger.info("Adding scripts router with /api/scripts prefix")
+    logger.debug("Adding scripts router with /api/scripts prefix")
     app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
-    logger.info("Scripts router added")
+    logger.debug("Scripts router added")
 
-    logger.info("Adding reports router")
+    logger.debug("Adding reports router")
     app.include_router(reports.router, tags=["reports"])
-    logger.info("Reports router added")
+    logger.debug("Reports router added")
 
-    logger.info("Adding tag router with /api prefix")
+    logger.debug("Adding access-groups + registration-keys routers (Phase 8.1)")
+    app.include_router(access_groups.groups_router)
+    app.include_router(access_groups.keys_router)
+
+    logger.debug("Adding airgap-bundles router with /api prefix")
+    app.include_router(airgap_bundles.router, prefix="/api", tags=["airgap-bundles"])
+    # Token-authed streaming bundle download (no blanket JWTBearer) so the
+    # browser can stream multi-GB ISOs without buffering them in a Blob.
+    app.include_router(
+        airgap_bundles.download_router, prefix="/api", tags=["airgap-bundles"]
+    )
+
+    logger.debug("Adding upgrade-profiles router (Phase 8.2)")
+    app.include_router(upgrade_profiles.router)
+
+    logger.debug("Adding package-compliance router (Phase 8.3)")
+    app.include_router(package_compliance.router)
+
+    logger.debug("Adding broadcast router (Phase 8.5)")
+    app.include_router(broadcast.router)
+
+    logger.debug(
+        "Adding report-branding + report-templates + dynamic-secrets routers (Phase 8.7)"
+    )
+    app.include_router(report_branding.router)
+    app.include_router(report_templates.router)
+    app.include_router(dynamic_secrets.router)
+
+    logger.debug("Adding tag router with /api prefix")
     app.include_router(tag.router, prefix="/api", tags=["tags"])
-    logger.info("Tag router added")
+    logger.debug("Tag router added")
 
-    logger.info("Adding queue router with /api/queue prefix")
+    logger.debug("Adding queue router with /api/queue prefix")
     app.include_router(queue.router, prefix="/api/queue", tags=["queue"])
-    logger.info("Queue router added")
+    logger.debug("Queue router added")
 
-    logger.info("Adding Ubuntu Pro settings router with /api/ubuntu-pro prefix")
+    logger.debug("Adding Ubuntu Pro settings router with /api/ubuntu-pro prefix")
     app.include_router(
         ubuntu_pro_settings.router, prefix="/api/ubuntu-pro", tags=["ubuntu-pro"]
     )
-    logger.info("Ubuntu Pro settings router added")
+    logger.debug("Ubuntu Pro settings router added")
 
-    logger.info("Adding antivirus defaults router with /api/antivirus-defaults prefix")
+    logger.debug("Adding antivirus defaults router with /api/antivirus-defaults prefix")
     app.include_router(
         antivirus_defaults.router, prefix="/api/antivirus-defaults", tags=["antivirus"]
     )
-    logger.info("Antivirus defaults router added")
+    logger.debug("Antivirus defaults router added")
 
-    logger.info("Adding antivirus status router with /api prefix")
+    logger.debug("Adding antivirus status router with /api prefix")
     app.include_router(antivirus_status.router, prefix="/api", tags=["antivirus"])
-    logger.info("Antivirus status router added")
+    logger.debug("Antivirus status router added")
 
-    logger.info("Adding commercial antivirus status router with /api prefix")
+    logger.debug("Adding commercial antivirus status router with /api prefix")
     app.include_router(
         commercial_antivirus_status.router, prefix="/api", tags=["commercial-antivirus"]
     )
-    logger.info("Commercial antivirus status router added")
+    logger.debug("Commercial antivirus status router added")
 
-    logger.info("Adding firewall status router with /api prefix")
+    logger.debug("Adding firewall status router with /api prefix")
     app.include_router(firewall_status.router, prefix="/api", tags=["firewall"])
-    logger.info("Firewall status router added")
+    logger.debug("Firewall status router added")
 
-    logger.info("Adding certificates auth router with /api prefix")
+    logger.debug("Adding certificates auth router with /api prefix")
     app.include_router(
         certificates.auth_router, prefix="/api", tags=["certificates"]
     )  # /api/certificates/client/* (with auth)
-    logger.info("Certificates auth router added")
+    logger.debug("Certificates auth router added")
 
-    logger.info("Adding host auth router with /api prefix")
+    logger.debug("Adding host auth router with /api prefix")
     app.include_router(
         host.auth_router, prefix="/api", tags=["hosts"]
     )  # /api/host/* (with auth)
-    logger.info("Host auth router added")
+    logger.debug("Host auth router added")
 
-    logger.info("Adding host hostname router with /api prefix")
+    logger.debug("Adding host hostname router with /api prefix")
     app.include_router(
         host_hostname.router, prefix="/api", tags=["hosts"]
     )  # /api/host/{host_id}/change-hostname (with auth)
-    logger.info("Host hostname router added")
+    logger.debug("Host hostname router added")
 
-    logger.info("Adding security router with /api prefix")
+    logger.debug("Adding security router with /api prefix")
     app.include_router(
         security.router, prefix="/api", tags=["security"]
     )  # /api/security/* (with auth)
-    logger.info("Security router added")
+    logger.debug("Security router added")
 
-    logger.info("Adding password reset admin router with /api prefix")
+    logger.debug("Adding password reset admin router with /api prefix")
     app.include_router(
         password_reset.admin_router, prefix="/api", tags=["password_reset"]
     )  # /api/admin/reset-user-password (with auth)
-    logger.info("Password reset admin router added")
+    logger.debug("Password reset admin router added")
 
-    logger.info("Adding packages router with /api/packages prefix")
+    logger.debug("Adding packages router with /api/packages prefix")
     app.include_router(
         packages.router, prefix="/api/packages", tags=["packages"]
     )  # /api/packages/* (with auth)
-    logger.info("Packages router added")
+    logger.debug("Packages router added")
 
-    logger.info("Adding OpenBAO router with /api prefix")
+    logger.debug("Adding OpenBAO router with /api prefix")
     app.include_router(
         openbao.router, prefix="/api", tags=["openbao"]
     )  # /api/openbao/* (with auth)
-    logger.info("OpenBAO router added")
+    logger.debug("OpenBAO router added")
 
-    logger.info("Adding secrets router with /api prefix")
+    logger.debug("Adding secrets router with /api prefix")
     app.include_router(
         secrets.router, prefix="/api", tags=["secrets"]
     )  # /api/secrets/* (with auth)
-    logger.info("Secrets router added")
+    logger.debug("Secrets router added")
 
-    logger.info("Adding Grafana integration router with /api prefix")
+    logger.debug("Adding Grafana integration router with /api prefix")
     app.include_router(
         grafana_integration.router, prefix="/api/grafana", tags=["grafana"]
     )  # /api/grafana/* (with auth)
-    logger.info("Grafana integration router added")
+    logger.debug("Grafana integration router added")
 
-    logger.info("Adding Graylog integration router with /api prefix")
+    logger.debug("Adding Graylog integration router with /api prefix")
     app.include_router(
         graylog_integration.router, prefix="/api/graylog", tags=["graylog"]
     )  # /api/graylog/* (with auth)
-    logger.info("Graylog integration router added")
+    logger.debug("Graylog integration router added")
 
-    logger.info("Adding Telemetry router with /api prefix")
+    logger.debug("Adding Telemetry router with /api prefix")
     app.include_router(
         telemetry.router, prefix="/api/telemetry", tags=["telemetry"]
     )  # /api/telemetry/* (with auth)
-    logger.info("Telemetry router added")
+    logger.debug("Telemetry router added")
 
-    logger.info("Adding OpenTelemetry router with /api prefix")
+    logger.debug("Adding OpenTelemetry router with /api prefix")
     app.include_router(
         opentelemetry.router, prefix="/api/opentelemetry", tags=["opentelemetry"]
     )  # /api/opentelemetry/* (with auth)
-    logger.info("OpenTelemetry router added")
+    logger.debug("OpenTelemetry router added")
 
-    logger.info("Adding Security Roles router")
+    logger.debug("Adding Security Roles router")
     app.include_router(security_roles.router)  # /api/security-roles/* (with auth)
-    logger.info("Security Roles router added")
+    logger.debug("Security Roles router added")
 
-    logger.info("Adding Third-Party Repositories router with /api prefix")
+    logger.debug("Adding Third-Party Repositories router with /api prefix")
     app.include_router(
         third_party_repos.router, prefix="/api", tags=["third-party-repos"]
     )  # /api/hosts/{host_id}/third-party-repos/* (with auth)
-    logger.info("Third-Party Repositories router added")
+    logger.debug("Third-Party Repositories router added")
 
-    logger.info("Adding Audit Log router")
+    logger.debug("Adding Audit Log router")
     app.include_router(audit_log.router)  # /api/audit-log/* (with auth)
-    logger.info("Audit Log router added")
+    logger.debug("Audit Log router added")
 
-    logger.info(
+    logger.debug(
         "Adding Default Repositories router with /api/default-repositories prefix"
     )
     app.include_router(
@@ -273,9 +400,9 @@ def register_routes(app: FastAPI):
         prefix="/api/default-repositories",
         tags=["default-repositories"],
     )  # /api/default-repositories/* (with auth)
-    logger.info("Default Repositories router added")
+    logger.debug("Default Repositories router added")
 
-    logger.info(
+    logger.debug(
         "Adding Enabled Package Managers router with /api/enabled-package-managers prefix"
     )
     app.include_router(
@@ -283,71 +410,79 @@ def register_routes(app: FastAPI):
         prefix="/api/enabled-package-managers",
         tags=["enabled-package-managers"],
     )  # /api/enabled-package-managers/* (with auth)
-    logger.info("Enabled Package Managers router added")
+    logger.debug("Enabled Package Managers router added")
 
-    logger.info("Adding Firewall Roles router with /api/firewall-roles prefix")
+    logger.debug("Adding Firewall Roles router with /api/firewall-roles prefix")
     app.include_router(
         firewall_roles.router,
         prefix="/api/firewall-roles",
         tags=["firewall-roles"],
     )  # /api/firewall-roles/* (with auth)
-    logger.info("Firewall Roles router added")
+    logger.debug("Firewall Roles router added")
 
-    logger.info("Adding Child Host router with /api prefix")
+    logger.debug("Adding Child Host router with /api prefix")
     app.include_router(
         child_host.router,
         prefix="/api",
         tags=["child-hosts"],
     )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
-    logger.info("Child Host router added")
+    logger.debug("Child Host router added")
 
-    logger.info("Adding Reboot Orchestration router with /api prefix")
+    logger.debug("Adding Reboot Orchestration router with /api prefix")
     app.include_router(
         reboot_orchestration.router,
         prefix="/api",
         tags=["reboot-orchestration"],
     )  # /api/host/{host_id}/reboot/* (with auth)
-    logger.info("Reboot Orchestration router added")
+    logger.debug("Reboot Orchestration router added")
 
-    logger.info("Adding License Management router with /api prefix")
+    logger.debug("Adding License Management router with /api prefix")
     app.include_router(
         license_management.router,
         prefix="/api",
         tags=["license-management", "pro-plus"],
     )  # /api/license/* (with auth, Pro+)
-    logger.info("License Management router added")
+    logger.debug("License Management router added")
 
     # Note: Pro+ module routes are mounted in lifecycle.py after modules are loaded
     # This ensures the compiled Cython modules are available before route mounting
-    logger.info("Pro+ module routes will be mounted after modules load in lifespan")
+    logger.debug("Pro+ module routes will be mounted after modules load in lifespan")
 
-    logger.info("Adding Plugin Bundle router with /api prefix")
+    logger.debug("Adding Plugin Bundle router with /api prefix")
     app.include_router(
         plugin_bundle.router,
         prefix="/api",
         tags=["plugins"],
     )  # /api/plugins/* (with auth)
-    logger.info("Plugin Bundle router added")
+    logger.debug("Plugin Bundle router added")
 
-    logger.info("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
+    logger.debug("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
     app.include_router(
         cve_refresh_settings.router,
         prefix="/api/cve-refresh",
         tags=["cve-refresh", "pro-plus"],
     )  # /api/cve-refresh/* (with auth)
-    logger.info("CVE Refresh Settings router added")
+    logger.debug("CVE Refresh Settings router added")
 
-    logger.info("=== ALL ROUTES REGISTERED ===")
+    # NOTE: the multi-tenancy control-plane router is NOT mounted here.  It is
+    # mounted at startup by ``mount_multitenancy_routes`` in
+    # ``backend/api/proplus_routes.py`` (Pro+ relocation, Phase 2) — after the
+    # licensed ``multitenancy_engine`` has loaded and been bridged into the seam,
+    # so the engine's router (when present) serves the control plane, with the
+    # built-in OSS router as the fallback.  Mounting here (import time) would be
+    # too early to ever pick up the engine.
+
+    logger.debug("=== ALL ROUTES REGISTERED ===")
 
     # Log all registered routes for debugging
-    logger.info("=== ROUTE SUMMARY ===")
+    logger.debug("=== ROUTE SUMMARY ===")
     route_count = 0
     for route in app.routes:
         if hasattr(route, "path") and hasattr(route, "methods"):
-            logger.info("Route: %s %s", list(route.methods), route.path)
+            logger.debug("Route: %s %s", list(route.methods), route.path)
             route_count += 1
         elif hasattr(route, "path"):
-            logger.info("Route: %s", route.path)
+            logger.debug("Route: %s", route.path)
             route_count += 1
     logger.info("Total routes registered: %d", route_count)
 
@@ -359,7 +494,7 @@ def register_app_routes(app: FastAPI):
     Args:
         app: The FastAPI application instance
     """
-    logger.info("=== REGISTERING APPLICATION ROUTES ===")
+    logger.debug("=== REGISTERING APPLICATION ROUTES ===")
 
     @app.get("/")
     async def root():
@@ -370,7 +505,7 @@ def register_app_routes(app: FastAPI):
         logger.debug("Root endpoint called")
         return {"message": "Hello World"}
 
-    logger.info("Root route (/) registered")
+    logger.debug("Root route (/) registered")
 
     @app.get("/api/health")
     @app.head("/api/health")
@@ -381,5 +516,5 @@ def register_app_routes(app: FastAPI):
         logger.debug("Health check endpoint called")
         return {"status": "healthy"}
 
-    logger.info("Health check routes (/api/health) registered")
-    logger.info("=== APPLICATION ROUTES REGISTRATION COMPLETE ===")
+    logger.debug("Health check routes (/api/health) registered")
+    logger.debug("=== APPLICATION ROUTES REGISTRATION COMPLETE ===")

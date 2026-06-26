@@ -14,7 +14,7 @@ This module tests:
 import json
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy import (
@@ -23,21 +23,16 @@ from sqlalchemy import (
     String,
     Boolean,
     DateTime,
-    Integer,
     Text,
-    ForeignKey,
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_models import (
     ChildHostResponse,
     CreateChildHostRequest,
     CreateWslChildHostRequest,
     DistributionResponse,
-    DistributionDetailResponse,
-    CreateDistributionRequest,
-    UpdateDistributionRequest,
     VirtualizationSupportResponse,
     ConfigureKvmNetworkingRequest,
 )
@@ -142,7 +137,7 @@ class TestUser(TestBase):
     _role_cache = None
 
     def load_role_cache(self, session):
-        from backend.security.roles import load_user_roles
+        pass
 
         self._role_cache = MagicMock()
         self._role_cache.has_role.return_value = True
@@ -160,12 +155,21 @@ class TestUser(TestBase):
 
 @pytest.fixture
 def test_engine():
-    """Create an in-memory SQLite database for testing."""
+    """Create an in-memory SQLite database for testing.
+
+    Uses ``yield`` + ``engine.dispose()`` so each test cleanly closes its
+    connection pool. Without dispose, the underlying sqlite3.Connection
+    objects leak and surface as ResourceWarnings in unrelated tests when
+    the garbage collector eventually sweeps them.
+    """
     engine = create_engine(
         "sqlite:///:memory:", connect_args={"check_same_thread": False}
     )
     TestBase.metadata.create_all(bind=engine)
-    return engine
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 
 
 @pytest.fixture

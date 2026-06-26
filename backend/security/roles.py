@@ -6,7 +6,7 @@ and utilities for checking user permissions.
 """
 
 from enum import Enum
-from typing import List, Optional, Set
+from typing import List, Set
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -34,6 +34,7 @@ class SecurityRoles(str, Enum):
     # - Host Power Operations (alphabetical)
     REBOOT_HOST = "Reboot Host"
     SHUTDOWN_HOST = "Shutdown Host"
+    UPDATE_AGENT = "Update Agent"
     # - Host Service Operations (alphabetical)
     RESTART_HOST_SERVICE = "Restart Host Service"
     START_HOST_SERVICE = "Start Host Service"
@@ -58,6 +59,7 @@ class SecurityRoles(str, Enum):
     ADD_PACKAGE = "Add Package"
     APPLY_HOST_OS_UPGRADE = "Apply Host OS Upgrade"
     APPLY_SOFTWARE_UPDATE = "Apply Software Update"
+    REMOVE_PACKAGE = "Remove Package"
     # - Third-Party Repository Operations (alphabetical)
     ADD_THIRD_PARTY_REPOSITORY = "Add Third-Party Repository"
     DELETE_THIRD_PARTY_REPOSITORY = "Delete Third-Party Repository"
@@ -118,6 +120,9 @@ class SecurityRoles(str, Enum):
     ADD_USER = "Add User"
     DELETE_USER = "Delete User"
     EDIT_USER = "Edit User"
+    # - Multi-Tenancy (Phase 13.1): provision / delete tenants from the
+    #   control plane.  Seeded + backfilled to admins by migration o12mgttenant.
+    MANAGE_TENANTS = "Manage Tenants"
     # - User Security Operations (alphabetical)
     LOCK_USER = "Lock User"
     RESET_USER_PASSWORD = (

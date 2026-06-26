@@ -4,9 +4,20 @@ Processes queued messages from agents asynchronously.
 """
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 
+from sqlalchemy.orm import sessionmaker
+
+from backend.config import config
 from backend.i18n import _
 from backend.persistence.db import get_db
+from backend.persistence.models import RegistryTenantPlacement
+from backend.persistence.partitions import (
+    PARTITION_REGISTRY,
+    PARTITION_TENANT,
+    partition_session,
+    resolve_engine,
+)
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.inbound_processor import process_pending_messages
 from backend.websocket.outbound_processor import process_outbound_messages
@@ -24,10 +35,16 @@ class MessageProcessor:
     agent data updates without blocking WebSocket connections.
     """
 
+    # How often to purge old completed/expired queue rows (they're otherwise
+    # never deleted, so message_queue grows unbounded — observed 21 GB on an
+    # agent).  Cheap delete-by-index; once a day is plenty.
+    _CLEANUP_INTERVAL = timedelta(hours=24)
+
     def __init__(self):
         """Initialize the message processor."""
         self.running = False
         self.process_interval = 1.0  # Process messages every second
+        self._last_cleanup = None  # last time old messages were purged
 
     async def start(self):
         """Start the background message processing loop."""
@@ -63,7 +80,7 @@ class MessageProcessor:
                     )
                     logger.info("Processing cycle #%s completed", cycle_count)
                 except Exception as e:
-                    logger.error(
+                    logger.exception(
                         _("Error in message processing loop: %s"), str(e), exc_info=True
                     )
                     print(
@@ -94,37 +111,116 @@ class MessageProcessor:
         self.running = False
 
     async def _process_pending_messages(self):
-        """Process all pending messages in the queue."""
-        db = next(get_db())
+        """Drain the message queue in the bootstrap DB and every provisioned
+        tenant DB (Phase 13.1 #2 — per-tenant queues).
 
-        try:
-            # Process inbound messages (from agents to server)
-            await process_pending_messages(db)
+        Each database is drained INDEPENDENTLY: a failure on one is logged and
+        isolated (rolled back) so it cannot stall the other tenants or the next
+        cycle.  In collapsed/single-tenant mode this is exactly one pass over the
+        bootstrap DB, identical to the prior behaviour.
+        """
+        now = datetime.now(timezone.utc)
+        do_cleanup = (
+            self._last_cleanup is None
+            or (now - self._last_cleanup) >= self._CLEANUP_INTERVAL
+        )
 
-            # Process outbound messages (from server to agents)
-            await process_outbound_messages(db)
+        for label, db in self._queue_sessions():
+            try:
+                # Inbound (agents→server), then outbound (server→agents).
+                await process_pending_messages(db)
+                await process_outbound_messages(db)
 
-            # Retry any messages that were sent but not acknowledged within timeout
-            # This handles cases where the websocket send succeeded but the agent
-            # disconnected before processing the message
-            retry_count = server_queue_manager.retry_unacknowledged_messages(
-                timeout_seconds=60, db=db
-            )
-            if retry_count > 0:
-                logger.info(
-                    "Scheduled %d unacknowledged messages for retry", retry_count
+                # Retry messages that were sent but not acknowledged within the
+                # timeout (websocket send succeeded but the agent disconnected
+                # before processing).
+                retry_count = server_queue_manager.retry_unacknowledged_messages(
+                    timeout_seconds=60, db=db
                 )
+                if retry_count > 0:
+                    logger.info(
+                        "Scheduled %d unacknowledged messages for retry (%s)",
+                        retry_count,
+                        label,
+                    )
 
-            # Commit all changes made during this processing cycle
-            db.commit()
-            logger.debug("Committed all message processing changes to database")
+                # Once a day, purge old completed rows so the queue doesn't grow
+                # unbounded (cleanup_old_messages keeps failed rows for debugging).
+                if do_cleanup:
+                    purged = server_queue_manager.cleanup_old_messages(db=db)
+                    if purged:
+                        logger.info(
+                            "Purged %d old completed messages (%s)", purged, label
+                        )
 
-        except Exception as e:
-            logger.error("Error during message processing, rolling back: %s", str(e))
-            db.rollback()
-            raise
-        finally:
-            db.close()
+                db.commit()
+                logger.debug("Committed message processing changes (%s)", label)
+            except (
+                Exception
+            ) as e:  # noqa: BLE001 — isolate per-DB; never stall the rest
+                logger.exception(
+                    "Error draining the %s message queue, rolling back: %s",
+                    label,
+                    str(e),
+                )
+                db.rollback()
+            finally:
+                db.close()
+
+        if do_cleanup:
+            self._last_cleanup = now
+
+    @staticmethod
+    def _bootstrap_session():
+        """A session on the bootstrap / main application DB.
+
+        In its own (non-generator) method so ``next(get_db())`` can't leak a
+        ``StopIteration`` into the ``_queue_sessions`` generator (PEP 479)."""
+        return next(get_db())
+
+    def _queue_sessions(self):
+        """Yield ``(label, session)`` for the bootstrap DB and each provisioned
+        tenant DB.  The bootstrap DB is ALWAYS drained (single-tenant mode +
+        unbound hosts whose messages live there); tenant DBs are drained only
+        when multi-tenancy is enabled."""
+        # Bootstrap / main application DB — always.
+        yield ("bootstrap", self._bootstrap_session())
+
+        if not config.is_multitenancy_enabled():
+            return
+
+        # Per-tenant queues.  Bounded by the number of provisioned tenants; a
+        # tenant whose engine can't be resolved this cycle is logged and skipped
+        # (never silently dropped — its queue just waits for the next cycle).
+        for tenant_id in self._provisioned_tenant_ids():
+            try:
+                engine = resolve_engine(partition=PARTITION_TENANT, tenant_id=tenant_id)
+            except Exception:  # noqa: BLE001
+                logger.error(
+                    "queue fan-out: could not resolve the database engine for "
+                    "tenant %s; skipping its queue this cycle (is the licensed "
+                    "engine loaded / the tenant provisioned?)",
+                    tenant_id,
+                    exc_info=True,
+                )
+                continue
+            yield (f"tenant {tenant_id}", sessionmaker(bind=engine)())
+
+    def _provisioned_tenant_ids(self):
+        """Tenant IDs that have a provisioned database (a placement in the
+        registry).  Returns ``[]`` (bootstrap-only this cycle) if the registry
+        can't be read — logged, not silently swallowed."""
+        try:
+            with partition_session(partition=PARTITION_REGISTRY) as session:
+                rows = session.query(RegistryTenantPlacement.tenant_id).distinct().all()
+            return [str(tenant_id) for (tenant_id,) in rows]
+        except Exception:  # noqa: BLE001
+            logger.error(
+                "queue fan-out: could not list provisioned tenants from the "
+                "registry; draining the bootstrap DB only this cycle",
+                exc_info=True,
+            )
+            return []
 
 
 # Global message processor instance

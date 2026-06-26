@@ -1,0 +1,159 @@
+name: SonarCloud
+
+# Runs the SonarCloud analysis on every push to ``main`` (and on demand).
+#
+# WHY a dedicated workflow instead of the tag-triggered ci.yml:
+# A tag checkout is detached-HEAD with GITHUB_REF=refs/tags/vX.Y.Z, so the
+# scanner auto-detected the *tag* as the branch name and filed each analysis
+# under a throwaway ``refs/tags/vX.Y.Z`` branch — the MAIN branch never got
+# re-analyzed (it sat stale from 2026-05-12 onward, with ~30 junk tag
+# branches piling up in SonarCloud).  Scanning on push to ``main`` (a
+# long-lived branch, GITHUB_REF=refs/heads/main) is what actually keeps the
+# main-branch dashboard + README badges current.  ``sonar.branch.name=main``
+# is also forced below so there is zero ambiguity.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Code Analysis
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: sysmanage
+          POSTGRES_DB: sysmanage
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      with:
+        fetch-depth: 0  # full history for accurate SCM blame / new-code detection
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      with:
+        python-version: '3.12'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      with:
+        node-version: '20'
+        registry-url: 'https://registry.npmjs.org/'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache pip packages
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-3.12-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-3.12-
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio
+
+    - name: Install frontend dependencies
+      working-directory: frontend
+      run: |
+        npm cache clean --force || true
+        npm install --legacy-peer-deps || npm ci --legacy-peer-deps
+
+    - name: Create test config
+      run: |
+        sudo mkdir -p /etc
+        sudo tee /etc/sysmanage.yaml > /dev/null <<EOF
+        api:
+          host: "localhost"
+          port: 8000
+          certFile: ""
+          chainFile: ""
+          keyFile: ""
+        database:
+          user: "sysmanage"
+          password: "abc123"
+          host: "localhost"
+          port: 5432
+          name: "sysmanage"
+        security:
+          password_salt: "TEST_fBLqXrh6evnpiDOEA+TtFy1c4ItzVIyyMUsYhCraqLs="
+          admin_userid: "admin@sysmanage.org"
+          admin_password: "TEST_AdminPass123!"
+          jwt_secret: "TEST_SuCHjkous8e0OgHRPxZ1Uayz0NS0b0SGXUXS26MUaZU="
+          jwt_algorithm: "HS256"
+          jwt_auth_timeout: 6000
+          jwt_refresh_timeout: 60000
+        webui:
+          host: "localhost"
+          port: 7443
+        EOF
+
+    - name: Run backend database migrations
+      run: |
+        python -c "from alembic.config import Config; from alembic import command; cfg = Config('alembic.ini'); command.upgrade(cfg, 'head')"
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Run backend tests with coverage
+      run: |
+        find . -name "*.db" -type f -delete 2>/dev/null || true
+        find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
+        find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
+        python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=xml --cov-report=term-missing
+      env:
+        PYTHONPATH: .
+        DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
+
+    - name: Run frontend tests with coverage
+      working-directory: frontend
+      run: |
+        npm run test:coverage
+
+    - name: Cache SonarCloud packages
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: SonarCloud Scan
+      # SHA-pinned to a verified release; semgrep misreads the 40-char SHA as a
+      # SonarQube API key.  Real auth is SONAR_TOKEN from GitHub Secrets.
+      # nosemgrep: generic.secrets.security.detected-sonarqube-docs-api-key.detected-sonarqube-docs-api-key
+      uses: SonarSource/sonarqube-scan-action@dcc5211de53084482f1c6779dda263459f5274f6 # master-2026-02-22
+      with:
+        args: >
+          -Dsonar.branch.name=main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    - name: SonarCloud summary
+      if: success()
+      run: |
+        echo "================================================"
+        echo "SonarCloud analysis complete (branch: main)"
+        echo "https://sonarcloud.io/project/overview?id=bceverly_sysmanage"
+        echo "================================================"

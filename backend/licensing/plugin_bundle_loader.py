@@ -5,6 +5,7 @@ Handles downloading, verification, and caching of Pro+ plugin
 bundles (IIFE JavaScript files served to the frontend).
 """
 
+import asyncio
 import hashlib
 import os
 from datetime import datetime, timezone
@@ -72,7 +73,7 @@ class PluginBundleLoader:
         try:
             Path(modules_path).mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            logger.error("Failed to create modules directory: %s", e)
+            logger.exception("Failed to create modules directory: %s", e)
 
         self._initialized = True
 
@@ -94,7 +95,7 @@ class PluginBundleLoader:
                     return cache_entry.version
                 return None
             except Exception as e:
-                logger.error("Error querying cached plugin version: %s", e)
+                logger.exception("Error querying cached plugin version: %s", e)
                 return None
 
     def _get_cached_plugin_hash(self, module_code: str) -> Optional[str]:
@@ -115,7 +116,7 @@ class PluginBundleLoader:
                     return cache_entry.file_hash
                 return None
             except Exception as e:
-                logger.error("Error querying cached plugin hash: %s", e)
+                logger.exception("Error querying cached plugin hash: %s", e)
                 return None
 
     async def _download_plugin_bundle(
@@ -138,6 +139,7 @@ class PluginBundleLoader:
         url = f"{download_url}/{module_code}/{version_str}"
 
         modules_path = self._get_modules_path()
+        Path(modules_path).mkdir(parents=True, exist_ok=True)
         temp_path = os.path.join(modules_path, f"{module_code}-plugin.tmp")
         final_path = os.path.join(modules_path, f"{module_code}-plugin.iife.js")
 
@@ -198,12 +200,12 @@ class PluginBundleLoader:
             return True
 
         except aiohttp.ClientError as e:
-            logger.error("Plugin download network error: %s", e)
+            logger.exception("Plugin download network error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
         except Exception as e:
-            logger.error("Plugin download error: %s", e)
+            logger.exception("Plugin download error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
@@ -249,7 +251,7 @@ class PluginBundleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to save plugin to cache: %s", e)
+                logger.exception("Failed to save plugin to cache: %s", e)
                 session.rollback()
 
     def _remove_cached_plugin(self, module_code: str) -> None:
@@ -279,7 +281,9 @@ class PluginBundleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to remove cached plugin %s: %s", module_code, e)
+                logger.exception(
+                    "Failed to remove cached plugin %s: %s", module_code, e
+                )
                 session.rollback()
 
     async def ensure_plugin_available(self, module_code: str) -> bool:
@@ -364,10 +368,25 @@ class PluginBundleLoader:
             logger.info("All plugin bundles are up to date")
             return {}
 
-        results = {}
+        # Remove cached plugins (fast, synchronous)
         for module_code in updates_needed:
             self._remove_cached_plugin(module_code)
-            success = await self._download_plugin_bundle(module_code)
+
+        # Download all plugin bundles in parallel
+        async def _download_one(mc: str):
+            return mc, await self._download_plugin_bundle(mc)
+
+        download_results = await asyncio.gather(
+            *[_download_one(mc) for mc in updates_needed],
+            return_exceptions=True,
+        )
+
+        results = {}
+        for item in download_results:
+            if isinstance(item, Exception):
+                logger.error("Plugin download raised exception: %s", item)
+                continue
+            module_code, success = item
             results[module_code] = success
 
             if success:

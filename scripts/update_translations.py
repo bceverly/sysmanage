@@ -3,7 +3,6 @@
 Update translation files with missing keys for Grafana/OpenTelemetry/Prometheus.
 """
 import json
-import os
 from pathlib import Path
 
 LOCALES_DIR = Path("/home/bceverly/dev/sysmanage/frontend/public/locales")

@@ -1,0 +1,167 @@
+digraph DC02_Data_Flow {
+    graph [
+        label = "DC-02: SysManage Data-Flow Diagram\n(Source-to-Destination — Telemetry, Commands, License/Module, Admin UI)\n",
+        labelloc = "t",
+        fontname = "Helvetica-Bold",
+        fontsize = 18,
+        rankdir = "LR",
+        compound = true,
+        nodesep = 0.45,
+        ranksep = 0.85,
+        bgcolor = "white",
+        pad = "0.5"
+    ];
+    node [fontname = "Helvetica", fontsize = 11, shape = "box", style = "filled,rounded", color = "#333333"];
+    edge [fontname = "Helvetica", fontsize = 9, color = "#333333"];
+
+    // ===== SOURCES (left) =====
+    subgraph cluster_sources {
+        label = "Data Sources (Managed Endpoints)";
+        style = "filled,rounded";
+        fillcolor = "#E5F2E8";
+        color = "#214E34";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        s_hw    [label = "Hardware\n(CPU, RAM, Disk,\nNIC, GPU, BIOS)", fillcolor = "#B8DCC2"];
+        s_os    [label = "OS Info\n(version, kernel,\nplatform, uptime)", fillcolor = "#B8DCC2"];
+        s_sw    [label = "Software Inventory\n(packages, versions,\nrepos, updates)", fillcolor = "#B8DCC2"];
+        s_users [label = "User Access\n(local users, groups,\nsudo, SSH keys, logins)", fillcolor = "#B8DCC2"];
+        s_certs [label = "Certificates\n(SSL/TLS, expiry)", fillcolor = "#B8DCC2"];
+        s_sec   [label = "Security Posture\n(AV, firewall,\nSELinux/AppArmor)", fillcolor = "#B8DCC2"];
+        s_logs  [label = "System Health\n(load, I/O, services)", fillcolor = "#B8DCC2"];
+    }
+
+    // ===== AGENT (collector) =====
+    subgraph cluster_agent {
+        label = "Agent (per endpoint)";
+        style = "filled,rounded";
+        fillcolor = "#D4E8DA";
+        color = "#214E34";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        a_collect [label = "Collector Modules\nNormalize → JSON", fillcolor = "#A4D2B0"];
+        a_queue   [label = "Local SQLite\nOutbound Queue\n(persistent, replay)", fillcolor = "#A4D2B0", shape = "cylinder"];
+        a_ws      [label = "WebSocket Client\nasyncio + websockets\nWSS / TLS 1.2+", fillcolor = "#A4D2B0"];
+    }
+
+    // ===== TRANSPORT =====
+    transport [
+        label = "WSS over TCP 6443\nTLS 1.2+ (mTLS)\nJWT host_token in header\nMax frame 512 MB",
+        fillcolor = "#FFE9B0",
+        shape = "note"
+    ];
+
+    // ===== SERVER =====
+    subgraph cluster_server {
+        label = "SysManage Server";
+        style = "filled,rounded";
+        fillcolor = "#FBF3E2";
+        color = "#7F5A0F";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        s_ws     [label = "WS Connection Mgr\n(verify token,\nroute messages)", fillcolor = "#F4D58A"];
+        s_router [label = "Message Router\n(per-message-type\nhandler dispatch)", fillcolor = "#F4D58A"];
+        s_api    [label = "FastAPI REST\n(admin / UI)\nHTTPS 6443", fillcolor = "#F4D58A"];
+
+        s_proc_h [label = "Hardware /\nInventory Processor", fillcolor = "#F9E8C2"];
+        s_proc_u [label = "Update / Patch\nProcessor", fillcolor = "#F9E8C2"];
+        s_proc_s [label = "Security / Cert\nProcessor", fillcolor = "#F9E8C2"];
+
+        // Pro+ analytics modules (compiled)
+        s_pro_h  [label = "Pro+ Health Engine\n(Cython .so)", fillcolor = "#D5BFE9"];
+        s_pro_v  [label = "Pro+ Vuln Engine\n(Cython .so)\nCVE matching", fillcolor = "#D5BFE9"];
+        s_pro_c  [label = "Pro+ Compliance\nEngine (Cython .so)", fillcolor = "#D5BFE9"];
+
+        // Persistence
+        db_pg    [label = "PostgreSQL 14+\nencrypted at rest\n(disk-level)", fillcolor = "#F4C97D", shape = "cylinder"];
+    }
+
+    // ===== DESTINATIONS / SINKS =====
+    subgraph cluster_dest {
+        label = "Destinations / Sinks";
+        style = "filled,rounded";
+        fillcolor = "#F4E5E5";
+        color = "#7A1F1F";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        ui_admin [label = "Admin Browser\nReact SPA\n(HTTPS + Bearer JWT)", fillcolor = "#E8C5C5"];
+        d_email  [label = "SMTP\n(Email Alerts)", fillcolor = "#E8C5C5"];
+        d_syslog [label = "Graylog / Syslog\n(audit + events)", fillcolor = "#E8C5C5"];
+        d_otel   [label = "OTLP / Prometheus\n(metrics, traces)", fillcolor = "#E8C5C5"];
+        d_vault  [label = "OpenBao / Vault\n(secrets)", fillcolor = "#E8C5C5"];
+    }
+
+    // ===== Pro+ License Server =====
+    subgraph cluster_lic {
+        label = "Professional+ License Server";
+        style = "filled,rounded";
+        fillcolor = "#EDE3F4";
+        color = "#5B2A8C";
+        fontname = "Helvetica-Bold";
+        fontsize = 13;
+
+        lic_api   [label = "License API\nHTTPS 8400", fillcolor = "#D5BFE9"];
+        lic_store [label = "Modules + Plugins\n(.so / .iife.js)\nSHA-512 manifest", fillcolor = "#C5A8DE", shape = "folder"];
+        lic_db    [label = "License DB\nECDSA P-521 signed\nAES-256-GCM keys", fillcolor = "#C5A8DE", shape = "cylinder"];
+    }
+
+    // ---------- EDGES: SOURCES → AGENT ----------
+    s_hw    -> a_collect [label = "OS APIs / sysfs"];
+    s_os    -> a_collect;
+    s_sw    -> a_collect [label = "pkg mgr\n(apt/dnf/brew/pkg)"];
+    s_users -> a_collect;
+    s_certs -> a_collect;
+    s_sec   -> a_collect;
+    s_logs  -> a_collect;
+
+    // ---------- AGENT INTERNAL ----------
+    a_collect -> a_queue [label = "enqueue JSON"];
+    a_queue   -> a_ws    [label = "drain on connect"];
+
+    // ---------- AGENT → SERVER ----------
+    a_ws -> transport [label = "outbound\n(agent initiates)", color = "#1F4E79", penwidth = 2];
+    transport -> s_ws [color = "#1F4E79", penwidth = 2];
+
+    // commands return path
+    s_ws -> transport [label = "commands /\nremote ops", color = "#7A1F1F", style = "dashed"];
+    transport -> a_ws [color = "#7A1F1F", style = "dashed"];
+
+    // ---------- SERVER PROCESSING ----------
+    s_ws -> s_router;
+    s_router -> s_proc_h;
+    s_router -> s_proc_u;
+    s_router -> s_proc_s;
+
+    s_proc_h -> db_pg [label = "INSERT / UPDATE"];
+    s_proc_u -> db_pg;
+    s_proc_s -> db_pg;
+
+    // Pro+ analytics read/write
+    db_pg -> s_pro_h [style = "dashed"];
+    db_pg -> s_pro_v [style = "dashed"];
+    db_pg -> s_pro_c [style = "dashed"];
+    s_pro_h -> db_pg [style = "dashed", label = "scores"];
+    s_pro_v -> db_pg [style = "dashed", label = "findings"];
+    s_pro_c -> db_pg [style = "dashed", label = "results"];
+
+    // ---------- ADMIN UI ----------
+    ui_admin -> s_api [label = "REST /\nlogin (JWT)\nHTTPS 6443", dir = "both"];
+    s_api    -> db_pg [label = "queries"];
+
+    // ---------- OUTBOUND TO SINKS ----------
+    s_pro_v -> d_email  [label = "vuln alerts"];
+    s_proc_s -> d_email [label = "cert expiry"];
+    s_router -> d_syslog [label = "audit /\nevents"];
+    s_api    -> d_otel   [label = "metrics", style = "dashed"];
+    s_api    -> d_vault  [label = "secret get/put", style = "dashed"];
+
+    // ---------- LICENSE / MODULE FLOW ----------
+    s_api -> lic_api [label = "phone-home\n(nonce, license key in\nX-License-Key header)\nHTTPS 8400", style = "dashed"];
+    lic_api -> lic_db;
+    lic_api -> lic_store;
+    lic_api -> s_api [label = "signed entitlement\n+ module / plugin\n(SHA-512 verified)", style = "dashed"];
+}

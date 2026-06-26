@@ -11,17 +11,19 @@ from sqlalchemy.sql.functions import count
 
 from backend.i18n import _
 from backend.persistence import db as db_module
-from backend.persistence.models import AvailablePackage
+from backend.persistence.models import AvailablePackage, Host
+from backend.persistence.partitions import get_request_engine
 
 
-def get_packages_summary_sync() -> List[dict]:
+def get_packages_summary_sync(tenant_id=None) -> List[dict]:
     """
     Synchronous helper function to retrieve package summary.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -62,6 +64,9 @@ def get_packages_summary_sync() -> List[dict]:
                 os_summary[os_key]["package_managers"].append(manager_summary)
                 os_summary[os_key]["total_packages"] += result.package_count
 
+            # Include OS versions from active hosts that have no packages yet
+            _add_host_os_versions(session, os_summary)
+
             # Convert to list format
             summary_list = list(os_summary.values())
 
@@ -77,19 +82,77 @@ def get_packages_summary_sync() -> List[dict]:
             ) from e
 
 
+# Known Linux distribution names (multi-word names must come before shorter ones)
+_LINUX_DISTROS = [
+    "CentOS Stream",
+    "openSUSE Leap",
+    "openSUSE Tumbleweed",
+    "Ubuntu",
+    "Fedora",
+    "RHEL",
+    "Rocky",
+    "AlmaLinux",
+    "SLES",
+]
+
+
+def _parse_host_os(platform: str, platform_release: str):
+    """Parse host platform fields into (os_name, os_version) tuple."""
+    if platform == "Linux" and platform_release:
+        for distro in _LINUX_DISTROS:
+            if platform_release.startswith(distro + " "):
+                return distro, platform_release[len(distro) + 1 :]
+        # Unknown distro: use full platform_release as os_name
+        return platform_release, ""
+    if platform and platform_release:
+        return platform, platform_release
+    return None, None
+
+
+def _add_host_os_versions(session, os_summary: dict) -> None:
+    """Add OS versions from active hosts that have no packages yet."""
+    hosts = (
+        session.query(Host.platform, Host.platform_release)
+        .filter(
+            Host.active.is_(True),
+            Host.approval_status == "approved",
+            Host.platform.isnot(None),
+            Host.platform_release.isnot(None),
+        )
+        .distinct()
+        .all()
+    )
+
+    for host in hosts:
+        os_name, os_version = _parse_host_os(host.platform, host.platform_release)
+        if not os_name or not os_version:
+            continue
+
+        os_key = f"{os_name}:{os_version}"
+        if os_key not in os_summary:
+            os_summary[os_key] = {
+                "os_name": os_name,
+                "os_version": os_version,
+                "package_managers": [],
+                "total_packages": 0,
+            }
+
+
 def search_packages_count_sync(
     query: str,
     os_name: Optional[str],
     os_version: Optional[str],
     package_manager: Optional[str],
+    tenant_id=None,
 ) -> dict:
     """
     Synchronous helper function to count packages matching search criteria.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:
@@ -124,14 +187,16 @@ def search_packages_sync(
     package_manager: Optional[str],
     limit: int,
     offset: int,
+    tenant_id=None,
 ) -> List[dict]:
     """
     Synchronous helper function to search for packages.
     This runs in a thread pool to avoid blocking the event loop.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    bind = (
+        db_module.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     )
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         try:

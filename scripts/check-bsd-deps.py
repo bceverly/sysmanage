@@ -53,7 +53,6 @@ def check_c_tracer_available():
 
             # Fallback: try direct import
             try:
-                import coverage.tracer
                 print("[OK] Coverage C tracer is available (verified by import)")
                 return True
             except ImportError:
@@ -67,7 +66,6 @@ def check_c_tracer_available():
         print(f"[WARN]  Error checking C tracer status: {e}")
         # Fallback to import test
         try:
-            import coverage.tracer
             print("[OK] Coverage C tracer available (fallback check)")
             return True
         except ImportError:
@@ -134,6 +132,10 @@ def main():
 
     # BSD-specific package checks (OpenBSD and NetBSD)
     if check_bsd_system():
+        # Default ``required_packages`` so the path below is safe even
+        # when both branches are skipped (e.g. FreeBSD reaches this
+        # block under ``check_bsd_system`` but isn't OpenBSD/NetBSD).
+        required_packages = []
         # Check if development tools are available
         if check_openbsd_system():
             required_packages = [

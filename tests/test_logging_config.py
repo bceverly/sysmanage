@@ -6,8 +6,6 @@ Tests logging configuration functionality.
 import os
 from unittest.mock import patch
 
-import pytest
-
 
 class TestConfigureLogging:
     """Tests for configure_logging function."""

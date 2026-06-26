@@ -1,0 +1,39 @@
+#!/sbin/openrc-run
+# OpenRC service for OpenBAO — SysManage's local secrets broker.
+#
+# Alpine is musl and OpenBAO publishes no .apk, but `bao` is a static Go
+# binary that runs fine on musl, so the SysManage post-install drops it at
+# /usr/local/bin/bao (bundled for air-gap, or downloaded from the official
+# release).  This service runs it against the shared config and, once the
+# listener is up, runs the idempotent init/unseal helper.
+
+name="openbao"
+description="OpenBAO secrets broker (SysManage)"
+
+command="/usr/local/bin/bao"
+command_args="server -config=/etc/openbao/openbao.hcl"
+command_background="yes"
+command_user="openbao:openbao"
+pidfile="/run/${RC_SVCNAME}.pid"
+output_log="/var/log/openbao.log"
+error_log="/var/log/openbao.log"
+
+depend() {
+	need net
+	before sysmanage
+}
+
+start_pre() {
+	checkpath --directory --mode 0750 --owner openbao:openbao /var/lib/openbao
+	checkpath --directory --mode 0750 --owner openbao:openbao /var/lib/openbao/data
+}
+
+start_post() {
+	# The helper waits for the listener, then initializes (once) + unseals.
+	# Runs as root so it can write the root-owned 0600 init material.
+	/usr/bin/python3 /usr/libexec/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 \
+		--keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage || \
+		ewarn "OpenBAO init/unseal did not complete; check /var/log/openbao.log"
+}

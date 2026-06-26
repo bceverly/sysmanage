@@ -1,0 +1,71 @@
+/* Horizontal scrollable nav with prev/next arrows.  Matches MUI's
+ * Tabs variant="scrollable" scrollButtons="auto" behaviour:  arrows
+ * fade in only when content overflows the viewport, list items never
+ * wrap, native scroll bar hidden so the chrome stays clean. */
+
+.scrollnav {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;          /* allow flex child to shrink under overflow */
+  position: relative;
+}
+
+.scrollnav__scroller {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  /* Hide the native scrollbar so the list looks like MUI Tabs. */
+  scrollbar-width: none;            /* Firefox */
+  -ms-overflow-style: none;         /* IE/legacy Edge */
+}
+.scrollnav__scroller::-webkit-scrollbar {
+  display: none;                    /* Chromium / WebKit */
+}
+
+.scrollnav__list {
+  display: flex;
+  flex-direction: row;
+  column-gap: 2.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  white-space: nowrap;              /* never wrap labels */
+  width: max-content;               /* let content drive width */
+}
+
+.scrollnav__list > li,
+.scrollnav__list .nav__item {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.scrollnav__btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  color: inherit;
+  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  flex: 0 0 auto;
+  z-index: 1;
+}
+
+.scrollnav__btn:hover {
+  color: rgb(36 157 239);
+}
+
+/* Hide arrows when scrolling isn't possible in that direction.  We
+ * keep the element in the DOM (visibility/opacity) so layout doesn't
+ * jump — the surrounding scroller widens/narrows smoothly. */
+.scrollnav__btn--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

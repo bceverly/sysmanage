@@ -131,7 +131,12 @@ class TestEmailServiceInitialization:
     """Test cases for EmailService initialization."""
 
     def test_email_service_init(self, mock_email_config, mock_smtp_config):
-        """Test EmailService initialization."""
+        """Test EmailService initialization.
+
+        Phase 13.1: config is resolved lazily at send time (so the active
+        tenant governs), not snapshotted in __init__ — so construction must
+        not read config at all.
+        """
         with patch("backend.services.email_service.config") as mock_config:
             mock_config.get_email_config.return_value = mock_email_config
             mock_config.get_smtp_config.return_value = mock_smtp_config
@@ -140,8 +145,9 @@ class TestEmailServiceInitialization:
 
             service = EmailService()
 
-            assert service.email_config == mock_email_config
-            assert service.smtp_config == mock_smtp_config
+            assert isinstance(service, EmailService)
+            mock_config.get_email_config.assert_not_called()
+            mock_config.get_smtp_config.assert_not_called()
 
     def test_email_service_is_enabled_true(self, mock_email_config, mock_smtp_config):
         """Test is_enabled returns True when email is enabled."""

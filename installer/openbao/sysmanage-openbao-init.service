@@ -1,0 +1,20 @@
+[Unit]
+Description=SysManage OpenBAO initialize + unseal
+# Run after the OpenBAO server is up, and gate the SysManage server on it so
+# the API never starts against a sealed OpenBAO.
+After=openbao.service
+Requires=openbao.service
+Before=sysmanage.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Runs as root: it must read/write the root-owned 0600 init material under
+# /var/lib/openbao.  The script is idempotent — initializes once, then just
+# unseals on subsequent boots.
+ExecStart=/usr/bin/python3 /opt/sysmanage/scripts/openbao_init_unseal.py \
+    --addr http://127.0.0.1:8200 --keyfile /var/lib/openbao/init.json \
+    --app-token-file /etc/sysmanage/openbao-token --app-token-owner sysmanage
+
+[Install]
+WantedBy=multi-user.target

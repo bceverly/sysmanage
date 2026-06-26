@@ -6,8 +6,6 @@ Tests HostCertificate model structure and methods.
 import uuid
 from datetime import datetime, timedelta, timezone
 
-import pytest
-
 
 class TestHostCertificateModel:
     """Tests for HostCertificate model."""

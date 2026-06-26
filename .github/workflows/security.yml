@@ -17,6 +17,29 @@ permissions:
   actions: read
 
 jobs:
+  bandit:
+    name: Bandit (Python SAST)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      with:
+        python-version: '3.12'
+
+    - name: Install Bandit
+      run: pip install bandit
+
+    # Gating bandit (matches the release ci.yml). The codebase tunes findings
+    # with inline ``# nosec`` annotations; a NEW high-severity finding should
+    # fail a PR rather than wait for a release tag. Mirrors local
+    # ``make security-python`` scope (backend/, excluding backend/tests/).
+    - name: Run Bandit
+      run: python -m bandit -r backend/ -f screen -x backend/tests/
+
   semgrep:
     name: Semgrep PRO Security Scan
     runs-on: ubuntu-latest
@@ -102,11 +125,36 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
+
+    - name: Install pip-audit (separate resolver pass)
+      # pip-audit pins tomli>=2.2.1 while semgrep (in requirements.txt) pins
+      # tomli~=2.0.1; installing pip-audit in the same resolver pass makes
+      # the graph unsolvable. Installing it in a separate `pip install`
+      # invocation lets pip resolve it independently — tomli gets bumped
+      # with a non-fatal warning, both tools still work.
+      run: pip install 'pip-audit>=2.10.0'
+
     - name: Run Safety scan (Python)
       run: |
         safety scan --output json --output-file safety-report.json || true
         safety scan --output screen || true
+
+    - name: Run pip-audit (Python — authoritative CVE check against PyPI advisory DB)
+      # Ignored CVEs (review periodically — remove an --ignore-vuln line once a fix exists upstream):
+      #   CVE-2026-3219 — pip itself (concatenated tar/ZIP handled as ZIP).
+      #     Latest pip on PyPI is 26.0.1 (no fix released yet); we are already on
+      #     the latest. Suppressing here keeps the report actionable; pip-audit
+      #     will re-flag it the moment a patched pip ships.
+      run: |
+        pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 --format json --output pip-audit-report.json || true
+        pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 || true
+
+    - name: Upload pip-audit results
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      if: hashFiles('pip-audit-report.json') != ''
+      with:
+        name: pip-audit-report
+        path: pip-audit-report.json
         
     - name: Upload Safety results
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

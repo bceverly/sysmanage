@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        0.9.0
+Version:        3.0.0.10
 Release:        1%{?dist}
 Summary:        Centralized system management server with web-based interface
 
@@ -14,17 +14,49 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 %global __os_install_post /usr/lib/rpm/brp-compress %{nil}
 
 # Disable automatic Python dependency generation
-# We manually specify python3 >= 3.12 in Requires
+# We manually specify python3 version in Requires (3.11 on EL8, 3.12 on EL9, 3.12+ elsewhere)
 %global __requires_exclude ^python\\(abi\\)
-%global __provides_exclude_from ^%{_libdir}/sysmanage/venv/.*$
+# Exclude the bundled venv from BOTH auto Provides and Requires scanning.
+# The vendored wheels (cryptography, Pillow, psycopg2, …) ship private
+# copies of libssl/libcrypto/libjpeg/libtiff/etc. with mangled sonames
+# (e.g. libcrypto-ea28cefb.so.1.1); RPM's auto-dep generator would emit
+# Requires on those phantom sonames that nothing provides, making the RPM
+# uninstallable via dnf.  The prior %{_libdir}/sysmanage/venv pattern never
+# matched — the real install path is /opt/sysmanage/.venv.
+%global __requires_exclude_from ^/opt/sysmanage/.venv/.*$
+%global __provides_exclude_from ^/opt/sysmanage/.venv/.*$
 
-BuildRequires:  python3-devel >= 3.12
-BuildRequires:  python3-pip
-BuildRequires:  python3-setuptools
+# EL8 ships Python 3.6 as default; use the python3.11 AppStream packages instead
+%if 0%{?el8}
+%global python3_bin python3.11
+%global python3_pkg python3.11
+%global python3_devel python3.11-devel
+%global python3_pip python3.11-pip
+%global python3_setuptools python3.11-setuptools
+%else
+# EL9 ships Python 3.9 as default; use the python3.12 AppStream packages instead
+%if 0%{?el9}
+%global python3_bin python3.12
+%global python3_pkg python3.12
+%global python3_devel python3.12-devel
+%global python3_pip python3.12-pip
+%global python3_setuptools python3.12-setuptools
+%else
+%global python3_bin python3
+%global python3_pkg python3 >= 3.12
+%global python3_devel python3-devel >= 3.12
+%global python3_pip python3-pip
+%global python3_setuptools python3-setuptools
+%endif
+%endif
+
+BuildRequires:  %{python3_devel}
+BuildRequires:  %{python3_pip}
+BuildRequires:  %{python3_setuptools}
 BuildRequires:  systemd-rpm-macros
 
-Requires:       python3 >= 3.12
-Requires:       python3-pip
+Requires:       %{python3_pkg}
+Requires:       %{python3_pip}
 Requires:       systemd
 Requires:       nginx
 Requires:       postgresql-server >= 12
@@ -58,7 +90,10 @@ if [ -f %{SOURCE1} ]; then
 fi
 
 %build
-# No build step needed - Python application with pre-built frontend
+# No compile step (Python app w/ pre-built frontend), but stamp the package
+# version into backend/__init__.py so backend.__version__ resolves at runtime
+# (server-info + federation "Reported version" show it instead of "unknown").
+printf '__version__ = "%s"\n' "%{version}" > backend/__init__.py
 
 %install
 # Create directory structure
@@ -76,6 +111,13 @@ install -m 644 requirements-prod.txt %{buildroot}/opt/sysmanage/
 cp -r config %{buildroot}/opt/sysmanage/
 cp -r scripts %{buildroot}/opt/sysmanage/
 
+# Air-gap bundle dispatcher template — buildAirGapBundle.sh (in scripts/)
+# resolves this relative to itself (../installer/airgap-bundle/install.sh),
+# so it must be packaged alongside scripts/ or every bundle build dies at
+# the "dispatcher template not found" preflight.
+install -d %{buildroot}/opt/sysmanage/installer/airgap-bundle
+install -m 0755 installer/airgap-bundle/install.sh %{buildroot}/opt/sysmanage/installer/airgap-bundle/install.sh
+
 # Copy frontend static files
 install -d %{buildroot}/opt/sysmanage/frontend
 cp -r frontend/dist %{buildroot}/opt/sysmanage/frontend/
@@ -89,7 +131,7 @@ fi
 # Create virtualenv and install Python dependencies
 # If vendor directory exists (COPR/OBS builds), use offline installation
 # If not (local Makefile builds), skip pip install here - will happen in %post with network
-python3 -m venv %{buildroot}/opt/sysmanage/.venv
+%{python3_bin} -m venv %{buildroot}/opt/sysmanage/.venv
 if [ -d %{_builddir}/%{name}-%{version}/vendor ]; then
     %{buildroot}/opt/sysmanage/.venv/bin/pip install --upgrade pip --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
     %{buildroot}/opt/sysmanage/.venv/bin/pip install -r requirements-prod.txt --no-index --find-links=%{_builddir}/%{name}-%{version}/vendor
@@ -106,6 +148,12 @@ install -m 644 installer/centos/sysmanage.yaml.example %{buildroot}/etc/sysmanag
 # Install systemd service
 install -d %{buildroot}/usr/lib/systemd/system
 install -m 644 installer/centos/sysmanage.service %{buildroot}/usr/lib/systemd/system/
+
+# Install OpenBAO config + init/unseal one-shot (secrets broker — central to
+# SysManage; see docs/planning/openbao-deployment-and-airgap.md)
+install -d %{buildroot}/etc/openbao
+install -m 640 installer/openbao/openbao.hcl %{buildroot}/etc/openbao/openbao.hcl
+install -m 644 installer/openbao/sysmanage-openbao-init.service %{buildroot}/usr/lib/systemd/system/
 
 # Install nginx configuration
 install -d %{buildroot}/etc/nginx/conf.d
@@ -145,7 +193,7 @@ chmod 750 /etc/sysmanage
 # Recreate the venv using the system's Python to fix all symlinks and paths
 cd /opt/sysmanage
 rm -rf .venv
-python3 -m venv .venv
+%{python3_bin} -m venv .venv
 
 # Check if we have a vendor directory from the RPM (for COPR/OBS builds)
 if [ -d vendor ]; then
@@ -169,6 +217,50 @@ fi
 if command -v nginx >/dev/null 2>&1; then
     # Test nginx configuration
     nginx -t >/dev/null 2>&1 && systemctl reload nginx >/dev/null 2>&1 || echo "[!] nginx configuration may need manual review"
+fi
+
+# ---------------------------------------------------------------
+# OpenBAO (secrets broker) — install + start + initialize/unseal.
+# Native package provides the bao binary, the openbao user, and the
+# stock openbao.service; we drop our config + run an init/unseal one-shot.
+# ---------------------------------------------------------------
+if ! command -v bao >/dev/null 2>&1; then
+    echo "Installing OpenBAO..."
+    BUNDLED_BAO="$(ls /opt/sysmanage/installer/openbao/*.rpm 2>/dev/null | head -n1 || true)"
+    if [ -n "$BUNDLED_BAO" ]; then
+        dnf install -y "$BUNDLED_BAO" >/dev/null 2>&1 || rpm -i "$BUNDLED_BAO" >/dev/null 2>&1 || true
+    elif command -v dnf >/dev/null 2>&1; then
+        cat > /etc/yum.repos.d/openbao.repo <<'EOF'
+[openbao]
+name=OpenBAO
+baseurl=https://pkg.openbao.org/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://pkg.openbao.org/gpg.key
+EOF
+        dnf install -y openbao >/dev/null 2>&1 || true
+    fi
+    if ! command -v bao >/dev/null 2>&1; then
+        echo "[!] OpenBAO ('bao') could not be installed automatically."
+        echo "    Install it manually (https://openbao.org) or set vault.enabled=false."
+    fi
+fi
+
+if command -v bao >/dev/null 2>&1; then
+    if ! getent passwd openbao >/dev/null; then
+        useradd --system --user-group --home-dir /var/lib/openbao --no-create-home \
+            --shell /sbin/nologin --comment "OpenBAO" openbao >/dev/null 2>&1 || true
+    fi
+    mkdir -p /var/lib/openbao/data /etc/openbao
+    chown -R openbao:openbao /var/lib/openbao
+    chown root:openbao /etc/openbao/openbao.hcl 2>/dev/null || true
+    chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable openbao.service >/dev/null 2>&1 || true
+    systemctl enable sysmanage-openbao-init.service >/dev/null 2>&1 || true
+    systemctl restart openbao.service >/dev/null 2>&1 || true
+    systemctl start sysmanage-openbao-init.service >/dev/null 2>&1 \
+        || echo "[!] OpenBAO init/unseal did not complete; check 'systemctl status sysmanage-openbao-init'."
 fi
 
 # Enable the service (but don't start it yet - user needs to configure first)
@@ -205,9 +297,9 @@ echo "   https://sysmanage.org/config-builder.html"
 echo ""
 echo "3. Database Initialization"
 echo "   -----------------------"
-echo "   Run database migrations:"
+echo "   Run database migrations (control-plane chains + every tenant database):"
 echo "     cd /opt/sysmanage"
-echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
+echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
 echo ""
 echo "4. Start the Services"
 echo "   ------------------"
@@ -256,6 +348,9 @@ fi
 %dir /var/lib/sysmanage
 %dir /var/log/sysmanage
 /usr/lib/systemd/system/sysmanage.service
+/usr/lib/systemd/system/sysmanage-openbao-init.service
+%dir /etc/openbao
+%config(noreplace) /etc/openbao/openbao.hcl
 %config(noreplace) /etc/nginx/conf.d/sysmanage-nginx.conf
 %doc /usr/share/doc/sysmanage/sbom/
 

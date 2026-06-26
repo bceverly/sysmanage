@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { secretsService, SecretResponse, SecretWithContent, SecretType } from '../Services/secrets';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -631,7 +631,7 @@ const Secrets: React.FC = () => {
               value={secretFilename}
               onChange={(e) => setSecretFilename(e.target.value)}
               margin="normal"
-              placeholder="e.g., id_rsa.pub, server.crt, database.conf"
+              placeholder={t('secrets.filenamePlaceholder', 'e.g., id_rsa.pub, server.crt, database.conf')}
             />
 
             <FormControl fullWidth margin="normal">

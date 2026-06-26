@@ -5,7 +5,6 @@ Host data update endpoints for hardware, users, and software information.
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import (
     get_host_network_interfaces,
@@ -19,7 +18,8 @@ from backend.api.host_utils import (
 from backend.api.error_constants import error_host_not_found
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -35,9 +35,7 @@ async def update_host_hardware(host_id: str, hardware_data: dict):  # NOSONAR
     This endpoint receives hardware data from the agent and stores it in the database.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Find the host
@@ -152,9 +150,7 @@ async def request_hardware_update(host_id: str):
     This sends a message via WebSocket to the agent requesting fresh hardware data.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Find the host
@@ -192,16 +188,24 @@ async def request_hardware_update_bulk(host_ids: list[str]):
     This sends messages via WebSocket to the selected agents requesting fresh hardware data.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     results = []
 
     with session_local() as session:
+        # Bulk-fetch all hosts in one query rather than per-id ``.first()``
+        # (flagged in the Phase 6 N+1 audit).  Key the dict by str(id)
+        # because the request payload arrives as a list of UUID strings
+        # while the model column is a GUID — string-keyed lookup matches
+        # both forms.
+        hosts_by_id = {
+            str(h.id): h
+            for h in session.query(models.Host)
+            .filter(models.Host.id.in_(host_ids))
+            .all()
+        }
         for host_id in host_ids:
-            # Find the host
-            host = session.query(models.Host).filter(models.Host.id == host_id).first()
+            host = hosts_by_id.get(str(host_id))
 
             if not host:
                 results.append(
@@ -272,9 +276,7 @@ async def request_user_access_update(host_id: str):
     This sends a message via WebSocket to the agent requesting fresh user and group data.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Find the host
@@ -314,9 +316,7 @@ async def request_system_info(host_id: str):
     Also requests virtualization support check for child host capabilities.
     """
     # Get the SQLAlchemy session
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    session_local = request_sessionmaker()
 
     with session_local() as session:
         # Find the host

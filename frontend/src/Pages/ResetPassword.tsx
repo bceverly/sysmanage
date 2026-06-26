@@ -58,7 +58,10 @@ const ResetPassword: React.FC = () => {
         // Validate the token when component mounts
         const validateToken = async () => {
             try {
-                await axiosInstance.get(`/validate-reset-token/${token}`);
+                // URL-encode the token so any path-traversal chars in
+                // the user-provided URL parameter can't redirect the
+                // request to a different endpoint (js/client-side-request-forgery).
+                await axiosInstance.get(`/api/validate-reset-token/${encodeURIComponent(token)}`);
                 setTokenValid(true);
                 setError(null);
             } catch (err: unknown) {
@@ -103,7 +106,7 @@ const ResetPassword: React.FC = () => {
         setError(null);
 
         try {
-            await axiosInstance.post('/reset-password', {
+            await axiosInstance.post('/api/reset-password', {
                 token: token,
                 password: password,
                 confirm_password: confirmPassword

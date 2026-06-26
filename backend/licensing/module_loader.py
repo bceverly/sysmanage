@@ -5,11 +5,14 @@ Handles downloading, verification, caching, and dynamic loading
 of Pro+ Cython extension modules.
 """
 
+import asyncio
 import hashlib
 import importlib.util
 import os
 import platform
+import shutil
 import sys
+import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -19,7 +22,6 @@ import aiohttp
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
-from backend.licensing.features import ModuleCode
 from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusModuleCache
@@ -120,7 +122,7 @@ class ModuleLoader:
             Path(modules_path).mkdir(parents=True, exist_ok=True)
             logger.info("Modules directory: %s", modules_path)
         except Exception as e:
-            logger.error("Failed to create modules directory: %s", e)
+            logger.exception("Failed to create modules directory: %s", e)
 
         self._plugin_loader.initialize()
         self._initialized = True
@@ -194,8 +196,65 @@ class ModuleLoader:
                     return cache_entry.file_path
                 return None
             except Exception as e:
-                logger.error("Error querying module cache: %s", e)
+                logger.exception("Error querying module cache: %s", e)
                 return None
+
+    def _log_failed_download_response(
+        self,
+        module_code: str,
+        url: str,
+        status: int,
+        platform_info: Dict[str, str],
+    ) -> None:
+        """Emit the right error log for a non-200 download response."""
+        if status == 404:
+            # Fatal-for-this-engine and distinct from the benign
+            # plugin-bundle 404s: the license server has NO compiled
+            # build of this engine for this platform/arch/Python, so the
+            # engine cannot load and anything gated on it (orchestrators,
+            # ticks, routes) stays disabled.  Name the exact missing
+            # target and the remedy so it is actionable, not buried among
+            # optional-plugin warnings.
+            logger.error(
+                "Pro+ ENGINE UNAVAILABLE: '%s' has no build for "
+                "%s/%s Python %s on the license server (HTTP 404). "
+                "The engine will NOT load and its features are "
+                "disabled. Build '%s' for Python %s on the license "
+                "server and re-run 'make update'. URL: %s",
+                module_code,
+                platform_info["platform"],
+                platform_info["architecture"],
+                platform_info["python_version"],
+                module_code,
+                platform_info["python_version"],
+                url,
+            )
+        else:
+            logger.error(
+                "Module download failed for '%s': %s returned %d",
+                module_code,
+                url,
+                status,
+            )
+
+    def _verify_downloaded_hash(
+        self, temp_path: str, expected_hash: Optional[str]
+    ) -> Optional[str]:
+        """Compute the temp file's hash, comparing to ``expected_hash``.
+
+        Returns the computed hash on success, or ``None`` (after
+        removing the temp file) when a provided hash does not match.
+        """
+        actual_hash = self._compute_file_hash(temp_path)
+        if expected_hash and actual_hash.lower() != expected_hash.lower():
+            logger.error(
+                "Module hash mismatch: expected %s, got %s",
+                expected_hash,
+                actual_hash,
+            )
+            os.remove(temp_path)
+            return None
+        return actual_hash
 
     async def _download_and_cache_module(
         self, module_code: str, version: Optional[str] = None
@@ -225,11 +284,8 @@ class ModuleLoader:
         )
 
         modules_path = self._get_modules_path()
+        Path(modules_path).mkdir(parents=True, exist_ok=True)
         temp_path = os.path.join(modules_path, f"{module_code}.tmp")
-        final_path = os.path.join(
-            modules_path,
-            f"{module_code}_{platform_info['python_version']}.so",
-        )
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -239,10 +295,8 @@ class ModuleLoader:
                     timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
                 ) as response:
                     if response.status != 200:
-                        logger.error(
-                            "Module download failed: %s returned %d",
-                            url,
-                            response.status,
+                        self._log_failed_download_response(
+                            module_code, url, response.status, platform_info
                         )
                         return False
 
@@ -258,33 +312,34 @@ class ModuleLoader:
                             await f.write(chunk)
 
             # Verify hash if provided
-            if expected_hash:
-                actual_hash = self._compute_file_hash(temp_path)
-                if actual_hash.lower() != expected_hash.lower():
-                    logger.error(
-                        "Module hash mismatch: expected %s, got %s",
-                        expected_hash,
-                        actual_hash,
-                    )
-                    os.remove(temp_path)
-                    return False
-            else:
-                actual_hash = self._compute_file_hash(temp_path)
+            actual_hash = self._verify_downloaded_hash(temp_path, expected_hash)
+            if actual_hash is None:
+                return False
 
-            # Move to final location
-            os.rename(temp_path, final_path)
+            # The download is a single bundle tarball (<code>.so +
+            # locales/<lang>/LC_MESSAGES/<code>.mo + metadata.json).  Extract it
+            # so locales/ sits beside the .so — the loader binds each module's
+            # gettext catalog from <so_dir>/locales at load time.
+            so_path = self._extract_module_bundle(
+                temp_path,
+                modules_path,
+                module_code,
+                platform_info["python_version"],
+            )
+            if so_path is None:
+                return False
 
-            # Save to cache database
+            # Save to cache database (points at the extracted .so)
             self._save_module_to_cache(
                 module_code=module_code,
                 version=actual_version,
                 platform_info=platform_info,
-                file_path=final_path,
+                file_path=so_path,
                 file_hash=actual_hash,
             )
 
             logger.info(
-                "Module downloaded: %s v%s for %s/%s Python %s",
+                "Module downloaded + extracted: %s v%s for %s/%s Python %s",
                 module_code,
                 actual_version,
                 platform_info["platform"],
@@ -293,15 +348,15 @@ class ModuleLoader:
             )
 
             # Load the module
-            return self._load_module_from_path(module_code, final_path)
+            return self._load_module_from_path(module_code, so_path)
 
         except aiohttp.ClientError as e:
-            logger.error("Module download network error: %s", e)
+            logger.exception("Module download network error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
         except Exception as e:
-            logger.error("Module download error: %s", e)
+            logger.exception("Module download error: %s", e)
             if os.path.exists(temp_path):
                 os.remove(temp_path)
             return False
@@ -357,7 +412,7 @@ class ModuleLoader:
 
                 session.commit()
             except Exception as e:
-                logger.error("Failed to save module to cache: %s", e)
+                logger.exception("Failed to save module to cache: %s", e)
                 session.rollback()
 
     def _load_module_from_path(self, module_code: str, file_path: str) -> bool:
@@ -374,6 +429,25 @@ class ModuleLoader:
             sys.modules[module_code] = module
             spec.loader.exec_module(module)
 
+            # Pro+ i18n: give the module a request-language-aware translator
+            # bound to its OWN bundled gettext catalog.  The plugin bundle ships
+            # locales/<lang>/LC_MESSAGES/<code>.mo alongside the .so, so its
+            # strings localise per-request just like core strings.  Opt-in: a
+            # module exposes set_translator(fn) only if it has translatable
+            # strings; engines without i18n are unaffected.
+            self._inject_module_translator(module_code, module, file_path)
+
+            # Migration compatibility gate: if the module declares a minimum
+            # OSS alembic revision and the current DB is below it, refuse to
+            # expose the module so its plan builders / injected rows don't
+            # run against a stale schema.  The incompatibility is recorded
+            # in the registry for the UI banner to surface.
+            if not self._check_migration_compatibility(module_code, module):
+                # Don't expose via _loaded_modules; leave sys.modules entry
+                # in place since unloading mid-import can be racy and the
+                # registry tells the UI what happened.
+                return False
+
             # Store in loaded modules
             self._loaded_modules[module_code] = module
 
@@ -381,8 +455,146 @@ class ModuleLoader:
             return True
 
         except Exception as e:
-            logger.error("Failed to load module %s: %s", module_code, e)
+            logger.exception("Failed to load module %s: %s", module_code, e)
             return False
+
+    def _extract_module_bundle(
+        self, bundle_path: str, modules_path: str, module_code: str, pyver: str
+    ) -> Optional[str]:
+        """Extract a ``.tar.gz`` bundle (``<code>.so`` + ``locales/`` + metadata)
+        into a per-version dir; return the compiled module path.  Staged into a
+        sibling ``<dir>.incoming`` and only swapped into the live dir once it
+        holds a compiled module, so a corrupt/truncated/wrong-format download
+        leaves a previously-working install intact instead of wiping it.
+        Path-traversal-safe.  Returns None on any failure."""
+        module_dir = os.path.join(modules_path, f"{module_code}_{pyver}")
+        staging_dir = module_dir + ".incoming"
+        try:
+            # Stage into a sibling dir; the live module_dir is untouched until swap.
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            os.makedirs(staging_dir, exist_ok=True)
+            dest_root = os.path.realpath(staging_dir)
+            with tarfile.open(bundle_path, "r:gz") as tar:
+                # Validate each member (NOT extractall): resolved path must stay
+                # inside dest_root; ``data`` filter rejects ../absolute/symlink.
+                for member in tar.getmembers():
+                    target = os.path.realpath(os.path.join(dest_root, member.name))
+                    if target != dest_root and not target.startswith(
+                        dest_root + os.sep
+                    ):
+                        logger.error(
+                            "Refusing unsafe path %s in bundle for %s",
+                            member.name,
+                            module_code,
+                        )
+                        return None
+                    tar.extract(member, dest_root, filter="data")
+            compiled = [
+                n
+                for n in sorted(os.listdir(staging_dir))
+                if n.endswith((".so", ".pyd"))
+            ]
+            if not compiled:
+                logger.error(
+                    "No compiled module (.so/.pyd) in bundle for %s", module_code
+                )
+                return None
+            # Bundle is good — atomically swap in: move the live dir aside (rename
+            # onto a non-empty POSIX dir fails), then restore on failure.
+            backup_dir = module_dir + ".old"
+            shutil.rmtree(backup_dir, ignore_errors=True)
+            had_existing = os.path.exists(module_dir)
+            if had_existing:
+                os.rename(module_dir, backup_dir)
+            try:
+                os.rename(staging_dir, module_dir)
+            except OSError:
+                if had_existing:
+                    os.rename(backup_dir, module_dir)
+                raise
+            shutil.rmtree(backup_dir, ignore_errors=True)
+            return os.path.join(module_dir, compiled[0])
+        except (tarfile.TarError, OSError) as exc:
+            logger.exception("Failed to extract module bundle %s: %s", module_code, exc)
+            return None
+        finally:
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            if os.path.exists(bundle_path):
+                os.remove(bundle_path)
+
+    def _inject_module_translator(
+        self, module_code: str, module: Any, file_path: str
+    ) -> None:
+        """Bind a Pro+ module's ``_`` to its own bundled gettext catalog.
+
+        The plugin bundle places ``locales/`` next to the ``.so``; we point a
+        per-module, request-language-aware translator at it.  No-op (and never
+        raises) for modules without translatable strings (no ``set_translator``)
+        or without a bundled catalog (the translator falls back to English)."""
+        set_translator = getattr(module, "set_translator", None)
+        if not callable(set_translator):
+            return
+        try:
+            from backend.i18n import module_translation  # noqa: PLC0415
+
+            locales_dir = os.path.join(os.path.dirname(file_path), "locales")
+            set_translator(module_translation(module_code, locales_dir))
+            logger.debug(
+                "Bound i18n catalog for module %s (locales=%s)",
+                module_code,
+                locales_dir,
+            )
+        except Exception as exc:  # never let i18n wiring break module load
+            logger.warning(
+                "Could not bind i18n catalog for module %s: %s", module_code, exc
+            )
+
+    def _check_migration_compatibility(self, module_code: str, module: Any) -> bool:
+        """Return True if module is compatible with current OSS schema, False otherwise.
+
+        On incompatibility, records the entry in the migration_compat registry
+        so the UI can show a banner.  On any internal error we fail-open
+        (return True) to avoid breaking deployments that don't have an
+        alembic config available — the schema mismatch will surface as a
+        runtime error instead.
+        """
+        try:
+            get_module_info = getattr(module, "get_module_info", None)
+            if not callable(get_module_info):
+                return True
+            module_info = get_module_info()
+            if not isinstance(module_info, dict):
+                return True
+            if "min_oss_alembic_revision" not in module_info:
+                return True
+
+            # pylint: disable=import-outside-toplevel
+            from backend.licensing.migration_compat import check_module_compatibility
+
+            session_local = sessionmaker(
+                autocommit=False, autoflush=False, bind=db_module.get_engine()
+            )
+            with session_local() as session:
+                incompat = check_module_compatibility(
+                    module_code=module_code,
+                    module_info=module_info,
+                    session=session,
+                    alembic_cfg_path=self._get_alembic_cfg_path(),
+                )
+                return incompat is None
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning(
+                "Migration compatibility check failed for %s; assuming compatible: %s",
+                module_code,
+                exc,
+            )
+            return True
+
+    def _get_alembic_cfg_path(self) -> str:
+        """Locate alembic.ini relative to the repo root."""
+        # repo root = backend/licensing/module_loader.py -> ../../alembic.ini
+        here = os.path.dirname(os.path.abspath(__file__))
+        return os.path.normpath(os.path.join(here, "..", "..", "alembic.ini"))
 
     def is_module_loaded(self, module_code: str) -> bool:
         """Check if a module is currently loaded."""
@@ -456,7 +668,7 @@ class ModuleLoader:
                     return cache_entry.version
                 return None
             except Exception as e:
-                logger.error("Error querying cached module version: %s", e)
+                logger.exception("Error querying cached module version: %s", e)
                 return None
 
     def _get_cached_module_hash(self, module_code: str) -> Optional[str]:
@@ -486,7 +698,7 @@ class ModuleLoader:
                     return cache_entry.file_hash
                 return None
             except Exception as e:
-                logger.error("Error querying cached module hash: %s", e)
+                logger.exception("Error querying cached module hash: %s", e)
                 return None
 
     async def query_server_versions(self) -> Dict[str, Any]:
@@ -560,7 +772,7 @@ class ModuleLoader:
             logger.warning("Version check network error: %s", e)
             return {}
         except Exception as e:
-            logger.error("Version check error: %s", e)
+            logger.exception("Version check error: %s", e)
             return {}
 
     async def check_for_updates(self) -> List[str]:
@@ -637,30 +849,42 @@ class ModuleLoader:
         updates_needed = await self.check_for_updates()
         if not updates_needed:
             logger.info("All modules are up to date")
-        else:
-            pass  # Will process below
 
-        results = {}
+        # Phase 1: Unload and remove cached modules (fast, synchronous)
+        was_loaded_map = {}
         for module_code in updates_needed:
-            # Unload the module if it's currently loaded
-            was_loaded = self.unload_module(module_code)
-
-            # Remove the old cached file
+            was_loaded_map[module_code] = self.unload_module(module_code)
             self._remove_cached_module(module_code)
 
-            # Download the new version
-            success = await self._download_and_cache_module(module_code)
+        # Phase 2: Download all modules in parallel
+        async def _download_one(mc: str):
+            return mc, await self._download_and_cache_module(mc)
+
+        download_results = await asyncio.gather(
+            *[_download_one(mc) for mc in updates_needed],
+            return_exceptions=True,
+        )
+
+        # Phase 3: Process results
+        results = {}
+        for item in download_results:
+            if isinstance(item, Exception):
+                logger.error("Module download raised exception: %s", item)
+                continue
+            module_code, success = item
             results[module_code] = success
 
             if success:
                 logger.info("Module %s updated successfully", module_code)
             else:
                 logger.error("Failed to update module %s", module_code)
-                # If it was loaded before, try to reload the old version
-                if was_loaded:
-                    cached_path = self._get_cached_module_path(module_code)
-                    if cached_path and os.path.exists(cached_path):
-                        self._load_module_from_path(module_code, cached_path)
+                cached_path = self._get_cached_module_path(module_code)
+                if (
+                    was_loaded_map.get(module_code)
+                    and cached_path
+                    and os.path.exists(cached_path)
+                ):
+                    self._load_module_from_path(module_code, cached_path)
 
         # Also update plugin bundles
         server_versions = await self.query_server_versions()
@@ -710,7 +934,9 @@ class ModuleLoader:
                 logger.debug("Removed cache entries for module %s", module_code)
 
             except Exception as e:
-                logger.error("Failed to remove cached module %s: %s", module_code, e)
+                logger.exception(
+                    "Failed to remove cached module %s: %s", module_code, e
+                )
                 session.rollback()
 
     # --- Plugin bundle methods (delegated to PluginBundleLoader) ---
@@ -766,7 +992,7 @@ class ModuleLoader:
             else:
                 logger.info("All modules are up to date")
         except Exception as e:
-            logger.error("Module update check failed: %s", e)
+            logger.exception("Module update check failed: %s", e)
 
 
 # Global module loader instance

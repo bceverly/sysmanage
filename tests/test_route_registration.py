@@ -3,8 +3,6 @@ Tests for backend/startup/route_registration.py module.
 Tests route registration functionality.
 """
 
-from unittest.mock import MagicMock, patch
-
 import pytest
 from fastapi import FastAPI
 

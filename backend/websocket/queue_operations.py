@@ -71,10 +71,27 @@ class QueueOperations:
         # Serialize message data
         serialized_data = json.dumps(message_data, default=str)
 
-        # Use provided session or get a new one
+        # Use provided session or get a new one.
+        # Phase 13.1 #2 (per-tenant queues): a host-targeted message is written
+        # to that host's TENANT queue.  ``tenant_engine_for_host`` returns None
+        # for unbound hosts / collapsed mode, so we stay on the default
+        # ``get_db()`` path (and existing behaviour) until a host is actually
+        # bound to a tenant.  (Messages with host_id=None — host determined
+        # during processing — stay on the main queue; they can't be routed
+        # without a host.)
         session_provided = db is not None
         if not session_provided:
-            db = next(get_db())
+            from backend.persistence.partitions import (  # noqa: PLC0415
+                tenant_engine_for_host,
+            )
+
+            tenant_engine = tenant_engine_for_host(host_id)
+            if tenant_engine is None:
+                db = next(get_db())
+            else:
+                from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+                db = sessionmaker(bind=tenant_engine)()
 
         try:
             # Validate host_id exists if provided
@@ -225,7 +242,7 @@ class QueueOperations:
                             f"Message {message_id} was not persisted to database despite successful commit"
                         )
                 except Exception as commit_error:
-                    logger.error(
+                    logger.exception(
                         "Commit failed for message %s: %s",
                         message_id,
                         commit_error,
@@ -268,7 +285,7 @@ class QueueOperations:
                             f"Message {message_id} was not added to session despite successful flush"
                         )
                 except Exception as flush_error:
-                    logger.error(
+                    logger.exception(
                         "Flush failed for message %s: %s",
                         message_id,
                         flush_error,
@@ -461,7 +478,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(
+            logger.exception(
                 _("Failed to mark message %s as processing: %s"),
                 message_id,
                 str(e),
@@ -504,7 +521,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(
+            logger.exception(
                 _("Failed to mark message %s as completed: %s"),
                 message_id,
                 str(e),
@@ -550,7 +567,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(
+            logger.exception(
                 _("Failed to mark message %s as sent: %s"),
                 message_id,
                 str(e),
@@ -606,7 +623,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(
+            logger.exception(
                 _("Failed to mark message %s as acknowledged: %s"),
                 message_id,
                 str(e),
@@ -712,7 +729,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Error retrying unacknowledged messages: %s"), str(e))
+            logger.exception(_("Error retrying unacknowledged messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -794,7 +811,7 @@ class QueueOperations:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(
+            logger.exception(
                 _("Failed to mark message %s as failed: %s"),
                 message_id,
                 str(e),
@@ -817,7 +834,7 @@ class QueueOperations:
         try:
             return json.loads(message.message_data)
         except (json.JSONDecodeError, TypeError) as e:
-            logger.error(
+            logger.exception(
                 _("Failed to deserialize message %s: %s"),
                 message.message_id,
                 str(e),

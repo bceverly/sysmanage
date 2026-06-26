@@ -16,6 +16,34 @@ class PasswordPolicy:
         """Initialize password policy with current configuration."""
         self.config = config.get_config()
         self.policy = self.config.get("security", {}).get("password_policy", {})
+        # Phase 13.1.H: the policy is per-customer operational config.  A
+        # DB-backed Settings value (tenant-scoped first, then server) overrides
+        # the legacy ``security.password_policy`` block in ``sysmanage.yaml``.
+        # Best-effort: any failure (no DB yet, etc.) keeps the YAML policy.
+        self._apply_db_override()
+
+    def _apply_db_override(self) -> None:
+        """Override ``self.policy`` from DB Settings when an operator set one."""
+        try:
+            from backend.config import settings_service  # noqa: PLC0415
+            from backend.persistence.tenant_context import (  # noqa: PLC0415
+                get_active_tenant,
+            )
+
+            db_policy = None
+            tenant_id = get_active_tenant()
+            if tenant_id:
+                db_policy = settings_service.get_tenant_setting(
+                    tenant_id, "password_policy", default=None
+                )
+            if not isinstance(db_policy, dict):
+                db_policy = settings_service.get_setting(
+                    "password_policy", default=None
+                )
+            if isinstance(db_policy, dict):
+                self.policy = db_policy
+        except Exception:  # noqa: BLE001 — best-effort; keep the YAML policy
+            pass
 
     def get_requirements_text(self) -> str:
         """Get human-readable password requirements text."""

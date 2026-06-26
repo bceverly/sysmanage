@@ -9,7 +9,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.x509.oid import NameOID
@@ -561,7 +560,7 @@ class TestCertificateManagerPlatformPaths:
 
         # Mock os.environ to prevent pytest temp dir override
         with patch("backend.security.certificate_manager.os.environ", {}):
-            cert_manager = CertificateManager()
+            CertificateManager()
             # Should have tried to use Windows path
             mock_path_class.assert_called_with(r"C:\ProgramData\SysManage\certs")
 

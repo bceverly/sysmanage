@@ -49,3 +49,11 @@
 #   # Log format - customize the log message appearance
 #   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 #
+# multitenancy:
+#   # Multi-tenancy (Phase 13.1) is OPT-IN. Leave disabled for single-tenant /
+#   # homelab installs (the default). Enable only to run a SaaS control plane
+#   # hosting isolated tenants. See the canonical sysmanage.yaml.example for the
+#   # accompanying registry: and backup: blocks.
+#   enabled: false
+#   self_service_provisioning: false
+#

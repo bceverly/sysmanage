@@ -38,6 +38,39 @@ export interface PluginSettingsTab {
     id: string;
     labelKey: string;
     component: ComponentType;
+    /**
+     * Optional license-module gate.  When set, the tab is only
+     * displayed if the active license includes this module code.
+     * Mirrors the same field on ``PluginHostDetailTab`` and the
+     * hardcoded ``tabDefs`` filter in ``Pages/Settings.tsx`` —
+     * plugin tabs that omit ``moduleRequired`` stay always-visible
+     * (the pre-Phase-10.7 behaviour).
+     */
+    moduleRequired?: string;
+}
+
+/**
+ * A widget a plugin renders into a fixed slot in the main navbar (e.g. the
+ * multi-tenancy tenant switcher).  Unlike a ``PluginNavItem`` (a link), this is
+ * an arbitrary component owned by the plugin.  The component owns its own
+ * visibility (e.g. renders ``null`` when not applicable).
+ */
+export interface PluginNavbarWidget {
+    id: string;
+    component: ComponentType;
+    /** Optional license-module gate (same semantics as the tab gates). */
+    moduleRequired?: string;
+}
+
+/**
+ * A banner a plugin renders at the top of the app shell (e.g. the
+ * tenant-migration banner).  The component owns its own visibility.
+ */
+export interface PluginAppBanner {
+    id: string;
+    component: ComponentType;
+    /** Optional license-module gate (same semantics as the tab gates). */
+    moduleRequired?: string;
 }
 
 /** Translation resources provided by a plugin. */
@@ -54,6 +87,8 @@ export interface PluginRegistration {
     routes?: PluginRoute[];
     hostDetailTabs?: PluginHostDetailTab[];
     settingsTabs?: PluginSettingsTab[];
+    navbarWidgets?: PluginNavbarWidget[];
+    appBanners?: PluginAppBanner[];
     translations?: PluginTranslations;
 }
 

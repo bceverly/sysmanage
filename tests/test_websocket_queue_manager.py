@@ -4,7 +4,6 @@ All tests properly mocked to avoid database dependencies.
 """
 
 import unittest
-from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
 from backend.websocket.queue_manager import (

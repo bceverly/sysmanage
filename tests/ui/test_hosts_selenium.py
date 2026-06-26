@@ -9,8 +9,6 @@ When adding/modifying tests, ensure feature parity across platforms.
 import time
 import pytest
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
@@ -126,7 +124,7 @@ def login_helper(selenium_page, test_user):
                 if errors:
                     error_msg += f" Errors on page: {errors}"
         except Exception:
-            pass
+            _ = None  # empty-except: failure here is non-fatal
         raise AssertionError(error_msg)
 
     # Brief wait for page to stabilize after login
@@ -172,7 +170,7 @@ def test_hosts_page_loads(selenium_page, test_user, ui_config, start_server):
 
         print(f"  [OK] Hosts page loaded successfully ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = (
             f"tests/ui/test-results/selenium_hosts_load_failure_{int(time.time())}.png"
         )
@@ -262,7 +260,7 @@ def test_hosts_data_displays(selenium_page, test_user, ui_config, start_server):
 
         print(f"  [OK] Hosts data display test passed ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = (
             f"tests/ui/test-results/selenium_hosts_data_failure_{int(time.time())}.png"
         )
@@ -337,12 +335,12 @@ def test_hosts_grid_interactive(selenium_page, test_user, ui_config, start_serve
                     time.sleep(1)
                     print(f"  [OK] Clicked first row - selection should work")
                     break
-            except (NoSuchElementException, Exception) as e:
+            except (NoSuchElementException, Exception):
                 continue
 
         print(f"  [OK] Hosts grid interactivity test passed ({browser_name})")
 
-    except Exception as e:
+    except Exception:
         screenshot_path = f"tests/ui/test-results/selenium_hosts_interactive_failure_{int(time.time())}.png"
         selenium_page.screenshot(screenshot_path)
         print(f"  [ERROR] Hosts grid interactivity test failed ({browser_name})")

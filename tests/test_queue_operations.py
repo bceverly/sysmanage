@@ -3,7 +3,6 @@ Tests for backend/websocket/queue_operations.py module.
 Tests core queue operations for message management.
 """
 
-import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 

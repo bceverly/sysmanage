@@ -4,7 +4,7 @@ This module contains the API implementation for the user object in the system.
 
 import asyncio
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from argon2 import PasswordHasher
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -22,15 +22,9 @@ from backend.i18n import _
 from backend.persistence import db, models
 from backend.security.login_security import login_security
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 
 # Import will be added at runtime to avoid circular imports
-
-if TYPE_CHECKING:
-    from backend.api.password_reset import (
-        create_password_reset_token,
-        send_initial_setup_email,
-    )
 
 argon2_hasher = PasswordHasher()
 
@@ -113,6 +107,21 @@ async def get_user_permissions(current_user: str = Depends(get_current_user)):
     Get the current user's security role permissions.
     Returns a dictionary of role names to boolean values.
     """
+    # Config-admin shortcut.  The userid configured under
+    # `security.admin_userid` is the recovery account; it has no DB row
+    # but is implicitly granted every security role.  Without this
+    # shortcut, the frontend's permission lookups all reject and any
+    # role-gated UI control (e.g. the "Add User" button on /users)
+    # never renders for the config-admin.  Mirrors the equivalent
+    # special case in /user/me below.
+    the_config = config.get_config()
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    if admin_userid and current_user == admin_userid:
+        return {
+            "is_admin": True,
+            "permissions": {role.value: True for role in SecurityRoles},
+        }
+
     session_local = sessionmaker(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
@@ -313,24 +322,37 @@ async def add_user(
         autocommit=False, autoflush=False, bind=db.get_engine()
     )
 
+    # Config-admin shortcut.  The userid configured under
+    # ``security.admin_userid`` is the recovery account; it has no DB
+    # row but is implicitly granted every security role.  Without this
+    # shortcut the recovery account can't create the very first real
+    # admin — the chicken-and-egg case the recovery account exists to
+    # break.  Mirrors the equivalent special case in get_user_permissions.
+    the_config = config.get_config()
+    admin_userid = the_config.get("security", {}).get("admin_userid")
+    is_config_admin = bool(admin_userid and current_user == admin_userid)
+
     # Add the data to the database
     with session_local() as session:
-        # Check if user has permission to add users
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-
-        if not auth_user.has_role(SecurityRoles.ADD_USER):
-            raise HTTPException(
-                status_code=403, detail=_("Permission denied: ADD_USER role required")
+        auth_user = None
+        if not is_config_admin:
+            # Check if user has permission to add users
+            auth_user = (
+                session.query(models.User)
+                .filter(models.User.userid == current_user)
+                .first()
             )
+            if not auth_user:
+                raise HTTPException(status_code=401, detail=error_user_not_found())
+
+            if auth_user._role_cache is None:
+                auth_user.load_role_cache(session)
+
+            if not auth_user.has_role(SecurityRoles.ADD_USER):
+                raise HTTPException(
+                    status_code=403,
+                    detail=_("Permission denied: ADD_USER role required"),
+                )
 
         # See if the caller is trying to add a user that already exists
         check_duplicate = (
@@ -363,10 +385,13 @@ async def add_user(
         session.add(user)
         session.commit()
 
-        # Audit log user creation
+        # Audit log user creation.  ``auth_user`` is None when the action
+        # was performed by the config-admin recovery account (no DB row).
+        # AuditService.log_create's user_id is Optional, so we pass None
+        # and rely on the username field to identify the actor.
         AuditService.log_create(
             db=session,
-            user_id=auth_user.id,
+            user_id=auth_user.id if auth_user is not None else None,
             username=current_user,
             entity_type=EntityType.USER,
             entity_id=str(user.id),

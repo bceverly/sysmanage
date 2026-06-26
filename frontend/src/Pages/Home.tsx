@@ -214,7 +214,7 @@ const Dashboard = () => {
         try {
             const response = await axiosInstance.get('/api/user-preferences/dashboard-cards');
             const prefs = response.data.preferences || [];
-            const visibilityMap: Record<string, boolean> = {
+            const defaults: Record<string, boolean> = {
                 hosts: true,
                 updates: true,
                 security: true,
@@ -223,11 +223,28 @@ const Dashboard = () => {
                 opentelemetry: true,
             };
 
-            // Apply saved preferences
-            if (Array.isArray(prefs)) {
-                prefs.forEach((pref: { card_identifier: string; visible: boolean }) => {
-                    visibilityMap[pref.card_identifier] = pref.visible;
-                });
+            // Index saved prefs in a Map (prototype-pollution-safe), then write
+            // ONLY known card keys back into the object.  The user-controlled
+            // card_identifier is never used as an object write key, so prototype
+            // pollution is impossible (S6109).
+            const savedVisible = new Map<string, boolean>(
+                Array.isArray(prefs)
+                    ? prefs.map(
+                          (pref: {
+                              card_identifier: string;
+                              visible: boolean;
+                          }): [string, boolean] => [
+                              pref.card_identifier,
+                              pref.visible,
+                          ],
+                      )
+                    : [],
+            );
+            const visibilityMap: Record<string, boolean> = { ...defaults };
+            for (const key of Object.keys(defaults)) {
+                if (savedVisible.has(key)) {
+                    visibilityMap[key] = savedVisible.get(key) ?? defaults[key];
+                }
             }
 
             setCardVisibility(visibilityMap);

@@ -15,8 +15,9 @@ from backend.api.error_constants import error_script_not_found, error_user_not_f
 from backend.auth.auth_bearer import get_current_user
 from backend.i18n import _
 from backend.persistence import db, models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.utils.verbosity_logger import sanitize_log
 
 from .models import SavedScriptCreate, SavedScriptResponse, SavedScriptUpdate
@@ -70,7 +71,7 @@ def _get_scripts_sync(
             ]
 
     except Exception as e:
-        logger.error("Error fetching saved scripts: %s", e)
+        logger.exception("Error fetching saved scripts: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved scripts")
         ) from e
@@ -166,7 +167,9 @@ async def create_saved_script(
             )
 
             logger.info(
-                "Created saved script '%s' by user %s", script.name, current_user
+                "Created saved script '%s' by user %s",
+                sanitize_log(script.name),
+                sanitize_log(current_user),
             )
             return SavedScriptResponse(
                 id=str(script.id),
@@ -185,7 +188,7 @@ async def create_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error creating saved script: %s", e)
+        logger.exception("Error creating saved script: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to create saved script")
         ) from e
@@ -226,7 +229,9 @@ async def get_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error fetching saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to fetch saved script")
         ) from e
@@ -316,7 +321,11 @@ async def update_saved_script(
                 },
             )
 
-            logger.info("Updated saved script %d by user %s", script_id, current_user)
+            logger.info(
+                "Updated saved script %d by user %s",
+                sanitize_log(script_id),
+                sanitize_log(current_user),
+            )
             return SavedScriptResponse(
                 id=str(script.id),
                 name=script.name,
@@ -334,7 +343,9 @@ async def update_saved_script(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error updating saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to update saved script")
         ) from e
@@ -376,17 +387,24 @@ async def delete_saved_script(
             if not script:
                 raise HTTPException(status_code=404, detail=error_script_not_found())
 
-            # Check if script is being used in any pending/running executions
-            active_executions = (
-                db_session.query(models.ScriptExecutionLog)
-                .filter(
-                    and_(
-                        models.ScriptExecutionLog.saved_script_id == script_id,
-                        models.ScriptExecutionLog.status.in_(["pending", "running"]),
+            # Check if script is being used in any pending/running executions.
+            # ScriptExecutionLog is host-scoped (lives in the tenant database),
+            # so query it on the active tenant's engine — querying the bootstrap
+            # engine here returns a false negative for tenant hosts and would let
+            # a script that is actively executing be deleted.
+            with request_sessionmaker()() as exec_session:
+                active_executions = (
+                    exec_session.query(models.ScriptExecutionLog)
+                    .filter(
+                        and_(
+                            models.ScriptExecutionLog.saved_script_id == script_id,
+                            models.ScriptExecutionLog.status.in_(
+                                ["pending", "running"]
+                            ),
+                        )
                     )
+                    .count()
                 )
-                .count()
-            )
 
             if active_executions > 0:
                 raise HTTPException(
@@ -414,13 +432,19 @@ async def delete_saved_script(
                 },
             )
 
-            logger.info("Deleted saved script %d by user %s", script_id, current_user)
+            logger.info(
+                "Deleted saved script %d by user %s",
+                sanitize_log(script_id),
+                sanitize_log(current_user),
+            )
             return {"message": _("Script deleted successfully")}
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting saved script %s: %s", sanitize_log(script_id), e)
+        logger.exception(
+            "Error deleting saved script %s: %s", sanitize_log(script_id), e
+        )
         raise HTTPException(
             status_code=500, detail=_("Failed to delete saved script")
         ) from e

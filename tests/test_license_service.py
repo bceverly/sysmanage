@@ -3,7 +3,7 @@ Tests for backend/licensing/license_service.py module.
 Tests Pro+ license service management.
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

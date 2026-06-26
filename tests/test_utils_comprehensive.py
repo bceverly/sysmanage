@@ -7,7 +7,6 @@ import datetime
 import logging
 from unittest.mock import Mock, patch
 
-import pytest
 
 from backend.utils.logging_formatter import UTCTimestampFormatter
 from backend.utils.password_policy import PasswordPolicy, password_policy

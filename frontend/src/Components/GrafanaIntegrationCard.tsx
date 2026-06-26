@@ -96,13 +96,13 @@ const GrafanaIntegrationCard: React.FC = () => {
     } catch (err: unknown) {
       console.error('Error loading Grafana data:', err);
       const errorMessage = axios.isAxiosError(err)
-        ? err.response?.data?.detail || 'Failed to load Grafana configuration'
-        : 'Failed to load Grafana configuration';
+        ? err.response?.data?.detail || t('grafana.loadError', 'Failed to load Grafana configuration')
+        : t('grafana.loadError', 'Failed to load Grafana configuration');
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Check Grafana health
   const checkHealth = useCallback(async () => {
@@ -120,12 +120,12 @@ const GrafanaIntegrationCard: React.FC = () => {
       }
       setHealthStatus({
         healthy: false,
-        error: errorResponse?.data?.detail || 'Health check failed'
+        error: errorResponse?.data?.detail || t('grafana.healthCheckFailed', 'Health check failed')
       });
     } finally {
       setCheckingHealth(false);
     }
-  }, [settings.enabled]);
+  }, [settings.enabled, t]);
 
   // Save settings
   const saveSettings = useCallback(async () => {
@@ -144,13 +144,13 @@ const GrafanaIntegrationCard: React.FC = () => {
     } catch (err: unknown) {
       console.error('Error saving Grafana settings:', err);
       const errorMessage = axios.isAxiosError(err)
-        ? err.response?.data?.detail || 'Failed to save settings'
-        : 'Failed to save settings';
+        ? err.response?.data?.detail || t('grafana.saveError', 'Failed to save settings')
+        : t('grafana.saveError', 'Failed to save settings');
       setError(errorMessage);
     } finally {
       setSaving(false);
     }
-  }, [settings, checkHealth]);
+  }, [settings, checkHealth, t]);
 
   // Check permissions
   useEffect(() => {
@@ -357,6 +357,7 @@ const GrafanaIntegrationCard: React.FC = () => {
                   </FormControl>
                   {selectedServer && (
                     <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- URL scheme/port are not translatable */}
                       {t('grafana.serverUrl.label', 'URL')}: http://{selectedServer.fqdn}:3000
                     </Typography>
                   )}
@@ -369,7 +370,7 @@ const GrafanaIntegrationCard: React.FC = () => {
                     label={t('grafana.manualUrl.label', 'Grafana URL')}
                     value={settings.manual_url || ''}
                     onChange={handleManualUrlChange}
-                    placeholder="https://grafana.example.com"
+                    placeholder={t('grafana.manualUrl.placeholder', 'https://grafana.example.com')}
                     slotProps={{
                       input: {
                         startAdornment: <LinkIcon sx={{ mr: 1, color: 'action.active' }} />,

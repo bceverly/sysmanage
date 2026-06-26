@@ -6,9 +6,7 @@ when no Pro+ module is loaded (community edition behavior).
 Also verifies that read-only endpoints remain functional.
 """
 
-from unittest.mock import patch, MagicMock
-
-import pytest
+from unittest.mock import patch
 
 
 class TestContainerCrudStubs:

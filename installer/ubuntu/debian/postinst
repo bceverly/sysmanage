@@ -34,7 +34,16 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	rm -rf .venv
 	python3 -m venv .venv
 	.venv/bin/pip install --quiet --upgrade pip
-	.venv/bin/pip install --quiet -r requirements.txt
+	# Install runtime-only deps.  The full requirements.txt carries dev
+	# tooling (pylint/astroid/pytest/playwright) that the server does not
+	# need to run AND that the air-gap wheel set does not contain — using
+	# it offline fails with "No matching distribution found for astroid".
+	# Fall back to requirements.txt only if the prod file isn't shipped.
+	if [ -f requirements-prod.txt ]; then
+		.venv/bin/pip install --quiet -r requirements-prod.txt
+	else
+		.venv/bin/pip install --quiet -r requirements.txt
+	fi
 	cd -
 	echo "✓ Python dependencies installed"
 
@@ -46,9 +55,71 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		chmod 640 /etc/sysmanage.yaml
 	fi
 
+	# ---------------------------------------------------------------
+	# OpenBAO (secrets broker) — install + start + initialize/unseal.
+	#
+	# OpenBAO is central to SysManage.  We install the native package
+	# (it provides the `bao` binary, the `openbao` service user, and the
+	# stock openbao.service unit), drop our own minimal config, and run a
+	# one-shot init/unseal so a fresh box comes up with a working local
+	# secrets broker.  See docs/planning/openbao-deployment-and-airgap.md.
+	# ---------------------------------------------------------------
+	if ! command -v bao >/dev/null 2>&1; then
+		echo "Installing OpenBAO..."
+		# 1) Air-gap path: a bundled .deb staged next to the SysManage
+		#    package (the air-gap mega-ISO places it here).
+		BUNDLED_BAO="$(ls /opt/sysmanage/installer/openbao/*.deb 2>/dev/null | head -n1 || true)"
+		if [ -n "$BUNDLED_BAO" ]; then
+			apt-get install -y "$BUNDLED_BAO" >/dev/null 2>&1 \
+				|| dpkg -i "$BUNDLED_BAO" >/dev/null 2>&1 || true
+		# 2) Online path: configure the official OpenBAO apt repo, install.
+		elif command -v curl >/dev/null 2>&1; then
+			install -m0755 -d /etc/apt/keyrings 2>/dev/null || true
+			if curl -fsSL https://pkg.openbao.org/gpg.key 2>/dev/null \
+				| gpg --dearmor -o /etc/apt/keyrings/openbao.gpg 2>/dev/null; then
+				echo "deb [signed-by=/etc/apt/keyrings/openbao.gpg] https://pkg.openbao.org/deb/ubuntu stable main" \
+					> /etc/apt/sources.list.d/openbao.list
+				apt-get update >/dev/null 2>&1 || true
+				apt-get install -y openbao >/dev/null 2>&1 || true
+			fi
+		fi
+		if ! command -v bao >/dev/null 2>&1; then
+			echo "⚠ OpenBAO ('bao') could not be installed automatically."
+			echo "  Install it manually (https://openbao.org) or set vault.enabled=false."
+		fi
+	fi
+
+	# Provision OpenBAO directories + config when the binary is present.
+	if command -v bao >/dev/null 2>&1; then
+		# The openbao package creates the 'openbao' user; fall back to
+		# creating it if a tarball-based install didn't.
+		if ! getent passwd openbao >/dev/null; then
+			adduser --system --group --home /var/lib/openbao --no-create-home \
+				--disabled-password --disabled-login \
+				--gecos "OpenBAO" openbao >/dev/null 2>&1 || true
+		fi
+		mkdir -p /var/lib/openbao/data /etc/openbao
+		chown -R openbao:openbao /var/lib/openbao
+		# Our config ships to /etc/openbao/openbao.hcl via debian/install.
+		chown root:openbao /etc/openbao/openbao.hcl 2>/dev/null || true
+		chmod 640 /etc/openbao/openbao.hcl 2>/dev/null || true
+	fi
+
 	# Reload systemd daemon
 	if [ -d /run/systemd/system ]; then
 		systemctl --system daemon-reload >/dev/null 2>&1 || true
+	fi
+
+	# Enable + start OpenBAO and run the init/unseal one-shot so the local
+	# secrets broker is ready before the operator starts SysManage.  Safe to
+	# run now (OpenBAO needs no external config); SysManage itself is still
+	# left stopped for the operator to configure.
+	if command -v bao >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+		systemctl enable openbao.service >/dev/null 2>&1 || true
+		systemctl enable sysmanage-openbao-init.service >/dev/null 2>&1 || true
+		systemctl restart openbao.service >/dev/null 2>&1 || true
+		systemctl start sysmanage-openbao-init.service >/dev/null 2>&1 \
+			|| echo "⚠ OpenBAO init/unseal did not complete; check 'systemctl status sysmanage-openbao-init'."
 	fi
 
 	# Enable but DON'T start the service (user needs to configure first)
@@ -71,6 +142,40 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 		fi
 	fi
 
+	# On a configure, $2 holds the previously-installed version: empty on a
+	# fresh install, set on an in-place upgrade.  The upgrade path leaves the
+	# existing config + database in place, so print the short migrate+restart
+	# checklist instead of the full first-time configuration wall.
+	if [ -n "$2" ]; then
+	echo ""
+	echo "=========================================="
+	echo "SysManage Server upgrade complete!"
+	echo "=========================================="
+	echo ""
+	echo "Your existing /etc/sysmanage.yaml was preserved and the service was"
+	echo "stopped for the upgrade.  It is NOT restarted automatically — two"
+	echo "manual steps remain:"
+	echo ""
+	echo "1. Apply database migrations"
+	echo "   ------------------------"
+	echo "   This migrates the control-plane chains AND every tenant database"
+	echo "   (with a progress bar).  Run '--status' first to see what's pending."
+	echo "     cd /opt/sysmanage"
+	echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py --status"
+	echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
+	echo ""
+	echo "   (Multi-tenancy: the per-tenant fan-out leases credentials from"
+	echo "    OpenBAO, so OpenBAO must be running when you migrate.)"
+	echo ""
+	echo "2. Restart the service"
+	echo "   -------------------"
+	echo "     sudo systemctl restart sysmanage"
+	echo "     sudo systemctl status sysmanage"
+	echo ""
+	echo "Log files: /var/log/sysmanage/"
+	echo "Web interface: https://your-server:8443/"
+	echo ""
+	else
 	echo ""
 	echo "=========================================="
 	echo "SysManage Server installation complete!"
@@ -106,11 +211,11 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "     • Authentication settings"
 	echo "     • Logging configuration"
 	echo ""
-	echo "3. Database Migration"
+	echo "3. Database Migration (control-plane chains + every tenant database)"
 	echo "   ------------------"
 	echo "   After configuring the database connection, run:"
 	echo "     cd /opt/sysmanage"
-	echo "     sudo -u sysmanage .venv/bin/python -m alembic upgrade head"
+	echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
 	echo ""
 	echo "4. Start the Service"
 	echo "   -----------------"
@@ -121,6 +226,7 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
 	echo "Log files: /var/log/sysmanage/"
 	echo "Web interface: https://your-server:8443/ (after configuration)"
 	echo ""
+	fi
 fi
 
 #DEBHELPER#

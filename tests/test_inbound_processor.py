@@ -4,7 +4,7 @@ Tests process_pending_messages and process_validated_message functions.
 """
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
@@ -116,8 +116,12 @@ class TestProcessPendingMessages:
         assert message.started_at is None
 
     @pytest.mark.asyncio
-    async def test_process_pending_messages_deletes_for_nonexistent_host(self, session):
-        """Test that messages for non-existent hosts are deleted."""
+    async def test_process_pending_messages_defers_for_nonexistent_host(self, session):
+        """Phase 13.1 #2: a message whose host isn't present on THIS database is
+        deferred (mark_failed → retry-with-backoff), NOT hard-deleted.  Under
+        per-tenant queues a freshly-registered host's row may not be visible yet
+        when its messages are already queued; deleting would lose the agent's
+        data, so we retry instead and only give up after max_retries."""
         nonexistent_host_id = str(uuid4())
 
         message = MessageQueue(
@@ -136,9 +140,13 @@ class TestProcessPendingMessages:
         message_id = message.message_id
         await process_pending_messages(session)
 
-        # Check that message was deleted
+        # The data-loss guard: the message must survive (not be deleted) and be
+        # rescheduled for retry rather than processed against a missing host.
         remaining = session.query(MessageQueue).filter_by(message_id=message_id).first()
-        assert remaining is None
+        assert remaining is not None
+        assert remaining.retry_count == 1
+        assert remaining.status == QueueStatus.PENDING
+        assert remaining.scheduled_at is not None
 
     @pytest.mark.asyncio
     async def test_process_pending_messages_deletes_for_unapproved_host(self, session):

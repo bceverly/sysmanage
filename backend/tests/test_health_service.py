@@ -43,11 +43,16 @@ def test_engine():
         poolclass=StaticPool,
     )
     try:
-        models.Base.metadata.create_all(bind=engine, checkfirst=True)
-    except Exception:
-        # If there's an issue with model definitions, create a minimal engine
-        pass
-    return engine
+        try:
+            models.Base.metadata.create_all(bind=engine, checkfirst=True)
+        except Exception:
+            # If there's an issue with model definitions, create a minimal engine
+            pass
+        yield engine
+    finally:
+        # ``engine.dispose()`` in teardown closes the underlying sqlite3
+        # connections so they don't surface as ResourceWarnings later.
+        engine.dispose()
 
 
 @pytest.fixture
@@ -103,7 +108,9 @@ class TestHealthAnalysisError:
         """Test that HealthAnalysisError can be raised and caught."""
         with pytest.raises(HealthAnalysisError) as exc_info:
             raise HealthAnalysisError("Pro+ license required")
-        assert "Pro+ license required" in str(exc_info.value)
+        assert "Pro+ license required" in str(
+            exc_info.value
+        )  # lgtm[py/unreachable-statement]
 
     def test_exception_with_no_message(self):
         """Test creating a HealthAnalysisError with no message."""

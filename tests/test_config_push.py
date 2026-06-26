@@ -4,10 +4,8 @@ Tests configuration push functionality for SysManage server.
 """
 
 import json
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
-
-import pytest
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 from backend.config.config_push import ConfigPushManager, config_push_manager
 
@@ -84,8 +82,8 @@ class TestConfigPushManager:
         manager = ConfigPushManager()
         config_data = {"key": "value", "num": 123}
 
-        config1 = manager.create_agent_config("host", config_data)
-        config2 = manager.create_agent_config("host", config_data)
+        manager.create_agent_config("host", config_data)
+        manager.create_agent_config("host", config_data)
 
         # Same data should produce same checksum
         checksum1 = manager._calculate_checksum(config_data)
@@ -107,135 +105,167 @@ class TestConfigPushManager:
         checksum2 = manager._calculate_checksum(config2)
         assert checksum1 == checksum2
 
-    @pytest.mark.asyncio
-    async def test_push_config_to_agent_success(self):
-        """Test successful configuration push to agent."""
+    # ------------------------------------------------------------------
+    # Helpers for the queue-based push tests below.
+    #
+    # The push methods now resolve target hosts via a SQLAlchemy session
+    # passed in by the caller, and enqueue OUTBOUND rows via
+    # ``_queue_ops.enqueue_message`` instead of calling
+    # ``connection_manager`` directly.  Tests mock the session and the
+    # queue-ops singleton; assertions exercise the enqueue contract,
+    # not any websocket-side behavior.
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _mock_session_for_single_host(host_id: str, fqdn: str):
+        """Return a mock session whose ``.query(...).filter(...).first()``
+        chain yields a Host-like object with the given id/fqdn."""
+        session = Mock()
+        host = Mock()
+        host.id = host_id
+        host.fqdn = fqdn
+        session.query.return_value.filter.return_value.first.return_value = host
+        return session
+
+    @staticmethod
+    def _mock_session_with_no_host():
+        """Return a mock session whose host lookup yields ``None``."""
+        session = Mock()
+        session.query.return_value.filter.return_value.first.return_value = None
+        return session
+
+    @staticmethod
+    def _mock_session_for_host_list(rows):
+        """Return a mock session whose ``.query(...).filter(...).all()``
+        chain yields the given ``[(host_id, fqdn), ...]`` rows."""
+        session = Mock()
+        session.query.return_value.filter.return_value.all.return_value = rows
+        return session
+
+    def test_push_config_to_agent_success(self):
+        """Successful push enqueues one OUTBOUND row and commits."""
         manager = ConfigPushManager()
         hostname = "test-host"
         config_data = {"test": "value"}
+        session = self._mock_session_for_single_host("host-uuid-1", hostname)
+
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            result = manager.push_config_to_agent(session, hostname, config_data)
+
+        assert result is True
+        assert hostname in manager.pending_configs
+        assert manager.pending_configs[hostname]["version"] == 1
+        mock_queue_ops.enqueue_message.assert_called_once()
+        # Verify the enqueue carried the right host_id and an OUTBOUND
+        # direction; the inner envelope is built by ``_build_config_envelope``
+        # and exercised by the envelope-shape test below.
+        kwargs = mock_queue_ops.enqueue_message.call_args.kwargs
+        assert kwargs["host_id"] == "host-uuid-1"
+        assert kwargs["message_type"] == "config_update"
+        assert kwargs["db"] is session
+        session.commit.assert_called_once()
+
+    def test_push_config_to_agent_host_not_found(self):
+        """When the hostname has no active Host row, push returns False
+        without enqueuing or committing."""
+        manager = ConfigPushManager()
+        session = self._mock_session_with_no_host()
+
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            result = manager.push_config_to_agent(session, "ghost-host", {"k": "v"})
+
+        assert result is False
+        assert "ghost-host" not in manager.pending_configs
+        mock_queue_ops.enqueue_message.assert_not_called()
+        session.commit.assert_not_called()
+
+    def test_push_config_to_agent_envelope_build_failure(self):
+        """If envelope construction raises (e.g. encryption error), push
+        returns False and the host's pending-config slot stays empty."""
+        manager = ConfigPushManager()
+        hostname = "test-host"
+        session = self._mock_session_for_single_host("host-uuid-1", hostname)
 
         with patch(
             "backend.config.config_push.message_encryption"
         ) as mock_encryption, patch(
-            "backend.config.config_push.connection_manager"
-        ) as mock_conn_mgr, patch(
-            "backend.config.config_push.Message"
-        ) as mock_message:
-
-            mock_encryption.encrypt_sensitive_data.return_value = "encrypted_data"
-            mock_conn_mgr.send_to_hostname = AsyncMock(return_value=True)
-            mock_message_instance = Mock()
-            mock_message_instance.to_dict.return_value = {"message": "data"}
-            mock_message.return_value = mock_message_instance
-
-            result = await manager.push_config_to_agent(hostname, config_data)
-
-            assert result is True
-            assert hostname in manager.pending_configs
-            assert manager.pending_configs[hostname]["version"] == 1
-            mock_encryption.encrypt_sensitive_data.assert_called_once()
-            mock_conn_mgr.send_to_hostname.assert_called_once_with(
-                hostname, {"message": "data"}
-            )
-
-    @pytest.mark.asyncio
-    async def test_push_config_to_agent_failure(self):
-        """Test configuration push failure."""
-        manager = ConfigPushManager()
-        hostname = "test-host"
-        config_data = {"test": "value"}
-
-        with patch(
-            "backend.config.config_push.message_encryption"
-        ) as mock_encryption, patch(
-            "backend.config.config_push.connection_manager"
-        ) as mock_conn_mgr, patch(
-            "backend.config.config_push.Message"
-        ) as mock_message:
-
-            mock_encryption.encrypt_sensitive_data.return_value = "encrypted_data"
-            mock_conn_mgr.send_to_hostname = AsyncMock(return_value=False)
-            mock_message_instance = Mock()
-            mock_message_instance.to_dict.return_value = {"message": "data"}
-            mock_message.return_value = mock_message_instance
-
-            result = await manager.push_config_to_agent(hostname, config_data)
-
-            assert result is False
-            assert hostname not in manager.pending_configs
-
-    @pytest.mark.asyncio
-    async def test_push_config_to_agent_exception(self):
-        """Test configuration push with exception."""
-        manager = ConfigPushManager()
-        hostname = "test-host"
-        config_data = {"test": "value"}
-
-        with patch("backend.config.config_push.message_encryption") as mock_encryption:
+            "backend.config.config_push._queue_ops"
+        ) as mock_queue_ops:
             mock_encryption.encrypt_sensitive_data.side_effect = ValueError(
                 "Encryption error"
             )
+            result = manager.push_config_to_agent(session, hostname, {"k": "v"})
 
-            result = await manager.push_config_to_agent(hostname, config_data)
+        assert result is False
+        assert hostname not in manager.pending_configs
+        mock_queue_ops.enqueue_message.assert_not_called()
 
-            assert result is False
-            assert hostname not in manager.pending_configs
-
-    @pytest.mark.asyncio
-    async def test_push_config_to_all_agents(self):
-        """Test pushing configuration to all agents."""
+    def test_push_config_to_all_agents(self):
+        """Fan-out push enqueues one row per active host and commits once."""
         manager = ConfigPushManager()
         config_data = {"test": "value"}
+        session = self._mock_session_for_host_list(
+            [
+                ("host-uuid-1", "host1.example"),
+                ("host-uuid-2", "host2.example"),
+            ]
+        )
 
-        agent_list = [
-            {"hostname": "host1"},
-            {"hostname": "host2"},
-            {"hostname": None},  # Should be skipped
-        ]
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            results = manager.push_config_to_all_agents(session, config_data)
 
-        with patch("backend.config.config_push.connection_manager") as mock_conn_mgr:
-            mock_conn_mgr.get_active_agents.return_value = agent_list
+        assert results == {"host1.example": True, "host2.example": True}
+        assert mock_queue_ops.enqueue_message.call_count == 2
+        # Both hosts received an enqueue with the right host_id
+        host_ids_enqueued = {
+            call.kwargs["host_id"]
+            for call in mock_queue_ops.enqueue_message.call_args_list
+        }
+        assert host_ids_enqueued == {"host-uuid-1", "host-uuid-2"}
+        session.commit.assert_called_once()
 
-            # Mock push_config_to_agent method
-            with patch.object(
-                manager, "push_config_to_agent", new_callable=AsyncMock
-            ) as mock_push:
-                mock_push.side_effect = [True, False]  # host1 success, host2 fail
-
-                results = await manager.push_config_to_all_agents(config_data)
-
-                assert len(results) == 2
-                assert results["host1"] is True
-                assert results["host2"] is False
-                assert mock_push.call_count == 2
-
-    @pytest.mark.asyncio
-    async def test_push_config_by_platform(self):
-        """Test pushing configuration by platform."""
+    def test_push_config_to_all_agents_empty(self):
+        """No active hosts → empty result dict, no commit."""
         manager = ConfigPushManager()
-        platform = "Linux"
-        config_data = {"test": "value"}
+        session = self._mock_session_for_host_list([])
 
-        with patch(
-            "backend.config.config_push.message_encryption"
-        ) as mock_encryption, patch(
-            "backend.config.config_push.connection_manager"
-        ) as mock_conn_mgr, patch(
-            "backend.config.config_push.Message"
-        ) as mock_message:
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            results = manager.push_config_to_all_agents(session, {"k": "v"})
 
-            mock_encryption.encrypt_sensitive_data.return_value = "encrypted_data"
-            mock_conn_mgr.broadcast_to_platform = AsyncMock(return_value=3)
-            mock_message_instance = Mock()
-            mock_message_instance.to_dict.return_value = {"message": "data"}
-            mock_message.return_value = mock_message_instance
+        assert results == {}
+        mock_queue_ops.enqueue_message.assert_not_called()
+        session.commit.assert_not_called()
 
-            result = await manager.push_config_by_platform(platform, config_data)
+    def test_push_config_by_platform(self):
+        """Platform fan-out enqueues one row per matching host and
+        returns the count of successful enqueues."""
+        manager = ConfigPushManager()
+        session = self._mock_session_for_host_list(
+            [
+                ("host-uuid-a", "linux-a.example"),
+                ("host-uuid-b", "linux-b.example"),
+                ("host-uuid-c", "linux-c.example"),
+            ]
+        )
 
-            assert result == 3
-            mock_conn_mgr.broadcast_to_platform.assert_called_once_with(
-                platform, {"message": "data"}
-            )
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            count = manager.push_config_by_platform(session, "Linux", {"k": "v"})
+
+        assert count == 3
+        assert mock_queue_ops.enqueue_message.call_count == 3
+        session.commit.assert_called_once()
+
+    def test_push_config_by_platform_no_matches(self):
+        """No hosts on the named platform → returns 0, no commit."""
+        manager = ConfigPushManager()
+        session = self._mock_session_for_host_list([])
+
+        with patch("backend.config.config_push._queue_ops") as mock_queue_ops:
+            count = manager.push_config_by_platform(session, "OpenBSD", {"k": "v"})
+
+        assert count == 0
+        mock_queue_ops.enqueue_message.assert_not_called()
+        session.commit.assert_not_called()
 
     def test_handle_config_acknowledgment_success(self):
         """Test handling successful configuration acknowledgment."""

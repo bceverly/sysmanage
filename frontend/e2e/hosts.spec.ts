@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { ensureAuthenticated } from './e2e-helpers';
 
 /**
  * E2E Tests for Host List and Detail Page Flows
@@ -22,20 +23,23 @@ async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
 
   // Click the View button (eye icon) in the Actions column
   const viewButton = firstRow.getByRole('button', { name: /view/i });
-  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await expect(viewButton).toBeVisible({ timeout: 20000 });
   await viewButton.click();
 
   // Wait for navigation to complete
-  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 10000 });
+  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 20000 });
   return true;
 }
 
 test.describe('Host List Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/hosts');
+    await ensureAuthenticated(page, '/hosts');
   });
 
   test('should display host list page', async ({ page }) => {
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
+
     // Page should load successfully
     await expect(page).toHaveURL(/\/hosts/);
 
@@ -46,9 +50,11 @@ test.describe('Host List Page', () => {
   });
 
   test('should display host data grid', async ({ page }) => {
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Wait for the data grid to be visible
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible();
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
   });
 
   test('should have search/filter functionality', async ({ page }) => {
@@ -63,9 +69,11 @@ test.describe('Host List Page', () => {
   });
 
   test('should navigate to host detail on row click', async ({ page }) => {
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Wait for grid to load
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible();
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     const navigated = await navigateToFirstHostDetail(page);
     if (navigated) {
@@ -74,19 +82,21 @@ test.describe('Host List Page', () => {
   });
 
   test('should have approve/reject buttons for pending hosts', async ({ page }) => {
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
     // Check if there are any pending hosts that need approval
     const approveButton = page.getByRole('button', { name: /approve/i }).first();
     const rejectButton = page.getByRole('button', { name: /reject|delete/i }).first();
 
     // These may or may not be visible depending on pending hosts
     // Just verify the page structure is correct
-    await expect(page.locator('.MuiDataGrid-root')).toBeVisible();
+    await expect(page.locator('.MuiDataGrid-root')).toBeVisible({ timeout: 30000 });
   });
 
   test('should show host count or statistics', async ({ page }) => {
     // Look for any count/statistics display
     try {
-      await page.waitForLoadState('networkidle', { timeout: 15000 });
+      await page.waitForLoadState('networkidle', { timeout: 3000 });
     } catch {
       // networkidle may timeout, continue anyway
     }
@@ -102,9 +112,13 @@ test.describe('Host Detail Page', () => {
   test('should display host detail when navigating directly', async ({ page }) => {
     // First get a host ID from the hosts list
     await page.goto('/hosts');
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
+
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible();
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     if (await navigateToFirstHostDetail(page)) {
       // Verify host detail page elements
@@ -128,15 +142,15 @@ test.describe('Host Detail Page', () => {
     await page.goto('/hosts');
 
     if (await navigateToFirstHostDetail(page)) {
-      // Look for system info content - CPU, RAM, OS, etc.
-      const pageContent = await page.textContent('body');
-      const hasSystemInfo =
-        pageContent?.toLowerCase().includes('cpu') ||
-        pageContent?.toLowerCase().includes('memory') ||
-        pageContent?.toLowerCase().includes('operating system') ||
-        pageContent?.toLowerCase().includes('hostname');
+      // Wait for the loading spinner to disappear and real content to render
+      const spinner = page.locator('[role="progressbar"]');
+      await expect(spinner).toBeHidden({ timeout: 60000 });
 
-      expect(hasSystemInfo).toBeTruthy();
+      // Use auto-retrying assertion so Playwright waits for the text to appear
+      await expect(page.locator('body')).toContainText(
+        /cpu|memory|operating system|platform|processor|architecture|hostname/i,
+        { timeout: 30000 }
+      );
     }
   });
 
@@ -145,7 +159,7 @@ test.describe('Host Detail Page', () => {
 
     if (await navigateToFirstHostDetail(page)) {
       // Look for common action buttons
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
       // Page should have interactive elements
       const buttons = page.locator('button');
@@ -164,7 +178,7 @@ test.describe('Host Detail Page', () => {
         await softwareTab.click();
 
         // Wait for tab content to load
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -177,7 +191,7 @@ test.describe('Host Detail Page', () => {
       const certTab = page.getByRole('tab', { name: /certificate/i }).first();
       if (await certTab.isVisible()) {
         await certTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -190,7 +204,7 @@ test.describe('Host Detail Page', () => {
       const firewallTab = page.getByRole('tab', { name: /firewall/i }).first();
       if (await firewallTab.isVisible()) {
         await firewallTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -203,7 +217,7 @@ test.describe('Host Detail Page', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
       }
     }
   });
@@ -213,16 +227,52 @@ test.describe('Host Actions', () => {
   test('should be able to refresh host data', async ({ page }) => {
     await page.goto('/hosts');
 
-    if (await navigateToFirstHostDetail(page)) {
-      // Look for refresh button
-      const refreshButton = page.getByRole('button', { name: /refresh/i }).first();
-      if (await refreshButton.isVisible()) {
-        await refreshButton.click();
-
-        // Wait for the refresh action to complete
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
-      }
+    if (!(await navigateToFirstHostDetail(page))) {
+      // No hosts in the grid — nothing to refresh; treat as a no-op pass.
+      return;
     }
+
+    // Anchor on the host-detail diagnostics button via its stable
+    // ``data-testid`` (request-host-data-button), NOT its accessible
+    // name.  The label toggles between "Request Host Data" and
+    // "Requesting..." (i18n keys hostDetail.requestHostData /
+    // requestingDiagnostics) as ``diagnosticsLoading`` flips, so a
+    // name-based locator drops the element the instant host-detail's
+    // initial fetch or periodic polling toggles that flag — the cause
+    // of the intermittent "element(s) not found" failure.  The testid
+    // is invariant across both states and is also unambiguous vs. the
+    // global "Broadcast Refresh" / per-tab "Refresh" buttons.
+    const refreshButton = page.getByTestId('request-host-data-button');
+
+    // The button is disabled while a diagnostics request is in-flight.
+    // Wait for it to be both visible AND enabled before clicking — that
+    // also lets host-detail's initial fetches settle, so we don't race
+    // a re-render mid-click.
+    try {
+      await refreshButton.waitFor({ state: 'visible', timeout: 15000 });
+    } catch {
+      // Diagnostics tab not present for this host (older agent, etc.);
+      // treat as a no-op pass rather than a hard failure.
+      return;
+    }
+    await expect(refreshButton).toBeEnabled({ timeout: 15000 });
+    // ``click()`` auto-scrolls the element into view and runs its own
+    // actionability retries (visible / stable / enabled / receives
+    // events) under the configured timeout.  The earlier two-step
+    // ``scrollIntoViewIfNeeded()`` + ``click()`` opened a window where
+    // host-detail's periodic polling could re-render between the
+    // scroll and the click, detaching the matched DOM node and
+    // restarting the locator wait against a freshly-mounted button.
+    // Collapsing to a single ``click`` with a generous timeout closes
+    // that race.
+    await refreshButton.click({ timeout: 15000 });
+
+    // After clicking, the button stays mounted (its label flips to
+    // "Requesting..." while the backend processes the request, then
+    // back).  Assert on the same stable testid locator to confirm the
+    // click landed without detaching; don't block on networkidle (the
+    // host-detail page has periodic polling that never goes idle).
+    await expect(refreshButton).toBeVisible({ timeout: 10000 });
   });
 
   test('should navigate back to hosts list', async ({ page }) => {

@@ -31,6 +31,7 @@ def upgrade() -> None:
         op.drop_index(
             "ix_firewall_role_closed_port_role_id", "firewall_role_closed_port"
         )
+        # expand-contract-ok: historical migration, applied fleet-wide pre-policy
         op.drop_table("firewall_role_closed_port")
 
 

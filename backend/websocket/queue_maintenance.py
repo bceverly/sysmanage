@@ -44,28 +44,22 @@ class QueueMaintenance:
             db = next(get_db())
 
         try:
-            query = db.query(MessageQueue).filter(
-                and_(
-                    MessageQueue.completed_at < cutoff_date,
-                    MessageQueue.status == QueueStatus.COMPLETED,
-                )
-            )
-
+            statuses = [QueueStatus.COMPLETED]
             if not keep_failed:
-                # Also clean up old failed messages
-                failed_query = db.query(MessageQueue).filter(
-                    and_(
-                        MessageQueue.completed_at < cutoff_date,
-                        MessageQueue.status == QueueStatus.FAILED,
-                    )
+                statuses.append(QueueStatus.FAILED)
+
+            # Bulk DELETE — a single SQL statement.  Do NOT load the rows and
+            # delete them one-by-one: a real backlog (observed 157k rows, each
+            # carrying a large message_data payload) would pull gigabytes into
+            # memory and block the event loop for over a minute.
+            deleted_count = (
+                db.query(MessageQueue)
+                .filter(
+                    MessageQueue.completed_at < cutoff_date,
+                    MessageQueue.status.in_(statuses),
                 )
-                query = query.union(failed_query)
-
-            messages_to_delete = query.all()
-            deleted_count = len(messages_to_delete)
-
-            for message in messages_to_delete:
-                db.delete(message)
+                .delete(synchronize_session=False)
+            )
 
             if not session_provided:
                 db.commit()
@@ -79,7 +73,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to cleanup old messages: %s"), str(e))
+            logger.exception(_("Failed to cleanup old messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -120,7 +114,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to delete messages for host %s: %s"), host_id, e)
+            logger.exception(_("Failed to delete messages for host %s: %s"), host_id, e)
             return 0
         finally:
             if not session_provided:
@@ -193,7 +187,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to expire old messages: %s"), str(e))
+            logger.exception(_("Failed to expire old messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:
@@ -248,7 +242,7 @@ class QueueMaintenance:
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.error(_("Failed to delete failed messages: %s"), str(e))
+            logger.exception(_("Failed to delete failed messages: %s"), str(e))
             return 0
         finally:
             if not session_provided:

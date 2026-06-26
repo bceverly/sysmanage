@@ -62,8 +62,9 @@ class HostChild(Base):
         String(50), nullable=False
     )  # 'wsl', 'lxd', 'virtualbox', 'hyperv', 'vmm', 'bhyve', 'kvm'
 
-    # Alias for Cython modules that reference vm_type instead of child_type
+    # Aliases for Cython modules that reference vm_type/vm_name instead of child_type/child_name
     vm_type = synonym("child_type")
+    vm_name = synonym("child_name")
 
     # Distribution/OS info
     distribution = Column(String(100), nullable=True)

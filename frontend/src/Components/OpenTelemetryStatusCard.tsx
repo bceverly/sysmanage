@@ -52,13 +52,13 @@ const OpenTelemetryStatusCard: React.FC = () => {
     } catch (err: unknown) {
       console.error('Error fetching OpenTelemetry status:', err);
       const errorMessage = err && typeof err === 'object' && 'response' in err ?
-        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || 'Failed to fetch OpenTelemetry status' :
-        'Failed to fetch OpenTelemetry status';
+        (err as {response?: {data?: {detail?: string}}}).response?.data?.detail || t('telemetry.opentelemetry.fetchError', 'Failed to fetch OpenTelemetry status') :
+        t('telemetry.opentelemetry.fetchError', 'Failed to fetch OpenTelemetry status');
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchStatus();

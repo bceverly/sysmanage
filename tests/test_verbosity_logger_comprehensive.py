@@ -6,7 +6,6 @@ Tests the FlexibleLogger class and logging configuration.
 import logging
 from unittest.mock import Mock, patch
 
-import pytest
 
 from backend.utils.verbosity_logger import FlexibleLogger, get_logger
 
@@ -243,6 +242,20 @@ class TestFlexibleLogger:
 
     @patch("backend.utils.verbosity_logger.get_log_levels")
     @patch("backend.utils.verbosity_logger.get_log_format")
+    def test_exception_logging_enabled(self, mock_get_format, mock_get_levels):
+        """Test exception logging (ERROR level + traceback) when enabled."""
+        mock_get_levels.return_value = "INFO|ERROR"
+        mock_get_format.return_value = "%(message)s"
+
+        logger = FlexibleLogger("exception.test")
+        logger.logger.exception = Mock()
+
+        logger.exception("Boom: %s", "details")
+
+        logger.logger.exception.assert_called_once_with("Boom: %s", "details")
+
+    @patch("backend.utils.verbosity_logger.get_log_levels")
+    @patch("backend.utils.verbosity_logger.get_log_format")
     def test_critical_logging_enabled(self, mock_get_format, mock_get_levels):
         """Test critical logging when CRITICAL level is enabled."""
         mock_get_levels.return_value = "ERROR|CRITICAL"
@@ -298,7 +311,7 @@ class TestFlexibleLogger:
             mock_logger_instance.handlers = []
             mock_get_logger.return_value = mock_logger_instance
 
-            logger = FlexibleLogger("handler.test")
+            FlexibleLogger("handler.test")
 
             # Verify handler was added and configured
             mock_logger_instance.addHandler.assert_called_once()
@@ -317,7 +330,7 @@ class TestFlexibleLogger:
             mock_logger_instance.handlers = [Mock()]  # Existing handler
             mock_get_logger.return_value = mock_logger_instance
 
-            logger = FlexibleLogger("existing.handler")
+            FlexibleLogger("existing.handler")
 
             # Verify no additional handler was added
             mock_logger_instance.addHandler.assert_not_called()

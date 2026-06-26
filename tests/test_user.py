@@ -3,14 +3,11 @@ Comprehensive tests for backend/api/user.py module.
 Tests user management functionality for SysManage server.
 """
 
-import json
 from datetime import datetime, timezone
-from io import BytesIO
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from fastapi import HTTPException, UploadFile
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
 
 from backend.api.user import (
     User,
@@ -89,7 +86,6 @@ class MockSession:
 
     def refresh(self, obj):
         """Mock refresh method."""
-        pass
 
     def commit(self):
         self.committed = True

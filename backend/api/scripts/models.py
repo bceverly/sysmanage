@@ -22,7 +22,9 @@ class SavedScriptCreate(BaseModel):
     run_as_user: Optional[str] = None
 
     @validator("name")
-    def validate_name(cls, value):  # pylint: disable=no-self-argument
+    def validate_name(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if not value or len(value.strip()) == 0:
             raise ValueError(_("Script name cannot be empty"))
         if len(value) > 255:
@@ -30,14 +32,18 @@ class SavedScriptCreate(BaseModel):
         return value.strip()
 
     @validator("shell_type")
-    def validate_shell_type(cls, value):  # pylint: disable=no-self-argument
+    def validate_shell_type(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         allowed_shells = ["bash", "sh", "zsh", "powershell", "cmd", "ksh"]
         if value not in allowed_shells:
             raise ValueError(error_unsupported_shell_type().format(value))
         return value
 
     @validator("content")
-    def validate_content(cls, value):  # pylint: disable=no-self-argument
+    def validate_content(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if not value or len(value.strip()) == 0:
             raise ValueError(_("Script content cannot be empty"))
         return value
@@ -55,7 +61,9 @@ class SavedScriptUpdate(BaseModel):
     is_active: Optional[bool] = None
 
     @validator("name", pre=True)
-    def validate_name(cls, value):  # pylint: disable=no-self-argument
+    def validate_name(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if value is not None and (not value or len(value.strip()) == 0):
             raise ValueError(_("Script name cannot be empty"))
         if value is not None and len(value) > 255:
@@ -63,7 +71,9 @@ class SavedScriptUpdate(BaseModel):
         return value.strip() if value else None
 
     @validator("shell_type")
-    def validate_shell_type(cls, value):  # pylint: disable=no-self-argument
+    def validate_shell_type(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if value is not None:
             allowed_shells = ["bash", "sh", "zsh", "powershell", "cmd", "ksh"]
             if value not in allowed_shells:
@@ -71,7 +81,9 @@ class SavedScriptUpdate(BaseModel):
         return value
 
     @validator("content", pre=True)
-    def validate_content(cls, value):  # pylint: disable=no-self-argument
+    def validate_content(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         if value is not None and (not value or len(value.strip()) == 0):
             raise ValueError(_("Script content cannot be empty"))
         return value
@@ -88,7 +100,9 @@ class ScriptExecutionRequest(BaseModel):
     run_as_user: Optional[str] = None
 
     @validator("host_id", pre=True)
-    def validate_host_id(cls, value):  # pylint: disable=no-self-argument
+    def validate_host_id(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert integer host_id to string for test compatibility."""
         if isinstance(value, int):
             return str(value)
@@ -108,7 +122,7 @@ class ScriptExecutionRequest(BaseModel):
     @validator("shell_type")
     def validate_shell_type_for_adhoc(
         cls, value, values
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         saved_script_id = values.get("saved_script_id")
         if not saved_script_id and not value:
             raise ValueError(_("shell_type is required for ad-hoc scripts"))

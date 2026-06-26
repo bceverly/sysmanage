@@ -3,9 +3,6 @@ Tests for backend/startup/exception_handlers.py module.
 Tests exception handlers for the FastAPI application.
 """
 
-from unittest.mock import MagicMock, patch
-
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from starlette.exceptions import HTTPException as StarletteHTTPException

@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
-import { useColumnVisibility } from '../Hooks/useColumnVisibility';
+import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -155,7 +155,7 @@ const Users = () => {
         } catch (error) {
             console.error('Error deleting users:', error);
         }
-    }
+    };
 
     const updateUserInTable = (updatedUser: SysManageUser) => {
         setTableData(prevData =>
@@ -181,7 +181,7 @@ const Users = () => {
         // Wait for all operations to complete, then clear selection
         await Promise.all(promises);
         setSelection([]);
-    }
+    };
 
     const handleLock = async () => {
         // Call the API to lock the selected rows
@@ -201,7 +201,7 @@ const Users = () => {
         // Wait for all operations to complete, then clear selection
         await Promise.all(promises);
         setSelection([]);
-    }
+    };
 
     const getSelectedUsersLockStatus = () => {
         const selectedUsers = filteredData.filter(user =>

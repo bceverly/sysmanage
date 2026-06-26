@@ -36,13 +36,13 @@ const ReportViewer: React.FC = () => {
     } catch (error: unknown) {
       console.error('Error fetching report:', error);
       const errorMessage = error && typeof error === 'object' && 'response' in error
-        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Failed to load report'
-        : 'Failed to load report';
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || t('reportViewer.loadError', 'Failed to load report')
+        : t('reportViewer.loadError', 'Failed to load report');
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [reportId]);
+  }, [reportId, t]);
 
   useEffect(() => {
     if (reportId) {
@@ -78,9 +78,9 @@ const ReportViewer: React.FC = () => {
     } catch (error: unknown) {
       console.error('Error generating PDF:', error);
       const errorMessage = error && typeof error === 'object' && 'response' in error
-        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Unknown error'
-        : 'Unknown error';
-      alert(`Error generating PDF: ${errorMessage}`);
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || t('reportViewer.unknownError', 'Unknown error')
+        : t('reportViewer.unknownError', 'Unknown error');
+      alert(t('reportViewer.pdfError', 'Error generating PDF: {{message}}', { message: errorMessage }));
     }
   };
 
@@ -176,7 +176,7 @@ const ReportViewer: React.FC = () => {
             border: 'none',
             minHeight: '600px'
           }}
-          title="Report Content"
+          title={t('reportViewer.iframeTitle', 'Report Content')}
         />
       </Box>
     </Box>

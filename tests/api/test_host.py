@@ -3,10 +3,6 @@ Unit tests for host management API endpoints.
 Tests all host CRUD operations and registration endpoints.
 """
 
-from datetime import datetime, timezone
-
-import pytest
-
 from backend.persistence import models
 
 
@@ -364,7 +360,7 @@ class TestHostRegister:
             "ipv6": "2001:db8::150",
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -404,7 +400,7 @@ class TestHostRegister:
             "ipv6": "2001:db8::101",  # Updated IP
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -426,7 +422,7 @@ class TestHostRegister:
             "hostname": "minimal",
         }
 
-        response = client.post("/host/register", json=registration_data)
+        response = client.post("/api/host/register", json=registration_data)
 
         assert response.status_code == 200
         data = response.json()
@@ -447,19 +443,19 @@ class TestHostRegister:
         """Test host registration with missing required fields."""
         # Missing FQDN
         response = client.post(
-            "/host/register", json={"active": True, "hostname": "test"}
+            "/api/host/register", json={"active": True, "hostname": "test"}
         )
         assert response.status_code == 422
 
         # Missing hostname
         response = client.post(
-            "/host/register", json={"active": True, "fqdn": "test.example.com"}
+            "/api/host/register", json={"active": True, "fqdn": "test.example.com"}
         )
         assert response.status_code == 422
 
         # Missing active flag
         response = client.post(
-            "/host/register", json={"fqdn": "test.example.com", "hostname": "test"}
+            "/api/host/register", json={"fqdn": "test.example.com", "hostname": "test"}
         )
         assert response.status_code == 422
 
@@ -467,7 +463,7 @@ class TestHostRegister:
         """Test host registration with invalid data types."""
         # Invalid active field (should be boolean) - use a value that won't coerce
         response = client.post(
-            "/host/register",
+            "/api/host/register",
             json={
                 "active": ["invalid"],  # Array won't coerce to boolean
                 "fqdn": "test.example.com",
@@ -478,7 +474,7 @@ class TestHostRegister:
 
         # Empty FQDN - API accepts empty strings
         response = client.post(
-            "/host/register", json={"active": True, "fqdn": "", "hostname": "test"}
+            "/api/host/register", json={"active": True, "fqdn": "", "hostname": "test"}
         )
         assert response.status_code == 200
 
@@ -933,3 +929,95 @@ class TestHostUpdateCounts:
                 assert host_data["security_updates_count"] == 0
                 assert host_data["system_updates_count"] == 0
                 assert host_data["total_updates_count"] == 0
+
+
+class TestHostRegisterTenantRouting:
+    """Phase 13.1 #2: ``/host/register`` must create the host row in the
+    ENROLLING tenant's database (resolved from the enrollment token), not the
+    bootstrap DB, so the per-tenant queue processor can find it.  The test
+    harness runs a single in-memory engine, so we spy the routing seam: a
+    resolved tenant must drive host creation through
+    ``resolve_engine(PARTITION_TENANT, tenant_id)`` and record the host→tenant
+    binding."""
+
+    def test_register_routes_host_creation_to_tenant_engine(
+        self, client, session, monkeypatch
+    ):
+        from backend.persistence import db as db_module
+        from backend.persistence import partitions
+
+        resolve_calls = []
+        bind_calls = []
+
+        def spy_resolve_engine(partition, tenant_id=None):
+            resolve_calls.append((partition, tenant_id))
+            # Single-engine harness: the test DB doubles as the tenant DB.
+            return db_module.get_engine()
+
+        # A valid token resolves to a tenant (the licensed engine's job).
+        monkeypatch.setattr(
+            "backend.api.host._resolve_enrollment_tenant",
+            lambda token: "tenant-abc" if token else None,
+        )
+        monkeypatch.setattr(partitions, "resolve_engine", spy_resolve_engine)
+        monkeypatch.setattr(
+            "backend.services.host_tenant_index.bind_host_to_tenant",
+            lambda host_id, tenant_id: bind_calls.append((str(host_id), tenant_id))
+            or True,
+        )
+
+        resp = client.post(
+            "/api/host/register",
+            json={
+                "active": True,
+                "fqdn": "tenant-host.example.com",
+                "hostname": "tenant-host",
+                "ipv4": "10.0.0.5",
+                "enrollment_token": "sme_fake_token",
+            },
+        )
+
+        assert resp.status_code == 200
+        # Core routing decision: host creation bound to the TENANT engine for
+        # the token's tenant.
+        assert (partitions.PARTITION_TENANT, "tenant-abc") in resolve_calls
+        # And the host→tenant binding was recorded for the created host.
+        assert len(bind_calls) == 1
+        assert bind_calls[0][1] == "tenant-abc"
+        created = (
+            session.query(models.Host)
+            .filter(models.Host.fqdn == "tenant-host.example.com")
+            .first()
+        )
+        assert created is not None
+        assert str(created.id) == bind_calls[0][0]
+
+    def test_register_without_token_stays_server_scoped(
+        self, client, session, monkeypatch
+    ):
+        """Inert path: no enrollment token → no tenant binding is recorded and
+        the host is created server-scoped (unchanged single-tenant behaviour)."""
+        bind_calls = []
+        monkeypatch.setattr(
+            "backend.services.host_tenant_index.bind_host_to_tenant",
+            lambda host_id, tenant_id: bind_calls.append((host_id, tenant_id)) or True,
+        )
+
+        resp = client.post(
+            "/api/host/register",
+            json={
+                "active": True,
+                "fqdn": "server-host.example.com",
+                "hostname": "server-host",
+                "ipv4": "10.0.0.6",
+            },
+        )
+
+        assert resp.status_code == 200
+        assert bind_calls == []
+        assert (
+            session.query(models.Host)
+            .filter(models.Host.fqdn == "server-host.example.com")
+            .first()
+            is not None
+        )

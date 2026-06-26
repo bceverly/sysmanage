@@ -15,34 +15,29 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
+from backend.api.child_host_creation_dispatch import try_plan_based_creation
 from backend.api.child_host_models import CreateWslChildHostRequest
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
-from backend.api.child_host_virtualization_enable import (
-    router as enable_router,
-)
-from backend.api.child_host_virtualization_status import (
-    router as status_router,
-)
+from backend.api.child_host_virtualization_enable import router as enable_router
+from backend.api.child_host_virtualization_status import router as status_router
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.config.config import get_config
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.utils.password_hash import hash_password_for_os
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
 
 # Main router that includes sub-routers
 router = APIRouter()
-queue_ops = QueueOperations()
 
 # Include status endpoints router
 router.include_router(status_router)
@@ -65,8 +60,48 @@ def _check_container_module():
 
 
 def _parse_agent_install_commands(distribution):
-    """Parse agent_install_commands from a distribution record."""
-    if not distribution or not distribution.agent_install_commands:
+    """Resolve the per-distro agent-install command list.
+
+    Phase 11.8 sets the architectural rule that ``virtualization_engine``
+    is the single source of truth for these commands — the engine's
+    ``_AGENT_INSTALL`` dispatch table emits the canonical PPA / Copr /
+    OBS / winget / brew recipes per distro, version-templated where
+    relevant.  This function calls into the engine first and falls
+    back to the ``ChildHostDistribution.agent_install_commands`` DB
+    column only when the engine is unavailable (OSS-only deployment)
+    or returns nothing (unknown distro).
+
+    Why bypass the DB row when the engine has an answer?  Because
+    seeded DB rows drift — they get populated once and then quietly
+    fall behind when the install recipe changes (Phase 11.8 PPA
+    migration is the example: the table seed still carried the
+    legacy direct-download path months after the engine was wired
+    for PPA install).  Routing reads through the engine first makes
+    the engine's dispatch table authoritative; the DB column becomes
+    a back-compat fallback that engine-aware deployments never touch.
+    """
+    if not distribution:
+        return []
+
+    # Preferred path: engine-resolved commands.  ``distribution_name``
+    # and ``distribution_version`` on the row hold the canonical strings
+    # (e.g. "Ubuntu" + "24.04" or "openSUSE Leap" + "15.6") that the
+    # engine's ``_normalize_distro_id`` helper consumes.
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            engine_cmds = virt_engine.get_agent_install_commands(
+                getattr(distribution, "distribution_name", "") or "",
+                getattr(distribution, "distribution_version", "") or "",
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            engine_cmds = []
+        if engine_cmds:
+            return list(engine_cmds)
+
+    # Fallback: DB-seeded commands.  Same parsing as before — string
+    # JSON or already-decoded list, anything else → empty.
+    if not distribution.agent_install_commands:
         return []
     if isinstance(distribution.agent_install_commands, str):
         try:
@@ -78,22 +113,274 @@ def _parse_agent_install_commands(distribution):
     return []
 
 
+def _distribution_to_dict(distribution):
+    """Convert a ``ChildHostDistribution`` row into a plain dict for the engine."""
+    if distribution is None:
+        return None
+    return {
+        "cloud_image_url": getattr(distribution, "cloud_image_url", None),
+        "install_identifier": getattr(distribution, "install_identifier", None),
+        "distribution_name": getattr(distribution, "distribution_name", None),
+        "distribution_version": getattr(distribution, "distribution_version", None),
+    }
+
+
 def _get_cloud_image_url(distribution):
-    """Get cloud image URL from a distribution record, with HTTPS fallback."""
-    if distribution and distribution.cloud_image_url:
+    """Resolve the cloud image URL for a distribution row.
+
+    Delegates to the Pro+ ``virtualization_engine.get_cloud_image_url`` so the
+    interpretation of distribution-row fields lives with the (proprietary)
+    seed data those rows hold.  Falls back to inline logic when the engine
+    isn't loaded — this branch only exists defensively; route-level guards
+    elsewhere already ensure Pro+ is loaded before reaching this code path.
+    """
+    if distribution is None:
+        return None
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            return (
+                virt_engine.get_cloud_image_url(_distribution_to_dict(distribution))
+                or None
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Engine raised — fall through to inline fallback below.
+            pass  # nosec B110 - engine optional; OSS fallback below
+    if distribution.cloud_image_url:
         return distribution.cloud_image_url
-    if distribution and distribution.install_identifier:
-        # Fallback: use install_identifier if it's an HTTPS URL
+    if distribution.install_identifier:
         if distribution.install_identifier.startswith("https://"):
             return distribution.install_identifier
     return None
+
+
+def _validate_platform_for_child_type(host, child_type):
+    """Validate that the host platform supports the requested child type."""
+    if child_type == "wsl":
+        if not host.platform or "Windows" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("WSL is only supported on Windows hosts"),
+            )
+    elif child_type == "kvm":
+        if not host.platform or "Linux" not in host.platform:
+            raise HTTPException(
+                status_code=400,
+                detail=_("KVM is only supported on Linux hosts"),
+            )
+
+
+def _determine_child_name(request):
+    """Determine the child host name based on child type and request fields."""
+    name_configs = {
+        "lxd": (
+            "container_name",
+            _("Container name is required for LXD containers"),
+        ),
+        "vmm": (
+            "vm_name",
+            _("VM name is required for VMM virtual machines"),
+        ),
+        "kvm": (
+            "vm_name",
+            _("VM name is required for KVM virtual machines"),
+        ),
+        "bhyve": (
+            "vm_name",
+            _("VM name is required for bhyve virtual machines"),
+        ),
+    }
+
+    config = name_configs.get(request.child_type)
+    if config:
+        field_name, error_message = config
+        child_name = getattr(request, field_name, None)
+        if not child_name:
+            raise HTTPException(status_code=400, detail=error_message)
+        return child_name
+
+    # WSL uses distribution as the name
+    return request.distribution
+
+
+def _resolve_server_url(api_host):
+    """Resolve a routable server URL for child host agent configuration.
+
+    If the API host is a listen-all or loopback address, determine the
+    actual routable IP so child hosts (e.g. LXD containers) can connect
+    back to the server.
+    """
+    if api_host not in (
+        "0.0.0.0",  # nosec B104  # string comparison, not binding
+        "localhost",
+        "127.0.0.1",
+    ):
+        return api_host
+
+    import socket
+
+    server_url = "localhost"
+    try:
+        fqdn = socket.getfqdn()
+        resolved_ip = socket.gethostbyname(fqdn)
+        if not resolved_ip.startswith("127."):
+            return resolved_ip
+        # FQDN resolves to loopback; detect actual outbound IP using a
+        # UDP socket.  connect() on SOCK_DGRAM merely selects the route
+        # — no packet is sent, so the destination address is irrelevant.
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            sock.connect(("8.8.8.8", 80))  # NOSONAR  # nosec B104
+            server_url = sock.getsockname()[0]
+        finally:
+            sock.close()
+    except Exception:  # nosec B110
+        pass
+
+    return server_url
+
+
+def _hash_child_password(request):
+    """Hash the password using the appropriate format for the child type."""
+    # VMM/KVM/bhyve use OS-specific hash format (SHA-512 crypt or bcrypt)
+    if request.child_type in ("vmm", "kvm", "bhyve"):
+        return hash_password_for_os(request.password, request.distribution or "")
+    # WSL and LXD use bcrypt
+    return bcrypt.hashpw(
+        request.password.encode("utf-8"), bcrypt.gensalt(rounds=12)
+    ).decode("utf-8")
+
+
+def _add_vmm_params(params, request):
+    """Add VMM-specific parameters (vm_name, iso_url, root_password_hash)."""
+    params["vm_name"] = request.vm_name
+    if request.iso_url:
+        params["iso_url"] = request.iso_url
+    root_pwd = request.root_password or request.password
+    params["root_password_hash"] = hash_password_for_os(
+        root_pwd, request.distribution or ""
+    )
+
+
+def _detect_autoinstall_mode(distribution):
+    """Determine which engine autoinstall mode applies to a distribution.
+
+    Delegates to ``virtualization_engine.detect_autoinstall_mode`` (Pro+),
+    with an inline fallback for safety when Pro+ isn't loaded.
+    """
+    if distribution is None:
+        return ""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    if virt_engine is not None:
+        try:
+            return (
+                virt_engine.detect_autoinstall_mode(_distribution_to_dict(distribution))
+                or ""
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass  # nosec B110 - engine optional; OSS heuristic below
+    if not distribution.install_identifier:
+        return ""
+    install_id = distribution.install_identifier.lower()
+    if not install_id.endswith(".iso"):
+        return ""
+    name = (distribution.distribution_name or "").lower()
+    if "debian" in name:
+        return "preseed"
+    if "ubuntu" in name:
+        return "ubuntu_autoinstall"
+    if "alpine" in name:
+        return "alpine_apkovl"
+    return ""
+
+
+def _request_attr(request, name: str) -> str:
+    """Safely read an optional string attr off the request, defaulting to ''."""
+    return getattr(request, name, "") or ""
+
+
+def _populate_autoinstall_params(params, request, distribution) -> None:
+    """Forward autoinstall-mode + ISO URL + network triple defaults.
+
+    Only fires when the distribution's ``install_identifier`` looks like an
+    .iso (Debian netinst / Ubuntu Server / Alpine).  Network triple
+    defaults are pulled off the request when present; the engine fills in
+    its own fallbacks otherwise.
+    """
+    autoinstall_mode = _detect_autoinstall_mode(distribution)
+    if not autoinstall_mode:
+        return
+    params["autoinstall_mode"] = autoinstall_mode
+    params["install_iso_url"] = distribution.install_identifier
+    params.setdefault("vm_ip", _request_attr(request, "vm_ip"))
+    params.setdefault("gateway_ip", _request_attr(request, "gateway_ip"))
+    params.setdefault("dns_server", _request_attr(request, "dns_server"))
+
+
+def _add_cloud_vm_params(params, request, distribution, mem, disk, cpus):
+    """Add cloud VM parameters for KVM/bhyve."""
+    params["vm_name"] = request.vm_name
+    params["memory"] = request.memory or mem
+    params["disk_size"] = request.disk_size or disk
+    params["cpus"] = request.cpus or cpus
+    cloud_image_url = _get_cloud_image_url(distribution)
+    if cloud_image_url:
+        params["cloud_image_url"] = cloud_image_url
+    # The Pro+ virtualization_engine cloud-init renderer branches on the
+    # distribution string (FreeBSD vs Linux) to pick shell, package
+    # names, and service-control commands.  Forward the human-readable
+    # distribution name so it can detect FreeBSD/etc.
+    if distribution and distribution.distribution_name:
+        params["distribution_label"] = distribution.distribution_name
+
+    _populate_autoinstall_params(params, request, distribution)
+
+
+def _build_command_params(
+    request,
+    password_hash,
+    agent_install_commands,
+    server_url,
+    api_port,
+    use_https,
+    new_child_id,
+    auto_approve_token,
+    distribution,
+):
+    """Build the command parameters dict for child host creation."""
+    params = {
+        "child_type": request.child_type,
+        "distribution": request.distribution,
+        "hostname": request.hostname,
+        "username": request.username,
+        "password_hash": password_hash,
+        "agent_install_commands": agent_install_commands,
+        "server_url": server_url,
+        "server_port": api_port,
+        "use_https": use_https,
+        "child_host_id": str(new_child_id),
+    }
+
+    if request.child_type == "lxd":
+        params["container_name"] = request.container_name
+    elif request.child_type == "vmm":
+        _add_vmm_params(params, request)
+    elif request.child_type == "kvm":
+        _add_cloud_vm_params(params, request, distribution, "2G", "20G", 2)
+    elif request.child_type == "bhyve":
+        _add_cloud_vm_params(params, request, distribution, "1G", "20G", 1)
+
+    if auto_approve_token:
+        params["auto_approve_token"] = auto_approve_token
+
+    return params
 
 
 @router.post(
     "/host/{host_id}/virtualization/create-child",
     dependencies=[Depends(JWTBearer())],
 )
-async def create_child_host_request(  # NOSONAR
+async def create_child_host_request(
     host_id: str,
     request: CreateWslChildHostRequest,
     current_user: str = Depends(get_current_user),
@@ -104,31 +391,20 @@ async def create_child_host_request(  # NOSONAR
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; child-host data + audit are tenant-scoped.  The
+    # ref session serves ChildHostDistribution, which is server-global reference
+    # data with no copy in the tenant database; keep it open for the whole
+    # handler so the loaded distribution row stays attached.
+    user = authorize_on_main(current_user, SecurityRoles.CREATE_CHILD_HOST)
+    session_local = request_sessionmaker()
+    ref_local = sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())
 
-    with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.CREATE_CHILD_HOST
-        )
-
+    with session_local() as session, ref_local() as ref_session:
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
         # Verify platform compatibility for child type
-        if request.child_type == "wsl":
-            if not host.platform or "Windows" not in host.platform:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("WSL is only supported on Windows hosts"),
-                )
-        elif request.child_type == "kvm":
-            if not host.platform or "Linux" not in host.platform:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("KVM is only supported on Linux hosts"),
-                )
+        _validate_platform_for_child_type(host, request.child_type)
 
         # Verify the agent is privileged
         if not host.is_agent_privileged:
@@ -141,38 +417,7 @@ async def create_child_host_request(  # NOSONAR
             )
 
         # Determine the child name based on type
-        # For LXD, use container_name; for VMM/KVM, use vm_name; for WSL, use distribution
-        if request.child_type == "lxd":
-            child_name = request.container_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("Container name is required for LXD containers"),
-                )
-        elif request.child_type == "vmm":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for VMM virtual machines"),
-                )
-        elif request.child_type == "kvm":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for KVM virtual machines"),
-                )
-        elif request.child_type == "bhyve":
-            child_name = request.vm_name
-            if not child_name:
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("VM name is required for bhyve virtual machines"),
-                )
-        else:
-            # WSL uses distribution as the name
-            child_name = request.distribution
+        child_name = _determine_child_name(request)
 
         # Check for existing child host with same name
         existing = (
@@ -192,10 +437,10 @@ async def create_child_host_request(  # NOSONAR
                 % child_name,
             )
 
-        # Look up the distribution to get agent install commands
-        # Match by install_identifier which is like "Ubuntu-24.04"
+        # Look up the distribution to get agent install commands (server-global
+        # reference data — read on the bootstrap engine via ref_session).
         distribution = (
-            session.query(ChildHostDistribution)
+            ref_session.query(ChildHostDistribution)
             .filter(
                 ChildHostDistribution.child_type == request.child_type,
                 ChildHostDistribution.install_identifier == request.distribution,
@@ -210,26 +455,10 @@ async def create_child_host_request(  # NOSONAR
         config = get_config()
         api_host = config["api"].get("host", "localhost")
         api_port = config["api"].get("port", 8443)
-
-        # Determine if server is using HTTPS (based on SSL certificate config)
         key_file = config["api"].get("keyFile")
         cert_file = config["api"].get("certFile")
         use_https = bool(key_file and cert_file)
-
-        # Use the actual server FQDN for the agent to connect back
-        if api_host in (
-            "0.0.0.0",
-            "localhost",
-            "127.0.0.1",
-        ):  # nosec B104  # string comparison, not binding
-            import socket
-
-            try:
-                server_url = socket.getfqdn()
-            except Exception:
-                server_url = "localhost"
-        else:
-            server_url = api_host
+        server_url = _resolve_server_url(api_host)
 
         # Generate auto-approve token if requested
         auto_approve_token = None
@@ -237,7 +466,6 @@ async def create_child_host_request(  # NOSONAR
             auto_approve_token = str(uuid.uuid4())
 
         # Create a placeholder HostChild record with "creating" status
-        # This provides immediate feedback in the UI while the agent works
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         new_child = models.HostChild(
             parent_host_id=host_id,
@@ -255,125 +483,25 @@ async def create_child_host_request(  # NOSONAR
             updated_at=now,
         )
         session.add(new_child)
-        session.flush()  # Get the ID assigned
+        session.flush()
 
-        # Hash password before sending to agent (security: avoid clear text in transit)
-        # Use appropriate hash format based on target OS:
-        # - Debian/Ubuntu: SHA-512 crypt ($6$...) for preseed/cloud-init
-        # - Alpine/OpenBSD: bcrypt ($2b$...)
-        # - WSL: bcrypt (default)
-        if request.child_type in ("vmm", "kvm", "bhyve"):
-            # VMM/KVM/bhyve use OS-specific hash format
-            password_hash = hash_password_for_os(
-                request.password, request.distribution or ""
-            )
-        else:
-            # WSL and LXD use bcrypt
-            password_hash = bcrypt.hashpw(
-                request.password.encode("utf-8"), bcrypt.gensalt(rounds=12)
-            ).decode("utf-8")
+        password_hash = _hash_child_password(request)
+        command_params = _build_command_params(
+            request,
+            password_hash,
+            agent_install_commands,
+            server_url,
+            api_port,
+            use_https,
+            new_child.id,
+            auto_approve_token,
+            distribution,
+        )
 
-        # Queue a command to create the child host
-        command_params = {
-            "child_type": request.child_type,
-            "distribution": request.distribution,
-            "hostname": request.hostname,
-            "username": request.username,
-            "password_hash": password_hash,  # Send hashed, not clear text
-            "agent_install_commands": agent_install_commands,
-            "server_url": server_url,
-            "server_port": api_port,
-            "use_https": use_https,
-            "child_host_id": str(new_child.id),  # Pass ID for status updates
-        }
-        # For LXD, include container_name
-        if request.child_type == "lxd":
-            command_params["container_name"] = request.container_name
+        if not try_plan_based_creation(request, command_params, host_id, session):
+            raise_engine_declined()
 
-        # For VMM, include vm_name, iso_url, and root_password_hash
-        if request.child_type == "vmm":
-            command_params["vm_name"] = request.vm_name
-            if request.iso_url:
-                command_params["iso_url"] = request.iso_url
-            # VMM needs separate root password - use OS-appropriate hash
-            root_pwd = (
-                request.root_password if request.root_password else request.password
-            )
-            root_password_hash = hash_password_for_os(
-                root_pwd, request.distribution or ""
-            )
-            command_params["root_password_hash"] = root_password_hash
-
-        # For KVM, include vm_name, cloud_image_url, memory, disk_size, cpus
-        if request.child_type == "kvm":
-            command_params["vm_name"] = request.vm_name
-            command_params["memory"] = request.memory or "2G"
-            command_params["disk_size"] = request.disk_size or "20G"
-            command_params["cpus"] = request.cpus or 2
-            cloud_image_url = _get_cloud_image_url(distribution)
-            if cloud_image_url:
-                command_params["cloud_image_url"] = cloud_image_url
-
-        # For bhyve, include vm_name, cloud_image_url, memory, disk_size, cpus
-        if request.child_type == "bhyve":
-            command_params["vm_name"] = request.vm_name
-            command_params["memory"] = request.memory or "1G"
-            command_params["disk_size"] = request.disk_size or "20G"
-            command_params["cpus"] = request.cpus or 1
-            cloud_image_url = _get_cloud_image_url(distribution)
-            if cloud_image_url:
-                command_params["cloud_image_url"] = cloud_image_url
-
-        # Include auto_approve_token if set
-        if auto_approve_token:
-            command_params["auto_approve_token"] = auto_approve_token
-
-        # Try plan-based creation for LXD/WSL if container_engine supports it
-        used_plan_based = False
-        if request.child_type in ("lxd", "wsl"):
-            try:
-                container_engine = module_loader.get_module("container_engine")
-                if container_engine is not None:
-                    service_cls = getattr(
-                        container_engine, "ContainerEngineServiceImpl", None
-                    )
-                    if service_cls and hasattr(
-                        service_cls, "create_container_with_plan"
-                    ):
-                        import logging as _logging
-
-                        _ce_logger = _logging.getLogger("container_engine")
-                        service = service_cls(
-                            db=session, models=models, logger=_ce_logger
-                        )
-                        steps = service.create_container_with_plan(
-                            child_type=request.child_type,
-                            params=command_params,
-                            host_id=host_id,
-                            db_session=session,
-                        )
-                        if steps is not None:
-                            used_plan_based = True
-            except Exception:
-                pass  # Fall through to legacy path
-
-        if not used_plan_based:
-            command_message = create_command_message(
-                command_type="create_child_host",
-                parameters=command_params,
-            )
-
-            queue_ops.enqueue_message(
-                message_type="command",
-                message_data=command_message,
-                direction=QueueDirection.OUTBOUND,
-                host_id=host_id,
-                db=session,
-            )
-
-        # Log the action with full details for debugging
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -400,7 +528,6 @@ async def create_child_host_request(  # NOSONAR
 
         session.commit()
 
-        # Build response message based on auto-approve setting
         if auto_approve_token:
             response_message = _(
                 "Child host creation requested. This may take several minutes. "

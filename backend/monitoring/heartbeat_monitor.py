@@ -8,55 +8,52 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from backend.config.config import get_heartbeat_timeout_minutes
-from backend.persistence.db import get_db
 from backend.persistence.models import Host
+from backend.persistence.partitions import iter_host_databases
 
 logger = logging.getLogger(__name__)
 
 
+def _mark_stale_hosts_down(db, timeout_threshold, label):
+    """Mark approved hosts in ``db`` that missed the heartbeat window as down.
+
+    Only approved hosts are marked — pending hosts are expected to have comms
+    gaps while awaiting approval."""
+    stale_hosts = (
+        db.query(Host)
+        .filter(Host.last_access < timeout_threshold)
+        .filter(Host.status == "up")
+        .filter(Host.approval_status == "approved")
+        .all()
+    )
+    for host in stale_hosts:
+        logger.info(
+            "Marking host %s as down due to heartbeat timeout (%s)", host.fqdn, label
+        )
+        host.status = "down"
+        host.active = False
+    if stale_hosts:
+        db.commit()
+        logger.info("Marked %s hosts as down (%s)", len(stale_hosts), label)
+
+
 async def check_host_heartbeats():  # NOSONAR
-    """
-    Check for hosts that haven't sent heartbeats within the timeout period
-    and mark them as down.
-    """
-    try:
-        db = next(get_db())
-    except Exception as e:
-        logger.error("Failed to get database connection: %s", e)
-        return
-
-    try:
-        timeout_minutes = get_heartbeat_timeout_minutes()
-        # Use naive UTC time to match how last_access is stored (as naive UTC)
-        timeout_threshold = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
-            minutes=timeout_minutes
-        )
-
-        # Find approved hosts that haven't been seen within the timeout period
-        # Only approved hosts should be marked as down - pending hosts are expected
-        # to have gaps in communication while awaiting approval
-        stale_hosts = (
-            db.query(Host)
-            .filter(Host.last_access < timeout_threshold)
-            .filter(Host.status == "up")
-            .filter(Host.approval_status == "approved")
-            .all()
-        )
-
-        for host in stale_hosts:
-            logger.info("Marking host %s as down due to heartbeat timeout", host.fqdn)
-            host.status = "down"
-            host.active = False
-
-        if stale_hosts:
-            db.commit()
-            logger.info("Marked %s hosts as down", len(stale_hosts))
-
-    except Exception as e:
-        logger.error("Error checking host heartbeats: %s", e)
-        db.rollback()
-    finally:
-        db.close()
+    """Mark approved hosts that missed the heartbeat window as down, across the
+    bootstrap DB and every provisioned tenant DB.  Each database is handled
+    independently so one failure can't stall the rest."""
+    for label, _tenant_id, db in iter_host_databases():
+        try:
+            timeout_minutes = get_heartbeat_timeout_minutes()
+            # Naive UTC to match how last_access is stored.
+            timeout_threshold = datetime.now(timezone.utc).replace(
+                tzinfo=None
+            ) - timedelta(minutes=timeout_minutes)
+            _mark_stale_hosts_down(db, timeout_threshold, label)
+        except Exception as e:  # noqa: BLE001
+            logger.exception("Error checking host heartbeats (%s): %s", label, e)
+            db.rollback()
+        finally:
+            db.close()
 
 
 async def heartbeat_monitor_service():
@@ -71,6 +68,6 @@ async def heartbeat_monitor_service():
             # Check every minute
             await asyncio.sleep(60)
         except Exception as e:
-            logger.error("Error in heartbeat monitor service: %s", e)
+            logger.exception("Error in heartbeat monitor service: %s", e)
             # Wait a bit before retrying
             await asyncio.sleep(30)

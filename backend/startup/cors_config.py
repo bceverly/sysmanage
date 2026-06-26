@@ -163,7 +163,9 @@ def get_cors_origins(web_ui_port, backend_api_port):  # NOSONAR
                 except Exception as e:
                     logger.warning("Failed to get local IP via socket fallback: %s", e)
             else:
-                logger.info("CI mode detected - skipping socket fallback method")
+                logger.info(
+                    "CI mode detected - skipping socket fallback method"
+                )  # lgtm[py/unreachable-statement]
         except Exception as e:
             logger.warning("Failed to get all network interface IPs: %s", e)
 

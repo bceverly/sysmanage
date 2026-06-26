@@ -2,7 +2,6 @@
 This module houses the API routes for user preferences management in SysManage.
 """
 
-import json
 import logging
 import uuid
 from datetime import datetime, timezone
@@ -17,7 +16,8 @@ from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence import models
 from backend.persistence.db import get_db
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
+from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class DataGridColumnPreferenceRequest(BaseModel):
     @validator("grid_identifier")
     def validate_grid_identifier(
         cls, grid_identifier
-    ):  # pylint: disable=no-self-argument
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate grid identifier."""
         if not grid_identifier or grid_identifier.strip() == "":
             raise ValueError(_("Grid identifier is required"))
@@ -53,7 +53,9 @@ class DataGridColumnPreferenceResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", "user_id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID objects to strings."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -105,7 +107,7 @@ async def get_column_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting column preferences: %s", e)
+        logger.exception("Error getting column preferences: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve column preferences: %s") % str(e),
@@ -159,8 +161,8 @@ async def update_column_preferences(
 
         logger.info(
             "Column preferences updated for user %s, grid %s",
-            current_user,
-            preference_request.grid_identifier,
+            sanitize_log(current_user),
+            sanitize_log(preference_request.grid_identifier),
         )
 
         # Log audit entry for column preference update
@@ -189,7 +191,7 @@ async def update_column_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating column preferences: %s", e)
+        logger.exception("Error updating column preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -228,8 +230,8 @@ async def delete_column_preferences(
 
             logger.info(
                 "Column preferences deleted for user %s, grid %s",
-                current_user,
-                grid_identifier,
+                sanitize_log(current_user),
+                sanitize_log(grid_identifier),
             )
 
             # Log audit entry for column preference deletion
@@ -248,7 +250,7 @@ async def delete_column_preferences(
         return {"message": _("No preferences found to delete")}
 
     except Exception as e:
-        logger.error("Error deleting column preferences: %s", e)
+        logger.exception("Error deleting column preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,
@@ -311,7 +313,7 @@ async def get_dashboard_card_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting dashboard card preferences: %s", e)
+        logger.exception("Error getting dashboard card preferences: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve dashboard card preferences: %s") % str(e),
@@ -334,25 +336,27 @@ async def update_dashboard_card_preferences(
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        # Process each preference
-        for pref in preference_request.preferences:
-            # Check if preference already exists
-            existing_pref = (
-                db.query(models.UserDashboardCardPreference)
-                .filter(
-                    models.UserDashboardCardPreference.user_id == user.id,
-                    models.UserDashboardCardPreference.card_identifier
-                    == pref.card_identifier,
-                )
-                .first()
+        # Bulk-fetch existing preferences for this user in one query
+        # rather than one ``.first()`` per card (flagged in the Phase 6
+        # N+1 audit).
+        card_ids = [p.card_identifier for p in preference_request.preferences]
+        existing_by_card = {
+            row.card_identifier: row
+            for row in db.query(models.UserDashboardCardPreference)
+            .filter(
+                models.UserDashboardCardPreference.user_id == user.id,
+                models.UserDashboardCardPreference.card_identifier.in_(card_ids),
             )
+            .all()
+        }
+
+        for pref in preference_request.preferences:
+            existing_pref = existing_by_card.get(pref.card_identifier)
 
             if existing_pref:
-                # Update existing preference
                 existing_pref.visible = pref.visible
                 existing_pref.updated_at = now
             else:
-                # Create new preference
                 new_pref = models.UserDashboardCardPreference(
                     user_id=user.id,
                     card_identifier=pref.card_identifier,
@@ -364,7 +368,9 @@ async def update_dashboard_card_preferences(
 
         db.commit()
 
-        logger.info("Dashboard card preferences updated for user %s", current_user)
+        logger.info(
+            "Dashboard card preferences updated for user %s", sanitize_log(current_user)
+        )
 
         # Log audit entry for dashboard card preferences update
         AuditService.log_update(
@@ -400,7 +406,7 @@ async def update_dashboard_card_preferences(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error updating dashboard card preferences: %s", e)
+        logger.exception("Error updating dashboard card preferences: %s", e)
         db.rollback()
         raise HTTPException(
             status_code=500,

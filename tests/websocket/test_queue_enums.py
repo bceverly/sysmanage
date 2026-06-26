@@ -5,8 +5,6 @@ This module tests the QueueStatus, QueueDirection, and Priority classes
 that define message queue constants.
 """
 
-import pytest
-
 from backend.websocket.queue_enums import Priority, QueueDirection, QueueStatus
 
 

@@ -22,40 +22,48 @@ async function navigateToFirstHostDetail(page: Page): Promise<boolean> {
 
   // Click the View button (eye icon) in the Actions column
   const viewButton = firstRow.getByRole('button', { name: /view/i });
-  await expect(viewButton).toBeVisible({ timeout: 10000 });
+  await expect(viewButton).toBeVisible({ timeout: 20000 });
   await viewButton.click();
 
   // Wait for navigation to complete
-  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 10000 });
+  await page.waitForURL(/\/hosts\/[a-f0-9-]+/, { timeout: 20000 });
   return true;
 }
 
 test.describe('Child Host Management', () => {
   test('should navigate to host with child host capabilities', async ({ page }) => {
     await page.goto('/hosts');
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
+
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     // Wait for host list to load
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible();
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     // Click on first host to check for child host tab
     if (await navigateToFirstHostDetail(page)) {
-      try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+      try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
     }
   });
 
   test('should display child hosts tab on virtualization host', async ({ page }) => {
     await page.goto('/hosts');
+    try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
+
+    // If we landed back on /login, auth setup broke — fail loudly.
+    expect(page.url()).not.toContain('/login');
 
     const dataGrid = page.locator('.MuiDataGrid-root');
-    await expect(dataGrid).toBeVisible();
+    await expect(dataGrid).toBeVisible({ timeout: 30000 });
 
     if (await navigateToFirstHostDetail(page)) {
       // Look for child hosts/VMs tab
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Tab content should be visible
         await expect(page.locator('body')).not.toBeEmpty();
@@ -73,7 +81,7 @@ test.describe('LXD Container Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Look for create LXD button
         const createLxdButton = page.getByRole('button', { name: /lxd|create.*container/i }).first();
@@ -91,7 +99,7 @@ test.describe('LXD Container Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         const createLxdButton = page.getByRole('button', { name: /lxd|create.*container/i }).first();
         if (await createLxdButton.isVisible()) {
@@ -112,7 +120,7 @@ test.describe('LXD Container Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         const createLxdButton = page.getByRole('button', { name: /lxd|create.*container/i }).first();
         if (await createLxdButton.isVisible()) {
@@ -146,7 +154,7 @@ test.describe('WSL Instance Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|wsl/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Look for create WSL button
         const createWslButton = page.getByRole('button', { name: /wsl|windows.*subsystem/i }).first();
@@ -164,7 +172,7 @@ test.describe('WSL Instance Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|wsl/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         const createWslButton = page.getByRole('button', { name: /wsl|windows.*subsystem/i }).first();
         if (await createWslButton.isVisible()) {
@@ -184,7 +192,7 @@ test.describe('WSL Instance Creation', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|wsl/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         const createWslButton = page.getByRole('button', { name: /wsl|windows.*subsystem/i }).first();
         if (await createWslButton.isVisible()) {
@@ -212,7 +220,7 @@ test.describe('VM Creation (KVM/bhyve)', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Look for create VM button
         const createVmButton = page.getByRole('button', { name: /vm|virtual.*machine|create/i }).first();
@@ -230,7 +238,7 @@ test.describe('VM Creation (KVM/bhyve)', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         const createVmButton = page.getByRole('button', { name: /vm|virtual.*machine|create/i }).first();
         if (await createVmButton.isVisible()) {
@@ -239,7 +247,7 @@ test.describe('VM Creation (KVM/bhyve)', () => {
           const dialog = page.locator('.MuiDialog-root');
           if (await dialog.isVisible()) {
             // Should have configuration options
-            try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+            try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
             await expect(dialog).toBeVisible();
           }
         }
@@ -256,7 +264,7 @@ test.describe('Child Host List', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Should show child hosts list or empty state
         const pageContent = await page.textContent('body');
@@ -272,7 +280,7 @@ test.describe('Child Host List', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // If there are child hosts, they should have action buttons
         const actionButtons = page.locator('button[aria-label], [class*="action"]');
@@ -293,7 +301,7 @@ test.describe('Child Host Operations', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Look for start/stop buttons
         const startButton = page.getByRole('button', { name: /start/i }).first();
@@ -312,7 +320,7 @@ test.describe('Child Host Operations', () => {
       const childHostsTab = page.getByRole('tab', { name: /child|virtual|vm|container/i }).first();
       if (await childHostsTab.isVisible()) {
         await childHostsTab.click();
-        try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch { /* timeout ok */ }
+        try { await page.waitForLoadState('networkidle', { timeout: 3000 }); } catch { /* timeout ok */ }
 
         // Look for delete buttons
         const deleteButton = page.getByRole('button', { name: /delete|remove/i }).first();

@@ -5,8 +5,6 @@ Tests password policy validation and requirements display.
 
 from unittest.mock import patch
 
-import pytest
-
 
 class TestPasswordPolicyValidate:
     """Tests for PasswordPolicy.validate_password method."""

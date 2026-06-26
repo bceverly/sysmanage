@@ -10,14 +10,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import sessionmaker
 
 from backend.api.host_utils import validate_host_approval_status
-from backend.api.error_constants import error_host_not_found, error_user_not_found
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.api.error_constants import error_host_not_found
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
 from backend.persistence import db, models
 from backend.persistence.models import HostChild
+from backend.persistence.partitions import get_request_engine
+from backend.persistence.tenant_context import get_active_tenant
 from backend.security.certificate_manager import certificate_manager
 from backend.security.roles import SecurityRoles
-from backend.services.audit_service import ActionType, AuditService, EntityType, Result
+from backend.services.audit_service import AuditService, EntityType
 from backend.websocket.messages import (
     create_command_message,
     create_host_approved_message,
@@ -32,36 +34,31 @@ queue_ops = QueueOperations()
 
 @router.put("/host/{host_id}/approve", dependencies=[Depends(JWTBearer())])
 async def approve_host(  # NOSONAR
-    host_id: str, current_user: str = Depends(get_current_user)
+    host_id: str, current_user=Depends(require_authenticated_user)
 ):  # pylint: disable=duplicate-code
     """
     Approve a pending host registration
     """
-    # Get the SQLAlchemy session
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global).  A host is bound to its tenant at
+    # registration (via enrollment token) before approval, so the approval data
+    # routes to the active tenant's engine; in collapsed/single-tenant mode this
+    # is the same single application engine.
+    if not current_user.has_role(SecurityRoles.APPROVE_HOST_REGISTRATION):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: APPROVE_HOST_REGISTRATION role required"),
+        )
+
+    # Capture the active tenant in the request's async context (the ContextVar
+    # is resolved by get_request_engine via the middleware-bound value).
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
-        # Check if user has permission to approve hosts
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-
-        # Load role cache if not already loaded
-        if user._role_cache is None:
-            user.load_role_cache(session)
-
-        # Check for APPROVE_HOST_REGISTRATION role
-        if not user.has_role(SecurityRoles.APPROVE_HOST_REGISTRATION):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: APPROVE_HOST_REGISTRATION role required"),
-            )
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -91,6 +88,25 @@ async def approve_host(  # NOSONAR
         host.approval_status = "approved"
         host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
         session.commit()
+
+        # Phase 10.4.4 — auto-apply default mirror assignments for the
+        # newly-approved host.  Best-effort; any failure is logged and
+        # swallowed so approval itself never breaks because of a
+        # mirror engine quirk.
+        try:
+            from backend.api.repository_mirroring import (
+                apply_default_mirrors_for_new_host,
+            )
+
+            apply_default_mirrors_for_new_host(str(host.id))
+        except (
+            Exception
+        ) as exc:  # pylint: disable=broad-except  # nosec B110 - mirror auto-apply is best-effort
+            logger.warning(
+                "Default-mirror auto-apply failed for approved host %s: %s",
+                host.fqdn,
+                exc,
+            )
 
         # Check if this host was created as a child host and link them
         try:
@@ -191,7 +207,7 @@ async def approve_host(  # NOSONAR
                 )
         except Exception as e:
             # Don't fail the approval process if we can't link child host
-            logger.error(
+            logger.exception(
                 "Error linking child host for %s (%s): %s",
                 host.id,
                 host.fqdn,
@@ -253,7 +269,7 @@ async def approve_host(  # NOSONAR
                     )
         except Exception as e:
             # Don't fail the approval process if we can't apply enabled PMs
-            logger.error(
+            logger.exception(
                 "Error applying enabled package managers to %s (%s): %s",
                 host.id,
                 host.fqdn,
@@ -263,8 +279,8 @@ async def approve_host(  # NOSONAR
         # Audit log host approval
         AuditService.log_update(
             db=session,
-            user_id=user.id,
-            username=current_user,
+            user_id=current_user.id,
+            username=current_user.userid,
             entity_type=EntityType.HOST,
             entity_id=host_id,
             entity_name=host.fqdn,
@@ -316,25 +332,22 @@ async def approve_host(  # NOSONAR
 
 @router.put("/host/{host_id}/reject", dependencies=[Depends(JWTBearer())])
 async def reject_host(
-    host_id: str, current_user: str = Depends(get_current_user)
+    host_id: str, current_user=Depends(require_authenticated_user)
 ):  # pylint: disable=duplicate-code
     """
     Reject a pending host registration
     """
-    # Get the SQLAlchemy session
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global).  The host's approval data is tenant-
+    # scoped (bound at registration), so it routes to the active tenant's engine;
+    # collapsed/single-tenant mode keeps using the single application engine.
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:
-        # Get the user object for audit logging
-        user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
-        )
-        if not user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
         # Find the host
         host = session.query(models.Host).filter(models.Host.id == host_id).first()
 
@@ -354,8 +367,8 @@ async def reject_host(
         # Audit log host rejection
         AuditService.log_update(
             db=session,
-            user_id=user.id,
-            username=current_user,
+            user_id=current_user.id,
+            username=current_user.userid,
             entity_type=EntityType.HOST,
             entity_id=host_id,
             entity_name=host.fqdn,
@@ -381,10 +394,12 @@ async def request_os_version_update(host_id: str):
     Request an agent to update its OS version information.
     This sends a message via WebSocket to the agent requesting fresh OS data.
     """
-    # Get a fresh session to avoid transaction warnings
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Operator-facing: the host + queue data is tenant-scoped, so route to the
+    # active tenant's engine (collapsed/single-tenant mode keeps the single
+    # application engine).
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=bind)
 
     with session_local() as session:
         # Find the host
@@ -422,9 +437,13 @@ async def request_updates_check(host_id: str):
     Request an agent to check for available updates.
     This sends a message via WebSocket to the agent requesting an update check.
     """
-    # Get the SQLAlchemy session
+    # Operator-facing: the host + queue data is tenant-scoped, so route to the
+    # active tenant's engine (collapsed/single-tenant mode keeps the single
+    # application engine).
+    tenant_id = get_active_tenant()
+    bind = db.get_engine() if tenant_id is None else get_request_engine(tenant_id)
     session_local = sessionmaker(  # pylint: disable=duplicate-code
-        autocommit=False, autoflush=False, bind=db.get_engine()
+        autocommit=False, autoflush=False, bind=bind
     )
 
     with session_local() as session:

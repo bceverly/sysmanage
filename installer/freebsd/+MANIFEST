@@ -96,7 +96,7 @@ chown -R sysmanage:sysmanage /etc/sysmanage
 cd /usr/local/lib/sysmanage
 python3.11 -m venv .venv
 .venv/bin/pip install --quiet --upgrade pip
-.venv/bin/pip install --quiet -r requirements.txt
+.venv/bin/pip install --quiet -r "$([ -f requirements-prod.txt ] && echo requirements-prod.txt || echo requirements.txt)"
 
 # Use existing config or create symlink to system config
 if [ -f /etc/sysmanage.yaml ]; then
@@ -104,6 +104,38 @@ if [ -f /etc/sysmanage.yaml ]; then
 elif [ ! -f /usr/local/etc/sysmanage/config.yaml ]; then
     cp /usr/local/etc/sysmanage/sysmanage.yaml.example \
        /usr/local/etc/sysmanage/config.yaml
+fi
+
+# OpenBAO secrets broker — install binary, create user, enable + start
+# (the openbao rc.d service runs init/unseal in its start_postcmd).
+if ! command -v bao >/dev/null 2>&1 && [ ! -x /usr/local/bin/bao ]; then
+    pkg install -y openbao >/dev/null 2>&1 || true
+    if [ ! -x /usr/local/bin/bao ]; then
+        OPENBAO_VERSION="2.5.4"
+        case "$(uname -m)" in
+            amd64) BAO_ARCH="x86_64" ;;
+            arm64|aarch64) BAO_ARCH="arm64" ;;
+            *) BAO_ARCH="" ;;
+        esac
+        if [ -n "$BAO_ARCH" ]; then
+            fetch -o /tmp/bao.tgz "https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Freebsd_${BAO_ARCH}.tar.gz" 2>/dev/null \
+                && tar -xzf /tmp/bao.tgz -C /usr/local/bin bao 2>/dev/null
+            rm -f /tmp/bao.tgz
+        fi
+    fi
+fi
+if command -v bao >/dev/null 2>&1 || [ -x /usr/local/bin/bao ]; then
+    if ! pw groupshow openbao >/dev/null 2>&1; then pw groupadd openbao -g 9997; fi
+    if ! pw usershow openbao >/dev/null 2>&1; then
+        pw useradd openbao -u 9997 -g openbao -h - -s /usr/sbin/nologin \
+            -d /var/lib/openbao -c "OpenBAO"
+    fi
+    mkdir -p /var/lib/openbao/data
+    chown -R openbao:openbao /var/lib/openbao
+    sysrc openbao_enable=YES >/dev/null 2>&1 || true
+    service openbao start >/dev/null 2>&1 || echo "[!] Start OpenBAO: service openbao start"
+else
+    echo "[!] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
 fi
 
 echo ""
@@ -133,9 +165,9 @@ echo "   Edit: /usr/local/etc/sysmanage/config.yaml"
 echo ""
 echo "3. Database Initialization"
 echo "   -----------------------"
-echo "   Run database migrations:"
+echo "   Run database migrations (control-plane chains + every tenant database):"
 echo "     cd /usr/local/lib/sysmanage"
-echo "     doas -u sysmanage .venv/bin/python -m alembic upgrade head"
+echo "     doas -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
 echo ""
 echo "4. Start the Services"
 echo "   ------------------"
@@ -168,4 +200,6 @@ EOD
 }
 files: {
   /usr/local/etc/rc.d/sysmanage: {uname: root, gname: wheel, perm: 0755}
+  /usr/local/etc/rc.d/openbao: {uname: root, gname: wheel, perm: 0755}
+  /usr/local/etc/openbao/openbao.hcl: {uname: root, gname: wheel, perm: 0640}
 }

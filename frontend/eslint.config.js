@@ -4,8 +4,26 @@ import typescriptParser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
+import i18next from 'eslint-plugin-i18next';
 
 export default [
+  {
+    // Top-level ignores — applies to every block below.  Without this,
+    // ``js.configs.recommended`` falls back to scanning vendored
+    // ``dist/`` bundles where browser globals aren't declared, flooding
+    // the report with thousands of false-positive ``no-undef``s.
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      'plugin-dist/**',
+      'public/locales/**',
+      '*.config.js',
+      'vite.config.ts',
+      'vitest.config.ts',
+      'playwright.config.ts',
+    ],
+  },
   js.configs.recommended,
   {
     files: ['src/**/*.{js,jsx,ts,tsx}'],
@@ -34,15 +52,34 @@ export default [
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        // DOM element types — needed by useRef<HTML*Element> generics
         HTMLElement: 'readonly',
         HTMLInputElement: 'readonly',
         HTMLFormElement: 'readonly',
         HTMLImageElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLAnchorElement: 'readonly',
+        HTMLSpanElement: 'readonly',
+        HTMLLabelElement: 'readonly',
+        // DOM event types — ``Event`` deliberately omitted; HostDetail.tsx
+        // and a few other files declare their own ``Event`` interface for
+        // domain-specific payloads, and adding it here would cause
+        // ``no-redeclare`` errors.
+        MouseEvent: 'readonly',
+        KeyboardEvent: 'readonly',
+        FocusEvent: 'readonly',
+        Node: 'readonly',
+        EventTarget: 'readonly',
+        // Browser APIs used directly without import
         FormData: 'readonly',
         AbortController: 'readonly',
         Blob: 'readonly',
         URL: 'readonly',
-        console: 'readonly',
+        URLSearchParams: 'readonly',
+        ResizeObserver: 'readonly',
+        MutationObserver: 'readonly',
+        IntersectionObserver: 'readonly',
         fetch: 'readonly'
       }
     },
@@ -50,7 +87,8 @@ export default [
       '@typescript-eslint': typescript,
       'react': react,
       'react-hooks': reactHooks,
-      'security': security
+      'security': security,
+      'i18next': i18next
     },
     rules: {
       ...typescript.configs.recommended.rules,
@@ -66,7 +104,13 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-wrapper-object-types': 'off',
       // Security plugin rule - disabled by default, but plugin needed for eslint-disable comments
-      'security/detect-possible-timing-attacks': 'off'
+      'security/detect-possible-timing-attacks': 'off',
+      // i18n guard: flag hardcoded user-facing text in JSX so it can't ship
+      // un-externalized.  jsx-text-only = literal text directly inside JSX
+      // elements (the common case), without the false positives of logic/value
+      // string literals.  Intentional non-translatable text (brand names, etc.)
+      // gets a `// eslint-disable-next-line i18next/no-literal-string`.
+      'i18next/no-literal-string': ['error', { mode: 'jsx-text-only' }]
     },
     settings: {
       react: {

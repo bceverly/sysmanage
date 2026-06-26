@@ -16,16 +16,17 @@ from backend.api.error_constants import (
     error_firewall_role_not_found,
     error_host_not_found,
     error_invalid_firewall_role_id,
-    error_user_not_found,
     error_view_firewall_roles_required,
 )
-from backend.auth.auth_bearer import JWTBearer, get_current_user
+from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.persistence import db as db_module
 from backend.persistence import models
-from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import AuditService, EntityType
 
+from backend.utils.verbosity_logger import sanitize_log
 from backend.api.firewall_roles_helpers import (
     COMMON_PORTS,
     CommonPortsResponse,
@@ -34,7 +35,6 @@ from backend.api.firewall_roles_helpers import (
     FirewallRoleUpdate,
     HostFirewallRoleCreate,
     HostFirewallRoleResponse,
-    PortCreate,
     get_host_firewall_ports,
     get_role_ports,
     queue_apply_firewall_roles,
@@ -67,30 +67,19 @@ async def get_common_ports(
 
 @router.get("/", response_model=List[FirewallRoleResponse])
 async def get_firewall_roles(
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get all firewall roles."""
-    # Check if user has permission to view firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the firewall role data routes to the
+    # tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=error_view_firewall_roles_required(),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=error_view_firewall_roles_required(),
-            )
 
     try:
         roles = (
@@ -102,7 +91,7 @@ async def get_firewall_roles(
         return [role_to_response_dict(role) for role in roles]
 
     except Exception as err:
-        logger.error("Error getting firewall roles: %s", err)
+        logger.exception("Error getting firewall roles: %s", err)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve firewall roles: %s") % str(err),
@@ -112,30 +101,19 @@ async def get_firewall_roles(
 @router.get("/{role_id}", response_model=FirewallRoleResponse)
 async def get_firewall_role(
     role_id: str,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get a specific firewall role by ID."""
-    # Check if user has permission to view firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the firewall role data routes to the
+    # tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=error_view_firewall_roles_required(),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=error_view_firewall_roles_required(),
-            )
 
     try:
         role_uuid = uuid.UUID(role_id)
@@ -163,7 +141,9 @@ async def get_firewall_role(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting firewall role %s: %s", role_id, err)
+        logger.exception(
+            "Error getting firewall role %s: %s", sanitize_log(role_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve firewall role: %s") % str(err),
@@ -174,31 +154,23 @@ async def get_firewall_role(
 async def create_firewall_role(  # NOSONAR
     role_data: FirewallRoleCreate,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Create a new firewall role."""
-    # Check if user has permission to add firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the firewall role data routes to the tenant engine via
+    # ``db_session``.
+    if not current_user.has_role(SecurityRoles.ADD_FIREWALL_ROLE):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ADD_FIREWALL_ROLE role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ADD_FIREWALL_ROLE):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: ADD_FIREWALL_ROLE role required"),
-            )
-        auth_user_id = auth_user.id
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         # Check if role name already exists
@@ -218,7 +190,7 @@ async def create_firewall_role(  # NOSONAR
         new_role = models.FirewallRole(
             name=role_data.name,
             created_at=now,
-            created_by=auth_user_id,
+            created_by=current_user.id,
         )
         db_session.add(new_role)
         db_session.flush()  # Get the ID
@@ -238,23 +210,23 @@ async def create_firewall_role(  # NOSONAR
         db_session.commit()
         db_session.refresh(new_role)
 
-        logger.info("Firewall role created: %s", role_data.name)
+        logger.info("Firewall role created: %s", sanitize_log(role_data.name))
 
-        # Log audit entry
-        AuditService.log_create(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name=f"Firewall Role: {role_data.name}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=str(new_role.id),
-            details={
-                "name": role_data.name,
-                "open_ports_count": len(role_data.open_ports),
-            },
-            ip_address=request.client.host if request.client else None,
-        )
-        db_session.commit()
+        # Log audit entry (on the main engine)
+        with session_local() as audit_session:
+            AuditService.log_create(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Firewall Role: {role_data.name}",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=str(new_role.id),
+                details={
+                    "name": role_data.name,
+                    "open_ports_count": len(role_data.open_ports),
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         return role_to_response_dict(new_role)
 
@@ -263,7 +235,7 @@ async def create_firewall_role(  # NOSONAR
     except ValueError as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
     except Exception as err:
-        logger.error("Error creating firewall role: %s", err)
+        logger.exception("Error creating firewall role: %s", err)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to create firewall role: %s") % str(err),
@@ -275,31 +247,23 @@ async def update_firewall_role(  # NOSONAR
     role_id: str,
     role_data: FirewallRoleUpdate,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Update an existing firewall role."""
-    # Check if user has permission to edit firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the firewall role data routes to the tenant engine via
+    # ``db_session``.
+    if not current_user.has_role(SecurityRoles.EDIT_FIREWALL_ROLE):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: EDIT_FIREWALL_ROLE role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.EDIT_FIREWALL_ROLE):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: EDIT_FIREWALL_ROLE role required"),
-            )
-        auth_user_id = auth_user.id
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         role_uuid = uuid.UUID(role_id)
@@ -341,7 +305,7 @@ async def update_firewall_role(  # NOSONAR
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         role.updated_at = now
-        role.updated_by = auth_user_id
+        role.updated_by = current_user.id
 
         # Update open ports if provided
         if role_data.open_ports is not None:
@@ -365,23 +329,23 @@ async def update_firewall_role(  # NOSONAR
         db_session.commit()
         db_session.refresh(role)
 
-        logger.info("Firewall role updated: %s", role.name)
+        logger.info("Firewall role updated: %s", sanitize_log(role.name))
 
-        # Log audit entry
-        AuditService.log_update(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name=f"Firewall Role: {role.name}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=str(role.id),
-            details={
-                "name": role.name,
-                "open_ports_count": len(role.open_ports),
-            },
-            ip_address=request.client.host if request.client else None,
-        )
-        db_session.commit()
+        # Log audit entry (on the main engine)
+        with session_local() as audit_session:
+            AuditService.log_update(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Firewall Role: {role.name}",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=str(role.id),
+                details={
+                    "name": role.name,
+                    "open_ports_count": len(role.open_ports),
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         return role_to_response_dict(role)
 
@@ -390,7 +354,9 @@ async def update_firewall_role(  # NOSONAR
     except ValueError as err:
         raise HTTPException(status_code=400, detail=str(err)) from err
     except Exception as err:
-        logger.error("Error updating firewall role %s: %s", role_id, err)
+        logger.exception(
+            "Error updating firewall role %s: %s", sanitize_log(role_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update firewall role: %s") % str(err),
@@ -401,31 +367,23 @@ async def update_firewall_role(  # NOSONAR
 async def delete_firewall_role(
     role_id: str,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Delete a firewall role."""
-    # Check if user has permission to delete firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the firewall role data routes to the tenant engine via
+    # ``db_session``.
+    if not current_user.has_role(SecurityRoles.DELETE_FIREWALL_ROLE):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: DELETE_FIREWALL_ROLE role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.DELETE_FIREWALL_ROLE):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: DELETE_FIREWALL_ROLE role required"),
-            )
-        auth_user_id = auth_user.id
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         role_uuid = uuid.UUID(role_id)
@@ -455,25 +413,27 @@ async def delete_firewall_role(
 
         logger.info("Firewall role deleted: %s", role_name)
 
-        # Log audit entry
-        AuditService.log_delete(
-            db=db_session,
-            entity_type=EntityType.SETTING,
-            entity_name=f"Firewall Role: {role_name}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=role_id,
-            details={"name": role_name},
-            ip_address=request.client.host if request.client else None,
-        )
-        db_session.commit()
+        # Log audit entry (on the main engine)
+        with session_local() as audit_session:
+            AuditService.log_delete(
+                db=audit_session,
+                entity_type=EntityType.SETTING,
+                entity_name=f"Firewall Role: {role_name}",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=role_id,
+                details={"name": role_name},
+                ip_address=request.client.host if request.client else None,
+            )
 
         return {"message": _("Firewall role deleted successfully")}
 
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error deleting firewall role %s: %s", role_id, err)
+        logger.exception(
+            "Error deleting firewall role %s: %s", sanitize_log(role_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to delete firewall role: %s") % str(err),
@@ -488,30 +448,19 @@ async def delete_firewall_role(
 @router.get("/host/{host_id}/roles", response_model=List[HostFirewallRoleResponse])
 async def get_host_firewall_roles(  # NOSONAR
     host_id: str,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Get all firewall roles assigned to a host."""
-    # Check if user has permission to view firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the host/role data routes to the
+    # tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=error_view_firewall_roles_required(),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=error_view_firewall_roles_required(),
-            )
 
     try:
         host_uuid = uuid.UUID(host_id)
@@ -553,7 +502,9 @@ async def get_host_firewall_roles(  # NOSONAR
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting host firewall roles for %s: %s", host_id, err)
+        logger.exception(
+            "Error getting host firewall roles for %s: %s", sanitize_log(host_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve host firewall roles: %s") % str(err),
@@ -563,9 +514,9 @@ async def get_host_firewall_roles(  # NOSONAR
 @router.get("/host/{host_id}/expected-ports")
 async def get_host_expected_ports(  # NOSONAR
     host_id: str,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """
     Get the expected open ports for a host based on assigned firewall roles.
@@ -573,25 +524,14 @@ async def get_host_expected_ports(  # NOSONAR
     Returns the ports that should be open based on all assigned firewall roles.
     This is useful for displaying expected state before the agent applies the rules.
     """
-    # Check if user has permission to view firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the host/role data routes to the
+    # tenant engine via ``db_session``.
+    if not current_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=error_view_firewall_roles_required(),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.VIEW_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=error_view_firewall_roles_required(),
-            )
 
     try:
         host_uuid = uuid.UUID(host_id)
@@ -650,7 +590,9 @@ async def get_host_expected_ports(  # NOSONAR
     except HTTPException:
         raise
     except Exception as err:
-        logger.error("Error getting expected ports for host %s: %s", host_id, err)
+        logger.exception(
+            "Error getting expected ports for host %s: %s", sanitize_log(host_id), err
+        )
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve expected ports: %s") % str(err),
@@ -666,31 +608,23 @@ async def assign_firewall_role_to_host(
     host_id: str,
     role_data: HostFirewallRoleCreate,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Assign a firewall role to a host."""
-    # Check if user has permission to assign firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/role data routes to the tenant engine via
+    # ``db_session``.
+    if not current_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"),
-            )
-        auth_user_id = auth_user.id
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         host_uuid = uuid.UUID(host_id)
@@ -741,7 +675,7 @@ async def assign_firewall_role_to_host(
         new_assignment = models.HostFirewallRole(
             host_id=host_uuid,
             firewall_role_id=role_uuid,
-            created_by=auth_user_id,
+            created_by=current_user.id,
         )
         db_session.add(new_assignment)
         db_session.commit()
@@ -753,23 +687,23 @@ async def assign_firewall_role_to_host(
             host.fqdn,
         )
 
-        # Log audit entry
-        AuditService.log_create(
-            db=db_session,
-            entity_type=EntityType.HOST,
-            entity_name=f"Host Firewall Role: {firewall_role.name} -> {host.fqdn}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=str(new_assignment.id),
-            details={
-                "host_id": str(host_uuid),
-                "host_fqdn": host.fqdn,
-                "firewall_role_id": str(role_uuid),
-                "firewall_role_name": firewall_role.name,
-            },
-            ip_address=request.client.host if request.client else None,
-        )
-        db_session.commit()
+        # Log audit entry (on the main engine)
+        with session_local() as audit_session:
+            AuditService.log_create(
+                db=audit_session,
+                entity_type=EntityType.HOST,
+                entity_name=f"Host Firewall Role: {firewall_role.name} -> {host.fqdn}",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=str(new_assignment.id),
+                details={
+                    "host_id": str(host_uuid),
+                    "host_fqdn": host.fqdn,
+                    "firewall_role_id": str(role_uuid),
+                    "firewall_role_name": firewall_role.name,
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         # Queue message to apply firewall roles to the agent
         queue_apply_firewall_roles(db_session, host)
@@ -785,9 +719,9 @@ async def assign_firewall_role_to_host(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(
+        logger.exception(
             "Error assigning firewall role to host %s: %s",
-            host_id,
+            sanitize_log(host_id),
             err,
         )
         raise HTTPException(
@@ -801,31 +735,23 @@ async def remove_firewall_role_from_host(
     host_id: str,
     assignment_id: str,
     request: Request,
-    db_session: Session = Depends(get_db),
+    db_session: Session = Depends(get_tenant_db),
     dependencies=Depends(JWTBearer()),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_authenticated_user),
 ):
     """Remove a firewall role assignment from a host."""
-    # Check if user has permission to assign firewall roles
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_session.get_bind()
-    )
-    with session_local() as session:
-        auth_user = (
-            session.query(models.User)
-            .filter(models.User.userid == current_user)
-            .first()
+    # Authorization is resolved on the MAIN engine by require_authenticated_user
+    # (user/role data is server-global); the audit trail also stays on the main
+    # engine, while the host/role data routes to the tenant engine via
+    # ``db_session``.
+    if not current_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):
+        raise HTTPException(
+            status_code=403,
+            detail=_("Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"),
         )
-        if not auth_user:
-            raise HTTPException(status_code=401, detail=error_user_not_found())
-        if auth_user._role_cache is None:
-            auth_user.load_role_cache(session)
-        if not auth_user.has_role(SecurityRoles.ASSIGN_HOST_FIREWALL_ROLES):
-            raise HTTPException(
-                status_code=403,
-                detail=_("Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"),
-            )
-        auth_user_id = auth_user.id
+    session_local = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_module.get_engine()
+    )
 
     try:
         host_uuid = uuid.UUID(host_id)
@@ -872,22 +798,22 @@ async def remove_firewall_role_from_host(
             host_fqdn,
         )
 
-        # Log audit entry
-        AuditService.log_delete(
-            db=db_session,
-            entity_type=EntityType.HOST,
-            entity_name=f"Host Firewall Role: {role_name} -> {host_fqdn}",
-            user_id=auth_user_id,
-            username=current_user,
-            entity_id=assignment_id,
-            details={
-                "host_id": str(host_uuid),
-                "host_fqdn": host_fqdn,
-                "firewall_role_name": role_name,
-            },
-            ip_address=request.client.host if request.client else None,
-        )
-        db_session.commit()
+        # Log audit entry (on the main engine)
+        with session_local() as audit_session:
+            AuditService.log_delete(
+                db=audit_session,
+                entity_type=EntityType.HOST,
+                entity_name=f"Host Firewall Role: {role_name} -> {host_fqdn}",
+                user_id=current_user.id,
+                username=current_user.userid,
+                entity_id=assignment_id,
+                details={
+                    "host_id": str(host_uuid),
+                    "host_fqdn": host_fqdn,
+                    "firewall_role_name": role_name,
+                },
+                ip_address=request.client.host if request.client else None,
+            )
 
         # If there are ports to remove, send them to the agent and update status
         if host and (ports_to_remove["ipv4_ports"] or ports_to_remove["ipv6_ports"]):
@@ -904,9 +830,9 @@ async def remove_firewall_role_from_host(
     except HTTPException:
         raise
     except Exception as err:
-        logger.error(
+        logger.exception(
             "Error removing firewall role from host %s: %s",
-            host_id,
+            sanitize_log(host_id),
             err,
         )
         raise HTTPException(

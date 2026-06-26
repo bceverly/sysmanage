@@ -4,10 +4,7 @@ Tests audit logging service functionality.
 """
 
 import uuid
-from datetime import datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class TestActionTypeEnum:
@@ -213,7 +210,6 @@ class TestAuditServiceLog:
             ActionType,
             AuditService,
             EntityType,
-            Result,
         )
 
         mock_session = MagicMock()

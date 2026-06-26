@@ -1,5 +1,14 @@
 """
 API routes for CVE database refresh settings management in SysManage.
+
+Phase 11.4 — every route here is gated on the Pro+ ``vuln_engine`` module
+being loaded.  When it isn't, the route returns 402 with a license-upgrade
+message; when it is, the route delegates the cron / fetch-plan / apply-plan
+heavy lifting into the engine (mirrors the Phase 10.6 upgrade-profile →
+``automation_engine`` migration).  The OSS-side
+``backend.vulnerability.cve_refresh_service`` is preserved as a thin
+delegator that the existing ``test_cve_refresh_service`` suite still
+exercises, but at runtime every route lands in the engine.
 """
 
 import logging
@@ -13,9 +22,10 @@ from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence.db import get_db
 from backend.persistence import models
-from backend.services.audit_service import ActionType, AuditService, EntityType
+from backend.services.audit_service import AuditService, EntityType
 from backend.vulnerability.cve_refresh_service import (
     CVE_SOURCES,
     CveRefreshError,
@@ -25,6 +35,28 @@ from backend.vulnerability.cve_refresh_service import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _check_vuln_engine_module():
+    """Refuse the request when the Pro+ ``vuln_engine`` module isn't loaded.
+
+    Phase 11.4 moved CVE feed config (cron evaluation, refresh-plan and
+    apply-plan builders, source validation) into the engine.  Without it
+    loaded, the OSS routes have no business logic to execute, so they
+    short-circuit with a 402.  Mirrors the Phase 10.6
+    ``upgrade_profiles._check_automation_module`` pattern.
+    """
+    engine = module_loader.get_module("vuln_engine")
+    if engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "CVE feed management requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
+    return engine
+
 
 # Error message constants
 ERROR_USER_NOT_FOUND = "User not found"
@@ -56,7 +88,9 @@ class CveRefreshSettingsResponse(BaseModel):
     updated_at: datetime
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID to string."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -75,7 +109,9 @@ class CveRefreshSettingsUpdate(BaseModel):
     nvd_api_key: Optional[str] = None
 
     @validator("refresh_interval_hours")
-    def validate_interval(cls, value):  # pylint: disable=no-self-argument
+    def validate_interval(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate refresh interval."""
         if value is not None:
             if value < 1:
@@ -85,7 +121,9 @@ class CveRefreshSettingsUpdate(BaseModel):
         return value
 
     @validator("enabled_sources")
-    def validate_sources(cls, value):  # pylint: disable=no-self-argument
+    def validate_sources(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Validate enabled sources."""
         if value is not None:
             for source in value:
@@ -118,7 +156,9 @@ class IngestionLogResponse(BaseModel):
     error_message: Optional[str] = None
 
     @validator("id", pre=True)
-    def convert_uuid_to_string(cls, value):  # pylint: disable=no-self-argument
+    def convert_uuid_to_string(
+        cls, value
+    ):  # pylint: disable=no-self-argument  # lgtm[py/not-named-self]
         """Convert UUID to string."""
         if isinstance(value, uuid.UUID):
             return str(value)
@@ -145,6 +185,7 @@ class RefreshResultResponse(BaseModel):
 @router.get("/sources", response_model=Dict[str, CveSourceInfo])
 async def get_available_sources(dependencies=Depends(JWTBearer())):
     """Get list of available CVE data sources."""
+    _check_vuln_engine_module()
     return {
         source_id: CveSourceInfo(
             name=source_info["name"],
@@ -160,6 +201,7 @@ async def get_cve_refresh_settings(
     db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get current CVE refresh settings."""
+    _check_vuln_engine_module()
     try:
         settings = cve_refresh_service.get_settings(db)
         return CveRefreshSettingsResponse(
@@ -174,7 +216,7 @@ async def get_cve_refresh_settings(
             updated_at=settings.updated_at,
         )
     except Exception as e:
-        logger.error("Error getting CVE refresh settings: %s", e)
+        logger.exception("Error getting CVE refresh settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE refresh settings: %s") % str(e),
@@ -189,6 +231,7 @@ async def update_cve_refresh_settings(
     current_user=Depends(get_current_user),
 ):
     """Update CVE refresh settings."""
+    _check_vuln_engine_module()
     # Check user permissions
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
@@ -240,7 +283,7 @@ async def update_cve_refresh_settings(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
-        logger.error("Error updating CVE refresh settings: %s", e)
+        logger.exception("Error updating CVE refresh settings: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to update CVE refresh settings: %s") % str(e),
@@ -252,11 +295,12 @@ async def get_database_stats(
     db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE database statistics."""
+    _check_vuln_engine_module()
     try:
         stats = cve_refresh_service.get_database_stats(db)
         return DatabaseStatsResponse(**stats)
     except Exception as e:
-        logger.error("Error getting CVE database stats: %s", e)
+        logger.exception("Error getting CVE database stats: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE database statistics: %s") % str(e),
@@ -268,6 +312,7 @@ async def get_ingestion_history(
     limit: int = 10, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE ingestion history."""
+    _check_vuln_engine_module()
     try:
         if limit < 1 or limit > 100:
             raise HTTPException(
@@ -291,7 +336,7 @@ async def get_ingestion_history(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting CVE ingestion history: %s", e)
+        logger.exception("Error getting CVE ingestion history: %s", e)
         raise HTTPException(
             status_code=500,
             detail=_("Failed to retrieve CVE ingestion history: %s") % str(e),
@@ -312,6 +357,7 @@ async def trigger_cve_refresh(
     If source is specified, only refresh from that source.
     Otherwise, refresh from all enabled sources.
     """
+    _check_vuln_engine_module()
     # Check user permissions - require admin for CVE refresh
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
@@ -364,7 +410,7 @@ async def trigger_cve_refresh(
                     total_vulns += src_result.get("vulnerabilities_processed", 0)
                     total_pkgs += src_result.get("packages_processed", 0)
                 except Exception as src_e:
-                    logger.error("CVE refresh failed for source %s: %s", src, src_e)
+                    logger.exception("CVE refresh failed for source %s: %s", src, src_e)
                     all_sources[src] = {"status": "error", "error": str(src_e)}
                     all_errors.append(_("Source %s failed: %s") % (src, str(src_e)))
 
@@ -382,7 +428,7 @@ async def trigger_cve_refresh(
             status_code=500, detail=_("CVE refresh failed: %s") % str(e)
         ) from e
     except Exception as e:
-        logger.error("Error triggering CVE refresh: %s", e)
+        logger.exception("Error triggering CVE refresh: %s", e)
         raise HTTPException(
             status_code=500, detail=_("Failed to trigger CVE refresh: %s") % str(e)
         ) from e
@@ -395,6 +441,7 @@ async def clear_nvd_api_key(
     current_user=Depends(get_current_user),
 ):
     """Clear the stored NVD API key."""
+    _check_vuln_engine_module()
     # Check user permissions - require admin
     auth_user = db.query(models.User).filter(models.User.userid == current_user).first()
     if not auth_user:
@@ -425,7 +472,7 @@ async def clear_nvd_api_key(
 
     except Exception as e:
         # Log error without exception details to avoid potential credential leakage
-        logger.error("Error clearing NVD API key", exc_info=True)
+        logger.exception("Error clearing NVD API key", exc_info=True)
         raise HTTPException(
             status_code=500, detail=_("Failed to clear NVD API key")
         ) from e

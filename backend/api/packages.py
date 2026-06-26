@@ -17,6 +17,7 @@ from backend.api.packages_helpers import (
     get_packages_summary_sync,
     search_packages_count_sync,
     search_packages_sync,
+    _parse_host_os,
 )
 from backend.api.packages_models import (
     InstallationCompletionRequest,
@@ -36,6 +37,7 @@ from backend.api.packages_operations import (
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_tenant_db
 from backend.persistence.models import (
     AvailablePackage,
     Host,
@@ -61,9 +63,16 @@ async def get_packages_summary():
 
     Returns package counts for each OS/version/package manager combination.
     """
+    # Capture the active tenant before the thread-pool offload — the active-
+    # tenant ContextVar is not visible inside the worker thread.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
-    summary_dicts = await loop.run_in_executor(None, get_packages_summary_sync)
+    summary_dicts = await loop.run_in_executor(
+        None, get_packages_summary_sync, tenant_id
+    )
     return [OSPackageSummary(**summary) for summary in summary_dicts]
 
 
@@ -71,7 +80,7 @@ async def get_packages_summary():
 async def get_package_managers(
     os_name: Optional[str] = Query(None, description=FILTER_BY_OS_NAME),
     os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
 ):
     """
     Get list of available package managers.
@@ -113,10 +122,20 @@ async def search_packages_count(
 
     This endpoint returns only the count of matching packages for pagination.
     """
+    # Capture the active tenant before the thread-pool offload.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
-        None, search_packages_count_sync, query, os_name, os_version, package_manager
+        None,
+        search_packages_count_sync,
+        query,
+        os_name,
+        os_version,
+        package_manager,
+        tenant_id,
     )
 
 
@@ -139,6 +158,10 @@ async def search_packages(
     Supports filtering by OS, version, and package manager.
     Results are paginated with limit and offset.
     """
+    # Capture the active tenant before the thread-pool offload.
+    from backend.persistence.tenant_context import get_active_tenant
+
+    tenant_id = get_active_tenant()
     # Run the synchronous database operation in a thread pool
     loop = asyncio.get_event_loop()
     package_dicts = await loop.run_in_executor(
@@ -150,28 +173,48 @@ async def search_packages(
         package_manager,
         limit,
         offset,
+        tenant_id,
     )
     return [PackageInfo(**pkg) for pkg in package_dicts]
 
 
 @router.get("/os-versions", response_model=List[dict])
-async def get_os_versions(db: Session = Depends(get_db)):
+async def get_os_versions(db: Session = Depends(get_tenant_db)):
     """
     Get list of available OS name/version combinations.
 
     Returns list of dictionaries with os_name and os_version fields.
     """
     try:
-        # Get unique OS/version combinations
+        # Get unique OS/version combinations from available packages
         os_versions = (
             db.query(AvailablePackage.os_name, AvailablePackage.os_version)
             .distinct()
             .all()
         )
 
+        result_set = {(r.os_name, r.os_version) for r in os_versions}
+
+        # Also include OS versions from active hosts that may not have packages yet
+        hosts = (
+            db.query(Host.platform, Host.platform_release)
+            .filter(
+                Host.active.is_(True),
+                Host.approval_status == "approved",
+                Host.platform.isnot(None),
+                Host.platform_release.isnot(None),
+            )
+            .distinct()
+            .all()
+        )
+        for host in hosts:
+            os_name, os_version = _parse_host_os(host.platform, host.platform_release)
+            if os_name and os_version:
+                result_set.add((os_name, os_version))
+
         return [
-            {"os_name": result.os_name, "os_version": result.os_version}
-            for result in os_versions
+            {"os_name": name, "os_version": version}
+            for name, version in sorted(result_set)
         ]
 
     except Exception as e:
@@ -188,7 +231,7 @@ async def get_packages_by_manager(
     os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
 ):
     """
     Get packages for a specific package manager.
@@ -233,7 +276,7 @@ async def get_packages_by_manager(
 
 @router.post("/refresh/{os_name}/{os_version:path}")
 async def refresh_packages_for_os_version(
-    os_name: str, os_version: str, db: Session = Depends(get_db)
+    os_name: str, os_version: str, db: Session = Depends(get_tenant_db)
 ):
     """
     Trigger package collection refresh for a specific OS/version combination.
@@ -289,7 +332,7 @@ async def refresh_packages_for_os_version(
 async def install_packages(
     host_id: str,
     request: PackageInstallRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """
@@ -305,7 +348,7 @@ async def install_packages(
 async def uninstall_packages(
     host_id: str,
     request: PackageUninstallRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     current_user: str = Depends(get_current_user),
 ):
     """
@@ -320,7 +363,7 @@ async def uninstall_packages(
 @router.get("/installation-history/{host_id}")
 async def get_installation_history(
     host_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ) -> InstallationHistoryResponse:
@@ -395,6 +438,8 @@ async def get_installation_history(
 @router.post("/installation-complete")
 async def handle_installation_completion(
     request: InstallationCompletionRequest,
+    # Agent-called (no logged-in user → no active-tenant context), so this stays
+    # on the main engine until the inbound queue/processor tenant-routing lands.
     db: Session = Depends(get_db),
 ):
     """
@@ -441,7 +486,7 @@ async def handle_installation_completion(
 @router.delete("/installation-history/{request_id}")
 async def delete_installation_record(
     request_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_tenant_db),
 ):
     """
     Delete an installation record and all its associated packages.

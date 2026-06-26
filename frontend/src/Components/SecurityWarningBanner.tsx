@@ -177,8 +177,9 @@ const SecurityWarningBanner: React.FC = () => {
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         padding: '2px 6px',
                         borderRadius: '3px'
+                      // eslint-disable-next-line i18next/no-literal-string -- shell command is not translatable
                       }}>
-                        python3 scripts/migrate-security-config.py --jwt-only
+                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --jwt-only
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>
@@ -188,8 +189,9 @@ const SecurityWarningBanner: React.FC = () => {
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         padding: '2px 6px',
                         borderRadius: '3px'
+                      // eslint-disable-next-line i18next/no-literal-string -- shell command is not translatable
                       }}>
-                        python3 scripts/migrate-security-config.py --salt-only
+                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --salt-only
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>
@@ -219,7 +221,7 @@ const SecurityWarningBanner: React.FC = () => {
                   )}
                 </Box>
                 <Box sx={{ fontSize: '14px', mt: 1, opacity: 0.9 }}>
-                  Remove admin_userid and admin_password from your configuration file and restart the server
+                  {t('security.removeCredentialsHint', 'Remove admin_userid and admin_password from your configuration file and restart the server')}
                 </Box>
               </Box>
             )}

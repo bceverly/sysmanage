@@ -6,8 +6,7 @@ system info, and heartbeat messages from agents.
 """
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -308,7 +307,7 @@ class TestHandleHeartbeat:
             new_callable=AsyncMock,
             return_value=True,
         ):
-            result = await handle_heartbeat(session, mock_connection, message_data)
+            await handle_heartbeat(session, mock_connection, message_data)
 
             updated_host = session.query(Host).filter_by(id=host.id).first()
             assert updated_host.is_agent_privileged is True
@@ -343,7 +342,7 @@ class TestHandleHeartbeat:
             new_callable=AsyncMock,
             return_value=True,
         ):
-            result = await handle_heartbeat(session, mock_connection, message_data)
+            await handle_heartbeat(session, mock_connection, message_data)
 
             import json
 
@@ -371,3 +370,108 @@ class TestHandleHeartbeat:
             # Mock connection should get acknowledgment
             mock_connection.send_message.assert_called_once()
             assert result["message_type"] == "success"
+
+
+class TestHandleSystemInfoTenantRouting:
+    """Phase 13.1 #2: ``handle_system_info`` must route a bound host's inventory
+    writes to that host's TENANT database (resolved from the agent-supplied
+    ``host_id``), not the inbound session — otherwise ``update_or_create_host``
+    (which looks up by FQDN) wouldn't find the tenant-resident row and would
+    create a DUPLICATE host in the bootstrap DB.  The single-engine test harness
+    can't give a second physical DB, so we assert the routing behaviour: when
+    bound, the handler opens its OWN session (not the one passed in)."""
+
+    @pytest.mark.asyncio
+    async def test_routes_to_tenant_session_when_host_bound(
+        self, session, mock_connection
+    ):
+        from backend.persistence import db as db_module
+
+        host_id = str(uuid.uuid4())
+        resolved = []
+        captured = {}
+
+        def spy_tenant_engine_for_host(hid):
+            resolved.append(hid)
+            # Single-engine harness: the test DB stands in for the tenant DB.
+            return db_module.get_engine()
+
+        async def fake_update_or_create(db_arg, hostname, *args, **kwargs):
+            captured["session"] = db_arg
+            host = MagicMock()
+            host.id = host_id
+            host.fqdn = hostname
+            host.approval_status = "pending"
+            host.host_token = "token"
+            return host
+
+        message_data = {
+            "host_id": host_id,
+            "hostname": "bound.example.com",
+            "ipv4": "10.0.0.9",
+            "platform": "Linux",
+        }
+
+        with patch(
+            "backend.persistence.partitions.tenant_engine_for_host",
+            side_effect=spy_tenant_engine_for_host,
+        ), patch(
+            "backend.api.host_utils.update_or_create_host",
+            new=AsyncMock(side_effect=fake_update_or_create),
+        ), patch(
+            "backend.utils.host_validation.validate_host_id",
+            new_callable=AsyncMock,
+            return_value=True,
+        ), patch(
+            "backend.websocket.connection_manager.connection_manager"
+        ):
+            result = await handle_system_info(session, mock_connection, message_data)
+
+        # The tenant was resolved from the agent-supplied host_id...
+        assert resolved == [host_id]
+        # ...and the handler ran on a FRESHLY-opened tenant session, not the
+        # inbound one (that's what lands the writes in the tenant DB).
+        assert captured["session"] is not None
+        assert captured["session"] is not session
+        assert result["message_type"] == "registration_pending"
+
+    @pytest.mark.asyncio
+    async def test_unbound_host_uses_inbound_session(self, session, mock_connection):
+        """Inert path: no tenant binding (tenant_engine_for_host → None) → the
+        handler uses the passed session unchanged (single-tenant behaviour)."""
+        host_id = str(uuid.uuid4())
+        captured = {}
+
+        async def fake_update_or_create(db_arg, hostname, *args, **kwargs):
+            captured["session"] = db_arg
+            host = MagicMock()
+            host.id = host_id
+            host.fqdn = hostname
+            host.approval_status = "pending"
+            host.host_token = "token"
+            return host
+
+        message_data = {
+            "host_id": host_id,
+            "hostname": "unbound.example.com",
+            "ipv4": "10.0.0.10",
+            "platform": "Linux",
+        }
+
+        with patch(
+            "backend.persistence.partitions.tenant_engine_for_host",
+            return_value=None,
+        ), patch(
+            "backend.api.host_utils.update_or_create_host",
+            new=AsyncMock(side_effect=fake_update_or_create),
+        ), patch(
+            "backend.utils.host_validation.validate_host_id",
+            new_callable=AsyncMock,
+            return_value=True,
+        ), patch(
+            "backend.websocket.connection_manager.connection_manager"
+        ):
+            await handle_system_info(session, mock_connection, message_data)
+
+        # Unbound → the passed session is used directly (no fresh tenant session).
+        assert captured["session"] is session

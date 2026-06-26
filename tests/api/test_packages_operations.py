@@ -6,8 +6,6 @@ This module tests the package management operation endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestPackageInstallEndpoint:
     """Test cases for the package install endpoint."""

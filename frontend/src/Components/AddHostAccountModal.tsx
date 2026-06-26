@@ -95,7 +95,11 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
             setAccountDisabled(false);
             setError(null);
         }
-    }, [open, hostPlatform]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Intentionally omitting ``form`` setters from deps — the effect
+    // resets form state when the modal opens or platform changes; it
+    // doesn't depend on the form itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, hostPlatform]);
 
     // Auto-generate home directory based on username for Unix systems
     useEffect(() => {
@@ -132,7 +136,6 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                 setError(t('hostAccount.passwordRequired', 'Password is required for Windows accounts'));
                 return false;
             }
-            // eslint-disable-next-line security/detect-possible-timing-attacks -- client-side form validation, not authentication
             if (password !== confirmPassword) {
                 setError(t('hostAccount.passwordMismatch', 'Passwords do not match'));
                 return false;
@@ -145,7 +148,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
 
         // UID validation if provided (platform-specific minimum)
         if (uid && (Number.isNaN(Number(uid)) || Number(uid) < minUid)) {
-            setError(t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`));
+            setError(t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`, { minUid }));
             return false;
         }
 
@@ -291,35 +294,37 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                                     onChange={(e) => setShell(e.target.value)}
                                     label={t('hostAccount.shell', 'Shell')}
                                 >
+                                    {/* eslint-disable i18next/no-literal-string -- shell file paths are not translatable */}
                                     {/* Common shells */}
-                                    <MenuItem value="/bin/sh">Bourne Shell (/bin/sh)</MenuItem>
+                                    <MenuItem value="/bin/sh">{t('hostAccount.shellBourne', 'Bourne Shell')} (/bin/sh)</MenuItem>
 
                                     {/* Bash - different paths on different platforms */}
-                                    {!isBSD && <MenuItem value="/bin/bash">Bash (/bin/bash)</MenuItem>}
-                                    {isBSD && <MenuItem value="/usr/local/bin/bash">Bash (/usr/local/bin/bash)</MenuItem>}
+                                    {!isBSD && <MenuItem value="/bin/bash">{t('hostAccount.shellBash', 'Bash')} (/bin/bash)</MenuItem>}
+                                    {isBSD && <MenuItem value="/usr/local/bin/bash">{t('hostAccount.shellBash', 'Bash')} (/usr/local/bin/bash)</MenuItem>}
 
                                     {/* Zsh - different paths */}
-                                    {!isBSD && <MenuItem value="/bin/zsh">Zsh (/bin/zsh)</MenuItem>}
-                                    {isBSD && <MenuItem value="/usr/local/bin/zsh">Zsh (/usr/local/bin/zsh)</MenuItem>}
+                                    {!isBSD && <MenuItem value="/bin/zsh">{t('hostAccount.shellZsh', 'Zsh')} (/bin/zsh)</MenuItem>}
+                                    {isBSD && <MenuItem value="/usr/local/bin/zsh">{t('hostAccount.shellZsh', 'Zsh')} (/usr/local/bin/zsh)</MenuItem>}
 
                                     {/* Ksh - common on OpenBSD */}
-                                    {isOpenBSD && <MenuItem value="/bin/ksh">Ksh (/bin/ksh)</MenuItem>}
-                                    {!isOpenBSD && <MenuItem value="/bin/ksh">Ksh (/bin/ksh)</MenuItem>}
+                                    {isOpenBSD && <MenuItem value="/bin/ksh">{t('hostAccount.shellKsh', 'Ksh')} (/bin/ksh)</MenuItem>}
+                                    {!isOpenBSD && <MenuItem value="/bin/ksh">{t('hostAccount.shellKsh', 'Ksh')} (/bin/ksh)</MenuItem>}
 
                                     {/* Fish - different paths */}
-                                    {!isBSD && <MenuItem value="/usr/bin/fish">Fish (/usr/bin/fish)</MenuItem>}
-                                    {isBSD && <MenuItem value="/usr/local/bin/fish">Fish (/usr/local/bin/fish)</MenuItem>}
+                                    {!isBSD && <MenuItem value="/usr/bin/fish">{t('hostAccount.shellFish', 'Fish')} (/usr/bin/fish)</MenuItem>}
+                                    {isBSD && <MenuItem value="/usr/local/bin/fish">{t('hostAccount.shellFish', 'Fish')} (/usr/local/bin/fish)</MenuItem>}
 
                                     {/* Tcsh/Csh */}
-                                    <MenuItem value="/bin/tcsh">Tcsh (/bin/tcsh)</MenuItem>
-                                    <MenuItem value="/bin/csh">Csh (/bin/csh)</MenuItem>
+                                    <MenuItem value="/bin/tcsh">{t('hostAccount.shellTcsh', 'Tcsh')} (/bin/tcsh)</MenuItem>
+                                    <MenuItem value="/bin/csh">{t('hostAccount.shellCsh', 'Csh')} (/bin/csh)</MenuItem>
 
                                     {/* No login shells */}
-                                    {!isBSD && <MenuItem value="/usr/sbin/nologin">No Login (/usr/sbin/nologin)</MenuItem>}
-                                    {!isBSD && <MenuItem value="/sbin/nologin">No Login (/sbin/nologin)</MenuItem>}
-                                    {isBSD && <MenuItem value="/sbin/nologin">No Login (/sbin/nologin)</MenuItem>}
+                                    {!isBSD && <MenuItem value="/usr/sbin/nologin">{t('hostAccount.shellNoLogin', 'No Login')} (/usr/sbin/nologin)</MenuItem>}
+                                    {!isBSD && <MenuItem value="/sbin/nologin">{t('hostAccount.shellNoLogin', 'No Login')} (/sbin/nologin)</MenuItem>}
+                                    {isBSD && <MenuItem value="/sbin/nologin">{t('hostAccount.shellNoLogin', 'No Login')} (/sbin/nologin)</MenuItem>}
 
-                                    <MenuItem value="/bin/false">False (/bin/false)</MenuItem>
+                                    <MenuItem value="/bin/false">{t('hostAccount.shellFalse', 'False')} (/bin/false)</MenuItem>
+                                    {/* eslint-enable i18next/no-literal-string */}
                                 </Select>
                             </FormControl>
 
@@ -331,8 +336,8 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                                 disabled={submitting}
                                 error={uid !== '' && (Number.isNaN(Number(uid)) || Number(uid) < minUid)}
                                 helperText={uid !== '' && (Number.isNaN(Number(uid)) || Number(uid) < minUid)
-                                    ? t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`)
-                                    : t('hostAccount.uidHelpPlatform', `Leave empty to auto-assign. Must be >= ${minUid} if specified.`)}
+                                    ? t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`, { minUid })
+                                    : t('hostAccount.uidHelpPlatform', `Leave empty to auto-assign. Must be >= ${minUid} if specified.`, { minUid })}
                             />
 
                             <TextField

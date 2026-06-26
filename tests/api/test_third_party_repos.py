@@ -6,8 +6,6 @@ This module tests the third party repository endpoints.
 
 import uuid
 
-import pytest
-
 
 class TestListThirdPartyReposEndpoint:
     """Test cases for listing third party repositories."""

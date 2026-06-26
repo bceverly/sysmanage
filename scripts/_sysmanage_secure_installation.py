@@ -11,6 +11,7 @@ The wrapper script handles privilege elevation and virtual environment setup.
 """
 
 import getpass
+import contextlib
 import os
 import platform
 import re
@@ -20,7 +21,6 @@ import string
 import subprocess
 import sys
 import time
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,9 +29,14 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Also add the virtual environment's site-packages if available
-venv_path = project_root / '.venv'
+venv_path = project_root / ".venv"
 if venv_path.exists():
-    site_packages = venv_path / 'lib' / f'python{sys.version_info.major}.{sys.version_info.minor}' / 'site-packages'
+    site_packages = (
+        venv_path
+        / "lib"
+        / f"python{sys.version_info.major}.{sys.version_info.minor}"
+        / "site-packages"
+    )
     if site_packages.exists():
         sys.path.insert(0, str(site_packages))
 
@@ -43,19 +48,23 @@ try:
     from alembic.config import Config
 except ImportError as e:
     print(f"Error: Missing required dependency: {e}")
-    print("Please ensure you have activated the virtual environment and installed all dependencies.")
+    print(
+        "Please ensure you have activated the virtual environment and installed all dependencies."
+    )
     print("Run: source .venv/bin/activate && pip install -r requirements.txt")
     sys.exit(1)
 
 # Import backend modules for config loading
 try:
-    from backend.config.config import CONFIG_PATH, get_config
     from backend.persistence import models
     from backend.persistence.db import SessionLocal, get_engine
 except ImportError as e:
     print(f"Error importing backend modules: {e}")
-    print("Please ensure you are running this script from the SysManage project root directory.")
+    print(
+        "Please ensure you are running this script from the SysManage project root directory."
+    )
     sys.exit(1)
+
 
 def is_valid_unix_username(username: str) -> bool:
     """
@@ -153,6 +162,7 @@ def check_elevated_privileges():
         # Windows
         try:
             import ctypes
+
             if not ctypes.windll.shell32.IsUserAnAdmin():
                 print("Error: This script must be run with Administrator privileges.")
                 print("Please run this script as Administrator.")
@@ -161,12 +171,16 @@ def check_elevated_privileges():
             print("Warning: Could not verify Administrator privileges on Windows.")
             print("Please ensure you are running as Administrator.")
     else:
-        print(f"Warning: Unknown operating system '{system}'. Cannot verify privileges.")
+        print(
+            f"Warning: Unknown operating system '{system}'. Cannot verify privileges."
+        )
+
 
 def validate_email(email):
     """Validate email format."""
-    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
     return re.match(pattern, email) is not None
+
 
 def get_make_command():
     """Get the appropriate make command for the current platform."""
@@ -176,43 +190,52 @@ def get_make_command():
     if system in ["OpenBSD", "FreeBSD", "NetBSD"]:
         try:
             # Check if gmake is available
-            subprocess.run(['gmake', '--version'], capture_output=True, text=True, timeout=5)
-            return 'gmake'
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            subprocess.run(
+                ["gmake", "--version"], capture_output=True, text=True, timeout=5
+            )
+            return "gmake"
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ):
             # Fall back to make if gmake is not available
-            return 'make'
+            return "make"
 
     # For Linux, macOS, and other systems, use make
-    return 'make'
+    return "make"
+
 
 def get_original_user():
     """Get the original user who invoked sudo/doas, if running under elevated privileges."""
     # Check for explicitly passed original user (for doas)
     # Validate to prevent command injection via environment variables
-    original_user = os.environ.get('ORIGINAL_USER')
+    original_user = os.environ.get("ORIGINAL_USER")
     if original_user and is_valid_unix_username(original_user):
         return original_user
 
     # Check if running under sudo
-    sudo_user = os.environ.get('SUDO_USER')
+    sudo_user = os.environ.get("SUDO_USER")
     if sudo_user and is_valid_unix_username(sudo_user):
         return sudo_user
 
     # Check if running under doas (OpenBSD/FreeBSD)
-    doas_user = os.environ.get('DOAS_USER')
+    doas_user = os.environ.get("DOAS_USER")
     if doas_user and is_valid_unix_username(doas_user):
         return doas_user
 
     # Fall back to current user
     if platform.system() == "Windows":
-        username = os.environ.get('USERNAME', 'user')
+        username = os.environ.get("USERNAME", "user")
         # Windows usernames can contain more characters, but validate basic sanity
-        if username and re.match(r'^[\w\.-]{1,64}$', username):
+        if username and re.match(r"^[\w\.-]{1,64}$", username):
             return username
-        return 'user'
+        return "user"
     else:
         import pwd
+
         return pwd.getpwuid(os.getuid()).pw_name
+
 
 def fix_file_ownership(file_path):
     """Fix file ownership to the original user if running under sudo/doas."""
@@ -222,10 +245,13 @@ def fix_file_ownership(file_path):
 
     try:
         original_user = get_original_user()
-        elevated_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
+        elevated_user = (
+            os.environ.get("SUDO_USER")
+            or os.environ.get("DOAS_USER")
+            or os.environ.get("ORIGINAL_USER")
+        )
 
         if elevated_user and original_user:
-            import grp
             import pwd
 
             # Get user and group info
@@ -236,28 +262,25 @@ def fix_file_ownership(file_path):
             # Change ownership back to original user
             # If it's a directory, recursively fix all contents
             if os.path.isdir(file_path):
-                print(f"  Fixing ownership of {file_path} and contents to {original_user}")
+                print(
+                    f"  Fixing ownership of {file_path} and contents to {original_user}"
+                )
                 for root, dirs, files in os.walk(file_path):
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(root, uid, gid)
-                    except Exception:
-                        pass
                     for d in dirs:
-                        try:
+                        with contextlib.suppress(Exception):
                             os.chown(os.path.join(root, d), uid, gid)
-                        except Exception:
-                            pass
                     for f in files:
-                        try:
+                        with contextlib.suppress(Exception):
                             os.chown(os.path.join(root, f), uid, gid)
-                        except Exception:
-                            pass
             else:
                 os.chown(file_path, uid, gid)
                 print(f"  Fixed ownership of {file_path} to {original_user}")
 
     except Exception as e:
         print(f"  Warning: Could not fix ownership of {file_path}: {e}")
+
 
 def setup_netbsd_gcc14_libstdcpp():
     """Create libstdc++.so.9 symlink for NetBSD GCC 14 compatibility."""
@@ -289,6 +312,7 @@ def setup_netbsd_gcc14_libstdcpp():
     except Exception as e:
         print(f"  ⚠️ Warning: Could not create symlink: {e}")
 
+
 def fix_pip_cache_permissions():
     """Fix pip cache directory permissions on Linux/macOS."""
     system = platform.system()
@@ -312,6 +336,7 @@ def fix_pip_cache_permissions():
             return
 
         import pwd
+
         user_info = pwd.getpwnam(original_user)
         user_home = user_info.pw_dir
         uid = user_info.pw_uid
@@ -319,11 +344,11 @@ def fix_pip_cache_permissions():
 
         # Fix pip cache directory ownership
         if system == "Darwin":
-            cache_base = os.path.join(user_home, 'Library', 'Caches')
-            pip_cache_dir = os.path.join(cache_base, 'pip')
+            cache_base = os.path.join(user_home, "Library", "Caches")
+            pip_cache_dir = os.path.join(cache_base, "pip")
         else:
-            cache_base = os.path.join(user_home, '.cache')
-            pip_cache_dir = os.path.join(cache_base, 'pip')
+            cache_base = os.path.join(user_home, ".cache")
+            pip_cache_dir = os.path.join(cache_base, "pip")
 
         # Ensure parent directories exist and have correct ownership
         for parent_dir in [cache_base, pip_cache_dir]:
@@ -336,20 +361,14 @@ def fix_pip_cache_permissions():
             print(f"  Fixing pip cache permissions at {pip_cache_dir}...")
             # Recursively fix ownership
             for root, dirs, files in os.walk(pip_cache_dir):
-                try:
+                with contextlib.suppress(Exception):
                     os.chown(root, uid, gid)
-                except Exception:
-                    pass
                 for d in dirs:
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(os.path.join(root, d), uid, gid)
-                    except Exception:
-                        pass
                 for f in files:
-                    try:
+                    with contextlib.suppress(Exception):
                         os.chown(os.path.join(root, f), uid, gid)
-                    except Exception:
-                        pass
             print("  Pip cache permissions fixed")
         else:
             # Create the directory with correct ownership so pip won't complain
@@ -359,6 +378,7 @@ def fix_pip_cache_permissions():
     except Exception as e:
         # Don't fail the installation if this doesn't work
         print(f"  Note: Could not fix pip cache permissions: {e}")
+
 
 def run_make_install_dev():
     """Run make install-dev to set up dependencies."""
@@ -382,28 +402,36 @@ def run_make_install_dev():
 
         # Preserve user's PATH to ensure tools like 'bao' are found
         env = os.environ.copy()
-        original_user = os.environ.get('SUDO_USER') or os.environ.get('DOAS_USER') or os.environ.get('ORIGINAL_USER')
+        original_user = (
+            os.environ.get("SUDO_USER")
+            or os.environ.get("DOAS_USER")
+            or os.environ.get("ORIGINAL_USER")
+        )
         if original_user:
             # Get the user's home directory
             import pwd
+
             try:
                 user_info = pwd.getpwnam(original_user)
                 user_home = user_info.pw_dir
 
                 # Add ~/.local/bin to PATH if not already present
-                current_path = env.get('PATH', '')
-                local_bin = os.path.join(user_home, '.local', 'bin')
+                current_path = env.get("PATH", "")
+                local_bin = os.path.join(user_home, ".local", "bin")
                 if local_bin not in current_path:
-                    env['PATH'] = f"{local_bin}:{current_path}"
+                    env["PATH"] = f"{local_bin}:{current_path}"
 
             except (KeyError, ImportError):
                 pass  # Fall back to default environment
 
-        result = subprocess.run([make_cmd, 'install-dev'], cwd=project_root,
-                              text=True, env=env)
+        result = subprocess.run(
+            [make_cmd, "install-dev"], cwd=project_root, text=True, env=env
+        )
 
         if result.returncode != 0:
-            print(f"Error: make install-dev failed with return code {result.returncode}")
+            print(
+                f"Error: make install-dev failed with return code {result.returncode}"
+            )
             sys.exit(1)
 
         print("Dependencies installed successfully!")
@@ -415,11 +443,13 @@ def run_make_install_dev():
         print(f"Error running make install-dev: {e}")
         sys.exit(1)
 
+
 def generate_secure_db_password(length=32):
     """Generate a secure random password for the database."""
     # Use alphanumeric characters (avoid special chars for DB compatibility)
     alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(length))
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
 
 def update_postgres_user_password(username, password):
     """Update the PostgreSQL user's password using psql."""
@@ -427,9 +457,9 @@ def update_postgres_user_password(username, password):
         # Use sudo -u postgres to run psql as the postgres user
         sql_command = f"ALTER USER {username} PASSWORD '{password}';"
         result = subprocess.run(
-            ['sudo', '-H', '-u', 'postgres', 'psql', '-c', sql_command],
+            ["sudo", "-H", "-u", "postgres", "psql", "-c", sql_command],
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode == 0:
@@ -441,6 +471,7 @@ def update_postgres_user_password(username, password):
     except Exception as e:
         print(f"  Error updating PostgreSQL password: {e}")
         return False
+
 
 def get_database_config():
     """Prompt for database configuration."""
@@ -465,54 +496,62 @@ def get_database_config():
         print("Password cannot be empty.")
 
     return {
-        'host': host,
-        'port': port,
-        'database': database,
-        'username': username,
-        'password': password
+        "host": host,
+        "port": port,
+        "database": database,
+        "username": username,
+        "password": password,
     }
+
 
 def test_database_connection(db_config):
     """Test database connectivity."""
     try:
         import psycopg2
 
-        conn_str = (f"host={db_config['host']} "
-                   f"port={db_config['port']} "
-                   f"dbname={db_config['database']} "
-                   f"user={db_config['username']} "
-                   f"password={db_config['password']}")
+        conn_str = (
+            f"host={db_config['host']} "
+            f"port={db_config['port']} "
+            f"dbname={db_config['database']} "
+            f"user={db_config['username']} "
+            f"password={db_config['password']}"
+        )
 
         conn = psycopg2.connect(conn_str)
         conn.close()
         return True
     except ImportError:
-        print("Error: psycopg2 not installed. This should have been installed by make install-dev.")
+        print(
+            "Error: psycopg2 not installed. This should have been installed by make install-dev."
+        )
         return False
     except Exception as e:
         print(f"Database connection failed: {e}")
         return False
 
+
 def update_database_config(config_path, db_config):
     """Update configuration file with database settings."""
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
 
         # Update database configuration
-        if 'database' not in config:
-            config['database'] = {}
+        if "database" not in config:
+            config["database"] = {}
 
-        config['database'].update({
-            'host': db_config['host'],
-            'port': db_config['port'],
-            'database': db_config['database'],
-            'username': db_config['username'],
-            'password': db_config['password']
-        })
+        config["database"].update(
+            {
+                "host": db_config["host"],
+                "port": db_config["port"],
+                "database": db_config["database"],
+                "username": db_config["username"],
+                "password": db_config["password"],
+            }
+        )
 
         # Write updated config
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
         print("  Database configuration updated successfully.")
@@ -520,6 +559,7 @@ def update_database_config(config_path, db_config):
     except Exception as e:
         print(f"Error updating database configuration: {e}")
         sys.exit(1)
+
 
 def check_database_connectivity():
     """Check database connectivity and configure if needed."""
@@ -531,16 +571,16 @@ def check_database_connectivity():
         sys.exit(1)
 
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
 
         # Check if database config exists
-        db_config = config.get('database', {})
+        db_config = config.get("database", {})
 
         # Check for the correct field names used in sysmanage.yaml
-        required_fields = ['host', 'port', 'password']
-        db_name_field = 'name' if 'name' in db_config else 'database'
-        user_field = 'user' if 'user' in db_config else 'username'
+        required_fields = ["host", "port", "password"]
+        db_name_field = "name" if "name" in db_config else "database"
+        user_field = "user" if "user" in db_config else "username"
 
         # Add the name and user fields to required check
         if db_name_field in db_config:
@@ -550,11 +590,18 @@ def check_database_connectivity():
 
         # Check if password is a placeholder that needs to be changed
         password_is_placeholder = False
-        if 'password' in db_config:
-            placeholder_passwords = ['CHANGE_ME_PLEASE!', 'changeme', 'password', 'GENERATE_NEW_PASSWORD']
-            if db_config['password'] in placeholder_passwords:
+        if "password" in db_config:
+            placeholder_passwords = [
+                "CHANGE_ME_PLEASE!",
+                "changeme",
+                "password",
+                "GENERATE_NEW_PASSWORD",
+            ]
+            if db_config["password"] in placeholder_passwords:
                 password_is_placeholder = True
-                print("  Detected placeholder database password - will generate secure password")
+                print(
+                    "  Detected placeholder database password - will generate secure password"
+                )
 
         if not all(key in db_config for key in required_fields):
             print("  Database configuration is incomplete or missing.")
@@ -564,11 +611,11 @@ def check_database_connectivity():
             print("  Testing existing database configuration...")
             # Normalize the config for the connection test
             normalized_config = {
-                'host': db_config['host'],
-                'port': db_config['port'],
-                'database': db_config.get('name', db_config.get('database')),
-                'username': db_config.get('user', db_config.get('username')),
-                'password': db_config['password']
+                "host": db_config["host"],
+                "port": db_config["port"],
+                "database": db_config.get("name", db_config.get("database")),
+                "username": db_config.get("user", db_config.get("username")),
+                "password": db_config["password"],
             }
 
             # If password is a placeholder or connection fails, generate new password
@@ -582,9 +629,11 @@ def check_database_connectivity():
                 new_password = generate_secure_db_password()
 
                 print("  Updating PostgreSQL password for database user...")
-                if update_postgres_user_password(normalized_config['username'], new_password):
+                if update_postgres_user_password(
+                    normalized_config["username"], new_password
+                ):
                     # Update the config with new password
-                    normalized_config['password'] = new_password
+                    normalized_config["password"] = new_password
 
                     # Test connection with new password
                     print("  Testing database connection with new password...")
@@ -594,11 +643,15 @@ def check_database_connectivity():
                         update_database_config(config_path, normalized_config)
                         return
                     else:
-                        print("  Error: Connection failed even after updating password.")
+                        print(
+                            "  Error: Connection failed even after updating password."
+                        )
                         print("  You may need to manually configure the database.")
                 else:
                     print("  Error: Failed to update PostgreSQL password.")
-                    print("  Please ensure PostgreSQL is running and you have sudo access.")
+                    print(
+                        "  Please ensure PostgreSQL is running and you have sudo access."
+                    )
             else:
                 print("  Database connection successful!")
                 return
@@ -606,8 +659,14 @@ def check_database_connectivity():
         # Offer to configure database
         print("\nDatabase configuration is needed.")
         while True:
-            choice = input("Do you want me to help configure the database settings? (yes/no): ").strip().lower()
-            if choice in ['yes', 'y']:
+            choice = (
+                input(
+                    "Do you want me to help configure the database settings? (yes/no): "
+                )
+                .strip()
+                .lower()
+            )
+            if choice in ["yes", "y"]:
                 db_config = get_database_config()
 
                 print("  Testing database connection...")
@@ -616,14 +675,24 @@ def check_database_connectivity():
                     update_database_config(config_path, db_config)
                     return
                 else:
-                    print("  Connection failed. Please check your database settings and try again.")
-                    retry = input("Would you like to try different settings? (yes/no): ").strip().lower()
-                    if retry not in ['yes', 'y']:
+                    print(
+                        "  Connection failed. Please check your database settings and try again."
+                    )
+                    retry = (
+                        input("Would you like to try different settings? (yes/no): ")
+                        .strip()
+                        .lower()
+                    )
+                    if retry not in ["yes", "y"]:
                         print("Database setup cancelled.")
                         sys.exit(1)
-            elif choice in ['no', 'n']:
-                print("Error: Database connectivity is required for SysManage installation.")
-                print("Please configure your database settings in the YAML file manually.")
+            elif choice in ["no", "n"]:
+                print(
+                    "Error: Database connectivity is required for SysManage installation."
+                )
+                print(
+                    "Please configure your database settings in the YAML file manually."
+                )
                 sys.exit(1)
             else:
                 print("Please answer 'yes' or 'no'.")
@@ -632,12 +701,14 @@ def check_database_connectivity():
         print(f"Error checking database connectivity: {e}")
         sys.exit(1)
 
+
 def run_database_migrations():
     """Run database migrations, handling existing databases intelligently."""
     print("\n--- Running Database Migrations ---")
 
     try:
         from sqlalchemy import text
+
         engine = get_engine()
 
         # Check current database state
@@ -653,16 +724,18 @@ def run_database_migrations():
             existing_tables = [row[0] for row in result]
 
             # Check if alembic_version table exists and get current revision
-            has_alembic_version = 'alembic_version' in existing_tables
+            has_alembic_version = "alembic_version" in existing_tables
             current_revision = None
 
             if has_alembic_version:
                 try:
-                    rev_result = connection.execute(text("SELECT version_num FROM alembic_version"))
+                    rev_result = connection.execute(
+                        text("SELECT version_num FROM alembic_version")
+                    )
                     row = rev_result.fetchone()
                     current_revision = row[0] if row else None
                 except Exception:
-                    pass
+                    _ = None  # empty-except: failure here is non-fatal
 
             print(f"  Found {len(existing_tables)} tables in database")
             if has_alembic_version and current_revision:
@@ -673,15 +746,24 @@ def run_database_migrations():
                 print("  No alembic version tracking found")
 
         # Determine strategy based on database state
-        expected_tables = ['user', 'host', 'secret', 'host_certificates']  # Core tables we expect
+        expected_tables = [
+            "user",
+            "host",
+            "secret",
+            "host_certificates",
+        ]  # Core tables we expect
         has_core_tables = any(table in existing_tables for table in expected_tables)
 
         if has_core_tables and not current_revision:
-            print("  Strategy: Existing database detected, synchronizing alembic tracking...")
+            print(
+                "  Strategy: Existing database detected, synchronizing alembic tracking..."
+            )
             # Database has tables but no proper alembic tracking - stamp it
             strategy = "stamp"
         elif existing_tables and current_revision:
-            print("  Strategy: Database properly tracked, running incremental migrations...")
+            print(
+                "  Strategy: Database properly tracked, running incremental migrations..."
+            )
             # Database is properly tracked - just run normal upgrade
             strategy = "upgrade"
         else:
@@ -692,20 +774,25 @@ def run_database_migrations():
         # Set DATABASE_URL environment variable to match sysmanage config
         # This ensures alembic uses the same database as our script
         import yaml
+
         config_path = get_config_file_path()
         if config_path:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 config = yaml.safe_load(f) or {}
 
-            db_config = config.get('database', {})
-            host = db_config.get('host', 'localhost')
-            port = db_config.get('port', 5432)
-            database = db_config.get('name', db_config.get('database', 'sysmanage'))
-            username = db_config.get('user', db_config.get('username', 'sysmanage'))
-            password = db_config.get('password', '')
+            db_config = config.get("database", {})
+            host = db_config.get("host", "localhost")
+            port = db_config.get("port", 5432)
+            database = db_config.get("name", db_config.get("database", "sysmanage"))
+            username = db_config.get("user", db_config.get("username", "sysmanage"))
+            password = db_config.get("password", "")
 
-            database_url = f"postgresql://{username}:{password}@{host}:{port}/{database}"
-            print(f"  Setting DATABASE_URL for alembic: postgresql://{username}:***@{host}:{port}/{database}")
+            database_url = (
+                f"postgresql://{username}:{password}@{host}:{port}/{database}"
+            )
+            print(
+                f"  Setting DATABASE_URL for alembic: postgresql://{username}:***@{host}:{port}/{database}"
+            )
         else:
             database_url = None
             print("  Warning: Could not determine database URL from config")
@@ -713,13 +800,18 @@ def run_database_migrations():
         # Set up environment for subprocess
         env = os.environ.copy()
         if database_url:
-            env['DATABASE_URL'] = database_url
+            env["DATABASE_URL"] = database_url
 
         # Execute strategy
         if strategy == "stamp":
             print("Synchronizing alembic tracking with existing database...")
-            result = subprocess.run([sys.executable, '-m', 'alembic', 'stamp', 'head'], cwd=project_root,
-                                  capture_output=True, text=True, env=env)
+            result = subprocess.run(
+                [sys.executable, "-m", "alembic", "stamp", "head"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
             if result.returncode == 0:
                 print("  Database tracking synchronized successfully!")
             else:
@@ -729,8 +821,13 @@ def run_database_migrations():
         elif strategy == "upgrade":
             print("Running incremental database migrations...")
             make_cmd = get_make_command()
-            result = subprocess.run([make_cmd, 'migrate'], cwd=project_root,
-                                  capture_output=True, text=True, env=env)
+            result = subprocess.run(
+                [make_cmd, "migrate"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
             if result.returncode == 0:
                 print("  Incremental migrations completed successfully!")
             else:
@@ -747,6 +844,7 @@ def run_database_migrations():
                         try:
                             # Use SQLAlchemy's quoted identifier to prevent SQL injection
                             from sqlalchemy import DDL
+
                             drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table}" CASCADE')
                             connection.execute(drop_stmt)
                             print(f"  Dropped existing table: {table}")
@@ -756,8 +854,13 @@ def run_database_migrations():
             # Use the comprehensive migration specifically
             print("  Running comprehensive database migration from scratch...")
             # Use python -m alembic to ensure we use the virtual environment's alembic
-            result = subprocess.run([sys.executable, '-m', 'alembic', 'upgrade', 'head'], cwd=project_root,
-                                  capture_output=True, text=True, env=env)
+            result = subprocess.run(
+                [sys.executable, "-m", "alembic", "upgrade", "head"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
             if result.returncode == 0:
                 print("  Comprehensive migration completed successfully!")
             else:
@@ -768,18 +871,19 @@ def run_database_migrations():
         # Show final output if there is any
         if result.stdout:
             print("Migration output:")
-            for line in result.stdout.split('\n'):
+            for line in result.stdout.split("\n"):
                 if line.strip():
                     print(f"  {line}")
     except Exception as e:
         print(f"Error running database migrations: {e}")
         sys.exit(1)
 
+
 def get_user_input():
     """Prompt for initial admin user information."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SysManage Secure Installation")
-    print("="*60)
+    print("=" * 60)
     print("\nThis script will initialize a fresh SysManage installation.")
     print("It will:")
     print("  1. Install development dependencies")
@@ -793,7 +897,7 @@ def get_user_input():
     print("\nWARNING: This will DELETE all existing data!")
 
     confirm = input("\nDo you want to continue? (yes/no): ").strip().lower()
-    if confirm != 'yes':
+    if confirm != "yes":
         print("Installation cancelled.")
         sys.exit(0)
 
@@ -832,12 +936,43 @@ def get_user_input():
             break
         print("Last name cannot be empty.")
 
+    # Phase 13.1.G: deployment mode. Homelab keeps the single-prompt simplicity
+    # (one implicit tenant); SaaS turns on the multi-tenancy control plane
+    # (database-per-tenant). Federated / air-gap roles are NOT chosen here — they
+    # are server-role settings configured later in the UI, and are independent of
+    # (and mutually exclusive with) multi-tenancy.
+    print("\n--- Deployment Mode ---")
+    print("  1. Homelab / on-prem (default) — single tenant, simplest setup")
+    print("  2. SaaS / multi-tenant control plane — host isolated tenants,")
+    print("     one database per tenant (opt-in; advanced)")
+    mode_choice = input("Deployment mode [1]: ").strip() or "1"
+
+    self_service = False
+    if mode_choice == "2":
+        deployment_mode = "saas"
+        print(
+            "\n  Multi-tenancy will be ENABLED. The local database doubles as the"
+            "\n  control-plane registry; tenant databases are provisioned later"
+            "\n  through the control plane (never written to this YAML)."
+        )
+        ss = (
+            input("  Enable self-service tenant provisioning? (yes/no) [no]: ")
+            .strip()
+            .lower()
+        )
+        self_service = ss in ("yes", "y")
+    else:
+        deployment_mode = "homelab"
+
     return {
-        'email': email,
-        'password': password,
-        'first_name': first_name,
-        'last_name': last_name
+        "email": email,
+        "password": password,
+        "first_name": first_name,
+        "last_name": last_name,
+        "deployment_mode": deployment_mode,
+        "self_service_provisioning": self_service,
     }
+
 
 def drop_all_tables(config):
     """Drop all tables properly while preserving migration system integrity."""
@@ -852,7 +987,9 @@ def drop_all_tables(config):
 
         # Use a separate connection to ensure we see the same state as alembic will
         with engine.begin() as connection:
-            current_schema = connection.execute(text("SELECT current_schema()")).scalar()
+            current_schema = connection.execute(
+                text("SELECT current_schema()")
+            ).scalar()
             print(f"  Current schema: {current_schema}")
 
             # Get all table names including system tables
@@ -879,6 +1016,7 @@ def drop_all_tables(config):
                         print(f"  Dropping table: {table_name}")
                         # Use SQLAlchemy's quoted identifier to prevent SQL injection
                         from sqlalchemy import DDL
+
                         drop_stmt = DDL(f'DROP TABLE IF EXISTS "{table_name}" CASCADE')
                         connection.execute(drop_stmt)
                     except Exception as e:
@@ -890,11 +1028,12 @@ def drop_all_tables(config):
 
             # Force a connection refresh to ensure subsequent queries see the changes
             # This addresses potential transaction isolation issues
-            connection.execute(text('SELECT 1'))  # Force a round-trip
+            connection.execute(text("SELECT 1"))  # Force a round-trip
 
     except Exception as e:
         print(f"Error dropping tables: {e}")
         sys.exit(1)
+
 
 def run_alembic_migrations():
     """Run alembic migrations to create fresh database schema."""
@@ -902,7 +1041,7 @@ def run_alembic_migrations():
 
     try:
         # Create alembic configuration
-        alembic_ini_path = project_root / 'alembic.ini'
+        alembic_ini_path = project_root / "alembic.ini"
         if not alembic_ini_path.exists():
             print(f"Error: alembic.ini not found at {alembic_ini_path}")
             sys.exit(1)
@@ -918,6 +1057,7 @@ def run_alembic_migrations():
         print(f"Error running migrations: {e}")
         sys.exit(1)
 
+
 def generate_security_keys():
     """Generate new salt and JWT secret."""
     print("\n--- Generating security keys ---")
@@ -932,6 +1072,7 @@ def generate_security_keys():
 
     return salt, jwt_secret
 
+
 def get_config_file_path():
     """Get the actual config file path, checking multiple locations."""
     # Check system config locations first
@@ -944,7 +1085,7 @@ def get_config_file_path():
     local_paths = [
         "sysmanage.yaml",
         "sysmanage-dev.yaml",
-        os.path.expanduser("~/sysmanage.yaml")
+        os.path.expanduser("~/sysmanage.yaml"),
     ]
 
     # Check all paths
@@ -954,6 +1095,7 @@ def get_config_file_path():
 
     return None
 
+
 def update_config_file(salt, jwt_secret):
     """Update the configuration file with new security keys."""
     print("\n--- Updating configuration file ---")
@@ -962,34 +1104,36 @@ def update_config_file(salt, jwt_secret):
     config_path = get_config_file_path()
     if not config_path:
         print("Error: Could not find configuration file.")
-        print("Searched locations: /etc/sysmanage.yaml, ./sysmanage.yaml, ~/sysmanage.yaml")
+        print(
+            "Searched locations: /etc/sysmanage.yaml, ./sysmanage.yaml, ~/sysmanage.yaml"
+        )
         sys.exit(1)
 
     print(f"  Using config file: {config_path}")
 
     try:
         # Load existing config
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
 
         # Update security section
-        if 'security' not in config:
-            config['security'] = {}
+        if "security" not in config:
+            config["security"] = {}
 
-        config['security']['password_salt'] = salt
-        config['security']['jwt_secret'] = jwt_secret
+        config["security"]["password_salt"] = salt
+        config["security"]["jwt_secret"] = jwt_secret
 
         # Remove deprecated admin credentials (admin user is now created via the installation script)
-        if 'admin_userid' in config['security']:
-            del config['security']['admin_userid']
+        if "admin_userid" in config["security"]:
+            del config["security"]["admin_userid"]
             print("  Removed deprecated admin_userid from config")
-        if 'admin_password' in config['security']:
-            del config['security']['admin_password']
+        if "admin_password" in config["security"]:
+            del config["security"]["admin_password"]
             print("  Removed deprecated admin_password from config")
 
         # Try to write directly first
         try:
-            with open(config_path, 'w') as f:
+            with open(config_path, "w") as f:
                 yaml.dump(config, f, default_flow_style=False, sort_keys=False)
             print("  Configuration updated successfully.")
         except PermissionError:
@@ -998,58 +1142,84 @@ def update_config_file(salt, jwt_secret):
 
             # Create temporary file with updated config
             import tempfile
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as tmp_file:
+
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".yaml", delete=False
+            ) as tmp_file:
                 yaml.dump(config, tmp_file, default_flow_style=False, sort_keys=False)
                 tmp_path = tmp_file.name
 
             try:
                 # Detect privilege escalation command
                 priv_cmd = None
-                if platform.system() in ['OpenBSD', 'FreeBSD', 'NetBSD']:
+                if platform.system() in ["OpenBSD", "FreeBSD", "NetBSD"]:
                     import subprocess
+
                     try:
-                        subprocess.run(['doas', 'true'], check=True, capture_output=True)
-                        priv_cmd = 'doas'
+                        subprocess.run(
+                            ["doas", "true"], check=True, capture_output=True
+                        )
+                        priv_cmd = "doas"
                     except (subprocess.CalledProcessError, FileNotFoundError):
+                        # ``doas`` unavailable / unauthorised — fall through to sudo probe.
                         try:
-                            subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
-                            priv_cmd = 'sudo'
+                            subprocess.run(
+                                ["sudo", "-n", "true"], check=True, capture_output=True
+                            )
+                            priv_cmd = "sudo"
                         except (subprocess.CalledProcessError, FileNotFoundError):
-                            pass
+                            # Neither doas nor sudo available — caller handles
+                            # ``priv_cmd is None`` below by exiting with a clear msg.
+                            priv_cmd = None
                 else:
                     import subprocess
+
                     try:
-                        subprocess.run(['sudo', '-n', 'true'], check=True, capture_output=True)
-                        priv_cmd = 'sudo'
+                        subprocess.run(
+                            ["sudo", "-n", "true"], check=True, capture_output=True
+                        )
+                        priv_cmd = "sudo"
                     except (subprocess.CalledProcessError, FileNotFoundError):
-                        pass
+                        # sudo unavailable — caller handles ``priv_cmd is None``.
+                        priv_cmd = None
 
                 if priv_cmd:
                     print(f"  Using {priv_cmd} to update configuration file...")
                     import subprocess
-                    result = subprocess.run([priv_cmd, 'cp', tmp_path, config_path],
-                                          capture_output=True, text=True)
+
+                    result = subprocess.run(
+                        [priv_cmd, "cp", tmp_path, config_path],
+                        capture_output=True,
+                        text=True,
+                    )
 
                     if result.returncode == 0:
-                        print("  Configuration updated successfully with elevated privileges.")
+                        print(
+                            "  Configuration updated successfully with elevated privileges."
+                        )
                     else:
-                        print(f"Error updating configuration with {priv_cmd}: {result.stderr}")
+                        print(
+                            f"Error updating configuration with {priv_cmd}: {result.stderr}"
+                        )
                         sys.exit(1)
                 else:
-                    print("Error: No privilege escalation method available (doas/sudo).")
-                    print("Please run with appropriate privileges or copy the config manually.")
+                    print(
+                        "Error: No privilege escalation method available (doas/sudo)."
+                    )
+                    print(
+                        "Please run with appropriate privileges or copy the config manually."
+                    )
                     sys.exit(1)
 
             finally:
                 # Clean up temporary file
-                try:
+                with contextlib.suppress(Exception):
                     os.unlink(tmp_path)
-                except:
-                    pass
 
     except Exception as e:
         print(f"Error updating configuration: {e}")
         sys.exit(1)
+
 
 def find_vault_binary():
     """Find OpenBAO or Vault binary."""
@@ -1058,16 +1228,20 @@ def find_vault_binary():
     if system == "Windows":
         # Windows-specific search
         # Check for bao/vault in PATH first
-        for cmd in ['bao.exe', 'bao', 'vault.exe', 'vault']:
+        for cmd in ["bao.exe", "bao", "vault.exe", "vault"]:
             binary_path = shutil.which(cmd)
-            if binary_path and os.path.exists(binary_path) and is_safe_vault_path(binary_path):
+            if (
+                binary_path
+                and os.path.exists(binary_path)
+                and is_safe_vault_path(binary_path)
+            ):
                 return binary_path
 
         # Check common Windows locations
         common_paths = [
-            os.path.expanduser(r'~\AppData\Local\bin\bao.exe'),
-            r'C:\Program Files\OpenBAO\bao.exe',
-            r'C:\Program Files (x86)\OpenBAO\bao.exe',
+            os.path.expanduser(r"~\AppData\Local\bin\bao.exe"),
+            r"C:\Program Files\OpenBAO\bao.exe",
+            r"C:\Program Files (x86)\OpenBAO\bao.exe",
         ]
         for path in common_paths:
             if os.path.exists(path) and is_safe_vault_path(path):
@@ -1081,52 +1255,58 @@ def find_vault_binary():
         # Check for bao in original user's home directory first
         try:
             import pwd
+
             user_info = pwd.getpwnam(original_user)
             user_home = user_info.pw_dir
-            bao_path = os.path.join(user_home, '.local', 'bin', 'bao')
+            bao_path = os.path.join(user_home, ".local", "bin", "bao")
             if os.path.exists(bao_path) and is_safe_vault_path(bao_path):
                 return bao_path
         except Exception as e:
             print(f"  Debug: Could not check user home for bao: {e}")
 
         # Check system PATH
-        for cmd in ['bao', 'vault']:
+        for cmd in ["bao", "vault"]:
             try:
-                result = subprocess.run(['which', cmd], capture_output=True, text=True)
+                result = subprocess.run(["which", cmd], capture_output=True, text=True)
                 if result.returncode == 0:
                     binary_path = result.stdout.strip()
                     if binary_path:
                         # Expand ~ if present (which sometimes returns unexpanded paths)
                         expanded_path = os.path.expanduser(binary_path)
-                        if os.path.exists(expanded_path) and is_safe_vault_path(expanded_path):
+                        if os.path.exists(expanded_path) and is_safe_vault_path(
+                            expanded_path
+                        ):
                             return expanded_path
-            except:
-                pass
+            except Exception:  # noqa: BLE001
+                _ = None  # empty-except: failure here is non-fatal
 
     return None
+
 
 def install_telemetry_stack():
     """Install OpenTelemetry and Prometheus for performance monitoring."""
     print("\n--- Installing Telemetry Stack ---")
 
-    telemetry_script = project_root / 'scripts' / 'install-telemetry.py'
+    telemetry_script = project_root / "scripts" / "install-telemetry.py"
     if not telemetry_script.exists():
         print("  Telemetry installation script not found, skipping telemetry setup")
         return False
 
-    print("  This will install OpenTelemetry Collector and Prometheus for monitoring SysManage performance.")
+    print(
+        "  This will install OpenTelemetry Collector and Prometheus for monitoring SysManage performance."
+    )
     install_telemetry = input("  Install telemetry stack? (y/n): ").strip().lower()
 
-    if install_telemetry != 'y' and install_telemetry != 'yes':
+    if install_telemetry != "y" and install_telemetry != "yes":
         print("  Skipping telemetry stack installation")
         return False
 
     try:
         print("  Running telemetry installation script...")
         # Run the telemetry installation script with elevated privileges
-        result = subprocess.run([
-            sys.executable, str(telemetry_script)
-        ], timeout=300, capture_output=False)
+        result = subprocess.run(
+            [sys.executable, str(telemetry_script)], timeout=300, capture_output=False
+        )
 
         if result.returncode == 0:
             print("  ✅ Telemetry stack installed successfully!")
@@ -1151,21 +1331,22 @@ def initialize_vault():
     if not vault_cmd:
         print("  OpenBAO/Vault not found, skipping vault initialization")
         print("  You can install OpenBAO later with: make install-dev")
-        return
+        return None
 
     print(f"  Using vault binary: {vault_cmd}")
 
     # Clean up any stale vault data from previous failed attempts
-    data_dir = project_root / 'data' / 'openbao'
+    data_dir = project_root / "data" / "openbao"
     if data_dir.exists() and any(data_dir.iterdir()):
         print("  Cleaning up stale vault data from previous installation...")
         import shutil
+
         shutil.rmtree(data_dir, ignore_errors=True)
         data_dir.mkdir(parents=True, exist_ok=True)
 
     # Create production configuration
-    vault_config_path = project_root / 'openbao.hcl'
-    vault_config = '''storage "file" {
+    vault_config_path = project_root / "openbao.hcl"
+    vault_config = """storage "file" {
   path = "./data/openbao"
 }
 
@@ -1177,14 +1358,14 @@ listener "tcp" {
 api_addr = "http://127.0.0.1:8200"
 cluster_addr = "https://127.0.0.1:8201"
 ui = true
-'''
+"""
 
     print("  Creating OpenBAO configuration file...")
-    with open(vault_config_path, 'w') as f:
+    with open(vault_config_path, "w") as f:
         f.write(vault_config)
 
     # Create data directory
-    data_dir = project_root / 'data' / 'openbao'
+    data_dir = project_root / "data" / "openbao"
     data_dir.mkdir(parents=True, exist_ok=True)
 
     # Fix ownership of data directory (if running under sudo)
@@ -1192,7 +1373,7 @@ ui = true
 
     # Start vault server
     print("  Starting OpenBAO server...")
-    log_file = project_root / 'logs' / 'openbao.log'
+    log_file = project_root / "logs" / "openbao.log"
     log_file.parent.mkdir(exist_ok=True)
 
     # Fix ownership of logs directory (if running under sudo)
@@ -1201,23 +1382,31 @@ ui = true
     # Use absolute path for config file
     vault_config_abs_path = str(vault_config_path.absolute())
 
-    # Start vault server with platform-specific handling
-    # vault_cmd is validated by is_safe_vault_path() in find_vault_binary()
-    if platform.system() == "Windows":
-        # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
-            vault_cmd, 'server', f'-config={vault_config_abs_path}'
-        ],
-        stdout=open(log_file, 'w'),
-        stderr=subprocess.STDOUT,
-        cwd=str(project_root),
-        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-    else:
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        vault_process = subprocess.Popen([
-            vault_cmd, 'server', f'-config={vault_config_abs_path}'
-        ], stdout=open(log_file, 'w'), stderr=subprocess.STDOUT, cwd=str(project_root))
+    # Start vault server with platform-specific handling.
+    # vault_cmd is validated by is_safe_vault_path() in find_vault_binary().
+    # Open the log file via ``with`` and let Popen dup the descriptor;
+    # after Popen returns we can safely close the parent-side handle —
+    # the child already has its own copy.  Without the ``with``, CodeQL
+    # flags ``py/file-not-closed`` on the leaked fp.
+    with open(log_file, "w") as log_fp:
+        if platform.system() == "Windows":
+            # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
+            vault_process = subprocess.Popen(
+                # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                [vault_cmd, "server", f"-config={vault_config_abs_path}"],
+                stdout=log_fp,
+                stderr=subprocess.STDOUT,
+                cwd=str(project_root),
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            )
+        else:
+            vault_process = subprocess.Popen(
+                # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+                [vault_cmd, "server", f"-config={vault_config_abs_path}"],
+                stdout=log_fp,
+                stderr=subprocess.STDOUT,
+                cwd=str(project_root),
+            )
 
     # Fix ownership of the log file after it's created
     fix_file_ownership(log_file)
@@ -1230,15 +1419,19 @@ ui = true
 
     # Set vault address
     env = os.environ.copy()
-    env['BAO_ADDR'] = 'http://127.0.0.1:8200'
+    env["BAO_ADDR"] = "http://127.0.0.1:8200"
 
     # Verify the vault server is actually running and responding
     print("  Verifying vault server is running...")
     try:
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        status_result = subprocess.run([
-            vault_cmd, 'status'
-        ], env=env, capture_output=True, text=True, timeout=10)
+        status_result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [vault_cmd, "status"],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
         print(f"  Vault status check: {status_result.returncode}")
         if "storage type" in status_result.stdout.lower():
             print(f"  Vault is using correct storage configuration")
@@ -1248,17 +1441,33 @@ ui = true
     try:
         # Initialize vault
         print("  Initializing vault...")
-        print(f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json")
+        print(
+            f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json"
+        )
         print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
-            vault_cmd, 'operator', 'init',
-            '-key-shares=1', '-key-threshold=1', '-format=json'
-        ], env=env, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [
+                vault_cmd,
+                "operator",
+                "init",
+                "-key-shares=1",
+                "-key-threshold=1",
+                "-format=json",
+            ],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
         print(f"  DEBUG: Init result return code: {result.returncode}")
-        print(f"  DEBUG: Init result stdout: {result.stdout[:200] if result.stdout else 'None'}")
-        print(f"  DEBUG: Init result stderr: {result.stderr[:200] if result.stderr else 'None'}")
+        print(
+            f"  DEBUG: Init result stdout: {result.stdout[:200] if result.stdout else 'None'}"
+        )
+        print(
+            f"  DEBUG: Init result stderr: {result.stderr[:200] if result.stderr else 'None'}"
+        )
 
         if result.returncode != 0:
             print(f"  Error initializing vault (return code {result.returncode})")
@@ -1267,58 +1476,75 @@ ui = true
             # If vault is already initialized, check if credentials exist
             if "already initialized" in result.stderr.lower():
                 print("  Vault already initialized")
-                credentials_file = project_root / '.vault_credentials'
+                credentials_file = project_root / ".vault_credentials"
                 if credentials_file.exists():
                     print("  Vault credentials file exists, fixing ownership...")
                     fix_file_ownership(credentials_file)
-                    pid_file = project_root / '.openbao.pid'
+                    pid_file = project_root / ".openbao.pid"
                     if pid_file.exists():
                         fix_file_ownership(pid_file)
                 else:
-                    print("  ERROR: Vault is initialized but credentials file is missing!")
-                    print("  This means the vault was previously initialized but the credentials were not saved.")
+                    print(
+                        "  ERROR: Vault is initialized but credentials file is missing!"
+                    )
+                    print(
+                        "  This means the vault was previously initialized but the credentials were not saved."
+                    )
                     print("  You need to either:")
-                    print("    1. Delete the vault data directory and re-run: rm -rf data/openbao")
-                    print("    2. Or manually unseal the vault if you have the credentials")
+                    print(
+                        "    1. Delete the vault data directory and re-run: rm -rf data/openbao"
+                    )
+                    print(
+                        "    2. Or manually unseal the vault if you have the credentials"
+                    )
             else:
                 print(f"  Vault initialization failed for another reason")
             vault_process.terminate()
-            return
+            return None
 
         import json
+
         init_data = json.loads(result.stdout)
-        unseal_key = init_data['unseal_keys_b64'][0]
-        root_token = init_data['root_token']
+        unseal_key = init_data["unseal_keys_b64"][0]
+        root_token = init_data["root_token"]
 
         # Unseal vault
         print("  Unsealing vault...")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
-            vault_cmd, 'operator', 'unseal', unseal_key
-        ], env=env, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [vault_cmd, "operator", "unseal", unseal_key],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
         if result.returncode != 0:
             print(f"  Error unsealing vault: {result.stderr}")
             vault_process.terminate()
-            return
+            return None
 
         # Set root token
-        env['BAO_TOKEN'] = root_token
+        env["BAO_TOKEN"] = root_token
 
         # Enable KV v2 secrets engine
         print("  Enabling KV v2 secrets engine...")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
-        result = subprocess.run([
-            vault_cmd, 'secrets', 'enable', '-version=2', '-path=secret', 'kv'
-        ], env=env, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [vault_cmd, "secrets", "enable", "-version=2", "-path=secret", "kv"],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
 
         if result.returncode != 0:
             print(f"  Warning: Could not enable KV v2 secrets engine: {result.stderr}")
 
         # Save credentials
-        credentials_file = project_root / '.vault_credentials'
+        credentials_file = project_root / ".vault_credentials"
         print("  Saving vault credentials...")
-        with open(credentials_file, 'w') as f:
+        with open(credentials_file, "w") as f:
             f.write("# OpenBAO Vault Credentials - KEEP SECURE\n")
             f.write("# Generated during vault initialization\n")
             f.write(f"UNSEAL_KEY={unseal_key}\n")
@@ -1331,8 +1557,8 @@ ui = true
         fix_file_ownership(credentials_file)
 
         # Save PID file
-        pid_file = project_root / '.openbao.pid'
-        with open(pid_file, 'w') as f:
+        pid_file = project_root / ".openbao.pid"
+        with open(pid_file, "w") as f:
             f.write(str(vault_process.pid))
 
         # Fix ownership of PID file too
@@ -1349,38 +1575,41 @@ ui = true
         vault_process.terminate()
         return None
 
+
 def update_config_with_vault(config_path, unseal_key=None, root_token=None):
     """Update configuration file with vault settings."""
     if not unseal_key or not root_token:
         return
 
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
 
         # Update vault configuration
-        if 'vault' not in config:
-            config['vault'] = {}
+        if "vault" not in config:
+            config["vault"] = {}
 
-        config['vault'].update({
-            'enabled': True,
-            'url': 'http://localhost:8200',
-            'token': root_token,
-            'mount_path': 'secret',
-            'timeout': 30,
-            'verify_ssl': False,
-            'dev_mode': False,  # Always use production mode
-            'server': {
-                'enabled': True,
-                'config_file': './openbao.hcl',
-                'data_path': './data/openbao',
-                'unseal_keys': [unseal_key],
-                'initialized': True
+        config["vault"].update(
+            {
+                "enabled": True,
+                "url": "http://localhost:8200",
+                "token": root_token,
+                "mount_path": "secret",
+                "timeout": 30,
+                "verify_ssl": False,
+                "dev_mode": False,  # Always use production mode
+                "server": {
+                    "enabled": True,
+                    "config_file": "./openbao.hcl",
+                    "data_path": "./data/openbao",
+                    "unseal_keys": [unseal_key],
+                    "initialized": True,
+                },
             }
-        })
+        )
 
         # Write updated config
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
         print("  Configuration updated with vault settings.")
@@ -1388,45 +1617,84 @@ def update_config_with_vault(config_path, unseal_key=None, root_token=None):
     except Exception as e:
         print(f"  Warning: Could not update config with vault settings: {e}")
 
+
+def update_config_with_deployment_mode(
+    config_path, deployment_mode, self_service_provisioning
+):
+    """Write the multi-tenancy block for the chosen deployment mode (Phase 13.1.G).
+
+    Homelab/on-prem → ``multitenancy.enabled: false`` (the pre-13.1 behaviour: one
+    implicit tenant). SaaS → ``enabled: true`` plus the self-service flag. The
+    control-plane registry uses the existing ``database`` block (config falls back
+    ``registry`` → ``database``), so no separate registry credentials are written
+    here; tenant database placements live in the registry, never in this YAML.
+    """
+    try:
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f) or {}
+
+        if deployment_mode == "saas":
+            config["multitenancy"] = {
+                "enabled": True,
+                "self_service_provisioning": bool(self_service_provisioning),
+            }
+        else:
+            # Explicit false keeps the single-tenant default visible/auditable.
+            config["multitenancy"] = {"enabled": False}
+
+        with open(config_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+
+        label = (
+            "SaaS / multi-tenant"
+            if deployment_mode == "saas"
+            else "homelab / single-tenant"
+        )
+        print(f"  Configuration updated for {label} deployment.")
+
+    except Exception as e:
+        print(f"  Warning: Could not update config with deployment mode: {e}")
+
+
 def fix_existing_vault_config(config_path):
     """Fix existing vault configuration to use production mode and proper token."""
     print("\n--- Updating Existing Vault Configuration ---")
 
     try:
         # Check if .vault_credentials exists
-        vault_creds_file = project_root / '.vault_credentials'
+        vault_creds_file = project_root / ".vault_credentials"
         if not vault_creds_file.exists():
             print("  No vault credentials found, skipping vault config update")
             return
 
         # Read credentials
         vault_env = {}
-        with open(vault_creds_file, 'r') as f:
+        with open(vault_creds_file, "r") as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
                     vault_env[key] = value
 
-        root_token = vault_env.get('ROOT_TOKEN')
+        root_token = vault_env.get("ROOT_TOKEN")
         if not root_token:
             print("  No ROOT_TOKEN found in credentials, skipping vault config update")
             return
 
         # Update config file
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
 
-        if 'vault' in config:
+        if "vault" in config:
             # Update existing vault configuration to production mode
-            config['vault']['dev_mode'] = False
-            config['vault']['token'] = root_token
+            config["vault"]["dev_mode"] = False
+            config["vault"]["token"] = root_token
             print(f"  Updated vault configuration:")
             print(f"    - dev_mode: false")
             print(f"    - token: {root_token[:12]}...")
 
             # Write updated config
-            with open(config_path, 'w') as f:
+            with open(config_path, "w") as f:
                 yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
             print("  Vault configuration updated to production mode")
@@ -1436,6 +1704,7 @@ def fix_existing_vault_config(config_path):
     except Exception as e:
         print(f"  Error updating vault configuration: {e}")
 
+
 def create_admin_user(user_data, salt):
     """Create the initial admin user in the database with all security roles."""
     print("\n--- Creating admin user ---")
@@ -1443,7 +1712,7 @@ def create_admin_user(user_data, salt):
     try:
         # Hash the password (salt is handled internally by argon2)
         ph = PasswordHasher()
-        hashed_password = ph.hash(user_data['password'])
+        hashed_password = ph.hash(user_data["password"])
 
         # Create database session
         db = SessionLocal()()
@@ -1451,16 +1720,16 @@ def create_admin_user(user_data, salt):
         try:
             # Create the admin user
             admin_user = models.User(
-                userid=user_data['email'],
+                userid=user_data["email"],
                 hashed_password=hashed_password,
-                first_name=user_data['first_name'],
-                last_name=user_data['last_name'],
+                first_name=user_data["first_name"],
+                last_name=user_data["last_name"],
                 active=True,
                 is_admin=True,
                 is_locked=False,
                 failed_login_attempts=0,
                 created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc)
+                updated_at=datetime.now(timezone.utc),
             )
 
             db.add(admin_user)
@@ -1471,7 +1740,9 @@ def create_admin_user(user_data, salt):
             # Get all security roles
             all_roles = db.query(models.SecurityRole).all()
             if all_roles:
-                print(f"  Assigning all {len(all_roles)} security roles to admin user...")
+                print(
+                    f"  Assigning all {len(all_roles)} security roles to admin user..."
+                )
 
                 # Create UserSecurityRole entries for each role
                 for role in all_roles:
@@ -1479,7 +1750,7 @@ def create_admin_user(user_data, salt):
                         user_id=admin_user.id,
                         role_id=role.id,
                         granted_by=admin_user.id,  # Self-granted
-                        granted_at=datetime.now(timezone.utc)
+                        granted_at=datetime.now(timezone.utc),
                     )
                     db.add(user_role)
 
@@ -1495,6 +1766,7 @@ def create_admin_user(user_data, salt):
     except Exception as e:
         print(f"Error creating admin user: {e}")
         sys.exit(1)
+
 
 def main():
     """Main installation routine."""
@@ -1514,10 +1786,10 @@ def main():
         import importlib
         import backend.config.config
         import backend.persistence.db
+
         importlib.reload(backend.config.config)
         importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
-        from backend.persistence.db import get_engine
 
         # Install development dependencies (includes migrations)
         run_make_install_dev()
@@ -1532,7 +1804,6 @@ def main():
         importlib.reload(backend.config.config)
         importlib.reload(backend.persistence.db)
         from backend.config.config import get_config
-        from backend.persistence.db import get_engine
 
         # Load current configuration (after potential database config updates)
         config = get_config()
@@ -1544,8 +1815,13 @@ def main():
         print("\n--- Stopping SysManage Server ---")
         try:
             make_cmd = get_make_command()
-            result = subprocess.run([make_cmd, 'stop'], cwd=project_root,
-                                  capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                [make_cmd, "stop"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
             if result.returncode == 0:
                 print("  SysManage server stopped successfully")
             else:
@@ -1565,6 +1841,12 @@ def main():
         config_path = get_config_file_path()
         if config_path:
             fix_existing_vault_config(config_path)
+            # Phase 13.1.G: persist the chosen deployment mode (multi-tenancy block).
+            update_config_with_deployment_mode(
+                config_path,
+                user_data.get("deployment_mode", "homelab"),
+                user_data.get("self_service_provisioning", False),
+            )
 
         # Initialize OpenBAO vault (for fresh installations)
         vault_result = initialize_vault()
@@ -1574,7 +1856,7 @@ def main():
                 update_config_with_vault(config_path, unseal_key, root_token)
 
         # Install telemetry stack (optional)
-        telemetry_installed = install_telemetry_stack()
+        install_telemetry_stack()
 
         # Reload configuration to ensure we're using the updated salt
         config = get_config()
@@ -1585,25 +1867,60 @@ def main():
         # Create admin user with new salt
         create_admin_user(user_data, salt)
 
+        # Phase 13.1.H (config classification): prime OpenBAO with the
+        # generated secrets so they become the source of truth — the app's
+        # startup overlay then reads them from OpenBAO instead of YAML.
+        # Best-effort: if vault isn't reachable the YAML values still work via
+        # the fallback.  (At this point the vault root token is in config, set
+        # by update_config_with_vault above, so the write authenticates.)
+        try:
+            from backend.config import secrets_service as _secrets_service
+
+            _secret_bag = {"jwt_secret": jwt_secret, "password_salt": salt}
+            # Phase 13.1.H: also prime the DB password and any optional secret
+            # config (license key, MaxMind key) so the reclassified getters read
+            # them from OpenBAO rather than YAML.  Only primed when actually set.
+            _db_block = config.get("registry") or config.get("database") or {}
+            for _name, _value in (
+                ("db_password", _db_block.get("password")),
+                ("license_key", (config.get("license") or {}).get("key")),
+                (
+                    "maxmind_license_key",
+                    (config.get("geo_lookup") or {}).get("maxmind_license_key"),
+                ),
+            ):
+                if _value:
+                    _secret_bag[_name] = _value
+            if _secrets_service.store_config_secrets(_secret_bag):
+                print(
+                    f"  Primed {len(_secret_bag)} secret(s) into OpenBAO "
+                    "(jwt_secret, password_salt, …)"
+                )
+        except Exception as _prime_exc:  # noqa: BLE001
+            print(
+                f"  Note: could not prime OpenBAO secrets ({_prime_exc}); "
+                "YAML fallback remains in effect"
+            )
+
         # Fix ownership of all created files (important for macOS/Linux when running under sudo)
         print("\n--- Fixing file ownership ---")
         files_to_fix = [
-            project_root / '.vault_credentials',
-            project_root / '.openbao.pid',
-            project_root / 'logs',
-            project_root / 'logs' / 'openbao.log',
-            project_root / 'openbao.hcl',
-            project_root / 'data',
-            project_root / 'data' / 'openbao'
+            project_root / ".vault_credentials",
+            project_root / ".openbao.pid",
+            project_root / "logs",
+            project_root / "logs" / "openbao.log",
+            project_root / "openbao.hcl",
+            project_root / "data",
+            project_root / "data" / "openbao",
         ]
 
         for file_path in files_to_fix:
             if file_path.exists():
                 fix_file_ownership(file_path)
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Installation completed successfully!")
-        print("="*60)
+        print("=" * 60)
         print(f"\nYou can now log in with the credentials you provided")
         print("\nStart the SysManage server with: make start")
         print("Access the web interface at: http://localhost:3000")
@@ -1614,6 +1931,7 @@ def main():
     except Exception as e:
         print(f"\nUnexpected error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

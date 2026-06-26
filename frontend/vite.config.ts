@@ -78,6 +78,24 @@ function loadConfig(): any {
 // Load configuration
 const config = loadConfig();
 
+// A backend may *bind* to a wildcard address (0.0.0.0 / ::) to listen on every
+// interface, but those are NOT valid *connect* targets for the dev-proxy client
+// — connecting to http://0.0.0.0:PORT is refused on Linux. Normalize wildcard
+// hosts to localhost so `/api` proxy requests actually reach the backend.
+// (Without this, an ``api.host: 0.0.0.0`` config silently breaks every proxied
+// request — e.g. the login POST fails with a network error and the UI just
+// sits on /login.)
+const proxyConnectHost = (h?: string): string => {
+  const v = (h || '').trim();
+  // IPv4 wildcard (and empty/default) -> IPv4 loopback; IPv6 wildcard -> IPv6
+  // loopback. Using a loopback that matches the bind family avoids the case
+  // where ``localhost`` resolves to ::1 while the backend bound 0.0.0.0 (IPv4
+  // only) and the proxy connection is refused.
+  if (v === '' || v === '0.0.0.0' || v === '0') return '127.0.0.1';
+  if (v === '::' || v === '[::]') return '::1';
+  return v;
+};
+
 // Determine SSL/HTTPS configuration dynamically
 const forceHTTP = process.env.FORCE_HTTP === 'true';
 const certPath = path.resolve(process.env.HOME || '', 'dev/certs/sysmanage.org');
@@ -138,7 +156,13 @@ export default defineConfig({
   // Development-specific settings
   define: {
     // Suppress some common development warnings
-    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production')
+    __DEV__: JSON.stringify(process.env.NODE_ENV !== 'production'),
+    // Build-time stamp appended to /locales fetch URLs as a cache-buster.
+    // Without it the browser serves a stale /locales/<lng>/translation.json
+    // (identical URL) after `make translate` + redeploy, so updated strings
+    // never appear until a manual hard-refresh.  A fresh value each build
+    // forces i18next-http-backend to re-fetch the current catalog.
+    __LOCALE_BUILD_ID__: JSON.stringify(String(Date.now()))
   },
   server: {
     // Use config-driven host and port with environment variable overrides
@@ -156,10 +180,53 @@ export default defineConfig({
       // Let Vite auto-detect the host from the browser location
       clientPort: finalPort // Ensure client connects to the same port
     },
-    // Proxy API requests to backend server
+    // Proxy API requests to backend server.
+    //
+    // Resolution order (first match wins):
+    //   1. VITE_BACKEND_HOST / VITE_BACKEND_PORT  — env vars from CI/dev shell
+    //   2. config.api.host / config.api.port      — yaml-loaded config
+    //   3. localhost:8080                          — package default
+    //
+    // Falling back from env -> yaml -> default matters on Windows CI:
+    // ``loadConfig`` only looks at Unix-style paths (``/etc/sysmanage.yaml``,
+    // ``../sysmanage-dev.yaml``) and can't find the Windows config at
+    // ``C:\ProgramData\sysmanage\sysmanage.yaml``, so without the env-var
+    // override the proxy defaulted to port 8080 while the backend was
+    // actually on 8001 — every ``/api/v1/server-info`` request returned
+    // 500 from the proxy and the Playwright "no critical failed requests"
+    // assertion failed.
     proxy: {
       '/api': {
-        target: `http://${config?.api?.host || 'localhost'}:${config?.api?.port || 8080}`,
+        target: `http://${
+          proxyConnectHost(process.env.VITE_BACKEND_HOST || config?.api?.host)
+        }:${
+          process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
+        }`,
+        changeOrigin: true,
+        secure: false
+      }
+    }
+  },
+  // Preview server — serves the pre-built ``dist/`` bundle (NOT the dev server
+  // that streams unbundled ESM modules one-per-request).  CI uses this for the
+  // Playwright UI tests: the dev server makes every page load fetch hundreds of
+  // module files, which never lets ``networkidle`` settle (so each wait burns
+  // its full timeout, worst on Windows).  ``vite preview`` serves the bundled
+  // build, so page loads are fast and deterministic.
+  //
+  // ``server.proxy`` does NOT apply to preview, so the ``/api`` proxy is
+  // repeated here with the same env -> yaml -> default resolution.
+  preview: {
+    host: finalHost,
+    port: finalPort,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: `http://${
+          proxyConnectHost(process.env.VITE_BACKEND_HOST || config?.api?.host)
+        }:${
+          process.env.VITE_BACKEND_PORT || config?.api?.port || 8080
+        }`,
         changeOrigin: true,
         secure: false
       }
@@ -169,7 +236,20 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development' ? 'inline' : false,
     // Reduce console noise in production
-    minify: process.env.NODE_ENV === 'production'
+    minify: process.env.NODE_ENV === 'production',
+    // Code-split heavy vendor groups so the main app chunk stays cacheable
+    // and parses faster on first load.  Without this, everything lands in
+    // a single ~2 MB index-*.js bundle.
+    // No `manualChunks` — Vite/Rollup's automatic chunk splitting is
+    // safe.  Custom splits are tempting (smaller initial parse, better
+    // caching) but the React 19 + MUI 7 dependency graph has internal
+    // circular imports that produce TDZ errors at runtime when chunks
+    // are split manually (symptoms: blank page,
+    //   "Cannot access 'X' before initialization" or
+    //   "Cannot set properties of undefined (setting 'Activity')"
+    // on first load).  Leave this alone unless you have a verified
+    // playwright e2e run proving the new split works.
+    chunkSizeWarningLimit: 2500,
   },
   test: {
     globals: true,
@@ -180,11 +260,6 @@ export default defineConfig({
     testTimeout: 10000,
     // Exclude Playwright E2E tests - they run separately via `npx playwright test`
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
-    // Reduce file descriptor usage by using threads with limited concurrency
-    // Note: In Vitest 4.x, poolOptions moved to top-level test options
-    pool: 'threads',
-    maxWorkers: 4,
-    minWorkers: 1,
     server: {
       deps: {
         inline: [

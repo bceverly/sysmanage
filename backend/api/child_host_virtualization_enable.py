@@ -3,28 +3,27 @@ Virtualization enable/initialize API endpoints.
 Handles enabling and initializing virtualization platforms (WSL, LXD, VMM, KVM).
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.child_host_models import ConfigureKvmNetworkingRequest
 from backend.api.child_host_utils import (
     audit_log,
+    authorize_on_main,
     get_host_or_404,
-    get_user_with_role_check,
+    raise_engine_declined,
     verify_host_active,
 )
 from backend.api.error_constants import error_kvm_linux_only
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
-from backend.websocket.messages import create_command_message
-from backend.websocket.queue_enums import QueueDirection
-from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
-queue_ops = QueueOperations()
 
 
 def _check_container_module():
@@ -38,6 +37,84 @@ def _check_container_module():
                 "Please upgrade to access this feature."
             ),
         )
+
+
+# Per-action timeout (seconds) for the engine apply_deployment_plan envelope.
+# The plan itself carries per-command timeouts; this is the outer ceiling.
+# Some init plans (KVM apt-get + libvirt install) can take a couple of
+# minutes — give them headroom.
+_INIT_ENGINE_TIMEOUT = 1500
+
+
+def _try_init_plan_dispatch(action: str, host_id: str) -> bool:
+    """Dispatch an init/enable/disable action via a Pro+ engine plan.
+
+    Maps server actions to plan-builders:
+
+      virtualization_engine
+        ``init_kvm``             → build_kvm_init_plan
+        ``enable_kvm_modules``   → build_kvm_modules_enable_plan
+        ``disable_kvm_modules``  → build_kvm_modules_disable_plan
+        ``init_bhyve``           → build_bhyve_init_plan
+        ``disable_bhyve``        → build_bhyve_disable_plan
+        ``init_vmm``             → build_vmm_init_plan
+      container_engine
+        ``init_lxd``             → build_lxd_init_plan
+
+    Returns True when the plan is queued, False when the engine isn't
+    loaded or the matching builder isn't present (caller surfaces a 502
+    to the user).
+    """
+    # Action → (engine_name, builder_name) mapping
+    routing = {
+        "init_kvm": ("virtualization_engine", "build_kvm_init_plan"),
+        "enable_kvm_modules": (
+            "virtualization_engine",
+            "build_kvm_modules_enable_plan",
+        ),
+        "disable_kvm_modules": (
+            "virtualization_engine",
+            "build_kvm_modules_disable_plan",
+        ),
+        "init_bhyve": ("virtualization_engine", "build_bhyve_init_plan"),
+        "disable_bhyve": ("virtualization_engine", "build_bhyve_disable_plan"),
+        "init_vmm": ("virtualization_engine", "build_vmm_init_plan"),
+        "init_lxd": ("container_engine", "build_lxd_init_plan"),
+        "enable_wsl": ("container_engine", "build_wsl_enable_plan"),
+    }
+    target = routing.get(action)
+    if target is None:
+        return False
+    engine_name, builder_name = target
+    engine = module_loader.get_module(engine_name)
+    if engine is None:
+        return False
+    builder = getattr(engine, builder_name, None)
+    if builder is None:
+        return False
+
+    try:
+        plan = builder()
+
+        # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import (
+            enqueue_apply_plan,
+            register_host_op_correlation,
+        )
+
+        message_id = enqueue_apply_plan(
+            host_id=str(host_id), plan=plan, timeout=_INIT_ENGINE_TIMEOUT
+        )
+        register_host_op_correlation(message_id, action, str(host_id))
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logging.getLogger(__name__).warning(
+            "Init plan path failed for action=%s host=%s; engine path declined: %s",
+            action,
+            sanitize_log(host_id),
+            exc,
+        )
+        return False
 
 
 @router.post(
@@ -54,13 +131,11 @@ async def enable_wsl(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_WSL)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_WSL)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -80,22 +155,11 @@ async def enable_wsl(
                 ),
             )
 
-        # Queue a command to enable WSL
-        command_message = create_command_message(
-            command_type="enable_wsl", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("enable_wsl", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -130,13 +194,11 @@ async def initialize_lxd(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_LXD)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_LXD)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -156,22 +218,11 @@ async def initialize_lxd(
                 ),
             )
 
-        # Queue a command to initialize LXD
-        command_message = create_command_message(
-            command_type="initialize_lxd", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("init_lxd", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -206,13 +257,11 @@ async def initialize_vmm(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_VMM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_VMM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -232,22 +281,11 @@ async def initialize_vmm(
                 ),
             )
 
-        # Queue a command to initialize VMM
-        command_message = create_command_message(
-            command_type="initialize_vmm", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("init_vmm", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -283,13 +321,11 @@ async def initialize_kvm(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -309,22 +345,11 @@ async def initialize_kvm(
                 ),
             )
 
-        # Queue a command to initialize KVM
-        command_message = create_command_message(
-            command_type="initialize_kvm", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("init_kvm", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -359,15 +384,11 @@ async def initialize_bhyve(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_BHYVE)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.ENABLE_BHYVE
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -387,22 +408,11 @@ async def initialize_bhyve(
                 ),
             )
 
-        # Queue a command to initialize bhyve
-        command_message = create_command_message(
-            command_type="initialize_bhyve", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("init_bhyve", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -438,15 +448,11 @@ async def disable_bhyve(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_BHYVE)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.ENABLE_BHYVE
-        )
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -464,22 +470,11 @@ async def disable_bhyve(
                 detail=_("Agent must be running with root privileges to disable bhyve"),
             )
 
-        # Queue a command to disable bhyve
-        command_message = create_command_message(
-            command_type="disable_bhyve", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("disable_bhyve", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -514,13 +509,11 @@ async def enable_kvm_modules(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -540,22 +533,11 @@ async def enable_kvm_modules(
                 ),
             )
 
-        # Queue a command to enable KVM modules
-        command_message = create_command_message(
-            command_type="enable_kvm_modules", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("enable_kvm_modules", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "CREATE",
@@ -591,13 +573,11 @@ async def disable_kvm_modules(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -617,22 +597,11 @@ async def disable_kvm_modules(
                 ),
             )
 
-        # Queue a command to disable KVM modules
-        command_message = create_command_message(
-            command_type="disable_kvm_modules", parameters={}
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not _try_init_plan_dispatch("disable_kvm_modules", host_id):
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "DELETE",
@@ -652,6 +621,47 @@ async def disable_kvm_modules(
         }
 
 
+def _try_kvm_network_plan_path(host_id, request) -> bool:
+    """Build + enqueue a KVM network apply_deployment_plan, or return False
+    so the caller surfaces a 502 to the user.  Caller has already
+    validated request.mode is one of ('nat', 'bridged', 'bridge') and that
+    bridged mode has request.bridge set."""
+    virt_engine = module_loader.get_module("virtualization_engine")
+    builder = (
+        getattr(virt_engine, "build_kvm_network_create_plan", None)
+        if virt_engine
+        else None
+    )
+    net_cfg_cls = getattr(virt_engine, "NetworkConfig", None) if virt_engine else None
+    if not (builder and net_cfg_cls and request.mode in ("nat", "bridged", "bridge")):
+        return False
+    try:
+        forward_mode = "bridge" if request.mode in ("bridged", "bridge") else "nat"
+        cfg_kwargs = {
+            "name": request.network_name or "default",
+            "forward_mode": forward_mode,
+        }
+        if forward_mode == "bridge":
+            cfg_kwargs["bridge_name"] = request.bridge or ""
+        plan = builder(net_cfg_cls(**cfg_kwargs))
+        # pylint: disable=import-outside-toplevel
+        from backend.services.proplus_dispatch import enqueue_apply_plan
+
+        enqueue_apply_plan(
+            host_id=str(host_id),
+            plan=plan,
+            timeout=_INIT_ENGINE_TIMEOUT,
+        )
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logging.getLogger(__name__).warning(
+            "KVM net plan path failed for host %s; engine path declined: %s",
+            sanitize_log(host_id),
+            exc,
+        )
+        return False
+
+
 @router.post(
     "/host/{host_id}/virtualization/configure-kvm-networking",
     dependencies=[Depends(JWTBearer())],
@@ -668,13 +678,11 @@ async def configure_kvm_networking(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data + audit are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.ENABLE_KVM)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(session, current_user, SecurityRoles.ENABLE_KVM)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -703,30 +711,19 @@ async def configure_kvm_networking(
                 ),
             )
 
-        # Queue a command to configure KVM networking
-        parameters = {
-            "mode": request.mode,
-        }
-        if request.network_name:
-            parameters["network_name"] = request.network_name
-        if request.bridge:
-            parameters["bridge"] = request.bridge
+        # Both NAT and bridged map onto build_kvm_network_create_plan.
+        # Bridged uses libvirt's bridge type, which requires the bridge
+        # interface to exist on the host (operator responsibility — host
+        # OS-level bridge persistence in NetworkManager / netplan /
+        # ifupdown is intentionally out of scope of the libvirt network
+        # definition).
+        used_plan_path = _try_kvm_network_plan_path(host_id, request)
 
-        command_message = create_command_message(
-            command_type="setup_kvm_networking", parameters=parameters
-        )
-
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+        if not used_plan_path:
+            raise_engine_declined()
 
         # Log the action
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -762,13 +759,11 @@ async def list_kvm_networks(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.VIEW_CHILD_HOSTS)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.VIEW_CHILD_HOSTS)
-
         host = get_host_or_404(session, host_id)
         verify_host_active(host)
 
@@ -779,18 +774,30 @@ async def list_kvm_networks(
                 detail=_("KVM networks are only available on Linux hosts"),
             )
 
-        # Queue a command to list KVM networks
-        command_message = create_command_message(
-            command_type="list_kvm_networks", parameters={}
+        used_plan_path = False
+        virt_engine = module_loader.get_module("virtualization_engine")
+        list_builder = (
+            getattr(virt_engine, "build_kvm_network_list_plan", None)
+            if virt_engine
+            else None
         )
+        if list_builder is not None:
+            try:
+                plan = list_builder()
+                # pylint: disable=import-outside-toplevel
+                from backend.services.proplus_dispatch import enqueue_apply_plan
 
-        queue_ops.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=host_id,
-            db=session,
-        )
+                enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=60)
+                used_plan_path = True
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                logging.getLogger(__name__).warning(
+                    "KVM net list plan path failed for host %s; engine path declined: %s",
+                    sanitize_log(host_id),
+                    sanitize_log(str(exc)),
+                )
+
+        if not used_plan_path:
+            raise_engine_declined()
 
         session.commit()
 

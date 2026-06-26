@@ -10,18 +10,13 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import sessionmaker
 
-from backend.api.child_host_utils import (
-    audit_log,
-    get_host_or_404,
-    get_user_with_role_check,
-)
+from backend.api.child_host_utils import audit_log, authorize_on_main, get_host_or_404
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db
 from backend.persistence.models import HostChild, RebootOrchestration
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.websocket.messages import create_command_message
 from backend.websocket.queue_enums import QueueDirection
@@ -61,13 +56,11 @@ async def reboot_pre_check(
     Returns information about running child hosts so the user can make an
     informed decision. This is an open-source endpoint (no Pro+ required).
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host + child data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.REBOOT_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.REBOOT_HOST)
-
         host = get_host_or_404(session, host_id)
 
         # Get all child hosts for this parent
@@ -110,15 +103,12 @@ async def orchestrated_reboot(
     """
     _check_container_module()
 
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; host/child/orchestration data + the per-tenant
+    # outbound queue are tenant-scoped.
+    user = authorize_on_main(current_user, SecurityRoles.REBOOT_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        user = get_user_with_role_check(
-            session, current_user, SecurityRoles.REBOOT_HOST
-        )
-
         host = get_host_or_404(session, host_id)
 
         if not host.active:
@@ -168,9 +158,24 @@ async def orchestrated_reboot(
         )
         session.add(orchestration)
 
-        # Enqueue stop commands for each running child
+        # Enqueue stop commands for each running child.  Mirror the
+        # ``_try_lifecycle_plan_dispatch`` pattern from child_host_control.py
+        # so the engine path runs first; without it the caller surfaces a 502 since the
+        # command_type only when Pro+ isn't loaded.  Without this, after
+        # the agent's legacy ``child_host_operations.py`` is deleted the
+        # safe-parent-reboot's child-stop phase fails because the agent's
+        # stub returns ``feature_not_licensed`` for the legacy
+        # ``stop_child_host`` command_type.
+        # pylint: disable=import-outside-toplevel
+        from backend.api.child_host_control import _try_lifecycle_plan_dispatch
+
         queue_ops = QueueOperations()
         for child in running_children:
+            used_plan_path = _try_lifecycle_plan_dispatch(
+                child.child_type, "stop", child.child_name, str(host_id), str(child.id)
+            )
+            if used_plan_path:
+                continue
             command_message = create_command_message(
                 command_type="stop_child_host",
                 parameters={
@@ -187,7 +192,6 @@ async def orchestrated_reboot(
             )
 
         audit_log(
-            session,
             user,
             current_user,
             "UPDATE",
@@ -223,13 +227,11 @@ async def get_orchestration_status(
     """
     Get the current status of a reboot orchestration.
     """
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=db.get_engine()
-    )
+    # Authz is server-global; orchestration data is tenant-scoped.
+    authorize_on_main(current_user, SecurityRoles.REBOOT_HOST)
+    session_local = request_sessionmaker()
 
     with session_local() as session:
-        get_user_with_role_check(session, current_user, SecurityRoles.REBOOT_HOST)
-
         orchestration = (
             session.query(RebootOrchestration)
             .filter(

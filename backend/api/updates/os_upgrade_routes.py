@@ -6,16 +6,20 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_
-from sqlalchemy.orm import sessionmaker
 
 from backend.api.error_constants import error_internal_server
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
-from backend.persistence import db, models
+from backend.persistence import models
+from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
-from backend.websocket.connection_manager import connection_manager
 from backend.websocket.messages import create_command_message
+from backend.websocket.queue_enums import QueueDirection
+from backend.websocket.queue_operations import QueueOperations
+from backend.utils.verbosity_logger import sanitize_log
+
+queue_ops = QueueOperations()
 
 from .constants import OS_UPGRADE_PACKAGE_MANAGERS
 from .models import UpdateExecutionRequest
@@ -30,7 +34,7 @@ async def get_os_upgrades(
 ):
     """Get available OS version upgrades for all hosts or a specific host."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Build query for OS upgrades
             query = session.query(models.PackageUpdate).filter(
@@ -87,7 +91,7 @@ async def get_os_upgrades(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error fetching OS upgrades: %s", e)
+        logger.exception("Error fetching OS upgrades: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
@@ -95,7 +99,7 @@ async def get_os_upgrades(
 async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
     """Get summary of OS upgrades across all hosts."""
     try:
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             # Get OS upgrades by package manager (OS type)
             query = session.query(models.PackageUpdate).filter(
@@ -154,7 +158,7 @@ async def get_os_upgrades_summary(dependencies=Depends(JWTBearer())):
             }
 
     except Exception as e:
-        logger.error("Error fetching OS upgrades summary: %s", e)
+        logger.exception("Error fetching OS upgrades summary: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e
 
 
@@ -170,7 +174,7 @@ async def execute_os_upgrades(  # NOSONAR
     """
     try:
         # Check if user has permission to apply host OS upgrades
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             user = (
                 session.query(models.User)
@@ -191,8 +195,8 @@ async def execute_os_upgrades(  # NOSONAR
 
         logger.info(
             "Received OS upgrade execution request: host_ids=%s, package_managers=%s",
-            request.host_ids,
-            request.package_managers,
+            sanitize_log(request.host_ids),
+            sanitize_log(request.package_managers),
         )
 
         # Validate that only OS upgrade package managers are specified
@@ -208,19 +212,45 @@ async def execute_os_upgrades(  # NOSONAR
                     ),
                 )
 
-        session_factory = sessionmaker(bind=db.get_engine())
+        session_factory = request_sessionmaker()
         with session_factory() as session:
             results = []
 
-            for host_id in request.host_ids:
-                # Verify host exists and is active
-                host = (
-                    session.query(models.Host)
-                    .filter(
-                        and_(models.Host.id == host_id, models.Host.active.is_(True))
-                    )
-                    .first()
+            # Bulk-fetch active hosts and OS-upgrade PackageUpdates in
+            # two queries rather than 2 per host (flagged in the
+            # Phase 6 N+1 audit).  Dicts are keyed by str(id) so they
+            # match the request payload's UUID strings.
+            active_hosts_by_id = {
+                str(h.id): h
+                for h in session.query(models.Host)
+                .filter(
+                    models.Host.id.in_(request.host_ids),
+                    models.Host.active.is_(True),
                 )
+                .all()
+            }
+            upgrades_filter = and_(
+                models.PackageUpdate.host_id.in_(request.host_ids),
+                models.PackageUpdate.package_manager.in_(OS_UPGRADE_PACKAGE_MANAGERS),
+            )
+            if request.package_managers:
+                upgrades_filter = and_(
+                    upgrades_filter,
+                    models.PackageUpdate.package_manager.in_(request.package_managers),
+                )
+            if request.package_names:
+                upgrades_filter = and_(
+                    upgrades_filter,
+                    models.PackageUpdate.package_name.in_(request.package_names),
+                )
+            upgrades_by_host: dict = {}
+            for upd in (
+                session.query(models.PackageUpdate).filter(upgrades_filter).all()
+            ):
+                upgrades_by_host.setdefault(str(upd.host_id), []).append(upd)
+
+            for host_id in request.host_ids:
+                host = active_hosts_by_id.get(str(host_id))
 
                 if not host:
                     results.append(
@@ -232,29 +262,7 @@ async def execute_os_upgrades(  # NOSONAR
                     )
                     continue
 
-                # Check if host has OS upgrades available
-                os_upgrades_query = session.query(models.PackageUpdate).filter(
-                    and_(
-                        models.PackageUpdate.host_id == host_id,
-                        models.PackageUpdate.package_manager.in_(
-                            OS_UPGRADE_PACKAGE_MANAGERS
-                        ),
-                    )
-                )
-
-                if request.package_managers:
-                    os_upgrades_query = os_upgrades_query.filter(
-                        models.PackageUpdate.package_manager.in_(
-                            request.package_managers
-                        )
-                    )
-
-                if request.package_names:
-                    os_upgrades_query = os_upgrades_query.filter(
-                        models.PackageUpdate.package_name.in_(request.package_names)
-                    )
-
-                available_upgrades = os_upgrades_query.all()
+                available_upgrades = upgrades_by_host.get(str(host_id), [])
 
                 if not available_upgrades:
                     results.append(
@@ -266,18 +274,10 @@ async def execute_os_upgrades(  # NOSONAR
                     )
                     continue
 
-                # Check if we can reach the host
-                if not connection_manager.get_agent_connection(host.fqdn):
-                    results.append(
-                        {
-                            "host_id": host_id,
-                            "status": "error",
-                            "message": _("Host is not connected"),
-                        }
-                    )
-                    continue
-
-                # Create the update command message
+                # Build the apply_updates command message and enqueue it on
+                # the OUTBOUND queue.  The websocket outbound processor is
+                # responsible for actually delivering it to the agent — this
+                # endpoint must never call send_message_to_agent directly.
                 packages_to_update = [
                     {
                         "package_name": update.package_name,
@@ -292,10 +292,22 @@ async def execute_os_upgrades(  # NOSONAR
                     "apply_updates", {"packages": packages_to_update}
                 )
 
-                # Send command to agent
-                success = await connection_manager.send_message_to_agent(
-                    host.fqdn, command_message
-                )
+                try:
+                    queue_ops.enqueue_message(
+                        message_type="command",
+                        message_data=command_message.to_dict(),
+                        direction=QueueDirection.OUTBOUND,
+                        host_id=str(host.id),
+                        db=session,
+                    )
+                    success = True
+                except Exception as enqueue_error:
+                    logger.exception(
+                        "Failed to enqueue OS upgrade command for host %s: %s",
+                        host.fqdn,
+                        enqueue_error,
+                    )
+                    success = False
 
                 if success:
                     # Mark updates as in progress
@@ -307,8 +319,8 @@ async def execute_os_upgrades(  # NOSONAR
                     session.commit()
 
                     logger.info(
-                        "OS upgrade command sent successfully to host %s (%s): %d upgrades",
-                        host_id,
+                        "OS upgrade command queued for host %s (%s): %d upgrades",
+                        sanitize_log(host_id),
                         host.fqdn,
                         len(available_upgrades),
                     )
@@ -347,7 +359,7 @@ async def execute_os_upgrades(  # NOSONAR
                         {
                             "host_id": host_id,
                             "status": "success",
-                            "message": _("OS upgrade command sent successfully"),
+                            "message": _("OS upgrade command queued for host"),
                             "upgrades_count": len(available_upgrades),
                             "requires_reboot": True,  # OS upgrades always require reboot
                         }
@@ -357,7 +369,7 @@ async def execute_os_upgrades(  # NOSONAR
                         {
                             "host_id": host_id,
                             "status": "error",
-                            "message": _("Failed to send OS upgrade command to host"),
+                            "message": _("Failed to queue OS upgrade command"),
                         }
                     )
 
@@ -366,5 +378,5 @@ async def execute_os_upgrades(  # NOSONAR
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error executing OS upgrades: %s", e)
+        logger.exception("Error executing OS upgrades: %s", e)
         raise HTTPException(status_code=500, detail=error_internal_server()) from e

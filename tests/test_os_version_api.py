@@ -3,14 +3,10 @@ Test OS version API functionality on the server side.
 """
 
 import json
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import sessionmaker
 
-from backend.api.host import router
 from backend.persistence import models
 
 

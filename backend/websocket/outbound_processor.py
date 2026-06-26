@@ -4,12 +4,10 @@ Handles processing and sending of messages from server to agents.
 """
 
 from datetime import datetime, timezone
-from typing import Dict
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 from backend.websocket.queue_manager import (
     QueueDirection,
@@ -198,7 +196,7 @@ async def process_outbound_message(message, host, db: Session) -> None:
             )
 
     except Exception as e:
-        logger.error(
+        logger.exception(
             "Error processing outbound message %s: %s", message.message_id, str(e)
         )
         server_queue_manager.mark_failed(
@@ -253,5 +251,5 @@ async def send_command_to_agent(
         return success
 
     except Exception as e:
-        logger.error("Error sending command to agent: %s", str(e))
+        logger.exception("Error sending command to agent: %s", str(e))
         return False
