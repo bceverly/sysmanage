@@ -4,7 +4,7 @@ COMMENT =		centralized system management server
 
 GH_ACCOUNT =		bceverly
 GH_PROJECT =		sysmanage
-GH_TAGNAME =ttv0.9.0.9
+GH_TAGNAME =ttv1.3.0.0
 REVISION =		0
 
 CATEGORIES =		sysutils www
