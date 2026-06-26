@@ -4287,10 +4287,20 @@ plan-builder + UI integration.
       address matches — stricter than the admin-facing `is_email_domain_allowed`),
       then `ensure_registry_user` + `ensure_grant` into the provider's tenant and
       a linked local account. 6 JIT tests + migration verified; black/pylint/tsc
-      clean. **Remaining for E:** SAML 2.0 (only LDAP/OIDC today), SCIM
-      provisioning, vendor-support grants bound to OpenBAO lease TTL, and the
-      break-glass flow (the `local_account_fallback` setting exists; the
-      grant-tied break-glass path is greenfield).)*
+      clean.
+      **Support / break-glass grants DONE (June 2026):**
+      `registry_service.create_support_grant` mints a deliberately short-lived,
+      **TTL-hard-capped (72h)** time-boxed grant whose `expires_at` is the sole
+      enforcement — the existing request-time `has_active_grant` gate refuses it
+      the instant it lapses, so there is no lingering backdoor and no separate
+      revocation sweep. The operator-facing `scripts/break_glass_grant.py`
+      (`--email`/`--tenant`/`--ttl-hours`/`--reason`, reason mandatory) is the
+      emergency access path, logging every issuance (operator + tenant + TTL +
+      reason) for audit. 5 tests (cap, floor, refresh, live→dead-on-expiry).
+      **Remaining for E:** SAML 2.0 (only LDAP/OIDC today), SCIM provisioning, and
+      binding the support-grant window to a live OpenBAO **lease object**
+      (the grant's own expiry already auto-revokes; lease-binding is the deeper
+      integration) — each its own dedicated, security-sensitive pass.)*
 - [x] **13.1.F** Backup orchestration & **data isolation verification** —
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement
@@ -4354,9 +4364,23 @@ plan-builder + UI integration.
       install/start wired into ALL installers except OpenBSD — Ubuntu/Debian, CentOS/
       RHEL, openSUSE, Alpine (OpenRC+musl tarball), FreeBSD (pkg/tarball+rc.d), NetBSD
       (tarball+rc.d), macOS (tarball+launchd), Windows (zip+NSSM), Snap (bundled binary
-      +wrapper). All migrate hints fixed to run the 3 chains. Remaining: air-gap bundle
-      builder staging of the bao artifact per platform, OpenBSD (gated on 13.1.I), and
-      the config reclassification.)*
+      +wrapper). All migrate hints fixed to run the 3 chains.
+      **Config reclassification (June 2026): the bulk DONE.** The accessor seams
+      (`config._server_setting` / `_config_secret` / `_db_setting`, `settings_service`,
+      `secrets_service`) and the startup OpenBAO overlay were already in place; this
+      pass reclassified the remaining getters, all backwards-compatible (DB/OpenBAO
+      first, one-release YAML fallback + a once-per-process deprecation warning):
+      **secrets→OpenBAO** — `license.key`, `geo_lookup.maxmind_license_key` (joining
+      the already-done `jwt_secret`/`password_salt`/db-password/SMTP-password);
+      **operational→server Settings DB** — `license.phone_home_url`/`interval`,
+      `geo_lookup.enabled`/`refresh_interval_hours`/`ipapi_fallback_enabled`;
+      **password policy→Settings DB** — `PasswordPolicy` now applies a tenant-scoped
+      (then server) DB override over the YAML policy. The secure-installation primer
+      now also stores db_password + license/MaxMind keys into OpenBAO. Remaining:
+      air-gap bundle staging of the bao artifact per platform; OpenBSD (gated on
+      13.1.I); the riskier auth-path moves (`admin_userid`/`admin_password` → DB-seed +
+      OpenBAO, JWT timeouts/cookie_domain → server settings); and the final
+      minimal-YAML cleanup (remove fallbacks — a later major per the plan's §7.5).)*
 - [ ] **13.1.I** OpenBSD OpenBAO prebuilt-binary verification — smoke-test the official
       `bao_*_Openbsd_x86_64.tar.gz` binary on real **OpenBSD 7.7 and 7.8**
       (`bao server -version`, init/unseal, basic KV round-trip). OpenBSD enforces

@@ -301,6 +301,7 @@ def upgrade() -> None:
     ) in _KNOWN_VERSIONS:
         existing = list(
             bind.execute(
+                # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
                 text(
                     f"SELECT id FROM {_TABLE} "
                     "WHERE platform = :platform AND version_key = :version_key"
@@ -311,6 +312,7 @@ def upgrade() -> None:
         if existing:
             continue
         bind.execute(
+            # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
             text(
                 f"INSERT INTO {_TABLE} "
                 "(id, platform, version_key, label, os_family, match_regex, "

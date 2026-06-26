@@ -16,7 +16,7 @@ SCIM); this layer operates on ``registry_user`` ids directly.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from backend.persistence.models.tenancy import (
@@ -214,4 +214,55 @@ def ensure_grant(session, user_id, tenant_id, role: str = "member"):
         )
         session.add(grant)
         session.flush()
+    return grant
+
+
+# ---------------------------------------------------------------------------
+# Phase 13.1.E — vendor-support / break-glass grants.
+#
+# A support grant is a deliberately SHORT-LIVED, time-boxed grant for external
+# support or break-glass access.  Its enforcement is the existing expiry check
+# in ``has_active_grant``: once ``expires_at`` passes, the grant is dead and the
+# request-time gate refuses it — no separate revocation sweep is needed.  The
+# TTL is hard-capped so an operator can't accidentally mint a long-lived
+# backdoor; binding the window to a live OpenBAO lease object is a deeper
+# follow-on, but the grant's own expiry already auto-revokes access.
+# ---------------------------------------------------------------------------
+
+SUPPORT_GRANT_ROLE = "support"
+SUPPORT_GRANT_MAX_TTL_SECONDS = 72 * 3600  # 72h hard cap
+
+
+def create_support_grant(
+    session,
+    user_id,
+    tenant_id,
+    ttl_seconds: int,
+    *,
+    role: str = SUPPORT_GRANT_ROLE,
+    max_ttl_seconds: int = SUPPORT_GRANT_MAX_TTL_SECONDS,
+) -> RegistryUserTenantGrant:
+    """Create or refresh a TIME-BOXED grant (vendor support / break-glass).
+
+    ``ttl_seconds`` is clamped to ``[1, max_ttl_seconds]`` so a support window can
+    never be unbounded.  Sets ``expires_at = now + ttl`` (naive-UTC, matching how
+    the grant store records expiry), so the existing request-time expiry gate
+    auto-revokes it.  Returns the grant row.  The CALLER must audit who issued it,
+    for which tenant, and why — these grants must always be logged.
+    """
+    ttl = max(1, min(int(ttl_seconds), int(max_ttl_seconds)))
+    grant = (
+        session.query(RegistryUserTenantGrant)
+        .filter(
+            RegistryUserTenantGrant.user_id == user_id,
+            RegistryUserTenantGrant.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if grant is None:
+        grant = RegistryUserTenantGrant(user_id=user_id, tenant_id=tenant_id)
+        session.add(grant)
+    grant.role = role or SUPPORT_GRANT_ROLE
+    grant.expires_at = _utcnow() + timedelta(seconds=ttl)
+    session.flush()
     return grant

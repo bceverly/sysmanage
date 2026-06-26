@@ -1391,8 +1391,8 @@ ui = true
     with open(log_file, "w") as log_fp:
         if platform.system() == "Windows":
             # On Windows, use CREATE_NEW_PROCESS_GROUP to properly detach
-            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             vault_process = subprocess.Popen(
+                # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 [vault_cmd, "server", f"-config={vault_config_abs_path}"],
                 stdout=log_fp,
                 stderr=subprocess.STDOUT,
@@ -1400,8 +1400,8 @@ ui = true
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             )
         else:
-            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             vault_process = subprocess.Popen(
+                # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
                 [vault_cmd, "server", f"-config={vault_config_abs_path}"],
                 stdout=log_fp,
                 stderr=subprocess.STDOUT,
@@ -1424,9 +1424,13 @@ ui = true
     # Verify the vault server is actually running and responding
     print("  Verifying vault server is running...")
     try:
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         status_result = subprocess.run(
-            [vault_cmd, "status"], env=env, capture_output=True, text=True, timeout=10
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+            [vault_cmd, "status"],
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         print(f"  Vault status check: {status_result.returncode}")
         if "storage type" in status_result.stdout.lower():
@@ -1441,8 +1445,8 @@ ui = true
             f"  DEBUG: Running command: {vault_cmd} operator init -key-shares=1 -key-threshold=1 -format=json"
         )
         print(f"  DEBUG: BAO_ADDR={env.get('BAO_ADDR')}")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             [
                 vault_cmd,
                 "operator",
@@ -1506,8 +1510,8 @@ ui = true
 
         # Unseal vault
         print("  Unsealing vault...")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             [vault_cmd, "operator", "unseal", unseal_key],
             env=env,
             capture_output=True,
@@ -1525,8 +1529,8 @@ ui = true
 
         # Enable KV v2 secrets engine
         print("  Enabling KV v2 secrets engine...")
-        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         result = subprocess.run(
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
             [vault_cmd, "secrets", "enable", "-version=2", "-path=secret", "kv"],
             env=env,
             capture_output=True,
@@ -1873,8 +1877,25 @@ def main():
             from backend.config import secrets_service as _secrets_service
 
             _secret_bag = {"jwt_secret": jwt_secret, "password_salt": salt}
+            # Phase 13.1.H: also prime the DB password and any optional secret
+            # config (license key, MaxMind key) so the reclassified getters read
+            # them from OpenBAO rather than YAML.  Only primed when actually set.
+            _db_block = config.get("registry") or config.get("database") or {}
+            for _name, _value in (
+                ("db_password", _db_block.get("password")),
+                ("license_key", (config.get("license") or {}).get("key")),
+                (
+                    "maxmind_license_key",
+                    (config.get("geo_lookup") or {}).get("maxmind_license_key"),
+                ),
+            ):
+                if _value:
+                    _secret_bag[_name] = _value
             if _secrets_service.store_config_secrets(_secret_bag):
-                print("  Primed jwt_secret + password_salt into OpenBAO")
+                print(
+                    f"  Primed {len(_secret_bag)} secret(s) into OpenBAO "
+                    "(jwt_secret, password_salt, …)"
+                )
         except Exception as _prime_exc:  # noqa: BLE001
             print(
                 f"  Note: could not prime OpenBAO secrets ({_prime_exc}); "

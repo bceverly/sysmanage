@@ -299,6 +299,25 @@ def _server_setting(key, yaml_getter, default=None):
             return default
 
 
+def _config_secret(name, yaml_getter, default=""):
+    """Resolve a server-scoped secret (Phase 13.1.H, B-bucket).
+
+    Reads the value from OpenBAO first (via secrets_service), falling back to the
+    legacy ``sysmanage.yaml`` value with a one-time deprecation warning.  Late
+    import keeps config.py DB/vault-free at import time.  Best-effort: any
+    failure yields the YAML value.
+    """
+    try:
+        from backend.config import secrets_service  # noqa: PLC0415
+
+        return secrets_service.get_secret(name, yaml_getter, default=default)
+    except Exception:  # noqa: BLE001
+        try:
+            return yaml_getter()
+        except Exception:  # noqa: BLE001
+            return default
+
+
 def get_heartbeat_timeout_minutes():
     """
     Get the heartbeat timeout in minutes after which a host is considered down.
@@ -607,30 +626,40 @@ def get_license_config():
 
 def get_license_key():
     """
-    Get the Pro+ license key.
+    Get the Pro+ license key.  Phase 13.1.H: secret — OpenBAO first, YAML fallback.
     """
-    return config["license"]["key"]
+    return _config_secret(
+        "license_key", lambda: config.get("license", {}).get("key", ""), default=""
+    )
 
 
 def is_license_configured():
     """
     Check if a license key is configured.
     """
-    return bool(config["license"]["key"])
+    return bool(get_license_key())
 
 
 def get_license_phone_home_url():
     """
-    Get the license phone-home URL.
+    Get the license phone-home URL.  Phase 13.1.H: server setting (DB), YAML fallback.
     """
-    return config["license"]["phone_home_url"]
+    return _server_setting(
+        "license_phone_home_url",
+        lambda: config["license"]["phone_home_url"],
+        default="https://license.sysmanage.io",
+    )
 
 
 def get_license_phone_home_interval():
     """
-    Get the license phone-home interval in hours.
+    Get the license phone-home interval in hours.  Phase 13.1.H: server setting.
     """
-    return config["license"]["phone_home_interval_hours"]
+    return _server_setting(
+        "license_phone_home_interval_hours",
+        lambda: config["license"]["phone_home_interval_hours"],
+        default=24,
+    )
 
 
 def get_license_modules_path():
@@ -698,30 +727,61 @@ def get_geo_lookup_config():
 
 
 def is_geo_lookup_enabled() -> bool:
-    """Check if geo-location lookup is enabled for this deployment."""
-    return bool(config.get("geo_lookup", {}).get("enabled", False))
+    """Check if geo-location lookup is enabled.  Phase 13.1.H: server setting."""
+    return bool(
+        _server_setting(
+            "geo_lookup_enabled",
+            lambda: config.get("geo_lookup", {}).get("enabled", False),
+            default=False,
+        )
+    )
 
 
 def get_geo_lookup_database_path() -> str:
-    """Filesystem path to the bundled GeoLite2-City.mmdb."""
+    """Filesystem path to the bundled GeoLite2-City.mmdb (bootstrap path — YAML)."""
     return config.get("geo_lookup", {}).get(
         "database_path", "/var/lib/sysmanage/geoip/GeoLite2-City.mmdb"
     )
 
 
 def get_geo_lookup_maxmind_license_key() -> str:
-    """MaxMind license key for GeoLite2 downloads.  Empty -> ipapi.co only."""
-    return config.get("geo_lookup", {}).get("maxmind_license_key", "")
+    """MaxMind license key for GeoLite2 downloads.  Empty -> ipapi.co only.
+
+    Phase 13.1.H: secret — OpenBAO first, YAML fallback.
+    """
+    return _config_secret(
+        "maxmind_license_key",
+        lambda: config.get("geo_lookup", {}).get("maxmind_license_key", ""),
+        default="",
+    )
 
 
 def get_geo_lookup_refresh_interval_hours() -> int:
-    """Hours between background-task GeoLite2 refresh runs (default 168 = 7d)."""
-    return int(config.get("geo_lookup", {}).get("refresh_interval_hours", 168))
+    """Hours between background-task GeoLite2 refresh runs (default 168 = 7d).
+
+    Phase 13.1.H: server setting (DB), YAML fallback.
+    """
+    return int(
+        _server_setting(
+            "geo_lookup_refresh_interval_hours",
+            lambda: config.get("geo_lookup", {}).get("refresh_interval_hours", 168),
+            default=168,
+        )
+    )
 
 
 def is_geo_lookup_ipapi_fallback_enabled() -> bool:
-    """Whether to query ipapi.co when the local GeoLite2 DB misses."""
-    return bool(config.get("geo_lookup", {}).get("ipapi_fallback_enabled", True))
+    """Whether to query ipapi.co when the local GeoLite2 DB misses.
+
+    Phase 13.1.H: server setting (DB), YAML fallback.
+    """
+    return bool(
+        _server_setting(
+            "geo_lookup_ipapi_fallback_enabled",
+            lambda: config.get("geo_lookup", {}).get("ipapi_fallback_enabled", True),
+            default=True,
+        )
+    )
 
 
 def is_collector():
