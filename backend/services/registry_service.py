@@ -15,6 +15,7 @@ SSO assertion to a ``registry_user`` row is delivered in 13.1.E (JIT /
 SCIM); this layer operates on ``registry_user`` ids directly.
 """
 
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
@@ -26,6 +27,8 @@ from backend.persistence.models.tenancy import (
     RegistryUserTenantGrant,
     TENANT_STATUS_ACTIVE,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _utcnow() -> datetime:
@@ -320,8 +323,10 @@ def revoke_support_grant(session, user_id, tenant_id):
             from backend.services.vault_service import VaultService  # noqa: PLC0415
 
             VaultService().revoke_support_lease(accessor)
-        except Exception:  # noqa: BLE001 - best-effort vault teardown
-            pass
+        except Exception as exc:  # noqa: BLE001 - best-effort vault teardown
+            # The lease auto-expires at its TTL anyway; log so an operator can
+            # see a stuck-lease teardown rather than swallowing it silently.
+            logger.debug("support-lease revoke failed (best-effort): %s", exc)
         grant.support_lease_accessor = None
     session.flush()
     return grant
