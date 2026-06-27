@@ -2122,7 +2122,22 @@
       "tenantHelp": "將此提供者限定為單一租戶（其 UUID）。留空表示伺服器層級的全域提供者。",
       "jit": "即時佈建（首次 SSO 登入時自動建立使用者）",
       "jitRole": "JIT 預設角色",
-      "jitRoleHelp": "授予自動建立成員的角色。需要租戶 ID 以及該租戶上相符的電子郵件網域允許清單。"
+      "jitRoleHelp": "授予自動建立成員的角色。需要租戶 ID 以及該租戶上相符的電子郵件網域允許清單。",
+      "samlEmailAttr": "電子郵件屬性（可選；如果為空，則為 NameID）",
+      "samlGroupAttr": "群組屬性",
+      "samlIdpCert": "IdP 簽署憑證（X.509）",
+      "samlIdpCertHelp": "公開 PEM/base64 憑證，用於驗證斷言簽名",
+      "samlIdpEntityId": "IdP 實體 ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "IdP 將斷言 POST 到的位置，例如 https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP 實體 ID",
+      "samlSpKey": "SP 私鑰（Vault secret id，可選）",
+      "samlSpKeyHelp": "引用類似 vault:secret/path 或字面量:plaintext",
+      "samlWantSigned": "要求已簽署的斷言（推薦）",
+      "scimEnabled": "啟用 SCIM 內部配置",
+      "scimToken": "SCIM 承載令牌（Vault secret id）",
+      "scimTokenHelp": "IdP 在每次 SCIM 請求中提供的令牌。引用類似 vault:secret/path 或字面量:plaintext"
     },
     "loadError": "無法載入身分提供者。",
     "mapAddError": "無法新增對應。",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "驗證設定",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

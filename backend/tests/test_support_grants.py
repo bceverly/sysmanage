@@ -7,6 +7,7 @@ be hard-capped so an operator can't accidentally mint an unbounded backdoor.
 
 import uuid
 from datetime import timedelta
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine
@@ -96,3 +97,73 @@ def test_live_then_dead_via_expiry(session):
     grant.expires_at = registry_service._utcnow() - timedelta(seconds=1)
     session.commit()
     assert registry_service.has_active_grant(session, user.id, TENANT) is False
+
+
+# --- Phase 13.1.E: OpenBAO lease binding -----------------------------------
+
+
+def test_bind_support_lease_records_accessor(session):
+    user = _user(session)
+    grant = registry_service.create_support_grant(session, user.id, TENANT, 3600)
+    with patch("backend.services.vault_service.VaultService") as mock_vs:
+        mock_vs.return_value.create_support_lease.return_value = "acc-123"
+        accessor = registry_service.bind_support_lease(
+            grant, 3600, metadata={"email": "vendor@acme.com"}
+        )
+    session.commit()
+    assert accessor == "acc-123"
+    assert grant.support_lease_accessor == "acc-123"
+    # The TTL + metadata were forwarded to the vault lease.
+    _, kwargs = mock_vs.return_value.create_support_lease.call_args
+    assert kwargs["ttl_seconds"] == 3600
+    assert kwargs["metadata"]["email"] == "vendor@acme.com"
+
+
+def test_bind_support_lease_noop_when_vault_returns_none(session):
+    user = _user(session)
+    grant = registry_service.create_support_grant(session, user.id, TENANT, 3600)
+    with patch("backend.services.vault_service.VaultService") as mock_vs:
+        mock_vs.return_value.create_support_lease.return_value = None
+        accessor = registry_service.bind_support_lease(grant, 3600)
+    assert accessor is None
+    assert grant.support_lease_accessor is None  # expires_at alone enforces
+
+
+def test_bind_support_lease_swallows_vault_errors(session):
+    user = _user(session)
+    grant = registry_service.create_support_grant(session, user.id, TENANT, 3600)
+    with patch(
+        "backend.services.vault_service.VaultService",
+        side_effect=RuntimeError("vault down"),
+    ):
+        accessor = registry_service.bind_support_lease(grant, 3600)
+    assert accessor is None
+    assert grant.support_lease_accessor is None
+
+
+def test_revoke_support_grant_expires_immediately(session):
+    user = _user(session)
+    registry_service.create_support_grant(session, user.id, TENANT, 3600)
+    session.commit()
+    assert registry_service.has_active_grant(session, user.id, TENANT) is True
+    grant = registry_service.revoke_support_grant(session, user.id, TENANT)
+    session.commit()
+    assert grant is not None
+    assert registry_service.has_active_grant(session, user.id, TENANT) is False
+
+
+def test_revoke_support_grant_revokes_bound_lease(session):
+    user = _user(session)
+    grant = registry_service.create_support_grant(session, user.id, TENANT, 3600)
+    grant.support_lease_accessor = "acc-xyz"
+    session.commit()
+    with patch("backend.services.vault_service.VaultService") as mock_vs:
+        registry_service.revoke_support_grant(session, user.id, TENANT)
+        mock_vs.return_value.revoke_support_lease.assert_called_once_with("acc-xyz")
+    session.commit()
+    assert grant.support_lease_accessor is None
+
+
+def test_revoke_support_grant_none_when_absent(session):
+    user = _user(session)
+    assert registry_service.revoke_support_grant(session, user.id, TENANT) is None

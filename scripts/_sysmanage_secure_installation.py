@@ -1883,6 +1883,12 @@ def main():
             _db_block = config.get("registry") or config.get("database") or {}
             for _name, _value in (
                 ("db_password", _db_block.get("password")),
+                # Recovery-account password (B-bucket): config.get_admin_password()
+                # reads it from OpenBAO, YAML fallback during migration.
+                (
+                    "admin_password",
+                    (config.get("security") or {}).get("admin_password"),
+                ),
                 ("license_key", (config.get("license") or {}).get("key")),
                 (
                     "maxmind_license_key",

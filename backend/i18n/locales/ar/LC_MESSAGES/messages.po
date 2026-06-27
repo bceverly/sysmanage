@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 09:39-0400\n"
+"POT-Creation-Date: 2026-06-26 16:17-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "لا يمكن التحقق من بيانات الاعتماد"
 msgid "User not found."
 msgstr "المستخدم غير موجود."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:605
+#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
 
@@ -133,8 +133,8 @@ msgstr "تنسيق ID المضيف غير صحيح"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
-#: backend/api/repository_mirroring.py:831
-#: backend/api/repository_mirroring.py:896
+#: backend/api/repository_mirroring.py:836
+#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
 #: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
 #: backend/api/tag.py:495 backend/api/tag.py:649
@@ -164,8 +164,8 @@ msgstr "المضيف غير معتمد"
 #: backend/api/opentelemetry/deployment.py:216
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
-#: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64
+#: backend/api/opentelemetry/grafana_connection.py:197 backend/api/scim.py:215
+#: backend/api/scim.py:225 backend/api/packages_operations.py:64
 #: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
@@ -376,9 +376,9 @@ msgstr "لم يتم العثور على طلب التثبيت: %s"
 msgid "Failed to record installation completion: %s"
 msgstr "فشل في تسجيل انتهاء التثبيت: %s"
 
-#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:156
+#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:161
 #: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
-#: backend/api/external_idp.py:61 backend/api/dynamic_secrets.py:106
+#: backend/api/external_idp.py:62 backend/api/dynamic_secrets.py:106
 #: backend/api/upgrade_profiles.py:122
 #, python-format
 msgid "Invalid UUID for %s: %s"
@@ -1142,7 +1142,7 @@ msgid ""
 "deletion."
 msgstr "تم طلب حذف المجموعة. ستحديث القائمة تلقائيًا بعد الحذف."
 
-#: backend/api/repository_mirroring.py:81
+#: backend/api/repository_mirroring.py:86
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
@@ -1150,44 +1150,44 @@ msgstr ""
 "تتطلب مرآة المخزن.requires a SysManage Professional+ رخصة. يرجى الترقية "
 "للاستفادة من هذه الميزة."
 
-#: backend/api/repository_mirroring.py:252
+#: backend/api/repository_mirroring.py:257
 msgid "Mirror host not found"
 msgstr "لم يتم العثور على مضيف المرآة"
 
-#: backend/api/repository_mirroring.py:360
+#: backend/api/repository_mirroring.py:365
 msgid "Mirror deleted"
 msgstr "تم حذف المرآة"
 
-#: backend/api/repository_mirroring.py:392
+#: backend/api/repository_mirroring.py:397
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "مدير الحزم غير مدعوم: %s"
 
-#: backend/api/repository_mirroring.py:405
+#: backend/api/repository_mirroring.py:410
 msgid "Mirror sync dispatched"
 msgstr "تم إرسال تحديث المرآة بنجاح"
 
-#: backend/api/repository_mirroring.py:601
+#: backend/api/repository_mirroring.py:606
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "يحتاج التحديث الدوري للمرآة إلى تفعيل خدمة automation_engine."
 
-#: backend/api/repository_mirroring.py:826
-#: backend/api/repository_mirroring.py:892
+#: backend/api/repository_mirroring.py:831
+#: backend/api/repository_mirroring.py:897
 #, python-format
 msgid "Invalid platform: %s"
 msgstr "المنصة غير صالحة: %s"
 
-#: backend/api/repository_mirroring.py:843
+#: backend/api/repository_mirroring.py:848
 #, python-format
 msgid "A platform config for %s on this host already exists"
 msgstr "存在着与此主机上的%s相关的平台配置"
 
-#: backend/api/repository_mirroring.py:941
+#: backend/api/repository_mirroring.py:946
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "التكوين الخاص بالمنصة لا يزال يمتلك %d مرآة (ات); قم بإزالتها أولاً"
 
-#: backend/api/repository_mirroring.py:1104
+#: backend/api/repository_mirroring.py:1116
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
@@ -1196,12 +1196,12 @@ msgstr ""
 "لم يتم تحديث المرآة %s بنجاح بعد — انتظر حتى يكتمل التحديث بنجاح قبل تعيينها"
 " كمرآة افتراضية."
 
-#: backend/api/repository_mirroring.py:1112
+#: backend/api/repository_mirroring.py:1124
 #, python-format
 msgid "Mirror %s is for %s, can't assign to a %s default"
 msgstr "المرآة %s هي لـ %s، لا يمكن تعيينها كمرآة افتراضية لـ %s"
 
-#: backend/api/repository_mirroring.py:1186
+#: backend/api/repository_mirroring.py:1201
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "عدم معرفة (نظام، إصدار، عائلة النظام) الثلاثي"
 
@@ -1243,7 +1243,7 @@ msgstr ""
 "البيانات من خيار باء أن يكون المرآة مرتبطة بإصدار كتالوج حتى يمكن تحديد "
 "التوزيع / الإصدار. قم بتحرير المرآة واختر إصدارًا من القائمة المنسدلة."
 
-#: backend/api/airgap_collector_runs.py:307
+#: backend/api/airgap_collector_runs.py:322
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
@@ -1251,22 +1251,22 @@ msgid ""
 msgstr ""
 "يشار إلى مرآة %r لنسخة كتالوج لم تعد موجودة. اختر نسخة جديدة على المرآة."
 
-#: backend/api/airgap_collector_runs.py:391
-#: backend/api/airgap_collector_runs.py:470
+#: backend/api/airgap_collector_runs.py:406
+#: backend/api/airgap_collector_runs.py:485
 msgid "At least one target is required to create a collection run."
 msgstr "يجب تحديد هدف واحد على الأقل لإنشاء جولة تجميع."
 
-#: backend/api/airgap_collector_runs.py:401
+#: backend/api/airgap_collector_runs.py:416
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "تنسيق UUID غير صالح لـ mirror_id: %s"
 
-#: backend/api/airgap_collector_runs.py:411
+#: backend/api/airgap_collector_runs.py:426
 #, python-format
 msgid "Mirror %s not found"
 msgstr "لم يتم العثور على المرآة %s"
 
-#: backend/api/airgap_collector_runs.py:417
+#: backend/api/airgap_collector_runs.py:432
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
@@ -1274,7 +1274,7 @@ msgstr ""
 "يحتوي المرآة %r على الخاصية غير مفعلة؛ قم بتفعيلها وتحديثها قبل استخدامها في"
 " تشغيل جمع البيانات."
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:443
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1284,7 +1284,7 @@ msgstr ""
 "الدعوات إلى وكيل واحد فقط). تم اختيار المرآات التي تغطي مضيفًا أو أكثر من %d"
 " مضيف."
 
-#: backend/api/airgap_collector_runs.py:524
+#: backend/api/airgap_collector_runs.py:539
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
@@ -1293,7 +1293,7 @@ msgstr ""
 "تم إنشاء تشغيل تجميع معزول لمرة واحدة '%s' مع %d مرآة مستهدفة؛ تم إرسال "
 "اللقطات."
 
-#: backend/api/airgap_collector_runs.py:647
+#: backend/api/airgap_collector_runs.py:662
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
@@ -1301,7 +1301,7 @@ msgid ""
 msgstr ""
 "لم يتم إعداد ملف ISO بعد (الحالة: %s). انتظر حتى يصل التشغيل إلى ISO_BUILT."
 
-#: backend/api/airgap_collector_runs.py:657
+#: backend/api/airgap_collector_runs.py:672
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
@@ -1309,30 +1309,30 @@ msgstr ""
 "تم تنظيف مجلد التخزين المؤقت؛ يرجى إعادة تشغيل جمع البيانات لإعادة بناء ملف "
 "ISO."
 
-#: backend/api/airgap_collector_runs.py:674
+#: backend/api/airgap_collector_runs.py:689
 msgid "ISO file not found."
 msgstr "ملف ISO غير موجود."
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:708
 #, python-format
 msgid "Disc %d not found for this run.  Available discs: %s"
 msgstr ".disc %d غير موجود لهذه الدورة. الأقراص المتاحة: %s"
 
-#: backend/api/airgap_collector_runs.py:774
+#: backend/api/airgap_collector_runs.py:789
 msgid "Invalid or expired download token."
 msgstr "رمز التنزيل غير صالح أو منتهٍ الصلاحية."
 
-#: backend/api/airgap_collector_runs.py:807
+#: backend/api/airgap_collector_runs.py:822
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "حذف عملية جمع الفجوة الهوائية '%s'"
 
-#: backend/api/airgap_collector_runs.py:879
+#: backend/api/airgap_collector_runs.py:894
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "لا يزال التشغيل غير مكتمل (الحالة: %s)"
 
-#: backend/api/airgap_collector_runs.py:885
+#: backend/api/airgap_collector_runs.py:900
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ملف ISO غير موجود على القرص: %s"
@@ -1449,7 +1449,7 @@ msgstr "تم حذف مفتاح التسجيل '%s'"
 msgid "Registration key deleted"
 msgstr "تم حذف مفتاح التسجيل"
 
-#: backend/api/external_idp.py:47
+#: backend/api/external_idp.py:48
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
@@ -1457,52 +1457,52 @@ msgstr ""
 "تطلب تكامل مزود الهوية الخارجية رخصة SysManage Professional+. يرجى الترقية "
 "لاستخدام هذه الميزة."
 
-#: backend/api/external_idp.py:73
+#: backend/api/external_idp.py:74
 msgid "IdP provider not found"
 msgstr "مزود IdP غير موجود"
 
-#: backend/api/external_idp.py:246
+#: backend/api/external_idp.py:276
 msgid "IdP provider deleted"
 msgstr "تم حذف مزود IdP"
 
-#: backend/api/external_idp.py:294
+#: backend/api/external_idp.py:324
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "存在着与此提供程序相关的未映射默认映射。"
 
-#: backend/api/external_idp.py:328
+#: backend/api/external_idp.py:358
 msgid "Role mapping not found"
 msgstr "لم يتم العثور على خ못ة الدور"
 
-#: backend/api/external_idp.py:331
+#: backend/api/external_idp.py:361
 msgid "Role mapping deleted"
 msgstr "تم حذف خ못م التحديد"
 
-#: backend/api/external_idp.py:382
+#: backend/api/external_idp.py:412
 msgid "Provider is not an OIDC provider."
 msgstr "الProveedor ليس مزود OIDC."
 
-#: backend/api/external_idp.py:385
+#: backend/api/external_idp.py:415
 msgid "OIDC provider is disabled."
 msgstr "OIDC提供程序已禁用。"
 
-#: backend/api/external_idp.py:416
+#: backend/api/external_idp.py:446
 msgid "Missing code or state in callback."
 msgstr "не указан код или состояние в ответе обратного вызова."
 
-#: backend/api/external_idp.py:420
+#: backend/api/external_idp.py:450
 msgid "Invalid OIDC state."
 msgstr "حالة OIDC غير صالحة."
 
-#: backend/api/external_idp.py:429
+#: backend/api/external_idp.py:459
 msgid "OIDC client secret could not be resolved."
 msgstr "لا يمكن حل سرシーOIDC客户端密钥。"
 
-#: backend/api/external_idp.py:436
+#: backend/api/external_idp.py:466
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登录失败：%s"
 
-#: backend/api/external_idp.py:451
+#: backend/api/external_idp.py:486 backend/api/external_idp.py:683
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1510,9 +1510,40 @@ msgstr ""
 "لا يوجد حساب SysManage مرتبط بهذا الهوية IdP. اطلب من المسؤول توفير الحساب "
 "أولاً."
 
-#: backend/api/external_idp.py:456
+#: backend/api/external_idp.py:491 backend/api/external_idp.py:688
 msgid "Account is inactive."
 msgstr "الحساب غير نشط."
+
+#: backend/api/external_idp.py:593 backend/api/external_idp.py:614
+msgid "Provider is not a SAML provider."
+msgstr "الموفر ليس موفرًا لـ SAML."
+
+#: backend/api/external_idp.py:599
+#, python-format
+msgid "Could not build SP metadata: %s"
+msgstr "لم يتم بناء بيانات SP الوصفية: %s"
+
+#: backend/api/external_idp.py:617
+msgid "SAML provider is disabled."
+msgstr "تم تعطيل موفر SAML."
+
+#: backend/api/external_idp.py:623
+#, python-format
+msgid "Could not start SAML sign-in: %s"
+msgstr "لا يمكن بدء تسجيل الدخول باستخدام SAML: %s"
+
+#: backend/api/external_idp.py:651
+msgid "Missing SAMLResponse or RelayState."
+msgstr "SAMLResponse أو RelayState مفقود."
+
+#: backend/api/external_idp.py:656
+msgid "Invalid or expired SAML RelayState."
+msgstr "SAML RelayState غير صالح أو منتهي الصلاحية."
+
+#: backend/api/external_idp.py:666
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
 
 #: backend/api/grafana_integration.py:316
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
@@ -2155,6 +2186,18 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr "فشل في حذف الإعدادات الافتراضية لمكافحة الفيروسات: %s"
 
+#: backend/api/scim.py:47
+msgid "SCIM provisioning requires a SysManage Professional+ license."
+msgstr "يتطلب تزويد SCIM رخصة SysManage Pro+."
+
+#: backend/api/scim.py:60 backend/api/scim.py:69
+msgid "Unknown SCIM target"
+msgstr "هدف SCIM غير معروف."
+
+#: backend/api/scim.py:81
+msgid "Invalid or missing SCIM bearer token."
+msgstr "رمز حامل SCIM غير صالح أو مفقود."
+
 #: backend/api/email.py:82
 msgid "Failed to get email configuration"
 msgstr "فشل الحصول على تكوين البريد الإلكتروني"
@@ -2613,11 +2656,11 @@ msgstr "فشل في معالجة نتائج التحديث"
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 
-#: backend/api/auth.py:271
+#: backend/api/auth.py:277
 msgid "Account is locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:360
+#: backend/api/auth.py:366
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
@@ -2625,19 +2668,19 @@ msgstr ""
 "يجب استخدام التحقق المتعدد العوامل لهذا الحساب. يرجى تسجيل الدخول من صفحة "
 "الملف الشخصي الخاصة بك."
 
-#: backend/api/auth.py:449
+#: backend/api/auth.py:455
 msgid "Account locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:475
+#: backend/api/auth.py:481
 msgid "Invalid or missing refresh token"
 msgstr "رمز التجديد غير صالح أو مفقود"
 
-#: backend/api/auth.py:538 backend/api/auth.py:587
+#: backend/api/auth.py:544 backend/api/auth.py:593
 msgid "Multi-tenancy is not enabled."
 msgstr "لم يتم تمكين متعددة المستخدمين."
 
-#: backend/api/auth.py:660
+#: backend/api/auth.py:664
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
@@ -4062,35 +4105,35 @@ msgstr "تم تحديث {entity_type} '\\u0027{entity_name}\\u0027"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
 
-#: backend/services/vault_service.py:92
+#: backend/services/vault_service.py:148
 msgid "vault.not_enabled"
 msgstr "غير ممكن vault"
 
-#: backend/services/vault_service.py:95
+#: backend/services/vault_service.py:151
 msgid "vault.no_token"
 msgstr "لا يوجد توكن في vault"
 
-#: backend/services/vault_service.py:123
+#: backend/services/vault_service.py:179
 msgid "vault.permission_denied"
 msgstr "ختم الوصول ممنوع"
 
-#: backend/services/vault_service.py:135
+#: backend/services/vault_service.py:191
 msgid "vault.connection_error"
 msgstr "خطأ الاتصال بـ vault"
 
-#: backend/services/vault_service.py:138
+#: backend/services/vault_service.py:194
 msgid "vault.timeout"
 msgstr "انتهاء الوقت"
 
-#: backend/services/vault_service.py:143
+#: backend/services/vault_service.py:199
 msgid "vault.invalid_response"
 msgstr "استجابة غير صالحة من vault"
 
-#: backend/services/vault_service.py:277
+#: backend/services/vault_service.py:333
 msgid "vault.secret_not_found"
 msgstr "السر غير موجود"
 
-#: backend/services/vault_service.py:283
+#: backend/services/vault_service.py:339
 msgid "vault.invalid_secret_format"
 msgstr "تنسيق السر غير صالح في vault"
 

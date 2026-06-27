@@ -7,6 +7,10 @@ database:
   host: localhost
   port: 5432
   name: sysmanage
+# Dev convenience: working secrets are inline here so `make start` runs without
+# OpenBAO. In PRODUCTION these are generated into OpenBAO and the admin user is
+# seeded in the DB by secure-installation; JWT timeouts move to Settings. See
+# sysmanage.yaml.example.
 security:
   password_salt: 4d287511d0a2b17c0f820feeb57ed976e87e38ab90385f5b41eadbeafe975542
   admin_userid: admin@sysmanage.org

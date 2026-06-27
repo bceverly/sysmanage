@@ -19,7 +19,7 @@ import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -135,7 +135,7 @@ def _resolve_secret(secret_id: Optional[str]) -> Optional[str]:
 
 class ProviderCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
-    type: str = Field(..., pattern="^(ldap|oidc)$")
+    type: str = Field(..., pattern="^(ldap|oidc|saml)$")
     enabled: bool = True
     # Phase 13.1.E — per-tenant scoping + JIT. ``tenant_id`` None = server-global.
     tenant_id: Optional[str] = None
@@ -159,6 +159,17 @@ class ProviderCreateRequest(BaseModel):
     oidc_scopes: str = Field(default="openid profile email")
     oidc_discovery_url: Optional[str] = None
     oidc_group_claim: str = Field(default="groups")
+    # SAML 2.0 fields.
+    saml_idp_entity_id: Optional[str] = None
+    saml_idp_sso_url: Optional[str] = None
+    saml_idp_x509_cert: Optional[str] = None
+    saml_sp_entity_id: Optional[str] = None
+    saml_sp_acs_url: Optional[str] = None
+    saml_sp_x509_cert: Optional[str] = None
+    saml_sp_private_key_secret_id: Optional[str] = None
+    saml_email_attribute: Optional[str] = None
+    saml_group_attribute: str = Field(default="groups")
+    saml_want_assertions_signed: bool = True
 
 
 class ProviderUpdateRequest(BaseModel):
@@ -184,6 +195,16 @@ class ProviderUpdateRequest(BaseModel):
     oidc_scopes: Optional[str] = None
     oidc_discovery_url: Optional[str] = None
     oidc_group_claim: Optional[str] = None
+    saml_idp_entity_id: Optional[str] = None
+    saml_idp_sso_url: Optional[str] = None
+    saml_idp_x509_cert: Optional[str] = None
+    saml_sp_entity_id: Optional[str] = None
+    saml_sp_acs_url: Optional[str] = None
+    saml_sp_x509_cert: Optional[str] = None
+    saml_sp_private_key_secret_id: Optional[str] = None
+    saml_email_attribute: Optional[str] = None
+    saml_group_attribute: Optional[str] = None
+    saml_want_assertions_signed: Optional[bool] = None
 
 
 class RoleMappingCreateRequest(BaseModel):
@@ -540,6 +561,143 @@ def _jit_provision_user(db: Session, provider, email: Optional[str], subject: st
         sanitize_log(str(provider.tenant_id)),
     )
     return user
+
+
+# ---------------------------------------------------------------------
+# Public SAML 2.0 endpoints (anonymous — SP-initiated POST profile)
+# ---------------------------------------------------------------------
+
+# RelayState token → (provider_id, AuthnRequest id).  The request id is threaded
+# into the ACS so the engine can pin the IdP's ``InResponseTo`` (replay /
+# unsolicited-response protection).  Single-use: popped at the ACS.
+_SAML_STATE_STORE: dict = {}
+
+
+def _saml_config(provider) -> dict:
+    """Provider dict + the optional SP private key unsealed from Vault."""
+    config = provider.to_dict()
+    if provider.saml_sp_private_key_secret_id:
+        config["saml_sp_private_key"] = _resolve_secret(
+            provider.saml_sp_private_key_secret_id
+        )
+    return config
+
+
+@router.get("/api/auth/saml/{provider_id}/metadata")
+async def saml_metadata(provider_id: str, db: Session = Depends(get_db)):
+    """Return our SP metadata XML, for the IdP administrator (anonymous)."""
+    engine = _check_idp_module()
+    provider = _get_provider_or_404(db, provider_id)
+    if provider.type != "saml":
+        raise HTTPException(
+            status_code=400, detail=_("Provider is not a SAML provider.")
+        )
+    result = engine.get_saml_sp_metadata(provider.to_dict())
+    if result.get("error") or not result.get("metadata"):
+        raise HTTPException(
+            status_code=400,
+            detail=_("Could not build SP metadata: %s")
+            % result.get("error", "unknown"),
+        )
+    return Response(
+        content=result["metadata"], media_type="application/samlmetadata+xml"
+    )
+
+
+@router.get("/api/auth/saml/{provider_id}/start")
+async def saml_start(provider_id: str, db: Session = Depends(get_db)):
+    """Build the SP-initiated SSO redirect to the IdP (anonymous)."""
+    engine = _check_idp_module()
+    provider = _get_provider_or_404(db, provider_id)
+    if provider.type != "saml":
+        raise HTTPException(
+            status_code=400, detail=_("Provider is not a SAML provider.")
+        )
+    if not provider.enabled:
+        raise HTTPException(status_code=403, detail=_("SAML provider is disabled."))
+    relay_state = _secrets.token_urlsafe(32)
+    result = engine.build_saml_authn_request(_saml_config(provider), relay_state)
+    if result.get("error") or not result.get("url"):
+        raise HTTPException(
+            status_code=500,
+            detail=_("Could not start SAML sign-in: %s")
+            % result.get("error", "unknown"),
+        )
+    _SAML_STATE_STORE[relay_state] = (str(provider.id), result.get("request_id") or "")
+    # Open-redirect note: the URL host is the IdP's admin-curated SSO endpoint
+    # (``saml_idp_sso_url``), NOT user input — redirecting to the IdP is the whole
+    # point of SP-initiated SSO. The RelayState guards the ACS.
+    # nosemgrep: python.fastapi.web.tainted-redirect-fastapi.tainted-redirect-fastapi
+    return RedirectResponse(url=result["url"], status_code=302)
+
+
+@router.post("/api/auth/saml/{provider_id}/acs")
+async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get_db)):
+    """Assertion Consumer Service — the IdP POSTs the signed SAMLResponse here.
+
+    The engine verifies the XML signature + conditions in strict mode and pins
+    the AuthnRequest id (InResponseTo).  On success we resolve/JIT-provision the
+    linked account, apply group→role mappings, and issue a session JWT — the same
+    shape the OIDC callback returns (the browser-facing landing is wired in the
+    frontend, identical to the OIDC flow).
+    """
+    engine = _check_idp_module()
+    provider = _get_provider_or_404(db, provider_id)
+    form = await request.form()
+    saml_response = form.get("SAMLResponse")
+    relay_state = form.get("RelayState")
+    if not saml_response or not relay_state:
+        raise HTTPException(
+            status_code=400, detail=_("Missing SAMLResponse or RelayState.")
+        )
+    stashed = _SAML_STATE_STORE.pop(str(relay_state), None)
+    if not stashed or stashed[0] != str(provider.id):
+        raise HTTPException(
+            status_code=400, detail=_("Invalid or expired SAML RelayState.")
+        )
+    request_id = stashed[1] or None
+
+    result = engine.process_saml_response(
+        _saml_config(provider), str(saml_response), request_id
+    )
+    if not result["success"]:
+        raise HTTPException(
+            status_code=401,
+            detail=_("SAML sign-in failed: %s") % result.get("error", "unknown"),
+        )
+
+    user = (
+        db.query(models.User)
+        .filter(
+            models.User.external_idp_provider_id == provider.id,
+            models.User.external_subject == result["subject"],
+        )
+        .first()
+    )
+    if not user:
+        user = _jit_provision_user(db, provider, result.get("email"), result["subject"])
+    if not user:
+        raise HTTPException(
+            status_code=403,
+            detail=_(
+                "No sysmanage account is linked to this IdP identity. "
+                "Ask an administrator to provision your account first."
+            ),
+        )
+    if not user.active:
+        raise HTTPException(status_code=403, detail=_("Account is inactive."))
+
+    mappings = [
+        m.to_dict()
+        for m in db.query(models.IdpRoleMapping)
+        .filter(models.IdpRoleMapping.provider_id == provider.id)
+        .all()
+    ]
+    role_names = engine.map_external_groups_to_roles(result["groups"], mappings)
+    _apply_role_mappings(db, user, role_names)
+    db.commit()
+
+    return {"Authorization": sign_jwt(user.userid)}
 
 
 def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) -> None:

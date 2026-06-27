@@ -2122,7 +2122,22 @@
       "tenantHelp": "Restringir este fornecedor a um inquilino (o respetivo UUID). Deixe em branco para um fornecedor global do servidor.",
       "jit": "Aprovisionamento just-in-time (criar utilizadores automaticamente no primeiro início de sessão SSO)",
       "jitRole": "Função predefinida do JIT",
-      "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de inquilino e uma lista de domínios de e-mail permitidos correspondente nesse inquilino."
+      "jitRoleHelp": "Função atribuída aos membros criados automaticamente. Requer um ID de inquilino e uma lista de domínios de e-mail permitidos correspondente nesse inquilino.",
+      "samlEmailAttr": "Atributo de email (opcional; NameID se vazio)",
+      "samlGroupAttr": "Atributo de grupo",
+      "samlIdpCert": "Certificado de assinatura do IdP (X.509)",
+      "samlIdpCertHelp": "Certificado público PEM/base64 usado para verificar assinaturas de afirmações",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "Onde o IdP POSTs a afirmação, por exemplo https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "Chave privada do SP (Vault secret id, opcional)",
+      "samlSpKeyHelp": "Referência como vault:secret/path ou literal:plaintext",
+      "samlWantSigned": "Requerer afirmações assinadas (recomendado)",
+      "scimEnabled": "Habilitar provisionamento SCIM inbound",
+      "scimToken": "Token SCIM bearer (Vault secret id)",
+      "scimTokenHelp": "Token que o IdP apresenta em cada solicitação SCIM. Referência como vault:secret/path ou literal:plaintext"
     },
     "loadError": "Não foi possível carregar provedores de identidade.",
     "mapAddError": "Não foi possível adicionar o mapeamento.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Configurações de autenticação",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

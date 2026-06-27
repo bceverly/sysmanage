@@ -2122,7 +2122,22 @@
       "tenantHelp": "Limita questo provider a un solo tenant (il suo UUID). Lascia vuoto per un provider globale del server.",
       "jit": "Provisioning just-in-time (crea automaticamente gli utenti al primo accesso SSO)",
       "jitRole": "Ruolo predefinito JIT",
-      "jitRoleHelp": "Ruolo assegnato ai membri creati automaticamente. Richiede un ID tenant e un elenco di domini email consentiti corrispondente per quel tenant."
+      "jitRoleHelp": "Ruolo assegnato ai membri creati automaticamente. Richiede un ID tenant e un elenco di domini email consentiti corrispondente per quel tenant.",
+      "samlEmailAttr": "Attributo email (opzionale; NameID se vuoto)",
+      "samlGroupAttr": "Attributo gruppo",
+      "samlIdpCert": "Certificato di firma IdP (X.509)",
+      "samlIdpCertHelp": "Certificato pubblico PEM/base64 utilizzato per verificare le firme delle asserzioni",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "URL SSO IdP",
+      "samlSpAcs": "URL ACS SP",
+      "samlSpAcsHelp": "Dove l'IdP invia il POST dell'asserzione, ad esempio https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "Chiave privata SP (Vault secret id, opzionale)",
+      "samlSpKeyHelp": "Riferimento come vault:secret/path o testo letterale:plaintext",
+      "samlWantSigned": "Richiedi asserzioni firmate (raccomandato)",
+      "scimEnabled": "Abilita la provisioning SCIM in ingresso",
+      "scimToken": "SCIM bearer token (Vault secret id)",
+      "scimTokenHelp": "Token che l'IdP presenta in ogni richiesta SCIM. Riferimento come vault:secret/path o testo letterale:plaintext"
     },
     "loadError": "Impossibile caricare i provider di identità.",
     "mapAddError": "Impossibile aggiungere la mappatura.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Impostazioni di autenticazione",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

@@ -2122,7 +2122,22 @@
       "tenantHelp": "Limiter ce fournisseur à un seul locataire (son UUID). Laisser vide pour un fournisseur global du serveur.",
       "jit": "Provisionnement à la volée (création automatique des utilisateurs à la première connexion SSO)",
       "jitRole": "Rôle par défaut JIT",
-      "jitRoleHelp": "Rôle attribué aux membres créés automatiquement. Nécessite un ID de locataire et une liste blanche de domaines de messagerie correspondante pour ce locataire."
+      "jitRoleHelp": "Rôle attribué aux membres créés automatiquement. Nécessite un ID de locataire et une liste blanche de domaines de messagerie correspondante pour ce locataire.",
+      "samlEmailAttr": "Attribut Email (facultatif—NameID si vide)",
+      "samlGroupAttr": "Attribut Groupe",
+      "samlIdpCert": "Certificat de signature de l'IdP (X.509)",
+      "samlIdpCertHelp": "Certificat public PEM/base64 utilisé pour vérifier les signatures des assertions",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "URL d'authentification unique de l'IdP (IdP SSO URL)",
+      "samlSpAcs": "URL ACS du SP",
+      "samlSpAcsHelp": "Où l'IdP POSTe l'affirmation, par exemple https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "Entity ID du SP",
+      "samlSpKey": "Clé privée du SP (Vault secret id, facultatif)",
+      "samlSpKeyHelp": "Référence comme vault:secret/path ou littéral:plaintext",
+      "samlWantSigned": "Exiger des assertions signées (recommandé)",
+      "scimEnabled": "Activer la provisionnement SCIM entrant",
+      "scimToken": "SCIM jeton porteur (Vault secret id)",
+      "scimTokenHelp": "Token que l'IdP présente sur chaque demande SCIM. Référence comme vault:secret/path ou littéral:plaintext"
     },
     "loadError": "Impossible de charger les fournisseurs d'identité.",
     "mapAddError": "Impossible d'ajouter la correspondance.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Paramètres d'authentification",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

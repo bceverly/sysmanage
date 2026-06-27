@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 09:39-0400\n"
+"POT-Creation-Date: 2026-06-26 16:17-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "자격 증명을 검증할 수 없습니다"
 msgid "User not found."
 msgstr "사용자를 찾을 수 없습니다."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:605
+#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "선택한 계정에 액세스 권한이 없습니다."
 
@@ -133,8 +133,8 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
-#: backend/api/repository_mirroring.py:831
-#: backend/api/repository_mirroring.py:896
+#: backend/api/repository_mirroring.py:836
+#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
 #: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
 #: backend/api/tag.py:495 backend/api/tag.py:649
@@ -164,8 +164,8 @@ msgstr "호스트가 승인이 되지 않았습니다."
 #: backend/api/opentelemetry/deployment.py:216
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
-#: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64
+#: backend/api/opentelemetry/grafana_connection.py:197 backend/api/scim.py:215
+#: backend/api/scim.py:225 backend/api/packages_operations.py:64
 #: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
@@ -376,9 +376,9 @@ msgstr "설정 요청을 찾을 수 없습니다: %s"
 msgid "Failed to record installation completion: %s"
 msgstr "_INSTALLATION_COMPLETION_ 기록에 실패했습니다: %s"
 
-#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:156
+#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:161
 #: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
-#: backend/api/external_idp.py:61 backend/api/dynamic_secrets.py:106
+#: backend/api/external_idp.py:62 backend/api/dynamic_secrets.py:106
 #: backend/api/upgrade_profiles.py:122
 #, python-format
 msgid "Invalid UUID for %s: %s"
@@ -1131,62 +1131,62 @@ msgid ""
 "deletion."
 msgstr "그룹 삭제 요청됨. 그룹 목록은 삭제 후 자동으로 업데이트됩니다."
 
-#: backend/api/repository_mirroring.py:81
+#: backend/api/repository_mirroring.py:86
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "저장소 미러링은 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능을 사용하려면 업그레이드하세요."
 
-#: backend/api/repository_mirroring.py:252
+#: backend/api/repository_mirroring.py:257
 msgid "Mirror host not found"
 msgstr "미러 호스트를 찾을 수 없습니다"
 
-#: backend/api/repository_mirroring.py:360
+#: backend/api/repository_mirroring.py:365
 msgid "Mirror deleted"
 msgstr "미러 삭제됨"
 
-#: backend/api/repository_mirroring.py:392
+#: backend/api/repository_mirroring.py:397
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "지원되지 않는 패키지 매니저: %s"
 
-#: backend/api/repository_mirroring.py:405
+#: backend/api/repository_mirroring.py:410
 msgid "Mirror sync dispatched"
 msgstr "미러 동기화가 배포됨"
 
-#: backend/api/repository_mirroring.py:601
+#: backend/api/repository_mirroring.py:606
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "미러 틱은 크론 평가를 위해 automation_engine이 필요합니다."
 
-#: backend/api/repository_mirroring.py:826
-#: backend/api/repository_mirroring.py:892
+#: backend/api/repository_mirroring.py:831
+#: backend/api/repository_mirroring.py:897
 #, python-format
 msgid "Invalid platform: %s"
 msgstr "지원되지 않는 플랫폼: %s"
 
-#: backend/api/repository_mirroring.py:843
+#: backend/api/repository_mirroring.py:848
 #, python-format
 msgid "A platform config for %s on this host already exists"
 msgstr "이 호스트上的平台配置%s已经存在"
 
-#: backend/api/repository_mirroring.py:941
+#: backend/api/repository_mirroring.py:946
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "플랫폼 설정은 여전히 %d 미러를 소유하고 있습니다; 먼저 이를 삭제해야 합니다"
 
-#: backend/api/repository_mirroring.py:1104
+#: backend/api/repository_mirroring.py:1116
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
 " before assigning it as a default."
 msgstr "미러 %s는 아직 성공적인 동기화를 완료하지 않았습니다 — 기본 미러로 지정하기 전에 동기화가 성공할 때까지 기다려주세요."
 
-#: backend/api/repository_mirroring.py:1112
+#: backend/api/repository_mirroring.py:1124
 #, python-format
 msgid "Mirror %s is for %s, can't assign to a %s default"
 msgstr "미러 %s은 %s용입니다. %s 기본값으로 할당할 수 없습니다."
 
-#: backend/api/repository_mirroring.py:1186
+#: backend/api/repository_mirroring.py:1201
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "알 수 없는 (플랫폼, 버전, os_family) 튜플"
 
@@ -1224,35 +1224,35 @@ msgstr ""
 "미러 %r의 known_version_id가 설정되어 있지 않습니다; 옵션-B 수집 작업은 미러가 카탈로그 버전에 연결되어 있어야 "
 "합니다. 이로써 배포판 / 버전을 파악할 수 있습니다. 미러를 편집하고 드롭다운에서 버전을 선택하세요."
 
-#: backend/api/airgap_collector_runs.py:307
+#: backend/api/airgap_collector_runs.py:322
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "미러 %r이 더 이상 존재하지 않는 카탈로그 버전을 참조합니다. 미러의 버전을 다시 선택하세요."
 
-#: backend/api/airgap_collector_runs.py:391
-#: backend/api/airgap_collector_runs.py:470
+#: backend/api/airgap_collector_runs.py:406
+#: backend/api/airgap_collector_runs.py:485
 msgid "At least one target is required to create a collection run."
 msgstr "수집 실행을 생성하려면 최소 한 개 이상의 대상이 필요합니다."
 
-#: backend/api/airgap_collector_runs.py:401
+#: backend/api/airgap_collector_runs.py:416
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "미러 ID(%s)에 대한 유효하지 않은 UUID 형식"
 
-#: backend/api/airgap_collector_runs.py:411
+#: backend/api/airgap_collector_runs.py:426
 #, python-format
 msgid "Mirror %s not found"
 msgstr "미러 %s을 찾을 수 없습니다"
 
-#: backend/api/airgap_collector_runs.py:417
+#: backend/api/airgap_collector_runs.py:432
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "미러 %r이 비활성화되어 있습니다; 수집 실행에서 사용하기 전에 활성화하고 동기화하세요."
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:443
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1261,50 +1261,50 @@ msgstr ""
 "모든 대상 미러는 동일한 호스트에 존재해야 합니다(수집 계획은 단일 에이전트로 디스패치됩니다). 선택된 미러가 %d개의 호스트를 "
 "포함합니다."
 
-#: backend/api/airgap_collector_runs.py:524
+#: backend/api/airgap_collector_runs.py:539
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
 "snapshots dispatched."
 msgstr "%d 개의 대상 미러로 일회성 오프라인 수집 실행 '%s' 생성됨; 스냅샷이 배포되었습니다."
 
-#: backend/api/airgap_collector_runs.py:647
+#: backend/api/airgap_collector_runs.py:662
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO가 아직 다운로드 준비가 되지 않았습니다(상태: %s). ISO_BUILT 상태까지 기다려주세요."
 
-#: backend/api/airgap_collector_runs.py:657
+#: backend/api/airgap_collector_runs.py:672
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음; 스테이징 볼륨이 정리되었을 수 있습니다. 수집을 다시 실행하여 재구축하세요."
 
-#: backend/api/airgap_collector_runs.py:674
+#: backend/api/airgap_collector_runs.py:689
 msgid "ISO file not found."
 msgstr "ISO 파일을 찾을 수 없습니다."
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:708
 #, python-format
 msgid "Disc %d not found for this run.  Available discs: %s"
 msgstr "디스크 %d을(를) 찾을 수 없습니다. 사용 가능한 디스크: %s"
 
-#: backend/api/airgap_collector_runs.py:774
+#: backend/api/airgap_collector_runs.py:789
 msgid "Invalid or expired download token."
 msgstr "잘못된 또는 만료된 다운로드 토큰."
 
-#: backend/api/airgap_collector_runs.py:807
+#: backend/api/airgap_collector_runs.py:822
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "오프라인 수집 실행 '%s' 삭제됨"
 
-#: backend/api/airgap_collector_runs.py:879
+#: backend/api/airgap_collector_runs.py:894
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "실행은 아직 완료되지 않았습니다 (상태: %s)"
 
-#: backend/api/airgap_collector_runs.py:885
+#: backend/api/airgap_collector_runs.py:900
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음: %s"
@@ -1421,66 +1421,97 @@ msgstr "등록 키 '%s' 가 삭제되었습니다"
 msgid "Registration key deleted"
 msgstr "등록 키가 삭제되었습니다"
 
-#: backend/api/external_idp.py:47
+#: backend/api/external_idp.py:48
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
 msgstr "外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
 
-#: backend/api/external_idp.py:73
+#: backend/api/external_idp.py:74
 msgid "IdP provider not found"
 msgstr "IdP 공급자를 찾을 수 없습니다"
 
-#: backend/api/external_idp.py:246
+#: backend/api/external_idp.py:276
 msgid "IdP provider deleted"
 msgstr "IdP 공급자가 삭제되었습니다."
 
-#: backend/api/external_idp.py:294
+#: backend/api/external_idp.py:324
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "이 공급자에 이미 미매핑된 기본 매핑이 존재합니다."
 
-#: backend/api/external_idp.py:328
+#: backend/api/external_idp.py:358
 msgid "Role mapping not found"
 msgstr "역할 매핑이 없습니다"
 
-#: backend/api/external_idp.py:331
+#: backend/api/external_idp.py:361
 msgid "Role mapping deleted"
 msgstr "역할 매핑 삭제됨"
 
-#: backend/api/external_idp.py:382
+#: backend/api/external_idp.py:412
 msgid "Provider is not an OIDC provider."
 msgstr "공급자가 OIDC 공급자일 수 없습니다."
 
-#: backend/api/external_idp.py:385
+#: backend/api/external_idp.py:415
 msgid "OIDC provider is disabled."
 msgstr "OIDC 공급자가 비활성화되었습니다."
 
-#: backend/api/external_idp.py:416
+#: backend/api/external_idp.py:446
 msgid "Missing code or state in callback."
 msgstr "콜백에 코드 또는 상태가 누락되었습니다."
 
-#: backend/api/external_idp.py:420
+#: backend/api/external_idp.py:450
 msgid "Invalid OIDC state."
 msgstr "유효하지 않은 OIDC 상태."
 
-#: backend/api/external_idp.py:429
+#: backend/api/external_idp.py:459
 msgid "OIDC client secret could not be resolved."
 msgstr "OIDC 클라이언트 시크릿을 해결할 수 없습니다."
 
-#: backend/api/external_idp.py:436
+#: backend/api/external_idp.py:466
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC 로그인 실패: %s"
 
-#: backend/api/external_idp.py:451
+#: backend/api/external_idp.py:486 backend/api/external_idp.py:683
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr "이 IdP 인식에 연결된 SysManage 계정이 없습니다. 관리자에게 먼저 계정을 제공받으세요."
 
-#: backend/api/external_idp.py:456
+#: backend/api/external_idp.py:491 backend/api/external_idp.py:688
 msgid "Account is inactive."
 msgstr "계정이 비활성화되었습니다."
+
+#: backend/api/external_idp.py:593 backend/api/external_idp.py:614
+msgid "Provider is not a SAML provider."
+msgstr "공급자가 SAML 공급자 아님."
+
+#: backend/api/external_idp.py:599
+#, python-format
+msgid "Could not build SP metadata: %s"
+msgstr "SP 메타데이터를 생성할 수 없습니다: %s"
+
+#: backend/api/external_idp.py:617
+msgid "SAML provider is disabled."
+msgstr "SAML 공급자가 비활성화됨."
+
+#: backend/api/external_idp.py:623
+#, python-format
+msgid "Could not start SAML sign-in: %s"
+msgstr "SAML 로그인을 시작할 수 없습니다: %s"
+
+#: backend/api/external_idp.py:651
+msgid "Missing SAMLResponse or RelayState."
+msgstr "SAMLResponse 또는 RelayState가 누락되었습니다."
+
+#: backend/api/external_idp.py:656
+msgid "Invalid or expired SAML RelayState."
+msgstr "유효하지 않거나 만료된 SAML RelayState."
+
+#: backend/api/external_idp.py:666
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "SAML 로그인 실패: %s"
 
 #: backend/api/grafana_integration.py:316
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
@@ -2109,6 +2140,18 @@ msgstr "이 운영 체제에 대한 기본_ANTIVIRUS_설정을 찾을 수 없습
 msgid "Failed to delete antivirus default: %s"
 msgstr "디폴트 악성코드 제거 프로그램 삭제 실패: %s"
 
+#: backend/api/scim.py:47
+msgid "SCIM provisioning requires a SysManage Professional+ license."
+msgstr "SCIM 프로비저닝은 SysManage Professional+ 라이선스가 필요합니다."
+
+#: backend/api/scim.py:60 backend/api/scim.py:69
+msgid "Unknown SCIM target"
+msgstr "알 수 없는 SCIM 대상"
+
+#: backend/api/scim.py:81
+msgid "Invalid or missing SCIM bearer token."
+msgstr "유효하지 않거나 누락된 SCIM bearer 토큰."
+
 #: backend/api/email.py:82
 msgid "Failed to get email configuration"
 msgstr "이메일 구성을 가져오지 못했습니다"
@@ -2557,29 +2600,29 @@ msgstr "업데이트 결과 처리에 실패했습니다"
 msgid "Invalid username or password"
 msgstr "잘못된 사용자명 또는 비밀번호"
 
-#: backend/api/auth.py:271
+#: backend/api/auth.py:277
 msgid "Account is locked due to too many failed login attempts"
 msgstr "로그인 시도 실패가 너무 많아 계정이 잠겼습니다"
 
-#: backend/api/auth.py:360
+#: backend/api/auth.py:366
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
 msgstr "이 계정은 다중 인증 요소가 필요합니다. 로그인 전에 프로필 페이지에서 등록해 주세요."
 
-#: backend/api/auth.py:449
+#: backend/api/auth.py:455
 msgid "Account locked due to too many failed login attempts"
 msgstr "로그인 시도 실패가 너무 많아 계정이 잠김"
 
-#: backend/api/auth.py:475
+#: backend/api/auth.py:481
 msgid "Invalid or missing refresh token"
 msgstr "유효하지 않은 refresh token"
 
-#: backend/api/auth.py:538 backend/api/auth.py:587
+#: backend/api/auth.py:544 backend/api/auth.py:593
 msgid "Multi-tenancy is not enabled."
 msgstr "멀티테넌시가 활성화되어 있지 않습니다."
 
-#: backend/api/auth.py:660
+#: backend/api/auth.py:664
 msgid "Logout successful"
 msgstr "로그아웃이 성공했습니다"
 
@@ -3984,35 +4027,35 @@ msgstr "{entity_type} '{entity_name}' 업데이트 완료"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "{entity_type} '{entity_name}' 삭제됨"
 
-#: backend/services/vault_service.py:92
+#: backend/services/vault_service.py:148
 msgid "vault.not_enabled"
 msgstr "vault.not_enabled"
 
-#: backend/services/vault_service.py:95
+#: backend/services/vault_service.py:151
 msgid "vault.no_token"
 msgstr "vault.no_token"
 
-#: backend/services/vault_service.py:123
+#: backend/services/vault_service.py:179
 msgid "vault.permission_denied"
 msgstr "vault.permission_denied"
 
-#: backend/services/vault_service.py:135
+#: backend/services/vault_service.py:191
 msgid "vault.connection_error"
 msgstr "vault.connection_error"
 
-#: backend/services/vault_service.py:138
+#: backend/services/vault_service.py:194
 msgid "vault.timeout"
 msgstr "vault.timeout"
 
-#: backend/services/vault_service.py:143
+#: backend/services/vault_service.py:199
 msgid "vault.invalid_response"
 msgstr "vault.invalid_response"
 
-#: backend/services/vault_service.py:277
+#: backend/services/vault_service.py:333
 msgid "vault.secret_not_found"
 msgstr "vault.secret_not_found"
 
-#: backend/services/vault_service.py:283
+#: backend/services/vault_service.py:339
 msgid "vault.invalid_secret_format"
 msgstr "vault.invalid_secret_format"
 

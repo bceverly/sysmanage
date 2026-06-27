@@ -690,10 +690,18 @@ EOF
 # /usr/local/bin/bao before installing the OS package.  Runs on the HOST
 # after the container build (curl + jq are host requirements).
 _OPENBAO_REPO="openbao/openbao"
+# Phase 13.1.H: pin the staged OpenBAO to a specific release so air-gap bundles
+# are REPRODUCIBLE — a bundle built today and one built next month embed the same
+# bao. Matches the version pinned by the online installers (installer/macos/
+# postinstall.sh). Override with OPENBAO_VERSION=x.y.z for a custom build.
+_OPENBAO_VERSION="${OPENBAO_VERSION:-2.5.4}"
 
 _openbao_asset_url() {
-  # $1 = jq regex matched against asset .name
-  curl -fsSL "https://api.github.com/repos/${_OPENBAO_REPO}/releases/latest" 2>/dev/null \
+  # $1 = jq regex matched against asset .name.  Resolves against the PINNED
+  # release tag (not "latest"), so the staged artifact is deterministic.
+  curl -fsSL \
+    "https://api.github.com/repos/${_OPENBAO_REPO}/releases/tags/v${_OPENBAO_VERSION}" \
+    2>/dev/null \
     | jq -r ".assets[] | select(.name | test(\"$1\")) | .browser_download_url" \
     | head -1
 }
@@ -729,6 +737,7 @@ _stage_openbao() {
         linux)   tok="Linux_x86_64";   ext="tar\\\\.gz"; bin="bao" ;;
         freebsd) tok="Freebsd_x86_64"; ext="tar\\\\.gz"; bin="bao" ;;
         netbsd)  tok="Netbsd_x86_64";  ext="tar\\\\.gz"; bin="bao" ;;
+        openbsd) tok="Openbsd_x86_64"; ext="tar\\\\.gz"; bin="bao" ;;
         darwin)  tok="Darwin_arm64";   ext="tar\\\\.gz"; bin="bao" ;;
         windows) tok="Windows_x86_64"; ext="zip";        bin="bao.exe" ;;
         *) warn "[openbao] unknown binary os: $osname"; return ;;
@@ -1477,6 +1486,9 @@ build_openbsd() {
   if _fetch_latest_release_asset 'openbsd[0-9]+\.tgz$' '' "$outdir/${PKG_NAME}.tgz"; then
     log "[openbsd] got .tgz"
     _write_bsd_installer "$outdir" "pkg_add"
+    # Phase 13.1.I: the official prebuilt OpenBAO binary is verified to run on
+    # OpenBSD, so stage it like the other BSDs (air-gapped OpenBSD can't source-build).
+    _stage_openbao "$outdir" binary-openbsd
   else
     warn "[openbsd] no openbsd[NN].tgz found in latest release — skipping"
     _safe_rmdir "$outdir"

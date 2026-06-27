@@ -87,6 +87,22 @@ TEST_CONFIG = {
 }
 
 
+def _stub_auth_config_getters(mock_config_module):
+    """Stub the config getters auth.py reads (Phase 13.1.H).
+
+    The login path no longer reads ``the_config["security"][...]`` directly for
+    the recovery password / JWT refresh timeout / cookie domain — it goes through
+    ``config.get_admin_password`` / ``get_jwt_refresh_timeout`` / ``get_cookie_domain``
+    (DB/OpenBAO-first, YAML fallback).  Under a wholesale ``backend.api.auth.config``
+    mock these would return MagicMocks, so resolve them to the TEST_CONFIG values.
+    """
+    sec = TEST_CONFIG["security"]
+    mock_config_module.get_config.return_value = TEST_CONFIG
+    mock_config_module.get_admin_password.return_value = sec["admin_password"]
+    mock_config_module.get_jwt_refresh_timeout.return_value = sec["jwt_refresh_timeout"]
+    mock_config_module.get_cookie_domain.return_value = None
+
+
 @pytest.fixture
 def mock_config():
     """Mock the configuration system to use test config."""
@@ -288,7 +304,7 @@ class TestUserLogin:
             mock_login_security.validate_login_attempt.return_value = (True, "Allowed")
             mock_login_security.is_user_account_locked.return_value = False
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
 
             # Phase 10.3 MFA flow: ``login`` returns ``{mfa_required,
             # pending_token}`` instead of a real session token when the
@@ -340,7 +356,7 @@ class TestUserLogin:
         ) as mock_db, patch("backend.api.auth.config") as mock_config_module:
             mock_login_security.validate_login_attempt.return_value = (True, "Allowed")
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
             mock_db.get_db.return_value = None
             mock_db.get_engine.return_value = MagicMock()
 
@@ -374,7 +390,7 @@ class TestUserLogin:
             mock_login_security.is_user_account_locked.return_value = False
             mock_login_security.record_failed_login_for_user.return_value = False
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
             mock_db.get_db.return_value = None
             mock_db.get_engine.return_value = MagicMock()
 
@@ -414,7 +430,7 @@ class TestUserLogin:
         ) as mock_db, patch("backend.api.auth.config") as mock_config_module:
             mock_login_security.validate_login_attempt.return_value = (True, "Allowed")
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
             mock_db.get_db.return_value = None
             mock_db.get_engine.return_value = MagicMock()
 
@@ -456,7 +472,7 @@ class TestUserLogin:
             mock_login_security.validate_login_attempt.return_value = (True, "Allowed")
             mock_login_security.is_user_account_locked.return_value = True
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
             mock_db.get_db.return_value = None
             mock_db.get_engine.return_value = MagicMock()
 
@@ -495,7 +511,7 @@ class TestUserLogin:
                 "Too many login attempts",
             )
 
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
 
             with pytest.raises(HTTPException) as exc_info:
                 await login(login_data, mock_request, mock_response)
@@ -1676,7 +1692,7 @@ class TestErrorHandling:
         with patch("backend.api.user.db") as mock_db, patch(
             "backend.api.user.config"
         ) as mock_config_module:
-            mock_config_module.get_config.return_value = TEST_CONFIG
+            _stub_auth_config_getters(mock_config_module)
             mock_db.get_engine.return_value = MagicMock()
 
             mock_session = MagicMock()

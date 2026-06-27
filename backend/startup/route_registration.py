@@ -56,6 +56,7 @@ from backend.api import (
     report_templates,
     reports,
     repository_mirroring,
+    scim,
     scripts,
     secrets,
     security,
@@ -166,6 +167,9 @@ def register_routes(app: FastAPI):
     )
     app.include_router(external_idp.router)
     logger.debug("External IdP router added")
+
+    app.include_router(scim.router)
+    logger.debug("SCIM provisioning router added")
 
     logger.debug("Adding agent public router with /api prefix")
     app.include_router(

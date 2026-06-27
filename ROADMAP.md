@@ -4271,7 +4271,7 @@ plan-builder + UI integration.
       relocated — it carries a per-host `host_id` and is genuinely tenant-scoped,
       not shared reference data. Verified end-to-end on scratch SQLite +
       `tests/test_shared_reference_relocation.py`; prefix guard green.)*
-- [ ] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
+- [x] **13.1.E** SSO & enforced grants — per-tenant IdP (Entra/Okta/OIDC/SAML),
       JIT/SCIM provisioning, vendor-support grants tied to OpenBAO issuance,
       break-glass path
       *(June 2026: **enforced grants already done** (13.1.B) — request-time
@@ -4297,10 +4297,60 @@ plan-builder + UI integration.
       (`--email`/`--tenant`/`--ttl-hours`/`--reason`, reason mandatory) is the
       emergency access path, logging every issuance (operator + tenant + TTL +
       reason) for audit. 5 tests (cap, floor, refresh, live→dead-on-expiry).
-      **Remaining for E:** SAML 2.0 (only LDAP/OIDC today), SCIM provisioning, and
-      binding the support-grant window to a live OpenBAO **lease object**
-      (the grant's own expiry already auto-revokes; lease-binding is the deeper
-      integration) — each its own dedicated, security-sensitive pass.)*
+      **Support-grant OpenBAO lease binding DONE (June 2026):** a support grant
+      now binds to a **live OpenBAO lease object** — `VaultService.create_support_lease`
+      mints an orphaned, non-renewable token whose `ttl`/`explicit_max_ttl` equal
+      the grant window (so it auto-expires exactly when the grant does and can
+      never outlive it), and its accessor is recorded on the new
+      `registry_user_tenant_grant.support_lease_accessor` column (registry
+      migration `r8registry`, nullable — best-effort, NULL when vault is off so
+      `expires_at` alone still enforces). `registry_service.bind_support_lease`
+      wires it from `break_glass_grant.py`; the new
+      `registry_service.revoke_support_grant` + `break_glass_grant.py --revoke`
+      give kill-the-break-glass — expire the grant *now* AND
+      `revoke_support_lease` (revoke-by-accessor) tears down the vault lease
+      before its TTL. 13 grant tests + 6 VaultService lease tests; migration
+      guard + sqlite up/idempotent/down verified; black + pylint clean.
+      **SAML 2.0 DONE (June 2026):** a third per-tenant IdP protocol alongside
+      LDAP/OIDC. The crypto lives in the Pro+ `external_idp_engine` (v0.2.0→**0.3.0**,
+      .so rebuilt) and goes through **python3-saml + xmlsec** — never hand-rolled:
+      `process_saml_response` verifies the XML signature + conditions in **strict
+      mode** and pins the AuthnRequest id (`InResponseTo`, replay protection);
+      `build_saml_authn_request` drives SP-initiated SSO; `get_saml_sp_metadata`
+      emits SP metadata for the IdP admin. OSS side: 10 `saml_*` columns on
+      `external_idp_provider` (migration `e2samlprovider`); anonymous endpoints
+      `/api/auth/saml/{id}/{metadata,start,acs}` that gate 402 without the engine,
+      verify via the engine, then reuse the existing JIT + group→role mapping +
+      session-issuance path; provider CRUD + the Authentication-Providers UI gained
+      the SAML type + fields. **Also fixed a latent gap:** `user.external_idp_provider_id`
+      / `external_subject` (which the OIDC flow already referenced but the model
+      never had) are now real columns (migration `e3idpuserlink`) — this unblocks
+      OIDC sign-in too. 7 engine SAML tests + 7 OSS endpoint tests; full chain
+      up/idempotent/down on sqlite; black + `backend/` pylint + `tsc` + eslint +
+      offline i18n gate all green. *Follow-ups (non-blocking):* the ACS browser
+      landing (cookie+redirect) is wired in the frontend like OIDC; SAML UI/API
+      strings are inline-English defaults pending a `make translate` GPU backfill;
+      and the engine `.so` needs a release rebuild for the other Python versions
+      (only cp314 built here).
+      **SCIM 2.0 inbound provisioning DONE (June 2026):** the IdP can now PUSH
+      user create/update/deactivate. The SCIM protocol logic lives in the Pro+
+      `external_idp_engine` (v0.3.0→**0.4.0**, .so rebuilt) — pure functions
+      (`scim_validate_user`, `scim_user_to_resource`, `scim_list_to_resource`,
+      `scim_parse_filter`, `scim_apply_patch`, `scim_error`), keeping the engine's
+      no-DB rule. OSS side: `scim_enabled` + `scim_bearer_token_secret_id` columns
+      (migration `e4scimprovider`); per-provider endpoints
+      `/api/scim/v2/{id}/Users[/{uid}]` (GET/POST/PUT/PATCH/DELETE) that gate 402
+      without the engine + 404 when SCIM is off, authenticate a **static bearer
+      token** (Vault-stored, constant-time compare — not a JWT), and apply
+      create/grant/deactivate via `registry_service` + the User model; PATCH/DELETE
+      `active=false` is the deprovision path (soft-deactivate, preserves audit).
+      The Authentication-Providers UI gained a SCIM toggle + token field. 12 engine
+      SCIM tests + 9 OSS endpoint tests; black + pylint + tsc + eslint + i18n gate
+      green. *Same release follow-up as SAML:* the engine `.so` needs a rebuild for
+      the other Python versions (only cp314 built here).
+      **13.1.E is complete** — per-tenant LDAP/OIDC/SAML IdP + JIT + SCIM
+      provisioning + enforced/expiry-checked grants + OpenBAO-lease-bound
+      vendor-support/break-glass, all licensed-engine-gated.)*
 - [x] **13.1.F** Backup orchestration & **data isolation verification** —
       per-tenant backup/RPO tracking + automated restore tests, two-tenant
       cross-leak test harness, per-account settings/limits enforcement
@@ -4335,7 +4385,7 @@ plan-builder + UI integration.
       `/tenants` UI gained a Backups & RPO panel (status chip, RPO target,
       back-up-now, run history). All limits/backup strings i18n'd (OSS gettext +
       plugin catalogs).)*
-- [ ] **13.1.G** Config builder & deployment docs — update the installer config
+- [x] **13.1.G** Config builder & deployment docs — update the installer config
       builder (`scripts/_sysmanage_secure_installation.py`) to emit the new
       `registry:` / `multitenancy:` / `secrets:` config shape with a deployment-mode
       prompt (homelab keeps its single-prompt simplicity; SaaS asks for
@@ -4347,6 +4397,30 @@ plan-builder + UI integration.
       `2 + N` topology, OpenBAO dynamic creds, and per-tenant SSO/grants —
       explicitly noting multi-tenancy is opt-in and homelab/on-prem/federated
       installs are unaffected; i18n the new strings
+      *(June 2026: DONE. **Installer** — the deployment-mode prompt (homelab vs
+      SaaS + self-service flag) and `update_config_with_deployment_mode()` write
+      the `multitenancy:` block; `registry:` is intentionally NOT written (config
+      falls back `registry`→`database` for the single-box default), and the
+      planned `secrets:` YAML block was superseded by the secrets→OpenBAO
+      direction realized in 13.1.H — secure-installation now generates secrets
+      into OpenBAO and writes a minimal pointer YAML. **`*.yaml.example` sync** —
+      `sysmanage.yaml.example` + `sysmanage-dev.yaml.example` gained the v3.0
+      minimal-bootstrap / secrets→OpenBAO / operational→Settings header +
+      `security:`-block annotations (matching the reduced docs `config-builder.html`);
+      both still parse. **Docs** — the substantive MT coverage already existed and
+      was verified: `docs/deployment/multi-tenancy.html` (registry model, dev+prod
+      setup, OpenBAO dynamic per-tenant creds, 3 migration chains, editions/quotas,
+      backups/RPO), `docs/getting-started/first-deployment.html` (the three
+      deployment modes + opt-in messaging), the `2 + N` topology in
+      `docs/architecture/multi-tenancy.html`, per-tenant SSO in
+      `docs/professional-plus/external-idp.html`, and grants/break-glass in
+      `docs/api/control-plane.html`. This pass synced the stale config examples in
+      `docs/server/{configuration,deployment,installation}.html` and
+      `first-deployment.html` to the v3.0 secrets→OpenBAO model (and corrected the
+      fake `authentication:`/`secret_key:` keys to the real `security:`/`jwt_secret`
+      shape). All edits were raw `<pre><code>` blocks (no `data-i18n` keys touched),
+      so docs `make lint` (i18n-validate + offline translate-check) stays green —
+      0 gaps, no GPU-translate run needed.)*
 - [ ] **13.1.H** OpenBAO on every OS + config classification — install & cleanly start
       OpenBAO in **every** OS installer (native package on Linux/FreeBSD, pinned
       verified tarball elsewhere; bundled into the air-gap mega-ISO), with a shared
@@ -4376,20 +4450,49 @@ plan-builder + UI integration.
       `geo_lookup.enabled`/`refresh_interval_hours`/`ipapi_fallback_enabled`;
       **password policy→Settings DB** — `PasswordPolicy` now applies a tenant-scoped
       (then server) DB override over the YAML policy. The secure-installation primer
-      now also stores db_password + license/MaxMind keys into OpenBAO. Remaining:
-      air-gap bundle staging of the bao artifact per platform; OpenBSD (gated on
-      13.1.I); the riskier auth-path moves (`admin_userid`/`admin_password` → DB-seed +
-      OpenBAO, JWT timeouts/cookie_domain → server settings); and the final
-      minimal-YAML cleanup (remove fallbacks — a later major per the plan's §7.5).)*
-- [ ] **13.1.I** OpenBSD OpenBAO prebuilt-binary verification — smoke-test the official
-      `bao_*_Openbsd_x86_64.tar.gz` binary on real **OpenBSD 7.7 and 7.8**
-      (`bao server -version`, init/unseal, basic KV round-trip). OpenBSD enforces
-      syscall-origin pinning + W^X, so a cross-compiled Go binary is version-sensitive
-      and may not run. **If it works:** make the prebuilt tarball the default for the
-      OpenBSD installer and retire the source-build path to a fallback. **If it fails:**
-      keep `scripts/build-openbao.sh` (source build) as the OpenBSD default. Until
-      verified, OpenBSD continues to use the source-build path. (Bryan to run on
-      real OpenBSD hardware.)
+      now also stores db_password + license/MaxMind keys into OpenBAO.
+      **Auth-path moves DONE (June 2026):** the security-sensitive accessors moved
+      off direct YAML reads, all backwards-compatible (DB/OpenBAO-first, YAML
+      fallback + one-time deprecation warning). **`admin_password` → OpenBAO**
+      (`config.get_admin_password` via `_config_secret`; the secure-installation
+      primer now stores it in the OpenBAO config bag) so the recovery credential
+      need not sit in plaintext YAML — the recovery *userid* deliberately STAYS in
+      YAML as a bootstrap identifier that must resolve with the DB/vault down (the
+      admin *user* itself is already DB-seeded at install), and `security.py`'s
+      "default credentials in the config file" audit keeps reading YAML on purpose.
+      **JWT `jwt_auth_timeout`/`jwt_refresh_timeout` + `cookie_domain` → server
+      Settings DB** (`config.get_jwt_auth_timeout`/`get_jwt_refresh_timeout`/
+      `get_cookie_domain` via `_server_setting`; already exposed in Settings →
+      Configuration), resolved at call time so a UI change applies without a
+      restart. Consumers in `auth_handler.py` + `auth.py` rerouted through the
+      getters; 12 new getter tests (DB/OpenBAO-first + YAML-fallback + empty→None +
+      int-coercion) plus the two JWT-sign tests updated; 1242 backend tests green,
+      black + `backend/` pylint clean.
+      **Air-gap OpenBAO staging (June 2026):** the bundle already stages bao per
+      platform (Linux via the apt/dnf dependency-closure; the extracted static
+      binary on Alpine/BSD/macOS/Windows). This pass made it **reproducible** —
+      `_stage_openbao` now resolves the **pinned** release tag (`v2.5.4`,
+      env-overridable via `OPENBAO_VERSION`) instead of GitHub "latest", so a
+      bundle built today and one built next month embed the same bao; the online
+      `install-openbao.py` stale `v2.4.1` fallback was bumped to `v2.5.4` to
+      match. OpenBSD bao staging + making the prebuilt the OpenBSD default landed
+      with **13.1.I** (verified on OpenBSD 7.9). **Remaining for H:** only the
+      final minimal-YAML cleanup (remove the YAML fallbacks — a later major per
+      the plan's §7.5).)*
+- [x] **13.1.I** OpenBSD OpenBAO prebuilt-binary verification — smoke-test the official
+      `bao_*_Openbsd_x86_64.tar.gz` binary on real OpenBSD.
+      *(June 2026: **VERIFIED POSITIVE on OpenBSD 7.9.** The official prebuilt
+      `bao_2.5.4_Openbsd_x86_64.tar.gz` runs clean — `--version`, `server` startup,
+      init/unseal, and a kv-v2 put/get round-trip all succeed, with no pinsyscalls /
+      W^X abort trap (it even ran from a non-`wxallowed` `/tmp`). Reproducible via
+      the new `scripts/verify-openbao-openbsd.sh` (download → version → server →
+      init/unseal → KV; single PASS/FAIL verdict). **Acted on it:** `install-openbao.py`
+      now PREFERS the pinned-v2.5.4 prebuilt on OpenBSD (download+extract), falling
+      back to `scripts/build-openbao.sh` (source build) only if that fails; and the
+      air-gap bundle stages the OpenBSD `bao` binary like the other BSDs
+      (`buildAirGapBundle.sh` `binary-openbsd`). The version is pinned because the
+      prebuilt is version-sensitive — only v2.5.4 is verified. NetBSD keeps the
+      source build (no verified prebuilt).)*
 - [x] **13.1.J** Per-tenant edition & central tenant administration ("master of
       tenants") — **corrects the GA assumption that every tenant runs Enterprise.**
       Each tenant is operator-assigned an independent **Community / Professional /

@@ -32,11 +32,13 @@ class TestAuthHandler:
         assert isinstance(result, dict)
 
     @patch("backend.auth.auth_handler.time.time")
-    @patch("backend.auth.auth_handler.the_config")
-    def test_sign_jwt_basic(self, mock_config, mock_time):
+    @patch("backend.auth.auth_handler.config.get_jwt_auth_timeout")
+    def test_sign_jwt_basic(self, mock_timeout, mock_time):
         """Test basic JWT token signing."""
         mock_time.return_value = 1000000000  # Fixed timestamp
-        mock_config.__getitem__.return_value = {"jwt_auth_timeout": "3600"}
+        # Phase 13.1.H: sign_jwt resolves the timeout via config.get_jwt_auth_timeout()
+        # (DB setting → YAML fallback), so the test patches that getter.
+        mock_timeout.return_value = 3600
 
         user_id = "test_user_123"
 
@@ -59,11 +61,11 @@ class TestAuthHandler:
             assert result == "encoded.jwt.token"
 
     @patch("backend.auth.auth_handler.time.time")
-    @patch("backend.auth.auth_handler.the_config")
-    def test_sign_refresh_token_basic(self, mock_config, mock_time):
+    @patch("backend.auth.auth_handler.config.get_jwt_refresh_timeout")
+    def test_sign_refresh_token_basic(self, mock_timeout, mock_time):
         """Test basic JWT refresh token signing."""
         mock_time.return_value = 2000000000  # Fixed timestamp
-        mock_config.__getitem__.return_value = {"jwt_refresh_timeout": "86400"}
+        mock_timeout.return_value = 86400
 
         user_id = "refresh_user_456"
 

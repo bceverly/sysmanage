@@ -266,3 +266,62 @@ def create_support_grant(
     grant.expires_at = _utcnow() + timedelta(seconds=ttl)
     session.flush()
     return grant
+
+
+def bind_support_lease(grant, ttl_seconds, *, metadata=None):
+    """Bind a support grant to a live OpenBAO lease object (Phase 13.1.E).
+
+    Best-effort: mints an OpenBAO token whose TTL mirrors the grant window and
+    records its accessor on ``grant.support_lease_accessor``.  Returns the
+    accessor, or ``None`` when OpenBAO is disabled/unreachable or lease creation
+    isn't permitted — in which case the grant's ``expires_at`` alone enforces the
+    window (unchanged single-tenant / vault-less behaviour).  The caller must
+    flush/commit to persist the accessor.
+    """
+    try:
+        from backend.services.vault_service import VaultService  # noqa: PLC0415
+
+        accessor = VaultService().create_support_lease(
+            ttl_seconds=ttl_seconds, metadata=metadata
+        )
+    except Exception:  # noqa: BLE001 - vault optional + best-effort
+        accessor = None
+    if accessor:
+        grant.support_lease_accessor = accessor
+    return accessor
+
+
+def revoke_support_grant(session, user_id, tenant_id):
+    """Immediately revoke a (user, tenant) grant — kill-the-break-glass.
+
+    Expires the grant *now* (the request-time ``has_active_grant`` gate refuses
+    it on the next call) AND, if a support lease was bound, revokes that live
+    OpenBAO lease so it cannot linger until its TTL.  ``expires_at`` is the
+    app-level enforcement; the lease revocation additionally tears down the
+    vault-side object.  Returns the revoked grant row, or ``None`` when no grant
+    exists for the pair.
+    """
+    grant = (
+        session.query(RegistryUserTenantGrant)
+        .filter(
+            RegistryUserTenantGrant.user_id == user_id,
+            RegistryUserTenantGrant.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if grant is None:
+        return None
+    # Backdate so the grant is unambiguously in the past (no equal-timestamp
+    # edge against a same-instant has_active_grant check).
+    grant.expires_at = _utcnow() - timedelta(seconds=1)
+    accessor = grant.support_lease_accessor
+    if accessor:
+        try:
+            from backend.services.vault_service import VaultService  # noqa: PLC0415
+
+            VaultService().revoke_support_lease(accessor)
+        except Exception:  # noqa: BLE001 - best-effort vault teardown
+            pass
+        grant.support_lease_accessor = None
+    session.flush()
+    return grant

@@ -349,6 +349,66 @@ def get_account_lockout_duration():
     )
 
 
+def get_jwt_auth_timeout():
+    """
+    Get the JWT auth-token lifetime in seconds.  Phase 13.1.H: server setting
+    (DB-backed, editable in Settings → Configuration), with a one-release
+    ``sysmanage.yaml`` fallback.
+    """
+    return int(
+        _server_setting(
+            "jwt_auth_timeout",
+            lambda: config["security"]["jwt_auth_timeout"],
+            default=3600,
+        )
+    )
+
+
+def get_jwt_refresh_timeout():
+    """
+    Get the JWT refresh-token lifetime in seconds.  Phase 13.1.H: server setting
+    (DB-backed), with a one-release ``sysmanage.yaml`` fallback.
+    """
+    return int(
+        _server_setting(
+            "jwt_refresh_timeout",
+            lambda: config["security"]["jwt_refresh_timeout"],
+            default=86400,
+        )
+    )
+
+
+def get_cookie_domain():
+    """
+    Get the refresh-cookie ``Domain`` attribute, or ``None`` to scope the cookie
+    to the serving host (RFC 6265 default — what most deployments want).  Phase
+    13.1.H: server setting (DB-backed), with a one-release ``sysmanage.yaml``
+    fallback.  An empty value is normalized to ``None``.
+    """
+    value = _server_setting(
+        "cookie_domain",
+        lambda: config["security"].get("cookie_domain"),
+        default=None,
+    )
+    return value or None
+
+
+def get_admin_password():
+    """
+    Get the recovery-account password.  Phase 13.1.H: B-bucket secret read from
+    OpenBAO, with a one-release ``sysmanage.yaml`` fallback.  The recovery
+    account (see ``backend/api/auth.py``) still authenticates against this value;
+    sourcing it from OpenBAO keeps the recovery credential out of plaintext YAML.
+    The recovery-account *userid* stays in YAML — it is a bootstrap identifier
+    that must resolve even when the DB/vault is unavailable.
+    """
+    return _config_secret(
+        "admin_password",
+        lambda: config["security"].get("admin_password"),
+        default="",
+    )
+
+
 def get_log_levels():
     """
     Get the pipe-separated logging levels configuration.

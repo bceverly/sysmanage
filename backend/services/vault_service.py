@@ -84,6 +84,62 @@ class VaultService:
         """
         return self._make_request(method, path, data)
 
+    def create_support_lease(
+        self, *, ttl_seconds: int, metadata: Optional[Dict[str, str]] = None
+    ) -> Optional[str]:
+        """Mint a short-lived OpenBAO token whose lease mirrors a support grant.
+
+        Phase 13.1.E: binds a vendor-support / break-glass grant to a live
+        OpenBAO lease object.  The token is created with ``ttl`` /
+        ``explicit_max_ttl`` equal to the grant window and is **orphaned**
+        (``no_parent``) and **non-renewable**, so it auto-expires exactly when
+        the grant does and can never outlive it.  It is not used to authenticate
+        anything — it exists as a vault-visible, individually-revocable lease
+        bound to the grant.  ``metadata`` (user/tenant/role/reason) is attached
+        so an operator can identify the lease via ``token lookup-accessor``.
+
+        Returns the token's **accessor** (the revocation handle), or ``None``
+        when vault is disabled/unreachable or token creation is not permitted —
+        the grant's own ``expires_at`` still enforces the window in that case.
+        """
+        if not self.vault_config.get("enabled", False):
+            return None
+        try:
+            ttl = max(1, int(ttl_seconds))
+            payload: Dict[str, Any] = {
+                "ttl": f"{ttl}s",
+                "explicit_max_ttl": f"{ttl}s",
+                "num_uses": 0,
+                "renewable": False,
+                "no_parent": True,
+                "display_name": "sysmanage-support-grant",
+            }
+            if metadata:
+                payload["meta"] = {k: str(v) for k, v in metadata.items()}
+            resp = self._make_request("POST", "auth/token/create", payload)
+            return (resp or {}).get("auth", {}).get("accessor") or None
+        except VaultError as exc:
+            logger.warning("Could not mint support-grant lease: %s", exc)
+            return None
+
+    def revoke_support_lease(self, accessor: str) -> bool:
+        """Revoke a support-grant lease by its token accessor (Phase 13.1.E).
+
+        Best-effort: returns ``True`` on success, ``False`` when vault is
+        disabled/unreachable or the accessor is empty/already gone.  Idempotent —
+        revoking an already-expired/absent accessor is treated as success.
+        """
+        if not accessor or not self.vault_config.get("enabled", False):
+            return False
+        try:
+            self._make_request(
+                "POST", "auth/token/revoke-accessor", {"accessor": accessor}
+            )
+            return True
+        except VaultError as exc:
+            logger.warning("Could not revoke support-grant lease: %s", exc)
+            return False
+
     def _make_request(  # NOSONAR
         self, method: str, path: str, data: Optional[Dict] = None
     ) -> Dict[str, Any]:
