@@ -374,12 +374,12 @@ else
 endif
 	@echo "Ensuring esbuild optional dependencies are installed..."
 ifeq ($(OS),Windows_NT)
-	@cd frontend && npm uninstall esbuild && npm install esbuild
+	@cd frontend && npm uninstall esbuild && npm install esbuild@^0.28.1
 else
 	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
-		cd frontend && npm uninstall esbuild && npm install esbuild --cache=$$HOME/.npm-cache; \
+		cd frontend && npm uninstall esbuild && npm install esbuild@^0.28.1 --cache=$$HOME/.npm-cache; \
 	else \
-		cd frontend && npm uninstall esbuild && npm install esbuild; \
+		cd frontend && npm uninstall esbuild && npm install esbuild@^0.28.1; \
 	fi
 endif
 	@echo "Installing packaging/installer build tools for your platform..."
