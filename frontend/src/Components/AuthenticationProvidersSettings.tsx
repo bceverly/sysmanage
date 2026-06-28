@@ -319,7 +319,11 @@ const AuthenticationProvidersSettings: React.FC = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                        {p.type === 'ldap' ? p.ldap_server_url : p.oidc_issuer_url}
+                        {p.type === 'ldap'
+                          ? p.ldap_server_url
+                          : p.type === 'saml'
+                            ? p.saml_idp_sso_url
+                            : p.oidc_issuer_url}
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -375,6 +379,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
               >
                 <MenuItem value="ldap">{t('idp.type.ldap', 'LDAP / Active Directory')}</MenuItem>
                 <MenuItem value="oidc">{t('idp.type.oidc', 'OIDC')}</MenuItem>
+                <MenuItem value="saml">{t('idp.type.saml', 'SAML 2.0')}</MenuItem>
               </Select>
             </FormControl>
             <FormControlLabel
@@ -561,6 +566,114 @@ const AuthenticationProvidersSettings: React.FC = () => {
                   fullWidth
                 />
               </>
+            )}
+            {draft.type === 'saml' && (
+              <>
+                <TextField
+                  label={t('idp.field.samlIdpEntityId', 'IdP Entity ID')}
+                  value={draft.saml_idp_entity_id ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_idp_entity_id: e.target.value })}
+                  fullWidth
+                  required
+                />
+                <TextField
+                  label={t('idp.field.samlIdpSso', 'IdP SSO URL')}
+                  value={draft.saml_idp_sso_url ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_idp_sso_url: e.target.value })}
+                  fullWidth
+                  required
+                />
+                <TextField
+                  label={t('idp.field.samlIdpCert', 'IdP signing certificate (X.509)')}
+                  helperText={t(
+                    'idp.field.samlIdpCertHelp',
+                    'Public PEM/base64 cert used to verify assertion signatures',
+                  )}
+                  value={draft.saml_idp_x509_cert ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_idp_x509_cert: e.target.value })}
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  required
+                />
+                <TextField
+                  label={t('idp.field.samlSpEntityId', 'SP Entity ID')}
+                  value={draft.saml_sp_entity_id ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_sp_entity_id: e.target.value })}
+                  fullWidth
+                  required
+                />
+                <TextField
+                  label={t('idp.field.samlSpAcs', 'SP ACS URL')}
+                  helperText={t(
+                    'idp.field.samlSpAcsHelp',
+                    'Where the IdP POSTs the assertion, e.g. https://host/api/auth/saml/<id>/acs',
+                  )}
+                  value={draft.saml_sp_acs_url ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_sp_acs_url: e.target.value })}
+                  fullWidth
+                  required
+                />
+                <TextField
+                  label={t('idp.field.samlSpKey', 'SP private key (Vault secret id, optional)')}
+                  helperText={t(
+                    'idp.field.samlSpKeyHelp',
+                    'Reference like vault:secret/path or literal:plaintext',
+                  )}
+                  value={draft.saml_sp_private_key_secret_id ?? ''}
+                  onChange={(e) =>
+                    setDraft({ ...draft, saml_sp_private_key_secret_id: e.target.value })
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label={t('idp.field.samlEmailAttr', 'Email attribute (optional; NameID if empty)')}
+                  value={draft.saml_email_attribute ?? ''}
+                  onChange={(e) => setDraft({ ...draft, saml_email_attribute: e.target.value })}
+                  fullWidth
+                />
+                <TextField
+                  label={t('idp.field.samlGroupAttr', 'Group attribute')}
+                  value={draft.saml_group_attribute ?? 'groups'}
+                  onChange={(e) => setDraft({ ...draft, saml_group_attribute: e.target.value })}
+                  fullWidth
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={draft.saml_want_assertions_signed ?? true}
+                      onChange={(e) =>
+                        setDraft({ ...draft, saml_want_assertions_signed: e.target.checked })
+                      }
+                    />
+                  }
+                  label={t('idp.field.samlWantSigned', 'Require signed assertions (recommended)')}
+                />
+              </>
+            )}
+            {/* SCIM 2.0 inbound provisioning — orthogonal to the auth protocol. */}
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!draft.scim_enabled}
+                  onChange={(e) => setDraft({ ...draft, scim_enabled: e.target.checked })}
+                />
+              }
+              label={t('idp.field.scimEnabled', 'Enable SCIM inbound provisioning')}
+            />
+            {draft.scim_enabled && (
+              <TextField
+                label={t('idp.field.scimToken', 'SCIM bearer token (Vault secret id)')}
+                helperText={t(
+                  'idp.field.scimTokenHelp',
+                  'Token the IdP presents on every SCIM request. Reference like vault:secret/path or literal:plaintext',
+                )}
+                value={draft.scim_bearer_token_secret_id ?? ''}
+                onChange={(e) =>
+                  setDraft({ ...draft, scim_bearer_token_secret_id: e.target.value })
+                }
+                fullWidth
+              />
             )}
           </Stack>
         </DialogContent>

@@ -2122,7 +2122,22 @@
       "tenantHelp": "Beperk deze provider tot één tenant (de UUID). Laat leeg voor een serverbrede provider.",
       "jit": "Just-in-time-provisioning (gebruikers automatisch aanmaken bij eerste SSO-aanmelding)",
       "jitRole": "JIT-standaardrol",
-      "jitRoleHelp": "Rol die wordt toegekend aan automatisch aangemaakte leden. Vereist een tenant-ID en een overeenkomende lijst met toegestane e-maildomeinen voor die tenant."
+      "jitRoleHelp": "Rol die wordt toegekend aan automatisch aangemaakte leden. Vereist een tenant-ID en een overeenkomende lijst met toegestane e-maildomeinen voor die tenant.",
+      "samlEmailAttr": "E-mailattribuut (optioneel; NameID als leeg)",
+      "samlGroupAttr": "Groepattribuut",
+      "samlIdpCert": "IdP ondertekencertificaat (X.509)",
+      "samlIdpCertHelp": "Openbaar PEM/base64-certificaat om asserties te verifiëren",
+      "samlIdpEntityId": "IdP Entiteit ID",
+      "samlIdpSso": "IdP SSO-URL",
+      "samlSpAcs": "SP ACS-URL",
+      "samlSpAcsHelp": "De locatie waar de IdP de assertie POST-t, bijvoorbeeld https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entiteit ID",
+      "samlSpKey": "SP privésleutel (Vault secret id, optioneel)",
+      "samlSpKeyHelp": "Referentie zoals vault:secret/path of literal:plaintext",
+      "samlWantSigned": "Gesigneerde asserties vereisen (aanbevolen)",
+      "scimEnabled": "Schakel SCIM inkomende provisioning in",
+      "scimToken": "SCIM bearer token (Vault secret id)",
+      "scimTokenHelp": "Token dat de IdP presenteert bij elke SCIM-aanvraag. Referentie zoals vault:secret/path of literal:plaintext"
     },
     "loadError": "Identiteitsproviders konden niet worden geladen.",
     "mapAddError": "Toewijzing kon niet worden toegevoegd.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Authenticatie-instellingen",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

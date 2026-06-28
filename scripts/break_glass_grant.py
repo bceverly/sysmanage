@@ -71,6 +71,12 @@ def main() -> int:
         required=True,
         help="why this break-glass access is needed (audited)",
     )
+    parser.add_argument(
+        "--revoke",
+        action="store_true",
+        help="immediately revoke the grant (expire it now + tear down its "
+        "OpenBAO lease) instead of issuing one",
+    )
     args = parser.parse_args()
 
     if not args.reason.strip():
@@ -100,8 +106,44 @@ def main() -> int:
             logger.error("Tenant not found: %s", args.tenant)
             return 1
         user = registry_service.ensure_registry_user(session, args.email)
+
+        if args.revoke:
+            grant = registry_service.revoke_support_grant(session, user.id, tenant.id)
+            session.commit()
+            if grant is None:
+                logger.error(
+                    "No grant to revoke for user=%s tenant=%s", args.email, tenant.slug
+                )
+                return 1
+            logger.warning(
+                "BREAK-GLASS GRANT revoked: user=%s tenant=%s(%s) operator=%s "
+                "reason=%r",
+                args.email,
+                tenant.slug,
+                str(tenant.id),
+                operator,
+                args.reason,
+            )
+            print(
+                f"Revoked access on tenant '{tenant.slug}' for {args.email} "
+                "(grant expired now; any OpenBAO lease torn down)."
+            )
+            return 0
+
         grant = registry_service.create_support_grant(
             session, user.id, tenant.id, ttl_seconds, role=role
+        )
+        # Bind the grant to a live OpenBAO lease (best-effort; no-op when vault
+        # is disabled — expires_at still enforces the window).
+        accessor = registry_service.bind_support_lease(
+            grant,
+            ttl_seconds,
+            metadata={
+                "email": args.email,
+                "tenant": tenant.slug,
+                "role": role,
+                "operator": operator,
+            },
         )
         expires_at = grant.expires_at
         session.commit()
@@ -109,7 +151,7 @@ def main() -> int:
     # Audit — break-glass access must always be logged.
     logger.warning(
         "BREAK-GLASS GRANT issued: user=%s tenant=%s(%s) role=%s expires_at=%s "
-        "ttl_hours=%.2f operator=%s reason=%r",
+        "ttl_hours=%.2f operator=%s lease=%s reason=%r",
         args.email,
         tenant.slug,
         str(tenant.id),
@@ -117,12 +159,16 @@ def main() -> int:
         expires_at.isoformat() if expires_at else "?",
         ttl_seconds / 3600.0,
         operator,
+        accessor or "none",
         args.reason,
+    )
+    lease_note = (
+        f" OpenBAO lease={accessor}." if accessor else " (no OpenBAO lease bound.)"
     )
     print(
         f"Granted '{role}' on tenant '{tenant.slug}' to {args.email} until "
-        f"{expires_at.isoformat() if expires_at else '?'} (auto-expires; "
-        "no manual revocation needed)."
+        f"{expires_at.isoformat() if expires_at else '?'} (auto-expires; revoke "
+        f"early with --revoke).{lease_note}"
     )
     return 0
 

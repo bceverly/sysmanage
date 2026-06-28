@@ -3,10 +3,13 @@ Password policy validation utility for SysManage.
 Validates passwords against configurable complexity rules.
 """
 
+import logging
 import re
 from typing import List, Tuple
 
 from backend.config import config
+
+logger = logging.getLogger(__name__)
 
 
 class PasswordPolicy:
@@ -42,8 +45,8 @@ class PasswordPolicy:
                 )
             if isinstance(db_policy, dict):
                 self.policy = db_policy
-        except Exception:  # noqa: BLE001 — best-effort; keep the YAML policy
-            pass
+        except Exception as exc:  # noqa: BLE001 — best-effort; keep the YAML policy
+            logger.debug("DB password-policy override unavailable; using YAML: %s", exc)
 
     def get_requirements_text(self) -> str:
         """Get human-readable password requirements text."""

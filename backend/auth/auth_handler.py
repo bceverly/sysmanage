@@ -39,7 +39,9 @@ def sign_jwt(user_id: str, tenant_id: Optional[str] = None):
     # Create the payload
     payload = {
         "user_id": user_id,
-        "expires": time.time() + int(the_config["security"]["jwt_auth_timeout"]),
+        # Phase 13.1.H: resolve the timeout at call time (DB setting → YAML),
+        # so a Settings-UI change takes effect without a server restart.
+        "expires": time.time() + config.get_jwt_auth_timeout(),
     }
     if tenant_id is not None:
         payload["tenant_id"] = str(tenant_id)
@@ -60,7 +62,7 @@ def sign_refresh_token(user_id: str, tenant_id: Optional[str] = None):
     # Create the payload
     payload = {
         "user_id": user_id,
-        "expires": time.time() + int(the_config["security"]["jwt_refresh_timeout"]),
+        "expires": time.time() + config.get_jwt_refresh_timeout(),
     }
     if tenant_id is not None:
         payload["tenant_id"] = str(tenant_id)

@@ -10,7 +10,7 @@ import axiosInstance from './api';
 export interface IdpProvider {
   id: string;
   name: string;
-  type: 'ldap' | 'oidc';
+  type: 'ldap' | 'oidc' | 'saml';
   enabled: boolean;
   // Phase 13.1.E — per-tenant IdP + JIT. tenant_id null = server-global provider.
   tenant_id?: string | null;
@@ -32,11 +32,25 @@ export interface IdpProvider {
   oidc_scopes?: string;
   oidc_discovery_url?: string | null;
   oidc_group_claim?: string;
+  // Phase 13.1.E — SAML 2.0.
+  saml_idp_entity_id?: string | null;
+  saml_idp_sso_url?: string | null;
+  saml_idp_x509_cert?: string | null;
+  saml_sp_entity_id?: string | null;
+  saml_sp_acs_url?: string | null;
+  saml_sp_x509_cert?: string | null;
+  saml_sp_private_key_secret_id?: string | null;
+  saml_email_attribute?: string | null;
+  saml_group_attribute?: string;
+  saml_want_assertions_signed?: boolean;
+  // Phase 13.1.E — SCIM 2.0 inbound provisioning.
+  scim_enabled?: boolean;
+  scim_bearer_token_secret_id?: string | null;
 }
 
 export interface IdpProviderCreate {
   name: string;
-  type: 'ldap' | 'oidc';
+  type: 'ldap' | 'oidc' | 'saml';
   enabled?: boolean;
   // Phase 13.1.E — per-tenant IdP + JIT.
   tenant_id?: string | null;
@@ -58,6 +72,20 @@ export interface IdpProviderCreate {
   oidc_scopes?: string;
   oidc_discovery_url?: string;
   oidc_group_claim?: string;
+  // Phase 13.1.E — SAML 2.0.
+  saml_idp_entity_id?: string;
+  saml_idp_sso_url?: string;
+  saml_idp_x509_cert?: string;
+  saml_sp_entity_id?: string;
+  saml_sp_acs_url?: string;
+  saml_sp_x509_cert?: string;
+  saml_sp_private_key_secret_id?: string;
+  saml_email_attribute?: string;
+  saml_group_attribute?: string;
+  saml_want_assertions_signed?: boolean;
+  // Phase 13.1.E — SCIM 2.0 inbound provisioning.
+  scim_enabled?: boolean;
+  scim_bearer_token_secret_id?: string;
 }
 
 export interface IdpRoleMapping {

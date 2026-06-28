@@ -2122,7 +2122,22 @@
       "tenantHelp": "このプロバイダーを1つのテナント（そのUUID）に限定します。サーバー全体のプロバイダーにする場合は空欄にします。",
       "jit": "ジャストインタイムプロビジョニング（初回SSOログイン時にユーザーを自動作成）",
       "jitRole": "JITの既定ロール",
-      "jitRoleHelp": "自動作成されたメンバーに割り当てるロール。テナントIDと、そのテナントに一致するメールドメイン許可リストが必要です。"
+      "jitRoleHelp": "自動作成されたメンバーに割り当てるロール。テナントIDと、そのテナントに一致するメールドメイン許可リストが必要です。",
+      "samlEmailAttr": "メール属性（オプション；空欄の場合は NameID）",
+      "samlGroupAttr": "グループ属性",
+      "samlIdpCert": "IdP 署名証明書（X.509）",
+      "samlIdpCertHelp": "署名されたアサーションを検証するために使用される公開 PEM/ベース64 証明書",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "IdP がアサーションを POST する場所、例：https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "SP 秘密キー（オプション；Vault secret id）",
+      "samlSpKeyHelp": "vault:secret/path のような参照または文字列:平文の文字列",
+      "samlWantSigned": "署名付きアサーションが必要（推奨）",
+      "scimEnabled": "SCIM 受信プロビジョニングを有効にする",
+      "scimToken": "SCIM ベアラーティクン（Vault secret id）",
+      "scimTokenHelp": "IdP が各 SCIM リクエストで提示するトークン。vault:secret/path のような参照または文字列:平文の文字列"
     },
     "loadError": "ID プロバイダーを読み込めませんでした。",
     "mapAddError": "マッピングを追加できませんでした。",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "認証設定",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

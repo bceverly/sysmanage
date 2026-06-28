@@ -2122,7 +2122,22 @@
       "tenantHelp": "Diesen Anbieter auf einen Mandanten beschränken (dessen UUID). Leer lassen für einen serverweiten Anbieter.",
       "jit": "Just-in-Time-Bereitstellung (Benutzer bei der ersten SSO-Anmeldung automatisch anlegen)",
       "jitRole": "JIT-Standardrolle",
-      "jitRoleHelp": "Rolle, die automatisch angelegten Mitgliedern zugewiesen wird. Erfordert eine Mandanten-ID und eine passende E-Mail-Domain-Zulassungsliste für diesen Mandanten."
+      "jitRoleHelp": "Rolle, die automatisch angelegten Mitgliedern zugewiesen wird. Erfordert eine Mandanten-ID und eine passende E-Mail-Domain-Zulassungsliste für diesen Mandanten.",
+      "samlEmailAttr": "E-Mail-Attribut (optional; NameID bei leerem Feld)",
+      "samlGroupAttr": "Gruppenattribut",
+      "samlIdpCert": "IdP-Signierzertifikat (X.509)",
+      "samlIdpCertHelp": "Öffentliches PEM/base64-Zertifikat zur Überprüfung der Assertionssignaturen",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "Wo der IdP die Assertion POSTs, z.B. https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "SP-Privat-Schlüssel (Vault secret id, optional)",
+      "samlSpKeyHelp": "Referenz wie vault:secret/path oder literal:plaintext",
+      "samlWantSigned": "Gesignierte Assertions erforderlich (empfohlen)",
+      "scimEnabled": "SCIM-Einbahn-Provisionierung aktivieren",
+      "scimToken": "SCIM-Tragtoken (Vault secret id)",
+      "scimTokenHelp": "Token, das der IdP bei jedem SCIM-Anfrage präsentiert. Referenz wie vault:secret/path oder literal:plaintext"
     },
     "loadError": "Identitätsanbieter konnten nicht geladen werden.",
     "mapAddError": "Zuordnung konnte nicht hinzugefügt werden.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Authentifizierungseinstellungen",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

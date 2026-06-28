@@ -2122,7 +2122,22 @@
       "tenantHelp": "Scope this provider to one tenant (its UUID). Leave blank for a server-global provider.",
       "jit": "Just-in-time provisioning (auto-create users on first SSO login)",
       "jitRole": "JIT default role",
-      "jitRoleHelp": "Grant role assigned to auto-created members. Requires a tenant ID and a matching email-domain allowlist on that tenant."
+      "jitRoleHelp": "Grant role assigned to auto-created members. Requires a tenant ID and a matching email-domain allowlist on that tenant.",
+      "samlEmailAttr": "Email attribute (optional; NameID if empty)",
+      "samlGroupAttr": "Group attribute",
+      "samlIdpCert": "IdP signing certificate (X.509)",
+      "samlIdpCertHelp": "Public PEM/base64 cert used to verify assertion signatures",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "Where the IdP POSTs the assertion, e.g. https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "SP private key (Vault secret id, optional)",
+      "samlSpKeyHelp": "Reference like vault:secret/path or literal:plaintext",
+      "samlWantSigned": "Require signed assertions (recommended)",
+      "scimEnabled": "Enable SCIM inbound provisioning",
+      "scimToken": "SCIM bearer token (Vault secret id)",
+      "scimTokenHelp": "Token the IdP presents on every SCIM request. Reference like vault:secret/path or literal:plaintext"
     },
     "loadError": "Could not load Identity Providers.",
     "mapAddError": "Could not add mapping.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Authentication Settings",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

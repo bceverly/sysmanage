@@ -31,6 +31,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
 )
 
 from backend.persistence.db import Base
@@ -46,7 +47,7 @@ class ExternalIdpProvider(Base):
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     name = Column(String(120), unique=True, nullable=False)
-    type = Column(String(20), nullable=False)  # 'ldap' | 'oidc'
+    type = Column(String(20), nullable=False)  # 'ldap' | 'oidc' | 'saml'
     enabled = Column(Boolean, nullable=False, default=True)
     # Phase 13.1.E — per-tenant IdP. SOFT reference to ``registry_tenant.id``
     # (no FK: the registry is a different partition). NULL means a server-global
@@ -79,6 +80,29 @@ class ExternalIdpProvider(Base):
     oidc_scopes = Column(String(500), nullable=False, default="openid profile email")
     oidc_discovery_url = Column(String(500), nullable=True)
     oidc_group_claim = Column(String(120), nullable=False, default="groups")
+    # SAML 2.0 parameters (Phase 13.1.E).  The IdP signing certificate is PUBLIC
+    # (used to VERIFY assertion signatures) so it is stored inline; the optional
+    # SP private key is a secret and lives in Vault — only its secret id is here.
+    saml_idp_entity_id = Column(String(500), nullable=True)
+    saml_idp_sso_url = Column(String(500), nullable=True)
+    saml_idp_x509_cert = Column(Text, nullable=True)
+    saml_sp_entity_id = Column(String(500), nullable=True)
+    saml_sp_acs_url = Column(String(500), nullable=True)
+    saml_sp_x509_cert = Column(Text, nullable=True)
+    saml_sp_private_key_secret_id = Column(String(255), nullable=True)
+    # SAML attribute that carries the user's email (NameID is used when empty)
+    # and the attribute carrying group memberships.
+    saml_email_attribute = Column(String(255), nullable=True)
+    saml_group_attribute = Column(String(255), nullable=False, default="groups")
+    # Security: require the IdP to sign assertions (the safe default — never
+    # accept an unsigned assertion).
+    saml_want_assertions_signed = Column(Boolean, nullable=False, default=True)
+    # SCIM 2.0 inbound provisioning (Phase 13.1.E).  When enabled, the IdP PUSHES
+    # user create/update/deactivate to ``/api/scim/v2/{provider_id}/Users``,
+    # authenticated by a bearer token whose value lives in Vault (only the secret
+    # id is here).  Provisioned users land in this provider's tenant.
+    scim_enabled = Column(Boolean, nullable=False, default=False)
+    scim_bearer_token_secret_id = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -111,6 +135,18 @@ class ExternalIdpProvider(Base):
             "oidc_scopes": self.oidc_scopes,
             "oidc_discovery_url": self.oidc_discovery_url,
             "oidc_group_claim": self.oidc_group_claim,
+            "saml_idp_entity_id": self.saml_idp_entity_id,
+            "saml_idp_sso_url": self.saml_idp_sso_url,
+            "saml_idp_x509_cert": self.saml_idp_x509_cert,
+            "saml_sp_entity_id": self.saml_sp_entity_id,
+            "saml_sp_acs_url": self.saml_sp_acs_url,
+            "saml_sp_x509_cert": self.saml_sp_x509_cert,
+            "saml_sp_private_key_secret_id": self.saml_sp_private_key_secret_id,
+            "saml_email_attribute": self.saml_email_attribute,
+            "saml_group_attribute": self.saml_group_attribute,
+            "saml_want_assertions_signed": self.saml_want_assertions_signed,
+            "scim_enabled": self.scim_enabled,
+            "scim_bearer_token_secret_id": self.scim_bearer_token_secret_id,
         }
 
 

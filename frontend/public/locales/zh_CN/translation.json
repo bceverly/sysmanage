@@ -2122,7 +2122,22 @@
       "tenantHelp": "将此提供程序限定为单个租户（其 UUID）。留空表示服务器级全局提供程序。",
       "jit": "即时预配（首次 SSO 登录时自动创建用户）",
       "jitRole": "JIT 默认角色",
-      "jitRoleHelp": "授予自动创建成员的角色。需要租户 ID 以及该租户上匹配的电子邮件域名白名单。"
+      "jitRoleHelp": "授予自动创建成员的角色。需要租户 ID 以及该租户上匹配的电子邮件域名白名单。",
+      "samlEmailAttr": "电子邮件属性（可选；如果为空，则为 NameID）",
+      "samlGroupAttr": "组属性",
+      "samlIdpCert": "IdP 签名证书（X.509）",
+      "samlIdpCertHelp": "用于验证断言签名的公共 PEM/base64 证书",
+      "samlIdpEntityId": "IdP 实体 ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "IdP POST 断言的位置，例如 https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP 实体 ID",
+      "samlSpKey": "SP 私钥（Vault 秘钥 id，可选）",
+      "samlSpKeyHelp": "引用如 vault:secret/path 或 literal:plaintext",
+      "samlWantSigned": "要求签署断言（推荐）",
+      "scimEnabled": "启用 SCIM 单向配置",
+      "scimToken": "SCIM 承载令牌（Vault 秘钥 id）",
+      "scimTokenHelp": "IdP 在每个 SCIM 请求中呈现的令牌。引用如 vault:secret/path 或 literal:plaintext"
     },
     "loadError": "无法加载身份提供程序。",
     "mapAddError": "无法添加映射。",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "身份验证设置",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

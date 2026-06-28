@@ -4,6 +4,19 @@
 # This is the SysManage server (https://sysmanage.org) configuration file.
 # This file contains working defaults that allow the server to start.
 # You should customize these settings for production use.
+#
+# As of v3.0, sysmanage.yaml is a MINIMAL BOOTSTRAP POINTER. The recommended
+# production path is to run `sudo scripts/sysmanage_secure_installation`, which
+# generates the secrets into OpenBAO, seeds the admin user + default settings in
+# the database, and writes a pointer-only YAML — you do NOT hand-edit secrets
+# here. The fields below are still honored from YAML during migration (with a
+# one-release deprecation warning) so existing installs keep working:
+#   * Secrets (jwt_secret, password_salt, admin/db/SMTP passwords, license keys)
+#     -> generated into and read from OpenBAO.
+#   * Operational settings (JWT timeouts, login/session, message-queue tuning)
+#     and email (server, credentials, templates) -> Settings -> Configuration in
+#     the UI after first login; email is per-tenant when multi-tenancy is on.
+# See docs/planning/config-classification.md for the full classification.
 
 api:
   host: "localhost"
@@ -11,11 +24,18 @@ api:
 
 database:
   user: "sysmanage"
+  # The DB password is the one bootstrap credential the server needs before it
+  # can reach OpenBAO; secure-installation also stores it in OpenBAO.
   password: "CHANGE_ME_IN_PRODUCTION"
   host: "localhost"
   port: 5432
   name: "sysmanage"
 
+# Bootstrap fallback only (v3.0). secure-installation generates jwt_secret /
+# password_salt into OpenBAO and seeds the admin user in the database; the JWT
+# timeouts move to Settings -> Configuration. Everything below is read from YAML
+# only when the corresponding OpenBAO secret / DB setting is absent, and emits a
+# deprecation warning. jwt_algorithm is the one non-secret kept here long-term.
 security:
   password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"
   admin_userid: "admin"

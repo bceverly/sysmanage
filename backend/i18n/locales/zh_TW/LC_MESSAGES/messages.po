@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 09:39-0400\n"
+"POT-Creation-Date: 2026-06-26 16:17-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "無法驗證憑證"
 msgid "User not found."
 msgstr "找不到用戶。"
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:605
+#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "您沒有權限訪問所選的帳戶"
 
@@ -133,8 +133,8 @@ msgstr "主機ID格式無效"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
-#: backend/api/repository_mirroring.py:831
-#: backend/api/repository_mirroring.py:896
+#: backend/api/repository_mirroring.py:836
+#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
 #: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
 #: backend/api/tag.py:495 backend/api/tag.py:649
@@ -164,8 +164,8 @@ msgstr "主機尚未被批准"
 #: backend/api/opentelemetry/deployment.py:216
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
-#: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64
+#: backend/api/opentelemetry/grafana_connection.py:197 backend/api/scim.py:215
+#: backend/api/scim.py:225 backend/api/packages_operations.py:64
 #: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
@@ -376,9 +376,9 @@ msgstr "未找到安裝請求：%s"
 msgid "Failed to record installation completion: %s"
 msgstr "無法記錄安裝完成：%s"
 
-#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:156
+#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:161
 #: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
-#: backend/api/external_idp.py:61 backend/api/dynamic_secrets.py:106
+#: backend/api/external_idp.py:62 backend/api/dynamic_secrets.py:106
 #: backend/api/upgrade_profiles.py:122
 #, python-format
 msgid "Invalid UUID for %s: %s"
@@ -1129,62 +1129,62 @@ msgid ""
 "deletion."
 msgstr "群組刪除請求。刪除後，群組列表將自動更新。"
 
-#: backend/api/repository_mirroring.py:81
+#: backend/api/repository_mirroring.py:86
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "存儲庫鏡像需要SysManage Professional+許可證。請升級以訪問此功能。"
 
-#: backend/api/repository_mirroring.py:252
+#: backend/api/repository_mirroring.py:257
 msgid "Mirror host not found"
 msgstr "找不到鏡像主機"
 
-#: backend/api/repository_mirroring.py:360
+#: backend/api/repository_mirroring.py:365
 msgid "Mirror deleted"
 msgstr "鏡像已刪除"
 
-#: backend/api/repository_mirroring.py:392
+#: backend/api/repository_mirroring.py:397
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "不支援的包管理器：%s"
 
-#: backend/api/repository_mirroring.py:405
+#: backend/api/repository_mirroring.py:410
 msgid "Mirror sync dispatched"
 msgstr "鏡像同步已發送"
 
-#: backend/api/repository_mirroring.py:601
+#: backend/api/repository_mirroring.py:606
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "鏡像tick需要automation_engine進行cron評估。"
 
-#: backend/api/repository_mirroring.py:826
-#: backend/api/repository_mirroring.py:892
+#: backend/api/repository_mirroring.py:831
+#: backend/api/repository_mirroring.py:897
 #, python-format
 msgid "Invalid platform: %s"
 msgstr "無效的平台： %s"
 
-#: backend/api/repository_mirroring.py:843
+#: backend/api/repository_mirroring.py:848
 #, python-format
 msgid "A platform config for %s on this host already exists"
 msgstr "在此主機上已存在 %s 的平台配置"
 
-#: backend/api/repository_mirroring.py:941
+#: backend/api/repository_mirroring.py:946
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "平台配置仍然擁有 %d 個鏡像；請先刪除這些鏡像"
 
-#: backend/api/repository_mirroring.py:1104
+#: backend/api/repository_mirroring.py:1116
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
 " before assigning it as a default."
 msgstr "鏡像%s尚未完成成功的同步——等待同步成功後再設置為默認值。"
 
-#: backend/api/repository_mirroring.py:1112
+#: backend/api/repository_mirroring.py:1124
 #, python-format
 msgid "Mirror %s is for %s, can't assign to a %s default"
 msgstr "鏡像%s是為%s，不能分配給%s默認值"
 
-#: backend/api/repository_mirroring.py:1186
+#: backend/api/repository_mirroring.py:1201
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "未知的 (平台, 版本, 操作系統類型) 元組"
 
@@ -1216,85 +1216,85 @@ msgid ""
 msgstr ""
 "鏡像%r沒有已知的known_version_id設置；選項B收集需要鏡像與目錄版本綁定，以便推斷分發/版本。請編輯鏡像並從下拉菜單中選擇一個版本。"
 
-#: backend/api/airgap_collector_runs.py:307
+#: backend/api/airgap_collector_runs.py:322
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "鏡像%r引用的目錄版本已不存在。請重新選擇鏡像上的版本。"
 
-#: backend/api/airgap_collector_runs.py:391
-#: backend/api/airgap_collector_runs.py:470
+#: backend/api/airgap_collector_runs.py:406
+#: backend/api/airgap_collector_runs.py:485
 msgid "At least one target is required to create a collection run."
 msgstr "至少需要一個目標來建立集合運行。"
 
-#: backend/api/airgap_collector_runs.py:401
+#: backend/api/airgap_collector_runs.py:416
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "鏡像 ID 的 UUID 格式無效：%s"
 
-#: backend/api/airgap_collector_runs.py:411
+#: backend/api/airgap_collector_runs.py:426
 #, python-format
 msgid "Mirror %s not found"
 msgstr "找不到鏡像%s"
 
-#: backend/api/airgap_collector_runs.py:417
+#: backend/api/airgap_collector_runs.py:432
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "鏡像%r已被禁用；啟用並同步後才能在收集運行中使用它。"
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:443
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr "所有目標鏡像必須位於同一主機上（收集計劃分派給單一 Agent）。選擇的鏡像跨越 %d 個主機。"
 
-#: backend/api/airgap_collector_runs.py:524
+#: backend/api/airgap_collector_runs.py:539
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
 "snapshots dispatched."
 msgstr "已創建一次性離線集合運行 '%s'，包含 %d 個目標鏡像；快照已發送。"
 
-#: backend/api/airgap_collector_runs.py:647
+#: backend/api/airgap_collector_runs.py:662
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO 尚未準備好下載（狀態：%s）。請等待運行達到 ISO_BUILT 狀態。"
 
-#: backend/api/airgap_collector_runs.py:657
+#: backend/api/airgap_collector_runs.py:672
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ISO 檔案已不在磁碟上；暫存卷可能已被清潔。重新執行收集以重建。"
 
-#: backend/api/airgap_collector_runs.py:674
+#: backend/api/airgap_collector_runs.py:689
 msgid "ISO file not found."
 msgstr "找不到 ISO 檔案。"
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:708
 #, python-format
 msgid "Disc %d not found for this run.  Available discs: %s"
 msgstr "磁碟 %d 未在此運行中找到。可用磁碟：%s"
 
-#: backend/api/airgap_collector_runs.py:774
+#: backend/api/airgap_collector_runs.py:789
 msgid "Invalid or expired download token."
 msgstr "無效或已過期的下載令牌。"
 
-#: backend/api/airgap_collector_runs.py:807
+#: backend/api/airgap_collector_runs.py:822
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "已刪除離線集合運行 '%s'"
 
-#: backend/api/airgap_collector_runs.py:879
+#: backend/api/airgap_collector_runs.py:894
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "運行尚未完成（狀態：%s）"
 
-#: backend/api/airgap_collector_runs.py:885
+#: backend/api/airgap_collector_runs.py:900
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 檔案已不在磁碟上：%s"
@@ -1411,66 +1411,97 @@ msgstr "已刪除註冊金鑰「%s」"
 msgid "Registration key deleted"
 msgstr "註冊金鑰已刪除"
 
-#: backend/api/external_idp.py:47
+#: backend/api/external_idp.py:48
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
 msgstr "外部身份提供者整合需要 SysManage Professional+ 許可證。請升級以使用此功能。"
 
-#: backend/api/external_idp.py:73
+#: backend/api/external_idp.py:74
 msgid "IdP provider not found"
 msgstr "找不到身份提供者"
 
-#: backend/api/external_idp.py:246
+#: backend/api/external_idp.py:276
 msgid "IdP provider deleted"
 msgstr "身份提供者已刪除"
 
-#: backend/api/external_idp.py:294
+#: backend/api/external_idp.py:324
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "此供應商已經存在預設的未映射對應關係。"
 
-#: backend/api/external_idp.py:328
+#: backend/api/external_idp.py:358
 msgid "Role mapping not found"
 msgstr "角色映射未找到"
 
-#: backend/api/external_idp.py:331
+#: backend/api/external_idp.py:361
 msgid "Role mapping deleted"
 msgstr "角色映射已刪除"
 
-#: backend/api/external_idp.py:382
+#: backend/api/external_idp.py:412
 msgid "Provider is not an OIDC provider."
 msgstr "提供者不是OIDC提供者。"
 
-#: backend/api/external_idp.py:385
+#: backend/api/external_idp.py:415
 msgid "OIDC provider is disabled."
 msgstr "OIDC提供商已停用。"
 
-#: backend/api/external_idp.py:416
+#: backend/api/external_idp.py:446
 msgid "Missing code or state in callback."
 msgstr "缺少代碼或狀態在回調中。"
 
-#: backend/api/external_idp.py:420
+#: backend/api/external_idp.py:450
 msgid "Invalid OIDC state."
 msgstr "無效的 OIDC 狀態。"
 
-#: backend/api/external_idp.py:429
+#: backend/api/external_idp.py:459
 msgid "OIDC client secret could not be resolved."
 msgstr "OIDC客戶端密鑰無法解析。"
 
-#: backend/api/external_idp.py:436
+#: backend/api/external_idp.py:466
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登入失敗：%s"
 
-#: backend/api/external_idp.py:451
+#: backend/api/external_idp.py:486 backend/api/external_idp.py:683
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr "沒有與此身份提供者身份相關聯的SysManage帳戶。請先要求管理員為您建立帳戶。"
 
-#: backend/api/external_idp.py:456
+#: backend/api/external_idp.py:491 backend/api/external_idp.py:688
 msgid "Account is inactive."
 msgstr "帳戶處於非活動狀態。"
+
+#: backend/api/external_idp.py:593 backend/api/external_idp.py:614
+msgid "Provider is not a SAML provider."
+msgstr "提供者不是 SAML 提供者。"
+
+#: backend/api/external_idp.py:599
+#, python-format
+msgid "Could not build SP metadata: %s"
+msgstr "無法建立 SP 元數據：%s"
+
+#: backend/api/external_idp.py:617
+msgid "SAML provider is disabled."
+msgstr "SAML 提供者已停用。"
+
+#: backend/api/external_idp.py:623
+#, python-format
+msgid "Could not start SAML sign-in: %s"
+msgstr "無法啟動 SAML 登入：%s"
+
+#: backend/api/external_idp.py:651
+msgid "Missing SAMLResponse or RelayState."
+msgstr "缺少 SAMLResponse 或 RelayState。"
+
+#: backend/api/external_idp.py:656
+msgid "Invalid or expired SAML RelayState."
+msgstr "無效或已過期的 SAML RelayState。"
+
+#: backend/api/external_idp.py:666
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "SAML 登入失敗：%s"
 
 #: backend/api/grafana_integration.py:316
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
@@ -2095,6 +2126,18 @@ msgstr "找不到此操作系統的防病毒默認值"
 msgid "Failed to delete antivirus default: %s"
 msgstr "刪除防毒預設值時失敗：%s"
 
+#: backend/api/scim.py:47
+msgid "SCIM provisioning requires a SysManage Professional+ license."
+msgstr "SCIM 權限配置需要 SysManage Professional+ 許可證。"
+
+#: backend/api/scim.py:60 backend/api/scim.py:69
+msgid "Unknown SCIM target"
+msgstr "未知的 SCIM 目標"
+
+#: backend/api/scim.py:81
+msgid "Invalid or missing SCIM bearer token."
+msgstr "無效或缺少 SCIM 承載令牌。"
+
 #: backend/api/email.py:82
 msgid "Failed to get email configuration"
 msgstr "無法取得電子郵件設定"
@@ -2541,29 +2584,29 @@ msgstr "無法處理更新結果"
 msgid "Invalid username or password"
 msgstr "無效的使用者名稱或密碼"
 
-#: backend/api/auth.py:271
+#: backend/api/auth.py:277
 msgid "Account is locked due to too many failed login attempts"
 msgstr "由於登入嘗試失敗次數過多，帳戶已被鎖定"
 
-#: backend/api/auth.py:360
+#: backend/api/auth.py:366
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
 msgstr "此帳戶需要多因素身份驗證。請從您的個人資料頁面進行註冊，然後再登錄。"
 
-#: backend/api/auth.py:449
+#: backend/api/auth.py:455
 msgid "Account locked due to too many failed login attempts"
 msgstr "由於登入嘗試失敗次數過多，帳戶被鎖定"
 
-#: backend/api/auth.py:475
+#: backend/api/auth.py:481
 msgid "Invalid or missing refresh token"
 msgstr "無效或缺少刷新令牌"
 
-#: backend/api/auth.py:538 backend/api/auth.py:587
+#: backend/api/auth.py:544 backend/api/auth.py:593
 msgid "Multi-tenancy is not enabled."
 msgstr "不支持多租戶。"
 
-#: backend/api/auth.py:660
+#: backend/api/auth.py:664
 msgid "Logout successful"
 msgstr "登出成功"
 
@@ -3960,35 +4003,35 @@ msgstr "已更新 {entity_type} '{entity_name}' 的內容"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已刪除 {entity_type} '{entity_name}'"
 
-#: backend/services/vault_service.py:92
+#: backend/services/vault_service.py:148
 msgid "vault.not_enabled"
 msgstr "vault.not_enabled"
 
-#: backend/services/vault_service.py:95
+#: backend/services/vault_service.py:151
 msgid "vault.no_token"
 msgstr "vault.no_token"
 
-#: backend/services/vault_service.py:123
+#: backend/services/vault_service.py:179
 msgid "vault.permission_denied"
 msgstr "vault.permission_denied"
 
-#: backend/services/vault_service.py:135
+#: backend/services/vault_service.py:191
 msgid "vault.connection_error"
 msgstr "vault.connection_error"
 
-#: backend/services/vault_service.py:138
+#: backend/services/vault_service.py:194
 msgid "vault.timeout"
 msgstr "vault.timeout"
 
-#: backend/services/vault_service.py:143
+#: backend/services/vault_service.py:199
 msgid "vault.invalid_response"
 msgstr "vault.invalid_response"
 
-#: backend/services/vault_service.py:277
+#: backend/services/vault_service.py:333
 msgid "vault.secret_not_found"
 msgstr "vault.secret_not_found"
 
-#: backend/services/vault_service.py:283
+#: backend/services/vault_service.py:339
 msgid "vault.invalid_secret_format"
 msgstr "vault.invalid_secret_format"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 09:39-0400\n"
+"POT-Creation-Date: 2026-06-26 16:17-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "Kon inloggegevens niet valideren"
 msgid "User not found."
 msgstr "Gebruiker niet gevonden."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:605
+#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "U heeft geen toegang tot het geselecteerde account."
 
@@ -133,8 +133,8 @@ msgstr "Ongeldige host-ID formaat"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
-#: backend/api/repository_mirroring.py:831
-#: backend/api/repository_mirroring.py:896
+#: backend/api/repository_mirroring.py:836
+#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
 #: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
 #: backend/api/tag.py:495 backend/api/tag.py:649
@@ -164,8 +164,8 @@ msgstr "Host is niet goedgekeurd"
 #: backend/api/opentelemetry/deployment.py:216
 #: backend/api/opentelemetry/eligibility.py:58
 #: backend/api/opentelemetry/grafana_connection.py:54
-#: backend/api/opentelemetry/grafana_connection.py:197
-#: backend/api/packages_operations.py:64
+#: backend/api/opentelemetry/grafana_connection.py:197 backend/api/scim.py:215
+#: backend/api/scim.py:225 backend/api/packages_operations.py:64
 #: backend/api/packages_operations.py:238
 #: backend/api/license_management.py:112
 #: backend/api/updates/os_upgrade_routes.py:185
@@ -377,9 +377,9 @@ msgstr "Installatiedeelverzoek niet gevonden: %s"
 msgid "Failed to record installation completion: %s"
 msgstr "Mislukt om installatiedoorvoer op te nemen: %s"
 
-#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:156
+#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:161
 #: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
-#: backend/api/external_idp.py:61 backend/api/dynamic_secrets.py:106
+#: backend/api/external_idp.py:62 backend/api/dynamic_secrets.py:106
 #: backend/api/upgrade_profiles.py:122
 #, python-format
 msgid "Invalid UUID for %s: %s"
@@ -1152,7 +1152,7 @@ msgstr ""
 "Groep verwijderen gevraagd. De groeplist zal automatisch bijwerken na de "
 "verwijdering."
 
-#: backend/api/repository_mirroring.py:81
+#: backend/api/repository_mirroring.py:86
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
@@ -1160,44 +1160,44 @@ msgstr ""
 "Repository-mirroring vereist een SysManage Professional+ licentie. Upgrade "
 "voor toegang tot deze functie."
 
-#: backend/api/repository_mirroring.py:252
+#: backend/api/repository_mirroring.py:257
 msgid "Mirror host not found"
 msgstr "Mirror-host niet gevonden"
 
-#: backend/api/repository_mirroring.py:360
+#: backend/api/repository_mirroring.py:365
 msgid "Mirror deleted"
 msgstr "Spiegel verwijderd"
 
-#: backend/api/repository_mirroring.py:392
+#: backend/api/repository_mirroring.py:397
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "Niet-ondersteunde package_manager: %s"
 
-#: backend/api/repository_mirroring.py:405
+#: backend/api/repository_mirroring.py:410
 msgid "Mirror sync dispatched"
 msgstr "Synchronisatie van spiegel uitgevoerd"
 
-#: backend/api/repository_mirroring.py:601
+#: backend/api/repository_mirroring.py:606
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "Mirror-tick vereist automation_engine voor cron-evaluatie."
 
-#: backend/api/repository_mirroring.py:826
-#: backend/api/repository_mirroring.py:892
+#: backend/api/repository_mirroring.py:831
+#: backend/api/repository_mirroring.py:897
 #, python-format
 msgid "Invalid platform: %s"
 msgstr "Ongeldige platform: %s"
 
-#: backend/api/repository_mirroring.py:843
+#: backend/api/repository_mirroring.py:848
 #, python-format
 msgid "A platform config for %s on this host already exists"
 msgstr "Een platformconfiguratie voor %s op deze host bestaat al"
 
-#: backend/api/repository_mirroring.py:941
+#: backend/api/repository_mirroring.py:946
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "Platform configuratie beheert nog %d spiegel(s); verwijder deze eerst"
 
-#: backend/api/repository_mirroring.py:1104
+#: backend/api/repository_mirroring.py:1116
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
@@ -1206,13 +1206,13 @@ msgstr ""
 "Spiegel %s heeft nog geen succesvolle synchronisatie voltooid — wacht tot de"
 " synchronisatie is geslaagd voordat je deze instelt als standaard."
 
-#: backend/api/repository_mirroring.py:1112
+#: backend/api/repository_mirroring.py:1124
 #, python-format
 msgid "Mirror %s is for %s, can't assign to a %s default"
 msgstr ""
 "Spiegel %s is voor %s, kan niet worden toegewezen aan een %s-standaard"
 
-#: backend/api/repository_mirroring.py:1186
+#: backend/api/repository_mirroring.py:1201
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "Onbekende (platform, versie, os_family) tuple"
 
@@ -1255,7 +1255,7 @@ msgstr ""
 "distributie / versie kan worden afgeleid. Pas de spiegel aan en selecteer "
 "een versie uit het dropdownmenu."
 
-#: backend/api/airgap_collector_runs.py:307
+#: backend/api/airgap_collector_runs.py:322
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
@@ -1264,22 +1264,22 @@ msgstr ""
 "Spiegel %r verwijst naar een catalogusversie die niet meer bestaat. "
 "Selecteer opnieuw een versie voor de spiegel."
 
-#: backend/api/airgap_collector_runs.py:391
-#: backend/api/airgap_collector_runs.py:470
+#: backend/api/airgap_collector_runs.py:406
+#: backend/api/airgap_collector_runs.py:485
 msgid "At least one target is required to create a collection run."
 msgstr "Ten minste één doel is vereist om een collectie uitvoering te maken."
 
-#: backend/api/airgap_collector_runs.py:401
+#: backend/api/airgap_collector_runs.py:416
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "Ongeldige UUID voor mirror_id: %s"
 
-#: backend/api/airgap_collector_runs.py:411
+#: backend/api/airgap_collector_runs.py:426
 #, python-format
 msgid "Mirror %s not found"
 msgstr "Spiegel %s niet gevonden"
 
-#: backend/api/airgap_collector_runs.py:417
+#: backend/api/airgap_collector_runs.py:432
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
@@ -1287,7 +1287,7 @@ msgstr ""
 "Spiegel %r is uitgeschakeld; schakel in en synchroniseer voordat je deze "
 "gebruikt in een collectierun."
 
-#: backend/api/airgap_collector_runs.py:428
+#: backend/api/airgap_collector_runs.py:443
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
@@ -1296,7 +1296,7 @@ msgstr ""
 "Alle doelspiegels moeten op dezelfde host leven (de collectieplan stuurt "
 "naar één agent). Geselecteerde spiegels overspannen %d hosts."
 
-#: backend/api/airgap_collector_runs.py:524
+#: backend/api/airgap_collector_runs.py:539
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
@@ -1305,7 +1305,7 @@ msgstr ""
 "Een eenmalige air-gap collectie uitvoering '%s' met %d doelspiegel(s) is "
 "gemaakt; snapshots zijn verzonden."
 
-#: backend/api/airgap_collector_runs.py:647
+#: backend/api/airgap_collector_runs.py:662
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
@@ -1314,7 +1314,7 @@ msgstr ""
 "ISO is nog niet klaar voor download (status: %s). Wacht tot het run bereikt "
 "ISO_BUILT."
 
-#: backend/api/airgap_collector_runs.py:657
+#: backend/api/airgap_collector_runs.py:672
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
@@ -1322,31 +1322,31 @@ msgstr ""
 "ISO-bestand is niet langer op schijf; de staging volume kan zijn "
 "schoongemaakt. Voer de verzameling opnieuw uit om te herbouwen."
 
-#: backend/api/airgap_collector_runs.py:674
+#: backend/api/airgap_collector_runs.py:689
 msgid "ISO file not found."
 msgstr "ISO-bestand niet gevonden."
 
-#: backend/api/airgap_collector_runs.py:693
+#: backend/api/airgap_collector_runs.py:708
 #, python-format
 msgid "Disc %d not found for this run.  Available discs: %s"
 msgstr ""
 "Schijf %d niet gevonden voor deze uitvoering. Beschikbare schijven: %s"
 
-#: backend/api/airgap_collector_runs.py:774
+#: backend/api/airgap_collector_runs.py:789
 msgid "Invalid or expired download token."
 msgstr "Ongeldig of verlopen downloadtoken."
 
-#: backend/api/airgap_collector_runs.py:807
+#: backend/api/airgap_collector_runs.py:822
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "Air-gap collectie uitvoering '%s' is verwijderd"
 
-#: backend/api/airgap_collector_runs.py:879
+#: backend/api/airgap_collector_runs.py:894
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "Run is nog niet COMPLETE (status: %s)"
 
-#: backend/api/airgap_collector_runs.py:885
+#: backend/api/airgap_collector_runs.py:900
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO-bestand is niet langer op schijf: %s"
@@ -1463,7 +1463,7 @@ msgstr "Registratiesleutel '%s' verwijderd"
 msgid "Registration key deleted"
 msgstr "Registratiesleutel verwijderd"
 
-#: backend/api/external_idp.py:47
+#: backend/api/external_idp.py:48
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
@@ -1472,53 +1472,53 @@ msgstr ""
 "Professional+-licentie. Upgrade naar deze licentie om deze functie te "
 "gebruiken."
 
-#: backend/api/external_idp.py:73
+#: backend/api/external_idp.py:74
 msgid "IdP provider not found"
 msgstr "IdP-provider niet gevonden"
 
-#: backend/api/external_idp.py:246
+#: backend/api/external_idp.py:276
 msgid "IdP provider deleted"
 msgstr "IdP-provider verwijderd"
 
-#: backend/api/external_idp.py:294
+#: backend/api/external_idp.py:324
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr ""
 "Een standaard-mapping voor ongemapte items bestaat al voor deze provider."
 
-#: backend/api/external_idp.py:328
+#: backend/api/external_idp.py:358
 msgid "Role mapping not found"
 msgstr "Roltoewijzing niet gevonden"
 
-#: backend/api/external_idp.py:331
+#: backend/api/external_idp.py:361
 msgid "Role mapping deleted"
 msgstr "Roltoewijzing verwijderd"
 
-#: backend/api/external_idp.py:382
+#: backend/api/external_idp.py:412
 msgid "Provider is not an OIDC provider."
 msgstr "Provider is geen OIDC-provider."
 
-#: backend/api/external_idp.py:385
+#: backend/api/external_idp.py:415
 msgid "OIDC provider is disabled."
 msgstr "De OIDC-provider is uitgeschakeld."
 
-#: backend/api/external_idp.py:416
+#: backend/api/external_idp.py:446
 msgid "Missing code or state in callback."
 msgstr "Ontbrekend code of state in callback."
 
-#: backend/api/external_idp.py:420
+#: backend/api/external_idp.py:450
 msgid "Invalid OIDC state."
 msgstr "Ongeldige OIDC-status."
 
-#: backend/api/external_idp.py:429
+#: backend/api/external_idp.py:459
 msgid "OIDC client secret could not be resolved."
 msgstr "Het OIDC-clientgeheim kon niet worden opgelost."
 
-#: backend/api/external_idp.py:436
+#: backend/api/external_idp.py:466
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC-inloggen mislukt: %s"
 
-#: backend/api/external_idp.py:451
+#: backend/api/external_idp.py:486 backend/api/external_idp.py:683
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1526,9 +1526,40 @@ msgstr ""
 "Er is geen SysManage-account gekoppeld aan deze IdP-identiteit. Neem contact"
 " op met een beheerder om uw account eerst in te richten."
 
-#: backend/api/external_idp.py:456
+#: backend/api/external_idp.py:491 backend/api/external_idp.py:688
 msgid "Account is inactive."
 msgstr "Het account is inactief."
+
+#: backend/api/external_idp.py:593 backend/api/external_idp.py:614
+msgid "Provider is not a SAML provider."
+msgstr "Provider is geen SAML provider."
+
+#: backend/api/external_idp.py:599
+#, python-format
+msgid "Could not build SP metadata: %s"
+msgstr "Kan SP metadata niet bouwen: %s"
+
+#: backend/api/external_idp.py:617
+msgid "SAML provider is disabled."
+msgstr "SAML provider is uitgeschakeld."
+
+#: backend/api/external_idp.py:623
+#, python-format
+msgid "Could not start SAML sign-in: %s"
+msgstr "Kon SAML inloggen niet starten: %s"
+
+#: backend/api/external_idp.py:651
+msgid "Missing SAMLResponse or RelayState."
+msgstr "Ontbreekt SAMLResponse of RelayState."
+
+#: backend/api/external_idp.py:656
+msgid "Invalid or expired SAML RelayState."
+msgstr "Ongeldig of verlopen SAML RelayState."
+
+#: backend/api/external_idp.py:666
+#, python-format
+msgid "SAML sign-in failed: %s"
+msgstr "SAML inloggen mislukt: %s"
 
 #: backend/api/grafana_integration.py:316
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
@@ -2179,6 +2210,18 @@ msgstr "Geen antivirus-standaard gevonden voor dit OS"
 msgid "Failed to delete antivirus default: %s"
 msgstr "Mislukt om de standaardantivirusinstellingen te verwijderen: %s"
 
+#: backend/api/scim.py:47
+msgid "SCIM provisioning requires a SysManage Professional+ license."
+msgstr "SCIM provisioning vereist een SysManage Professional+ licentie."
+
+#: backend/api/scim.py:60 backend/api/scim.py:69
+msgid "Unknown SCIM target"
+msgstr "Onbekend SCIM doel"
+
+#: backend/api/scim.py:81
+msgid "Invalid or missing SCIM bearer token."
+msgstr "Ongeldig of ontbrekende SCIM bearer token."
+
 #: backend/api/email.py:82
 msgid "Failed to get email configuration"
 msgstr "Kan e-mailconfiguratie niet ophalen"
@@ -2645,11 +2688,11 @@ msgstr "Mislukt om de update resultaten te verwerken"
 msgid "Invalid username or password"
 msgstr "Ongeldige gebruikersnaam of wachtwoord"
 
-#: backend/api/auth.py:271
+#: backend/api/auth.py:277
 msgid "Account is locked due to too many failed login attempts"
 msgstr "Account is vergrendeld vanwege te veel mislukte inlogpogingen"
 
-#: backend/api/auth.py:360
+#: backend/api/auth.py:366
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
@@ -2657,19 +2700,19 @@ msgstr ""
 "Meervoudige verificatie is vereist voor deze account. Meld je aan vanaf jouw"
 " profielpagina om dit in te stellen."
 
-#: backend/api/auth.py:449
+#: backend/api/auth.py:455
 msgid "Account locked due to too many failed login attempts"
 msgstr "Account vergrendeld wegens te veel mislukte inlogpogingen"
 
-#: backend/api/auth.py:475
+#: backend/api/auth.py:481
 msgid "Invalid or missing refresh token"
 msgstr "Ongeldig of ontbrekend refresh-token"
 
-#: backend/api/auth.py:538 backend/api/auth.py:587
+#: backend/api/auth.py:544 backend/api/auth.py:593
 msgid "Multi-tenancy is not enabled."
 msgstr "Multi-tenantie is niet ingeschakeld."
 
-#: backend/api/auth.py:660
+#: backend/api/auth.py:664
 msgid "Logout successful"
 msgstr "Uitloggen succesvol"
 
@@ -4111,35 +4154,35 @@ msgstr "Bijgewerkte {entity_type} '{entity_name}'"
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "Verwijderd {entity_type} '{entity_name}'"
 
-#: backend/services/vault_service.py:92
+#: backend/services/vault_service.py:148
 msgid "vault.not_enabled"
 msgstr "vault.niet_ingeschakeld"
 
-#: backend/services/vault_service.py:95
+#: backend/services/vault_service.py:151
 msgid "vault.no_token"
 msgstr "vault.geen_token"
 
-#: backend/services/vault_service.py:123
+#: backend/services/vault_service.py:179
 msgid "vault.permission_denied"
 msgstr "vault.toegang_verweigerd"
 
-#: backend/services/vault_service.py:135
+#: backend/services/vault_service.py:191
 msgid "vault.connection_error"
 msgstr "vault.connection_error"
 
-#: backend/services/vault_service.py:138
+#: backend/services/vault_service.py:194
 msgid "vault.timeout"
 msgstr "vault.timeout"
 
-#: backend/services/vault_service.py:143
+#: backend/services/vault_service.py:199
 msgid "vault.invalid_response"
 msgstr "vault.ongeldige_response"
 
-#: backend/services/vault_service.py:277
+#: backend/services/vault_service.py:333
 msgid "vault.secret_not_found"
 msgstr "vault.secret_niet_gevonden"
 
-#: backend/services/vault_service.py:283
+#: backend/services/vault_service.py:339
 msgid "vault.invalid_secret_format"
 msgstr "vault.ongeldig_secret_format"
 

@@ -2122,7 +2122,22 @@
       "tenantHelp": "Limitar este proveedor a un inquilino (su UUID). Déjelo en blanco para un proveedor global del servidor.",
       "jit": "Aprovisionamiento JIT (crear usuarios automáticamente en el primer inicio de sesión SSO)",
       "jitRole": "Rol predeterminado de JIT",
-      "jitRoleHelp": "Rol concedido a los miembros creados automáticamente. Requiere un ID de inquilino y una lista de dominios de correo permitidos coincidente en ese inquilino."
+      "jitRoleHelp": "Rol concedido a los miembros creados automáticamente. Requiere un ID de inquilino y una lista de dominios de correo permitidos coincidente en ese inquilino.",
+      "samlEmailAttr": "Atributo de correo electrónico (opcional; NameID si está vacío)",
+      "samlGroupAttr": "Atributo del grupo",
+      "samlIdpCert": "Certificado de firma IdP (X.509)",
+      "samlIdpCertHelp": "Certificado público PEM/base64 utilizado para verificar las firmas de aserciones",
+      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "Dónde el IdP POSTea la aserción, por ejemplo https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP Entity ID",
+      "samlSpKey": "Clave privada SP (Vault secret id, opcional)",
+      "samlSpKeyHelp": "Referencia como vault:secret/path o literal:plaintext",
+      "samlWantSigned": "Requerir aserciones firmadas (recomendado)",
+      "scimEnabled": "Habilitar la provisión SCIM entrante",
+      "scimToken": "SCIM token portador (Vault secret id)",
+      "scimTokenHelp": "Token que el IdP presenta en cada solicitud SCIM. Referencia como vault:secret/path o literal:plaintext"
     },
     "loadError": "No se pudieron cargar los proveedores de identidad.",
     "mapAddError": "No se pudo agregar la asignación.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "Configuración de autenticación",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

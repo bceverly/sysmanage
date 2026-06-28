@@ -52,9 +52,10 @@ def _is_secure_cookie_enabled(the_config):
 def _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure):
     """Set the refresh token cookie on the response.
 
-    The cookie's Domain attribute is taken from `security.cookie_domain` in
-    the YAML configuration. If that key is unset (the default), the Domain
-    attribute is omitted entirely and the cookie is scoped to the host that
+    The cookie's Domain attribute comes from the ``cookie_domain`` server
+    setting (DB-backed, with a ``security.cookie_domain`` YAML fallback — Phase
+    13.1.H). If unset (the default), the Domain attribute is omitted entirely
+    and the cookie is scoped to the host that
     served the response — RFC 6265's default behavior, and what most
     deployments want. Setting an explicit domain that doesn't match the
     request host (e.g. hard-coding 'sysmanage.org' on a localhost dev box)
@@ -62,7 +63,7 @@ def _set_refresh_cookie(response, refresh_token, jwt_refresh_timeout, is_secure)
     to produce 'invalid cookie' errors in local load testing and against
     any non-sysmanage.org deployment.
     """
-    cookie_domain = config.get_config().get("security", {}).get("cookie_domain")
+    cookie_domain = config.get_cookie_domain()
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -126,9 +127,7 @@ async def login(login_data: UserLogin, request: Request, response: Response):  #
 
     the_config = config.get_config()
     db.get_db()
-    jwt_refresh_timeout = int(
-        the_config.get("security", {}).get("jwt_refresh_timeout", 86400)
-    )
+    jwt_refresh_timeout = config.get_jwt_refresh_timeout()
     is_secure = _is_secure_cookie_enabled(the_config)
 
     # Get the SQLAlchemy session
@@ -189,9 +188,16 @@ def _try_admin_login(
     jwt_refresh_timeout,
     is_secure,
 ):
-    """Try to authenticate using admin credentials from config file."""
+    """Try to authenticate using the recovery (config) admin credentials.
+
+    Phase 13.1.H: the recovery *userid* is a bootstrap identifier that stays in
+    ``sysmanage.yaml`` (it must resolve even with the DB/vault down), but the
+    recovery *password* is a secret read from OpenBAO (``config.get_admin_password``),
+    falling back to the YAML value during the migration window — so the recovery
+    credential is no longer required to sit in plaintext YAML.
+    """
     admin_userid = the_config.get("security", {}).get("admin_userid")
-    admin_password = the_config.get("security", {}).get("admin_password")
+    admin_password = config.get_admin_password()
 
     if not (admin_userid and admin_password and login_data.userid == admin_userid):
         return None
@@ -608,9 +614,7 @@ async def switch_account(
             session.close()
 
     the_config = config.get_config()
-    jwt_refresh_timeout = int(
-        the_config.get("security", {}).get("jwt_refresh_timeout", 86400)
-    )
+    jwt_refresh_timeout = config.get_jwt_refresh_timeout()
     is_secure = _is_secure_cookie_enabled(the_config)
 
     refresh_token = sign_refresh_token(current_user, tenant_id=target_tenant)

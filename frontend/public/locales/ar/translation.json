@@ -2122,7 +2122,22 @@
       "tenantHelp": "حصر هذا الموفّر في مستأجر واحد (معرّفه UUID). اتركه فارغًا للحصول على موفّر عام على مستوى الخادم.",
       "jit": "التزويد الفوري (إنشاء المستخدمين تلقائيًا عند أول تسجيل دخول عبر SSO)",
       "jitRole": "الدور الافتراضي للتزويد الفوري",
-      "jitRoleHelp": "الدور الممنوح للأعضاء المُنشأين تلقائيًا. يتطلب معرّف مستأجر وقائمة سماح بنطاقات البريد الإلكتروني مطابقة لذلك المستأجر."
+      "jitRoleHelp": "الدور الممنوح للأعضاء المُنشأين تلقائيًا. يتطلب معرّف مستأجر وقائمة سماح بنطاقات البريد الإلكتروني مطابقة لذلك المستأجر.",
+      "samlEmailAttr": "الحقل البريدي الإلكتروني (اختياري؛ NameID إذا كان فارغاً)",
+      "samlGroupAttr": "حقل المجموعة",
+      "samlIdpCert": " сертификат التوقيع IdP (X.509)",
+      "samlIdpCertHelp": "ال сертификат العام PEM/base64 المستخدم لتأكيد توقيعاتsertificates",
+      "samlIdpEntityId": "رمز الكيان IdP",
+      "samlIdpSso": "URL SSO للكيان IdP",
+      "samlSpAcs": "URL ACS للـ SP",
+      "samlSpAcsHelp": "مكان إرسال IdP للتأكيد بالبريد الإلكتروني، على سبيل المثال https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "رمز الكيان للـ SP",
+      "samlSpKey": "مفتاح خاص للـ SP (Vault secret id، اختياري)",
+      "samlSpKeyHelp": " ссылка, مثل vault:secret/path أو قيمة ثابتة:plaintext",
+      "samlWantSigned": "تطلب تأكيد التصريحات (مُوصى به)",
+      "scimEnabled": "تمكين تزويد SCIM الوارد",
+      "scimToken": "SCIM بearer token (Vault secret id)",
+      "scimTokenHelp": "التوكن الذي يعرضه IdP في كل طلب SCIM. ссылка, مثل vault:secret/path أو قيمة ثابتة:plaintext"
     },
     "loadError": "تعذر تحميل موفري الهوية.",
     "mapAddError": "تعذرت إضافة التعيين.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "إعدادات المصادقة",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

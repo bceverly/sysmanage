@@ -306,6 +306,14 @@ class User(Base):
         nullable=False,
         default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
     )
+    # External IdP linkage (Phase 10.5 / 13.1.E).  When set, this local account
+    # is authenticated by an external provider (LDAP/OIDC/SAML) instead of by
+    # Argon2: ``external_idp_provider_id`` is a SOFT reference to
+    # ``external_idp_provider.id`` and ``external_subject`` is the stable
+    # per-user identifier the IdP returns (OIDC ``sub`` / SAML NameID).  Both
+    # NULL for a normal password account.
+    external_idp_provider_id = Column(GUID(), nullable=True, index=True)
+    external_subject = Column(String(500), nullable=True)
 
     # Relationships
     security_roles = relationship(

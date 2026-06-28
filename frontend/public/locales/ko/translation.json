@@ -2122,7 +2122,22 @@
       "tenantHelp": "이 공급자를 하나의 테넌트(해당 UUID)로 제한합니다. 서버 전역 공급자로 사용하려면 비워 두세요.",
       "jit": "JIT 프로비저닝(첫 SSO 로그인 시 사용자 자동 생성)",
       "jitRole": "JIT 기본 역할",
-      "jitRoleHelp": "자동 생성된 구성원에게 부여되는 역할입니다. 테넌트 ID와 해당 테넌트의 일치하는 이메일 도메인 허용 목록이 필요합니다."
+      "jitRoleHelp": "자동 생성된 구성원에게 부여되는 역할입니다. 테넌트 ID와 해당 테넌트의 일치하는 이메일 도메인 허용 목록이 필요합니다.",
+      "samlEmailAttr": "이메일 속성 (선택사항; NameID가 비어있을 경우)",
+      "samlGroupAttr": "그룹 속성",
+      "samlIdpCert": "IdP 서명 인증서 (X.509)",
+      "samlIdpCertHelp": "공개 PEM/베이스64 인증서는 어설션 서명을 검증하기 위해 사용됩니다.",
+      "samlIdpEntityId": "IdP 엔티티 ID",
+      "samlIdpSso": "IdP SSO URL",
+      "samlSpAcs": "SP ACS URL",
+      "samlSpAcsHelp": "IdP가 어설션을 POST로 전송하는 위치, 예를 들어 https://host/api/auth/saml/<id>/acs",
+      "samlSpEntityId": "SP 엔티티 ID",
+      "samlSpKey": "SP 개인키 (Vault secret id, 선택사항)",
+      "samlSpKeyHelp": "vault:secret/path 또는 literal:plaintext과 같은 참조 형식",
+      "samlWantSigned": "서명된 어설션 필요 (권장사항)",
+      "scimEnabled": "SCIM 인바운드 프로비저닝 활성화",
+      "scimToken": "SCIM 보러 토큰 (Vault secret id)",
+      "scimTokenHelp": "IdP가 각 SCIM 요청에서 제공하는 토큰입니다. vault:secret/path 또는 literal:plaintext과 같은 참조 형식"
     },
     "loadError": "ID 공급자를 불러올 수 없습니다.",
     "mapAddError": "매핑을 추가할 수 없습니다.",
@@ -2146,7 +2161,8 @@
     "settingsTitle": "인증 설정",
     "type": {
       "ldap": "LDAP / Active Directory",
-      "oidc": "OIDC"
+      "oidc": "OIDC",
+      "saml": "SAML 2.0"
     }
   },
   "mfa": {

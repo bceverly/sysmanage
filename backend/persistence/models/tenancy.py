@@ -200,6 +200,11 @@ class RegistryUserTenantGrant(Base):
     role = Column(String(64), nullable=False, default="member")
     is_default = Column(Boolean, nullable=False, default=False)
     expires_at = Column(DateTime, nullable=True)
+    # Phase 13.1.E: accessor of the OpenBAO token whose lease mirrors a
+    # vendor-support / break-glass grant window.  NULL unless OpenBAO is enabled
+    # and a support lease was minted; lets revoke_support_grant kill the live
+    # vault lease in addition to expiring the grant.
+    support_lease_accessor = Column(String(255), nullable=True)
     created_at = Column(DateTime, nullable=False, default=_utcnow)
 
     __table_args__ = (

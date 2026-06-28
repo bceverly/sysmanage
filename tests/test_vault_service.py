@@ -531,6 +531,90 @@ class TestVaultServiceTestConnection:
         assert "Unexpected" in result["error"]
 
 
+class TestVaultServiceSupportLease:
+    """Tests for the Phase 13.1.E support-grant lease methods."""
+
+    @patch("backend.services.vault_service.config")
+    def test_create_support_lease_returns_accessor(self, mock_config):
+        from backend.services.vault_service import VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": True, "token": "token"}
+        service = VaultService()
+
+        with patch.object(service, "_make_request") as mock_request:
+            mock_request.return_value = {"auth": {"accessor": "acc-123"}}
+            accessor = service.create_support_lease(
+                ttl_seconds=3600, metadata={"email": "vendor@acme.com"}
+            )
+
+        assert accessor == "acc-123"
+        method, path = mock_request.call_args.args[:2]
+        payload = mock_request.call_args.args[2]
+        assert (method, path) == ("POST", "auth/token/create")
+        # TTL mirrors the grant window and the token is orphaned + non-renewable
+        # so it can never outlive it.
+        assert payload["ttl"] == "3600s"
+        assert payload["explicit_max_ttl"] == "3600s"
+        assert payload["no_parent"] is True
+        assert payload["renewable"] is False
+        assert payload["meta"]["email"] == "vendor@acme.com"
+
+    @patch("backend.services.vault_service.config")
+    def test_create_support_lease_none_when_disabled(self, mock_config):
+        from backend.services.vault_service import VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": False}
+        service = VaultService()
+
+        assert service.create_support_lease(ttl_seconds=3600) is None
+
+    @patch("backend.services.vault_service.config")
+    def test_create_support_lease_none_on_vault_error(self, mock_config):
+        from backend.services.vault_service import VaultError, VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": True, "token": "token"}
+        service = VaultService()
+
+        with patch.object(service, "_make_request", side_effect=VaultError("denied")):
+            assert service.create_support_lease(ttl_seconds=3600) is None
+
+    @patch("backend.services.vault_service.config")
+    def test_revoke_support_lease_success(self, mock_config):
+        from backend.services.vault_service import VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": True, "token": "token"}
+        service = VaultService()
+
+        with patch.object(service, "_make_request") as mock_request:
+            mock_request.return_value = {}
+            assert service.revoke_support_lease("acc-xyz") is True
+            method, path = mock_request.call_args.args[:2]
+            assert (method, path) == ("POST", "auth/token/revoke-accessor")
+            assert mock_request.call_args.args[2] == {"accessor": "acc-xyz"}
+
+    @patch("backend.services.vault_service.config")
+    def test_revoke_support_lease_false_when_empty_or_disabled(self, mock_config):
+        from backend.services.vault_service import VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": True, "token": "token"}
+        service = VaultService()
+        assert service.revoke_support_lease("") is False  # no accessor
+
+        mock_config.get_vault_config.return_value = {"enabled": False}
+        disabled = VaultService()
+        assert disabled.revoke_support_lease("acc") is False
+
+    @patch("backend.services.vault_service.config")
+    def test_revoke_support_lease_false_on_vault_error(self, mock_config):
+        from backend.services.vault_service import VaultError, VaultService
+
+        mock_config.get_vault_config.return_value = {"enabled": True, "token": "token"}
+        service = VaultService()
+
+        with patch.object(service, "_make_request", side_effect=VaultError("boom")):
+            assert service.revoke_support_lease("acc") is False
+
+
 class TestVaultConstants:
     """Tests for vault service constants."""
 

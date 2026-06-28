@@ -256,6 +256,9 @@ class TestLogin:
 class TestTryAdminLogin:
     """Tests for _try_admin_login function."""
 
+    # Phase 13.1.H: the recovery password is read via config.get_admin_password()
+    # (OpenBAO-first, YAML fallback), so stub it to the_config's value.
+    @patch("backend.api.auth.config.get_admin_password", return_value="secret123")
     @patch("backend.api.auth.login_security")
     @patch("backend.api.auth._log_login_attempt")
     @patch("backend.api.auth.sign_refresh_token")
@@ -268,6 +271,7 @@ class TestTryAdminLogin:
         mock_sign_refresh,
         mock_log,
         mock_login_security,
+        _mock_admin_pw,
     ):
         """Test successful admin login."""
         from backend.api.auth import UserLogin, _try_admin_login
@@ -325,9 +329,12 @@ class TestTryAdminLogin:
 
         assert result is None
 
+    @patch("backend.api.auth.config.get_admin_password", return_value="correct")
     @patch("backend.api.auth.login_security")
     @patch("backend.api.auth._log_login_attempt")
-    def test_admin_login_wrong_password(self, mock_log, mock_login_security):
+    def test_admin_login_wrong_password(
+        self, mock_log, mock_login_security, _mock_admin_pw
+    ):
         """Test admin login with wrong password."""
         from backend.api.auth import UserLogin, _try_admin_login
 
