@@ -121,7 +121,11 @@
     "unknown": "Unknown",
     "update": "Update",
     "selected": "Selected",
-    "view": "View"
+    "view": "View",
+    "copied": "Copied",
+    "copy": "Copy",
+    "create": "Create",
+    "done": "Done"
   },
   "connectionStatus": {
     "connected": "Connected",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "settings tabs"
+  },
+  "apiKeys": {
+    "active": "Active",
+    "confirmRevoke": "Are you sure you want to revoke this API key? Any automation using it will stop working immediately.",
+    "copyWarning": "Copy this key now — it will not be shown again.",
+    "create": "Create API Key",
+    "createError": "Failed to create API key.",
+    "created": "Created",
+    "createdTitle": "API key created",
+    "description": "API keys let automation authenticate to the API as you. Treat them like passwords.",
+    "expires": "Expires",
+    "expiresOptional": "Expires (optional)",
+    "lastUsed": "Last used",
+    "loadError": "Failed to load API keys.",
+    "name": "Name",
+    "prefix": "Key prefix",
+    "revoke": "Revoke",
+    "revokeError": "Failed to revoke API key.",
+    "revoked": "Revoked",
+    "status": "Status",
+    "title": "API Keys"
   }
 }

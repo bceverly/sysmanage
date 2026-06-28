@@ -4549,11 +4549,125 @@ plan-builder + UI integration.
 
 #### 13.2 API Completeness
 
-- [ ] Audit all features for missing endpoints
-- [ ] API versioning (/api/v1/, /api/v2/)
-- [ ] ApiKey model for automation
-- [ ] Rate limiting middleware
-- [ ] Complete OpenAPI documentation
+- [x] **Audit all features for missing endpoints** — full inventory of the REST
+      surface (~50 routers, ~277 routes).  Closed the discoverability gaps:
+      tagged the 6 previously-untagged routers (auth/agent/host-public/
+      certs-public/password-reset) and added the new api-keys CRUD.  Remaining
+      CRUD gaps are deferred *by design* (they need new persistence/agent work,
+      not API plumbing): broadcast history, dynamic-secret rotation, queue
+      retry/bulk-clear, telemetry-target config.  Listed here so they aren't lost.
+- [x] **API versioning (/api/v1/, /api/v2/)** — `ApiVersionMiddleware`
+      (pure-ASGI, covers HTTP + WebSocket) makes the unversioned `/api/...`
+      surface the canonical **v1** and serves `/api/v1/...` as an exact alias, so
+      the agent, frontend, and Pro+ engines keep working unchanged (zero
+      regression).  `/api/v2/...` is reserved (404s until a real v2 ships).
+- [x] **ApiKey model for automation** — `api_key` table (migration
+      `f1apikey01`), GitHub-PAT-style hashed storage (only `sha256(key)` + a
+      display prefix persisted; plaintext shown once).  API keys present in the
+      same `Authorization: Bearer smk_...` header and are validated in the JWT
+      path, so every JWT-protected endpoint accepts them with no per-endpoint
+      change; they authenticate as the owning user.  Self-service CRUD at
+      `/api/api-keys` (key auth can't manage keys) + account-menu UI.
+- [x] **Rate limiting middleware** — `RateLimitMiddleware` (fixed-window,
+      per-client, proxy-aware via X-Forwarded-For).  **Opt-in / disabled by
+      default** (`api.rate_limit.*` or `SYSMANAGE_RATE_LIMIT_ENABLED`) to avoid
+      throttling shared-proxy users or the polling UI; agent comms, health, and
+      WebSockets are always exempt.  Independent of the existing login/agent-
+      connect limiters.
+- [x] **Complete OpenAPI documentation** — app-level metadata (title, version,
+      description documenting versioning + auth schemes + rate limiting) and tag
+      groups; every router now carries tags; new endpoints have summaries,
+      response models, and explicit status codes.
+
+#### 13.2.1 Native `/api/v1` migration (incremental — retire bridge dependence)
+
+**Why.** 13.2 introduced versioning via `ApiVersionMiddleware`, which *bridges*
+`/api/v1/X` → legacy `/api/X` for any feature not yet natively versioned. The
+bridge is the right safety net during transition, but it shouldn't be a
+permanent forward-path dependency. The codebase is **mid-migration** — some
+routers/clients already serve & call `/api/v1` natively (server-info, air-gap,
+federation; Pro+ fleet/automation/secrets/audit/containers/observability/virt),
+while ~45 OSS routers + ~7 Pro+ engines + their callers are still on legacy
+`/api`. This item completes that migration **feature-by-feature** so each
+feature is natively `/api/v1` on both server and client, and the bridge is left
+as thin back-compat only.
+
+**Method (per feature, the definition of done):**
+1. Move the server router to `prefix="/api/v1/..."` natively (refactor
+   self-prefixed routers to use an explicit prefix). Keep a **deprecated `/api`
+   alias for one release** via dual-include where an external/scripted caller
+   might exist; pure-UI features can move without an alias (frontend ships with
+   the server).
+2. Update that feature's frontend caller(s) — centralized in `Services/*.ts`
+   (main) / `plugin-src/services|components` (Pro+) — to `/api/v1`.
+3. Update/confirm tests; `make lint` + `make test` green.
+4. Verify the route is served **natively** (not via the bridge): the middleware
+   is route-aware and checks native `/api/v1` routes first, so there is no
+   `/api/v1/v1` doubling risk.
+
+**Explicitly OUT of scope — stays unversioned (stable wire contract):**
+- **Agent endpoints** — `/api/agent/auth`, `/api/agent/connect` (WS),
+  `/api/agent/installation-complete`, `/api/host/register`, the public + client
+  certificate endpoints the agent fetches. Agents are independently deployed
+  (fleet version skew); the websocket protocol is versioned by `message_type`,
+  not URL. Evolve the agent protocol via a handshake/protocol-version field, not
+  a URL bump.
+- **SCIM** (`/api/scim/v2/...`) and **IdP SSO/ACS/metadata callbacks** — their
+  URLs are configured in the external IdP; changing them requires reconfiguring
+  the customer's IdP. Keep stable.
+
+**OSS backend routers to migrate (sysmanage) — by slice:**
+- [ ] *Slice 1 (pilot, low-risk):* `user`, `profile`, `user_preferences`, `tag`;
+      flip the brand-new `api_keys` to native `/api/v1/api-keys` (both sides ship
+      together, so no alias needed) to set the pattern.
+- [ ] *Slice 2 (hosts/fleet):* `host` (auth router only — NOT `/host/register`),
+      `host_hostname`, `fleet`, `child_host`, `reboot_orchestration`.
+- [ ] *Slice 3 (packages/updates/repos):* `packages`, `updates`, `scripts`,
+      `third_party_repos`, `default_repositories`, `enabled_package_managers`,
+      `package_compliance`, `upgrade_profiles`.
+- [ ] *Slice 4 (security/auth-mgmt):* `auth` (login/refresh/logout), `security`,
+      `security_roles`, `password_reset`, `openbao`, `secrets` (OSS),
+      `external_idp` **management** endpoints only (NOT the SSO callbacks),
+      `certificates` auth router (NOT the agent client-cert path).
+- [ ] *Slice 5 (settings/integrations):* `config_management`, `email`,
+      `server_settings`, `ubuntu_pro_settings`, `grafana_integration`,
+      `graylog_integration`, `telemetry`, `opentelemetry`, `firewall_roles`,
+      `firewall_status`, `antivirus_status`, `antivirus_defaults`,
+      `commercial_antivirus_status`, `cve_refresh_settings`.
+- [ ] *Slice 6 (reports/audit/misc):* `reports`, `report_branding`,
+      `report_templates`, `audit_log`, `broadcast`, `queue`, `diagnostics`,
+      `license_management`, `plugin_bundle`, `access_groups`, `dynamic_secrets`,
+      `airgap_bundles`.
+
+**Frontend (sysmanage):**
+- [ ] Migrate the ~364 legacy `/api/*` call sites to `/api/v1` *paired with each
+      backend slice above* (the ~70 already-v1 sites need no change). Keep edits
+      grouped in the per-feature `Services/*.ts` modules.
+
+**Pro+ engines (sysmanage-professional-plus) — require version bump + rebuild:**
+- [ ] *Slice 7:* add `/v1` to the ~7 unversioned engines — `vuln_engine`,
+      `health_engine`, `compliance_engine`, `av_management_engine`,
+      `firewall_orchestration_engine`, `airgap_repository_engine`,
+      `airgap_collector_engine`. Each is a `.pyx` change, so it **MUST bump the
+      engine `__version__` + metadata.json in lockstep** or `make update` won't
+      pull the new `.so` (see the cython-engine-version-bump rule). Verify each
+      engine's *effective served path* after the mount prefix (`proplus_routes`
+      adds `/api`) — confirm no `/api/api/...` or `/api/v1/v1/...`. The 9
+      already-`/v1` engines need no change. Engines make no outbound `/api`
+      calls, so nothing else in the repo breaks.
+- [ ] Migrate the 25 Pro+ frontend `plugin-src` call sites on legacy `/api/*` to
+      `/api/v1` (paired with the engine slice). Many components already use `/v1`.
+
+**Optional / later:**
+- [ ] Control-plane: `multitenancy_engine` `/api/control-plane` →
+      `/api/v1/control-plane` (+ `controlPlane.ts` / `TenantMigrationBanner.tsx`,
+      ~8 sites). Engine change ⇒ version bump + rebuild.
+- [ ] Once every feature is native-v1, decide whether to keep the bridge as
+      permanent back-compat for old agents/scripts or retire it.
+
+**sysmanage-agent:** no change (see OUT-of-scope above).
+**sysmanage-docs:** document `/api/v1` as the canonical base + the agent's stable
+unversioned contract once the migration lands.
 
 #### 13.3 Additional Polish Items
 

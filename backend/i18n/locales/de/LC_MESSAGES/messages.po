@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "Ungültige Signatur"
 msgid "Decryption failed"
 msgstr "Entschlüsselung fehlgeschlagen"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "Ungültiges Authentifizierungsschema."
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "Abgelaufener Token."
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "Ungültiger Autorisierungscode."
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "Anmeldedaten konnten nicht validiert werden"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "Benutzer nicht gefunden."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "Sie haben keinen Zugriff auf das gewählte Konto."
 
@@ -2742,6 +2742,15 @@ msgstr ""
 "Anforderung zur Prüfung der Virtualisierungsfunktion. Die Ergebnisse werden "
 "bald verfügbar sein."
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr ""
+"API-Schlüssel können mit API-Schlüsselaufforderung nicht verwaltet werden."
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API-Schlüssel nicht gefunden."
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "Fehler beim Verarbeiten der Aktualisierergebnisse"
@@ -4196,6 +4205,10 @@ msgstr "Nachrichtenprozessor wurde gestoppt"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "Servernachrichtenwarteschlange erfolgreich initialisiert"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "Rate limit erreicht. Bitte später erneut versuchen."
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

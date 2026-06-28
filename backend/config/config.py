@@ -349,6 +349,44 @@ def get_account_lockout_duration():
     )
 
 
+def _rate_limit_cfg():
+    """Return the ``api.rate_limit`` config sub-dict (or empty)."""
+    try:
+        return config.get("api", {}).get("rate_limit", {}) or {}
+    except Exception:  # noqa: BLE001 — never let config shape break the limiter
+        return {}
+
+
+def get_rate_limit_enabled() -> bool:
+    """Whether the request rate-limiter is active (Phase 13.2).
+
+    Read from the in-memory config (NOT the DB) so it adds no per-request query.
+    Disabled by default: per-IP limiting can throttle all users behind a shared
+    reverse-proxy IP, so operators opt in and tune limits per deployment.  The
+    ``SYSMANAGE_RATE_LIMIT_ENABLED`` env var overrides config (handy for e2e).
+    """
+    env = os.getenv("SYSMANAGE_RATE_LIMIT_ENABLED")
+    if env is not None:
+        return env.strip().lower() in ("1", "true", "yes", "on")
+    return bool(_rate_limit_cfg().get("enabled", False))
+
+
+def get_rate_limit_requests() -> int:
+    """Max requests allowed per client per window (Phase 13.2). Default 1000."""
+    try:
+        return int(_rate_limit_cfg().get("requests", 1000))
+    except (TypeError, ValueError):
+        return 1000
+
+
+def get_rate_limit_window_seconds() -> int:
+    """Length of the rate-limit window in seconds (Phase 13.2). Default 60."""
+    try:
+        return int(_rate_limit_cfg().get("window_seconds", 60))
+    except (TypeError, ValueError):
+        return 60
+
+
 def get_jwt_auth_timeout():
     """
     Get the JWT auth-token lifetime in seconds.  Phase 13.1.H: server setting
@@ -438,9 +476,9 @@ def _active_tenant():
     Best-effort: never raises.
     """
     try:
-        from backend.persistence.tenant_context import (  # noqa: PLC0415
+        from backend.persistence.tenant_context import (
             get_active_tenant,
-        )
+        )  # noqa: PLC0415
 
         return get_active_tenant()
     except Exception:  # noqa: BLE001
@@ -742,9 +780,9 @@ def get_server_role():
     ``standard`` if the DB isn't reachable yet.  Late import keeps the
     config module free of a DB dependency at import time.
     """
-    from backend.services.server_config_service import (  # pylint: disable=import-outside-toplevel
+    from backend.services.server_config_service import (
         get_server_role as _db_get_server_role,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     return _db_get_server_role()
 
@@ -757,9 +795,9 @@ def get_federation_role():
     the ``server_configuration`` DB singleton (set via Settings → Server
     Role); defaults to ``none`` if the DB isn't reachable yet.
     """
-    from backend.services.server_config_service import (  # pylint: disable=import-outside-toplevel
+    from backend.services.server_config_service import (
         get_federation_role as _db_get_federation_role,
-    )
+    )  # pylint: disable=import-outside-toplevel
 
     return _db_get_federation_role()
 

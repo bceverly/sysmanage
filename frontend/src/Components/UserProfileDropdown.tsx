@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import {
     Person as PersonIcon,
-    Logout as LogoutIcon
+    Logout as LogoutIcon,
+    VpnKey as VpnKeyIcon
 } from '@mui/icons-material';
 
 // Extend window interface for global function
@@ -115,6 +116,11 @@ const UserProfileDropdown: React.FC = () => {
         navigate('/profile');
     };
 
+    const handleApiKeys = () => {
+        handleClose();
+        navigate('/api-keys');
+    };
+
     const handleLogout = () => {
         handleClose();
         navigate('/logout');
@@ -187,7 +193,15 @@ const UserProfileDropdown: React.FC = () => {
                     </ListItemIcon>
                     <ListItemText primary={t('userProfile.profile', 'Profile')} />
                 </MenuItem>
-                
+
+                {/* API Keys link (Phase 13.2) */}
+                <MenuItem onClick={handleApiKeys}>
+                    <ListItemIcon>
+                        <VpnKeyIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={t('apiKeys.title', 'API Keys')} />
+                </MenuItem>
+
                 <Divider />
                 
                 {/* Logout link */}

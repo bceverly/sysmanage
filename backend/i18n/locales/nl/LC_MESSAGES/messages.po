@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "Ongeldige handtekening"
 msgid "Decryption failed"
 msgstr "Versleuteling mislukt"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "Ongeldig authenticatieschema."
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "Verlopen token."
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "Ongeldige autorisatiecode."
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "Kon inloggegevens niet valideren"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "Gebruiker niet gevonden."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "U heeft geen toegang tot het geselecteerde account."
 
@@ -2680,6 +2680,14 @@ msgstr ""
 "Aanvraag voor controle op virtualisatiesupport. De resultaten zijn "
 "binnenkort beschikbaar."
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr "API-sleutels kunnen niet worden beheerd met API-sleutelauteïsatie."
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API-sleutel niet gevonden."
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "Mislukt om de update resultaten te verwerken"
@@ -4112,6 +4120,10 @@ msgstr "Berichtverwerker gestopt"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "Serverberichtwachtrijbeheer geïnitialiseerd"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "Rate limit overschreden. Probeer het later opnieuw."
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

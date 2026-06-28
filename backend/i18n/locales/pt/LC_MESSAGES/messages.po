@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "Assinatura inválida"
 msgid "Decryption failed"
 msgstr "Falha ao descriptografar"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "Esquema de autenticação inválido."
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "Token expirado."
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "Código de autorização inválido."
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "Não foi possível validar as credenciais"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "Usuário não encontrado."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "Você não tem acesso à conta selecionada."
 
@@ -2691,6 +2691,16 @@ msgstr ""
 "Solicitação de verificação de suporte a virtualização. Os resultados estarão"
 " disponíveis em breve."
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr ""
+"As chaves da API não podem ser gerenciadas com autenticação por chave da "
+"API."
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "Chave da API não encontrada."
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "Falha ao processar os resultados da atualização"
@@ -4141,6 +4151,10 @@ msgstr "Processador de mensagem parado"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "Gerenciador da fila de mensagens do servidor inicializado"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "Limite de taxa excedido. Por favor, tente novamente mais tarde."
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

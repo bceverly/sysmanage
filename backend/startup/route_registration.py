@@ -19,6 +19,7 @@ from backend.api import (
     airgap_repository_list,
     antivirus_defaults,
     antivirus_status,
+    api_keys,
     audit_log,
     auth,
     auth_mfa,
@@ -40,9 +41,9 @@ from backend.api import (
     fleet,
     grafana_integration,
     graylog_integration,
-    license_management,
     host,
     host_hostname,
+    license_management,
     openbao,
     opentelemetry,
     package_compliance,
@@ -92,7 +93,7 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding auth router with /api prefix")
     app.include_router(
-        auth.router, prefix="/api"
+        auth.router, prefix="/api", tags=["authentication"]
     )  # /api/login, /api/refresh, /api/logout
     logger.debug("Auth router added")
 
@@ -173,31 +174,31 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding agent public router with /api prefix")
     app.include_router(
-        agent.public_router, prefix="/api"
+        agent.public_router, prefix="/api", tags=["agent"]
     )  # /api/agent/auth (no auth required)
     logger.debug("Agent public router added")
 
     logger.debug("Adding agent authenticated router with /api prefix")
     app.include_router(
-        agent.router, prefix="/api"
+        agent.router, prefix="/api", tags=["agent"]
     )  # /api/agent/connect, /api/agent/installation-complete
     logger.debug("Agent authenticated router added")
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(
-        host.public_router, prefix="/api"
+        host.public_router, prefix="/api", tags=["hosts"]
     )  # /api/host/register (no auth)
     logger.debug("Host public router added")
 
     logger.debug("Adding certificates public router with /api prefix")
     app.include_router(
-        certificates.public_router, prefix="/api"
+        certificates.public_router, prefix="/api", tags=["certificates"]
     )  # /api/certificates/server-fingerprint, /api/certificates/ca-certificate (no auth)
     logger.debug("Certificates public router added")
 
     logger.debug("Adding password reset router with /api prefix")
     app.include_router(
-        password_reset.router, prefix="/api"
+        password_reset.router, prefix="/api", tags=["password-reset"]
     )  # /api/forgot-password, /api/reset-password, /api/validate-reset-token (no auth)
     logger.debug("Password reset router added")
 
@@ -243,6 +244,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding scripts router with /api/scripts prefix")
     app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
     logger.debug("Scripts router added")
+
+    logger.debug("Adding api-keys router with /api/api-keys prefix (Phase 13.2)")
+    app.include_router(api_keys.router, prefix="/api/api-keys", tags=["api-keys"])
+    logger.debug("API-keys router added")
 
     logger.debug("Adding reports router")
     app.include_router(reports.router, tags=["reports"])

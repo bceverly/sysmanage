@@ -14,10 +14,7 @@ is unchanged.
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.config import config
-from backend.persistence.tenant_context import (
-    reset_active_tenant,
-    set_active_tenant,
-)
+from backend.persistence.tenant_context import reset_active_tenant, set_active_tenant
 
 
 class ActiveTenantMiddleware(BaseHTTPMiddleware):
@@ -37,14 +34,26 @@ class ActiveTenantMiddleware(BaseHTTPMiddleware):
 
 
 def _tenant_from_request(request):
-    """Best-effort extraction of the tenant_id claim from the bearer token."""
+    """Best-effort extraction of the active tenant from the bearer credential.
+
+    Handles both auth types: a JWT carries ``tenant_id`` as a claim; an API key
+    (``smk_`` prefix, Phase 13.2) carries its tenant pin in the ``api_key`` row.
+    """
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
         return None
+    credential = auth[len("Bearer ") :]
     try:
+        from backend.auth.api_key import (  # noqa: PLC0415
+            authenticate_api_key,
+            looks_like_api_key,
+        )
         from backend.auth.auth_handler import decode_jwt  # noqa: PLC0415
 
-        payload = decode_jwt(auth[len("Bearer ") :]) or {}
+        if looks_like_api_key(credential):
+            principal = authenticate_api_key(credential) or {}
+            return principal.get("tenant_id")
+        payload = decode_jwt(credential) or {}
         return payload.get("tenant_id")
     except Exception:  # noqa: BLE001 - best-effort; never block the request
         return None

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "Недействительная подпись"
 msgid "Decryption failed"
 msgstr "Расшифровка не удалась"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "Недопустимая схема аутентификации."
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "Истекший токен."
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "Недопустимый код авторизации."
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "Не удалось проверить учетные данные"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "Пользователь не найден."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "У вас нет доступа к выбранной учетной записи."
 
@@ -2697,6 +2697,16 @@ msgstr ""
 "Запрошена проверка поддержки виртуализации. Результаты будут доступны через "
 "некоторое время."
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr ""
+"Управление API-ключами невозможно с использованием аутентификации по API-"
+"ключу."
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API-ключ не найден."
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "Не удалось обработать результаты обновления"
@@ -4136,6 +4146,10 @@ msgstr "Обработчик сообщений остановлен"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "Инициализация менеджера очереди сообщений сервера завершена"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "Превышен лимит запросов. Пожалуйста, повторите попытку позже."
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

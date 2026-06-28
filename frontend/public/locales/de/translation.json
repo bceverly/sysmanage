@@ -121,7 +121,11 @@
     "unknown": "Unbekannt",
     "update": "Aktualisieren",
     "selected": "Ausgewählt",
-    "view": "Anzeigen"
+    "view": "Anzeigen",
+    "copied": "Gekopiert",
+    "copy": "Kopieren",
+    "create": "Erstellen",
+    "done": "Fertig"
   },
   "connectionStatus": {
     "connected": "Verbunden",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "Einstellungsregisterkarten"
+  },
+  "apiKeys": {
+    "active": "Aktiv",
+    "confirmRevoke": "Sind Sie sicher, dass Sie diesen API-Schlüssel widerrufen möchten? Jede Automatisierung, die ihn verwendet, wird sofort nicht mehr funktionieren.",
+    "copyWarning": "Für jetzt kopieren Sie diesen Schlüssel ab — er wird nicht wieder angezeigt werden.",
+    "create": "API-Schlüssel erstellen",
+    "createError": "Das Erstellen des API-Schlüssels ist fehlgeschlagen.",
+    "created": "Erstellt",
+    "createdTitle": "API-Schlüssel erstellt",
+    "description": "API-Schlüssel ermöglichen Automatisierungen, sich als Sie am API-Endpunkt zu authentifizieren. Behandeln Sie sie wie Passwörter.",
+    "expires": "Gültig bis",
+    "expiresOptional": "Gültig bis (optional)",
+    "lastUsed": "Zuletzt verwendet",
+    "loadError": "API-Schlüssel konnten nicht geladen werden.",
+    "name": "Name",
+    "prefix": "Schlüsselprefix",
+    "revoke": "Widerrufen",
+    "revokeError": "Widerruf des API-Schlüssels ist fehlgeschlagen.",
+    "revoked": "Widerrufen",
+    "status": "Status",
+    "title": "API Keys"
   }
 }

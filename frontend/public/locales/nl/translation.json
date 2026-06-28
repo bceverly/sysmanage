@@ -121,7 +121,11 @@
     "unknown": "Onbekend",
     "update": "Bijwerken",
     "selected": "Geselecteerd",
-    "view": "Weergeven"
+    "view": "Weergeven",
+    "copied": "Gekopieerd",
+    "copy": "Kopiéren",
+    "create": "Maken",
+    "done": "Klaar"
   },
   "connectionStatus": {
     "connected": "Verbonden",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "instellingen-tabs"
+  },
+  "apiKeys": {
+    "active": "Actief",
+    "confirmRevoke": "Weet u zeker dat u deze API-sleutel wilt intrekken? Elke automatisering die er gebruik van maakt, zal direct stoppen met werken.",
+    "copyWarning": "Kopiëer nu deze sleutel — hij wordt niet opnieuw weergegeven.",
+    "create": "API-sleutel maken",
+    "createError": "Kon API-sleutel niet aanmaken.",
+    "created": "Gemaakt",
+    "createdTitle": "API-sleutel gemaakt",
+    "description": "API-sleutels laten automatisering authenticeren bij de API namens u. Behandel ze als wachtwoorden.",
+    "expires": "Verloopt",
+    "expiresOptional": "Verloopt (optioneel)",
+    "lastUsed": "Laatst gebruikt",
+    "loadError": "Kon API-sleutels niet laden.",
+    "name": "Naam",
+    "prefix": "Sleutelprefix",
+    "revoke": "Intrekken",
+    "revokeError": "Kon API-sleutel niet intrekken.",
+    "revoked": "Gehaald",
+    "status": "Status",
+    "title": "API-sleutels"
   }
 }

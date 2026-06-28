@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "無效簽名"
 msgid "Decryption failed"
 msgstr "解密失敗"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "無效的身份驗證方案。"
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "過期的權杖。"
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "無效的授權碼。"
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "無法驗證憑證"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "找不到用戶。"
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "您沒有權限訪問所選的帳戶"
 
@@ -2576,6 +2576,14 @@ msgid ""
 "Virtualization support check requested. Results will be available shortly."
 msgstr "虛擬化支援檢查請求。結果很快會顯示。"
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr "無法使用 API 金鑰認證管理 API 金鑰。"
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API 金鑰未找到。"
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "無法處理更新結果"
@@ -3961,6 +3969,10 @@ msgstr "消息處理程序已停止"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "伺服器消息佇列管理器初始化完成"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "超出速率限制。請稍後再試。"
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

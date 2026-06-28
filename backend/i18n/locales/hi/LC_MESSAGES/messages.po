@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "अवैध हस्ताक्षर"
 msgid "Decryption failed"
 msgstr "डिक्रिप्शन असफल हो गई"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "अवैध प्रमाणीकरण योजना।"
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "समाप्त हो चुका टोकन।"
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "अवैध प्राधिकरण कोड।"
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "प्रमाणीकरण की पुष्टि नहीं हो सकी"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "उपयोगकर्ता पाया नहीं जा सकता."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "आपके पास चयनित खाते के लिए पहुंच नहीं है।"
 
@@ -2700,6 +2700,14 @@ msgid ""
 "Virtualization support check requested. Results will be available shortly."
 msgstr "रिवलेशन समर्थन जांच की आवश्यकता है। परिणाम तुरंत मिलेंगे।"
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr "API कुंजी API-कुंजी प्रमाणन से प्रबंधित नहीं हो सकती।"
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API कुंजी नहीं मिली।"
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "अपडेट परिणामों का प्रसंस्करण विफल हुआ"
@@ -4159,6 +4167,10 @@ msgstr "संदेश प्रोसेसर रुक गया"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "सर्वर मेसेज क्वो निरीक्षक संचालन कराया"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "रेट लिमिट अतिक्रांत हो गया। कृपया बाद में पुन: प्रयास करें।"
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format
