@@ -74,6 +74,7 @@ websockets==16.0
 zope.event==6.1
 zope.interface==8.2
 Babel==2.18.0
+polib>=1.2.0  # PO file parsing for backend i18n validation
 reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
