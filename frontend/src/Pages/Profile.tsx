@@ -211,7 +211,7 @@ const Profile: React.FC = () => {
     const fetchProfileImage = useCallback(async () => {
         setImageLoading(true);
         try {
-            const response = await axiosInstance.get('/api/profile/image', {
+            const response = await axiosInstance.get('/api/v1/profile/image', {
                 responseType: 'blob'
             });
 
@@ -398,7 +398,7 @@ const Profile: React.FC = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            await axiosInstance.post('/api/profile/image', formData, {
+            await axiosInstance.post('/api/v1/profile/image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -431,7 +431,7 @@ const Profile: React.FC = () => {
             setImageError(null);
             setImageSuccess(null);
 
-            await axiosInstance.delete('/api/profile/image');
+            await axiosInstance.delete('/api/v1/profile/image');
 
             // Clear the current image
             if (profileImageUrl) {

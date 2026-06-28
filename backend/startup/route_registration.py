@@ -79,6 +79,26 @@ from backend.utils.verbosity_logger import get_logger
 logger = get_logger("backend.startup.routes")
 
 
+def _include_versioned(app: FastAPI, router, *, suffix: str = "", tags=None):
+    """Register a router natively under ``/api/v1`` (Phase 13.2.1 migration).
+
+    Mounts the router twice:
+
+    * ``/api/v1{suffix}`` — the **canonical** versioned route (shown in OpenAPI).
+      ``ApiVersionMiddleware`` matches this natively and passes it through, so the
+      feature no longer depends on the v1→legacy bridge.
+    * ``/api{suffix}`` — a **deprecated** unversioned alias kept for one release
+      for any pre-13.2.1 external caller (e.g. API-key automation). Hidden from
+      the OpenAPI schema so the docs advertise only the versioned surface.
+
+    Drop the alias (the second mount) once the deprecation window closes.
+    """
+    app.include_router(router, prefix="/api/v1" + suffix, tags=tags)
+    app.include_router(
+        router, prefix="/api" + suffix, tags=tags, include_in_schema=False
+    )
+
+
 def register_routes(app: FastAPI):
     """
     Register all API routes with the FastAPI application.
@@ -205,8 +225,8 @@ def register_routes(app: FastAPI):
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")
 
-    logger.debug("Adding user router with /api prefix")
-    app.include_router(user.router, prefix="/api", tags=["users"])
+    logger.debug("Adding user router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, user.router, tags=["users"])
     logger.debug("User router added")
 
     logger.debug("Adding fleet router with /api prefix")
@@ -225,14 +245,15 @@ def register_routes(app: FastAPI):
     app.include_router(email.router, prefix="/api", tags=["email"])
     logger.debug("Email router added")
 
-    logger.debug("Adding profile router with /api prefix")
-    app.include_router(profile.router, prefix="/api", tags=["profile"])
+    logger.debug("Adding profile router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, profile.router, tags=["profile"])
     logger.debug("Profile router added")
 
-    logger.debug("Adding user preferences router with /api/user-preferences prefix")
-    app.include_router(
+    logger.debug("Adding user preferences router (native /api/v1 + deprecated alias)")
+    _include_versioned(
+        app,
         user_preferences.router,
-        prefix="/api/user-preferences",
+        suffix="/user-preferences",
         tags=["user-preferences"],
     )
     logger.debug("User preferences router added")
@@ -245,8 +266,10 @@ def register_routes(app: FastAPI):
     app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
     logger.debug("Scripts router added")
 
-    logger.debug("Adding api-keys router with /api/api-keys prefix (Phase 13.2)")
-    app.include_router(api_keys.router, prefix="/api/api-keys", tags=["api-keys"])
+    # api-keys shipped in 13.2 with no external consumers yet, so it goes
+    # straight to native /api/v1 with no deprecated /api alias (Phase 13.2.1).
+    logger.debug("Adding api-keys router with /api/v1/api-keys prefix")
+    app.include_router(api_keys.router, prefix="/api/v1/api-keys", tags=["api-keys"])
     logger.debug("API-keys router added")
 
     logger.debug("Adding reports router")
@@ -281,8 +304,8 @@ def register_routes(app: FastAPI):
     app.include_router(report_templates.router)
     app.include_router(dynamic_secrets.router)
 
-    logger.debug("Adding tag router with /api prefix")
-    app.include_router(tag.router, prefix="/api", tags=["tags"])
+    logger.debug("Adding tag router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, tag.router, tags=["tags"])
     logger.debug("Tag router added")
 
     logger.debug("Adding queue router with /api/queue prefix")

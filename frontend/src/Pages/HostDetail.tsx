@@ -2076,7 +2076,7 @@ const HostDetail = () => { // NOSONAR
 
     const loadAvailableTags = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/api/tags');
+            const response = await axiosInstance.get('/api/v1/tags');
             
             if (response.status === 200) {
                 const allTags = response.data;

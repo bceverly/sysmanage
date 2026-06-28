@@ -14,7 +14,7 @@ let permissionsCache: UserPermissions | null = null;
  * Fetch user permissions from the API
  */
 export const fetchUserPermissions = async (): Promise<UserPermissions> => {
-    const response = await axiosInstance.get<UserPermissions>('/api/user/permissions');
+    const response = await axiosInstance.get<UserPermissions>('/api/v1/user/permissions');
     permissionsCache = response.data;
     return response.data;
 };

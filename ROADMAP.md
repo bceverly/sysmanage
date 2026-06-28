@@ -4617,9 +4617,13 @@ as thin back-compat only.
   the customer's IdP. Keep stable.
 
 **OSS backend routers to migrate (sysmanage) — by slice:**
-- [ ] *Slice 1 (pilot, low-risk):* `user`, `profile`, `user_preferences`, `tag`;
-      flip the brand-new `api_keys` to native `/api/v1/api-keys` (both sides ship
-      together, so no alias needed) to set the pattern.
+- [x] *Slice 1 (pilot, low-risk):* `user`, `profile`, `user_preferences`, `tag`
+      migrated to native `/api/v1` via the new `_include_versioned()` helper
+      (canonical `/api/v1` + hidden, deprecated `/api` alias); `api_keys` moved
+      v1-only (no alias). Frontend call sites for these features switched to
+      `/api/v1` (explicit edits). Tests: `test_api_v1_slice1.py` proves the
+      dual-surface contract + api-keys-v1-only; backend 5493+539 green, frontend
+      122 green. Pattern established for the remaining slices.
 - [ ] *Slice 2 (hosts/fleet):* `host` (auth router only — NOT `/host/register`),
       `host_hostname`, `fleet`, `child_host`, `reboot_orchestration`.
 - [ ] *Slice 3 (packages/updates/repos):* `packages`, `updates`, `scripts`,

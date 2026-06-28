@@ -212,7 +212,7 @@ const Dashboard = () => {
 
     const loadCardPreferences = async () => {
         try {
-            const response = await axiosInstance.get('/api/user-preferences/dashboard-cards');
+            const response = await axiosInstance.get('/api/v1/user-preferences/dashboard-cards');
             const prefs = response.data.preferences || [];
             const defaults: Record<string, boolean> = {
                 hosts: true,

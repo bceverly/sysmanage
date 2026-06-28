@@ -502,7 +502,7 @@ const Settings: React.FC = () => {
   const loadTags = useCallback(async () => {
     setTagsLoading(true);
     try {
-      const response = await axiosInstance.get('/api/tags');
+      const response = await axiosInstance.get('/api/v1/tags');
       setTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
@@ -556,7 +556,7 @@ const Settings: React.FC = () => {
     if (!tagName.trim()) return;
     
     try {
-      await axiosInstance.post('/api/tags', {
+      await axiosInstance.post('/api/v1/tags', {
         name: tagName.trim(),
         description: tagDescription.trim() || null
       });
@@ -575,7 +575,7 @@ const Settings: React.FC = () => {
     if (!editingTag || !tagName.trim()) return;
     
     try {
-      await axiosInstance.put(`/api/tags/${editingTag.id}`, {
+      await axiosInstance.put(`/api/v1/tags/${editingTag.id}`, {
         name: tagName.trim(),
         description: tagDescription.trim() || null
       });
@@ -596,7 +596,7 @@ const Settings: React.FC = () => {
     
     try {
       const deletePromises = selectedTags.map(id =>
-        axiosInstance.delete(`/api/tags/${id}`)
+        axiosInstance.delete(`/api/v1/tags/${id}`)
       );
       
       await Promise.all(deletePromises);
@@ -610,7 +610,7 @@ const Settings: React.FC = () => {
   // Handle view hosts for tag
   const handleViewHosts = async (tagId: number) => {
     try {
-      const response = await axiosInstance.get(`/api/tags/${tagId}/hosts`);
+      const response = await axiosInstance.get(`/api/v1/tags/${tagId}/hosts`);
       setViewingTag(response.data);
       setViewHostsDialogOpen(true);
     } catch (error) {

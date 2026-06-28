@@ -1,7 +1,7 @@
 /**
  * API key management client (Phase 13.2 — API Completeness).
  *
- * Wraps ``/api/api-keys`` — list/create/get/revoke of the current user's
+ * Wraps ``/api/v1/api-keys`` — list/create/get/revoke of the current user's
  * programmatic-access keys.  The plaintext key is returned only by
  * ``createApiKey`` (once); it is never available afterwards.
  */
@@ -34,22 +34,22 @@ export interface ApiKeyCreated extends ApiKey {
 }
 
 export const listApiKeys = async (): Promise<ApiKey[]> => {
-  const r = await axiosInstance.get<ApiKey[]>('/api/api-keys');
+  const r = await axiosInstance.get<ApiKey[]>('/api/v1/api-keys');
   return r.data;
 };
 
 export const createApiKey = async (
   payload: ApiKeyCreate,
 ): Promise<ApiKeyCreated> => {
-  const r = await axiosInstance.post<ApiKeyCreated>('/api/api-keys', payload);
+  const r = await axiosInstance.post<ApiKeyCreated>('/api/v1/api-keys', payload);
   return r.data;
 };
 
 export const getApiKey = async (id: string): Promise<ApiKey> => {
-  const r = await axiosInstance.get<ApiKey>(`/api/api-keys/${id}`);
+  const r = await axiosInstance.get<ApiKey>(`/api/v1/api-keys/${id}`);
   return r.data;
 };
 
 export const revokeApiKey = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/api/api-keys/${id}`);
+  await axiosInstance.delete(`/api/v1/api-keys/${id}`);
 };

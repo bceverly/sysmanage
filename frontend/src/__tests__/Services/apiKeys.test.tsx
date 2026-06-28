@@ -36,11 +36,11 @@ describe('apiKeys service', () => {
     mockDelete.mockReset();
   });
 
-  test('listApiKeys GETs /api/api-keys', async () => {
+  test('listApiKeys GETs /api/v1/api-keys', async () => {
     mockGet.mockResolvedValueOnce({ data: [KEY] });
     const keys = await listApiKeys();
     expect(keys).toEqual([KEY]);
-    expect(mockGet).toHaveBeenCalledWith('/api/api-keys');
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/api-keys');
   });
 
   test('createApiKey POSTs payload and returns the one-time key', async () => {
@@ -49,19 +49,19 @@ describe('apiKeys service', () => {
     });
     const created = await createApiKey({ name: 'ci' });
     expect(created.key).toBe('smk_thePlaintextValue');
-    expect(mockPost).toHaveBeenCalledWith('/api/api-keys', { name: 'ci' });
+    expect(mockPost).toHaveBeenCalledWith('/api/v1/api-keys', { name: 'ci' });
   });
 
   test('getApiKey GETs the key by id', async () => {
     mockGet.mockResolvedValueOnce({ data: KEY });
     const key = await getApiKey('k1');
     expect(key).toEqual(KEY);
-    expect(mockGet).toHaveBeenCalledWith('/api/api-keys/k1');
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/api-keys/k1');
   });
 
   test('revokeApiKey DELETEs the key by id', async () => {
     mockDelete.mockResolvedValueOnce({});
     await revokeApiKey('k1');
-    expect(mockDelete).toHaveBeenCalledWith('/api/api-keys/k1');
+    expect(mockDelete).toHaveBeenCalledWith('/api/v1/api-keys/k1');
   });
 });

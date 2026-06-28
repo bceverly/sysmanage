@@ -42,7 +42,7 @@ export const handlers = [
     }
 
     // User data
-    if (path === '/api/user/me' || path === '/api/users/me') {
+    if (path === '/api/v1/user/me' || path === '/api/v1/users/me') {
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440001',
         username: 'current_user',
@@ -118,7 +118,7 @@ export const handlers = [
     }
 
     // Dashboard card preferences
-    if (path === '/api/user-preferences/dashboard-cards') {
+    if (path === '/api/v1/user-preferences/dashboard-cards') {
       return HttpResponse.json({
         preferences: [
           { card_identifier: 'hosts', visible: true },
@@ -175,7 +175,7 @@ export const handlers = [
   }),
 
   // Handle PUT requests for dashboard preferences
-  http.put('http://localhost:8080/api/user-preferences/dashboard-cards', async ({ request }) => {
+  http.put('http://localhost:8080/api/v1/user-preferences/dashboard-cards', async ({ request }) => {
     const body = await request.json() as { preferences: Array<{ card_identifier: string; visible: boolean }> };
     return HttpResponse.json({
       preferences: body.preferences
