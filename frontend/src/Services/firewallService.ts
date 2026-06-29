@@ -18,6 +18,6 @@ export interface FirewallStatus {
 }
 
 export const getFirewallStatus = async (hostId: string): Promise<FirewallStatus | null> => {
-  const response = await axiosInstance.get<FirewallStatus | null>(`/api/hosts/${hostId}/firewall-status`);
+  const response = await axiosInstance.get<FirewallStatus | null>(`/api/v1/hosts/${hostId}/firewall-status`);
   return response.data;
 };

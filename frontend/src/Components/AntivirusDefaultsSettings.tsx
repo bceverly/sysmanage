@@ -95,7 +95,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
   const loadDefaults = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get<AntivirusDefault[]>('/api/antivirus-defaults/');
+      const response = await axiosInstance.get<AntivirusDefault[]>('/api/v1/antivirus-defaults/');
 
       // Convert array to object for easier state management
       const defaultsMap: Record<string, string> = {};
@@ -165,7 +165,7 @@ const AntivirusDefaultsSettings: React.FC = () => {
         antivirus_package: getAntivirusPackage(osName),
       }));
 
-      await axiosInstance.put('/api/antivirus-defaults/', {
+      await axiosInstance.put('/api/v1/antivirus-defaults/', {
         defaults: defaultsArray,
       });
 

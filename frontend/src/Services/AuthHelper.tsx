@@ -7,7 +7,7 @@ type DoLoginRequest = {
 
 
 const doLogin = async (requestData: DoLoginRequest) => {
-  await api.post("/api/login", {
+  await api.post("/api/v1/login", {
     'userid': requestData.userid,
     'password': requestData.password
   })

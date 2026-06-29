@@ -87,8 +87,8 @@ const GrafanaIntegrationCard: React.FC = () => {
       setError(null);
 
       const [serversData, settingsData] = await Promise.all([
-        axiosInstance.get('/api/grafana/grafana-servers'),
-        axiosInstance.get('/api/grafana/settings')
+        axiosInstance.get('/api/v1/grafana/grafana-servers'),
+        axiosInstance.get('/api/v1/grafana/settings')
       ]);
 
       setServers(serversData.data.grafana_servers || []);
@@ -110,7 +110,7 @@ const GrafanaIntegrationCard: React.FC = () => {
 
     try {
       setCheckingHealth(true);
-      const response = await axiosInstance.get('/api/grafana/health');
+      const response = await axiosInstance.get('/api/v1/grafana/health');
       setHealthStatus(response.data);
     } catch (err: unknown) {
       // Only log non-400 errors to reduce console spam
@@ -133,7 +133,7 @@ const GrafanaIntegrationCard: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      await axiosInstance.post('/api/grafana/settings', settings);
+      await axiosInstance.post('/api/v1/grafana/settings', settings);
 
       // Refresh health status if enabled
       if (settings.enabled) {

@@ -86,7 +86,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
 
   const loadMasterKeyStatus = async () => {
     try {
-      const response = await axiosInstance.get('/api/ubuntu-pro/master-key/status');
+      const response = await axiosInstance.get('/api/v1/ubuntu-pro/master-key/status');
       const data = response.data;
       setMasterKeyAvailable(data.has_master_key);
       setOrganizationName(data.organization_name);
@@ -126,7 +126,7 @@ const UbuntuProEnrollmentDialog: React.FC<UbuntuProEnrollmentDialogProps> = ({
         custom_key: useMasterKey ? null : customKey,
       };
 
-      const response = await axiosInstance.post('/api/ubuntu-pro/enroll', payload);
+      const response = await axiosInstance.post('/api/v1/ubuntu-pro/enroll', payload);
       setEnrollmentResults(response.data.results || []);
       setShowResults(true);
 

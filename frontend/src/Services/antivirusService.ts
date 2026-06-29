@@ -11,6 +11,6 @@ export interface AntivirusStatus {
 }
 
 export const getAntivirusStatus = async (hostId: string): Promise<AntivirusStatus | null> => {
-  const response = await axiosInstance.get<AntivirusStatus | null>(`/api/hosts/${hostId}/antivirus-status`);
+  const response = await axiosInstance.get<AntivirusStatus | null>(`/api/v1/hosts/${hostId}/antivirus-status`);
   return response.data;
 };

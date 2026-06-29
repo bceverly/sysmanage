@@ -268,7 +268,7 @@ const Reports: React.FC = () => {
         name: t('reports.registeredHosts.name', 'Registered Hosts'),
         description: t('reports.registeredHosts.description', 'Complete listing of all registered hosts showing basic information and operating system details including hostname, IP addresses, OS version, and status.'),
         category: 'hosts',
-        screenshot: `${baseURL}/api/reports/screenshots/registered-hosts.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/registered-hosts.png`,
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.systemInfo', 'system info'), t('reports.tag.basic', 'basic')]
       },
       {
@@ -276,7 +276,7 @@ const Reports: React.FC = () => {
         name: t('reports.hostsWithTags.name', 'Hosts with Tags'),
         description: t('reports.hostsWithTags.description', 'Shows all registered hosts along with their assigned tags for easy categorization and filtering. Useful for organizing hosts by environment, purpose, or department.'),
         category: 'hosts',
-        screenshot: `${baseURL}/api/reports/screenshots/hosts-with-tags.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/hosts-with-tags.png`,
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.tags', 'tags'), t('reports.tag.organization', 'organization')]
       },
       {
@@ -284,7 +284,7 @@ const Reports: React.FC = () => {
         name: t('reports.usersList.name', 'SysManage Users'),
         description: t('reports.usersList.description', 'Comprehensive list of all SysManage users showing their profiles, roles, permissions, and account status. Includes user creation dates and last login times.'),
         category: 'users',
-        screenshot: `${baseURL}/api/reports/screenshots/users-list.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/users-list.png`,
         tags: [t('reports.tag.users', 'users'), t('reports.tag.accounts', 'accounts'), t('reports.tag.permissions', 'permissions')]
       },
       {
@@ -292,7 +292,7 @@ const Reports: React.FC = () => {
         name: t('reports.userRbac.name', 'User Security Roles (RBAC)'),
         description: t('reports.userRbac.description', 'Complete view of all users with their assigned security roles organized by role groups. Shows the granular permission structure for role-based access control across the system.'),
         category: 'security',
-        screenshot: `${baseURL}/api/reports/screenshots/user-rbac.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/user-rbac.png`,
         tags: [t('reports.tag.users', 'users'), t('reports.tag.security', 'security'), t('reports.tag.rbac', 'rbac'), t('reports.tag.permissions', 'permissions'), t('reports.tag.roles', 'roles')]
       },
       {
@@ -300,7 +300,7 @@ const Reports: React.FC = () => {
         name: t('reports.firewallStatus.name', 'Host Firewall Status'),
         description: t('reports.firewallStatus.description', 'Detailed firewall status for all managed hosts including firewall software, enabled/disabled status, open IPv4 and IPv6 ports, and operating system information.'),
         category: 'hosts',
-        screenshot: `${baseURL}/api/reports/screenshots/firewall-status.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/firewall-status.png`,
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.firewall', 'firewall'), t('reports.tag.network', 'network')]
       },
       {
@@ -308,7 +308,7 @@ const Reports: React.FC = () => {
         name: t('reports.antivirusOpensource.name', 'Open-Source Antivirus Status'),
         description: t('reports.antivirusOpensource.description', 'Status of open-source antivirus software across all hosts showing software name, version, installation path, and enabled/disabled status.'),
         category: 'hosts',
-        screenshot: `${baseURL}/api/reports/screenshots/antivirus-opensource.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/antivirus-opensource.png`,
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.antivirus', 'antivirus'), t('reports.tag.opensource', 'opensource')]
       },
       {
@@ -316,7 +316,7 @@ const Reports: React.FC = () => {
         name: t('reports.antivirusCommercial.name', 'Commercial Antivirus Status'),
         description: t('reports.antivirusCommercial.description', 'Commercial antivirus protection status including product name, version, signature version, real-time protection status, and service status across all managed hosts.'),
         category: 'hosts',
-        screenshot: `${baseURL}/api/reports/screenshots/antivirus-commercial.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/antivirus-commercial.png`,
         tags: [t('reports.tag.hosts', 'hosts'), t('reports.tag.security', 'security'), t('reports.tag.antivirus', 'antivirus'), t('reports.tag.commercial', 'commercial')]
       },
       {
@@ -324,7 +324,7 @@ const Reports: React.FC = () => {
         name: t('reports.auditLogReport.name', 'Audit Log'),
         description: t('reports.auditLogReport.description', 'Complete audit trail of all user actions and system changes for compliance and security monitoring. Tracks database modifications, agent messages, and administrative operations.'),
         category: 'security',
-        screenshot: `${baseURL}/api/reports/screenshots/audit-log.png`,
+        screenshot: `${baseURL}/api/v1/reporting/screenshots/audit-log.png`,
         tags: [t('reports.tag.users', 'users'), t('reports.tag.security', 'security'), t('reports.tag.audit', 'audit'), t('reports.tag.compliance', 'compliance'), t('reports.tag.tracking', 'tracking')]
       }
     ];
@@ -363,7 +363,7 @@ const Reports: React.FC = () => {
 
   const handleGenerateReport = async (reportId: string) => {
     try {
-      const response = await api.get(`/api/reports/generate/${reportId}`, {
+      const response = await api.get(`/api/v1/reporting/generate/${reportId}`, {
         responseType: 'blob', // Important for binary data
       });
 

@@ -49,7 +49,7 @@ const PrometheusStatusCard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/api/telemetry/prometheus/status');
+      const response = await axiosInstance.get('/api/v1/telemetry/prometheus/status');
       setStatus(response.data);
     } catch (err: unknown) {
       console.error('Error fetching Prometheus status:', err);

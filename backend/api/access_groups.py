@@ -56,12 +56,12 @@ _FEDERATION_GATE = Depends(
 
 
 groups_router = APIRouter(
-    prefix="/api/access-groups",
+    prefix="/access-groups",
     tags=["access-groups"],
     dependencies=[Depends(JWTBearer()), _FEDERATION_GATE],
 )
 keys_router = APIRouter(
-    prefix="/api/registration-keys",
+    prefix="/registration-keys",
     tags=["registration-keys"],
     dependencies=[Depends(JWTBearer()), _FEDERATION_GATE],
 )

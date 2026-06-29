@@ -39,12 +39,12 @@ describe('license cache helpers', () => {
     expect(getCachedLicense()).toBeNull();
   });
 
-  test('refreshLicenseCache populates cache from /api/license', async () => {
+  test('refreshLicenseCache populates cache from /api/v1/license', async () => {
     mockGet.mockResolvedValueOnce({ data: PRO_PLUS_LICENSE });
     const info = await refreshLicenseCache();
     expect(info).toEqual(PRO_PLUS_LICENSE);
     expect(getCachedLicense()).toEqual(PRO_PLUS_LICENSE);
-    expect(mockGet).toHaveBeenCalledWith('/api/license');
+    expect(mockGet).toHaveBeenCalledWith('/api/v1/license');
   });
 
   test('isFeatureLicensed reflects cached features after refresh', async () => {

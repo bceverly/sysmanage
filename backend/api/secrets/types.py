@@ -64,7 +64,7 @@ SECRET_TYPES = [
 ]
 
 
-@router.get("/secrets/types", dependencies=[Depends(JWTBearer())])
+@router.get("/types", dependencies=[Depends(JWTBearer())])
 async def get_secret_types():
     """Get available secret types."""
     secrets_engine = module_loader.get_module("secrets_engine")

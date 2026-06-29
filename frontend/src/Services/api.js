@@ -74,7 +74,7 @@ async function handle401Refresh(originalConfig) {
   originalConfig._retry = true;
   console.log("Calling /refresh to get a new auth token...");
   try {
-    const response = await axiosInstance.post("/api/refresh", {});
+    const response = await axiosInstance.post("/api/v1/refresh", {});
     console.log('Received response:', response);
     localStorage.setItem("bearer_token", response.data.Authorization);
     return axiosInstance(originalConfig);

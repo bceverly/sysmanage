@@ -24,7 +24,7 @@ export const emailService = {
    * Get email configuration status
    */
   async getConfig(): Promise<EmailConfig> {
-    const response = await axiosInstance.get('/api/email/config');
+    const response = await axiosInstance.get('/api/v1/email/config');
     return response.data;
   },
 
@@ -32,7 +32,7 @@ export const emailService = {
    * Send a test email to verify configuration
    */
   async sendTestEmail(toAddress: string): Promise<EmailTestResponse> {
-    const response = await axiosInstance.post('/api/email/test', {
+    const response = await axiosInstance.post('/api/v1/email/test', {
       to_address: toAddress
     });
     return response.data;

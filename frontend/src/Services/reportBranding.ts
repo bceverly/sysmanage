@@ -15,26 +15,26 @@ export interface ReportBrandingUpdate {
 
 export const reportBrandingService = {
   async get(): Promise<ReportBranding> {
-    const r = await axiosInstance.get('/api/report-branding');
+    const r = await axiosInstance.get('/api/v1/report-branding');
     return r.data;
   },
 
   async update(payload: ReportBrandingUpdate): Promise<ReportBranding> {
-    const r = await axiosInstance.put('/api/report-branding', payload);
+    const r = await axiosInstance.put('/api/v1/report-branding', payload);
     return r.data;
   },
 
   async uploadLogo(file: globalThis.File): Promise<ReportBranding> {
     const form = new FormData();
     form.append('file', file);
-    const r = await axiosInstance.post('/api/report-branding/logo', form, {
+    const r = await axiosInstance.post('/api/v1/report-branding/logo', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return r.data;
   },
 
   async deleteLogo(): Promise<ReportBranding> {
-    const r = await axiosInstance.delete('/api/report-branding/logo');
+    const r = await axiosInstance.delete('/api/v1/report-branding/logo');
     return r.data;
   },
 
@@ -44,7 +44,7 @@ export const reportBrandingService = {
   // component's effect-cleanup hook).
   async fetchLogoObjectUrl(): Promise<string | null> {
     try {
-      const r = await axiosInstance.get('/api/report-branding/logo', {
+      const r = await axiosInstance.get('/api/v1/report-branding/logo', {
         responseType: 'blob',
       });
       return globalThis.URL.createObjectURL(r.data as Blob);

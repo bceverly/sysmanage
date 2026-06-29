@@ -52,7 +52,7 @@ queue_ops = QueueOperations()
 
 
 router = APIRouter(
-    prefix="/api/broadcast",
+    prefix="/broadcast",
     tags=["broadcast"],
     dependencies=[Depends(JWTBearer())],
 )

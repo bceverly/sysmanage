@@ -28,7 +28,7 @@ const ReportViewer: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`/api/reports/view/${reportId}`, {
+      const response = await api.get(`/api/v1/reporting/view/${reportId}`, {
         responseType: 'text', // Important: get raw HTML
       });
 
@@ -61,7 +61,7 @@ const ReportViewer: React.FC = () => {
 
   const handleGeneratePdf = async () => {
     try {
-      const response = await api.get(`/api/reports/generate/${reportId}`, {
+      const response = await api.get(`/api/v1/reporting/generate/${reportId}`, {
         responseType: 'blob', // Important for binary data
       });
 

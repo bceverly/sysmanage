@@ -630,7 +630,7 @@ const Settings: React.FC = () => {
   const loadQueueMessages = useCallback(async () => {
     setQueueLoading(true);
     try {
-      const response = await axiosInstance.get('/api/queue/failed');
+      const response = await axiosInstance.get('/api/v1/queue/failed');
       setQueueMessages(response.data);
     } catch (error) {
       console.error('Error fetching queue messages:', error);
@@ -644,7 +644,7 @@ const Settings: React.FC = () => {
     if (selectedMessages.length === 0) return;
     
     try {
-      await axiosInstance.delete('/api/queue/failed', {
+      await axiosInstance.delete('/api/v1/queue/failed', {
         data: selectedMessages
       });
       
@@ -658,7 +658,7 @@ const Settings: React.FC = () => {
   // Handle view message details
   const handleViewMessage = async (messageId: string) => {
     try {
-      const response = await axiosInstance.get(`/api/queue/failed/${messageId}`);
+      const response = await axiosInstance.get(`/api/v1/queue/failed/${messageId}`);
       setSelectedMessage(response.data);
       setMessageDetailOpen(true);
     } catch (error) {

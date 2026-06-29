@@ -18,7 +18,7 @@ export interface BroadcastResponse {
 
 export const broadcastService = {
   async send(payload: BroadcastRequest): Promise<BroadcastResponse> {
-    const r = await axiosInstance.post('/api/broadcast', payload);
+    const r = await axiosInstance.post('/api/v1/broadcast', payload);
     return r.data;
   },
 };

@@ -147,7 +147,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await axiosInstance.get<Bundle[]>('/api/airgap-bundles');
+      const r = await axiosInstance.get<Bundle[]>('/api/v1/airgap-bundles');
       setBundles(r.data);
     } catch (e) {
       console.error(e);
@@ -160,7 +160,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const refreshDocker = useCallback(async () => {
     try {
       const r = await axiosInstance.get<DockerStatus>(
-        '/api/airgap-bundles/docker-status',
+        '/api/v1/airgap-bundles/docker-status',
       );
       setDocker(r.data);
     } catch (e) {
@@ -172,7 +172,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const refreshResources = useCallback(async () => {
     try {
       const r = await axiosInstance.get<ResourceStatus>(
-        '/api/airgap-bundles/resource-status',
+        '/api/v1/airgap-bundles/resource-status',
       );
       setResources(r.data);
     } catch (e) {
@@ -205,7 +205,7 @@ const AirGapBundlesSettings: React.FC = () => {
   const handleBuild = async (product: 'server' | 'agent' | 'proplus') => {
     setBuilding(product);
     try {
-      await axiosInstance.post('/api/airgap-bundles', { product });
+      await axiosInstance.post('/api/v1/airgap-bundles', { product });
       showSuccess(
         t('airgapBundles.queued', 'Bundle build queued — refreshing list'),
       );
@@ -231,7 +231,7 @@ const AirGapBundlesSettings: React.FC = () => {
       return;
     }
     try {
-      await axiosInstance.delete(`/api/airgap-bundles/${bundle.id}`);
+      await axiosInstance.delete(`/api/v1/airgap-bundles/${bundle.id}`);
       showSuccess(t('airgapBundles.deleted', 'Bundle deleted'));
       await refresh();
     } catch (e: unknown) {
@@ -254,12 +254,12 @@ const AirGapBundlesSettings: React.FC = () => {
     // which is exactly why the token route exists.
     try {
       const tok = await axiosInstance.post<{ token: string }>(
-        `/api/airgap-bundles/${bundle.id}/download-token`,
+        `/api/v1/airgap-bundles/${bundle.id}/download-token`,
       );
       const filename = `sysmanage-${bundle.product}-bundle${
         bundle.version ? `-${bundle.version}` : ''
       }.iso`;
-      const url = `/api/airgap-bundles/${bundle.id}/download-stream?token=${encodeURIComponent(
+      const url = `/api/v1/airgap-bundles/${bundle.id}/download-stream?token=${encodeURIComponent(
         tok.data.token,
       )}`;
       const a = document.createElement('a');

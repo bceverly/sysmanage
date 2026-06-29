@@ -46,7 +46,7 @@ def _check_secrets_module():
     return secrets_engine
 
 
-@router.get("/secrets", dependencies=[Depends(JWTBearer())])
+@router.get("", dependencies=[Depends(JWTBearer())])
 async def list_secrets(
     db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
 ):
@@ -59,7 +59,7 @@ async def list_secrets(
 
 
 @router.get(
-    "/secrets/ssh-keys",
+    "/ssh-keys",
     response_model=List[SecretResponse],
     dependencies=[Depends(JWTBearer())],
 )
@@ -78,7 +78,7 @@ async def list_ssh_keys(
 
 
 @router.get(
-    "/secrets/{secret_id}",
+    "/{secret_id}",
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
@@ -96,7 +96,7 @@ async def get_secret_metadata(
 
 
 @router.get(
-    "/secrets/{secret_id}/content",
+    "/{secret_id}/content",
     response_model=SecretWithContent,
     dependencies=[Depends(JWTBearer())],
 )
@@ -130,9 +130,7 @@ async def get_secret_content(
     return result
 
 
-@router.post(
-    "/secrets", response_model=SecretResponse, dependencies=[Depends(JWTBearer())]
-)
+@router.post("", response_model=SecretResponse, dependencies=[Depends(JWTBearer())])
 async def create_secret(
     secret_data: SecretCreate,
     db: Session = Depends(get_db),
@@ -176,7 +174,7 @@ async def create_secret(
 
 
 @router.put(
-    "/secrets/{secret_id}",
+    "/{secret_id}",
     response_model=SecretResponse,
     dependencies=[Depends(JWTBearer())],
 )
@@ -236,7 +234,7 @@ async def update_secret(
     return secret.to_dict()
 
 
-@router.delete("/secrets/{secret_id}", dependencies=[Depends(JWTBearer())])
+@router.delete("/{secret_id}", dependencies=[Depends(JWTBearer())])
 async def delete_secret(
     secret_id: str,
     db: Session = Depends(get_db),
@@ -264,7 +262,7 @@ async def delete_secret(
     return {"message": _("Secret deleted successfully")}
 
 
-@router.delete("/secrets", dependencies=[Depends(JWTBearer())])
+@router.delete("", dependencies=[Depends(JWTBearer())])
 async def delete_multiple_secrets(
     secret_ids: List[str],
     db: Session = Depends(get_db),

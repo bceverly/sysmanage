@@ -121,7 +121,7 @@ describe('Reports Page', () => {
           },
         });
       }
-      if (url.includes('/api/reports/generate/')) {
+      if (url.includes('/api/v1/reporting/generate/')) {
         // Default mock for report generation
         return Promise.resolve({
           data: new Blob(['mock pdf content'], { type: 'application/pdf' }),
@@ -262,7 +262,7 @@ describe('Reports Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/generate/registered-hosts',
+        '/api/v1/reporting/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
         })
@@ -487,7 +487,7 @@ describe('Reports Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/generate/registered-hosts',
+        '/api/v1/reporting/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
         })

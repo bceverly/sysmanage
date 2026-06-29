@@ -33,7 +33,7 @@ export const doCheckOpenTelemetryEligibility = async (
 ): Promise<OpenTelemetryEligibilityResponse> => {
     try {
         const response = await api.get<OpenTelemetryEligibilityResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry-eligible`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry-eligible`
         )
         return response.data
     } catch (error) {
@@ -58,7 +58,7 @@ export const doDeployOpenTelemetry = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/deploy-opentelemetry`
+            `/api/v1/opentelemetry/hosts/${hostId}/deploy-opentelemetry`
         )
         return response.data
     } catch (error) {
@@ -83,7 +83,7 @@ export const doGetOpenTelemetryStatus = async (
 ): Promise<OpenTelemetryStatusResponse> => {
     try {
         const response = await api.get<OpenTelemetryStatusResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry-status`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry-status`
         )
         return response.data
     } catch (error) {
@@ -108,7 +108,7 @@ export const doStartOpenTelemetry = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry/start`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry/start`
         )
         return response.data
     } catch (error) {
@@ -133,7 +133,7 @@ export const doStopOpenTelemetry = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry/stop`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry/stop`
         )
         return response.data
     } catch (error) {
@@ -158,7 +158,7 @@ export const doRestartOpenTelemetry = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry/restart`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry/restart`
         )
         return response.data
     } catch (error) {
@@ -183,7 +183,7 @@ export const doConnectOpenTelemetryToGrafana = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry/connect`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry/connect`
         )
         return response.data
     } catch (error) {
@@ -208,7 +208,7 @@ export const doDisconnectOpenTelemetryFromGrafana = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/opentelemetry/disconnect`
+            `/api/v1/opentelemetry/hosts/${hostId}/opentelemetry/disconnect`
         )
         return response.data
     } catch (error) {
@@ -233,7 +233,7 @@ export const doRemoveOpenTelemetry = async (
 ): Promise<OpenTelemetryDeployResponse> => {
     try {
         const response = await api.post<OpenTelemetryDeployResponse>(
-            `/api/opentelemetry/hosts/${hostId}/remove-opentelemetry`
+            `/api/v1/opentelemetry/hosts/${hostId}/remove-opentelemetry`
         )
         return response.data
     } catch (error) {

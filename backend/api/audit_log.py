@@ -29,7 +29,7 @@ from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/audit-log", tags=["audit-log"])
+router = APIRouter(prefix="/audit-log", tags=["audit-log"])
 
 
 # Reused 403 detail string — extracted so the wording can't drift

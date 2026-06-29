@@ -193,7 +193,7 @@ const UserDetail = () => { // NOSONAR
         setResetSuccess(null);
 
         try {
-            const response = await axiosInstance.post(`/api/admin/reset-user-password/${user.id}`);
+            const response = await axiosInstance.post(`/api/v1/admin/reset-user-password/${user.id}`);
 
             setResetSuccess(
                 response.data.message ||

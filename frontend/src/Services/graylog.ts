@@ -27,7 +27,7 @@ export interface GraylogAttachmentResponse {
 }
 
 export async function doCheckGraylogHealth(): Promise<GraylogHealthResponse> {
-    const response = await axiosInstance.get('/api/graylog/health');
+    const response = await axiosInstance.get('/api/v1/graylog/health');
     return response.data;
 }
 

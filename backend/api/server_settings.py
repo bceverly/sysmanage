@@ -261,7 +261,7 @@ def _all_items() -> List[SettingItem]:
 
 
 @router.get(
-    "/api/settings",
+    "/settings",
     dependencies=[Depends(JWTBearer())],
 )
 async def get_settings(_user: str = Depends(get_current_user)) -> SettingsResponse:
@@ -292,7 +292,7 @@ def _store_setting(desc: dict, tenant_id, key: str, value) -> None:
 
 
 @router.put(
-    "/api/settings",
+    "/settings",
     dependencies=[Depends(JWTBearer())],
 )
 async def update_settings(

@@ -1,7 +1,7 @@
 /**
  * External Identity Provider API client (Phase 10.5).
  *
- * Wraps ``/api/idp-providers/*``, ``/api/settings/idp``, and the two
+ * Wraps ``/api/v1/idp-providers/*``, ``/api/v1/settings/idp``, and the two
  * anonymous OIDC endpoints used by the login redirect dance.
  */
 
@@ -103,14 +103,14 @@ export interface IdpSettings {
 }
 
 export const listProviders = async (): Promise<IdpProvider[]> => {
-  const r = await axiosInstance.get<IdpProvider[]>('/api/idp-providers');
+  const r = await axiosInstance.get<IdpProvider[]>('/api/v1/idp-providers');
   return r.data;
 };
 
 export const createProvider = async (
   payload: IdpProviderCreate,
 ): Promise<IdpProvider> => {
-  const r = await axiosInstance.post<IdpProvider>('/api/idp-providers', payload);
+  const r = await axiosInstance.post<IdpProvider>('/api/v1/idp-providers', payload);
   return r.data;
 };
 
@@ -119,21 +119,21 @@ export const updateProvider = async (
   patch: Partial<IdpProviderCreate>,
 ): Promise<IdpProvider> => {
   const r = await axiosInstance.put<IdpProvider>(
-    `/api/idp-providers/${id}`,
+    `/api/v1/idp-providers/${id}`,
     patch,
   );
   return r.data;
 };
 
 export const deleteProvider = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/api/idp-providers/${id}`);
+  await axiosInstance.delete(`/api/v1/idp-providers/${id}`);
 };
 
 export const listRoleMappings = async (
   providerId: string,
 ): Promise<IdpRoleMapping[]> => {
   const r = await axiosInstance.get<IdpRoleMapping[]>(
-    `/api/idp-providers/${providerId}/role-mappings`,
+    `/api/v1/idp-providers/${providerId}/role-mappings`,
   );
   return r.data;
 };
@@ -143,7 +143,7 @@ export const createRoleMapping = async (
   payload: { external_group: string; role_name: string; default_for_unmapped?: boolean },
 ): Promise<IdpRoleMapping> => {
   const r = await axiosInstance.post<IdpRoleMapping>(
-    `/api/idp-providers/${providerId}/role-mappings`,
+    `/api/v1/idp-providers/${providerId}/role-mappings`,
     payload,
   );
   return r.data;
@@ -154,18 +154,18 @@ export const deleteRoleMapping = async (
   mappingId: string,
 ): Promise<void> => {
   await axiosInstance.delete(
-    `/api/idp-providers/${providerId}/role-mappings/${mappingId}`,
+    `/api/v1/idp-providers/${providerId}/role-mappings/${mappingId}`,
   );
 };
 
 export const getIdpSettings = async (): Promise<IdpSettings> => {
-  const r = await axiosInstance.get<IdpSettings>('/api/settings/idp');
+  const r = await axiosInstance.get<IdpSettings>('/api/v1/settings/idp');
   return r.data;
 };
 
 export const updateIdpSettings = async (
   patch: Partial<IdpSettings>,
 ): Promise<IdpSettings> => {
-  const r = await axiosInstance.put<IdpSettings>('/api/settings/idp', patch);
+  const r = await axiosInstance.put<IdpSettings>('/api/v1/settings/idp', patch);
   return r.data;
 };

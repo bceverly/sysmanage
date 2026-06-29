@@ -141,7 +141,7 @@ export const handlers = [
     }
 
     // OpenTelemetry coverage
-    if (path === '/api/opentelemetry/opentelemetry-coverage') {
+    if (path === '/api/v1/opentelemetry/opentelemetry-coverage') {
       return HttpResponse.json({
         total_hosts: 0,
         hosts_with_opentelemetry: 0,

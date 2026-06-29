@@ -22,7 +22,9 @@ from backend.persistence.models import (
 from backend.security.roles import SecurityRoles, check_user_has_role
 from backend.services.audit_service import ActionType, AuditService, EntityType
 
-router = APIRouter(prefix="/api/security-roles", tags=["security-roles"])
+# Phase 13.2.1: the /api part of the prefix moved to registration
+# (_include_versioned) so this serves /api/v1/security-roles + /api alias.
+router = APIRouter(prefix="/security-roles", tags=["security-roles"])
 
 
 class SecurityRoleResponse(BaseModel):

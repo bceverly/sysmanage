@@ -194,7 +194,7 @@ const Dashboard = () => {
                 doGetHosts(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/antivirus-coverage'),
-                axiosInstance.get('/api/opentelemetry/opentelemetry-coverage')
+                axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage')
             ]);
 
             processHostsResponse(hostsResponse);

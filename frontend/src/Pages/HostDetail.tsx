@@ -1892,7 +1892,7 @@ const HostDetail = () => { // NOSONAR
                     }
 
                     if (osName) {
-                        const response = await axiosInstance.get(`/api/antivirus-defaults/${osName}`);
+                        const response = await axiosInstance.get(`/api/v1/antivirus-defaults/${osName}`);
                         setHasAntivirusOsDefault(response.data?.antivirus_package !== null);
                     } else {
                         setHasAntivirusOsDefault(false);
@@ -2348,7 +2348,7 @@ const HostDetail = () => { // NOSONAR
         setSelectedUser(user);
         try {
             // Load available SSH keys
-            const response = await axiosInstance.get('/api/secrets?type=ssh_key');
+            const response = await axiosInstance.get('/api/v1/stored-secrets?type=ssh_key');
             const secrets = response.data;
             const sshKeys = secrets.filter((secret: SecretResponse) => secret.secret_type === 'ssh_key');
             setAvailableSSHKeys(sshKeys);
@@ -2490,7 +2490,7 @@ const HostDetail = () => { // NOSONAR
                 secret_ids: selectedCertificates
             };
 
-            await axiosInstance.post('/api/secrets/deploy-certificates', deployData);
+            await axiosInstance.post('/api/v1/stored-secrets/deploy-certificates', deployData);
 
             setSnackbarMessage(t('hostDetail.certificatesDeployedSuccess', 'Certificates deployment queued successfully'));
             setSnackbarSeverity('success');
@@ -2514,7 +2514,7 @@ const HostDetail = () => { // NOSONAR
         try {
             setIsCertificateSearching(true);
             // Load available SSL certificates - same pattern as SSH keys
-            const response = await axiosInstance.get('/api/secrets?type=ssl_certificate');
+            const response = await axiosInstance.get('/api/v1/stored-secrets?type=ssl_certificate');
             const secrets = response.data;
             const certificates = secrets.filter((secret: SecretResponse) => secret.secret_type === 'ssl_certificate');
             setAvailableCertificates(certificates);
@@ -2611,7 +2611,7 @@ const HostDetail = () => { // NOSONAR
                 secret_ids: selectedSSHKeys
             };
 
-            const response = await axiosInstance.post('/api/secrets/deploy-ssh-keys', deployData);
+            const response = await axiosInstance.post('/api/v1/stored-secrets/deploy-ssh-keys', deployData);
             const result = response.data;
             console.log('SSH key deployment queued:', result);
 
@@ -3159,7 +3159,7 @@ const HostDetail = () => { // NOSONAR
         if (!host?.id) return;
 
         try {
-            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/enable`);
+            await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/enable`);
             setSnackbarMessage(t('security.antivirusEnableSuccess', 'Antivirus enable initiated successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -3177,7 +3177,7 @@ const HostDetail = () => { // NOSONAR
         if (!host?.id) return;
 
         try {
-            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/disable`);
+            await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/disable`);
             setSnackbarMessage(t('security.antivirusDisableSuccess', 'Antivirus disable initiated successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -3195,7 +3195,7 @@ const HostDetail = () => { // NOSONAR
         if (!host?.id) return;
 
         try {
-            await axiosInstance.post(`/api/hosts/${host.id}/antivirus/remove`);
+            await axiosInstance.post(`/api/v1/hosts/${host.id}/antivirus/remove`);
             setSnackbarMessage(t('security.antivirusRemoveSuccess', 'Antivirus removal initiated successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -3378,7 +3378,7 @@ const HostDetail = () => { // NOSONAR
     const handleUbuntuProAttach = async () => {
         // Try to load master Ubuntu Pro token
         try {
-            const response = await axiosInstance.get('/api/ubuntu-pro/');
+            const response = await axiosInstance.get('/api/v1/ubuntu-pro/');
             const masterKey = response.data.master_key;
             if (masterKey?.trim()) {
                 // Master key exists - attach directly without showing the token

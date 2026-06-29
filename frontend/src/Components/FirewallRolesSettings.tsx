@@ -127,7 +127,7 @@ const FirewallRolesSettings: React.FC = () => {
   // Load common ports
   const loadCommonPorts = useCallback(async () => {
     try {
-      const response = await axiosInstance.get<CommonPortsResponse>('/api/firewall-roles/common-ports');
+      const response = await axiosInstance.get<CommonPortsResponse>('/api/v1/firewall-roles/common-ports');
       setCommonPorts(response.data.ports);
     } catch (err) {
       console.error('Error loading common ports:', err);
@@ -141,7 +141,7 @@ const FirewallRolesSettings: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axiosInstance.get<FirewallRole[]>('/api/firewall-roles/');
+      const response = await axiosInstance.get<FirewallRole[]>('/api/v1/firewall-roles/');
       setRoles(response.data);
     } catch (err) {
       console.error('Error loading firewall roles:', err);
@@ -369,10 +369,10 @@ const FirewallRolesSettings: React.FC = () => {
       };
 
       if (editingRole) {
-        await axiosInstance.put(`/api/firewall-roles/${editingRole.id}`, roleData);
+        await axiosInstance.put(`/api/v1/firewall-roles/${editingRole.id}`, roleData);
         showSnackbar(t('firewallRoles.updateSuccess'), 'success');
       } else {
-        await axiosInstance.post('/api/firewall-roles/', roleData);
+        await axiosInstance.post('/api/v1/firewall-roles/', roleData);
         showSnackbar(t('firewallRoles.createSuccess'), 'success');
       }
 
@@ -397,7 +397,7 @@ const FirewallRolesSettings: React.FC = () => {
     if (!roleToDelete) return;
 
     try {
-      await axiosInstance.delete(`/api/firewall-roles/${roleToDelete.id}`);
+      await axiosInstance.delete(`/api/v1/firewall-roles/${roleToDelete.id}`);
       showSnackbar(t('firewallRoles.deleteSuccess'), 'success');
       loadRoles();
     } catch (err: unknown) {
@@ -536,7 +536,7 @@ const FirewallRolesSettings: React.FC = () => {
 
     try {
       for (const roleId of selectedRows) {
-        await axiosInstance.delete(`/api/firewall-roles/${roleId}`);
+        await axiosInstance.delete(`/api/v1/firewall-roles/${roleId}`);
       }
       showSnackbar(t('firewallRoles.deleteSuccess'), 'success');
       setSelectedRows([]);

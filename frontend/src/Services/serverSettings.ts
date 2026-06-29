@@ -18,14 +18,14 @@ interface SettingsResponse {
 
 export const serverSettingsService = {
   async get(): Promise<ServerSetting[]> {
-    const response = await axiosInstance.get<SettingsResponse>('/api/settings');
+    const response = await axiosInstance.get<SettingsResponse>('/api/v1/settings');
     return response.data.settings;
   },
 
   async update(
     settings: Record<string, number | boolean | string>,
   ): Promise<ServerSetting[]> {
-    const response = await axiosInstance.put<SettingsResponse>('/api/settings', {
+    const response = await axiosInstance.put<SettingsResponse>('/api/v1/settings', {
       settings,
     });
     return response.data.settings;

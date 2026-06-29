@@ -4645,19 +4645,47 @@ as thin back-compat only.
       antivirus/firewall paths left for Slice 5. `test_api_v1_slice3.py` covers
       dual-surface (incl. the Pro+-gated 402 profile routers behaving the same on
       both surfaces). Backend 5512+539 green, frontend 122 green.
-- [ ] *Slice 4 (security/auth-mgmt):* `auth` (login/refresh/logout), `security`,
-      `security_roles`, `password_reset`, `openbao`, `secrets` (OSS),
-      `external_idp` **management** endpoints only (NOT the SSO callbacks),
-      `certificates` auth router (NOT the agent client-cert path).
-- [ ] *Slice 5 (settings/integrations):* `config_management`, `email`,
+- [x] *Slice 4 (security/auth-mgmt):* `auth` (login/refresh/logout), `security`,
+      `security_roles`, `password_reset` (+admin), `openbao` migrated to native
+      `/api/v1` (+ hidden `/api` alias). `external_idp` **split** into
+      `mgmt_router` (idp-providers + settings/idp → v1) and `router` (SSO/ACS/
+      metadata callbacks — **stay unversioned**, IdP-configured URLs).
+      `security_roles` de-prefixed (`/api/security-roles` → `/security-roles`,
+      `/api` added at registration). Frontend: login/logout/refresh (incl. the
+      `api.js` interceptor — a `.js` file the earlier `.ts/.tsx` seds didn't
+      cover), security/-roles, openbao, password-reset, idp-providers,
+      settings/idp → `/api/v1`. **Deferred (documented):** OSS `secrets` —
+      `/api/v1/secrets` collides with the Pro+ `secrets_engine`
+      (`prefix="/v1/secrets"`); needs a namespace decision, kept on `/api/secrets`.
+      `certificates` — entirely agent-facing (`server-fingerprint`,
+      `client/{host_id}`) with no frontend caller, kept unversioned as a stable
+      contract. `test_api_v1_slice4.py` covers dual-surface + asserts the SSO
+      callbacks / secrets / certificates are NOT natively versioned. Backend
+      5521+539 green, frontend 122 green.
+- [x] *Slice 5 (settings/integrations):* `config_management`, `email`,
       `server_settings`, `ubuntu_pro_settings`, `grafana_integration`,
       `graylog_integration`, `telemetry`, `opentelemetry`, `firewall_roles`,
       `firewall_status`, `antivirus_status`, `antivirus_defaults`,
-      `commercial_antivirus_status`, `cve_refresh_settings`.
-- [ ] *Slice 6 (reports/audit/misc):* `reports`, `report_branding`,
-      `report_templates`, `audit_log`, `broadcast`, `queue`, `diagnostics`,
-      `license_management`, `plugin_bundle`, `access_groups`, `dynamic_secrets`,
-      `airgap_bundles`.
+      `commercial_antivirus_status`, `cve_refresh_settings` → native `/api/v1`
+      (+ hidden `/api` alias). `server_settings` de-prefixed (full `/api/settings`
+      decorators → relative). **Closed the Slice-2 leftover:** the host
+      `/api/hosts/{id}/antivirus|firewall|commercial-antivirus` paths now use
+      `/api/v1`. Frontend: bare `/api/settings` migrated while `/api/settings/mfa`
+      (auth_mfa) and `/api/settings/mirror` stay on `/api`. `test_api_v1_slice5.py`
+      covers dual-surface + the host-scoped av/fw routes. Backend 5545+539 green,
+      frontend 122 green.
+- [x] *Slice 6 (reports/audit/misc):* `report_branding`, `report_templates`,
+      `audit_log`, `broadcast`, `queue`, `diagnostics`, `license_management`,
+      `plugin_bundle`, `access_groups` (+ `registration_keys`), `dynamic_secrets`,
+      `airgap_bundles` (incl. the token-authed streaming download router) → native
+      `/api/v1` (+ hidden `/api` alias); the self-prefixed routers de-prefixed.
+      **`reports` DEFERRED** — the Pro+ `reporting_engine` already owns
+      `/api/v1/reports`, so moving OSS `reports` there shadows it (broke the
+      proplus stub tests); kept on `/api/reports` pending the same namespace
+      decision as `secrets`. `registration_keys` confirmed UI-only (the agent
+      sends its key value via `/host/register`, never calls this endpoint).
+      `test_api_v1_slice6.py` covers dual-surface + asserts reports stays
+      unversioned. Backend 5545+539 green, frontend 122 green.
 
 **Frontend (sysmanage):**
 - [ ] Migrate the ~364 legacy `/api/*` call sites to `/api/v1` *paired with each
@@ -4679,6 +4707,31 @@ as thin back-compat only.
       `/api/v1` (paired with the engine slice). Many components already use `/v1`.
 
 **Optional / later:**
+- [x] **Route-collision guard** (`check_route_collisions`, run in the lifespan
+      after OSS + Pro+ engine/stub routes are all mounted): fails startup loudly
+      if any two routers share the same method+path, turning silent OSS↔Pro+
+      route-shadowing into a hard error. Backs the shared-namespace ("C") model
+      for any feature.
+- [x] OSS `secrets` + `reports` namespace decision (resolved — **option A**).
+      Static check of the engine `.pyx` confirmed the "C" shared-namespace model
+      is NOT viable: the OSS sub-paths *exactly overlap* the Pro+ engines (same
+      feature, two implementations) — `secrets` vs `secrets_engine` both define
+      `/deploy-certificates`,`/deploy-ssh-keys`,`/types`; `reports` vs
+      `reporting_engine` both define `/view/{report_type}`,`/generate/{report_type}`,
+      `/screenshots/{report_id}`. So the OSS routers were given **distinct v1
+      names** via `_include_renamed`: OSS secrets → `/api/v1/stored-secrets`,
+      OSS reports → `/api/v1/reporting` (each + a deprecated `/api/secrets`,
+      `/api/reports` alias). Pro+ keeps `/api/v1/secrets`,`/api/v1/reports`. The
+      route-collision guard backs this. `test_api_v1_secrets_reports_rename.py`
+      covers it. Backend 5552+539 green, frontend 122 green.
+- [ ] Flaky-test root-cause (interim shipped): a pre-existing test leaves an
+      `AsyncMock` (`_execute_mock_call`) coroutine un-awaited; on Python 3.14 its
+      GC finalization raises (transient `KeyError: '__import__'`), which pytest
+      surfaces as a `PytestUnraisableExceptionWarning` on an innocent victim test
+      under xdist (~1-in-4). Interim: a narrow `pytest.ini` `filterwarnings`
+      ignore (beside the pre-existing RuntimeWarning ignore for the same leak).
+      TODO: find + fix the leaking test (await/close the AsyncMock), then drop
+      both ignores.
 - [ ] Control-plane: `multitenancy_engine` `/api/control-plane` →
       `/api/v1/control-plane` (+ `controlPlane.ts` / `TenantMigrationBanner.tsx`,
       ~8 sites). Engine change ⇒ version bump + rebuild.

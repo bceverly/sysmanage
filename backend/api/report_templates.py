@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
-    prefix="/api/report-templates",
+    prefix="/report-templates",
     tags=["report-templates"],
     dependencies=[Depends(JWTBearer())],
 )

@@ -14,7 +14,10 @@ from backend.auth.auth_handler import sign_jwt
 
 def _client():
     app = FastAPI()
-    app.include_router(server_settings.router)
+    # Phase 13.2.1: the router carries relative paths now (/settings); the /api
+    # prefix is added at registration. Mount under /api here to exercise the
+    # (still-supported) /api/settings alias surface these tests assert.
+    app.include_router(server_settings.router, prefix="/api")
     return TestClient(app)
 
 

@@ -35,32 +35,32 @@ export interface OpenBAOOperationResult {
 
 class OpenBAOService {
   async getStatus(): Promise<OpenBAOStatus> {
-    const response = await axiosInstance.get('/api/openbao/status');
+    const response = await axiosInstance.get('/api/v1/openbao/status');
     return response.data;
   }
 
   async getConfig(): Promise<OpenBAOConfig> {
-    const response = await axiosInstance.get('/api/openbao/config');
+    const response = await axiosInstance.get('/api/v1/openbao/config');
     return response.data;
   }
 
   async start(): Promise<OpenBAOOperationResult> {
-    const response = await axiosInstance.post('/api/openbao/start');
+    const response = await axiosInstance.post('/api/v1/openbao/start');
     return response.data;
   }
 
   async stop(): Promise<OpenBAOOperationResult> {
-    const response = await axiosInstance.post('/api/openbao/stop');
+    const response = await axiosInstance.post('/api/v1/openbao/stop');
     return response.data;
   }
 
   async seal(): Promise<OpenBAOOperationResult> {
-    const response = await axiosInstance.post('/api/openbao/seal');
+    const response = await axiosInstance.post('/api/v1/openbao/seal');
     return response.data;
   }
 
   async unseal(): Promise<OpenBAOOperationResult> {
-    const response = await axiosInstance.post('/api/openbao/unseal');
+    const response = await axiosInstance.post('/api/v1/openbao/unseal');
     return response.data;
   }
 }

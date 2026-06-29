@@ -21,6 +21,6 @@ export interface CommercialAntivirusStatus {
 }
 
 export const getCommercialAntivirusStatus = async (hostId: string): Promise<CommercialAntivirusStatus | null> => {
-  const response = await axiosInstance.get<CommercialAntivirusStatus | null>(`/api/hosts/${hostId}/commercial-antivirus-status`);
+  const response = await axiosInstance.get<CommercialAntivirusStatus | null>(`/api/v1/hosts/${hostId}/commercial-antivirus-status`);
   return response.data;
 };
