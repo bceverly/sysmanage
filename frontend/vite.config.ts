@@ -270,8 +270,12 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
     css: true,  // Enable CSS processing in vitest 4.x
-    // Increase timeout for Windows CI environments
-    testTimeout: 10000,
+    // Raised for slow environments: Windows CI, and especially an NFS-mounted
+    // checkout where a cold dynamic ``import()`` of a module graph (e.g. the
+    // AuthHelper import smoke test) transforms over the network and blows past
+    // a 10s budget. The suite's import phase alone runs into the hundreds of
+    // seconds on NFS, so give individual tests real headroom.
+    testTimeout: 30000,
     // Exclude Playwright E2E tests - they run separately via `npx playwright test`
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     server: {
