@@ -103,7 +103,7 @@ const Login = () => {
       if (!mfaPendingToken || mfaCode.trim() === "") return;
       setIsLoggingIn(true);
       setMfaError(null);
-      api.post<LoginResponse>("/api/auth/mfa/verify", {
+      api.post<LoginResponse>("/api/v1/auth/mfa/verify", {
         pending_token: mfaPendingToken,
         code: mfaCode.trim(),
       })

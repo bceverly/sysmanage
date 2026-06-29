@@ -41,13 +41,13 @@ export interface MfaSettings {
 }
 
 export const getMfaStatus = async (): Promise<MfaStatus> => {
-  const response = await axiosInstance.get<MfaStatus>('/api/auth/mfa/status');
+  const response = await axiosInstance.get<MfaStatus>('/api/v1/auth/mfa/status');
   return response.data;
 };
 
 export const enrollStart = async (): Promise<EnrollStartResponse> => {
   const response = await axiosInstance.post<EnrollStartResponse>(
-    '/api/auth/mfa/enroll/start',
+    '/api/v1/auth/mfa/enroll/start',
     {},
   );
   return response.data;
@@ -57,7 +57,7 @@ export const enrollComplete = async (
   code: string,
 ): Promise<EnrollCompleteResponse> => {
   const response = await axiosInstance.post<EnrollCompleteResponse>(
-    '/api/auth/mfa/enroll/complete',
+    '/api/v1/auth/mfa/enroll/complete',
     { code },
   );
   return response.data;
@@ -69,7 +69,7 @@ export const disableMfa = async (
   const response = await axiosInstance.post<{
     message: string;
     enrolled: boolean;
-  }>('/api/auth/mfa/disable', { password });
+  }>('/api/v1/auth/mfa/disable', { password });
   return response.data;
 };
 
@@ -77,20 +77,20 @@ export const regenerateBackupCodes = async (
   code: string,
 ): Promise<EnrollCompleteResponse> => {
   const response = await axiosInstance.post<EnrollCompleteResponse>(
-    '/api/auth/mfa/backup-codes/regenerate',
+    '/api/v1/auth/mfa/backup-codes/regenerate',
     { code },
   );
   return response.data;
 };
 
 export const getMfaSettings = async (): Promise<MfaSettings> => {
-  const response = await axiosInstance.get<MfaSettings>('/api/settings/mfa');
+  const response = await axiosInstance.get<MfaSettings>('/api/v1/settings/mfa');
   return response.data;
 };
 
 export const updateMfaSettings = async (
   patch: Partial<MfaSettings>,
 ): Promise<MfaSettings> => {
-  const response = await axiosInstance.put<MfaSettings>('/api/settings/mfa', patch);
+  const response = await axiosInstance.put<MfaSettings>('/api/v1/settings/mfa', patch);
   return response.data;
 };

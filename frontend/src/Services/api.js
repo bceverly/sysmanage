@@ -93,7 +93,10 @@ async function handleResponseError(err) {
     throw err;
   }
   const originalConfig = err.config;
-  if (originalConfig.url === "/login") {
+  // The login request itself failing (bad credentials) must short-circuit —
+  // don't try the refresh-token path on it.  Match by suffix because the
+  // login endpoint is now versioned (``/api/v1/login``), not ``/login``.
+  if (originalConfig.url?.endsWith("/login")) {
     throw err;
   }
   console.debug('Token expired? err.response = ' + err.response);

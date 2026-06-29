@@ -159,7 +159,7 @@ class ConnectionMonitor {
     
     try {
       // Simple health check - try to fetch from the API
-      const response = await axiosInstance.head('/api/health', {
+      const response = await axiosInstance.head('/api/v1/health', {
         timeout: 15000,
       });
 
@@ -230,7 +230,7 @@ class ConnectionMonitor {
 
     try {
       // Try to connect to the server
-      const response = await axiosInstance.head('/api/health', {
+      const response = await axiosInstance.head('/api/v1/health', {
         timeout: 15000,
       });
 

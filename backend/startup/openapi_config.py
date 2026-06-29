@@ -33,8 +33,8 @@ a future, deliberately-introduced breaking version and is not yet served.
 **Authentication.** Most endpoints require a bearer credential in the
 `Authorization: Bearer <credential>` header. Two credential types are accepted:
 
-* a **JWT** issued by `POST /api/login` (short-lived, refreshable), and
-* an **API key** (prefix `smk_`) created under `/api/api-keys`, for automation.
+* a **JWT** issued by `POST /api/v1/login` (short-lived, refreshable), and
+* an **API key** (prefix `smk_`) created under `/api/v1/api-keys`, for automation.
   An API key authenticates as its owning user and inherits that user's
   permissions.
 
