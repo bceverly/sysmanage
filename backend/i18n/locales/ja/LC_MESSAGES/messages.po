@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "無効な署名"
 msgid "Decryption failed"
 msgstr "復号化に失敗しました"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "無効な認証スキームです。"
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "期限切れのトークンです。"
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "無効な認証コードです。"
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "認証情報を検証できませんでした"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "ユーザーが見つかりません。"
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "選択したアカウントにアクセス権限がありません"
 
@@ -2597,6 +2597,14 @@ msgid ""
 "Virtualization support check requested. Results will be available shortly."
 msgstr "バーチャライゼーションサポートの確認が要求されました。結果はすぐに利用可能です。"
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr "APIキー認証を使用すると、APIキーを管理できません。"
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "APIキーが見つかりません。"
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "更新結果の処理に失敗しました"
@@ -3994,6 +4002,10 @@ msgstr "メッセージプロセッサが停止しました"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "サーバーメッセージキュー管理者が初期化されました"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "レート制限を超えました。後で再度お試しください。"
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format

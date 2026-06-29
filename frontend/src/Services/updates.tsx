@@ -87,7 +87,7 @@ class UpdatesService {
 
   async getUpdatesSummary(): Promise<UpdateStatsSummary> {
     try {
-      const response = await axiosInstance.get('/api/updates/summary');
+      const response = await axiosInstance.get('/api/v1/updates/summary');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch updates summary:', error);
@@ -112,7 +112,7 @@ class UpdatesService {
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 
-      const response = await axiosInstance.get(`/api/updates/?${params}`);
+      const response = await axiosInstance.get(`/api/v1/updates/?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch updates:', error);
@@ -134,7 +134,7 @@ class UpdatesService {
       if (systemOnly) params.append('system_only', 'true');
       if (applicationOnly) params.append('application_only', 'true');
 
-      const response = await axiosInstance.get(`/api/updates/${hostId}?${params}`);
+      const response = await axiosInstance.get(`/api/v1/updates/${hostId}?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch host updates:', error);
@@ -150,7 +150,7 @@ class UpdatesService {
         package_managers: packageManagers,
       };
       
-      const response = await axiosInstance.post('/api/updates/execute', requestData);
+      const response = await axiosInstance.post('/api/v1/updates/execute', requestData);
       return response.data;
     } catch (error) {
       console.error('Failed to execute updates:', error);
@@ -164,7 +164,7 @@ class UpdatesService {
       params.append('limit', limit.toString());
       params.append('offset', offset.toString());
 
-      const response = await axiosInstance.get(`/api/updates/execution-log/${hostId}?${params}`);
+      const response = await axiosInstance.get(`/api/v1/updates/execution-log/${hostId}?${params}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch execution log:', error);
@@ -174,7 +174,7 @@ class UpdatesService {
 
   async getUpdateResults(): Promise<UpdateResultsResponse> {
     try {
-      const response = await axiosInstance.get('/api/updates/summary');
+      const response = await axiosInstance.get('/api/v1/updates/summary');
       // Return the actual response data which includes update results
       return response.data;
     } catch (error) {
@@ -186,7 +186,7 @@ class UpdatesService {
   // OS Upgrade Methods
   async getOSUpgrades(): Promise<OSUpgradesListResponse> {
     try {
-      const response = await axiosInstance.get('/api/updates/os-upgrades');
+      const response = await axiosInstance.get('/api/v1/updates/os-upgrades');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch OS upgrades:', error);
@@ -196,7 +196,7 @@ class UpdatesService {
 
   async getOSUpgradesSummary(): Promise<OSUpgradeSummary> {
     try {
-      const response = await axiosInstance.get('/api/updates/os-upgrades/summary');
+      const response = await axiosInstance.get('/api/v1/updates/os-upgrades/summary');
       return response.data;
     } catch (error) {
       console.error('Failed to fetch OS upgrades summary:', error);
@@ -211,7 +211,7 @@ class UpdatesService {
         package_managers: packageManagers,
       };
 
-      const response = await axiosInstance.post('/api/updates/execute-os-upgrades', requestData);
+      const response = await axiosInstance.post('/api/v1/updates/execute-os-upgrades', requestData);
       return response.data;
     } catch (error) {
       console.error('Failed to execute OS upgrades:', error);

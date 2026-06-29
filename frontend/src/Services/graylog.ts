@@ -27,12 +27,12 @@ export interface GraylogAttachmentResponse {
 }
 
 export async function doCheckGraylogHealth(): Promise<GraylogHealthResponse> {
-    const response = await axiosInstance.get('/api/graylog/health');
+    const response = await axiosInstance.get('/api/v1/graylog/health');
     return response.data;
 }
 
 export async function doGetGraylogAttachment(hostId: string): Promise<GraylogAttachmentResponse> {
-    const response = await axiosInstance.get(`/api/host/${hostId}/graylog_attachment`);
+    const response = await axiosInstance.get(`/api/v1/host/${hostId}/graylog_attachment`);
     return response.data;
 }
 
@@ -43,6 +43,6 @@ export interface GraylogAttachRequest {
 }
 
 export async function doAttachToGraylog(hostId: string, request: GraylogAttachRequest): Promise<{ success: boolean; message: string }> {
-    const response = await axiosInstance.post(`/api/host/${hostId}/graylog/attach`, request);
+    const response = await axiosInstance.post(`/api/v1/host/${hostId}/graylog/attach`, request);
     return response.data;
 }

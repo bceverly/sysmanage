@@ -14,7 +14,7 @@ export const handlers = [
     console.log(`${logPrefix} Handling GET ${path}`);
 
     // Host data - using pattern matching for UUID
-    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path) || path === '/api/v1/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440000',
         fqdn: 'test-host.example.com',
@@ -42,7 +42,7 @@ export const handlers = [
     }
 
     // User data
-    if (path === '/api/user/me' || path === '/api/users/me') {
+    if (path === '/api/v1/user/me' || path === '/api/v1/users/me') {
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440001',
         username: 'current_user',
@@ -57,7 +57,7 @@ export const handlers = [
     }
 
     // Software packages - using pattern matching for UUID
-    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/.test(path) || path === '/api/v1/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
       return HttpResponse.json([
         {
           id: '550e8400-e29b-41d4-a716-446655440002',
@@ -79,7 +79,7 @@ export const handlers = [
     }
 
     // Package search
-    if (path === '/api/packages/search') {
+    if (path === '/api/v1/packages/search') {
       const query = url.searchParams.get('query');
       if (!query || query.length < 2) {
         return HttpResponse.json([]);
@@ -118,7 +118,7 @@ export const handlers = [
     }
 
     // Dashboard card preferences
-    if (path === '/api/user-preferences/dashboard-cards') {
+    if (path === '/api/v1/user-preferences/dashboard-cards') {
       return HttpResponse.json({
         preferences: [
           { card_identifier: 'hosts', visible: true },
@@ -141,7 +141,7 @@ export const handlers = [
     }
 
     // OpenTelemetry coverage
-    if (path === '/api/opentelemetry/opentelemetry-coverage') {
+    if (path === '/api/v1/opentelemetry/opentelemetry-coverage') {
       return HttpResponse.json({
         total_hosts: 0,
         hosts_with_opentelemetry: 0,
@@ -155,7 +155,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package installation
-  http.post('http://localhost:8080/api/packages/install/*', async ({ request }) => {
+  http.post('http://localhost:8080/api/v1/packages/install/*', async ({ request }) => {
     const body = await request.json() as { package_names: string[]; requested_by: string };
 
     return HttpResponse.json({
@@ -166,7 +166,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package uninstallation
-  http.post('http://localhost:8080/api/packages/uninstall/*', async () => {
+  http.post('http://localhost:8080/api/v1/packages/uninstall/*', async () => {
     return HttpResponse.json({
       success: true,
       message: 'Package uninstallation has been queued',
@@ -175,7 +175,7 @@ export const handlers = [
   }),
 
   // Handle PUT requests for dashboard preferences
-  http.put('http://localhost:8080/api/user-preferences/dashboard-cards', async ({ request }) => {
+  http.put('http://localhost:8080/api/v1/user-preferences/dashboard-cards', async ({ request }) => {
     const body = await request.json() as { preferences: Array<{ card_identifier: string; visible: boolean }> };
     return HttpResponse.json({
       preferences: body.preferences

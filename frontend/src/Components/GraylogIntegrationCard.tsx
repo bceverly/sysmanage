@@ -91,8 +91,8 @@ const GraylogIntegrationCard: React.FC = () => {
       setError(null);
 
       const [serversData, settingsData] = await Promise.all([
-        axiosInstance.get('/api/graylog/graylog-servers'),
-        axiosInstance.get('/api/graylog/settings')
+        axiosInstance.get('/api/v1/graylog/graylog-servers'),
+        axiosInstance.get('/api/v1/graylog/settings')
       ]);
 
       setServers(serversData.data.graylog_servers || []);
@@ -114,7 +114,7 @@ const GraylogIntegrationCard: React.FC = () => {
 
     try {
       setCheckingHealth(true);
-      const response = await axiosInstance.get('/api/graylog/health');
+      const response = await axiosInstance.get('/api/v1/graylog/health');
       setHealthStatus(response.data);
     } catch (err: unknown) {
       // Only log non-400 errors to reduce console spam
@@ -137,7 +137,7 @@ const GraylogIntegrationCard: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      await axiosInstance.post('/api/graylog/settings', settings);
+      await axiosInstance.post('/api/v1/graylog/settings', settings);
 
       // Refresh health status if enabled
       if (settings.enabled) {

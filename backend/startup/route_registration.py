@@ -19,6 +19,7 @@ from backend.api import (
     airgap_repository_list,
     antivirus_defaults,
     antivirus_status,
+    api_keys,
     audit_log,
     auth,
     auth_mfa,
@@ -40,9 +41,9 @@ from backend.api import (
     fleet,
     grafana_integration,
     graylog_integration,
-    license_management,
     host,
     host_hostname,
+    license_management,
     openbao,
     opentelemetry,
     package_compliance,
@@ -78,6 +79,101 @@ from backend.utils.verbosity_logger import get_logger
 logger = get_logger("backend.startup.routes")
 
 
+def _include_versioned(app: FastAPI, router, *, suffix: str = "", tags=None):
+    """Register a router natively under ``/api/v1`` (Phase 13.2.1 migration).
+
+    Mounts the router twice:
+
+    * ``/api/v1{suffix}`` — the **canonical** versioned route (shown in OpenAPI).
+      ``ApiVersionMiddleware`` matches this natively and passes it through, so the
+      feature no longer depends on the v1→legacy bridge.
+    * ``/api{suffix}`` — a **deprecated** unversioned alias kept for one release
+      for any pre-13.2.1 external caller (e.g. API-key automation). Hidden from
+      the OpenAPI schema so the docs advertise only the versioned surface.
+
+    Drop the alias (the second mount) once the deprecation window closes.
+    """
+    app.include_router(router, prefix="/api/v1" + suffix, tags=tags)
+    app.include_router(
+        router, prefix="/api" + suffix, tags=tags, include_in_schema=False
+    )
+
+
+def _include_renamed(
+    app: FastAPI, router, *, new_prefix: str, old_prefix: str, tags=None
+):
+    """Register a router at a NEW canonical ``/api/v1`` path + its OLD path alias.
+
+    Phase 13.2.1, option A: used where the bare feature name under ``/api/v1`` is
+    already owned by a Pro+ engine (``secrets_engine`` → ``/api/v1/secrets``,
+    ``reporting_engine`` → ``/api/v1/reports``).  The OSS feature takes a
+    DISTINCT v1 name (``/api/v1/stored-secrets``, ``/api/v1/reporting``) so the
+    two never collide, while its original unversioned ``/api`` path is kept as a
+    hidden, deprecated alias for one release.
+    """
+    app.include_router(router, prefix=new_prefix, tags=tags)
+    app.include_router(router, prefix=old_prefix, tags=tags, include_in_schema=False)
+
+
+def check_route_collisions(app: FastAPI, *, strict: bool = False) -> dict:
+    """Surface routes that share the same (method, path) — Phase 13.2.1.
+
+    The ``/api/v1`` native + ``/api`` alias mounts are DIFFERENT paths, so they
+    are NOT collisions.  A genuine duplicate means one endpoint silently shadows
+    another (Starlette matches first-registered) — most dangerously across the
+    OSS↔Pro+ boundary, where the compiled engine mounts at runtime on licensed
+    boxes and neither test suite covers the seam.  This guard turns that silent
+    heisenbug into a **loud** one.
+
+    Behaviour:
+      * Always logs an ERROR (with the offending ``method path -> handlers``)
+        when collisions exist — so they're visible in every startup log / CI.
+      * ``strict=True`` *additionally* raises ``RuntimeError`` — for tests/CI
+        that want to fail fast on a NEW collision.
+
+    It deliberately does NOT crash startup by default: there are pre-existing,
+    long-tolerated duplicates among the Pro+ stub mounts (e.g. av/firewall stubs
+    sharing ``/api/status/{host_id}`` and ``/api/deploy``), and a hard failure
+    there would take down Community-Edition boxes over a benign first-match-wins
+    condition.  Returns the collisions dict (empty when clean).
+
+    Call this AFTER all routers are registered (including the Pro+ engine/stub
+    mounts in the lifespan), so it sees the fully-assembled route table.
+    """
+    from collections import Counter  # noqa: PLC0415
+
+    seen: Counter = Counter()
+    owners: dict = {}
+    for route in app.routes:
+        path = getattr(route, "path", None)
+        if path is None:
+            continue
+        methods = getattr(route, "methods", None) or {"WEBSOCKET"}
+        for method in methods:
+            key = (method, path)
+            seen[key] += 1
+            owners.setdefault(key, []).append(getattr(route, "name", "?"))
+
+    collisions = {key: owners[key] for key, count in seen.items() if count > 1}
+    if collisions:
+        detail = "\n".join(
+            f"  {method} {path}  ->  {names}"
+            for (method, path), names in sorted(collisions.items())
+        )
+        msg = (
+            "Route collision(s) detected — the same method+path is registered "
+            "more than once, so one handler silently shadows another (commonly "
+            "an OSS router and a Pro+ engine claiming the same /api/v1 path). "
+            "Give them disjoint sub-paths.\n" + detail
+        )
+        logger.error(msg)
+        if strict:
+            raise RuntimeError(msg)
+        return collisions
+    logger.info("Route collision guard: OK (%d routes, no duplicates)", len(app.routes))
+    return {}
+
+
 def register_routes(app: FastAPI):
     """
     Register all API routes with the FastAPI application.
@@ -90,10 +186,10 @@ def register_routes(app: FastAPI):
     # Unauthenticated routes (no /api prefix)
     logger.debug("Registering unauthenticated routes:")
 
-    logger.debug("Adding auth router with /api prefix")
-    app.include_router(
-        auth.router, prefix="/api"
-    )  # /api/login, /api/refresh, /api/logout
+    logger.debug("Adding auth router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, auth.router, tags=["authentication"]
+    )  # /api/v1/login, /refresh, /logout (+ /api alias)
     logger.debug("Auth router added")
 
     logger.debug(
@@ -108,8 +204,8 @@ def register_routes(app: FastAPI):
     logger.debug("Server-info router added")
 
     # Phase 13.1.H — server-scoped configuration settings (Settings →
-    # Configuration UI).  Endpoints carry their own /api/settings prefix.
-    app.include_router(server_settings.router)
+    # Configuration UI).  Phase 13.2.1: native /api/v1/settings + /api alias.
+    _include_versioned(app, server_settings.router, tags=["settings"])
     logger.debug("Server-settings router added")
 
     # Phase 11 B2 — air-gap collection schedules.  Routes are
@@ -162,152 +258,179 @@ def register_routes(app: FastAPI):
     app.include_router(repository_mirroring.router)
     logger.debug("Repository mirroring router added")
 
-    logger.debug(
-        "Adding external IdP router (no prefix — endpoints carry their own /api prefix)"
-    )
+    # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.
+    logger.debug("Adding external IdP SSO callback router (unversioned /api/auth/*)")
     app.include_router(external_idp.router)
-    logger.debug("External IdP router added")
+    # Provider/settings management — native /api/v1 + deprecated /api alias.
+    logger.debug("Adding external IdP management router (native /api/v1 + alias)")
+    _include_versioned(app, external_idp.mgmt_router, tags=["external-idp"])
+    logger.debug("External IdP routers added")
 
     app.include_router(scim.router)
     logger.debug("SCIM provisioning router added")
 
     logger.debug("Adding agent public router with /api prefix")
     app.include_router(
-        agent.public_router, prefix="/api"
+        agent.public_router, prefix="/api", tags=["agent"]
     )  # /api/agent/auth (no auth required)
     logger.debug("Agent public router added")
 
     logger.debug("Adding agent authenticated router with /api prefix")
     app.include_router(
-        agent.router, prefix="/api"
+        agent.router, prefix="/api", tags=["agent"]
     )  # /api/agent/connect, /api/agent/installation-complete
     logger.debug("Agent authenticated router added")
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(
-        host.public_router, prefix="/api"
+        host.public_router, prefix="/api", tags=["hosts"]
     )  # /api/host/register (no auth)
     logger.debug("Host public router added")
 
     logger.debug("Adding certificates public router with /api prefix")
     app.include_router(
-        certificates.public_router, prefix="/api"
+        certificates.public_router, prefix="/api", tags=["certificates"]
     )  # /api/certificates/server-fingerprint, /api/certificates/ca-certificate (no auth)
     logger.debug("Certificates public router added")
 
-    logger.debug("Adding password reset router with /api prefix")
-    app.include_router(
-        password_reset.router, prefix="/api"
-    )  # /api/forgot-password, /api/reset-password, /api/validate-reset-token (no auth)
+    logger.debug("Adding password reset router (native /api/v1 + deprecated alias)")
+    _include_versioned(
+        app, password_reset.router, tags=["password-reset"]
+    )  # /api/v1/forgot-password, /reset-password, /validate-reset-token (+ /api alias)
     logger.debug("Password reset router added")
 
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")
 
-    logger.debug("Adding user router with /api prefix")
-    app.include_router(user.router, prefix="/api", tags=["users"])
+    logger.debug("Adding user router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, user.router, tags=["users"])
     logger.debug("User router added")
 
-    logger.debug("Adding fleet router with /api prefix")
-    app.include_router(fleet.router, prefix="/api", tags=["fleet"])
+    logger.debug("Adding fleet router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, fleet.router, tags=["fleet"])
     logger.debug("Fleet router added")
 
-    logger.debug("Adding config management router with /api prefix")
-    app.include_router(config_management.router, prefix="/api", tags=["config"])
+    logger.debug("Adding config management router (native /api/v1 + alias)")
+    _include_versioned(app, config_management.router, tags=["config"])
     logger.debug("Config management router added")
 
-    logger.debug("Adding diagnostics router with /api prefix")
-    app.include_router(diagnostics.router, prefix="/api", tags=["diagnostics"])
+    logger.debug("Adding diagnostics router (native /api/v1 + alias)")
+    _include_versioned(app, diagnostics.router, tags=["diagnostics"])
     logger.debug("Diagnostics router added")
 
-    logger.debug("Adding email router with /api prefix")
-    app.include_router(email.router, prefix="/api", tags=["email"])
+    logger.debug("Adding email router (native /api/v1 + alias)")
+    _include_versioned(app, email.router, tags=["email"])
     logger.debug("Email router added")
 
-    logger.debug("Adding profile router with /api prefix")
-    app.include_router(profile.router, prefix="/api", tags=["profile"])
+    logger.debug("Adding profile router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, profile.router, tags=["profile"])
     logger.debug("Profile router added")
 
-    logger.debug("Adding user preferences router with /api/user-preferences prefix")
-    app.include_router(
+    logger.debug("Adding user preferences router (native /api/v1 + deprecated alias)")
+    _include_versioned(
+        app,
         user_preferences.router,
-        prefix="/api/user-preferences",
+        suffix="/user-preferences",
         tags=["user-preferences"],
     )
     logger.debug("User preferences router added")
 
-    logger.debug("Adding updates router with /api/updates prefix")
-    app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
+    logger.debug("Adding updates router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, updates.router, suffix="/updates", tags=["updates"])
     logger.debug("Updates router added")
 
-    logger.debug("Adding scripts router with /api/scripts prefix")
-    app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
+    logger.debug("Adding scripts router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, scripts.router, suffix="/scripts", tags=["scripts"])
     logger.debug("Scripts router added")
 
-    logger.debug("Adding reports router")
-    app.include_router(reports.router, tags=["reports"])
+    # api-keys shipped in 13.2 with no external consumers yet, so it goes
+    # straight to native /api/v1 with no deprecated /api alias (Phase 13.2.1).
+    logger.debug("Adding api-keys router with /api/v1/api-keys prefix")
+    app.include_router(api_keys.router, prefix="/api/v1/api-keys", tags=["api-keys"])
+    logger.debug("API-keys router added")
+
+    # Deferred from 13.2.1: OSS `reports` stays on /api/reports — the Pro+
+    # reporting_engine already owns the /api/v1/reports namespace, so moving OSS
+    # there would shadow it. Needs the same namespace decision as OSS `secrets`.
+    # Phase 13.2.1 (option A): OSS reports takes a distinct v1 name
+    # (/api/v1/reporting) because the Pro+ reporting_engine owns /api/v1/reports
+    # with the same view/generate/screenshots endpoints. /api/reports kept as a
+    # deprecated alias.
+    logger.debug(
+        "Adding reports router (native /api/v1/reporting + /api/reports alias)"
+    )
+    _include_renamed(
+        app,
+        reports.router,
+        new_prefix="/api/v1/reporting",
+        old_prefix="/api/reports",
+    )
     logger.debug("Reports router added")
 
-    logger.debug("Adding access-groups + registration-keys routers (Phase 8.1)")
-    app.include_router(access_groups.groups_router)
-    app.include_router(access_groups.keys_router)
+    logger.debug(
+        "Adding access-groups + registration-keys routers (native /api/v1 + alias)"
+    )
+    _include_versioned(app, access_groups.groups_router)
+    _include_versioned(app, access_groups.keys_router)
 
-    logger.debug("Adding airgap-bundles router with /api prefix")
-    app.include_router(airgap_bundles.router, prefix="/api", tags=["airgap-bundles"])
+    logger.debug("Adding airgap-bundles router (native /api/v1 + alias)")
+    _include_versioned(app, airgap_bundles.router, tags=["airgap-bundles"])
     # Token-authed streaming bundle download (no blanket JWTBearer) so the
     # browser can stream multi-GB ISOs without buffering them in a Blob.
-    app.include_router(
-        airgap_bundles.download_router, prefix="/api", tags=["airgap-bundles"]
-    )
+    _include_versioned(app, airgap_bundles.download_router, tags=["airgap-bundles"])
 
-    logger.debug("Adding upgrade-profiles router (Phase 8.2)")
-    app.include_router(upgrade_profiles.router)
+    logger.debug("Adding upgrade-profiles router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, upgrade_profiles.router, suffix="/upgrade-profiles")
 
-    logger.debug("Adding package-compliance router (Phase 8.3)")
-    app.include_router(package_compliance.router)
+    logger.debug("Adding package-compliance router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, package_compliance.router, suffix="/package-profiles")
 
-    logger.debug("Adding broadcast router (Phase 8.5)")
-    app.include_router(broadcast.router)
+    logger.debug("Adding broadcast router (native /api/v1 + alias)")
+    _include_versioned(app, broadcast.router)
 
     logger.debug(
-        "Adding report-branding + report-templates + dynamic-secrets routers (Phase 8.7)"
+        "Adding report-branding + report-templates + dynamic-secrets routers "
+        "(native /api/v1 + alias)"
     )
-    app.include_router(report_branding.router)
-    app.include_router(report_templates.router)
-    app.include_router(dynamic_secrets.router)
+    _include_versioned(app, report_branding.router)
+    _include_versioned(app, report_templates.router)
+    _include_versioned(app, dynamic_secrets.router)
 
-    logger.debug("Adding tag router with /api prefix")
-    app.include_router(tag.router, prefix="/api", tags=["tags"])
+    logger.debug("Adding tag router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, tag.router, tags=["tags"])
     logger.debug("Tag router added")
 
-    logger.debug("Adding queue router with /api/queue prefix")
-    app.include_router(queue.router, prefix="/api/queue", tags=["queue"])
+    logger.debug("Adding queue router (native /api/v1 + alias)")
+    _include_versioned(app, queue.router, suffix="/queue", tags=["queue"])
     logger.debug("Queue router added")
 
-    logger.debug("Adding Ubuntu Pro settings router with /api/ubuntu-pro prefix")
-    app.include_router(
-        ubuntu_pro_settings.router, prefix="/api/ubuntu-pro", tags=["ubuntu-pro"]
+    logger.debug("Adding Ubuntu Pro settings router (native /api/v1 + alias)")
+    _include_versioned(
+        app, ubuntu_pro_settings.router, suffix="/ubuntu-pro", tags=["ubuntu-pro"]
     )
     logger.debug("Ubuntu Pro settings router added")
 
-    logger.debug("Adding antivirus defaults router with /api/antivirus-defaults prefix")
-    app.include_router(
-        antivirus_defaults.router, prefix="/api/antivirus-defaults", tags=["antivirus"]
+    logger.debug("Adding antivirus defaults router (native /api/v1 + alias)")
+    _include_versioned(
+        app,
+        antivirus_defaults.router,
+        suffix="/antivirus-defaults",
+        tags=["antivirus"],
     )
     logger.debug("Antivirus defaults router added")
 
-    logger.debug("Adding antivirus status router with /api prefix")
-    app.include_router(antivirus_status.router, prefix="/api", tags=["antivirus"])
+    logger.debug("Adding antivirus status router (native /api/v1 + alias)")
+    _include_versioned(app, antivirus_status.router, tags=["antivirus"])
     logger.debug("Antivirus status router added")
 
-    logger.debug("Adding commercial antivirus status router with /api prefix")
-    app.include_router(
-        commercial_antivirus_status.router, prefix="/api", tags=["commercial-antivirus"]
+    logger.debug("Adding commercial antivirus status router (native /api/v1 + alias)")
+    _include_versioned(
+        app, commercial_antivirus_status.router, tags=["commercial-antivirus"]
     )
     logger.debug("Commercial antivirus status router added")
 
-    logger.debug("Adding firewall status router with /api prefix")
-    app.include_router(firewall_status.router, prefix="/api", tags=["firewall"])
+    logger.debug("Adding firewall status router (native /api/v1 + alias)")
+    _include_versioned(app, firewall_status.router, tags=["firewall"])
     logger.debug("Firewall status router added")
 
     logger.debug("Adding certificates auth router with /api prefix")
@@ -316,156 +439,169 @@ def register_routes(app: FastAPI):
     )  # /api/certificates/client/* (with auth)
     logger.debug("Certificates auth router added")
 
-    logger.debug("Adding host auth router with /api prefix")
-    app.include_router(
-        host.auth_router, prefix="/api", tags=["hosts"]
-    )  # /api/host/* (with auth)
+    # NOTE: only the AUTH router migrates. host.public_router (/host/register)
+    # is agent-facing and stays unversioned (Phase 13.2.1 — fleet version skew).
+    logger.debug("Adding host auth router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, host.auth_router, tags=["hosts"])
     logger.debug("Host auth router added")
 
-    logger.debug("Adding host hostname router with /api prefix")
-    app.include_router(
-        host_hostname.router, prefix="/api", tags=["hosts"]
-    )  # /api/host/{host_id}/change-hostname (with auth)
+    logger.debug("Adding host hostname router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, host_hostname.router, tags=["hosts"])
     logger.debug("Host hostname router added")
 
-    logger.debug("Adding security router with /api prefix")
-    app.include_router(
-        security.router, prefix="/api", tags=["security"]
-    )  # /api/security/* (with auth)
+    logger.debug("Adding security router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, security.router, tags=["security"]
+    )  # /api/v1/security/* (+ /api alias)
     logger.debug("Security router added")
 
-    logger.debug("Adding password reset admin router with /api prefix")
-    app.include_router(
-        password_reset.admin_router, prefix="/api", tags=["password_reset"]
-    )  # /api/admin/reset-user-password (with auth)
+    logger.debug("Adding password reset admin router (native /api/v1 + alias)")
+    _include_versioned(
+        app, password_reset.admin_router, tags=["password_reset"]
+    )  # /api/v1/admin/reset-user-password (+ /api alias)
     logger.debug("Password reset admin router added")
 
-    logger.debug("Adding packages router with /api/packages prefix")
-    app.include_router(
-        packages.router, prefix="/api/packages", tags=["packages"]
-    )  # /api/packages/* (with auth)
+    logger.debug("Adding packages router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, packages.router, suffix="/packages", tags=["packages"]
+    )  # /api/v1/packages/* (+ /api alias)
     logger.debug("Packages router added")
 
-    logger.debug("Adding OpenBAO router with /api prefix")
-    app.include_router(
-        openbao.router, prefix="/api", tags=["openbao"]
-    )  # /api/openbao/* (with auth)
+    logger.debug("Adding OpenBAO router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, openbao.router, tags=["openbao"]
+    )  # /api/v1/openbao/* (+ /api alias)
     logger.debug("OpenBAO router added")
 
-    logger.debug("Adding secrets router with /api prefix")
-    app.include_router(
-        secrets.router, prefix="/api", tags=["secrets"]
-    )  # /api/secrets/* (with auth)
+    # Phase 13.2.1 (option A): OSS secrets takes a distinct v1 name
+    # (/api/v1/stored-secrets) because the Pro+ secrets_engine owns
+    # /api/v1/secrets with the same deploy-ssh-keys/deploy-certificates/types
+    # endpoints. /api/secrets kept as a deprecated alias.
+    logger.debug(
+        "Adding secrets routers (native /api/v1/stored-secrets + /api/secrets alias)"
+    )
+    # Registered as ordered sub-routers (types before crud) — their collection
+    # routes use a bare "" path that needs the non-empty feature prefix.
+    for _secrets_sub in secrets.ordered_routers:
+        _include_renamed(
+            app,
+            _secrets_sub,
+            new_prefix="/api/v1/stored-secrets",
+            old_prefix="/api/secrets",
+            tags=["secrets"],
+        )
     logger.debug("Secrets router added")
 
-    logger.debug("Adding Grafana integration router with /api prefix")
-    app.include_router(
-        grafana_integration.router, prefix="/api/grafana", tags=["grafana"]
-    )  # /api/grafana/* (with auth)
+    logger.debug("Adding Grafana integration router (native /api/v1 + alias)")
+    _include_versioned(
+        app, grafana_integration.router, suffix="/grafana", tags=["grafana"]
+    )  # /api/v1/grafana/* (+ /api alias)
     logger.debug("Grafana integration router added")
 
-    logger.debug("Adding Graylog integration router with /api prefix")
-    app.include_router(
-        graylog_integration.router, prefix="/api/graylog", tags=["graylog"]
-    )  # /api/graylog/* (with auth)
+    logger.debug("Adding Graylog integration router (native /api/v1 + alias)")
+    _include_versioned(
+        app, graylog_integration.router, suffix="/graylog", tags=["graylog"]
+    )  # /api/v1/graylog/* (+ /api alias)
     logger.debug("Graylog integration router added")
 
-    logger.debug("Adding Telemetry router with /api prefix")
-    app.include_router(
-        telemetry.router, prefix="/api/telemetry", tags=["telemetry"]
-    )  # /api/telemetry/* (with auth)
+    logger.debug("Adding Telemetry router (native /api/v1 + alias)")
+    _include_versioned(
+        app, telemetry.router, suffix="/telemetry", tags=["telemetry"]
+    )  # /api/v1/telemetry/* (+ /api alias)
     logger.debug("Telemetry router added")
 
-    logger.debug("Adding OpenTelemetry router with /api prefix")
-    app.include_router(
-        opentelemetry.router, prefix="/api/opentelemetry", tags=["opentelemetry"]
-    )  # /api/opentelemetry/* (with auth)
+    logger.debug("Adding OpenTelemetry router (native /api/v1 + alias)")
+    _include_versioned(
+        app, opentelemetry.router, suffix="/opentelemetry", tags=["opentelemetry"]
+    )  # /api/v1/opentelemetry/* (+ /api alias)
     logger.debug("OpenTelemetry router added")
 
-    logger.debug("Adding Security Roles router")
-    app.include_router(security_roles.router)  # /api/security-roles/* (with auth)
+    logger.debug("Adding Security Roles router (native /api/v1 + deprecated alias)")
+    _include_versioned(
+        app, security_roles.router
+    )  # /api/v1/security-roles/* (+ /api alias)
     logger.debug("Security Roles router added")
 
-    logger.debug("Adding Third-Party Repositories router with /api prefix")
-    app.include_router(
-        third_party_repos.router, prefix="/api", tags=["third-party-repos"]
-    )  # /api/hosts/{host_id}/third-party-repos/* (with auth)
+    logger.debug("Adding Third-Party Repositories router (native /api/v1 + alias)")
+    _include_versioned(
+        app, third_party_repos.router, tags=["third-party-repos"]
+    )  # /api/v1/hosts/{host_id}/third-party-repos/* (+ /api alias)
     logger.debug("Third-Party Repositories router added")
 
-    logger.debug("Adding Audit Log router")
-    app.include_router(audit_log.router)  # /api/audit-log/* (with auth)
+    logger.debug("Adding Audit Log router (native /api/v1 + alias)")
+    _include_versioned(app, audit_log.router)  # /api/v1/audit-log/* (+ /api alias)
     logger.debug("Audit Log router added")
 
     logger.debug(
         "Adding Default Repositories router with /api/default-repositories prefix"
     )
-    app.include_router(
+    _include_versioned(
+        app,
         default_repositories.router,
-        prefix="/api/default-repositories",
+        suffix="/default-repositories",
         tags=["default-repositories"],
-    )  # /api/default-repositories/* (with auth)
+    )  # /api/v1/default-repositories/* (+ /api alias)
     logger.debug("Default Repositories router added")
 
     logger.debug(
         "Adding Enabled Package Managers router with /api/enabled-package-managers prefix"
     )
-    app.include_router(
+    _include_versioned(
+        app,
         enabled_package_managers.router,
-        prefix="/api/enabled-package-managers",
+        suffix="/enabled-package-managers",
         tags=["enabled-package-managers"],
-    )  # /api/enabled-package-managers/* (with auth)
+    )  # /api/v1/enabled-package-managers/* (+ /api alias)
     logger.debug("Enabled Package Managers router added")
 
-    logger.debug("Adding Firewall Roles router with /api/firewall-roles prefix")
-    app.include_router(
+    logger.debug("Adding Firewall Roles router (native /api/v1 + alias)")
+    _include_versioned(
+        app,
         firewall_roles.router,
-        prefix="/api/firewall-roles",
+        suffix="/firewall-roles",
         tags=["firewall-roles"],
-    )  # /api/firewall-roles/* (with auth)
+    )  # /api/v1/firewall-roles/* (+ /api alias)
     logger.debug("Firewall Roles router added")
 
-    logger.debug("Adding Child Host router with /api prefix")
-    app.include_router(
-        child_host.router,
-        prefix="/api",
-        tags=["child-hosts"],
-    )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
+    logger.debug("Adding Child Host router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, child_host.router, tags=["child-hosts"]
+    )  # /host/{host_id}/children/*, /child-host-distributions/* (with auth)
     logger.debug("Child Host router added")
 
-    logger.debug("Adding Reboot Orchestration router with /api prefix")
-    app.include_router(
-        reboot_orchestration.router,
-        prefix="/api",
-        tags=["reboot-orchestration"],
-    )  # /api/host/{host_id}/reboot/* (with auth)
+    logger.debug("Adding Reboot Orchestration router (native /api/v1 + alias)")
+    _include_versioned(
+        app, reboot_orchestration.router, tags=["reboot-orchestration"]
+    )  # /host/{host_id}/reboot/* (with auth)
     logger.debug("Reboot Orchestration router added")
 
-    logger.debug("Adding License Management router with /api prefix")
-    app.include_router(
+    logger.debug("Adding License Management router (native /api/v1 + alias)")
+    _include_versioned(
+        app,
         license_management.router,
-        prefix="/api",
         tags=["license-management", "pro-plus"],
-    )  # /api/license/* (with auth, Pro+)
+    )  # /api/v1/license/* (+ /api alias)
     logger.debug("License Management router added")
 
     # Note: Pro+ module routes are mounted in lifecycle.py after modules are loaded
     # This ensures the compiled Cython modules are available before route mounting
     logger.debug("Pro+ module routes will be mounted after modules load in lifespan")
 
-    logger.debug("Adding Plugin Bundle router with /api prefix")
-    app.include_router(
+    logger.debug("Adding Plugin Bundle router (native /api/v1 + alias)")
+    _include_versioned(
+        app,
         plugin_bundle.router,
-        prefix="/api",
         tags=["plugins"],
-    )  # /api/plugins/* (with auth)
+    )  # /api/v1/plugins/* (+ /api alias)
     logger.debug("Plugin Bundle router added")
 
-    logger.debug("Adding CVE Refresh Settings router with /api/cve-refresh prefix")
-    app.include_router(
+    logger.debug("Adding CVE Refresh Settings router (native /api/v1 + alias)")
+    _include_versioned(
+        app,
         cve_refresh_settings.router,
-        prefix="/api/cve-refresh",
+        suffix="/cve-refresh",
         tags=["cve-refresh", "pro-plus"],
-    )  # /api/cve-refresh/* (with auth)
+    )  # /api/v1/cve-refresh/* (+ /api alias)
     logger.debug("CVE Refresh Settings router added")
 
     # NOTE: the multi-tenancy control-plane router is NOT mounted here.  It is

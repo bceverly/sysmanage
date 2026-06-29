@@ -194,7 +194,7 @@ const Dashboard = () => {
                 doGetHosts(),
                 updatesService.getUpdatesSummary(),
                 axiosInstance.get('/api/antivirus-coverage'),
-                axiosInstance.get('/api/opentelemetry/opentelemetry-coverage')
+                axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage')
             ]);
 
             processHostsResponse(hostsResponse);
@@ -212,7 +212,7 @@ const Dashboard = () => {
 
     const loadCardPreferences = async () => {
         try {
-            const response = await axiosInstance.get('/api/user-preferences/dashboard-cards');
+            const response = await axiosInstance.get('/api/v1/user-preferences/dashboard-cards');
             const prefs = response.data.preferences || [];
             const defaults: Record<string, boolean> = {
                 hosts: true,

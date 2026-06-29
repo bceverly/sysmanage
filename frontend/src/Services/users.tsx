@@ -55,7 +55,7 @@ const doAddUser = async (active: boolean, userid: string, password: string, firs
         payload['password'] = password;
     }
 
-    await api.post("/api/user", payload)
+    await api.post("/api/v1/user", payload)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -71,7 +71,7 @@ const doAddUser = async (active: boolean, userid: string, password: string, firs
 const doDeleteUser = async (id: string) => {
     let successResponse = {} as SuccessResponse;
 
-    await api.delete<SuccessResponse>("/api/user/" + id)
+    await api.delete<SuccessResponse>("/api/v1/user/" + id)
     .then((response) => {
         // No error - process response
         successResponse = response.data;
@@ -86,7 +86,7 @@ const doDeleteUser = async (id: string) => {
 
 const doGetMe = async (): Promise<SysManageUser> => {
     let result = {} as SysManageUser;
-    await api.get<SysManageUser>("/api/user/me")
+    await api.get<SysManageUser>("/api/v1/user/me")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -102,7 +102,7 @@ const doGetMe = async (): Promise<SysManageUser> => {
 const doGetUserByID = async (id: string) => {
     let result = {} as SysManageUser;
 
-    await api.get<SysManageUser>("/api/user/" + id)
+    await api.get<SysManageUser>("/api/v1/user/" + id)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -118,7 +118,7 @@ const doGetUserByID = async (id: string) => {
 const doGetUsers = async (): Promise<SysManageUser[]> => {
     let results: SysManageUser[] = [];
 
-    await api.get<SysManageUser[]>("/api/users")
+    await api.get<SysManageUser[]>("/api/v1/users")
     .then((response) => {
         // No error - process response
         results = response.data;
@@ -134,7 +134,7 @@ const doGetUsers = async (): Promise<SysManageUser[]> => {
 const doGetUserByUserid = async (userid: string) => {
     let result = {} as SysManageUser;
 
-    await api.get<SysManageUser>("/api/host/by_userid/" + userid)
+    await api.get<SysManageUser>("/api/v1/host/by_userid/" + userid)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -150,7 +150,7 @@ const doGetUserByUserid = async (userid: string) => {
 const doUpdateUser = async (id: string, active: boolean, userid: string, password: string, firstName?: string, lastName?: string) => {
     let successResponse = {} as SuccessResponse;
 
-    await api.put<SuccessResponse>("/api/user/" + id, {
+    await api.put<SuccessResponse>("/api/v1/user/" + id, {
         'active': active,
         'userid': userid,
         'password': password,
@@ -172,7 +172,7 @@ const doUpdateUser = async (id: string, active: boolean, userid: string, passwor
 const doUnlockUser = async (id: string) => {
     let result = {} as SysManageUser;
 
-    await api.post<SysManageUser>("/api/user/" + id + "/unlock")
+    await api.post<SysManageUser>("/api/v1/user/" + id + "/unlock")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -188,7 +188,7 @@ const doUnlockUser = async (id: string) => {
 const doLockUser = async (id: string) => {
     let result = {} as SysManageUser;
 
-    await api.post<SysManageUser>("/api/user/" + id + "/lock")
+    await api.post<SysManageUser>("/api/v1/user/" + id + "/lock")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -206,7 +206,7 @@ const doUploadUserImage = async (userId: string, file: globalThis.File) => {
     formData.append('file', file);
 
     try {
-        const response = await api.post(`/api/user/${userId}/image`, formData, {
+        const response = await api.post(`/api/v1/user/${userId}/image`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -220,7 +220,7 @@ const doUploadUserImage = async (userId: string, file: globalThis.File) => {
 
 const doGetUserImage = async (userId: string): Promise<globalThis.Blob> => {
     try {
-        const response = await api.get(`/api/user/${userId}/image`, {
+        const response = await api.get(`/api/v1/user/${userId}/image`, {
             responseType: 'blob'
         });
         return response.data;
@@ -232,7 +232,7 @@ const doGetUserImage = async (userId: string): Promise<globalThis.Blob> => {
 
 const doDeleteUserImage = async (userId: string) => {
     try {
-        const response = await api.delete(`/api/user/${userId}/image`);
+        const response = await api.delete(`/api/v1/user/${userId}/image`);
         return response.data;
     } catch (error) {
         processError(error as AxiosError);

@@ -64,7 +64,7 @@ const UbuntuProSettings: React.FC = () => {
 
   const loadSettings = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/api/ubuntu-pro/');
+      const response = await axiosInstance.get('/api/v1/ubuntu-pro/');
       const data = response.data;
       setMasterKey(data.master_key || '');
       setOrganizationName(data.organization_name || '');
@@ -79,7 +79,7 @@ const UbuntuProSettings: React.FC = () => {
 
   const loadKeyStatus = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/api/ubuntu-pro/master-key/status');
+      const response = await axiosInstance.get('/api/v1/ubuntu-pro/master-key/status');
       setKeyStatus(response.data);
     } catch (error) {
       console.error('Error loading master key status:', error);
@@ -110,7 +110,7 @@ const UbuntuProSettings: React.FC = () => {
         auto_attach_enabled: autoAttachEnabled,
       };
 
-      await axiosInstance.put('/api/ubuntu-pro/', payload);
+      await axiosInstance.put('/api/v1/ubuntu-pro/', payload);
       loadKeyStatus(); // Refresh status
       showSnackbar(t('ubuntuPro.messages.saveSuccess', 'Ubuntu Pro settings saved successfully'), 'success');
     } catch (error: unknown) {
@@ -125,7 +125,7 @@ const UbuntuProSettings: React.FC = () => {
   const clearMasterKey = async () => {
     setSaving(true);
     try {
-      await axiosInstance.delete('/api/ubuntu-pro/master-key');
+      await axiosInstance.delete('/api/v1/ubuntu-pro/master-key');
       setMasterKey('');
       loadKeyStatus();
       showSnackbar(t('ubuntuPro.messages.keyCleared', 'Master key cleared successfully'), 'success');

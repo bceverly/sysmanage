@@ -112,7 +112,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
     if (!canViewFirewallRoles) return;
     try {
       const response = await axiosInstance.get<HostFirewallRoleAssignment[]>(
-        `/api/firewall-roles/host/${hostId}/roles`
+        `/api/v1/firewall-roles/host/${hostId}/roles`
       );
       setHostFirewallRoles(response.data);
     } catch (err) {
@@ -124,7 +124,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
   const loadAllFirewallRoles = useCallback(async () => {
     if (!canViewFirewallRoles) return;
     try {
-      const response = await axiosInstance.get<FirewallRole[]>('/api/firewall-roles/');
+      const response = await axiosInstance.get<FirewallRole[]>('/api/v1/firewall-roles/');
       setAllFirewallRoles(response.data);
     } catch (err) {
       console.error('Error loading firewall roles:', err);
@@ -136,7 +136,7 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
     if (!canViewFirewallRoles) return;
     try {
       const response = await axiosInstance.get<ExpectedPorts>(
-        `/api/firewall-roles/host/${hostId}/expected-ports`
+        `/api/v1/firewall-roles/host/${hostId}/expected-ports`
       );
       setExpectedPorts(response.data);
     } catch (err) {
@@ -264,14 +264,14 @@ const FirewallStatusCard: React.FC<FirewallStatusCardProps> = ({
       for (const roleId of rolesToRemove) {
         const assignment = hostFirewallRoles.find(r => r.firewall_role_id === roleId);
         if (assignment) {
-          await axiosInstance.delete(`/api/firewall-roles/host/${hostId}/roles/${assignment.id}`);
+          await axiosInstance.delete(`/api/v1/firewall-roles/host/${hostId}/roles/${assignment.id}`);
         }
       }
 
       // Add new roles
       for (const role of pendingRoles) {
         if (role.id.startsWith('new-')) {
-          await axiosInstance.post(`/api/firewall-roles/host/${hostId}/roles`, {
+          await axiosInstance.post(`/api/v1/firewall-roles/host/${hostId}/roles`, {
             firewall_role_id: role.firewall_role_id,
           });
         }

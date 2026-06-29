@@ -87,7 +87,7 @@ const AuditLogViewer: React.FC = () => {
       if (startDate) params.start_date = new Date(startDate).toISOString();
       if (endDate) params.end_date = new Date(endDate).toISOString();
 
-      const response = await api.get('/api/audit-log/list', { params });
+      const response = await api.get('/api/v1/audit-log/list', { params });
       setEntries(response.data.entries);
       setTotal(response.data.total);
     } catch (error) {
@@ -134,7 +134,7 @@ const AuditLogViewer: React.FC = () => {
       if (startDate) params.start_date = new Date(startDate).toISOString();
       if (endDate) params.end_date = new Date(endDate).toISOString();
 
-      const response = await api.get('/api/audit-log/export', {
+      const response = await api.get('/api/v1/audit-log/export', {
         params,
         responseType: 'blob',
       });

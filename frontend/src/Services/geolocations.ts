@@ -23,7 +23,7 @@ export interface HostGeolocation {
 
 export async function doGetHostGeolocations(): Promise<HostGeolocation[]> {
   const response = await axiosInstance.get<HostGeolocation[]>(
-    "/api/hosts/geolocations",
+    "/api/v1/hosts/geolocations",
   );
   return response.data;
 }

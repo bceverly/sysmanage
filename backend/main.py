@@ -18,6 +18,7 @@ from backend.startup.cors_config import get_cors_origins
 from backend.startup.exception_handlers import register_exception_handlers
 from backend.startup.lifecycle import lifespan
 from backend.startup.logging_config import configure_logging
+from backend.startup.openapi_config import get_openapi_kwargs
 from backend.startup.route_registration import register_app_routes, register_routes
 from backend.telemetry.otel_config import setup_telemetry
 from backend.utils.verbosity_logger import get_logger
@@ -48,7 +49,7 @@ configure_logging()
 # Start the application
 startup_logger.info("=== CREATING FASTAPI APPLICATION ===")
 startup_logger.info("Creating FastAPI app with lifespan manager")
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, **get_openapi_kwargs())
 startup_logger.info("FastAPI app created successfully")
 startup_logger.info(
     "App info - Title: %s, Version: %s",
@@ -124,6 +125,13 @@ from backend.startup.tenant_middleware import ActiveTenantMiddleware  # noqa: E4
 app.add_middleware(ActiveTenantMiddleware)
 startup_logger.info("Active-tenant middleware added")
 
+# Request rate limiting (Phase 13.2).  Opt-in (disabled by default); added
+# inside CORS so CORS preflight is handled first and never counted.
+from backend.startup.rate_limit_middleware import RateLimitMiddleware  # noqa: E402
+
+app.add_middleware(RateLimitMiddleware)
+startup_logger.info("Rate-limit middleware added")
+
 startup_logger.info("Adding CORS middleware to FastAPI app")
 app.add_middleware(
     CORSMiddleware,
@@ -134,6 +142,13 @@ app.add_middleware(
     expose_headers=["Authorization"],
 )
 startup_logger.info("CORS middleware added successfully")
+
+# API versioning (Phase 13.2).  Outermost so ``/api/v1/...`` is normalised to
+# the canonical ``/api/...`` before any other middleware or routing runs.
+from backend.startup.api_version_middleware import ApiVersionMiddleware  # noqa: E402
+
+app.add_middleware(ApiVersionMiddleware, fastapi_app=app)
+startup_logger.info("API-version middleware added")
 
 # Add exception handlers to ensure CORS headers are always present
 register_exception_handlers(app, origins)

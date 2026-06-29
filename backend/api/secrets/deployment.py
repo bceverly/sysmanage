@@ -35,7 +35,7 @@ def _check_secrets_module():
     return secrets_engine
 
 
-@router.post("/secrets/deploy-ssh-keys", dependencies=[Depends(JWTBearer())])
+@router.post("/deploy-ssh-keys", dependencies=[Depends(JWTBearer())])
 async def deploy_ssh_keys(
     deploy_request: SSHKeyDeployRequest,
     db=Depends(get_db),
@@ -54,7 +54,7 @@ async def deploy_ssh_keys(
     )
 
 
-@router.post("/secrets/deploy-certificates", dependencies=[Depends(JWTBearer())])
+@router.post("/deploy-certificates", dependencies=[Depends(JWTBearer())])
 async def deploy_certificates(
     deploy_request: CertificateDeployRequest,
     db=Depends(get_db),

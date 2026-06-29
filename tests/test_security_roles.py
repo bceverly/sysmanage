@@ -134,7 +134,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         # Setup mocks
         mock_user = MagicMock()
@@ -177,7 +177,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.first.return_value = None
@@ -198,7 +198,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         mock_user = MagicMock()
         mock_user.id = uuid4()
@@ -229,7 +229,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -269,7 +269,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -301,7 +301,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -337,7 +337,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -390,7 +390,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -430,7 +430,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -472,7 +472,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -505,7 +505,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -531,7 +531,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router)
+        app.include_router(router, prefix="/api")
 
         user_id = uuid4()
 
@@ -566,7 +566,9 @@ class TestRouterConfiguration:
         """Test router has correct prefix."""
         from backend.api.security_roles import router
 
-        assert router.prefix == "/api/security-roles"
+        # Phase 13.2.1: the /api part moved to registration (_include_versioned),
+        # so the router now carries just /security-roles.
+        assert router.prefix == "/security-roles"
 
     def test_router_tags(self):
         """Test router has correct tags."""

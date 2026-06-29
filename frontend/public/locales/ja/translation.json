@@ -121,7 +121,11 @@
     "unknown": "不明",
     "update": "更新",
     "selected": "選択済み",
-    "view": "表示"
+    "view": "表示",
+    "copied": "コピーしました",
+    "copy": "コピー",
+    "create": "作成",
+    "done": "完了"
   },
   "connectionStatus": {
     "connected": "接続済み",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "設定タブ"
+  },
+  "apiKeys": {
+    "active": "有効",
+    "confirmRevoke": "この API キーを無効にしてもよろしいですか？ 使用している自動化プロセスはすぐに停止します。",
+    "copyWarning": "このキーを今すぐコピーしてください — その後表示されなくなります。",
+    "create": "API キーの作成",
+    "createError": "API キーを作成できませんでした。",
+    "created": "作成されました",
+    "createdTitle": "API キー作成",
+    "description": "API キーを使用して自動化プロセスが API に認証できるようにします。パスワードと同じように取り扱ってください。",
+    "expires": "有効期限",
+    "expiresOptional": "有効期限（任意）",
+    "lastUsed": "最終使用日時",
+    "loadError": "API キーを読み込めませんでした。",
+    "name": "名前",
+    "prefix": "キーの接頭辞",
+    "revoke": "無効にする",
+    "revokeError": "API キーを無効にできませんでした。",
+    "revoked": "無効にしました",
+    "status": "ステータス",
+    "title": "API Keys"
   }
 }

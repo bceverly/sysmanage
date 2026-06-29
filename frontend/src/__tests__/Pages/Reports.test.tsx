@@ -110,7 +110,7 @@ describe('Reports Page', () => {
 
     // Mock the permissions API endpoint - set default implementation
     mockApiGet.mockImplementation((url: string) => {
-      if (url === '/api/user/permissions') {
+      if (url === '/api/v1/user/permissions') {
         return Promise.resolve({
           data: {
             is_admin: false,
@@ -121,7 +121,7 @@ describe('Reports Page', () => {
           },
         });
       }
-      if (url.includes('/api/reports/generate/')) {
+      if (url.includes('/api/v1/reporting/generate/')) {
         // Default mock for report generation
         return Promise.resolve({
           data: new Blob(['mock pdf content'], { type: 'application/pdf' }),
@@ -145,7 +145,7 @@ describe('Reports Page', () => {
 
     // Wait for permissions to load
     await waitFor(() => {
-      expect(mockApiGet).toHaveBeenCalledWith('/api/user/permissions');
+      expect(mockApiGet).toHaveBeenCalledWith('/api/v1/user/permissions');
     });
 
     expect(screen.getByText('Reports')).toBeInTheDocument();
@@ -225,7 +225,7 @@ describe('Reports Page', () => {
     let callCount = 0;
     mockApiGet.mockImplementation((url: string) => {
       callCount++;
-      if (url === '/api/user/permissions' || callCount === 1) {
+      if (url === '/api/v1/user/permissions' || callCount === 1) {
         return Promise.resolve({
           data: {
             is_admin: false,
@@ -262,7 +262,7 @@ describe('Reports Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/generate/registered-hosts',
+        '/api/v1/reporting/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
         })
@@ -279,7 +279,7 @@ describe('Reports Page', () => {
     let callCount = 0;
     mockApiGet.mockImplementation((url: string) => {
       callCount++;
-      if (url === '/api/user/permissions' || callCount === 1) {
+      if (url === '/api/v1/user/permissions' || callCount === 1) {
         return Promise.resolve({
           data: {
             is_admin: false,
@@ -322,7 +322,7 @@ describe('Reports Page', () => {
     let callCount = 0;
     mockApiGet.mockImplementation((url: string) => {
       callCount++;
-      if (url === '/api/user/permissions' || callCount === 1) {
+      if (url === '/api/v1/user/permissions' || callCount === 1) {
         return Promise.resolve({
           data: {
             is_admin: false,
@@ -455,7 +455,7 @@ describe('Reports Page', () => {
     // Reset and setup fresh mock - need to handle permissions call first
     mockApiGet.mockReset();
     mockApiGet.mockImplementation((url: string) => {
-      if (url === '/api/user/permissions') {
+      if (url === '/api/v1/user/permissions') {
         return Promise.resolve({
           data: {
             is_admin: false,
@@ -487,7 +487,7 @@ describe('Reports Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/generate/registered-hosts',
+        '/api/v1/reporting/generate/registered-hosts',
         expect.objectContaining({
           responseType: 'blob',
         })
@@ -508,7 +508,7 @@ describe('Reports Page', () => {
     let callCount = 0;
     mockApiGet.mockImplementation((url: string) => {
       callCount++;
-      if (url === '/api/user/permissions' || callCount === 1) {
+      if (url === '/api/v1/user/permissions' || callCount === 1) {
         return Promise.resolve({
           data: {
             is_admin: false,

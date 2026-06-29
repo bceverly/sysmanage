@@ -22,7 +22,7 @@ from backend.persistence import db as db_module
 from backend.persistence.partitions import request_sessionmaker
 from backend.persistence.tenant_context import get_active_tenant
 
-router = APIRouter(prefix="/api/reports", tags=["reports"])
+router = APIRouter(tags=["reports"])
 
 
 # Define allowed report types to prevent injection

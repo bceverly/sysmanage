@@ -121,7 +121,11 @@
     "unknown": "Inconnu",
     "update": "Mettre à jour",
     "selected": "Sélectionné",
-    "view": "Afficher"
+    "view": "Afficher",
+    "copied": "Copié",
+    "copy": "Copier",
+    "create": "Créer",
+    "done": "Terminé"
   },
   "connectionStatus": {
     "connected": "Connecté",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "onglets des paramètres"
+  },
+  "apiKeys": {
+    "active": "Actif",
+    "confirmRevoke": "Voulez-vous vraiment révoquer cette clé API ? Toute automatisation qui en fait usage cessera immédiatement de fonctionner.",
+    "copyWarning": "Copiez cette clé maintenant — elle ne sera pas affichée une seconde fois.",
+    "create": "Créer une clé API",
+    "createError": "Impossible de créer la clé API.",
+    "created": "Créé",
+    "createdTitle": "Clé API créée",
+    "description": "Les clés API permettent à l'automatisation de s'authentifier via l'API au nom du compte. Traitez-les comme des mots de passe.",
+    "expires": "Expiration",
+    "expiresOptional": "Date d'expiration (facultatif)",
+    "lastUsed": "Dernière utilisation",
+    "loadError": "Impossible de charger les clés API.",
+    "name": "Nom",
+    "prefix": "Préfixe de la clé",
+    "revoke": "Révoquer",
+    "revokeError": "Impossible de révoquer la clé API.",
+    "revoked": "Révoqué",
+    "status": "Statut",
+    "title": "API Keys"
   }
 }

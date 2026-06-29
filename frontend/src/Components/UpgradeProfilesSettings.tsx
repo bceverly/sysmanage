@@ -106,7 +106,7 @@ const UpgradeProfilesSettings: React.FC = () => {
     try {
       const [p, tagResp] = await Promise.all([
         upgradeProfilesService.list(),
-        axiosInstance.get('/api/tags'),
+        axiosInstance.get('/api/v1/tags'),
       ]);
       setProfiles(p);
       setTags(tagResp.data || []);

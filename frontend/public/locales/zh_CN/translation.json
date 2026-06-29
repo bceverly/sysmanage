@@ -121,7 +121,11 @@
     "unknown": "未知",
     "update": "更新",
     "selected": "已选",
-    "view": "查看"
+    "view": "查看",
+    "copied": "已复制",
+    "copy": "复制",
+    "create": "创建",
+    "done": "完成"
   },
   "connectionStatus": {
     "connected": "已连接",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "设置选项卡"
+  },
+  "apiKeys": {
+    "active": "活动",
+    "confirmRevoke": "关于恢复此个 API 链目？仅从前使用它的活动结束。",
+    "copyWarning": "现在复制此链目？它不会再正在显示。",
+    "create": "创建 API 密钥",
+    "createError": "无法创建 API 密钥。",
+    "created": "已创建",
+    "createdTitle": "API密钥已创建",
+    "description": "API密钥允许自动化程序以您的身份进行身份验证。请妥善保管，如同对待密码一样处理它们。",
+    "expires": "将选期",
+    "expiresOptional": "将选期（可选）",
+    "lastUsed": "主要使用时间",
+    "loadError": "无法加载 API 密钥。",
+    "name": "名称",
+    "prefix": "密钥前缀",
+    "revoke": "撤销",
+    "revokeError": "无法撤销 API 密钥。",
+    "revoked": "已撤销",
+    "status": "状态",
+    "title": "API密钥"
   }
 }

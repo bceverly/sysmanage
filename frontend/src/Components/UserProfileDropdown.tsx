@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 import {
     Person as PersonIcon,
-    Logout as LogoutIcon
+    Logout as LogoutIcon,
+    VpnKey as VpnKeyIcon
 } from '@mui/icons-material';
 
 // Extend window interface for global function
@@ -53,7 +54,7 @@ const UserProfileDropdown: React.FC = () => {
         
         try {
             // First check if user has a profile image via the profile endpoint
-            const profileResponse = await axiosInstance.get('/api/profile');
+            const profileResponse = await axiosInstance.get('/api/v1/profile');
             
             if (!profileResponse.data.has_profile_image) {
                 // User doesn't have a profile image, don't try to fetch it
@@ -62,7 +63,7 @@ const UserProfileDropdown: React.FC = () => {
             }
 
             // User has a profile image, fetch it
-            const response = await axiosInstance.get('/api/profile/image', {
+            const response = await axiosInstance.get('/api/v1/profile/image', {
                 responseType: 'blob'
             });
 
@@ -113,6 +114,11 @@ const UserProfileDropdown: React.FC = () => {
     const handleProfile = () => {
         handleClose();
         navigate('/profile');
+    };
+
+    const handleApiKeys = () => {
+        handleClose();
+        navigate('/api-keys');
     };
 
     const handleLogout = () => {
@@ -187,7 +193,15 @@ const UserProfileDropdown: React.FC = () => {
                     </ListItemIcon>
                     <ListItemText primary={t('userProfile.profile', 'Profile')} />
                 </MenuItem>
-                
+
+                {/* API Keys link (Phase 13.2) */}
+                <MenuItem onClick={handleApiKeys}>
+                    <ListItemIcon>
+                        <VpnKeyIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={t('apiKeys.title', 'API Keys')} />
+                </MenuItem>
+
                 <Divider />
                 
                 {/* Logout link */}

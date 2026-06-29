@@ -239,7 +239,7 @@ const Settings: React.FC = () => {
         labelDefault: 'Update Profiles',
         // Phase 10.6: scheduled upgrade profiles moved to the Pro+
         // ``automation_engine`` (cron + per-host dispatch live there).
-        // The OSS server returns 402 from every /api/upgrade-profiles
+        // The OSS server returns 402 from every /api/v1/upgrade-profiles
         // route without it, so the tab simply hides.
         moduleRequired: 'automation_engine',
       },
@@ -250,7 +250,7 @@ const Settings: React.FC = () => {
         // Phase 11.5: package compliance profiles moved to the Pro+
         // ``compliance_engine`` (evaluator + remediation-plan builder
         // live there).  The OSS server returns 402 from every
-        // /api/package-profiles route without it, so the tab simply
+        // /api/v1/package-profiles route without it, so the tab simply
         // hides for unlicensed deployments.
         moduleRequired: 'compliance_engine',
       },
@@ -502,7 +502,7 @@ const Settings: React.FC = () => {
   const loadTags = useCallback(async () => {
     setTagsLoading(true);
     try {
-      const response = await axiosInstance.get('/api/tags');
+      const response = await axiosInstance.get('/api/v1/tags');
       setTags(response.data);
     } catch (error) {
       console.error('Error fetching tags:', error);
@@ -556,7 +556,7 @@ const Settings: React.FC = () => {
     if (!tagName.trim()) return;
     
     try {
-      await axiosInstance.post('/api/tags', {
+      await axiosInstance.post('/api/v1/tags', {
         name: tagName.trim(),
         description: tagDescription.trim() || null
       });
@@ -575,7 +575,7 @@ const Settings: React.FC = () => {
     if (!editingTag || !tagName.trim()) return;
     
     try {
-      await axiosInstance.put(`/api/tags/${editingTag.id}`, {
+      await axiosInstance.put(`/api/v1/tags/${editingTag.id}`, {
         name: tagName.trim(),
         description: tagDescription.trim() || null
       });
@@ -596,7 +596,7 @@ const Settings: React.FC = () => {
     
     try {
       const deletePromises = selectedTags.map(id =>
-        axiosInstance.delete(`/api/tags/${id}`)
+        axiosInstance.delete(`/api/v1/tags/${id}`)
       );
       
       await Promise.all(deletePromises);
@@ -610,7 +610,7 @@ const Settings: React.FC = () => {
   // Handle view hosts for tag
   const handleViewHosts = async (tagId: number) => {
     try {
-      const response = await axiosInstance.get(`/api/tags/${tagId}/hosts`);
+      const response = await axiosInstance.get(`/api/v1/tags/${tagId}/hosts`);
       setViewingTag(response.data);
       setViewHostsDialogOpen(true);
     } catch (error) {
@@ -630,7 +630,7 @@ const Settings: React.FC = () => {
   const loadQueueMessages = useCallback(async () => {
     setQueueLoading(true);
     try {
-      const response = await axiosInstance.get('/api/queue/failed');
+      const response = await axiosInstance.get('/api/v1/queue/failed');
       setQueueMessages(response.data);
     } catch (error) {
       console.error('Error fetching queue messages:', error);
@@ -644,7 +644,7 @@ const Settings: React.FC = () => {
     if (selectedMessages.length === 0) return;
     
     try {
-      await axiosInstance.delete('/api/queue/failed', {
+      await axiosInstance.delete('/api/v1/queue/failed', {
         data: selectedMessages
       });
       
@@ -658,7 +658,7 @@ const Settings: React.FC = () => {
   // Handle view message details
   const handleViewMessage = async (messageId: string) => {
     try {
-      const response = await axiosInstance.get(`/api/queue/failed/${messageId}`);
+      const response = await axiosInstance.get(`/api/v1/queue/failed/${messageId}`);
       setSelectedMessage(response.data);
       setMessageDetailOpen(true);
     } catch (error) {
@@ -670,7 +670,7 @@ const Settings: React.FC = () => {
   const loadPackageSummary = useCallback(async () => {
     setPackageSummaryLoading(true);
     try {
-      const response = await axiosInstance.get('/api/packages/summary');
+      const response = await axiosInstance.get('/api/v1/packages/summary');
       setPackageSummary(response.data);
     } catch (error) {
       console.error('Error fetching package summary:', error);
@@ -713,7 +713,7 @@ const Settings: React.FC = () => {
       }
 
       // Get total count for proper pagination
-      const countResponse = await axiosInstance.get('/api/packages/search/count', { params });
+      const countResponse = await axiosInstance.get('/api/v1/packages/search/count', { params });
       setPackageTotalCount(countResponse.data.total_count);
 
       // Get the actual page data
@@ -723,7 +723,7 @@ const Settings: React.FC = () => {
         offset: page * pageSize
       };
 
-      const response = await axiosInstance.get('/api/packages/search', { params: searchParams });
+      const response = await axiosInstance.get('/api/v1/packages/search', { params: searchParams });
       setPackages(response.data);
     } catch (error) {
       console.error('Error searching packages:', error);
@@ -737,7 +737,7 @@ const Settings: React.FC = () => {
   // Refresh packages for a specific OS/version
   const refreshPackagesForOS = useCallback(async (osName: string, osVersion: string) => {
     try {
-      const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+      const response = await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
       if (response.data.success) {
         // Show success message and reload package summary
         console.log('Package refresh requested successfully:', response.data.message);
@@ -758,7 +758,7 @@ const Settings: React.FC = () => {
         // Refresh packages for all known OS/version combinations from package summaries
         for (const summary of packageSummary) {
           try {
-            await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
+            await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
           } catch (error) {
             console.error('Error refreshing packages for', summary.os_name, summary.os_version, ':', error);
           }
@@ -766,7 +766,7 @@ const Settings: React.FC = () => {
       } else {
         // No package summaries exist yet, discover active hosts and trigger collection
         try {
-          const hostsResponse = await axiosInstance.get('/api/hosts');
+          const hostsResponse = await axiosInstance.get('/api/v1/hosts');
           const activeHosts = hostsResponse.data.filter((host: Host) => host.active && host.approval_status === 'approved');
 
           // Create unique OS/version combinations
@@ -781,7 +781,7 @@ const Settings: React.FC = () => {
           for (const combination of Array.from(osVersionCombinations)) {
             const [osName, osVersion] = combination.split('|');
             try {
-              await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+              await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
             } catch (error) {
               console.error('Error refreshing packages for', osName, osVersion, ':', error);
             }

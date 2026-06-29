@@ -47,7 +47,7 @@ const OpenTelemetryStatusCard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/api/telemetry/opentelemetry/status');
+      const response = await axiosInstance.get('/api/v1/telemetry/opentelemetry/status');
       setStatus(response.data);
     } catch (err: unknown) {
       console.error('Error fetching OpenTelemetry status:', err);

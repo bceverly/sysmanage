@@ -888,7 +888,7 @@ const Hosts = () => {
     // Load all tags for filtering
     const loadAllTags = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/api/tags');
+            const response = await axiosInstance.get('/api/v1/tags');
             setAllTags(response.data);
         } catch (error) {
             console.error('Error loading tags:', error);

@@ -61,32 +61,32 @@ export interface ScriptExecutionResponse {
 export const scriptsService = {
   // Saved scripts management
   async getSavedScripts(): Promise<Script[]> {
-    const response = await axiosInstance.get('/api/scripts/');
+    const response = await axiosInstance.get('/api/v1/scripts/');
     return response.data;
   },
 
   async createScript(script: Omit<Script, 'id' | 'created_by' | 'created_at' | 'updated_at'>): Promise<Script> {
-    const response = await axiosInstance.post('/api/scripts/', script);
+    const response = await axiosInstance.post('/api/v1/scripts/', script);
     return response.data;
   },
 
   async updateScript(id: string, script: Partial<Script>): Promise<Script> {
-    const response = await axiosInstance.put(`/api/scripts/${id}`, script);
+    const response = await axiosInstance.put(`/api/v1/scripts/${id}`, script);
     return response.data;
   },
 
   async deleteScript(id: string): Promise<void> {
-    await axiosInstance.delete(`/api/scripts/${id}`);
+    await axiosInstance.delete(`/api/v1/scripts/${id}`);
   },
 
   async getScript(id: string): Promise<Script> {
-    const response = await axiosInstance.get(`/api/scripts/${id}`);
+    const response = await axiosInstance.get(`/api/v1/scripts/${id}`);
     return response.data;
   },
 
   // Script execution
   async executeScript(executeRequest: ExecuteScriptRequest): Promise<ScriptExecutionResponse> {
-    const response = await axiosInstance.post('/api/scripts/execute', executeRequest);
+    const response = await axiosInstance.post('/api/v1/scripts/execute', executeRequest);
     return response.data;
   },
 
@@ -97,19 +97,19 @@ export const scriptsService = {
     page: number;
     pages: number;
   }> {
-    const response = await axiosInstance.get('/api/scripts/executions/', {
+    const response = await axiosInstance.get('/api/v1/scripts/executions/', {
       params: { page, limit }
     });
     return response.data;
   },
 
   async getScriptExecution(id: string | number): Promise<ScriptExecution> {
-    const response = await axiosInstance.get(`/api/scripts/executions/${id}`);
+    const response = await axiosInstance.get(`/api/v1/scripts/executions/${id}`);
     return response.data;
   },
 
   async deleteScriptExecution(id: string | number): Promise<void> {
-    await axiosInstance.delete(`/api/scripts/executions/${id}`);
+    await axiosInstance.delete(`/api/v1/scripts/executions/${id}`);
   },
 
   async deleteScriptExecutionsBulk(executionIds: (string | number)[]): Promise<void> {
@@ -118,14 +118,14 @@ export const scriptsService = {
     console.log('Sending bulk delete request for execution IDs:', stringIds);
     await axiosInstance.request({
       method: 'DELETE',
-      url: '/api/scripts/executions/bulk',
+      url: '/api/v1/scripts/executions/bulk',
       data: stringIds
     });
   },
 
   // Hosts (for host selection)
   async getActiveHosts(): Promise<Host[]> {
-    const response = await axiosInstance.get('/api/hosts');
+    const response = await axiosInstance.get('/api/v1/hosts');
     // Filter for approved hosts that are either active or currently up
     return response.data.filter((host: Host) => 
       host.approval_status === 'approved' && (host.active === true || host.status === 'up')

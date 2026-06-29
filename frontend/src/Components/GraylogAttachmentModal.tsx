@@ -122,7 +122,7 @@ const GraylogAttachmentModal: React.FC<GraylogAttachmentModalProps> = ({
                 return;
             }
 
-            const settingsResponse = await axiosInstance.get('/api/graylog/settings');
+            const settingsResponse = await axiosInstance.get('/api/v1/graylog/settings');
             const settings = settingsResponse.data;
 
             setGraylogServer(extractServerAddress(settings));

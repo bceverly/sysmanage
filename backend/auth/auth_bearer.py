@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from backend.auth.api_key import authenticate_api_key, looks_like_api_key
 from backend.auth.auth_handler import decode_jwt
 from backend.config import config
 from backend.i18n import _
@@ -51,16 +52,23 @@ class JWTBearer(HTTPBearer):
         regular endpoints — their only valid recipient is
         ``/api/auth/mfa/verify``, which decodes them via
         ``decode_mfa_pending_token`` directly.
+
+        Phase 13.2: when the credential is not a valid JWT, it may be an API
+        key (``smk_`` prefix) presented in the same Bearer header — those are
+        validated against the ``api_key`` table so automation can reach every
+        JWT-protected endpoint unchanged.
         """
         try:
             payload = decode_jwt(jwtoken)
         except (ValueError, TypeError, KeyError):
             payload = None
-        if not payload:
-            return False
-        if payload.get("mfa_pending"):
-            return False
-        return True
+        if payload:
+            if payload.get("mfa_pending"):
+                return False
+            return True
+        if looks_like_api_key(jwtoken):
+            return authenticate_api_key(jwtoken) is not None
+        return False
 
 
 async def get_current_user(  # NOSONAR
@@ -78,6 +86,13 @@ async def get_current_user(  # NOSONAR
         # we intentionally swallow the specific exception details rather
         # than echoing them back to the client.
         payload = None  # noqa: F841 — placates py/empty-except
+
+    # Phase 13.2: fall back to API-key auth when the credential is an API key
+    # rather than a JWT, so automation resolves to the owning user's identity.
+    if looks_like_api_key(token):
+        principal = authenticate_api_key(token)
+        if principal and principal.get("user_id"):
+            return principal["user_id"]
 
     raise HTTPException(status_code=401, detail=_("Could not validate credentials"))
 
@@ -145,6 +160,11 @@ async def get_current_tenant(  # NOSONAR
         payload = decode_jwt(token) or {}
     except (ValueError, TypeError, KeyError):
         payload = {}
+
+    # Phase 13.2: API keys carry their tenant pin in the api_key row, not a JWT
+    # claim — resolve the principal the same way when the credential is a key.
+    if not payload and looks_like_api_key(token):
+        payload = authenticate_api_key(token) or {}
 
     tenant_id = payload.get("tenant_id")
     if not tenant_id:

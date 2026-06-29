@@ -549,6 +549,15 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             logger.info("=== MOUNTING PRO+ STUB ROUTES FOR COMMUNITY EDITION ===")
             mount_proplus_routes(_fastapi_app)
 
+        # Phase 13.2.1: now that OSS + Pro+ (engine or stub) routes are all
+        # mounted, fail fast if any two share the same method+path — this is the
+        # only point where the OSS↔Pro+ route seam is fully assembled.
+        from backend.startup.route_registration import (  # noqa: PLC0415
+            check_route_collisions,
+        )
+
+        check_route_collisions(_fastapi_app)
+
         # Startup: Start the heartbeat monitor service
         logger.info("=== HEARTBEAT MONITOR STARTUP ===")
         logger.info("About to start heartbeat monitor service")

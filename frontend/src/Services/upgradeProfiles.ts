@@ -41,26 +41,26 @@ export interface TriggerResult {
 
 export const upgradeProfilesService = {
   async list(): Promise<UpgradeProfile[]> {
-    const r = await axiosInstance.get('/api/upgrade-profiles');
+    const r = await axiosInstance.get('/api/v1/upgrade-profiles');
     return r.data;
   },
 
   async create(payload: UpgradeProfileCreate): Promise<UpgradeProfile> {
-    const r = await axiosInstance.post('/api/upgrade-profiles', payload);
+    const r = await axiosInstance.post('/api/v1/upgrade-profiles', payload);
     return r.data;
   },
 
   async update(id: string, payload: UpgradeProfileUpdate): Promise<UpgradeProfile> {
-    const r = await axiosInstance.put(`/api/upgrade-profiles/${id}`, payload);
+    const r = await axiosInstance.put(`/api/v1/upgrade-profiles/${id}`, payload);
     return r.data;
   },
 
   async remove(id: string): Promise<void> {
-    await axiosInstance.delete(`/api/upgrade-profiles/${id}`);
+    await axiosInstance.delete(`/api/v1/upgrade-profiles/${id}`);
   },
 
   async trigger(id: string): Promise<TriggerResult> {
-    const r = await axiosInstance.post(`/api/upgrade-profiles/${id}/trigger`);
+    const r = await axiosInstance.post(`/api/v1/upgrade-profiles/${id}/trigger`);
     return r.data;
   },
 };

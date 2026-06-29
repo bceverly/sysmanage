@@ -154,7 +154,7 @@ describe('ReportViewer Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/view/hosts',
+        '/api/v1/reporting/view/hosts',
         expect.objectContaining({
           responseType: 'text',
         })
@@ -249,7 +249,7 @@ describe('ReportViewer Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/generate/hosts',
+        '/api/v1/reporting/generate/hosts',
         expect.objectContaining({
           responseType: 'blob',
         })
@@ -328,7 +328,7 @@ describe('ReportViewer Page', () => {
 
     await waitFor(() => {
       expect(mockApiGet).toHaveBeenCalledWith(
-        '/api/reports/view/users',
+        '/api/v1/reporting/view/users',
         expect.objectContaining({
           responseType: 'text',
         })

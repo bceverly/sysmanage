@@ -32,7 +32,16 @@ from backend.persistence.db import get_db
 from backend.utils.verbosity_logger import sanitize_log
 
 logger = logging.getLogger(__name__)
+
+# Phase 13.2.1 — two routers so versioning can split the surface:
+#   * ``mgmt_router`` — IdP provider/settings management (UI-facing). Registered
+#     under native /api/v1 (+ deprecated /api alias) via ``_include_versioned``.
+#   * ``router`` — the SSO/ACS/metadata callback endpoints, whose URLs are
+#     configured in the external IdP. These STAY unversioned (changing them would
+#     require every customer to reconfigure their IdP), so they keep their full
+#     ``/api/auth/...`` decorator paths and are registered as-is.
 router = APIRouter()
+mgmt_router = APIRouter()
 
 # Prefix marking a local-development literal secret reference.
 _LITERAL_PREFIX = "literal:"
@@ -223,7 +232,7 @@ class IdpSettingsRequest(BaseModel):
 # ---------------------------------------------------------------------
 
 
-@router.get("/api/idp-providers", dependencies=[Depends(JWTBearer())])
+@mgmt_router.get("/idp-providers", dependencies=[Depends(JWTBearer())])
 async def list_providers(db: Session = Depends(get_db)):
     _check_idp_module()
     rows = (
@@ -234,7 +243,7 @@ async def list_providers(db: Session = Depends(get_db)):
     return [r.to_dict() for r in rows]
 
 
-@router.post("/api/idp-providers", dependencies=[Depends(JWTBearer())])
+@mgmt_router.post("/idp-providers", dependencies=[Depends(JWTBearer())])
 async def create_provider(
     request: ProviderCreateRequest, db: Session = Depends(get_db)
 ):
@@ -246,13 +255,13 @@ async def create_provider(
     return row.to_dict()
 
 
-@router.get("/api/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
+@mgmt_router.get("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
 async def get_provider(provider_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     return _get_provider_or_404(db, provider_id).to_dict()
 
 
-@router.put("/api/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
+@mgmt_router.put("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
 async def update_provider(
     provider_id: str,
     request: ProviderUpdateRequest,
@@ -267,7 +276,7 @@ async def update_provider(
     return row.to_dict()
 
 
-@router.delete("/api/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
+@mgmt_router.delete("/idp-providers/{provider_id}", dependencies=[Depends(JWTBearer())])
 async def delete_provider(provider_id: str, db: Session = Depends(get_db)):
     _check_idp_module()
     row = _get_provider_or_404(db, provider_id)
@@ -366,13 +375,13 @@ async def delete_mapping(
 # ---------------------------------------------------------------------
 
 
-@router.get("/api/settings/idp", dependencies=[Depends(JWTBearer())])
+@mgmt_router.get("/settings/idp", dependencies=[Depends(JWTBearer())])
 async def get_idp_settings(db: Session = Depends(get_db)):
     _check_idp_module()
     return _get_settings(db).to_dict()
 
 
-@router.put("/api/settings/idp", dependencies=[Depends(JWTBearer())])
+@mgmt_router.put("/settings/idp", dependencies=[Depends(JWTBearer())])
 async def update_idp_settings(
     request: IdpSettingsRequest = Body(...), db: Session = Depends(get_db)
 ):

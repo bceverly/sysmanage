@@ -80,7 +80,7 @@ export const PluginProvider: React.FC<PluginProviderProps> = ({ children }) => {
             // request, so no server-side CORS allow-list is needed for the UI.
             const baseURL = '';
 
-            const response = await fetch(`${baseURL}/api/plugins/bundles`, {
+            const response = await fetch(`${baseURL}/api/v1/plugins/bundles`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 

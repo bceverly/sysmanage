@@ -7,6 +7,7 @@ All models are re-exported here for backward compatibility.
 
 # Re-export all models for backward compatibility
 from .access_groups import *
+from .api_key import *
 from .airgap import *
 from .airgap_bundle import *
 from .child_host import *
@@ -38,6 +39,8 @@ __all__ = [
     "Host",
     "User",
     "generate_secure_host_token",
+    # API keys (Phase 13.2)
+    "ApiKey",
     # Server-wide configuration singleton
     "ServerConfiguration",
     # Hardware models

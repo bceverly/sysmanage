@@ -121,7 +121,11 @@
     "unknown": "未知",
     "update": "更新",
     "selected": "已選取",
-    "view": "檢視"
+    "view": "檢視",
+    "copied": "已複製",
+    "copy": "複製",
+    "create": "建立",
+    "done": "完成"
   },
   "connectionStatus": {
     "connected": "已連線",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "設置選項卡"
+  },
+  "apiKeys": {
+    "active": "啟用",
+    "confirmRevoke": "只有一样允许拒措此接口關鍵？你的激活管理程式将立刻停止工作。",
+    "copyWarning": "現在就複製這個金鑰——它將不會再顯示。",
+    "create": "建立 API 金鑰",
+    "createError": "建立 API 金鑰失敗。",
+    "created": "已建立",
+    "createdTitle": "API 金鑰已建立",
+    "description": "API 金鑰讓自動化程序以您的身份進行驗證。請像處理密碼一樣小心保管它們。",
+    "expires": "到期日",
+    "expiresOptional": "(可選) 到期日",
+    "lastUsed": "最後使用日期",
+    "loadError": "載入 API 金鑰失敗。",
+    "name": "名稱",
+    "prefix": "金鑰前綴",
+    "revoke": "撤銷",
+    "revokeError": "撤銷 API 金鑰失敗。",
+    "revoked": "已撤銷",
+    "status": "狀態",
+    "title": "API Keys"
   }
 }

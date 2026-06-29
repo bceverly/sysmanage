@@ -121,7 +121,11 @@
     "unknown": "غير معروف",
     "update": "تحديث",
     "selected": "محدد",
-    "view": "عرض"
+    "view": "عرض",
+    "copied": "تم نسخ المفتاح",
+    "copy": "نسخ",
+    "create": "إنشاء",
+    "done": "انتهى"
   },
   "connectionStatus": {
     "connected": "متصل",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "صفحات الإعدادات"
+  },
+  "apiKeys": {
+    "active": "مفعل",
+    "confirmRevoke": "‬هل أنت متأكد أنك تريد سحب هذا مفتاح API؟ أي Automation يستخدمه سيتوقف عن العمل فورا.‬",
+    "copyWarning": "انسخ هذا المفتاح الآن - لن يتم عرضه مرة أخرى.",
+    "create": "إنشاء مفتاح API",
+    "createError": "فشل في إنشاء مفتاح API.",
+    "created": "تم إنشاء",
+    "createdTitle": "تم إنشاء مفتاح API",
+    "description": "تتيح مفاتيح API للAutomation التحقق من هويتك عند استخدام API. تعامل معها مثل كلمات المرور.",
+    "expires": "ينتهي",
+    "expiresOptional": "ينتهي (اختياري)",
+    "lastUsed": "آخر استخدام",
+    "loadError": "فشل في تحميل مفاتيح API.",
+    "name": "الاسم",
+    "prefix": " Präfix المفتاح",
+    "revoke": "سحب",
+    "revokeError": "فشل في سحب مفتاح API.",
+    "revoked": "تم سحبه",
+    "status": "الحالة",
+    "title": "API Keys"
   }
 }

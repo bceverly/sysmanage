@@ -39,7 +39,7 @@ const MigrationCompatBanner: React.FC = () => {
       }
       try {
         const response = await api.get<ModuleCompatibilityResponse>(
-          '/api/license/module-compat',
+          '/api/v1/license/module-compat',
         );
         if (!cancelled) {
           setEntries(response.data?.incompatibilities ?? []);

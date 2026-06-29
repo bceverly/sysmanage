@@ -35,6 +35,7 @@ import Reports from './Pages/Reports';
 import ReportViewer from './Pages/ReportViewer';
 import AuditLogViewer from './Pages/AuditLogViewer';
 import Profile from './Pages/Profile';
+import ApiKeys from './Pages/ApiKeys';
 import Settings from './Pages/Settings';
 import AirgapRepositories from './Pages/AirgapRepositories';
 import AirgapCollections from './Pages/AirgapCollections';
@@ -70,6 +71,7 @@ function AppRoutes() {
       <Route path="/reports/audit-log" element={<AuditLogViewer />} />
       <Route path="/reports/:reportId" element={<ReportViewer />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/api-keys" element={<ApiKeys />} />
       <Route path="/settings" element={<Settings />} />
       {/* Air-gap and federation pages are ENTERPRISE-only — guard the routes so
           they're unreachable by direct URL on a license that lacks the engine

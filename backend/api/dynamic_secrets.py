@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 _SECRETS_GATE = Depends(require_module_loaded(ModuleCode.SECRETS_ENGINE))
 
 router = APIRouter(
-    prefix="/api/dynamic-secrets",
+    prefix="/dynamic-secrets",
     tags=["dynamic-secrets"],
     dependencies=[Depends(JWTBearer()), _SECRETS_GATE],
 )

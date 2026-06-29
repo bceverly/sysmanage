@@ -121,7 +121,11 @@
     "unknown": "Desconocido",
     "update": "Actualizar",
     "selected": "Seleccionado",
-    "view": "Ver"
+    "view": "Ver",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "create": "Crear",
+    "done": "Listo"
   },
   "connectionStatus": {
     "connected": "Conectado",
@@ -2996,5 +3000,26 @@
   },
   "settings": {
     "tabsAriaLabel": "pestañas de configuración"
+  },
+  "apiKeys": {
+    "active": "Activo",
+    "confirmRevoke": "¡Estás seguro de que quieres revocar esta clave de API? Cualquier automatización que la esté utilizando dejará de funcionar inmediatamente.",
+    "copyWarning": "Copia esta clave ahora — no se mostrará nuevamente.",
+    "create": "Crear Clave de API",
+    "createError": "No se pudo crear la clave de API.",
+    "created": "Creado",
+    "createdTitle": "API key creado",
+    "description": "Las claves de API permiten que la automatización se autentique en la API como si fueras tún. Trátalas como contraseñas.",
+    "expires": "Expira",
+    "expiresOptional": "Expiración (opcional)",
+    "lastUsed": "Último uso",
+    "loadError": "No se pudieron cargar las claves de API.",
+    "name": "Nombre",
+    "prefix": "Prefijo de clave",
+    "revoke": "Revocar",
+    "revokeError": "No se pudo revocar la clave de API.",
+    "revoked": "Revocado",
+    "status": "Estado",
+    "title": "API Keys"
   }
 }

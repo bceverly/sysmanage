@@ -21,12 +21,12 @@ export interface UserRoles {
 }
 
 export const doGetAllRoleGroups = async (): Promise<SecurityRoleGroup[]> => {
-    const response = await axiosInstance.get('/api/security-roles/groups');
+    const response = await axiosInstance.get('/api/v1/security-roles/groups');
     return response.data;
 };
 
 export const doGetUserRoles = async (userId: string): Promise<UserRoles> => {
-    const response = await axiosInstance.get(`/api/security-roles/user/${userId}`);
+    const response = await axiosInstance.get(`/api/v1/security-roles/user/${userId}`);
     return response.data;
 };
 
@@ -34,7 +34,7 @@ export const doUpdateUserRoles = async (
     userId: string,
     roleIds: string[]
 ): Promise<UserRoles> => {
-    const response = await axiosInstance.put(`/api/security-roles/user/${userId}`, {
+    const response = await axiosInstance.put(`/api/v1/security-roles/user/${userId}`, {
         role_ids: roleIds,
     });
     return response.data;

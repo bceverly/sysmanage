@@ -28,36 +28,36 @@ export interface ReportTemplateField {
 
 export const reportTemplatesService = {
   async list(): Promise<ReportTemplate[]> {
-    const r = await axiosInstance.get('/api/report-templates');
+    const r = await axiosInstance.get('/api/v1/report-templates');
     return r.data;
   },
 
   async get(id: string): Promise<ReportTemplate> {
-    const r = await axiosInstance.get(`/api/report-templates/${id}`);
+    const r = await axiosInstance.get(`/api/v1/report-templates/${id}`);
     return r.data;
   },
 
   async create(payload: ReportTemplateCreate): Promise<ReportTemplate> {
-    const r = await axiosInstance.post('/api/report-templates', payload);
+    const r = await axiosInstance.post('/api/v1/report-templates', payload);
     return r.data;
   },
 
   async update(id: string, payload: ReportTemplateUpdate): Promise<ReportTemplate> {
-    const r = await axiosInstance.put(`/api/report-templates/${id}`, payload);
+    const r = await axiosInstance.put(`/api/v1/report-templates/${id}`, payload);
     return r.data;
   },
 
   async remove(id: string): Promise<void> {
-    await axiosInstance.delete(`/api/report-templates/${id}`);
+    await axiosInstance.delete(`/api/v1/report-templates/${id}`);
   },
 
   async fieldsFor(baseType: string): Promise<{ base_report_type: string; fields: ReportTemplateField[] }> {
-    const r = await axiosInstance.get(`/api/report-templates/fields/${baseType}`);
+    const r = await axiosInstance.get(`/api/v1/report-templates/fields/${baseType}`);
     return r.data;
   },
 
   async baseTypes(): Promise<string[]> {
-    const r = await axiosInstance.get('/api/report-templates/base-types');
+    const r = await axiosInstance.get('/api/v1/report-templates/base-types');
     return r.data.base_types;
   },
 };

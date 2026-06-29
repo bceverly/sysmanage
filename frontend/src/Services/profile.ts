@@ -30,16 +30,16 @@ export interface PasswordChangeResponse {
 }
 
 export const getProfile = async (): Promise<ProfileData> => {
-    const response = await axiosInstance.get('/api/profile');
+    const response = await axiosInstance.get('/api/v1/profile');
     return response.data;
 };
 
 export const updateProfile = async (profileData: ProfileUpdateData): Promise<ProfileData> => {
-    const response = await axiosInstance.put('/api/profile', profileData);
+    const response = await axiosInstance.put('/api/v1/profile', profileData);
     return response.data;
 };
 
 export const changePassword = async (passwordData: PasswordChangeData): Promise<PasswordChangeResponse> => {
-    const response = await axiosInstance.put('/api/profile/password', passwordData);
+    const response = await axiosInstance.put('/api/v1/profile/password', passwordData);
     return response.data;
 };

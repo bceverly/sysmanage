@@ -23,7 +23,7 @@ export interface LicenseInfo {
  * Get current license information.
  */
 export const getLicenseInfo = async (): Promise<LicenseInfo> => {
-    const response = await axiosInstance.get('/api/license');
+    const response = await axiosInstance.get('/api/v1/license');
     return response.data;
 };
 
@@ -35,7 +35,7 @@ export const installLicense = async (licenseKey: string): Promise<{
     message: string;
     license_info?: LicenseInfo;
 }> => {
-    const response = await axiosInstance.post('/api/license', {
+    const response = await axiosInstance.post('/api/v1/license', {
         license_key: licenseKey
     });
     return response.data;

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-26 16:17-0400\n"
+"POT-Creation-Date: 2026-06-28 09:36-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,27 +33,27 @@ msgstr "잘못된 서명"
 msgid "Decryption failed"
 msgstr "암호화 해제 실패"
 
-#: backend/auth/auth_bearer.py:36
+#: backend/auth/auth_bearer.py:37
 msgid "Invalid authentication scheme."
 msgstr "잘못된 인증 방식입니다."
 
-#: backend/auth/auth_bearer.py:39
+#: backend/auth/auth_bearer.py:40
 msgid "Expired token."
 msgstr "만료된 토큰입니다."
 
-#: backend/auth/auth_bearer.py:43
+#: backend/auth/auth_bearer.py:44
 msgid "Invalid authorization code."
 msgstr "잘못된 권한 부여 코드입니다."
 
-#: backend/auth/auth_bearer.py:82
+#: backend/auth/auth_bearer.py:97
 msgid "Could not validate credentials"
 msgstr "자격 증명을 검증할 수 없습니다"
 
-#: backend/auth/auth_bearer.py:113
+#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
 msgid "User not found."
 msgstr "사용자를 찾을 수 없습니다."
 
-#: backend/auth/auth_bearer.py:168 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
 msgid "You do not have access to the selected account."
 msgstr "선택한 계정에 액세스 권한이 없습니다."
 
@@ -2592,6 +2592,14 @@ msgid ""
 "Virtualization support check requested. Results will be available shortly."
 msgstr "가상화 지원 확인 요청됨. 결과는 곧 제공될 것입니다."
 
+#: backend/api/api_keys.py:79
+msgid "API keys cannot be managed with API-key authentication."
+msgstr "API 키는 API 키 인증을 사용하여 관리할 수 없습니다."
+
+#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+msgid "API key not found."
+msgstr "API 키가 없습니다."
+
 #: backend/api/update_handlers.py:203
 msgid "Failed to process update results"
 msgstr "업데이트 결과 처리에 실패했습니다"
@@ -3985,6 +3993,10 @@ msgstr "메시지 프로세서가 중단됨"
 #: backend/websocket/queue_manager.py:43
 msgid "Server message queue manager initialized"
 msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
+
+#: backend/startup/rate_limit_middleware.py:94
+msgid "Rate limit exceeded. Please retry later."
+msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
 
 #: backend/services/reboot_orchestration_service.py:249
 #, python-format
