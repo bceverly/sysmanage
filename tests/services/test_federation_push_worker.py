@@ -14,13 +14,9 @@ Skipped automatically when the engine ``.so`` isn't on disk.
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,protected-access,redefined-outer-name
 
-import importlib.util
 import json
 import logging
-import sys
-import sysconfig
 import uuid
-from pathlib import Path
 from unittest.mock import AsyncMock
 
 import pytest
@@ -40,53 +36,16 @@ from backend.services import federation_site_service as site_svc
 from tests.federation_crypto import enroll_site
 
 
-def _candidate_so_paths():
-    """Mirror of ``test_federation_sync_worker._candidate_so_paths``
-    for the controller engine."""
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    home = Path.home()
-    candidates = []
-    proplus = home / "dev" / "sysmanage-professional-plus" / "storage" / "modules"
-    if proplus.exists():
-        version_dir = proplus / "federation_controller_engine"
-        if version_dir.exists():
-            for version in sorted(version_dir.iterdir(), reverse=True):
-                py_dir = version / "linux" / "x86_64" / py
-                if py_dir.exists():
-                    # ONLY match the .so built for THIS interpreter's ABI
-                    # (e.g. ``.cpython-314-...so``).  A bare ``*.so`` glob
-                    # would sort a stale ``cpython-313`` build ahead of the
-                    # correct one and load it, segfaulting on the
-                    # compile-time/runtime Python version mismatch.
-                    ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
-                    candidates.extend(sorted(py_dir.glob(f"*{ext}")))
-    candidates.append(
-        Path("/var/lib/sysmanage/modules") / f"federation_controller_engine_{py}.so"
-    )
-    return candidates
-
-
-def _load_engine():
-    for path in _candidate_so_paths():
-        if path.exists():
-            spec = importlib.util.spec_from_file_location(
-                "federation_controller_engine", path
-            )
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            return mod
-    return None
-
-
 @pytest.fixture(scope="module")
 def engine():
-    mod = _load_engine()
-    if mod is None:
-        pytest.skip(
-            "federation_controller_engine .so not available — "
-            "build the Pro+ engine first"
-        )
-    return mod
+    """The real compiled federation_controller_engine (see tests/_engine_loader).
+
+    Skips only on an OSS-only run (no Pro+ checkout); fails loudly if the
+    engine is present but won't load for this platform/interpreter.
+    """
+    from tests._engine_loader import require_engine
+
+    return require_engine("federation_controller_engine")
 
 
 _FEDERATION_TABLE_NAMES = [

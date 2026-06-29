@@ -1358,6 +1358,11 @@ format-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "Formatting Python code..."
 	@$(PYTHON) -m black backend/ tests/
 
+# Alias so the pre-commit hook's advice (`make format`) resolves to the
+# black-formatting target.  The hook prints "Fix locally with: make format".
+.PHONY: format
+format: format-python
+
 # Python tests
 test-python: $(VENV_ACTIVATE) clean-whitespace
 	@echo "=== Running Python Tests ==="
@@ -1367,9 +1372,15 @@ ifeq ($(OS),Windows_NT)
 	-@del /q "%TEMP%\*sysmanage*.db" >nul 2>&1
 	-@del /q "%TEMP%\tmp*.db" >nul 2>&1
 else
-	@find . -name "*.db" -type f -delete 2>/dev/null || true
-	@find /tmp -name "*sysmanage*.db" -type f -delete 2>/dev/null || true
-	@find /tmp -name "tmp*.db" -type f -delete 2>/dev/null || true
+	@# Surgical, no filesystem walk: test DBs are either in-memory (sqlite://)
+	@# or tempfile.mkstemp() files in $$TMPDIR.  The only on-disk repo DB is a
+	@# stray ./<name>.db written to cwd when the app boots with a file-sqlite
+	@# config (db.py: sqlite:///<db_name>) — always top-level, never nested.
+	@# A recursive ``find .`` here just crawled the tree (brutal on NFS) to
+	@# delete nothing, so target the real locations directly.
+	-@rm -f ./*.db ./tests/*.db 2>/dev/null || true
+	-@rm -f "$${TMPDIR:-/tmp}"/*sysmanage*.db "$${TMPDIR:-/tmp}"/tmp*.db 2>/dev/null || true
+	-@rm -f /tmp/*sysmanage*.db /tmp/tmp*.db 2>/dev/null || true
 endif
 # Backend tests run as TWO separate pytest processes accumulating into
 # one coverage dataset via --cov-append: tests/ (canonical) then
@@ -1457,9 +1468,9 @@ else
 			PERF_BACKEND_PID=$$!; \
 			echo "$$PERF_BACKEND_PID" > logs/backend-perf.pid; \
 			BACKEND_STARTED_BY_US=1; \
-			echo "[INFO] Backend PID: $$PERF_BACKEND_PID - waiting up to 90s for /api/health..."; \
+			echo "[INFO] Backend PID: $$PERF_BACKEND_PID - waiting up to 180s for /api/health..."; \
 			BACKEND_READY=0; \
-			for i in $$(seq 1 45); do \
+			for i in $$(seq 1 90); do \
 				if curl --silent --fail --max-time 2 --output /dev/null "$$TARGET_URL/api/health"; then \
 					BACKEND_READY=1; \
 					echo "[INFO] Backend is ready."; \
@@ -1468,7 +1479,7 @@ else
 				sleep 2; \
 			done; \
 			if [ $$BACKEND_READY -eq 0 ]; then \
-				echo "[ERROR] Backend failed to become healthy within 90s. See logs/backend-perf.log."; \
+				echo "[ERROR] Backend failed to become healthy within 180s. See logs/backend-perf.log."; \
 				kill $$PERF_BACKEND_PID 2>/dev/null || true; \
 				rm -f logs/backend-perf.pid; \
 				exit 1; \
@@ -1583,24 +1594,28 @@ else
 			lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
 			sleep 1; \
 		fi; \
+		echo "[INFO] Ensuring OpenBAO is up + primed (supplies jwt_secret to the e2e backend)..."; \
+		./scripts/start-openbao.sh > logs/openbao-e2e.log 2>&1 || true; \
+		. $(VENV_ACTIVATE) && PYTHONPATH=$$(pwd) $(PYTHON) scripts/prime_openbao_secrets.py >> logs/openbao-e2e.log 2>&1 || \
+			echo "[WARN] OpenBAO prime skipped/failed — see logs/openbao-e2e.log. Backend then falls back to jwt_secret in /etc/sysmanage.yaml; if neither is set, e2e login fails with 'HMAC key must not be empty'."; \
 		echo "[INFO] Starting backend API server (email disabled, single-tenant for e2e)..."; \
 		. $(VENV_ACTIVATE) && SYSMANAGE_DISABLE_EMAIL=true SYSMANAGE_MULTITENANCY=false nohup $(PYTHON) -m backend.main > logs/backend-e2e.log 2>&1 & \
 		BACKEND_PID=$$!; \
 		echo "[INFO] Backend PID: $$BACKEND_PID"; \
 		echo "$$BACKEND_PID" > logs/backend-e2e.pid; \
-		echo "[INFO] Waiting for backend to be ready on port 8080 (may take up to 2 minutes)..."; \
+		echo "[INFO] Waiting for backend to be ready on port 8080 (may take up to 3 minutes)..."; \
 		BACKEND_READY=0; \
-		for i in $$(seq 1 45); do \
+		for i in $$(seq 1 90); do \
 			if curl -s http://127.0.0.1:8080/api/health > /dev/null 2>&1; then \
 				echo "[INFO] Backend is ready!"; \
 				BACKEND_READY=1; \
 				break; \
 			fi; \
-			echo "[INFO] Waiting for backend... ($$i/45)"; \
+			echo "[INFO] Waiting for backend... ($$i/90)"; \
 			sleep 2; \
 		done; \
 		if [ $$BACKEND_READY -eq 0 ]; then \
-			echo "[ERROR] Backend failed to start within 90 seconds"; \
+			echo "[ERROR] Backend failed to start within 180 seconds"; \
 			kill $$BACKEND_PID 2>/dev/null || true; \
 			exit 1; \
 		fi; \

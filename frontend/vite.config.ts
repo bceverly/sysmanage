@@ -180,6 +180,20 @@ export default defineConfig({
       // Let Vite auto-detect the host from the browser location
       clientPort: finalPort // Ensure client connects to the same port
     },
+    // Keep the HMR watcher off Playwright's own output dirs.  They live under
+    // the Vite root (frontend/), so while a Playwright run writes its HTML
+    // report / traces / screenshots, Vite sees those changes and fires
+    // full-page reloads at the very browser under test — the /login page then
+    // reloads in a loop and never reaches the "load" event (manifests as a
+    // 60s navigation timeout in auth.setup.ts).  Excluding them stops the loop
+    // (and avoids the watcher churning over these dirs on NFS).
+    watch: {
+      ignored: [
+        '**/playwright-report/**',
+        '**/test-results/**',
+        '**/playwright/.cache/**',
+      ],
+    },
     // Proxy API requests to backend server.
     //
     // Resolution order (first match wins):

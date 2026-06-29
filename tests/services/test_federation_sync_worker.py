@@ -23,14 +23,9 @@ the expected state in a fresh OSS-only checkout.
 
 # pylint: disable=missing-class-docstring,missing-function-docstring,protected-access,redefined-outer-name
 
-import importlib
-import importlib.util
 import json
 import logging
-import sys
-import sysconfig
 import uuid
-from pathlib import Path
 from unittest.mock import AsyncMock
 
 import pytest
@@ -42,72 +37,17 @@ from backend.persistence.models.federation import FederationSyncQueue
 from backend.services import federation_coordinator_service as csvc
 from backend.services import federation_sync_queue_service as qsvc
 
-# ---------------------------------------------------------------------------
-# Engine ``.so`` discovery
-# ---------------------------------------------------------------------------
-
-
-def _candidate_so_paths():
-    """Return the most likely locations of the engine ``.so``.
-
-    Dev (this repo + Pro+ side-by-side, preferred): the freshly-built
-    artifact at ``../sysmanage-professional-plus/storage/modules/federation_site_engine/<ver>/linux/<arch>/<py>/<name>.cpython-...-<plat>.so``.
-
-    Production-deployed fallback: ``/var/lib/sysmanage/modules/<name>_<py>.so``.
-    The license-server download path lags the dev build, so we try the
-    dev artifact FIRST — otherwise running these tests right after a
-    Pro+ engine code change would hit the stale prod copy and fail with
-    a "module has no attribute" error.
-    """
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    home = Path.home()
-    candidates = []
-    # Dev path (preferred).
-    proplus = home / "dev" / "sysmanage-professional-plus" / "storage" / "modules"
-    if proplus.exists():
-        version_dir = proplus / "federation_site_engine"
-        if version_dir.exists():
-            # If multiple versions live side-by-side, sort highest-first
-            # so the newest version wins.
-            for version in sorted(version_dir.iterdir(), reverse=True):
-                py_dir = version / "linux" / "x86_64" / py
-                if py_dir.exists():
-                    # ONLY match the .so built for THIS interpreter's ABI
-                    # (e.g. ``.cpython-314-...so``).  A bare ``*.so`` glob
-                    # would sort a stale ``cpython-313`` build ahead of the
-                    # correct one and load it, segfaulting on the
-                    # compile-time/runtime Python version mismatch.
-                    ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
-                    candidates.extend(sorted(py_dir.glob(f"*{ext}")))
-    # Prod-deployed fallback.
-    candidates.append(
-        Path("/var/lib/sysmanage/modules") / f"federation_site_engine_{py}.so"
-    )
-    return candidates
-
-
-def _load_engine():
-    for path in _candidate_so_paths():
-        if path.exists():
-            spec = importlib.util.spec_from_file_location(
-                "federation_site_engine", path
-            )
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            return mod
-    return None
-
 
 @pytest.fixture(scope="module")
 def engine():
-    mod = _load_engine()
-    if mod is None:
-        pytest.skip(
-            "federation_site_engine .so not available — "
-            "build the Pro+ engine first (sysmanage-professional-plus: "
-            "make build-federation-site-plugin or similar)"
-        )
-    return mod
+    """The real compiled federation_site_engine (see tests/_engine_loader).
+
+    Skips only on an OSS-only run (no Pro+ checkout); fails loudly if the
+    engine is present but won't load for this platform/interpreter.
+    """
+    from tests._engine_loader import require_engine
+
+    return require_engine("federation_site_engine")
 
 
 # ---------------------------------------------------------------------------

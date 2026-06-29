@@ -8,9 +8,6 @@ valid-token path exercises the real compiled engine via the shim and skips when
 the ``.so`` isn't importable.
 """
 
-import importlib
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -30,26 +27,11 @@ def _tenant(db_session, slug="enroll-reg"):
     return t
 
 
-def _import_real_engine():
-    path = (
-        Path(__file__).resolve().parents[3]
-        / "sysmanage-professional-plus"
-        / "module-source"
-        / "multitenancy_engine"
-    )
-    if path.is_dir() and str(path) not in sys.path:
-        sys.path.insert(0, str(path))
-    try:
-        return importlib.import_module("multitenancy_engine")
-    except ImportError:
-        return None
-
-
 @pytest.fixture
 def real_engine():
-    mod = _import_real_engine()
-    if mod is None:
-        pytest.skip("compiled multitenancy_engine .so not importable here")
+    from tests._engine_loader import require_engine
+
+    mod = require_engine("multitenancy_engine")
     seam.register_engine(MagicMock(), module=mod)
     yield mod
     seam.unregister_engine()

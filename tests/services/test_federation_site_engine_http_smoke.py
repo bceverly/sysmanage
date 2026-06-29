@@ -16,12 +16,8 @@ Skips automatically when the engine ``.so`` isn't built (OSS-only checkout).
 # pylint: disable=redefined-outer-name,import-outside-toplevel
 
 import hashlib
-import importlib.util
 import logging
-import sys
-import sysconfig
 import uuid
-from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
@@ -39,37 +35,6 @@ pytestmark = pytest.mark.integration
 _INBOUND_TOKEN = "smoke-inbound-bearer"
 
 
-def _candidate_so_paths():
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    candidates = []
-    proplus = (
-        Path.home() / "dev" / "sysmanage-professional-plus" / "storage" / "modules"
-    )
-    version_dir = proplus / "federation_site_engine"
-    if version_dir.exists():
-        for version in sorted(version_dir.iterdir(), reverse=True):
-            py_dir = version / "linux" / "x86_64" / py
-            if py_dir.exists():
-                ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
-                candidates.extend(sorted(py_dir.glob(f"*{ext}")))
-    candidates.append(
-        Path("/var/lib/sysmanage/modules") / f"federation_site_engine_{py}.so"
-    )
-    return candidates
-
-
-def _load_engine():
-    for path in _candidate_so_paths():
-        if path.exists():
-            spec = importlib.util.spec_from_file_location(
-                "federation_site_engine", path
-            )
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            return mod
-    return None
-
-
 def _noop_gate(*_args, **_kwargs):
     def deco(func):
         return func
@@ -83,13 +48,9 @@ def _stub_user():
 
 @pytest.fixture(scope="module")
 def engine():
-    mod = _load_engine()
-    if mod is None:
-        pytest.skip(
-            "federation_site_engine .so not available — build the Pro+ engine "
-            "first (this smoke test needs the real compiled engine)"
-        )
-    return mod
+    from tests._engine_loader import require_engine
+
+    return require_engine("federation_site_engine")
 
 
 @pytest.fixture

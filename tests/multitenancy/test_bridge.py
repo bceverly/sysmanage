@@ -12,9 +12,6 @@ registers it, so the OSS data-plane resolver defers to the engine.  Two layers:
     couples the OSS suite to the Pro+ build.
 """
 
-import importlib
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -89,28 +86,10 @@ def test_resolver_routes_through_bridged_engine():
 # ---------------------------------------------------------------------------
 
 
-def _import_real_engine():
-    """Import the compiled multitenancy_engine .so from the sibling Pro+ repo,
-    or return None if it can't be imported here."""
-    candidates = [
-        Path(__file__).resolve().parents[3]
-        / "sysmanage-professional-plus"
-        / "module-source"
-        / "multitenancy_engine",
-    ]
-    for path in candidates:
-        if path.is_dir() and str(path) not in sys.path:
-            sys.path.insert(0, str(path))
-    try:
-        return importlib.import_module("multitenancy_engine")
-    except ImportError:
-        return None
-
-
 def test_real_compiled_engine_bridges_into_seam():
-    engine_mod = _import_real_engine()
-    if engine_mod is None:
-        pytest.skip("compiled multitenancy_engine .so not importable here")
+    from tests._engine_loader import require_engine
+
+    engine_mod = require_engine("multitenancy_engine")
 
     # The real module declares the contract...
     info = engine_mod.get_module_info()

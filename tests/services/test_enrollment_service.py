@@ -11,10 +11,7 @@ OSS module is now a thin shim, so:
     suite to the Pro+ build.
 """
 
-import importlib
-import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -67,26 +64,11 @@ def test_validate_without_engine_returns_none(_no_engine):
 # ---------------------------------------------------------------------------
 
 
-def _import_real_engine():
-    path = (
-        Path(__file__).resolve().parents[3]
-        / "sysmanage-professional-plus"
-        / "module-source"
-        / "multitenancy_engine"
-    )
-    if path.is_dir() and str(path) not in sys.path:
-        sys.path.insert(0, str(path))
-    try:
-        return importlib.import_module("multitenancy_engine")
-    except ImportError:
-        return None
-
-
 @pytest.fixture
 def real_engine():
-    mod = _import_real_engine()
-    if mod is None:
-        pytest.skip("compiled multitenancy_engine .so not importable here")
+    from tests._engine_loader import require_engine
+
+    mod = require_engine("multitenancy_engine")
     seam.register_engine(MagicMock(), module=mod)
     yield mod
     seam.unregister_engine()

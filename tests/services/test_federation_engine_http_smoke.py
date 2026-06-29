@@ -22,12 +22,8 @@ Skips automatically when the engine ``.so`` isn't built (OSS-only checkout).
 
 # pylint: disable=redefined-outer-name,import-outside-toplevel
 
-import importlib.util
 import logging
-import sys
-import sysconfig
 import uuid
-from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
@@ -42,38 +38,6 @@ from backend.services import federation_site_service as site_svc
 from tests.federation_crypto import enroll_site
 
 pytestmark = pytest.mark.integration
-
-
-def _candidate_so_paths():
-    """Where a locally-built federation_controller_engine .so might live."""
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    candidates = []
-    proplus = (
-        Path.home() / "dev" / "sysmanage-professional-plus" / "storage" / "modules"
-    )
-    version_dir = proplus / "federation_controller_engine"
-    if version_dir.exists():
-        for version in sorted(version_dir.iterdir(), reverse=True):
-            py_dir = version / "linux" / "x86_64" / py
-            if py_dir.exists():
-                ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
-                candidates.extend(sorted(py_dir.glob(f"*{ext}")))
-    candidates.append(
-        Path("/var/lib/sysmanage/modules") / f"federation_controller_engine_{py}.so"
-    )
-    return candidates
-
-
-def _load_engine():
-    for path in _candidate_so_paths():
-        if path.exists():
-            spec = importlib.util.spec_from_file_location(
-                "federation_controller_engine", path
-            )
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            return mod
-    return None
 
 
 def _noop_gate(*_args, **_kwargs):
@@ -92,13 +56,9 @@ def _stub_user():
 
 @pytest.fixture(scope="module")
 def engine():
-    mod = _load_engine()
-    if mod is None:
-        pytest.skip(
-            "federation_controller_engine .so not available — build the Pro+ "
-            "engine first (this smoke test needs the real compiled engine)"
-        )
-    return mod
+    from tests._engine_loader import require_engine
+
+    return require_engine("federation_controller_engine")
 
 
 @pytest.fixture

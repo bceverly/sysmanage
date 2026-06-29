@@ -44,11 +44,17 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Use the system-installed Chrome instead of Playwright's bundled
-     * chromium-headless-shell. Required on distros that Playwright's
-     * official support matrix does not yet list (e.g. Ubuntu 26.04).
-     * Set at the top level so every project — including `setup` — inherits it. */
-    channel: 'chrome',
+    /* Browser channel.  Default to Playwright's bundled, version-matched
+     * chromium.  Forcing the system-installed Chrome (channel:'chrome') was a
+     * workaround for Linux distros Playwright's matrix doesn't list (e.g.
+     * Ubuntu 26.04) — but on macOS it launches the user's already-running
+     * Chrome install, and each automation process gets reclaimed by that Chrome
+     * singleton and instantly closes ("browserContext.newPage: Target page,
+     * context or browser has been closed"), failing every parallel worker.  The
+     * bundled chromium is a separate binary with no such conflict.  Opt back
+     * into system Chrome where a distro needs it via PLAYWRIGHT_CHANNEL=chrome.
+     * Inherited by every project (incl. `setup`). */
+    ...(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}),
 
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',

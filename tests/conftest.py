@@ -666,6 +666,19 @@ def pytest_configure(config):
     # httpx logs every test request at INFO; same treatment.
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
+    # Ensure auth_handler has a usable JWT secret BEFORE any test module is
+    # collected.  Under the v3.0 minimal-config layout jwt_secret lives in
+    # OpenBAO and is absent from the YAML, so auth_handler captures "" at
+    # import time.  ``pytest_configure`` runs before collection, so setting it
+    # here means even modules that do ``from ...auth_handler import JWT_SECRET``
+    # at top level bind the correct value (a top-level import otherwise captures
+    # the stale "").  Mirrors the OpenBAO overlay's runtime reassignment in
+    # secrets_bootstrap.refresh_secrets_from_openbao.
+    from backend.auth import auth_handler
+
+    auth_handler.JWT_SECRET = TEST_CONFIG["security"]["jwt_secret"]
+    auth_handler.JWT_ALGORITHM = TEST_CONFIG["security"]["jwt_algorithm"]
+
     if sys.version_info >= (3, 7):
         # For Python 3.7+, use the built-in asyncio support
         pass
@@ -680,36 +693,22 @@ def pytest_configure(config):
 # against the actual artifact.  Skips when the .so isn't importable (pure OSS
 # CI), so the OSS suite never hard-depends on the Pro+ build.
 # ---------------------------------------------------------------------------
-def _import_multitenancy_engine():
-    import importlib
-    import sys as _sys
-    from pathlib import Path as _Path
-
-    path = (
-        _Path(__file__).resolve().parents[1].parent
-        / "sysmanage-professional-plus"
-        / "module-source"
-        / "multitenancy_engine"
-    )
-    if path.is_dir() and str(path) not in _sys.path:
-        _sys.path.insert(0, str(path))
-    try:
-        return importlib.import_module("multitenancy_engine")
-    except ImportError:
-        return None
-
-
 @pytest.fixture
 def real_engine():
-    """Register the real compiled multitenancy_engine; skip if its .so is absent."""
-    import pytest as _pytest
+    """Register the REAL compiled multitenancy_engine into the seam.
+
+    Discovery/loading is centralized in :mod:`tests._engine_loader`.
+    ``require_engine`` skips only on a genuine OSS-only run (no Pro+ checkout)
+    and fails loudly if the engine is present but won't load for this
+    platform/interpreter — so this stops silently skipping.
+    """
     from unittest.mock import MagicMock
 
     from backend.multitenancy import seam
 
-    mod = _import_multitenancy_engine()
-    if mod is None:
-        _pytest.skip("compiled multitenancy_engine .so not importable here")
+    from tests._engine_loader import require_engine
+
+    mod = require_engine("multitenancy_engine")
     seam.register_engine(MagicMock(), module=mod)
     yield mod
     seam.unregister_engine()

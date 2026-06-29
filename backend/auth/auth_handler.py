@@ -13,8 +13,14 @@ from backend.config import config
 # Read the YAML file
 the_config = config.get_config()
 
-JWT_SECRET = the_config["security"]["jwt_secret"]
-JWT_ALGORITHM = the_config["security"]["jwt_algorithm"]
+# jwt_secret is a B-bucket secret (Phase 13.1.H): in OpenBAO-backed v3.0
+# deployments it is absent from the minimal YAML and overlaid at startup by
+# secrets_bootstrap.refresh_secrets_from_openbao(), which reassigns this
+# global.  Read it defensively so module import never crashes before that
+# overlay runs (it also lets the test harness patch the global).  The empty
+# default matches the fallback used by config._config_secret.
+JWT_SECRET = the_config.get("security", {}).get("jwt_secret", "")
+JWT_ALGORITHM = the_config.get("security", {}).get("jwt_algorithm", "HS256")
 
 
 def token_response(token: str):

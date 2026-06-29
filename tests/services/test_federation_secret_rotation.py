@@ -16,13 +16,9 @@ engine tests skip automatically when it isn't built.
 
 # pylint: disable=redefined-outer-name,protected-access,import-outside-toplevel
 
-import importlib.util
 import logging
-import sys
-import sysconfig
 import uuid
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -214,37 +210,11 @@ class TestRotationWorkLists:
 # ---------------------------------------------------------------------------
 
 
-def _load_controller_engine():
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    base = (
-        Path.home()
-        / "dev"
-        / "sysmanage-professional-plus"
-        / "storage"
-        / "modules"
-        / "federation_controller_engine"
-    )
-    if base.exists():
-        ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
-        for version in sorted(base.iterdir(), reverse=True):
-            py_dir = version / "linux" / "x86_64" / py
-            if py_dir.exists():
-                for so in sorted(py_dir.glob(f"*{ext}")):
-                    spec = importlib.util.spec_from_file_location(
-                        "federation_controller_engine", so
-                    )
-                    mod = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(mod)
-                    return mod
-    return None
-
-
 @pytest.fixture(scope="module")
 def engine_mod():
-    mod = _load_controller_engine()
-    if mod is None:
-        pytest.skip("federation_controller_engine .so not built")
-    return mod
+    from tests._engine_loader import require_engine
+
+    return require_engine("federation_controller_engine")
 
 
 @pytest.fixture
