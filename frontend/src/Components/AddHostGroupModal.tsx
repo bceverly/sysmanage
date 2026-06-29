@@ -105,7 +105,7 @@ const AddHostGroupModal: React.FC<AddHostGroupModalProps> = ({
                 payload.description = description.trim();
             }
 
-            await axiosInstance.post(`/api/host/${hostId}/groups`, payload);
+            await axiosInstance.post(`/api/v1/host/${hostId}/groups`, payload);
 
             // Call success callback and close modal
             if (onSuccess) {

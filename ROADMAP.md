@@ -4624,8 +4624,16 @@ as thin back-compat only.
       `/api/v1` (explicit edits). Tests: `test_api_v1_slice1.py` proves the
       dual-surface contract + api-keys-v1-only; backend 5493+539 green, frontend
       122 green. Pattern established for the remaining slices.
-- [ ] *Slice 2 (hosts/fleet):* `host` (auth router only — NOT `/host/register`),
-      `host_hostname`, `fleet`, `child_host`, `reboot_orchestration`.
+- [x] *Slice 2 (hosts/fleet):* `host` (auth router only — `/host/register` stays
+      unversioned), `host_hostname`, `fleet`, `child_host`,
+      `reboot_orchestration` migrated to native `/api/v1` (+ hidden `/api` alias).
+      Frontend: singular `/api/host/*`, `/api/fleet/*`,
+      `/api/child-host-distributions/*`, and the `/api/hosts` list/geolocations
+      switched to `/api/v1` — leaving the *shared* `/api/hosts/{id}/*` paths
+      (antivirus/firewall=Slice 5, third-party-repos=Slice 3, tags=Slice 1) on
+      their own surfaces. `test_api_v1_slice2.py` covers dual-surface + asserts
+      `/host/register` is never natively versioned. Backend 5502+539 green,
+      frontend 122 green.
 - [ ] *Slice 3 (packages/updates/repos):* `packages`, `updates`, `scripts`,
       `third_party_repos`, `default_repositories`, `enabled_package_managers`,
       `package_compliance`, `upgrade_profiles`.

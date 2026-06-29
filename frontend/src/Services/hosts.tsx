@@ -229,7 +229,7 @@ function processError(error: AxiosError) {
 const doDeleteHost = async (id: string) => {
     let successResponse = {} as SuccessResponse;
 
-    await api.delete<SuccessResponse>("/api/host/" + id)
+    await api.delete<SuccessResponse>("/api/v1/host/" + id)
     .then((response) => {
         // No error - process response
         successResponse = response.data;
@@ -245,7 +245,7 @@ const doDeleteHost = async (id: string) => {
 const doGetHostByID = async (id: string) => {
     let result = {} as SysManageHost;
 
-    await api.get<SysManageHost>("/api/host/" + id)
+    await api.get<SysManageHost>("/api/v1/host/" + id)
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -261,7 +261,7 @@ const doGetHostByID = async (id: string) => {
 const doGetHosts = async (): Promise<SysManageHost[]> => {
     let results = [] as SysManageHost[];
 
-    await api.get<SysManageHost[]>("/api/hosts")
+    await api.get<SysManageHost[]>("/api/v1/hosts")
     .then((response) => {
         // No error - process response
         results = response.data;
@@ -277,7 +277,7 @@ const doGetHosts = async (): Promise<SysManageHost[]> => {
 const doApproveHost = async (id: string) => {
     let result = {} as SysManageHost;
 
-    await api.put<SysManageHost>("/api/host/" + id + "/approve")
+    await api.put<SysManageHost>("/api/v1/host/" + id + "/approve")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -293,7 +293,7 @@ const doApproveHost = async (id: string) => {
 const doRefreshHostData = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post<SuccessResponse>("/api/host/" + id + "/request-os-update")
+    await api.post<SuccessResponse>("/api/v1/host/" + id + "/request-os-update")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -309,7 +309,7 @@ const doRefreshHostData = async (id: string) => {
 const doRefreshHardwareData = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post<SuccessResponse>("/api/host/" + id + "/request-hardware-update")
+    await api.post<SuccessResponse>("/api/v1/host/" + id + "/request-hardware-update")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -325,7 +325,7 @@ const doRefreshHardwareData = async (id: string) => {
 const doRefreshUpdatesCheck = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post<SuccessResponse>("/api/host/" + id + "/request-updates-check")
+    await api.post<SuccessResponse>("/api/v1/host/" + id + "/request-updates-check")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -354,7 +354,7 @@ const doRefreshAllHostData = async (id: string) => {
 const doGetHostStorage = async (id: string): Promise<StorageDevice[]> => {
     let result: StorageDevice[] = [];
 
-    await api.get<StorageDevice[]>("/api/host/" + id + "/storage")
+    await api.get<StorageDevice[]>("/api/v1/host/" + id + "/storage")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -370,7 +370,7 @@ const doGetHostStorage = async (id: string): Promise<StorageDevice[]> => {
 const doGetHostNetwork = async (id: string): Promise<NetworkInterface[]> => {
     let result: NetworkInterface[] = [];
 
-    await api.get<NetworkInterface[]>("/api/host/" + id + "/network")
+    await api.get<NetworkInterface[]>("/api/v1/host/" + id + "/network")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -386,7 +386,7 @@ const doGetHostNetwork = async (id: string): Promise<NetworkInterface[]> => {
 const doGetHostUsers = async (id: string): Promise<UserAccount[]> => {
     let result: UserAccount[] = [];
 
-    await api.get<UserAccount[]>("/api/host/" + id + "/users")
+    await api.get<UserAccount[]>("/api/v1/host/" + id + "/users")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -402,7 +402,7 @@ const doGetHostUsers = async (id: string): Promise<UserAccount[]> => {
 const doGetHostGroups = async (id: string): Promise<UserGroup[]> => {
     let result: UserGroup[] = [];
 
-    await api.get<UserGroup[]>("/api/host/" + id + "/groups")
+    await api.get<UserGroup[]>("/api/v1/host/" + id + "/groups")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -418,7 +418,7 @@ const doGetHostGroups = async (id: string): Promise<UserGroup[]> => {
 const doRefreshUserAccessData = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post<SuccessResponse>("/api/host/" + id + "/request-user-access-update")
+    await api.post<SuccessResponse>("/api/v1/host/" + id + "/request-user-access-update")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -434,7 +434,7 @@ const doRefreshUserAccessData = async (id: string) => {
 const doRequestSystemInfo = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post<SuccessResponse>("/api/host/" + id + "/request-system-info")
+    await api.post<SuccessResponse>("/api/v1/host/" + id + "/request-system-info")
     .then((response) => {
         // No error - process response
         result = response.data;
@@ -464,7 +464,7 @@ const doGetHostSoftware = async (
         params.append('search', search);
     }
 
-    await api.get("/api/host/" + id + "/software?" + params.toString())
+    await api.get("/api/v1/host/" + id + "/software?" + params.toString())
     .then((response) => {
         result = response.data;
     })
@@ -478,7 +478,7 @@ const doGetHostSoftware = async (
 const doRefreshSoftwareData = async (id: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/refresh/software/" + id)
+    await api.post("/api/v1/host/refresh/software/" + id)
     .then((response) => {
         result = response.data;
     })
@@ -492,7 +492,7 @@ const doRefreshSoftwareData = async (id: string) => {
 const doGetHostDiagnostics = async (id: string) => {
     let result = [] as DiagnosticReport[];
     
-    await api.get("/api/host/" + id + "/diagnostics")
+    await api.get("/api/v1/host/" + id + "/diagnostics")
     .then((response) => {
         // The API returns {host_id: string, diagnostics: array}
         // Extract the diagnostics array from the response
@@ -508,7 +508,7 @@ const doGetHostDiagnostics = async (id: string) => {
 const doRequestHostDiagnostics = async (id: string) => {
     let result = {} as SuccessResponse;
     
-    await api.post("/api/host/" + id + "/collect-diagnostics")
+    await api.post("/api/v1/host/" + id + "/collect-diagnostics")
     .then((response) => {
         result = response.data;
     })
@@ -550,7 +550,7 @@ const doDeleteDiagnostic = async (diagnosticId: string) => {
 const doRebootHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
     
-    await api.post("/api/host/reboot/" + hostId)
+    await api.post("/api/v1/host/reboot/" + hostId)
     .then((response) => {
         result = response.data;
     })
@@ -564,7 +564,7 @@ const doRebootHost = async (hostId: string) => {
 const doShutdownHost = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/shutdown/" + hostId)
+    await api.post("/api/v1/host/shutdown/" + hostId)
     .then((response) => {
         result = response.data;
     })
@@ -578,7 +578,7 @@ const doShutdownHost = async (hostId: string) => {
 const doUpdateAgent = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/update-agent/" + hostId)
+    await api.post("/api/v1/host/update-agent/" + hostId)
     .then((response) => {
         result = response.data;
     })
@@ -592,7 +592,7 @@ const doUpdateAgent = async (hostId: string) => {
 const doRequestPackages = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/request-packages")
+    await api.post("/api/v1/host/" + hostId + "/request-packages")
     .then((response) => {
         result = response.data;
     })
@@ -606,7 +606,7 @@ const doRequestPackages = async (hostId: string) => {
 const doGetHostUbuntuPro = async (hostId: string) => {
     let result = {} as UbuntuProInfo;
 
-    await api.get("/api/host/" + hostId + "/ubuntu-pro")
+    await api.get("/api/v1/host/" + hostId + "/ubuntu-pro")
     .then((response) => {
         result = response.data;
     })
@@ -620,7 +620,7 @@ const doGetHostUbuntuPro = async (hostId: string) => {
 const doAttachUbuntuPro = async (hostId: string, token: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/ubuntu-pro/attach", {
+    await api.post("/api/v1/host/" + hostId + "/ubuntu-pro/attach", {
         token: token
     })
     .then((response) => {
@@ -636,7 +636,7 @@ const doAttachUbuntuPro = async (hostId: string, token: string) => {
 const doDetachUbuntuPro = async (hostId: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/ubuntu-pro/detach")
+    await api.post("/api/v1/host/" + hostId + "/ubuntu-pro/detach")
     .then((response) => {
         result = response.data;
     })
@@ -650,7 +650,7 @@ const doDetachUbuntuPro = async (hostId: string) => {
 const doEnableUbuntuProService = async (hostId: string, service: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/ubuntu-pro/service/enable", {
+    await api.post("/api/v1/host/" + hostId + "/ubuntu-pro/service/enable", {
         service: service
     })
     .then((response) => {
@@ -666,7 +666,7 @@ const doEnableUbuntuProService = async (hostId: string, service: string) => {
 const doDisableUbuntuProService = async (hostId: string, service: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/ubuntu-pro/service/disable", {
+    await api.post("/api/v1/host/" + hostId + "/ubuntu-pro/service/disable", {
         service: service
     })
     .then((response) => {
@@ -727,7 +727,7 @@ type RebootOrchestrationStatus = {
 const doRebootPreCheck = async (hostId: string): Promise<RebootPreCheckResponse> => {
     let result = {} as RebootPreCheckResponse;
 
-    await api.get<RebootPreCheckResponse>("/api/host/" + hostId + "/reboot/pre-check")
+    await api.get<RebootPreCheckResponse>("/api/v1/host/" + hostId + "/reboot/pre-check")
     .then((response) => {
         result = response.data;
     })
@@ -741,7 +741,7 @@ const doRebootPreCheck = async (hostId: string): Promise<RebootPreCheckResponse>
 const doOrchestratedReboot = async (hostId: string): Promise<OrchestratedRebootResponse> => {
     let result = {} as OrchestratedRebootResponse;
 
-    await api.post<OrchestratedRebootResponse>("/api/host/" + hostId + "/reboot/orchestrated")
+    await api.post<OrchestratedRebootResponse>("/api/v1/host/" + hostId + "/reboot/orchestrated")
     .then((response) => {
         result = response.data;
     })
@@ -755,7 +755,7 @@ const doOrchestratedReboot = async (hostId: string): Promise<OrchestratedRebootR
 const getRebootOrchestrationStatus = async (hostId: string, orchestrationId: string): Promise<RebootOrchestrationStatus> => {
     let result = {} as RebootOrchestrationStatus;
 
-    await api.get<RebootOrchestrationStatus>("/api/host/" + hostId + "/reboot/orchestration/" + orchestrationId)
+    await api.get<RebootOrchestrationStatus>("/api/v1/host/" + hostId + "/reboot/orchestration/" + orchestrationId)
     .then((response) => {
         result = response.data;
     })
@@ -769,7 +769,7 @@ const getRebootOrchestrationStatus = async (hostId: string, orchestrationId: str
 const doChangeHostname = async (hostId: string, newHostname: string) => {
     let result = {} as SuccessResponse;
 
-    await api.post("/api/host/" + hostId + "/change-hostname", {
+    await api.post("/api/v1/host/" + hostId + "/change-hostname", {
         new_hostname: newHostname
     })
     .then((response) => {

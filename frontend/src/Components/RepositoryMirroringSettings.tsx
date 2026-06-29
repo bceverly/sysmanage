@@ -195,7 +195,7 @@ const RepositoryMirroringSettings: React.FC = () => {
       const [c, m, h] = await Promise.all([
         listPlatformConfigs(),
         listMirrors(),
-        axiosInstance.get<HostSummary[]>('/api/hosts').then((r) => r.data),
+        axiosInstance.get<HostSummary[]>('/api/v1/hosts').then((r) => r.data),
       ]);
       setConfigs(c);
       setMirrors(m);

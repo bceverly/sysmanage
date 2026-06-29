@@ -210,7 +210,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
                 }
             }
 
-            await axiosInstance.post(`/api/host/${hostId}/accounts`, payload);
+            await axiosInstance.post(`/api/v1/host/${hostId}/accounts`, payload);
 
             // Call success callback and close modal
             if (onSuccess) {

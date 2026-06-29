@@ -134,7 +134,7 @@ const doGetUsers = async (): Promise<SysManageUser[]> => {
 const doGetUserByUserid = async (userid: string) => {
     let result = {} as SysManageUser;
 
-    await api.get<SysManageUser>("/api/host/by_userid/" + userid)
+    await api.get<SysManageUser>("/api/v1/host/by_userid/" + userid)
     .then((response) => {
         // No error - process response
         result = response.data;

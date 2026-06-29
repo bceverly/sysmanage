@@ -48,31 +48,31 @@ export interface UpdateDistributionRequest {
 export const distributionService = {
     async getAll(childType?: string): Promise<Distribution[]> {
         const params = childType ? { child_type: childType } : {};
-        const response = await axiosInstance.get('/api/child-host-distributions/all', { params });
+        const response = await axiosInstance.get('/api/v1/child-host-distributions/all', { params });
         return response.data;
     },
 
     async get(id: string): Promise<Distribution> {
-        const response = await axiosInstance.get(`/api/child-host-distributions/${id}`);
+        const response = await axiosInstance.get(`/api/v1/child-host-distributions/${id}`);
         return response.data;
     },
 
     async create(request: CreateDistributionRequest): Promise<Distribution> {
-        const response = await axiosInstance.post('/api/child-host-distributions', request);
+        const response = await axiosInstance.post('/api/v1/child-host-distributions', request);
         return response.data;
     },
 
     async update(id: string, request: UpdateDistributionRequest): Promise<Distribution> {
-        const response = await axiosInstance.put(`/api/child-host-distributions/${id}`, request);
+        const response = await axiosInstance.put(`/api/v1/child-host-distributions/${id}`, request);
         return response.data;
     },
 
     async delete(id: string): Promise<void> {
-        await axiosInstance.delete(`/api/child-host-distributions/${id}`);
+        await axiosInstance.delete(`/api/v1/child-host-distributions/${id}`);
     },
 
     async toggleActive(id: string, isActive: boolean): Promise<Distribution> {
-        const response = await axiosInstance.put(`/api/child-host-distributions/${id}`, {
+        const response = await axiosInstance.put(`/api/v1/child-host-distributions/${id}`, {
             is_active: isActive,
         });
         return response.data;

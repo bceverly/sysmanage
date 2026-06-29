@@ -14,7 +14,7 @@ export const handlers = [
     console.log(`${logPrefix} Handling GET ${path}`);
 
     // Host data - using pattern matching for UUID
-    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path) || path === '/api/v1/host/550e8400-e29b-41d4-a716-446655440000' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000') {
       return HttpResponse.json({
         id: '550e8400-e29b-41d4-a716-446655440000',
         fqdn: 'test-host.example.com',
@@ -57,7 +57,7 @@ export const handlers = [
     }
 
     // Software packages - using pattern matching for UUID
-    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/.test(path) || path === '/api/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
+    if (/^\/api\/hosts?\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/software$/.test(path) || path === '/api/v1/host/550e8400-e29b-41d4-a716-446655440000/software' || path === '/api/hosts/550e8400-e29b-41d4-a716-446655440000/software') {
       return HttpResponse.json([
         {
           id: '550e8400-e29b-41d4-a716-446655440002',

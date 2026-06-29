@@ -714,7 +714,7 @@ const HostDetail = () => { // NOSONAR
 
         try {
             setCertificatesLoading(true);
-            const response = await axiosInstance.get(`/api/host/${hostId}/certificates`);
+            const response = await axiosInstance.get(`/api/v1/host/${hostId}/certificates`);
 
             if (response.status === 200) {
                 setCertificates(response.data.certificates || []);
@@ -733,7 +733,7 @@ const HostDetail = () => { // NOSONAR
 
         try {
             setCertificatesLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/request-certificates-collection`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/request-certificates-collection`);
 
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.certificateCollectionRequested', 'Certificate collection requested'));
@@ -762,7 +762,7 @@ const HostDetail = () => { // NOSONAR
             if (showLoading) {
                 setRolesLoading(true);
             }
-            const response = await axiosInstance.get(`/api/host/${hostId}/roles`);
+            const response = await axiosInstance.get(`/api/v1/host/${hostId}/roles`);
             if (response.status === 200) {
                 setRoles(response.data.roles || []);
             }
@@ -781,7 +781,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setRolesLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/request-roles-collection`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/request-roles-collection`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.roleCollectionRequested', 'Role collection requested'));
                 setSnackbarSeverity('success');
@@ -812,7 +812,7 @@ const HostDetail = () => { // NOSONAR
             if (showLoading) {
                 setChildHostsLoading(true);
             }
-            const response = await axiosInstance.get(`/api/host/${hostId}/children`);
+            const response = await axiosInstance.get(`/api/v1/host/${hostId}/children`);
             if (response.status === 200) {
                 setChildHosts(response.data || []);
             }
@@ -835,7 +835,7 @@ const HostDetail = () => { // NOSONAR
         if (!licenseModules.includes('container_engine')) return;
         try {
             setVirtualizationLoading(true);
-            const response = await axiosInstance.get(`/api/host/${hostId}/virtualization/status`);
+            const response = await axiosInstance.get(`/api/v1/host/${hostId}/virtualization/status`);
             if (response.status === 200) {
                 setVirtualizationStatus(response.data);
             }
@@ -854,9 +854,9 @@ const HostDetail = () => { // NOSONAR
             setChildHostsRefreshRequested(true);
             // Request the agent to list child hosts with fresh status and refresh virtualization status
             const [childHostsResponse] = await Promise.all([
-                axiosInstance.post(`/api/host/${hostId}/children/refresh`),
+                axiosInstance.post(`/api/v1/host/${hostId}/children/refresh`),
                 // Also request virtualization status refresh
-                axiosInstance.get(`/api/host/${hostId}/virtualization`).catch(err => {
+                axiosInstance.get(`/api/v1/host/${hostId}/virtualization`).catch(err => {
                     console.log('Virtualization check request failed (optional):', err);
                     return null;
                 })
@@ -890,7 +890,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'start' }));
-            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/start`);
+            await axiosInstance.post(`/api/v1/host/${hostId}/children/${child.id}/start`);
             setSnackbarMessage(t('hostDetail.childHostStartRequested', 'Start requested for {{name}}', { name: child.child_name }));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -912,7 +912,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'stop' }));
-            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/stop`);
+            await axiosInstance.post(`/api/v1/host/${hostId}/children/${child.id}/stop`);
             setSnackbarMessage(t('hostDetail.childHostStopRequested', 'Stop requested for {{name}}', { name: child.child_name }));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -934,7 +934,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'restart' }));
-            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/restart`);
+            await axiosInstance.post(`/api/v1/host/${hostId}/children/${child.id}/restart`);
             setSnackbarMessage(t('hostDetail.childHostRestartRequested', 'Restart requested for {{name}}', { name: child.child_name }));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -956,7 +956,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setChildHostOperationLoading(prev => ({ ...prev, [child.id]: 'update-agent' }));
-            await axiosInstance.post(`/api/host/${hostId}/children/${child.id}/update-agent`);
+            await axiosInstance.post(`/api/v1/host/${hostId}/children/${child.id}/update-agent`);
             setSnackbarMessage(t('hosts.updateAgentRequested', 'Agent update requested successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -989,7 +989,7 @@ const HostDetail = () => { // NOSONAR
         try {
             setChildHostOperationLoading(prev => ({ ...prev, [childHostToDelete.id]: 'delete' }));
             setDeleteChildHostConfirmOpen(false);
-            await axiosInstance.delete(`/api/host/${hostId}/children/${childHostToDelete.id}`);
+            await axiosInstance.delete(`/api/v1/host/${hostId}/children/${childHostToDelete.id}`);
             setSnackbarMessage(t('hostDetail.childHostDeleteRequested', 'Delete requested for {{name}}', { name: childHostToDelete.child_name }));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -1028,7 +1028,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setEnableWslLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/enable-wsl`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/enable-wsl`);
             if (response.status === 200) {
                 const result = response.data;
                 if (result.reboot_required) {
@@ -1058,7 +1058,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setInitializeLxdLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-lxd`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/initialize-lxd`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.lxdInitializedSuccess', 'LXD initialization requested. The agent will install and configure LXD.'));
                 setSnackbarSeverity('success');
@@ -1083,7 +1083,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setInitializeVmmLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-vmm`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/initialize-vmm`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.vmmInitializedSuccess', 'VMM initialization requested. The agent will enable and start the vmd daemon.'));
                 setSnackbarSeverity('success');
@@ -1108,7 +1108,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setInitializeKvmLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-kvm`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/initialize-kvm`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.kvmInitializedSuccess', 'KVM initialization requested. The agent will install and configure libvirt.'));
                 setSnackbarSeverity('success');
@@ -1133,7 +1133,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setInitializeBhyveLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/initialize-bhyve`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/initialize-bhyve`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.bhyveInitializedSuccess', 'bhyve initialization requested. The agent will load vmm.ko and configure the system.'));
                 setSnackbarSeverity('success');
@@ -1158,7 +1158,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setDisableBhyveLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/disable-bhyve`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/disable-bhyve`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.bhyveDisabledSuccess', 'bhyve disable requested. The agent will unload vmm.ko and update the configuration.'));
                 setSnackbarSeverity('success');
@@ -1183,7 +1183,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setKvmModulesLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/enable-kvm-modules`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/enable-kvm-modules`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.kvmModulesEnableSuccess', 'KVM modules enable requested. The agent will load the kernel modules.'));
                 setSnackbarSeverity('success');
@@ -1208,7 +1208,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
         try {
             setKvmModulesLoading(true);
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/disable-kvm-modules`);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/disable-kvm-modules`);
             if (response.status === 200) {
                 setSnackbarMessage(t('hostDetail.kvmModulesDisableSuccess', 'KVM modules disable requested. The agent will unload the kernel modules.'));
                 setSnackbarSeverity('success');
@@ -1359,7 +1359,7 @@ const HostDetail = () => { // NOSONAR
                 }
             }
 
-            const response = await axiosInstance.post(`/api/host/${hostId}/virtualization/create-child`, requestData);
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/virtualization/create-child`, requestData);
 
             if (response.status === 200) {
                 const result = response.data;
@@ -1476,7 +1476,7 @@ const HostDetail = () => { // NOSONAR
                 return;
             }
 
-            const response = await axiosInstance.post(`/api/host/${hostId}/service-control`, {
+            const response = await axiosInstance.post(`/api/v1/host/${hostId}/service-control`, {
                 action,
                 services: serviceNames
             });
@@ -2385,7 +2385,7 @@ const HostDetail = () => { // NOSONAR
 
         setDeletingUser(true);
         try {
-            await axiosInstance.delete(`/api/host/${hostId}/accounts/${encodeURIComponent(userToDelete.username)}?delete_default_group=${deleteDefaultGroup}`);
+            await axiosInstance.delete(`/api/v1/host/${hostId}/accounts/${encodeURIComponent(userToDelete.username)}?delete_default_group=${deleteDefaultGroup}`);
             setSnackbarMessage(t('hostAccount.deleteSuccess', 'User account deletion requested. The user list will update automatically.'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -2421,7 +2421,7 @@ const HostDetail = () => { // NOSONAR
 
         setDeletingGroup(true);
         try {
-            await axiosInstance.delete(`/api/host/${hostId}/groups/${encodeURIComponent(groupToDelete.group_name)}`);
+            await axiosInstance.delete(`/api/v1/host/${hostId}/groups/${encodeURIComponent(groupToDelete.group_name)}`);
             setSnackbarMessage(t('hostGroup.deleteSuccess', 'Group deletion requested. The group list will update automatically.'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);
@@ -2936,7 +2936,7 @@ const HostDetail = () => { // NOSONAR
             // If host supports child hosts (Windows), also request virtualization check
             if (supportsChildHosts()) {
                 requests.push(
-                    axiosInstance.get(`/api/host/${hostId}/virtualization`).catch(err => {
+                    axiosInstance.get(`/api/v1/host/${hostId}/virtualization`).catch(err => {
                         console.log('Virtualization check request failed (optional):', err);
                         return null;
                     })

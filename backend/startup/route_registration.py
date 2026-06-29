@@ -229,8 +229,8 @@ def register_routes(app: FastAPI):
     _include_versioned(app, user.router, tags=["users"])
     logger.debug("User router added")
 
-    logger.debug("Adding fleet router with /api prefix")
-    app.include_router(fleet.router, prefix="/api", tags=["fleet"])
+    logger.debug("Adding fleet router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, fleet.router, tags=["fleet"])
     logger.debug("Fleet router added")
 
     logger.debug("Adding config management router with /api prefix")
@@ -344,16 +344,14 @@ def register_routes(app: FastAPI):
     )  # /api/certificates/client/* (with auth)
     logger.debug("Certificates auth router added")
 
-    logger.debug("Adding host auth router with /api prefix")
-    app.include_router(
-        host.auth_router, prefix="/api", tags=["hosts"]
-    )  # /api/host/* (with auth)
+    # NOTE: only the AUTH router migrates. host.public_router (/host/register)
+    # is agent-facing and stays unversioned (Phase 13.2.1 — fleet version skew).
+    logger.debug("Adding host auth router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, host.auth_router, tags=["hosts"])
     logger.debug("Host auth router added")
 
-    logger.debug("Adding host hostname router with /api prefix")
-    app.include_router(
-        host_hostname.router, prefix="/api", tags=["hosts"]
-    )  # /api/host/{host_id}/change-hostname (with auth)
+    logger.debug("Adding host hostname router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, host_hostname.router, tags=["hosts"])
     logger.debug("Host hostname router added")
 
     logger.debug("Adding security router with /api prefix")
@@ -452,20 +450,16 @@ def register_routes(app: FastAPI):
     )  # /api/firewall-roles/* (with auth)
     logger.debug("Firewall Roles router added")
 
-    logger.debug("Adding Child Host router with /api prefix")
-    app.include_router(
-        child_host.router,
-        prefix="/api",
-        tags=["child-hosts"],
-    )  # /api/host/{host_id}/children/*, /api/child-host-distributions/* (with auth)
+    logger.debug("Adding Child Host router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, child_host.router, tags=["child-hosts"]
+    )  # /host/{host_id}/children/*, /child-host-distributions/* (with auth)
     logger.debug("Child Host router added")
 
-    logger.debug("Adding Reboot Orchestration router with /api prefix")
-    app.include_router(
-        reboot_orchestration.router,
-        prefix="/api",
-        tags=["reboot-orchestration"],
-    )  # /api/host/{host_id}/reboot/* (with auth)
+    logger.debug("Adding Reboot Orchestration router (native /api/v1 + alias)")
+    _include_versioned(
+        app, reboot_orchestration.router, tags=["reboot-orchestration"]
+    )  # /host/{host_id}/reboot/* (with auth)
     logger.debug("Reboot Orchestration router added")
 
     logger.debug("Adding License Management router with /api prefix")

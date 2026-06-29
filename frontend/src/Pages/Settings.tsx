@@ -766,7 +766,7 @@ const Settings: React.FC = () => {
       } else {
         // No package summaries exist yet, discover active hosts and trigger collection
         try {
-          const hostsResponse = await axiosInstance.get('/api/hosts');
+          const hostsResponse = await axiosInstance.get('/api/v1/hosts');
           const activeHosts = hostsResponse.data.filter((host: Host) => host.active && host.approval_status === 'approved');
 
           // Create unique OS/version combinations
