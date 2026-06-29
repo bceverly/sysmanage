@@ -152,7 +152,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
   // Load OS options
   const loadOSOptions = useCallback(async () => {
     try {
-      const response = await axiosInstance.get<OSPackageManagersResponse>('/api/default-repositories/os-options');
+      const response = await axiosInstance.get<OSPackageManagersResponse>('/api/v1/default-repositories/os-options');
       setOsOptions(response.data.operating_systems);
       setPackageManagerOptions(response.data.package_managers);
     } catch (err) {
@@ -167,7 +167,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
     setLoading(true);
     try {
-      const response = await axiosInstance.get<DefaultRepository[]>('/api/default-repositories/');
+      const response = await axiosInstance.get<DefaultRepository[]>('/api/v1/default-repositories/');
       setRepositories(response.data);
       setError(null);
     } catch (err) {
@@ -181,7 +181,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
   // Load enabled package managers OS options
   const loadPMOSOptions = useCallback(async () => {
     try {
-      const response = await axiosInstance.get<PMOSOptionsResponse>('/api/enabled-package-managers/os-options');
+      const response = await axiosInstance.get<PMOSOptionsResponse>('/api/v1/enabled-package-managers/os-options');
       setPmOSOptions(response.data.operating_systems);
       setPmDefaultManagers(response.data.default_package_managers);
       setPmOptionalManagers(response.data.optional_package_managers);
@@ -197,7 +197,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
     setPmLoading(true);
     try {
-      const response = await axiosInstance.get<EnabledPackageManager[]>('/api/enabled-package-managers/');
+      const response = await axiosInstance.get<EnabledPackageManager[]>('/api/v1/enabled-package-managers/');
       setEnabledPMs(response.data);
       setPmError(null);
     } catch (err) {
@@ -342,7 +342,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
     setSaving(true);
     try {
-      await axiosInstance.post('/api/default-repositories/', {
+      await axiosInstance.post('/api/v1/default-repositories/', {
         os_name: selectedOS,
         package_manager: selectedPackageManager,
         repository_url: finalRepoUrl,
@@ -392,7 +392,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
   // Handle delete repository
   const handleDeleteRepository = async (repoId: string) => {
     try {
-      await axiosInstance.delete(`/api/default-repositories/${repoId}`);
+      await axiosInstance.delete(`/api/v1/default-repositories/${repoId}`);
 
       // Reload repositories
       await loadRepositories();
@@ -419,7 +419,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
 
     setPmSaving(true);
     try {
-      await axiosInstance.post('/api/enabled-package-managers/', {
+      await axiosInstance.post('/api/v1/enabled-package-managers/', {
         os_name: selectedPMOS,
         package_manager: selectedOptionalPM,
       });
@@ -449,7 +449,7 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
   // Handle delete enabled package manager
   const handleDeleteEnabledPM = async (pmId: string) => {
     try {
-      await axiosInstance.delete(`/api/enabled-package-managers/${pmId}`);
+      await axiosInstance.delete(`/api/v1/enabled-package-managers/${pmId}`);
 
       // Reload enabled package managers
       await loadEnabledPMs();

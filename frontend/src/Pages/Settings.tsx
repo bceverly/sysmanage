@@ -239,7 +239,7 @@ const Settings: React.FC = () => {
         labelDefault: 'Update Profiles',
         // Phase 10.6: scheduled upgrade profiles moved to the Pro+
         // ``automation_engine`` (cron + per-host dispatch live there).
-        // The OSS server returns 402 from every /api/upgrade-profiles
+        // The OSS server returns 402 from every /api/v1/upgrade-profiles
         // route without it, so the tab simply hides.
         moduleRequired: 'automation_engine',
       },
@@ -250,7 +250,7 @@ const Settings: React.FC = () => {
         // Phase 11.5: package compliance profiles moved to the Pro+
         // ``compliance_engine`` (evaluator + remediation-plan builder
         // live there).  The OSS server returns 402 from every
-        // /api/package-profiles route without it, so the tab simply
+        // /api/v1/package-profiles route without it, so the tab simply
         // hides for unlicensed deployments.
         moduleRequired: 'compliance_engine',
       },
@@ -670,7 +670,7 @@ const Settings: React.FC = () => {
   const loadPackageSummary = useCallback(async () => {
     setPackageSummaryLoading(true);
     try {
-      const response = await axiosInstance.get('/api/packages/summary');
+      const response = await axiosInstance.get('/api/v1/packages/summary');
       setPackageSummary(response.data);
     } catch (error) {
       console.error('Error fetching package summary:', error);
@@ -713,7 +713,7 @@ const Settings: React.FC = () => {
       }
 
       // Get total count for proper pagination
-      const countResponse = await axiosInstance.get('/api/packages/search/count', { params });
+      const countResponse = await axiosInstance.get('/api/v1/packages/search/count', { params });
       setPackageTotalCount(countResponse.data.total_count);
 
       // Get the actual page data
@@ -723,7 +723,7 @@ const Settings: React.FC = () => {
         offset: page * pageSize
       };
 
-      const response = await axiosInstance.get('/api/packages/search', { params: searchParams });
+      const response = await axiosInstance.get('/api/v1/packages/search', { params: searchParams });
       setPackages(response.data);
     } catch (error) {
       console.error('Error searching packages:', error);
@@ -737,7 +737,7 @@ const Settings: React.FC = () => {
   // Refresh packages for a specific OS/version
   const refreshPackagesForOS = useCallback(async (osName: string, osVersion: string) => {
     try {
-      const response = await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+      const response = await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
       if (response.data.success) {
         // Show success message and reload package summary
         console.log('Package refresh requested successfully:', response.data.message);
@@ -758,7 +758,7 @@ const Settings: React.FC = () => {
         // Refresh packages for all known OS/version combinations from package summaries
         for (const summary of packageSummary) {
           try {
-            await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
+            await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(summary.os_name)}/${encodeURIComponent(summary.os_version)}`);
           } catch (error) {
             console.error('Error refreshing packages for', summary.os_name, summary.os_version, ':', error);
           }
@@ -781,7 +781,7 @@ const Settings: React.FC = () => {
           for (const combination of Array.from(osVersionCombinations)) {
             const [osName, osVersion] = combination.split('|');
             try {
-              await axiosInstance.post(`/api/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
+              await axiosInstance.post(`/api/v1/packages/refresh/${encodeURIComponent(osName)}/${encodeURIComponent(osVersion)}`);
             } catch (error) {
               console.error('Error refreshing packages for', osName, osVersion, ':', error);
             }

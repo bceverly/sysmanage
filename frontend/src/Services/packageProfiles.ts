@@ -55,45 +55,45 @@ export interface HostComplianceStatus {
 
 export const packageProfilesService = {
   async list(): Promise<PackageProfile[]> {
-    const r = await axiosInstance.get('/api/package-profiles');
+    const r = await axiosInstance.get('/api/v1/package-profiles');
     return r.data;
   },
 
   async get(id: string): Promise<PackageProfile> {
-    const r = await axiosInstance.get(`/api/package-profiles/${id}`);
+    const r = await axiosInstance.get(`/api/v1/package-profiles/${id}`);
     return r.data;
   },
 
   async create(payload: PackageProfileCreate): Promise<PackageProfile> {
-    const r = await axiosInstance.post('/api/package-profiles', payload);
+    const r = await axiosInstance.post('/api/v1/package-profiles', payload);
     return r.data;
   },
 
   async update(id: string, payload: PackageProfileUpdate): Promise<PackageProfile> {
-    const r = await axiosInstance.put(`/api/package-profiles/${id}`, payload);
+    const r = await axiosInstance.put(`/api/v1/package-profiles/${id}`, payload);
     return r.data;
   },
 
   async remove(id: string): Promise<void> {
-    await axiosInstance.delete(`/api/package-profiles/${id}`);
+    await axiosInstance.delete(`/api/v1/package-profiles/${id}`);
   },
 
   async scanHost(profileId: string, hostId: string): Promise<HostComplianceStatus> {
     const r = await axiosInstance.post(
-      `/api/package-profiles/${profileId}/scan/${hostId}`,
+      `/api/v1/package-profiles/${profileId}/scan/${hostId}`,
     );
     return r.data;
   },
 
   async dispatchToAgent(profileId: string, hostId: string): Promise<{ status: string }> {
     const r = await axiosInstance.post(
-      `/api/package-profiles/${profileId}/dispatch/${hostId}`,
+      `/api/v1/package-profiles/${profileId}/dispatch/${hostId}`,
     );
     return r.data;
   },
 
   async statusForHost(hostId: string): Promise<HostComplianceStatus[]> {
-    const r = await axiosInstance.get(`/api/package-profiles/status/host/${hostId}`);
+    const r = await axiosInstance.get(`/api/v1/package-profiles/status/host/${hostId}`);
     return r.data;
   },
 };

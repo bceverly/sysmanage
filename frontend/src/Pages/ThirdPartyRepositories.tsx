@@ -172,7 +172,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 
         try {
             const response = await axiosInstance.get(
-                `/api/default-repositories/by-os/${encodeURIComponent(extractedOsName)}`
+                `/api/v1/default-repositories/by-os/${encodeURIComponent(extractedOsName)}`
             );
             setDefaultRepositories(response.data || []);
         } catch {
@@ -192,7 +192,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
 
         try {
             const response = await axiosInstance.get(
-                `/api/hosts/${hostId}/third-party-repos`
+                `/api/v1/hosts/${hostId}/third-party-repos`
             );
             const repos = response.data.repositories || [];
             // Add unique IDs for DataGrid and mark as not default
@@ -322,7 +322,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 payload.type = windowsRepoType;
             }
 
-            await axiosInstance.post(`/api/hosts/${hostId}/third-party-repos`, payload);
+            await axiosInstance.post(`/api/v1/hosts/${hostId}/third-party-repos`, payload);
             setSuccess(t('thirdPartyRepos.addSuccess'));
             setAddDialogOpen(false);
 
@@ -369,7 +369,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 selectedRows.includes(repo.id)
             );
 
-            await axiosInstance.delete(`/api/hosts/${hostId}/third-party-repos`, {
+            await axiosInstance.delete(`/api/v1/hosts/${hostId}/third-party-repos`, {
                 data: {
                     repositories: reposToDelete.map((repo) => ({
                         name: repo.name,
@@ -404,7 +404,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 selectedRows.includes(repo.id)
             );
 
-            await axiosInstance.post(`/api/hosts/${hostId}/third-party-repos/enable`, {
+            await axiosInstance.post(`/api/v1/hosts/${hostId}/third-party-repos/enable`, {
                 repositories: reposToEnable.map((repo) => ({
                     name: repo.name,
                     type: repo.type,
@@ -437,7 +437,7 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
                 selectedRows.includes(repo.id)
             );
 
-            await axiosInstance.post(`/api/hosts/${hostId}/third-party-repos/disable`, {
+            await axiosInstance.post(`/api/v1/hosts/${hostId}/third-party-repos/disable`, {
                 repositories: reposToDisable.map((repo) => ({
                     name: repo.name,
                     type: repo.type,

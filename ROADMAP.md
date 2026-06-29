@@ -4634,9 +4634,17 @@ as thin back-compat only.
       their own surfaces. `test_api_v1_slice2.py` covers dual-surface + asserts
       `/host/register` is never natively versioned. Backend 5502+539 green,
       frontend 122 green.
-- [ ] *Slice 3 (packages/updates/repos):* `packages`, `updates`, `scripts`,
+- [x] *Slice 3 (packages/updates/repos):* `packages`, `updates`, `scripts`,
       `third_party_repos`, `default_repositories`, `enabled_package_managers`,
-      `package_compliance`, `upgrade_profiles`.
+      `package_compliance` (`/package-profiles`), `upgrade_profiles` migrated to
+      native `/api/v1` (+ hidden `/api` alias). `package_compliance` and
+      `upgrade_profiles` were self-prefixed `APIRouter(prefix=...)`; refactored to
+      register the prefix via `_include_versioned` (suffix). **Folded in the
+      Slice-1 leftover:** the host→tag calls (`/api/hosts/{id}/tags`) now use
+      `/api/v1` (they hit the already-v1 `tag` router). Shared `/api/hosts/{id}/*`
+      antivirus/firewall paths left for Slice 5. `test_api_v1_slice3.py` covers
+      dual-surface (incl. the Pro+-gated 402 profile routers behaving the same on
+      both surfaces). Backend 5512+539 green, frontend 122 green.
 - [ ] *Slice 4 (security/auth-mgmt):* `auth` (login/refresh/logout), `security`,
       `security_roles`, `password_reset`, `openbao`, `secrets` (OSS),
       `external_idp` **management** endpoints only (NOT the SSO callbacks),

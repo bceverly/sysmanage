@@ -2063,7 +2063,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
 
         try {
-            const response = await axiosInstance.get(`/api/hosts/${hostId}/tags`);
+            const response = await axiosInstance.get(`/api/v1/hosts/${hostId}/tags`);
 
             if (response.status === 200) {
                 const tags = response.data;
@@ -2097,7 +2097,7 @@ const HostDetail = () => { // NOSONAR
 
         setInstallationHistoryLoading(true);
         try {
-            const response = await axiosInstance.get(`/api/packages/installation-history/${hostId}`);
+            const response = await axiosInstance.get(`/api/v1/packages/installation-history/${hostId}`);
             setInstallationHistory(response.data.installations || []);
         } catch (error) {
             console.error('Error fetching installation history:', error);
@@ -2818,7 +2818,7 @@ const HostDetail = () => { // NOSONAR
         setIsSearching(true);
         try {
             // Get host information to determine OS for package search
-            const response = await axiosInstance.get(`/api/packages/search?query=${encodeURIComponent(query)}&limit=20`);
+            const response = await axiosInstance.get(`/api/v1/packages/search?query=${encodeURIComponent(query)}&limit=20`);
 
             if (response.data && Array.isArray(response.data)) {
                 // Get list of already installed package names
@@ -3274,7 +3274,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId || !selectedTagToAdd) return;
 
         try {
-            const response = await globalThis.fetch(`/api/hosts/${hostId}/tags/${selectedTagToAdd}`, {
+            const response = await globalThis.fetch(`/api/v1/hosts/${hostId}/tags/${selectedTagToAdd}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
@@ -3305,7 +3305,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId) return;
 
         try {
-            const response = await globalThis.fetch(`/api/hosts/${hostId}/tags/${tagId}`, {
+            const response = await globalThis.fetch(`/api/v1/hosts/${hostId}/tags/${tagId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('bearer_token')}`,
@@ -3518,7 +3518,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId || selectedPackages.size === 0) return;
 
         try {
-            const response = await axiosInstance.post(`/api/packages/install/${hostId}`, {
+            const response = await axiosInstance.post(`/api/v1/packages/install/${hostId}`, {
                 package_names: Array.from(selectedPackages),
                 requested_by: currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.userid : 'Unknown User'
             });
@@ -3572,7 +3572,7 @@ const HostDetail = () => { // NOSONAR
         if (!hostId || !packageToUninstall) return;
 
         try {
-            const response = await axiosInstance.post(`/api/packages/uninstall/${hostId}`, {
+            const response = await axiosInstance.post(`/api/v1/packages/uninstall/${hostId}`, {
                 package_names: [packageToUninstall.package_name],
                 requested_by: currentUser ? `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || currentUser.userid : 'Unknown User'
             });
@@ -3628,7 +3628,7 @@ const HostDetail = () => { // NOSONAR
         if (!installationToDelete) return;
 
         try {
-            await axiosInstance.delete(`/api/packages/installation-history/${installationToDelete.request_id}`);
+            await axiosInstance.delete(`/api/v1/packages/installation-history/${installationToDelete.request_id}`);
             setSnackbarMessage(t('hostDetail.installationDeleted', 'Installation record deleted successfully'));
             setSnackbarSeverity('success');
             setSnackbarOpen(true);

@@ -41,8 +41,9 @@ logger = logging.getLogger(__name__)
 queue_ops = QueueOperations()
 
 
+# Phase 13.2.1: prefix moved to registration (_include_versioned) so this router
+# serves natively under /api/v1/upgrade-profiles with a deprecated /api alias.
 router = APIRouter(
-    prefix="/api/upgrade-profiles",
     tags=["upgrade-profiles"],
     dependencies=[Depends(JWTBearer())],
 )

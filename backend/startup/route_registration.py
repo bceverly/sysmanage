@@ -258,12 +258,12 @@ def register_routes(app: FastAPI):
     )
     logger.debug("User preferences router added")
 
-    logger.debug("Adding updates router with /api/updates prefix")
-    app.include_router(updates.router, prefix="/api/updates", tags=["updates"])
+    logger.debug("Adding updates router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, updates.router, suffix="/updates", tags=["updates"])
     logger.debug("Updates router added")
 
-    logger.debug("Adding scripts router with /api/scripts prefix")
-    app.include_router(scripts.router, prefix="/api/scripts", tags=["scripts"])
+    logger.debug("Adding scripts router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(app, scripts.router, suffix="/scripts", tags=["scripts"])
     logger.debug("Scripts router added")
 
     # api-keys shipped in 13.2 with no external consumers yet, so it goes
@@ -288,11 +288,11 @@ def register_routes(app: FastAPI):
         airgap_bundles.download_router, prefix="/api", tags=["airgap-bundles"]
     )
 
-    logger.debug("Adding upgrade-profiles router (Phase 8.2)")
-    app.include_router(upgrade_profiles.router)
+    logger.debug("Adding upgrade-profiles router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, upgrade_profiles.router, suffix="/upgrade-profiles")
 
-    logger.debug("Adding package-compliance router (Phase 8.3)")
-    app.include_router(package_compliance.router)
+    logger.debug("Adding package-compliance router (native /api/v1 + deprecated alias)")
+    _include_versioned(app, package_compliance.router, suffix="/package-profiles")
 
     logger.debug("Adding broadcast router (Phase 8.5)")
     app.include_router(broadcast.router)
@@ -366,10 +366,10 @@ def register_routes(app: FastAPI):
     )  # /api/admin/reset-user-password (with auth)
     logger.debug("Password reset admin router added")
 
-    logger.debug("Adding packages router with /api/packages prefix")
-    app.include_router(
-        packages.router, prefix="/api/packages", tags=["packages"]
-    )  # /api/packages/* (with auth)
+    logger.debug("Adding packages router (native /api/v1 + deprecated /api alias)")
+    _include_versioned(
+        app, packages.router, suffix="/packages", tags=["packages"]
+    )  # /api/v1/packages/* (+ /api alias)
     logger.debug("Packages router added")
 
     logger.debug("Adding OpenBAO router with /api prefix")
@@ -412,10 +412,10 @@ def register_routes(app: FastAPI):
     app.include_router(security_roles.router)  # /api/security-roles/* (with auth)
     logger.debug("Security Roles router added")
 
-    logger.debug("Adding Third-Party Repositories router with /api prefix")
-    app.include_router(
-        third_party_repos.router, prefix="/api", tags=["third-party-repos"]
-    )  # /api/hosts/{host_id}/third-party-repos/* (with auth)
+    logger.debug("Adding Third-Party Repositories router (native /api/v1 + alias)")
+    _include_versioned(
+        app, third_party_repos.router, tags=["third-party-repos"]
+    )  # /api/v1/hosts/{host_id}/third-party-repos/* (+ /api alias)
     logger.debug("Third-Party Repositories router added")
 
     logger.debug("Adding Audit Log router")
@@ -425,21 +425,23 @@ def register_routes(app: FastAPI):
     logger.debug(
         "Adding Default Repositories router with /api/default-repositories prefix"
     )
-    app.include_router(
+    _include_versioned(
+        app,
         default_repositories.router,
-        prefix="/api/default-repositories",
+        suffix="/default-repositories",
         tags=["default-repositories"],
-    )  # /api/default-repositories/* (with auth)
+    )  # /api/v1/default-repositories/* (+ /api alias)
     logger.debug("Default Repositories router added")
 
     logger.debug(
         "Adding Enabled Package Managers router with /api/enabled-package-managers prefix"
     )
-    app.include_router(
+    _include_versioned(
+        app,
         enabled_package_managers.router,
-        prefix="/api/enabled-package-managers",
+        suffix="/enabled-package-managers",
         tags=["enabled-package-managers"],
-    )  # /api/enabled-package-managers/* (with auth)
+    )  # /api/v1/enabled-package-managers/* (+ /api alias)
     logger.debug("Enabled Package Managers router added")
 
     logger.debug("Adding Firewall Roles router with /api/firewall-roles prefix")

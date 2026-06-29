@@ -79,7 +79,7 @@ export const handlers = [
     }
 
     // Package search
-    if (path === '/api/packages/search') {
+    if (path === '/api/v1/packages/search') {
       const query = url.searchParams.get('query');
       if (!query || query.length < 2) {
         return HttpResponse.json([]);
@@ -155,7 +155,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package installation
-  http.post('http://localhost:8080/api/packages/install/*', async ({ request }) => {
+  http.post('http://localhost:8080/api/v1/packages/install/*', async ({ request }) => {
     const body = await request.json() as { package_names: string[]; requested_by: string };
 
     return HttpResponse.json({
@@ -166,7 +166,7 @@ export const handlers = [
   }),
 
   // Handle POST requests for package uninstallation
-  http.post('http://localhost:8080/api/packages/uninstall/*', async () => {
+  http.post('http://localhost:8080/api/v1/packages/uninstall/*', async () => {
     return HttpResponse.json({
       success: true,
       message: 'Package uninstallation has been queued',
