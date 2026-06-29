@@ -41,7 +41,18 @@ def generate_api_key() -> Tuple[str, str, str]:
 
 
 def hash_api_key(full_key: str) -> str:
-    """Return the SHA-256 hex digest used for storage and lookup."""
+    """Return the SHA-256 hex digest used for storage and lookup.
+
+    SHA-256 (a fast hash) is the CORRECT choice here, NOT a slow KDF like
+    Argon2/bcrypt: an API key is a 256-bit cryptographically-random token
+    (``secrets.token_urlsafe(32)``), so it has full machine entropy and is not
+    brute-forceable from its digest — the threat a slow KDF defends against
+    (low-entropy human passwords) does not apply.  A fast digest also enables the
+    O(1) indexed lookup in ``authenticate_api_key`` (a per-record salted KDF
+    cannot be indexed).  This is the same model GitHub uses for personal access
+    tokens.  CodeQL's ``py/weak-sensitive-data-hashing`` flags this generically
+    (it can't see the input's entropy) — it is a false positive in this context.
+    """
     return hashlib.sha256(full_key.encode("utf-8")).hexdigest()
 
 
@@ -92,6 +103,8 @@ def authenticate_api_key(credential: str) -> Optional[dict]:
             session.commit()
         except Exception as exc:  # noqa: BLE001 - usage tracking is non-critical
             session.rollback()
+            # Logs the caught exception object, not the API key/credential.
+            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             logger.debug("api-key last_used_at update failed: %s", exc)
         return principal
     finally:

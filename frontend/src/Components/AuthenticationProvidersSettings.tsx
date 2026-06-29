@@ -72,6 +72,14 @@ const DEFAULT_DRAFT: IdpProviderCreate = {
   oidc_group_claim: 'groups',
 };
 
+// The provider's primary endpoint depends on its type (extracted to avoid a
+// nested ternary in the table cell).
+const providerEndpoint = (p: IdpProvider): string | null | undefined => {
+  if (p.type === 'ldap') return p.ldap_server_url;
+  if (p.type === 'saml') return p.saml_idp_sso_url;
+  return p.oidc_issuer_url;
+};
+
 const AuthenticationProvidersSettings: React.FC = () => {
   const { t } = useTranslation();
   const [providers, setProviders] = useState<IdpProvider[]>([]);
@@ -319,11 +327,7 @@ const AuthenticationProvidersSettings: React.FC = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                        {p.type === 'ldap'
-                          ? p.ldap_server_url
-                          : p.type === 'saml'
-                            ? p.saml_idp_sso_url
-                            : p.oidc_issuer_url}
+                        {providerEndpoint(p)}
                       </TableCell>
                       <TableCell>
                         <Chip

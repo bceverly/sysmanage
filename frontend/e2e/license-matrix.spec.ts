@@ -88,7 +88,10 @@ const FIXTURES = {
  * the frontend issues lands on the mock.
  */
 async function mockLicense(page: Page, fixture: object): Promise<void> {
-    await page.route('**/api/license', async route => {
+    // Phase 13.2.1: the license cache now calls /api/v1/license (with /api/license
+    // kept as a deprecated alias). Match both so the mock intercepts the real call
+    // — a plain "**/api/license" glob does NOT match "/api/v1/license".
+    await page.route(/\/api\/(v1\/)?license(\?.*)?$/, async route => {
         if (route.request().method() !== 'GET') {
             return route.continue();
         }

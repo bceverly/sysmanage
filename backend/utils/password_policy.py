@@ -46,6 +46,8 @@ class PasswordPolicy:
             if isinstance(db_policy, dict):
                 self.policy = db_policy
         except Exception as exc:  # noqa: BLE001 — best-effort; keep the YAML policy
+            # Logs the caught exception object, not a password/credential.
+            # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             logger.debug("DB password-policy override unavailable; using YAML: %s", exc)
 
     def get_requirements_text(self) -> str:
