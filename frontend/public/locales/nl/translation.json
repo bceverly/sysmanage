@@ -125,7 +125,8 @@
     "copied": "Gekopieerd",
     "copy": "Kopiéren",
     "create": "Maken",
-    "done": "Klaar"
+    "done": "Klaar",
+    "loading": "Laden..."
   },
   "connectionStatus": {
     "connected": "Verbonden",

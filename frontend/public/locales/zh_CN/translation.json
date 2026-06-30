@@ -125,7 +125,8 @@
     "copied": "已复制",
     "copy": "复制",
     "create": "创建",
-    "done": "完成"
+    "done": "完成",
+    "loading": "加载中..."
   },
   "connectionStatus": {
     "connected": "已连接",

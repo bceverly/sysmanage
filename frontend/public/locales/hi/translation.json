@@ -125,7 +125,8 @@
     "copied": "कॉपी कर लिया",
     "copy": "कॉपी",
     "create": "बनाएं",
-    "done": "किया गया"
+    "done": "किया गया",
+    "loading": "लोड हो रहा है..."
   },
   "connectionStatus": {
     "connected": "कनेक्टेड",

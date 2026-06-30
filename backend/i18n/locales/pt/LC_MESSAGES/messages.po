@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 09:36-0400\n"
+"POT-Creation-Date: 2026-06-30 13:45-0400\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -135,7 +135,7 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:901
-#: backend/api/package_compliance.py:312 backend/api/package_compliance.py:430
+#: backend/api/package_compliance.py:313 backend/api/package_compliance.py:431
 #: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
 #: backend/api/tag.py:495 backend/api/tag.py:649
 #: backend/api/airgap_repository_buckets.py:61
@@ -154,8 +154,8 @@ msgstr "Host não encontrado"
 msgid "Host is not approved"
 msgstr "O host não está aprovado"
 
-#: backend/api/certificates.py:152 backend/api/security_roles.py:155
-#: backend/api/security_roles.py:198 backend/api/auth_mfa.py:153
+#: backend/api/certificates.py:152 backend/api/security_roles.py:157
+#: backend/api/security_roles.py:200 backend/api/auth_mfa.py:153
 #: backend/api/airgap_collection_schedule.py:140
 #: backend/api/graylog_integration.py:168 backend/api/broadcast.py:124
 #: backend/api/queue.py:118 backend/api/airgap_collector_runs.py:90
@@ -175,20 +175,20 @@ msgstr "O host não está aprovado"
 msgid "User not found"
 msgstr "Usuário não encontrado"
 
-#: backend/api/security_roles.py:88 backend/api/security_roles.py:149
+#: backend/api/security_roles.py:90 backend/api/security_roles.py:151
 msgid "You do not have permission to view user security roles"
 msgstr "Você não tem permissão para visualizar papéis de segurança do usuário"
 
-#: backend/api/security_roles.py:192
+#: backend/api/security_roles.py:194
 msgid "You do not have permission to edit user security roles"
 msgstr "Você não tem permissão para editar papéis de segurança do usuário"
 
-#: backend/api/security_roles.py:210
+#: backend/api/security_roles.py:212
 #, python-format
 msgid "Invalid UUID format: %s"
 msgstr "Formato de UUID inválido: %s"
 
-#: backend/api/security_roles.py:224
+#: backend/api/security_roles.py:226
 #, python-format
 msgid "Role with ID %s does not exist"
 msgstr "Papel com ID %s não existe"
@@ -223,6 +223,11 @@ msgstr "Hostname atualizado para o host %s de %s para %s"
 #, python-format
 msgid "Error handling hostname changed message: %s"
 msgstr "Erro ao lidar com mensagem de alteração do nome do host: %s"
+
+#: backend/api/handlers/process_handlers.py:117
+#, python-format
+msgid "Failed to process process status update: %s"
+msgstr "Falha ao processar a atualização do estado dos processos: %s"
 
 #: backend/api/handlers/user_access_handlers.py:258
 #: backend/api/handlers/user_access_handlers.py:266
@@ -379,9 +384,9 @@ msgid "Failed to record installation completion: %s"
 msgstr "Falha ao registrar a conclusão da instalação: %s"
 
 #: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:161
-#: backend/api/package_compliance.py:135 backend/api/access_groups.py:194
-#: backend/api/external_idp.py:62 backend/api/dynamic_secrets.py:106
-#: backend/api/upgrade_profiles.py:122
+#: backend/api/package_compliance.py:136 backend/api/access_groups.py:194
+#: backend/api/external_idp.py:71 backend/api/dynamic_secrets.py:106
+#: backend/api/upgrade_profiles.py:123
 #, python-format
 msgid "Invalid UUID for %s: %s"
 msgstr "UUID inválido para %s: %s"
@@ -595,7 +600,7 @@ msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "Expressão cron inválida: esperados 5 campos (m h dom mon dow)"
 
 #: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:141
+#: backend/api/upgrade_profiles.py:142
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "Expressão cron inválida: %s"
@@ -960,6 +965,44 @@ msgstr "Formato de nome de host inválido"
 msgid "Hostname change requested"
 msgstr "Mudança de nome do hospedeiro solicitada"
 
+#: backend/api/invitations.py:119
+msgid "Permission denied: Add User role required"
+msgstr "Permissão negada: é necessária a função Adicionar usuário"
+
+#: backend/api/invitations.py:238 backend/api/invitations.py:256
+msgid "No pending invitation found"
+msgstr "Nenhum convite pendente encontrado"
+
+#: backend/api/invitations.py:241
+msgid "Invitation revoked"
+msgstr "Convite revogado"
+
+#: backend/api/invitations.py:265
+msgid "Failed to send invitation email. Please check email configuration."
+msgstr ""
+"Falha ao enviar o e-mail de convite. Verifique a configuração de e-mail."
+
+#: backend/api/invitations.py:269
+#, python-brace-format
+msgid "Invitation re-sent to {email}"
+msgstr "Convite reenviado para {email}"
+
+#: backend/api/invitations.py:283
+msgid "Invalid or expired invitation"
+msgstr "Convite inválido ou expirado"
+
+#: backend/api/invitations.py:292 backend/api/password_reset.py:347
+msgid "Passwords do not match"
+msgstr "As senhas não correspondem"
+
+#: backend/api/invitations.py:296 backend/api/password_reset.py:352
+msgid "Password must be at least 8 characters long"
+msgstr "A senha deve ter pelo menos 8 caracteres"
+
+#: backend/api/invitations.py:313
+msgid "Your account is ready. You can now log in."
+msgstr "Sua conta está pronta. Agora você pode entrar."
+
 #: backend/api/server_info.py:245
 #, python-format
 msgid "Set server role to '%s'"
@@ -1025,6 +1068,29 @@ msgstr "Falha ao solicitar desativação do serviço Ubuntu Pro: %s"
 #: backend/api/host_utils.py:662
 msgid "Host limit reached for this tenant."
 msgstr "Limite de hosts atingido para este inquilino."
+
+#: backend/api/processes.py:82 backend/api/processes.py:128
+msgid "Permission denied: View Host Details role required"
+msgstr "Permissão negada: é necessária a função Ver detalhes do host"
+
+#: backend/api/processes.py:145
+msgid "Process refresh requested. The list will update shortly."
+msgstr ""
+"Atualização de processos solicitada. A lista será atualizada em breve."
+
+#: backend/api/processes.py:164
+msgid "Permission denied: Kill Host Process role required"
+msgstr "Permissão negada: é necessária a função Encerrar processo do host"
+
+#: backend/api/processes.py:171
+msgid "Agent must be running in privileged mode to terminate processes"
+msgstr ""
+"O agente deve estar em execução em modo privilegiado para encerrar processos"
+
+#: backend/api/processes.py:220
+msgid "Process termination requested. The list will update shortly."
+msgstr ""
+"Encerramento de processo solicitado. A lista será atualizada em breve."
 
 #: backend/api/broadcast.py:106
 #, python-format
@@ -1359,7 +1425,7 @@ msgstr "Execução ainda não está COMPLETA (status: %s)"
 msgid "ISO file is no longer on disk: %s"
 msgstr "O arquivo ISO não está mais no disco: %s"
 
-#: backend/api/package_compliance.py:71
+#: backend/api/package_compliance.py:72
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
@@ -1367,31 +1433,31 @@ msgstr ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
 
-#: backend/api/package_compliance.py:196
+#: backend/api/package_compliance.py:197
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "Perfil de pacote '%s' criado"
 
-#: backend/api/package_compliance.py:248
+#: backend/api/package_compliance.py:249
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "Perfil de pacote '%s' atualizado"
 
-#: backend/api/package_compliance.py:278
+#: backend/api/package_compliance.py:279
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "Perfil de pacote '%s' excluído"
 
-#: backend/api/package_compliance.py:283
+#: backend/api/package_compliance.py:284
 msgid "Package profile deleted"
 msgstr "Perfil de pacote excluído"
 
-#: backend/api/package_compliance.py:369
+#: backend/api/package_compliance.py:370
 #, python-format
 msgid "Scanned host '%s' against profile '%s': %s (%d violation(s))"
 msgstr "Host '%s' verificado contra perfil '%s': %s (%d violação/ões)"
 
-#: backend/api/package_compliance.py:487
+#: backend/api/package_compliance.py:488
 #, python-format
 msgid "Dispatched compliance check to agent '%s' for profile '%s'"
 msgstr "Verificação de conformidade enviada ao agente '%s' para o perfil '%s'"
@@ -1472,7 +1538,7 @@ msgstr "Chave de registro '%s' excluída"
 msgid "Registration key deleted"
 msgstr "Chave de registro excluída"
 
-#: backend/api/external_idp.py:48
+#: backend/api/external_idp.py:57
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
@@ -1481,52 +1547,52 @@ msgstr ""
 "SysManage Professional+. Por favor, atualize para acessar esta "
 "funcionalidade."
 
-#: backend/api/external_idp.py:74
+#: backend/api/external_idp.py:83
 msgid "IdP provider not found"
 msgstr "Fornecedor IdP não encontrado"
 
-#: backend/api/external_idp.py:276
+#: backend/api/external_idp.py:285
 msgid "IdP provider deleted"
 msgstr "Fornecedor IdP excluído"
 
-#: backend/api/external_idp.py:324
+#: backend/api/external_idp.py:333
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "Já existe um mapeamento padrão para fornecedores não mapeados."
 
-#: backend/api/external_idp.py:358
+#: backend/api/external_idp.py:367
 msgid "Role mapping not found"
 msgstr "Mapeamento de papel não encontrado"
 
-#: backend/api/external_idp.py:361
+#: backend/api/external_idp.py:370
 msgid "Role mapping deleted"
 msgstr "Mapeamento de papéis excluído"
 
-#: backend/api/external_idp.py:412
+#: backend/api/external_idp.py:421
 msgid "Provider is not an OIDC provider."
 msgstr "Fornecedor não é um provedor OIDC."
 
-#: backend/api/external_idp.py:415
+#: backend/api/external_idp.py:424
 msgid "OIDC provider is disabled."
 msgstr "Fornecedor OIDC está desabilitado."
 
-#: backend/api/external_idp.py:446
+#: backend/api/external_idp.py:455
 msgid "Missing code or state in callback."
 msgstr "Falta código ou estado na chamada de retorno."
 
-#: backend/api/external_idp.py:450
+#: backend/api/external_idp.py:459
 msgid "Invalid OIDC state."
 msgstr "Estado OIDC inválido."
 
-#: backend/api/external_idp.py:459
+#: backend/api/external_idp.py:468
 msgid "OIDC client secret could not be resolved."
 msgstr "O segredo do cliente OIDC não póde ser resolvido."
 
-#: backend/api/external_idp.py:466
+#: backend/api/external_idp.py:475
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "Falha na entrada OIDC: %s"
 
-#: backend/api/external_idp.py:486 backend/api/external_idp.py:683
+#: backend/api/external_idp.py:495 backend/api/external_idp.py:692
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1534,37 +1600,37 @@ msgstr ""
 "Nenhuma conta SysManage está vinculada a esta identidade do IdP. Peça ao "
 "administrador para provisionar sua conta primeiro."
 
-#: backend/api/external_idp.py:491 backend/api/external_idp.py:688
+#: backend/api/external_idp.py:500 backend/api/external_idp.py:697
 msgid "Account is inactive."
 msgstr "A conta está inativa."
 
-#: backend/api/external_idp.py:593 backend/api/external_idp.py:614
+#: backend/api/external_idp.py:602 backend/api/external_idp.py:623
 msgid "Provider is not a SAML provider."
 msgstr "Fornecedor não é um provedor de SAML."
 
-#: backend/api/external_idp.py:599
+#: backend/api/external_idp.py:608
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "Não foi possível construir o metadado SP: %s"
 
-#: backend/api/external_idp.py:617
+#: backend/api/external_idp.py:626
 msgid "SAML provider is disabled."
 msgstr "Provedor de SAML está desabilitado."
 
-#: backend/api/external_idp.py:623
+#: backend/api/external_idp.py:632
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "Não foi possível iniciar o SAML sign-in: %s"
 
-#: backend/api/external_idp.py:651
+#: backend/api/external_idp.py:660
 msgid "Missing SAMLResponse or RelayState."
 msgstr "Ausente SAMLResponse ou RelayState."
 
-#: backend/api/external_idp.py:656
+#: backend/api/external_idp.py:665
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState inválido ou expirado."
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:675
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "Falha no SAML sign-in: %s"
@@ -1801,7 +1867,7 @@ msgid "Refresh interval cannot exceed 168 hours (1 week)"
 msgstr "Intervalo de atualização não pode exceder 168 horas (1 semana)"
 
 #: backend/api/cve_refresh_settings.py:131
-#: backend/api/cve_refresh_settings.py:374
+#: backend/api/cve_refresh_settings.py:376
 #, python-format
 msgid "Invalid CVE source: %s"
 msgstr "Fonte CVE inválida: %s"
@@ -1821,36 +1887,36 @@ msgstr "Falha ao atualizar configurações de atualização do CVE: %s"
 msgid "Failed to retrieve CVE database statistics: %s"
 msgstr "Falha ao recuperar estatísticas do banco de dados CVE: %s"
 
-#: backend/api/cve_refresh_settings.py:319
+#: backend/api/cve_refresh_settings.py:321
 msgid "Limit must be between 1 and 100"
 msgstr "O limite deve estar entre 1 e 100"
 
-#: backend/api/cve_refresh_settings.py:342
+#: backend/api/cve_refresh_settings.py:344
 #, python-format
 msgid "Failed to retrieve CVE ingestion history: %s"
 msgstr "Falha ao recuperar o histórico de ingestão de CVE: %s"
 
-#: backend/api/cve_refresh_settings.py:415
+#: backend/api/cve_refresh_settings.py:417
 #, python-format
 msgid "Source %s failed: %s"
 msgstr "Fonte %s falhou: %s"
 
-#: backend/api/cve_refresh_settings.py:428
+#: backend/api/cve_refresh_settings.py:430
 #, python-format
 msgid "CVE refresh failed: %s"
 msgstr "Falha ao atualizar CVEs: %s"
 
-#: backend/api/cve_refresh_settings.py:433
+#: backend/api/cve_refresh_settings.py:435
 #, python-format
 msgid "Failed to trigger CVE refresh: %s"
 msgstr "Falha ao disparar atualização de CVE: %s"
 
 # Secret deployment messages
-#: backend/api/cve_refresh_settings.py:471
+#: backend/api/cve_refresh_settings.py:473
 msgid "NVD API key cleared successfully"
 msgstr "Chave da API do NVD limpa com sucesso"
 
-#: backend/api/cve_refresh_settings.py:477
+#: backend/api/cve_refresh_settings.py:479
 msgid "Failed to clear NVD API key"
 msgstr "Falha ao limpar a chave mestra"
 
@@ -2135,14 +2201,6 @@ msgid ""
 msgstr ""
 "Se uma conta com esse email existe, um link para redefinição de senha foi "
 "enviado."
-
-#: backend/api/password_reset.py:347
-msgid "Passwords do not match"
-msgstr "As senhas não correspondem"
-
-#: backend/api/password_reset.py:352
-msgid "Password must be at least 8 characters long"
-msgstr "A senha deve ter pelo menos 8 caracteres"
 
 #: backend/api/password_reset.py:365 backend/api/password_reset.py:406
 msgid "Invalid or expired password reset token"
@@ -3116,19 +3174,19 @@ msgstr ""
 msgid "Failed to retrieve secret content from vault"
 msgstr "Falha ao recuperar o conteúdo do segredo do cofre"
 
-#: backend/api/secrets/crud.py:158
+#: backend/api/secrets/crud.py:156
 msgid "Failed to store secret in vault"
 msgstr "Falha ao armazenar o segredo no cofre"
 
-#: backend/api/secrets/crud.py:221
+#: backend/api/secrets/crud.py:219
 msgid "Failed to update secret in vault"
 msgstr "Falha ao atualizar o segredo no cofre"
 
-#: backend/api/secrets/crud.py:264
+#: backend/api/secrets/crud.py:262
 msgid "Secret deleted successfully"
 msgstr "Segredo excluído com sucesso"
 
-#: backend/api/secrets/crud.py:294
+#: backend/api/secrets/crud.py:292
 #, python-brace-format
 msgid "Deleted {count} secrets"
 msgstr "{count} segredos excluídos"
@@ -3175,7 +3233,7 @@ msgstr ""
 msgid "Reboot orchestration not found"
 msgstr "Orquestração de reinicialização não encontrada"
 
-#: backend/api/upgrade_profiles.py:69
+#: backend/api/upgrade_profiles.py:70
 msgid ""
 "Scheduled upgrade profiles require a SysManage Professional+ license. Please"
 " upgrade to access this feature."
@@ -3183,26 +3241,26 @@ msgstr ""
 "Os perfis de atualização agendados exigem uma licença SysManage "
 "Professional+. Faça upgrade para acessar este recurso."
 
-#: backend/api/upgrade_profiles.py:189
+#: backend/api/upgrade_profiles.py:190
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' criado"
 
-#: backend/api/upgrade_profiles.py:256
+#: backend/api/upgrade_profiles.py:257
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' atualizado"
 
-#: backend/api/upgrade_profiles.py:288
+#: backend/api/upgrade_profiles.py:289
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "Perfil de atualização '%s' excluído"
 
-#: backend/api/upgrade_profiles.py:293
+#: backend/api/upgrade_profiles.py:294
 msgid "Upgrade profile deleted"
 msgstr "Perfil de atualização excluído"
 
-#: backend/api/upgrade_profiles.py:382
+#: backend/api/upgrade_profiles.py:383
 #, python-format
 msgid "Triggered upgrade profile '%s' against %d host(s)"
 msgstr "Perfil de atualização '%s' disparado contra %d host(s)"
@@ -3870,12 +3928,12 @@ msgstr "Falha ao excluir script salvo"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Falha ao recuperar o status comercial do antivírus: %s"
 
-#: backend/websocket/message_router.py:268
+#: backend/websocket/message_router.py:275
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Tipo de mensagem desconhecido na fila: %s"
 
-#: backend/websocket/message_router.py:273
+#: backend/websocket/message_router.py:280
 #, python-format
 msgid "Error routing message type %s: %s"
 msgstr "Erro ao roteirizar tipo de mensagem %s: %s"

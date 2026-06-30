@@ -125,7 +125,8 @@
     "copied": "Copiato",
     "copy": "Copia",
     "create": "Crea",
-    "done": "Completato"
+    "done": "Completato",
+    "loading": "Caricamento..."
   },
   "connectionStatus": {
     "connected": "Connesso",

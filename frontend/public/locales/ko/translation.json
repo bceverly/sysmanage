@@ -125,7 +125,8 @@
     "copied": "복사됨",
     "copy": "복사",
     "create": "생성",
-    "done": "완료"
+    "done": "완료",
+    "loading": "로딩 중..."
   },
   "connectionStatus": {
     "connected": "연결됨",

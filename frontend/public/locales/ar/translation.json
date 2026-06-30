@@ -125,7 +125,8 @@
     "copied": "تم نسخ المفتاح",
     "copy": "نسخ",
     "create": "إنشاء",
-    "done": "انتهى"
+    "done": "انتهى",
+    "loading": "جارٍ التحميل..."
   },
   "connectionStatus": {
     "connected": "متصل",

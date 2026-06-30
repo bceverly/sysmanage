@@ -125,7 +125,8 @@
     "copied": "Скопировано",
     "copy": "Копировать",
     "create": "Создать",
-    "done": "Готово"
+    "done": "Готово",
+    "loading": "Загрузка..."
   },
   "connectionStatus": {
     "connected": "Подключен",
