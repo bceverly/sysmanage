@@ -69,23 +69,33 @@ class TestCveRefreshServiceEnsureModuleConfigured:
 
         mock_get_module.assert_not_called()
 
-    @patch("backend.vulnerability.cve_refresh_service.db_module")
+    @patch("backend.vulnerability.cve_refresh_service.resolve_engine")
     @patch("backend.vulnerability.cve_refresh_service._get_module")
-    def test_ensure_module_configured_success(self, mock_get_module, mock_db_module):
-        """Test _ensure_module_configured configures the module."""
-        from backend.vulnerability.cve_refresh_service import CveRefreshService
+    def test_ensure_module_configured_success(
+        self, mock_get_module, mock_resolve_engine
+    ):
+        """Test _ensure_module_configured configures the module against the shared
+        partition engine (CVE data is shared platform truth — option B)."""
+        from backend.vulnerability.cve_refresh_service import (
+            PARTITION_SHARED,
+            CveRefreshService,
+        )
 
         mock_vuln_engine = MagicMock()
         mock_cve_service = MagicMock()
         mock_vuln_engine._cve_refresh_service = mock_cve_service
         mock_get_module.return_value = mock_vuln_engine
-        mock_db_module.get_engine.return_value = MagicMock()
+        shared_engine = MagicMock()
+        mock_resolve_engine.return_value = shared_engine
 
         service = CveRefreshService()
         service._ensure_module_configured()
 
         assert service._module_configured is True
         mock_cve_service.configure.assert_called_once()
+        # Must bind to the SHARED partition engine, not the bootstrap/tenant one.
+        mock_resolve_engine.assert_called_once_with(partition=PARTITION_SHARED)
+        assert mock_cve_service.configure.call_args[0][0] is shared_engine
 
     @patch("backend.vulnerability.cve_refresh_service._get_module")
     def test_ensure_module_configured_no_module(self, mock_get_module):

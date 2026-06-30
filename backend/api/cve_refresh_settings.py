@@ -23,8 +23,8 @@ from sqlalchemy.orm import Session
 from backend.auth.auth_bearer import JWTBearer, get_current_user
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
-from backend.persistence.db import get_db
 from backend.persistence import models
+from backend.persistence.partitions import get_shared_db
 from backend.services.audit_service import AuditService, EntityType
 from backend.vulnerability.cve_refresh_service import (
     CVE_SOURCES,
@@ -198,7 +198,7 @@ async def get_available_sources(dependencies=Depends(JWTBearer())):
 
 @router.get("/settings", response_model=CveRefreshSettingsResponse)
 async def get_cve_refresh_settings(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_shared_db), dependencies=Depends(JWTBearer())
 ):
     """Get current CVE refresh settings."""
     _check_vuln_engine_module()
@@ -226,7 +226,7 @@ async def get_cve_refresh_settings(
 @router.put("/settings", response_model=CveRefreshSettingsResponse)
 async def update_cve_refresh_settings(
     settings_update: CveRefreshSettingsUpdate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(get_current_user),
 ):
@@ -292,7 +292,7 @@ async def update_cve_refresh_settings(
 
 @router.get("/stats", response_model=DatabaseStatsResponse)
 async def get_database_stats(
-    db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    db: Session = Depends(get_shared_db), dependencies=Depends(JWTBearer())
 ):
     """Get CVE database statistics."""
     _check_vuln_engine_module()
@@ -309,7 +309,9 @@ async def get_database_stats(
 
 @router.get("/history", response_model=List[IngestionLogResponse])
 async def get_ingestion_history(
-    limit: int = 10, db: Session = Depends(get_db), dependencies=Depends(JWTBearer())
+    limit: int = 10,
+    db: Session = Depends(get_shared_db),
+    dependencies=Depends(JWTBearer()),
 ):
     """Get CVE ingestion history."""
     _check_vuln_engine_module()
@@ -347,7 +349,7 @@ async def get_ingestion_history(
 async def trigger_cve_refresh(
     background_tasks: BackgroundTasks,
     source: Optional[str] = None,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(get_current_user),
 ):
@@ -436,7 +438,7 @@ async def trigger_cve_refresh(
 
 @router.delete("/nvd-api-key")
 async def clear_nvd_api_key(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_shared_db),
     dependencies=Depends(JWTBearer()),
     current_user=Depends(get_current_user),
 ):

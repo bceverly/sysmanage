@@ -176,7 +176,7 @@ class TestVulnerabilityModel:
         """Test Vulnerability table name."""
         from backend.persistence.models.proplus import Vulnerability
 
-        assert Vulnerability.__tablename__ == "vulnerability"
+        assert Vulnerability.__tablename__ == "shared_vulnerability"
 
     def test_columns_exist(self):
         """Test Vulnerability has expected columns."""
@@ -219,7 +219,7 @@ class TestPackageVulnerabilityModel:
         """Test PackageVulnerability table name."""
         from backend.persistence.models.proplus import PackageVulnerability
 
-        assert PackageVulnerability.__tablename__ == "package_vulnerability"
+        assert PackageVulnerability.__tablename__ == "shared_package_vulnerability"
 
     def test_columns_exist(self):
         """Test PackageVulnerability has expected columns."""
@@ -342,7 +342,10 @@ class TestVulnerabilityIngestionLogModel:
         """Test VulnerabilityIngestionLog table name."""
         from backend.persistence.models.proplus import VulnerabilityIngestionLog
 
-        assert VulnerabilityIngestionLog.__tablename__ == "vulnerability_ingestion_log"
+        assert (
+            VulnerabilityIngestionLog.__tablename__
+            == "shared_vulnerability_ingestion_log"
+        )
 
     def test_columns_exist(self):
         """Test VulnerabilityIngestionLog has expected columns."""
@@ -380,7 +383,7 @@ class TestCveRefreshSettingsModel:
         """Test CveRefreshSettings table name."""
         from backend.persistence.models.proplus import CveRefreshSettings
 
-        assert CveRefreshSettings.__tablename__ == "cve_refresh_settings"
+        assert CveRefreshSettings.__tablename__ == "shared_cve_refresh_settings"
 
     def test_columns_exist(self):
         """Test CveRefreshSettings has expected columns."""

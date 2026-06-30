@@ -169,9 +169,13 @@ class Vulnerability(Base):
     """
     Central vulnerability database storing CVE data.
     Ingested from NVD, Ubuntu Security API, Red Hat, Debian, FreeBSD VuXML, etc.
+
+    Phase 13.1 multi-tenancy: CVE data is global platform truth (identical for
+    every tenant), so it lives in the SHARED partition (``shared_*`` prefix),
+    not per-tenant.  See ROADMAP "CVE shared platform truth (option B)".
     """
 
-    __tablename__ = "vulnerability"
+    __tablename__ = "shared_vulnerability"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     cve_id = Column(String(20), nullable=False, unique=True, index=True)
@@ -212,12 +216,13 @@ class PackageVulnerability(Base):
     Allows matching host software inventory against known vulnerabilities.
     """
 
-    __tablename__ = "package_vulnerability"
+    __tablename__ = "shared_package_vulnerability"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     vulnerability_id = Column(
         GUID(),
-        ForeignKey("vulnerability.id", ondelete=CASCADE_DELETE),
+        # Intra-shared FK (both tables live in the shared partition) — kept.
+        ForeignKey("shared_vulnerability.id", ondelete=CASCADE_DELETE),
         nullable=False,
         index=True,
     )
@@ -324,9 +329,14 @@ class HostVulnerabilityFinding(Base):
         nullable=False,
         index=True,
     )
+    # Soft cross-partition reference to shared_vulnerability.id.  This is a
+    # host-scoped (tenant) row pointing at shared CVE data, so it is NOT a DB
+    # ForeignKey (the two tables live in different partitions/engines under
+    # scale-out — a hard FK would be a cross-partition constraint).  Callers
+    # resolve the CVE via the shared session (``cve_db``), not an ORM
+    # relationship.  See ROADMAP option B.
     vulnerability_id = Column(
         GUID(),
-        ForeignKey("vulnerability.id", ondelete=CASCADE_DELETE),
         nullable=False,
         index=True,
     )
@@ -337,9 +347,10 @@ class HostVulnerabilityFinding(Base):
     cvss_score = Column(String(10), nullable=True)
     remediation = Column(Text, nullable=True)
 
-    # Relationships
+    # Relationship to the (tenant-local) scan only.  No ``vulnerability``
+    # relationship: that target lives in the shared partition and cannot be
+    # ORM-joined across engines — resolve it explicitly via the shared session.
     scan = relationship("HostVulnerabilityScan", back_populates="findings")
-    vulnerability = relationship("Vulnerability")
 
     def __repr__(self):
         return f"<HostVulnerabilityFinding(package='{self.package_name}', severity='{self.severity}')>"
@@ -351,7 +362,7 @@ class VulnerabilityIngestionLog(Base):
     Tracks when data was fetched from each source.
     """
 
-    __tablename__ = "vulnerability_ingestion_log"
+    __tablename__ = "shared_vulnerability_ingestion_log"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     source = Column(
@@ -375,7 +386,7 @@ class CveRefreshSettings(Base):
     Stores refresh frequency, enabled sources, and last refresh timestamp.
     """
 
-    __tablename__ = "cve_refresh_settings"
+    __tablename__ = "shared_cve_refresh_settings"
 
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     enabled = Column(Boolean, nullable=False, default=True)

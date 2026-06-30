@@ -18,6 +18,7 @@ from backend.licensing.module_loader import module_loader
 from backend.monitoring.graylog_health_monitor import graylog_health_monitor_service
 from backend.monitoring.heartbeat_monitor import heartbeat_monitor_service
 from backend.persistence.db import get_db
+from backend.persistence.partitions import get_shared_db
 from backend.security.certificate_manager import certificate_manager
 from backend.services.email_service import email_service
 from backend.utils.verbosity_logger import get_logger
@@ -525,7 +526,7 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
                             cve_refresh_task = asyncio.create_task(
                                 cve_refresh_service.check_and_refresh_if_overdue(
-                                    db_maker=get_db,
+                                    db_maker=get_shared_db,
                                 )
                             )
                             logger.info("CVE refresh staleness check task started")
@@ -552,9 +553,9 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
         # Phase 13.2.1: now that OSS + Pro+ (engine or stub) routes are all
         # mounted, fail fast if any two share the same method+path — this is the
         # only point where the OSS↔Pro+ route seam is fully assembled.
-        from backend.startup.route_registration import (  # noqa: PLC0415
+        from backend.startup.route_registration import (
             check_route_collisions,
-        )
+        )  # noqa: PLC0415
 
         check_route_collisions(_fastapi_app)
 

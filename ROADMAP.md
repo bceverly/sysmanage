@@ -4738,6 +4738,92 @@ as thin back-compat only.
 - [ ] Once every feature is native-v1, decide whether to keep the bridge as
       permanent back-compat for old agents/scripts or retire it.
 
+**Discovered during 13.2.1 live testing on a licensed multi-tenant box (2026-06-29):**
+- [x] **`reporting_engine` double-prefix — licensed reporting 404s.** *(Fixed in
+      source 2026-06-29 — engine prefix `/api/v1/reports`→`/v1/reports`,
+      `__version__`/`metadata.json` `1.0.6`→`1.0.7`, 21 router-level test assertions
+      updated to `/v1/reports`; reporting tests 146 green, full Pro+ suite 2151 green.
+      **Needs a reporting-engine rebuild to deploy v1.0.7.**)* The engine
+      router self-prefixed the *full* path `APIRouter(prefix="/api/v1/reports")` but
+      `proplus_routes.mount_reporting_routes` mounts it at `prefix="/api"`, so it
+      actually serves `/api/api/v1/reports/...`. The frontend (`ReportsPage.tsx`)
+      and the Community stub both use `/api/v1/reports`, so it only breaks on
+      **licensed** installs. This is exactly the "verify effective served path"
+      hazard called out in Slice 7. **Fix:** change the engine prefix
+      `"/api/v1/reports"` → `"/v1/reports"` (consistent with every other engine that
+      mounts at `/api` + self-prefixes `/v1/<name>`); bump `__version__`
+      (`1.0.6`→next) + `metadata.json` in lockstep; rebuild.
+- [x] **CVE reference data never reaches tenant DBs — every tenant scan returns
+      "0 vulnerabilities."** *(RESOLVED 2026-06-29 — option B, both phases done; needs
+      `vuln_engine` v2.0.13 rebuild to deploy.)* Scans read the active tenant DB (`get_tenant_db`), but
+      the CVE refresh pipeline (`/cve-sources` refresh/tick, scheduler) writes only
+      the default/bootstrap DB via `db_dependency`. The `vulnerability` /
+      `package_vulnerability` tables are classified tenant-partition (unprefixed),
+      so a tenant with a populated host but empty CVE tables matches nothing
+      (observed: 3086 packages, 41 apt security updates pending, scan reported 0).
+      Already flagged as a `NOTE/follow-up` comment in `vuln_engine.pyx`. The
+      per-host "last updated" being blank is the same root cause.
+      **Decision (2026-06-29) — option B, CVE is shared platform truth, not
+      per-tenant.** Rationale: a CVE is identical for every tenant (global truth),
+      so per-tenant copies add zero value and waste ~400k rows + N× ingestion runs;
+      and in a SaaS model the *provider* owns feed freshness (it's a platform SLA,
+      not a customer knob), while the air-gap/single-tenant appliance collapses
+      "shared" to its one local DB so the operator still controls it. Shared-first
+      is also the *more* reversible direction — a future per-tenant need is an
+      additive overlay (read tenant-overlay-else-shared), whereas per-tenant-first →
+      shared is a destructive N-way merge. Implementation:
+    - [x] **Phase 1 — read/write through the shared seam (DONE 2026-06-29; fixes the
+          live "0 vulns" bug).** `vuln_engine` v2.0.12: scans thread BOTH a tenant
+          session (host data + scan results) and a `cve_db` **shared** session
+          (`get_shared_db`) for CVE-reference lookups (`get_vulnerability_data` + the
+          finding's vuln_record lookup). OSS refresh write-path moved to the shared
+          partition too: `cve_refresh_settings` routes → `get_shared_db`,
+          `cve_refresh_service` configures the engine service against
+          `resolve_engine(PARTITION_SHARED)`, lifecycle staleness check →
+          `get_shared_db`. Refresh interval/sources is already server-scoped. Works
+          today because the shared partition collapses onto the bootstrap engine
+          (where the 152k CVEs already live). Tests: engine 156 + 3 new partition
+          tests, OSS 39 CVE tests, full Pro+ 2154 green. **Needs the multi-version
+          `vuln_engine` rebuild to deploy v2.0.12.**
+    - [x] **Phase 2 — formal `shared_*` physical reclassification (DONE 2026-06-29).**
+          Models `vulnerability` / `package_vulnerability` / `vulnerability_ingestion_log`
+          / `cve_refresh_settings` renamed to `shared_*`;
+          `host_vulnerability_finding.vulnerability_id` converted from a FK to a soft
+          cross-partition reference (engine `get_latest_scan` resolves it via a batched
+          `cve_db` lookup — `vuln_engine` v2.0.13). Migrations: **shared chain**
+          (`s2sharedcve`) renames in place when the old table exists (preserves rows)
+          else creates empty `shared_*` (fresh install); **tenant chain** (`g1cveshared`)
+          drops the old copies + the cross-partition FK (dialect-aware: PG drops by
+          name, SQLite recreates via `batch_alter_table`). Chain order
+          (registry→shared→tenant, see `sysmanage_migrate.py`) guarantees the rename
+          precedes the tenant drop, so populated CVE data is never lost. Idempotent;
+          expand-contract-guard + black clean; pylint 10/10. Tests: new
+          `test_cve_shared_partition_migration.py` runs the real migrations end-to-end
+          on SQLite (asserts row preservation + FK removal + fresh-create), prefix-guard
+          green, OSS 5586 + Pro+ 2154 green. **Apply with `make migrate` (back up the
+          DB first — it renames a populated table on the live MT box).** *Note:* a true
+          dedicated-shared-engine split at scale-out (13.1.C/D) will need a data-COPY
+          migration (not rename-in-place), since the rows then live in a different DB.
+    - [ ] Generalize the rule for other "platform truth" reference data (package/OS
+          metadata, geoip, threat-intel/OS-release feeds): shared by default. Test:
+          *would two reasonable customers rationally want different values, and would
+          you let them?* If no → shared.
+- [x] **Naive-UTC timestamps render in UTC, not the browser's timezone.** *(Fixed
+      in the Pro+ plugin frontend 2026-06-29.)* Engine responses emit
+      `datetime.now(timezone.utc).replace(tzinfo=None).isoformat()` → a no-offset
+      string (e.g. `2026-06-29T18:04:06`); the frontend parsed it as *local*,
+      printing the UTC clock value unshifted. **Fix shipped:** new shared
+      `plugin-src/utils/datetime.ts` (`parseServerDate`/`formatServerDateTime`/
+      `formatServerDate`) treats a no-offset date-time as UTC (leaves `Z`/offset and
+      date-only strings untouched); all 11 render sites routed through it
+      (`VulnerabilitiesCard`, `CveRefreshSettings`, `AlertsCard`, `HealthAnalysisCard`,
+      `ComplianceCard`, `ContainerAnalyticsPage`, `Vulnerability/ComplianceHostDetail`,
+      `Vulnerabilities/Compliance/AlertsPage`). Covers CVE Last/Next Refresh,
+      per-host Last Scanned, compliance, health, alerts, containers. tsc + lint clean,
+      vitest 17 green (9 new util tests). No engine rebuild needed — display layer
+      normalizes uniformly. *(Engines still emit naive UTC; if a non-browser API
+      consumer ever needs unambiguous timestamps, emit tz-aware ISO then.)*
+
 **sysmanage-agent:** no change (see OUT-of-scope above).
 **sysmanage-docs:** document `/api/v1` as the canonical base + the agent's stable
 unversioned contract once the migration lands.
