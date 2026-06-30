@@ -174,17 +174,20 @@ def require_engine(name: str):
     import pytest  # local import: keeps this module importable outside pytest
 
     mod = load_engine(name)
-    if mod is not None:
-        return mod
-    if not proplus_present():
-        pytest.skip(f"{name}: no sysmanage-professional-plus checkout — OSS-only run")
-    plat, arch, py = _plat_arch_py()
-    pytest.fail(
-        f"{name}: Pro+ checkout present but no loadable engine for "
-        f"{plat}/{arch}/py{py}.\n"
-        f"Expected build artifact: "
-        f"{_STORAGE_MODULES}/{name}/<version>/{plat}/{arch}/{py}/{name}.tar.gz "
-        f"(containing *{sysconfig.get_config_var('EXT_SUFFIX')}).\n"
-        f"Build the Pro+ engines for this platform/interpreter, or check the "
-        f"layout — this path used to skip silently."
-    )
+    if mod is None:
+        # No loadable engine: skip on a genuine OSS-only run, else fail loudly.
+        if not proplus_present():
+            pytest.skip(
+                f"{name}: no sysmanage-professional-plus checkout — OSS-only run"
+            )
+        plat, arch, py = _plat_arch_py()
+        pytest.fail(
+            f"{name}: Pro+ checkout present but no loadable engine for "
+            f"{plat}/{arch}/py{py}.\n"
+            f"Expected build artifact: "
+            f"{_STORAGE_MODULES}/{name}/<version>/{plat}/{arch}/{py}/{name}.tar.gz "
+            f"(containing *{sysconfig.get_config_var('EXT_SUFFIX')}).\n"
+            f"Build the Pro+ engines for this platform/interpreter, or check the "
+            f"layout — this path used to skip silently."
+        )
+    return mod

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
 import FirewallStatusCard from '../Components/FirewallStatusCard';
+import ProcessesPanel from '../Components/ProcessesPanel';
 import HypervisorStatusCard from '../Components/HypervisorStatusCard';
 import GraylogAttachmentModal from '../Components/GraylogAttachmentModal';
 import {
@@ -54,6 +55,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
 import InfoIcon from '@mui/icons-material/Info';
 import MemoryIcon from '@mui/icons-material/Memory';
+import DvrIcon from '@mui/icons-material/Dvr';
 import StorageIcon from '@mui/icons-material/Storage';
 import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
 import GroupIcon from '@mui/icons-material/Group';
@@ -655,7 +657,7 @@ const HostDetail = () => { // NOSONAR
     // version of an OSS tab should pick a distinct id (e.g. ``compliance-pro``).
     const tabDefinitions = useMemo(() => {
         const HARDCODED_IDS = new Set([
-            'info', 'hardware', 'software', 'software-changes',
+            'info', 'hardware', 'processes', 'software', 'software-changes',
             'third-party-repos', 'access', 'security', 'compliance',
             'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
             'diagnostics',
@@ -667,6 +669,7 @@ const HostDetail = () => { // NOSONAR
             { id: 'info', icon: <InfoIcon />, label: t('hostDetail.infoTab', 'Info') },
             ...safePluginTabs.filter(p => p.position === 'after-info').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'hardware', icon: <MemoryIcon />, label: t('hostDetail.hardwareTab', 'Hardware') },
+            { id: 'processes', icon: <DvrIcon />, label: t('hostDetail.processesTab', 'Processes') },
             { id: 'software', icon: <AppsIcon />, label: t('hostDetail.softwareTab', 'Software') },
             { id: 'software-changes', icon: <HistoryIcon />, label: t('hostDetail.softwareChangesTab', 'Software Changes') },
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
@@ -4985,6 +4988,15 @@ const HostDetail = () => { // NOSONAR
                 </Grid>
 
                 </Grid>
+            )}
+
+            {/* Processes Tab */}
+            {currentTabId === 'processes' && hostId && (
+                <ProcessesPanel
+                    hostId={hostId}
+                    hostActive={host?.active}
+                    isAgentPrivileged={host?.is_agent_privileged}
+                />
             )}
 
             {/* Software Tab */}

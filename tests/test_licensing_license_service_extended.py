@@ -28,6 +28,23 @@ import pytest
 # ---------------------------------------------------------------------------
 
 
+def _create_task_closing(sentinel):
+    """Stand-in for ``asyncio.create_task`` that doesn't run the coroutine.
+
+    The background loops are mocked away so they never run, but the coroutine
+    the SUT hands to ``create_task`` must still be **closed** — otherwise it is
+    an un-awaited coroutine that GC-finalizes later, surfacing as a flaky
+    ``PytestUnraisableExceptionWarning`` on an unrelated test (Python 3.14).
+    """
+
+    def _factory(coro, *args, **kwargs):
+        if asyncio.iscoroutine(coro):
+            coro.close()
+        return sentinel
+
+    return _factory
+
+
 @contextmanager
 def _patch_session(rows=None, raise_on_query=None):
     """Mock backend.licensing.license_service.sessionmaker."""
@@ -164,7 +181,7 @@ class TestInitializeWithLicense:
             "backend.licensing.license_service.module_loader"
         ) as ml, patch(
             "backend.licensing.license_service.asyncio.create_task",
-            return_value=sentinel_task,
+            side_effect=_create_task_closing(sentinel_task),
         ), patch.object(
             service, "_phone_home_loop", return_value=None
         ), patch.object(
@@ -562,7 +579,7 @@ class TestInstallLicenseHappyPath:
             service, "_get_phone_home_url", return_value="https://l.example/"
         ), patch(
             "backend.licensing.license_service.asyncio.create_task",
-            return_value=sentinel_task,
+            side_effect=_create_task_closing(sentinel_task),
         ), patch.object(
             service, "_phone_home_loop", return_value=None
         ):

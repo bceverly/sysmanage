@@ -27,6 +27,7 @@ from .hardware import *
 from .host_certificate import *
 from .host_role import *
 from .operations import *
+from .processes import *
 from .proplus import *
 from .secret import *
 from .server_configuration import *
@@ -58,6 +59,8 @@ __all__ = [
     "AntivirusStatus",
     "CommercialAntivirusStatus",
     "FirewallStatus",
+    # Process management models (Phase 13.3)
+    "HostProcess",
     # User management models
     "UserAccount",
     "UserGroup",
@@ -91,6 +94,7 @@ __all__ = [
     "SecurityRoleGroup",
     "SecurityRole",
     "UserSecurityRole",
+    "UserInvitation",
     # User preference models
     "UserDataGridColumnPreference",
     "UserDashboardCardPreference",

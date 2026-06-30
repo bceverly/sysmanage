@@ -13,9 +13,10 @@ which case every control-plane route answers ``501 Not Implemented`` so an
 unlicensed fork cannot operate a SaaS control plane.  That absence of logic in
 the public source is the technical moat.
 
-The router keeps the same ``/api/control-plane`` prefix and bearer-token gate so
-an unauthenticated probe is still rejected (401/403) before it learns the plane
-is unlicensed.
+The router keeps the same effective ``/api/v1/control-plane`` surface (mounted by
+``proplus_routes``; ``/api/control-plane`` stays as a deprecated alias) and
+bearer-token gate so an unauthenticated probe is still rejected (401/403) before
+it learns the plane is unlicensed.
 """
 
 import logging
@@ -28,8 +29,10 @@ logger = logging.getLogger(__name__)
 
 # Highly privileged surface — gate the whole (stub) router on a valid token, so
 # the unlicensed 501 is only revealed to authenticated callers.
+# Self-prefix only "/control-plane"; proplus_routes mounts this at "/api/v1"
+# (canonical) + "/api" (deprecated alias).  See Phase 13.2.1.
 router = APIRouter(
-    prefix="/api/control-plane",
+    prefix="/control-plane",
     tags=["control-plane"],
     dependencies=[Depends(JWTBearer())],
 )

@@ -28,6 +28,7 @@ import Avatar from '@mui/material/Avatar';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import InvitationsManager from '../Components/InvitationsManager';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -459,6 +460,7 @@ const Users = () => {
                         {t('common.add')}
                     </Button>
                 )}
+                {canAddUser && <InvitationsManager />}
                 {canEditUser && (
                     <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length !== 1} onClick={handleEditClickOpen}>
                         {t('common.edit')}

@@ -516,7 +516,7 @@ class AlertRule(Base):
     description = Column(Text, nullable=True)
     condition_type = Column(
         String(50), nullable=False
-    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric"
+    )  # "host_down", "reboot_required", "updates_available", "disk_usage", "cve_severity", "custom_metric", "process_resource"
     condition_params = Column(JSON, nullable=False)  # Condition-specific parameters
     severity = Column(
         String(20), nullable=False

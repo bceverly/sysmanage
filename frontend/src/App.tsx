@@ -22,6 +22,7 @@ import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import MigrationCompatBanner from './Components/MigrationCompatBanner';
 import Login from './Pages/Login';
 import ResetPassword from './Pages/ResetPassword';
+import AcceptInvitation from './Pages/AcceptInvitation';
 import Home from './Pages/Home';
 import Hosts from './Pages/Hosts';
 import HostDetail from './Pages/HostDetail';
@@ -58,6 +59,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/accept-invitation" element={<AcceptInvitation />} />
       <Route path="/" element={<Home />} />
       <Route path="/hosts" element={<Hosts />} />
       <Route path="/hosts/:hostId" element={<HostDetail />} />

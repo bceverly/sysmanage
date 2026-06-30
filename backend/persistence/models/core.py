@@ -509,6 +509,52 @@ class UserSecurityRole(Base):
         return f"<UserSecurityRole(user_id={self.user_id}, role_id={self.role_id})>"
 
 
+class UserInvitation(Base):
+    """Pending administrator invitation (Phase 13.3).
+
+    An admin invites a person by email with a set of security roles; the
+    recipient accepts via a one-time tokened link, which creates their ``User``
+    account, assigns the roles, and sets their password.  Distinct from a
+    password reset (no account exists yet) and from ``add_user`` (here the
+    recipient self-activates and chooses their own password).
+    """
+
+    __tablename__ = "user_invitation"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    email = Column(String, nullable=False, index=True)
+    token = Column(String, nullable=False, unique=True, index=True)
+    invited_by = Column(String, nullable=True)  # userid of the inviting admin
+    is_admin = Column(Boolean, nullable=False, default=False)
+    role_ids = Column(JSON, nullable=True)  # list of SecurityRole id strings to grant
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+    )
+    expires_at = Column(DateTime, nullable=False)
+    accepted_at = Column(DateTime, nullable=True)
+    revoked_at = Column(DateTime, nullable=True)
+
+    def is_pending(self) -> bool:
+        """True when the invitation can still be accepted."""
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        return (
+            self.accepted_at is None
+            and self.revoked_at is None
+            and self.expires_at is not None
+            and self.expires_at > now
+        )
+
+    def __repr__(self):
+        return (
+            f"<UserInvitation(email='{self.email}', "
+            f"accepted={self.accepted_at is not None})>"
+        )
+
+
 class UserDataGridColumnPreference(Base):
     """
     User preferences for DataGrid column visibility.

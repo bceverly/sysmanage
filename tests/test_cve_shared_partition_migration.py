@@ -12,6 +12,7 @@ Plus a FRESH-install check: the shared chain creates empty ``shared_*`` CVE
 tables when there is nothing to rename.
 """
 
+import contextlib
 import os
 import sqlite3
 import subprocess
@@ -58,10 +59,8 @@ def _scratch_db():
 
 
 def _safe_unlink(path):
-    try:
+    with contextlib.suppress(OSError):
         os.unlink(path)
-    except OSError:
-        pass
 
 
 def test_existing_deployment_preserves_cve_rows_and_drops_old():

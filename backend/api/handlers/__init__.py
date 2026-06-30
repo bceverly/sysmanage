@@ -68,6 +68,11 @@ from backend.api.handlers.hostname_handler import (
     handle_hostname_changed,
 )
 
+# Import from process_handlers (Phase 13.3)
+from backend.api.handlers.process_handlers import (
+    handle_process_status_update,
+)
+
 __all__ = [
     # OS and Hardware handlers
     "is_new_os_version_combination",
@@ -86,6 +91,7 @@ __all__ = [
     "handle_commercial_antivirus_status_update",
     "handle_firewall_status_update",
     "handle_graylog_status_update",
+    "handle_process_status_update",
     "handle_installation_complete",
     # Infrastructure handlers
     "handle_script_execution_result",

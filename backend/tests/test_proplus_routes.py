@@ -667,14 +667,17 @@ class TestRouterConfiguration:
 
             mount_proplus_routes(mock_app)
 
-            # All include_router calls should land under /api.  Most engines are
-            # mounted with an explicit prefix="/api" kwarg; a few routers (e.g.
-            # the multi-tenancy control plane) bake their own full "/api/..."
-            # prefix into the APIRouter and are included without the kwarg.
+            # All include_router calls should land under /api.  Engines are
+            # mounted either with an explicit prefix kwarg ("/api" legacy, or
+            # "/api/v1" canonical since Phase 13.2.1 — e.g. the multi-tenancy
+            # control plane is dual-mounted at "/api/v1" + "/api"), or with a
+            # router that bakes its own full "/api/..." prefix and is included
+            # without the kwarg.
             for call in mock_app.include_router.call_args_list:
                 router_arg = call.args[0] if call.args else None
                 baked_prefix = getattr(router_arg, "prefix", "")
-                assert call.kwargs.get("prefix") == "/api" or (
+                prefix_kwarg = call.kwargs.get("prefix") or ""
+                assert prefix_kwarg.startswith("/api") or (
                     isinstance(baked_prefix, str) and baked_prefix.startswith("/api")
                 )
 

@@ -40,6 +40,8 @@ class MessageType(str, Enum):
     COMMERCIAL_ANTIVIRUS_STATUS_UPDATE = "commercial_antivirus_status_update"
     FIREWALL_STATUS_UPDATE = "firewall_status_update"
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
+    # Phase 13.3 — running-process snapshot from the agent.
+    PROCESS_STATUS_UPDATE = "process_status_update"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
     # Replaces the legacy ``POST /agent/installation-complete`` HTTP path so the
@@ -106,6 +108,9 @@ class CommandType(str, Enum):
     CHECK_REBOOT_STATUS = "check_reboot_status"
     COLLECT_DIAGNOSTICS = "collect_diagnostics"
     COLLECT_CERTIFICATES = "collect_certificates"
+    # Phase 13.3 — process management.
+    COLLECT_PROCESSES = "collect_processes"
+    KILL_PROCESS = "kill_process"
     # NOTE: The legacy DEPLOY_ANTIVIRUS / ENABLE_ANTIVIRUS / DISABLE_ANTIVIRUS /
     # REMOVE_ANTIVIRUS / DEPLOY_FIREWALL / ENABLE_FIREWALL / DISABLE_FIREWALL /
     # RESTART_FIREWALL / APPLY_FIREWALL_ROLES / REMOVE_FIREWALL_PORTS commands

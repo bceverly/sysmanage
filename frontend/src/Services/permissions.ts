@@ -83,6 +83,8 @@ export const SecurityRoles = {
     RESTART_HOST_SERVICE: 'Restart Host Service',
     START_HOST_SERVICE: 'Start Host Service',
     STOP_HOST_SERVICE: 'Stop Host Service',
+    // - Host Process Operations (Phase 13.3)
+    KILL_HOST_PROCESS: 'Kill Host Process',
 
     // Integration Management
     // - Queue Operations (alphabetical)

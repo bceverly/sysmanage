@@ -26,6 +26,7 @@ from backend.api.handlers import (
     handle_kvm_modules_enable_result,
     handle_os_version_update,
     handle_package_updates_update,
+    handle_process_status_update,
     handle_reboot_status_update,
     handle_script_execution_result,
     handle_software_update,
@@ -176,6 +177,12 @@ async def route_inbound_message(  # NOSONAR
             await handle_graylog_status_update(db, mock_connection, message_data)
             success = True
             print("Successfully processed Graylog status update", flush=True)
+
+        elif message_type == MessageType.PROCESS_STATUS_UPDATE:
+            print("About to call handle_process_status_update", flush=True)
+            await handle_process_status_update(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed process status update", flush=True)
 
         elif message_type == MessageType.HOSTNAME_CHANGED:
             print("About to call handle_hostname_changed", flush=True)

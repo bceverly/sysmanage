@@ -1202,7 +1202,11 @@ def mount_multitenancy_routes(app: FastAPI) -> bool:
             if engine is not None
             else control_plane.router
         )
-        app.include_router(router)
+        # The router self-prefixes "/control-plane"; mount it at the canonical
+        # native "/api/v1" surface plus a hidden deprecated "/api" alias (Phase
+        # 13.2.1), matching the _include_versioned pattern used by the OSS routes.
+        app.include_router(router, prefix="/api/v1")
+        app.include_router(router, prefix="/api", include_in_schema=False)
         logger.info(
             "Mounted multi-tenancy control-plane router (%s)",
             "licensed engine" if engine is not None else "OSS built-in",

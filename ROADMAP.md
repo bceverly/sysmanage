@@ -4724,17 +4724,30 @@ as thin back-compat only.
       `/api/reports` alias). Pro+ keeps `/api/v1/secrets`,`/api/v1/reports`. The
       route-collision guard backs this. `test_api_v1_secrets_reports_rename.py`
       covers it. Backend 5552+539 green, frontend 122 green.
-- [ ] Flaky-test root-cause (interim shipped): a pre-existing test leaves an
-      `AsyncMock` (`_execute_mock_call`) coroutine un-awaited; on Python 3.14 its
-      GC finalization raises (transient `KeyError: '__import__'`), which pytest
-      surfaces as a `PytestUnraisableExceptionWarning` on an innocent victim test
-      under xdist (~1-in-4). Interim: a narrow `pytest.ini` `filterwarnings`
-      ignore (beside the pre-existing RuntimeWarning ignore for the same leak).
-      TODO: find + fix the leaking test (await/close the AsyncMock), then drop
-      both ignores.
-- [ ] Control-plane: `multitenancy_engine` `/api/control-plane` →
-      `/api/v1/control-plane` (+ `controlPlane.ts` / `TenantMigrationBanner.tsx`,
-      ~8 sites). Engine change ⇒ version bump + rebuild.
+- [x] Flaky-test root-cause **FIXED 2026-06-30**: the culprit was
+      `tests/test_licensing_license_service_extended.py`, which patched
+      `asyncio.create_task` with `return_value=sentinel_task` — discarding the
+      coroutine the SUT passed in (`license_service.py:177`,
+      `create_task(self._phone_home_loop())`). `_phone_home_loop` is an async
+      method → auto-`AsyncMock` → calling it created a coroutine that the mocked
+      `create_task` then dropped un-awaited → GC-finalized later as the flaky
+      `PytestUnraisableExceptionWarning` on a random victim. Fix: a
+      `_create_task_closing(sentinel)` helper used as `side_effect` at both patch
+      sites `coro.close()`s the discarded coroutine (loops still never run).
+      **Both `pytest.ini` ignores removed.** Verified by a full-suite forced-GC
+      run (deterministic leak detection) — zero coroutine/unraisable failures.
+      (Found via an AsyncMock instrumentation probe: wrap `_execute_mock_call`,
+      log the creation stack of any coroutine that's never awaited.)
+- [x] Control-plane: `multitenancy_engine` `/api/control-plane` →
+      `/api/v1/control-plane` *(DONE 2026-06-30)*. Both routers (engine + OSS
+      `control_plane.py`) now self-prefix `/control-plane`; `proplus_routes`
+      mounts at `/api/v1` (canonical) + `/api` (hidden deprecated alias).
+      Plugin frontend migrated (controlPlane.ts 28 sites + TenantMigrationBanner).
+      `multitenancy_engine` v0.4.2→**0.4.3** (+ metadata). Tests updated (OSS
+      `test_control_plane.py` mounts at `/api/v1`; engine route-path assertions →
+      `/control-plane`); verified against a fresh 0.4.3 engine — OSS 5586 + Pro+
+      2154 green. **Needs the multitenancy engine rebuilt to 0.4.3** to deploy
+      (and to green the OSS behavioral tests against the storage bundle).
 - [ ] Once every feature is native-v1, decide whether to keep the bridge as
       permanent back-compat for old agents/scripts or retire it.
 
@@ -4825,17 +4838,35 @@ as thin back-compat only.
       consumer ever needs unambiguous timestamps, emit tz-aware ISO then.)*
 
 **sysmanage-agent:** no change (see OUT-of-scope above).
-**sysmanage-docs:** document `/api/v1` as the canonical base + the agent's stable
-unversioned contract once the migration lands.
+**sysmanage-docs:** *(DONE 2026-06-30)* normalized drifted API paths to canonical
+`/api/v1` across the docs — both layers: HTML (raw code/curl blocks) **and** all 14
+locale JSONs (keyed elements render from the locale value, not the HTML). Fixed the
+v1-only segments, `/api/v2`/`/api/v3` errors, `control-plane` → `/api/v1/control-plane`,
+and `/api/auth/login` → `/api/v1/login`; left the intentionally-unversioned surfaces
+(agent, auth/mfa, auth/oidc, auth/saml, host, health, mirror-*, settings, certificates,
+idp-providers, host-defaults). Corrected fictional/standalone endpoints to the real
+host-scoped routes (`third-party-repos`, agent approval/register). Added an
+`authentication.html` section documenting **API keys (`smk_`)**, **rate limiting
+(429/Retry-After)**, and the **versioning** scheme. i18n-validate + translate-check
+green. *Follow-ups (illustrative only, not contract):* `/api/agents|metrics|tasks` in
+architecture/perf/tutorial pages are example placeholders; the new feature strings sit
+in the English-passthrough budget (run the GPU `make translate` to localize if wanted).
 
 #### 13.3 Additional Polish Items
 
 - [ ] GPG Key Management
-- [ ] Administrator Invitations
+- [x] Administrator Invitations — email-tokened invites with security-role
+      assignment; backend (`user_invitation` table + `invitation_service` +
+      `/api/v1/invitations` API), admin UI (`InvitationsManager` in Users
+      page), public `/accept-invitation` page, service-level tests, i18n.
 - [ ] Platform-Native Logging
 - [ ] Livepatch Integration (Ubuntu)
 - [ ] Custom Metrics and Graphs (Professional+)
-- [ ] Process Management
+- [x] Process Management — agent psutil snapshot collector (periodic + on-demand)
+      → `host_process` tenant table → HostDetail "Processes" tab (sortable, search,
+      kill/SIGKILL with confirm); server→agent `kill_process`/`collect_processes`
+      commands; gated on new `Kill Host Process` role; Pro+ `process_resource`
+      alert condition in `alerting_engine`. Tests + i18n + lint across all repos.
 
 ### GA Release Checklist
 

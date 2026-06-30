@@ -43,6 +43,7 @@ from backend.api import (
     graylog_integration,
     host,
     host_hostname,
+    invitations,
     license_management,
     openbao,
     opentelemetry,
@@ -50,6 +51,7 @@ from backend.api import (
     packages,
     password_reset,
     plugin_bundle,
+    processes,
     profile,
     queue,
     reboot_orchestration,
@@ -299,6 +301,14 @@ def register_routes(app: FastAPI):
     )  # /api/v1/forgot-password, /reset-password, /validate-reset-token (+ /api alias)
     logger.debug("Password reset router added")
 
+    # Phase 13.3 — administrator invitations (invite by email + role; recipient
+    # accepts via a tokened link that creates their account).
+    logger.debug("Adding invitations router (native /api/v1 + deprecated alias)")
+    _include_versioned(
+        app, invitations.router, tags=["invitations"]
+    )  # /api/v1/invitations/* (+ /api alias)
+    logger.debug("Invitations router added")
+
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")
 
@@ -432,6 +442,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding firewall status router (native /api/v1 + alias)")
     _include_versioned(app, firewall_status.router, tags=["firewall"])
     logger.debug("Firewall status router added")
+
+    logger.debug("Adding processes router (native /api/v1 + alias)")
+    _include_versioned(app, processes.router, tags=["processes"])
+    logger.debug("Processes router added")
 
     logger.debug("Adding certificates auth router with /api prefix")
     app.include_router(
