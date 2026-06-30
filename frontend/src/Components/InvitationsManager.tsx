@@ -97,7 +97,7 @@ const InvitationsManager: React.FC = () => {
         response?: { data?: { detail?: string } };
     }
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const handleCreate = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault();
         setError(null);
         setInfo(null);

@@ -859,7 +859,14 @@
     "interfaceNumber": "인터페이스 {{number}}",
     "noChangesMade": "변경 사항 없음",
     "servicesUpdatedCount": "{{count}} 서비스가 업데이트되었습니다",
-    "processesTab": "프로세스"
+    "processesTab": "프로세스",
+    "livepatchTitle": "커널 라이브패치",
+    "livepatchState": "패치 상태",
+    "livepatchKernel": "패치된 커널",
+    "livepatchPatchVersion": "패치 버전",
+    "livepatchClientVersion": "클라이언트 버전",
+    "livepatchLastCheck": "마지막 확인",
+    "livepatchFixes": "적용된 수정 사항"
   },
   "hostGroup": {
     "add": "추가",

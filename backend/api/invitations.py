@@ -65,11 +65,11 @@ class InvitationResponse(BaseModel):
     email: str
     is_admin: bool
     role_ids: List[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    invited_by: Optional[str]
-    created_at: Optional[str]
-    expires_at: Optional[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    invited_by: Optional[str] = None
+    created_at: Optional[str] = None
+    expires_at: Optional[str] = None
     status: str  # pending | accepted | revoked | expired
 
 

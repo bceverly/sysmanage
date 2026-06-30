@@ -859,7 +859,14 @@
     "interfaceNumber": "Schnittstelle {{number}}",
     "noChangesMade": "Keine Änderungen vorgenommen",
     "servicesUpdatedCount": "{{count}} Dienst(e) aktualisiert",
-    "processesTab": "Prozesse"
+    "processesTab": "Prozesse",
+    "livepatchTitle": "Kernel-Livepatch",
+    "livepatchState": "Patch-Status",
+    "livepatchKernel": "Gepatchter Kernel",
+    "livepatchPatchVersion": "Patch-Version",
+    "livepatchClientVersion": "Client-Version",
+    "livepatchLastCheck": "Letzte Prüfung",
+    "livepatchFixes": "Angewendete Fixes"
   },
   "hostGroup": {
     "add": "Hinzufügen",

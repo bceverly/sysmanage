@@ -859,7 +859,14 @@
     "interfaceNumber": "واجهة {{number}}",
     "noChangesMade": "لم يتم إجراء أي تغييرات",
     "servicesUpdatedCount": "{{count}} خدمة تم تحديثها",
-    "processesTab": " العمليات"
+    "processesTab": " العمليات",
+    "livepatchTitle": "تصحيح النواة المباشر",
+    "livepatchState": "حالة التصحيح",
+    "livepatchKernel": "النواة المصححة",
+    "livepatchPatchVersion": "إصدار التصحيح",
+    "livepatchClientVersion": "إصدار العميل",
+    "livepatchLastCheck": "آخر اتصال",
+    "livepatchFixes": "الإصلاحات المطبَّقة"
   },
   "hostGroup": {
     "add": "إضافة",

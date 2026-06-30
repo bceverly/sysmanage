@@ -6674,6 +6674,78 @@ const HostDetail = () => { // NOSONAR
                             </CardContent>
                         </Card>
                     </Grid>
+
+                    {/* Kernel Livepatch detail (only when livepatch is enabled) */}
+                    {ubuntuProInfo.livepatch?.enabled && (
+                        <Grid size={{ xs: 12 }}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <VerifiedUserIcon />
+                                        {t('hostDetail.livepatchTitle', 'Kernel Livepatch')}
+                                    </Typography>
+                                    <Table size="small">
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                    {t('hostDetail.livepatchState', 'Patch Status')}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Chip
+                                                        size="small"
+                                                        label={ubuntuProInfo.livepatch.patch_state || t('common.unknown', 'Unknown')}
+                                                        color={ubuntuProInfo.livepatch.patch_state === 'applied'
+                                                            ? 'success'
+                                                            : (ubuntuProInfo.livepatch.patch_state === 'nothing-to-apply' ? 'default' : 'warning')}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                    {t('hostDetail.livepatchKernel', 'Patched Kernel')}
+                                                </TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.kernel || '—'}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                    {t('hostDetail.livepatchPatchVersion', 'Patch Version')}
+                                                </TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.patch_version || '—'}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                    {t('hostDetail.livepatchClientVersion', 'Client Version')}
+                                                </TableCell>
+                                                <TableCell>{ubuntuProInfo.livepatch.client_version || '—'}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell variant="head" sx={{ fontWeight: 'bold', color: 'textSecondary' }}>
+                                                    {t('hostDetail.livepatchLastCheck', 'Last Check-in')}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {ubuntuProInfo.livepatch.last_check
+                                                        ? new Date(ubuntuProInfo.livepatch.last_check).toLocaleString()
+                                                        : '—'}
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                    {ubuntuProInfo.livepatch.fixes && ubuntuProInfo.livepatch.fixes.length > 0 && (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="subtitle2" gutterBottom>
+                                                {t('hostDetail.livepatchFixes', 'Applied Fixes')}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                {ubuntuProInfo.livepatch.fixes.map((fix) => (
+                                                    <Chip key={fix} size="small" variant="outlined" label={fix} />
+                                                ))}
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                    )}
                 </Grid>
             )}
 

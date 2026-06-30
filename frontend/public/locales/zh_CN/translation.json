@@ -859,7 +859,14 @@
     "interfaceNumber": "接口 {{number}}",
     "noChangesMade": "未做任何更改",
     "servicesUpdatedCount": "{{count}} 服务已更新",
-    "processesTab": "进程"
+    "processesTab": "进程",
+    "livepatchTitle": "内核实时补丁",
+    "livepatchState": "补丁状态",
+    "livepatchKernel": "已打补丁的内核",
+    "livepatchPatchVersion": "补丁版本",
+    "livepatchClientVersion": "客户端版本",
+    "livepatchLastCheck": "上次签入",
+    "livepatchFixes": "已应用的修复"
   },
   "hostGroup": {
     "add": "添加",

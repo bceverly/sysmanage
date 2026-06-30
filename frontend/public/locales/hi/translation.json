@@ -859,7 +859,14 @@
     "interfaceNumber": "इंटरफेस {{number}}",
     "noChangesMade": "कोई परिवर्तन नहीं किया गया",
     "servicesUpdatedCount": "{{count}} सेवा(ओं) अपडेट की",
-    "processesTab": "प्रोसेसेज़"
+    "processesTab": "प्रोसेसेज़",
+    "livepatchTitle": "कर्नेल लाइवपैच",
+    "livepatchState": "पैच स्थिति",
+    "livepatchKernel": "पैच किया गया कर्नेल",
+    "livepatchPatchVersion": "पैच संस्करण",
+    "livepatchClientVersion": "क्लाइंट संस्करण",
+    "livepatchLastCheck": "अंतिम जाँच",
+    "livepatchFixes": "लागू किए गए सुधार"
   },
   "hostGroup": {
     "add": "जोड़ें",

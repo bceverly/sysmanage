@@ -859,7 +859,14 @@
     "interfaceNumber": "Интерфейс {{number}}",
     "noChangesMade": "Не внесено изменений",
     "servicesUpdatedCount": "{{count}} обновленный(ые) сервис(ы)",
-    "processesTab": "Процессы"
+    "processesTab": "Процессы",
+    "livepatchTitle": "Livepatch ядра",
+    "livepatchState": "Состояние патча",
+    "livepatchKernel": "Пропатченное ядро",
+    "livepatchPatchVersion": "Версия патча",
+    "livepatchClientVersion": "Версия клиента",
+    "livepatchLastCheck": "Последняя проверка",
+    "livepatchFixes": "Применённые исправления"
   },
   "hostGroup": {
     "add": "Добавить",

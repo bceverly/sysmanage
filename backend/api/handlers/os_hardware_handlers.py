@@ -533,6 +533,20 @@ async def handle_ubuntu_pro_update(  # NOSONAR
             except (ValueError, AttributeError) as e:
                 debug_logger.warning("Failed to parse Ubuntu Pro expires date: %s", e)
 
+        # Parse optional livepatch detail (present only when the livepatch
+        # service is enabled on the host).
+        livepatch = ubuntu_pro_data.get("livepatch") or {}
+        livepatch_last_check = None
+        if livepatch.get("last_check"):
+            try:
+                livepatch_last_check = datetime.fromisoformat(
+                    str(livepatch["last_check"]).replace("Z", "+00:00")
+                ).replace(tzinfo=None)
+            except (ValueError, AttributeError):
+                livepatch_last_check = None
+        livepatch_fixes = livepatch.get("fixes")
+        livepatch_fixes_json = json.dumps(livepatch_fixes) if livepatch_fixes else None
+
         # Create Ubuntu Pro info record
         ubuntu_pro_info = UbuntuProInfo(
             host_id=host.id,
@@ -542,6 +556,14 @@ async def handle_ubuntu_pro_update(  # NOSONAR
             account_name=ubuntu_pro_data.get("account_name"),
             contract_name=ubuntu_pro_data.get("contract_name"),
             tech_support_level=ubuntu_pro_data.get("tech_support_level"),
+            livepatch_enabled=bool(livepatch.get("enabled", False)),
+            livepatch_client_version=livepatch.get("client_version") or None,
+            livepatch_patch_state=livepatch.get("patch_state") or None,
+            livepatch_check_state=livepatch.get("check_state") or None,
+            livepatch_patch_version=livepatch.get("patch_version") or None,
+            livepatch_kernel=livepatch.get("kernel") or None,
+            livepatch_last_check=livepatch_last_check,
+            livepatch_fixes=livepatch_fixes_json,
             created_at=now,
             updated_at=now,
         )

@@ -3,6 +3,7 @@ Utility functions for host management operations.
 Contains common database operations and helper functions for host API endpoints.
 """
 
+import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -601,6 +602,7 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
                 "contract_name": None,
                 "tech_support_level": None,
                 "services": [],
+                "livepatch": None,
             }
 
         # Get services
@@ -622,6 +624,32 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
             for service in services
         ]
 
+        # Build the livepatch block only when livepatch is enabled on the host.
+        livepatch_data = None
+        if ubuntu_pro_info.livepatch_enabled:
+            try:
+                fixes = (
+                    json.loads(ubuntu_pro_info.livepatch_fixes)
+                    if ubuntu_pro_info.livepatch_fixes
+                    else []
+                )
+            except (ValueError, TypeError):
+                fixes = []
+            livepatch_data = {
+                "enabled": True,
+                "client_version": ubuntu_pro_info.livepatch_client_version,
+                "patch_state": ubuntu_pro_info.livepatch_patch_state,
+                "check_state": ubuntu_pro_info.livepatch_check_state,
+                "patch_version": ubuntu_pro_info.livepatch_patch_version,
+                "kernel": ubuntu_pro_info.livepatch_kernel,
+                "last_check": (
+                    ubuntu_pro_info.livepatch_last_check.isoformat()
+                    if ubuntu_pro_info.livepatch_last_check
+                    else None
+                ),
+                "fixes": fixes,
+            }
+
         return {
             "available": True,  # If we have Ubuntu Pro data, it's available
             "attached": ubuntu_pro_info.attached,
@@ -633,6 +661,7 @@ def get_host_ubuntu_pro_info(host_id: str) -> Dict[str, Any]:
             "contract_name": ubuntu_pro_info.contract_name,
             "tech_support_level": ubuntu_pro_info.tech_support_level,
             "services": services_data,
+            "livepatch": livepatch_data,
         }
 
 

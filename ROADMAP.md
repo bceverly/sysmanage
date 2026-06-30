@@ -4860,7 +4860,12 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       `/api/v1/invitations` API), admin UI (`InvitationsManager` in Users
       page), public `/accept-invitation` page, service-level tests, i18n.
 - [ ] Platform-Native Logging
-- [ ] Livepatch Integration (Ubuntu)
+- [x] Livepatch Integration (Ubuntu) — agent collects `canonical-livepatch
+      status` when the livepatch Pro service is enabled (patched kernel, patch/
+      check state, applied CVE fixes, client version, last check-in) onto the
+      existing `ubuntu_pro` payload; livepatch_* columns on `ubuntu_pro_info`
+      (migration `k1livepatch`); served on `/host/{id}/ubuntu-pro`; Kernel
+      Livepatch card in the HostDetail Ubuntu Pro tab. Tests + i18n + lint.
 - [ ] Custom Metrics and Graphs (Professional+)
 - [x] Process Management — agent psutil snapshot collector (periodic + on-demand)
       → `host_process` tenant table → HostDetail "Processes" tab (sortable, search,

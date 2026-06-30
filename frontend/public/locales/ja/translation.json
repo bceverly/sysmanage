@@ -859,7 +859,14 @@
     "interfaceNumber": "インターフェース {{number}}",
     "noChangesMade": "変更はありません",
     "servicesUpdatedCount": "{{count}} サービスが更新されました",
-    "processesTab": "プロセス"
+    "processesTab": "プロセス",
+    "livepatchTitle": "カーネル Livepatch",
+    "livepatchState": "パッチ状態",
+    "livepatchKernel": "パッチ適用カーネル",
+    "livepatchPatchVersion": "パッチバージョン",
+    "livepatchClientVersion": "クライアントバージョン",
+    "livepatchLastCheck": "最終チェックイン",
+    "livepatchFixes": "適用済みの修正"
   },
   "hostGroup": {
     "add": "追加",

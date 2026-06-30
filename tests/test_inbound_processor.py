@@ -3,8 +3,9 @@ Comprehensive unit tests for backend.websocket.inbound_processor module.
 Tests process_pending_messages and process_validated_message functions.
 """
 
+import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -219,6 +220,69 @@ class TestProcessPendingMessages:
 
             # Verify process_validated_message was called
             assert mock_process.called
+
+    @pytest.mark.asyncio
+    async def test_host_id_resolves_to_tenant_over_stale_bootstrap_hostname(
+        self, session
+    ):
+        """A provided host_id that resolves to a tenant host must win over a
+        stale bootstrap row sharing the same fqdn.
+
+        Regression: a leftover bootstrap row (often ``pending``) matched the
+        hostname fallback first and shadowed the real, approved tenant host the
+        agent identified by id — failing every inbound message as "not
+        approved".  host_id must be resolved (bootstrap + tenants) before any
+        hostname fallback runs.
+        """
+        stale = Host(
+            id=str(uuid4()),
+            fqdn="dup-host.example.com",
+            ipv4="10.0.0.9",
+            active=True,
+            platform="Ubuntu",
+            platform_release="22.04",
+            approval_status="pending",  # the stale duplicate
+        )
+        session.add(stale)
+        session.commit()
+
+        real_id = str(uuid4())  # the agent's real (tenant) host id
+        message = MessageQueue(
+            message_id=str(uuid4()),
+            host_id=None,
+            direction=QueueDirection.INBOUND,
+            status=QueueStatus.PENDING,
+            message_type="process_status_update",
+            message_data=json.dumps(
+                {"host_id": real_id, "hostname": "dup-host.example.com"}
+            ),
+            priority="normal",
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        session.add(message)
+        session.commit()
+
+        # The agent's host_id resolves to an APPROVED host in a tenant DB.
+        tenant_host = MagicMock()
+        tenant_host.id = real_id
+        tenant_host.fqdn = "dup-host.example.com"
+        tenant_host.approval_status = "approved"
+
+        with patch(
+            "backend.websocket.inbound_processor._find_host_in_tenant_dbs",
+            return_value=(tenant_host, None),
+        ) as mock_find, patch(
+            "backend.websocket.inbound_processor.process_validated_message",
+            new_callable=AsyncMock,
+        ) as mock_process:
+            await process_pending_messages(session)
+
+        # host_id was resolved across tenants FIRST (by id, no hostname).
+        mock_find.assert_called_once_with(real_id, None)
+        # Processed against the tenant host, NOT the stale pending bootstrap row.
+        assert mock_process.called
+        assert mock_process.call_args[0][1] is tenant_host
+        assert mock_process.call_args[0][1].id != stale.id
 
     @pytest.mark.asyncio
     async def test_process_pending_messages_null_host_id_with_hostname(self, session):

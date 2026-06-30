@@ -859,7 +859,14 @@
     "interfaceNumber": "Interfaccia {{number}}",
     "noChangesMade": "Nessuna modifica apportata",
     "servicesUpdatedCount": "{{count}} servizio(i) aggiornato",
-    "processesTab": "Processi"
+    "processesTab": "Processi",
+    "livepatchTitle": "Livepatch del kernel",
+    "livepatchState": "Stato della patch",
+    "livepatchKernel": "Kernel con patch",
+    "livepatchPatchVersion": "Versione della patch",
+    "livepatchClientVersion": "Versione del client",
+    "livepatchLastCheck": "Ultimo controllo",
+    "livepatchFixes": "Correzioni applicate"
   },
   "hostGroup": {
     "add": "Aggiungi",

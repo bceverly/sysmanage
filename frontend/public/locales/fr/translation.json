@@ -859,7 +859,14 @@
     "interfaceNumber": "Interface {{number}}",
     "noChangesMade": "Aucune modification apportée",
     "servicesUpdatedCount": "{{count}} service(s) mis à jour",
-    "processesTab": "Processus"
+    "processesTab": "Processus",
+    "livepatchTitle": "Livepatch du noyau",
+    "livepatchState": "État du correctif",
+    "livepatchKernel": "Noyau corrigé",
+    "livepatchPatchVersion": "Version du correctif",
+    "livepatchClientVersion": "Version du client",
+    "livepatchLastCheck": "Dernière vérification",
+    "livepatchFixes": "Correctifs appliqués"
   },
   "hostGroup": {
     "add": "Ajouter",

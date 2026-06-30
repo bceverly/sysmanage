@@ -790,6 +790,17 @@ type UbuntuProService = {
     entitled: boolean;
 }
 
+type UbuntuProLivepatch = {
+    enabled: boolean;
+    client_version: string | null;
+    patch_state: string | null;
+    check_state: string | null;
+    patch_version: string | null;
+    kernel: string | null;
+    last_check: string | null;
+    fixes: string[];
+}
+
 type UbuntuProInfo = {
     available: boolean;
     attached: boolean;
@@ -799,7 +810,8 @@ type UbuntuProInfo = {
     contract_name: string | null;
     tech_support_level: string | null;
     services: UbuntuProService[];
+    livepatch?: UbuntuProLivepatch | null;
 }
 
-export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
+export type { SuccessResponse, SysManageHost, StorageDevice, NetworkInterface, UserAccount, UserGroup, SoftwarePackage, PaginatedSoftwareResponse, PaginationInfo, DiagnosticReport, DiagnosticDetailResponse, UbuntuProInfo, UbuntuProService, UbuntuProLivepatch, RebootPreCheckResponse, OrchestratedRebootResponse, RebootOrchestrationStatus };
 export { doDeleteHost, doGetHostByID, doGetHosts, doApproveHost, doRefreshHostData, doRefreshHardwareData, doRefreshUpdatesCheck, doRefreshAllHostData, doGetHostStorage, doGetHostNetwork, doGetHostUsers, doGetHostGroups, doRefreshUserAccessData, doRequestSystemInfo, doGetHostSoftware, doRefreshSoftwareData, doGetHostDiagnostics, doRequestHostDiagnostics, doGetDiagnosticDetail, doDeleteDiagnostic, doRebootHost, doShutdownHost, doUpdateAgent, doRequestPackages, doGetHostUbuntuPro, doAttachUbuntuPro, doDetachUbuntuPro, doEnableUbuntuProService, doDisableUbuntuProService, doChangeHostname, doRebootPreCheck, doOrchestratedReboot, getRebootOrchestrationStatus };

@@ -859,7 +859,14 @@
     "interfaceNumber": "介面 {{number}}",
     "noChangesMade": "未做任何更改",
     "servicesUpdatedCount": "{{count}} 服務已更新",
-    "processesTab": "進程"
+    "processesTab": "進程",
+    "livepatchTitle": "核心即時修補",
+    "livepatchState": "修補狀態",
+    "livepatchKernel": "已修補的核心",
+    "livepatchPatchVersion": "修補版本",
+    "livepatchClientVersion": "用戶端版本",
+    "livepatchLastCheck": "上次簽入",
+    "livepatchFixes": "已套用的修正"
   },
   "hostGroup": {
     "add": "新增",

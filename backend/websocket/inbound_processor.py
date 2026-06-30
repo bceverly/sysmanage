@@ -366,23 +366,29 @@ async def process_pending_messages(  # NOSONAR
                 )
                 continue
 
-            # Look up host by host_id first (more reliable, especially for
-            # hostname_changed), then fall back to hostname lookup.
+            # Resolve the host.  ``host_id`` (when the agent sends one) is
+            # authoritative and is resolved FIRST across the bootstrap DB and
+            # every tenant DB — BEFORE any hostname fallback.  This matters in
+            # multi-tenancy: a host's row lives in its tenant DB, but a stale
+            # leftover row in the bootstrap DB can share the same fqdn.  If we
+            # let the bootstrap hostname lookup run first it would match that
+            # stale row (often ``pending``) and shadow the real, approved
+            # tenant host the agent identified by id — silently failing every
+            # inbound message as "not approved".  So: id everywhere, then
+            # hostname everywhere.
             host = None
+            tenant_session = None
             if host_id:
                 host = db.query(Host).filter(Host.id == host_id).first()
+                if not host:
+                    host, tenant_session = _find_host_in_tenant_dbs(host_id, None)
+
+            # Hostname fallback only when no host_id was provided, or it didn't
+            # resolve anywhere (e.g. hostname_changed before the index updates).
             if not host and hostname:
                 host = db.query(Host).filter(Host.fqdn == hostname).first()
-
-            # Phase 13.1: a tenant host's data lives in its tenant database, but
-            # this NULL-host_id message sits in the bootstrap queue (inbound
-            # messages are enqueued without a host_id and resolved here).  When
-            # the host isn't on THIS database, resolve it across the provisioned
-            # tenant databases and run the handler against the tenant DB it lives
-            # in (host_db), while the queue row stays on the bootstrap db.
-            tenant_session = None
-            if not host:
-                host, tenant_session = _find_host_in_tenant_dbs(host_id, hostname)
+                if not host:
+                    host, tenant_session = _find_host_in_tenant_dbs(None, hostname)
 
             await _dispatch_null_host_message(
                 message, host, db, hostname, tenant_session

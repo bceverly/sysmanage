@@ -33,16 +33,16 @@ class ProcessResponse(BaseModel):
 
     id: str
     pid: int
-    parent_pid: Optional[int]
+    parent_pid: Optional[int] = None
     process_name: str
-    username: Optional[str]
-    status: Optional[str]
-    cpu_percent: Optional[float]
-    memory_percent: Optional[float]
-    memory_rss_bytes: Optional[int]
-    command_line: Optional[str]
-    started_at: Optional[str]
-    collected_at: Optional[str]
+    username: Optional[str] = None
+    status: Optional[str] = None
+    cpu_percent: Optional[float] = None
+    memory_percent: Optional[float] = None
+    memory_rss_bytes: Optional[int] = None
+    command_line: Optional[str] = None
+    started_at: Optional[str] = None
+    collected_at: Optional[str] = None
 
 
 class KillProcessRequest(BaseModel):

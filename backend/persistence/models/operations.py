@@ -385,6 +385,17 @@ class UbuntuProInfo(Base):
     contract_name = Column(String(255), nullable=True)
     tech_support_level = Column(String(100), nullable=True)
     expires = Column(DateTime, nullable=True)
+    # Livepatch detail (Phase 13.3) — populated from canonical-livepatch status
+    # when the livepatch Pro service is enabled; all nullable so non-livepatch
+    # hosts simply leave them empty.
+    livepatch_enabled = Column(Boolean, nullable=False, default=False)
+    livepatch_client_version = Column(String(50), nullable=True)
+    livepatch_patch_state = Column(String(50), nullable=True)
+    livepatch_check_state = Column(String(50), nullable=True)
+    livepatch_patch_version = Column(String(50), nullable=True)
+    livepatch_kernel = Column(String(255), nullable=True)
+    livepatch_last_check = Column(DateTime, nullable=True)
+    livepatch_fixes = Column(Text, nullable=True)  # JSON array of CVE fix strings
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, nullable=False)
 
