@@ -71,6 +71,11 @@ SysManage is a comprehensive system management solution that allows you to monit
 
 ## Quick Start
 
+> **Prebuilt packages** (macOS `.pkg`, Windows `.msi`, and the apt/rpm
+> repositories) are hosted on **Cloudflare R2** at `https://repo.sysmanage.org`.
+> Ubuntu/Debian are also on the Launchpad PPA and Fedora/RHEL on COPR. To build
+> from source instead, follow the steps below.
+
 ```bash
 # 1. Clone and setup
 git clone https://github.com/bceverly/sysmanage.git

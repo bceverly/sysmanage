@@ -246,17 +246,28 @@ if __name__ == "__main__":
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
     startup_logger.info("About to call uvicorn.run()")
 
+    # Default to a single worker (production behaviour is unchanged).  The load-
+    # test workflow sets SYSMANAGE_UVICORN_WORKERS>1 to use the runner's spare
+    # cores — a single worker is GIL-bound to ~1 core and caps throughput.
+    # NOTE: >1 worker requires an import string (uvicorn re-imports the app per
+    # worker) and runs the lifespan — and thus the background queue processors —
+    # once per worker; that's acceptable for the health-poll load scenarios.
+    workers = int(os.environ.get("SYSMANAGE_UVICORN_WORKERS", "1") or "1")
+    run_kwargs = {
+        "host": host,
+        "port": port,
+        "ws_ping_interval": ws_ping_interval,  # match agent config (default 20s)
+        "ws_ping_timeout": ws_ping_timeout,  # handle large message transmissions
+        "ws_max_size": ws_max_size,  # 100MB for large software inventories
+        "log_config": log_config,
+        **ssl_config,
+    }
     try:
-        uvicorn.run(
-            app,
-            host=host,
-            port=port,
-            ws_ping_interval=ws_ping_interval,  # Increased from default 20s to match agent config
-            ws_ping_timeout=ws_ping_timeout,  # Increased to handle large message transmissions
-            ws_max_size=ws_max_size,  # Increased from default 16MB to handle large software inventories
-            log_config=log_config,
-            **ssl_config,
-        )
+        if workers > 1:
+            startup_logger.info("Launching uvicorn with %d workers", workers)
+            uvicorn.run("backend.main:app", workers=workers, **run_kwargs)
+        else:
+            uvicorn.run(app, **run_kwargs)
     except Exception as e:
         startup_logger.exception("UVICORN SERVER STARTUP FAILED: %s", e, exc_info=True)
         startup_logger.exception("Server startup exception details:")

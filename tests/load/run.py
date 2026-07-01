@@ -89,7 +89,9 @@ except ImportError:  # pragma: no cover
 
 # SLA thresholds.  Anything stricter goes here — the workflow only
 # cares about exit code 2 vs 0, so fold all SLA logic into one place.
-SLA_P95_MS = 2000.0
+# 2500ms leaves headroom for the 1000-agent tail on a shared 4-vCPU GitHub
+# runner (multi-worker server); tighten once we have a dedicated perf box.
+SLA_P95_MS = 2500.0
 SLA_ERROR_RATE = 0.50
 
 

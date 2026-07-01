@@ -1776,6 +1776,10 @@ jobs:
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
+      # Don't let one series' upload hiccup (e.g. a transient Launchpad SSH auth
+      # timeout, or a not-yet-open series) cancel the others — each PPA target
+      # is independent, so a failure on resolute shouldn't abort noble/jammy.
+      fail-fast: false
       matrix:
         include:
           - release: resolute
@@ -2000,14 +2004,18 @@ jobs:
           # uses method=sftp; see the SSH setup step above for why FTP was
           # abandoned — it silently dropped the data channel from GitHub
           # runners and Launchpad never received the files, Bug #1836059).
-          # An sftp session can still hiccup mid-transfer, so retry up to
-          # 3× with linear backoff before failing the workflow.  ``-f``
-          # (force) makes a retry re-send even if dput's local .upload log
-          # marks a prior partial attempt as done.
+          # An sftp session can still hiccup mid-transfer (and Launchpad's SSH
+          # auth occasionally times out — paramiko then drops to an interactive
+          # password prompt that can't be answered in CI), so retry up to 5×
+          # with linear backoff before failing the workflow.  ``-f`` (force)
+          # makes a retry re-send even if dput's local .upload log marks a prior
+          # partial attempt as done.  ``< /dev/null`` denies dput a TTY so the
+          # password fallback fails fast (EOFError) instead of hanging, letting
+          # the retry re-attempt publickey auth cleanly.
           changes_file="sysmanage_${VERSION}+ppa1~${RELEASE}1_source.changes"
           attempt=1
-          max_attempts=3
-          until dput -f launchpad "$changes_file"; do
+          max_attempts=5
+          until dput -f launchpad "$changes_file" < /dev/null; do
             if [ "$attempt" -ge "$max_attempts" ]; then
               echo "::error::dput failed after $attempt attempts uploading $changes_file"
               exit 1
