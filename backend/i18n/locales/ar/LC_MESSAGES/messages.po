@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,7 +150,7 @@ msgstr "تنسيق ID المضيف غير صحيح"
 msgid "Host not found"
 msgstr "لم يتم العثور على المضيف"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr "المضيف غير معتمد"
 
@@ -1061,7 +1061,7 @@ msgstr "تم طلب تعطيل خدمة Ubuntu Pro"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "فشل في طلب تعطيل خدمة Ubuntu Pro: %s"
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr "تم بلوغ الحد الأقصى لعدد المضيفين لهذا المستأجر."
 
@@ -2050,9 +2050,28 @@ msgstr "تم الموافقة تلقائيًا عند إنشاء مضيف فرع
 msgid "Agent registered and connected successfully"
 msgstr "تم تسجيل وكيل وإحالته بنجاح"
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
 msgstr "فشل في معالجة النبضة القلبية"
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr "تم رفض الإذن: مطلوب مسؤول"
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr "وجهة سجل أصلية غير صالحة: %s"
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr "الوجهة '%(t)s' غير صالحة لـ %(f)s"
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
+msgstr "عائلة نظام تشغيل غير معروفة: %s"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization.py:163
@@ -3962,42 +3981,42 @@ msgstr "معالجة رسالة التسجيل SYSTEM_INFO %s"
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "رسالة %s مفقودة أو بدون اسم المضيف و ID المضيف، سيتم حذفها"
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr "خطأ في معالجة رسالة NULL لـ host_id %s: %s"
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "ไม่ يمكن وضع علامة على الرسالة %s كجاري المعالجة"
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr "معالجة الرسالة المتأخرة في الطلب: %s (نوع: %s, النظام: %s)"
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr "تم معالجة الرسالة وتقديمها بنجاح: %s للخادم %s"
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "فشل في معالجة الرسالة %s: نوع الرسالة غير معرف"
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr "خطأ في معالجة الرسالة %s للنظام المستضافة (host) %s: %s"
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "ไม่ يمكن وضع علامة على رسالة SYSTEM_INFO %s كجاري المعالجة"
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr "خطأ في معالجة رسالة SYSTEM_INFO %s: %s"

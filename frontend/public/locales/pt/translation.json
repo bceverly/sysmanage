@@ -3105,5 +3105,25 @@
     "loadError": "Falha ao carregar os processos",
     "refreshError": "Falha ao solicitar atualização",
     "killError": "Falha ao solicitar terminação"
+  },
+  "logging": {
+    "title": "Registro",
+    "intro": "Configure o registro para o servidor e os padrões de agente por SO. Estas configurações do banco de dados substituem os arquivos yaml, e as alterações são enviadas automaticamente aos agentes conectados.",
+    "serverCardTitle": "Registro do servidor",
+    "agentDefaultsTitle": "Padrões de agente por sistema operacional",
+    "nativeTarget": "Destino nativo",
+    "nativeIdentifier": "Identificador / etiqueta nativo",
+    "logLevel": "Nível de registro",
+    "levelDefault": "Padrão (do yaml)",
+    "verbosity": "Verbosidade",
+    "saved": "Configurações de registro salvas e enviadas aos agentes.",
+    "loadError": "Falha ao carregar as configurações de registro",
+    "saveError": "Falha ao salvar as configurações de registro",
+    "nativeEnabledSink": "Enviar registros para {{sink}}",
+    "sinkLinux": "o journal do systemd (ou syslog)",
+    "sinkWindows": "o Log de Eventos do Windows",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "o coletor de logs nativo do sistema operacional"
   }
 }

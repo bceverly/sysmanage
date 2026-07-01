@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,7 +150,7 @@ msgstr "Неверный формат идентификатора узла"
 msgid "Host not found"
 msgstr "Хост не найден"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr "Узел не одобрен"
 
@@ -1064,7 +1064,7 @@ msgstr "Запрошено отключение службы Ubuntu Pro"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "Не удалось запросить отключение услуги Ubuntu Pro: %s"
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr "Достигнут лимит хостов для этого арендатора."
 
@@ -2087,9 +2087,28 @@ msgstr "Узел автоматически одобрен при создани
 msgid "Agent registered and connected successfully"
 msgstr "Агент успешно зарегистрирован и подключен"
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
 msgstr "Не удалось обработать пульс"
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr "Доступ запрещён: требуется администратор"
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr "Недопустимая нативная цель журналирования: %s"
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr "Цель '%(t)s' недопустима для %(f)s"
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
+msgstr "Неизвестное семейство ОС: %s"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization.py:163
@@ -4036,42 +4055,42 @@ msgstr "Обработка SYSTEM_INFO сообщения регистрации
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "Сообщение %s отсутствует имя узла и host_id, удаляется"
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr "Ошибка при обработке сообщения NULL host_id %s: %s"
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "Не удалось пометить сообщение %s как обрабатываемое"
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr "Обработка очередного сообщения: %s (тип: %s, хост: %s)"
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr "Сообщение успешно обработано и завершено: %s для хоста %s"
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "Не удалось обработать сообщение %s: неизвестный тип сообщения"
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr "Ошибка при обработке сообщения %s для хоста %s: %s"
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "Не удалось пометить сообщение SYSTEM_INFO %s как обрабатываемое"
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr "Ошибка при обработке SYSTEM_INFO сообщения %s: %s"

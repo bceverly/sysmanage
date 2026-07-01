@@ -52,6 +52,14 @@ webui:
 logging:
   level: "INFO|WARNING|ERROR|CRITICAL"
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  # Platform-native logging: also emit to the OS log sink (in addition to the
+  # rotating backend.log) so the server shows up in journalctl / syslog / Event
+  # Viewer — handy under systemd/launchd or when shipping to a log aggregator.
+  # native: false                 # set true to enable
+  # native_target: "auto"         # auto | journald | syslog | eventlog | none
+  #                               # auto = journald (Linux) / Event Log (Windows)
+  #                               #        / syslog (macOS, BSD)
+  # native_identifier: "sysmanage"   # tag/identifier for native log entries
 
 # Multi-tenancy (Phase 13.1) — OPT-IN. Leave disabled for homelab / on-prem /
 # single-tenant installs: that is the default (one implicit tenant, no behaviour

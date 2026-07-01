@@ -3105,5 +3105,25 @@
     "loadError": "فشل في تحميل العمليات",
     "refreshError": "فشل في طلب تحديث",
     "killError": "فشل في طلب إنهاء"
+  },
+  "logging": {
+    "title": "التسجيل",
+    "intro": "تكوين التسجيل للخادم والإعدادات الافتراضية للوكلاء حسب نظام التشغيل. تتجاوز إعدادات قاعدة البيانات هذه ملفات yaml، وتُدفع التغييرات إلى الوكلاء المتصلين تلقائيًا.",
+    "serverCardTitle": "تسجيل الخادم",
+    "agentDefaultsTitle": "الإعدادات الافتراضية للوكلاء حسب نظام التشغيل",
+    "nativeTarget": "الوجهة الأصلية",
+    "nativeIdentifier": "المعرّف / الوسم الأصلي",
+    "logLevel": "مستوى السجل",
+    "levelDefault": "افتراضي (من yaml)",
+    "verbosity": "مستوى التفصيل",
+    "saved": "تم حفظ إعدادات التسجيل ودفعها إلى الوكلاء.",
+    "loadError": "فشل تحميل إعدادات التسجيل",
+    "saveError": "فشل حفظ إعدادات التسجيل",
+    "nativeEnabledSink": "إرسال السجلات إلى {{sink}}",
+    "sinkLinux": "سجل systemd (أو syslog)",
+    "sinkWindows": "سجل أحداث Windows",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "وجهة السجلات الأصلية لنظام التشغيل"
   }
 }

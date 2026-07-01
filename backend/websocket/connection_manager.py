@@ -298,16 +298,37 @@ class ConnectionManager:
 
     @_drain_only
     async def send_to_host(self, host_id: str, message: dict) -> bool:
-        """Send a message to an agent by database host ID.  Queue-drain-only."""
+        """Send a message to an agent by database host ID.  Queue-drain-only.
+
+        The host row is resolved on the partition that actually owns it: under
+        multi-tenancy a host lives in its tenant database, NOT the bootstrap DB
+        (which holds zero host rows), so a bootstrap-only lookup would miss it
+        and report the agent as disconnected even while it is happily connected.
+        ``tenant_engine_for_host`` returns the tenant engine, or ``None`` for a
+        bootstrap/single-tenant host — in which case we fall back to the default
+        engine and behaviour is unchanged.
+        """
         # Import here to avoid circular imports
         from sqlalchemy.orm import sessionmaker
 
         from backend.persistence.db import get_engine
         from backend.persistence.models import Host
+        from backend.persistence.partitions import tenant_engine_for_host
 
-        session_local = sessionmaker(
-            autocommit=False, autoflush=False, bind=get_engine()
-        )
+        try:
+            engine = tenant_engine_for_host(host_id) or get_engine()
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Host→tenant routing failed (e.g. registry unreachable). Do not
+            # guess a partition — surface it and leave the message queued so a
+            # later drain retries once routing recovers.
+            logger.exception(
+                "send_to_host: could not resolve the tenant database for host "
+                "%s; leaving the message queued for retry",
+                sanitize_log(str(host_id)),
+            )
+            return False
+
+        session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
         with session_local() as session:
             host = session.query(Host).filter(Host.id == host_id).first()

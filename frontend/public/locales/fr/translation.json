@@ -3105,5 +3105,25 @@
     "loadError": "Impossible de charger les processus",
     "refreshError": "Impossible de demander une mise à jour",
     "killError": "Impossible de demander la terminaison"
+  },
+  "logging": {
+    "title": "Journalisation",
+    "intro": "Configurez la journalisation pour le serveur et les valeurs par défaut des agents par SE. Ces paramètres de base de données remplacent les fichiers yaml, et les modifications sont envoyées automatiquement aux agents connectés.",
+    "serverCardTitle": "Journalisation du serveur",
+    "agentDefaultsTitle": "Valeurs par défaut des agents par système d'exploitation",
+    "nativeTarget": "Cible native",
+    "nativeIdentifier": "Identifiant / tag natif",
+    "logLevel": "Niveau de journalisation",
+    "levelDefault": "Par défaut (depuis yaml)",
+    "verbosity": "Verbosité",
+    "saved": "Paramètres de journalisation enregistrés et envoyés aux agents.",
+    "loadError": "Échec du chargement des paramètres de journalisation",
+    "saveError": "Échec de l'enregistrement des paramètres de journalisation",
+    "nativeEnabledSink": "Envoyer les journaux vers {{sink}}",
+    "sinkLinux": "le journal systemd (ou syslog)",
+    "sinkWindows": "le journal des événements Windows",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "le collecteur de journaux natif du système d'exploitation"
   }
 }

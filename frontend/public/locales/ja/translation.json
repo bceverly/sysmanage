@@ -3105,5 +3105,25 @@
     "loadError": "プロセス一覧を読み込めませんでした",
     "refreshError": "リフレッシュ要求に失敗しました",
     "killError": "終了要求に失敗しました"
+  },
+  "logging": {
+    "title": "ロギング",
+    "intro": "サーバーと OS ごとのエージェント既定値のロギングを構成します。これらのデータベース設定は yaml ファイルより優先され、変更は接続中のエージェントへ自動的に配信されます。",
+    "serverCardTitle": "サーバーのロギング",
+    "agentDefaultsTitle": "オペレーティングシステム別のエージェント既定値",
+    "nativeTarget": "ネイティブ出力先",
+    "nativeIdentifier": "ネイティブ識別子 / タグ",
+    "logLevel": "ログレベル",
+    "levelDefault": "既定 (yaml から)",
+    "verbosity": "詳細度",
+    "saved": "ロギング設定を保存し、エージェントに配信しました。",
+    "loadError": "ロギング設定の読み込みに失敗しました",
+    "saveError": "ロギング設定の保存に失敗しました",
+    "nativeEnabledSink": "{{sink}} にログを送信",
+    "sinkLinux": "systemd ジャーナル（または syslog）",
+    "sinkWindows": "Windows イベントログ",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "OS ネイティブのログ出力先"
   }
 }

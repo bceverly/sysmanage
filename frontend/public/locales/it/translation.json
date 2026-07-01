@@ -3105,5 +3105,25 @@
     "loadError": "Impossibile caricare i processi",
     "refreshError": "Impossibile richiedere l'aggiornamento",
     "killError": "Impossibile richiedere la terminazione"
+  },
+  "logging": {
+    "title": "Registrazione",
+    "intro": "Configura la registrazione per il server e i valori predefiniti degli agent per SO. Queste impostazioni del database hanno la precedenza sui file yaml e le modifiche vengono inviate automaticamente agli agent connessi.",
+    "serverCardTitle": "Registrazione del server",
+    "agentDefaultsTitle": "Valori predefiniti degli agent per sistema operativo",
+    "nativeTarget": "Destinazione nativa",
+    "nativeIdentifier": "Identificatore / tag nativo",
+    "logLevel": "Livello di log",
+    "levelDefault": "Predefinito (da yaml)",
+    "verbosity": "Verbosità",
+    "saved": "Impostazioni di registrazione salvate e inviate agli agent.",
+    "loadError": "Impossibile caricare le impostazioni di registrazione",
+    "saveError": "Impossibile salvare le impostazioni di registrazione",
+    "nativeEnabledSink": "Invia i log a {{sink}}",
+    "sinkLinux": "il journal di systemd (o syslog)",
+    "sinkWindows": "il Registro eventi di Windows",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "il sink di log nativo del sistema operativo"
   }
 }

@@ -446,6 +446,18 @@ async def _process_approved_system_info(
         },
     )
 
+    # Phase 13.3: on (re)connect, hand the agent the server's stored logging
+    # config for its OS family (if any) so DB settings win over its yaml and a
+    # fresh/reconnecting agent converges without waiting for the next UI save.
+    try:
+        from backend.services import (  # noqa: PLC0415
+            logging_config_service as _logsvc,
+        )
+
+        _logsvc.push_logging_to_host(db, host)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.warning("Could not push logging config to %s: %s", hostname, exc)
+
     return {
         "message_type": "registration_success",
         "approved": True,
@@ -625,7 +637,30 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                 has_ipv4 = hasattr(connection, "ipv4") and connection.ipv4
                 has_ipv6 = hasattr(connection, "ipv6") and connection.ipv6
 
-                if has_hostname and has_ipv4 and has_ipv6:
+                # Phase 13.3: a tenant-bound host's row lives in its tenant DB,
+                # not this bootstrap ``db``.  ``handle_heartbeat`` isn't tenant-
+                # routed, so the lookup above misses and we'd otherwise create a
+                # DUPLICATE pending bootstrap orphan (a fresh id, same fqdn) that
+                # shadows the real, approved tenant host across inbound routing,
+                # config push, etc.  Never create the orphan for a host_id we
+                # know is tenant-bound — the heartbeat is also processed on the
+                # tenant DB via the inbound queue.
+                from backend.persistence.partitions import (  # noqa: PLC0415
+                    tenant_engine_for_host,
+                )
+
+                agent_host_id = message_data.get("host_id") or connection.host_id
+                if (
+                    agent_host_id is not None
+                    and tenant_engine_for_host(agent_host_id) is not None
+                ):
+                    logger.info(
+                        "Heartbeat: host %s is tenant-bound; not creating a "
+                        "bootstrap duplicate",
+                        agent_host_id,
+                    )
+                    result_rowcount = 0
+                elif has_hostname and has_ipv4 and has_ipv6:
                     # Create new host
                     is_privileged = message_data.get("is_privileged", False)
                     # Get script execution status from agent message, default to False for security

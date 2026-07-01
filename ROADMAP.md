@@ -4859,7 +4859,19 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       assignment; backend (`user_invitation` table + `invitation_service` +
       `/api/v1/invitations` API), admin UI (`InvitationsManager` in Users
       page), public `/accept-invitation` page, service-level tests, i18n.
-- [ ] Platform-Native Logging
+- [x] Platform-Native Logging — opt-in OS-native log sink (journald / syslog /
+      Windows Event Log, auto-selected per platform) alongside the rotating file
+      log, on BOTH server (`backend/utils/native_logging.py` wired into
+      `configure_logging`, `sysmanage.yaml` `logging.native*`) and agent
+      (`utils/native_logging.py` wired into `setup_logging`, agent yaml). Tests +
+      lint both repos; graceful fallback when journald/pywin32/syslog absent.
+  - [x] DB-stored logging config — `logging_setting` table (server row +
+        per-OS-family agent defaults) editable from a Settings → Logging page
+        (OS-aware server card + per-OS agent cards); DB wins over yaml;
+        `logging_config_service` resolves + applies the server handler live +
+        pushes `logging_config_update` to agents (on save to all, on connect per
+        host) over the durable queue; agent applies live via
+        `apply_logging_config` (no restart). Tests + i18n + lint across repos.
 - [x] Livepatch Integration (Ubuntu) — agent collects `canonical-livepatch
       status` when the livepatch Pro service is enabled (patched kernel, patch/
       check state, applied CVE fixes, client version, last check-in) onto the

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,7 +150,7 @@ msgstr "ホストIDの形式が無効です"
 msgid "Host not found"
 msgstr "ホストが見つかりません"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr "ホストは承認されていません"
 
@@ -1051,7 +1051,7 @@ msgstr "Ubuntu Pro サービスの無効化が要求されました"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "Ubuntu Pro サービス無効化を要求するのに失敗しました: %s"
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr "このテナントのホスト上限に達しました。"
 
@@ -2017,9 +2017,28 @@ msgstr "ホストは自動的に承認されました（子ホスト作成時）
 msgid "Agent registered and connected successfully"
 msgstr "Agent の登録と接続に成功しました"
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
 msgstr "ハートビートの処理に失敗しました"
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr "アクセスが拒否されました: 管理者権限が必要です"
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr "無効なネイティブログ出力先: %s"
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr "出力先 '%(t)s' は %(f)s では無効です"
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
+msgstr "不明な OS ファミリー: %s"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization.py:163
@@ -3893,42 +3912,42 @@ msgstr "SYSTEM_INFO 登録メッセージ %s を処理中"
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "メッセージ %s にホスト名と host_id が欠落しているため、削除します"
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr "NULL ホストID メッセージ %s の処理中にエラーが発生しました: %s"
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "メッセージ %s を処理中としてマークすることができません"
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr "キュー内のメッセージを処理中: %s (タイプ: %s, ホスト: %s)"
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr "メッセージ:%s を処理し、ホスト:%s で完了しました"
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "メッセージ%sの処理に失敗しました: 知らないメッセージタイプ"
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr "ホスト %s に対するメッセージ %s の処理中にエラーが発生しました: %s"
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "SYSTEM_INFOメッセージ %s を処理中としてマークすることができません"
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr "SYSTEM_INFO メッセージ %s の処理中にエラーが発生しました: %s"

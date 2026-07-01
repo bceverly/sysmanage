@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,7 +158,7 @@ msgstr ""
 msgid "Host not found"
 msgstr ""
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr ""
 
@@ -1052,7 +1052,7 @@ msgstr ""
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr ""
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr ""
 
@@ -1994,8 +1994,27 @@ msgstr ""
 msgid "Agent registered and connected successfully"
 msgstr ""
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
+msgstr ""
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr ""
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr ""
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr ""
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
 msgstr ""
 
 #: backend/api/child_host_virtualization.py:163
@@ -3841,42 +3860,42 @@ msgstr ""
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr ""
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr ""

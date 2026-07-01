@@ -57,6 +57,7 @@ import AirGapBundlesSettings from '../Components/AirGapBundlesSettings';
 import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import ServerRoleSettings from '../Components/ServerRoleSettings';
+import LoggingSettings from '../Components/LoggingSettings';
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
@@ -197,6 +198,7 @@ const Settings: React.FC = () => {
         labelKey: 'serverRole.menuTitle',
         labelDefault: 'Server Role',
       },
+      { id: 'logging', labelKey: 'logging.title', labelDefault: 'Logging' },
       { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
       { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
       { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
@@ -1321,6 +1323,7 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
         {tabNames[activeTab] === 'queues' && renderQueuesTab()}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
+        {tabNames[activeTab] === 'logging' && <LoggingSettings />}
         {tabNames[activeTab] === 'integrations' && renderIntegrationsTab()}
         {tabNames[activeTab] === 'ubuntu-pro' && renderUbuntuProTab()}
         {tabNames[activeTab] === 'antivirus' && <AntivirusDefaultsSettings />}

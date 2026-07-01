@@ -3105,5 +3105,25 @@
     "loadError": "Kon de processen niet laden",
     "refreshError": "Kon vernieuwing niet aanvragen",
     "killError": "Kon afzegging niet aanvragen"
+  },
+  "logging": {
+    "title": "Logging",
+    "intro": "Configureer logging voor de server en per-OS agent-standaardwaarden. Deze database-instellingen overschrijven de yaml-bestanden en wijzigingen worden automatisch naar verbonden agents gepusht.",
+    "serverCardTitle": "Serverlogging",
+    "agentDefaultsTitle": "Agent-standaardwaarden per besturingssysteem",
+    "nativeTarget": "Native bestemming",
+    "nativeIdentifier": "Native identifier / tag",
+    "logLevel": "Logniveau",
+    "levelDefault": "Standaard (uit yaml)",
+    "verbosity": "Uitgebreidheid",
+    "saved": "Logging-instellingen opgeslagen en naar agents gepusht.",
+    "loadError": "Laden van logging-instellingen mislukt",
+    "saveError": "Opslaan van logging-instellingen mislukt",
+    "nativeEnabledSink": "Logs sturen naar {{sink}}",
+    "sinkLinux": "het systemd-journaal (of syslog)",
+    "sinkWindows": "het Windows-logboek voor gebeurtenissen",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "de OS-eigen logbestemming"
   }
 }

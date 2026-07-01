@@ -90,6 +90,10 @@ class MessageType(str, Enum):
     # Always enqueued (never sent directly via connection_manager) so
     # offline agents receive it on reconnect.
     CONFIG_UPDATE = "config_update"
+    # Phase 13.3 — DB-stored logging configuration pushed to agents (plaintext;
+    # non-sensitive).  Enqueued OUTBOUND so connected agents apply it live and
+    # offline agents pick it up on reconnect.
+    LOGGING_CONFIG_UPDATE = "logging_config_update"
 
 
 class CommandType(str, Enum):

@@ -3105,5 +3105,25 @@
     "loadError": "No se pudieron cargar los procesos",
     "refreshError": "No se pudo solicitar recarga",
     "killError": "No se pudo solicitar terminación"
+  },
+  "logging": {
+    "title": "Registro",
+    "intro": "Configure el registro para el servidor y los valores predeterminados de los agentes por SO. Estos ajustes de la base de datos anulan los archivos yaml, y los cambios se envían automáticamente a los agentes conectados.",
+    "serverCardTitle": "Registro del servidor",
+    "agentDefaultsTitle": "Valores predeterminados de agente por sistema operativo",
+    "nativeTarget": "Destino nativo",
+    "nativeIdentifier": "Identificador / etiqueta nativo",
+    "logLevel": "Nivel de registro",
+    "levelDefault": "Predeterminado (de yaml)",
+    "verbosity": "Detalle",
+    "saved": "Configuración de registro guardada y enviada a los agentes.",
+    "loadError": "Error al cargar la configuración de registro",
+    "saveError": "Error al guardar la configuración de registro",
+    "nativeEnabledSink": "Enviar registros a {{sink}}",
+    "sinkLinux": "el diario de systemd (o syslog)",
+    "sinkWindows": "el Registro de eventos de Windows",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "el destino de registro nativo del sistema operativo"
   }
 }

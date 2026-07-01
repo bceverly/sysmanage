@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,7 +150,7 @@ msgstr "Format d'ID hôte incorrect"
 msgid "Host not found"
 msgstr "Hôte introuvable"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr "L'hôte n'est pas approuvé"
 
@@ -1079,7 +1079,7 @@ msgstr "Ubuntu Pro service disable demandé"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "Échec de la demande de désactivation du service Ubuntu Pro : %s"
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr "Limite d'hôtes atteinte pour ce locataire."
 
@@ -2121,9 +2121,28 @@ msgstr ""
 msgid "Agent registered and connected successfully"
 msgstr "Agent enregistré et connecté avec succès"
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
 msgstr "Échec du traitement du battement de coeur"
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr "Autorisation refusée : administrateur requis"
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr "Cible de journalisation native invalide : %s"
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr "La cible '%(t)s' n'est pas valide pour %(f)s"
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
+msgstr "Famille de système d'exploitation inconnue : %s"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization.py:163
@@ -4114,43 +4133,43 @@ msgid "Message %s missing hostname and host_id, deleting"
 msgstr ""
 "Message %s manquant le nom d'hôte et l'ID d'hôte, suppression en cours"
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr "Erreur lors du traitement du message NULL host_id %s : %s"
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "Impossible de marquer le message %s comme en cours de traitement"
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr "Traitement du message en file d'attente : %s (type : %s, hôte : %s)"
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr "Message traité et complété avec succès : %s pour l'hôte %s"
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "Échec du traitement du message %s : type de message inconnu"
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr "Erreur lors du traitement du message %s pour l'hôte %s : %s"
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr ""
 "Impossible de marquer le message SYSTEM_INFO %s comme en cours de traitement"
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr "Erreur lors du traitement du message SYSTEM_INFO %s : %s"

@@ -3105,5 +3105,25 @@
     "loadError": "加载进程失败",
     "refreshError": "请求刷新失败",
     "killError": "请求终止失败"
+  },
+  "logging": {
+    "title": "日志",
+    "intro": "为服务器和按操作系统的代理默认值配置日志。这些数据库设置会覆盖 yaml 文件，更改会自动推送到已连接的代理。",
+    "serverCardTitle": "服务器日志",
+    "agentDefaultsTitle": "按操作系统的代理默认值",
+    "nativeTarget": "原生目标",
+    "nativeIdentifier": "原生标识符 / 标签",
+    "logLevel": "日志级别",
+    "levelDefault": "默认（来自 yaml）",
+    "verbosity": "详细程度",
+    "saved": "日志设置已保存并推送到代理。",
+    "loadError": "加载日志设置失败",
+    "saveError": "保存日志设置失败",
+    "nativeEnabledSink": "将日志发送到 {{sink}}",
+    "sinkLinux": "systemd 日志（或 syslog）",
+    "sinkWindows": "Windows 事件日志",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "操作系统原生日志接收器"
   }
 }

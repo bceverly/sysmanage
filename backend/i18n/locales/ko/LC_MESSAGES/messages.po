@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-30 13:45-0400\n"
+"POT-Creation-Date: 2026-06-30 16:54-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,7 +150,7 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 msgid "Host not found"
 msgstr "호스트를 찾을 수 없습니다"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:43
+#: backend/api/certificates.py:94 backend/api/host_utils.py:44
 msgid "Host is not approved"
 msgstr "호스트가 승인이 되지 않았습니다."
 
@@ -1050,7 +1050,7 @@ msgstr "Ubuntu Pro 서비스 비활성화 요청됨"
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "Ubuntu Pro 서비스 비활성화 요청에 실패했습니다: %s"
 
-#: backend/api/host_utils.py:662
+#: backend/api/host_utils.py:691
 msgid "Host limit reached for this tenant."
 msgstr "이 테넌트의 호스트 한도에 도달했습니다."
 
@@ -2012,9 +2012,28 @@ msgstr "호스트 자동 승인됨(자식 호스트 생성 시)"
 msgid "Agent registered and connected successfully"
 msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 
-#: backend/api/message_handlers_core.py:706
+#: backend/api/message_handlers_core.py:718
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
+
+#: backend/api/logging_settings.py:58
+msgid "Permission denied: administrator required"
+msgstr "권한 거부됨: 관리자 권한이 필요합니다"
+
+#: backend/api/logging_settings.py:95
+#, python-format
+msgid "Invalid native log target: %s"
+msgstr "잘못된 네이티브 로그 대상: %s"
+
+#: backend/api/logging_settings.py:100
+#, python-format
+msgid "Target '%(t)s' is not valid for %(f)s"
+msgstr "대상 '%(t)s'은(는) %(f)s에 유효하지 않습니다"
+
+#: backend/api/logging_settings.py:122
+#, python-format
+msgid "Unknown OS family: %s"
+msgstr "알 수 없는 OS 제품군: %s"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization.py:163
@@ -3884,42 +3903,42 @@ msgstr "SYSTEM_INFO 등록 메시지 처리 중: %s"
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "메시지 %s 호스트 이름 및 host_id 정보 없음, 삭제됨"
 
-#: backend/websocket/inbound_processor.py:393
+#: backend/websocket/inbound_processor.py:399
 #, python-format
 msgid "Error processing NULL host_id message %s: %s"
 msgstr "NULL 호스트 ID 메시지 %s 처리 중 오류: %s"
 
-#: backend/websocket/inbound_processor.py:431
+#: backend/websocket/inbound_processor.py:437
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "메시지 %s 를 처리 중으로 표시할 수 없습니다."
 
-#: backend/websocket/inbound_processor.py:458
+#: backend/websocket/inbound_processor.py:464
 #, python-format
 msgid "Processing queued message: %s (type: %s, host: %s)"
 msgstr "대기 중인 메시지 처리: %s (타입: %s, 호스트: %s)"
 
-#: backend/websocket/inbound_processor.py:487
+#: backend/websocket/inbound_processor.py:493
 #, python-format
 msgid "Successfully processed and completed message: %s for host %s"
 msgstr "호스트 %s를 위한 메시지: %s 처리 및 완료 성공"
 
-#: backend/websocket/inbound_processor.py:505
+#: backend/websocket/inbound_processor.py:511
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "메시지 %s 처리에 실패했습니다: 알 수 없는 메시지 유형"
 
-#: backend/websocket/inbound_processor.py:526
+#: backend/websocket/inbound_processor.py:532
 #, python-format
 msgid "Error processing message %s for host %s: %s"
 msgstr "호스트 %s에 대한 메시지 %s 처리 중 오류: %s"
 
-#: backend/websocket/inbound_processor.py:554
+#: backend/websocket/inbound_processor.py:560
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "SYSTEM_INFO 메시지 %s 를 처리 중으로 표시할 수 없습니다."
 
-#: backend/websocket/inbound_processor.py:586
+#: backend/websocket/inbound_processor.py:592
 #, python-format
 msgid "Error processing SYSTEM_INFO message %s: %s"
 msgstr "SYSTEM_INFO 메시지 %s 처리 중 오류: %s"

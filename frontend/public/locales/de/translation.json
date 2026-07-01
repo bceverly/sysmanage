@@ -3105,5 +3105,25 @@
     "loadError": "Die Prozesse konnten nicht geladen werden",
     "refreshError": "Der Token konnte nicht aktualisiert werden",
     "killError": "Der Beendigungsantrag konnte nicht gestartet werden"
+  },
+  "logging": {
+    "title": "Protokollierung",
+    "intro": "Konfigurieren Sie die Protokollierung für den Server und die OS-spezifischen Agent-Standardwerte. Diese Datenbankeinstellungen überschreiben die yaml-Dateien, und Änderungen werden automatisch an verbundene Agenten übertragen.",
+    "serverCardTitle": "Server-Protokollierung",
+    "agentDefaultsTitle": "Agent-Standardwerte nach Betriebssystem",
+    "nativeTarget": "Natives Ziel",
+    "nativeIdentifier": "Native Kennung / Tag",
+    "logLevel": "Protokollebene",
+    "levelDefault": "Standard (aus yaml)",
+    "verbosity": "Ausführlichkeit",
+    "saved": "Protokolleinstellungen gespeichert und an Agenten übertragen.",
+    "loadError": "Protokolleinstellungen konnten nicht geladen werden",
+    "saveError": "Protokolleinstellungen konnten nicht gespeichert werden",
+    "nativeEnabledSink": "Logs senden an {{sink}}",
+    "sinkLinux": "das systemd-Journal (oder syslog)",
+    "sinkWindows": "das Windows-Ereignisprotokoll",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "die native Protokollierung des Betriebssystems"
   }
 }

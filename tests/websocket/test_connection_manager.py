@@ -413,6 +413,64 @@ class TestConnectionManager:
             assert result is False
 
     @pytest.mark.asyncio
+    async def test_send_to_host_uses_tenant_engine(self):
+        """send_to_host must resolve the host on its tenant partition.
+
+        Under multi-tenancy the host row lives in the tenant database (the
+        bootstrap DB has zero host rows), so a bootstrap-only lookup would miss
+        it and wrongly report the agent as disconnected.  Assert the tenant
+        engine is consulted and the send still reaches the agent by fqdn.
+        """
+        manager = ConnectionManager()
+        mock_ws = AsyncMock(spec=WebSocket)
+        connection = AgentConnection(mock_ws, agent_id="agent-tenant")
+        connection.send_message = AsyncMock(return_value=True)
+        manager.active_connections["agent-tenant"] = connection
+        manager.hostname_to_agent["tenant-host.example.com"] = "agent-tenant"
+
+        mock_host = Mock()
+        mock_host.fqdn = "tenant-host.example.com"
+        tenant_engine = object()
+
+        with patch(
+            "backend.persistence.partitions.tenant_engine_for_host",
+            return_value=tenant_engine,
+        ) as mock_resolver, patch(
+            "sqlalchemy.orm.sessionmaker"
+        ) as mock_sessionmaker, patch(
+            "backend.persistence.db.get_engine"
+        ) as mock_get_engine:
+            mock_session = MagicMock()
+            mock_session.__enter__ = Mock(return_value=mock_session)
+            mock_session.__exit__ = Mock(return_value=False)
+            mock_session.query.return_value.filter.return_value.first.return_value = (
+                mock_host
+            )
+            mock_sessionmaker.return_value.return_value = mock_session
+
+            result = await manager.send_to_host("tenant-host-id", {"test": "message"})
+
+            assert result is True
+            mock_resolver.assert_called_once_with("tenant-host-id")
+            # Bound to the tenant engine, never the bootstrap default.
+            mock_sessionmaker.assert_called_once()
+            assert mock_sessionmaker.call_args.kwargs["bind"] is tenant_engine
+            mock_get_engine.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_send_to_host_routing_error_returns_false(self):
+        """A tenant-routing failure must not raise — leave the message queued."""
+        manager = ConnectionManager()
+
+        with patch(
+            "backend.persistence.partitions.tenant_engine_for_host",
+            side_effect=RuntimeError("registry unreachable"),
+        ):
+            result = await manager.send_to_host("host-id", {"test": "message"})
+
+        assert result is False
+
+    @pytest.mark.asyncio
     async def test_broadcast_to_all_success(self):
         """Test broadcast_to_all sends to all connected agents."""
         manager = ConnectionManager()

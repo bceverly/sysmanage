@@ -26,6 +26,7 @@ from .graylog_integration import *
 from .hardware import *
 from .host_certificate import *
 from .host_role import *
+from .logging_config import *
 from .operations import *
 from .processes import *
 from .proplus import *
@@ -61,6 +62,8 @@ __all__ = [
     "FirewallStatus",
     # Process management models (Phase 13.3)
     "HostProcess",
+    # Logging configuration (Phase 13.3)
+    "LoggingSetting",
     # User management models
     "UserAccount",
     "UserGroup",

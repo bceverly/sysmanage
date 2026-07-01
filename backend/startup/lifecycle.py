@@ -97,6 +97,28 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
 
         refresh_secrets_from_openbao()
 
+        # Startup: apply DB-stored server logging (Phase 13.3).  configure_logging
+        # ran at import from the yaml file; now the DB is reachable, so overlay
+        # the server's stored logging setting (DB wins over yaml).
+        logger.info("=== LOGGING SETTINGS OVERLAY (DB) ===")
+        try:
+            from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
+
+            from backend.config import config as _cfg  # noqa: PLC0415
+            from backend.persistence import db as _db  # noqa: PLC0415
+            from backend.services import (  # noqa: PLC0415
+                logging_config_service as _logsvc,
+            )
+
+            with sessionmaker(bind=_db.get_engine())() as _log_session:
+                _logsvc.apply_server_native_logging(
+                    _logsvc.resolve_server_logging(
+                        _log_session, _cfg.get_config().get("logging", {})
+                    )
+                )
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            logger.warning("Could not apply DB logging settings: %s", exc)
+
         # Startup: Initialize Pro+ license service
         logger.info("=== LICENSE SERVICE INITIALIZATION ===")
         logger.info("About to initialize license service")

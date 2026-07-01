@@ -3105,5 +3105,25 @@
     "loadError": "Failed to load processes",
     "refreshError": "Failed to request refresh",
     "killError": "Failed to request termination"
+  },
+  "logging": {
+    "title": "Logging",
+    "intro": "Configure logging for the server and per-OS agent defaults. These database settings override the yaml files, and changes are pushed to connected agents automatically.",
+    "serverCardTitle": "Server logging",
+    "agentDefaultsTitle": "Agent defaults by operating system",
+    "nativeTarget": "Native target",
+    "nativeIdentifier": "Native identifier / tag",
+    "logLevel": "Log level",
+    "levelDefault": "Default (from yaml)",
+    "verbosity": "Verbosity",
+    "saved": "Logging settings saved and pushed to agents.",
+    "loadError": "Failed to load logging settings",
+    "saveError": "Failed to save logging settings",
+    "nativeEnabledSink": "Send logs to {{sink}}",
+    "sinkLinux": "the systemd journal (or syslog)",
+    "sinkWindows": "the Windows Event Log",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "the OS-native sink"
   }
 }

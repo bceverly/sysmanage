@@ -3105,5 +3105,25 @@
     "loadError": "無法加載進程",
     "refreshError": "無法請求刷新",
     "killError": "無法請求終止"
+  },
+  "logging": {
+    "title": "日誌",
+    "intro": "為伺服器及各作業系統的代理預設值設定日誌。這些資料庫設定會覆寫 yaml 檔案，變更會自動推送到已連線的代理。",
+    "serverCardTitle": "伺服器日誌",
+    "agentDefaultsTitle": "各作業系統的代理預設值",
+    "nativeTarget": "原生目標",
+    "nativeIdentifier": "原生識別碼 / 標籤",
+    "logLevel": "日誌等級",
+    "levelDefault": "預設（來自 yaml）",
+    "verbosity": "詳細程度",
+    "saved": "日誌設定已儲存並推送到代理。",
+    "loadError": "載入日誌設定失敗",
+    "saveError": "儲存日誌設定失敗",
+    "nativeEnabledSink": "將日誌傳送到 {{sink}}",
+    "sinkLinux": "systemd 日誌（或 syslog）",
+    "sinkWindows": "Windows 事件記錄檔",
+    "sinkMacos": "syslog",
+    "sinkBsd": "syslog",
+    "sinkGeneric": "作業系統原生日誌接收器"
   }
 }

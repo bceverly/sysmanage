@@ -45,6 +45,7 @@ from backend.api import (
     host_hostname,
     invitations,
     license_management,
+    logging_settings,
     openbao,
     opentelemetry,
     package_compliance,
@@ -308,6 +309,10 @@ def register_routes(app: FastAPI):
         app, invitations.router, tags=["invitations"]
     )  # /api/v1/invitations/* (+ /api alias)
     logger.debug("Invitations router added")
+
+    logger.debug("Adding logging-settings router (native /api/v1 + alias)")
+    _include_versioned(app, logging_settings.router, tags=["logging-settings"])
+    logger.debug("Logging-settings router added")
 
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")

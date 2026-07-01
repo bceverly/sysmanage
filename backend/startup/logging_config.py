@@ -11,9 +11,38 @@ import sys
 
 from backend.utils.log_rotation import GzipTimedRotatingFileHandler
 from backend.utils.logging_formatter import UTCTimestampFormatter
+from backend.utils.native_logging import build_native_handler
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.logging")
+
+
+def _maybe_add_native_handler():
+    """Add an OS-native log handler (journald/syslog/Event Log) when enabled in
+    ``sysmanage.yaml``'s ``logging`` section.  No-op if disabled or unavailable."""
+    try:
+        from backend.config import config as cfg  # noqa: PLC0415
+
+        logging_cfg = cfg.get_config().get("logging", {})
+    except Exception:  # pylint: disable=broad-exception-caught
+        return
+
+    if not logging_cfg.get("native", False):
+        return
+
+    handler = build_native_handler(
+        target=logging_cfg.get("native_target", "auto"),
+        identifier=logging_cfg.get("native_identifier", "sysmanage"),
+    )
+    if handler is not None:
+        logging.root.addHandler(handler)
+        logger.info("Platform-native log handler attached: %s", type(handler).__name__)
+    else:
+        print(
+            "WARNING: platform-native logging requested but unavailable; "
+            "continuing with file logging.",
+            file=sys.stderr,
+        )
 
 
 def configure_logging():
@@ -87,4 +116,9 @@ def configure_logging():
     for i, handler in enumerate(logging.root.handlers):
         logger.debug("Setting formatter for handler %d: %s", i, type(handler).__name__)
         handler.setFormatter(utc_formatter)
+
+    # Attach the OS-native sink AFTER the formatter pass so it keeps its own
+    # syslog/journald formatting rather than the file/console UTC format.
+    _maybe_add_native_handler()
+
     logger.info("Logging configuration complete")

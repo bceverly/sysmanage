@@ -151,48 +151,67 @@ async def process_outbound_message(message, host, db: Session) -> None:
         )
 
         # Handle different types of outbound messages
-        success = False
         if message.message_type == "command":
             success = await send_command_to_agent(
                 message_data, host, message.message_id
             )
+            if success:
+                # Mark as SENT (not COMPLETED) - wait for agent acknowledgment
+                server_queue_manager.mark_sent(message.message_id, db=db)
+                # Log details for create_child_host commands to help debug delivery
+                command_type = message_data.get("data", {}).get(
+                    "command_type", "unknown"
+                )
+                if command_type == "create_child_host":
+                    params = message_data.get("data", {}).get("parameters", {})
+                    distribution = params.get("distribution", "unknown")
+                    vm_name = params.get("vm_name")
+                    container_name = params.get("container_name")
+                    child_type = params.get("child_type", "unknown")
+                    hostname = params.get("hostname", "unknown")
+                    # Log the specific name being sent based on child type
+                    child_name = vm_name or container_name or distribution
+                    logger.info(
+                        "SENT create_child_host command to agent: "
+                        "message_id=%s, child_name=%s, child_type=%s, "
+                        "distribution=%s, hostname=%s, host=%s (awaiting ack)",
+                        message.message_id,
+                        child_name,
+                        child_type,
+                        distribution,
+                        hostname,
+                        host.fqdn,
+                    )
+                else:
+                    logger.info(
+                        "Sent outbound message: %s to host %s (awaiting ack)",
+                        message.message_id,
+                        host.fqdn,
+                    )
+            else:
+                server_queue_manager.mark_failed(
+                    message.message_id, "Failed to send message to agent", db=db
+                )
+        elif message.message_type == "logging_config_update":
+            # Fire-and-forget config push: the agent applies it and does not
+            # send an acknowledgment, so mark COMPLETED on a successful send
+            # rather than SENT-awaiting-ack (which would retry forever).
+            success = await send_message_to_agent(
+                message_data, host, message.message_id
+            )
+            if success:
+                server_queue_manager.mark_completed(message.message_id, db=db)
+                logger.info("Sent logging_config_update to host %s", host.fqdn)
+            else:
+                server_queue_manager.mark_failed(
+                    message.message_id, "Failed to send message to agent", db=db
+                )
         else:
             logger.warning("Unknown outbound message type: %s", message.message_type)
-
-        if success:
-            # Mark as SENT (not COMPLETED) - wait for agent acknowledgment
-            server_queue_manager.mark_sent(message.message_id, db=db)
-            # Log details for create_child_host commands to help debug delivery issues
-            command_type = message_data.get("data", {}).get("command_type", "unknown")
-            if command_type == "create_child_host":
-                params = message_data.get("data", {}).get("parameters", {})
-                distribution = params.get("distribution", "unknown")
-                vm_name = params.get("vm_name")
-                container_name = params.get("container_name")
-                child_type = params.get("child_type", "unknown")
-                hostname = params.get("hostname", "unknown")
-                # Log the specific name being sent based on child type
-                child_name = vm_name or container_name or distribution
-                logger.info(
-                    "SENT create_child_host command to agent: "
-                    "message_id=%s, child_name=%s, child_type=%s, "
-                    "distribution=%s, hostname=%s, host=%s (awaiting ack)",
-                    message.message_id,
-                    child_name,
-                    child_type,
-                    distribution,
-                    hostname,
-                    host.fqdn,
-                )
-            else:
-                logger.info(
-                    "Sent outbound message: %s to host %s (awaiting acknowledgment)",
-                    message.message_id,
-                    host.fqdn,
-                )
-        else:
             server_queue_manager.mark_failed(
-                message.message_id, "Failed to send message to agent", db=db
+                message.message_id,
+                f"Unknown outbound message type: {message.message_type}",
+                db=db,
             )
 
     except Exception as e:
@@ -252,4 +271,38 @@ async def send_command_to_agent(
 
     except Exception as e:
         logger.exception("Error sending command to agent: %s", str(e))
+        return False
+
+
+async def send_message_to_agent(
+    message_data: dict, host, queue_message_id: str
+) -> bool:
+    """Send a non-command server message (e.g. logging_config_update) to an agent.
+
+    The message_data is already a full message envelope; we attach the queue id
+    and deliver it over the agent's websocket connection.  Returns True on a
+    successful send (the agent may or may not acknowledge, depending on type).
+    """
+    from backend.websocket.connection_manager import connection_manager
+
+    try:
+        message = message_data.copy()
+        message["queue_message_id"] = queue_message_id
+        logger.info(
+            "Sending %s message %s to host %s (%s)",
+            message.get("message_type"),
+            queue_message_id,
+            host.id,
+            host.fqdn,
+        )
+        success = await connection_manager.send_to_host(host.id, message)
+        if not success:
+            logger.warning(
+                "Failed to send %s to host %s - agent may not be connected",
+                message.get("message_type"),
+                host.fqdn,
+            )
+        return success
+    except Exception as e:
+        logger.exception("Error sending message to agent: %s", str(e))
         return False
