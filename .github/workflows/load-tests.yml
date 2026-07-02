@@ -160,8 +160,9 @@ jobs:
           mkdir -p .runtime-logs
           nohup python -m backend.main > .runtime-logs/server.log 2>&1 &
           echo $! > .runtime-logs/server.pid
-          # (SYSMANAGE_UVICORN_WORKERS below fans the server across the
-          # runner's cores so a single GIL-bound worker isn't the ceiling.)
+          # Single worker on purpose: multi-worker was tried and REGRESSED
+          # throughput here — the lifespan starts per-worker background tasks
+          # (queue processors, telemetry) that compete for the runner's cores.
           # Wait for /api/health to return 200 (max 60s)
           for i in $(seq 1 60); do
             if curl -fsS http://localhost:8000/api/health > /dev/null 2>&1; then
@@ -176,9 +177,6 @@ jobs:
         env:
           PYTHONPATH: .
           DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage
-          # 4-vCPU GitHub runner — use the spare cores instead of one GIL-bound
-          # worker (which capped health-poll throughput at ~385 rps).
-          SYSMANAGE_UVICORN_WORKERS: "4"
 
       - name: Run load scenario(s)
         env:
