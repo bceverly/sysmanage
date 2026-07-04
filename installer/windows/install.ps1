@@ -180,6 +180,16 @@ try {
         }
         Write-Log "Virtual environment created successfully"
 
+        # Native ARM64 uses pure-Python psycopg, which loads libpq at runtime. The
+        # arm64 MSI ships libpq (+ deps) under <InstallDir>\libpq; copy them next to
+        # the venv python.exe so the OS DLL loader finds them. (x64 uses
+        # psycopg[binary] with libpq bundled, so this dir is absent and this no-ops.)
+        $LibpqDir = Join-Path $InstallDir "libpq"
+        if (Test-Path $LibpqDir) {
+            Write-Log "Bundling libpq DLLs into venv (native ARM64 psycopg)..."
+            Copy-Item -Path (Join-Path $LibpqDir "*.dll") -Destination (Join-Path $VenvPath "Scripts") -Force
+        }
+
         # Install dependencies
         $VenvPython = Join-Path $VenvPath "Scripts\python.exe"
         # Prefer the runtime-only requirements (matches the air-gap wheel
@@ -195,8 +205,24 @@ try {
         }
 
         Write-Log "Installing Python dependencies..."
-        Write-Log "Running: pip install -r $RequirementsFile"
-        & $VenvPython -m pip install -r $RequirementsFile --disable-pip-version-check 2>&1 | Tee-Object -FilePath $LogFile -Append
+        # Prefer a bundled offline wheel set when the MSI ships one. The arm64 MSI
+        # does, because several deps have no arm64 wheels on PyPI and the target
+        # machine has no build toolchain; install from the wheels with no network.
+        # Falls back to an online PyPI install when no wheel set is bundled (x64).
+        $WheelsZip = Join-Path $InstallDir "wheels.zip"
+        $PipSourceArgs = @()
+        if (Test-Path $WheelsZip) {
+            $WheelsDir = Join-Path $InstallDir "wheels"
+            Write-Log "Extracting bundled wheels..."
+            if (Test-Path $WheelsDir) { Remove-Item $WheelsDir -Recurse -Force -ErrorAction SilentlyContinue }
+            Expand-Archive -Path $WheelsZip -DestinationPath $WheelsDir -Force
+            $PipSourceArgs = @("--no-index", "--find-links", $WheelsDir)
+            Write-Log "Installing dependencies from bundled wheels (offline): $WheelsDir"
+        } else {
+            Write-Log "Installing dependencies from PyPI..."
+        }
+        Write-Log "Running: pip install $($PipSourceArgs -join ' ') -r $RequirementsFile"
+        & $VenvPython -m pip install @PipSourceArgs -r $RequirementsFile --disable-pip-version-check 2>&1 | Tee-Object -FilePath $LogFile -Append
 
         if ($LASTEXITCODE -eq 0) {
             Write-Log "Dependencies installed successfully"

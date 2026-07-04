@@ -76,10 +76,23 @@ VENV := .venv
 
 # Detect OS and set paths accordingly
 ifeq ($(OS),Windows_NT)
+    # Pin cmd.exe so make's Windows shell is deterministic and independent of PATH.
+    # (A stray sh.exe on PATH would otherwise flip make to a POSIX shell and break
+    # the cmd-batch recipes below.) The Unix branch keeps the default /bin/sh.
+    SHELL := cmd.exe
+    .SHELLFLAGS := /c
     PYTHON := python
     PIP := pip
     SEMGREP := semgrep
     VENV_ACTIVATE := $(VENV)/Scripts/activate
+    # Native-ARM64 build-env prefix for pip: put Rust (cargo) on PATH and build
+    # cryptography (no win_arm64 wheel exists for the CVE-patched pin) against a
+    # STATIC vcpkg OpenSSL with a STATIC CRT, so its _rust extension carries no
+    # external OpenSSL/vcruntime deps. A dynamically-linked build loads flakily
+    # against this box's multi-Python PATH ("procedure could not be found"); static
+    # linking makes it self-contained and deterministic. Harmless on x64 (dirs
+    # absent, so cryptography just uses its prebuilt wheel).
+    WIN_ARM64_ENV := set "PATH=%USERPROFILE%\.cargo\bin;%USERPROFILE%\vcpkg\installed\arm64-windows\bin;%PATH%" & set "OPENSSL_DIR=%USERPROFILE%\vcpkg\installed\arm64-windows-static" & set "OPENSSL_STATIC=1" & set "OPENSSL_NO_VENDOR=1" & set "RUSTFLAGS=-C target-feature=+crt-static" &
 else
     PYTHON := $(VENV)/bin/python
     PIP := $(VENV)/bin/pip
@@ -143,7 +156,11 @@ endif
 install-dev: setup-venv install-hooks
 	@echo "Installing Python development dependencies..."
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON) -m pip install -r requirements-dev.txt
+	@REM Native ARM64: provision the build toolchain (MSVC ARM64 tools, Rust, vcpkg +
+	@REM a native arm64 libpq) so the from-source wheels build and pure psycopg finds
+	@REM libpq at runtime. Idempotent; no-ops on x64. See ROADMAP Phase 15.2.
+	-@powershell -ExecutionPolicy Bypass -File scripts/provision-win-arm64.ps1
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
 		echo "[INFO] macOS detected - checking for packaging tools..."; \
@@ -181,7 +198,7 @@ else
 endif
 	@echo "Installing requirements.txt (includes Selenium WebDriver)..."
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON) -m pip install -r requirements.txt
+	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements.txt
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright..."; \
@@ -374,7 +391,11 @@ else
 endif
 	@echo "Ensuring esbuild optional dependencies are installed..."
 ifeq ($(OS),Windows_NT)
-	@cd frontend && npm uninstall esbuild && npm install esbuild@^0.28.1
+	@REM npm 11 rejects directly installing a package that is also pinned in
+	@REM package.json "overrides" (esbuild) → EOVERRIDE. The overrides pin plus
+	@REM --include=optional already fetch the correct per-platform esbuild binary
+	@REM (incl. @esbuild/win32-arm64), so just ensure optional deps here.
+	@cd frontend && npm install --include=optional
 else
 	@if [ "$$(uname -s)" = "OpenBSD" ]; then \
 		cd frontend && npm uninstall esbuild && npm install esbuild@^0.28.1 --cache=$$HOME/.npm-cache; \
@@ -744,6 +765,12 @@ endif
 migrate: stop
 	@echo "Running database migrations (via sysmanage-migrate — the same tool"
 	@echo "operators run in production)..."
+ifeq ($(OS),Windows_NT)
+	@REM Windows dev runs single-tenant/homelab in practice: run the migrator
+	@REM directly. If multi-tenancy is enabled, start OpenBAO first with
+	@REM 'make start-openbao' (the per-tenant fan-out needs it to lease creds).
+	@$(PYTHON) scripts/sysmanage_migrate.py
+else
 	@# Multi-tenancy: 'make stop' took OpenBAO down, but the per-tenant fan-out
 	@# inside sysmanage-migrate needs it up to lease credentials — so start it
 	@# just for the migration and stop it again, restoring the clean stopped
@@ -759,6 +786,7 @@ migrate: stop
 	else \
 		$(PYTHON) scripts/sysmanage_migrate.py; \
 	fi
+endif
 	@echo ""
 	@echo "NOTE: In the default single-database deployment all chains run against"
 	@echo "      the SAME database (collapsed/homelab mode)."
@@ -788,6 +816,10 @@ TRANSLATE_PROJECTS ?= frontend backend
 TRANSLATE := scripts/translation-service/i18n_backfill.py
 
 translate: $(VENV_ACTIVATE)
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -c "import polib" >nul 2>&1 || $(PIP) install --quiet polib
+	@$(foreach p,$(TRANSLATE_PROJECTS),$(PYTHON) $(TRANSLATE) --project $(p) --service "$(SERVICE)" --fail-on-gaps && )echo [OK] translation backfill complete (frontend + backend).
+else
 	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
 	@rc=0; for p in $(TRANSLATE_PROJECTS); do \
 		echo ""; echo "=== make translate: $$p  (service $(SERVICE)) ==="; \
@@ -802,13 +834,19 @@ translate: $(VENV_ACTIVATE)
 		exit $$rc; \
 	fi; \
 	echo ""; echo "[OK] translation backfill complete — frontend + backend at 100%."
+endif
 
 translate-dry: $(VENV_ACTIVATE)
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -c "import polib" >nul 2>&1 || $(PIP) install --quiet polib
+	@$(foreach p,$(TRANSLATE_PROJECTS),$(PYTHON) $(TRANSLATE) --project $(p) --dry-run && )echo [OK] dry-run complete.
+else
 	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
 	@for p in $(TRANSLATE_PROJECTS); do \
 		echo ""; echo "=== translate (dry-run): $$p ==="; \
 		$(PYTHON) $(TRANSLATE) --project $$p --dry-run || exit $$?; \
 	done
+endif
 
 # Offline translation-completeness GATE — no service, no writes, no network.
 # Scans THIS repo's own locale stores (frontend JSON + backend gettext) and
@@ -817,12 +855,17 @@ translate-dry: $(VENV_ACTIVATE)
 # (docs / proplus / agent) gate themselves via their own `make translate-check`.
 TRANSLATE_CHECK_PROJECTS ?= frontend backend
 translate-check: $(VENV_ACTIVATE)
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -c "import polib" >nul 2>&1 || $(PIP) install --quiet polib
+	@$(foreach p,$(TRANSLATE_CHECK_PROJECTS),$(PYTHON) $(TRANSLATE) --project $(p) --check && )echo [OK] all locales complete.
+else
 	@$(PYTHON) -c "import polib" 2>/dev/null || $(PIP) install --quiet polib
 	@rc=0; for p in $(TRANSLATE_CHECK_PROJECTS); do \
 		echo ""; echo "=== translate-check (offline): $$p ==="; \
 		$(PYTHON) $(TRANSLATE) --project $$p --check || rc=$$?; \
 	done; \
 	[ $$rc -eq 0 ] || exit $$rc
+endif
 
 provision-bootstrap: $(VENV_ACTIVATE)
 	@echo "=== Multi-tenancy provisioning bootstrap (one-time, operator) ==="
@@ -1001,6 +1044,9 @@ BACKEND_I18N_LANGS := en ar de es fr hi it ja ko nl pt ru zh_CN zh_TW
 BACKEND_I18N_SRC    = $(shell find backend -name '*.py' -not -path '*/test*' -not -path '*/__pycache__/*')
 
 i18n-extract-backend:
+ifeq ($(OS),Windows_NT)
+	@echo [skip] i18n-extract-backend needs GNU gettext (xgettext/msgmerge/msgen); run on Linux/macOS or CI.
+else
 	@command -v xgettext msgmerge msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
 	@echo "=== extracting backend _() strings -> messages.pot ==="
 	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
@@ -1017,8 +1063,13 @@ i18n-extract-backend:
 	@msgen $(BACKEND_I18N)/en/LC_MESSAGES/messages.po -o $(BACKEND_I18N)/en/LC_MESSAGES/messages.po
 	@echo "[OK] backend msgids extracted + merged into all $(words $(BACKEND_I18N_LANGS)) catalogs."
 	@echo "     Next: make translate TRANSLATE_PROJECTS=backend SERVICE=http://<beast>:8765 && make i18n-compile-backend"
+endif
 
 i18n-compile-backend:
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -c "import polib" >nul 2>&1 || $(PYTHON) -m pip install --quiet --disable-pip-version-check polib
+	@$(foreach l,$(BACKEND_I18N_LANGS),$(PYTHON) -c "import polib,sys; polib.pofile(sys.argv[1]).save_as_mofile(sys.argv[2])" $(BACKEND_I18N)/$(l)/LC_MESSAGES/messages.po $(BACKEND_I18N)/$(l)/LC_MESSAGES/messages.mo && )echo [OK] compiled backend .mo for all locales (polib).
+else
 	@if command -v msgfmt >/dev/null 2>&1; then \
 		for l in $(BACKEND_I18N_LANGS); do \
 			msgfmt -o $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.mo $(BACKEND_I18N)/$$l/LC_MESSAGES/messages.po; \
@@ -1034,6 +1085,7 @@ i18n-compile-backend:
 		done; \
 		echo "[OK] compiled backend .mo for all locales (polib fallback)."; \
 	fi
+endif
 
 # Compile backend .mo from the committed .po BEFORE any package is built — every
 # installer payload copies backend/i18n/locales/, and .mo is gitignored (never
@@ -1048,12 +1100,16 @@ installer installer-deb installer-rpm-centos installer-rpm-opensuse installer-al
 # untranslated — so fail the build.  Network-free.  Pairs with `translate-check`
 # (which fails on any empty msgstr, i.e. extracted-but-not-translated).
 i18n-check-backend:
+ifeq ($(OS),Windows_NT)
+	@echo [skip] i18n-check-backend needs GNU gettext (xgettext/msgcmp); enforced on Linux/CI.
+else
 	@command -v xgettext msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
 	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
 	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
 		|| { echo "FAIL: backend code has _() strings missing from the catalog — run 'make i18n-extract-backend'"; exit 1; }
 	@echo "[OK] backend catalog is in sync with code."
+endif
 
 # Comprehensive security analysis (default)
 security: security-full

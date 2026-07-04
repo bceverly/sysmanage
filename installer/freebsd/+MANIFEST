@@ -27,7 +27,7 @@ deps: {
   py311-pip: {origin: devel/py-pip},
   py311-sqlalchemy20: {origin: databases/py-sqlalchemy20},
   py311-alembic: {origin: databases/py-alembic},
-  py311-psycopg2: {origin: databases/py-psycopg2},
+  py311-psycopg: {origin: databases/py-psycopg},
   py311-cryptography: {origin: security/py-cryptography},
   py311-pyyaml: {origin: devel/py-yaml},
   py311-aiohttp: {origin: www/py-aiohttp},
@@ -45,14 +45,14 @@ scripts: {
 #!/bin/sh
 echo "Installing SysManage Server..."
 echo "Note: If installation fails due to missing dependencies, install them with:"
-echo "  pkg install py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg2 py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
+echo "  pkg install py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
 echo ""
 EOD
   post-install: <<EOD
 #!/bin/sh
 # Check for required dependencies
 MISSING_DEPS=""
-REQUIRED_PACKAGES="py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg2 py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
+REQUIRED_PACKAGES="py311-pip py311-sqlalchemy20 py311-alembic py311-psycopg py311-cryptography py311-pyyaml py311-aiohttp py311-fastapi py311-uvicorn py311-websockets postgresql15-server nginx"
 
 for pkg in $REQUIRED_PACKAGES; do
     if ! pkg info -q "$pkg" >/dev/null 2>&1; then

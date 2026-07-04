@@ -84,7 +84,7 @@ Required packages (automatically installed):
 - Python 3 with modules:
   - py3-sqlalchemy
   - py3-alembic
-  - py3-psycopg2
+  - py3-psycopg  <!-- VERIFY: confirm OpenBSD psycopg3 package name during testing -->
   - py3-websockets
   - py3-aiohttp
   - py3-fastapi

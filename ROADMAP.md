@@ -5033,12 +5033,42 @@ Deliberately scoped as *survive failover*, not *orchestrate it*: leader election
 
 **Estimated Size:** ~1,200 lines (mostly the retry wrapper, engine-factory wiring, and failover tests).
 
+### 15.2 Driver Migration: psycopg2 → psycopg3
+
+**Platform gap addressed:** `psycopg2-binary` publishes **no wheels for Windows ARM64 or any BSD**, so on those targets pip falls back to a source build that needs `pg_config` + a C toolchain (the `pg_config executable not found` wall hit during ARM64 Windows bring-up). psycopg3 removes that: `psycopg[binary]` ships wheels for Linux (incl. aarch64), macOS (incl. Apple Silicon) and Windows x64, and the pure-Python `psycopg` runs anywhere Python + a system `libpq` exist — so the BSDs and Windows ARM64 install with **no compiler**.
+
+Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DDL** driver — the async app path is untouched. Both repos are already on **SQLAlchemy 2.0** (sysmanage 2.0.43, Pro+ ≥ 2.0.25), which ships the `postgresql+psycopg` dialect, so **no SQLAlchemy upgrade is required**. Neither repo uses `RealDictCursor` / `execute_values` / `copy_from` / custom adapters, and psycopg3 is still DBAPI-2.0 — so ORM/query code is untouched.
+
+**sysmanage** (sync-SQLAlchemy on psycopg2; no asyncpg):
+- [ ] `requirements.txt`: `psycopg2-binary==2.9.10` → `psycopg[binary]`
+- [ ] Engine URL: select the `postgresql+psycopg` dialect (the default `postgresql://` picks psycopg2)
+- [ ] Port the ~5 raw spots — `scripts/provision_bootstrap.py`, `scripts/_sysmanage_secure_installation.py`, `tests/test_alembic_postgres.py`, 2× `alembic/versions/*.py`: `import psycopg2`→`import psycopg`, `from psycopg2 import sql`→`from psycopg import sql` (near drop-in), `ISOLATION_LEVEL_AUTOCOMMIT`→`autocommit=True`, `psycopg2.errors.*`→`psycopg.errors.*`
+- [ ] Audit each `with conn:` — psycopg3 **closes** the connection at block end (psycopg2 left it open); use `with conn.transaction():` where a transaction scope was intended
+
+**sysmanage-professional-plus** (async on asyncpg — unaffected; psycopg2 only sync/Alembic):
+- [ ] `requirements.txt`: `psycopg2-binary>=2.9.9` → `psycopg[binary]`
+- [ ] `alembic/env.py`: the sync-driver rewrite `postgresql+asyncpg → postgresql+psycopg2` becomes `→ postgresql+psycopg`
+- [ ] `module-source/multitenancy_engine/multitenancy_engine.pyx` (raw per-tenant DDL): psycopg2→psycopg swaps. **This is Cython — the engine must be recompiled + re-bundled** (`make build-modules`) after the change
+- [ ] `scripts/{cleanup_orphan_modules,cleanup_old_module_versions,register_modules}.py` + tests: same rename swaps
+- [ ] Leave asyncpg untouched (async path is unaffected and already packages cleanly on ARM/BSD — no libpq)
+
+**sysmanage-agent:** N/A — no psycopg2 dependency (SQLite locally; the "postgres" references are host role-detection strings, not a DB driver).
+
+**Synergy with 15.1:** psycopg3 honors the same libpq multi-host DSN (`host=n1,n2,n3 target_session_attrs=read-write`) that the HA work relies on, so the two land together cleanly.
+
+**Verify during BSD / ARM64 testing (names below are best-guesses, not confirmed):**
+- [ ] **BSD/distro psycopg3 package names** — the OS-package deps updated in the ports/installers (FreeBSD `databases/py-psycopg`, OpenBSD `py3-psycopg`, NetBSD `databases/py-psycopg`, Alpine `py3-psycopg`, Arch `python-psycopg`) are best-guesses. When testing each distro, confirm the port/package actually exists under that name (and that it is v3, not v2) and correct any that differ — otherwise the OS-package install fails. The code already imports `psycopg` (v3), so the packaging MUST match or the install ImportErrors.
+- [ ] **Windows ARM64 libpq** — `install-dev` installs PostgreSQL via winget to provide libpq, but winget's PostgreSQL is x64. Confirm a native ARM64 Python can actually load a libpq (obtain/build an ARM64 libpq, or standardize on x64-emulated Python + `psycopg[binary]`); `import psycopg` itself needs libpq present.
+
+**Estimated Size:** ~300–500 lines across both repos (mechanical renames + the multitenancy Cython rebuild); no ORM/query changes.
+
 ### Exit Criteria
 
 - [ ] Advisory computation validated against real USN/RHSA data per distro family
 - [ ] Maintenance-window gating verified end-to-end (queue → window open → execute)
 - [ ] All new endpoints return 402 cleanly when the gating engine is unlicensed
 - [ ] **PostgreSQL HA (15.1):** pre-ping/recycle on all engines, transient-failover retry, and a passing kill-the-primary failover test
+- [ ] **Driver migration (15.2):** psycopg2 → psycopg3 (sync/Alembic/DDL only) in sysmanage + Pro+; `psycopg[binary]` installs wheel-only on Windows ARM64 + BSD (no compiler); asyncpg async path unchanged; multitenancy engine recompiled
 - [ ] Docs + 14-language i18n complete for Phase 14 surfaces
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** backend
       ≥ prior floor +5%; frontend floors raised to **OSS 30% /

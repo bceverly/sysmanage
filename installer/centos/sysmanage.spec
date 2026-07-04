@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        3.0.1.2
+Version:        3.0.1.3
 Release:        1%{?dist}
 Summary:        Centralized system management server with web-based interface
 
@@ -17,7 +17,7 @@ Source1:        %{name}-vendor-%{version}.tar.gz
 # We manually specify python3 version in Requires (3.11 on EL8, 3.12 on EL9, 3.12+ elsewhere)
 %global __requires_exclude ^python\\(abi\\)
 # Exclude the bundled venv from BOTH auto Provides and Requires scanning.
-# The vendored wheels (cryptography, Pillow, psycopg2, …) ship private
+# The vendored wheels (cryptography, Pillow, psycopg, …) ship private
 # copies of libssl/libcrypto/libjpeg/libtiff/etc. with mangled sonames
 # (e.g. libcrypto-ea28cefb.so.1.1); RPM's auto-dep generator would emit
 # Requires on those phantom sonames that nothing provides, making the RPM

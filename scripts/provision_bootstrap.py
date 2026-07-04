@@ -79,10 +79,10 @@ def _enable_database_engine(addr, token, db_mount):
 
 def _create_pg_provisioner_direct(args, provisioner_password):
     """Create/ensure the provisioner role by connecting as a superuser (password auth)."""
-    import psycopg2  # noqa: PLC0415
-    from psycopg2 import sql  # noqa: PLC0415
+    import psycopg  # noqa: PLC0415
+    from psycopg import sql  # noqa: PLC0415
 
-    conn = psycopg2.connect(
+    conn = psycopg.connect(
         host=args.pg_host,
         port=args.pg_port,
         user=args.pg_superuser,
@@ -99,7 +99,7 @@ def _create_pg_provisioner_direct(args, provisioner_password):
             exists = cur.fetchone() is not None
             role = sql.Identifier(args.provisioner_user)
             verb = "ALTER" if exists else "CREATE"
-            # psycopg2: ``verb`` is a fixed literal, the role name goes through
+            # psycopg: ``verb`` is a fixed literal, the role name goes through
             # sql.Identifier (safe quoting), and the password is a %s bind param.
             cur.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 sql.SQL(

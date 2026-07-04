@@ -106,7 +106,9 @@ def run_migrations(
 
     # Set the URL unless one was already injected (tests pass a connection).
     if not config.get_main_option(_SQLALCHEMY_URL):
-        config.set_main_option(_SQLALCHEMY_URL, _resolve_database_url())
+        from backend.persistence.db import _psycopg_url  # noqa: PLC0415
+
+        config.set_main_option(_SQLALCHEMY_URL, _psycopg_url(_resolve_database_url()))
 
     if config.config_file_name is not None:
         fileConfig(config.config_file_name)

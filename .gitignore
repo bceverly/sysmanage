@@ -234,6 +234,8 @@ sbom/
 installer/dist/
 installer/windows/*.zip
 installer/windows/nssm.exe
+installer/windows/libpq-arm64/
+installer/windows/wheels-arm64/
 
 # NOTE: requirements-prod.txt is auto-generated (scripts/update-requirements-prod.py)
 # but IS committed: the air-gap bundle builder fetches it from the repo at the

@@ -44,7 +44,13 @@
 
     <!-- Directory structure -->
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="SysManage Server" />
+      <Directory Id="INSTALLFOLDER" Name="SysManage Server">
+        <?if $(sys.BUILDARCH) = "arm64" ?>
+        <!-- Native ARM64 ships libpq (+ deps) for pure-Python psycopg. x64 uses
+             psycopg[binary], which bundles libpq, so this subdir is arm64-only. -->
+        <Directory Id="LIBPQFOLDER" Name="libpq" />
+        <?endif?>
+      </Directory>
     </StandardDirectory>
 
     <StandardDirectory Id="CommonAppDataFolder">
@@ -120,7 +126,30 @@
       <Component Id="AlembicZip" Guid="A3B4C5D6-E7F8-4A5B-8C9D-0E1F2A3B4C5D">
         <File Id="AlembicZipFile" Source="alembic.zip" />
       </Component>
+      <?if $(sys.BUILDARCH) = "arm64" ?>
+      <!-- ARM64: prebuilt wheel set (several deps have no arm64 wheels on PyPI).
+           install.ps1 installs from these offline so the target needs no toolchain.
+           Staged/zipped by build-msi.ps1. -->
+      <Component Id="WheelsZip" Guid="D8E1F2A3-B4C5-4D6E-9F0A-1B2C3D4E5F60">
+        <File Id="WheelsZipFile" Source="wheels.zip" />
+      </Component>
+      <?endif?>
     </ComponentGroup>
+
+    <?if $(sys.BUILDARCH) = "arm64" ?>
+    <!-- ARM64: bundle the vcpkg-built libpq runtime for pure-Python psycopg.
+         build-msi.ps1 stages these into installer\windows\libpq-arm64\. -->
+    <ComponentGroup Id="LibpqArm64" Directory="LIBPQFOLDER">
+      <Component Id="LibpqDlls" Guid="C7A9E1F0-3B2D-4C6E-9A8B-1D2E3F4A5B60">
+        <File Id="LibpqDll" Source="libpq-arm64\libpq.dll" KeyPath="yes" />
+        <File Source="libpq-arm64\libcrypto-3-arm64.dll" />
+        <File Source="libpq-arm64\libssl-3-arm64.dll" />
+        <File Source="libpq-arm64\z.dll" />
+        <File Source="libpq-arm64\lz4.dll" />
+        <File Source="libpq-arm64\legacy.dll" />
+      </Component>
+    </ComponentGroup>
+    <?endif?>
 
     <!-- Configuration directory -->
     <ComponentGroup Id="ConfigFiles" Directory="APPDATAFOLDER">
@@ -152,6 +181,9 @@
       <ComponentGroupRef Id="SourceFilesComponent" />
       <ComponentGroupRef Id="ConfigFiles" />
       <ComponentGroupRef Id="WindowsService" />
+      <?if $(sys.BUILDARCH) = "arm64" ?>
+      <ComponentGroupRef Id="LibpqArm64" />
+      <?endif?>
     </Feature>
 
     <!-- Custom actions -->

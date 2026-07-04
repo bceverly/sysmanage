@@ -8,6 +8,21 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from backend.config import config
 
+
+def _psycopg_url(url: str) -> str:
+    """Route a PostgreSQL SQLAlchemy URL through psycopg (psycopg3).
+
+    Converts ``postgresql://`` to ``postgresql+psycopg://`` so SQLAlchemy uses
+    the psycopg3 driver. Leaves SQLite / other schemes and already-qualified
+    ``postgresql+<driver>://`` URLs untouched. Apply ONLY to URLs handed to
+    SQLAlchemy's create_engine/engine_from_config — never to a raw libpq /
+    psycopg.connect() conninfo (libpq does not understand the ``+psycopg`` tag).
+    """
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
 # Database context - determines whether we're in production or test mode
 IS_TEST_MODE = False
 TEST_ENGINE = None
@@ -46,7 +61,9 @@ def _init_production_database():
         )
 
     # create the database connection
-    PROD_ENGINE = create_engine(PROD_DATABASE_URL, connect_args={}, echo=False)
+    PROD_ENGINE = create_engine(
+        _psycopg_url(PROD_DATABASE_URL), connect_args={}, echo=False
+    )
     PROD_SESSION_LOCAL = sessionmaker(
         autocommit=False, autoflush=False, bind=PROD_ENGINE
     )

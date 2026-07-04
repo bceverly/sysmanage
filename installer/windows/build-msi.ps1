@@ -180,6 +180,75 @@ Write-Host "  Frontend: $($frontendSize | ForEach-Object { '{0:N2}' -f $_ }) MB"
 Write-Host "  Alembic:  $($alembicSize | ForEach-Object { '{0:N2}' -f $_ }) MB" -ForegroundColor Gray
 Write-Host ""
 
+# ARM64: stage the libpq runtime DLLs the WiX references (installer\windows\libpq-arm64\).
+# Native ARM64 uses pure-Python psycopg, which needs an ARM64 libpq at runtime; x64
+# uses psycopg[binary] (libpq bundled in the wheel), so this is arm64-only.
+if ($Architecture -eq "arm64") {
+    Write-Host "Staging ARM64 libpq runtime DLLs..." -ForegroundColor Cyan
+    $LibpqStage = Join-Path $CurrentDir "installer\windows\libpq-arm64"
+    $needed = @("libpq.dll","libcrypto-3-arm64.dll","libssl-3-arm64.dll","z.dll","lz4.dll","legacy.dll")
+    $missing = @($needed | Where-Object { -not (Test-Path (Join-Path $LibpqStage $_)) })
+    if ($missing.Count -gt 0) {
+        $vcpkgBin = Join-Path $env:USERPROFILE "vcpkg\installed\arm64-windows\bin"
+        if (Test-Path (Join-Path $vcpkgBin "libpq.dll")) {
+            New-Item -ItemType Directory -Path $LibpqStage -Force | Out-Null
+            foreach ($d in $needed) {
+                $src = Join-Path $vcpkgBin $d
+                if (Test-Path $src) { Copy-Item $src -Destination $LibpqStage -Force }
+            }
+            Write-Host "[OK] libpq staged from vcpkg: $vcpkgBin" -ForegroundColor Green
+        } else {
+            Write-Host "ERROR: ARM64 libpq DLLs not found for the MSI." -ForegroundColor Red
+            Write-Host "  Provide them at $LibpqStage, or build with: vcpkg install libpq:arm64-windows" -ForegroundColor Yellow
+            exit 1
+        }
+    } else {
+        Write-Host "[OK] libpq DLLs already staged at $LibpqStage" -ForegroundColor Green
+    }
+    Write-Host ""
+}
+
+# ARM64: bundle prebuilt wheels so the target installs offline (no build toolchain).
+if ($Architecture -eq "arm64") {
+    Write-Host "Preparing ARM64 wheel set for offline install..." -ForegroundColor Cyan
+    $WheelsDir = Join-Path $CurrentDir "installer\windows\wheels-arm64"
+    if (-not (Test-Path $WheelsDir) -or @(Get-ChildItem "$WheelsDir\*.whl" -ErrorAction SilentlyContinue).Count -eq 0) {
+        Write-Host "  No prebuilt wheels found - building from requirements-prod.txt (arm64 toolchain)..." -ForegroundColor Yellow
+        $venvPy = Join-Path $CurrentDir ".venv\Scripts\python.exe"
+        if (-not (Test-Path $venvPy)) {
+            Write-Host "ERROR: arm64 .venv not found; run 'make install-dev' first." -ForegroundColor Red
+            exit 1
+        }
+        New-Item -ItemType Directory -Path $WheelsDir -Force | Out-Null
+        $vcpkgRoot = Join-Path $env:USERPROFILE "vcpkg"
+        # cryptography has no win_arm64 wheel for the CVE-patched pin, so it is built
+        # from source. Link it against a STATIC OpenSSL + static CRT so its _rust
+        # extension carries no external OpenSSL/vcruntime deps — a dynamically-linked
+        # build resolves those flakily at runtime on end-user machines ("procedure
+        # could not be found"). Mirrors the Makefile's WIN_ARM64_ENV.
+        if (-not (Test-Path "$vcpkgRoot\installed\arm64-windows-static\lib\libcrypto.lib")) {
+            Write-Host "  Building static OpenSSL for the cryptography wheel (a few minutes)..." -ForegroundColor Yellow
+            & "$vcpkgRoot\vcpkg.exe" install openssl:arm64-windows-static
+            if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: static OpenSSL build failed." -ForegroundColor Red; exit 1 }
+        }
+        $env:PATH = "$env:USERPROFILE\.cargo\bin;$vcpkgRoot\installed\arm64-windows\bin;$env:PATH"
+        $env:OPENSSL_DIR = "$vcpkgRoot\installed\arm64-windows-static"
+        $env:OPENSSL_STATIC = "1"; $env:OPENSSL_NO_VENDOR = "1"
+        $env:RUSTFLAGS = "-C target-feature=+crt-static"
+        # Drop any cached dynamic cryptography wheel so the static one is (re)built.
+        & $venvPy -m pip cache remove cryptography 2>$null | Out-Null
+        & $venvPy -m pip wheel -r (Join-Path $CurrentDir "requirements-prod.txt") -w $WheelsDir
+        if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: ARM64 wheel build failed." -ForegroundColor Red; exit 1 }
+    }
+    $WheelsZip = Join-Path $CurrentDir "installer\windows\wheels.zip"
+    if (Test-Path $WheelsZip) { Remove-Item $WheelsZip -Force }
+    $ProgressPreference = 'SilentlyContinue'
+    Compress-Archive -Path "$WheelsDir\*" -DestinationPath $WheelsZip -Force
+    $ProgressPreference = 'Continue'
+    Write-Host "[OK] Bundled $(@(Get-ChildItem "$WheelsDir\*.whl").Count) ARM64 wheels into wheels.zip" -ForegroundColor Green
+    Write-Host ""
+}
+
 # Build MSI package
 Write-Host "Building MSI package..." -ForegroundColor Cyan
 Push-Location (Join-Path $CurrentDir "installer\windows")

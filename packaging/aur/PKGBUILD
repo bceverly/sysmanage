@@ -12,7 +12,7 @@
 #
 # Dependency translation reference (see installer/opensuse/sysmanage.spec
 # and requirements.txt):
-#   FastAPI / Starlette / Uvicorn / SQLAlchemy / Alembic / psycopg2 /
+#   FastAPI / Starlette / Uvicorn / SQLAlchemy / Alembic / psycopg /
 #   aiohttp / cryptography / bcrypt / argon2-cffi / PyYAML / Pillow /
 #   defusedxml / Jinja2 / orjson / Mako / etc.
 #
@@ -44,7 +44,7 @@ depends=(
     'python-orjson'
     'python-pillow'
     'python-psutil'
-    'python-psycopg2'
+    'python-psycopg'
     'python-pydantic'
     'python-pyyaml'
     'python-sqlalchemy'

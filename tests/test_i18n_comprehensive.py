@@ -93,11 +93,18 @@ class TestTranslationLoading:
 
         i18n.TRANSLATIONS.clear()
 
-    @patch("backend.i18n.gettext.translation")
+    # NOTE: gettext.translation is the INNERMOST patch (applied first) on purpose.
+    # mock resolves each patch target as it is entered; resolving
+    # "backend.i18n.gettext.translation" triggers an import whose file-path lookup
+    # uses os.path.join. If os.path.join is already mocked, that lookup yields a
+    # MagicMock path and Python 3.13's stricter pathlib raises
+    # "ValueError: Invalid name 'MagicMock/join().py'". Resolving gettext.translation
+    # first (while os.path.join is still real) avoids it.
     @patch("backend.i18n.os.path.join")
     @patch("backend.i18n.os.path.dirname")
+    @patch("backend.i18n.gettext.translation")
     def test_get_translation_success(
-        self, mock_dirname, mock_join, mock_gettext_translation
+        self, mock_gettext_translation, mock_dirname, mock_join
     ):
         """Test successful translation loading."""
         # Mock the paths

@@ -37,7 +37,7 @@ RUN_DEPENDS =		www/py-aiohttp${MODPY_FLAVOR} \
 			devel/py-orjson${MODPY_FLAVOR} \
 			graphics/py-Pillow${MODPY_FLAVOR} \
 			sysutils/py-psutil${MODPY_FLAVOR} \
-			databases/py-psycopg2${MODPY_FLAVOR} \
+			databases/py-psycopg${MODPY_FLAVOR} \
 			devel/py-pydantic${MODPY_FLAVOR} \
 			textproc/py-yaml${MODPY_FLAVOR} \
 			databases/py-sqlalchemy${MODPY_FLAVOR} \

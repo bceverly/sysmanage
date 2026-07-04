@@ -21,7 +21,7 @@ finding, with the reason it is safe. Scanner findings that were *fixed in code*
 
 | Finding | Location | Why it's safe |
 | --- | --- | --- |
-| Semgrep `sqlalchemy-execute-raw-query` | `services/tenant_orchestration.py` (create/drop role+db), `scripts/provision_bootstrap.py` | **psycopg2**, not SQLAlchemy (rule mis-targets). Every identifier goes through `psycopg2.sql.Identifier()` (injection-safe quoting); values are `%s` bind params. DDL (CREATE/DROP ROLE/DATABASE, GRANT) cannot parameterize identifiers, so this is the correct construct. |
+| Semgrep `sqlalchemy-execute-raw-query` | `services/tenant_orchestration.py` (create/drop role+db), `scripts/provision_bootstrap.py` | **psycopg**, not SQLAlchemy (rule mis-targets). Every identifier goes through `psycopg.sql.Identifier()` (injection-safe quoting); values are `%s` bind params. DDL (CREATE/DROP ROLE/DATABASE, GRANT) cannot parameterize identifiers, so this is the correct construct. |
 | Semgrep `dynamic-urllib-use-detected` | `scripts/provision_bootstrap.py` | URL is the operator-configured OpenBAO address (trusted config, not user input). Operator-run bootstrap CLI — no SSRF surface. |
 | Semgrep `logger-credential-leak` | `persistence/tenant_engine.py`, `scripts/openbao_init_unseal.py` | The log lines emit a tenant id / TTL / filesystem error only — never the leased credential or token value. |
 | Bandit `B608` (hardcoded SQL) | `scripts/provision_bootstrap.py` (peer-auth SQL-file emit) | Pre-existing. The role identifier is regex-validated (`^[a-z_][a-z0-9_]*$`), the password is URL-safe (no quotes), and the file is written 0600 and applied by the operator themselves — not a runtime query. |

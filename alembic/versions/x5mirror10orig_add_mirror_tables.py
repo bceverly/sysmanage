@@ -160,7 +160,10 @@ def upgrade() -> None:
                 "snapshot_count_to_keep) "
                 "VALUES (:id, :root, :cadence, :retention, :cap, :keep)"
             ).bindparams(
-                id=str(_SINGLETON_MIRROR_SETTINGS_ID),
+                # psycopg3 sends parameters with explicit types, so a stringified
+                # UUID is rejected by a uuid column (psycopg2 coerced it silently).
+                # Bind with the GUID type so it goes over as a real uuid.
+                sa.bindparam("id", _SINGLETON_MIRROR_SETTINGS_ID, type_=GUID()),
                 root="/var/mirror",
                 cadence=24,
                 retention=30,

@@ -49,7 +49,7 @@ addFilter("devel-file-in-non-devel-package .*/\.venv/.*\.pc$")
 addFilter("package-with-huge-docs")
 
 # RPATH in Python binary wheels is intentional and correct
-# Packages like Pillow and psycopg2-binary bundle their own libraries with RPATH
+# Packages like Pillow and psycopg bundle their own libraries with RPATH
 addFilter("binary-or-shlib-defines-rpath")
 
 # Non-executable scripts with shebangs in Python packages are test/example files
@@ -63,7 +63,7 @@ addFilter("python-leftover-require python311-pip")
 # Unstripped binaries in Python packages are expected from binary wheels
 addFilter("unstripped-binary-or-object /opt/sysmanage/\.venv/lib/python.*/site-packages/.*")
 
-# gethostbyname calls in vendored libraries (psycopg2, cryptography, etc.)
+# gethostbyname calls in vendored libraries (psycopg, cryptography, etc.)
 addFilter("binary-or-shlib-calls-gethostbyname")
 
 # Dangling symlink to system Python is intentional for venv

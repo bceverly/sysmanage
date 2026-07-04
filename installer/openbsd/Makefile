@@ -23,7 +23,7 @@ MODPY_VERSION =		${MODPY_DEFAULT_VERSION_3}
 # Python backend dependencies
 RUN_DEPENDS =		databases/py-sqlalchemy${MODPY_FLAVOR} \
 			databases/py-alembic${MODPY_FLAVOR} \
-			databases/py-psycopg2${MODPY_FLAVOR} \
+			databases/py-psycopg${MODPY_FLAVOR} \
 			devel/py-babel${MODPY_FLAVOR} \
 			net/py-websockets${MODPY_FLAVOR} \
 			security/py-cryptography${MODPY_FLAVOR} \

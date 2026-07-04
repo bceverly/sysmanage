@@ -20,18 +20,17 @@ import sys
 import pytest
 
 try:
-    import psycopg2
-    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-except ImportError:  # pragma: no cover - psycopg2 is a backend dependency
-    psycopg2 = None
+    import psycopg
+except ImportError:  # pragma: no cover - psycopg is a backend dependency
+    psycopg = None
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 _DB_URL = os.environ.get("DATABASE_URL", "")
 _SCRATCH_DB = "sysmanage_migtest"
 
 pytestmark = pytest.mark.skipif(
-    not _DB_URL.startswith(("postgresql://", "postgres://")) or psycopg2 is None,
-    reason="set DATABASE_URL to a PostgreSQL server (with psycopg2) to run the "
+    not _DB_URL.startswith(("postgresql://", "postgres://")) or psycopg is None,
+    reason="set DATABASE_URL to a PostgreSQL server (with psycopg) to run the "
     "PG migration smoke test",
 )
 
@@ -49,8 +48,8 @@ def _scratch_url() -> str:
 
 
 def _create_scratch_db():
-    conn = psycopg2.connect(_admin_dsn())
-    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    conn = psycopg.connect(_admin_dsn())
+    conn.autocommit = True
     try:
         with conn.cursor() as cur:
             cur.execute(f'DROP DATABASE IF EXISTS "{_SCRATCH_DB}"')
@@ -60,8 +59,8 @@ def _create_scratch_db():
 
 
 def _drop_scratch_db():
-    conn = psycopg2.connect(_admin_dsn())
-    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    conn = psycopg.connect(_admin_dsn())
+    conn.autocommit = True
     try:
         with conn.cursor() as cur:
             # Terminate any leftover connections, then drop.
@@ -90,7 +89,7 @@ def _upgrade(chain: str, url: str) -> None:
 
 
 def _tables(url: str) -> set:
-    conn = psycopg2.connect(url)
+    conn = psycopg.connect(url)
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
@@ -105,7 +104,7 @@ def _tables(url: str) -> set:
 def scratch_db():
     try:
         _create_scratch_db()
-    except psycopg2.Error as exc:  # pragma: no cover - privilege-dependent
+    except psycopg.Error as exc:  # pragma: no cover - privilege-dependent
         pytest.skip(f"cannot create scratch PG database (privilege?): {exc}")
     try:
         yield _scratch_url()

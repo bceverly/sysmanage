@@ -79,6 +79,45 @@ def _bundle_for(name: str) -> Path | None:
     return None
 
 
+def _abi3_binary_for(name: str) -> Path | None:
+    """Newest abi3 engine binary under ``<version>/<plat>/<arch>/abi3/``, or None.
+
+    The Pro+ build migrated from a per-Python-version ``.tar.gz`` bundle to a
+    single **abi3** (CPython limited-API) binary that loads on 3.10+, laid out as
+    ``<version>/<plat>/<arch>/abi3/<name><ext>`` — a bare ``.pyd`` on Windows, a
+    ``.so`` elsewhere. This is now the canonical layout; prefer it over the
+    legacy per-version bundle.
+    """
+    plat, arch, _py = _plat_arch_py()
+    base = _STORAGE_MODULES / name
+    if not base.is_dir():
+        return None
+    suffix = ".pyd" if sys.platform == "win32" else ".so"
+    for version in sorted(base.iterdir(), reverse=True):  # newest version wins
+        abi3_dir = version / plat / arch / "abi3"
+        if not abi3_dir.is_dir():
+            continue
+        for cand in sorted(abi3_dir.glob(f"{name}*{suffix}")):
+            return cand
+    return None
+
+
+def _cache_copy(name: str, src: Path) -> Path:
+    """Copy an engine binary into the session cache and return the copy.
+
+    Loading the ``.pyd`` directly from ``storage/modules`` would lock that file on
+    Windows (an in-use DLL cannot be deleted), which then breaks a subsequent
+    ``make build-modules`` — its clear-stale step can't unlink the loaded artifact.
+    Load from a throwaway copy instead, mirroring ``_so_from_bundle``'s extract.
+    """
+    dest = _EXTRACT_DIR / name
+    dest.mkdir(parents=True, exist_ok=True)
+    target = dest / src.name
+    if not target.exists() or target.stat().st_mtime < src.stat().st_mtime:
+        target.write_bytes(src.read_bytes())
+    return target
+
+
 def _so_from_bundle(name: str, bundle: Path) -> Path | None:
     """Extract the matching-ABI ``.so`` member from ``bundle`` into the cache.
 
@@ -123,9 +162,12 @@ def _raw_so_candidates(name: str) -> list[Path]:
 def resolve_so(name: str) -> Path | None:
     """Return a loadable ``.so`` Path for this interpreter, or None.
 
-    Order: canonical ``storage/modules`` bundle (extracted) → dev build dir →
-    prod ``/var/lib/sysmanage/modules``.
+    Order: canonical abi3 binary → legacy per-version ``.tar.gz`` bundle
+    (extracted) → dev build dir → prod ``/var/lib/sysmanage/modules``.
     """
+    abi3 = _abi3_binary_for(name)
+    if abi3 is not None:
+        return _cache_copy(name, abi3)
     bundle = _bundle_for(name)
     if bundle is not None:
         so = _so_from_bundle(name, bundle)
@@ -181,13 +223,14 @@ def require_engine(name: str):
                 f"{name}: no sysmanage-professional-plus checkout — OSS-only run"
             )
         plat, arch, py = _plat_arch_py()
+        ext = ".pyd" if sys.platform == "win32" else ".so"
         pytest.fail(
             f"{name}: Pro+ checkout present but no loadable engine for "
             f"{plat}/{arch}/py{py}.\n"
-            f"Expected build artifact: "
-            f"{_STORAGE_MODULES}/{name}/<version>/{plat}/{arch}/{py}/{name}.tar.gz "
-            f"(containing *{sysconfig.get_config_var('EXT_SUFFIX')}).\n"
-            f"Build the Pro+ engines for this platform/interpreter, or check the "
-            f"layout — this path used to skip silently."
+            f"Expected an abi3 build at "
+            f"{_STORAGE_MODULES}/{name}/<version>/{plat}/{arch}/abi3/{name}{ext} "
+            f"(or the legacy per-version {py}/{name}.tar.gz bundle).\n"
+            f"Build the Pro+ engines for this platform (make build-modules), or "
+            f"check the layout — this path used to skip silently."
         )
     return mod

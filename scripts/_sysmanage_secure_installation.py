@@ -507,7 +507,7 @@ def get_database_config():
 def test_database_connection(db_config):
     """Test database connectivity."""
     try:
-        import psycopg2
+        import psycopg
 
         conn_str = (
             f"host={db_config['host']} "
@@ -517,12 +517,12 @@ def test_database_connection(db_config):
             f"password={db_config['password']}"
         )
 
-        conn = psycopg2.connect(conn_str)
+        conn = psycopg.connect(conn_str)
         conn.close()
         return True
     except ImportError:
         print(
-            "Error: psycopg2 not installed. This should have been installed by make install-dev."
+            "Error: psycopg not installed. This should have been installed by make install-dev."
         )
         return False
     except Exception as e:

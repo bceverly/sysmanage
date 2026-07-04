@@ -35,7 +35,8 @@ packaging>=24.0
 Pillow>=12.2.0  # multiple CVEs in the 11.x series (heap overflows in image parsers)
 platformdirs>=4.0.0
 pluggy>=1.0.0
-psycopg2-binary==2.9.10
+psycopg[binary]>=3.2; sys_platform != "win32" or platform_machine != "ARM64"
+psycopg>=3.2; sys_platform == "win32" and platform_machine == "ARM64"
 argon2-cffi==25.1.0
 bcrypt>=4.0.0
 pyotp>=2.9.0  # Phase 10.3: TOTP-based multi-factor authentication
@@ -106,5 +107,8 @@ opentelemetry-instrumentation-fastapi>=0.48b0
 opentelemetry-instrumentation-sqlalchemy>=0.48b0
 opentelemetry-instrumentation-requests>=0.48b0
 opentelemetry-instrumentation-logging>=0.48b0
-opentelemetry-exporter-otlp>=1.12.0
+# grpcio (pulled transitively by this) has no win_arm64 wheel and its source build
+# is intractable; the telemetry code degrades gracefully without it (see
+# backend/telemetry/otel_config.py "grpcio issue?" fallback), so skip it on win-arm64.
+opentelemetry-exporter-otlp>=1.12.0; sys_platform != "win32" or platform_machine != "ARM64"
 opentelemetry-exporter-prometheus>=0.48b0

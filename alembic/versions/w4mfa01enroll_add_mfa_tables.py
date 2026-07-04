@@ -116,7 +116,11 @@ def upgrade() -> None:
                 "backup_code_count, admin_required, grace_period_days) "
                 "VALUES (:id, :issuer, :digits, :period, :count, :req, :grace)"
             ).bindparams(
-                id=str(_SINGLETON_MFA_SETTINGS_ID),
+                # psycopg3 sends parameters with explicit types, so a stringified
+                # UUID is rejected by a uuid column ("type uuid but expression is
+                # of type character varying"); psycopg2 coerced it silently. Bind
+                # with the GUID type so it goes over as a real uuid on every driver.
+                sa.bindparam("id", _SINGLETON_MFA_SETTINGS_ID, type_=GUID()),
                 issuer="SysManage",
                 digits=6,
                 period=30,

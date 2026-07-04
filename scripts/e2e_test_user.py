@@ -69,7 +69,7 @@ def get_database_url():
                     name = db_config.get("name", "sysmanage")
                     user = db_config.get("user", "sysmanage")
                     password = db_config.get("password", "")
-                    url = f"postgresql://{user}:{password}@{host}:{port}/{name}"
+                    url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{name}"
                     print(f"Using PostgreSQL database: {host}:{port}/{name}")
                     return url
                 elif "path" in db_config:
@@ -83,7 +83,7 @@ def get_database_url():
                     name = db_config.get("name", "sysmanage")
                     user = db_config.get("user", "sysmanage")
                     password = db_config.get("password", "")
-                    url = f"postgresql://{user}:{password}@{host}:{port}/{name}"
+                    url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{name}"
                     print(f"Using PostgreSQL database: {host}:{port}/{name}")
                     return url
         except FileNotFoundError:

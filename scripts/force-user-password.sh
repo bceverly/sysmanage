@@ -41,7 +41,7 @@ export FORCE_NEWPW="$NEWPW"
 export FORCE_CONFIG="$CONFIG"
 
 "$VENV_PY" <<'PY'
-import os, sys, yaml, psycopg2
+import os, sys, yaml, psycopg
 from argon2 import PasswordHasher
 
 with open(os.environ["FORCE_CONFIG"]) as f:
@@ -55,7 +55,7 @@ dsn = (
 
 hashed = PasswordHasher().hash(os.environ["FORCE_NEWPW"])
 
-with psycopg2.connect(dsn) as conn:
+with psycopg.connect(dsn) as conn:
     with conn.cursor() as cur:
         # Columns per backend/persistence/models/core.py:277 (User model):
         #   hashed_password, failed_login_attempts, is_locked, locked_at,

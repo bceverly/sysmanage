@@ -148,7 +148,10 @@ def upgrade() -> None:
                 "(id, local_account_fallback, max_failed_attempts) "
                 "VALUES (:id, :fb, :max)"
             ).bindparams(
-                id=str(_SINGLETON_IDP_SETTINGS_ID),
+                # psycopg3 sends parameters with explicit types, so a stringified
+                # UUID is rejected by a uuid column (psycopg2 coerced it silently).
+                # Bind with the GUID type so it goes over as a real uuid.
+                sa.bindparam("id", _SINGLETON_IDP_SETTINGS_ID, type_=GUID()),
                 fb=True,
                 max=5,
             )

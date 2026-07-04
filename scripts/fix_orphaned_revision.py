@@ -57,7 +57,7 @@ def get_database_url():
         username = db_config.get('user', 'sysmanage')  # 'user' not 'username' in config
         password = db_config.get('password', '')
 
-        return f"postgresql://{username}:{password}@{host}:{port}/{database}"
+        return f"postgresql+psycopg://{username}:{password}@{host}:{port}/{database}"
 
     except Exception as e:
         print(f"Error reading config file {config_path}: {e}")
