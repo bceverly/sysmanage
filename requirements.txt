@@ -35,8 +35,12 @@ packaging>=24.0
 Pillow>=12.2.0  # multiple CVEs in the 11.x series (heap overflows in image parsers)
 platformdirs>=4.0.0
 pluggy>=1.0.0
-psycopg[binary]>=3.2; sys_platform != "win32" or platform_machine != "ARM64"
-psycopg>=3.2; sys_platform == "win32" and platform_machine == "ARM64"
+# psycopg-binary wheels exist only for Linux, macOS and Windows-x64. Everywhere
+# else (the BSDs, Windows-ARM64) there is no binary wheel, so use the pure-Python
+# psycopg, which links libpq at runtime (pg_config/postgresql-client is installed
+# by the platform bootstrap).
+psycopg[binary]>=3.2; platform_system == "Linux" or platform_system == "Darwin" or (platform_system == "Windows" and platform_machine != "ARM64")
+psycopg>=3.2; (platform_system != "Linux" and platform_system != "Darwin" and platform_system != "Windows") or (platform_system == "Windows" and platform_machine == "ARM64")
 argon2-cffi==25.1.0
 bcrypt>=4.0.0
 pyotp>=2.9.0  # Phase 10.3: TOTP-based multi-factor authentication

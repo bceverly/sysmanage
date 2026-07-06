@@ -205,6 +205,10 @@ else
 			echo "[INFO] Installing cmake (Pillow's pybind11 build needs it; a from-source cmake fails to bootstrap on NetBSD)..."; \
 			$$SU pkgin -y install cmake || $$SU pkg_add cmake || echo "[WARN] Could not auto-install cmake; if Pillow/pybind11 fails to build, run:  doas pkgin install cmake"; \
 		fi; \
+		if [ ! -f /usr/pkg/include/jpeglib.h ]; then \
+			echo "[INFO] Installing image libraries (jpeg/png/tiff/freetype2) for Pillow..."; \
+			$$SU pkgin -y install jpeg png tiff freetype2 || $$SU pkg_add jpeg png tiff freetype2 || echo "[WARN] Could not auto-install image libs; if Pillow fails on jpeg, run:  doas pkgin install jpeg png tiff freetype2"; \
+		fi; \
 		if ! command -v cargo >/dev/null 2>&1; then \
 			echo "[INFO] Installing Rust (needed to build cryptography/bcrypt from source)..."; \
 			$$SU pkgin -y install rust || $$SU pkg_add rust || { \
