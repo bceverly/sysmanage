@@ -113,6 +113,26 @@ def _abi3_binary_for(name: str) -> Path | None:
     return None
 
 
+def _abi3_bundle_for(name: str) -> Path | None:
+    """Newest abi3 ``<name>.tar.gz`` bundle under ``<version>/<plat>/<arch>/abi3/``.
+
+    ``make build`` runs ``package-bundles``, which replaces the bare abi3 ``.so``
+    with a ``<name>.tar.gz`` bundle (the ``.so`` + gettext catalog + metadata) in
+    the same ``abi3/`` dir and removes the bare binary.  Handle that alongside the
+    bare-``.so`` case so a full ``make build`` (not just ``make build-modules``)
+    still yields a loadable engine.
+    """
+    plat, arch, _py = _plat_arch_py()
+    base = _STORAGE_MODULES / name
+    if not base.is_dir():
+        return None
+    for version in sorted(base.iterdir(), reverse=True):  # newest version wins
+        bundle = version / plat / arch / "abi3" / f"{name}.tar.gz"
+        if bundle.is_file():
+            return bundle
+    return None
+
+
 def _cache_copy(name: str, src: Path) -> Path:
     """Copy an engine binary into the session cache and return the copy.
 
@@ -137,16 +157,16 @@ def _so_from_bundle(name: str, bundle: Path) -> Path | None:
     (the test suite runs with ``filterwarnings = error``), and so this works
     unchanged on 3.10–3.14 (the ``filter=`` arg only exists from 3.12).
     """
-    # Match the generic abi3 suffix (``.pyd``/``.so``), not the version-specific
-    # ``EXT_SUFFIX`` (e.g. ``.cp313-win_arm64.pyd``): these are abi3 bundles whose
-    # member is a bare ``<name>.pyd`` / ``<name>.abi3.so`` that loads on any 3.10+.
-    # ``.pyd``/``.so`` still matches a legacy version-tagged member too (it ends the
-    # same way), so this stays backward compatible.
-    ext = ".pyd" if sys.platform == "win32" else ".so"
+    # Match the compiled member by its generic platform suffix (``.so`` /
+    # ``.pyd``): an abi3 bundle carries ``<name>.abi3.so`` while a legacy
+    # per-version bundle carries ``<name>.cpython-<py>-<plat>.so`` — both end in
+    # ``.so`` (``.pyd`` on Windows), so this finds either without pinning the
+    # interpreter-specific ``EXT_SUFFIX`` (which never matches an abi3 build).
+    suffix = ".pyd" if sys.platform == "win32" else ".so"
     dest = _EXTRACT_DIR / name
     dest.mkdir(parents=True, exist_ok=True)
     with tarfile.open(bundle) as tar:
-        member = next((m for m in tar.getmembers() if m.name.endswith(ext)), None)
+        member = next((m for m in tar.getmembers() if m.name.endswith(suffix)), None)
         if member is None:
             return None
         target = dest / Path(member.name).name  # flatten any leading path
@@ -178,12 +198,18 @@ def _raw_so_candidates(name: str) -> list[Path]:
 def resolve_so(name: str) -> Path | None:
     """Return a loadable ``.so`` Path for this interpreter, or None.
 
-    Order: canonical abi3 binary → legacy per-version ``.tar.gz`` bundle
-    (extracted) → dev build dir → prod ``/var/lib/sysmanage/modules``.
+    Order: canonical abi3 binary → abi3 ``.tar.gz`` bundle (extracted) → legacy
+    per-version ``.tar.gz`` bundle (extracted) → dev build dir → prod
+    ``/var/lib/sysmanage/modules``.
     """
     abi3 = _abi3_binary_for(name)
     if abi3 is not None:
         return _cache_copy(name, abi3)
+    abi3_bundle = _abi3_bundle_for(name)
+    if abi3_bundle is not None:
+        so = _so_from_bundle(name, abi3_bundle)
+        if so is not None:
+            return so
     bundle = _bundle_for(name)
     if bundle is not None:
         so = _so_from_bundle(name, bundle)
