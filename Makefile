@@ -191,16 +191,27 @@ else
 		export TMPDIR=$$HOME/tmp && \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
-		echo "[INFO] NetBSD detected - configuring for grpcio + cryptography build..."; \
-		if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$$HOME/.cargo/bin/cargo" ]; then \
-			echo "[INFO] Rust not found - installing (needed to build cryptography from source)..."; \
-			SU=$$(command -v sudo 2>/dev/null || command -v doas 2>/dev/null); \
+		echo "[INFO] NetBSD detected - configuring source builds (grpcio, cryptography, lxml)..."; \
+		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
+		SU=$$(command -v sudo 2>/dev/null || command -v doas 2>/dev/null); \
+		if ! command -v cargo >/dev/null 2>&1; then \
+			echo "[INFO] Installing Rust (needed to build cryptography/bcrypt from source)..."; \
 			$$SU pkgin -y install rust || $$SU pkg_add rust || { \
 				echo "[ERROR] Could not auto-install Rust. Install it manually, then re-run:  doas pkgin install rust"; \
 				exit 1; \
 			}; \
 		fi; \
-		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
+		if ! command -v xml2-config >/dev/null 2>&1; then \
+			echo "[INFO] Installing libxml2/libxslt (needed to build lxml for python3-saml)..."; \
+			$$SU pkgin -y install libxml2 libxslt || $$SU pkg_add libxml2 libxslt || { \
+				echo "[ERROR] Could not auto-install libxml2/libxslt. Install them manually, then re-run:  doas pkgin install libxml2 libxslt"; \
+				exit 1; \
+			}; \
+		fi; \
+		if ! command -v xmlsec1 >/dev/null 2>&1; then \
+			echo "[INFO] Installing xmlsec1 + pkgconf (needed to build the xmlsec binding for python3-saml)..."; \
+			$$SU pkgin -y install xmlsec1 pkgconf || $$SU pkg_add xmlsec1 pkgconf || echo "[WARN] Could not auto-install xmlsec1/pkgconf; if the xmlsec wheel later fails to build, run:  doas pkgin install xmlsec1 pkgconf"; \
+		fi; \
 		if [ -d /usr/pkg/include/openssl ]; then export OPENSSL_DIR=/usr/pkg; \
 		elif [ -d /usr/include/openssl ]; then export OPENSSL_DIR=/usr; fi; \
 		export TMPDIR=/var/tmp && \
