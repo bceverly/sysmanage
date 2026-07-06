@@ -48,6 +48,15 @@ emergencies with `git push --no-verify`.
   ```bash
   make test
   ```
+- **Pro+ engine tests**: Tests that exercise the compiled Pro+ engines load them
+  through `tests/_engine_loader.py`, which finds the artifact matching the running
+  interpreter's platform/arch under the sibling
+  `sysmanage-professional-plus/storage/modules/<engine>/<version>/<plat>/<arch>/abi3/`.
+  It prefers a freshly-built loose `.pyd`/`.so` and falls back to the committed
+  `abi3/*.tar.gz` bundle (the shipped deliverable), so a fresh checkout works without
+  a local engine build. If a test fails with *"no loadable engine for `<plat>/<arch>`"*,
+  build the Pro+ engines for your platform (`make build` in the `sysmanage-professional-plus`
+  checkout). Tests skip cleanly when no Pro+ checkout is present (OSS-only run).
 
 ### 4. Formatting & Linting
 - Python: `black` + `pylint`

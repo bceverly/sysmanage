@@ -28,6 +28,7 @@ engine for this platform/interpreter now **fails loudly** instead of hiding.
 from __future__ import annotations
 
 import importlib.util
+import os
 import platform
 import sys
 import sysconfig
@@ -41,7 +42,12 @@ _STORAGE_MODULES = _PROPLUS_ROOT / "storage" / "modules"
 # Production-deployed raw ``.so`` location (license-server download target).
 _PROD_MODULES = Path("/var/lib/sysmanage/modules")
 # Session cache for ``.so`` files extracted from bundles.
-_EXTRACT_DIR = Path(tempfile.gettempdir()) / "sysmanage-test-engines"
+# Namespaced by pytest-xdist worker: several workers extract the same engine
+# concurrently under -n auto, and a shared cache path races — one worker's write
+# hits a file another worker already holds open/loaded (on Windows the loaded .pyd
+# is a locked DLL -> PermissionError). A per-worker dir gives each its own copy.
+_WORKER = os.environ.get("PYTEST_XDIST_WORKER", "main")
+_EXTRACT_DIR = Path(tempfile.gettempdir()) / "sysmanage-test-engines" / _WORKER
 
 # Engine modules already loaded this session, keyed by name.
 _loaded: dict[str, object] = {}
@@ -73,9 +79,14 @@ def _bundle_for(name: str) -> Path | None:
     if not base.is_dir():
         return None
     for version in sorted(base.iterdir(), reverse=True):  # newest version wins
-        bundle = version / plat / arch / py / f"{name}.tar.gz"
-        if bundle.is_file():
-            return bundle
+        # ``abi3`` is the current canonical layout (the abi3 bundle loads on every
+        # CPython 3.10+); ``<py>`` (e.g. ``3.13``) is the legacy per-version layout,
+        # kept as a fallback. The bundle is the committed deliverable — the loader
+        # falls back to it when no loose per-arch binary has been built locally.
+        for sub in ("abi3", py):
+            bundle = version / plat / arch / sub / f"{name}.tar.gz"
+            if bundle.is_file():
+                return bundle
     return None
 
 
@@ -126,7 +137,12 @@ def _so_from_bundle(name: str, bundle: Path) -> Path | None:
     (the test suite runs with ``filterwarnings = error``), and so this works
     unchanged on 3.10–3.14 (the ``filter=`` arg only exists from 3.12).
     """
-    ext = sysconfig.get_config_var("EXT_SUFFIX") or ".so"
+    # Match the generic abi3 suffix (``.pyd``/``.so``), not the version-specific
+    # ``EXT_SUFFIX`` (e.g. ``.cp313-win_arm64.pyd``): these are abi3 bundles whose
+    # member is a bare ``<name>.pyd`` / ``<name>.abi3.so`` that loads on any 3.10+.
+    # ``.pyd``/``.so`` still matches a legacy version-tagged member too (it ends the
+    # same way), so this stays backward compatible.
+    ext = ".pyd" if sys.platform == "win32" else ".so"
     dest = _EXTRACT_DIR / name
     dest.mkdir(parents=True, exist_ok=True)
     with tarfile.open(bundle) as tar:

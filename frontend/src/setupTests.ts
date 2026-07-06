@@ -48,6 +48,44 @@ declare global {
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
+// Node 22+ (this repo runs Node 25) ships a built-in *experimental* `localStorage`
+// global that shadows JSDom's; without a valid `--localstorage-file` it warns and is
+// not a spec-complete Storage, so component code calling `localStorage.getItem(...)`
+// throws "getItem is not a function". Install a deterministic in-memory Storage.
+function createTestStorage(): Storage {
+  let store: Record<string, string> = {};
+  return {
+    get length() {
+      return Object.keys(store).length;
+    },
+    clear() {
+      store = {};
+    },
+    getItem(key: string) {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    setItem(key: string, value: string) {
+      store[key] = String(value);
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    key(index: number) {
+      return Object.keys(store)[index] ?? null;
+    }
+  } as Storage;
+}
+Object.defineProperty(globalThis, 'localStorage', {
+  configurable: true,
+  writable: true,
+  value: createTestStorage()
+});
+Object.defineProperty(globalThis, 'sessionStorage', {
+  configurable: true,
+  writable: true,
+  value: createTestStorage()
+});
+
 // JSDom lacks ResizeObserver, which our scrollable nav/button components
 // instantiate inside useEffect.  Provide a no-op stub so tests don't crash.
 // The methods deliberately do nothing — JSDom never fires resize events

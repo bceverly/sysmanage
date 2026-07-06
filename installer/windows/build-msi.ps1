@@ -236,8 +236,19 @@ if ($Architecture -eq "arm64") {
         $env:OPENSSL_STATIC = "1"; $env:OPENSSL_NO_VENDOR = "1"
         $env:RUSTFLAGS = "-C target-feature=+crt-static"
         # Drop any cached dynamic cryptography wheel so the static one is (re)built.
-        & $venvPy -m pip cache remove cryptography 2>$null | Out-Null
-        & $venvPy -m pip wheel -r (Join-Path $CurrentDir "requirements-prod.txt") -w $WheelsDir
+        # (SilentlyContinue + no 2> redirect: under -ErrorActionPreference Stop, PS 5.1
+        #  would otherwise wrap pip's "no matching packages" stderr into a fatal error.)
+        $ErrorActionPreference = 'SilentlyContinue'
+        & $venvPy -m pip cache remove cryptography | Out-Null
+        $ErrorActionPreference = 'Stop'
+        # grpcio (opentelemetry-exporter-otlp dep) has no win_arm64 wheel either, and its
+        # deep upb-gen tree overflows MAX_PATH at link time under pip's own deep temp
+        # layout (LNK1181) -- so `pip wheel grpcio` / `pip wheel -r ...` both fail. Build it
+        # FIRST via the short-dir builder, then let the -r step reuse that wheel through
+        # --find-links instead of rebuilding it from the deep tree.
+        & (Join-Path $PSScriptRoot "..\..\scripts\build-grpcio-wheel-win-arm64.ps1") -Python $venvPy -OutputDir $WheelsDir
+        if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: grpcio wheel build failed." -ForegroundColor Red; exit 1 }
+        & $venvPy -m pip wheel -r (Join-Path $CurrentDir "requirements-prod.txt") --find-links $WheelsDir -w $WheelsDir
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: ARM64 wheel build failed." -ForegroundColor Red; exit 1 }
     }
     $WheelsZip = Join-Path $CurrentDir "installer\windows\wheels.zip"

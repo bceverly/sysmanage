@@ -98,6 +98,10 @@ else
     PIP := $(VENV)/bin/pip
     SEMGREP := $(VENV)/bin/semgrep
     VENV_ACTIVATE := $(VENV)/bin/activate
+    # Host interpreter for the few recipes that shell out to python3 directly (SBOM,
+    # update-requirements): prefer python3, else the newest versioned binary (NetBSD
+    # ships only python3.13, no python3 symlink). No-op where python3 exists.
+    PYTHON3 := $(shell for p in python3 python3.14 python3.13 python3.12 python3.11; do command -v $$p >/dev/null 2>&1 && { echo $$p; exit 0; }; done; echo python3)
 endif
 
 # Create or repair virtual environment
@@ -111,6 +115,10 @@ else
 	@rm -rf $(VENV) 2>/dev/null || true
 	@if command -v python3 >/dev/null 2>&1; then \
 		python3 -m venv $(VENV); \
+	elif command -v python3.14 >/dev/null 2>&1; then \
+		python3.14 -m venv $(VENV); \
+	elif command -v python3.13 >/dev/null 2>&1; then \
+		python3.13 -m venv $(VENV); \
 	elif command -v python3.12 >/dev/null 2>&1; then \
 		python3.12 -m venv $(VENV); \
 	elif command -v python3.11 >/dev/null 2>&1; then \
@@ -160,6 +168,10 @@ ifeq ($(OS),Windows_NT)
 	@REM a native arm64 libpq) so the from-source wheels build and pure psycopg finds
 	@REM libpq at runtime. Idempotent; no-ops on x64. See ROADMAP Phase 15.2.
 	-@powershell -ExecutionPolicy Bypass -File scripts/provision-win-arm64.ps1
+	@REM Native ARM64: grpcio has no win_arm64 wheel, so build it from source (like the
+	@REM BSD branches) BEFORE the pip install, so opentelemetry-exporter-otlp resolves
+	@REM against it. No-ops on x64 (prebuilt wheel) and if grpcio is already built.
+	-@powershell -ExecutionPolicy Bypass -File scripts/build-grpcio-win-arm64.ps1
 	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements-dev.txt
 else
 	@if [ "$$(uname -s)" = "Darwin" ]; then \
@@ -179,7 +191,18 @@ else
 		export TMPDIR=$$HOME/tmp && \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
-		echo "[INFO] NetBSD detected - configuring for grpcio build..."; \
+		echo "[INFO] NetBSD detected - configuring for grpcio + cryptography build..."; \
+		if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$$HOME/.cargo/bin/cargo" ]; then \
+			echo "[INFO] Rust not found - installing (needed to build cryptography from source)..."; \
+			SU=$$(command -v sudo 2>/dev/null || command -v doas 2>/dev/null); \
+			$$SU pkgin -y install rust || $$SU pkg_add rust || { \
+				echo "[ERROR] Could not auto-install Rust. Install it manually, then re-run:  doas pkgin install rust"; \
+				exit 1; \
+			}; \
+		fi; \
+		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
+		if [ -d /usr/pkg/include/openssl ]; then export OPENSSL_DIR=/usr/pkg; \
+		elif [ -d /usr/include/openssl ]; then export OPENSSL_DIR=/usr; fi; \
 		export TMPDIR=/var/tmp && \
 		export CC=/usr/pkg/gcc14/bin/gcc && \
 		export CXX=/usr/pkg/gcc14/bin/g++ && \
@@ -1076,7 +1099,7 @@ else
 		done; \
 		echo "[OK] compiled backend .mo for all locales (msgfmt)."; \
 	else \
-		PYB=$$(command -v python3 || command -v python); \
+		PYB=$$(command -v python3 || command -v python3.14 || command -v python3.13 || command -v python3.12 || command -v python3.11 || command -v python); \
 		[ -n "$$PYB" ] || { echo "ERROR: need msgfmt OR python3+polib to compile .mo"; exit 1; }; \
 		$$PYB -c "import polib" 2>/dev/null || $$PYB -m pip install --quiet --disable-pip-version-check polib; \
 		for l in $(BACKEND_I18N_LANGS); do \
@@ -2234,7 +2257,7 @@ installer-rpm-centos:
 	echo "✓ SBOM files generated"; \
 	echo ""; \
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	echo "✓ requirements-prod.txt generated"; \
 	echo ""; \
 	echo "Setting up RPM build tree..."; \
@@ -2356,7 +2379,7 @@ installer-rpm-opensuse:
 	fi; \
 	echo ""; \
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	echo "✓ requirements-prod.txt generated"; \
 	echo ""; \
 	echo "Building frontend..."; \
@@ -2980,7 +3003,7 @@ snap:
 	@echo "Cleaning old LXD containers..."
 	@$(MAKE) snap-clean 2>/dev/null || true
 	@echo "Generating requirements-prod.txt..."
-	@python3 scripts/update-requirements-prod.py
+	@$(PYTHON3) scripts/update-requirements-prod.py
 	@echo "Copying snapcraft.yaml and icon to project root..."
 	@cp installer/snap/snapcraft.yaml .
 	@mkdir -p snap/gui
@@ -3076,9 +3099,9 @@ sbom:
 	@echo ""
 	@echo "Checking for CycloneDX tools..."
 	@set -e; \
-	if ! python3 -c "import cyclonedx_py" 2>/dev/null; then \
+	if ! $(PYTHON3) -c "import cyclonedx_py" 2>/dev/null; then \
 		echo "Installing cyclonedx-bom for Python..."; \
-		python3 -m pip install cyclonedx-bom --quiet; \
+		$(PYTHON3) -m pip install cyclonedx-bom --quiet; \
 		echo "✓ cyclonedx-bom installed"; \
 	else \
 		echo "✓ cyclonedx-bom already installed"; \
@@ -3087,7 +3110,7 @@ sbom:
 	@echo ""
 	@echo "Generating Python SBOM from requirements.txt..."
 	@set -e; \
-	python3 -m cyclonedx_py requirements \
+	$(PYTHON3) -m cyclonedx_py requirements \
 		requirements.txt \
 		--of JSON \
 		-o sbom/backend-sbom.json
@@ -3164,7 +3187,7 @@ deploy-check-deps:
 	echo ""; \
 	\
 	echo "--- SBOM Generation ---"; \
-	if python3 -c "import cyclonedx_py" 2>/dev/null; then \
+	if $(PYTHON3) -c "import cyclonedx_py" 2>/dev/null; then \
 		echo "  [OK] cyclonedx-bom (Python)"; \
 	else \
 		echo "  [MISSING] cyclonedx-bom"; \
@@ -3596,7 +3619,7 @@ deploy-launchpad:
 	echo ""; \
 	\
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	\
 	echo "Building frontend..."; \
 	cd frontend && npm ci --legacy-peer-deps && npm run build && cd ..; \
@@ -3707,7 +3730,7 @@ deploy-obs:
 	echo ""; \
 	\
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	\
 	echo "Building frontend..."; \
 	cd frontend && npm ci --legacy-peer-deps && npm run build && cd ..; \
@@ -3863,7 +3886,7 @@ deploy-copr:
 	echo ""; \
 	\
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	\
 	echo "Building frontend..."; \
 	cd frontend && npm ci --legacy-peer-deps && npm run build && cd ..; \
@@ -4002,7 +4025,7 @@ deploy-snap:
 	}; \
 	\
 	echo "Generating requirements-prod.txt..."; \
-	python3 scripts/update-requirements-prod.py; \
+	$(PYTHON3) scripts/update-requirements-prod.py; \
 	\
 	echo "Preparing snapcraft files..."; \
 	cp installer/snap/snapcraft.yaml .; \
