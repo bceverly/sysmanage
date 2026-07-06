@@ -194,6 +194,17 @@ else
 		echo "[INFO] NetBSD detected - configuring source builds (grpcio, cryptography, lxml)..."; \
 		export PATH="$$HOME/.cargo/bin:/usr/pkg/bin:$$PATH"; \
 		SU=$$(command -v sudo 2>/dev/null || command -v doas 2>/dev/null); \
+		if [ ! -x /usr/pkg/gcc14/bin/gcc ]; then \
+			echo "[INFO] Installing gcc14 (this build sets CC=/usr/pkg/gcc14/bin/gcc)..."; \
+			$$SU pkgin -y install gcc14 || $$SU pkg_add gcc14 || { \
+				echo "[ERROR] Could not auto-install gcc14. Install it manually, then re-run:  doas pkgin install gcc14"; \
+				exit 1; \
+			}; \
+		fi; \
+		if ! command -v cmake >/dev/null 2>&1; then \
+			echo "[INFO] Installing cmake (Pillow's pybind11 build needs it; a from-source cmake fails to bootstrap on NetBSD)..."; \
+			$$SU pkgin -y install cmake || $$SU pkg_add cmake || echo "[WARN] Could not auto-install cmake; if Pillow/pybind11 fails to build, run:  doas pkgin install cmake"; \
+		fi; \
 		if ! command -v cargo >/dev/null 2>&1; then \
 			echo "[INFO] Installing Rust (needed to build cryptography/bcrypt from source)..."; \
 			$$SU pkgin -y install rust || $$SU pkg_add rust || { \
