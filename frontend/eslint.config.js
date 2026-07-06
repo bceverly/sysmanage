@@ -47,6 +47,9 @@ export default [
         console: 'readonly',
         process: 'readonly',
         localStorage: 'readonly',
+        // Storage: the interface type of localStorage/sessionStorage, referenced
+        // as a type annotation by the in-memory polyfill in setupTests.ts.
+        Storage: 'readonly',
         alert: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
