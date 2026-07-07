@@ -209,10 +209,6 @@ else
 			echo "[INFO] Installing image libraries (jpeg/png/tiff/freetype2) for Pillow..."; \
 			$$SU pkgin -y install jpeg png tiff freetype2 || $$SU pkg_add jpeg png tiff freetype2 || echo "[WARN] Could not auto-install image libs; if Pillow fails on jpeg, run:  doas pkgin install jpeg png tiff freetype2"; \
 		fi; \
-		if [ ! -f /usr/pkg/include/uv.h ]; then \
-			echo "[INFO] Installing libuv (gevent builds its libuv backend against the system copy on NetBSD; its bundled one does not compile)..."; \
-			$$SU pkgin -y install libuv || $$SU pkg_add libuv || echo "[WARN] Could not auto-install libuv; if gevent fails, run:  doas pkgin install libuv"; \
-		fi; \
 		if ! command -v cargo >/dev/null 2>&1; then \
 			echo "[INFO] Installing Rust (needed to build cryptography/bcrypt from source)..."; \
 			$$SU pkgin -y install rust || $$SU pkg_add rust || { \
@@ -254,7 +250,7 @@ ifeq ($(OS),Windows_NT)
 	@$(WIN_ARM64_ENV) $(PYTHON) -m pip install -r requirements.txt
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
-		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright..."; \
+		echo "[INFO] NetBSD - using /var/tmp and excluding Playwright and gevent..."; \
 		export TMPDIR=/var/tmp && \
 		export CC=/usr/pkg/gcc14/bin/gcc && \
 		export CXX=/usr/pkg/gcc14/bin/g++ && \
@@ -266,8 +262,7 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_ZLIB=1 && \
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
-		export GEVENTSETUP_EMBED_LIBUV=0 && \
-		grep -v "playwright" requirements.txt | $(PYTHON) -m pip install -r /dev/stdin || true; \
+		grep -v "playwright" requirements.txt | grep -v "gevent==" | $(PYTHON) -m pip install -r /dev/stdin || true; \
 		echo "[INFO] Selenium will be used for browser testing on BSD systems"; \
 	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
 		echo "[INFO] Installing packages except Playwright (not available on BSD systems)..."; \
