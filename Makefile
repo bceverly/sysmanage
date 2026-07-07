@@ -227,6 +227,10 @@ else
 			echo "[INFO] Installing xmlsec1 + pkgconf (needed to build the xmlsec binding for python3-saml)..."; \
 			$$SU pkgin -y install xmlsec1 pkgconf || $$SU pkg_add xmlsec1 pkgconf || echo "[WARN] Could not auto-install xmlsec1/pkgconf; if the xmlsec wheel later fails to build, run:  doas pkgin install xmlsec1 pkgconf"; \
 		fi; \
+		if ! command -v chromium >/dev/null 2>&1; then \
+			echo "[INFO] Installing Chromium (Selenium uses it for screenshot/UI tests; Playwright has no NetBSD build)..."; \
+			$$SU pkgin -y install chromium || $$SU pkg_add chromium || echo "[WARN] Could not auto-install Chromium; screenshot/UI tests need it - run:  doas pkgin install chromium"; \
+		fi; \
 		if [ -d /usr/pkg/include/openssl ]; then export OPENSSL_DIR=/usr/pkg; \
 		elif [ -d /usr/include/openssl ]; then export OPENSSL_DIR=/usr; fi; \
 		export TMPDIR=/var/tmp && \
@@ -398,7 +402,7 @@ else
 	fi
 endif
 	@echo "Setting up WebDriver for screenshots..."
-	@$(PYTHON) scripts/install-browsers.py
+	@$(PYTHON) scripts/install-browsers.py || echo "[WARN] WebDriver/browser setup failed - continuing (screenshot/UI tests may not work; install a browser, e.g. 'doas pkgin install chromium' on NetBSD)"
 ifeq ($(OS),Windows_NT)
 	@echo "Installing Playwright browsers for Windows..."
 	@$(PYTHON) -m playwright install chromium firefox webkit 2>nul || echo "Playwright browser installation failed - continuing with Selenium fallback"
