@@ -264,6 +264,15 @@ def require_engine(name: str):
             pytest.skip(
                 f"{name}: no sysmanage-professional-plus checkout — OSS-only run"
             )
+        # If the storage/modules tree doesn't exist at all, or there are no
+        # builds for this engine on *any* platform, the engines simply haven't
+        # been compiled yet — skip rather than fail.
+        engine_dir = _STORAGE_MODULES / name
+        if not _STORAGE_MODULES.is_dir() or not engine_dir.is_dir():
+            pytest.skip(
+                f"{name}: Pro+ checkout present but no engine builds exist yet "
+                f"(storage/modules/{name}/ not found) — run 'make build-modules'"
+            )
         plat, arch, py = _plat_arch_py()
         ext = ".pyd" if sys.platform == "win32" else ".so"
         pytest.fail(

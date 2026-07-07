@@ -245,6 +245,24 @@ else
 		export GRPC_PYTHON_BUILD_SYSTEM_CARES=1 && \
 		export GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 && \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
+	elif [ "$$(uname -s)" = "FreeBSD" ]; then \
+		echo "[INFO] FreeBSD detected - checking for system dependencies..."; \
+		PYVER=$$($(PYTHON) -c "import sys; v=sys.version_info; print(f'py{v.major}{v.minor}')"); \
+		if ! $(PYTHON) -c "import _sqlite3" 2>/dev/null; then \
+			echo "[INFO] Installing $${PYVER}-sqlite3 (needed by coverage/pytest-cov)..."; \
+			sudo pkg install -y "$${PYVER}-sqlite3" || { \
+				echo "[ERROR] Could not auto-install $${PYVER}-sqlite3. Install it manually, then re-run:  sudo pkg install $${PYVER}-sqlite3"; \
+				exit 1; \
+			}; \
+		fi; \
+		if ! command -v xmlsec1 >/dev/null 2>&1; then \
+			echo "[INFO] Installing xmlsec1 (needed to build the xmlsec binding for python3-saml)..."; \
+			sudo pkg install -y xmlsec1 || { \
+				echo "[ERROR] Could not auto-install xmlsec1. Install it manually, then re-run:  sudo pkg install xmlsec1"; \
+				exit 1; \
+			}; \
+		fi; \
+		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	else \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	fi
