@@ -1111,9 +1111,18 @@ ifeq ($(OS),Windows_NT)
 else
 	@command -v xgettext msgmerge msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
 	@echo "=== extracting backend _() strings -> messages.pot ==="
-	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
-		--package-name=SysManage --msgid-bugs-address=" " \
-		-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC)
+	@# --package-name / --msgid-bugs-address only set .pot header fields and need
+	@# GNU gettext >= 0.19; NetBSD's base xgettext is older and rejects them.  They
+	@# don't affect the extracted msgids, so pass them only when supported.
+	@if xgettext --help 2>/dev/null | grep -q -- '--package-name'; then \
+		xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+			--package-name=SysManage --msgid-bugs-address=" " \
+			-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC); \
+	else \
+		echo "[INFO] xgettext too old for --package-name (e.g. NetBSD base gettext) - extracting without .pot header metadata"; \
+		xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+			-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC); \
+	fi
 	@# --no-fuzzy-matching: never guess a translation onto a changed string.
 	@# An unmatched/changed string becomes an EMPTY gap (which `make translate`
 	@# fills accurately) rather than a fuzzy guess that msgfmt would drop from the
