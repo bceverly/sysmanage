@@ -341,8 +341,13 @@ ifeq ($(OS),Windows_NT)
 else
 	@if [ "$$(uname -s)" = "NetBSD" ]; then \
 		echo "[INFO] NetBSD detected - building Prometheus from source..."; \
-		if [ ! -f "$$HOME/.local/bin/prometheus" ]; then \
-			mkdir -p /tmp/prometheus-build && \
+		if [ -f "$$HOME/.local/bin/prometheus" ]; then \
+			echo "[OK] Prometheus already installed"; \
+		elif ! command -v go >/dev/null 2>&1; then \
+			echo "[WARN] Go not found - skipping Prometheus build (optional telemetry component)."; \
+			echo "       Install Go with:  pkgin install go   then re-run:  gmake install-dev"; \
+		else \
+			( mkdir -p /tmp/prometheus-build && \
 			cd /tmp/prometheus-build && \
 			rm -rf prometheus && \
 			git clone --depth 1 --branch v3.1.0 https://github.com/prometheus/prometheus.git && \
@@ -354,14 +359,18 @@ else
 			cp prometheus promtool $$HOME/.local/bin/ && \
 			chmod +x $$HOME/.local/bin/prometheus $$HOME/.local/bin/promtool && \
 			cd /tmp && rm -rf /tmp/prometheus-build && \
-			echo "[OK] Prometheus built and installed to ~/.local/bin"; \
-		else \
-			echo "[OK] Prometheus already installed"; \
+			echo "[OK] Prometheus built and installed to ~/.local/bin" ) || \
+			echo "[WARNING] Prometheus build failed - continuing without it (optional telemetry component)"; \
 		fi; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - building Prometheus from source..."; \
-		if [ ! -f "$$HOME/.local/bin/prometheus" ]; then \
-			mkdir -p $$HOME/tmp/prometheus-build && \
+		if [ -f "$$HOME/.local/bin/prometheus" ]; then \
+			echo "[OK] Prometheus already installed"; \
+		elif ! command -v go >/dev/null 2>&1; then \
+			echo "[WARN] Go not found - skipping Prometheus build (optional telemetry component)."; \
+			echo "       Install Go with:  pkg_add go   then re-run:  gmake install-dev"; \
+		else \
+			( mkdir -p $$HOME/tmp/prometheus-build && \
 			export GOCACHE=$$HOME/tmp/go-cache && \
 			export GOMODCACHE=$$HOME/tmp/go-mod-cache && \
 			export GOTMPDIR=$$HOME/tmp/go-tmp && \
@@ -377,9 +386,8 @@ else
 			cp prometheus promtool $$HOME/.local/bin/ && \
 			chmod +x $$HOME/.local/bin/prometheus $$HOME/.local/bin/promtool && \
 			cd $$HOME && rm -rf $$HOME/tmp/prometheus-build && \
-			echo "[OK] Prometheus built and installed to ~/.local/bin"; \
-		else \
-			echo "[OK] Prometheus already installed"; \
+			echo "[OK] Prometheus built and installed to ~/.local/bin" ) || \
+			echo "[WARNING] Prometheus build failed - continuing without it (optional telemetry component)"; \
 		fi; \
 	fi
 	@echo "Installing telemetry stack (OpenTelemetry + Prometheus)..."
