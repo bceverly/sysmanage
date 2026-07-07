@@ -295,7 +295,8 @@ else
 		export CFLAGS="-I/usr/pkg/include" && \
 		export CXXFLAGS="-I/usr/pkg/include" && \
 		export LDFLAGS="-L/usr/pkg/lib -Wl,-rpath,/usr/pkg/lib" && \
-		$(PYTHON) -m pip uninstall -y Pillow && $(PYTHON) -m pip install --no-binary=:all: Pillow; \
+		$(PYTHON) -m pip cache remove Pillow 2>/dev/null || true; \
+		$(PYTHON) -m pip uninstall -y Pillow && $(PYTHON) -m pip install --no-binary=:all: --no-cache-dir --force-reinstall Pillow; \
 		echo "[OK] Pillow rebuilt for NetBSD"; \
 		echo "[INFO] NetBSD detected - rebuilding grpcio with GCC 14 for C++ compatibility..."; \
 		$(PYTHON) -m pip cache remove grpcio 2>/dev/null || true; \
@@ -313,13 +314,13 @@ else
 		GRPC_PYTHON_BUILD_EXT_COMPILER_JOBS=1 \
 		$(PYTHON) -m pip install --no-binary=:all: --no-cache-dir grpcio; \
 		echo "[OK] grpcio rebuilt for NetBSD with GCC 14"; \
-		echo "[INFO] Setting up GCC 14 library path in venv activate script..."; \
+		echo "[INFO] Setting up pkgsrc + GCC 14 library paths in venv activate script..."; \
 		if [ ! -f "$(VENV)/bin/activate.backup" ]; then \
 			cp "$(VENV)/bin/activate" "$(VENV)/bin/activate.backup"; \
 		fi; \
-		grep -q "LD_LIBRARY_PATH.*gcc14" "$(VENV)/bin/activate" || \
-		echo 'export LD_LIBRARY_PATH="/usr/pkg/gcc14/lib:$${LD_LIBRARY_PATH}"' >> "$(VENV)/bin/activate"; \
-		echo "[OK] GCC 14 library path configured in venv"; \
+		grep -q "gcc14/lib:/usr/pkg/lib" "$(VENV)/bin/activate" || \
+		echo 'export LD_LIBRARY_PATH="/usr/pkg/gcc14/lib:/usr/pkg/lib:$${LD_LIBRARY_PATH}"' >> "$(VENV)/bin/activate"; \
+		echo "[OK] pkgsrc + GCC 14 library paths configured in venv"; \
 		echo "[INFO] NetBSD detected - fixing websocket dependencies for Selenium compatibility..."; \
 		$(PYTHON) -m pip uninstall -y websocket 2>/dev/null || true; \
 		rm -rf $(VENV_DIR)/lib/python*/site-packages/websocket $(VENV_DIR)/lib/python*/site-packages/websocket-*.dist-info 2>/dev/null || true; \
