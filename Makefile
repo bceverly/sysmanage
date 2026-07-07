@@ -262,6 +262,13 @@ else
 				exit 1; \
 			}; \
 		fi; \
+		if ! command -v xgettext >/dev/null 2>&1; then \
+			echo "[INFO] Installing gettext-tools (needed for i18n catalog extraction)..."; \
+			sudo pkg install -y gettext-tools || { \
+				echo "[ERROR] Could not auto-install gettext-tools. Install it manually, then re-run:  sudo pkg install gettext-tools"; \
+				exit 1; \
+			}; \
+		fi; \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	else \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
@@ -1127,7 +1134,7 @@ i18n-extract-backend:
 ifeq ($(OS),Windows_NT)
 	@echo [skip] i18n-extract-backend needs GNU gettext (xgettext/msgmerge/msgen); run on Linux/macOS or CI.
 else
-	@command -v xgettext msgmerge msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
+	@command -v xgettext >/dev/null 2>&1 && command -v msgmerge >/dev/null 2>&1 && command -v msgen >/dev/null 2>&1 || { echo "ERROR: GNU gettext tools (xgettext/msgmerge/msgen) required — apt install gettext"; exit 1; }
 	@echo "=== extracting backend _() strings -> messages.pot ==="
 	@# --package-name / --msgid-bugs-address only set .pot header fields and need
 	@# GNU gettext >= 0.19; NetBSD's base xgettext is older and rejects them.  They
@@ -1192,7 +1199,7 @@ i18n-check-backend:
 ifeq ($(OS),Windows_NT)
 	@echo [skip] i18n-check-backend needs GNU gettext (xgettext/msgcmp); enforced on Linux/CI.
 else
-	@command -v xgettext msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
+	@command -v xgettext >/dev/null 2>&1 && command -v msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
 	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
 	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
