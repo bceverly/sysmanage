@@ -188,6 +188,10 @@ else
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "OpenBSD" ]; then \
 		echo "[INFO] OpenBSD detected - using ~/tmp for builds..."; \
+		if ! command -v xmlsec1 >/dev/null 2>&1; then \
+			echo "[INFO] Installing xmlsec (needed to build the xmlsec binding for python3-saml; pkg-config is already in OpenBSD base)..."; \
+			doas pkg_add xmlsec || echo "[WARN] Could not auto-install xmlsec; if the xmlsec wheel later fails to build, run:  doas pkg_add xmlsec"; \
+		fi; \
 		export TMPDIR=$$HOME/tmp && \
 		$(PYTHON) -m pip install -r requirements-dev.txt; \
 	elif [ "$$(uname -s)" = "NetBSD" ]; then \
