@@ -13,13 +13,23 @@ def _psycopg_url(url: str) -> str:
     """Route a PostgreSQL SQLAlchemy URL through psycopg (psycopg3).
 
     Converts ``postgresql://`` to ``postgresql+psycopg://`` so SQLAlchemy uses
-    the psycopg3 driver. Leaves SQLite / other schemes and already-qualified
-    ``postgresql+<driver>://`` URLs untouched. Apply ONLY to URLs handed to
+    the psycopg3 driver, and forces ``client_encoding=utf8`` on the connection.
+    Leaves SQLite / other schemes untouched. Apply ONLY to URLs handed to
     SQLAlchemy's create_engine/engine_from_config — never to a raw libpq /
     psycopg.connect() conninfo (libpq does not understand the ``+psycopg`` tag).
+
+    The UTF-8 client encoding matters on clusters initialised with SQL_ASCII
+    encoding — the ``initdb`` default under a C/POSIX locale, as on NetBSD.
+    Against a SQL_ASCII connection, psycopg3 hands back text query results as
+    ``bytes`` rather than ``str``, which breaks SQLAlchemy's PostgreSQL dialect
+    start-up (it runs ``re.match`` on the server-version string) and any code
+    expecting ``str``. Requesting UTF-8 makes psycopg decode text to ``str``
+    everywhere; it is a no-op on the UTF-8 clusters Linux/macOS build by default.
     """
     if url.startswith("postgresql://"):
-        return "postgresql+psycopg://" + url[len("postgresql://") :]
+        url = "postgresql+psycopg://" + url[len("postgresql://") :]
+    if url.startswith("postgresql+psycopg://") and "client_encoding=" not in url:
+        url += ("&" if "?" in url else "?") + "client_encoding=utf8"
     return url
 
 
