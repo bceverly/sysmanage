@@ -146,6 +146,19 @@ def run_migrations(
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
+    # WAL journal mode is more reliable than the default DELETE mode when
+    # multiple pytest-xdist workers run migrations against separate SQLite
+    # databases concurrently — DELETE mode creates/removes a rollback
+    # journal per transaction, which can trigger "attempt to write a
+    # readonly database" on FreeBSD under heavy parallel I/O.
+    if connectable.url.get_backend_name() == "sqlite":
+        from sqlalchemy import event  # noqa: PLC0415
+
+        @event.listens_for(connectable, "connect")
+        def _set_sqlite_wal(dbapi_conn, _rec):
+            dbapi_conn.execute("PRAGMA journal_mode=WAL")
+
     with connectable.connect() as connection:
         context.configure(connection=connection, **common)
         with context.begin_transaction():
