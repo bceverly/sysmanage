@@ -18,8 +18,11 @@ async function globalTeardown() {
 
   const scriptPath = join(__dirname, '..', '..', 'scripts', 'e2e_test_user.py');
 
+  // Windows ships `python` (no `python3` on PATH — it maps to a Store stub); Unix uses `python3`.
+  const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+
   try {
-    const result = execFileSync('python3', [scriptPath, 'delete'], {
+    const result = execFileSync(pythonCmd, [scriptPath, 'delete'], {
       encoding: 'utf-8',
       timeout: 30000,
       cwd: join(__dirname, '..', '..'),

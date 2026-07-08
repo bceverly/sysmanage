@@ -1674,17 +1674,7 @@ else
 			echo "[ERROR] Artillery did not produce a report (run failed silently?)"; \
 			exit 1; \
 		fi; \
-		REPORT_SUMMARY=$$($(PYTHON) -c "\
-import json, sys; \
-d = json.load(open('artillery-report.json')); \
-c = d.get('aggregate', {}).get('counters', {}); \
-created = c.get('vusers.created', 0); \
-failed = c.get('vusers.failed', 0); \
-responses = c.get('http.responses', 0); \
-ok_2xx = sum(v for k, v in c.items() if k.startswith('http.codes.2')); \
-err_4xx = sum(v for k, v in c.items() if k.startswith('http.codes.4')); \
-err_5xx = sum(v for k, v in c.items() if k.startswith('http.codes.5')); \
-print(f'{created}|{failed}|{responses}|{ok_2xx}|{err_4xx}|{err_5xx}')"); \
+		REPORT_SUMMARY=$$($(PYTHON) -c "import json,sys; d=json.load(open('artillery-report.json')); c=d.get('aggregate',{}).get('counters',{}); created=c.get('vusers.created',0); failed=c.get('vusers.failed',0); responses=c.get('http.responses',0); ok_2xx=sum(v for k,v in c.items() if k.startswith('http.codes.2')); err_4xx=sum(v for k,v in c.items() if k.startswith('http.codes.4')); err_5xx=sum(v for k,v in c.items() if k.startswith('http.codes.5')); print(f'{created}|{failed}|{responses}|{ok_2xx}|{err_4xx}|{err_5xx}')"); \
 		CREATED=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f1); \
 		FAILED=$$(echo "$$REPORT_SUMMARY"  | cut -d'|' -f2); \
 		RESPONSES=$$(echo "$$REPORT_SUMMARY" | cut -d'|' -f3); \
@@ -1717,28 +1707,44 @@ endif
 test-vite: test-typescript
 
 # Frontend E2E tests (Playwright TypeScript tests in frontend/e2e/)
-# Automatically starts backend + frontend on port 5173, runs tests, then stops everything
+# Automatically starts backend (8080) + frontend (3000), runs tests, then stops everything
 test-e2e: $(VENV_ACTIVATE)
 	@echo "=== Running Frontend E2E Tests (Playwright) ==="
 ifeq ($(OS),Windows_NT)
 	@if not exist logs mkdir logs
 	@if exist logs\e2e-fail.flag del logs\e2e-fail.flag
-	@echo "[INFO] Starting backend API server (single-tenant for e2e)..."
+	@echo "[INFO] Freeing ports 8080 and 3000 if a prior run left them in use..."
+	-@powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8080,3000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $$_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+	@REM Hermetic config: copy the box's config but inject a throwaway jwt_secret and
+	@REM disable vault, so the e2e backend never depends on the real OpenBAO (which would
+	@REM make the test brittle) yet can still sign JWTs. Reuses the box's DB creds so the
+	@REM e2e test user and the e2e backend share one database. Generated WITHOUT
+	@REM SYSMANAGE_CONFIG_PATH set, so it reads the real config as its source.
+	@echo "[INFO] Generating hermetic e2e config (inject jwt_secret, disable vault - real OpenBAO untouched)..."
+	@$(PYTHON) scripts\make_e2e_config.py logs\e2e-config.yaml
+	@echo "[INFO] Creating E2E test user (clearing any leftover first)..."
+	-@set SYSMANAGE_MULTITENANCY=false && set SYSMANAGE_CONFIG_PATH=%CD%\logs\e2e-config.yaml && $(PYTHON) scripts\e2e_test_user.py delete
+	@set SYSMANAGE_MULTITENANCY=false && set SYSMANAGE_CONFIG_PATH=%CD%\logs\e2e-config.yaml && $(PYTHON) scripts\e2e_test_user.py create
+	@echo "[INFO] Starting backend API server (email disabled, single-tenant, hermetic config)..."
 	@REM < NUL detaches the child's stdin so it can't grab the console (vite/uvicorn
 	@REM otherwise hold the terminal in raw mode and eat keystrokes if teardown misses them).
-	@start /B cmd /c "set SYSMANAGE_MULTITENANCY=false && $(PYTHON) -m backend.main < NUL > logs\backend-e2e.log 2>&1"
-	@echo "[INFO] Waiting for backend to be ready..."
-	@powershell -Command "Start-Sleep -Seconds 5"
-	@echo "[INFO] Starting frontend dev server on port 5173..."
-	@cd frontend && start /B cmd /c "set VITE_PORT=5173 && set FORCE_HTTP=true && npm start < NUL > ..\logs\frontend-e2e.log 2>&1"
-	@echo "[INFO] Waiting for frontend to be ready..."
-	@powershell -Command "for ($$i=1; $$i -le 20; $$i++) { try { Invoke-WebRequest -Uri http://localhost:5173 -TimeoutSec 2 -UseBasicParsing | Out-Null; Write-Host '[INFO] Frontend ready!'; break } catch { Write-Host '[INFO] Waiting...'; Start-Sleep -Seconds 2 } }"
+	@start /B cmd /c "set SYSMANAGE_DISABLE_EMAIL=true && set SYSMANAGE_MULTITENANCY=false && set SYSMANAGE_CONFIG_PATH=%CD%\logs\e2e-config.yaml && $(PYTHON) -m backend.main < NUL > logs\backend-e2e.log 2>&1"
+	@echo "[INFO] Waiting for backend to be ready on port 8080 (up to 180s)..."
+	-@powershell -NoProfile -Command "$$ok=$$false; for ($$i=1; $$i -le 90; $$i++) { try { Invoke-WebRequest -Uri http://127.0.0.1:8080/api/health -TimeoutSec 2 -UseBasicParsing | Out-Null; Write-Host '[INFO] Backend is ready!'; $$ok=$$true; break } catch { Write-Host ('[INFO] Waiting for backend... (' + $$i + '/90)'); Start-Sleep -Seconds 2 } }; if (-not $$ok) { Write-Host '[WARN] Backend not healthy within 180s - tests may fail; see logs\backend-e2e.log' }"
+	@echo "[INFO] Starting frontend dev server on port 3000..."
+	@REM NOTE: do NOT set VITE_HOST=127.0.0.1 here - on Windows/ARM64 Node resolves the
+	@REM literal IP via getaddrinfo and vite dies with 'ENOTFOUND 127.0.0.1'. Default bind works.
+	@cd frontend && start /B cmd /c "set VITE_PORT=3000 && set FORCE_HTTP=true && npm start < NUL > ..\logs\frontend-e2e.log 2>&1"
+	@echo "[INFO] Waiting for frontend to be ready on port 3000 (up to 120s; vite cold-starts + re-optimizes deps)..."
+	-@powershell -NoProfile -Command "for ($$i=1; $$i -le 60; $$i++) { try { Invoke-WebRequest -Uri http://localhost:3000 -TimeoutSec 2 -UseBasicParsing | Out-Null; Write-Host '[INFO] Frontend ready!'; break } catch { Write-Host ('[INFO] Waiting for frontend... (' + $$i + '/60)'); Start-Sleep -Seconds 2 } }"
 	@echo "[INFO] Running E2E tests..."
-	-@cd frontend && (npm run test:e2e || echo FAIL > ..\logs\e2e-fail.flag)
-	@echo "[INFO] Stopping servers (freeing ports 8080 and 5173)..."
-	@REM Kill by listening port (reliable) - the old 'taskkill /FI WINDOWTITLE eq *vite*'
-	@REM never matched because 'start /B' processes have no window title, so they leaked.
-	-@powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8080,5173 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $$_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+	-@cd frontend && set PLAYWRIGHT_BASE_URL=http://localhost:3000 && (npm run test:e2e || echo FAIL > ..\logs\e2e-fail.flag)
+	@echo "[INFO] Stopping servers (freeing ports 8080 and 3000)..."
+	@REM Kill by listening port (reliable) - 'start /B' processes have no window title,
+	@REM so the old 'taskkill /FI WINDOWTITLE eq *vite*' never matched and they leaked.
+	-@powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8080,3000 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $$_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+	@echo "[INFO] Cleaning up E2E test user..."
+	-@set SYSMANAGE_MULTITENANCY=false && set SYSMANAGE_CONFIG_PATH=%CD%\logs\e2e-config.yaml && $(PYTHON) scripts\e2e_test_user.py delete
 	@if exist logs\e2e-fail.flag (del logs\e2e-fail.flag & echo [ERROR] E2E tests failed. & exit /b 1)
 	@echo "[OK] E2E tests passed."
 else

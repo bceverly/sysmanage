@@ -45,6 +45,18 @@ def get_database_url():
 
         url = _app_db_url()
         if url:
+            # The app's resolver returns a bare ``postgresql://`` URL and applies
+            # the psycopg3-dialect rewrite separately (right before create_engine).
+            # Do the same here, or SQLAlchemy defaults a bare ``postgresql://`` to
+            # the psycopg2 dialect — which this project does NOT install (it uses
+            # psycopg3) → ModuleNotFoundError: No module named 'psycopg2'.
+            try:
+                from backend.persistence.db import _psycopg_url
+
+                url = _psycopg_url(url)
+            except Exception:  # noqa: BLE001 - helper absent; do the minimal rewrite
+                if url.startswith("postgresql://"):
+                    url = "postgresql+psycopg://" + url[len("postgresql://") :]
             # Mirror the app's masking-free log, but don't print the URL (it
             # carries the password).  The fallback below prints host/db only.
             print("Using server-resolved database URL")
