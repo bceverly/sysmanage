@@ -1582,6 +1582,16 @@ test-playwright:
 	@$(MAKE) test-e2e
 
 # Performance testing with Artillery (browser performance tests are now in test-e2e via performance.spec.ts)
+#
+# NOTE: the Unix recipe below is a single backslash-continued logical line. Do NOT add
+# indented `#` shell comments inside it: some shells collapse the backslash-newlines
+# before comment recognition, so a mid-recipe `#` swallows the rest of the line
+# (trap, fi, closing quotes) and make dies with "syntax error: unexpected end of file".
+# Two such things the recipe relies on, documented here where it's safe:
+#   - The `trap ... EXIT` deletes the perf-test user and stops any backend we started,
+#     even if artillery or the report checks fail partway through the recipe.
+#   - The report sanity-check treats a run with zero 2xx responses as a failure
+#     (endpoints 404, auth 401, or a misconfigured server all produce traffic-but-no-success).
 test-performance: $(VENV_ACTIVATE)
 	@echo "=== Running Performance Tests (Artillery) ==="
 ifeq ($(OS),Windows_NT)
@@ -1649,10 +1659,6 @@ else
 		done; \
 		echo "[INFO] Provisioning perf-test user (e2e-test@sysmanage.org)..."; \
 		. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py create; \
-		# Ensure the test user is deleted AND any backend we started is \
-		# stopped, even if artillery or the report checks fail. Without \
-		# the trap, a failure between create and the end of the recipe \
-		# would leave the user in the database and the backend running. \
 		trap ' \
 			. $(VENV_ACTIVATE) && $(PYTHON) scripts/e2e_test_user.py delete >/dev/null 2>&1 || true; \
 			if [ "$$BACKEND_STARTED_BY_US" = "1" ] && [ -f logs/backend-perf.pid ]; then \
@@ -1668,9 +1674,6 @@ else
 			echo "[ERROR] Artillery did not produce a report (run failed silently?)"; \
 			exit 1; \
 		fi; \
-		# Sanity-check the report. A "successful" run requires at least one 2xx HTTP \
-		# response — anything else means we sent traffic but got nothing useful back \
-		# (wrong endpoints, broken auth, server returning errors, etc.). \
 		REPORT_SUMMARY=$$($(PYTHON) -c "\
 import json, sys; \
 d = json.load(open('artillery-report.json')); \
