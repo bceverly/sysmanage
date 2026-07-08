@@ -1721,20 +1721,26 @@ test-vite: test-typescript
 test-e2e: $(VENV_ACTIVATE)
 	@echo "=== Running Frontend E2E Tests (Playwright) ==="
 ifeq ($(OS),Windows_NT)
+	@if not exist logs mkdir logs
+	@if exist logs\e2e-fail.flag del logs\e2e-fail.flag
 	@echo "[INFO] Starting backend API server (single-tenant for e2e)..."
-	@start /B cmd /c "set SYSMANAGE_MULTITENANCY=false && $(PYTHON) -m backend.main > logs\backend-e2e.log 2>&1"
+	@REM < NUL detaches the child's stdin so it can't grab the console (vite/uvicorn
+	@REM otherwise hold the terminal in raw mode and eat keystrokes if teardown misses them).
+	@start /B cmd /c "set SYSMANAGE_MULTITENANCY=false && $(PYTHON) -m backend.main < NUL > logs\backend-e2e.log 2>&1"
 	@echo "[INFO] Waiting for backend to be ready..."
 	@powershell -Command "Start-Sleep -Seconds 5"
 	@echo "[INFO] Starting frontend dev server on port 5173..."
-	@cd frontend && set VITE_PORT=5173 && set FORCE_HTTP=true && start /B npm start > ..\logs\frontend-e2e.log 2>&1
+	@cd frontend && start /B cmd /c "set VITE_PORT=5173 && set FORCE_HTTP=true && npm start < NUL > ..\logs\frontend-e2e.log 2>&1"
 	@echo "[INFO] Waiting for frontend to be ready..."
 	@powershell -Command "for ($$i=1; $$i -le 20; $$i++) { try { Invoke-WebRequest -Uri http://localhost:5173 -TimeoutSec 2 -UseBasicParsing | Out-Null; Write-Host '[INFO] Frontend ready!'; break } catch { Write-Host '[INFO] Waiting...'; Start-Sleep -Seconds 2 } }"
 	@echo "[INFO] Running E2E tests..."
-	@cd frontend && npm run test:e2e & set E2E_EXIT=%%ERRORLEVEL%%
-	@echo "[INFO] Stopping servers..."
-	@taskkill /F /FI "WINDOWTITLE eq *vite*" 2>nul || echo.
-	@taskkill /F /FI "WINDOWTITLE eq *python*" 2>nul || echo.
-	@if %%E2E_EXIT%% neq 0 exit /b %%E2E_EXIT%%
+	-@cd frontend && (npm run test:e2e || echo FAIL > ..\logs\e2e-fail.flag)
+	@echo "[INFO] Stopping servers (freeing ports 8080 and 5173)..."
+	@REM Kill by listening port (reliable) - the old 'taskkill /FI WINDOWTITLE eq *vite*'
+	@REM never matched because 'start /B' processes have no window title, so they leaked.
+	-@powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 8080,5173 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $$_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+	@if exist logs\e2e-fail.flag (del logs\e2e-fail.flag & echo [ERROR] E2E tests failed. & exit /b 1)
+	@echo "[OK] E2E tests passed."
 else
 	@if [ "$(shell uname -s)" = "OpenBSD" ] || [ "$(shell uname -s)" = "FreeBSD" ] || [ "$(shell uname -s)" = "NetBSD" ]; then \
 		echo "[SKIP] Playwright E2E tests not supported on $(shell uname -s)"; \
