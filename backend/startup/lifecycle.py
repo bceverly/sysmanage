@@ -40,6 +40,11 @@ def _track_background_task(task) -> None:
     task.add_done_callback(_BACKGROUND_TASKS.discard)
 
 
+# Guard against double-starting the OSS custom-metric retention loop (e.g. if
+# the lifespan runs twice under a test harness or a reload).
+_custom_metric_retention_started = False
+
+
 @asynccontextmanager
 async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
     """
@@ -604,6 +609,30 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             logger.info("GeoLite2 refresh task created: %s", geolite_refresh_task)
         except Exception as geo_exc:  # pylint: disable=broad-exception-caught
             logger.warning("Failed to start GeoLite2 refresh task: %s", geo_exc)
+
+        # Startup: Start the custom-metric sample retention loop (OSS).  The
+        # tenant ``custom_metric_sample`` table grows unbounded; this daily
+        # loop prunes samples older than ``custom_metrics.retention_days``
+        # across every provisioned tenant DB (or the single collapsed DB in
+        # single-tenant mode).  Tracked like the other fire-and-forget tasks;
+        # guarded against a double start.
+        global _custom_metric_retention_started  # pylint: disable=global-statement
+        if not _custom_metric_retention_started:
+            logger.info("=== CUSTOM METRIC RETENTION STARTUP ===")
+            try:
+                from backend.services.custom_metric_retention import (  # noqa: PLC0415
+                    run_custom_metric_retention_loop,
+                )
+
+                _track_background_task(
+                    asyncio.create_task(run_custom_metric_retention_loop())
+                )
+                _custom_metric_retention_started = True
+                logger.info("Custom-metric retention loop started")
+            except Exception as cmr_e:  # pylint: disable=broad-exception-caught
+                logger.warning(
+                    "Failed to start custom-metric retention loop: %s", cmr_e
+                )
 
         # Startup: Start the Graylog health monitor service
         logger.info("=== GRAYLOG HEALTH MONITOR STARTUP ===")

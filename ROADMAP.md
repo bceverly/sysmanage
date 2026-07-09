@@ -4968,17 +4968,23 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       1.0.8→**1.0.9** `evaluate_custom_metric`. Needs farm rebuilds
       (`observability_engine` 0.7.14, `alerting_engine` 1.0.9) + the observability
       plugin bundle.)*
-      - [ ] **`custom_metric_sample` retention/prune** — the samples table grows
-            unbounded; add a retention job (per-metric age/row cap) before GA.
-      - [ ] **Grafana flow-through** — provision a Grafana Postgres datasource +
-            auto-build/update a dashboard panel per custom metric via the
-            `grafana_integration` API, on metric create/update. (Bryan: "would be
-            interesting" — optional; benefits only Grafana-configured customers.)
+      - [x] **`custom_metric_sample` retention/prune** *(2026-07)* — OSS daily
+            background prune (`custom_metric_retention.py`), config
+            `custom_metrics_retention_days` (default 90, DB/YAML overridable),
+            per-tenant via `iter_host_databases()` (bootstrap-only in collapsed
+            mode). 7 tests.
+      - [x] **Grafana flow-through** *(2026-07, approach B — decided with Bryan)* —
+            NOT a Postgres datasource/dashboard; instead a Prometheus exposition
+            endpoint `GET /metrics/custom-metrics` (`backend/api/custom_metric_exporter.py`,
+            unauthenticated, latest-ok sample per metric+host, `tenant` label in MT)
+            that the existing Prometheus→Grafana pipeline scrapes. 6 tests.
+            *Human step:* add a Prometheus scrape job for the endpoint + firewall it
+            to the Prometheus host.
 - [ ] **Document GPG Key Management + Custom Metrics & Graphs in `sysmanage-docs`**
-      — new Pro+ feature pages (usage, roles, OpenBAO/agent notes for GPG;
-      tag-targeting + script model + graphs/alerting for custom metrics) **with
-      screenshots**, i18n'd. Both features are unL documented; folds into the GA
-      "Documentation 100%" gate.
+      *(2026-07: pages WRITTEN — `docs/professional-plus/gpg-keys.html` +
+      `custom-metrics.html`, registered in the Pro+ index, 109 English i18n keys
+      seeded, `i18n-validate` green. **Remaining for the box:** capture the 5
+      screenshots on the docs VM + `make translate` the 13 locales.)*
 - [x] Process Management — agent psutil snapshot collector (periodic + on-demand)
       → `host_process` tenant table → HostDetail "Processes" tab (sortable, search,
       kill/SIGKILL with confirm); server→agent `kill_process`/`collect_processes`

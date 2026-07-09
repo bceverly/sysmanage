@@ -49,10 +49,13 @@ rc_pre() {
 	install -d -m 0700 /var/lib/openbao /var/lib/openbao/data
 }
 
-rc_start() {
-	# Redirect to a log file (rc.subr's default drops the daemon's output).
-	${rcexec} "${daemon} ${daemon_flags} >> /var/log/openbao.log 2>&1"
-}
+# No custom rc_start: rc.subr's default daemon mechanism runs
+# `${daemon} ${daemon_flags}` and rc_bg=YES backgrounds the foreground
+# `bao server` (the proven pattern from sysmanage.rc).  A custom rc_start that
+# tried to add a `>> log 2>&1` redirect failed because OpenBSD's ${rcexec}
+# doesn't run its argument through a shell, so the redirect was treated as part
+# of the command path ("... not found").  bao logs to stderr; add a file/syslog
+# sink via the hcl or a wrapper only if operational logging is needed.
 
 rc_post() {
 	# Idempotent init + unseal; the helper polls the listener until it is up and
@@ -63,8 +66,7 @@ rc_post() {
 		--keyfile /var/lib/openbao/init.json \
 		--app-token-file /etc/sysmanage/openbao-token \
 		--app-token-owner _sysmanage \
-		2>/dev/null || \
-		echo "openbao: init/unseal did not complete; see /var/log/openbao.log"
+		|| echo "openbao: init/unseal did not complete; run 'BAO_ADDR=http://127.0.0.1:8200 bao status' to check"
 }
 
 rc_cmd $1

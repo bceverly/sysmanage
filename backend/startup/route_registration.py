@@ -28,6 +28,7 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
+    custom_metric_exporter,
     cve_refresh_settings,
     default_repositories,
     diagnostics,
@@ -205,6 +206,14 @@ def register_routes(app: FastAPI):
     # render the role chip + monitoring identify the box without login.
     app.include_router(server_info.router)
     logger.debug("Server-info router added")
+
+    # Custom Metrics Prometheus exporter — UNAUTHENTICATED (Prometheus-scrape
+    # convention).  Mounted at the app ROOT so the path is exactly
+    # ``/metrics/custom-metrics`` (NOT under /api/v1), the way the infra/health
+    # routes are.  Must be firewalled to the Prometheus host (see module
+    # docstring).
+    app.include_router(custom_metric_exporter.router)
+    logger.debug("Custom-metric Prometheus exporter router added")
 
     # Phase 13.1.H — server-scoped configuration settings (Settings →
     # Configuration UI).  Phase 13.2.1: native /api/v1/settings + /api alias.

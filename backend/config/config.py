@@ -767,6 +767,21 @@ def get_license_modules_path():
     return config["license"]["modules_path"]
 
 
+def get_custom_metrics_retention_days():
+    """
+    Get the retention window (in days) for custom-metric time-series samples.
+
+    Rows in ``custom_metric_sample`` older than this are pruned by the
+    background retention loop (``backend/services/custom_metric_retention.py``).
+    Server setting (DB via settings_service), YAML fallback, default 90 days.
+    """
+    return _server_setting(
+        "custom_metrics_retention_days",
+        lambda: config["custom_metrics"]["retention_days"],
+        default=90,
+    )
+
+
 def get_server_role():
     """
     Return the server role: ``standard``, ``collector``, or ``repository``.
