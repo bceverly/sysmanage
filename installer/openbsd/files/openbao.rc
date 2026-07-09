@@ -47,6 +47,20 @@ rc_pre() {
 	fi
 	# File-storage data dir (path fixed by the shared openbao.hcl).
 	install -d -m 0700 /var/lib/openbao /var/lib/openbao/data
+
+	# Idempotent init + unseal.  OpenBSD's rc.subr runs rc_post ONLY after STOP
+	# (not after start) and offers no post-start hook, so spawn the helper DETACHED
+	# here: it polls the loopback listener until bao (launched next by rc_start) is
+	# up, then initializes + unseals and writes the server's app token.  Runs on
+	# every boot — a reboot leaves bao sealed, and this re-unseals it from the
+	# stored init.json.  Output (incl. the "did not complete" path) -> its own log.
+	( /usr/local/bin/python3 \
+		/usr/local/libexec/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 \
+		--keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token \
+		--app-token-owner _sysmanage \
+		>> /var/log/openbao-init.log 2>&1 & )
 }
 
 # No custom rc_start: rc.subr's default daemon mechanism runs
@@ -56,17 +70,5 @@ rc_pre() {
 # doesn't run its argument through a shell, so the redirect was treated as part
 # of the command path ("... not found").  bao logs to stderr; add a file/syslog
 # sink via the hcl or a wrapper only if operational logging is needed.
-
-rc_post() {
-	# Idempotent init + unseal; the helper polls the listener until it is up and
-	# writes the server's app token.  Non-fatal so a manual init still works.
-	/usr/local/bin/python3 \
-		/usr/local/libexec/sysmanage/scripts/openbao_init_unseal.py \
-		--addr http://127.0.0.1:8200 \
-		--keyfile /var/lib/openbao/init.json \
-		--app-token-file /etc/sysmanage/openbao-token \
-		--app-token-owner _sysmanage \
-		|| echo "openbao: init/unseal did not complete; run 'BAO_ADDR=http://127.0.0.1:8200 bao status' to check"
-}
 
 rc_cmd $1
