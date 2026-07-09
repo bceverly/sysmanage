@@ -926,6 +926,41 @@ jobs:
           cd frontend
           npm run build
 
+      - name: Stage prebuilt ARM64 build deps (libpq + wheels)
+        # ARM64 libpq + the cross-compiled wheels are built ONCE on the local ARM64
+        # box (installer\windows\package-arm64-build-deps.ps1) and uploaded to the
+        # 'windows-arm64-deps' release. Download them here so build-msi.ps1 finds
+        # them pre-staged and skips the 30-60 min in-CI cross-compile.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = 'windows-arm64-deps'
+          New-Item -ItemType Directory -Force -Path deps-dl | Out-Null
+          gh release download $tag --repo "${{ github.repository }}" `
+            --pattern 'libpq-arm64.zip' --pattern 'wheels-arm64.zip' --pattern 'wheels-arm64.requirements.sha256' `
+            --dir deps-dl --clobber
+          New-Item -ItemType Directory -Force -Path installer\windows\libpq-arm64, installer\windows\wheels-arm64 | Out-Null
+          Expand-Archive -Path deps-dl\libpq-arm64.zip  -DestinationPath installer\windows\libpq-arm64  -Force
+          Expand-Archive -Path deps-dl\wheels-arm64.zip -DestinationPath installer\windows\wheels-arm64 -Force
+          $dlls = (Get-ChildItem installer\windows\libpq-arm64 -Filter *.dll).Count
+          $whls = (Get-ChildItem installer\windows\wheels-arm64 -Filter *.whl).Count
+          Write-Host "[OK] Staged $dlls libpq DLLs and $whls ARM64 wheels"
+          if ($dlls -lt 6 -or $whls -lt 1) {
+            throw "ARM64 build deps look incomplete (dlls=$dlls, whls=$whls) — rebuild + re-upload with package-arm64-build-deps.ps1"
+          }
+          # Staleness guard: warn (don't fail) if the wheels were built against a
+          # different requirements-prod.txt than this release is packaging.
+          $hashFile = 'deps-dl\wheels-arm64.requirements.sha256'
+          if (Test-Path $hashFile) {
+            $built = (Get-Content $hashFile -Raw).Trim().ToLower()
+            $cur   = (Get-FileHash requirements-prod.txt -Algorithm SHA256).Hash.ToLower()
+            if ($built -ne $cur) {
+              Write-Host "::warning::Prebuilt ARM64 wheels were built against a different requirements-prod.txt ($built vs $cur) — rebuild + re-upload via package-arm64-build-deps.ps1 or the MSI may ship stale deps."
+            }
+          }
+
       - name: Build Windows MSI (ARM64)
         env:
           VERSION: ${{ steps.version.outputs.version }}
