@@ -14,6 +14,7 @@ from backend.api.handlers import (
     handle_child_host_creation_progress,
     handle_child_hosts_list_update,
     handle_commercial_antivirus_status_update,
+    handle_custom_metric_samples,
     handle_firewall_status_update,
     handle_graylog_status_update,
     handle_hardware_update,
@@ -183,6 +184,12 @@ async def route_inbound_message(  # NOSONAR
             await handle_process_status_update(db, mock_connection, message_data)
             success = True
             print("Successfully processed process status update", flush=True)
+
+        elif message_type == MessageType.CUSTOM_METRIC_SAMPLES:
+            print("About to call handle_custom_metric_samples", flush=True)
+            await handle_custom_metric_samples(db, mock_connection, message_data)
+            success = True
+            print("Successfully processed custom metric samples", flush=True)
 
         elif message_type == MessageType.HOSTNAME_CHANGED:
             print("About to call handle_hostname_changed", flush=True)

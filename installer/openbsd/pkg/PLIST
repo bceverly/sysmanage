@@ -3,13 +3,18 @@
 @comment For official port submission, register these in /usr/ports/infrastructure/db/user.list
 @comment @newgroup _sysmanage:828
 @comment @newuser _sysmanage:828:_sysmanage::SysManage Server:/nonexistent:/sbin/nologin
-@comment rc.d script
+@comment rc.d scripts
 @rcscript ${RCDIR}/sysmanage
+@comment OpenBAO secrets broker (Phase 13.1.H): rc.d service (provisions the
+@comment verified prebuilt 'bao' on first start), shared config, init helper.
+@rcscript ${RCDIR}/openbao
 @comment Backend application directory
 libexec/sysmanage/
 libexec/sysmanage/alembic.ini
 libexec/sysmanage/alembic/
 libexec/sysmanage/backend/
+libexec/sysmanage/scripts/
+libexec/sysmanage/scripts/openbao_init_unseal.py
 @comment Backend Python files will be listed here after make update-plist
 @comment Frontend static files
 share/sysmanage/
@@ -26,6 +31,10 @@ share/doc/sysmanage/sbom/frontend-sbom.json
 share/examples/sysmanage/
 share/examples/sysmanage/sysmanage.yaml
 @sample ${SYSCONFDIR}/sysmanage.yaml
+@comment OpenBAO config (installed to /etc/openbao/openbao.hcl)
+share/examples/openbao/
+share/examples/openbao/openbao.hcl
+@sample ${SYSCONFDIR}/openbao/openbao.hcl
 @comment Data directories
 @sample /var/db/sysmanage/
 @sample /var/log/sysmanage/

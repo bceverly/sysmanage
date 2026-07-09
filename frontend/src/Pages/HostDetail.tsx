@@ -3135,7 +3135,7 @@ const HostDetail = () => { // NOSONAR
 
         try {
             // Call backend API to deploy antivirus to this specific host
-            const response = await axiosInstance.post('/api/deploy', {
+            const response = await axiosInstance.post('/api/v1/deploy', {
                 host_ids: [host.id]
             });
 

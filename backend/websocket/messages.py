@@ -42,6 +42,9 @@ class MessageType(str, Enum):
     GRAYLOG_STATUS_UPDATE = "graylog_status_update"
     # Phase 13.3 — running-process snapshot from the agent.
     PROCESS_STATUS_UPDATE = "process_status_update"
+    # Custom Metrics & Graphs (Slice 3b) — a batch of collected metric samples
+    # from the agent, stored into the OSS ``custom_metric_sample`` tenant table.
+    CUSTOM_METRIC_SAMPLES = "custom_metric_samples"
     HOSTNAME_CHANGED = "hostname_changed"
     # Agent reports completion of a server-initiated package install/uninstall.
     # Replaces the legacy ``POST /agent/installation-complete`` HTTP path so the

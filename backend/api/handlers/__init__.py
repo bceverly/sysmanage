@@ -73,6 +73,11 @@ from backend.api.handlers.process_handlers import (
     handle_process_status_update,
 )
 
+# Import from custom_metric_handlers (Custom Metrics & Graphs — Slice 3b)
+from backend.api.handlers.custom_metric_handlers import (
+    handle_custom_metric_samples,
+)
+
 __all__ = [
     # OS and Hardware handlers
     "is_new_os_version_combination",
@@ -112,4 +117,6 @@ __all__ = [
     "handle_kvm_modules_disable_result",
     # Hostname handler
     "handle_hostname_changed",
+    # Custom Metrics & Graphs handlers (Slice 3b)
+    "handle_custom_metric_samples",
 ]

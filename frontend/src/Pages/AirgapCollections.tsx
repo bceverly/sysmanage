@@ -359,7 +359,7 @@ const AirgapCollections: React.FC = () => {
     // them.
     try {
       const r = await axiosInstance.get<MirrorPickItem[]>(
-        '/api/mirror-repositories',
+        '/api/v1/mirror-repositories',
       );
       setAvailableMirrors(r.data.filter((m) => m.enabled));
     } catch {

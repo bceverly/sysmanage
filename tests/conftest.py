@@ -287,6 +287,8 @@ def client(engine, db_session, mock_config):
             "00000000-0000-0000-0000-000000000010"
         ),
         SecurityRoles.VIEW_FIREWALL_ROLES: UUID("00000000-0000-0000-0000-000000000010"),
+        # Secrets group - GPG Key Management (Slice 2)
+        SecurityRoles.MANAGE_GPG_KEYS: UUID("00000000-0000-0000-0000-000000000003"),
     }
 
     for role_enum, group_id in role_to_group.items():
@@ -497,6 +499,8 @@ def authenticated_client(db_session, mock_config):
             "00000000-0000-0000-0000-000000000010"
         ),
         SecurityRoles.VIEW_FIREWALL_ROLES: UUID("00000000-0000-0000-0000-000000000010"),
+        # Secrets group - GPG Key Management (Slice 2)
+        SecurityRoles.MANAGE_GPG_KEYS: UUID("00000000-0000-0000-0000-000000000003"),
     }
 
     for role_enum, group_id in role_to_group.items():

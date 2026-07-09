@@ -255,10 +255,8 @@ def register_routes(app: FastAPI):
     app.include_router(airgap_devices.router)
     logger.debug("Air-gap devices router added")
 
-    logger.debug(
-        "Adding repository mirroring router (no prefix — endpoints carry /api prefix)"
-    )
-    app.include_router(repository_mirroring.router)
+    # Phase 13.2.1 — Slice 8: native /api/v1/mirror-* (+ deprecated /api alias).
+    _include_versioned(app, repository_mirroring.router, tags=["repository-mirroring"])
     logger.debug("Repository mirroring router added")
 
     # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.
@@ -410,6 +408,10 @@ def register_routes(app: FastAPI):
     _include_versioned(app, report_branding.router)
     _include_versioned(app, report_templates.router)
     _include_versioned(app, dynamic_secrets.router)
+
+    # GPG Key Management relocated into the Pro+ secrets_engine (Pro+ moat):
+    # the endpoints now live under /api/v1/secrets/gpg-keys*, served by the
+    # licensed engine (or the OSS licensed-stub when the engine is absent).
 
     logger.debug("Adding tag router (native /api/v1 + deprecated /api alias)")
     _include_versioned(app, tag.router, tags=["tags"])

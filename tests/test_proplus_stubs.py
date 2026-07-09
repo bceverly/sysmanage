@@ -437,6 +437,71 @@ class TestContainerActionStubs:
         assert response.json()["licensed"] is False
 
 
+class TestObservabilityCustomMetricsStubs:
+    """Test custom-metrics stub endpoints return licensed=false without the
+    observability_engine (Custom Metrics Slice 2)."""
+
+    def test_custom_metrics_list_stub(self, client):
+        """Listing custom metrics returns licensed=false without the engine."""
+        response = client.get("/api/v1/observability/custom-metrics")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["licensed"] is False
+        assert data["custom_metrics"] == []
+
+    def test_custom_metrics_create_stub(self, client):
+        """Creating a custom metric returns licensed=false without the engine."""
+        response = client.post(
+            "/api/v1/observability/custom-metrics",
+            json={
+                "name": "disk-free",
+                "script": "echo 42",
+                "interpreter": "sh",
+                "tag_ids": [],
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["licensed"] is False
+
+    def test_custom_metrics_get_stub(self, client):
+        """Getting a custom metric returns licensed=false without the engine."""
+        response = client.get("/api/v1/observability/custom-metrics/test-id")
+        assert response.status_code == 200
+        assert response.json()["licensed"] is False
+
+    def test_custom_metrics_update_stub(self, client):
+        """Updating a custom metric returns licensed=false without the engine."""
+        response = client.put(
+            "/api/v1/observability/custom-metrics/test-id",
+            json={"enabled": False},
+        )
+        assert response.status_code == 200
+        assert response.json()["licensed"] is False
+
+    def test_custom_metrics_delete_stub(self, client):
+        """Deleting a custom metric returns licensed=false without the engine."""
+        response = client.delete("/api/v1/observability/custom-metrics/test-id")
+        assert response.status_code == 200
+        assert response.json()["licensed"] is False
+
+    def test_custom_metrics_tags_stub(self, client):
+        """Setting tags returns licensed=false without the engine."""
+        response = client.put(
+            "/api/v1/observability/custom-metrics/test-id/tags",
+            json={"tag_ids": []},
+        )
+        assert response.status_code == 200
+        assert response.json()["licensed"] is False
+
+    def test_custom_metrics_samples_stub(self, client):
+        """Reading samples returns licensed=false without the engine."""
+        response = client.get("/api/v1/observability/custom-metrics/test-id/samples")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["licensed"] is False
+        assert data["samples"] == []
+
+
 class TestAuditIntegrityHash:
     """Test that audit log entries include integrity hash."""
 

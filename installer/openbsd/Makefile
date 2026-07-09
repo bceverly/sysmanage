@@ -92,4 +92,18 @@ do-install:
 	${INSTALL_SCRIPT} ${FILESDIR}/sysmanage.rc \
 		${DESTDIR}/etc/rc.d/sysmanage
 
+	# OpenBAO secrets broker (Phase 13.1.H/13.1.I): rc.d service + the shared
+	# config + the init/unseal helper.  OpenBSD has no OpenBAO package, so the
+	# rc script provisions the verified prebuilt 'bao' binary on first start.
+	${INSTALL_SCRIPT} ${FILESDIR}/openbao.rc \
+		${DESTDIR}/etc/rc.d/openbao
+	${INSTALL_DATA_DIR} ${PREFIX}/share/examples/openbao
+	test -f ${WRKSRC}/installer/openbao/openbao.hcl && \
+		${INSTALL_DATA} ${WRKSRC}/installer/openbao/openbao.hcl \
+			${PREFIX}/share/examples/openbao/openbao.hcl || true
+	${INSTALL_DATA_DIR} ${PREFIX}/libexec/sysmanage/scripts
+	test -f ${WRKSRC}/scripts/openbao_init_unseal.py && \
+		${INSTALL_SCRIPT} ${WRKSRC}/scripts/openbao_init_unseal.py \
+			${PREFIX}/libexec/sysmanage/scripts/openbao_init_unseal.py || true
+
 .include <bsd.port.mk>

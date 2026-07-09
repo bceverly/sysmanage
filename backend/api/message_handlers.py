@@ -179,6 +179,18 @@ async def handle_command_result(db, connection, message_data: dict):  # NOSONAR
 
         return await handle_kvm_initialize_result(db, connection, message_data)
 
+    # GPG Key Management (Slice 3b): flip gpg_key_assignment.status from the
+    # agent's install/remove command result.  OSS status update only.
+    if command_type in ("install_gpg_key", "remove_gpg_key"):
+        logger.info(
+            "Detected GPG key command result (%s), routing to handler", command_type
+        )
+        from backend.api.handlers.gpg_key_handlers import (
+            handle_gpg_key_command_result,
+        )
+
+        return await handle_gpg_key_command_result(db, connection, message_data)
+
     logger.info("PACKAGE_DEBUG: message_data keys: %s", list(message_data.keys()))
     logger.info(
         "PACKAGE_DEBUG: result_data type: %s, keys: %s",

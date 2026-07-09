@@ -132,7 +132,7 @@ export const handlers = [
     }
 
     // Antivirus coverage
-    if (path === '/api/antivirus-coverage') {
+    if (path === '/api/v1/antivirus-coverage') {
       return HttpResponse.json({
         total_hosts: 0,
         hosts_with_antivirus: 0,

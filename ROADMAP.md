@@ -4435,10 +4435,17 @@ plan-builder + UI integration.
       [`docs/planning/openbao-deployment-and-airgap.md`](docs/planning/openbao-deployment-and-airgap.md),
       [`docs/planning/config-classification.md`](docs/planning/config-classification.md).
       *(Started June 2026: backend startup guard + shared OpenBAO assets done; OpenBAO
-      install/start wired into ALL installers except OpenBSD — Ubuntu/Debian, CentOS/
+      install/start wired into ALL installers — Ubuntu/Debian, CentOS/
       RHEL, openSUSE, Alpine (OpenRC+musl tarball), FreeBSD (pkg/tarball+rc.d), NetBSD
       (tarball+rc.d), macOS (tarball+launchd), Windows (zip+NSSM), Snap (bundled binary
-      +wrapper). All migrate hints fixed to run the 3 chains.
+      +wrapper). **OpenBSD wired 2026-07** — the port now ships `files/openbao.rc`
+      (`/etc/rc.d/openbao`) which provisions the verified prebuilt `bao` (v2.5.4, per
+      13.1.I) on first start, runs it against the shared `openbao.hcl`
+      (`@sample /etc/openbao/openbao.hcl`), and idempotently init/unseals via the
+      installed `openbao_init_unseal.py`; Makefile `do-install` + PLIST updated.
+      **Pending: a smoke-test on real OpenBSD 7.9** (rc.d start/init/unseal, like the
+      13.1.I binary verification) — authored but not yet run on-box. All migrate hints
+      fixed to run the 3 chains.
       **Config reclassification (June 2026): the bulk DONE.** The accessor seams
       (`config._server_setting` / `_config_secret` / `_db_setting`, `settings_service`,
       `secrets_service`) and the startup OpenBAO overlay were already in place; this
@@ -4688,23 +4695,35 @@ as thin back-compat only.
       unversioned. Backend 5545+539 green, frontend 122 green.
 
 **Frontend (sysmanage):**
-- [ ] Migrate the ~364 legacy `/api/*` call sites to `/api/v1` *paired with each
-      backend slice above* (the ~70 already-v1 sites need no change). Keep edits
-      grouped in the per-feature `Services/*.ts` modules.
+- [x] Migrate the legacy `/api/*` call sites to `/api/v1` *paired with each
+      backend slice above*. *(2026-07 reconciliation: the "~364" was already
+      largely done via Slices 1-6; the last genuine leftovers — antivirus-coverage,
+      antivirus-deploy, and diagnostics (5 files) — were migrated to `/api/v1`
+      (incl. the msw mock). Intentionally-unversioned surfaces stay: agent, SCIM,
+      IdP SSO/ACS callbacks, auth/mfa, mirror settings.)*
+- [x] *Slice 8: `repository_mirroring` → native `/api/v1`.* (Decided 2026-07:
+      repository mirroring **should** be versioned — the one router no earlier
+      slice had covered.) De-prefixed the ~23 decorators
+      (`/api/mirror-repositories`(+ sub-resources), `/api/settings/mirror`,
+      `/api/mirror-platform-configs`, `/api/mirror-known-versions`,
+      `/api/host-defaults/mirrors`), registered via `_include_versioned`
+      (canonical `/api/v1` + hidden deprecated `/api` alias), and migrated the
+      ~21 frontend sites in `Services/repositoryMirroring.ts`.
 
 **Pro+ engines (sysmanage-professional-plus) — require version bump + rebuild:**
-- [ ] *Slice 7:* add `/v1` to the ~7 unversioned engines — `vuln_engine`,
-      `health_engine`, `compliance_engine`, `av_management_engine`,
-      `firewall_orchestration_engine`, `airgap_repository_engine`,
-      `airgap_collector_engine`. Each is a `.pyx` change, so it **MUST bump the
-      engine `__version__` + metadata.json in lockstep** or `make update` won't
-      pull the new `.so` (see the cython-engine-version-bump rule). Verify each
-      engine's *effective served path* after the mount prefix (`proplus_routes`
-      adds `/api`) — confirm no `/api/api/...` or `/api/v1/v1/...`. The 9
-      already-`/v1` engines need no change. Engines make no outbound `/api`
-      calls, so nothing else in the repo breaks.
-- [ ] Migrate the 25 Pro+ frontend `plugin-src` call sites on legacy `/api/*` to
-      `/api/v1` (paired with the engine slice). Many components already use `/v1`.
+- [x] *Slice 7:* add `/v1` to the unversioned engines. *(2026-07 reconciliation:
+      5 of the 7 named were already `/v1` (`vuln_engine`, `health_engine`,
+      `compliance_engine`, `av_management_engine`, `firewall_orchestration_engine`).
+      The remaining two were migrated: `airgap_repository_engine`
+      `/airgap/repository`→`/v1/airgap/repository` (0.1.7→**0.1.8**) and
+      `airgap_collector_engine` `/airgap/collector`→`/v1/airgap/collector`
+      (0.1.5→**0.1.6**), `__version__` + metadata.json bumped in lockstep. **Both
+      need a farm rebuild to deploy.** Effective path `/api/v1/airgap/...` already
+      matches the frontend + OSS airgap routers.)*
+- [x] Migrate the Pro+ frontend `plugin-src` call sites to `/api/v1`.
+      *(2026-07 reconciliation: already done — the only remaining legacy `/api/*`
+      in plugin-src are the intentionally-unversioned `/api/auth/accounts` +
+      `/api/auth/switch-account`; every engine call already uses `/api/v1`.)*
 
 **Optional / later:**
 - [x] **Route-collision guard** (`check_route_collisions`, run in the lifespan
@@ -4748,8 +4767,17 @@ as thin back-compat only.
       `/control-plane`); verified against a fresh 0.4.3 engine — OSS 5586 + Pro+
       2154 green. **Needs the multitenancy engine rebuilt to 0.4.3** to deploy
       (and to green the OSS behavioral tests against the storage bundle).
-- [ ] Once every feature is native-v1, decide whether to keep the bridge as
-      permanent back-compat for old agents/scripts or retire it.
+- [ ] **RETIRE THE BRIDGE — the final Phase 13 engineering action (do LAST).**
+      (Decided 2026-07, Bryan: the `ApiVersionMiddleware` legacy `/api`→`/api/v1`
+      bridge is *removed*, not kept as permanent back-compat.) The bridge is the
+      safety net during the incremental migration, so it comes out only **after**
+      every feature is native-`/api/v1` (all slices incl. Slice 7/8 above) AND the
+      remaining 13.3 features (GPG, custom metrics) have landed — i.e. this is the
+      last box checked before the GA Release Checklist. Removal = drop the
+      middleware, drop the one-release deprecated `/api` aliases, keep only the
+      deliberately-unversioned surfaces (agent, SCIM, IdP SSO/ACS callbacks,
+      auth/mfa, mirror settings), and confirm no client still calls a bare
+      `/api/*` path.
 
 **Discovered during 13.2.1 live testing on a licensed multi-tenant box (2026-06-29):**
 - [x] **`reporting_engine` double-prefix — licensed reporting 404s.** *(Fixed in
@@ -4854,7 +4882,40 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
 
 #### 13.3 Additional Polish Items
 
-- [ ] GPG Key Management
+- [ ] **GPG Key Management** — store **named GPG keys as secrets in the OpenBAO
+      vault** and assign them by name to specific hosts / to specific users on
+      those hosts. (Design 2026-07, Bryan.)
+      - **Storage:** each key is a named OpenBAO (KV) secret — private material
+        never touches the DB or YAML; a registry/DB row holds only the *name* +
+        metadata (fingerprint, owner, created) and the OpenBAO secret reference.
+        **Must work on every OS incl. OpenBSD** — depends on OpenBAO-on-OpenBSD
+        (the OpenBSD installer OpenBAO hook, see the **13.1.H** tail).
+      - **Assignment UI:** a UI to assign a named key → a host, or → a specific
+        user account on a host, and manage those host↔key / user↔key bindings.
+      - **Agent:** server→agent command over the durable queue installs/removes
+        the assigned key into the target user's GnuPG keyring and reports
+        installed-key state back; gate on a new `Manage GPG Keys` role.
+      - *Edition gating: likely Professional+. The vault + agent-command + durable-
+        queue plumbing already exist (OpenBAO, process-management, logging-config).*
+
+      *(Implemented 2026-07 as a Pro+ capability folded into `secrets_engine`
+      (decision: Pro+ in secrets_engine). **Schema in OSS:** `gpg_key` +
+      `gpg_key_assignment` tenant tables (migration `m1gpgkeys`), `MANAGE_GPG_KEYS`
+      role. **Logic in the engine** (`secrets_engine` 1.1.4→**1.1.5**): store/list/
+      delete/assign + vault storage (`VaultService`, material vault-only, never in
+      any response), 7 endpoints at `/api/v1/secrets/gpg-keys*`, and a
+      `deploy_gpg_key` that enqueues `install_gpg_key`/`remove_gpg_key` on the
+      host's tenant queue (mirrors `deploy_ssh_keys`). OSS keeps a 402 stub.
+      **Agent** (`gpg_operations.py`): imports/removes into the target user's
+      GnuPG keyring (`su` to user + `GNUPGHOME`, material only in a 0600 temp file,
+      never on argv/log; Windows runs-as-user limitation noted). **Result→status:**
+      `handle_gpg_key_command_result` flips `gpg_key_assignment.status`. **UI:**
+      Pro+ plugin `GpgKeysPage` (upload one-way, assign to host/user, status chips),
+      role-gated, i18n×14. Tests green in all repos. **To deploy:** rebuild
+      `secrets_engine` 1.1.5 + the secrets plugin bundle. **Open refinement:** DELETE
+      assignment currently drops the row immediately (remove is fire-and-forget) —
+      deferring row removal until the agent confirms is a small follow-up. GPG on
+      OpenBSD is gated on the 13.1.H OpenBSD OpenBAO smoke-test.)*
 - [x] Administrator Invitations — email-tokened invites with security-role
       assignment; backend (`user_invitation` table + `invitation_service` +
       `/api/v1/invitations` API), admin UI (`InvitationsManager` in Users
@@ -4878,7 +4939,46 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       existing `ubuntu_pro` payload; livepatch_* columns on `ubuntu_pro_info`
       (migration `k1livepatch`); served on `/host/{id}/ubuntu-pro`; Kernel
       Livepatch card in the HostDetail Ubuntu Pro tab. Tests + i18n + lint.
-- [ ] Custom Metrics and Graphs (Professional+)
+- [ ] **Custom Metrics and Graphs (Professional+)** — scope (2026-07): do NOT
+      rebuild a Grafana-class dashboarding engine; reuse what exists
+      (`observability_engine` OTLP/hostmetrics, `alerting_engine`, the Grafana
+      bridge). Two focused pieces:
+      1. **Custom metric definitions** — UI + registry/tenant table defining a
+         named metric as either (a) an agent-collected value (a whitelisted
+         command / psutil field / file-scrape the agent already runs, sampled on a
+         cadence into a `host_metric_sample` tenant table) or (b) a derived
+         expression over existing series. This finishes the existing
+         `alerting_engine.evaluate_custom_metric()` stub so custom metrics become
+         first-class **alert inputs** (the highest-value use).
+      2. **Lightweight in-UI time-series graphs** over those samples (a simple
+         chart card, NOT a dashboard builder); defer heavy/ad-hoc analytics to the
+         existing **Grafana** integration (auto-provision a datasource/dashboard
+         from the same samples). Raw material for Phase 21 (Proactive Ops &
+         Advisor).
+
+      *(Core IMPLEMENTED 2026-07, Landscape "Custom Graphs" parity — tag-targeted
+      script → single numeric value → sampled → graphed → alertable. OSS schema:
+      `custom_metric` / `custom_metric_tag` / `custom_metric_sample` (migration
+      `n1custmetric`), `MANAGE_CUSTOM_METRICS` role. Logic in `observability_engine`
+      0.7.13→**0.7.14** (CRUD/API at `/api/v1/observability/custom-metrics*`,
+      tag→host `sync_custom_metrics` deploy). Agent `custom_metrics_operations`
+      (cadence scheduler, runs scripts, sends `custom_metric_samples`, persisted
+      locally). OSS ingest handler. Pro+ plugin UI (new observability bundle:
+      define dialog + SVG time-series card). Alerting wired: `alerting_engine`
+      1.0.8→**1.0.9** `evaluate_custom_metric`. Needs farm rebuilds
+      (`observability_engine` 0.7.14, `alerting_engine` 1.0.9) + the observability
+      plugin bundle.)*
+      - [ ] **`custom_metric_sample` retention/prune** — the samples table grows
+            unbounded; add a retention job (per-metric age/row cap) before GA.
+      - [ ] **Grafana flow-through** — provision a Grafana Postgres datasource +
+            auto-build/update a dashboard panel per custom metric via the
+            `grafana_integration` API, on metric create/update. (Bryan: "would be
+            interesting" — optional; benefits only Grafana-configured customers.)
+- [ ] **Document GPG Key Management + Custom Metrics & Graphs in `sysmanage-docs`**
+      — new Pro+ feature pages (usage, roles, OpenBAO/agent notes for GPG;
+      tag-targeting + script model + graphs/alerting for custom metrics) **with
+      screenshots**, i18n'd. Both features are unL documented; folds into the GA
+      "Documentation 100%" gate.
 - [x] Process Management — agent psutil snapshot collector (periodic + on-demand)
       → `host_process` tenant table → HostDetail "Processes" tab (sortable, search,
       kill/SIGKILL with confirm); server→agent `kill_process`/`collect_processes`

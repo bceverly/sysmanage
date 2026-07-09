@@ -1,7 +1,7 @@
 /**
  * Repository Mirroring API client (Phase 10.4).
  *
- * Wraps the ``/api/mirror-repositories/*`` and ``/api/settings/mirror``
+ * Wraps the ``/api/v1/mirror-repositories/*`` and ``/api/v1/settings/mirror``
  * endpoints.  Every call returns 402 when the Pro+
  * ``repository_mirroring_engine`` module isn't loaded; the caller is
  * expected to gate its UI on ``isModuleLicensed("repository_mirroring_engine")``
@@ -112,7 +112,7 @@ export interface MirrorSettings {
 }
 
 export const listMirrors = async (): Promise<MirrorRepository[]> => {
-  const r = await axiosInstance.get<MirrorRepository[]>('/api/mirror-repositories');
+  const r = await axiosInstance.get<MirrorRepository[]>('/api/v1/mirror-repositories');
   return r.data;
 };
 
@@ -120,7 +120,7 @@ export const createMirror = async (
   payload: MirrorRepositoryCreate,
 ): Promise<MirrorRepository> => {
   const r = await axiosInstance.post<MirrorRepository>(
-    '/api/mirror-repositories',
+    '/api/v1/mirror-repositories',
     payload,
   );
   return r.data;
@@ -131,27 +131,27 @@ export const updateMirror = async (
   patch: Partial<MirrorRepositoryCreate>,
 ): Promise<MirrorRepository> => {
   const r = await axiosInstance.put<MirrorRepository>(
-    `/api/mirror-repositories/${safeId(id)}`,
+    `/api/v1/mirror-repositories/${safeId(id)}`,
     patch,
   );
   return r.data;
 };
 
 export const deleteMirror = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/api/mirror-repositories/${safeId(id)}`);
+  await axiosInstance.delete(`/api/v1/mirror-repositories/${safeId(id)}`);
 };
 
 export const syncMirror = async (
   id: string,
 ): Promise<{ message: string; mirror_id: string; message_id: string }> => {
-  const r = await axiosInstance.post(`/api/mirror-repositories/${safeId(id)}/sync`);
+  const r = await axiosInstance.post(`/api/v1/mirror-repositories/${safeId(id)}/sync`);
   return r.data;
 };
 
 export const snapshotMirror = async (
   id: string,
 ): Promise<{ snapshot_id: string; message_id: string }> => {
-  const r = await axiosInstance.post(`/api/mirror-repositories/${safeId(id)}/snapshot`);
+  const r = await axiosInstance.post(`/api/v1/mirror-repositories/${safeId(id)}/snapshot`);
   return r.data;
 };
 
@@ -160,7 +160,7 @@ export const restoreMirror = async (
   snapshotId: string,
 ): Promise<{ snapshot_id: string; message_id: string }> => {
   const r = await axiosInstance.post(
-    `/api/mirror-repositories/${safeId(id)}/restore/${safeId(snapshotId)}`,
+    `/api/v1/mirror-repositories/${safeId(id)}/restore/${safeId(snapshotId)}`,
   );
   return r.data;
 };
@@ -169,20 +169,20 @@ export const listSnapshots = async (
   id: string,
 ): Promise<MirrorSnapshot[]> => {
   const r = await axiosInstance.get<MirrorSnapshot[]>(
-    `/api/mirror-repositories/${safeId(id)}/snapshots`,
+    `/api/v1/mirror-repositories/${safeId(id)}/snapshots`,
   );
   return r.data;
 };
 
 export const getMirrorSettings = async (): Promise<MirrorSettings> => {
-  const r = await axiosInstance.get<MirrorSettings>('/api/settings/mirror');
+  const r = await axiosInstance.get<MirrorSettings>('/api/v1/settings/mirror');
   return r.data;
 };
 
 export const updateMirrorSettings = async (
   patch: Partial<MirrorSettings>,
 ): Promise<MirrorSettings> => {
-  const r = await axiosInstance.put<MirrorSettings>('/api/settings/mirror', patch);
+  const r = await axiosInstance.put<MirrorSettings>('/api/v1/settings/mirror', patch);
   return r.data;
 };
 
@@ -219,7 +219,7 @@ export interface MirrorPlatformConfigPayload {
 
 export const listPlatformConfigs = async (): Promise<MirrorPlatformConfig[]> => {
   const r = await axiosInstance.get<MirrorPlatformConfig[]>(
-    '/api/mirror-platform-configs',
+    '/api/v1/mirror-platform-configs',
   );
   return r.data;
 };
@@ -228,7 +228,7 @@ export const createPlatformConfig = async (
   payload: MirrorPlatformConfigPayload,
 ): Promise<MirrorPlatformConfig> => {
   const r = await axiosInstance.post<MirrorPlatformConfig>(
-    '/api/mirror-platform-configs',
+    '/api/v1/mirror-platform-configs',
     payload,
   );
   return r.data;
@@ -239,14 +239,14 @@ export const updatePlatformConfig = async (
   payload: MirrorPlatformConfigPayload,
 ): Promise<MirrorPlatformConfig> => {
   const r = await axiosInstance.put<MirrorPlatformConfig>(
-    `/api/mirror-platform-configs/${safeId(id)}`,
+    `/api/v1/mirror-platform-configs/${safeId(id)}`,
     payload,
   );
   return r.data;
 };
 
 export const deletePlatformConfig = async (id: string): Promise<void> => {
-  await axiosInstance.delete(`/api/mirror-platform-configs/${safeId(id)}`);
+  await axiosInstance.delete(`/api/v1/mirror-platform-configs/${safeId(id)}`);
 };
 
 // ---------------------------------------------------------------------
@@ -272,7 +272,7 @@ export const listKnownVersions = async (
   platform?: MirrorPlatform,
 ): Promise<MirrorKnownVersion[]> => {
   const r = await axiosInstance.get<MirrorKnownVersion[]>(
-    '/api/mirror-known-versions',
+    '/api/v1/mirror-known-versions',
     { params: platform ? { platform } : {} },
   );
   return r.data;
@@ -292,7 +292,7 @@ export interface HostDefaultMirrorRow {
 
 export const listDefaultMirrorAssignments = async (): Promise<HostDefaultMirrorRow[]> => {
   const r = await axiosInstance.get<HostDefaultMirrorRow[]>(
-    '/api/host-defaults/mirrors',
+    '/api/v1/host-defaults/mirrors',
   );
   return r.data;
 };
@@ -311,7 +311,7 @@ export const setDefaultMirrorAssignment = async (
   dispatched: Array<{ host_id: string; message_id: string }>;
 }> => {
   const r = await axiosInstance.put(
-    `/api/host-defaults/mirrors/${platform}/${encodeURIComponent(versionKey)}/${osFamily}`,
+    `/api/v1/host-defaults/mirrors/${platform}/${encodeURIComponent(versionKey)}/${osFamily}`,
     { mirror_id: mirrorId },
   );
   return r.data;
@@ -343,7 +343,7 @@ export const getMirrorSetupStatus = async (
   hostId: string,
 ): Promise<MirrorSetupStatus> => {
   const r = await axiosInstance.get<MirrorSetupStatus>(
-    `/api/mirror-repositories/setup-status/${safeId(hostId)}`,
+    `/api/v1/mirror-repositories/setup-status/${safeId(hostId)}`,
   );
   return r.data;
 };
@@ -352,7 +352,7 @@ export const refreshMirrorSetupStatus = async (
   hostId: string,
 ): Promise<{ host_id: string; message_id: string; status: string }> => {
   const r = await axiosInstance.post(
-    `/api/mirror-repositories/setup-status/${safeId(hostId)}/refresh`,
+    `/api/v1/mirror-repositories/setup-status/${safeId(hostId)}/refresh`,
   );
   return r.data;
 };
@@ -367,7 +367,7 @@ export const installMirrorTools = async (
   status: string;
 }> => {
   const r = await axiosInstance.post(
-    `/api/mirror-repositories/setup-install/${safeId(hostId)}`,
+    `/api/v1/mirror-repositories/setup-install/${safeId(hostId)}`,
     { package_manager: packageManager },
   );
   return r.data;

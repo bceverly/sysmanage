@@ -35,7 +35,7 @@ const AntivirusCoverageCard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axiosInstance.get('/api/antivirus-coverage');
+      const response = await axiosInstance.get('/api/v1/antivirus-coverage');
       setCoverage(response.data);
     } catch (err: unknown) {
       console.error('Error fetching antivirus coverage:', err);

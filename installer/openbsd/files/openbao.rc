@@ -1,0 +1,70 @@
+#!/bin/ksh
+#
+# $OpenBSD$
+#
+# OpenBAO secrets broker for SysManage.  OpenBSD ships no OpenBAO package, so
+# the verified prebuilt static `bao` binary (v2.5.4 -- the release verified to
+# run cleanly on OpenBSD 7.9, Phase 13.1.I) is provisioned on first start.
+#
+# Modeled on the sysmanage rc script: runs via the standard rc.subr daemon
+# mechanism.  OpenBAO here is a single-node, loopback-only appliance broker
+# (file storage, TLS disabled on the loopback listener, mlock disabled -- see
+# the shared openbao.hcl), so it is intentionally minimal.  After start it
+# idempotently initializes + unseals OpenBAO and writes an app token for the
+# SysManage server.
+
+daemon="/usr/local/bin/bao"
+daemon_flags="server -config=/etc/openbao/openbao.hcl"
+daemon_timeout=60
+
+. /etc/rc.d/rc.subr
+
+pexp="/usr/local/bin/bao server -config=/etc/openbao/openbao.hcl"
+rc_bg=YES
+rc_reload=NO
+
+OPENBAO_VERSION="2.5.4"
+
+rc_pre() {
+	# OpenBSD has no OpenBAO package -- provision the verified prebuilt if absent.
+	if [ ! -x /usr/local/bin/bao ]; then
+		case "$(uname -m)" in
+			amd64)	_a="x86_64" ;;
+			arm64)	_a="arm64" ;;
+			*)	echo "openbao: unsupported arch $(uname -m)"; return 1 ;;
+		esac
+		_u="https://github.com/openbao/openbao/releases/download/v${OPENBAO_VERSION}/bao_${OPENBAO_VERSION}_Openbsd_${_a}.tar.gz"
+		if /usr/bin/ftp -o /tmp/bao.tgz "$_u" 2>/dev/null; then
+			tar -xzf /tmp/bao.tgz -C /usr/local/bin bao 2>/dev/null
+			chmod 0755 /usr/local/bin/bao 2>/dev/null
+		fi
+		rm -f /tmp/bao.tgz
+		if [ ! -x /usr/local/bin/bao ]; then
+			echo "openbao: could not provision the 'bao' binary from ${_u}"
+			echo "openbao: install it manually or set vault.enabled=false in sysmanage.yaml"
+			return 1
+		fi
+	fi
+	# File-storage data dir (path fixed by the shared openbao.hcl).
+	install -d -m 0700 /var/lib/openbao /var/lib/openbao/data
+}
+
+rc_start() {
+	# Redirect to a log file (rc.subr's default drops the daemon's output).
+	${rcexec} "${daemon} ${daemon_flags} >> /var/log/openbao.log 2>&1"
+}
+
+rc_post() {
+	# Idempotent init + unseal; the helper polls the listener until it is up and
+	# writes the server's app token.  Non-fatal so a manual init still works.
+	/usr/local/bin/python3 \
+		/usr/local/libexec/sysmanage/scripts/openbao_init_unseal.py \
+		--addr http://127.0.0.1:8200 \
+		--keyfile /var/lib/openbao/init.json \
+		--app-token-file /etc/sysmanage/openbao-token \
+		--app-token-owner _sysmanage \
+		2>/dev/null || \
+		echo "openbao: init/unseal did not complete; see /var/log/openbao.log"
+}
+
+rc_cmd $1

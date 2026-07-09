@@ -1281,6 +1281,57 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
         ):
             return {"licensed": False, "versions": []}
 
+        # GPG Key Management relocated into the licensed secrets_engine (Pro+
+        # moat).  Without the engine, these sub-paths serve the licensed-stub so
+        # /api/v1/secrets/gpg-keys* returns {"licensed": False} rather than 404.
+        @router.get("/gpg-keys")
+        async def gpg_keys_list_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "gpg_keys": []}
+
+        @router.post("/gpg-keys")
+        async def gpg_keys_upload_stub(
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/gpg-keys/{key_id}")
+        async def gpg_keys_get_stub(
+            key_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.delete("/gpg-keys/{key_id}")
+        async def gpg_keys_delete_stub(
+            key_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/gpg-keys/{key_id}/assignments")
+        async def gpg_keys_list_assignments_stub(
+            key_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "assignments": []}
+
+        @router.post("/gpg-keys/{key_id}/assignments")
+        async def gpg_keys_create_assignment_stub(
+            key_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.delete("/gpg-keys/{key_id}/assignments/{assignment_id}")
+        async def gpg_keys_delete_assignment_stub(
+            key_id: str,
+            assignment_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
         app.include_router(router, prefix="/api")
         stubs_mounted += 1
         logger.debug("Mounted secrets engine stub routes")
@@ -1774,6 +1825,58 @@ def mount_proplus_stub_routes(app: FastAPI, results: dict) -> None:
             current_user=Depends(get_current_user),
         ):
             return {"licensed": False}
+
+        # Custom Metrics & Graphs relocated into the licensed
+        # observability_engine (Pro+ moat — Custom Metrics Slice 2).  Without
+        # the engine, these sub-paths serve the licensed-stub so
+        # /api/v1/observability/custom-metrics* returns {"licensed": False}
+        # rather than 404.  Mirrors the gpg-keys stub template.
+        @router.get("/custom-metrics")
+        async def obs_custom_metrics_list_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "custom_metrics": []}
+
+        @router.post("/custom-metrics")
+        async def obs_custom_metrics_create_stub(  # pylint: disable=unused-argument
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/custom-metrics/{metric_id}")
+        async def obs_custom_metrics_get_stub(  # pylint: disable=unused-argument
+            metric_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.put("/custom-metrics/{metric_id}")
+        async def obs_custom_metrics_update_stub(  # pylint: disable=unused-argument
+            metric_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.delete("/custom-metrics/{metric_id}")
+        async def obs_custom_metrics_delete_stub(  # pylint: disable=unused-argument
+            metric_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.put("/custom-metrics/{metric_id}/tags")
+        async def obs_custom_metrics_tags_stub(  # pylint: disable=unused-argument
+            metric_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False}
+
+        @router.get("/custom-metrics/{metric_id}/samples")
+        async def obs_custom_metrics_samples_stub(  # pylint: disable=unused-argument
+            metric_id: str,
+            current_user=Depends(get_current_user),
+        ):
+            return {"licensed": False, "samples": []}
 
         app.include_router(router, prefix="/api")
         stubs_mounted += 1

@@ -193,7 +193,7 @@ const Dashboard = () => {
             const [hostsResponse, updatesResponse, antivirusResponse, otelResponse] = await Promise.allSettled([
                 doGetHosts(),
                 updatesService.getUpdatesSummary(),
-                axiosInstance.get('/api/antivirus-coverage'),
+                axiosInstance.get('/api/v1/antivirus-coverage'),
                 axiosInstance.get('/api/v1/opentelemetry/opentelemetry-coverage')
             ]);
 

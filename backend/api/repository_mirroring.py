@@ -10,35 +10,35 @@ executes.
 
 Routes:
 
-  GET    /api/mirror-repositories                — list mirrors (?platform_config_id filter)
-  POST   /api/mirror-repositories                — create
-  GET    /api/mirror-repositories/{id}           — get one
-  PUT    /api/mirror-repositories/{id}           — update
-  DELETE /api/mirror-repositories/{id}           — delete
-  POST   /api/mirror-repositories/{id}/sync      — fire sync NOW
-  POST   /api/mirror-repositories/{id}/snapshot  — take a snapshot
-  POST   /api/mirror-repositories/{id}/restore/{snapshot_id} — restore
-  GET    /api/mirror-repositories/{id}/snapshots — list snapshots
-  POST   /api/mirror-repositories/tick           — sync-due driver hook
-  GET    /api/settings/mirror                    — singleton settings (legacy)
-  PUT    /api/settings/mirror                    — singleton update (legacy)
+  GET    /api/v1/mirror-repositories                — list mirrors (?platform_config_id filter)
+  POST   /api/v1/mirror-repositories                — create
+  GET    /api/v1/mirror-repositories/{id}           — get one
+  PUT    /api/v1/mirror-repositories/{id}           — update
+  DELETE /api/v1/mirror-repositories/{id}           — delete
+  POST   /api/v1/mirror-repositories/{id}/sync      — fire sync NOW
+  POST   /api/v1/mirror-repositories/{id}/snapshot  — take a snapshot
+  POST   /api/v1/mirror-repositories/{id}/restore/{snapshot_id} — restore
+  GET    /api/v1/mirror-repositories/{id}/snapshots — list snapshots
+  POST   /api/v1/mirror-repositories/tick           — sync-due driver hook
+  GET    /api/v1/settings/mirror                    — singleton settings (legacy)
+  PUT    /api/v1/settings/mirror                    — singleton update (legacy)
 
 Phase 10.4.2 — per-platform configs (replaces the singleton settings
 as the source of truth for filesystem + retention defaults):
 
-  GET    /api/mirror-platform-configs            — list (one per platform)
-  POST   /api/mirror-platform-configs            — create or upsert
-  GET    /api/mirror-platform-configs/{id}       — get one
-  PUT    /api/mirror-platform-configs/{id}       — update
-  DELETE /api/mirror-platform-configs/{id}       — delete (cascades repos to NULL)
+  GET    /api/v1/mirror-platform-configs            — list (one per platform)
+  POST   /api/v1/mirror-platform-configs            — create or upsert
+  GET    /api/v1/mirror-platform-configs/{id}       — get one
+  PUT    /api/v1/mirror-platform-configs/{id}       — update
+  DELETE /api/v1/mirror-platform-configs/{id}       — delete (cascades repos to NULL)
 
 Phase 10.4.1 — per-host setup status / install routes (still keyed by
 host_id since "is apt-mirror installed on this host" is a host-level
 question, not a platform-level one):
 
-  GET    /api/mirror-repositories/setup-status/{host_id}
-  POST   /api/mirror-repositories/setup-status/{host_id}/refresh
-  POST   /api/mirror-repositories/setup-install/{host_id}
+  GET    /api/v1/mirror-repositories/setup-status/{host_id}
+  POST   /api/v1/mirror-repositories/setup-status/{host_id}/refresh
+  POST   /api/v1/mirror-repositories/setup-install/{host_id}
 """
 
 import logging
@@ -218,7 +218,7 @@ class MirrorSettingsRequest(BaseModel):
 # ---------------------------------------------------------------------
 
 
-@router.get("/api/mirror-repositories", dependencies=[Depends(JWTBearer())])
+@router.get("/mirror-repositories", dependencies=[Depends(JWTBearer())])
 async def list_mirrors(
     platform_config_id: Optional[str] = None, db: Session = Depends(get_tenant_db)
 ):
@@ -239,7 +239,7 @@ def _platform_for_pm(pm: str) -> str:
     return (pm or "").lower()
 
 
-@router.post("/api/mirror-repositories", dependencies=[Depends(JWTBearer())])
+@router.post("/mirror-repositories", dependencies=[Depends(JWTBearer())])
 async def create_mirror(
     request: MirrorCreateRequest,
     db: Session = Depends(get_tenant_db),
@@ -304,7 +304,7 @@ async def create_mirror(
     return row.to_dict()
 
 
-@router.get("/api/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
+@router.get("/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
 async def get_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(mirror_id, "mirror_id")
@@ -318,7 +318,7 @@ async def get_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     return row.to_dict()
 
 
-@router.put("/api/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
+@router.put("/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
 async def update_mirror(
     mirror_id: str,
     request: MirrorUpdateRequest,
@@ -343,9 +343,7 @@ async def update_mirror(
     return row.to_dict()
 
 
-@router.delete(
-    "/api/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())]
-)
+@router.delete("/mirror-repositories/{mirror_id}", dependencies=[Depends(JWTBearer())])
 async def delete_mirror(
     mirror_id: str,
     db: Session = Depends(get_tenant_db),
@@ -371,7 +369,7 @@ async def delete_mirror(
 
 
 @router.post(
-    "/api/mirror-repositories/{mirror_id}/sync", dependencies=[Depends(JWTBearer())]
+    "/mirror-repositories/{mirror_id}/sync", dependencies=[Depends(JWTBearer())]
 )
 async def sync_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_mirror_module()
@@ -414,7 +412,7 @@ async def sync_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.post(
-    "/api/mirror-repositories/{mirror_id}/snapshot", dependencies=[Depends(JWTBearer())]
+    "/mirror-repositories/{mirror_id}/snapshot", dependencies=[Depends(JWTBearer())]
 )
 async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
     engine = _check_mirror_module()
@@ -454,7 +452,7 @@ async def snapshot_mirror(mirror_id: str, db: Session = Depends(get_tenant_db)):
 
 
 @router.post(
-    "/api/mirror-repositories/{mirror_id}/restore/{snapshot_id}",
+    "/mirror-repositories/{mirror_id}/restore/{snapshot_id}",
     dependencies=[Depends(JWTBearer())],
 )
 async def restore_mirror(
@@ -486,7 +484,7 @@ async def restore_mirror(
 
 
 @router.get(
-    "/api/mirror-repositories/{mirror_id}/snapshots",
+    "/mirror-repositories/{mirror_id}/snapshots",
     dependencies=[Depends(JWTBearer())],
 )
 async def list_snapshots(mirror_id: str, db: Session = Depends(get_tenant_db)):
@@ -583,7 +581,7 @@ def _tick_mirrors_one_db(session, engine, automation, now):
     return fired, disabled
 
 
-@router.post("/api/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
+@router.post("/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
 async def tick_mirrors():
     """Driver hook for an external scheduler.  Selects every enabled
     mirror with ``next_sync_at <= now`` (or NULL) and dispatches a
@@ -633,13 +631,13 @@ async def tick_mirrors():
 # ---------------------------------------------------------------------
 
 
-@router.get("/api/settings/mirror", dependencies=[Depends(JWTBearer())])
+@router.get("/settings/mirror", dependencies=[Depends(JWTBearer())])
 async def get_mirror_settings(db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     return _get_settings(db).to_dict()
 
 
-@router.put("/api/settings/mirror", dependencies=[Depends(JWTBearer())])
+@router.put("/settings/mirror", dependencies=[Depends(JWTBearer())])
 async def update_mirror_settings(
     request: MirrorSettingsRequest = Body(...),
     db: Session = Depends(get_tenant_db),
@@ -674,7 +672,7 @@ async def update_mirror_settings(
 
 
 @router.get(
-    "/api/mirror-repositories/setup-status/{host_id}",
+    "/mirror-repositories/setup-status/{host_id}",
     dependencies=[Depends(JWTBearer())],
 )
 async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
@@ -710,7 +708,7 @@ async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant
 
 
 @router.post(
-    "/api/mirror-repositories/setup-status/{host_id}/refresh",
+    "/mirror-repositories/setup-status/{host_id}/refresh",
     dependencies=[Depends(JWTBearer())],
 )
 async def refresh_mirror_setup_status(
@@ -746,7 +744,7 @@ class MirrorSetupInstallRequest(BaseModel):
 
 
 @router.post(
-    "/api/mirror-repositories/setup-install/{host_id}",
+    "/mirror-repositories/setup-install/{host_id}",
     dependencies=[Depends(JWTBearer())],
 )
 async def install_mirror_tools(
@@ -807,7 +805,7 @@ class PlatformConfigRequest(BaseModel):
     snapshot_count_to_keep: Optional[int] = Field(None, ge=0, le=100)
 
 
-@router.get("/api/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
+@router.get("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
 async def list_platform_configs(db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     rows = (
@@ -818,7 +816,7 @@ async def list_platform_configs(db: Session = Depends(get_tenant_db)):
     return [r.to_dict() for r in rows]
 
 
-@router.post("/api/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
+@router.post("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
 async def create_platform_config(
     request: PlatformConfigRequest = Body(...),
     db: Session = Depends(get_tenant_db),
@@ -858,9 +856,7 @@ async def create_platform_config(
     return cfg.to_dict()
 
 
-@router.get(
-    "/api/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())]
-)
+@router.get("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
 async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db)):
     _check_mirror_module()
     pid = _parse_uuid(cfg_id, "cfg_id")
@@ -874,9 +870,7 @@ async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db))
     return row.to_dict()
 
 
-@router.put(
-    "/api/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())]
-)
+@router.put("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
 async def update_platform_config(
     cfg_id: str,
     request: PlatformConfigRequest = Body(...),
@@ -916,9 +910,7 @@ async def update_platform_config(
     return row.to_dict()
 
 
-@router.delete(
-    "/api/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())]
-)
+@router.delete("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
 async def delete_platform_config(
     cfg_id: str,
     db: Session = Depends(get_tenant_db),
@@ -958,7 +950,7 @@ async def delete_platform_config(
 # ---------------------------------------------------------------------
 
 
-@router.get("/api/mirror-known-versions", dependencies=[Depends(JWTBearer())])
+@router.get("/mirror-known-versions", dependencies=[Depends(JWTBearer())])
 async def list_known_versions(
     platform: Optional[str] = None, db: Session = Depends(get_shared_db)
 ):
@@ -1052,7 +1044,7 @@ def _assignment_row(kv, cur, eligible: list[dict]) -> dict:
     }
 
 
-@router.get("/api/host-defaults/mirrors", dependencies=[Depends(JWTBearer())])
+@router.get("/host-defaults/mirrors", dependencies=[Depends(JWTBearer())])
 async def list_default_mirror_assignments(
     db: Session = Depends(get_tenant_db),
     shared_db: Session = Depends(get_shared_db),
@@ -1166,7 +1158,7 @@ def _dispatch_default_mirror_change(engine, kv, new_mirror, db: Session) -> list
 
 
 @router.put(
-    "/api/host-defaults/mirrors/{platform}/{version_key}/{os_family}",
+    "/host-defaults/mirrors/{platform}/{version_key}/{os_family}",
     dependencies=[Depends(JWTBearer())],
 )
 async def set_default_mirror_assignment(

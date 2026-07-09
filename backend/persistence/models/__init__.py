@@ -12,6 +12,7 @@ from .airgap import *
 from .airgap_bundle import *
 from .child_host import *
 from .core import *
+from .custom_metric import *
 from .dynamic_secrets import *
 from .external_idp import *
 from .federation import *
@@ -20,6 +21,7 @@ from .package_compliance import *
 from .report_branding import *
 from .repository_mirroring import *
 from .upgrade_profiles import *
+from .gpg_key import *
 from .grafana_integration import *
 from .graylog_attachment import *
 from .graylog_integration import *
@@ -84,6 +86,13 @@ __all__ = [
     "UbuntuProSettings",
     # Secret models
     "Secret",
+    # GPG key management models
+    "GpgKey",
+    "GpgKeyAssignment",
+    # Custom metrics & graphs models (Pro+ observability_engine — Slice 1)
+    "CustomMetric",
+    "CustomMetricTag",
+    "CustomMetricSample",
     # Certificate models
     "HostCertificate",
     # Role models

@@ -41,6 +41,8 @@ class SecurityRoles(str, Enum):
     STOP_HOST_SERVICE = "Stop Host Service"
     # - Host Process Operations (Phase 13.3)
     KILL_HOST_PROCESS = "Kill Host Process"
+    # - Custom Metrics & Graphs (Pro+ observability_engine — Slice 1)
+    MANAGE_CUSTOM_METRICS = "Manage Custom Metrics"
 
     # Integration Management Roles
     # - Queue Operations (alphabetical)
@@ -90,6 +92,8 @@ class SecurityRoles(str, Enum):
     DEPLOY_CERTIFICATE = "Deploy Certificate"
     # - SSH Key Deployment (alphabetical)
     DEPLOY_SSH_KEY = "Deploy SSH Key"
+    # - GPG Key Management (GPG Key Management feature)
+    MANAGE_GPG_KEYS = "Manage GPG Keys"
     # - Vault Operations (alphabetical)
     START_VAULT = "Start Vault"
     STOP_VAULT = "Stop Vault"

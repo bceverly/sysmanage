@@ -522,7 +522,7 @@ const doRequestHostDiagnostics = async (id: string) => {
 const doGetDiagnosticDetail = async (diagnosticId: string) => {
     let result = {} as DiagnosticDetailResponse;
     
-    await api.get("/api/diagnostic/" + diagnosticId)
+    await api.get("/api/v1/diagnostic/" + diagnosticId)
     .then((response) => {
         result = response.data;
     })
@@ -536,7 +536,7 @@ const doGetDiagnosticDetail = async (diagnosticId: string) => {
 const doDeleteDiagnostic = async (diagnosticId: string) => {
     let result = {} as SuccessResponse;
     
-    await api.delete("/api/diagnostic/" + diagnosticId)
+    await api.delete("/api/v1/diagnostic/" + diagnosticId)
     .then((response) => {
         result = response.data;
     })
