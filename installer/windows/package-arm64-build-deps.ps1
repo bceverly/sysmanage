@@ -44,13 +44,13 @@ $neededDlls = @("libpq.dll","libcrypto-3-arm64.dll","libssl-3-arm64.dll","z.dll"
 
 # --- validate inputs -------------------------------------------------------
 if (-not (Test-Path $Libpq)) {
-    throw "Missing $Libpq — run 'build-msi.ps1 -Architecture arm64' on this box first."
+    throw "Missing $Libpq - run 'build-msi.ps1 -Architecture arm64' on this box first."
 }
 $missing = @($neededDlls | Where-Object { -not (Test-Path (Join-Path $Libpq $_)) })
 if ($missing.Count -gt 0) { throw "libpq-arm64 is missing DLL(s): $($missing -join ', ')" }
 
 if (-not (Test-Path $Wheels)) {
-    throw "Missing $Wheels — run 'build-msi.ps1 -Architecture arm64' on this box first."
+    throw "Missing $Wheels - run 'build-msi.ps1 -Architecture arm64' on this box first."
 }
 $whlCount = @(Get-ChildItem "$Wheels\*.whl" -ErrorAction SilentlyContinue).Count
 if ($whlCount -lt 1) { throw "No .whl files in $Wheels." }
@@ -78,10 +78,9 @@ Write-Host "[OK] Packaged ARM64 build deps ($whlCount wheels) into:" -Foreground
 Write-Host "     $Out"
 Get-ChildItem $Out | ForEach-Object { Write-Host ("       " + $_.Name) }
 Write-Host ""
-Write-Host "Upload to the '$Tag' release (run these yourself — gh):" -ForegroundColor Cyan
-Write-Host "  # first time only — create the release (a non-'v' tag, so it won't trigger build-and-release):"
+Write-Host "Upload to the '$Tag' release (run these yourself - gh):" -ForegroundColor Cyan
+Write-Host "  # first time only - create the release (a non-'v' tag, so it won't trigger build-and-release):"
 Write-Host "  gh release create $Tag --repo $Repo --title `"Windows ARM64 build deps`" --notes `"Prebuilt libpq DLLs + arm64 wheels for the ARM64 MSI CI job.`""
 Write-Host ""
-Write-Host "  # every time — upload/replace the assets:"
-Write-Host "  gh release upload $Tag --repo $Repo --clobber ```"
-Write-Host "    `"$Out\libpq-arm64.zip`" `"$Out\wheels-arm64.zip`" `"$Out\wheels-arm64.requirements.sha256`""
+Write-Host "  # every time - upload/replace the assets:"
+Write-Host "  gh release upload $Tag --repo $Repo --clobber `"$Out\libpq-arm64.zip`" `"$Out\wheels-arm64.zip`" `"$Out\wheels-arm64.requirements.sha256`""
