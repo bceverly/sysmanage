@@ -72,13 +72,29 @@ def _plat_arch_py() -> tuple[str, str, str]:
     return plat, arch, py
 
 
+def _version_key(path: Path):
+    """Sort key ordering version dirs by SEMVER numerically, not lexically.
+
+    A plain string sort puts ``1.0.10`` *before* ``1.0.8`` ('1' < '8' at the
+    fourth char), so once a component reaches two digits the loader selects the
+    older build and silently tests a stale engine. Parse each dot-component to an
+    int; numeric components sort before any non-numeric tag, name breaks ties.
+    """
+    parsed = []
+    for part in path.name.split("."):
+        parsed.append((0, int(part)) if part.isdigit() else (1, part))
+    return (parsed, path.name)
+
+
 def _bundle_for(name: str) -> Path | None:
     """Newest ``<engine>.tar.gz`` bundle for this interpreter/platform, or None."""
     plat, arch, py = _plat_arch_py()
     base = _STORAGE_MODULES / name
     if not base.is_dir():
         return None
-    for version in sorted(base.iterdir(), reverse=True):  # newest version wins
+    for version in sorted(
+        base.iterdir(), key=_version_key, reverse=True
+    ):  # semver, not lexical
         # ``abi3`` is the current canonical layout (the abi3 bundle loads on every
         # CPython 3.10+); ``<py>`` (e.g. ``3.13``) is the legacy per-version layout,
         # kept as a fallback. The bundle is the committed deliverable — the loader
@@ -104,7 +120,9 @@ def _abi3_binary_for(name: str) -> Path | None:
     if not base.is_dir():
         return None
     suffix = ".pyd" if sys.platform == "win32" else ".so"
-    for version in sorted(base.iterdir(), reverse=True):  # newest version wins
+    for version in sorted(
+        base.iterdir(), key=_version_key, reverse=True
+    ):  # semver, not lexical
         abi3_dir = version / plat / arch / "abi3"
         if not abi3_dir.is_dir():
             continue
@@ -126,7 +144,9 @@ def _abi3_bundle_for(name: str) -> Path | None:
     base = _STORAGE_MODULES / name
     if not base.is_dir():
         return None
-    for version in sorted(base.iterdir(), reverse=True):  # newest version wins
+    for version in sorted(
+        base.iterdir(), key=_version_key, reverse=True
+    ):  # semver, not lexical
         bundle = version / plat / arch / "abi3" / f"{name}.tar.gz"
         if bundle.is_file():
             return bundle
