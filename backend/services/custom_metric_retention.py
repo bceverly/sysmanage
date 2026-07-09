@@ -128,7 +128,7 @@ def _run_one_pass() -> int:
                 )
             else:
                 logger.debug(
-                    "custom-metric retention: nothing to prune in %s " "(tenant_id=%s)",
+                    "custom-metric retention: nothing to prune in %s (tenant_id=%s)",
                     label,
                     tenant_id,
                 )
