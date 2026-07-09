@@ -1172,9 +1172,9 @@ jobs:
           # instead of emitting a workflow annotation.
           if-no-files-found: ignore
 
-  # Consolidated Release - Push to sysmanage-docs and create GitHub release
+  # Consolidated Release - Publish packages to Cloudflare R2 and create GitHub release
   release:
-    name: Create Release and Push to Docs
+    name: Create Release and Publish to R2
     runs-on: ubuntu-latest
     needs: [build-ubuntu, build-openbsd-port, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
