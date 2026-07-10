@@ -137,7 +137,7 @@ def _run_one_pass() -> int:
             # failure abort the sweep or kill the loop.
             try:
                 session.rollback()
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # nosec B110  # pylint: disable=broad-except
                 pass
             logger.exception(
                 "custom-metric retention: prune FAILED for %s (tenant_id=%s); "
@@ -149,7 +149,7 @@ def _run_one_pass() -> int:
             # iter_host_databases hands us ownership of every session it opens.
             try:
                 session.close()
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # nosec B110  # pylint: disable=broad-except
                 pass
 
     return total_deleted

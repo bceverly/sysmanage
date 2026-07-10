@@ -79,7 +79,7 @@ def _find_assignment(db: Session, host_id, key_id, target_username, prefer_pendi
     return query.first()
 
 
-async def handle_gpg_key_command_result(
+async def handle_gpg_key_command_result(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Flip ``gpg_key_assignment.status`` from an install/remove command result.

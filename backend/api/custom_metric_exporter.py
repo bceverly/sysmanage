@@ -136,7 +136,7 @@ def _collect_series_for_session(session, tenant_id):
                 labels.append(f'tenant="{_escape_label_value(tenant_id)}"')
 
             lines.append(
-                f"{METRIC_NAME}{{{','.join(labels)}}} " f"{_format_value(row.value)}"
+                f"{METRIC_NAME}{{{','.join(labels)}}} {_format_value(row.value)}"
             )
         except Exception:  # pylint: disable=broad-except
             logger.exception(
@@ -185,7 +185,7 @@ def _render_exposition() -> str:
             # iter_host_databases hands us ownership of every session it opens.
             try:
                 session.close()
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # nosec B110  # pylint: disable=broad-except
                 pass
 
     # Header printed once; series follow.  Trailing newline is required by the

@@ -4443,9 +4443,13 @@ plan-builder + UI integration.
       13.1.I) on first start, runs it against the shared `openbao.hcl`
       (`@sample /etc/openbao/openbao.hcl`), and idempotently init/unseals via the
       installed `openbao_init_unseal.py`; Makefile `do-install` + PLIST updated.
-      **Pending: a smoke-test on real OpenBSD 7.9** (rc.d start/init/unseal, like the
-      13.1.I binary verification) — authored but not yet run on-box. All migrate hints
-      fixed to run the 3 chains.
+      **VERIFIED on OpenBSD 7.9 (2026-07):** the rc.d service provisions v2.5.4,
+      runs `bao server` cleanly (no W^X/pinsyscall), and auto-inits/unseals across a
+      seal→start cycle. Two on-box fixes during verification: the init/unseal moved
+      out of `rc_post` (OpenBSD runs it only after STOP) into a detached spawn in
+      `rc_pre`, and the custom `rc_start` log-redirect was dropped (OpenBSD `${rcexec}`
+      doesn't shell-interpret it) in favor of the default daemon mechanism. All
+      migrate hints fixed to run the 3 chains.
       **Config reclassification (June 2026): the bulk DONE.** The accessor seams
       (`config._server_setting` / `_config_secret` / `_db_setting`, `settings_service`,
       `secrets_service`) and the startup OpenBAO overlay were already in place; this

@@ -66,7 +66,7 @@ def _parse_collected_at(raw: Any) -> datetime:
     return datetime.now(timezone.utc)
 
 
-async def handle_custom_metric_samples(
+async def handle_custom_metric_samples(  # NOSONAR
     db: Session, connection: Any, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
     """Ingest a batch of custom-metric samples into ``custom_metric_sample``.
