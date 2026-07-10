@@ -24,121 +24,125 @@ _DIAG_ID = str(uuid.uuid4())
 
 
 class TestDiagnosticsRoutes:
-    """Hit every endpoint in backend/api/diagnostics.py for coverage."""
+    """Hit every endpoint in backend/api/v1/diagnostics.py for coverage."""
 
     def test_collect_diagnostics_requires_auth(self, client):
-        r = client.post(f"/api/host/{_HOST_ID}/collect-diagnostics")
+        r = client.post(f"/api/v1/host/{_HOST_ID}/collect-diagnostics")
         assert r.status_code in [401, 403, 404]
 
     def test_collect_diagnostics_with_auth(self, client, auth_headers):
         r = client.post(
-            f"/api/host/{_HOST_ID}/collect-diagnostics", headers=auth_headers
+            f"/api/v1/host/{_HOST_ID}/collect-diagnostics", headers=auth_headers
         )
         # 200 if host exists / 404 if not / 403 if perms missing.
         assert r.status_code in [200, 400, 403, 404, 422]
 
     def test_list_host_diagnostics(self, client, auth_headers):
-        r = client.get(f"/api/host/{_HOST_ID}/diagnostics", headers=auth_headers)
+        r = client.get(f"/api/v1/host/{_HOST_ID}/diagnostics", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_get_diagnostic_requires_auth(self, client):
-        r = client.get(f"/api/diagnostic/{_DIAG_ID}")
+        r = client.get(f"/api/v1/diagnostic/{_DIAG_ID}")
         assert r.status_code in [401, 403, 404]
 
     def test_get_diagnostic_status_requires_auth(self, client):
-        r = client.get(f"/api/diagnostic/{_DIAG_ID}/status")
+        r = client.get(f"/api/v1/diagnostic/{_DIAG_ID}/status")
         assert r.status_code in [401, 403, 404]
 
     def test_delete_diagnostic_requires_auth(self, client):
-        r = client.delete(f"/api/diagnostic/{_DIAG_ID}")
+        r = client.delete(f"/api/v1/diagnostic/{_DIAG_ID}")
         assert r.status_code in [401, 403, 404]
 
 
 class TestHostAccountManagementRoutes:
     def test_create_account_requires_auth(self, client):
-        r = client.post(f"/api/host/{_HOST_ID}/accounts", json={"username": "x"})
+        r = client.post(f"/api/v1/host/{_HOST_ID}/accounts", json={"username": "x"})
         assert r.status_code in [401, 403, 404]
 
     def test_create_account_invalid_payload(self, client, auth_headers):
         r = client.post(
-            f"/api/host/{_HOST_ID}/accounts",
+            f"/api/v1/host/{_HOST_ID}/accounts",
             json={},  # missing required fields
             headers=auth_headers,
         )
         assert r.status_code in [400, 403, 404, 422]
 
     def test_create_group_requires_auth(self, client):
-        r = client.post(f"/api/host/{_HOST_ID}/groups", json={"name": "x"})
+        r = client.post(f"/api/v1/host/{_HOST_ID}/groups", json={"name": "x"})
         assert r.status_code in [401, 403, 404]
 
     def test_create_group_invalid_payload(self, client, auth_headers):
-        r = client.post(f"/api/host/{_HOST_ID}/groups", json={}, headers=auth_headers)
+        r = client.post(
+            f"/api/v1/host/{_HOST_ID}/groups", json={}, headers=auth_headers
+        )
         assert r.status_code in [400, 403, 404, 422]
 
 
 class TestAntivirusStatusRoutes:
     def test_get_status_requires_auth(self, client):
-        r = client.get("/api/antivirus-status")
+        r = client.get("/api/v1/antivirus-status")
         assert r.status_code in [401, 403, 404]
 
     def test_get_status_with_auth(self, client, auth_headers):
-        r = client.get("/api/antivirus-status", headers=auth_headers)
+        r = client.get("/api/v1/antivirus-status", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_deploy_requires_auth(self, client):
-        r = client.post("/api/deploy", json={"host_ids": [_HOST_ID]})
+        r = client.post("/api/v1/deploy", json={"host_ids": [_HOST_ID]})
         assert r.status_code in [401, 403, 404]
 
 
 class TestFirewallStatusRoutes:
     def test_status_requires_auth(self, client):
-        r = client.get("/api/firewall-status")
+        r = client.get("/api/v1/firewall-status")
         assert r.status_code in [401, 403, 404]
 
     def test_status_with_auth(self, client, auth_headers):
-        r = client.get("/api/firewall-status", headers=auth_headers)
+        r = client.get("/api/v1/firewall-status", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
 class TestThirdPartyReposRoutes:
     def test_list_repos_requires_auth(self, client):
-        r = client.get("/api/third-party-repos")
+        r = client.get("/api/v1/third-party-repos")
         assert r.status_code in [401, 403, 404]
 
     def test_list_repos_with_auth(self, client, auth_headers):
-        r = client.get("/api/third-party-repos", headers=auth_headers)
+        r = client.get("/api/v1/third-party-repos", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
 class TestEnabledPackageManagersRoutes:
     def test_list_enabled_pms_requires_auth(self, client):
-        r = client.get("/api/enabled-package-managers")
+        r = client.get("/api/v1/enabled-package-managers")
         assert r.status_code in [401, 403, 404]
 
     def test_list_enabled_pms_with_auth(self, client, auth_headers):
-        r = client.get("/api/enabled-package-managers", headers=auth_headers)
+        r = client.get("/api/v1/enabled-package-managers", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
 class TestUserPreferencesRoutes:
     def test_get_pref_requires_auth(self, client):
-        r = client.get("/api/user-preferences/foo")
+        r = client.get("/api/v1/user-preferences/foo")
         assert r.status_code in [401, 403, 404]
 
     def test_get_pref_unknown_key(self, client, auth_headers):
-        r = client.get("/api/user-preferences/non-existent-pref", headers=auth_headers)
+        r = client.get(
+            "/api/v1/user-preferences/non-existent-pref", headers=auth_headers
+        )
         assert r.status_code in [200, 403, 404]
 
 
 class TestUpdatesRoutes:
-    """Phase 9: surface backend/api/updates/*.py endpoints under coverage."""
+    """Phase 9: surface backend/api/v1/updates/*.py endpoints under coverage."""
 
     def test_updates_summary_requires_auth(self, client):
-        r = client.get("/api/updates/summary")
+        r = client.get("/api/v1/updates/summary")
         assert r.status_code in [401, 403, 404]
 
     def test_updates_with_auth(self, client, auth_headers):
-        r = client.get("/api/updates/summary", headers=auth_headers)
+        r = client.get("/api/v1/updates/summary", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
@@ -147,29 +151,33 @@ class TestReportsEndpoints:
     402s otherwise.  Either way: never 500."""
 
     def test_view_unknown_type_400(self, client, auth_headers):
-        r = client.get("/api/reports/view/not-a-real-type", headers=auth_headers)
+        r = client.get("/api/v1/reporting/view/not-a-real-type", headers=auth_headers)
         assert r.status_code in [400, 402, 403, 422]
 
     def test_generate_unknown_type_400(self, client, auth_headers):
-        r = client.get("/api/reports/generate/not-a-real-type", headers=auth_headers)
+        r = client.get(
+            "/api/v1/reporting/generate/not-a-real-type", headers=auth_headers
+        )
         assert r.status_code in [400, 402, 403, 422]
 
     def test_view_screenshot_returns_svg(self, client, auth_headers):
         # Screenshot endpoint has no auth dependency — accept either way.
-        r = client.get("/api/reports/screenshots/registered-hosts")
+        r = client.get("/api/v1/reporting/screenshots/registered-hosts")
         assert r.status_code in [200, 401, 403]
         if r.status_code == 200:
             assert r.headers.get("content-type", "").startswith("image/svg+xml")
 
     def test_view_known_type_without_proplus_returns_402(self, client, auth_headers):
         """Without the Pro+ engine loaded, /view/* must 402, not 500."""
-        r = client.get("/api/reports/view/registered-hosts", headers=auth_headers)
+        r = client.get("/api/v1/reporting/view/registered-hosts", headers=auth_headers)
         assert r.status_code in [200, 402, 403]
 
     def test_generate_known_type_without_proplus_returns_402(
         self, client, auth_headers
     ):
-        r = client.get("/api/reports/generate/registered-hosts", headers=auth_headers)
+        r = client.get(
+            "/api/v1/reporting/generate/registered-hosts", headers=auth_headers
+        )
         assert r.status_code in [200, 402, 403]
 
 
@@ -225,11 +233,11 @@ class TestProplusDispatchHelpers:
 
 class TestSecretsCrudRoutes:
     def test_list_secrets_requires_auth(self, client):
-        r = client.get("/api/secrets")
+        r = client.get("/api/v1/secrets")
         assert r.status_code in [401, 403, 404]
 
     def test_list_secrets_with_auth(self, client, auth_headers):
-        r = client.get("/api/secrets", headers=auth_headers)
+        r = client.get("/api/v1/secrets", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
@@ -237,96 +245,98 @@ class TestGraylogIntegrationRoutes:
     """Auth + happy/error path coverage for graylog_integration.py."""
 
     def test_graylog_servers_requires_auth(self, client):
-        r = client.get("/api/integrations/graylog/graylog-servers")
+        r = client.get("/api/v1/integrations/graylog/graylog-servers")
         assert r.status_code in [401, 403, 404]
 
     def test_graylog_servers_with_auth(self, client, auth_headers):
         r = client.get(
-            "/api/integrations/graylog/graylog-servers", headers=auth_headers
+            "/api/v1/integrations/graylog/graylog-servers", headers=auth_headers
         )
         assert r.status_code in [200, 403, 404]
 
     def test_graylog_settings_get(self, client, auth_headers):
-        r = client.get("/api/integrations/graylog/settings", headers=auth_headers)
+        r = client.get("/api/v1/integrations/graylog/settings", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_graylog_settings_put_requires_auth(self, client):
         r = client.post(
-            "/api/integrations/graylog/settings",
+            "/api/v1/integrations/graylog/settings",
             json={"server_id": str(uuid.uuid4()), "enabled": False},
         )
         assert r.status_code in [401, 403, 404]
 
     def test_graylog_health(self, client, auth_headers):
-        r = client.get("/api/integrations/graylog/health", headers=auth_headers)
+        r = client.get("/api/v1/integrations/graylog/health", headers=auth_headers)
         assert r.status_code in [200, 400, 403, 404, 503]
 
 
 class TestSavedScriptsRoutes:
-    """backend/api/scripts/routes_saved_scripts.py — bring 20% → 50%+."""
+    """backend/api/v1/scripts/routes_saved_scripts.py — bring 20% → 50%+."""
 
     def test_list_scripts_requires_auth(self, client):
-        r = client.get("/api/scripts/")
+        r = client.get("/api/v1/scripts/")
         assert r.status_code in [401, 403, 404]
 
     def test_list_scripts_with_auth(self, client, auth_headers):
-        r = client.get("/api/scripts/", headers=auth_headers)
+        r = client.get("/api/v1/scripts/", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_create_script_requires_auth(self, client):
-        r = client.post("/api/scripts/", json={"name": "x", "content": "echo hi"})
+        r = client.post("/api/v1/scripts/", json={"name": "x", "content": "echo hi"})
         assert r.status_code in [401, 403, 404, 422]
 
     def test_create_script_invalid_payload(self, client, auth_headers):
-        r = client.post("/api/scripts/", json={}, headers=auth_headers)
+        r = client.post("/api/v1/scripts/", json={}, headers=auth_headers)
         assert r.status_code in [400, 403, 422]
 
     def test_get_script_unknown_id(self, client, auth_headers):
-        r = client.get(f"/api/scripts/{uuid.uuid4()}", headers=auth_headers)
+        r = client.get(f"/api/v1/scripts/{uuid.uuid4()}", headers=auth_headers)
         assert r.status_code in [403, 404]
 
     def test_update_script_unknown_id(self, client, auth_headers):
         r = client.put(
-            f"/api/scripts/{uuid.uuid4()}",
+            f"/api/v1/scripts/{uuid.uuid4()}",
             json={"name": "n"},
             headers=auth_headers,
         )
         assert r.status_code in [400, 403, 404, 422]
 
     def test_delete_script_unknown_id(self, client, auth_headers):
-        r = client.delete(f"/api/scripts/{uuid.uuid4()}", headers=auth_headers)
+        r = client.delete(f"/api/v1/scripts/{uuid.uuid4()}", headers=auth_headers)
         assert r.status_code in [403, 404]
 
 
 class TestScriptExecutionsRoutes:
-    """backend/api/scripts/routes_executions.py."""
+    """backend/api/v1/scripts/routes_executions.py."""
 
     def test_list_executions_requires_auth(self, client):
-        r = client.get("/api/scripts/executions/")
+        r = client.get("/api/v1/scripts/executions/")
         assert r.status_code in [401, 403, 404]
 
     def test_list_executions_with_auth(self, client, auth_headers):
-        r = client.get("/api/scripts/executions/", headers=auth_headers)
+        r = client.get("/api/v1/scripts/executions/", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_execute_requires_auth(self, client):
         r = client.post(
-            "/api/scripts/execute",
+            "/api/v1/scripts/execute",
             json={"host_id": _HOST_ID, "script_content": "echo"},
         )
         assert r.status_code in [401, 403, 404]
 
     def test_execute_invalid_payload(self, client, auth_headers):
-        r = client.post("/api/scripts/execute", json={}, headers=auth_headers)
+        r = client.post("/api/v1/scripts/execute", json={}, headers=auth_headers)
         assert r.status_code in [400, 403, 422]
 
     def test_get_execution_unknown_id(self, client, auth_headers):
-        r = client.get(f"/api/scripts/executions/{uuid.uuid4()}", headers=auth_headers)
+        r = client.get(
+            f"/api/v1/scripts/executions/{uuid.uuid4()}", headers=auth_headers
+        )
         assert r.status_code in [403, 404]
 
     def test_delete_execution_unknown_id(self, client, auth_headers):
         r = client.delete(
-            f"/api/scripts/executions/{uuid.uuid4()}", headers=auth_headers
+            f"/api/v1/scripts/executions/{uuid.uuid4()}", headers=auth_headers
         )
         assert r.status_code in [403, 404]
 
@@ -335,56 +345,58 @@ class TestEnabledPackageManagersExtraRoutes:
     """Walk all 4 endpoints for enabled_package_managers.py."""
 
     def test_os_options_requires_auth(self, client):
-        r = client.get("/api/enabled-package-managers/os-options")
+        r = client.get("/api/v1/enabled-package-managers/os-options")
         assert r.status_code in [401, 403, 404]
 
     def test_os_options_with_auth(self, client, auth_headers):
-        r = client.get("/api/enabled-package-managers/os-options", headers=auth_headers)
+        r = client.get(
+            "/api/v1/enabled-package-managers/os-options", headers=auth_headers
+        )
         assert r.status_code in [200, 403, 404]
 
     def test_create_pm_requires_auth(self, client):
         r = client.post(
-            "/api/enabled-package-managers/",
+            "/api/v1/enabled-package-managers/",
             json={"os_name": "Ubuntu", "package_manager": "apt"},
         )
         assert r.status_code in [401, 403, 404, 422]
 
     def test_delete_pm_unknown_id(self, client, auth_headers):
         r = client.delete(
-            f"/api/enabled-package-managers/{uuid.uuid4()}", headers=auth_headers
+            f"/api/v1/enabled-package-managers/{uuid.uuid4()}", headers=auth_headers
         )
         assert r.status_code in [403, 404]
 
 
 class TestHostMonitoringRoutes:
-    """backend/api/host_monitoring.py — certificates, roles, service-ctrl."""
+    """backend/api/v1/host_monitoring.py — certificates, roles, service-ctrl."""
 
     def test_certificates_requires_auth(self, client):
-        r = client.get(f"/api/host/{_HOST_ID}/certificates")
+        r = client.get(f"/api/v1/host/{_HOST_ID}/certificates")
         assert r.status_code in [401, 403, 404]
 
     def test_certificates_with_auth(self, client, auth_headers):
-        r = client.get(f"/api/host/{_HOST_ID}/certificates", headers=auth_headers)
+        r = client.get(f"/api/v1/host/{_HOST_ID}/certificates", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_roles_requires_auth(self, client):
-        r = client.get(f"/api/host/{_HOST_ID}/roles")
+        r = client.get(f"/api/v1/host/{_HOST_ID}/roles")
         assert r.status_code in [401, 403, 404]
 
     def test_roles_with_auth(self, client, auth_headers):
-        r = client.get(f"/api/host/{_HOST_ID}/roles", headers=auth_headers)
+        r = client.get(f"/api/v1/host/{_HOST_ID}/roles", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_service_control_requires_auth(self, client):
         r = client.post(
-            f"/api/host/{_HOST_ID}/service-control",
+            f"/api/v1/host/{_HOST_ID}/service-control",
             json={"action": "start", "service_name": "nginx"},
         )
         assert r.status_code in [401, 403, 404]
 
 
 class TestAntivirusDefaultsRoutes:
-    """backend/api/antivirus_defaults.py — 27% baseline.
+    """backend/api/v1/antivirus_defaults.py — 27% baseline.
 
     The ``antivirus_default`` table is not mirrored in the manual
     api-test conftest fixture, so the GET happy-path tests deliberately
@@ -393,68 +405,69 @@ class TestAntivirusDefaultsRoutes:
     """
 
     def test_list_defaults_requires_auth(self, client):
-        r = client.get("/api/antivirus-defaults/")
+        r = client.get("/api/v1/antivirus-defaults/")
         assert r.status_code in [401, 403, 404]
 
     def test_get_one_default_requires_auth(self, client):
-        r = client.get("/api/antivirus-defaults/no-such-os")
+        r = client.get("/api/v1/antivirus-defaults/no-such-os")
         assert r.status_code in [401, 403, 404]
 
     def test_put_defaults_requires_auth(self, client):
-        r = client.put("/api/antivirus-defaults/", json={})
+        r = client.put("/api/v1/antivirus-defaults/", json={})
         assert r.status_code in [401, 403, 404, 422]
 
     def test_put_defaults_invalid_payload(self, client, auth_headers):
-        r = client.put("/api/antivirus-defaults/", json={}, headers=auth_headers)
+        r = client.put("/api/v1/antivirus-defaults/", json={}, headers=auth_headers)
         assert r.status_code in [400, 403, 422]
 
     def test_delete_default_requires_auth(self, client):
-        r = client.delete("/api/antivirus-defaults/no-such-os")
+        r = client.delete("/api/v1/antivirus-defaults/no-such-os")
         assert r.status_code in [401, 403, 404]
 
 
 class TestOpenTelemetryRoutes:
-    """backend/api/opentelemetry/* — 22-28% baseline; these endpoints
+    """backend/api/v1/opentelemetry/* — 22-28% baseline; these endpoints
     are gated by the openTelemetry feature flag, so most paths early-
     return 402 / 403."""
 
     def test_eligibility_requires_auth(self, client):
-        r = client.get("/api/host/eligible-otel-hosts")
+        r = client.get("/api/v1/host/eligible-otel-hosts")
         assert r.status_code in [401, 403, 404]
 
     def test_deploy_requires_auth(self, client):
-        # Real route is /api/opentelemetry/hosts/{host_id}/deploy-opentelemetry
-        r = client.post(f"/api/opentelemetry/hosts/{_HOST_ID}/deploy-opentelemetry")
+        # Real route is /api/v1/opentelemetry/hosts/{host_id}/deploy-opentelemetry
+        r = client.post(f"/api/v1/opentelemetry/hosts/{_HOST_ID}/deploy-opentelemetry")
         assert r.status_code in [401, 403, 404]
 
     def test_grafana_connection_requires_auth(self, client):
-        r = client.get("/api/grafana-connection")
+        r = client.get("/api/v1/grafana-connection")
         assert r.status_code in [401, 403, 404]
 
 
 class TestPackagesOperationsRoutes:
-    """backend/api/packages_operations.py — 20% baseline."""
+    """backend/api/v1/packages_operations.py — 20% baseline."""
 
     def test_install_packages_requires_auth(self, client):
         r = client.post(
-            "/api/packages/install", json={"host_ids": [_HOST_ID], "packages": ["vim"]}
+            "/api/v1/packages/install",
+            json={"host_ids": [_HOST_ID], "packages": ["vim"]},
         )
         assert r.status_code in [401, 403, 404]
 
     def test_install_packages_invalid_payload(self, client, auth_headers):
-        r = client.post("/api/packages/install", json={}, headers=auth_headers)
+        r = client.post("/api/v1/packages/install", json={}, headers=auth_headers)
         assert r.status_code in [400, 403, 404, 422]
 
 
 class TestAuthEndpoints:
-    """backend/api/auth.py — log-out path is rarely tested."""
+    """backend/api/v1/auth.py — log-out path is rarely tested."""
 
     def test_logout_requires_auth(self, client):
-        r = client.post("/api/logout")
+        r = client.post("/api/v1/logout")
         assert r.status_code in [200, 401, 403, 404]
 
     def test_refresh_requires_auth(self, client):
-        r = client.post("/api/refresh")
+        r = client.post("/api/v1/refresh")
         assert r.status_code in [200, 401, 403, 404, 422]
 
 
@@ -482,32 +495,32 @@ class TestMessageRouterCoverage:
 
 class TestQueueOperationsCoverage:
     """Lightweight query helpers in queue_operations.py — exercised
-    via the existing /api/queue endpoints."""
+    via the existing /api/v1/queue endpoints."""
 
     def test_queue_messages_requires_auth(self, client):
-        r = client.get("/api/queue/messages")
+        r = client.get("/api/v1/queue/messages")
         assert r.status_code in [401, 403, 404]
 
     def test_queue_messages_with_auth(self, client, auth_headers):
-        r = client.get("/api/queue/messages", headers=auth_headers)
+        r = client.get("/api/v1/queue/messages", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
     def test_queue_failed_requires_auth(self, client):
-        r = client.get("/api/queue/failed")
+        r = client.get("/api/v1/queue/failed")
         assert r.status_code in [401, 403, 404]
 
     def test_queue_failed_with_auth(self, client, auth_headers):
-        r = client.get("/api/queue/failed", headers=auth_headers)
+        r = client.get("/api/v1/queue/failed", headers=auth_headers)
         assert r.status_code in [200, 403, 404]
 
 
 class TestHostHostnameRoutes:
-    """backend/api/host_hostname.py — narrow surface but currently
+    """backend/api/v1/host_hostname.py — narrow surface but currently
     untouched by tests."""
 
     def test_set_hostname_requires_auth(self, client):
         r = client.post(
-            f"/api/host/{_HOST_ID}/set-hostname",
+            f"/api/v1/host/{_HOST_ID}/set-hostname",
             json={"hostname": "newhostname"},
         )
         assert r.status_code in [401, 403, 404]
@@ -516,7 +529,7 @@ class TestHostHostnameRoutes:
 class TestHostGraylogRoutes:
     def test_attach_requires_auth(self, client):
         r = client.post(
-            f"/api/host/{_HOST_ID}/graylog/attach",
+            f"/api/v1/host/{_HOST_ID}/graylog/attach",
             json={"server_id": str(uuid.uuid4())},
         )
         assert r.status_code in [401, 403, 404]
@@ -524,12 +537,12 @@ class TestHostGraylogRoutes:
 
 class TestUserPreferencesExtraRoutes:
     def test_set_pref_requires_auth(self, client):
-        r = client.put("/api/user-preferences/dashboard-cards", json={"value": "{}"})
+        r = client.put("/api/v1/user-preferences/dashboard-cards", json={"value": "{}"})
         assert r.status_code in [401, 403, 404]
 
     def test_set_pref_with_auth(self, client, auth_headers):
         r = client.put(
-            "/api/user-preferences/dashboard-cards",
+            "/api/v1/user-preferences/dashboard-cards",
             json={"value": "{}"},
             headers=auth_headers,
         )

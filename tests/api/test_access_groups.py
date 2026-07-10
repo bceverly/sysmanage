@@ -50,18 +50,18 @@ def _grant_federation_engine(request):
 
 class TestAccessGroupsAuth:
     def test_list_requires_auth(self, client):
-        r = client.get("/api/access-groups")
+        r = client.get("/api/v1/access-groups")
         assert r.status_code in [401, 403]
 
     def test_create_requires_auth(self, client):
-        r = client.post("/api/access-groups", json={"name": "no-auth"})
+        r = client.post("/api/v1/access-groups", json={"name": "no-auth"})
         assert r.status_code in [401, 403]
 
 
 class TestAccessGroupsCrud:
     def test_create_root_group(self, client, auth_headers):
         r = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "DC-East", "description": "East-coast datacenter"},
             headers=auth_headers,
         )
@@ -73,24 +73,24 @@ class TestAccessGroupsCrud:
 
     def test_list_after_create(self, client, auth_headers):
         client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "DC-West"},
             headers=auth_headers,
         )
-        r = client.get("/api/access-groups", headers=auth_headers)
+        r = client.get("/api/v1/access-groups", headers=auth_headers)
         assert r.status_code == 200
         names = [g["name"] for g in r.json()]
         assert "DC-West" in names
 
     def test_create_child_group(self, client, auth_headers):
         parent_resp = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "DC-Central"},
             headers=auth_headers,
         )
         parent_id = parent_resp.json()["id"]
         child_resp = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "DC-Central / Web", "parent_id": parent_id},
             headers=auth_headers,
         )
@@ -99,7 +99,7 @@ class TestAccessGroupsCrud:
 
     def test_create_with_unknown_parent_404(self, client, auth_headers):
         r = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={
                 "name": "orphan",
                 "parent_id": "00000000-0000-0000-0000-000000000099",
@@ -110,22 +110,22 @@ class TestAccessGroupsCrud:
 
     def test_get_one(self, client, auth_headers):
         created = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "single"},
             headers=auth_headers,
         ).json()
-        r = client.get(f"/api/access-groups/{created['id']}", headers=auth_headers)
+        r = client.get(f"/api/v1/access-groups/{created['id']}", headers=auth_headers)
         assert r.status_code == 200
         assert r.json()["id"] == created["id"]
 
     def test_update_name(self, client, auth_headers):
         created = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "rename-me"},
             headers=auth_headers,
         ).json()
         r = client.put(
-            f"/api/access-groups/{created['id']}",
+            f"/api/v1/access-groups/{created['id']}",
             json={"name": "renamed"},
             headers=auth_headers,
         )
@@ -134,23 +134,25 @@ class TestAccessGroupsCrud:
 
     def test_delete(self, client, auth_headers):
         created = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "ephemeral"},
             headers=auth_headers,
         ).json()
-        r = client.delete(f"/api/access-groups/{created['id']}", headers=auth_headers)
+        r = client.delete(
+            f"/api/v1/access-groups/{created['id']}", headers=auth_headers
+        )
         assert r.status_code == 200
 
 
 class TestAccessGroupsCycleGuard:
     def test_cannot_set_self_as_parent(self, client, auth_headers):
         created = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "loopy"},
             headers=auth_headers,
         ).json()
         r = client.put(
-            f"/api/access-groups/{created['id']}",
+            f"/api/v1/access-groups/{created['id']}",
             json={"parent_id": created["id"]},
             headers=auth_headers,
         )
@@ -159,16 +161,16 @@ class TestAccessGroupsCycleGuard:
     def test_cannot_create_ancestor_cycle(self, client, auth_headers):
         """Build a chain a → b, then try to make a's parent be b → cycle."""
         a = client.post(
-            "/api/access-groups", json={"name": "a"}, headers=auth_headers
+            "/api/v1/access-groups", json={"name": "a"}, headers=auth_headers
         ).json()
         b = client.post(
-            "/api/access-groups",
+            "/api/v1/access-groups",
             json={"name": "b", "parent_id": a["id"]},
             headers=auth_headers,
         ).json()
         # Now try: a.parent = b would create the cycle a → b → a.
         r = client.put(
-            f"/api/access-groups/{a['id']}",
+            f"/api/v1/access-groups/{a['id']}",
             json={"parent_id": b["id"]},
             headers=auth_headers,
         )
@@ -180,7 +182,7 @@ class TestRegistrationKeys:
         """The plaintext key must be in the create response, but a
         subsequent list call must NOT echo it."""
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "first-key", "auto_approve": False},
             headers=auth_headers,
         )
@@ -190,7 +192,7 @@ class TestRegistrationKeys:
         key_id = body["id"]
         secret = body["key"]
 
-        list_resp = client.get("/api/registration-keys", headers=auth_headers)
+        list_resp = client.get("/api/v1/registration-keys", headers=auth_headers)
         assert list_resp.status_code == 200
         for entry in list_resp.json():
             if entry["id"] == key_id:
@@ -208,22 +210,22 @@ class TestRegistrationKeys:
 
     def test_revoke_is_idempotent(self, client, auth_headers):
         created = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "revokable"},
             headers=auth_headers,
         ).json()
         r1 = client.post(
-            f"/api/registration-keys/{created['id']}/revoke", headers=auth_headers
+            f"/api/v1/registration-keys/{created['id']}/revoke", headers=auth_headers
         )
         r2 = client.post(
-            f"/api/registration-keys/{created['id']}/revoke", headers=auth_headers
+            f"/api/v1/registration-keys/{created['id']}/revoke", headers=auth_headers
         )
         assert r1.status_code == 200
         assert r2.status_code == 200
 
     def test_create_with_unknown_access_group_404(self, client, auth_headers):
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={
                 "name": "bad-group",
                 "access_group_id": "00000000-0000-0000-0000-000000000abc",
@@ -242,7 +244,7 @@ class TestRegistrationKeys:
         cache would create an unusable key that silently rejects
         every enrolling agent."""
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={
                 "name": "bad-site",
                 "site_id": "00000000-0000-0000-0000-000000000def",
@@ -255,7 +257,7 @@ class TestRegistrationKeys:
         """Default OSS / single-server keys have ``site_id=NULL`` so
         they're not federation-scoped — pre-Phase-12.4 behaviour."""
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "any-site"},
             headers=auth_headers,
         )
@@ -263,7 +265,7 @@ class TestRegistrationKeys:
         body = r.json()
         assert body["site_id"] is None
         # ``list`` should also echo NULL.
-        listing = client.get("/api/registration-keys", headers=auth_headers).json()
+        listing = client.get("/api/v1/registration-keys", headers=auth_headers).json()
         match = [entry for entry in listing if entry["id"] == body["id"]]
         assert match and match[0]["site_id"] is None
 
@@ -293,7 +295,7 @@ class TestRegistrationKeys:
         session.commit()
 
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "scoped-key", "site_id": str(site_id)},
             headers=auth_headers,
         )
@@ -321,7 +323,7 @@ class TestRegistrationKeys:
         session.commit()
 
         r = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "key-for-dead", "site_id": str(site_id)},
             headers=auth_headers,
         )
@@ -329,12 +331,12 @@ class TestRegistrationKeys:
 
     def test_delete(self, client, auth_headers):
         created = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "to-delete"},
             headers=auth_headers,
         ).json()
         r = client.delete(
-            f"/api/registration-keys/{created['id']}", headers=auth_headers
+            f"/api/v1/registration-keys/{created['id']}", headers=auth_headers
         )
         assert r.status_code == 200
 
@@ -378,7 +380,7 @@ class TestRegistrationKeyEnrollmentFlow:
         subsequent /host/register that presents that key creates an
         APPROVED host (not pending)."""
         key_resp = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "auto-key", "auto_approve": True},
             headers=auth_headers,
         )
@@ -401,14 +403,14 @@ class TestRegistrationKeyEnrollmentFlow:
         # exact key name varies by SQLAlchemy version (some include
         # ``approval_status``, others wrap fields).  Verify approval via
         # the list endpoint instead — that's the API surface operators use.
-        list_resp = client.get("/api/hosts", headers=auth_headers)
+        list_resp = client.get("/api/v1/hosts", headers=auth_headers)
         assert list_resp.status_code == 200
         matching = [
             h
             for h in list_resp.json()
             if h.get("fqdn") == "auto-approved-host.example.com"
         ]
-        assert matching, "newly-registered host not in /api/hosts"
+        assert matching, "newly-registered host not in /api/v1/hosts"
         assert matching[0].get("approval_status") == "approved", (
             f"expected approved, got {matching[0].get('approval_status')!r}; "
             f"full row: {matching[0]}"
@@ -418,7 +420,7 @@ class TestRegistrationKeyEnrollmentFlow:
         """auto_approve=False:  the key validates, the host enrolls into
         any associated access group, but stays PENDING."""
         key_resp = client.post(
-            "/api/registration-keys",
+            "/api/v1/registration-keys",
             json={"name": "manual-key", "auto_approve": False},
             headers=auth_headers,
         )
@@ -434,9 +436,9 @@ class TestRegistrationKeyEnrollmentFlow:
             },
         )
         assert r.status_code == 200
-        # See note in the auto-approve test:  verify via the /api/hosts
+        # See note in the auto-approve test:  verify via the /api/v1/hosts
         # list endpoint, which reliably exposes approval_status.
-        list_resp = client.get("/api/hosts", headers=auth_headers)
+        list_resp = client.get("/api/v1/hosts", headers=auth_headers)
         matching = [
             h
             for h in list_resp.json()
@@ -487,8 +489,8 @@ class TestRegistrationKeyModel:
 
 
 class TestAccessGroupsFederationGate:
-    """Verify that both routers (``/api/access-groups`` and
-    ``/api/registration-keys``) return 403 (license missing) or 503
+    """Verify that both routers (``/api/v1/access-groups`` and
+    ``/api/v1/registration-keys``) return 403 (license missing) or 503
     (license OK but engine not loaded) when the federation controller
     engine isn't available.
 
@@ -501,7 +503,7 @@ class TestAccessGroupsFederationGate:
     def test_groups_list_returns_403_when_license_missing(self, client, auth_headers):
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
-            r = client.get("/api/access-groups", headers=auth_headers)
+            r = client.get("/api/v1/access-groups", headers=auth_headers)
         assert r.status_code == 403
         body = r.json()
         assert body["detail"]["error"] == "pro_plus_required"
@@ -517,19 +519,19 @@ class TestAccessGroupsFederationGate:
         ) as mock_loader:
             mock_license.has_module.return_value = True
             mock_loader.is_module_loaded.return_value = False
-            r = client.get("/api/access-groups", headers=auth_headers)
+            r = client.get("/api/v1/access-groups", headers=auth_headers)
         assert r.status_code == 503
         body = r.json()
         assert body["detail"]["error"] == "module_not_available"
         assert body["detail"]["module"] == "federation_controller_engine"
 
     def test_registration_keys_list_is_gated_too(self, client, auth_headers):
-        """The second router (``/api/registration-keys``) wears the
+        """The second router (``/api/v1/registration-keys``) wears the
         same gate.  A separate test pin so a future refactor that
         drops the gate on one router but not the other gets caught."""
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
-            r = client.get("/api/registration-keys", headers=auth_headers)
+            r = client.get("/api/v1/registration-keys", headers=auth_headers)
         assert r.status_code == 403
         body = r.json()
         assert body["detail"]["module"] == "federation_controller_engine"
@@ -541,7 +543,7 @@ class TestAccessGroupsFederationGate:
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
             r = client.post(
-                "/api/access-groups",
+                "/api/v1/access-groups",
                 json={"name": "blocked-by-gate"},
                 headers=auth_headers,
             )

@@ -13,14 +13,14 @@ class TestFirewallStatusEndpoint:
     def test_status_requires_authentication(self, client):
         """Test that firewall status requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/host/{host_id}/firewall-status")
+        response = client.get(f"/api/v1/host/{host_id}/firewall-status")
         assert response.status_code in [401, 403, 404]
 
     def test_status_host_not_found(self, client, auth_headers):
         """Test that status returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/firewall-status",
+            f"/api/v1/host/{host_id}/firewall-status",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -32,14 +32,14 @@ class TestFirewallEnableEndpoint:
     def test_enable_requires_authentication(self, client):
         """Test that enable firewall requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.post(f"/api/host/{host_id}/firewall-enable")
+        response = client.post(f"/api/v1/host/{host_id}/firewall-enable")
         assert response.status_code in [401, 403, 404]
 
     def test_enable_host_not_found(self, client, auth_headers):
         """Test that enable returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/firewall-enable",
+            f"/api/v1/host/{host_id}/firewall-enable",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -51,14 +51,14 @@ class TestFirewallDisableEndpoint:
     def test_disable_requires_authentication(self, client):
         """Test that disable firewall requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.post(f"/api/host/{host_id}/firewall-disable")
+        response = client.post(f"/api/v1/host/{host_id}/firewall-disable")
         assert response.status_code in [401, 403, 404]
 
     def test_disable_host_not_found(self, client, auth_headers):
         """Test that disable returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/firewall-disable",
+            f"/api/v1/host/{host_id}/firewall-disable",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]

@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/host_operations.py module.
+Comprehensive tests for backend/api/v1/host_operations.py module.
 Tests host system operations endpoints (reboot, shutdown, software refresh).
 """
 

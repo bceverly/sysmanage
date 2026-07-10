@@ -23,7 +23,7 @@ class TestHostDelete:
         session.commit()
         host_id = host.id
 
-        response = client.delete(f"/api/host/{host_id}", headers=auth_headers)
+        response = client.delete(f"/api/v1/host/{host_id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -37,7 +37,7 @@ class TestHostDelete:
 
     def test_delete_host_not_found(self, client, auth_headers):
         """Test deleting non-existent host."""
-        response = client.delete("/api/host/999", headers=auth_headers)
+        response = client.delete("/api/v1/host/999", headers=auth_headers)
 
         assert response.status_code == 404
         data = response.json()
@@ -45,7 +45,7 @@ class TestHostDelete:
 
     def test_delete_host_unauthorized(self, client):
         """Test deleting host without authentication."""
-        response = client.delete("/api/host/1")
+        response = client.delete("/api/v1/host/1")
         assert response.status_code == 401
 
 
@@ -65,7 +65,7 @@ class TestHostGet:
         session.add(host)
         session.commit()
 
-        response = client.get(f"/api/host/{host.id}", headers=auth_headers)
+        response = client.get(f"/api/v1/host/{host.id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -76,7 +76,7 @@ class TestHostGet:
 
     def test_get_host_not_found(self, client, auth_headers):
         """Test getting non-existent host."""
-        response = client.get("/api/host/999", headers=auth_headers)
+        response = client.get("/api/v1/host/999", headers=auth_headers)
 
         assert response.status_code == 404
         data = response.json()
@@ -84,7 +84,7 @@ class TestHostGet:
 
     def test_get_host_unauthorized(self, client):
         """Test getting host without authentication."""
-        response = client.get("/api/host/1")
+        response = client.get("/api/v1/host/1")
         assert response.status_code == 401
 
 
@@ -123,7 +123,7 @@ class TestHostsList:
             session.add(host)
         session.commit()
 
-        response = client.get("/api/hosts", headers=auth_headers)
+        response = client.get("/api/v1/hosts", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -138,7 +138,7 @@ class TestHostsList:
 
     def test_get_hosts_empty(self, client, auth_headers):
         """Test getting empty hosts list."""
-        response = client.get("/api/hosts", headers=auth_headers)
+        response = client.get("/api/v1/hosts", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -147,7 +147,7 @@ class TestHostsList:
 
     def test_get_hosts_unauthorized(self, client):
         """Test getting hosts without authentication."""
-        response = client.get("/api/hosts")
+        response = client.get("/api/v1/hosts")
         assert response.status_code == 401
 
 
@@ -163,7 +163,7 @@ class TestHostCreate:
             "active": True,
         }
 
-        response = client.post("/api/host", json=host_data, headers=auth_headers)
+        response = client.post("/api/v1/host", json=host_data, headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -204,7 +204,7 @@ class TestHostCreate:
             "active": True,
         }
 
-        response = client.post("/api/host", json=host_data, headers=auth_headers)
+        response = client.post("/api/v1/host", json=host_data, headers=auth_headers)
 
         assert response.status_code == 409
         data = response.json()
@@ -214,7 +214,7 @@ class TestHostCreate:
         """Test creating host with missing required fields."""
         # Missing FQDN
         response = client.post(
-            "/api/host",
+            "/api/v1/host",
             json={"ipv4": "192.168.1.100", "ipv6": "2001:db8::100", "active": True},
             headers=auth_headers,
         )
@@ -222,7 +222,7 @@ class TestHostCreate:
 
         # Missing IPv4
         response = client.post(
-            "/api/host",
+            "/api/v1/host",
             json={"fqdn": "test.example.com", "ipv6": "2001:db8::100", "active": True},
             headers=auth_headers,
         )
@@ -236,7 +236,7 @@ class TestHostCreate:
             "ipv6": "2001:db8::100",
             "active": True,
         }
-        response = client.post("/api/host", json=host_data)
+        response = client.post("/api/v1/host", json=host_data)
         assert response.status_code == 401
 
 
@@ -266,7 +266,7 @@ class TestHostUpdate:
         }
 
         response = client.put(
-            f"/api/host/{host_id}", json=update_data, headers=auth_headers
+            f"/api/v1/host/{host_id}", json=update_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -291,7 +291,9 @@ class TestHostUpdate:
             "active": True,
         }
 
-        response = client.put("/api/host/999", json=update_data, headers=auth_headers)
+        response = client.put(
+            "/api/v1/host/999", json=update_data, headers=auth_headers
+        )
 
         assert response.status_code == 404
         data = response.json()
@@ -326,7 +328,7 @@ class TestHostUpdate:
         }
 
         response = client.put(
-            f"/api/host/{host2.id}", json=update_data, headers=auth_headers
+            f"/api/v1/host/{host2.id}", json=update_data, headers=auth_headers
         )
 
         # API allows duplicate FQDNs on update
@@ -343,7 +345,7 @@ class TestHostUpdate:
             "ipv6": "2001:db8::100",
             "active": True,
         }
-        response = client.put("/api/host/1", json=update_data)
+        response = client.put("/api/v1/host/1", json=update_data)
         assert response.status_code == 401
 
 
@@ -495,7 +497,7 @@ class TestHostUpdateCounts:
         session.add(host)
         session.commit()
 
-        response = client.get(f"/api/host/{host.id}", headers=auth_headers)
+        response = client.get(f"/api/v1/host/{host.id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -573,7 +575,7 @@ class TestHostUpdateCounts:
             session.add(update)
         session.commit()
 
-        response = client.get(f"/api/host/{host.id}", headers=auth_headers)
+        response = client.get(f"/api/v1/host/{host.id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -636,7 +638,7 @@ class TestHostUpdateCounts:
             session.add(update)
         session.commit()
 
-        response = client.get("/api/hosts", headers=auth_headers)
+        response = client.get("/api/v1/hosts", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -709,7 +711,7 @@ class TestHostUpdateCounts:
             session.add(patch)
         session.commit()
 
-        response = client.get(f"/api/host/by_fqdn/{host.fqdn}", headers=auth_headers)
+        response = client.get(f"/api/v1/host/by_fqdn/{host.fqdn}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -777,7 +779,7 @@ class TestHostUpdateCounts:
             session.add(update)
         session.commit()
 
-        response = client.get(f"/api/host/{host.id}", headers=auth_headers)
+        response = client.get(f"/api/v1/host/{host.id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -902,7 +904,7 @@ class TestHostUpdateCounts:
         ]
 
         for host, expected_counts in zip(hosts, expected_counts_list):
-            response = client.get(f"/api/host/{host.id}", headers=auth_headers)
+            response = client.get(f"/api/v1/host/{host.id}", headers=auth_headers)
             assert response.status_code == 200
             data = response.json()
             assert data["security_updates_count"] == expected_counts[0]
@@ -910,7 +912,7 @@ class TestHostUpdateCounts:
             assert data["total_updates_count"] == expected_counts[2]
 
         # Test hosts list endpoint
-        response = client.get("/api/hosts", headers=auth_headers)
+        response = client.get("/api/v1/hosts", headers=auth_headers)
         assert response.status_code == 200
         hosts_data = response.json()
         assert len(hosts_data) == 3

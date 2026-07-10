@@ -1,4 +1,4 @@
-"""API tests for /api/airgap-bundles endpoints.
+"""API tests for /api/v1/airgap-bundles endpoints.
 
 The build subprocess is patched out — we only verify the API surface
 (create → row inserted, list, get, delete) and the queued-state
@@ -67,13 +67,13 @@ class TestAirGapBundlesAPI:
             yield m
 
     def test_list_empty(self, client, auth_headers):
-        resp = client.get("/api/airgap-bundles", headers=auth_headers)
+        resp = client.get("/api/v1/airgap-bundles", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json() == []
 
     def test_create_server_bundle(self, client, auth_headers, _mute_builder):
         resp = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "server"},
             headers=auth_headers,
         )
@@ -87,7 +87,7 @@ class TestAirGapBundlesAPI:
 
     def test_create_agent_bundle(self, client, auth_headers, _mute_builder):
         resp = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "agent"},
             headers=auth_headers,
         )
@@ -116,7 +116,7 @@ class TestAirGapBundlesAPI:
             },
         ):
             resp = client.post(
-                "/api/airgap-bundles",
+                "/api/v1/airgap-bundles",
                 json={"product": "server"},
                 headers=auth_headers,
             )
@@ -145,14 +145,16 @@ class TestAirGapBundlesAPI:
             },
         ):
             resp = client.post(
-                "/api/airgap-bundles",
+                "/api/v1/airgap-bundles",
                 json={"product": "proplus"},
                 headers=auth_headers,
             )
         assert resp.status_code == 202, resp.text
 
     def test_resource_status_endpoint(self, client, auth_headers):
-        resp = client.get("/api/airgap-bundles/resource-status", headers=auth_headers)
+        resp = client.get(
+            "/api/v1/airgap-bundles/resource-status", headers=auth_headers
+        )
         assert resp.status_code == 200, resp.text
         body = resp.json()
         for key in ("sufficient", "severity", "min_available_mb", "min_disk_gb"):
@@ -160,7 +162,7 @@ class TestAirGapBundlesAPI:
 
     def test_create_rejects_unknown_product(self, client, auth_headers):
         resp = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "scanner"},
             headers=auth_headers,
         )
@@ -168,7 +170,7 @@ class TestAirGapBundlesAPI:
 
     def test_get_returns_404_for_unknown_id(self, client, auth_headers):
         resp = client.get(
-            "/api/airgap-bundles/00000000-0000-0000-0000-000000000000",
+            "/api/v1/airgap-bundles/00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
         )
         assert resp.status_code == 404
@@ -176,46 +178,46 @@ class TestAirGapBundlesAPI:
     def test_download_409_when_not_ready(self, client, auth_headers, _mute_builder):
         # Create a bundle (stays in 'queued' because builder is muted).
         r = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "server"},
             headers=auth_headers,
         )
         bundle_id = r.json()["id"]
 
         resp = client.get(
-            f"/api/airgap-bundles/{bundle_id}/download", headers=auth_headers
+            f"/api/v1/airgap-bundles/{bundle_id}/download", headers=auth_headers
         )
         assert resp.status_code == 409
         assert "not ready" in resp.json()["detail"].lower()
 
     def test_delete_removes_row(self, client, auth_headers, _mute_builder):
         r = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "agent"},
             headers=auth_headers,
         )
         bundle_id = r.json()["id"]
 
-        d = client.delete(f"/api/airgap-bundles/{bundle_id}", headers=auth_headers)
+        d = client.delete(f"/api/v1/airgap-bundles/{bundle_id}", headers=auth_headers)
         assert d.status_code == 204
 
         # And the row is really gone.
-        g = client.get(f"/api/airgap-bundles/{bundle_id}", headers=auth_headers)
+        g = client.get(f"/api/v1/airgap-bundles/{bundle_id}", headers=auth_headers)
         assert g.status_code == 404
 
     def test_list_orders_newest_first(self, client, auth_headers, _mute_builder):
         first = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "server"},
             headers=auth_headers,
         ).json()
         second = client.post(
-            "/api/airgap-bundles",
+            "/api/v1/airgap-bundles",
             json={"product": "agent"},
             headers=auth_headers,
         ).json()
 
-        rows = client.get("/api/airgap-bundles", headers=auth_headers).json()
+        rows = client.get("/api/v1/airgap-bundles", headers=auth_headers).json()
         # Newest first by created_at ordering — second post should be first.
         ids = [r["id"] for r in rows]
         assert second["id"] in ids
@@ -224,7 +226,7 @@ class TestAirGapBundlesAPI:
 
     def test_anonymous_rejected(self, client):
         # No auth header — JWTBearer should refuse before reaching the handler.
-        resp = client.post("/api/airgap-bundles", json={"product": "server"})
+        resp = client.post("/api/v1/airgap-bundles", json={"product": "server"})
         assert resp.status_code in (401, 403)
 
     @_skip_on_windows
@@ -233,7 +235,9 @@ class TestAirGapBundlesAPI:
         # installed=False rather than 500.  We force shutil.which to
         # return None to simulate a docker-less host.
         with patch("backend.api.airgap_bundles.shutil.which", return_value=None):
-            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            resp = client.get(
+                "/api/v1/airgap-bundles/docker-status", headers=auth_headers
+            )
             assert resp.status_code == 200, resp.text
             body = resp.json()
             assert body["installed"] is False
@@ -266,7 +270,9 @@ class TestAirGapBundlesAPI:
                 ]
             ),
         ):
-            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            resp = client.get(
+                "/api/v1/airgap-bundles/docker-status", headers=auth_headers
+            )
             assert resp.status_code == 200, resp.text
             body = resp.json()
             assert body["installed"] is True
@@ -296,7 +302,9 @@ class TestAirGapBundlesAPI:
                 ]
             ),
         ):
-            resp = client.get("/api/airgap-bundles/docker-status", headers=auth_headers)
+            resp = client.get(
+                "/api/v1/airgap-bundles/docker-status", headers=auth_headers
+            )
             assert resp.status_code == 200, resp.text
             body = resp.json()
             assert body["installed"] is True
@@ -319,7 +327,7 @@ class TestAirGapBundlesProPlusGate:
             return_value=False,
         ):
             resp = client.post(
-                "/api/airgap-bundles",
+                "/api/v1/airgap-bundles",
                 json={"product": "server"},
                 headers=auth_headers,
             )
@@ -333,5 +341,5 @@ class TestAirGapBundlesProPlusGate:
             new_callable=PropertyMock,
             return_value=False,
         ):
-            resp = client.get("/api/airgap-bundles", headers=auth_headers)
+            resp = client.get("/api/v1/airgap-bundles", headers=auth_headers)
             assert resp.status_code == 403

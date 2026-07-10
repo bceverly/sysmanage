@@ -1,6 +1,6 @@
 """
 Unit tests for Ubuntu Pro settings API endpoints.
-Tests the /api/ubuntu-pro/ endpoints with various scenarios.
+Tests the /api/v1/ubuntu-pro/ endpoints with various scenarios.
 """
 
 from datetime import datetime, timezone
@@ -11,7 +11,7 @@ from backend.persistence import models
 
 
 class TestUbuntuProSettingsGet:
-    """Test cases for the GET /api/ubuntu-pro/ endpoint."""
+    """Test cases for the GET /api/v1/ubuntu-pro/ endpoint."""
 
     def test_get_settings_success_existing(self, client, session, auth_headers):
         """Test successful retrieval of existing Ubuntu Pro settings."""
@@ -28,7 +28,7 @@ class TestUbuntuProSettingsGet:
         session.commit()
 
         # Test get settings
-        response = client.get("/api/ubuntu-pro/", headers=auth_headers)
+        response = client.get("/api/v1/ubuntu-pro/", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -47,7 +47,7 @@ class TestUbuntuProSettingsGet:
         assert session.query(models.UbuntuProSettings).count() == 0
 
         # Test get settings
-        response = client.get("/api/ubuntu-pro/", headers=auth_headers)
+        response = client.get("/api/v1/ubuntu-pro/", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -61,14 +61,14 @@ class TestUbuntuProSettingsGet:
 
     def test_get_settings_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
-        response = client.get("/api/ubuntu-pro/")
+        response = client.get("/api/v1/ubuntu-pro/")
         assert response.status_code == 401
 
     def test_get_settings_creates_default_with_proper_timestamps(
         self, client, session, auth_headers
     ):
         """Test that default settings are created with proper timestamps when none exist."""
-        response = client.get("/api/ubuntu-pro/", headers=auth_headers)
+        response = client.get("/api/v1/ubuntu-pro/", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
 
@@ -90,7 +90,7 @@ class TestUbuntuProSettingsGet:
 
 
 class TestUbuntuProSettingsUpdate:
-    """Test cases for the PUT /api/ubuntu-pro/ endpoint."""
+    """Test cases for the PUT /api/v1/ubuntu-pro/ endpoint."""
 
     def test_update_settings_success_existing(self, client, session, auth_headers):
         """Test successful update of existing Ubuntu Pro settings."""
@@ -114,7 +114,7 @@ class TestUbuntuProSettingsUpdate:
         }
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
 
         assert response.status_code == 200
@@ -145,7 +145,7 @@ class TestUbuntuProSettingsUpdate:
         }
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
 
         assert response.status_code == 200
@@ -176,7 +176,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"master_key": "C4444444444444444444444444"}
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
 
         assert response.status_code == 200
@@ -203,7 +203,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"master_key": ""}
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
 
         assert response.status_code == 200
@@ -216,7 +216,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"master_key": "INVALID123456789012345"}
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
         assert response.status_code == 422
         # FastAPI validation errors have a different structure
@@ -227,7 +227,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"master_key": "C123"}
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
         assert response.status_code == 422
         error_detail = response.json()
@@ -240,7 +240,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"organization_name": "x" * 256}  # Too long
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
         assert response.status_code == 422
         error_detail = response.json()
@@ -253,7 +253,7 @@ class TestUbuntuProSettingsUpdate:
         update_data = {"organization_name": "   "}  # Empty string with spaces
 
         response = client.put(
-            "/api/ubuntu-pro/", headers=auth_headers, json=update_data
+            "/api/v1/ubuntu-pro/", headers=auth_headers, json=update_data
         )
 
         assert response.status_code == 200
@@ -268,12 +268,12 @@ class TestUbuntuProSettingsUpdate:
         """Test that unauthorized requests are rejected."""
         update_data = {"master_key": "C1234567890123456789012345"}
 
-        response = client.put("/api/ubuntu-pro/", json=update_data)
+        response = client.put("/api/v1/ubuntu-pro/", json=update_data)
         assert response.status_code == 401
 
 
 class TestUbuntuProSettingsClearKey:
-    """Test cases for the DELETE /api/ubuntu-pro/master-key endpoint."""
+    """Test cases for the DELETE /api/v1/ubuntu-pro/master-key endpoint."""
 
     def test_clear_master_key_success(self, client, session, auth_headers):
         """Test successful clearing of master key."""
@@ -290,7 +290,7 @@ class TestUbuntuProSettingsClearKey:
         session.commit()
 
         # Test clear master key
-        response = client.delete("/api/ubuntu-pro/master-key", headers=auth_headers)
+        response = client.delete("/api/v1/ubuntu-pro/master-key", headers=auth_headers)
 
         assert response.status_code == 200
         assert "Master key cleared successfully" in response.json()["message"]
@@ -306,19 +306,19 @@ class TestUbuntuProSettingsClearKey:
         assert session.query(models.UbuntuProSettings).count() == 0
 
         # Test clear master key
-        response = client.delete("/api/ubuntu-pro/master-key", headers=auth_headers)
+        response = client.delete("/api/v1/ubuntu-pro/master-key", headers=auth_headers)
 
         assert response.status_code == 200
         assert "No settings found to clear" in response.json()["message"]
 
     def test_clear_master_key_unauthorized(self, client, session):
         """Test that unauthorized requests are rejected."""
-        response = client.delete("/api/ubuntu-pro/master-key")
+        response = client.delete("/api/v1/ubuntu-pro/master-key")
         assert response.status_code == 401
 
 
 class TestUbuntuProSettingsKeyStatus:
-    """Test cases for the GET /api/ubuntu-pro/master-key/status endpoint."""
+    """Test cases for the GET /api/v1/ubuntu-pro/master-key/status endpoint."""
 
     def test_get_key_status_with_key(self, client, session, auth_headers):
         """Test getting key status when master key exists."""
@@ -335,7 +335,9 @@ class TestUbuntuProSettingsKeyStatus:
         session.commit()
 
         # Test get key status
-        response = client.get("/api/ubuntu-pro/master-key/status", headers=auth_headers)
+        response = client.get(
+            "/api/v1/ubuntu-pro/master-key/status", headers=auth_headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -358,7 +360,9 @@ class TestUbuntuProSettingsKeyStatus:
         session.commit()
 
         # Test get key status
-        response = client.get("/api/ubuntu-pro/master-key/status", headers=auth_headers)
+        response = client.get(
+            "/api/v1/ubuntu-pro/master-key/status", headers=auth_headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -372,7 +376,9 @@ class TestUbuntuProSettingsKeyStatus:
         assert session.query(models.UbuntuProSettings).count() == 0
 
         # Test get key status
-        response = client.get("/api/ubuntu-pro/master-key/status", headers=auth_headers)
+        response = client.get(
+            "/api/v1/ubuntu-pro/master-key/status", headers=auth_headers
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -382,7 +388,7 @@ class TestUbuntuProSettingsKeyStatus:
 
 
 class TestUbuntuProEnrollment:
-    """Test cases for the POST /api/ubuntu-pro/enroll endpoint."""
+    """Test cases for the POST /api/v1/ubuntu-pro/enroll endpoint."""
 
     def test_enroll_with_master_key_success(self, client, session, auth_headers):
         """Test successful enrollment using master key."""
@@ -424,7 +430,7 @@ class TestUbuntuProEnrollment:
             }
 
             response = client.post(
-                "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+                "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
             )
 
             assert response.status_code == 200
@@ -468,7 +474,7 @@ class TestUbuntuProEnrollment:
             }
 
             response = client.post(
-                "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+                "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
             )
 
             assert response.status_code == 200
@@ -491,7 +497,7 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post(
-            "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+            "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
         )
 
         assert response.status_code == 400
@@ -507,7 +513,7 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post(
-            "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+            "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
         )
 
         assert response.status_code == 422  # Validation error
@@ -521,7 +527,7 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post(
-            "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+            "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
         )
 
         assert response.status_code == 422  # Validation error
@@ -549,7 +555,7 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post(
-            "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+            "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
         )
 
         assert response.status_code == 200
@@ -590,7 +596,7 @@ class TestUbuntuProEnrollment:
             }
 
             response = client.post(
-                "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+                "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
             )
 
             assert response.status_code == 200
@@ -606,7 +612,7 @@ class TestUbuntuProEnrollment:
         }
 
         response = client.post(
-            "/api/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
+            "/api/v1/ubuntu-pro/enroll", headers=auth_headers, json=enrollment_data
         )
 
         assert response.status_code == 422  # Validation error
@@ -618,5 +624,5 @@ class TestUbuntuProEnrollment:
             "use_master_key": True,
         }
 
-        response = client.post("/api/ubuntu-pro/enroll", json=enrollment_data)
+        response = client.post("/api/v1/ubuntu-pro/enroll", json=enrollment_data)
         assert response.status_code == 401

@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/host_utils.py module.
+Comprehensive tests for backend/api/v1/host_utils.py module.
 Tests utility functions for host management operations.
 """
 

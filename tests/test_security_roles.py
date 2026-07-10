@@ -1,5 +1,5 @@
 """
-Tests for backend/api/security_roles.py module.
+Tests for backend/api/v1/security_roles.py module.
 Tests security roles API endpoints.
 """
 
@@ -134,7 +134,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         # Setup mocks
         mock_user = MagicMock()
@@ -165,7 +165,7 @@ class TestGetAllRoleGroups:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/security-roles/groups")
+        response = client.get("/api/v1/security-roles/groups")
 
         assert response.status_code == 200
 
@@ -177,7 +177,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_db = MagicMock()
         mock_db.query.return_value.filter.return_value.first.return_value = None
@@ -186,7 +186,7 @@ class TestGetAllRoleGroups:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/security-roles/groups")
+        response = client.get("/api/v1/security-roles/groups")
 
         assert response.status_code == 401
 
@@ -198,7 +198,7 @@ class TestGetAllRoleGroups:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_user = MagicMock()
         mock_user.id = uuid4()
@@ -213,7 +213,7 @@ class TestGetAllRoleGroups:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/security-roles/groups")
+        response = client.get("/api/v1/security-roles/groups")
 
         assert response.status_code == 403
 
@@ -229,7 +229,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -257,7 +257,7 @@ class TestGetUserRoles:
         app.dependency_overrides[get_current_user] = lambda: "admin@example.com"
 
         client = TestClient(app)
-        response = client.get(f"/api/security-roles/user/{user_id}")
+        response = client.get(f"/api/v1/security-roles/user/{user_id}")
 
         assert response.status_code == 200
 
@@ -269,7 +269,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -289,7 +289,7 @@ class TestGetUserRoles:
         app.dependency_overrides[get_current_user] = lambda: "admin@example.com"
 
         client = TestClient(app)
-        response = client.get(f"/api/security-roles/user/{user_id}")
+        response = client.get(f"/api/v1/security-roles/user/{user_id}")
 
         assert response.status_code == 404
 
@@ -301,7 +301,7 @@ class TestGetUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -320,7 +320,7 @@ class TestGetUserRoles:
         app.dependency_overrides[get_current_user] = lambda: "user@example.com"
 
         client = TestClient(app)
-        response = client.get(f"/api/security-roles/user/{user_id}")
+        response = client.get(f"/api/v1/security-roles/user/{user_id}")
 
         assert response.status_code == 403
 
@@ -337,7 +337,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -376,7 +376,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": [str(role_id)]},
         )
 
@@ -390,7 +390,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -415,7 +415,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": ["not-a-valid-uuid"]},
         )
 
@@ -430,7 +430,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
         role_id = uuid4()
@@ -457,7 +457,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": [str(role_id)]},
         )
 
@@ -472,7 +472,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -492,7 +492,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": []},
         )
 
@@ -505,7 +505,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -517,7 +517,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": []},
         )
 
@@ -531,7 +531,7 @@ class TestUpdateUserRoles:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         user_id = uuid4()
 
@@ -552,7 +552,7 @@ class TestUpdateUserRoles:
 
         client = TestClient(app)
         response = client.put(
-            f"/api/security-roles/user/{user_id}",
+            f"/api/v1/security-roles/user/{user_id}",
             json={"role_ids": []},
         )
 

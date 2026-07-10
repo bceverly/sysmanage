@@ -29,7 +29,7 @@ class TestUserDelete:
         session.commit()
         user_id = user.id
 
-        response = client.delete(f"/api/user/{user_id}", headers=auth_headers)
+        response = client.delete(f"/api/v1/user/{user_id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -43,7 +43,7 @@ class TestUserDelete:
 
     def test_delete_user_not_found(self, client, auth_headers):
         """Test deleting non-existent user."""
-        response = client.delete("/api/user/999", headers=auth_headers)
+        response = client.delete("/api/v1/user/999", headers=auth_headers)
 
         assert response.status_code == 404
         data = response.json()
@@ -51,7 +51,7 @@ class TestUserDelete:
 
     def test_delete_user_unauthorized(self, client):
         """Test deleting user without authentication."""
-        response = client.delete("/api/user/1")
+        response = client.delete("/api/v1/user/1")
         assert response.status_code == 401
 
 
@@ -60,7 +60,7 @@ class TestUserMe:
 
     def test_get_user_me_success(self, client, session, auth_headers):
         """Test getting current user info."""
-        response = client.get("/api/user/me", headers=auth_headers)
+        response = client.get("/api/v1/user/me", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -70,7 +70,7 @@ class TestUserMe:
 
     def test_get_user_me_unauthorized(self, client):
         """Test getting current user without authentication."""
-        response = client.get("/api/user/me")
+        response = client.get("/api/v1/user/me")
         assert response.status_code == 401
 
 
@@ -90,7 +90,7 @@ class TestUserGet:
         session.add(user)
         session.commit()
 
-        response = client.get(f"/api/user/{user.id}", headers=auth_headers)
+        response = client.get(f"/api/v1/user/{user.id}", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -100,7 +100,7 @@ class TestUserGet:
 
     def test_get_user_not_found(self, client, auth_headers):
         """Test getting non-existent user."""
-        response = client.get("/api/user/999", headers=auth_headers)
+        response = client.get("/api/v1/user/999", headers=auth_headers)
 
         assert response.status_code == 404
         data = response.json()
@@ -108,7 +108,7 @@ class TestUserGet:
 
     def test_get_user_unauthorized(self, client):
         """Test getting user without authentication."""
-        response = client.get("/api/user/1")
+        response = client.get("/api/v1/user/1")
         assert response.status_code == 401
 
 
@@ -129,7 +129,7 @@ class TestUserGetByUserid:
         session.commit()
 
         response = client.get(
-            "/api/user/by_userid/findme@example.com", headers=auth_headers
+            "/api/v1/user/by_userid/findme@example.com", headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -140,7 +140,7 @@ class TestUserGetByUserid:
     def test_get_user_by_userid_not_found(self, client, auth_headers):
         """Test getting non-existent user by userid."""
         response = client.get(
-            "/api/user/by_userid/nonexistent@example.com", headers=auth_headers
+            "/api/v1/user/by_userid/nonexistent@example.com", headers=auth_headers
         )
 
         assert response.status_code == 404
@@ -149,7 +149,7 @@ class TestUserGetByUserid:
 
     def test_get_user_by_userid_unauthorized(self, client):
         """Test getting user by userid without authentication."""
-        response = client.get("/api/user/by_userid/test@example.com")
+        response = client.get("/api/v1/user/by_userid/test@example.com")
         assert response.status_code == 401
 
 
@@ -174,7 +174,7 @@ class TestUsersList:
             session.add(user)
         session.commit()
 
-        response = client.get("/api/users", headers=auth_headers)
+        response = client.get("/api/v1/users", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -197,7 +197,7 @@ class TestUsersList:
 
     def test_get_users_empty(self, client, auth_headers):
         """Test getting empty users list."""
-        response = client.get("/api/users", headers=auth_headers)
+        response = client.get("/api/v1/users", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -206,7 +206,7 @@ class TestUsersList:
 
     def test_get_users_unauthorized(self, client):
         """Test getting users without authentication."""
-        response = client.get("/api/users")
+        response = client.get("/api/v1/users")
         assert response.status_code == 401
 
 
@@ -223,7 +223,7 @@ class TestUserCreate:
             "last_name": "User",
         }
 
-        response = client.post("/api/user", json=user_data, headers=auth_headers)
+        response = client.post("/api/v1/user", json=user_data, headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -265,7 +265,7 @@ class TestUserCreate:
             "last_name": "User",
         }
 
-        response = client.post("/api/user", json=user_data, headers=auth_headers)
+        response = client.post("/api/v1/user", json=user_data, headers=auth_headers)
 
         assert response.status_code == 409
         data = response.json()
@@ -281,7 +281,7 @@ class TestUserCreate:
             "last_name": "Email",
         }
 
-        response = client.post("/api/user", json=user_data, headers=auth_headers)
+        response = client.post("/api/v1/user", json=user_data, headers=auth_headers)
         assert response.status_code == 422
 
     def test_create_user_missing_fields(self, client, auth_headers):
@@ -294,7 +294,7 @@ class TestUserCreate:
             return_value="fake-token",
         ):
             response = client.post(
-                "/api/user",
+                "/api/v1/user",
                 json={"userid": "test@example.com", "active": True},
                 headers=auth_headers,
             )
@@ -305,7 +305,7 @@ class TestUserCreate:
 
         # Missing userid should still fail
         response = client.post(
-            "/api/user",
+            "/api/v1/user",
             json={"password": "Password123!", "active": True},
             headers=auth_headers,
         )
@@ -320,7 +320,7 @@ class TestUserCreate:
             "first_name": "Test",
             "last_name": "User",
         }
-        response = client.post("/api/user", json=user_data)
+        response = client.post("/api/v1/user", json=user_data)
         assert response.status_code == 401
 
 
@@ -351,7 +351,7 @@ class TestUserUpdate:
         }
 
         response = client.put(
-            f"/api/user/{user_id}", json=update_data, headers=auth_headers
+            f"/api/v1/user/{user_id}", json=update_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -375,7 +375,9 @@ class TestUserUpdate:
             "last_name": "User",
         }
 
-        response = client.put("/api/user/999", json=update_data, headers=auth_headers)
+        response = client.put(
+            "/api/v1/user/999", json=update_data, headers=auth_headers
+        )
 
         assert response.status_code == 404
         data = response.json()
@@ -411,7 +413,7 @@ class TestUserUpdate:
         }
 
         response = client.put(
-            f"/api/user/{user2.id}", json=update_data, headers=auth_headers
+            f"/api/v1/user/{user2.id}", json=update_data, headers=auth_headers
         )
 
         # Should return 409 error for duplicate userid
@@ -428,7 +430,7 @@ class TestUserUpdate:
             "first_name": "Test",
             "last_name": "User",
         }
-        response = client.put("/api/user/1", json=update_data)
+        response = client.put("/api/v1/user/1", json=update_data)
         assert response.status_code == 401
 
 
@@ -460,7 +462,7 @@ class TestUserUnlock:
 
         mock_login_security.unlock_user_account.side_effect = unlock_user_side_effect
 
-        response = client.post(f"/api/user/{user_id}/unlock", headers=auth_headers)
+        response = client.post(f"/api/v1/user/{user_id}/unlock", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -475,7 +477,7 @@ class TestUserUnlock:
 
     def test_unlock_user_not_found(self, client, auth_headers):
         """Test unlocking non-existent user."""
-        response = client.post("/api/user/999/unlock", headers=auth_headers)
+        response = client.post("/api/v1/user/999/unlock", headers=auth_headers)
 
         assert response.status_code == 404
         data = response.json()
@@ -483,5 +485,5 @@ class TestUserUnlock:
 
     def test_unlock_user_unauthorized(self, client):
         """Test unlocking user without authentication."""
-        response = client.post("/api/user/1/unlock")
+        response = client.post("/api/v1/user/1/unlock")
         assert response.status_code == 401

@@ -1,5 +1,5 @@
 """
-Comprehensive tests for Pydantic models in backend/api/email.py module.
+Comprehensive tests for Pydantic models in backend/api/v1/email.py module.
 Tests email request/response models and validation.
 """
 

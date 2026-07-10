@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/message_handlers.py module.
+Comprehensive tests for backend/api/v1/message_handlers.py module.
 Tests WebSocket message handling functions for agent communication.
 """
 

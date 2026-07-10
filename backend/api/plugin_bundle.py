@@ -63,7 +63,10 @@ async def list_plugin_bundles(
     pattern = os.path.join(modules_path, "*-plugin.iife.js")
     for bundle_path in sorted(glob.glob(pattern)):
         filename = os.path.basename(bundle_path)
-        bundles.append(f"/api/plugins/bundle/{filename}")
+        # Self-referential URL must use the canonical versioned path — the
+        # deprecated /api alias was retired with the API-version bridge, so the
+        # bundle-serving route only answers under /api/v1.
+        bundles.append(f"/api/v1/plugins/bundle/{filename}")
 
     return PluginBundleListResponse(bundles=bundles)
 

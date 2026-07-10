@@ -62,7 +62,7 @@ class TestRegisterRoutes:
 
         paths = [getattr(route, "path", "") for route in app.routes]
         # Check for user routes with /api prefix
-        has_user_routes = any("/api/user" in p for p in paths)
+        has_user_routes = any("/api/v1/user" in p for p in paths)
         assert has_user_routes
 
     def test_register_routes_includes_host_router(self):

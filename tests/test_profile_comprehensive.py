@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/profile.py module.
+Comprehensive tests for backend/api/v1/profile.py module.
 Tests password change and image handling functionality.
 """
 

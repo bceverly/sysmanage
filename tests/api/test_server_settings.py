@@ -14,10 +14,11 @@ from backend.auth.auth_handler import sign_jwt
 
 def _client():
     app = FastAPI()
-    # Phase 13.2.1: the router carries relative paths now (/settings); the /api
-    # prefix is added at registration. Mount under /api here to exercise the
-    # (still-supported) /api/settings alias surface these tests assert.
-    app.include_router(server_settings.router, prefix="/api")
+    # Phase 13.2.1: the router carries relative paths now (/settings); the /api/v1
+    # prefix is added at registration.  Mount under /api/v1 here to exercise the
+    # canonical versioned surface (the deprecated /api alias was retired with the
+    # API-version bridge).
+    app.include_router(server_settings.router, prefix="/api/v1")
     return TestClient(app)
 
 
@@ -26,21 +27,21 @@ def _auth():
 
 
 def test_get_returns_known_settings(engine):
-    resp = _client().get("/api/settings", headers=_auth())
+    resp = _client().get("/api/v1/settings", headers=_auth())
     assert resp.status_code == 200
     keys = {s["key"] for s in resp.json()["settings"]}
     assert {"heartbeat_timeout", "jwt_auth_timeout", "email_enabled"} <= keys
 
 
 def test_requires_auth(engine):
-    resp = _client().get("/api/settings")
+    resp = _client().get("/api/v1/settings")
     assert resp.status_code in (401, 403)
 
 
 def test_put_persists_and_reads_back(engine):
     client = _client()
     put = client.put(
-        "/api/settings",
+        "/api/v1/settings",
         json={"settings": {"heartbeat_timeout": 11, "email_enabled": True}},
         headers=_auth(),
     )
@@ -52,7 +53,7 @@ def test_put_persists_and_reads_back(engine):
     # A fresh GET reflects the persisted DB values.
     got = {
         s["key"]: s["value"]
-        for s in client.get("/api/settings", headers=_auth()).json()["settings"]
+        for s in client.get("/api/v1/settings", headers=_auth()).json()["settings"]
     }
     assert got["heartbeat_timeout"] == 11
     assert got["email_enabled"] is True
@@ -60,7 +61,7 @@ def test_put_persists_and_reads_back(engine):
 
 def test_unknown_keys_ignored(engine):
     resp = _client().put(
-        "/api/settings",
+        "/api/v1/settings",
         json={"settings": {"not_a_real_setting": 999}},
         headers=_auth(),
     )
@@ -72,13 +73,13 @@ def test_unknown_keys_ignored(engine):
 def test_int_coercion(engine):
     client = _client()
     client.put(
-        "/api/settings",
+        "/api/v1/settings",
         json={"settings": {"jwt_auth_timeout": "7200"}},  # string -> int
         headers=_auth(),
     )
     got = {
         s["key"]: s["value"]
-        for s in client.get("/api/settings", headers=_auth()).json()["settings"]
+        for s in client.get("/api/v1/settings", headers=_auth()).json()["settings"]
     }
     assert got["jwt_auth_timeout"] == 7200
 
@@ -93,7 +94,7 @@ def test_email_password_is_write_only_and_goes_to_openbao(engine):
         "backend.config.secrets_service.store_config_secrets", return_value=True
     ) as store:
         put = client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"email_password": "hunter2"}},
             headers=_auth(),
         )
@@ -115,7 +116,7 @@ def test_blank_email_password_does_not_overwrite(engine):
         "backend.config.secrets_service.store_config_secrets", return_value=True
     ) as store:
         client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"email_password": ""}},
             headers=_auth(),
         )
@@ -137,7 +138,7 @@ def test_email_setting_routes_to_tenant_scope_when_mt_enabled(engine):
         "backend.config.settings_service.set_setting", return_value=True
     ) as set_server:
         put = client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"email_host": "mx.tenant"}},
             headers=_auth(),
         )
@@ -159,7 +160,7 @@ def test_non_email_setting_stays_server_scoped_under_mt(engine):
         "backend.config.settings_service.set_setting", return_value=True
     ) as set_server:
         client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"heartbeat_timeout": 7}},
             headers=_auth(),
         )
@@ -179,7 +180,7 @@ def test_email_password_routes_to_tenant_openbao_when_mt_enabled(engine):
         "backend.config.secrets_service.store_config_secrets", return_value=True
     ) as store_server:
         client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"email_password": "hunter2"}},
             headers=_auth(),
         )
@@ -200,7 +201,7 @@ def test_email_uses_server_scope_when_mt_disabled(engine):
         "backend.config.settings_service.set_setting", return_value=True
     ) as set_server:
         client.put(
-            "/api/settings",
+            "/api/v1/settings",
             json={"settings": {"email_host": "mx.server"}},
             headers=_auth(),
         )

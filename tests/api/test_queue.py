@@ -39,7 +39,7 @@ class TestQueueAPI:
                 "type": "heartbeat"
             }
 
-            response = client.get("/api/queue/failed")
+            response = client.get("/api/v1/queue/failed")
 
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -50,7 +50,7 @@ class TestQueueAPI:
 
     def test_get_failed_messages_empty_result(self, client, session, mock_current_user):
         """Test retrieval of failed messages when none exist."""
-        response = client.get("/api/queue/failed")
+        response = client.get("/api/v1/queue/failed")
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -59,7 +59,7 @@ class TestQueueAPI:
 
     def test_get_failed_messages_unauthorized(self, client):
         """Test that unauthorized access is rejected."""
-        response = client.get("/api/queue/failed")
+        response = client.get("/api/v1/queue/failed")
         # This should return 401/403 due to missing authentication
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
@@ -97,7 +97,7 @@ class TestQueueAPI:
 
         response = client.request(
             "DELETE",
-            "/api/queue/failed",
+            "/api/v1/queue/failed",
             content=json.dumps(["test-msg-1", "test-msg-2"]),
             headers={"Content-Type": "application/json"},
         )
@@ -115,7 +115,7 @@ class TestQueueAPI:
 
         response = client.request(
             "DELETE",
-            "/api/queue/failed",
+            "/api/v1/queue/failed",
             content=json.dumps([]),
             headers={"Content-Type": "application/json"},
         )
@@ -128,7 +128,7 @@ class TestQueueAPI:
         """Test that unauthorized deletion is rejected."""
         response = client.request(
             "DELETE",
-            "/api/queue/failed",
+            "/api/v1/queue/failed",
             content='["test-msg-1"]',
             headers={"Content-Type": "application/json"},
         )
@@ -164,7 +164,7 @@ class TestQueueAPI:
                 "command": "ls",
             }
 
-            response = client.get("/api/queue/failed/test-msg-detail")
+            response = client.get("/api/v1/queue/failed/test-msg-detail")
 
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -178,7 +178,7 @@ class TestQueueAPI:
 
     def test_get_message_details_not_found(self, client, session, mock_current_user):
         """Test retrieval of non-existent message details."""
-        response = client.get("/api/queue/failed/nonexistent-msg")
+        response = client.get("/api/v1/queue/failed/nonexistent-msg")
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
         data = response.json()
@@ -208,7 +208,7 @@ class TestQueueAPI:
                 "Invalid JSON"
             )
 
-            response = client.get("/api/queue/failed/test-msg-bad-data")
+            response = client.get("/api/v1/queue/failed/test-msg-bad-data")
 
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -218,7 +218,7 @@ class TestQueueAPI:
 
     def test_get_message_details_unauthorized(self, client):
         """Test that unauthorized access to message details is rejected."""
-        response = client.get("/api/queue/failed/test-msg-123")
+        response = client.get("/api/v1/queue/failed/test-msg-123")
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
             status.HTTP_403_FORBIDDEN,
@@ -235,7 +235,7 @@ class TestQueueAPI:
 
                 # The actual function should catch this and raise HTTPException
                 try:
-                    response = client.get("/api/queue/failed")
+                    response = client.get("/api/v1/queue/failed")
                     # If we get here, the error was handled properly
                     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
                 except Exception:
@@ -253,7 +253,7 @@ class TestQueueAPI:
             try:
                 response = client.request(
                     "DELETE",
-                    "/api/queue/failed",
+                    "/api/v1/queue/failed",
                     content='["test-msg-1"]',
                     headers={"Content-Type": "application/json"},
                 )
@@ -271,7 +271,7 @@ class TestQueueAPI:
             mock_query.side_effect = Exception("Database connection failed")
 
             try:
-                response = client.get("/api/queue/failed/test-msg-123")
+                response = client.get("/api/v1/queue/failed/test-msg-123")
                 # If we get here, the error was handled properly
                 assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
             except Exception:

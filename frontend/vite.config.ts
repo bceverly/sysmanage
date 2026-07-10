@@ -291,6 +291,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'html'],
       reportsDirectory: './coverage',
+      // Phase 13 GA ratchet: floors at today's measured coverage so it can only
+      // go up.  vitest fails the run if any metric drops below these — raise
+      // them as coverage improves (never lower).
+      thresholds: {
+        lines: 12,
+        statements: 12,
+        functions: 9,
+        branches: 7,
+      },
       exclude: [
         'node_modules/',
         'src/setupTests.ts',

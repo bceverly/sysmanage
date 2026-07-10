@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/host_data_updates.py module.
+Comprehensive tests for backend/api/v1/host_data_updates.py module.
 Tests host data update endpoints for hardware, users, and software information.
 """
 

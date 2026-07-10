@@ -1,5 +1,5 @@
 """
-Tests for backend/api/auth.py module.
+Tests for backend/api/v1/auth.py module.
 Tests authentication API endpoints.
 """
 
@@ -147,14 +147,14 @@ class TestRefresh:
         from backend.api.auth import router
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_decode.return_value = {"user_id": "test@example.com"}
         mock_sign.return_value = "new_jwt_token"
 
         client = TestClient(app)
         client.cookies.set("refresh_token", "valid_refresh_token")
-        response = client.post("/api/refresh")
+        response = client.post("/api/v1/refresh")
 
         assert response.status_code == 200
         assert response.json()["Authorization"] == "new_jwt_token"
@@ -165,13 +165,13 @@ class TestRefresh:
         from backend.api.auth import router
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_decode.return_value = None
 
         client = TestClient(app)
         client.cookies.set("refresh_token", "invalid_refresh_token")
-        response = client.post("/api/refresh")
+        response = client.post("/api/v1/refresh")
 
         assert response.status_code == 403
 
@@ -180,10 +180,10 @@ class TestRefresh:
         from backend.api.auth import router
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         client = TestClient(app)
-        response = client.post("/api/refresh")
+        response = client.post("/api/v1/refresh")
 
         assert response.status_code == 403
 
@@ -202,7 +202,7 @@ class TestLogin:
         from backend.api.auth import router
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_login_security.validate_login_attempt.return_value = (
             False,
@@ -211,7 +211,7 @@ class TestLogin:
 
         client = TestClient(app)
         response = client.post(
-            "/api/login",
+            "/api/v1/login",
             json={"userid": "test@example.com", "password": "password"},
         )
 
@@ -234,7 +234,7 @@ class TestLogin:
         from backend.api.auth import router
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_login_security.validate_login_attempt.return_value = (True, None)
         mock_config.get_config.return_value = {
@@ -245,7 +245,7 @@ class TestLogin:
 
         client = TestClient(app)
         response = client.post(
-            "/api/login",
+            "/api/v1/login",
             json={"userid": "admin@example.com", "password": "admin123"},
         )
 

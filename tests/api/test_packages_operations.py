@@ -14,7 +14,7 @@ class TestPackageInstallEndpoint:
         """Test that package install requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/install",
+            f"/api/v1/host/{host_id}/packages/install",
             json={"packages": ["nginx"]},
         )
         assert response.status_code in [401, 403, 404]
@@ -23,7 +23,7 @@ class TestPackageInstallEndpoint:
         """Test that install returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/install",
+            f"/api/v1/host/{host_id}/packages/install",
             json={"packages": ["nginx"]},
             headers=auth_headers,
         )
@@ -37,7 +37,7 @@ class TestPackageUpdateEndpoint:
         """Test that package update requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/update",
+            f"/api/v1/host/{host_id}/packages/update",
             json={"packages": ["nginx"]},
         )
         assert response.status_code in [401, 403, 404]
@@ -46,7 +46,7 @@ class TestPackageUpdateEndpoint:
         """Test that update returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/update",
+            f"/api/v1/host/{host_id}/packages/update",
             json={"packages": ["nginx"]},
             headers=auth_headers,
         )
@@ -60,7 +60,7 @@ class TestPackageRemoveEndpoint:
         """Test that package remove requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/remove",
+            f"/api/v1/host/{host_id}/packages/remove",
             json={"packages": ["nginx"]},
         )
         assert response.status_code in [401, 403, 404]
@@ -69,7 +69,7 @@ class TestPackageRemoveEndpoint:
         """Test that remove returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/packages/remove",
+            f"/api/v1/host/{host_id}/packages/remove",
             json={"packages": ["nginx"]},
             headers=auth_headers,
         )
@@ -82,14 +82,14 @@ class TestPackageListEndpoint:
     def test_list_requires_authentication(self, client):
         """Test that package list requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/host/{host_id}/packages")
+        response = client.get(f"/api/v1/host/{host_id}/packages")
         assert response.status_code in [401, 403, 404]
 
     def test_list_host_not_found(self, client, auth_headers):
         """Test that list returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/packages",
+            f"/api/v1/host/{host_id}/packages",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -101,5 +101,5 @@ class TestPackageSearchEndpoint:
     def test_search_requires_authentication(self, client):
         """Test that package search requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/host/{host_id}/packages/search?q=nginx")
+        response = client.get(f"/api/v1/host/{host_id}/packages/search?q=nginx")
         assert response.status_code in [401, 403, 404]

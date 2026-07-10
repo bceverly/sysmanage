@@ -14,7 +14,7 @@ class TestTagEndpoints:
 
     def test_get_tags_empty(self, client: TestClient, auth_headers):
         """Test getting tags when none exist"""
-        response = client.get("/api/tags", headers=auth_headers)
+        response = client.get("/api/v1/tags", headers=auth_headers)
 
         assert response.status_code == 200
         assert response.json() == []
@@ -23,7 +23,7 @@ class TestTagEndpoints:
         """Test creating a new tag"""
         tag_data = {"name": "Production", "description": "Production servers"}
 
-        response = client.post("/api/tags", json=tag_data, headers=auth_headers)
+        response = client.post("/api/v1/tags", json=tag_data, headers=auth_headers)
 
         assert response.status_code == 201
         data = response.json()
@@ -48,7 +48,7 @@ class TestTagEndpoints:
 
         tag_data = {"name": "Development", "description": "Another dev tag"}
 
-        response = client.post("/api/tags", json=tag_data, headers=auth_headers)
+        response = client.post("/api/v1/tags", json=tag_data, headers=auth_headers)
 
         assert response.status_code == 400
         assert "already exists" in response.json()["detail"]
@@ -57,7 +57,7 @@ class TestTagEndpoints:
         """Test creating a tag without description"""
         tag_data = {"name": "Testing"}
 
-        response = client.post("/api/tags", json=tag_data, headers=auth_headers)
+        response = client.post("/api/v1/tags", json=tag_data, headers=auth_headers)
 
         assert response.status_code == 201
         data = response.json()
@@ -82,7 +82,7 @@ class TestTagEndpoints:
         session.add_all([tag1, tag2])
         session.commit()
 
-        response = client.get("/api/tags", headers=auth_headers)
+        response = client.get("/api/v1/tags", headers=auth_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -106,7 +106,7 @@ class TestTagEndpoints:
         update_data = {"name": "New Name", "description": "New description"}
 
         response = client.put(
-            f"/api/tags/{tag.id}", json=update_data, headers=auth_headers
+            f"/api/v1/tags/{tag.id}", json=update_data, headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -118,7 +118,9 @@ class TestTagEndpoints:
         """Test updating non-existent tag"""
         update_data = {"name": "New Name"}
 
-        response = client.put("/api/tags/999", json=update_data, headers=auth_headers)
+        response = client.put(
+            "/api/v1/tags/999", json=update_data, headers=auth_headers
+        )
 
         assert response.status_code == 404
 
@@ -135,7 +137,7 @@ class TestTagEndpoints:
         session.refresh(tag)
         tag_id = tag.id
 
-        response = client.delete(f"/api/tags/{tag_id}", headers=auth_headers)
+        response = client.delete(f"/api/v1/tags/{tag_id}", headers=auth_headers)
 
         if response.status_code != 204:
             print(f"Error response: {response.json()}")
@@ -147,7 +149,7 @@ class TestTagEndpoints:
 
     def test_delete_tag_not_found(self, client: TestClient, auth_headers):
         """Test deleting non-existent tag"""
-        response = client.delete("/api/tags/999", headers=auth_headers)
+        response = client.delete("/api/v1/tags/999", headers=auth_headers)
 
         assert response.status_code == 404
 
@@ -180,7 +182,7 @@ class TestTagHostAssociation:
         session.refresh(tag)
 
         response = client.post(
-            f"/api/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
+            f"/api/v1/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
         )
 
         if response.status_code != 201:
@@ -227,7 +229,7 @@ class TestTagHostAssociation:
 
         # Try to add again
         response = client.post(
-            f"/api/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
+            f"/api/v1/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
         )
 
         assert response.status_code == 400
@@ -247,7 +249,7 @@ class TestTagHostAssociation:
         session.commit()
         session.refresh(tag)
 
-        response = client.post(f"/api/hosts/999/tags/{tag.id}", headers=auth_headers)
+        response = client.post(f"/api/v1/hosts/999/tags/{tag.id}", headers=auth_headers)
 
         assert response.status_code == 404
         assert "Host not found" in response.json()["detail"]
@@ -268,7 +270,9 @@ class TestTagHostAssociation:
         session.commit()
         session.refresh(host)
 
-        response = client.post(f"/api/hosts/{host.id}/tags/999", headers=auth_headers)
+        response = client.post(
+            f"/api/v1/hosts/{host.id}/tags/999", headers=auth_headers
+        )
 
         assert response.status_code == 404
         assert "Tag not found" in response.json()["detail"]
@@ -306,7 +310,7 @@ class TestTagHostAssociation:
         session.commit()
 
         response = client.delete(
-            f"/api/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
+            f"/api/v1/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
         )
 
         assert response.status_code == 204
@@ -345,7 +349,7 @@ class TestTagHostAssociation:
         session.refresh(tag)
 
         response = client.delete(
-            f"/api/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
+            f"/api/v1/hosts/{host.id}/tags/{tag.id}", headers=auth_headers
         )
 
         assert response.status_code == 404
@@ -391,7 +395,7 @@ class TestTagHostAssociation:
         session.add_all([assoc1, assoc2])
         session.commit()
 
-        response = client.get(f"/api/hosts/{host.id}/tags", headers=auth_headers)
+        response = client.get(f"/api/v1/hosts/{host.id}/tags", headers=auth_headers)
 
         if response.status_code != 200:
             print(f"Error response: {response.json()}")
@@ -432,7 +436,7 @@ class TestTagHostAssociation:
         session.add(association)
         session.commit()
 
-        response = client.get(f"/api/tags/{tag.id}/hosts", headers=auth_headers)
+        response = client.get(f"/api/v1/tags/{tag.id}/hosts", headers=auth_headers)
 
         if response.status_code != 200:
             print(f"Error response: {response.json()}")
@@ -449,32 +453,32 @@ class TestTagEndpointsAuth:
 
     def test_get_tags_unauthorized(self, client: TestClient):
         """Test that getting tags requires authentication"""
-        response = client.get("/api/tags")
+        response = client.get("/api/v1/tags")
         assert response.status_code == 401
 
     def test_create_tag_unauthorized(self, client: TestClient):
         """Test that creating tags requires authentication"""
         tag_data = {"name": "Test", "description": "Test tag"}
-        response = client.post("/api/tags", json=tag_data)
+        response = client.post("/api/v1/tags", json=tag_data)
         assert response.status_code == 401
 
     def test_update_tag_unauthorized(self, client: TestClient):
         """Test that updating tags requires authentication"""
         update_data = {"name": "Updated"}
-        response = client.put("/api/tags/1", json=update_data)
+        response = client.put("/api/v1/tags/1", json=update_data)
         assert response.status_code == 401
 
     def test_delete_tag_unauthorized(self, client: TestClient):
         """Test that deleting tags requires authentication"""
-        response = client.delete("/api/tags/1")
+        response = client.delete("/api/v1/tags/1")
         assert response.status_code == 401
 
     def test_add_tag_to_host_unauthorized(self, client: TestClient):
         """Test that adding tags to hosts requires authentication"""
-        response = client.post("/api/hosts/1/tags/1")
+        response = client.post("/api/v1/hosts/1/tags/1")
         assert response.status_code == 401
 
     def test_remove_tag_from_host_unauthorized(self, client: TestClient):
         """Test that removing tags from hosts requires authentication"""
-        response = client.delete("/api/hosts/1/tags/1")
+        response = client.delete("/api/v1/hosts/1/tags/1")
         assert response.status_code == 401

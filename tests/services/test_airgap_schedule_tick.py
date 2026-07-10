@@ -19,7 +19,7 @@ from backend.services import airgap_schedule_tick as tick_module
 def _engines(*, collector=True, automation=True):
     """Patch module_loader.get_module so engine availability is
     deterministic per test — mirrors the helper in
-    tests/api/test_airgap_collection_schedule.py."""
+    tests/api/v1/test_airgap_collection_schedule.py."""
 
     def _resolver(name):
         if name == "airgap_collector_engine" and collector:

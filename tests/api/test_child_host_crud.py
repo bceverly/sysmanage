@@ -14,7 +14,7 @@ class TestListChildHostsEndpoint:
     def test_list_children_requires_authentication(self, client):
         """Test that list_child_hosts requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/child-hosts/host/{host_id}/children")
+        response = client.get(f"/api/v1/child-hosts/host/{host_id}/children")
         # Without auth, should return 401, 403, or 404 (host not found)
         assert response.status_code in [401, 403, 404]
 
@@ -22,7 +22,7 @@ class TestListChildHostsEndpoint:
         """Test that list_child_hosts returns 404 for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/child-hosts/host/{host_id}/children", headers=auth_headers
+            f"/api/v1/child-hosts/host/{host_id}/children", headers=auth_headers
         )
         assert response.status_code in [403, 404]
 
@@ -34,7 +34,7 @@ class TestCreateChildHostEndpoint:
         """Test that create_child_host requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children",
+            f"/api/v1/child-hosts/host/{host_id}/children",
             json={"hostname": "test", "child_type": "lxd", "distribution_id": "123"},
         )
         assert response.status_code in [401, 403, 404]
@@ -43,7 +43,7 @@ class TestCreateChildHostEndpoint:
         """Test that create returns 404 for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children",
+            f"/api/v1/child-hosts/host/{host_id}/children",
             json={
                 "hostname": "testchild",
                 "child_type": "lxd",
@@ -60,14 +60,14 @@ class TestChildHostDistributions:
 
     def test_list_distributions_requires_authentication(self, client):
         """Test that distributions endpoint requires authentication."""
-        response = client.get("/api/child-hosts/distributions/lxd")
+        response = client.get("/api/v1/child-hosts/distributions/lxd")
         # Should require auth or return 404 if endpoint not found
         assert response.status_code in [200, 401, 403, 404]
 
     def test_list_distributions_invalid_type(self, client, auth_headers):
         """Test listing distributions for invalid type."""
         response = client.get(
-            "/api/child-hosts/distributions/invalid_type", headers=auth_headers
+            "/api/v1/child-hosts/distributions/invalid_type", headers=auth_headers
         )
         # Either empty list or error
         assert response.status_code in [200, 400, 403, 404]
@@ -80,7 +80,9 @@ class TestDeleteChildHostEndpoint:
         """Test that delete_child_host requires authentication."""
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
-        response = client.delete(f"/api/child-hosts/host/{host_id}/children/{child_id}")
+        response = client.delete(
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}"
+        )
         assert response.status_code in [401, 403, 404, 405]
 
     def test_delete_child_not_found(self, client, auth_headers):
@@ -88,7 +90,7 @@ class TestDeleteChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.delete(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}",
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}",
             headers=auth_headers,
         )
         # Either 403 (permission), 404 (not found), or 405 (method not allowed)

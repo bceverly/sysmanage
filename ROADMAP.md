@@ -4421,7 +4421,7 @@ plan-builder + UI integration.
       shape). All edits were raw `<pre><code>` blocks (no `data-i18n` keys touched),
       so docs `make lint` (i18n-validate + offline translate-check) stays green —
       0 gaps, no GPU-translate run needed.)*
-- [ ] **13.1.H** OpenBAO on every OS + config classification — install & cleanly start
+- [x] **13.1.H** OpenBAO on every OS + config classification — install & cleanly start
       OpenBAO in **every** OS installer (native package on Linux/FreeBSD, pinned
       verified tarball elsewhere; bundled into the air-gap mega-ISO), with a shared
       file-storage config + auto-init/unseal one-shot and a startup guard enforcing
@@ -4771,7 +4771,7 @@ as thin back-compat only.
       `/control-plane`); verified against a fresh 0.4.3 engine — OSS 5586 + Pro+
       2154 green. **Needs the multitenancy engine rebuilt to 0.4.3** to deploy
       (and to green the OSS behavioral tests against the storage bundle).
-- [ ] **RETIRE THE BRIDGE — the final Phase 13 engineering action (do LAST).**
+- [x] **RETIRE THE BRIDGE — the final Phase 13 engineering action (do LAST).**
       (Decided 2026-07, Bryan: the `ApiVersionMiddleware` legacy `/api`→`/api/v1`
       bridge is *removed*, not kept as permanent back-compat.) The bridge is the
       safety net during the incremental migration, so it comes out only **after**
@@ -4782,6 +4782,23 @@ as thin back-compat only.
       deliberately-unversioned surfaces (agent, SCIM, IdP SSO/ACS callbacks,
       auth/mfa, mirror settings), and confirm no client still calls a bare
       `/api/*` path.
+
+      *(DONE 2026-07. Deleted `ApiVersionMiddleware` + its test (dead once every
+      route is native /api/v1); `_include_versioned`/`_include_renamed` now
+      single-mount (the deprecated `/api` aliases are gone).  Kept the
+      deliberately-unversioned surfaces confirmed from the live route table:
+      `/api/agent/*`, `/api/auth/{mfa,saml,oidc}/*`, `/api/scim/v2/*`,
+      `/api/certificates/*`, `/api/health`, `/api/host/register`,
+      `/api/idp-providers/{id}/role-mappings`, `/api/settings/mfa`.  Frontend +
+      agent verified /api/v1-native (agent only hits the unversioned surfaces).
+      Migrated ~836 backend-test call-sites to /api/v1 and flipped the slice
+      alias-match tests to assert the alias is now retired (404).  Bug caught &
+      fixed: `plugin_bundle.list_bundles` returned self-referential
+      `/api/plugins/bundle/…` URLs that would 404 post-retirement → now
+      `/api/v1/…`.  Green: OSS `tests/` 5685 passed + `backend/tests/` 539 passed;
+      black/pylint clean.  NOTE: this is an intentional breaking change for any
+      pre-13.2.1 external `/api/*` caller — the one-release deprecation window is
+      closed.)*
 
 **Discovered during 13.2.1 live testing on a licensed multi-tenant box (2026-06-29):**
 - [x] **`reporting_engine` double-prefix — licensed reporting 404s.** *(Fixed in
@@ -4886,7 +4903,7 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
 
 #### 13.3 Additional Polish Items
 
-- [ ] **GPG Key Management** — store **named GPG keys as secrets in the OpenBAO
+- [x] **GPG Key Management** — store **named GPG keys as secrets in the OpenBAO
       vault** and assign them by name to specific hosts / to specific users on
       those hosts. (Design 2026-07, Bryan.)
       - **Storage:** each key is a named OpenBAO (KV) secret — private material
@@ -4943,7 +4960,7 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       existing `ubuntu_pro` payload; livepatch_* columns on `ubuntu_pro_info`
       (migration `k1livepatch`); served on `/host/{id}/ubuntu-pro`; Kernel
       Livepatch card in the HostDetail Ubuntu Pro tab. Tests + i18n + lint.
-- [ ] **Custom Metrics and Graphs (Professional+)** — scope (2026-07): do NOT
+- [x] **Custom Metrics and Graphs (Professional+)** — scope (2026-07): do NOT
       rebuild a Grafana-class dashboarding engine; reuse what exists
       (`observability_engine` OTLP/hostmetrics, `alerting_engine`, the Grafana
       bridge). Two focused pieces:
@@ -4987,8 +5004,11 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
 - [ ] **Document GPG Key Management + Custom Metrics & Graphs in `sysmanage-docs`**
       *(2026-07: pages WRITTEN — `docs/professional-plus/gpg-keys.html` +
       `custom-metrics.html`, registered in the Pro+ index, 109 English i18n keys
-      seeded, `i18n-validate` green. **Remaining for the box:** capture the 5
-      screenshots on the docs VM + `make translate` the 13 locales.)*
+      seeded, `i18n-validate` green.  The 5 screenshots (`gpg-keys-list/-assign`,
+      `custom-metrics-list/-define/-graph`) are captured & wired into both pages,
+      fully reproducible via `make screenshots` (Pro pass for GPG, Enterprise pass
+      for Custom Metrics). **Remaining for the box:** `make translate` the 13
+      non-English locales.)*
 - [x] Process Management — agent psutil snapshot collector (periodic + on-demand)
       → `host_process` tenant table → HostDetail "Processes" tab (sortable, search,
       kill/SIGKILL with confirm); server→agent `kill_process`/`collect_processes`
@@ -4999,13 +5019,22 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
 
 - [ ] All planned features implemented
 - [ ] All tests passing (unit, integration, E2E)
-- [ ] **Backend coverage ratchet enforced** — `--cov-fail-under` gate in
+- [x] **Backend coverage ratchet enforced** — `--cov-fail-under` gate in
       CI/Makefile across both Python test trees (`tests/` + `backend/tests/`);
-      floor at the current measured number (≥70%)
+      floor at the current measured number (≥70%). *(Done — `make test-python`
+      accumulates `tests/` then `backend/tests/` via `--cov-append` and gates the
+      final run with `--cov-fail-under=70`; `make test` runs `test-python`.)*
 - [ ] **Frontend coverage ratchet installed** — vitest
       `coverage.thresholds` wired into CI for all three scopes with floors
       at today's measured values (OSS ≥10%, license-server ≥25%, Pro+
       components ≥10%); see "Frontend Test Coverage"
+      *(2026-07: **OSS scope DONE** — `frontend/vite.config.ts` now sets
+      `coverage.thresholds` at the measured floors (lines 12 / statements 12 /
+      functions 9 / branches 7; note branches/functions measured below the rough
+      ≥10% estimate, so per-metric floors were used), enforced via
+      `make test-typescript` → `npm run test:coverage`.  **Remaining:** the
+      license-server frontend and the Pro+ component frontend (separate repos)
+      still need their `coverage.thresholds` set from a measured run.)*
 - [ ] SonarQube: 0 critical issues
 - [ ] Security audit complete
 - [ ] Performance benchmarks met

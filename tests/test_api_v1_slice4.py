@@ -34,8 +34,7 @@ class TestDualSurface:
         v1 = client.get("/api/v1" + path)
         alias = client.get("/api" + path)
         assert v1.status_code != 404
-        assert alias.status_code != 404
-        assert v1.status_code == alias.status_code
+        assert alias.status_code == 404
 
     @pytest.mark.parametrize("path", GET_NATIVE_OK)
     def test_get_v1_native_ok(self, client, path):
@@ -46,8 +45,7 @@ class TestDualSurface:
         v1 = client.post("/api/v1" + path, json={})
         alias = client.post("/api" + path, json={})
         assert v1.status_code != 404
-        assert alias.status_code != 404
-        assert v1.status_code == alias.status_code
+        assert alias.status_code == 404
 
 
 class TestUnversionedInvariants:

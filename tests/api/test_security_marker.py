@@ -9,7 +9,7 @@ Covers the four buckets called out in pen-tests.yml's comment block:
   3. Privilege escalation across security_roles edge cases
   4. WebSocket connect without auth, with stale auth, with wrong-host auth
 
-Tests use the same fixtures pattern as tests/api/test_auth.py so they
+Tests use the same fixtures pattern as tests/api/v1/test_auth.py so they
 plug into the existing in-memory SQLite + TestClient harness.
 """
 
@@ -51,7 +51,7 @@ def test_jwt_with_expired_timestamp_is_rejected(client, mock_config):
         mock_config["security"]["jwt_secret"],
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {token}"})
+    resp = client.post("/api/v1/logout", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code in (
         401,
         403,
@@ -70,7 +70,7 @@ def test_jwt_signed_with_wrong_secret_is_rejected(client, mock_config):
         _WRONG_SECRET_SHORT,
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {forged}"})
+    resp = client.post("/api/v1/logout", headers={"Authorization": f"Bearer {forged}"})
     assert resp.status_code in (
         401,
         403,
@@ -97,7 +97,9 @@ def test_jwt_with_alg_none_is_rejected(
     ).rstrip(b"=")
     bad_token = (header + b"." + body + b".").decode()
 
-    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {bad_token}"})
+    resp = client.post(
+        "/api/v1/logout", headers={"Authorization": f"Bearer {bad_token}"}
+    )
     assert resp.status_code in (
         401,
         403,
@@ -113,7 +115,7 @@ def test_jwt_missing_required_claims_is_rejected(client, mock_config):
         mock_config["security"]["jwt_secret"],
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
-    resp = client.post("/api/logout", headers={"Authorization": f"Bearer {token}"})
+    resp = client.post("/api/v1/logout", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code in (
         401,
         403,
@@ -123,7 +125,7 @@ def test_jwt_missing_required_claims_is_rejected(client, mock_config):
 @pytest.mark.security
 def test_request_without_authorization_header_is_rejected(client):
     """Endpoints behind JWTBearer must reject unauthenticated requests."""
-    resp = client.post("/api/logout")
+    resp = client.post("/api/v1/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -136,7 +138,7 @@ def test_request_with_malformed_authorization_header_is_rejected(client):
         "Bearer ",  # empty token
         "not-even-a-scheme",
     ]:
-        resp = client.post("/api/logout", headers={"Authorization": header_val})
+        resp = client.post("/api/v1/logout", headers={"Authorization": header_val})
         assert resp.status_code in (
             401,
             403,
@@ -151,7 +153,7 @@ def test_request_with_malformed_authorization_header_is_rejected(client):
 @pytest.mark.security
 def test_refresh_without_cookie_is_rejected(client):
     """The /refresh endpoint must reject calls without a refresh_token cookie."""
-    resp = client.post("/api/refresh")
+    resp = client.post("/api/v1/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -173,7 +175,7 @@ def test_refresh_with_expired_cookie_is_rejected(client, mock_config):
         algorithm=mock_config["security"]["jwt_algorithm"],
     )
     client.cookies.set("refresh_token", expired_refresh)
-    resp = client.post("/api/refresh")
+    resp = client.post("/api/v1/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -198,7 +200,7 @@ def test_refresh_with_forged_cookie_signature_is_rejected(
         algorithm="HS256",
     )
     client.cookies.set("refresh_token", forged)
-    resp = client.post("/api/refresh")
+    resp = client.post("/api/v1/refresh")
     assert resp.status_code in (
         401,
         403,
@@ -216,7 +218,7 @@ def test_login_with_unknown_user_returns_401_not_404(
 ):
     """Auth must not leak whether a username exists (401, not 404, on miss)."""
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={"userid": "nobody@example.com", "password": "irrelevant"},
     )
     # 401 = "invalid credentials" — what we want.  404 would leak existence.
@@ -239,7 +241,7 @@ def test_inactive_user_cannot_login(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],
@@ -270,7 +272,7 @@ def test_rate_limited_login_is_blocked(
     )
 
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],  # CORRECT password
@@ -293,7 +295,7 @@ def test_rate_limited_login_is_blocked(
 def test_anonymous_cannot_access_admin_endpoints(client):
     """A handful of admin/Pro+ endpoints — none should respond with data when unauthenticated."""
     for path in [
-        "/api/users",
+        "/api/v1/users",
         "/api/v1/automation/scripts",
         "/api/v1/fleet/groups",
         "/security/default-credentials-status",
@@ -307,7 +309,7 @@ def test_anonymous_cannot_access_admin_endpoints(client):
 @pytest.mark.security
 def test_anonymous_cannot_post_to_state_changing_endpoints(client):
     """POST endpoints that change state must reject unauthenticated callers."""
-    resp = client.post("/api/logout")
+    resp = client.post("/api/v1/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -322,7 +324,7 @@ def test_valid_token_authenticates(
 ):  # pylint: disable=unused-argument
     """Positive control: a freshly-issued admin token does authenticate."""
     resp = client.post(
-        "/api/logout", headers={"Authorization": f"Bearer {admin_token}"}
+        "/api/v1/logout", headers={"Authorization": f"Bearer {admin_token}"}
     )
     # /logout returns 200 on success; the negative-case tests above all
     # expect 401/403, so this positive check pins the contract.
@@ -438,9 +440,9 @@ def reporter_user_token(session, mock_config):
 
 @pytest.mark.security
 def test_role_escalation_post_user_blocked(client, reporter_user_token):
-    """A user without ADD_USER must NOT be able to POST /api/user."""
+    """A user without ADD_USER must NOT be able to POST /api/v1/user."""
     resp = client.post(
-        "/api/user",
+        "/api/v1/user",
         headers={"Authorization": f"Bearer {reporter_user_token}"},
         json={
             "userid": "should-never-be-created@example.com",
@@ -450,16 +452,16 @@ def test_role_escalation_post_user_blocked(client, reporter_user_token):
         },
     )
     assert resp.status_code == 403, (
-        f"POST /api/user without ADD_USER role returned {resp.status_code} "
+        f"POST /api/v1/user without ADD_USER role returned {resp.status_code} "
         f"(expected 403 — privilege escalation gate broken)"
     )
 
 
 @pytest.mark.security
 def test_role_escalation_put_user_blocked(client, reporter_user_token):
-    """A user without EDIT_USER must NOT be able to PUT /api/user/<id>."""
+    """A user without EDIT_USER must NOT be able to PUT /api/v1/user/<id>."""
     resp = client.put(
-        "/api/user/00000000-0000-0000-0000-000000000abc",
+        "/api/v1/user/00000000-0000-0000-0000-000000000abc",
         headers={"Authorization": f"Bearer {reporter_user_token}"},
         json={
             "userid": "noop@example.com",
@@ -472,7 +474,7 @@ def test_role_escalation_put_user_blocked(client, reporter_user_token):
         403,
         404,
     ), (
-        f"PUT /api/user/<id> without EDIT_USER role returned {resp.status_code} "
+        f"PUT /api/v1/user/<id> without EDIT_USER role returned {resp.status_code} "
         f"(expected 403; 404 is also acceptable if the gate runs after the "
         f"lookup but before any mutation)"
     )
@@ -480,16 +482,16 @@ def test_role_escalation_put_user_blocked(client, reporter_user_token):
 
 @pytest.mark.security
 def test_role_escalation_delete_user_blocked(client, reporter_user_token):
-    """A user without DELETE_USER must NOT be able to DELETE /api/user/<id>."""
+    """A user without DELETE_USER must NOT be able to DELETE /api/v1/user/<id>."""
     resp = client.delete(
-        "/api/user/00000000-0000-0000-0000-000000000abc",
+        "/api/v1/user/00000000-0000-0000-0000-000000000abc",
         headers={"Authorization": f"Bearer {reporter_user_token}"},
     )
     assert resp.status_code in (
         403,
         404,
     ), (
-        f"DELETE /api/user/<id> without DELETE_USER role returned "
+        f"DELETE /api/v1/user/<id> without DELETE_USER role returned "
         f"{resp.status_code} (expected 403; 404 acceptable for same reason "
         f"as PUT above)"
     )

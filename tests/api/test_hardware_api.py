@@ -24,7 +24,7 @@ class TestHardwareEndpoints:
             "ipv6": "::1",
         }
 
-        response = client.post("/api/host", json=host_data, headers=auth_headers)
+        response = client.post("/api/v1/host", json=host_data, headers=auth_headers)
         assert response.status_code == 200
         host = response.json()
         host_id = host["id"]
@@ -55,7 +55,7 @@ class TestHardwareEndpoints:
         }
 
         response = client.post(
-            f"/api/host/{host_id}/update-hardware",
+            f"/api/v1/host/{host_id}/update-hardware",
             json=hardware_data,
             headers=auth_headers,
         )
@@ -74,7 +74,9 @@ class TestHardwareEndpoints:
         hardware_data = {"cpu_vendor": "Intel", "cpu_model": "Intel Core i7-9700K"}
 
         response = client.post(
-            "/api/host/99999/update-hardware", json=hardware_data, headers=auth_headers
+            "/api/v1/host/99999/update-hardware",
+            json=hardware_data,
+            headers=auth_headers,
         )
 
         assert response.status_code == 404
@@ -96,13 +98,13 @@ class TestHardwareEndpoints:
             "ipv6": "::1",
         }
 
-        response = client.post("/api/host", json=host_data, headers=auth_headers)
+        response = client.post("/api/v1/host", json=host_data, headers=auth_headers)
         assert response.status_code == 200
         host_id = response.json()["id"]
 
         # Request hardware update
         response = client.post(
-            f"/api/host/{host_id}/request-hardware-update", headers=auth_headers
+            f"/api/v1/host/{host_id}/request-hardware-update", headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -133,13 +135,13 @@ class TestHardwareEndpoints:
                 "ipv6": "::1",
             }
 
-            response = client.post("/api/host", json=host_data, headers=auth_headers)
+            response = client.post("/api/v1/host", json=host_data, headers=auth_headers)
             assert response.status_code == 200
             host_ids.append(response.json()["id"])
 
         # Request bulk hardware update
         response = client.post(
-            "/api/hosts/request-hardware-update", json=host_ids, headers=auth_headers
+            "/api/v1/hosts/request-hardware-update", json=host_ids, headers=auth_headers
         )
 
         assert response.status_code == 200

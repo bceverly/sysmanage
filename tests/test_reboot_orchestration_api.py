@@ -2,9 +2,9 @@
 Tests for the reboot orchestration API endpoints.
 
 Tests cover:
-- GET /api/host/{host_id}/reboot/pre-check
-- POST /api/host/{host_id}/reboot/orchestrated
-- GET /api/host/{host_id}/reboot/orchestration/{orch_id}
+- GET /api/v1/host/{host_id}/reboot/pre-check
+- POST /api/v1/host/{host_id}/reboot/orchestrated
+- GET /api/v1/host/{host_id}/reboot/orchestration/{orch_id}
 - License/permission checks
 """
 
@@ -29,7 +29,7 @@ class TestRebootPreCheck:
         db_session.add(host)
         db_session.commit()
 
-        response = client.get(f"/api/host/{host.id}/reboot/pre-check")
+        response = client.get(f"/api/v1/host/{host.id}/reboot/pre-check")
         assert response.status_code == 200
         data = response.json()
         assert data["has_running_children"] is False
@@ -65,7 +65,7 @@ class TestRebootPreCheck:
         db_session.add(child2)
         db_session.commit()
 
-        response = client.get(f"/api/host/{host.id}/reboot/pre-check")
+        response = client.get(f"/api/v1/host/{host.id}/reboot/pre-check")
         assert response.status_code == 200
         data = response.json()
         assert data["has_running_children"] is True
@@ -77,7 +77,7 @@ class TestRebootPreCheck:
     def test_pre_check_host_not_found(self, client):
         """Test pre-check with non-existent host."""
         fake_id = str(uuid.uuid4())
-        response = client.get(f"/api/host/{fake_id}/reboot/pre-check")
+        response = client.get(f"/api/v1/host/{fake_id}/reboot/pre-check")
         assert response.status_code == 404
 
     def test_pre_check_container_engine_status(self, client, db_session):
@@ -94,7 +94,7 @@ class TestRebootPreCheck:
         db_session.commit()
 
         # Without Pro+ module
-        response = client.get(f"/api/host/{host.id}/reboot/pre-check")
+        response = client.get(f"/api/v1/host/{host.id}/reboot/pre-check")
         assert response.status_code == 200
         data = response.json()
         assert data["has_container_engine"] is False
@@ -116,7 +116,7 @@ class TestOrchestratedReboot:
         db_session.add(host)
         db_session.commit()
 
-        response = client.post(f"/api/host/{host.id}/reboot/orchestrated")
+        response = client.post(f"/api/v1/host/{host.id}/reboot/orchestrated")
         assert response.status_code == 402
 
     def test_orchestrated_reboot_inactive_host(self, client, db_session):
@@ -135,7 +135,7 @@ class TestOrchestratedReboot:
         with patch("backend.api.reboot_orchestration.module_loader") as mock_loader:
             mock_loader.get_module.return_value = MagicMock()  # Pro+ available
 
-            response = client.post(f"/api/host/{host.id}/reboot/orchestrated")
+            response = client.post(f"/api/v1/host/{host.id}/reboot/orchestrated")
             assert response.status_code == 400
 
     def test_orchestrated_reboot_no_running_children(self, client, db_session):
@@ -154,7 +154,7 @@ class TestOrchestratedReboot:
         with patch("backend.api.reboot_orchestration.module_loader") as mock_loader:
             mock_loader.get_module.return_value = MagicMock()
 
-            response = client.post(f"/api/host/{host.id}/reboot/orchestrated")
+            response = client.post(f"/api/v1/host/{host.id}/reboot/orchestrated")
             assert response.status_code == 400
 
     def test_orchestrated_reboot_success(self, client, db_session):
@@ -188,7 +188,7 @@ class TestOrchestratedReboot:
                 mock_queue = MagicMock()
                 mock_queue_cls.return_value = mock_queue
 
-                response = client.post(f"/api/host/{host.id}/reboot/orchestrated")
+                response = client.post(f"/api/v1/host/{host.id}/reboot/orchestrated")
 
         assert response.status_code == 200
         data = response.json()
@@ -209,7 +209,7 @@ class TestOrchestratedReboot:
         with patch("backend.api.reboot_orchestration.module_loader") as mock_loader:
             mock_loader.get_module.return_value = MagicMock()
 
-            response = client.post(f"/api/host/{fake_id}/reboot/orchestrated")
+            response = client.post(f"/api/v1/host/{fake_id}/reboot/orchestrated")
             assert response.status_code == 404
 
 
@@ -247,7 +247,7 @@ class TestGetOrchestrationStatus:
         db_session.add(orch)
         db_session.commit()
 
-        response = client.get(f"/api/host/{host.id}/reboot/orchestration/{orch.id}")
+        response = client.get(f"/api/v1/host/{host.id}/reboot/orchestration/{orch.id}")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "shutting_down"
@@ -269,7 +269,7 @@ class TestGetOrchestrationStatus:
 
         fake_orch_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host.id}/reboot/orchestration/{fake_orch_id}"
+            f"/api/v1/host/{host.id}/reboot/orchestration/{fake_orch_id}"
         )
         assert response.status_code == 404
 
@@ -303,5 +303,5 @@ class TestGetOrchestrationStatus:
         db_session.commit()
 
         # Try to access orchestration using wrong host ID
-        response = client.get(f"/api/host/{host2.id}/reboot/orchestration/{orch.id}")
+        response = client.get(f"/api/v1/host/{host2.id}/reboot/orchestration/{orch.id}")
         assert response.status_code == 404

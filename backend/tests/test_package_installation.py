@@ -168,7 +168,7 @@ class TestPackageInstallationAPI:
             mock_enqueue.return_value = "mock-message-id"
 
             response = client.post(
-                f"/api/packages/install/{test_host.id}",
+                f"/api/v1/packages/install/{test_host.id}",
                 json={
                     "package_names": ["vim", "curl", "htop"],
                     "requested_by": "test-user",
@@ -225,7 +225,7 @@ class TestPackageInstallationAPI:
     def test_install_packages_host_not_found(self, client, mock_auth_header):
         """Test package installation with non-existent host"""
         response = client.post(
-            "/api/packages/install/999",
+            "/api/v1/packages/install/999",
             json={"package_names": ["vim"], "requested_by": "test-user"},
             headers=mock_auth_header,
         )
@@ -236,7 +236,7 @@ class TestPackageInstallationAPI:
     def test_install_packages_empty_list(self, client, test_host, mock_auth_header):
         """Test package installation with empty package list"""
         response = client.post(
-            f"/api/packages/install/{test_host.id}",
+            f"/api/v1/packages/install/{test_host.id}",
             json={"package_names": [], "requested_by": "test-user"},
             headers=mock_auth_header,
         )
@@ -266,7 +266,7 @@ class TestPackageInstallationAPI:
         connection.close()
 
         response = client.post(
-            "/api/packages/install/2",
+            "/api/v1/packages/install/2",
             json={"package_names": ["vim"], "requested_by": "test-user"},
             headers=mock_auth_header,
         )

@@ -58,7 +58,7 @@ def _mock_vault_post():
 class TestDynamicSecretsAuth:
     def test_issue_requires_auth(self, client):
         r = client.post(
-            "/api/dynamic-secrets/issue",
+            "/api/v1/dynamic-secrets/issue",
             json={
                 "name": "x",
                 "kind": "token",
@@ -68,13 +68,13 @@ class TestDynamicSecretsAuth:
         assert r.status_code in (401, 403)
 
     def test_list_requires_auth(self, client):
-        r = client.get("/api/dynamic-secrets/leases")
+        r = client.get("/api/v1/dynamic-secrets/leases")
         assert r.status_code in (401, 403)
 
 
 class TestDynamicSecretsKinds:
     def test_kinds_endpoint(self, client, auth_headers):
-        r = client.get("/api/dynamic-secrets/kinds", headers=auth_headers)
+        r = client.get("/api/v1/dynamic-secrets/kinds", headers=auth_headers)
         assert r.status_code == 200
         body = r.json()
         kinds = {k["kind"] for k in body["kinds"]}
@@ -89,7 +89,7 @@ class TestDynamicSecretsIssue:
             VS.return_value.mount_path = "secret"
             VS.return_value._make_request.return_value = {}
             r = client.post(
-                "/api/dynamic-secrets/issue",
+                "/api/v1/dynamic-secrets/issue",
                 json={
                     "name": "ci-runner-creds",
                     "kind": "token",
@@ -114,7 +114,7 @@ class TestDynamicSecretsIssue:
 
     def test_issue_rejects_unknown_kind(self, client, auth_headers):
         r = client.post(
-            "/api/dynamic-secrets/issue",
+            "/api/v1/dynamic-secrets/issue",
             json={
                 "name": "x",
                 "kind": "fairy-dust",
@@ -126,7 +126,7 @@ class TestDynamicSecretsIssue:
 
     def test_issue_rejects_ttl_below_floor(self, client, auth_headers):
         r = client.post(
-            "/api/dynamic-secrets/issue",
+            "/api/v1/dynamic-secrets/issue",
             json={
                 "name": "x",
                 "kind": "token",
@@ -140,7 +140,7 @@ class TestDynamicSecretsIssue:
 
     def test_issue_rejects_ttl_above_ceiling(self, client, auth_headers):
         r = client.post(
-            "/api/dynamic-secrets/issue",
+            "/api/v1/dynamic-secrets/issue",
             json={
                 "name": "x",
                 "kind": "token",
@@ -159,7 +159,7 @@ class TestDynamicSecretsList:
             VS.return_value.mount_path = "secret"
             VS.return_value._make_request.return_value = {}
             client.post(
-                "/api/dynamic-secrets/issue",
+                "/api/v1/dynamic-secrets/issue",
                 json={
                     "name": "list-target",
                     "kind": "token",
@@ -169,7 +169,7 @@ class TestDynamicSecretsList:
                 headers=auth_headers,
             )
         r = client.get(
-            "/api/dynamic-secrets/leases?status=ACTIVE", headers=auth_headers
+            "/api/v1/dynamic-secrets/leases?status=ACTIVE", headers=auth_headers
         )
         assert r.status_code == 200
         names = [le["name"] for le in r.json()]
@@ -177,7 +177,7 @@ class TestDynamicSecretsList:
 
     def test_list_rejects_unknown_status(self, client, auth_headers):
         r = client.get(
-            "/api/dynamic-secrets/leases?status=NOT-A-STATUS",
+            "/api/v1/dynamic-secrets/leases?status=NOT-A-STATUS",
             headers=auth_headers,
         )
         assert r.status_code == 400
@@ -189,7 +189,7 @@ class TestDynamicSecretsRevoke:
             VS.return_value.mount_path = "secret"
             VS.return_value._make_request.return_value = {}
             issue_resp = client.post(
-                "/api/dynamic-secrets/issue",
+                "/api/v1/dynamic-secrets/issue",
                 json={
                     "name": "to-revoke",
                     "kind": "token",
@@ -201,7 +201,7 @@ class TestDynamicSecretsRevoke:
             lease_id = issue_resp.json()["lease"]["id"]
 
             r = client.post(
-                f"/api/dynamic-secrets/leases/{lease_id}/revoke",
+                f"/api/v1/dynamic-secrets/leases/{lease_id}/revoke",
                 headers=auth_headers,
             )
         assert r.status_code == 200, r.text
@@ -211,14 +211,14 @@ class TestDynamicSecretsRevoke:
 
     def test_revoke_unknown_lease_returns_404(self, client, auth_headers):
         r = client.post(
-            "/api/dynamic-secrets/leases/00000000-0000-0000-0000-000000000abc/revoke",
+            "/api/v1/dynamic-secrets/leases/00000000-0000-0000-0000-000000000abc/revoke",
             headers=auth_headers,
         )
         assert r.status_code == 404
 
     def test_revoke_invalid_uuid_returns_400(self, client, auth_headers):
         r = client.post(
-            "/api/dynamic-secrets/leases/not-a-uuid/revoke",
+            "/api/v1/dynamic-secrets/leases/not-a-uuid/revoke",
             headers=auth_headers,
         )
         assert r.status_code == 400
@@ -245,7 +245,7 @@ class TestDynamicSecretsReconcile:
         session.add(old)
         session.commit()
 
-        r = client.post("/api/dynamic-secrets/reconcile", headers=auth_headers)
+        r = client.post("/api/v1/dynamic-secrets/reconcile", headers=auth_headers)
         assert r.status_code == 200
         assert r.json()["transitioned_count"] >= 1
 
@@ -259,7 +259,7 @@ class TestDynamicSecretsReconcile:
 
 
 class TestDynamicSecretsSecretsEngineGate:
-    """Verify ``/api/dynamic-secrets/*`` returns 403 / 503 when the
+    """Verify ``/api/v1/dynamic-secrets/*`` returns 403 / 503 when the
     Pro+ ``secrets_engine`` module isn't available.  The autouse
     fixture at the top of the file is skipped for this class so the
     real license-service + module-loader calls fire."""
@@ -267,7 +267,7 @@ class TestDynamicSecretsSecretsEngineGate:
     def test_list_returns_403_when_license_missing(self, client, auth_headers):
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
-            r = client.get("/api/dynamic-secrets/leases", headers=auth_headers)
+            r = client.get("/api/v1/dynamic-secrets/leases", headers=auth_headers)
         assert r.status_code == 403
         body = r.json()
         assert body["detail"]["error"] == "pro_plus_required"
@@ -281,7 +281,7 @@ class TestDynamicSecretsSecretsEngineGate:
         ) as mock_loader:
             mock_license.has_module.return_value = True
             mock_loader.is_module_loaded.return_value = False
-            r = client.get("/api/dynamic-secrets/leases", headers=auth_headers)
+            r = client.get("/api/v1/dynamic-secrets/leases", headers=auth_headers)
         assert r.status_code == 503
         body = r.json()
         assert body["detail"]["error"] == "module_not_available"
@@ -294,7 +294,7 @@ class TestDynamicSecretsSecretsEngineGate:
         with patch("backend.licensing.feature_gate.license_service") as mock_license:
             mock_license.has_module.return_value = False
             r = client.post(
-                "/api/dynamic-secrets/issue",
+                "/api/v1/dynamic-secrets/issue",
                 json={"name": "blocked", "kind": "token"},
                 headers=auth_headers,
             )

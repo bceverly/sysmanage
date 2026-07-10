@@ -1,5 +1,5 @@
 """
-Tests for backend/api/license_management.py module.
+Tests for backend/api/v1/license_management.py module.
 Tests Pro+ license management API endpoints.
 """
 
@@ -101,14 +101,14 @@ class TestGetLicenseInfo:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_license_service.is_pro_plus_active = False
 
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/proplus/license")
+        response = client.get("/api/v1/proplus/license")
 
         assert response.status_code == 200
         data = response.json()
@@ -121,7 +121,7 @@ class TestGetLicenseInfo:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_license_service.is_pro_plus_active = True
         mock_license_service.get_license_info.return_value = {
@@ -138,7 +138,7 @@ class TestGetLicenseInfo:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/proplus/license")
+        response = client.get("/api/v1/proplus/license")
 
         assert response.status_code == 200
         data = response.json()
@@ -163,7 +163,7 @@ class TestInstallLicense:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         # Mock user as admin
         mock_user = MagicMock()
@@ -202,7 +202,7 @@ class TestInstallLicense:
 
         client = TestClient(app)
         response = client.post(
-            "/api/proplus/license",
+            "/api/v1/proplus/license",
             json={"license_key": "VALID-LICENSE-KEY"},
         )
 
@@ -220,7 +220,7 @@ class TestInstallLicense:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
@@ -237,7 +237,7 @@ class TestInstallLicense:
 
         client = TestClient(app)
         response = client.post(
-            "/api/proplus/license",
+            "/api/v1/proplus/license",
             json={"license_key": "SOME-KEY"},
         )
 
@@ -252,7 +252,7 @@ class TestInstallLicense:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_user = MagicMock()
         mock_user.userid = "user@example.com"
@@ -275,7 +275,7 @@ class TestInstallLicense:
 
         client = TestClient(app)
         response = client.post(
-            "/api/proplus/license",
+            "/api/v1/proplus/license",
             json={"license_key": "SOME-KEY"},
         )
 
@@ -293,7 +293,7 @@ class TestInstallLicense:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_user = MagicMock()
         mock_user.userid = "admin@example.com"
@@ -321,7 +321,7 @@ class TestInstallLicense:
 
         client = TestClient(app)
         response = client.post(
-            "/api/proplus/license",
+            "/api/v1/proplus/license",
             json={"license_key": "INVALID-KEY"},
         )
 
@@ -342,7 +342,7 @@ class TestInstallLicense:
         from backend.persistence.db import get_db
 
         app = FastAPI()
-        app.include_router(router, prefix="/api/proplus")
+        app.include_router(router, prefix="/api/v1/proplus")
 
         mock_user = MagicMock()
         mock_user.userid = "admin@example.com"
@@ -369,7 +369,7 @@ class TestInstallLicense:
 
         client = TestClient(app)
         response = client.post(
-            "/api/proplus/license",
+            "/api/v1/proplus/license",
             json={"license_key": "SOME-KEY"},
         )
 

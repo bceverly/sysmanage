@@ -12,7 +12,7 @@ These tests verify the stubs are mounted and gated behind auth.  The real
 lifecycle / role-gate / no-material-leak tests live with the engine in the
 sysmanage-professional-plus repo (test_secrets_engine_deployment.py style).
 
-Modelled on ``tests/api/test_phase10_proplus_stubs.py``.
+Modelled on ``tests/api/v1/test_phase10_proplus_stubs.py``.
 """
 
 # pylint: disable=missing-class-docstring,missing-function-docstring

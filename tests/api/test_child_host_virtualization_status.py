@@ -13,7 +13,9 @@ class TestVirtualizationStatusEndpoint:
     def test_status_requires_authentication(self, client):
         """Test that virtualization status requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/child-hosts/host/{host_id}/virtualization-status")
+        response = client.get(
+            f"/api/v1/child-hosts/host/{host_id}/virtualization-status"
+        )
         # Without auth, should return 401, 403, or 404
         assert response.status_code in [401, 403, 404]
 
@@ -21,7 +23,7 @@ class TestVirtualizationStatusEndpoint:
         """Test that status returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/child-hosts/host/{host_id}/virtualization-status",
+            f"/api/v1/child-hosts/host/{host_id}/virtualization-status",
             headers=auth_headers,
         )
         # Should return 403 (permission) or 404 (not found)
@@ -35,7 +37,7 @@ class TestEnableVirtualizationEndpoint:
         """Test that enable virtualization requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/enable-wsl",
+            f"/api/v1/child-hosts/host/{host_id}/enable-wsl",
             json={},
         )
         assert response.status_code in [401, 403, 404]
@@ -44,7 +46,7 @@ class TestEnableVirtualizationEndpoint:
         """Test that enable returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/enable-wsl",
+            f"/api/v1/child-hosts/host/{host_id}/enable-wsl",
             json={},
             headers=auth_headers,
         )
@@ -58,7 +60,7 @@ class TestRefreshVirtualizationEndpoint:
         """Test that refresh virtualization requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/refresh-virtualization"
+            f"/api/v1/child-hosts/host/{host_id}/refresh-virtualization"
         )
         assert response.status_code in [401, 403, 404]
 
@@ -66,7 +68,7 @@ class TestRefreshVirtualizationEndpoint:
         """Test that refresh returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/refresh-virtualization",
+            f"/api/v1/child-hosts/host/{host_id}/refresh-virtualization",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -79,7 +81,7 @@ class TestConfigureKvmNetworkEndpoint:
         """Test that configure KVM network requires authentication."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/configure-kvm-network",
+            f"/api/v1/child-hosts/host/{host_id}/configure-kvm-network",
             json={"mode": "nat"},
         )
         assert response.status_code in [401, 403, 404]
@@ -88,7 +90,7 @@ class TestConfigureKvmNetworkEndpoint:
         """Test that configure returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/configure-kvm-network",
+            f"/api/v1/child-hosts/host/{host_id}/configure-kvm-network",
             json={"mode": "nat"},
             headers=auth_headers,
         )

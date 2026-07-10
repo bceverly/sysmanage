@@ -275,7 +275,7 @@ class TestRouterEndpoints:
                 "sealed": None,
             },
         ):
-            resp = client.get("/api/openbao/status", headers=auth_headers)
+            resp = client.get("/api/v1/openbao/status", headers=auth_headers)
         assert resp.status_code == 200
         assert resp.json()["status"] == "stopped"
 
@@ -292,7 +292,7 @@ class TestRouterEndpoints:
                 "token": "shhh-secret",
             },
         ):
-            resp = client.get("/api/openbao/config", headers=auth_headers)
+            resp = client.get("/api/v1/openbao/config", headers=auth_headers)
         body = resp.json()
         # Token must NOT leak — has_token boolean only.
         assert "token" not in body
@@ -308,7 +308,7 @@ class TestRouterEndpoints:
                 "status": {"running": True, "pid": 999, "server_url": "http://x"},
             },
         ):
-            resp = client.post("/api/openbao/start", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/start", headers=auth_headers)
         body = resp.json()
         # The endpoint sanitises — only `success` is exposed on success.
         assert body == {"success": True}
@@ -321,7 +321,7 @@ class TestRouterEndpoints:
                 "message": "internal: leaked detail",
             },
         ):
-            resp = client.post("/api/openbao/start", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/start", headers=auth_headers)
         body = resp.json()
         assert body["success"] is False
         assert "leaked" not in body["error"].lower()
@@ -331,7 +331,7 @@ class TestRouterEndpoints:
             "backend.api.openbao.start_openbao",
             side_effect=RuntimeError("blew up"),
         ):
-            resp = client.post("/api/openbao/start", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/start", headers=auth_headers)
         assert resp.status_code == 500
         assert "blew up" not in resp.text
 
@@ -340,7 +340,7 @@ class TestRouterEndpoints:
             "backend.api.openbao.stop_openbao",
             return_value={"success": False, "message": "secret detail"},
         ):
-            resp = client.post("/api/openbao/stop", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/stop", headers=auth_headers)
         body = resp.json()
         assert body["success"] is False
         assert "secret detail" not in str(body)
@@ -350,7 +350,7 @@ class TestRouterEndpoints:
             "backend.api.openbao.seal_openbao",
             return_value={"success": True, "message": "sealed"},
         ):
-            resp = client.post("/api/openbao/seal", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/seal", headers=auth_headers)
         assert resp.json() == {"success": True}
 
     def test_unseal_endpoint_sanitises(self, client, auth_headers):
@@ -358,7 +358,7 @@ class TestRouterEndpoints:
             "backend.api.openbao.unseal_openbao",
             return_value={"success": True, "message": "unsealed"},
         ):
-            resp = client.post("/api/openbao/unseal", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/unseal", headers=auth_headers)
         assert resp.json() == {"success": True}
 
     def test_seal_endpoint_exception_returns_500(self, client, auth_headers):
@@ -366,7 +366,7 @@ class TestRouterEndpoints:
             "backend.api.openbao.seal_openbao",
             side_effect=RuntimeError("internal"),
         ):
-            resp = client.post("/api/openbao/seal", headers=auth_headers)
+            resp = client.post("/api/v1/openbao/seal", headers=auth_headers)
         assert resp.status_code == 500
 
 

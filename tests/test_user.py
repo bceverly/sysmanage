@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/user.py module.
+Comprehensive tests for backend/api/v1/user.py module.
 Tests user management functionality for SysManage server.
 """
 

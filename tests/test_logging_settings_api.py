@@ -1,4 +1,4 @@
-"""Tests for backend/api/logging_settings.py PUT glue (Phase 13.3).
+"""Tests for backend/api/v1/logging_settings.py PUT glue (Phase 13.3).
 
 Focus: turning an OS family's override off (omitting it from the payload) must
 delete its stored row and push a revert-to-yaml to that family's agents.

@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 from backend.persistence import models
 
-URL = "/api/firewall-roles"
+URL = "/api/v1/firewall-roles"
 
 
 def _create_role(session, name="web", **fields):

@@ -6,7 +6,7 @@ These exist to populate @pytest.mark.integration so the
 something real to do.  They are deliberately focused on cross-cutting
 flows (router → middleware → DB) rather than unit-testing individual
 functions, so they catch wiring regressions that single-layer tests
-in tests/api/ would miss.
+in tests/api/v1/ would miss.
 """
 
 # pylint: disable=missing-function-docstring,missing-class-docstring,invalid-name

@@ -1,5 +1,5 @@
 """
-Tests for backend/api/packages_helpers.py module.
+Tests for backend/api/v1/packages_helpers.py module.
 Tests package management helper functions.
 """
 

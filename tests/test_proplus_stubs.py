@@ -19,7 +19,7 @@ class TestContainerCrudStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/host/test-host-id/children",
+                "/api/v1/host/test-host-id/children",
                 json={
                     "hostname": "test-child",
                     "child_type": "wsl",
@@ -38,7 +38,7 @@ class TestContainerCrudStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.delete("/api/host/test-host-id/children/test-child-id")
+            response = client.delete("/api/v1/host/test-host-id/children/test-child-id")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -52,7 +52,9 @@ class TestVirtualizationEnableStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.post("/api/host/test-host-id/virtualization/enable-wsl")
+            response = client.post(
+                "/api/v1/host/test-host-id/virtualization/enable-wsl"
+            )
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -63,7 +65,7 @@ class TestVirtualizationEnableStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/host/test-host-id/virtualization/initialize-lxd"
+                "/api/v1/host/test-host-id/virtualization/initialize-lxd"
             )
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
@@ -75,7 +77,7 @@ class TestVirtualizationEnableStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/host/test-host-id/virtualization/create-child",
+                "/api/v1/host/test-host-id/virtualization/create-child",
                 json={
                     "child_type": "wsl",
                     "distribution": "Ubuntu-24.04",
@@ -99,7 +101,7 @@ class TestContainerControlStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/host/test-host-id/children/test-child-id/start"
+                "/api/v1/host/test-host-id/children/test-child-id/start"
             )
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
@@ -110,7 +112,9 @@ class TestContainerControlStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.post("/api/host/test-host-id/children/test-child-id/stop")
+            response = client.post(
+                "/api/v1/host/test-host-id/children/test-child-id/stop"
+            )
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -121,7 +125,7 @@ class TestContainerControlStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/host/test-host-id/children/test-child-id/restart"
+                "/api/v1/host/test-host-id/children/test-child-id/restart"
             )
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
@@ -137,7 +141,7 @@ class TestDistributionCrudStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/child-host-distributions",
+                "/api/v1/child-host-distributions",
                 json={
                     "child_type": "wsl",
                     "distribution_name": "Ubuntu",
@@ -159,7 +163,7 @@ class TestDistributionCrudStubs:
             return_value=None,
         ):
             response = client.put(
-                "/api/child-host-distributions/test-dist-id",
+                "/api/v1/child-host-distributions/test-dist-id",
                 json={"display_name": "Updated Name"},
             )
             assert response.status_code == 402
@@ -171,7 +175,7 @@ class TestDistributionCrudStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.delete("/api/child-host-distributions/test-dist-id")
+            response = client.delete("/api/v1/child-host-distributions/test-dist-id")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -185,7 +189,7 @@ class TestSecretsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/secrets")
+            response = client.get("/api/v1/stored-secrets")
             assert response.status_code == 200
             assert response.json()["licensed"] is False
 
@@ -195,7 +199,7 @@ class TestSecretsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/secrets/test-secret-id")
+            response = client.get("/api/v1/stored-secrets/test-secret-id")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -205,7 +209,7 @@ class TestSecretsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/secrets/test-secret-id/content")
+            response = client.get("/api/v1/stored-secrets/test-secret-id/content")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -216,7 +220,7 @@ class TestSecretsStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/secrets",
+                "/api/v1/stored-secrets",
                 json={
                     "name": "test-secret",
                     "secret_type": "ssh_key",
@@ -233,7 +237,7 @@ class TestSecretsStubs:
             return_value=None,
         ):
             response = client.put(
-                "/api/secrets/test-secret-id",
+                "/api/v1/stored-secrets/test-secret-id",
                 json={"name": "updated-secret"},
             )
             assert response.status_code == 402
@@ -245,7 +249,7 @@ class TestSecretsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.delete("/api/secrets/test-secret-id")
+            response = client.delete("/api/v1/stored-secrets/test-secret-id")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -255,7 +259,7 @@ class TestSecretsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/secrets/types")
+            response = client.get("/api/v1/stored-secrets/types")
             assert response.status_code == 200
             assert response.json()["licensed"] is False
 
@@ -266,7 +270,7 @@ class TestSecretsStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/secrets/deploy-ssh-keys",
+                "/api/v1/stored-secrets/deploy-ssh-keys",
                 json={
                     "host_id": "test-host-id",
                     "username": "testuser",
@@ -283,7 +287,7 @@ class TestSecretsStubs:
             return_value=None,
         ):
             response = client.post(
-                "/api/secrets/deploy-certificates",
+                "/api/v1/stored-secrets/deploy-certificates",
                 json={
                     "host_id": "test-host-id",
                     "secret_ids": ["cert-1"],
@@ -302,7 +306,7 @@ class TestReportsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/reports/view/registered-hosts")
+            response = client.get("/api/v1/reporting/view/registered-hosts")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
@@ -312,19 +316,19 @@ class TestReportsStubs:
             "backend.licensing.module_loader.module_loader.get_module",
             return_value=None,
         ):
-            response = client.get("/api/reports/generate/registered-hosts")
+            response = client.get("/api/v1/reporting/generate/registered-hosts")
             assert response.status_code == 402
             assert "Professional+" in response.json()["detail"]
 
     def test_report_screenshots_still_work(self, client):
         """Test that report screenshot placeholders remain available."""
-        response = client.get("/api/reports/screenshots/registered-hosts")
+        response = client.get("/api/v1/reporting/screenshots/registered-hosts")
         assert response.status_code == 200
         assert "image/svg+xml" in response.headers.get("content-type", "")
 
     def test_report_screenshots_head_works(self, client):
         """Test that report screenshot HEAD requests work."""
-        response = client.head("/api/reports/screenshots/registered-hosts")
+        response = client.head("/api/v1/reporting/screenshots/registered-hosts")
         assert response.status_code == 200
 
 
@@ -381,13 +385,13 @@ class TestReadOnlyEndpointsStillWork:
 
     def test_list_distributions_works(self, client):
         """Test listing distributions still works (read-only)."""
-        response = client.get("/api/child-host-distributions")
+        response = client.get("/api/v1/child-host-distributions")
         assert response.status_code == 200
 
     def test_report_screenshot_xss_prevention(self, client):
         """Test that report screenshots escape HTML entities in report_id."""
         # Use a report_id with & character that html.escape will sanitize
-        response = client.get("/api/reports/screenshots/test&name")
+        response = client.get("/api/v1/reporting/screenshots/test&name")
         assert response.status_code == 200
         body = response.text
         # html.escape should convert & to &amp;

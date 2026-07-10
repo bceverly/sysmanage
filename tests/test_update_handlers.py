@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/update_handlers.py module.
+Comprehensive tests for backend/api/v1/update_handlers.py module.
 Tests update result handling functionality for SysManage server.
 """
 

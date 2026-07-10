@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/host_ubuntu_pro.py module.
+Comprehensive tests for backend/api/v1/host_ubuntu_pro.py module.
 Tests Ubuntu Pro management endpoints for SysManage server.
 """
 

@@ -1,5 +1,5 @@
 """
-Tests for backend/api/certificates.py module.
+Tests for backend/api/v1/certificates.py module.
 Tests certificate management API endpoints.
 """
 

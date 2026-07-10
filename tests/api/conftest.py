@@ -7,7 +7,7 @@ This file uses MANUAL model definitions for fast, focused API testing.
 When adding new database models, you MUST update BOTH:
 
 1. Main conftest (/tests/conftest.py) - automatic via Alembic migrations
-2. This file (/tests/api/conftest.py) - manual SQLite-compatible models
+2. This file (/tests/api/v1/conftest.py) - manual SQLite-compatible models
 
 SQLite Compatibility Rules:
 - ✅ Use Integer primary keys (not BigInteger) for auto-increment

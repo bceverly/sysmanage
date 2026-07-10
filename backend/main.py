@@ -132,14 +132,11 @@ from backend.startup.rate_limit_middleware import RateLimitMiddleware  # noqa: E
 app.add_middleware(RateLimitMiddleware)
 startup_logger.info("Rate-limit middleware added")
 
-# API versioning (Phase 13.2).  Added BEFORE CORS so it sits *inside* the CORS
-# layer: CORS stays the last-registered (outermost) middleware and tags every
-# response, while the path rewrite still runs before rate-limiting and routing
-# (so /api/v1 exemptions in the limiter resolve correctly).
-from backend.startup.api_version_middleware import ApiVersionMiddleware  # noqa: E402
-
-app.add_middleware(ApiVersionMiddleware, fastapi_app=app)
-startup_logger.info("API-version middleware added")
+# Phase 13.2.1 bridge RETIRED: the ApiVersionMiddleware /api/v1->/api rewrite is
+# gone.  Every feature now serves natively under /api/v1 (all migration slices
+# complete), so the bridge was dead code — /api/v1 requests match native routes
+# directly and the deliberately-unversioned surfaces (agent, auth/mfa, IdP
+# SSO/ACS, SCIM) keep their bare /api paths.
 
 # CORS MUST be added LAST so it is the outermost middleware (Starlette runs
 # middleware in reverse order of registration) and tags every response,

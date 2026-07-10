@@ -24,8 +24,7 @@ class TestDualSurface:
         v1 = client.get("/api/v1" + path)
         alias = client.get("/api" + path)
         assert v1.status_code != 404, f"/api/v1{path} should be native"
-        assert alias.status_code != 404, f"/api{path} alias should still work"
-        assert v1.status_code == alias.status_code
+        assert alias.status_code == 404, f"/api{path} alias retired (bridge removed)"
 
 
 class TestParamRoutesVersioned:
@@ -42,7 +41,9 @@ class TestParamRoutesVersioned:
             "/mirror-platform-configs/{cfg_id}",
         ]:
             assert "/api/v1" + sub in paths, f"missing native /api/v1{sub}"
-            assert "/api" + sub in paths, f"missing alias /api{sub}"
+            assert (
+                "/api" + sub not in paths
+            ), f"/api{sub} alias retired (bridge removed)"
 
     def test_mirror_settings_does_not_collide_with_server_settings(self):
         import backend.main as m  # noqa: PLC0415

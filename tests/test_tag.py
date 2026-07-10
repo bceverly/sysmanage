@@ -1,5 +1,5 @@
 """
-Comprehensive tests for backend/api/tag.py module.
+Comprehensive tests for backend/api/v1/tag.py module.
 Tests tag management API endpoints.
 """
 

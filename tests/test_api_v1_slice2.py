@@ -25,8 +25,7 @@ class TestDualSurface:
         v1 = client.get("/api/v1" + path)
         alias = client.get("/api" + path)
         assert v1.status_code != 404, f"/api/v1{path} should be native"
-        assert alias.status_code != 404, f"/api{path} alias should still work"
-        assert v1.status_code == alias.status_code
+        assert alias.status_code == 404, f"/api{path} alias retired (bridge removed)"
 
     @pytest.mark.parametrize("path", DUAL_SURFACE_PATHS)
     def test_v1_is_native(self, client, path):

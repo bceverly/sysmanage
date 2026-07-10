@@ -1,5 +1,5 @@
 """
-Tests for backend/api/error_constants.py module.
+Tests for backend/api/v1/error_constants.py module.
 Tests all error message functions and constants.
 """
 

@@ -3,7 +3,7 @@ End-to-end auth flow tests.
 
 Exercises the full login → authed-request → logout cycle through the
 real router stack with the test database.  Differs from the unit tests
-in tests/api/test_auth.py:  those mock individual layers; these run
+in tests/api/v1/test_auth.py:  those mock individual layers; these run
 the cycle through real components and verify the issued JWT is then
 accepted by a real protected endpoint.
 
@@ -46,7 +46,7 @@ def test_login_issues_usable_jwt(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={
             "userid": test_user_data["userid"],
             "password": test_user_data["password"],
@@ -58,7 +58,7 @@ def test_login_issues_usable_jwt(
 
     # Now use that token on /logout (the simplest JWT-gated endpoint).
     logout_resp = client.post(
-        "/api/logout", headers={"Authorization": f"Bearer {token}"}
+        "/api/v1/logout", headers={"Authorization": f"Bearer {token}"}
     )
     assert logout_resp.status_code == 200, (
         f"freshly-issued JWT was not accepted by /logout (status="
@@ -80,7 +80,7 @@ def test_login_then_use_health_endpoint_unauth(client):
 @pytest.mark.integration
 def test_logout_without_auth_rejected(client):
     """The /logout endpoint must reject anonymous calls."""
-    resp = client.post("/api/logout")
+    resp = client.post("/api/v1/logout")
     assert resp.status_code in (401, 403)
 
 
@@ -95,7 +95,7 @@ def test_failed_login_records_audit_attempt(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={
             "userid": test_user_data["userid"],
             "password": "definitely-not-the-right-password",
@@ -117,7 +117,7 @@ def test_login_unknown_user_does_not_distinguish_from_wrong_password(
     mock_login_security.validate_login_attempt.return_value = (True, "")
 
     resp = client.post(
-        "/api/login",
+        "/api/v1/login",
         json={
             "userid": "no-such-user@example.com",
             "password": "anything",

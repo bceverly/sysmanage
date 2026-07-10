@@ -12,12 +12,12 @@ class TestTelemetryEndpoint:
 
     def test_telemetry_requires_authentication(self, client):
         """Test that telemetry requires authentication."""
-        response = client.get("/api/telemetry")
+        response = client.get("/api/v1/telemetry")
         assert response.status_code in [401, 403, 404]
 
     def test_telemetry_with_auth(self, client, auth_headers):
         """Test that authenticated users can access telemetry."""
-        response = client.get("/api/telemetry", headers=auth_headers)
+        response = client.get("/api/v1/telemetry", headers=auth_headers)
         assert response.status_code in [200, 403, 404]
 
 
@@ -27,14 +27,14 @@ class TestHostTelemetryEndpoint:
     def test_host_telemetry_requires_authentication(self, client):
         """Test that host telemetry requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.get(f"/api/host/{host_id}/telemetry")
+        response = client.get(f"/api/v1/host/{host_id}/telemetry")
         assert response.status_code in [401, 403, 404]
 
     def test_host_telemetry_not_found(self, client, auth_headers):
         """Test that host telemetry returns error for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/telemetry",
+            f"/api/v1/host/{host_id}/telemetry",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -47,7 +47,7 @@ class TestTelemetryDataPoints:
         """Test getting CPU telemetry."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/telemetry?type=cpu",
+            f"/api/v1/host/{host_id}/telemetry?type=cpu",
             headers=auth_headers,
         )
         assert response.status_code in [200, 403, 404]
@@ -56,7 +56,7 @@ class TestTelemetryDataPoints:
         """Test getting memory telemetry."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/telemetry?type=memory",
+            f"/api/v1/host/{host_id}/telemetry?type=memory",
             headers=auth_headers,
         )
         assert response.status_code in [200, 403, 404]
@@ -65,7 +65,7 @@ class TestTelemetryDataPoints:
         """Test getting disk telemetry."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/telemetry?type=disk",
+            f"/api/v1/host/{host_id}/telemetry?type=disk",
             headers=auth_headers,
         )
         assert response.status_code in [200, 403, 404]
@@ -78,7 +78,7 @@ class TestTelemetryTimeRange:
         """Test getting telemetry with time range."""
         host_id = str(uuid.uuid4())
         response = client.get(
-            f"/api/host/{host_id}/telemetry?start=2024-01-01&end=2024-12-31",
+            f"/api/v1/host/{host_id}/telemetry?start=2024-01-01&end=2024-12-31",
             headers=auth_headers,
         )
         assert response.status_code in [200, 403, 404]

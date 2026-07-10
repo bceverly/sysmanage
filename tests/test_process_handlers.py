@@ -1,4 +1,4 @@
-"""Tests for backend/api/handlers/process_handlers.py (Phase 13.3)."""
+"""Tests for backend/api/v1/handlers/process_handlers.py (Phase 13.3)."""
 
 from unittest.mock import Mock, patch
 

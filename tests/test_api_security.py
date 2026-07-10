@@ -1,5 +1,5 @@
 """
-Tests for backend/api/security.py module.
+Tests for backend/api/v1/security.py module.
 Tests security configuration checks and platform command generation.
 """
 

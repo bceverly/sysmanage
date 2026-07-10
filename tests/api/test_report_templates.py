@@ -14,12 +14,12 @@ Covers:
 
 class TestReportTemplatesAuth:
     def test_list_requires_auth(self, client):
-        r = client.get("/api/report-templates")
+        r = client.get("/api/v1/report-templates")
         assert r.status_code in (401, 403)
 
     def test_create_requires_auth(self, client):
         r = client.post(
-            "/api/report-templates",
+            "/api/v1/report-templates",
             json={"name": "x", "base_report_type": "registered-hosts"},
         )
         assert r.status_code in (401, 403)
@@ -27,7 +27,7 @@ class TestReportTemplatesAuth:
 
 class TestReportTemplatesCrud:
     def test_list_empty(self, client, auth_headers):
-        r = client.get("/api/report-templates", headers=auth_headers)
+        r = client.get("/api/v1/report-templates", headers=auth_headers)
         assert r.status_code == 200, r.text
         assert isinstance(r.json(), list)
 
@@ -39,20 +39,20 @@ class TestReportTemplatesCrud:
             "selected_fields": ["fqdn", "os", "status", "last_seen"],
             "enabled": True,
         }
-        r = client.post("/api/report-templates", json=payload, headers=auth_headers)
+        r = client.post("/api/v1/report-templates", json=payload, headers=auth_headers)
         assert r.status_code == 200, r.text
         created = r.json()
         assert created["name"] == "executive-host-summary"
         assert created["selected_fields"] == ["fqdn", "os", "status", "last_seen"]
         tid = created["id"]
 
-        r2 = client.get(f"/api/report-templates/{tid}", headers=auth_headers)
+        r2 = client.get(f"/api/v1/report-templates/{tid}", headers=auth_headers)
         assert r2.status_code == 200
         assert r2.json()["id"] == tid
 
     def test_update_replaces_fields(self, client, auth_headers):
         r = client.post(
-            "/api/report-templates",
+            "/api/v1/report-templates",
             json={
                 "name": "host-wide-network",
                 "base_report_type": "registered-hosts",
@@ -63,7 +63,7 @@ class TestReportTemplatesCrud:
         tid = r.json()["id"]
 
         r2 = client.put(
-            f"/api/report-templates/{tid}",
+            f"/api/v1/report-templates/{tid}",
             json={"selected_fields": ["fqdn", "status"]},
             headers=auth_headers,
         )
@@ -72,7 +72,7 @@ class TestReportTemplatesCrud:
 
     def test_delete_removes_template(self, client, auth_headers):
         r = client.post(
-            "/api/report-templates",
+            "/api/v1/report-templates",
             json={
                 "name": "throwaway",
                 "base_report_type": "users-list",
@@ -82,17 +82,17 @@ class TestReportTemplatesCrud:
         )
         tid = r.json()["id"]
 
-        r2 = client.delete(f"/api/report-templates/{tid}", headers=auth_headers)
+        r2 = client.delete(f"/api/v1/report-templates/{tid}", headers=auth_headers)
         assert r2.status_code == 200
 
-        r3 = client.get(f"/api/report-templates/{tid}", headers=auth_headers)
+        r3 = client.get(f"/api/v1/report-templates/{tid}", headers=auth_headers)
         assert r3.status_code == 404
 
 
 class TestReportTemplatesValidation:
     def test_unknown_base_type_rejected(self, client, auth_headers):
         r = client.post(
-            "/api/report-templates",
+            "/api/v1/report-templates",
             json={
                 "name": "junk",
                 "base_report_type": "hot-takes",
@@ -104,7 +104,7 @@ class TestReportTemplatesValidation:
 
     def test_unknown_field_code_rejected(self, client, auth_headers):
         r = client.post(
-            "/api/report-templates",
+            "/api/v1/report-templates",
             json={
                 "name": "junk2",
                 "base_report_type": "registered-hosts",
@@ -116,7 +116,7 @@ class TestReportTemplatesValidation:
 
     def test_get_fields_for_known_base_type(self, client, auth_headers):
         r = client.get(
-            "/api/report-templates/fields/registered-hosts",
+            "/api/v1/report-templates/fields/registered-hosts",
             headers=auth_headers,
         )
         assert r.status_code == 200, r.text
@@ -128,12 +128,12 @@ class TestReportTemplatesValidation:
 
     def test_get_fields_for_unknown_base_type(self, client, auth_headers):
         r = client.get(
-            "/api/report-templates/fields/no-such-thing", headers=auth_headers
+            "/api/v1/report-templates/fields/no-such-thing", headers=auth_headers
         )
         assert r.status_code == 404
 
     def test_list_base_types(self, client, auth_headers):
-        r = client.get("/api/report-templates/base-types", headers=auth_headers)
+        r = client.get("/api/v1/report-templates/base-types", headers=auth_headers)
         assert r.status_code == 200
         types = r.json()["base_types"]
         assert "registered-hosts" in types

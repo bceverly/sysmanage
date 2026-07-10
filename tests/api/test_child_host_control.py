@@ -16,7 +16,7 @@ class TestStartChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/start"
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/start"
         )
         assert response.status_code in [401, 403, 404]
 
@@ -25,7 +25,7 @@ class TestStartChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/start",
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/start",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -39,7 +39,7 @@ class TestStopChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/stop"
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/stop"
         )
         assert response.status_code in [401, 403, 404]
 
@@ -48,7 +48,7 @@ class TestStopChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/stop",
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/stop",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]
@@ -62,7 +62,7 @@ class TestRestartChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/restart"
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/restart"
         )
         assert response.status_code in [401, 403, 404]
 
@@ -71,7 +71,7 @@ class TestRestartChildHostEndpoint:
         host_id = str(uuid.uuid4())
         child_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/child-hosts/host/{host_id}/children/{child_id}/restart",
+            f"/api/v1/child-hosts/host/{host_id}/children/{child_id}/restart",
             headers=auth_headers,
         )
         assert response.status_code in [403, 404]

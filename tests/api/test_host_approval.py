@@ -19,14 +19,14 @@ class TestApproveHostEndpoint:
     def test_approve_host_requires_authentication(self, client):
         """Test that approve_host requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.put(f"/api/host/{host_id}/approve")
+        response = client.put(f"/api/v1/host/{host_id}/approve")
         # Without auth, should be 401 (Unauthorized) or 403 (Forbidden)
         assert response.status_code in [401, 403]
 
     def test_approve_host_not_found(self, client, auth_headers):
         """Test that approve_host returns error for non-existent host."""
         host_id = str(uuid.uuid4())
-        response = client.put(f"/api/host/{host_id}/approve", headers=auth_headers)
+        response = client.put(f"/api/v1/host/{host_id}/approve", headers=auth_headers)
         # Could be 403 (no permission) or 404 (not found) depending on auth
         assert response.status_code in [401, 403, 404]
 
@@ -37,14 +37,14 @@ class TestRejectHostEndpoint:
     def test_reject_host_requires_authentication(self, client):
         """Test that reject_host requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.put(f"/api/host/{host_id}/reject")
+        response = client.put(f"/api/v1/host/{host_id}/reject")
         # Without auth, should be 401 (Unauthorized) or 403 (Forbidden)
         assert response.status_code in [401, 403]
 
     def test_reject_host_not_found(self, client, auth_headers):
         """Test that reject_host returns error for non-existent host."""
         host_id = str(uuid.uuid4())
-        response = client.put(f"/api/host/{host_id}/reject", headers=auth_headers)
+        response = client.put(f"/api/v1/host/{host_id}/reject", headers=auth_headers)
         # Could be 401 (no permission) or 404 (not found)
         assert response.status_code in [401, 403, 404]
 
@@ -55,7 +55,7 @@ class TestRequestOsUpdateEndpoint:
     def test_request_os_update_requires_authentication(self, client):
         """Test that request-os-update requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.post(f"/api/host/{host_id}/request-os-update")
+        response = client.post(f"/api/v1/host/{host_id}/request-os-update")
         # Without auth, should be 401 (Unauthorized) or 403 (Forbidden)
         assert response.status_code in [401, 403]
 
@@ -63,7 +63,7 @@ class TestRequestOsUpdateEndpoint:
         """Test that request-os-update returns 404 for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/request-os-update", headers=auth_headers
+            f"/api/v1/host/{host_id}/request-os-update", headers=auth_headers
         )
         assert response.status_code == 404
 
@@ -74,7 +74,7 @@ class TestRequestUpdatesCheckEndpoint:
     def test_request_updates_check_requires_authentication(self, client):
         """Test that request-updates-check requires authentication."""
         host_id = str(uuid.uuid4())
-        response = client.post(f"/api/host/{host_id}/request-updates-check")
+        response = client.post(f"/api/v1/host/{host_id}/request-updates-check")
         # Without auth, should be 401 (Unauthorized) or 403 (Forbidden)
         assert response.status_code in [401, 403]
 
@@ -82,7 +82,7 @@ class TestRequestUpdatesCheckEndpoint:
         """Test that request-updates-check returns 404 for non-existent host."""
         host_id = str(uuid.uuid4())
         response = client.post(
-            f"/api/host/{host_id}/request-updates-check", headers=auth_headers
+            f"/api/v1/host/{host_id}/request-updates-check", headers=auth_headers
         )
         assert response.status_code == 404
 
@@ -111,7 +111,7 @@ class TestApproveHostExtended:
         host = _create_host(
             session, fqdn="already-approved.x", approval_status="approved"
         )
-        response = client.put(f"/api/host/{host.id}/approve", headers=auth_headers)
+        response = client.put(f"/api/v1/host/{host.id}/approve", headers=auth_headers)
         assert response.status_code == 400
         assert "pending" in response.json()["detail"].lower()
 
@@ -131,7 +131,9 @@ class TestApproveHostExtended:
             "backend.api.host_approval.AuditService.log_update"
         ):
             load_cert.return_value.serial_number = 12345
-            response = client.put(f"/api/host/{host.id}/approve", headers=auth_headers)
+            response = client.put(
+                f"/api/v1/host/{host.id}/approve", headers=auth_headers
+            )
         # Auto-link to child host runs queries that may or may not match — we
         # accept 200 (happy) or 500 if the link logic encounters a schema gap
         # on the test host model.
@@ -141,13 +143,15 @@ class TestApproveHostExtended:
 class TestRejectHostExtended:
     def test_reject_non_pending_returns_400(self, client, auth_headers, session):
         host = _create_host(session, fqdn="not-pending.x", approval_status="approved")
-        response = client.put(f"/api/host/{host.id}/reject", headers=auth_headers)
+        response = client.put(f"/api/v1/host/{host.id}/reject", headers=auth_headers)
         assert response.status_code == 400
 
     def test_reject_pending_succeeds(self, client, auth_headers, session):
         host = _create_host(session, fqdn="pending-reject.x")
         with patch("backend.api.host_approval.AuditService.log_update"):
-            response = client.put(f"/api/host/{host.id}/reject", headers=auth_headers)
+            response = client.put(
+                f"/api/v1/host/{host.id}/reject", headers=auth_headers
+            )
         assert response.status_code == 200
         body = response.json()
         assert body["approval_status"] == "rejected"
@@ -158,7 +162,7 @@ class TestRequestOsUpdateExtended:
         # validate_host_approval_status raises if host isn't approved.
         host = _create_host(session, fqdn="not-approved.x", approval_status="pending")
         response = client.post(
-            f"/api/host/{host.id}/request-os-update", headers=auth_headers
+            f"/api/v1/host/{host.id}/request-os-update", headers=auth_headers
         )
         assert response.status_code in (400, 403)
 
@@ -166,7 +170,7 @@ class TestRequestOsUpdateExtended:
         host = _create_host(session, fqdn="approved.x", approval_status="approved")
         with patch("backend.api.host_approval.queue_ops.enqueue_message") as enqueue:
             response = client.post(
-                f"/api/host/{host.id}/request-os-update", headers=auth_headers
+                f"/api/v1/host/{host.id}/request-os-update", headers=auth_headers
             )
         assert response.status_code == 200
         assert response.json()["result"] is True
@@ -179,7 +183,7 @@ class TestRequestUpdatesCheckExtended:
             session, fqdn="unapproved-check.x", approval_status="pending"
         )
         response = client.post(
-            f"/api/host/{host.id}/request-updates-check", headers=auth_headers
+            f"/api/v1/host/{host.id}/request-updates-check", headers=auth_headers
         )
         assert response.status_code in (400, 403)
 
@@ -189,7 +193,7 @@ class TestRequestUpdatesCheckExtended:
         )
         with patch("backend.api.host_approval.queue_ops.enqueue_message") as enqueue:
             response = client.post(
-                f"/api/host/{host.id}/request-updates-check", headers=auth_headers
+                f"/api/v1/host/{host.id}/request-updates-check", headers=auth_headers
             )
         assert response.status_code == 200
         enqueue.assert_called_once()

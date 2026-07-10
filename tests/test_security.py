@@ -1,5 +1,5 @@
 """
-Tests for backend/api/security.py module.
+Tests for backend/api/v1/security.py module.
 Tests security status API endpoints.
 """
 
@@ -326,7 +326,7 @@ class TestGetDefaultCredentialsStatus:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_config.get_config.return_value = {
             "security": {},
@@ -336,7 +336,7 @@ class TestGetDefaultCredentialsStatus:
         app.dependency_overrides[get_current_user] = lambda: "user@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/security/default-credentials-status")
+        response = client.get("/api/v1/security/default-credentials-status")
 
         assert response.status_code == 200
         data = response.json()
@@ -353,7 +353,7 @@ class TestGetDefaultCredentialsStatus:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_config.get_config.return_value = {
             "security": {
@@ -366,7 +366,7 @@ class TestGetDefaultCredentialsStatus:
         app.dependency_overrides[get_current_user] = lambda: "admin"
 
         client = TestClient(app)
-        response = client.get("/api/security/default-credentials-status")
+        response = client.get("/api/v1/security/default-credentials-status")
 
         assert response.status_code == 200
         data = response.json()
@@ -382,7 +382,7 @@ class TestGetDefaultCredentialsStatus:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_config.get_config.return_value = {
             "security": {},
@@ -400,7 +400,7 @@ class TestGetDefaultCredentialsStatus:
         app.dependency_overrides[get_current_user] = lambda: "user@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/security/default-credentials-status")
+        response = client.get("/api/v1/security/default-credentials-status")
 
         assert response.status_code == 200
         data = response.json()

@@ -212,12 +212,12 @@ class TestPackageProfileProplusGate:
             yield
 
     def test_list_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/package-profiles", headers=auth_headers)
+        r = client.get("/api/v1/package-profiles", headers=auth_headers)
         assert r.status_code == 402
 
     def test_create_returns_402(self, client, auth_headers, _engine_absent):
         r = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={"name": "x"},
             headers=auth_headers,
         )
@@ -225,14 +225,14 @@ class TestPackageProfileProplusGate:
 
     def test_get_returns_402(self, client, auth_headers, _engine_absent):
         r = client.get(
-            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            "/api/v1/package-profiles/00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
         )
         assert r.status_code == 402
 
     def test_update_returns_402(self, client, auth_headers, _engine_absent):
         r = client.put(
-            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            "/api/v1/package-profiles/00000000-0000-0000-0000-000000000000",
             json={},
             headers=auth_headers,
         )
@@ -240,14 +240,14 @@ class TestPackageProfileProplusGate:
 
     def test_delete_returns_402(self, client, auth_headers, _engine_absent):
         r = client.delete(
-            "/api/package-profiles/00000000-0000-0000-0000-000000000000",
+            "/api/v1/package-profiles/00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
         )
         assert r.status_code == 402
 
     def test_scan_returns_402(self, client, auth_headers, _engine_absent):
         r = client.post(
-            "/api/package-profiles/"
+            "/api/v1/package-profiles/"
             "00000000-0000-0000-0000-000000000000/scan/"
             "00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
@@ -256,7 +256,7 @@ class TestPackageProfileProplusGate:
 
     def test_dispatch_returns_402(self, client, auth_headers, _engine_absent):
         r = client.post(
-            "/api/package-profiles/"
+            "/api/v1/package-profiles/"
             "00000000-0000-0000-0000-000000000000/dispatch/"
             "00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
@@ -265,7 +265,8 @@ class TestPackageProfileProplusGate:
 
     def test_status_for_host_returns_402(self, client, auth_headers, _engine_absent):
         r = client.get(
-            "/api/package-profiles/status/host/" "00000000-0000-0000-0000-000000000000",
+            "/api/v1/package-profiles/status/host/"
+            "00000000-0000-0000-0000-000000000000",
             headers=auth_headers,
         )
         assert r.status_code == 402
@@ -273,7 +274,7 @@ class TestPackageProfileProplusGate:
 
 class TestPackageProfileAuth:
     def test_list_requires_auth(self, client):
-        r = client.get("/api/package-profiles")
+        r = client.get("/api/v1/package-profiles")
         assert r.status_code in [401, 403]
 
 
@@ -284,7 +285,7 @@ class TestPackageProfileCrud:
 
     def test_create_with_constraints(self, client, auth_headers):
         r = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={
                 "name": "prod-required",
                 "constraints": [
@@ -301,7 +302,7 @@ class TestPackageProfileCrud:
 
     def test_create_with_invalid_constraint_type(self, client, auth_headers):
         r = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={
                 "name": "bogus",
                 "constraints": [{"package_name": "x", "constraint_type": "OPTIONAL"}],
@@ -313,7 +314,7 @@ class TestPackageProfileCrud:
 
     def test_create_with_invalid_version_op(self, client, auth_headers):
         r = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={
                 "name": "bogus-op",
                 "constraints": [
@@ -331,7 +332,7 @@ class TestPackageProfileCrud:
 
     def test_get_one_with_constraints(self, client, auth_headers):
         created = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={
                 "name": "fetch-me",
                 "constraints": [
@@ -340,13 +341,15 @@ class TestPackageProfileCrud:
             },
             headers=auth_headers,
         ).json()
-        r = client.get(f"/api/package-profiles/{created['id']}", headers=auth_headers)
+        r = client.get(
+            f"/api/v1/package-profiles/{created['id']}", headers=auth_headers
+        )
         assert r.status_code == 200
         assert len(r.json()["constraints"]) == 1
 
     def test_update_replaces_constraints(self, client, auth_headers):
         created = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={
                 "name": "to-rewrite",
                 "constraints": [{"package_name": "old", "constraint_type": "REQUIRED"}],
@@ -354,7 +357,7 @@ class TestPackageProfileCrud:
             headers=auth_headers,
         ).json()
         r = client.put(
-            f"/api/package-profiles/{created['id']}",
+            f"/api/v1/package-profiles/{created['id']}",
             json={
                 "constraints": [{"package_name": "new", "constraint_type": "REQUIRED"}]
             },
@@ -366,11 +369,11 @@ class TestPackageProfileCrud:
 
     def test_delete(self, client, auth_headers):
         created = client.post(
-            "/api/package-profiles",
+            "/api/v1/package-profiles",
             json={"name": "ephemeral"},
             headers=auth_headers,
         ).json()
         r = client.delete(
-            f"/api/package-profiles/{created['id']}", headers=auth_headers
+            f"/api/v1/package-profiles/{created['id']}", headers=auth_headers
         )
         assert r.status_code == 200

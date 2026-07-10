@@ -24,15 +24,15 @@ import pytest
 
 class TestCveRefreshAuth:
     def test_sources_requires_auth(self, client):
-        r = client.get("/api/cve-refresh/sources")
+        r = client.get("/api/v1/cve-refresh/sources")
         assert r.status_code in [401, 403]
 
     def test_settings_requires_auth(self, client):
-        r = client.get("/api/cve-refresh/settings")
+        r = client.get("/api/v1/cve-refresh/settings")
         assert r.status_code in [401, 403]
 
     def test_refresh_requires_auth(self, client):
-        r = client.post("/api/cve-refresh/refresh")
+        r = client.post("/api/v1/cve-refresh/refresh")
         assert r.status_code in [401, 403]
 
 
@@ -48,40 +48,40 @@ class TestCveRefreshProplusGate:
             yield
 
     def test_sources_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/cve-refresh/sources", headers=auth_headers)
+        r = client.get("/api/v1/cve-refresh/sources", headers=auth_headers)
         assert r.status_code == 402
 
     def test_settings_get_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/cve-refresh/settings", headers=auth_headers)
+        r = client.get("/api/v1/cve-refresh/settings", headers=auth_headers)
         assert r.status_code == 402
 
     def test_settings_put_returns_402(self, client, auth_headers, _engine_absent):
         r = client.put(
-            "/api/cve-refresh/settings",
+            "/api/v1/cve-refresh/settings",
             json={"enabled": True},
             headers=auth_headers,
         )
         assert r.status_code == 402
 
     def test_stats_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/cve-refresh/stats", headers=auth_headers)
+        r = client.get("/api/v1/cve-refresh/stats", headers=auth_headers)
         assert r.status_code == 402
 
     def test_history_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/cve-refresh/history", headers=auth_headers)
+        r = client.get("/api/v1/cve-refresh/history", headers=auth_headers)
         assert r.status_code == 402
 
     def test_refresh_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.post("/api/cve-refresh/refresh", headers=auth_headers)
+        r = client.post("/api/v1/cve-refresh/refresh", headers=auth_headers)
         assert r.status_code == 402
 
     def test_clear_nvd_api_key_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.delete("/api/cve-refresh/nvd-api-key", headers=auth_headers)
+        r = client.delete("/api/v1/cve-refresh/nvd-api-key", headers=auth_headers)
         assert r.status_code == 402
 
     def test_402_carries_upgrade_message(self, client, auth_headers, _engine_absent):
         """The 402 detail must mention Professional+ so users know to upgrade."""
-        r = client.get("/api/cve-refresh/settings", headers=auth_headers)
+        r = client.get("/api/v1/cve-refresh/settings", headers=auth_headers)
         assert r.status_code == 402
         body = r.json()
         # detail wording is i18n'd but the English msgid contains "Professional+"

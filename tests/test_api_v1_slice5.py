@@ -31,8 +31,7 @@ class TestDualSurface:
         v1 = client.get("/api/v1" + path)
         alias = client.get("/api" + path)
         assert v1.status_code != 404, f"/api/v1{path} should be native"
-        assert alias.status_code != 404, f"/api{path} alias should still work"
-        assert v1.status_code == alias.status_code
+        assert alias.status_code == 404, f"/api{path} alias retired (bridge removed)"
 
 
 class TestHostScopedAvFwVersioned:
@@ -48,4 +47,6 @@ class TestHostScopedAvFwVersioned:
             "/hosts/{host_id}/commercial-antivirus-status",
         ]:
             assert "/api/v1" + sub in paths, f"missing native /api/v1{sub}"
-            assert "/api" + sub in paths, f"missing alias /api{sub}"
+            assert (
+                "/api" + sub not in paths
+            ), f"/api{sub} alias retired (bridge removed)"

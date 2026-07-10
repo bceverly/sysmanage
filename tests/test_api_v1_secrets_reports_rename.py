@@ -4,16 +4,18 @@ Phase 13.2.1 (option A) — OSS secrets/reports renamed under /api/v1.
 The Pro+ secrets_engine/reporting_engine own /api/v1/secrets and /api/v1/reports
 (same endpoint names), so OSS takes DISTINCT v1 names:
 
-  * OSS secrets  -> /api/v1/stored-secrets   (+ deprecated /api/secrets alias)
-  * OSS reports  -> /api/v1/reporting        (+ deprecated /api/reports alias)
+  * OSS secrets  -> /api/v1/stored-secrets   (was /api/secrets)
+  * OSS reports  -> /api/v1/reporting        (was /api/reports)
 
 This keeps the two editions collision-free (the route-collision guard would fire
-otherwise) while preserving the old unversioned paths for one release.
+otherwise).  The old unversioned /api aliases were retired with the API-version
+bridge (final Phase 13.2.1 action), so only the canonical /api/v1 names resolve.
 """
 
 import pytest
 
-# (new canonical, old alias) pairs that resolve param-free with the test user.
+# (canonical v1 path, retired bare alias) pairs — resolve param-free with the
+# test user.
 SECRETS_PAIRS = [
     ("/api/v1/stored-secrets", "/api/secrets"),
     ("/api/v1/stored-secrets/types", "/api/secrets/types"),
@@ -22,12 +24,12 @@ SECRETS_PAIRS = [
 
 class TestSecretsRename:
     @pytest.mark.parametrize("new,old", SECRETS_PAIRS)
-    def test_new_and_alias_match(self, client, new, old):
-        rn = client.get(new)
-        ro = client.get(old)
-        assert rn.status_code != 404, f"{new} should be native"
-        assert ro.status_code != 404, f"{old} alias should still work"
-        assert rn.status_code == ro.status_code
+    def test_new_native_old_alias_retired(self, client, new, old):
+        # The canonical /api/v1 name is native; the old bare /api alias is gone.
+        assert client.get(new).status_code != 404, f"{new} should be native"
+        assert (
+            client.get(old).status_code == 404
+        ), f"{old} alias retired (bridge removed)"
 
     def test_new_canonical_is_200(self, client):
         assert client.get("/api/v1/stored-secrets").status_code == 200
@@ -38,11 +40,12 @@ class TestRenameInvariants:
         import backend.main as m  # noqa: PLC0415
 
         paths = {r.path for r in m.app.routes if hasattr(r, "path")}
-        # OSS canonical names present on both surfaces.
+        # OSS canonical /api/v1 names present.
         assert "/api/v1/stored-secrets/types" in paths
-        assert "/api/secrets/types" in paths
         assert "/api/v1/reporting/view/{report_type}" in paths
-        assert "/api/reports/view/{report_type}" in paths
+        # The old bare /api aliases are retired (bridge removed).
+        assert "/api/secrets/types" not in paths
+        assert "/api/reports/view/{report_type}" not in paths
 
     def test_oss_did_not_take_proplus_names(self):
         # The OSS routers themselves must not register the bare Pro+ names.

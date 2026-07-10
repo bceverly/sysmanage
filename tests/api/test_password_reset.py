@@ -42,7 +42,7 @@ class TestForgotPassword:
         mock_send_email.return_value = True
 
         response = client.post(
-            "/api/forgot-password", json={"email": "test@example.com"}
+            "/api/v1/forgot-password", json={"email": "test@example.com"}
         )
 
         assert response.status_code == 200
@@ -64,7 +64,7 @@ class TestForgotPassword:
     ):
         """Test forgot password for non-existent user - should still return success for security."""
         response = client.post(
-            "/api/forgot-password", json={"email": "nonexistent@example.com"}
+            "/api/v1/forgot-password", json={"email": "nonexistent@example.com"}
         )
 
         assert response.status_code == 200
@@ -96,7 +96,7 @@ class TestForgotPassword:
         mock_send_email.return_value = False
 
         response = client.post(
-            "/api/forgot-password", json={"email": "test@example.com"}
+            "/api/v1/forgot-password", json={"email": "test@example.com"}
         )
 
         # Should still return success for security (don't reveal email delivery status)
@@ -106,7 +106,9 @@ class TestForgotPassword:
 
     def test_forgot_password_invalid_email(self, client):
         """Test forgot password with invalid email format."""
-        response = client.post("/api/forgot-password", json={"email": "invalid-email"})
+        response = client.post(
+            "/api/v1/forgot-password", json={"email": "invalid-email"}
+        )
 
         assert response.status_code == 422  # Validation error
 
@@ -137,7 +139,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "newpassword123",
@@ -161,7 +163,7 @@ class TestResetPassword:
     def test_reset_password_invalid_token(self, client):
         """Test password reset with invalid token."""
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "invalid-token",
                 "password": "newpassword123",
@@ -196,7 +198,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "expired-token-123",
                 "password": "newpassword123",
@@ -231,7 +233,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "used-token-123",
                 "password": "newpassword123",
@@ -265,7 +267,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "newpassword123",
@@ -299,7 +301,7 @@ class TestResetPassword:
         session.commit()
 
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": "valid-token-123",
                 "password": "short",
@@ -326,7 +328,7 @@ class TestResetPassword:
 
         # Try to reset password using the orphaned token
         response = client.post(
-            "/api/reset-password",
+            "/api/v1/reset-password",
             json={
                 "token": reset_token.token,
                 "password": "newpassword123",
@@ -363,7 +365,7 @@ class TestValidateResetToken:
         session.add(reset_token)
         session.commit()
 
-        response = client.get("/api/validate-reset-token/valid-token-123")
+        response = client.get("/api/v1/validate-reset-token/valid-token-123")
 
         assert response.status_code == 200
         data = response.json()
@@ -372,7 +374,7 @@ class TestValidateResetToken:
 
     def test_validate_reset_token_invalid(self, client):
         """Test validating an invalid token."""
-        response = client.get("/api/validate-reset-token/invalid-token")
+        response = client.get("/api/v1/validate-reset-token/invalid-token")
 
         assert response.status_code == 400
         data = response.json()
@@ -399,7 +401,7 @@ class TestValidateResetToken:
         session.add(reset_token)
         session.commit()
 
-        response = client.get("/api/validate-reset-token/expired-token-123")
+        response = client.get("/api/v1/validate-reset-token/expired-token-123")
 
         assert response.status_code == 400
         data = response.json()
@@ -429,7 +431,7 @@ class TestAdminResetUserPassword:
         mock_send_email.return_value = True
 
         response = client.post(
-            f"/api/admin/reset-user-password/{user.id}", headers=auth_headers
+            f"/api/v1/admin/reset-user-password/{user.id}", headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -447,7 +449,7 @@ class TestAdminResetUserPassword:
     def test_admin_reset_user_password_not_found(self, client, auth_headers):
         """Test admin reset for non-existent user."""
         response = client.post(
-            "/api/admin/reset-user-password/999", headers=auth_headers
+            "/api/v1/admin/reset-user-password/999", headers=auth_headers
         )
 
         assert response.status_code == 404
@@ -474,7 +476,7 @@ class TestAdminResetUserPassword:
         mock_send_email.return_value = False
 
         response = client.post(
-            f"/api/admin/reset-user-password/{user.id}", headers=auth_headers
+            f"/api/v1/admin/reset-user-password/{user.id}", headers=auth_headers
         )
 
         assert response.status_code == 500
@@ -491,7 +493,7 @@ class TestAdminResetUserPassword:
         session.add(user)
         session.commit()
 
-        response = client.post(f"/api/admin/reset-user-password/{user.id}")
+        response = client.post(f"/api/v1/admin/reset-user-password/{user.id}")
         assert response.status_code == 401
 
 

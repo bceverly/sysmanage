@@ -1,5 +1,5 @@
 """
-Tests for backend/api/plugin_bundle.py module.
+Tests for backend/api/v1/plugin_bundle.py module.
 Tests plugin bundle serving endpoints.
 """
 
@@ -32,9 +32,9 @@ class TestPluginBundleListResponse:
         """Test PluginBundleListResponse model structure."""
         from backend.api.plugin_bundle import PluginBundleListResponse
 
-        response = PluginBundleListResponse(bundles=["/api/plugins/bundle/test.js"])
+        response = PluginBundleListResponse(bundles=["/api/v1/plugins/bundle/test.js"])
 
-        assert response.bundles == ["/api/plugins/bundle/test.js"]
+        assert response.bundles == ["/api/v1/plugins/bundle/test.js"]
 
     def test_empty_bundles(self):
         """Test PluginBundleListResponse with empty bundles."""
@@ -82,7 +82,7 @@ class TestListPluginBundles:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_path.return_value = "/var/lib/sysmanage/modules"
         mock_glob.return_value = []
@@ -90,7 +90,7 @@ class TestListPluginBundles:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundles")
+        response = client.get("/api/v1/plugins/bundles")
 
         assert response.status_code == 200
         assert response.json()["bundles"] == []
@@ -103,7 +103,7 @@ class TestListPluginBundles:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_path.return_value = "/modules"
         mock_glob.return_value = [
@@ -114,13 +114,13 @@ class TestListPluginBundles:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundles")
+        response = client.get("/api/v1/plugins/bundles")
 
         assert response.status_code == 200
         bundles = response.json()["bundles"]
         assert len(bundles) == 2
-        assert "/api/plugins/bundle/health_engine-plugin.iife.js" in bundles
-        assert "/api/plugins/bundle/vuln_engine-plugin.iife.js" in bundles
+        assert "/api/v1/plugins/bundle/health_engine-plugin.iife.js" in bundles
+        assert "/api/v1/plugins/bundle/vuln_engine-plugin.iife.js" in bundles
 
 
 class TestGetPluginBundle:
@@ -132,12 +132,12 @@ class TestGetPluginBundle:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundle/evil.txt")
+        response = client.get("/api/v1/plugins/bundle/evil.txt")
 
         assert response.status_code == 400
         assert "Invalid bundle filename" in response.json()["error"]
@@ -148,13 +148,13 @@ class TestGetPluginBundle:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
         # Test backslash in filename
-        response = client.get("/api/plugins/bundle/test\\evil.js")
+        response = client.get("/api/v1/plugins/bundle/test\\evil.js")
 
         # Should reject filenames containing backslashes
         assert response.status_code == 400
@@ -165,12 +165,12 @@ class TestGetPluginBundle:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundle/..evil.js")
+        response = client.get("/api/v1/plugins/bundle/..evil.js")
 
         assert response.status_code == 400
 
@@ -183,7 +183,7 @@ class TestGetPluginBundle:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_path.return_value = "/modules"
         mock_realpath.side_effect = lambda x: x  # Return path as-is
@@ -192,7 +192,7 @@ class TestGetPluginBundle:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundle/nonexistent.js")
+        response = client.get("/api/v1/plugins/bundle/nonexistent.js")
 
         assert response.status_code == 404
         assert "not found" in response.json()["error"]
@@ -208,7 +208,7 @@ class TestGetPluginBundle:
         from backend.auth.auth_bearer import get_current_user
 
         app = FastAPI()
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api/v1")
 
         mock_path.return_value = "/modules"
         # Simulate realpath resolving to outside modules dir
@@ -220,7 +220,7 @@ class TestGetPluginBundle:
         app.dependency_overrides[get_current_user] = lambda: "test@example.com"
 
         client = TestClient(app)
-        response = client.get("/api/plugins/bundle/symlink.js")
+        response = client.get("/api/v1/plugins/bundle/symlink.js")
 
         assert response.status_code == 400
 

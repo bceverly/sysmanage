@@ -1,5 +1,5 @@
 """
-Comprehensive tests for Pydantic validators in backend/api/scripts.py module.
+Comprehensive tests for Pydantic validators in backend/api/v1/scripts.py module.
 Tests script creation and update model validation.
 """
 

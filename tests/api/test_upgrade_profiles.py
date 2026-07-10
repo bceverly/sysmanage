@@ -113,11 +113,11 @@ class TestNextRun:
 
 class TestUpgradeProfilesAuth:
     def test_list_requires_auth(self, client):
-        r = client.get("/api/upgrade-profiles")
+        r = client.get("/api/v1/upgrade-profiles")
         assert r.status_code in [401, 403]
 
     def test_create_requires_auth(self, client):
-        r = client.post("/api/upgrade-profiles", json={"name": "no-auth"})
+        r = client.post("/api/v1/upgrade-profiles", json={"name": "no-auth"})
         assert r.status_code in [401, 403]
 
 
@@ -133,12 +133,12 @@ class TestUpgradeProfilesProplusGate:
             yield
 
     def test_list_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.get("/api/upgrade-profiles", headers=auth_headers)
+        r = client.get("/api/v1/upgrade-profiles", headers=auth_headers)
         assert r.status_code == 402
 
     def test_create_returns_402(self, client, auth_headers, _engine_absent):
         r = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "x"},
             headers=auth_headers,
         )
@@ -146,13 +146,13 @@ class TestUpgradeProfilesProplusGate:
 
     def test_trigger_returns_402(self, client, auth_headers, _engine_absent):
         r = client.post(
-            "/api/upgrade-profiles/00000000-0000-0000-0000-000000000000/trigger",
+            "/api/v1/upgrade-profiles/00000000-0000-0000-0000-000000000000/trigger",
             headers=auth_headers,
         )
         assert r.status_code == 402
 
     def test_tick_returns_402(self, client, auth_headers, _engine_absent):
-        r = client.post("/api/upgrade-profiles/tick", headers=auth_headers)
+        r = client.post("/api/v1/upgrade-profiles/tick", headers=auth_headers)
         assert r.status_code == 402
 
 
@@ -219,7 +219,7 @@ class TestUpgradeProfilesCrud:
 
     def test_create_with_default_cron(self, client, auth_headers):
         r = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "daily-3am"},
             headers=auth_headers,
         )
@@ -231,7 +231,7 @@ class TestUpgradeProfilesCrud:
 
     def test_create_with_invalid_cron_400(self, client, auth_headers):
         r = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "bad-cron", "cron": "not a cron"},
             headers=auth_headers,
         )
@@ -239,7 +239,7 @@ class TestUpgradeProfilesCrud:
 
     def test_create_with_security_only(self, client, auth_headers):
         r = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "sec-only", "security_only": True},
             headers=auth_headers,
         )
@@ -248,34 +248,36 @@ class TestUpgradeProfilesCrud:
 
     def test_list_after_create(self, client, auth_headers):
         client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "weekly"},
             headers=auth_headers,
         )
-        r = client.get("/api/upgrade-profiles", headers=auth_headers)
+        r = client.get("/api/v1/upgrade-profiles", headers=auth_headers)
         assert r.status_code == 200
         names = [p["name"] for p in r.json()]
         assert "weekly" in names
 
     def test_get_one(self, client, auth_headers):
         created = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "one-shot"},
             headers=auth_headers,
         ).json()
-        r = client.get(f"/api/upgrade-profiles/{created['id']}", headers=auth_headers)
+        r = client.get(
+            f"/api/v1/upgrade-profiles/{created['id']}", headers=auth_headers
+        )
         assert r.status_code == 200
         assert r.json()["id"] == created["id"]
 
     def test_update_cron_recomputes_next_run(self, client, auth_headers):
         created = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "rebench", "cron": "0 3 * * *"},
             headers=auth_headers,
         ).json()
         original_next = created["next_run"]
         r = client.put(
-            f"/api/upgrade-profiles/{created['id']}",
+            f"/api/v1/upgrade-profiles/{created['id']}",
             json={"cron": "*/5 * * * *"},
             headers=auth_headers,
         )
@@ -286,12 +288,12 @@ class TestUpgradeProfilesCrud:
 
     def test_delete(self, client, auth_headers):
         created = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "ephemeral"},
             headers=auth_headers,
         ).json()
         r = client.delete(
-            f"/api/upgrade-profiles/{created['id']}", headers=auth_headers
+            f"/api/v1/upgrade-profiles/{created['id']}", headers=auth_headers
         )
         assert r.status_code == 200
 
@@ -303,12 +305,12 @@ class TestUpgradeProfileTrigger:
 
     def test_trigger_updates_last_run_and_returns_targets(self, client, auth_headers):
         created = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "fire-now"},
             headers=auth_headers,
         ).json()
         r = client.post(
-            f"/api/upgrade-profiles/{created['id']}/trigger",
+            f"/api/v1/upgrade-profiles/{created['id']}/trigger",
             headers=auth_headers,
         )
         assert r.status_code == 200, r.text
@@ -320,14 +322,14 @@ class TestUpgradeProfileTrigger:
 
         # Verify last_run was set.
         get_resp = client.get(
-            f"/api/upgrade-profiles/{created['id']}", headers=auth_headers
+            f"/api/v1/upgrade-profiles/{created['id']}", headers=auth_headers
         )
         assert get_resp.json()["last_run"] is not None
         assert get_resp.json()["last_status"] == "SUCCESS"
 
     def test_trigger_unknown_profile_404(self, client, auth_headers):
         r = client.post(
-            "/api/upgrade-profiles/00000000-0000-0000-0000-000000000abc/trigger",
+            "/api/v1/upgrade-profiles/00000000-0000-0000-0000-000000000abc/trigger",
             headers=auth_headers,
         )
         assert r.status_code == 404
@@ -341,11 +343,11 @@ class TestUpgradeProfileTick:
     def test_tick_endpoint_runs(self, client, auth_headers):
         # Create a profile with cron that's already due (every minute).
         client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "everyminute", "cron": "* * * * *"},
             headers=auth_headers,
         )
-        r = client.post("/api/upgrade-profiles/tick", headers=auth_headers)
+        r = client.post("/api/v1/upgrade-profiles/tick", headers=auth_headers)
         assert r.status_code == 200
         assert "fired_count" in r.json()
         assert "fired" in r.json()
@@ -361,12 +363,12 @@ class TestUpgradeProfileDispatch:
 
     def test_trigger_response_carries_enqueued_count(self, client, auth_headers):
         created = client.post(
-            "/api/upgrade-profiles",
+            "/api/v1/upgrade-profiles",
             json={"name": "real-fire"},
             headers=auth_headers,
         ).json()
         r = client.post(
-            f"/api/upgrade-profiles/{created['id']}/trigger",
+            f"/api/v1/upgrade-profiles/{created['id']}/trigger",
             headers=auth_headers,
         )
         assert r.status_code == 200

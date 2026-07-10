@@ -14,7 +14,7 @@ Covers:
 class TestBroadcastAuth:
     def test_broadcast_requires_auth(self, client):
         r = client.post(
-            "/api/broadcast", json={"broadcast_action": "refresh_inventory"}
+            "/api/v1/broadcast", json={"broadcast_action": "refresh_inventory"}
         )
         assert r.status_code in [401, 403]
 
@@ -24,7 +24,7 @@ class TestBroadcastBasic:
         """No connected agents in the test harness — broadcast must
         still return 200 with delivered_count=0, NEVER 500."""
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={"broadcast_action": "refresh_inventory"},
             headers=auth_headers,
         )
@@ -38,7 +38,7 @@ class TestBroadcastBasic:
 
     def test_broadcast_with_message_payload(self, client, auth_headers):
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={
                 "broadcast_action": "banner",
                 "message": "scheduled maintenance starts in 5 minutes",
@@ -50,7 +50,7 @@ class TestBroadcastBasic:
 
     def test_broadcast_with_unknown_tag_returns_404(self, client, auth_headers):
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={
                 "broadcast_action": "refresh_inventory",
                 "tag_id": "00000000-0000-0000-0000-000000000abc",
@@ -61,7 +61,7 @@ class TestBroadcastBasic:
 
     def test_broadcast_with_invalid_tag_uuid_returns_400(self, client, auth_headers):
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={
                 "broadcast_action": "refresh_inventory",
                 "tag_id": "not-a-uuid",
@@ -74,7 +74,7 @@ class TestBroadcastBasic:
         """Empty broadcast_action → 422 from Pydantic; can't accidentally
         send a meaningless broadcast to the whole fleet."""
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={"broadcast_action": ""},
             headers=auth_headers,
         )
@@ -84,7 +84,7 @@ class TestBroadcastBasic:
         """Platform-only filter (no tag) routes through
         ``broadcast_to_platform``; empty fleet → delivered=0."""
         r = client.post(
-            "/api/broadcast",
+            "/api/v1/broadcast",
             json={
                 "broadcast_action": "refresh_inventory",
                 "platform": "Linux",

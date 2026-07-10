@@ -86,37 +86,31 @@ logger = get_logger("backend.startup.routes")
 def _include_versioned(app: FastAPI, router, *, suffix: str = "", tags=None):
     """Register a router natively under ``/api/v1`` (Phase 13.2.1 migration).
 
-    Mounts the router twice:
-
-    * ``/api/v1{suffix}`` — the **canonical** versioned route (shown in OpenAPI).
-      ``ApiVersionMiddleware`` matches this natively and passes it through, so the
-      feature no longer depends on the v1→legacy bridge.
-    * ``/api{suffix}`` — a **deprecated** unversioned alias kept for one release
-      for any pre-13.2.1 external caller (e.g. API-key automation). Hidden from
-      the OpenAPI schema so the docs advertise only the versioned surface.
-
-    Drop the alias (the second mount) once the deprecation window closes.
+    Mounts the router once, at ``/api/v1{suffix}`` — the canonical versioned
+    route.  The deprecated unversioned ``/api{suffix}`` alias was retired as the
+    final Phase 13.2.1 action (the migration is complete: every feature is native
+    ``/api/v1``, so the one-release back-compat window for pre-13.2.1 callers is
+    closed).  The deliberately-unversioned surfaces (agent, auth/mfa, IdP
+    SSO/ACS, SCIM) are registered directly, not through this helper, so they keep
+    their bare ``/api`` paths.
     """
     app.include_router(router, prefix="/api/v1" + suffix, tags=tags)
-    app.include_router(
-        router, prefix="/api" + suffix, tags=tags, include_in_schema=False
-    )
 
 
 def _include_renamed(
     app: FastAPI, router, *, new_prefix: str, old_prefix: str, tags=None
 ):
-    """Register a router at a NEW canonical ``/api/v1`` path + its OLD path alias.
+    """Register a router at its canonical ``/api/v1`` path (Phase 13.2.1).
 
-    Phase 13.2.1, option A: used where the bare feature name under ``/api/v1`` is
-    already owned by a Pro+ engine (``secrets_engine`` → ``/api/v1/secrets``,
-    ``reporting_engine`` → ``/api/v1/reports``).  The OSS feature takes a
-    DISTINCT v1 name (``/api/v1/stored-secrets``, ``/api/v1/reporting``) so the
-    two never collide, while its original unversioned ``/api`` path is kept as a
-    hidden, deprecated alias for one release.
+    Option A: used where the bare feature name under ``/api/v1`` is already owned
+    by a Pro+ engine (``secrets_engine`` → ``/api/v1/secrets``, ``reporting_engine``
+    → ``/api/v1/reports``).  The OSS feature takes a DISTINCT v1 name
+    (``/api/v1/stored-secrets``, ``/api/v1/reporting``) so the two never collide.
+    ``old_prefix`` is retained in the signature for call-site clarity but the
+    deprecated unversioned alias mount has been retired (bridge removal).
     """
+    del old_prefix  # deprecated /api alias retired (Phase 13.2.1 bridge removal)
     app.include_router(router, prefix=new_prefix, tags=tags)
-    app.include_router(router, prefix=old_prefix, tags=tags, include_in_schema=False)
 
 
 def check_route_collisions(app: FastAPI, *, strict: bool = False) -> dict:

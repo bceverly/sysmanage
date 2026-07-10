@@ -671,7 +671,7 @@ class TestRouterConfiguration:
             # mounted either with an explicit prefix kwarg ("/api" legacy, or
             # "/api/v1" canonical since Phase 13.2.1 — e.g. the multi-tenancy
             # control plane is dual-mounted at "/api/v1" + "/api"), or with a
-            # router that bakes its own full "/api/..." prefix and is included
+            # router that bakes its own full "/api/v1/..." prefix and is included
             # without the kwarg.
             for call in mock_app.include_router.call_args_list:
                 router_arg = call.args[0] if call.args else None

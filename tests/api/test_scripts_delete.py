@@ -4,7 +4,7 @@ from backend.persistence import models
 
 
 class TestScriptExecutionDelete:
-    """Test cases for DELETE /api/scripts/executions/{execution_id} endpoint."""
+    """Test cases for DELETE /api/v1/scripts/executions/{execution_id} endpoint."""
 
     def test_delete_script_execution_success(self, client, session, auth_headers):
         """Test successful deletion of a script execution."""
@@ -52,7 +52,7 @@ class TestScriptExecutionDelete:
 
             # Delete the execution
             response = client.delete(
-                f"/api/scripts/executions/{execution_id}", headers=auth_headers
+                f"/api/v1/scripts/executions/{execution_id}", headers=auth_headers
             )
 
             assert response.status_code == 200
@@ -70,7 +70,7 @@ class TestScriptExecutionDelete:
     def test_delete_script_execution_not_found(self, client, auth_headers):
         """Test deletion of non-existent script execution."""
         response = client.delete(
-            "/api/scripts/executions/nonexistent-id", headers=auth_headers
+            "/api/v1/scripts/executions/nonexistent-id", headers=auth_headers
         )
 
         assert response.status_code == 404
@@ -79,7 +79,7 @@ class TestScriptExecutionDelete:
 
     def test_delete_script_execution_unauthorized(self, client):
         """Test deletion without authentication."""
-        response = client.delete("/api/scripts/executions/test-id")
+        response = client.delete("/api/v1/scripts/executions/test-id")
 
         # Should return 401 or 403, not 404
         assert response.status_code in [401, 403]
