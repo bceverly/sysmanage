@@ -330,10 +330,12 @@ async def deploy_antivirus(  # NOSONAR
     if success_count == len(deploy_request.host_ids):
         message = _("Antivirus deployment initiated for all %d hosts") % success_count
     elif success_count > 0:
-        message = _("Antivirus deployment initiated for %d of %d hosts") % (
-            success_count,
-            len(deploy_request.host_ids),
-        )
+        message = _(
+            "Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+        ) % {
+            "success_count": success_count,
+            "total_count": len(deploy_request.host_ids),
+        }
     else:
         message = _("Antivirus deployment failed for all hosts")
 

@@ -331,9 +331,12 @@ async def execute_os_upgrades(  # NOSONAR
                         action_type=ActionType.UPDATE,
                         entity_type=EntityType.HOST,
                         description=_(
-                            "Initiated OS upgrade on host %s with %d upgrade(s)"
+                            "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
                         )
-                        % (host.fqdn, len(available_upgrades)),
+                        % {
+                            "fqdn": host.fqdn,
+                            "upgrade_count": len(available_upgrades),
+                        },
                         result=Result.SUCCESS,
                         user_id=user.id,
                         username=current_user,

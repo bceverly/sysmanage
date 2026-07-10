@@ -170,7 +170,8 @@ def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
-            detail=_("Invalid UUID for %s: %s") % (field, value),
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 
@@ -192,8 +193,13 @@ def _validate_template_payload(
             if unknown:
                 raise HTTPException(
                     status_code=400,
-                    detail=_("Unknown field code(s) for %s: %s")
-                    % (base_report_type, ", ".join(unknown)),
+                    detail=_(
+                        "Unknown field code(s) for %(base_report_type)s: %(codes)s"
+                    )
+                    % {
+                        "base_report_type": base_report_type,
+                        "codes": ", ".join(unknown),
+                    },
                 )
 
 

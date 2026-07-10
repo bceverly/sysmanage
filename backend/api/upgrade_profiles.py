@@ -120,7 +120,9 @@ def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
         return uuid.UUID(value)
     except ValueError as exc:
         raise HTTPException(
-            status_code=400, detail=_("Invalid UUID for %s: %s") % (field, value)
+            status_code=400,
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 
@@ -380,8 +382,10 @@ async def trigger_profile(
         entity_type=EntityType.SETTING,
         entity_id=str(profile.id),
         entity_name=profile.name,
-        description=_("Triggered upgrade profile '%s' against %d host(s)")
-        % (profile.name, len(target_ids)),
+        description=_(
+            "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
+        )
+        % {"profile_name": profile.name, "host_count": len(target_ids)},
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,

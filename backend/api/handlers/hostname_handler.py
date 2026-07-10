@@ -41,9 +41,8 @@ async def handle_hostname_changed(  # NOSONAR
 
         if not success:
             logger.warning(
-                _("Hostname change failed for host %s: %s"),
-                host_id,
-                error_message or "Unknown error",
+                _("Hostname change failed for host %(host_id)s: %(error)s"),
+                {"host_id": host_id, "error": error_message or "Unknown error"},
             )
             return
 
@@ -65,10 +64,14 @@ async def handle_hostname_changed(  # NOSONAR
         db.commit()
 
         logger.info(
-            _("Updated hostname for host %s from %s to %s"),
-            host_id,
-            old_hostname,
-            new_hostname,
+            _(
+                "Updated hostname for host %(host_id)s from %(old_hostname)s to %(new_hostname)s"
+            ),
+            {
+                "host_id": host_id,
+                "old_hostname": old_hostname,
+                "new_hostname": new_hostname,
+            },
         )
 
     except Exception as e:

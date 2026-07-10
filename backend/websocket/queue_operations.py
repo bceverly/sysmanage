@@ -293,11 +293,15 @@ class QueueOperations:
                     raise
 
             logger.debug(
-                _("Enqueued message: id=%s, type=%s, direction=%s, host_id=%s"),
-                message_id,
-                message_type,
-                direction,
-                host_id,
+                _(
+                    "Enqueued message: id=%(message_id)s, type=%(message_type)s, direction=%(direction)s, host_id=%(host_id)s"
+                ),
+                {
+                    "message_id": message_id,
+                    "message_type": message_type,
+                    "direction": direction,
+                    "host_id": host_id,
+                },
             )
 
         except Exception:
@@ -479,9 +483,8 @@ class QueueOperations:
             if not session_provided:
                 db.rollback()
             logger.exception(
-                _("Failed to mark message %s as processing: %s"),
-                message_id,
-                str(e),
+                _("Failed to mark message %(message_id)s as processing: %(error)s"),
+                {"message_id": message_id, "error": str(e)},
             )
             return False
         finally:
@@ -522,9 +525,8 @@ class QueueOperations:
             if not session_provided:
                 db.rollback()
             logger.exception(
-                _("Failed to mark message %s as completed: %s"),
-                message_id,
-                str(e),
+                _("Failed to mark message %(message_id)s as completed: %(error)s"),
+                {"message_id": message_id, "error": str(e)},
             )
             return False
         finally:
@@ -568,9 +570,8 @@ class QueueOperations:
             if not session_provided:
                 db.rollback()
             logger.exception(
-                _("Failed to mark message %s as sent: %s"),
-                message_id,
-                str(e),
+                _("Failed to mark message %(message_id)s as sent: %(error)s"),
+                {"message_id": message_id, "error": str(e)},
             )
             return False
         finally:
@@ -604,9 +605,10 @@ class QueueOperations:
             # Only acknowledge messages that are in SENT status
             if message.status != QueueStatus.SENT:
                 logger.debug(
-                    _("Message %s not in SENT status (is %s), skipping ack"),
-                    message_id,
-                    message.status,
+                    _(
+                        "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+                    ),
+                    {"message_id": message_id, "status": message.status},
                 )
                 # Still return True if already completed - idempotent behavior
                 return message.status == QueueStatus.COMPLETED
@@ -624,9 +626,8 @@ class QueueOperations:
             if not session_provided:
                 db.rollback()
             logger.exception(
-                _("Failed to mark message %s as acknowledged: %s"),
-                message_id,
-                str(e),
+                _("Failed to mark message %(message_id)s as acknowledged: %(error)s"),
+                {"message_id": message_id, "error": str(e)},
             )
             return False
         finally:
@@ -784,12 +785,14 @@ class QueueOperations:
 
                 logger.debug(
                     _(
-                        "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
+                        "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), scheduled for retry in %(backoff)d seconds"
                     ),
-                    message_id,
-                    message.retry_count,
-                    message.max_retries,
-                    backoff_seconds,
+                    {
+                        "message_id": message_id,
+                        "attempt": message.retry_count,
+                        "max_retries": message.max_retries,
+                        "backoff": backoff_seconds,
+                    },
                 )
             else:
                 # Max retries reached or retry disabled
@@ -797,10 +800,14 @@ class QueueOperations:
                 message.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
                 logger.warning(
-                    _("Message %s permanently failed after %d attempts: %s"),
-                    message_id,
-                    message.retry_count,
-                    error_message,
+                    _(
+                        "Message %(message_id)s permanently failed after %(attempts)d attempts: %(error)s"
+                    ),
+                    {
+                        "message_id": message_id,
+                        "attempts": message.retry_count,
+                        "error": error_message,
+                    },
                 )
 
             if not session_provided:
@@ -812,9 +819,8 @@ class QueueOperations:
             if not session_provided:
                 db.rollback()
             logger.exception(
-                _("Failed to mark message %s as failed: %s"),
-                message_id,
-                str(e),
+                _("Failed to mark message %(message_id)s as failed: %(error)s"),
+                {"message_id": message_id, "error": str(e)},
             )
             return False
         finally:
@@ -835,8 +841,7 @@ class QueueOperations:
             return json.loads(message.message_data)
         except (json.JSONDecodeError, TypeError) as e:
             logger.exception(
-                _("Failed to deserialize message %s: %s"),
-                message.message_id,
-                str(e),
+                _("Failed to deserialize message %(message_id)s: %(error)s"),
+                {"message_id": message.message_id, "error": str(e)},
             )
             return {}

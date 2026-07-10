@@ -184,10 +184,10 @@ def register_routes(app: FastAPI):
     # Unauthenticated routes (no /api prefix)
     logger.debug("Registering unauthenticated routes:")
 
-    logger.debug("Adding auth router (native /api/v1 + deprecated /api alias)")
+    logger.debug("Adding auth router (native /api/v1; bridge retired)")
     _include_versioned(
         app, auth.router, tags=["authentication"]
-    )  # /api/v1/login, /refresh, /logout (+ /api alias)
+    )  # /api/v1/login, /refresh, /logout
     logger.debug("Auth router added")
 
     logger.debug(

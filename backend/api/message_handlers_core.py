@@ -456,7 +456,9 @@ async def _process_approved_system_info(
 
         _logsvc.push_logging_to_host(db, host)
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.warning("Could not push logging config to %s: %s", hostname, exc)
+        logger.warning(
+            "Could not push logging config to %s: %s", sanitize_log(hostname), exc
+        )
 
     return {
         "message_type": "registration_success",
@@ -657,7 +659,7 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                     logger.info(
                         "Heartbeat: host %s is tenant-bound; not creating a "
                         "bootstrap duplicate",
-                        agent_host_id,
+                        sanitize_log(agent_host_id),
                     )
                     result_rowcount = 0
                 elif has_hostname and has_ipv4 and has_ipv6:

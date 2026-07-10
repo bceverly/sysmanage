@@ -283,8 +283,15 @@ class DefaultRepositoryCreate(BaseModel):
             valid_managers = OS_PACKAGE_MANAGERS[os_name]
             if package_manager.strip() not in valid_managers:
                 raise ValueError(
-                    _("Invalid package manager '%s' for OS '%s'. Valid options: %s")
-                    % (package_manager, os_name, ", ".join(valid_managers))
+                    _(
+                        "Invalid package manager '%(package_manager)s' for OS "
+                        "'%(os_name)s'. Valid options: %(valid_options)s"
+                    )
+                    % {
+                        "package_manager": package_manager,
+                        "os_name": os_name,
+                        "valid_options": ", ".join(valid_managers),
+                    }
                 )
         return package_manager.strip()
 

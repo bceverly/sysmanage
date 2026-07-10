@@ -121,9 +121,8 @@ async def _dispatch_null_host_message(message, host, db, hostname, tenant_sessio
     try:
         if not host:
             logger.warning(
-                _("Host %s not found for message %s, deleting"),
-                hostname,
-                message.message_id,
+                _("Host %(hostname)s not found for message %(message_id)s, deleting"),
+                {"hostname": hostname, "message_id": message.message_id},
             )
             server_queue_manager.mark_failed(
                 message.message_id, f"Host {hostname} not found", db=db
@@ -132,10 +131,14 @@ async def _dispatch_null_host_message(message, host, db, hostname, tenant_sessio
 
         if host.approval_status != "approved":
             logger.warning(
-                _("Host %s not approved (status: %s) for message %s, deleting"),
-                hostname,
-                host.approval_status,
-                message.message_id,
+                _(
+                    "Host %(hostname)s not approved (status: %(status)s) for message %(message_id)s, deleting"
+                ),
+                {
+                    "hostname": hostname,
+                    "status": host.approval_status,
+                    "message_id": message.message_id,
+                },
             )
             server_queue_manager.mark_failed(
                 message.message_id, f"Host {hostname} not approved", db=db
@@ -145,9 +148,10 @@ async def _dispatch_null_host_message(message, host, db, hostname, tenant_sessio
         # Host is valid and approved - process the message.  Handler writes go to
         # tenant_session when the host is in a tenant DB.
         logger.info(
-            _("Processing NULL host_id message for approved host %s (ID: %s)"),
-            hostname,
-            host.id,
+            _(
+                "Processing NULL host_id message for approved host %(hostname)s (ID: %(host_id)s)"
+            ),
+            {"hostname": hostname, "host_id": host.id},
         )
         await process_validated_message(message, host, db, host_db=tenant_session)
     finally:
@@ -262,12 +266,11 @@ async def process_pending_messages(  # NOSONAR
             )
             logger.warning(
                 _(
-                    "Host %s not found on this database; deferring %d queued "
+                    "Host %(host_id)s not found on this database; deferring %(count)d queued "
                     "message(s) for retry (NOT deleting) — may be an in-flight "
                     "enrollment or a deleted host"
                 ),
-                host_id,
-                len(pending),
+                {"host_id": host_id, "count": len(pending)},
             )
             for message in pending:
                 server_queue_manager.mark_failed(
@@ -280,25 +283,25 @@ async def process_pending_messages(  # NOSONAR
         if host.approval_status != "approved":
             logger.warning(
                 _(
-                    "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its messages from queue"
+                    "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), deleting all its messages from queue"
                 ),
-                host_id,
-                host.fqdn,
-                host.approval_status,
+                {
+                    "host_id": host_id,
+                    "fqdn": host.fqdn,
+                    "status": host.approval_status,
+                },
             )
             deleted = server_queue_manager.delete_messages_for_host(host_id, db=db)
             logger.info(
-                _("Deleted %d messages for unapproved host %s"),
-                deleted,
-                host_id,
+                _("Deleted %(count)d messages for unapproved host %(host_id)s"),
+                {"count": deleted, "host_id": host_id},
             )
             continue
 
         # Host exists and is approved - process its messages
         logger.info(
-            _("Processing messages for approved host %s (FQDN: %s)"),
-            host_id,
-            host.fqdn,
+            _("Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"),
+            {"host_id": host_id, "fqdn": host.fqdn},
         )
         host_messages = server_queue_manager.dequeue_messages_for_host(
             host_id=host_id, direction=QueueDirection.INBOUND, limit=10, db=db
@@ -396,9 +399,8 @@ async def process_pending_messages(  # NOSONAR
 
         except Exception as e:
             logger.exception(
-                _("Error processing NULL host_id message %s: %s"),
-                message.message_id,
-                str(e),
+                _("Error processing NULL host_id message %(message_id)s: %(error)s"),
+                {"message_id": message.message_id, "error": str(e)},
             )
             server_queue_manager.mark_failed(
                 message.message_id, f"Processing error: {str(e)}", db=db
@@ -461,10 +463,14 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
         mock_connection.hostname = host.fqdn
 
         logger.info(
-            _("Processing queued message: %s (type: %s, host: %s)"),
-            message.message_id,
-            message.message_type,
-            host.fqdn,
+            _(
+                "Processing queued message: %(message_id)s (type: %(message_type)s, host: %(host)s)"
+            ),
+            {
+                "message_id": message.message_id,
+                "message_type": message.message_type,
+                "host": host.fqdn,
+            },
         )
 
         # Log specific data for different message types
@@ -490,9 +496,10 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
             )
             server_queue_manager.mark_completed(message.message_id, db=db)
             logger.info(
-                _("Successfully processed and completed message: %s for host %s"),
-                message.message_id,
-                host.fqdn,
+                _(
+                    "Successfully processed and completed message: %(message_id)s for host %(host)s"
+                ),
+                {"message_id": message.message_id, "host": host.fqdn},
             )
             print(
                 f"Message {message.message_id} marked as completed successfully",
@@ -529,10 +536,12 @@ async def process_validated_message(message, host, db: Session, host_db=None) ->
 
     except Exception as e:
         logger.exception(
-            _("Error processing message %s for host %s: %s"),
-            message.message_id,
-            host.fqdn,
-            str(e),
+            _("Error processing message %(message_id)s for host %(host)s: %(error)s"),
+            {
+                "message_id": message.message_id,
+                "host": host.fqdn,
+                "error": str(e),
+            },
         )
         # Mark message as failed and remove from queue
         server_queue_manager.mark_failed(
@@ -589,9 +598,8 @@ async def process_system_info_message(message, db: Session) -> None:
 
     except Exception as e:
         logger.exception(
-            _("Error processing SYSTEM_INFO message %s: %s"),
-            message.message_id,
-            str(e),
+            _("Error processing SYSTEM_INFO message %(message_id)s: %(error)s"),
+            {"message_id": message.message_id, "error": str(e)},
             exc_info=True,
         )
         server_queue_manager.mark_failed(

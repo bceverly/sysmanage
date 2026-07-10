@@ -158,7 +158,9 @@ def _parse_uuid(value: Optional[str], field: str) -> Optional[uuid.UUID]:
         return uuid.UUID(value)
     except ValueError as exc:
         raise HTTPException(
-            status_code=400, detail=_("Invalid UUID for %s: %s") % (field, value)
+            status_code=400,
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 
@@ -1113,8 +1115,15 @@ def _resolve_assignment_mirror(db: Session, request, platform: str):
     if mirror.package_manager != platform:
         raise HTTPException(
             status_code=400,
-            detail=_("Mirror %s is for %s, can't assign to a %s default")
-            % (mirror.name, mirror.package_manager, platform),
+            detail=_(
+                "Mirror %(mirror_name)s is for %(package_manager)s, "
+                "can't assign to a %(platform)s default"
+            )
+            % {
+                "mirror_name": mirror.name,
+                "package_manager": mirror.package_manager,
+                "platform": platform,
+            },
         )
     return mirror
 

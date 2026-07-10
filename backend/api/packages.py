@@ -269,8 +269,10 @@ async def get_packages_by_manager(
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=_("Failed to retrieve packages for manager %s: %s")
-            % (manager_name, str(e)),
+            detail=_(
+                "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
+            )
+            % {"manager_name": manager_name, "error": str(e)},
         ) from e
 
 
@@ -291,7 +293,8 @@ async def refresh_packages_for_os_version(
         if not hosts:
             raise HTTPException(
                 status_code=404,
-                detail=_("No active hosts found for %s %s") % (os_name, os_version),
+                detail=_("No active hosts found for %(os_name)s %(os_version)s")
+                % {"os_name": os_name, "os_version": os_version},
             )
 
         # Select best host with bias towards those with more package managers

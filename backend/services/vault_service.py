@@ -4,6 +4,7 @@ Service for interacting with OpenBAO vault to store and retrieve secrets.
 
 import json
 import logging
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
@@ -149,6 +150,15 @@ class VaultService:
 
         if not self.token:
             raise VaultError(_("vault.no_token", "Vault token not configured"))
+
+        # SSRF / path-traversal barrier.  ``path`` is a caller-supplied vault API
+        # path that may embed user-influenced data (secret ids, key names), so it
+        # must stay a plain relative path under the FIXED vault base URL.
+        # Allowlist the characters real vault paths use and reject traversal —
+        # otherwise a crafted path could reach an unintended endpoint (e.g.
+        # ``sys/seal``) or inject a scheme/host/credentials into the request URL.
+        if ".." in path or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", path):
+            raise VaultError(_("vault.invalid_path", "Invalid vault path"))
 
         url = f"{self.base_url}/v1/{path}"
 

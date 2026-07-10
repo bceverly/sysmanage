@@ -158,8 +158,8 @@ async def upload_logo(
         entity_type=EntityType.SETTING,
         entity_id=str(row.id),
         entity_name="report_branding_logo",
-        description=_("Uploaded report branding logo (%d bytes, %s)")
-        % (len(contents), mime),
+        description=_("Uploaded report branding logo (%(size)d bytes, %(mime)s)")
+        % {"size": len(contents), "mime": mime},
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,

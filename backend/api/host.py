@@ -864,8 +864,10 @@ async def register_host(registration_data: HostRegistration):
                 entity_type=EntityType.HOST,
                 entity_id=str(host.id),
                 entity_name=host.fqdn,
-                description=_("Host '%s' enrolled into tenant %s via enrollment token")
-                % (host.fqdn, enrollment_tenant_id),
+                description=_(
+                    "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+                )
+                % {"fqdn": host.fqdn, "tenant_id": enrollment_tenant_id},
                 result=Result.SUCCESS,
                 details={"tenant_id": enrollment_tenant_id},
             )
@@ -880,9 +882,13 @@ async def register_host(registration_data: HostRegistration):
                 entity_id=str(host.id),
                 entity_name=host.fqdn,
                 description=_(
-                    "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
+                    "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' (auto_approve=%(auto_approve)s)"
                 )
-                % (host.fqdn, validated_key.name, validated_key.auto_approve),
+                % {
+                    "fqdn": host.fqdn,
+                    "key_name": validated_key.name,
+                    "auto_approve": validated_key.auto_approve,
+                },
                 result=Result.SUCCESS,
                 details={
                     "registration_key_id": str(validated_key.id),

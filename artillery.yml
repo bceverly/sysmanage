@@ -1,5 +1,5 @@
 config:
-  target: http://localhost:8080
+  target: http://127.0.0.1:8080
   phases:
   - duration: 10
     arrivalRate: 2
@@ -29,7 +29,7 @@ scenarios:
   weight: 40
   flow:
   - post:
-      url: /api/login
+      url: /api/v1/login
       json:
         userid: e2e-test@sysmanage.org
         password: E2ETestPassword123!
@@ -43,7 +43,7 @@ scenarios:
   weight: 20
   flow:
   - post:
-      url: /api/login
+      url: /api/v1/login
       json:
         userid: e2e-test@sysmanage.org
         password: E2ETestPassword123!
@@ -53,7 +53,7 @@ scenarios:
       - json: $.Authorization
         as: authToken
   - get:
-      url: /api/hosts
+      url: /api/v1/hosts
       headers:
         Authorization: Bearer {{ authToken }}
       expect:

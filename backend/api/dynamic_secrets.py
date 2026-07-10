@@ -103,7 +103,8 @@ def _parse_uuid_or_400(value: str, field: str) -> uuid.UUID:
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
-            detail=_("Invalid UUID for %s: %s") % (field, value),
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 
@@ -125,8 +126,8 @@ async def issue(
     if request.kind not in LEASE_KINDS:
         raise HTTPException(
             status_code=400,
-            detail=_("Unknown kind: %s (allowed: %s)")
-            % (request.kind, ", ".join(LEASE_KINDS)),
+            detail=_("Unknown kind: %(kind)s (allowed: %(allowed)s)")
+            % {"kind": request.kind, "allowed": ", ".join(LEASE_KINDS)},
         )
     try:
         result = issue_lease(
@@ -147,13 +148,15 @@ async def issue(
         entity_type=EntityType.SETTING,
         entity_id=result["lease"]["id"],
         entity_name=result["lease"]["name"],
-        description=_("Issued dynamic secret '%s' (kind=%s, role=%s, ttl=%ds)")
-        % (
-            result["lease"]["name"],
-            request.kind,
-            request.backend_role,
-            request.ttl_seconds,
-        ),
+        description=_(
+            "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+        )
+        % {
+            "name": result["lease"]["name"],
+            "kind": request.kind,
+            "role": request.backend_role,
+            "ttl": request.ttl_seconds,
+        },
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,
@@ -179,13 +182,14 @@ async def list_leases(
     if status is not None and status not in LEASE_STATUSES:
         raise HTTPException(
             status_code=400,
-            detail=_("Unknown status: %s (allowed: %s)")
-            % (status, ", ".join(LEASE_STATUSES)),
+            detail=_("Unknown status: %(status)s (allowed: %(allowed)s)")
+            % {"status": status, "allowed": ", ".join(LEASE_STATUSES)},
         )
     if kind is not None and kind not in LEASE_KINDS:
         raise HTTPException(
             status_code=400,
-            detail=_("Unknown kind: %s (allowed: %s)") % (kind, ", ".join(LEASE_KINDS)),
+            detail=_("Unknown kind: %(kind)s (allowed: %(allowed)s)")
+            % {"kind": kind, "allowed": ", ".join(LEASE_KINDS)},
         )
 
     q = db.query(models.DynamicSecretLease)

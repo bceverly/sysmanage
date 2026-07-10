@@ -414,7 +414,10 @@ async def trigger_cve_refresh(
                 except Exception as src_e:
                     logger.exception("CVE refresh failed for source %s: %s", src, src_e)
                     all_sources[src] = {"status": "error", "error": str(src_e)}
-                    all_errors.append(_("Source %s failed: %s") % (src, str(src_e)))
+                    all_errors.append(
+                        _("Source %(source)s failed: %(error)s")
+                        % {"source": src, "error": str(src_e)}
+                    )
 
             return RefreshResultResponse(
                 started_at=started_at,

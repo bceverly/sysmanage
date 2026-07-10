@@ -68,7 +68,9 @@ def _parse_uuid(value: Optional[str], field: str) -> Optional[uuid.UUID]:
         return uuid.UUID(value)
     except ValueError as exc:
         raise HTTPException(
-            status_code=400, detail=_("Invalid UUID for %s: %s") % (field, value)
+            status_code=400,
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 

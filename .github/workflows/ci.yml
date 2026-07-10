@@ -741,7 +741,7 @@ jobs:
         # Production-style reverse-proxy setup: nginx serves the SPA on
         # :3000 and reverse-proxies /api/* + /ws to the backend on :8080.
         # We can't use ``npx serve`` here because the frontend bundle
-        # makes relative API calls (/api/login etc.) that need to reach
+        # makes relative API calls (/api/v1/login etc.) that need to reach
         # the backend — ``serve -s`` would fall through to /index.html
         # for any /api/* path and login would silently get HTML back.
         #

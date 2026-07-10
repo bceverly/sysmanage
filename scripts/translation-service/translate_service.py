@@ -236,16 +236,18 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
 # template vars, printf specifiers, HTML tags and entities.  Used to verify the
 # model didn't drop/alter one (a 14b model occasionally drops e.g. {{count}} in a
 # lower-resource language).  Ordered so the most specific form matches first.
+# NB: the {{...}} form uses [^{}] rather than .*? so a match can't overlap
+# braces — .*? there backtracks polynomially on adversarial input (ReDoS).
 _PLACEHOLDER_RE = re.compile(
-    r"\{\{.*?\}\}"            # {{ name }}  (i18next / handlebars)
-    r"|\$\{[^}]+\}"          # ${VAR}
-    r"|\{[^{}]*\}"           # { name } { 0 }  (ICU / .NET / python)
-    r"|%\d+\$[sdfgex]"       # %1$s
-    r"|%\(\w+\)[sdfgexr]"    # %(name)s
-    r"|%[sdfgexr%]"          # %s %d %%
-    r"|\$[A-Za-z_]\w*"       # $VAR
-    r"|</?[A-Za-z][^>]*>"    # <tag ...>  </tag>  <br/>
-    r"|&[a-zA-Z]+;|&#\d+;"   # &mdash;  &#8212;
+    r"\{\{[^{}]*\}\}"  # {{ name }}  (i18next / handlebars)
+    r"|\$\{[^}]+\}"  # ${VAR}
+    r"|\{[^{}]*\}"  # { name } { 0 }  (ICU / .NET / python)
+    r"|%\d+\$[sdfgex]"  # %1$s
+    r"|%\(\w+\)[sdfgexr]"  # %(name)s
+    r"|%[sdfgexr%]"  # %s %d %%
+    r"|\$[A-Za-z_]\w*"  # $VAR
+    r"|</?[A-Za-z][^>]*>"  # <tag ...>  </tag>  <br/>
+    r"|&[a-zA-Z]+;|&#\d+;"  # &mdash;  &#8212;
 )
 
 
@@ -287,7 +289,10 @@ async def _raw_chunk(
         "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": {"temperature": 0, "num_ctx": NUM_CTX},
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT.replace("{language}", language)},
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT.replace("{language}", language),
+            },
             {"role": "user", "content": json.dumps(sources, ensure_ascii=False)},
         ],
     }
@@ -395,6 +400,7 @@ async def _translate(texts: List[str], targets: List[str]) -> List[Dict[str, str
 # ---------------------------------------------------------------------------
 # API
 # ---------------------------------------------------------------------------
+
 
 def _gpu_info() -> List[str]:
     """Best-effort GPU/VRAM lines via nvidia-smi (no torch/CUDA dependency)."""
@@ -530,8 +536,7 @@ async def translate_batch(req: BatchTranslateRequest) -> dict:
         "count": len(req.texts),
         "targets": targets,
         "results": [
-            {"source": src, "translations": row}
-            for src, row in zip(req.texts, rows)
+            {"source": src, "translations": row} for src, row in zip(req.texts, rows)
         ],
     }
 

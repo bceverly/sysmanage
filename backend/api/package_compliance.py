@@ -133,7 +133,9 @@ def _parse_uuid_or_400(value: Optional[str], field: str) -> Optional[uuid.UUID]:
         return uuid.UUID(value)
     except ValueError as exc:
         raise HTTPException(
-            status_code=400, detail=_("Invalid UUID for %s: %s") % (field, value)
+            status_code=400,
+            detail=_("Invalid UUID for %(field)s: %(value)s")
+            % {"field": field, "value": value},
         ) from exc
 
 
@@ -367,8 +369,16 @@ async def scan_host_against_profile(
         entity_type=EntityType.SETTING,
         entity_id=str(profile.id),
         entity_name=profile.name,
-        description=_("Scanned host '%s' against profile '%s': %s (%d violation(s))")
-        % (host.fqdn, profile.name, status, len(violations)),
+        description=_(
+            "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': "
+            "%(status)s (%(violation_count)d violation(s))"
+        )
+        % {
+            "host_fqdn": host.fqdn,
+            "profile_name": profile.name,
+            "status": status,
+            "violation_count": len(violations),
+        },
         user_id=current_user.id,
         username=current_user.userid,
         result=(Result.SUCCESS if status == "COMPLIANT" else Result.FAILURE),
@@ -485,8 +495,10 @@ async def dispatch_compliance_check_to_agent(
         entity_type=EntityType.SETTING,
         entity_id=str(profile.id),
         entity_name=profile.name,
-        description=_("Dispatched compliance check to agent '%s' for profile '%s'")
-        % (host.fqdn, profile.name),
+        description=_(
+            "Dispatched compliance check to agent '%(host_fqdn)s' for profile '%(profile_name)s'"
+        )
+        % {"host_fqdn": host.fqdn, "profile_name": profile.name},
         user_id=current_user.id,
         username=current_user.userid,
         result=Result.SUCCESS,

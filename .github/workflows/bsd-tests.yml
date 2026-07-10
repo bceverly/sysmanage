@@ -93,7 +93,7 @@ jobs:
         # NOTE: pin to a SHA before merging.  The repo's convention is to
         # pin every third-party action — see the `# v4` comments on
         # actions/checkout etc.
-        uses: cross-platform-actions/action@v1.0.0
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
         env:
           # Pre-bind any github / inputs context value used inside the
           # VM's run: script to env vars so the script can reference
@@ -161,7 +161,7 @@ jobs:
           path: sysmanage-agent
 
       - name: Run agent integration tests in OpenBSD VM
-        uses: cross-platform-actions/action@v1.0.0
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
@@ -222,7 +222,7 @@ jobs:
           path: sysmanage-agent
 
       - name: Run agent integration tests in NetBSD VM
-        uses: cross-platform-actions/action@v1.0.0
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:

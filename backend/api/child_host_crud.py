@@ -661,12 +661,14 @@ async def create_distribution(
         if existing:
             raise HTTPException(
                 status_code=409,
-                detail=_("Distribution '%s %s' already exists for type '%s'")
-                % (
-                    request.distribution_name,
-                    request.distribution_version,
-                    request.child_type,
-                ),
+                detail=_(
+                    "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
+                )
+                % {
+                    "name": request.distribution_name,
+                    "version": request.distribution_version,
+                    "child_type": request.child_type,
+                },
             )
 
         import uuid

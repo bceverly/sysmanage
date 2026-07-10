@@ -37,14 +37,24 @@ def load_sysmanage_config():
         print(f"Error loading config file: {e}")
         sys.exit(1)
 
+
 def resolve_host_for_client(config_host):
     """Resolve host for client connections, same logic as start.sh generate_urls function"""
     if config_host == "0.0.0.0":
-        # When bound to 0.0.0.0, prefer localhost for client connections
-        return "localhost"
+        # When bound to 0.0.0.0 (the IPv4 wildcard), pin the client target to the
+        # IPv4 loopback rather than the ambiguous "localhost".  "localhost" is
+        # dual-stack: curl's happy-eyeballs will happily satisfy a health check
+        # against an unrelated IPv6 backend on ::1:PORT (e.g. a dev stack), so the
+        # perf harness thinks a server is "already running" and skips starting its
+        # own — but Artillery/Node then connects to 127.0.0.1 and gets
+        # ECONNREFUSED for every VU.  Pinning to 127.0.0.1 (mirrors the e2e IPv4
+        # pinning) keeps the pre-flight, the started backend, and the load client
+        # all on the same address family.
+        return "127.0.0.1"
     else:
         # Use the configured host directly
         return config_host
+
 
 def generate_artillery_config():
     """Generate artillery.yml with correct target URL from sysmanage.yaml.
@@ -52,11 +62,14 @@ def generate_artillery_config():
     Scenario design notes:
     - Health Check hits /api/health (the actual route registered by the server,
       see backend/startup/route_registration.py).
-    - API Authentication Flow logs in via POST /api/login. Body keys are 'userid'
-      (an EmailStr per backend.api.auth.UserLogin) and 'password'. Response is
-      {"Authorization": "<token>"}. Credentials match scripts/e2e_test_user.py
-      so 'make test-performance' can reuse the same provisioning helper.
-    - Host Management API uses the captured Authorization value as the header.
+    - API Authentication Flow logs in via POST /api/v1/login (the native
+      versioned route — the /api/login bridge alias was retired). Body keys are
+      'userid' (an EmailStr per backend.api.auth.UserLogin) and 'password'.
+      Response is {"Authorization": "<token>"}. Credentials match
+      scripts/e2e_test_user.py so 'make test-performance' can reuse the same
+      provisioning helper.
+    - Host Management API (GET /api/v1/hosts) uses the captured Authorization
+      value as the header.
       sign_jwt() returns a raw JWT string (e.g. "eyJ…"); the JWTBearer
       dependency on the server side strips the "Bearer " prefix, so the
       client must add it. We send `Authorization: Bearer {{ authToken }}`.
@@ -89,136 +102,96 @@ def generate_artillery_config():
 
     # Artillery configuration template
     artillery_config = {
-        'config': {
-            'target': target_url,
-            'phases': [
-                {
-                    'duration': 10,
-                    'arrivalRate': 2,
-                    'name': "Warm-up"
-                },
-                {
-                    'duration': 30,
-                    'arrivalRate': 5,
-                    'name': "Normal load"
-                },
-                {
-                    'duration': 20,
-                    'arrivalRate': 10,
-                    'name': "Peak load"
-                }
+        "config": {
+            "target": target_url,
+            "phases": [
+                {"duration": 10, "arrivalRate": 2, "name": "Warm-up"},
+                {"duration": 30, "arrivalRate": 5, "name": "Normal load"},
+                {"duration": 20, "arrivalRate": 10, "name": "Peak load"},
             ],
-            'processor': "./artillery-processor.js",
-            'ensure': {
-                'p95': 500,
-                'p99': 1000,
-                'maxErrorRate': 1,
-                'minRPS': 8
-            }
+            "processor": "./artillery-processor.js",
+            "ensure": {"p95": 500, "p99": 1000, "maxErrorRate": 1, "minRPS": 8},
         },
-        'scenarios': [
+        "scenarios": [
             {
-                'name': "Health Check",
-                'weight': 30,
-                'flow': [
-                    {
-                        'get': {
-                            'url': "/api/health",
-                            'expect': [
-                                {'statusCode': 200}
-                            ]
-                        }
-                    },
-                    {'think': 1}
-                ]
+                "name": "Health Check",
+                "weight": 30,
+                "flow": [
+                    {"get": {"url": "/api/health", "expect": [{"statusCode": 200}]}},
+                    {"think": 1},
+                ],
             },
             {
-                'name': "API Authentication Flow",
-                'weight': 40,
-                'flow': [
+                "name": "API Authentication Flow",
+                "weight": 40,
+                "flow": [
                     {
-                        'post': {
-                            'url': "/api/login",
-                            'json': {
-                                'userid': perf_test_userid,
-                                'password': perf_test_password
+                        "post": {
+                            "url": "/api/v1/login",
+                            "json": {
+                                "userid": perf_test_userid,
+                                "password": perf_test_password,
                             },
-                            'expect': [
-                                {'statusCode': 200}
-                            ],
-                            'capture': [
-                                {
-                                    'json': "$.Authorization",
-                                    'as': "authToken"
-                                }
-                            ]
+                            "expect": [{"statusCode": 200}],
+                            "capture": [{"json": "$.Authorization", "as": "authToken"}],
                         }
                     },
-                    {'think': 2}
-                ]
+                    {"think": 2},
+                ],
             },
             {
-                'name': "Host Management API",
-                'weight': 20,
-                'flow': [
+                "name": "Host Management API",
+                "weight": 20,
+                "flow": [
                     # Inline login so we can reuse the captured token in the
                     # next request — Artillery scopes captured variables to
                     # a single scenario flow, not across scenarios.
                     {
-                        'post': {
-                            'url': "/api/login",
-                            'json': {
-                                'userid': perf_test_userid,
-                                'password': perf_test_password
+                        "post": {
+                            "url": "/api/v1/login",
+                            "json": {
+                                "userid": perf_test_userid,
+                                "password": perf_test_password,
                             },
-                            'expect': [
-                                {'statusCode': 200}
-                            ],
-                            'capture': [
-                                {
-                                    'json': "$.Authorization",
-                                    'as': "authToken"
-                                }
-                            ]
+                            "expect": [{"statusCode": 200}],
+                            "capture": [{"json": "$.Authorization", "as": "authToken"}],
                         }
                     },
                     {
-                        'get': {
-                            'url': "/api/hosts",
-                            'headers': {
+                        "get": {
+                            "url": "/api/v1/hosts",
+                            "headers": {
                                 # sign_jwt() returns a raw JWT; add the
                                 # "Bearer " prefix that JWTBearer expects.
-                                'Authorization': "Bearer {{ authToken }}"
+                                "Authorization": "Bearer {{ authToken }}"
                             },
-                            'expect': [
-                                {'statusCode': 200}
-                            ]
+                            "expect": [{"statusCode": 200}],
                         }
                     },
-                    {'think': 1}
-                ]
+                    {"think": 1},
+                ],
             },
             {
-                'name': "WebSocket Endpoint Reachability",
-                'weight': 10,
-                'flow': [
+                "name": "WebSocket Endpoint Reachability",
+                "weight": 10,
+                "flow": [
                     {
-                        'get': {
-                            'url': "/api/agent/connect",
-                            'expect': [
+                        "get": {
+                            "url": "/api/agent/connect",
+                            "expect": [
                                 # GET on a WebSocket endpoint: 101 = upgrade
                                 # accepted, 400/426 = protocol mismatch,
                                 # 404 = FastAPI's WS-only route doesn't
                                 # accept HTTP. All are "the path resolved",
                                 # which is what we want to confirm.
-                                {'statusCode': [101, 400, 404, 426]}
-                            ]
+                                {"statusCode": [101, 400, 404, 426]}
+                            ],
                         }
                     },
-                    {'think': 3}
-                ]
-            }
-        ]
+                    {"think": 3},
+                ],
+            },
+        ],
     }
 
     # Write the generated config
@@ -228,6 +201,7 @@ def generate_artillery_config():
 
     print(f"Generated {output_file} with target: {target_url}")
     return target_url
+
 
 if __name__ == "__main__":
     generate_artillery_config()

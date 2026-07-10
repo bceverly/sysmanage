@@ -77,14 +77,15 @@ async def handle_packages_batch_start(db: Session, connection, message_data: dic
         if host.platform and host.platform_release:
             if os_name != host.platform or os_version != host.platform_release:
                 error_msg = _(
-                    "Host %s (%s %s) attempted to report packages for %s %s"
-                ) % (
-                    host.fqdn,
-                    host.platform,
-                    host.platform_release,
-                    os_name,
-                    os_version,
-                )
+                    "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) "
+                    "attempted to report packages for %(os_name)s %(os_version)s"
+                ) % {
+                    "host_fqdn": host.fqdn,
+                    "host_platform": host.platform,
+                    "host_platform_release": host.platform_release,
+                    "os_name": os_name,
+                    "os_version": os_version,
+                }
                 debug_logger.error(error_msg)
                 return {
                     "message_type": "error",

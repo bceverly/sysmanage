@@ -5,6 +5,10 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    # Wait a few days after a version is published before opening the bump PR,
+    # so a freshly-published malicious/broken release isn't pulled in on day 0.
+    cooldown:
+      default-days: 7
     ignore:
       # Ignore major version updates for @mui/x-data-grid until we're ready to migrate to v8
       - dependency-name: "@mui/x-data-grid"
@@ -15,9 +19,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7

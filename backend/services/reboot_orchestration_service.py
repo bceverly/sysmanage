@@ -246,8 +246,8 @@ def check_restart_progress(db, parent_host_id):
         if failed_count > 0:
             orchestration.status = "completed"
             orchestration.error_message = _(
-                "%d of %d child host(s) failed to restart"
-            ) % (failed_count, len(restart_status))
+                "%(failed_count)d of %(total_count)d child host(s) failed to restart"
+            ) % {"failed_count": failed_count, "total_count": len(restart_status)}
         else:
             orchestration.status = "completed"
 

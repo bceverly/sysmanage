@@ -108,13 +108,19 @@ class QueueMaintenance:
             if not session_provided:
                 db.commit()
 
-            logger.info(_("Deleted %d messages for host %s"), count, host_id)
+            logger.info(
+                _("Deleted %(count)d messages for host %(host_id)s"),
+                {"count": count, "host_id": host_id},
+            )
             return count
 
         except Exception as e:
             if not session_provided:
                 db.rollback()
-            logger.exception(_("Failed to delete messages for host %s: %s"), host_id, e)
+            logger.exception(
+                _("Failed to delete messages for host %(host_id)s: %(error)s"),
+                {"host_id": host_id, "error": e},
+            )
             return 0
         finally:
             if not session_provided:
@@ -177,9 +183,10 @@ class QueueMaintenance:
                     db.commit()
 
                 logger.info(
-                    _("Marked %d old messages as expired (older than %d minutes)"),
-                    count,
-                    timeout_minutes,
+                    _(
+                        "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
+                    ),
+                    {"count": count, "timeout": timeout_minutes},
                 )
 
             return count

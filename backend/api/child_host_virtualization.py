@@ -507,8 +507,8 @@ async def create_child_host_request(
             "CREATE",
             str(host.id),
             host.fqdn,
-            _("Child host creation requested: %s (%s)")
-            % (child_name, request.distribution),
+            _("Child host creation requested: %(child_name)s (%(distribution)s)")
+            % {"child_name": child_name, "distribution": request.distribution},
             details={
                 "child_name": child_name,
                 "child_type": request.child_type,

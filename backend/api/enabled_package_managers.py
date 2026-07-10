@@ -123,8 +123,15 @@ class EnabledPackageManagerCreate(BaseModel):
             valid_managers = OS_OPTIONAL_PACKAGE_MANAGERS[os_name]
             if package_manager.strip() not in valid_managers:
                 raise ValueError(
-                    _("Invalid package manager '%s' for OS '%s'. Valid options: %s")
-                    % (package_manager, os_name, ", ".join(valid_managers))
+                    _(
+                        "Invalid package manager '%(package_manager)s' for OS "
+                        "'%(os_name)s'. Valid options: %(valid_options)s"
+                    )
+                    % {
+                        "package_manager": package_manager,
+                        "os_name": os_name,
+                        "valid_options": ", ".join(valid_managers),
+                    }
                 )
         return package_manager.strip()
 
@@ -292,8 +299,13 @@ async def create_enabled_package_manager(
         if existing:
             raise HTTPException(
                 status_code=409,
-                detail=_("Package manager '%s' is already enabled for OS '%s'")
-                % (pm_data.package_manager, pm_data.os_name),
+                detail=_(
+                    "Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+                )
+                % {
+                    "package_manager": pm_data.package_manager,
+                    "os_name": pm_data.os_name,
+                },
             )
 
         # Create new enabled package manager

@@ -171,8 +171,13 @@ async def install_packages_operation(  # NOSONAR
                 db=audit_session,
                 action_type=ActionType.UPDATE,
                 entity_type=EntityType.PACKAGE,
-                description=_("Queued installation of %d packages on host %s")
-                % (len(request.package_names), host.fqdn),
+                description=_(
+                    "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+                )
+                % {
+                    "package_count": len(request.package_names),
+                    "host_fqdn": host.fqdn,
+                },
                 result=Result.SUCCESS,
                 user_id=audit_user_id,
                 username=current_user,
@@ -345,8 +350,13 @@ async def uninstall_packages_operation(  # NOSONAR
                 db=audit_session,
                 action_type=ActionType.UPDATE,
                 entity_type=EntityType.PACKAGE,
-                description=_("Queued uninstallation of %d packages on host %s")
-                % (len(request.package_names), host.fqdn),
+                description=_(
+                    "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
+                )
+                % {
+                    "package_count": len(request.package_names),
+                    "host_fqdn": host.fqdn,
+                },
                 result=Result.SUCCESS,
                 user_id=audit_user_id,
                 username=current_user,

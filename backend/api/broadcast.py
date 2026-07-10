@@ -207,8 +207,15 @@ async def broadcast_to_fleet(
         entity_type=EntityType.HOST,
         entity_id=broadcast_id,
         entity_name=request.broadcast_action,
-        description=_("Broadcast '%s' delivered to %d host(s) (filter=%s, %.0fms)")
-        % (request.broadcast_action, delivered, target_filter, elapsed_ms),
+        description=_(
+            "Broadcast '%(action)s' delivered to %(delivered)d host(s) (filter=%(filter)s, %(elapsed).0fms)"
+        )
+        % {
+            "action": request.broadcast_action,
+            "delivered": delivered,
+            "filter": target_filter,
+            "elapsed": elapsed_ms,
+        },
         user_id=user.id,
         username=current_user,
         result=Result.SUCCESS,

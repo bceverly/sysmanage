@@ -536,10 +536,10 @@ async def create_run(
         entity_name=run.iso_label,
         description=(
             _(
-                "Created one-shot air-gap collection run '%s' with "
-                "%d target mirror(s); snapshots dispatched."
+                "Created one-shot air-gap collection run '%(iso_label)s' with "
+                "%(mirror_count)d target mirror(s); snapshots dispatched."
             )
-            % (run.iso_label, len(mirrors))
+            % {"iso_label": run.iso_label, "mirror_count": len(mirrors)}
         ),
         user_id=user.id,
         username=current_user,
@@ -705,8 +705,13 @@ def _iso_file_response(
         if target not in available:
             raise HTTPException(
                 status_code=404,
-                detail=_("Disc %d not found for this run.  Available discs: %s")
-                % (disc, ", ".join(os.path.basename(p) for p in available)),
+                detail=_(
+                    "Disc %(disc)d not found for this run.  Available discs: %(available)s"
+                )
+                % {
+                    "disc": disc,
+                    "available": ", ".join(os.path.basename(p) for p in available),
+                },
             )
         chosen = target
     is_multidisc = len(available) > 1 or "-disc-" in os.path.basename(chosen)
