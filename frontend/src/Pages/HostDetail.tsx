@@ -6694,9 +6694,14 @@ const HostDetail = () => { // NOSONAR
                                                     <Chip
                                                         size="small"
                                                         label={ubuntuProInfo.livepatch.patch_state || t('common.unknown', 'Unknown')}
-                                                        color={ubuntuProInfo.livepatch.patch_state === 'applied'
-                                                            ? 'success'
-                                                            : (ubuntuProInfo.livepatch.patch_state === 'nothing-to-apply' ? 'default' : 'warning')}
+                                                        color={
+                                                            (
+                                                                {
+                                                                    applied: 'success',
+                                                                    'nothing-to-apply': 'default',
+                                                                } as Record<string, 'success' | 'default'>
+                                                            )[ubuntuProInfo.livepatch.patch_state ?? ''] ?? 'warning'
+                                                        }
                                                     />
                                                 </TableCell>
                                             </TableRow>

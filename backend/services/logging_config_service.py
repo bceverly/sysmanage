@@ -128,10 +128,16 @@ def apply_server_native_logging(resolved: dict) -> None:
     enabled — so a UI change applied at runtime takes effect without a restart.
     """
     root = logging.getLogger()
-    for handler in list(root.handlers):
-        if getattr(handler, "_sysmanage_native", False):
-            handler.close()
-            root.removeHandler(handler)
+    # Snapshot the matching handlers first so we can safely removeHandler()
+    # while iterating (mutating root.handlers mid-loop otherwise skips entries).
+    native_handlers = [
+        handler
+        for handler in root.handlers
+        if getattr(handler, "_sysmanage_native", False)
+    ]
+    for handler in native_handlers:
+        handler.close()
+        root.removeHandler(handler)
 
     if not resolved.get("native_enabled"):
         return

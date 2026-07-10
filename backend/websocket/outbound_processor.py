@@ -122,6 +122,33 @@ async def process_outbound_messages(  # NOSONAR
             await process_outbound_message(message, host, db)
 
 
+def _log_command_sent(message, message_data, host) -> None:
+    """Emit the SENT log line for a command; extra create_child_host detail to
+    aid delivery debugging."""
+    command_type = message_data.get("data", {}).get("command_type", "unknown")
+    if command_type != "create_child_host":
+        logger.info(
+            "Sent outbound message: %s to host %s (awaiting ack)",
+            message.message_id,
+            host.fqdn,
+        )
+        return
+    params = message_data.get("data", {}).get("parameters", {})
+    distribution = params.get("distribution", "unknown")
+    child_name = params.get("vm_name") or params.get("container_name") or distribution
+    logger.info(
+        "SENT create_child_host command to agent: "
+        "message_id=%s, child_name=%s, child_type=%s, "
+        "distribution=%s, hostname=%s, host=%s (awaiting ack)",
+        message.message_id,
+        child_name,
+        params.get("child_type", "unknown"),
+        distribution,
+        params.get("hostname", "unknown"),
+        host.fqdn,
+    )
+
+
 async def process_outbound_message(message, host, db: Session) -> None:
     """
     Process a single outbound message.
@@ -158,36 +185,7 @@ async def process_outbound_message(message, host, db: Session) -> None:
             if success:
                 # Mark as SENT (not COMPLETED) - wait for agent acknowledgment
                 server_queue_manager.mark_sent(message.message_id, db=db)
-                # Log details for create_child_host commands to help debug delivery
-                command_type = message_data.get("data", {}).get(
-                    "command_type", "unknown"
-                )
-                if command_type == "create_child_host":
-                    params = message_data.get("data", {}).get("parameters", {})
-                    distribution = params.get("distribution", "unknown")
-                    vm_name = params.get("vm_name")
-                    container_name = params.get("container_name")
-                    child_type = params.get("child_type", "unknown")
-                    hostname = params.get("hostname", "unknown")
-                    # Log the specific name being sent based on child type
-                    child_name = vm_name or container_name or distribution
-                    logger.info(
-                        "SENT create_child_host command to agent: "
-                        "message_id=%s, child_name=%s, child_type=%s, "
-                        "distribution=%s, hostname=%s, host=%s (awaiting ack)",
-                        message.message_id,
-                        child_name,
-                        child_type,
-                        distribution,
-                        hostname,
-                        host.fqdn,
-                    )
-                else:
-                    logger.info(
-                        "Sent outbound message: %s to host %s (awaiting ack)",
-                        message.message_id,
-                        host.fqdn,
-                    )
+                _log_command_sent(message, message_data, host)
             else:
                 server_queue_manager.mark_failed(
                     message.message_id, "Failed to send message to agent", db=db

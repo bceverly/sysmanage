@@ -86,7 +86,7 @@ def _syslog_handler(identifier: str, system: str) -> Optional[logging.Handler]:
         address = ("localhost", 514)
     try:
         handler = logging.handlers.SysLogHandler(address=address)
-    except (OSError, ConnectionError):
+    except OSError:  # ConnectionError is an OSError subclass
         return None
     # syslog convention: "ident[pid]: message"
     handler.setFormatter(
