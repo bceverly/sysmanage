@@ -18,6 +18,26 @@ from backend.services.vault_service import (
     VaultService,
 )
 
+
+@pytest.fixture(autouse=True)
+def _isolate_vault_token_file():
+    """Keep these tests off the host's real OpenBAO token file.
+
+    ``VaultService.__init__`` resolves its token as ``config token or
+    _load_token_file()``, and ``_load_token_file`` reads
+    ``/etc/sysmanage/openbao-token`` by default.  On a box that actually runs
+    OpenBAO (e.g. a dev / OpenBSD host) that file exists, so ``_make_service``'s
+    empty-token path would pick up a live token and the "no token" assertions
+    would fail.  Force the file source to empty so each service's token comes
+    solely from its (mocked) config.
+    """
+    with patch(
+        "backend.services.vault_service.VaultService._load_token_file",
+        return_value="",
+    ):
+        yield
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

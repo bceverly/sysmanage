@@ -8,6 +8,25 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _isolate_vault_token_file():
+    """Keep these tests off the host's real OpenBAO token file.
+
+    ``VaultService.__init__`` resolves its token as ``config token or
+    _load_token_file()``, and ``_load_token_file`` reads
+    ``/etc/sysmanage/openbao-token`` by default.  On a box that actually runs
+    OpenBAO (e.g. a dev / OpenBSD host) that file exists, so the "no token
+    configured" cases would pick up a live token and the empty-token assertions
+    would fail.  Force the file source to empty so each test's token comes solely
+    from its (mocked) config.
+    """
+    with patch(
+        "backend.services.vault_service.VaultService._load_token_file",
+        return_value="",
+    ):
+        yield
+
+
 class TestVaultErrorException:
     """Tests for VaultError exception class."""
 
