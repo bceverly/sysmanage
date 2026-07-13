@@ -238,7 +238,7 @@ Requires prior `snapcraft login`.
 ```bash
 make installer-alpine
 ```
-Pulls Alpine Docker images (3.19, 3.20, 3.21 by default) and runs `abuild` inside
+Pulls Alpine Docker images (3.20, 3.21, 3.22 by default) and runs `abuild` inside
 each container. Produces `installer/dist/sysmanage-VERSION-alpineXYZ.apk`.
 Override versions: `ALPINE_VERSIONS="3.20 3.21" make installer-alpine`
 
@@ -426,7 +426,7 @@ VERSION=1.2.3 make release-notes  # Release notes in installer/dist/
 |----------|---------|-------------|
 | `VERSION` | Auto-detected from git tag | Override the release version (e.g., `VERSION=1.2.3`) |
 | `DOCS_REPO` | `~/dev/sysmanage-docs` | Path to the sysmanage-docs repository |
-| `ALPINE_VERSIONS` | `3.19 3.20 3.21` | Space-separated Alpine versions to build |
+| `ALPINE_VERSIONS` | `3.20 3.21 3.22` | Space-separated Alpine versions to build |
 | `LAUNCHPAD_RELEASES` | `resolute noble jammy` | Space-separated Ubuntu releases for PPA |
 | `LAUNCHPAD_GPG_KEY` | Auto-detected from keyring | GPG key ID for signing source packages |
 | `LAUNCHPAD_GPG_PASSPHRASE` | (none) | GPG passphrase for non-interactive signing |

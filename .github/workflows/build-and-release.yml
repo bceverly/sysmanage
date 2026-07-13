@@ -247,7 +247,7 @@ jobs:
   # OpenBSD Port Tarball Build
   build-openbsd-port:
     name: Build OpenBSD Port Tarball
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: wait-for-tests
 
     steps:
@@ -328,7 +328,7 @@ jobs:
   # CentOS/RHEL/Fedora RPM Build
   build-centos-rpm:
     name: Build CentOS/RHEL RPM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: wait-for-tests
 
     steps:
@@ -409,7 +409,7 @@ jobs:
   # right RPM per distro.
   build-el9-rpm:
     name: Build EL9 (RHEL/Rocky) RPM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: wait-for-tests
 
     steps:
@@ -482,7 +482,7 @@ jobs:
   # OpenSUSE/SLES RPM Build
   build-opensuse-rpm:
     name: Build OpenSUSE/SLES RPM
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: wait-for-tests
 
     steps:
@@ -572,7 +572,7 @@ jobs:
   # FreeBSD Package Build
   build-freebsd-pkg:
     name: Build FreeBSD Package
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: wait-for-tests
 
     steps:
@@ -644,7 +644,7 @@ jobs:
 
   build-macos-pkg:
     name: Build macOS Package
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: wait-for-tests
 
     steps:
@@ -985,7 +985,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        alpine-version: ['3.19', '3.20', '3.21']
+        alpine-version: ['3.20', '3.21', '3.22']
 
     steps:
       - name: Checkout code

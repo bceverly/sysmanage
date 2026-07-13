@@ -25,17 +25,17 @@ on:
       release_freebsd:
         description: "FreeBSD release tag"
         required: false
-        default: "14.1"
+        default: "14.3"
         type: string
       release_openbsd:
-        description: "OpenBSD release tag (current is 7.8)"
+        description: "OpenBSD release tag (current is 7.9)"
         required: false
-        default: "7.8"
+        default: "7.9"
         type: string
       release_netbsd:
         description: "NetBSD release tag"
         required: false
-        default: "10.0"
+        default: "10.1"
         type: string
   push:
     # Mirror build-and-release.yml's tag pattern.
@@ -76,7 +76,7 @@ permissions:
 
 jobs:
   freebsd:
-    name: "FreeBSD ${{ inputs.release_freebsd || '14.1' }} (QEMU)"
+    name: "FreeBSD ${{ inputs.release_freebsd || '14.3' }} (QEMU)"
     if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'freebsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -102,7 +102,7 @@ jobs:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: freebsd
-          version: ${{ inputs.release_freebsd || '14.1' }}
+          version: ${{ inputs.release_freebsd || '14.3' }}
           environment_variables: PYTEST_MARKER
           run: |
             # FreeBSD pkg aborts the WHOLE batch if any package name is
@@ -143,11 +143,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-freebsd-${{ inputs.release_freebsd || '14.1' }}-junit
+          name: bsd-freebsd-${{ inputs.release_freebsd || '14.3' }}-junit
           path: sysmanage-agent/bsd-freebsd-junit.xml
 
   openbsd:
-    name: "OpenBSD ${{ inputs.release_openbsd || '7.8' }} (QEMU)"
+    name: "OpenBSD ${{ inputs.release_openbsd || '7.9' }} (QEMU)"
     if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'openbsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -166,7 +166,7 @@ jobs:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: openbsd
-          version: ${{ inputs.release_openbsd || '7.8' }}
+          version: ${{ inputs.release_openbsd || '7.9' }}
           environment_variables: PYTEST_MARKER
           run: |
             # OpenBSD packages use py3- prefix.  Python is pulled in
@@ -204,11 +204,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-openbsd-${{ inputs.release_openbsd || '7.8' }}-junit
+          name: bsd-openbsd-${{ inputs.release_openbsd || '7.9' }}-junit
           path: sysmanage-agent/bsd-openbsd-junit.xml
 
   netbsd:
-    name: "NetBSD ${{ inputs.release_netbsd || '10.0' }} (QEMU)"
+    name: "NetBSD ${{ inputs.release_netbsd || '10.1' }} (QEMU)"
     if: ${{ (inputs.bsd || 'all') == 'all' || (inputs.bsd || 'all') == 'netbsd' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -227,7 +227,7 @@ jobs:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: netbsd
-          version: ${{ inputs.release_netbsd || '10.0' }}
+          version: ${{ inputs.release_netbsd || '10.1' }}
           environment_variables: PYTEST_MARKER
           run: |
             # The cross-platform-actions NetBSD image ships pkgin pointed at
@@ -270,5 +270,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: bsd-netbsd-${{ inputs.release_netbsd || '10.0' }}-junit
+          name: bsd-netbsd-${{ inputs.release_netbsd || '10.1' }}-junit
           path: sysmanage-agent/bsd-netbsd-junit.xml

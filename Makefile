@@ -3021,7 +3021,7 @@ installer-alpine:
 			echo "Building version: $$VERSION"; \
 		fi; \
 	fi; \
-	ALPINE_VERSIONS="$${ALPINE_VERSIONS:-3.19 3.20 3.21}"; \
+	ALPINE_VERSIONS="$${ALPINE_VERSIONS:-3.20 3.21 3.22}"; \
 	echo "Alpine versions: $$ALPINE_VERSIONS"; \
 	echo ""; \
 	mkdir -p installer/dist; \

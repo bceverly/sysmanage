@@ -1,0 +1,156 @@
+name: Build OpenBSD Packages
+
+# Standalone, on-demand builder for pre-built OpenBSD binary packages (.tgz)
+# of the sysmanage SERVER, one per OpenBSD release.
+#
+# This is the binary-package counterpart to the version-independent port
+# tarball produced by build-and-release.yml (`make installer-openbsd`).  The
+# port tarball lets users compile from source on any 7.x; these .tgz packages
+# let them `pkg_add` a pre-built server for a specific release.
+#
+# It is intentionally SEPARATE from the release pipeline (workflow_dispatch
+# only) so a slow/flaky OpenBSD VM build never blocks a server release.  Once a
+# manual run has proven the server builds cleanly on each release, this matrix
+# job can be lifted into build-and-release.yml (needs + release-asset upload).
+#
+# NOTE: the server is heavy (grpc/cryptography/lxml/xmlsec + a large frontend),
+# so `make package` inside the emulated OpenBSD VM is much slower than the
+# agent's — hence the longer timeout.  `make makesum`/`make package` fetch the
+# GitHub source dist for GH_TAGNAME=v<version>, so the matching release tag must
+# already exist on GitHub before running this.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (must match an existing release tag, e.g. 1.3.0.0)'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-openbsd:
+    name: Build OpenBSD ${{ matrix.openbsd-version }} Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        openbsd-version: ['7.7', '7.8', '7.9']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Build on OpenBSD ${{ matrix.openbsd-version }}
+        uses: vmactions/openbsd-vm@2e29de1eb150dfe1c9c97b84ff2b7896f14ca690 # v1.2.5
+        env:
+          INPUT_OPENBSD_VERSION: ${{ matrix.openbsd-version }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        with:
+          release: ${{ matrix.openbsd-version }}
+          usesh: true
+          sync: rsync
+          run: |
+            set -x
+
+            OPENBSD_VERSION="$INPUT_OPENBSD_VERSION"
+            OPENBSD_VERSION_NODOT=$(echo "$OPENBSD_VERSION" | tr -d '.')
+            VERSION="$INPUT_VERSION"
+
+            echo "=== Building sysmanage ${VERSION} on OpenBSD ${OPENBSD_VERSION} ==="
+
+            # Step 1: Fetch the matching ports tree
+            echo "=== Step 1: Fetching ports tree ==="
+            PORTS_URL="https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
+            echo "Downloading ports from: $PORTS_URL"
+            if ! ftp -o /tmp/ports.tar.gz "$PORTS_URL"; then
+              echo "ERROR: Failed to download ports from $PORTS_URL"
+              exit 1
+            fi
+            echo "Extracting full ports tree..."
+            if ! tar xzf /tmp/ports.tar.gz -C /usr; then
+              echo "ERROR: Failed to extract ports tarball"
+              exit 1
+            fi
+            rm /tmp/ports.tar.gz
+            ls /usr/ports/
+
+            # Step 2: Stage the sysmanage port (category www, matching the
+            # port tarball built by `make installer-openbsd`)
+            echo "=== Step 2: Setting up port directory ==="
+            PORT_DIR=/usr/ports/mystuff/www/sysmanage
+            mkdir -p "$PORT_DIR/files" "$PORT_DIR/pkg"
+            cp "$GITHUB_WORKSPACE/installer/openbsd/Makefile" "$PORT_DIR/"
+            cp "$GITHUB_WORKSPACE/installer/openbsd/distinfo" "$PORT_DIR/"
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/files/"* "$PORT_DIR/files/" 2>/dev/null || true
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/pkg/"* "$PORT_DIR/pkg/" 2>/dev/null || true
+
+            # Pin the release tag the port fetches its source dist from
+            cd "$PORT_DIR"
+            sed -i "s/^GH_TAGNAME.*=.*/GH_TAGNAME = v${VERSION}/" Makefile
+            sed -i "s/^REVISION.*=.*/REVISION = 0/" Makefile
+            echo "=== Makefile contents ==="
+            cat Makefile
+            echo "========================="
+
+            # Step 3: Regenerate checksums for the pinned dist
+            echo "=== Step 3: Generating checksums ==="
+            make makesum 2>&1 || echo "makesum had warnings"
+            cat distinfo
+
+            # Step 4: Build the binary package
+            echo "=== Step 4: Building package ==="
+            if ! make package 2>&1; then
+              echo "ERROR: Package build failed"
+              exit 1
+            fi
+
+            # Step 5: Locate + export the built package
+            echo "=== Step 5: Finding built package ==="
+            find /usr/ports/packages -name "*.tgz" -type f 2>/dev/null || true
+            PKG_FILE=$(find /usr/ports/packages -name "sysmanage-*.tgz" -type f 2>/dev/null | grep -v 'sysmanage-agent' | head -1)
+            if [ -n "$PKG_FILE" ]; then
+              cp "$PKG_FILE" "$GITHUB_WORKSPACE/sysmanage-${VERSION}-openbsd${OPENBSD_VERSION_NODOT}.tgz"
+              echo "SUCCESS: Package copied to workspace"
+              ls -la "$GITHUB_WORKSPACE"/*.tgz
+            else
+              echo "ERROR: Package file not found!"
+              find /usr/ports/packages -type f 2>/dev/null || echo "No files in /usr/ports/packages"
+              exit 1
+            fi
+
+      - name: List built package
+        run: ls -la *.tgz 2>/dev/null || echo "No packages found"
+
+      - name: Upload OpenBSD ${{ matrix.openbsd-version }} package
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-openbsd-${{ matrix.openbsd-version }}
+          path: "*.tgz"
+          if-no-files-found: error
+
+  collect-packages:
+    name: Collect All Packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-openbsd
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          path: packages/
+        continue-on-error: true
+
+      - name: List all packages
+        run: find packages/ -name "*.tgz" -type f 2>/dev/null || echo "No packages found"
+
+      - name: Upload combined packages
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: hashFiles('packages/*/*.tgz') != ''
+        with:
+          name: sysmanage-openbsd-all
+          path: packages/
