@@ -25,6 +25,11 @@ class TestOsFamily:
         assert "journald" not in svc.valid_targets_for_family("windows")
         assert "syslog" in svc.valid_targets_for_family("macos")
 
+    def test_syslog_remote_valid_for_every_family(self):
+        """syslog_remote is network-based → offered on every family incl. Windows."""
+        for family in ("linux", "windows", "macos", "bsd"):
+            assert "syslog_remote" in svc.valid_targets_for_family(family)
+
 
 class TestResolveServer:
     """resolve_server_logging — DB wins over yaml."""
@@ -83,6 +88,34 @@ class TestResolveAgent:
         out2 = svc.resolve_agent_logging(db_session, "linux")
         assert out2["native_enabled"] is False
         assert out2["native_target"] == "syslog"
+
+    def test_syslog_remote_fields_round_trip(self, db_session):
+        """The remote-syslog fields survive upsert → resolve → agent payload."""
+        svc.upsert_setting(
+            db_session,
+            SCOPE_AGENT,
+            "linux",
+            {
+                "native_enabled": True,
+                "native_target": "syslog_remote",
+                "syslog_host": "loghost.example",
+                "syslog_port": 6514,
+                "syslog_facility": "local0",
+                "syslog_protocol": "tcp",
+            },
+        )
+        db_session.commit()
+        out = svc.resolve_agent_logging(db_session, "linux")
+        assert out["syslog_host"] == "loghost.example"
+        assert out["syslog_port"] == 6514
+        assert out["syslog_facility"] == "local0"
+        assert out["syslog_protocol"] == "tcp"
+
+        payload = svc._agent_payload(out)
+        assert payload["native_target"] == "syslog_remote"
+        assert payload["syslog_host"] == "loghost.example"
+        assert payload["syslog_port"] == 6514
+        assert payload["syslog_protocol"] == "tcp"
 
 
 class TestDeleteAgent:

@@ -7,11 +7,13 @@ delete its stored row and push a revert-to-yaml to that family's agents.
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import HTTPException
 
 from backend.api import logging_settings as mod
 from backend.api.logging_settings import (
     LoggingConfig,
     UpdateLoggingSettingsRequest,
+    _validate_syslog_remote,
     update_logging_settings,
 )
 
@@ -29,6 +31,54 @@ def _patched_session():
     session.__exit__.return_value = False
     session_local = MagicMock(return_value=session)
     return session, session_local
+
+
+class TestValidateSyslogRemote:
+    """_validate_syslog_remote: license gate (402) + field validation (400)."""
+
+    def _cfg(self, **kw):
+        base = dict(native_enabled=True, native_target="syslog_remote", syslog_host="h")
+        base.update(kw)
+        return LoggingConfig(**base)
+
+    def test_non_remote_target_is_a_noop(self):
+        """A local target never triggers the gate, even unlicensed."""
+        with patch.object(mod.license_service, "has_feature", return_value=False):
+            # Must not raise.
+            _validate_syslog_remote(LoggingConfig(native_target="syslog"))
+
+    def test_unlicensed_remote_is_402(self):
+        """syslog_remote without LOG_ROUTING is payment-required."""
+        with patch.object(mod.license_service, "has_feature", return_value=False):
+            with pytest.raises(HTTPException) as exc:
+                _validate_syslog_remote(self._cfg())
+        assert exc.value.status_code == 402
+
+    def test_licensed_requires_host(self):
+        """Licensed but no host → 400."""
+        with patch.object(mod.license_service, "has_feature", return_value=True):
+            with pytest.raises(HTTPException) as exc:
+                _validate_syslog_remote(self._cfg(syslog_host="  "))
+        assert exc.value.status_code == 400
+
+    def test_licensed_bad_port(self):
+        """A port outside 1..65535 → 400."""
+        with patch.object(mod.license_service, "has_feature", return_value=True):
+            with pytest.raises(HTTPException) as exc:
+                _validate_syslog_remote(self._cfg(syslog_port=70000))
+        assert exc.value.status_code == 400
+
+    def test_licensed_bad_protocol(self):
+        """A protocol other than udp/tcp → 400."""
+        with patch.object(mod.license_service, "has_feature", return_value=True):
+            with pytest.raises(HTTPException) as exc:
+                _validate_syslog_remote(self._cfg(syslog_protocol="carrier-pigeon"))
+        assert exc.value.status_code == 400
+
+    def test_licensed_valid_passes(self):
+        """A licensed, well-formed remote config validates cleanly."""
+        with patch.object(mod.license_service, "has_feature", return_value=True):
+            _validate_syslog_remote(self._cfg(syslog_port=6514, syslog_protocol="tcp"))
 
 
 @pytest.mark.asyncio

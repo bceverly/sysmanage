@@ -11,7 +11,7 @@ logging config for agents of that OS.
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Column, DateTime, String, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, UniqueConstraint
 
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
@@ -20,6 +20,14 @@ from backend.persistence.models.core import GUID
 SCOPE_SERVER = "server"
 SCOPE_AGENT = "agent"
 OS_FAMILIES = ("linux", "windows", "macos", "bsd")
+
+# Valid native_target values.  ``syslog`` is the LOCAL syslog daemon (OSS);
+# ``syslog_remote`` forwards to a remote host:port (Phase 14.5, gated behind the
+# Professional ``LOG_ROUTING`` feature).  Kept here so the API validation and the
+# model stay in one place.
+NATIVE_TARGETS = ("auto", "journald", "syslog", "syslog_remote", "eventlog", "none")
+SYSLOG_PROTOCOLS = ("udp", "tcp")
+DEFAULT_SYSLOG_PORT = 514
 
 
 class LoggingSetting(Base):
@@ -36,10 +44,16 @@ class LoggingSetting(Base):
     native_enabled = Column(Boolean, nullable=False, default=False)
     native_target = Column(
         String(20), nullable=False, default="auto"
-    )  # auto|journald|syslog|eventlog|none
+    )  # auto|journald|syslog|syslog_remote|eventlog|none
     native_identifier = Column(String(255), nullable=True)
     log_level = Column(String(64), nullable=True)  # e.g. "INFO" or pipe-list
     verbosity = Column(String(20), nullable=True)  # agent: low|medium|high
+    # Remote-syslog forwarding (Phase 14.5) — only meaningful when
+    # native_target == 'syslog_remote'.  Professional-gated (LOG_ROUTING).
+    syslog_host = Column(String(255), nullable=True)
+    syslog_port = Column(Integer, nullable=True)  # default 514 when unset
+    syslog_facility = Column(String(20), nullable=True)  # e.g. local0..local7, user
+    syslog_protocol = Column(String(3), nullable=True)  # udp|tcp
     created_at = Column(
         DateTime,
         nullable=False,
@@ -62,6 +76,10 @@ class LoggingSetting(Base):
             "native_identifier": self.native_identifier,
             "log_level": self.log_level,
             "verbosity": self.verbosity,
+            "syslog_host": self.syslog_host,
+            "syslog_port": self.syslog_port,
+            "syslog_facility": self.syslog_facility,
+            "syslog_protocol": self.syslog_protocol,
         }
 
     def __repr__(self):

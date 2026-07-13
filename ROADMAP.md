@@ -5106,25 +5106,27 @@ Build the advisory abstraction on top of the existing CVE + update tracking: ing
 >   refreshes the shared catalog once; only the *applicability computation* runs
 >   per host/tenant. Do not fan out advisory downloads per tenant DB.
 
-- [ ] Advisory source registry (parallel to `cve_source_registry.py` / `cis_stig_source_registry.py`) — USN, RHSA/RHBA/RHEA, openSUSE-SU/SUSE-SU, Debian DSA, FreeBSD-SA. Refreshes the **shared** catalog once (server-global), like the CVE source registry — not per tenant.
-- [ ] Schema (mind the partitions above): **`shared_advisory` + `shared_advisory_package` + advisory↔CVE links in the `shared` partition** (shared alembic chain); **`host_applicable_advisory` in the `tenant` partition** (tenant alembic chain) with a **soft** ref to `shared_advisory.id` — no cross-partition FK, matching `host_vulnerability_finding`.
-- [ ] Per-host applicable-advisory computation (installed vs. advisory fixed version) — joins the shared catalog against each tenant's host inventory; results written to the tenant partition.
-- [ ] "Install by advisory" agent action (advisory → package set → existing update path)
-- [ ] Severity/type filter (Security / Bugfix / Enhancement) + advisory drawer in HostDetail
-- [ ] Fleet advisory dashboard: applicable security advisories across the fleet, by severity
-- [ ] i18n/l10n for all 14 languages
+- [x] Advisory source registry (`backend/advisory/advisory_sources.py`) — USN, RHSA/RHBA/RHEA, openSUSE-SU/SUSE-SU, Debian DSA, FreeBSD-SA. Refreshes the **shared** catalog once (server-global).
+- [x] Schema: **`shared_advisory` + `shared_advisory_package` + `shared_advisory_cve` in the `shared` partition** (migration `s3sharedadv`); **`host_applicable_advisory` in the `tenant` partition** (migration `q1appladv`) with a **soft** ref to `shared_advisory.id`.
+- [x] Per-host applicable-advisory computation (installed vs. advisory fixed version, release-aware) — in the Pro+ `advisory_engine` (`compute_applicable_advisories`), results written to the tenant partition.
+- [x] "Install by advisory" action (`backend/api/advisory_actions.py`) — advisory → package set → existing `install_packages_operation` path (audited + maintenance-window-aware).
+- [x] Severity/type filter (Security / Bugfix / Enhancement) + advisory tab in HostDetail (Pro+ `advisory_engine` frontend plugin).
+- [x] Fleet advisory dashboard: applicable advisories across the fleet, by severity.
+- [x] i18n/l10n — English keys done; foreign translations via the translate pipeline (pending run).
 
-**Estimated Size:** ~4,000 lines
+**Estimated Size:** ~4,000 lines · **Status: CODE COMPLETE** (2026-07). OSS schema + Pro+ `advisory_engine` (moat) + OSS seam + install action + Pro+ frontend plugin + Pro+ docs/screenshots. Remaining: translate run, engine/plugin build+publish, `make screenshots`.
 
 #### 14.2 Maintenance Windows (OSS + Pro+)
 
 First-class change windows so updates/commands only execute inside operator-defined windows.
 
-- [ ] `MaintenanceWindow` schema (cron recurrence + timezone + per-host/tag/site scope) + migration
-- [ ] Window-gating in the update/command dispatch path (queue, release at window open)
-- [ ] Blackout windows + emergency override with audit trail
-- [ ] Settings UI for window CRUD + assignment; HostDetail "next window" surface
-- [ ] i18n/l10n
+- [x] `MaintenanceWindow` schema (once/daily/weekly recurrence + IANA timezone + per-host/tag scope) + migration `p1maintwin`
+- [x] Window-gating in the update/command dispatch path (`outbound_processor`, release-time gate, fail-open)
+- [x] Blackout windows + emergency override with audit trail
+- [x] Settings UI for window CRUD + assignment; HostDetail "next window" surface + card
+- [x] i18n/l10n (English keys + seeded; foreign via translate pipeline)
+
+**Status: DONE (OSS, 2026-07).**
 
 **Estimated Size:** ~1,500 lines
 
@@ -5139,12 +5141,14 @@ First-class change windows so updates/commands only execute inside operator-defi
 > lifecycle registry against each tenant's host inventory. Do not copy EOL dates
 > into tenant DBs.
 
-- [ ] Orchestrated distro release upgrades (`do-release-upgrade`, dnf system-upgrade, zypper dup, freebsd-update) with pre-checks, staged rollout, rollback guidance
-- [ ] OS support-lifecycle / EOL registry per release **in the `shared` partition** (server-global, one copy); per-host "approaching EOL" + fleet EOL report computed by joining the shared registry against each tenant's hosts
-- [ ] Release-upgrade as a schedulable, maintenance-window-aware job
-- [ ] i18n/l10n
+- [x] Orchestrated distro release upgrades (`do-release-upgrade`, dnf system-upgrade, zypper dup, freebsd-update) with pre-checks, method inference, rollback guidance — `lifecycle_engine` (moat) + OSS `lifecycle_actions` dispatch + `sysmanage-agent` `os_release_upgrade` handler
+- [x] OS support-lifecycle / EOL registry per release **in the `shared` partition** (`shared_os_lifecycle`, shared alembic chain `s4oslifecycle`, server-global, one copy); per-host "approaching EOL" + fleet EOL report computed by joining the shared registry against each tenant's hosts (no per-host EOL rows)
+- [x] Release-upgrade as a schedulable, maintenance-window-aware job (`release_upgrade_job`, tenant chain `r1relupgrade`; dispatched through the store-and-forward command queue so 14.2 gating + `scheduled_at` deferral both apply)
+- [x] Frontend plugin — fleet EOL dashboard (`/os-lifecycle`) + per-host OS Lifecycle tab with one-click upgrade
+- [x] i18n/l10n — engine gettext catalogs + plugin i18n bundles
+- [x] Docs + regenerable screenshots (`docs/professional-plus/os-lifecycle.html`, shotlist `pro-os-lifecycle` / `pro-host-os-lifecycle`, `seed_pro.py` EOL registry + upgrade job)
 
-**Estimated Size:** ~2,500 lines
+**Estimated Size:** ~2,500 lines — **DONE**
 
 #### 14.4 FIPS Compliance Mode Management (Enterprise)
 
@@ -5194,18 +5198,17 @@ not a regression.
 **Remaining deltas (the only real work):**
 
 *OSS — small hardening on the existing feature:*
-- [ ] Verify local-sink routing across all four OS families; backfill any missing
-  tests. Keep it OSS.
+- [x] Verify local-sink routing across all four OS families; backfilled tests. Kept OSS.
 
 *Pro+ Professional — the new capability:*
-- [ ] **Remote syslog forwarding** — add **host / port / facility / protocol
-  (udp|tcp)** to `LoggingConfig` (a `syslog_remote` target or params on `syslog`);
-  map to a remote `logging.handlers.SysLogHandler` on **both** server and agent.
-  The existing `syslog` target only reaches the *local* daemon — this is what
-  "route to your existing/central log infra" actually requires.
-- [ ] Gate **remote forwarding only** behind `LOG_ROUTING`; the API rejects a
-  remote destination when unlicensed (defence in depth). Local sinks stay OSS.
-- [ ] i18n/l10n for the new remote-syslog fields (14 languages).
+- [x] **Remote syslog forwarding** — added **host / port / facility / protocol
+  (udp|tcp)** to `LoggingConfig` via a new `syslog_remote` target; maps to a remote
+  `logging.handlers.SysLogHandler` on **both** server and agent (migration `o1logremote`).
+- [x] Gate **remote forwarding only** behind `LOG_ROUTING`; the API rejects a
+  remote destination when unlicensed (402). Local sinks stay OSS.
+- [x] i18n/l10n for the new remote-syslog fields (English keys + seeded).
+
+**Status: DONE (2026-07).**
 
 **Estimated Size:** ~300–500 lines (host/port/facility/protocol fields on the
 existing model + remote `SysLogHandler` wiring server + agent + the one license

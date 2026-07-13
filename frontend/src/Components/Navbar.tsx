@@ -116,7 +116,7 @@ const Navbar = () => {
   };
 
   // Paths that are hardcoded in the navbar - plugins must not duplicate these
-  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/secrets', '/scripts', '/reports', '/airgap/repositories', '/airgap/collections']);
+  const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/reports', '/airgap/repositories', '/airgap/collections']);
 
   // Labels that are hardcoded in the navbar - plugins with matching labels are duplicates
   const hardcodedLabels = new Set([
@@ -255,6 +255,15 @@ const Navbar = () => {
                 onClick={closeMenuOnMobile}
               >
                 {t('nav.osUpgrades')}
+              </NavLink>
+            </li>
+            <li className="nav__item">
+              <NavLink
+                to="/maintenance-windows"
+                className="nav__link"
+                onClick={closeMenuOnMobile}
+              >
+                {t('nav.maintenanceWindows')}
               </NavLink>
             </li>
             {visiblePluginNavItems.map(item => (

@@ -9,6 +9,7 @@ from fastapi import FastAPI
 
 from backend.api import (
     access_groups,
+    advisory_actions,
     agent,
     airgap_bundles,
     airgap_collection_schedule,
@@ -46,7 +47,9 @@ from backend.api import (
     host_hostname,
     invitations,
     license_management,
+    lifecycle_actions,
     logging_settings,
+    maintenance_windows,
     openbao,
     opentelemetry,
     package_compliance,
@@ -314,6 +317,18 @@ def register_routes(app: FastAPI):
     logger.debug("Adding logging-settings router (native /api/v1 + alias)")
     _include_versioned(app, logging_settings.router, tags=["logging-settings"])
     logger.debug("Logging-settings router added")
+
+    logger.debug("Adding maintenance-windows router (native /api/v1)")
+    _include_versioned(app, maintenance_windows.router, tags=["maintenance-windows"])
+    logger.debug("Maintenance-windows router added")
+
+    logger.debug("Adding advisory-actions router (native /api/v1)")
+    _include_versioned(app, advisory_actions.router, tags=["advisories"])
+    logger.debug("Advisory-actions router added")
+
+    logger.debug("Adding lifecycle-actions router (native /api/v1)")
+    _include_versioned(app, lifecycle_actions.router, tags=["os-lifecycle"])
+    logger.debug("Lifecycle-actions router added")
 
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")

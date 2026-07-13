@@ -17,17 +17,21 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.config import config
 from backend.i18n import _
+from backend.licensing.features import FeatureCode
+from backend.licensing.license_service import license_service
 from backend.persistence import db as db_module
 from backend.persistence.models.logging_config import (
+    NATIVE_TARGETS,
     OS_FAMILIES,
     SCOPE_AGENT,
     SCOPE_SERVER,
+    SYSLOG_PROTOCOLS,
 )
 from backend.services import logging_config_service as svc
 
 router = APIRouter()
 
-_VALID_TARGETS_ALL = {"auto", "journald", "syslog", "eventlog", "none"}
+_VALID_TARGETS_ALL = set(NATIVE_TARGETS)
 
 
 def _sessionmaker():
@@ -42,6 +46,11 @@ class LoggingConfig(BaseModel):
     native_identifier: Optional[str] = None
     log_level: Optional[str] = None
     verbosity: Optional[str] = None
+    # Remote-syslog forwarding (Phase 14.5) — only for native_target=syslog_remote.
+    syslog_host: Optional[str] = None
+    syslog_port: Optional[int] = None
+    syslog_facility: Optional[str] = None
+    syslog_protocol: Optional[str] = None
 
 
 class UpdateLoggingSettingsRequest(BaseModel):
@@ -78,6 +87,9 @@ def _build_response(session: Session) -> dict:
         "agent_valid_targets": {
             family: svc.valid_targets_for_family(family) for family in OS_FAMILIES
         },
+        # Phase 14.5: the UI offers the syslog_remote target but disables it with a
+        # "Professional" hint unless this is True; the PUT also rejects it (below).
+        "log_routing_licensed": license_service.has_feature(FeatureCode.LOG_ROUTING),
     }
 
 
@@ -102,6 +114,38 @@ def _validate_target(family: str, target: str) -> None:
         )
 
 
+def _validate_syslog_remote(cfg: "LoggingConfig") -> None:
+    """License-gate + validate the remote-syslog fields (Phase 14.5).
+
+    Local sinks stay OSS; only ``syslog_remote`` requires the Professional
+    ``LOG_ROUTING`` feature.  Rejecting it here is the server-side defence in
+    depth behind the UI's disabled-with-a-hint option.
+    """
+    if cfg.native_target != "syslog_remote":
+        return
+    if not license_service.has_feature(FeatureCode.LOG_ROUTING):
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Remote syslog forwarding requires a Professional license "
+                "(LOG_ROUTING)."
+            ),
+        )
+    if not (cfg.syslog_host or "").strip():
+        raise HTTPException(
+            status_code=400,
+            detail=_("A syslog host is required for the remote-syslog target."),
+        )
+    if cfg.syslog_port is not None and not 1 <= int(cfg.syslog_port) <= 65535:
+        raise HTTPException(
+            status_code=400, detail=_("syslog port must be between 1 and 65535.")
+        )
+    if cfg.syslog_protocol and cfg.syslog_protocol.lower() not in SYSLOG_PROTOCOLS:
+        raise HTTPException(
+            status_code=400, detail=_("syslog protocol must be 'udp' or 'tcp'.")
+        )
+
+
 @router.put("/logging-settings", dependencies=[Depends(JWTBearer())])
 async def update_logging_settings(
     body: UpdateLoggingSettingsRequest,
@@ -114,6 +158,7 @@ async def update_logging_settings(
     with _sessionmaker()() as session:
         if body.server is not None:
             _validate_target(_server_family(), body.server.native_target)
+            _validate_syslog_remote(body.server)
             svc.upsert_setting(session, SCOPE_SERVER, None, body.server.model_dump())
 
         # ``agents`` is None => not managing agents this save (server-only);
@@ -127,6 +172,7 @@ async def update_logging_settings(
                         detail=_("Unknown OS family: %s") % family,
                     )
                 _validate_target(family, cfg.native_target)
+                _validate_syslog_remote(cfg)
                 svc.upsert_setting(session, SCOPE_AGENT, family, cfg.model_dump())
             for family in OS_FAMILIES:
                 if family not in body.agents and svc.delete_agent_setting(

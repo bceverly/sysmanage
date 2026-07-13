@@ -238,16 +238,22 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
 # lower-resource language).  Ordered so the most specific form matches first.
 # NB: the {{...}} form uses [^{}] rather than .*? so a match can't overlap
 # braces — .*? there backtracks polynomially on adversarial input (ReDoS).
+# Every quantifier below is UPPER-BOUNDED: this regex runs via ``findall`` over
+# uncontrolled translation text, and an unbounded terminator-seeking branch
+# (e.g. ``[^}]+\}`` or ``[a-zA-Z]+;``) with no terminator is O(n^2) across all
+# start positions (CodeQL py/polynomial-redos).  Bounding the repeats caps the
+# per-position work to a constant; the bounds are far larger than any real
+# placeholder / tag / HTML entity, so extraction is unchanged in practice.
 _PLACEHOLDER_RE = re.compile(
-    r"\{\{[^{}]*\}\}"  # {{ name }}  (i18next / handlebars)
-    r"|\$\{[^}]+\}"  # ${VAR}
-    r"|\{[^{}]*\}"  # { name } { 0 }  (ICU / .NET / python)
-    r"|%\d+\$[sdfgex]"  # %1$s
-    r"|%\(\w+\)[sdfgexr]"  # %(name)s
+    r"\{\{[^{}]{0,200}\}\}"  # {{ name }}  (i18next / handlebars)
+    r"|\$\{[^}]{1,200}\}"  # ${VAR}
+    r"|\{[^{}]{0,200}\}"  # { name } { 0 }  (ICU / .NET / python)
+    r"|%\d{1,9}\$[sdfgex]"  # %1$s
+    r"|%\(\w{1,100}\)[sdfgexr]"  # %(name)s
     r"|%[sdfgexr%]"  # %s %d %%
-    r"|\$[A-Za-z_]\w*"  # $VAR
-    r"|</?[A-Za-z][^>]*>"  # <tag ...>  </tag>  <br/>
-    r"|&[a-zA-Z]+;|&#\d+;"  # &mdash;  &#8212;
+    r"|\$[A-Za-z_]\w{0,100}"  # $VAR
+    r"|</?[A-Za-z][^>]{0,1000}>"  # <tag ...>  </tag>  <br/>
+    r"|&[a-zA-Z]{1,40};|&#\d{1,10};"  # &mdash;  &#8212;
 )
 
 

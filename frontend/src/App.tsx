@@ -30,6 +30,7 @@ import Users from './Pages/Users';
 import UserDetail from './Pages/UserDetail';
 import Updates from './Pages/Updates';
 import OSUpgrades from './Pages/OSUpgrades';
+import MaintenanceWindows from './Pages/MaintenanceWindows';
 import Secrets from './Pages/Secrets';
 import Scripts from './Pages/Scripts';
 import Reports from './Pages/Reports';
@@ -67,6 +68,7 @@ function AppRoutes() {
       <Route path="/users/:userId" element={<UserDetail />} />
       <Route path="/updates" element={<Updates />} />
       <Route path="/os-upgrades" element={<OSUpgrades />} />
+      <Route path="/maintenance-windows" element={<MaintenanceWindows />} />
       <Route path="/secrets" element={<Secrets />} />
       <Route path="/scripts" element={<Scripts />} />
       <Route path="/reports" element={<Reports />} />

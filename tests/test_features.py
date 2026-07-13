@@ -286,6 +286,12 @@ class TestTierFeatures:
             # Phase 11.4 — paired with VULN_ENGINE module which is already
             # in the Professional tier.
             FeatureCode.CVE_FEED_MANAGEMENT,
+            # Phase 14.5 — remote syslog forwarding.
+            FeatureCode.LOG_ROUTING,
+            # Phase 14.1 — errata/advisory management.
+            FeatureCode.ADVISORY_MANAGEMENT,
+            # Phase 14.3 — OS lifecycle / EOL + release upgrades.
+            FeatureCode.OS_LIFECYCLE,
         }
         assert pro_features == expected
 
@@ -352,6 +358,10 @@ class TestTierModules:
             ModuleCode.SECRETS_ENGINE,
             ModuleCode.CONTAINER_ENGINE,
             ModuleCode.PROPLUS_CORE,
+            # Phase 14.1 — errata/advisory management engine.
+            ModuleCode.ADVISORY_ENGINE,
+            # Phase 14.3 — OS lifecycle / release-upgrade engine.
+            ModuleCode.LIFECYCLE_ENGINE,
         }
         assert pro_modules == expected
 

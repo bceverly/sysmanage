@@ -27,6 +27,8 @@ class FeatureCode(str, Enum):
 
     # Security Features
     VULNERABILITY_SCANNING = "vuln"  # Matches license server feature code
+    ADVISORY_MANAGEMENT = "advisory_management"  # Phase 14.1 errata/advisory
+    OS_LIFECYCLE = "os_lifecycle"  # Phase 14.3 EOL tracking + release upgrades
     COMPLIANCE_REPORTS = "compliance"  # Matches license server feature code
     SECURITY_HARDENING = "security_hardening"
 
@@ -39,6 +41,11 @@ class FeatureCode(str, Enum):
     SIEM_INTEGRATION = "siem_integration"
     API_EXTENDED = "api"  # Matches license server feature code
     WEBHOOK_ADVANCED = "webhook_advanced"
+
+    # Operability — routing SysManage's OWN diagnostic logs (Phase 14.5).
+    # Local sinks (file / journald / local syslog / Windows Event Log) stay OSS;
+    # this gates only REMOTE syslog forwarding (the ``syslog_remote`` target).
+    LOG_ROUTING = "log_routing"
 
     # Reporting Features
     CUSTOM_REPORTS = "custom_reports"
@@ -143,6 +150,8 @@ class ModuleCode(str, Enum):
     HEALTH_ENGINE = "health_engine"
     SECURITY_SCANNER = "security_scanner"  # Legacy alias
     VULN_ENGINE = "vuln_engine"  # Renamed from security_scanner
+    ADVISORY_ENGINE = "advisory_engine"  # Phase 14.1 errata/advisory
+    LIFECYCLE_ENGINE = "lifecycle_engine"  # Phase 14.3 EOL + release upgrades
     COMPLIANCE_ENGINE = "compliance_engine"
     PERFORMANCE_ANALYZER = "performance_analyzer"
 
@@ -240,10 +249,14 @@ TIER_FEATURES = {
         FeatureCode.HEALTH_ANALYSIS,
         FeatureCode.HEALTH_HISTORY,
         FeatureCode.VULNERABILITY_SCANNING,
+        FeatureCode.ADVISORY_MANAGEMENT,
+        FeatureCode.OS_LIFECYCLE,
         FeatureCode.ADVANCED_MONITORING,
         FeatureCode.CUSTOM_REPORTS,
         # Phase 11.4 — CVE feed management (paired with VULN_ENGINE module)
         FeatureCode.CVE_FEED_MANAGEMENT,
+        # Phase 14.5 — remote syslog forwarding of SysManage's own logs
+        FeatureCode.LOG_ROUTING,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -255,6 +268,8 @@ TIER_FEATURES = {
         FeatureCode.PERFORMANCE_ANALYTICS,
         FeatureCode.PREDICTIVE_MAINTENANCE,
         FeatureCode.VULNERABILITY_SCANNING,
+        FeatureCode.ADVISORY_MANAGEMENT,
+        FeatureCode.OS_LIFECYCLE,
         FeatureCode.COMPLIANCE_REPORTS,
         FeatureCode.SECURITY_HARDENING,
         FeatureCode.AUTO_REMEDIATION,
@@ -266,6 +281,8 @@ TIER_FEATURES = {
         FeatureCode.CUSTOM_REPORTS,
         FeatureCode.EXECUTIVE_DASHBOARD,
         FeatureCode.EXPORT_PDF,
+        # Phase 14.5 — remote syslog forwarding of SysManage's own logs
+        FeatureCode.LOG_ROUTING,
         # Phase 3
         FeatureCode.AV_INSTALL,
         FeatureCode.AV_UNINSTALL,
@@ -338,6 +355,8 @@ TIER_MODULES = {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
+        ModuleCode.ADVISORY_ENGINE,
+        ModuleCode.LIFECYCLE_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
         ModuleCode.REPORTING_ENGINE,
@@ -350,6 +369,8 @@ TIER_MODULES = {
         ModuleCode.HEALTH_ENGINE,
         ModuleCode.SECURITY_SCANNER,
         ModuleCode.VULN_ENGINE,
+        ModuleCode.ADVISORY_ENGINE,
+        ModuleCode.LIFECYCLE_ENGINE,
         ModuleCode.COMPLIANCE_ENGINE,
         ModuleCode.ALERTING_ENGINE,
         ModuleCode.REPORTING_ENGINE,

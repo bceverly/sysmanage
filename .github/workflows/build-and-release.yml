@@ -1812,8 +1812,6 @@ jobs:
         include:
           - release: resolute
             release_name: "26.04 Resolute"
-          - release: questing
-            release_name: "25.10 Questing"
           - release: noble
             release_name: "24.04 Noble"
           - release: jammy
@@ -1844,8 +1842,12 @@ jobs:
 
       - name: Install packaging tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko
+          n=0; ok=0
+          until [ "$n" -ge 3 ]; do
+            if sudo apt-get update && sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::apt-get install (packaging tools) attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::apt-get install (packaging tools) failed after 3 attempts"; exit 1; }
 
       - name: Import GPG key
         env:
@@ -2089,8 +2091,12 @@ jobs:
 
       - name: Install OBS tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y osc
+          n=0; ok=0
+          until [ "$n" -ge 3 ]; do
+            if sudo apt-get update && sudo apt-get install -y osc; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::apt-get install osc attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::apt-get install osc failed after 3 attempts"; exit 1; }
 
       - name: Configure OBS credentials
         env:
@@ -2123,11 +2129,16 @@ jobs:
           OBS_USERNAME: ${{ secrets.OBS_USERNAME }}
         run: |
           echo "Checking out OBS package home:${OBS_USERNAME}/sysmanage"
-          if ! osc checkout home:${OBS_USERNAME}/sysmanage; then
-            echo "Checkout failed (possible stale cache), retrying with clean directory..."
+          # OBS API can have transient connectivity blips, and a stale local
+          # cache can also break the checkout — start each retry from a clean
+          # directory and back off before failing the workflow.
+          n=0; ok=0
+          until [ "$n" -ge 5 ]; do
             rm -rf "home:${OBS_USERNAME}"
-            osc checkout home:${OBS_USERNAME}/sysmanage
-          fi
+            if osc checkout home:${OBS_USERNAME}/sysmanage; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::osc checkout attempt $n/5 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::osc checkout failed after 5 attempts"; exit 1; }
           cd home:${OBS_USERNAME}/sysmanage
           # Remove old tarballs so only the new release is uploaded
           rm -f sysmanage-*.tar.gz sysmanage-vendor-*.tar.gz
@@ -2308,7 +2319,14 @@ jobs:
           cd home:${OBS_USERNAME}/sysmanage
 
           echo "Committing to OBS..."
-          osc commit -m "Release version $VERSION"
+          # OBS API can have transient connectivity blips during the upload;
+          # retry the commit with backoff before failing the workflow.
+          n=0; ok=0
+          until [ "$n" -ge 5 ]; do
+            if osc commit -m "Release version $VERSION"; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::osc commit attempt $n/5 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::osc commit failed after 5 attempts"; exit 1; }
 
           echo ""
           echo "=========================================="
@@ -2360,15 +2378,24 @@ jobs:
 
       - name: Install Copr CLI and build tools
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip rpm
+          n=0; ok=0
+          until [ "$n" -ge 3 ]; do
+            if sudo apt-get update && sudo apt-get install -y python3-pip rpm; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::apt-get install (copr build tools) attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::apt-get install (copr build tools) failed after 3 attempts"; exit 1; }
 
           # Install copr-cli via pip (not available in Ubuntu repos).
           # `rich` is an undeclared runtime dep in copr-cli >= 1.115 — without
           # it, `copr-cli whoami` (or any subcommand) crashes with
           # `ModuleNotFoundError: No module named 'rich'` before sending a
           # request. Install both to keep the workflow stable across releases.
-          pip3 install copr-cli rich
+          n=0; ok=0
+          until [ "$n" -ge 3 ]; do
+            if pip3 install copr-cli rich; then ok=1; break; fi
+            n=$((n+1)); echo "::warning::pip3 install copr-cli rich attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
+          done
+          [ "$ok" = 1 ] || { echo "::error::pip3 install copr-cli rich failed after 3 attempts"; exit 1; }
 
           # Add pip binaries to PATH
           echo "$HOME/.local/bin" >> $GITHUB_PATH

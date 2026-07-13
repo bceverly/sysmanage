@@ -117,8 +117,34 @@ async def process_outbound_messages(  # NOSONAR
                 )
             continue
 
-        # Process each message for this host
+        # Maintenance-window gating (Phase 14.2): defer gated change actions
+        # (command / update_request) when the host is outside its allowed
+        # windows or inside a blackout.  Evaluated once per host per tick; the
+        # message stays PENDING and is retried next tick when the window opens.
+        # Control-plane pushes (e.g. logging_config_update) are never gated.
+        from backend.services.maintenance_window_service import (  # noqa: PLC0415
+            GATED_MESSAGE_TYPES,
+            is_dispatch_allowed,
+        )
+
+        gated_pending = [
+            m for m in host_messages if m.message_type in GATED_MESSAGE_TYPES
+        ]
+        dispatch_allowed = True
+        if gated_pending:
+            dispatch_allowed = is_dispatch_allowed(db, host_id, now)
+            if not dispatch_allowed:
+                logger.info(
+                    "Maintenance window closed for host %s; deferring %d gated "
+                    "message(s) until the next window opens",
+                    host.fqdn,
+                    len(gated_pending),
+                )
+
+        # Process each message for this host (skip gated ones while deferred).
         for message in host_messages:
+            if not dispatch_allowed and message.message_type in GATED_MESSAGE_TYPES:
+                continue
             await process_outbound_message(message, host, db)
 
 

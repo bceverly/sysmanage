@@ -243,6 +243,8 @@ class TestMountProplusRoutes:
             results = proplus_routes.mount_proplus_routes(FastAPI())
         expected_keys = {
             "vuln_engine",
+            "advisory_engine",
+            "lifecycle_engine",
             "health_engine",
             "compliance_engine",
             "alerting_engine",

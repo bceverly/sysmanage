@@ -307,6 +307,95 @@ def mount_vulnerability_routes(app: FastAPI) -> bool:
         return False
 
 
+def mount_advisory_routes(app: FastAPI) -> bool:
+    """
+    Mount advisory/errata routes from the advisory_engine module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    advisory_engine = module_loader.get_module("advisory_engine")
+    if advisory_engine is None:
+        logger.debug("advisory_engine module not loaded, skipping advisory routes")
+        return False
+
+    module_info = advisory_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("advisory_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = advisory_engine.get_advisory_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted advisory routes from advisory_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.exception("Failed to mount advisory routes: %s", e)
+        return False
+
+
+def mount_lifecycle_routes(app: FastAPI) -> bool:
+    """
+    Mount OS-lifecycle / release-upgrade routes from the lifecycle_engine
+    module if available.
+
+    Args:
+        app: The FastAPI application instance
+
+    Returns:
+        True if routes were mounted, False otherwise
+    """
+    lifecycle_engine = module_loader.get_module("lifecycle_engine")
+    if lifecycle_engine is None:
+        logger.debug("lifecycle_engine module not loaded, skipping lifecycle routes")
+        return False
+
+    module_info = lifecycle_engine.get_module_info()
+    if not module_info.get("provides_routes", False):
+        logger.debug("lifecycle_engine module does not provide routes")
+        return False
+
+    try:
+        with _cython_compat():
+            router = lifecycle_engine.get_lifecycle_router(
+                db_dependency=Depends(get_db),
+                auth_dependency=Depends(get_current_user),
+                feature_gate=_feature_dependency,
+                module_gate=_module_dependency,
+                models=models,
+                http_exception=HTTPException,
+                status_codes=status,
+                logger=logger,
+            )
+            app.include_router(router, prefix="/api")
+        logger.info(
+            "Mounted OS-lifecycle routes from lifecycle_engine v%s",
+            module_info.get("version", "unknown"),
+        )
+        return True
+
+    except Exception as e:
+        logger.exception("Failed to mount OS-lifecycle routes: %s", e)
+        return False
+
+
 def mount_health_routes(app: FastAPI) -> bool:
     """
     Mount health analysis routes from the health_engine module if available.
@@ -2300,6 +2389,8 @@ def mount_proplus_routes(app: FastAPI) -> dict:
     """
     results = {
         "vuln_engine": mount_vulnerability_routes(app),
+        "advisory_engine": mount_advisory_routes(app),
+        "lifecycle_engine": mount_lifecycle_routes(app),
         "health_engine": mount_health_routes(app),
         "compliance_engine": mount_compliance_routes(app),
         "alerting_engine": mount_alerting_routes(app),

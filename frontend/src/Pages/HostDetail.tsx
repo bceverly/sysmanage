@@ -2,6 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
+import MaintenanceWindowCard from '../Components/MaintenanceWindowCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
 import FirewallStatusCard from '../Components/FirewallStatusCard';
 import ProcessesPanel from '../Components/ProcessesPanel';
@@ -4172,6 +4173,10 @@ const HostDetail = () => { // NOSONAR
             <Box sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
             {currentTabId === 'info' && (
                 <Grid container spacing={3}>
+                {/* Maintenance window status (Phase 14.2) */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <MaintenanceWindowCard hostId={hostId || ''} />
+                </Grid>
                 {/* Basic Information */}
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Card sx={{ height: '100%' }}>

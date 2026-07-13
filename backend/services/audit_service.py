@@ -54,6 +54,7 @@ class EntityType(str, Enum):
     SECURITY_ROLE = "security_role"
     AUTHENTICATION = "authentication"
     TENANT = "tenant"
+    MAINTENANCE_WINDOW = "maintenance_window"
 
 
 class Result(str, Enum):

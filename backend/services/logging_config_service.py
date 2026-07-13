@@ -28,11 +28,13 @@ from backend.utils.native_logging import build_native_handler
 logger = logging.getLogger(__name__)
 
 # Native targets that make sense per OS family (drives the UI + validation).
+# ``syslog_remote`` is network-based so it's offered on every family (incl.
+# Windows); the API/UI gate it behind the Professional LOG_ROUTING feature.
 _VALID_TARGETS: Dict[str, List[str]] = {
-    "linux": ["auto", "journald", "syslog", "none"],
-    "windows": ["auto", "eventlog", "none"],
-    "macos": ["auto", "syslog", "none"],
-    "bsd": ["auto", "syslog", "none"],
+    "linux": ["auto", "journald", "syslog", "syslog_remote", "none"],
+    "windows": ["auto", "eventlog", "syslog_remote", "none"],
+    "macos": ["auto", "syslog", "syslog_remote", "none"],
+    "bsd": ["auto", "syslog", "syslog_remote", "none"],
 }
 
 
@@ -50,7 +52,7 @@ def os_family_for_system(system: Optional[str]) -> str:
 
 def valid_targets_for_family(family: str) -> List[str]:
     """Native log targets valid for an OS family."""
-    return _VALID_TARGETS.get(family, ["auto", "syslog", "none"])
+    return _VALID_TARGETS.get(family, ["auto", "syslog", "syslog_remote", "none"])
 
 
 def get_setting(
@@ -79,6 +81,10 @@ def resolve_server_logging(db: Session, yaml_logging: Optional[dict] = None) -> 
         "native_identifier": yaml_logging.get("native_identifier", "sysmanage"),
         "log_level": yaml_logging.get("level"),
         "verbosity": yaml_logging.get("verbosity"),
+        "syslog_host": yaml_logging.get("syslog_host"),
+        "syslog_port": yaml_logging.get("syslog_port"),
+        "syslog_facility": yaml_logging.get("syslog_facility"),
+        "syslog_protocol": yaml_logging.get("syslog_protocol"),
     }
 
 
@@ -104,6 +110,10 @@ def upsert_setting(
     row.native_identifier = values.get("native_identifier") or None
     row.log_level = values.get("log_level") or None
     row.verbosity = values.get("verbosity") or None
+    row.syslog_host = values.get("syslog_host") or None
+    row.syslog_port = values.get("syslog_port") or None
+    row.syslog_facility = values.get("syslog_facility") or None
+    row.syslog_protocol = values.get("syslog_protocol") or None
     return row
 
 
@@ -145,6 +155,10 @@ def apply_server_native_logging(resolved: dict) -> None:
     handler = build_native_handler(
         target=resolved.get("native_target", "auto"),
         identifier=resolved.get("native_identifier") or "sysmanage",
+        host=resolved.get("syslog_host"),
+        port=resolved.get("syslog_port"),
+        facility=resolved.get("syslog_facility"),
+        protocol=resolved.get("syslog_protocol"),
     )
     if handler is not None:
         handler._sysmanage_native = True  # pylint: disable=protected-access
@@ -160,6 +174,10 @@ def _agent_payload(resolved: dict) -> dict:
         "native_identifier": resolved.get("native_identifier"),
         "log_level": resolved.get("log_level"),
         "verbosity": resolved.get("verbosity"),
+        "syslog_host": resolved.get("syslog_host"),
+        "syslog_port": resolved.get("syslog_port"),
+        "syslog_facility": resolved.get("syslog_facility"),
+        "syslog_protocol": resolved.get("syslog_protocol"),
     }
 
 

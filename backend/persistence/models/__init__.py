@@ -19,6 +19,8 @@ from .federation import *
 from .mfa import *
 from .package_compliance import *
 from .report_branding import *
+from .advisory import *
+from .os_lifecycle import *
 from .repository_mirroring import *
 from .upgrade_profiles import *
 from .gpg_key import *
@@ -29,6 +31,7 @@ from .hardware import *
 from .host_certificate import *
 from .host_role import *
 from .logging_config import *
+from .maintenance_windows import *
 from .operations import *
 from .processes import *
 from .proplus import *
@@ -66,6 +69,21 @@ __all__ = [
     "HostProcess",
     # Logging configuration (Phase 13.3)
     "LoggingSetting",
+    # Maintenance windows (Phase 14.2)
+    "MaintenanceWindow",
+    "MaintenanceWindowScope",
+    "MaintenanceOverride",
+    # Advisory / errata management (Phase 14.1)
+    "SharedAdvisory",
+    "SharedAdvisoryPackage",
+    "SharedAdvisoryCve",
+    "AdvisoryIngestionLog",
+    "AdvisoryRefreshSettings",
+    "HostApplicableAdvisory",
+    # OS lifecycle / release-upgrade (Phase 14.3)
+    "SharedOsLifecycle",
+    "OsLifecycleIngestionLog",
+    "ReleaseUpgradeJob",
     # User management models
     "UserAccount",
     "UserGroup",

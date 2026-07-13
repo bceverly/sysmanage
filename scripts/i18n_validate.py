@@ -38,6 +38,8 @@ DYNAMIC_KEY_PREFIXES = (
     "airgap.freshness.label.",  # Phase 11 B4 — t(`airgap.freshness.label.${label}`)
     "engine.",  # Phase 11 B7 — engine plan-description envelope: t(cmd.description_key, params)
     "hostDetail.hypervisor.state.",
+    "maintenanceWindows.day.",  # Phase 14.2 — t(`maintenanceWindows.day.${d}`)
+    "maintenanceWindows.state.",  # Phase 14.2 — t(`maintenanceWindows.state.${status.state}`)
     "nav.role.",  # Phase 11 — role chip uses t(`nav.role.${serverRole}`)
     "scripts.status.",
     "secrets.api_provider.",
@@ -361,6 +363,19 @@ def cmd_validate(seed: bool) -> int:
     if failures and not seed:
         print(
             f"\nFAIL: {failures} locale(s) have missing or orphan keys",
+            file=sys.stderr,
+        )
+        # An "orphan" is a key in translation.json with no *static* t('...')
+        # reference.  There are exactly two legitimate causes — spell out both so
+        # this failure is self-service:
+        print(
+            "\nTo fix orphan keys, pick the cause:\n"
+            "  1. The key is genuinely unused  -> remove it: "
+            "python scripts/i18n_validate.py --strip-orphans\n"
+            "  2. The key is looked up dynamically, e.g. "
+            "t(`foo.bar.${x}`)  -> add its prefix ('foo.bar.') to "
+            "DYNAMIC_KEY_PREFIXES near the top of scripts/i18n_validate.py\n"
+            "(Missing keys, by contrast, are seeded with: make i18n-seed)",
             file=sys.stderr,
         )
         return 1

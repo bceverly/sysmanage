@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-10 15:53-0400\n"
+"POT-Creation-Date: 2026-07-13 07:59-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -153,7 +153,8 @@ msgstr ""
 #: backend/api/updates/execution_routes.py:247 backend/api/diagnostics.py:98
 #: backend/api/diagnostics.py:231 backend/api/error_constants.py:29
 #: backend/api/antivirus_status.py:221 backend/api/child_host_utils.py:80
-#: backend/api/packages.py:389 backend/api/scripts/routes_executions.py:74
+#: backend/api/packages.py:389 backend/api/lifecycle_actions.py:98
+#: backend/api/scripts/routes_executions.py:74
 #: backend/api/commercial_antivirus_status.py:84
 msgid "Host not found"
 msgstr ""
@@ -180,6 +181,14 @@ msgstr ""
 #: backend/api/secrets/permissions.py:35 backend/api/error_constants.py:18
 #: backend/api/child_host_utils.py:29
 msgid "User not found"
+msgstr ""
+
+#: backend/api/advisory_actions.py:36
+msgid "Advisory management requires a SysManage Professional license."
+msgstr ""
+
+#: backend/api/advisory_actions.py:67
+msgid "No applicable packages for this advisory on this host."
 msgstr ""
 
 #: backend/api/security_roles.py:90 backend/api/security_roles.py:151
@@ -2017,21 +2026,37 @@ msgstr ""
 msgid "Failed to process heartbeat"
 msgstr ""
 
-#: backend/api/logging_settings.py:58
+#: backend/api/logging_settings.py:67 backend/api/maintenance_windows.py:58
 msgid "Permission denied: administrator required"
 msgstr ""
 
-#: backend/api/logging_settings.py:95
+#: backend/api/logging_settings.py:107
 #, python-format
 msgid "Invalid native log target: %s"
 msgstr ""
 
-#: backend/api/logging_settings.py:100
+#: backend/api/logging_settings.py:112
 #, python-format
 msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr ""
 
-#: backend/api/logging_settings.py:127
+#: backend/api/logging_settings.py:130
+msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgstr ""
+
+#: backend/api/logging_settings.py:137
+msgid "A syslog host is required for the remote-syslog target."
+msgstr ""
+
+#: backend/api/logging_settings.py:141
+msgid "syslog port must be between 1 and 65535."
+msgstr ""
+
+#: backend/api/logging_settings.py:145
+msgid "syslog protocol must be 'udp' or 'tcp'."
+msgstr ""
+
+#: backend/api/logging_settings.py:172
 #, python-format
 msgid "Unknown OS family: %s"
 msgstr ""
@@ -3418,6 +3443,68 @@ msgstr ""
 msgid "Failed to delete installation record: %s"
 msgstr ""
 
+#: backend/api/maintenance_windows.py:107
+msgid "A window name is required."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:110
+msgid "kind must be 'allow' or 'blackout'."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:115
+msgid "recurrence must be 'once', 'daily', or 'weekly'."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:124
+#, python-format
+msgid "Unknown timezone: %s"
+msgstr ""
+
+#: backend/api/maintenance_windows.py:133
+msgid "A one-time window needs starts_at before ends_at."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:141
+msgid "A recurring window needs a start_time as 'HH:MM'."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:146
+msgid "A recurring window needs a positive duration_minutes."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:153
+msgid "A weekly window needs valid days_of_week."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:159
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:165
+msgid "scope_type must be 'all', 'host', or 'tag'."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:169
+msgid "A host scope needs a host_id."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:173
+msgid "A tag scope needs a tag_id."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:292
+#: backend/api/maintenance_windows.py:315
+msgid "Maintenance window not found."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:334
+msgid "An override reason is required."
+msgstr ""
+
+#: backend/api/maintenance_windows.py:338
+msgid "Override duration must be positive."
+msgstr ""
+
 #: backend/api/report_branding.py:112
 msgid "Updated report branding"
 msgstr ""
@@ -3531,6 +3618,14 @@ msgstr ""
 #: backend/api/firewall_roles.py:840
 #, python-format
 msgid "Failed to remove firewall role: %s"
+msgstr ""
+
+#: backend/api/lifecycle_actions.py:54 backend/api/lifecycle_actions.py:65
+msgid "OS lifecycle management requires a SysManage Professional license."
+msgstr ""
+
+#: backend/api/lifecycle_actions.py:72
+msgid "The OS lifecycle module is not currently available."
 msgstr ""
 
 #: backend/api/audit_log.py:131
@@ -4093,17 +4188,17 @@ msgstr ""
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr ""
 
-#: backend/services/audit_service.py:183
+#: backend/services/audit_service.py:184
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr ""
 
-#: backend/services/audit_service.py:231
+#: backend/services/audit_service.py:232
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr ""
 
-#: backend/services/audit_service.py:279
+#: backend/services/audit_service.py:280
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr ""

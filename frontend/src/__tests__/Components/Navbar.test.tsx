@@ -115,9 +115,10 @@ describe('Navbar Component', () => {
     // federation controller engine being loaded.  In this test the
     // MSW federation handler isn't installed, so the probe falls
     // through to ``licensed: false`` and the Sites entry is hidden —
-    // exactly the OSS behaviour we want.  10 links: logo + Dashboard,
-    // Users, Hosts, Map, Updates, OS Upgrades, Secrets, Scripts, Reports.
-    expect(allLinks).toHaveLength(10);
+    // exactly the OSS behaviour we want.  11 links: logo + Dashboard,
+    // Users, Hosts, Map, Updates, OS Upgrades, Maintenance Windows (Phase
+    // 14.2, OSS), Secrets, Scripts, Reports.
+    expect(allLinks).toHaveLength(11);
 
     // Find links by their href attributes since they don't have accessible names when hidden
     const dashboardLink = allLinks.find(link => link.getAttribute('href') === '/');
@@ -127,6 +128,7 @@ describe('Navbar Component', () => {
     const sitesLink = allLinks.find(link => link.getAttribute('href') === '/sites');
     const updatesLink = allLinks.find(link => link.getAttribute('href') === '/updates');
     const osUpgradesLink = allLinks.find(link => link.getAttribute('href') === '/os-upgrades');
+    const maintenanceWindowsLink = allLinks.find(link => link.getAttribute('href') === '/maintenance-windows');
     const secretsLink = allLinks.find(link => link.getAttribute('href') === '/secrets');
     const scriptsLink = allLinks.find(link => link.getAttribute('href') === '/scripts');
     const reportsLink = allLinks.find(link => link.getAttribute('href') === '/reports');
@@ -141,6 +143,7 @@ describe('Navbar Component', () => {
     expect(sitesLink).toBeUndefined();
     expect(updatesLink).toHaveAttribute('href', '/updates');
     expect(osUpgradesLink).toHaveAttribute('href', '/os-upgrades');
+    expect(maintenanceWindowsLink).toHaveAttribute('href', '/maintenance-windows');
     expect(secretsLink).toHaveAttribute('href', '/secrets');
     expect(scriptsLink).toHaveAttribute('href', '/scripts');
     expect(reportsLink).toHaveAttribute('href', '/reports');

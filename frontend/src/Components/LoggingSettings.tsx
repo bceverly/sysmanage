@@ -36,7 +36,25 @@ const emptyConfig = (identifier: string | null = null): LoggingConfig => ({
     native_identifier: identifier,
     log_level: null,
     verbosity: null,
+    syslog_host: null,
+    syslog_port: null,
+    syslog_facility: null,
+    syslog_protocol: null,
 });
+
+// Common syslog facilities offered for the remote-syslog target (Phase 14.5).
+const SYSLOG_FACILITIES = [
+    'user',
+    'daemon',
+    'local0',
+    'local1',
+    'local2',
+    'local3',
+    'local4',
+    'local5',
+    'local6',
+    'local7',
+];
 
 const LoggingSettings: React.FC = () => {
     const { t } = useTranslation();
@@ -67,6 +85,9 @@ const LoggingSettings: React.FC = () => {
     const [serverFamily, setServerFamily] = useState('linux');
     const [serverTargets, setServerTargets] = useState<string[]>(['auto', 'none']);
     const [agentTargets, setAgentTargets] = useState<Record<string, string[]>>({});
+    // Phase 14.5: the syslog_remote target + its fields are enabled only when the
+    // Professional LOG_ROUTING feature is licensed (server-side is authoritative).
+    const [logRoutingLicensed, setLogRoutingLicensed] = useState(false);
 
     const [server, setServer] = useState<LoggingConfig>(emptyConfig());
     const [agents, setAgents] = useState<Record<string, LoggingConfig>>({});
@@ -79,6 +100,7 @@ const LoggingSettings: React.FC = () => {
             setServerFamily(data.server_os_family);
             setServerTargets(data.server_valid_targets);
             setAgentTargets(data.agent_valid_targets || {});
+            setLogRoutingLicensed(!!data.log_routing_licensed);
             const nextAgents: Record<string, LoggingConfig> = {};
             OS_FAMILIES.forEach((fam) => {
                 const stored = data.agents ? data.agents[fam] : null;
@@ -158,11 +180,22 @@ const LoggingSettings: React.FC = () => {
                 disabled={!cfg.native_enabled}
                 onChange={(e) => onChange({ ...cfg, native_target: e.target.value })}
             >
-                {targets.map((tg) => (
-                    <MenuItem key={tg} value={tg}>
-                        {tg}
-                    </MenuItem>
-                ))}
+                {targets.map((tg) => {
+                    // syslog_remote is offered on every OS but requires the
+                    // Professional LOG_ROUTING feature; lock it with a hint.
+                    const locked = tg === 'syslog_remote' && !logRoutingLicensed;
+                    return (
+                        <MenuItem key={tg} value={tg} disabled={locked}>
+                            {locked
+                                ? t(
+                                      'logging.targetRemoteLocked',
+                                      '{{target}} (Professional)',
+                                      { target: tg },
+                                  )
+                                : tg}
+                        </MenuItem>
+                    );
+                })}
             </TextField>
             <TextField
                 size="small"
@@ -174,6 +207,99 @@ const LoggingSettings: React.FC = () => {
                     onChange({ ...cfg, native_identifier: e.target.value || null })
                 }
             />
+            {cfg.native_target === 'syslog_remote' && (
+                <Box
+                    sx={{
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        p: 2,
+                    }}
+                >
+                    <Typography variant="subtitle2" gutterBottom>
+                        {t('logging.remoteSyslogTitle', 'Remote syslog forwarding')}
+                    </Typography>
+                    {!logRoutingLicensed && (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                            {t(
+                                'logging.remoteSyslogLocked',
+                                'Remote syslog forwarding requires a SysManage ' +
+                                    'Professional license.',
+                            )}
+                        </Alert>
+                    )}
+                    <Stack spacing={2}>
+                        <TextField
+                            size="small"
+                            fullWidth
+                            required
+                            label={t('logging.syslogHost', 'Syslog host')}
+                            value={cfg.syslog_host ?? ''}
+                            disabled={!cfg.native_enabled || !logRoutingLicensed}
+                            onChange={(e) =>
+                                onChange({
+                                    ...cfg,
+                                    syslog_host: e.target.value || null,
+                                })
+                            }
+                        />
+                        <TextField
+                            size="small"
+                            fullWidth
+                            type="number"
+                            label={t('logging.syslogPort', 'Syslog port')}
+                            placeholder="514"
+                            value={cfg.syslog_port ?? ''}
+                            disabled={!cfg.native_enabled || !logRoutingLicensed}
+                            onChange={(e) =>
+                                onChange({
+                                    ...cfg,
+                                    syslog_port: e.target.value
+                                        ? Number(e.target.value)
+                                        : null,
+                                })
+                            }
+                        />
+                        <TextField
+                            select
+                            size="small"
+                            fullWidth
+                            label={t('logging.syslogProtocol', 'Protocol')}
+                            value={cfg.syslog_protocol ?? 'udp'}
+                            disabled={!cfg.native_enabled || !logRoutingLicensed}
+                            onChange={(e) =>
+                                onChange({
+                                    ...cfg,
+                                    syslog_protocol: e.target.value || null,
+                                })
+                            }
+                        >
+                            <MenuItem value="udp">UDP</MenuItem>
+                            <MenuItem value="tcp">TCP</MenuItem>
+                        </TextField>
+                        <TextField
+                            select
+                            size="small"
+                            fullWidth
+                            label={t('logging.syslogFacility', 'Facility')}
+                            value={cfg.syslog_facility ?? 'user'}
+                            disabled={!cfg.native_enabled || !logRoutingLicensed}
+                            onChange={(e) =>
+                                onChange({
+                                    ...cfg,
+                                    syslog_facility: e.target.value || null,
+                                })
+                            }
+                        >
+                            {SYSLOG_FACILITIES.map((f) => (
+                                <MenuItem key={f} value={f}>
+                                    {f}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Stack>
+                </Box>
+            )}
             <TextField
                 select
                 size="small"

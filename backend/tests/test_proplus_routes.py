@@ -17,6 +17,7 @@ from fastapi import FastAPI
 
 from backend.api.proplus_routes import (
     mount_alerting_routes,
+    mount_advisory_routes,
     mount_compliance_routes,
     mount_federation_controller_routes,
     mount_federation_site_routes,
@@ -198,6 +199,49 @@ class TestMountVulnerabilityRoutes:
             result = mount_vulnerability_routes(mock_app)
 
             assert result is False
+
+
+# =============================================================================
+# mount_advisory_routes() TESTS
+# =============================================================================
+
+
+class TestMountAdvisoryRoutes:
+    """Test cases for mount_advisory_routes function (Phase 14.1)."""
+
+    def test_advisory_routes_module_not_loaded(self, mock_app):
+        """advisory_engine not loaded → no routes mounted."""
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = None
+            result = mount_advisory_routes(mock_app)
+            assert result is False
+            mock_loader.get_module.assert_called_once_with("advisory_engine")
+
+    def test_advisory_routes_module_no_routes(
+        self, mock_app, mock_module_without_routes
+    ):
+        """Module that doesn't provide routes → not mounted."""
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = mock_module_without_routes
+            assert mount_advisory_routes(mock_app) is False
+
+    def test_advisory_routes_success(self, mock_app, mock_module_with_routes):
+        """Successful mount of advisory routes."""
+        mock_module, mock_router = mock_module_with_routes
+        mock_module.get_advisory_router.return_value = mock_router
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = mock_module
+            result = mount_advisory_routes(mock_app)
+            assert result is True
+            mock_app.include_router.assert_called_once_with(mock_router, prefix="/api")
+
+    def test_advisory_routes_exception(self, mock_app, mock_module_with_routes):
+        """Router-factory failure is handled gracefully."""
+        mock_module, _ = mock_module_with_routes
+        mock_module.get_advisory_router.side_effect = RuntimeError("Error")
+        with patch("backend.api.proplus_routes.module_loader") as mock_loader:
+            mock_loader.get_module.return_value = mock_module
+            assert mount_advisory_routes(mock_app) is False
 
 
 # =============================================================================
