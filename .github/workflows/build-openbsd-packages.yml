@@ -95,8 +95,10 @@ jobs:
             # Install BUILD/RUN dependency ports as prebuilt BINARY packages
             # (pkg_add via the ports framework) instead of compiling them —
             # cryptography/pydantic-core/... would otherwise need a Rust
-            # toolchain and hours of emulated build time.
-            export FETCH_PACKAGES=Yes
+            # toolchain and hours of emulated build time.  Per ports(7) the
+            # value is passed to pkg_add as OPTIONS, so it must be EMPTY (the
+            # old `FETCH_PACKAGES=Yes` boolean is rejected as "old syntax").
+            export FETCH_PACKAGES=
 
             echo "=== Building sysmanage ${VERSION} on OpenBSD ${OPENBSD_VERSION} ==="
 
@@ -164,10 +166,12 @@ jobs:
               exit 1
             fi
 
-            # Step 6: Locate + export the built package
+            # Step 6: Locate + export the built package.  PACKAGE_REPOSITORY
+            # varies (/usr/ports/packages by default, /usr/packages on hosts
+            # with a mk.conf override), so search both.
             echo "=== Step 6: Finding built package ==="
-            find /usr/ports/packages -name "*.tgz" -type f 2>/dev/null || true
-            PKG_FILE=$(find /usr/ports/packages -name "sysmanage-*.tgz" -type f 2>/dev/null | grep -v 'sysmanage-agent' | head -1)
+            find /usr/ports/packages /usr/packages -name "*.tgz" -type f 2>/dev/null || true
+            PKG_FILE=$(find /usr/ports/packages /usr/packages -name "sysmanage-*.tgz" -type f 2>/dev/null | grep -v 'sysmanage-agent' | head -1)
             if [ -z "$PKG_FILE" ]; then
               echo "ERROR: Package file not found!"
               find /usr/ports/packages -type f 2>/dev/null || echo "No files in /usr/ports/packages"

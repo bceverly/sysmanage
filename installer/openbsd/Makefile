@@ -58,7 +58,9 @@ RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 # libpq for the (pure-Python) psycopg 3 adapter bundled via pip — OpenBSD has
 # no psycopg 3 port (only databases/py-psycopg2, a different module), so plain
 # `psycopg` is pip-bundled and loads libpq.so at runtime from postgresql-client.
-RUN_DEPENDS +=		databases/postgresql-client
+# postgresql is a multi-package port; its ,-main subpackage IS postgresql-client
+# (ships libpq.so), so that is the correct dependency spec.
+RUN_DEPENDS +=		databases/postgresql,-main
 
 # The ports above must be present at BUILD time too, so `pip install --target`
 # sees them already satisfied and does NOT drag their C/Rust deps back into the
@@ -110,20 +112,35 @@ post-extract:
 # strip "pydantic-settings" / "pydantic-extra-types" (both pip-bundled).
 do-build:
 	@cd ${WRKSRC} && { \
-		excl=$$(echo '${PIP_PORT_PROVIDED} ${PIP_OMIT}' | tr ' ' '|') ; \
+		excl=$$(echo '${PIP_PORT_PROVIDED} ${PIP_OMIT}' | tr -s ' ' | tr ' ' '|') ; \
 		grep -viE "^($$excl)( |>|<|=|!|~|;|\[|$$)" requirements-prod.txt \
 			| sed -E 's/psycopg\[binary\]/psycopg/' \
 			> ${WRKDIR}/pip-bundle.txt ; \
 		echo "=== pip bundle (pure-Python deps not from ports) ===" ; \
 		cat ${WRKDIR}/pip-bundle.txt ; }
-	${MODPY_BIN} -m pip install \
-		--target=${WRKSRC}/pip-packages \
-		--no-compile --no-cache-dir \
+	# Build the bundle inside a --system-site-packages venv so pip SEES the dep
+	# ports installed above and installs ONLY what they don't provide.  A bare
+	# `pip install --target` IGNORES installed packages and would re-download +
+	# rebuild cryptography/pydantic-core/aiohttp from source (Rust/C) — verified
+	# on a real 7.9 box — defeating the whole ports/pip split.  We then lift just
+	# the venv's own site-packages (the pure-Python bundle) into pip-packages;
+	# the system ports stay reachable on the default sys.path at runtime.
+	rm -rf ${WRKDIR}/bldvenv
+	${MODPY_BIN} -m venv --system-site-packages ${WRKDIR}/bldvenv
+	# PYTHONNOUSERSITE keeps a stray ~/.local on the build host from being
+	# counted as "already satisfied" (which would silently drop a package from
+	# the bundle → runtime ImportError); only the system dep ports count.
+	PYTHONNOUSERSITE=1 ${WRKDIR}/bldvenv/bin/python -m pip install --no-cache-dir \
 		-r ${WRKDIR}/pip-bundle.txt
-	# Drop bundled *.libs shims and __pycache__ so the package stays lean and
-	# does not ship duplicate copies of system shared libraries.
-	@find ${WRKSRC}/pip-packages -type d -name '*.libs' -exec rm -rf {} + 2>/dev/null || true
-	@find ${WRKSRC}/pip-packages -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
+	mkdir -p ${WRKSRC}/pip-packages
+	cp -R ${WRKDIR}/bldvenv/lib/python${MODPY_VERSION}/site-packages/* \
+		${WRKSRC}/pip-packages/
+	# Drop venv/pip scaffolding + caches we don't ship (setuptools stays — it is
+	# a listed runtime dep); *.libs shims duplicate system shared libraries.
+	@cd ${WRKSRC}/pip-packages && rm -rf pip pip-*.dist-info wheel wheel-*.dist-info \
+		_distutils_hack distutils-precedence.pth 2>/dev/null || true
+	@find ${WRKSRC}/pip-packages -type d \( -name '__pycache__' -o -name '*.libs' \) \
+		-exec rm -rf {} + 2>/dev/null || true
 
 do-install:
 	# Backend Python application
