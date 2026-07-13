@@ -247,6 +247,33 @@ def is_dispatch_allowed(db: Session, host_id, now_utc: datetime) -> bool:
         return True
 
 
+def _soonest_allow(
+    allow: list, now_utc: datetime
+) -> tuple[Optional[datetime], Optional[MaintenanceWindow]]:
+    """Return (next_start, next_window) for the soonest upcoming/open allow window."""
+    next_start: Optional[datetime] = None
+    next_window: Optional[MaintenanceWindow] = None
+    for m in allow:
+        start = _next_start(m["window"], now_utc)
+        if start is not None and (next_start is None or start < next_start):
+            next_start = start
+            next_window = m["window"]
+    return next_start, next_window
+
+
+def _gating_state(override, has_allow: bool, active_blackout, in_allow: bool) -> str:
+    """Resolve the host's gating state from its window evaluation."""
+    if override is not None:
+        return "override"
+    if not has_allow and active_blackout is None:
+        return "unrestricted"
+    if active_blackout is not None:
+        return "blocked"
+    if in_allow:
+        return "in_window"
+    return "blocked"
+
+
 def next_window_for_host(db: Session, host_id, now_utc: datetime) -> dict:
     """Describe a host's current gating state + its next allow-window, for the
     HostDetail surface.  ``state`` is one of ``unrestricted`` | ``in_window`` |
@@ -261,40 +288,23 @@ def next_window_for_host(db: Session, host_id, now_utc: datetime) -> dict:
         (m["window"] for m in blackout if window_contains(m["window"], now_utc)),
         None,
     )
-
-    # Soonest upcoming (or currently-open) allow window.
-    next_start: Optional[datetime] = None
-    next_window: Optional[MaintenanceWindow] = None
-    for m in allow:
-        start = _next_start(m["window"], now_utc)
-        if start is not None and (next_start is None or start < next_start):
-            next_start = start
-            next_window = m["window"]
-
+    next_start, next_window = _soonest_allow(allow, now_utc)
     in_allow = any(window_contains(m["window"], now_utc) for m in allow)
+    state = _gating_state(override, bool(allow), active_blackout, in_allow)
 
-    if override is not None:
-        state = "override"
-    elif not allow and not active_blackout:
-        state = "unrestricted"
-    elif active_blackout is not None:
-        state = "blocked"
-    elif in_allow:
-        state = "in_window"
-    else:
-        state = "blocked"
+    # Build the next-window summary as an independent statement rather than a
+    # nested conditional inside the returned literal.
+    next_window_summary = None
+    if next_window is not None:
+        next_window_summary = {
+            "id": str(next_window.id),
+            "name": next_window.name,
+            "starts_at": next_start.isoformat() if next_start else None,
+        }
 
     return {
         "state": state,
         "override": override.to_dict() if override else None,
         "active_blackout": active_blackout.name if active_blackout else None,
-        "next_window": (
-            {
-                "id": str(next_window.id),
-                "name": next_window.name,
-                "starts_at": next_start.isoformat() if next_start else None,
-            }
-            if next_window is not None
-            else None
-        ),
+        "next_window": next_window_summary,
     }

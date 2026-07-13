@@ -46,19 +46,20 @@ jobs:
 
       - name: Build on OpenBSD ${{ matrix.openbsd-version }}
         uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
-        env:
-          INPUT_OPENBSD_VERSION: ${{ matrix.openbsd-version }}
-          INPUT_VERSION: ${{ github.event.inputs.version }}
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true
           sync: rsync
+          # NOTE: values are interpolated on the runner (before the script is
+          # shipped into the guest); the anyvm-based vmactions/openbsd-vm does
+          # NOT forward step-level `env:` vars into the VM, so `$INPUT_*` would
+          # be unset there.  matrix.openbsd-version is a fixed allow-list value.
           run: |
             set -x
 
-            OPENBSD_VERSION="$INPUT_OPENBSD_VERSION"
+            OPENBSD_VERSION="${{ matrix.openbsd-version }}"
             OPENBSD_VERSION_NODOT=$(echo "$OPENBSD_VERSION" | tr -d '.')
-            VERSION="$INPUT_VERSION"
+            VERSION="${{ github.event.inputs.version }}"
 
             echo "=== Building sysmanage ${VERSION} on OpenBSD ${OPENBSD_VERSION} ==="
 

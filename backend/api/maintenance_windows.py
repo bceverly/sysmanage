@@ -101,8 +101,8 @@ def _to_naive_utc(value: Optional[datetime]) -> Optional[datetime]:
     return value
 
 
-def _validate_window(payload: MaintenanceWindowIn) -> None:
-    """Reject a malformed window before it touches the DB (HTTP 400)."""
+def _validate_meta(payload: MaintenanceWindowIn) -> None:
+    """Validate the always-present fields (name, kind, recurrence, timezone)."""
     if not (payload.name or "").strip():
         raise HTTPException(status_code=400, detail=_("A window name is required."))
     if payload.kind not in WINDOW_KINDS:
@@ -124,6 +124,9 @@ def _validate_window(payload: MaintenanceWindowIn) -> None:
                 detail=_("Unknown timezone: %s") % payload.timezone,
             ) from exc
 
+
+def _validate_schedule(payload: MaintenanceWindowIn) -> None:
+    """Validate the schedule fields for the payload's recurrence mode."""
     if payload.recurrence == RECURRENCE_ONCE:
         start = _to_naive_utc(payload.starts_at)
         end = _to_naive_utc(payload.ends_at)
@@ -132,46 +135,51 @@ def _validate_window(payload: MaintenanceWindowIn) -> None:
                 status_code=400,
                 detail=_("A one-time window needs starts_at before ends_at."),
             )
-    else:
-        if (
-            mw._parse_hhmm(payload.start_time) is None
-        ):  # pylint: disable=protected-access
-            raise HTTPException(
-                status_code=400,
-                detail=_("A recurring window needs a start_time as 'HH:MM'."),
-            )
-        if not payload.duration_minutes or payload.duration_minutes <= 0:
-            raise HTTPException(
-                status_code=400,
-                detail=_("A recurring window needs a positive duration_minutes."),
-            )
-        if payload.recurrence == "weekly":
-            days = payload.days_of_week or []
-            if not days or any(d not in WEEKDAYS for d in days):
-                raise HTTPException(
-                    status_code=400,
-                    detail=_("A weekly window needs valid days_of_week."),
-                )
+        return
 
+    if mw._parse_hhmm(payload.start_time) is None:  # pylint: disable=protected-access
+        raise HTTPException(
+            status_code=400,
+            detail=_("A recurring window needs a start_time as 'HH:MM'."),
+        )
+    if not payload.duration_minutes or payload.duration_minutes <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail=_("A recurring window needs a positive duration_minutes."),
+        )
+    if payload.recurrence == "weekly":
+        days = payload.days_of_week or []
+        if not days or any(d not in WEEKDAYS for d in days):
+            raise HTTPException(
+                status_code=400,
+                detail=_("A weekly window needs valid days_of_week."),
+            )
+
+
+def _validate_scope(scope) -> None:
+    """Validate a single scope entry."""
+    if scope.scope_type not in SCOPE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=_("scope_type must be 'all', 'host', or 'tag'."),
+        )
+    if scope.scope_type == SCOPE_HOST and not scope.host_id:
+        raise HTTPException(status_code=400, detail=_("A host scope needs a host_id."))
+    if scope.scope_type == SCOPE_TAG and not scope.tag_id:
+        raise HTTPException(status_code=400, detail=_("A tag scope needs a tag_id."))
+
+
+def _validate_window(payload: MaintenanceWindowIn) -> None:
+    """Reject a malformed window before it touches the DB (HTTP 400)."""
+    _validate_meta(payload)
+    _validate_schedule(payload)
     if not payload.scopes:
         raise HTTPException(
             status_code=400,
             detail=_("A window needs at least one scope (all, host, or tag)."),
         )
     for scope in payload.scopes:
-        if scope.scope_type not in SCOPE_TYPES:
-            raise HTTPException(
-                status_code=400,
-                detail=_("scope_type must be 'all', 'host', or 'tag'."),
-            )
-        if scope.scope_type == SCOPE_HOST and not scope.host_id:
-            raise HTTPException(
-                status_code=400, detail=_("A host scope needs a host_id.")
-            )
-        if scope.scope_type == SCOPE_TAG and not scope.tag_id:
-            raise HTTPException(
-                status_code=400, detail=_("A tag scope needs a tag_id.")
-            )
+        _validate_scope(scope)
 
 
 def _apply_payload(window: MaintenanceWindow, payload: MaintenanceWindowIn) -> None:

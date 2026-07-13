@@ -412,9 +412,8 @@ const MaintenanceWindows: React.FC = () => {
                 </Alert>
             )}
 
-            <div style={{ width: '100%' }}>
+            <div style={{ width: '100%', height: 520 }}>
                 <DataGrid
-                    autoHeight
                     rows={windows}
                     columns={columns}
                     getRowId={(row) => row.id}
@@ -539,7 +538,7 @@ const MaintenanceWindows: React.FC = () => {
                                     value={form.start_time ?? ''}
                                     size="small"
                                     fullWidth
-                                    InputLabelProps={{ shrink: true }}
+                                    slotProps={{ inputLabel: { shrink: true } }}
                                     onChange={(e) =>
                                         setForm({ ...form, start_time: e.target.value })
                                     }
@@ -587,7 +586,7 @@ const MaintenanceWindows: React.FC = () => {
                                     value={(form.starts_at ?? '').slice(0, 16)}
                                     size="small"
                                     fullWidth
-                                    InputLabelProps={{ shrink: true }}
+                                    slotProps={{ inputLabel: { shrink: true } }}
                                     onChange={(e) =>
                                         setForm({
                                             ...form,
@@ -601,7 +600,7 @@ const MaintenanceWindows: React.FC = () => {
                                     value={(form.ends_at ?? '').slice(0, 16)}
                                     size="small"
                                     fullWidth
-                                    InputLabelProps={{ shrink: true }}
+                                    slotProps={{ inputLabel: { shrink: true } }}
                                     onChange={(e) =>
                                         setForm({
                                             ...form,
