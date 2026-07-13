@@ -2252,7 +2252,7 @@ installer-deb:
 	echo "  4. Start: sudo systemctl start sysmanage"
 
 # Build OpenBSD port tarball
-installer-openbsd: build
+installer-openbsd:
 	@echo "=== Building OpenBSD Port Tarball ==="
 	@echo ""
 	@CURRENT_DIR=$$(pwd); \
@@ -2271,15 +2271,14 @@ installer-openbsd: build
 		fi; \
 	fi; \
 	echo ""; \
-	echo "Checking prerequisites..."; \
-	if [ ! -d frontend/dist ]; then \
-		echo "ERROR: Frontend not built. Run 'make build' first."; \
-		exit 1; \
-	fi; \
-	echo "✓ Frontend build found"; \
+	echo "Note: this port builds fully OFFLINE from a pre-built libs distfile"; \
+	echo "(backend + web UI + pure-Python bundle) that the release publishes to"; \
+	echo "R2; the tarball here is just the port recipe, so no local build is"; \
+	echo "needed.  A valid installer/openbsd/distinfo (produced by the"; \
+	echo "build-openbsd-libs CI job) must be present for end users to build."; \
 	echo ""; \
-	echo "Updating port Makefile with version v$$VERSION..."; \
-	sed -i.bak "s/^GH_TAGNAME =.*/GH_TAGNAME =\t\tv$$VERSION/" "$$PORT_DIR/Makefile"; \
+	echo "Updating port Makefile with version $$VERSION..."; \
+	sed -i.bak "s/^V =.*/V = $$VERSION/" "$$PORT_DIR/Makefile"; \
 	rm -f "$$PORT_DIR/Makefile.bak"; \
 	echo "✓ Version updated"; \
 	echo ""; \

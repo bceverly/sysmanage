@@ -1,23 +1,22 @@
 name: Build OpenBSD Packages
 
-# Standalone, on-demand builder for pre-built OpenBSD binary packages (.tgz)
-# of the sysmanage SERVER, one per OpenBSD release.
+# Standalone, on-demand builder for the OpenBSD SERVER packages, using the
+# fully-offline port model (see installer/openbsd/Makefile + build-libs.sh).
 #
-# This is the binary-package counterpart to the version-independent port
-# tarball produced by build-and-release.yml (`make installer-openbsd`).  The
-# port tarball lets users compile from source on any 7.x; these .tgz packages
-# let them `pkg_add` a pre-built server for a specific release.
+# Two phases:
+#   1. build-libs  — build the single, version-independent "complete" distfile
+#      (backend source + built web UI + the pure-Python dependency bundle) and
+#      its distinfo.  The frontend is built on Linux; the pure-Python bundle is
+#      built in an OpenBSD VM (so it excludes the C/Rust deps that come from
+#      ports).  This distfile is what the release publishes to R2 and what the
+#      port fetches.
+#   2. build-openbsd (matrix 7.8/7.9) — stage the port with that distfile +
+#      distinfo and build the pre-built .tgz FULLY OFFLINE (no pip/npm/compiler
+#      at port-build time).  Per-version because the .tgz records
+#      version-specific dependency-package pins.
 #
-# It is intentionally SEPARATE from the release pipeline (workflow_dispatch
-# only) so a slow/flaky OpenBSD VM build never blocks a server release.  Once a
-# manual run has proven the server builds cleanly on each release, this matrix
-# job can be lifted into build-and-release.yml (needs + release-asset upload).
-#
-# NOTE: the server is heavy (grpc/cryptography/lxml/xmlsec + a large frontend),
-# so `make package` inside the emulated OpenBSD VM is much slower than the
-# agent's — hence the longer timeout.  `make makesum`/`make package` fetch the
-# GitHub source dist for GH_TAGNAME=v<version>, so the matching release tag must
-# already exist on GitHub before running this.
+# workflow_dispatch only, so a slow/flaky emulated VM build never blocks a
+# release.  The matching release tag's source is used for the backend/frontend.
 
 on:
   workflow_dispatch:
@@ -30,19 +29,10 @@ permissions:
   contents: read
 
 jobs:
-  build-openbsd:
-    name: Build OpenBSD ${{ matrix.openbsd-version }} Package
+  build-libs:
+    name: Build OpenBSD libs distfile
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # OpenBSD supports only the latest two releases; 7.7 is EOL (its ports
-        # are also too old — e.g. cryptography 44.0.2 — to satisfy the current
-        # pure-Python deps without a from-source Rust build).
-        openbsd-version: ['7.8', '7.9']
-
+    timeout-minutes: 60
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -52,36 +42,103 @@ jobs:
         with:
           node-version: '20'
 
-      # The frontend cannot be built on OpenBSD — Vite/rolldown ships no OpenBSD
-      # native binary — so we build the UI here on Linux, at the exact release
-      # tag, and rsync frontend/dist into the OpenBSD VM below, where do-install
-      # bundles it into the package.  Without this the .tgz would ship a UI-less
-      # (backend-only) server.
-      - name: Build frontend from the release tag (on Linux)
+      # Build the frontend on Linux (fast) from the exact release tag; the
+      # OpenBSD VM only assembles + bundles.
+      - name: Build frontend + stage source at the release tag
         env:
           # user-controllable input → env only, never inlined into run: (semgrep)
           RELEASE_VERSION: ${{ github.event.inputs.version }}
         run: |
           set -e
-          V="${RELEASE_VERSION#v}"   # bare version; the git tag is v${V}
-          echo "Fetching frontend source at tag v${V}"
+          V="${RELEASE_VERSION#v}"
           git fetch --depth 1 origin "refs/tags/v${V}:refs/tags/v${V}"
-          git checkout "v${V}" -- frontend
+          git checkout "v${V}" -- backend alembic alembic.ini scripts installer \
+            requirements-prod.txt README.md LICENSE frontend 2>/dev/null || \
+            git checkout "v${V}" -- backend alembic alembic.ini scripts installer \
+            requirements-prod.txt frontend
           cd frontend
-          npm install --legacy-peer-deps
+          npm install
           npm run build
-          test -d dist && [ -n "$(ls -A dist)" ] || {
-            echo "ERROR: frontend build produced no dist/"; exit 1; }
-          echo "Frontend built:"; ls -la dist | head
+          test -d dist && [ -n "$(ls -A dist)" ] || { echo "ERROR: no frontend dist/"; exit 1; }
+
+      - name: Assemble libs distfile + distinfo (in an OpenBSD VM)
+        uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        with:
+          release: '7.9'
+          usesh: true
+          sync: rsync
+          envs: 'RELEASE_VERSION'
+          run: |
+            set -ex
+            VERSION="${RELEASE_VERSION#v}"
+            export FETCH_PACKAGES=
+
+            # Fetch the 7.9 release ports tree (for the dep ports + the port
+            # infrastructure that generates distinfo).
+            ftp -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/7.9/ports.tar.gz"
+            tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
+
+            # 1. Build the complete distfile from the synced source.
+            sh "$GITHUB_WORKSPACE/installer/openbsd/build-libs.sh" \
+              "$VERSION" "$GITHUB_WORKSPACE" /tmp/libout
+
+            # Stage the port so `make makesum` can generate distinfo.
+            PORT_DIR=/usr/ports/mystuff/www/sysmanage
+            mkdir -p "$PORT_DIR"
+            cp "$GITHUB_WORKSPACE/installer/openbsd/Makefile" "$PORT_DIR/"
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/files" "$PORT_DIR/" 2>/dev/null || true
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/pkg" "$PORT_DIR/" 2>/dev/null || true
+            cd "$PORT_DIR"
+            sed -i "s/^V =.*/V = ${VERSION}/" Makefile
+            sed -i "s/^REVISION.*=.*/REVISION = 0/" Makefile
+            DISTDIR=$(make show=DISTDIR)
+            mkdir -p "$DISTDIR"
+            cp "/tmp/libout/sysmanage-${VERSION}-openbsd.tar.gz" "$DISTDIR/"
+
+            # 2. Generate distinfo (checksums the local distfile — no fetch).
+            make makesum
+            cat distinfo
+
+            # Export both to the workspace.
+            cp "/tmp/libout/sysmanage-${VERSION}-openbsd.tar.gz" "$GITHUB_WORKSPACE/"
+            cp distinfo "$GITHUB_WORKSPACE/distinfo"
+
+      - name: Upload libs distfile + distinfo
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-openbsd-libs
+          path: |
+            sysmanage-*-openbsd.tar.gz
+            distinfo
+          if-no-files-found: error
+
+  build-openbsd:
+    name: Build OpenBSD ${{ matrix.openbsd-version }} Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: build-libs
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # OpenBSD supports only the latest two releases; 7.7 is EOL.
+        openbsd-version: ['7.8', '7.9']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Download libs distfile + distinfo
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: sysmanage-openbsd-libs
+          path: libs/
 
       - name: Build on OpenBSD ${{ matrix.openbsd-version }}
         uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
         env:
-          # The user-controllable workflow input goes through an env var and is
-          # forwarded into the VM via `envs:` below — NEVER interpolated into the
-          # run: script (that is a shell-injection sink; semgrep
-          # run-shell-injection).  matrix.openbsd-version is a fixed allow-list
-          # value (7.8/7.9) and is safe to interpolate directly.
           RELEASE_VERSION: ${{ github.event.inputs.version }}
         with:
           release: ${{ matrix.openbsd-version }}
@@ -90,128 +147,74 @@ jobs:
           envs: 'RELEASE_VERSION'
           run: |
             set -ex
-
             OPENBSD_VERSION="${{ matrix.openbsd-version }}"
             OPENBSD_VERSION_NODOT=$(echo "$OPENBSD_VERSION" | tr -d '.')
-            VERSION="${RELEASE_VERSION#v}"  # bare version; the git tag is v${VERSION}
-
-            # Install BUILD/RUN dependency ports as prebuilt BINARY packages
-            # (pkg_add via the ports framework) instead of compiling them —
-            # cryptography/pydantic-core/... would otherwise need a Rust
-            # toolchain and hours of emulated build time.  Per ports(7) the
-            # value is passed to pkg_add as OPTIONS, so it must be EMPTY (the
-            # old `FETCH_PACKAGES=Yes` boolean is rejected as "old syntax").
+            VERSION="${RELEASE_VERSION#v}"
+            # Dep ports come as binaries (recorded as @depend in the .tgz).
             export FETCH_PACKAGES=
 
-            echo "=== Building sysmanage ${VERSION} on OpenBSD ${OPENBSD_VERSION} ==="
+            # 7.x release ports tree.
+            ftp -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
+            tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
 
-            # Step 1: Fetch the matching ports tree
-            echo "=== Step 1: Fetching ports tree ==="
-            PORTS_URL="https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
-            echo "Downloading ports from: $PORTS_URL"
-            if ! ftp -o /tmp/ports.tar.gz "$PORTS_URL"; then
-              echo "ERROR: Failed to download ports from $PORTS_URL"
-              exit 1
-            fi
-            echo "Extracting full ports tree..."
-            if ! tar xzf /tmp/ports.tar.gz -C /usr; then
-              echo "ERROR: Failed to extract ports tarball"
-              exit 1
-            fi
-            rm /tmp/ports.tar.gz
-            ls /usr/ports/
-
-            # Step 2: Stage the sysmanage port (category www, matching the
-            # port tarball built by `make installer-openbsd`)
-            echo "=== Step 2: Setting up port directory ==="
+            # Stage the port + the pre-built distinfo (do NOT regenerate it —
+            # end users get exactly this distinfo).
             PORT_DIR=/usr/ports/mystuff/www/sysmanage
-            mkdir -p "$PORT_DIR/files" "$PORT_DIR/pkg"
+            mkdir -p "$PORT_DIR"
             cp "$GITHUB_WORKSPACE/installer/openbsd/Makefile" "$PORT_DIR/"
-            cp "$GITHUB_WORKSPACE/installer/openbsd/distinfo" "$PORT_DIR/"
-            cp -r "$GITHUB_WORKSPACE/installer/openbsd/files/"* "$PORT_DIR/files/" 2>/dev/null || true
-            cp -r "$GITHUB_WORKSPACE/installer/openbsd/pkg/"* "$PORT_DIR/pkg/" 2>/dev/null || true
-
-            # Pin the release tag the port fetches its source dist from
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/files" "$PORT_DIR/" 2>/dev/null || true
+            cp -r "$GITHUB_WORKSPACE/installer/openbsd/pkg" "$PORT_DIR/" 2>/dev/null || true
+            cp "$GITHUB_WORKSPACE/libs/distinfo" "$PORT_DIR/distinfo"
             cd "$PORT_DIR"
-            sed -i "s/^GH_TAGNAME.*=.*/GH_TAGNAME = v${VERSION}/" Makefile
+            sed -i "s/^V =.*/V = ${VERSION}/" Makefile
             sed -i "s/^REVISION.*=.*/REVISION = 0/" Makefile
-            echo "=== Makefile contents ==="
-            cat Makefile
-            echo "========================="
 
-            # Step 3: Regenerate checksums, then fetch + extract the source dist
-            echo "=== Step 3: makesum + extract ==="
-            make makesum 2>&1 || echo "makesum had warnings"
-            cat distinfo
+            # Place the pre-built distfile in DISTDIR (the offline "fetch").
+            DISTDIR=$(make show=DISTDIR)
+            mkdir -p "$DISTDIR"
+            cp "$GITHUB_WORKSPACE/libs/sysmanage-${VERSION}-openbsd.tar.gz" "$DISTDIR/"
+
+            # Offline build: extract → fake → regenerate PLIST → package.
+            make checksum
             make extract
-
-            # Step 4: Inject the Linux-built frontend into WRKSRC (the GitHub
-            # source dist has no pre-built dist/, and it cannot be built on
-            # OpenBSD).  do-install fails hard if this is missing.
-            echo "=== Step 4: Injecting Linux-built frontend ==="
-            WRKSRC=$(make show=WRKSRC)
-            echo "WRKSRC=$WRKSRC"
-            rm -rf "$WRKSRC/frontend/dist"
-            mkdir -p "$WRKSRC/frontend"
-            cp -R "$GITHUB_WORKSPACE/frontend/dist" "$WRKSRC/frontend/dist"
-            ls "$WRKSRC/frontend/dist" | head
-
-            # Step 5: Build (installs binary dep packages + bundles pip deps),
-            # fake-install, regenerate the PLIST from the fake install (the
-            # checked-in PLIST is a template; backend + bundle + hashed frontend
-            # asset names are filled in here), then package.
-            echo "=== Step 5: build + fake + update-plist + package ==="
-            make build
             make fake
             make update-plist 2>&1 || echo "update-plist had warnings"
-            if ! make package 2>&1; then
-              echo "ERROR: Package build failed"
-              exit 1
-            fi
+            make package
 
-            # Step 6: Locate + export the built package.  PACKAGE_REPOSITORY
-            # varies (/usr/ports/packages by default, /usr/packages on hosts
-            # with a mk.conf override), so search both.
-            echo "=== Step 6: Finding built package ==="
-            find /usr/ports/packages /usr/packages -name "*.tgz" -type f 2>/dev/null || true
+            # Guard: nothing should have compiled.  (No pip/npm here at all.)
             PKG_FILE=$(find /usr/ports/packages /usr/packages -name "sysmanage-*.tgz" -type f 2>/dev/null | grep -v 'sysmanage-agent' | head -1)
             if [ -z "$PKG_FILE" ]; then
-              echo "ERROR: Package file not found!"
-              find /usr/ports/packages -type f 2>/dev/null || echo "No files in /usr/ports/packages"
-              exit 1
+              echo "ERROR: package not found"; find /usr/ports/packages /usr/packages -type f 2>/dev/null || true; exit 1
             fi
-
-            # Step 7: Verify the package is actually complete — a UI-less or
-            # dependency-less server must fail the build, not ship silently.
-            echo "=== Step 7: Verifying package contents ==="
-            tar ztf "$PKG_FILE" > /tmp/pkg-contents.txt
-            grep -q 'share/sysmanage/frontend/index.html' /tmp/pkg-contents.txt || {
-              echo "ERROR: package is missing the frontend (share/sysmanage/frontend/index.html)"; exit 1; }
-            grep -q 'libexec/sysmanage/pip-packages/fastapi' /tmp/pkg-contents.txt || {
-              echo "ERROR: package is missing the pip bundle (libexec/sysmanage/pip-packages/fastapi)"; exit 1; }
-            grep -q 'libexec/sysmanage/backend/main.py' /tmp/pkg-contents.txt || {
-              echo "ERROR: package is missing the backend (libexec/sysmanage/backend/main.py)"; exit 1; }
-            echo "Package contents verified (frontend + pip bundle + backend present)"
-
+            tar ztf "$PKG_FILE" > /tmp/pc.txt
+            grep -q 'share/sysmanage/frontend/index.html' /tmp/pc.txt || { echo "ERROR: no frontend"; exit 1; }
+            grep -q 'libexec/sysmanage/pip-packages/fastapi' /tmp/pc.txt || { echo "ERROR: no pip bundle"; exit 1; }
+            grep -q 'libexec/sysmanage/backend/main.py' /tmp/pc.txt || { echo "ERROR: no backend"; exit 1; }
             cp "$PKG_FILE" "$GITHUB_WORKSPACE/sysmanage-${VERSION}-openbsd${OPENBSD_VERSION_NODOT}.tgz"
-            echo "SUCCESS: Package copied to workspace"
             ls -la "$GITHUB_WORKSPACE"/*.tgz
 
-      - name: List built package
-        run: ls -la *.tgz 2>/dev/null || echo "No packages found"
+      - name: Generate SHA256 checksum
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          V="${RELEASE_VERSION#v}"
+          NODOT=$(echo '${{ matrix.openbsd-version }}' | tr -d '.')
+          PKG="sysmanage-${V}-openbsd${NODOT}.tgz"
+          sha256sum "$PKG" > "${PKG}.sha256"
+          cat "${PKG}.sha256"
 
       - name: Upload OpenBSD ${{ matrix.openbsd-version }} package
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: sysmanage-openbsd-${{ matrix.openbsd-version }}
-          path: "*.tgz"
+          name: sysmanage-openbsd-${{ matrix.openbsd-version }}-pkg
+          path: "*.tgz*"
           if-no-files-found: error
 
   collect-packages:
     name: Collect All Packages
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: build-openbsd
+    needs: [build-libs, build-openbsd]
     if: always()
     steps:
       - name: Download all artifacts
@@ -221,11 +224,11 @@ jobs:
         continue-on-error: true
 
       - name: List all packages
-        run: find packages/ -name "*.tgz" -type f 2>/dev/null || echo "No packages found"
+        run: find packages/ \( -name "*.tgz" -o -name "*-openbsd.tar.gz" \) -type f 2>/dev/null || echo "none"
 
       - name: Upload combined packages
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: hashFiles('packages/*/*.tgz') != ''
+        if: hashFiles('packages/**/*.tgz') != ''
         with:
           name: sysmanage-openbsd-all
           path: packages/

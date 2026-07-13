@@ -2,9 +2,9 @@
 
 COMMENT =		centralized system management server
 
-GH_ACCOUNT =		bceverly
-GH_PROJECT =		sysmanage
-GH_TAGNAME =		v0.0.0		# auto-updated by CI / make installer
+V =			0.0.0		# auto-updated by CI / make installer
+DISTNAME =		sysmanage-${V}-openbsd
+PKGNAME =		sysmanage-${V}
 REVISION =		0
 
 CATEGORIES =		sysutils www
@@ -16,29 +16,31 @@ MAINTAINER =		Bryan Everly <bryan@theeverlys.com>
 # AGPLv3
 PERMIT_PACKAGE =	Yes
 
+# --- Offline build model ---------------------------------------------------
+#
+# This port builds FULLY OFFLINE (no pip / npm / compiler at build time): all
+# network access happens in the fetch phase, as OpenBSD ports policy expects.
+# It fetches a SINGLE pre-built distfile from the SysManage R2 repository,
+# produced by the release pipeline, containing everything needed:
+#
+#   * the backend source,
+#   * the built web UI (frontend/dist),
+#   * the pure-Python dependency bundle (pip-packages/).
+#
+# The pip-packages bundle is 100% pure-Python (no compiled .so), so one distfile
+# serves every OpenBSD/python version.  The heavy C/Rust runtime deps
+# (cryptography, pydantic, Pillow, ...) are NOT bundled — they come from OpenBSD
+# ports (RUN_DEPENDS below), verified present via openbsd.app.  At runtime,
+# PYTHONPATH = the app + pip-packages, and the system ports satisfy the rest
+# (see files/sysmanage.rc).
+MASTER_SITES =		https://repo.sysmanage.org/server/openbsd/
+
 MODULES =		lang/python
 MODPY_VERSION =		${MODPY_DEFAULT_VERSION_3}
 
-# --- Runtime Python dependencies -------------------------------------------
-#
-# The server has ~60 runtime Python deps.  We split them (see the Alpine
-# APKBUILD, which uses the same hybrid model):
-#
-#   * The heavy C / Rust extension deps come from OpenBSD ports below, so they
-#     are NEVER compiled from source in the (emulated, slow) build VM.  Every
-#     path here was verified present in the current ports tree via openbsd.app.
-#     Transitive C/Rust deps (py-pydantic-core, py-greenlet, py-cffi,
-#     py-MarkupSafe, ...) are pulled in automatically by these top-level ports.
-#   * The remaining ~45 pure-Python deps are bundled at their exact,
-#     CVE-pinned versions into a private ${PREFIX}/libexec/sysmanage/pip-packages
-#     directory by the pip step in do-build (PYTHONPATH points there at
-#     runtime — see files/sysmanage.rc).  Bundling keeps our security pins
-#     (which ports may lag) for the pure-Python surface.
-#
-# The frontend cannot be built on OpenBSD at all (Vite/rolldown ships no
-# OpenBSD native binary), so the built frontend/dist is produced on Linux in CI
-# and rsynced into ${WRKSRC}/frontend/dist before the build — see
-# .github/workflows/build-openbsd-packages.yml.
+# Nothing to compile — everything in the distfile is pre-built.
+NO_BUILD =		Yes
+
 RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 			databases/py-sqlalchemy${MODPY_FLAVOR} \
 			devel/py-babel${MODPY_FLAVOR} \
@@ -62,14 +64,6 @@ RUN_DEPENDS =		databases/py-alembic${MODPY_FLAVOR} \
 # (ships libpq.so), so that is the correct dependency spec.
 RUN_DEPENDS +=		databases/postgresql,-main
 
-# The ports above must be present at BUILD time too, so `pip install --target`
-# sees them already satisfied and does NOT drag their C/Rust deps back into the
-# pip resolution (which would compile cryptography/pydantic-core/... from
-# source).  py-pip drives the bundle step.  CI runs the build with
-# FETCH_PACKAGES=Yes so these are pkg_add'd as binaries, not built.
-BUILD_DEPENDS =		${RUN_DEPENDS} \
-			devel/py-pip${MODPY_FLAVOR}
-
 NO_TEST =		Yes
 
 # Installation directories
@@ -79,68 +73,11 @@ SUBST_VARS +=		SYSCONFDIR LOCALSTATEDIR
 SYSMANAGE_USER =	_sysmanage
 SYSMANAGE_GROUP =	_sysmanage
 
-# PyPI distributions already provided by the RUN_DEPENDS ports above (and their
-# port-provided transitive C/Rust builders).  These lines are stripped from
-# requirements-prod.txt before the pip bundle so their exact security pins do
-# not force a from-source rebuild of the very extensions we took from ports.
-# NB: psycopg is intentionally NOT here — it is pip-bundled (see above).
-PIP_PORT_PROVIDED =	aiohttp alembic annotated-types argon2-cffi Babel \
-			bcrypt cffi cryptography gevent greenlet Jinja2 Mako \
-			MarkupSafe orjson Pillow pycparser pydantic \
-			pydantic-core PyYAML reportlab SQLAlchemy \
-			websockets zope.event zope.interface
-
-# PyPI distributions deliberately NOT shipped on OpenBSD, each because it would
-# drag a heavy compiled toolchain into the VM for functionality that degrades
-# gracefully:
-#   * opentelemetry-exporter-otlp pulls grpcio (a large C++ build with no
-#     OpenBSD port); backend/telemetry/otel_config.py imports the OTLP exporter
-#     under try/except ImportError and disables telemetry when it is absent.
-#   * watchfiles is a Rust extension used only by `uvicorn --reload` (dev);
-#     production uvicorn runs fine without it.
-PIP_OMIT =		opentelemetry-exporter-otlp watchfiles
-
 # Stamp the package version into backend/__init__.py so backend.__version__
 # resolves at runtime (server-info + federation "Reported version" show it
 # instead of "unknown"); the GitHub source tarball ships it empty.
 post-extract:
-	printf '__version__ = "%s"\n' "${GH_TAGNAME:S/^v//}" > ${WRKSRC}/backend/__init__.py
-
-# Build the private pip bundle of the pure-Python deps not provided by ports.
-# The exclusion alternation is built from PIP_PORT_PROVIDED; each excluded name
-# must be followed by a version/marker boundary so e.g. "pydantic" does not also
-# strip "pydantic-settings" / "pydantic-extra-types" (both pip-bundled).
-do-build:
-	@cd ${WRKSRC} && { \
-		excl=$$(echo '${PIP_PORT_PROVIDED} ${PIP_OMIT}' | tr -s ' ' | tr ' ' '|') ; \
-		grep -viE "^($$excl)( |>|<|=|!|~|;|\[|$$)" requirements-prod.txt \
-			| sed -E 's/psycopg\[binary\]/psycopg/' \
-			> ${WRKDIR}/pip-bundle.txt ; \
-		echo "=== pip bundle (pure-Python deps not from ports) ===" ; \
-		cat ${WRKDIR}/pip-bundle.txt ; }
-	# Build the bundle inside a --system-site-packages venv so pip SEES the dep
-	# ports installed above and installs ONLY what they don't provide.  A bare
-	# `pip install --target` IGNORES installed packages and would re-download +
-	# rebuild cryptography/pydantic-core/aiohttp from source (Rust/C) — verified
-	# on a real 7.9 box — defeating the whole ports/pip split.  We then lift just
-	# the venv's own site-packages (the pure-Python bundle) into pip-packages;
-	# the system ports stay reachable on the default sys.path at runtime.
-	rm -rf ${WRKDIR}/bldvenv
-	${MODPY_BIN} -m venv --system-site-packages ${WRKDIR}/bldvenv
-	# PYTHONNOUSERSITE keeps a stray ~/.local on the build host from being
-	# counted as "already satisfied" (which would silently drop a package from
-	# the bundle → runtime ImportError); only the system dep ports count.
-	PYTHONNOUSERSITE=1 ${WRKDIR}/bldvenv/bin/python -m pip install --no-cache-dir \
-		-r ${WRKDIR}/pip-bundle.txt
-	mkdir -p ${WRKSRC}/pip-packages
-	cp -R ${WRKDIR}/bldvenv/lib/python${MODPY_VERSION}/site-packages/* \
-		${WRKSRC}/pip-packages/
-	# Drop venv/pip scaffolding + caches we don't ship (setuptools stays — it is
-	# a listed runtime dep); *.libs shims duplicate system shared libraries.
-	@cd ${WRKSRC}/pip-packages && rm -rf pip pip-*.dist-info wheel wheel-*.dist-info \
-		_distutils_hack distutils-precedence.pth 2>/dev/null || true
-	@find ${WRKSRC}/pip-packages -type d \( -name '__pycache__' -o -name '*.libs' \) \
-		-exec rm -rf {} + 2>/dev/null || true
+	printf '__version__ = "%s"\n' "${V}" > ${WRKSRC}/backend/__init__.py
 
 do-install:
 	# Backend Python application
@@ -149,12 +86,17 @@ do-install:
 	cp -R ${WRKSRC}/alembic ${PREFIX}/libexec/sysmanage/
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${PREFIX}/libexec/sysmanage/
 
-	# Bundled pure-Python dependencies (runtime PYTHONPATH; see files/sysmanage.rc)
+	# Bundled pure-Python dependencies (from the libs distfile; runtime
+	# PYTHONPATH points here — see files/sysmanage.rc).
+	@test -d ${WRKSRC}/pip-packages || { \
+		echo "ERROR: ${WRKSRC}/pip-packages is missing — the openbsd-libs" ; \
+		echo "distfile was not fetched/extracted.  Refusing to package." ; \
+		exit 1 ; }
 	cp -R ${WRKSRC}/pip-packages ${PREFIX}/libexec/sysmanage/
 
-	# Frontend static files.  A missing frontend is a hard error: shipping a
-	# server without its UI is exactly the defect this port must never
-	# reproduce.  CI injects the Linux-built dist into ${WRKSRC}/frontend/dist.
+	# Frontend static files (from the libs distfile).  A missing frontend is a
+	# hard error: shipping a server without its UI is exactly the defect this
+	# port must never reproduce.
 	${INSTALL_DATA_DIR} ${PREFIX}/share/sysmanage/frontend
 	@test -d ${WRKSRC}/frontend/dist || { \
 		echo "ERROR: ${WRKSRC}/frontend/dist is missing — the frontend was" ; \
