@@ -1,5 +1,9 @@
-@comment This file can be auto-generated using: make update-plist
-@comment After first build, run: cd /usr/ports/mystuff/www/sysmanage && make update-plist
+@comment This PLIST is a TEMPLATE.  The real packing list is regenerated at
+@comment package time via `make update-plist` (run in CI) because the bundle of
+@comment pure-Python deps under libexec/sysmanage/pip-packages/ and the
+@comment hash-named Vite frontend assets under share/sysmanage/frontend/ change
+@comment per release and cannot be enumerated statically here.
+@comment To regenerate by hand: cd /usr/ports/mystuff/www/sysmanage && make update-plist
 @comment For official port submission, register these in /usr/ports/infrastructure/db/user.list
 @comment @newgroup _sysmanage:828
 @comment @newuser _sysmanage:828:_sysmanage::SysManage Server:/nonexistent:/sbin/nologin
@@ -15,7 +19,9 @@ libexec/sysmanage/alembic/
 libexec/sysmanage/backend/
 libexec/sysmanage/scripts/
 libexec/sysmanage/scripts/openbao_init_unseal.py
-@comment Backend Python files will be listed here after make update-plist
+@comment Backend Python files + the pip-packages/ bundle of pure-Python deps
+@comment (fastapi, uvicorn, starlette, psycopg, ...) are listed here after
+@comment make update-plist.
 @comment Frontend static files
 share/sysmanage/
 share/sysmanage/frontend/

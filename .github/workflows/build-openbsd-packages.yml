@@ -44,22 +44,59 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: '20'
+
+      # The frontend cannot be built on OpenBSD — Vite/rolldown ships no OpenBSD
+      # native binary — so we build the UI here on Linux, at the exact release
+      # tag, and rsync frontend/dist into the OpenBSD VM below, where do-install
+      # bundles it into the package.  Without this the .tgz would ship a UI-less
+      # (backend-only) server.
+      - name: Build frontend from the release tag (on Linux)
+        env:
+          # user-controllable input → env only, never inlined into run: (semgrep)
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -e
+          V="${RELEASE_VERSION#v}"   # bare version; the git tag is v${V}
+          echo "Fetching frontend source at tag v${V}"
+          git fetch --depth 1 origin "refs/tags/v${V}:refs/tags/v${V}"
+          git checkout "v${V}" -- frontend
+          cd frontend
+          npm install --legacy-peer-deps
+          npm run build
+          test -d dist && [ -n "$(ls -A dist)" ] || {
+            echo "ERROR: frontend build produced no dist/"; exit 1; }
+          echo "Frontend built:"; ls -la dist | head
+
       - name: Build on OpenBSD ${{ matrix.openbsd-version }}
         uses: vmactions/openbsd-vm@18edb32f4e48dae5865d7b8b3a9587bc01218a20 # v1.4.4
+        env:
+          # The user-controllable workflow input goes through an env var and is
+          # forwarded into the VM via `envs:` below — NEVER interpolated into the
+          # run: script (that is a shell-injection sink; semgrep
+          # run-shell-injection).  matrix.openbsd-version is a fixed allow-list
+          # value (7.7/7.8/7.9) and is safe to interpolate directly.
+          RELEASE_VERSION: ${{ github.event.inputs.version }}
         with:
           release: ${{ matrix.openbsd-version }}
           usesh: true
           sync: rsync
-          # NOTE: values are interpolated on the runner (before the script is
-          # shipped into the guest); the anyvm-based vmactions/openbsd-vm does
-          # NOT forward step-level `env:` vars into the VM, so `$INPUT_*` would
-          # be unset there.  matrix.openbsd-version is a fixed allow-list value.
+          envs: 'RELEASE_VERSION'
           run: |
-            set -x
+            set -ex
 
             OPENBSD_VERSION="${{ matrix.openbsd-version }}"
             OPENBSD_VERSION_NODOT=$(echo "$OPENBSD_VERSION" | tr -d '.')
-            VERSION="${{ github.event.inputs.version }}"
+            VERSION="${RELEASE_VERSION#v}"  # bare version; the git tag is v${VERSION}
+
+            # Install BUILD/RUN dependency ports as prebuilt BINARY packages
+            # (pkg_add via the ports framework) instead of compiling them —
+            # cryptography/pydantic-core/... would otherwise need a Rust
+            # toolchain and hours of emulated build time.
+            export FETCH_PACKAGES=Yes
 
             echo "=== Building sysmanage ${VERSION} on OpenBSD ${OPENBSD_VERSION} ==="
 
@@ -97,31 +134,61 @@ jobs:
             cat Makefile
             echo "========================="
 
-            # Step 3: Regenerate checksums for the pinned dist
-            echo "=== Step 3: Generating checksums ==="
+            # Step 3: Regenerate checksums, then fetch + extract the source dist
+            echo "=== Step 3: makesum + extract ==="
             make makesum 2>&1 || echo "makesum had warnings"
             cat distinfo
+            make extract
 
-            # Step 4: Build the binary package
-            echo "=== Step 4: Building package ==="
+            # Step 4: Inject the Linux-built frontend into WRKSRC (the GitHub
+            # source dist has no pre-built dist/, and it cannot be built on
+            # OpenBSD).  do-install fails hard if this is missing.
+            echo "=== Step 4: Injecting Linux-built frontend ==="
+            WRKSRC=$(make show=WRKSRC)
+            echo "WRKSRC=$WRKSRC"
+            rm -rf "$WRKSRC/frontend/dist"
+            mkdir -p "$WRKSRC/frontend"
+            cp -R "$GITHUB_WORKSPACE/frontend/dist" "$WRKSRC/frontend/dist"
+            ls "$WRKSRC/frontend/dist" | head
+
+            # Step 5: Build (installs binary dep packages + bundles pip deps),
+            # fake-install, regenerate the PLIST from the fake install (the
+            # checked-in PLIST is a template; backend + bundle + hashed frontend
+            # asset names are filled in here), then package.
+            echo "=== Step 5: build + fake + update-plist + package ==="
+            make build
+            make fake
+            make update-plist 2>&1 || echo "update-plist had warnings"
             if ! make package 2>&1; then
               echo "ERROR: Package build failed"
               exit 1
             fi
 
-            # Step 5: Locate + export the built package
-            echo "=== Step 5: Finding built package ==="
+            # Step 6: Locate + export the built package
+            echo "=== Step 6: Finding built package ==="
             find /usr/ports/packages -name "*.tgz" -type f 2>/dev/null || true
             PKG_FILE=$(find /usr/ports/packages -name "sysmanage-*.tgz" -type f 2>/dev/null | grep -v 'sysmanage-agent' | head -1)
-            if [ -n "$PKG_FILE" ]; then
-              cp "$PKG_FILE" "$GITHUB_WORKSPACE/sysmanage-${VERSION}-openbsd${OPENBSD_VERSION_NODOT}.tgz"
-              echo "SUCCESS: Package copied to workspace"
-              ls -la "$GITHUB_WORKSPACE"/*.tgz
-            else
+            if [ -z "$PKG_FILE" ]; then
               echo "ERROR: Package file not found!"
               find /usr/ports/packages -type f 2>/dev/null || echo "No files in /usr/ports/packages"
               exit 1
             fi
+
+            # Step 7: Verify the package is actually complete — a UI-less or
+            # dependency-less server must fail the build, not ship silently.
+            echo "=== Step 7: Verifying package contents ==="
+            tar ztf "$PKG_FILE" > /tmp/pkg-contents.txt
+            grep -q 'share/sysmanage/frontend/index.html' /tmp/pkg-contents.txt || {
+              echo "ERROR: package is missing the frontend (share/sysmanage/frontend/index.html)"; exit 1; }
+            grep -q 'libexec/sysmanage/pip-packages/fastapi' /tmp/pkg-contents.txt || {
+              echo "ERROR: package is missing the pip bundle (libexec/sysmanage/pip-packages/fastapi)"; exit 1; }
+            grep -q 'libexec/sysmanage/backend/main.py' /tmp/pkg-contents.txt || {
+              echo "ERROR: package is missing the backend (libexec/sysmanage/backend/main.py)"; exit 1; }
+            echo "Package contents verified (frontend + pip bundle + backend present)"
+
+            cp "$PKG_FILE" "$GITHUB_WORKSPACE/sysmanage-${VERSION}-openbsd${OPENBSD_VERSION_NODOT}.tgz"
+            echo "SUCCESS: Package copied to workspace"
+            ls -la "$GITHUB_WORKSPACE"/*.tgz
 
       - name: List built package
         run: ls -la *.tgz 2>/dev/null || echo "No packages found"

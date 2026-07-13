@@ -18,6 +18,12 @@ export SYSMANAGE_CONFIG=/etc/sysmanage.yaml
 export SYSMANAGE_DB_DIR=/var/db/sysmanage
 export SYSMANAGE_LOG_DIR=/var/log/sysmanage
 
+# The app root (for the "backend" package) plus the private bundle of
+# pure-Python deps (fastapi, uvicorn, starlette, psycopg, ...) that ship
+# alongside the app rather than as system ports.  The C/Rust deps
+# (cryptography, pydantic, ...) come from packages on the default sys.path.
+export PYTHONPATH=/usr/local/libexec/sysmanage:/usr/local/libexec/sysmanage/pip-packages
+
 # Set working directory
 rc_chdir="/usr/local/libexec/sysmanage"
 
@@ -37,7 +43,9 @@ rc_pre() {
 		echo "  3. Admin user credentials"
 		echo ""
 		echo "Then initialize the database with:"
-		echo "  cd /usr/local/libexec/sysmanage && python3 -m alembic upgrade head"
+		echo "  cd /usr/local/libexec/sysmanage && \\"
+		echo "    PYTHONPATH=/usr/local/libexec/sysmanage:/usr/local/libexec/sysmanage/pip-packages \\"
+		echo "    python3 -m alembic upgrade head"
 		echo ""
 		return 1
 	fi
