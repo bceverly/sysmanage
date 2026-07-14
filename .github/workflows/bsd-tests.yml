@@ -89,60 +89,62 @@ jobs:
           repository: bceverly/sysmanage-agent
           path: sysmanage-agent
 
-      - name: Run agent integration tests in FreeBSD VM
-        # NOTE: pin to a SHA before merging.  The repo's convention is to
-        # pin every third-party action — see the `# v4` comments on
-        # actions/checkout etc.
+      - name: Start FreeBSD VM
+        # cross-platform-actions v1.3.0 deprecated the `run:` input: the action
+        # now just starts the VM (which persists across steps) and commands run
+        # in it via `shell: cpa.sh {0}` in the next step.
         uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         env:
-          # Pre-bind any github / inputs context value used inside the
-          # VM's run: script to env vars so the script can reference
-          # "$PYTEST_MARKER" instead of interpolating ${{ ... }} —
-          # closes the run-shell-injection semgrep finding.
+          # Bind the user-controllable input to an env var that's forwarded into
+          # the VM (environment_variables) so the script uses "$PYTEST_MARKER"
+          # instead of interpolating ${{ ... }} — closes the run-shell-injection
+          # semgrep finding.
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
           operating_system: freebsd
           version: ${{ inputs.release_freebsd || '14.3' }}
           environment_variables: PYTEST_MARKER
-          run: |
-            # FreeBSD pkg aborts the WHOLE batch if any package name is
-            # unresolvable in the repo (unlike NetBSD pkgin and OpenBSD
-            # pkg_add, which warn and continue).  Install per-package so
-            # one missing name doesn't take down Python + everything.
-            for p in \
-              python311 py311-pip py311-sqlite3 git \
-              py311-cryptography py311-pyyaml py311-aiohttp py311-websockets \
-              py311-psutil py311-bcrypt
-            do
-              sudo pkg install -y "$p" || true
-            done
-            cd sysmanage-agent
-            python3.11 -m venv --system-site-packages .venv
-            . .venv/bin/activate
-            python -m pip install --upgrade pip
-            # SQLAlchemy + aiofiles + defusedxml are not consistently
-            # packaged for py311 on FreeBSD; install via pip (they
-            # have wheels or are pure Python).  pytest/pytest-asyncio
-            # always via pip.  defusedxml is an unconditional runtime
-            # import in package_collector_windows.py — required for
-            # conftest collection even when the Windows collector
-            # path itself isn't exercised on FreeBSD.
-            # websockets is a hard import in the agent's main.py; the py311-*
-            # pkg for it can be unresolvable on a given FreeBSD release (the
-            # `|| true` above then silently skips it), so install it via pip as
-            # a fallback.  In the --system-site-packages venv this is a no-op if
-            # the pkg did install.
-            python -m pip install pytest pytest-asyncio sqlalchemy aiofiles defusedxml websockets
-            set +e
-            python -m pytest tests/ -m "$PYTEST_MARKER" \
-              -v --tb=short --junit-xml=bsd-freebsd-junit.xml
-            rc=$?
-            set -e
-            if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
-              exit 0
-            fi
-            exit $rc
+
+      - name: Run agent integration tests in FreeBSD VM
+        shell: cpa.sh {0}
+        run: |
+          # FreeBSD's pkg repo ships only the DEFAULT python flavor, and that
+          # default moves between releases (14.3 → 3.12, so py311-* no longer
+          # resolve — the per-package `|| true` loop then silently skips
+          # everything, leaving the venv empty).  Derive the flavor prefix from
+          # the installed default python3 instead of hardcoding it.  pkg aborts
+          # the whole batch on one unresolvable name, so install per-package.
+          sudo pkg install -y python3 git
+          PYVER=$(python3 -c 'import sys; print("%d%d" % sys.version_info[:2])')
+          PYBIN=$(python3 -c 'import sys; print("python%d.%d" % sys.version_info[:2])')
+          echo "FreeBSD default python: ${PYBIN} (py${PYVER}-*)"
+          for p in \
+            py${PYVER}-sqlite3 py${PYVER}-cryptography py${PYVER}-yaml \
+            py${PYVER}-aiohttp py${PYVER}-websockets py${PYVER}-psutil \
+            py${PYVER}-bcrypt
+          do
+            sudo pkg install -y "$p" || true
+          done
+          cd sysmanage-agent
+          "${PYBIN}" -m venv --system-site-packages .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          # pytest/pytest-asyncio/sqlalchemy/aiofiles/defusedxml aren't reliably
+          # packaged — pip them (wheels/pure Python).  websockets + PyYAML are
+          # hard imports in the agent's main.py; pip them too as a fallback for a
+          # skipped py*-pkg (no-op in the --system-site-packages venv if the pkg
+          # installed).
+          python -m pip install pytest pytest-asyncio sqlalchemy aiofiles defusedxml websockets pyyaml
+          set +e
+          python -m pytest tests/ -m "$PYTEST_MARKER" \
+            -v --tb=short --junit-xml=bsd-freebsd-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            exit 0
+          fi
+          exit $rc
 
       - name: Upload junit report
         if: always()
@@ -165,7 +167,9 @@ jobs:
           repository: bceverly/sysmanage-agent
           path: sysmanage-agent
 
-      - name: Run agent integration tests in OpenBSD VM
+      - name: Start OpenBSD VM
+        # v1.3.0 deprecated `run:`; VM starts here, commands run via
+        # `shell: cpa.sh {0}` in the next step.
         uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
@@ -173,38 +177,37 @@ jobs:
           operating_system: openbsd
           version: ${{ inputs.release_openbsd || '7.9' }}
           environment_variables: PYTEST_MARKER
-          run: |
-            # OpenBSD packages use py3- prefix.  Python is pulled in
-            # automatically as a dep of any py3-* package, so we don't
-            # name it explicitly (the `python%3.12` flavor syntax used
-            # by ports doesn't work in pkg_add).  pytest is not packaged
-            # for OpenBSD — install it via pip below.
-            # OpenBSD pkg_add tolerates missing names (warns and continues),
-            # so a single batch is fine.  Drop py3-aiofiles — not packaged
-            # — and pip install it (pure Python).
-            sudo pkg_add -I \
-              git py3-pip \
-              py3-cryptography py3-yaml py3-aiohttp py3-websockets \
-              py3-sqlalchemy py3-bcrypt py3-psutil || true
-            cd sysmanage-agent
-            python3 -m venv --system-site-packages .venv
-            . .venv/bin/activate
-            python -m pip install --upgrade pip
-            # defusedxml is an unconditional runtime import in
-            # package_collector_windows.py, so conftest collection
-            # needs it even on non-Windows BSDs.  websockets via pip too, as a
-            # fallback for a skipped py3-websockets pkg (no-op if it installed).
-            python -m pip install pytest pytest-asyncio aiofiles defusedxml websockets
-            set +e
-            python -m pytest tests/ -m "$PYTEST_MARKER" \
-              -v --tb=short --junit-xml=bsd-openbsd-junit.xml
-            rc=$?
-            set -e
-            if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
-              exit 0
-            fi
-            exit $rc
+
+      - name: Run agent integration tests in OpenBSD VM
+        shell: cpa.sh {0}
+        run: |
+          # OpenBSD packages use the version-agnostic py3- prefix.  Python is
+          # pulled in automatically as a dep of any py3-* package.  pytest is not
+          # packaged for OpenBSD — install it via pip below.  pkg_add tolerates
+          # missing names (warns and continues), so a single batch is fine.
+          sudo pkg_add -I \
+            git py3-pip \
+            py3-cryptography py3-yaml py3-aiohttp py3-websockets \
+            py3-sqlalchemy py3-bcrypt py3-psutil || true
+          cd sysmanage-agent
+          python3 -m venv --system-site-packages .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          # defusedxml is an unconditional runtime import in
+          # package_collector_windows.py, so conftest collection needs it even on
+          # non-Windows BSDs.  aiofiles isn't packaged; websockets via pip too as
+          # a fallback for a skipped py3-websockets pkg (no-op if it installed).
+          python -m pip install pytest pytest-asyncio aiofiles defusedxml websockets
+          set +e
+          python -m pytest tests/ -m "$PYTEST_MARKER" \
+            -v --tb=short --junit-xml=bsd-openbsd-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            exit 0
+          fi
+          exit $rc
 
       - name: Upload junit report
         if: always()
@@ -227,7 +230,9 @@ jobs:
           repository: bceverly/sysmanage-agent
           path: sysmanage-agent
 
-      - name: Run agent integration tests in NetBSD VM
+      - name: Start NetBSD VM
+        # v1.3.0 deprecated `run:`; VM starts here, commands run via
+        # `shell: cpa.sh {0}` in the next step.
         uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
@@ -235,43 +240,44 @@ jobs:
           operating_system: netbsd
           version: ${{ inputs.release_netbsd || '10.1' }}
           environment_variables: PYTEST_MARKER
-          run: |
-            # The cross-platform-actions NetBSD image ships pkgin pointed at
-            # ftp.NetBSD.org over FTP, which routinely times out fetching
-            # pkg_summary.gz (that timeout is what failed this job: no python311
-            # installed -> later "python3.11: not found" exit 127).  Repoint at
-            # the HTTPS CDN mirror, which is far more reliable.
-            REL="$(uname -r)"
-            echo "https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/amd64/${REL}/All" | sudo tee /usr/pkg/etc/pkgin/repositories.conf
-            # Refresh the index + install the REQUIRED toolchain with retries so
-            # a single transient mirror blip doesn't fail the whole job.
-            n=0; until [ "$n" -ge 5 ]; do sudo pkgin -y update && sudo pkgin -y install python311 py311-pip git && break; n=$((n+1)); echo "pkgin core install attempt $n failed; retrying in 15s..."; sleep 15; done
-            # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip them
-            # in below.  These py311-* deps are best-effort optimizations the
-            # --system-site-packages venv reuses instead of pip-compiling on
-            # NetBSD; || true so a renamed/missing pkg doesn't fail the job.
-            sudo pkgin -y install py311-cryptography py311-yaml py311-aiohttp py311-websockets py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
-            # Fail loudly (not at a downstream 127) if the mirror was unreachable.
-            command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed — NetBSD pkg mirror unreachable after retries."; exit 1; }
-            cd sysmanage-agent
-            python3.11 -m venv --system-site-packages .venv
-            . .venv/bin/activate
-            python -m pip install --upgrade pip
-            # defusedxml is an unconditional runtime import in
-            # package_collector_windows.py, so conftest collection
-            # needs it even on non-Windows BSDs.  websockets via pip too, as a
-            # fallback for a skipped py311-websockets pkg (no-op if it installed).
-            python -m pip install pytest pytest-asyncio defusedxml websockets
-            set +e
-            python -m pytest tests/ -m "$PYTEST_MARKER" \
-              -v --tb=short --junit-xml=bsd-netbsd-junit.xml
-            rc=$?
-            set -e
-            if [ $rc -eq 5 ]; then
-              echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
-              exit 0
-            fi
-            exit $rc
+
+      - name: Run agent integration tests in NetBSD VM
+        shell: cpa.sh {0}
+        run: |
+          # pkgsrc ships every python flavor (py311-*, py312-*, ...), so unlike
+          # FreeBSD the py311 names stay valid across releases.  The image ships
+          # pkgin pointed at ftp.NetBSD.org over FTP, which routinely times out
+          # fetching pkg_summary.gz — repoint at the HTTPS CDN mirror.
+          REL="$(uname -r)"
+          echo "https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/amd64/${REL}/All" | sudo tee /usr/pkg/etc/pkgin/repositories.conf
+          # Refresh the index + install the REQUIRED toolchain with retries so a
+          # single transient mirror blip doesn't fail the whole job.
+          n=0; until [ "$n" -ge 5 ]; do sudo pkgin -y update && sudo pkgin -y install python311 py311-pip git && break; n=$((n+1)); echo "pkgin core install attempt $n failed; retrying in 15s..."; sleep 15; done
+          # py311-pytest / py311-pytest-asyncio are not in pkgsrc — pip them in
+          # below.  These py311-* deps are best-effort; || true so a
+          # renamed/missing pkg doesn't fail the job.
+          sudo pkgin -y install py311-cryptography py311-yaml py311-aiohttp py311-websockets py311-sqlalchemy py311-bcrypt py311-psutil py311-aiofiles || true
+          # Fail loudly (not at a downstream 127) if the mirror was unreachable.
+          command -v python3.11 >/dev/null 2>&1 || { echo "ERROR: python3.11 not installed — NetBSD pkg mirror unreachable after retries."; exit 1; }
+          cd sysmanage-agent
+          python3.11 -m venv --system-site-packages .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          # defusedxml is an unconditional runtime import in
+          # package_collector_windows.py, so conftest collection needs it even on
+          # non-Windows BSDs.  websockets via pip too as a fallback for a skipped
+          # py311-websockets pkg (no-op if it installed).
+          python -m pip install pytest pytest-asyncio defusedxml websockets
+          set +e
+          python -m pytest tests/ -m "$PYTEST_MARKER" \
+            -v --tb=short --junit-xml=bsd-netbsd-junit.xml
+          rc=$?
+          set -e
+          if [ $rc -eq 5 ]; then
+            echo "No agent tests tagged @pytest.mark.$PYTEST_MARKER — exiting clean."
+            exit 0
+          fi
+          exit $rc
 
       - name: Upload junit report
         if: always()
