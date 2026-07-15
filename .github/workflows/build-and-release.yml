@@ -81,6 +81,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: i18n-gate
     steps:
+      # NOTE: the release runs on a TAG push, where only ``ci.yml`` runs (the
+      # exhaustive Python matrix + a single Frontend Tests job).  ``multi-os-ci.yml``
+      # is branch/PR-only, so its ``Backend Tests (Linux + PostgreSQL)`` and
+      # per-OS ``Frontend Tests (<os>-latest)`` checks NEVER exist on a tag —
+      # waiting on them made wait-on-check fail with "check was never run against
+      # this ref".  So the check-names below must match ci.yml's job names.  The
+      # Python matrix runs against a Postgres service, so Linux+Postgres coverage
+      # is already gated here.
       - name: Wait for Backend Tests (Python 3.10)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
@@ -89,35 +97,43 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
-      - name: Wait for Backend Tests (Linux + PostgreSQL)
+      - name: Wait for Backend Tests (Python 3.11)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
           ref: ${{ github.sha }}
-          check-name: 'Backend Tests (Linux + PostgreSQL)'
+          check-name: 'Backend Tests (Python 3.11)'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
-      - name: Wait for Frontend Tests (ubuntu-latest)
+      - name: Wait for Backend Tests (Python 3.12)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
           ref: ${{ github.sha }}
-          check-name: 'Frontend Tests (ubuntu-latest)'
+          check-name: 'Backend Tests (Python 3.12)'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
-      - name: Wait for Frontend Tests (windows-latest)
+      - name: Wait for Backend Tests (Python 3.13)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
           ref: ${{ github.sha }}
-          check-name: 'Frontend Tests (windows-latest)'
+          check-name: 'Backend Tests (Python 3.13)'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
-      - name: Wait for Frontend Tests (macos-latest)
+      - name: Wait for Backend Tests (Python 3.14)
         uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
         with:
           ref: ${{ github.sha }}
-          check-name: 'Frontend Tests (macos-latest)'
+          check-name: 'Backend Tests (Python 3.14)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+
+      - name: Wait for Frontend Tests
+        uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Frontend Tests'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
 
