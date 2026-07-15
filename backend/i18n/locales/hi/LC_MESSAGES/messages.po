@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 10:09-0400\n"
+"POT-Creation-Date: 2026-07-15 13:27-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -177,11 +177,15 @@ msgstr "होस्ट की पार्सनल है"
 msgid "User not found"
 msgstr "उपयोगकर्ता पाया नहीं जा सकता"
 
-#: backend/api/advisory_actions.py:36
+#: backend/api/advisory_actions.py:64
+msgid "syspatch apply queued"
+msgstr "सिसपैच अप्लाइ क्वीडेड"
+
+#: backend/api/advisory_actions.py:79
 msgid "Advisory management requires a SysManage Professional license."
 msgstr "सलाहकार प्रबंधन के लिए SysManage Professional लाइसेंस की आवश्यकता है।"
 
-#: backend/api/advisory_actions.py:67
+#: backend/api/advisory_actions.py:110
 msgid "No applicable packages for this advisory on this host."
 msgstr "इस होस्ट पर इस सलाहकार के लिए उपयुक्त पैकेज नहीं मिले।"
 

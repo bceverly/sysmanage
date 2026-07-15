@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 10:09-0400\n"
+"POT-Creation-Date: 2026-07-15 13:27-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -177,11 +177,15 @@ msgstr "Узел не одобрен"
 msgid "User not found"
 msgstr "Пользователь не найден"
 
-#: backend/api/advisory_actions.py:36
+#: backend/api/advisory_actions.py:64
+msgid "syspatch apply queued"
+msgstr "Применить syspatch из очереди"
+
+#: backend/api/advisory_actions.py:79
 msgid "Advisory management requires a SysManage Professional license."
 msgstr "Управление рекомендациями требует лицензии SysManage Professional."
 
-#: backend/api/advisory_actions.py:67
+#: backend/api/advisory_actions.py:110
 msgid "No applicable packages for this advisory on this host."
 msgstr "Нет применимых пакетов для этой рекомендации на этом хосте."
 

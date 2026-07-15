@@ -48,6 +48,18 @@ ADVISORY_SOURCES: Dict[str, Dict[str, Any]] = {
         "formats": ["FreeBSD-SA"],
         "enabled_by_default": False,
     },
+    "openbsd": {
+        "name": "OpenBSD Errata (syspatch)",
+        "base_url": "https://www.openbsd.org/errata.html",
+        "description": (
+            "OpenBSD base-system security/reliability errata, signed with "
+            "signify(1) and applied with syspatch(8).  Per-host applicability is "
+            "reported authoritatively by the agent (syspatch -c), not by version "
+            "comparison."
+        ),
+        "formats": ["OpenBSD-Errata"],
+        "enabled_by_default": False,
+    },
 }
 
 

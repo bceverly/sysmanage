@@ -5116,6 +5116,50 @@ Build the advisory abstraction on top of the existing CVE + update tracking: ing
 
 **Estimated Size:** ~4,000 lines · **Status: CODE COMPLETE** (2026-07). OSS schema + Pro+ `advisory_engine` (moat) + OSS seam + install action + Pro+ frontend plugin + Pro+ docs/screenshots. Remaining: translate run, engine/plugin build+publish, `make screenshots`.
 
+#### 14.1a OpenBSD Errata + `syspatch` Remediation (Pro+ Professional) — added 2026-07
+
+Follow-on to 14.1: extend the advisory abstraction to **OpenBSD**, joining
+FreeBSD-SA as the second BSD source. OpenBSD ships signed base-system security
+**errata** (`signify(1)`-verified) applied with `syspatch(8)` — a base-system
+binary patcher, not a package manager — so it reuses 14.1's spine (the
+`shared_advisory` catalog, the `host_applicable_advisory` soft-ref, the Pro+
+`advisory_engine`, and maintenance-window-gated store-and-forward dispatch) with
+one OpenBSD-specific remediation executor. **No new tables** — same shared/tenant
+storage split as 14.1.
+
+- [x] OpenBSD errata source — registered in `backend/advisory/advisory_sources.py`;
+      scraper `_fetch_openbsd_errata` / `_parse_openbsd_errata` in the Pro+
+      `advisory_engine` fetches the per-release errata pages
+      (`https://www.openbsd.org/errata<rel>.html`; **no API**), keys each erratum by
+      its `syspatch -c` patch id, and normalizes into the **shared** `shared_advisory`
+      catalog (+ `shared_advisory_cve` for cited CVEs). Registered in `_FETCHERS`.
+- [x] Agent-side applicability (authoritative) — `_detect_openbsd_system_updates`
+      now reports **one `PackageUpdate` per erratum** (`package_manager='syspatch'`,
+      `package_name` = the syspatch patch id). The engine's `_openbsd_pending_advisories`
+      branch in `compute_applicable_advisories` derives applicability directly from
+      that pending set (no version comparison) → `host_applicable_advisory`.
+- [x] `syspatch` remediation — `advisory_actions.install_by_advisory` routes OpenBSD
+      advisories to a queued `apply_updates` (syspatch) command via the store-and-
+      forward queue (**maintenance-window-gated at outbound release time**, audited),
+      instead of the package-manager install path. Agent applies all-or-nothing +
+      reports `requires_reboot`.
+- [~] Frontend — OpenBSD errata already surface through the generic 14.1
+      `advisory_engine` plugin (source/severity/CVE all populated). **Repolish:**
+      reboot-required badge + explicit "apply all pending patches" affordance.
+- [~] i18n/l10n + docs/screenshots — strings externalized (engine `_()` reused;
+      agent/OSS user-facing strings wrapped). **Repolish:** `sysmanage-docs` feature
+      page, `make screenshots` (seed an OpenBSD host with pending errata in
+      `seed_pro.py`), and the `make translate` catalog fill.
+
+**Tier:** Pro+ **Professional** (`advisory_management`), same as FreeBSD-SA.
+**Estimated Size:** ~600–900 lines (errata scraper + agent `syspatch -c`/apply +
+one remediation dispatch path + plugin surface; reuses all 14.1 storage/engine).
+**Status: CORE CODE COMPLETE (2026-07)** — engine scraper + applicability branch,
+agent per-erratum reporting, OSS syspatch remediation dispatch; all lint-clean +
+unit-tested locally (engine 16, OSS advisory 17, agent BSD/update suites). Repolish
+open: frontend reboot/apply-all affordance, docs + screenshots, translate run,
+`make release-advisory` version bump/build/publish.
+
 #### 14.2 Maintenance Windows (OSS + Pro+)
 
 First-class change windows so updates/commands only execute inside operator-defined windows.

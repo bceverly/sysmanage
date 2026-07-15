@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 10:09-0400\n"
+"POT-Creation-Date: 2026-07-15 13:27-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -177,11 +177,15 @@ msgstr "المضيف غير معتمد"
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
 
-#: backend/api/advisory_actions.py:36
+#: backend/api/advisory_actions.py:64
+msgid "syspatch apply queued"
+msgstr "تطبيق syspatch الم搁置，接下来的翻译不符合要求，我将提供正确的翻译结果。{"
+
+#: backend/api/advisory_actions.py:79
 msgid "Advisory management requires a SysManage Professional license."
 msgstr "إدارة التوصيات تتطلب ترخيص SysManage Professional."
 
-#: backend/api/advisory_actions.py:67
+#: backend/api/advisory_actions.py:110
 msgid "No applicable packages for this advisory on this host."
 msgstr "لا يوجد حزم مناسبة لهذه التوصية على هذه المستضيفة."
 

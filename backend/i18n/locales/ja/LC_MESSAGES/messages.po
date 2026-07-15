@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 10:09-0400\n"
+"POT-Creation-Date: 2026-07-15 13:27-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -177,11 +177,15 @@ msgstr "ホストは承認されていません"
 msgid "User not found"
 msgstr "ユーザーが見つかりません"
 
-#: backend/api/advisory_actions.py:36
+#: backend/api/advisory_actions.py:64
+msgid "syspatch apply queued"
+msgstr "システムパッチ適用：待機中"
+
+#: backend/api/advisory_actions.py:79
 msgid "Advisory management requires a SysManage Professional license."
 msgstr "アドバイザリーマネジメントは SysManage Professional ライセンスが必要です。"
 
-#: backend/api/advisory_actions.py:67
+#: backend/api/advisory_actions.py:110
 msgid "No applicable packages for this advisory on this host."
 msgstr "このホストのこのアドバイザリーには対応するパッケージはありません。"
 
