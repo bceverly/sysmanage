@@ -5114,7 +5114,7 @@ Build the advisory abstraction on top of the existing CVE + update tracking: ing
 - [x] Fleet advisory dashboard: applicable advisories across the fleet, by severity.
 - [x] i18n/l10n — English keys done; foreign translations via the translate pipeline (pending run).
 
-**Estimated Size:** ~4,000 lines · **Status: CODE COMPLETE** (2026-07). OSS schema + Pro+ `advisory_engine` (moat) + OSS seam + install action + Pro+ frontend plugin + Pro+ docs/screenshots. Remaining: translate run, engine/plugin build+publish, `make screenshots`.
+**Estimated Size:** ~4,000 lines · **Status: DONE** (2026-07). OSS schema + Pro+ `advisory_engine` (moat) + OSS seam + install action + Pro+ frontend plugin + Pro+ docs/screenshots; engine/plugin built + published, `make screenshots` green. Remaining: foreign `make translate` run only (shared Phase-14 i18n tail).
 
 #### 14.1a OpenBSD Errata + `syspatch` Remediation (Pro+ Professional) — added 2026-07
 
@@ -5143,22 +5143,24 @@ storage split as 14.1.
       forward queue (**maintenance-window-gated at outbound release time**, audited),
       instead of the package-manager install path. Agent applies all-or-nothing +
       reports `requires_reboot`.
-- [~] Frontend — OpenBSD errata already surface through the generic 14.1
-      `advisory_engine` plugin (source/severity/CVE all populated). **Repolish:**
-      reboot-required badge + explicit "apply all pending patches" affordance.
-- [~] i18n/l10n + docs/screenshots — strings externalized (engine `_()` reused;
-      agent/OSS user-facing strings wrapped). **Repolish:** `sysmanage-docs` feature
-      page, `make screenshots` (seed an OpenBSD host with pending errata in
-      `seed_pro.py`), and the `make translate` catalog fill.
+- [x] Frontend — OpenBSD advisories surface through the 14.1 `advisory_engine`
+      plugin (source/severity/CVE), plus an OpenBSD-specific **reboot-required
+      badge** and an **"Apply all patches"** button (syspatch is all-or-nothing) in
+      `AdvisoriesCard.tsx`; covered by a vitest case (plugin-src coverage ratchet held).
+- [x] docs/screenshots — `sysmanage-docs/docs/professional-plus/advisory-management.html`
+      OpenBSD errata section added; `make screenshots` green across all tiers
+      (`advisory-fleet` / `advisory-host-tab` captured). Strings externalized
+      (engine `_()` reused; agent/OSS wrapped; plugin English keys added).
+      **Repolish only:** `make translate` foreign-catalog fill.
 
 **Tier:** Pro+ **Professional** (`advisory_management`), same as FreeBSD-SA.
 **Estimated Size:** ~600–900 lines (errata scraper + agent `syspatch -c`/apply +
 one remediation dispatch path + plugin surface; reuses all 14.1 storage/engine).
-**Status: CORE CODE COMPLETE (2026-07)** — engine scraper + applicability branch,
-agent per-erratum reporting, OSS syspatch remediation dispatch; all lint-clean +
-unit-tested locally (engine 16, OSS advisory 17, agent BSD/update suites). Repolish
-open: frontend reboot/apply-all affordance, docs + screenshots, translate run,
-`make release-advisory` version bump/build/publish.
+**Status: DONE (2026-07)** — engine scraper + applicability branch, agent per-erratum
+reporting, OSS syspatch remediation dispatch, frontend reboot/apply-all affordance,
+docs + screenshots; built/published (`advisory_engine v1.0.3` loaded). All lint-clean
++ unit-tested (engine 16, OSS advisory 17, agent BSD/update suites, plugin 6). Only
+the foreign `make translate` run remains (shared Phase-14 i18n tail).
 
 #### 14.2 Maintenance Windows (OSS + Pro+)
 
