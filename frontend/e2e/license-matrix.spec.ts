@@ -77,7 +77,29 @@ const FIXTURES = {
         tier: 'enterprise',
         license_id: 'test-ent',
         modules: Object.values(MODULES),
-        features: [],
+        // A real enterprise license carries the full feature set (never empty).
+        // Some nav items gate on a FEATURE flag as well as the module — e.g. the
+        // Reports link needs both ``reporting_engine`` and the ``reports``
+        // feature — so an empty list here would spuriously hide them.  Mirrors
+        // ENTERPRISE_FEATURES on the license server (professional + enterprise).
+        features: [
+            'health',
+            'vuln',
+            'reports',
+            'secrets',
+            'containers',
+            'api',
+            'multiuser',
+            'cve_feed_management',
+            'log_routing',
+            'advisory_management',
+            'os_lifecycle',
+            'sso',
+            'rbac',
+            'ha',
+            'compliance',
+            'alerts',
+        ],
     },
 } as const;
 

@@ -144,19 +144,19 @@ const ApiKeys: React.FC = () => {
             field: 'created_at',
             headerName: t('apiKeys.created', 'Created'),
             width: 190,
-            valueFormatter: (value) => formatDate(value as string | null),
+            valueFormatter: (value) => formatDate(value),
         },
         {
             field: 'last_used_at',
             headerName: t('apiKeys.lastUsed', 'Last used'),
             width: 190,
-            valueFormatter: (value) => formatDate(value as string | null),
+            valueFormatter: (value) => formatDate(value),
         },
         {
             field: 'expires_at',
             headerName: t('apiKeys.expires', 'Expires'),
             width: 190,
-            valueFormatter: (value) => formatDate(value as string | null),
+            valueFormatter: (value) => formatDate(value),
         },
         {
             field: 'actions',

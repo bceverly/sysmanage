@@ -188,6 +188,7 @@ const HostDetail = () => { // NOSONAR
     const [error, setError] = useState<string | null>(null);
     const [hasAntivirusOsDefault, setHasAntivirusOsDefault] = useState<boolean>(false);
     const [licenseModules, setLicenseModules] = useState<string[]>([]);
+    const [licenseFeatures, setLicenseFeatures] = useState<string[]>([]);
 
     // Check if OS supports third-party repositories
     const supportsThirdPartyRepos = useCallback(() => {
@@ -619,9 +620,11 @@ const HostDetail = () => { // NOSONAR
             try {
                 const licenseInfo = await getLicenseInfo();
                 setLicenseModules(licenseInfo.modules || []);
+                setLicenseFeatures(licenseInfo.features || []);
             } catch {
                 // License check unavailable — proceed without Pro+ features
                 setLicenseModules([]);
+                setLicenseFeatures([]);
             }
         };
         checkLicenseModules();
@@ -641,15 +644,23 @@ const HostDetail = () => { // NOSONAR
     // Plugin system: get registered host detail tabs
     const { hostDetailTabs: pluginTabs } = usePlugins();
 
-    // Filter plugin tabs based on required license modules
+    // Filter plugin tabs based on the license.  A tab is shown only when BOTH
+    // its module gate (is the engine bundle licensed?) AND its feature gate
+    // (is this specific capability licensed?) pass.  The feature gate is what
+    // hides an Enterprise capability that ships inside a Professional module
+    // (e.g. the ``fips_mode`` tab inside ``compliance_engine``) — without it a
+    // Professional user would see the tab and then hit a 402.
     const visiblePluginTabs = useMemo(() => {
         return pluginTabs.filter(pt => {
-            if (pt.moduleRequired) {
-                return licenseModules.includes(pt.moduleRequired);
+            if (pt.moduleRequired && !licenseModules.includes(pt.moduleRequired)) {
+                return false;
+            }
+            if (pt.featureFlag && !licenseFeatures.includes(pt.featureFlag)) {
+                return false;
             }
             return true;
         });
-    }, [pluginTabs, licenseModules]);
+    }, [pluginTabs, licenseModules, licenseFeatures]);
 
     // Build ordered tab definitions array.  Plugin-registered tabs whose
     // ``id`` collides with a hardcoded OSS tab are dropped — otherwise
@@ -676,10 +687,11 @@ const HostDetail = () => { // NOSONAR
             ...(supportsThirdPartyRepos() ? [{ id: 'third-party-repos', icon: <SourceIcon />, label: t('hostDetail.thirdPartyReposTab', 'Third-Party Repositories') }] : []),
             { id: 'access', icon: <SecurityIcon />, label: t('hostDetail.accessTab', 'Access') },
             { id: 'security', icon: <ShieldIcon />, label: t('hostDetail.securityTab', 'Security') },
-            // Compliance is a Pro+ feature gated on the ``compliance_engine``
-            // module; the tab simply hides for OSS deployments rather than
-            // rendering an empty panel that 402s on every API call.
-            ...(licenseModules.includes('compliance_engine') ? [{ id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') }] : []),
+            // Compliance is an Enterprise capability: the ``compliance_engine``
+            // module ships at Professional, but the compliance surface itself is
+            // gated on the Enterprise ``compliance`` feature — so require BOTH,
+            // otherwise a Professional user sees a tab that 402s on every call.
+            ...((licenseModules.includes('compliance_engine') && licenseFeatures.includes('compliance')) ? [{ id: 'compliance', icon: <RuleIcon />, label: t('hostDetail.complianceTab', 'Compliance') }] : []),
             ...safePluginTabs.filter(p => p.position === 'after-security').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             { id: 'certificates', icon: <CertificateIcon />, label: t('hostDetail.certificatesTab', 'Certificates') },
             { id: 'server-roles', icon: <AssignmentIcon />, label: t('hostDetail.serverRolesTab', 'Server Roles') },
@@ -690,7 +702,7 @@ const HostDetail = () => { // NOSONAR
         ];
 
         return tabs;
-    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, t]);
+    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, licenseFeatures, t]);
 
     // Get tab ID for current numeric index
     const currentTabId = tabDefinitions[currentTab]?.id || 'info';

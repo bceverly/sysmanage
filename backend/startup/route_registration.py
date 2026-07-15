@@ -38,6 +38,7 @@ from backend.api import (
     enabled_package_managers,
     external_idp,
     federation_identity,
+    fips_actions,
     firewall_roles,
     firewall_status,
     fleet,
@@ -329,6 +330,10 @@ def register_routes(app: FastAPI):
     logger.debug("Adding lifecycle-actions router (native /api/v1)")
     _include_versioned(app, lifecycle_actions.router, tags=["os-lifecycle"])
     logger.debug("Lifecycle-actions router added")
+
+    logger.debug("Adding fips-actions router (native /api/v1)")
+    _include_versioned(app, fips_actions.router, tags=["fips-compliance"])
+    logger.debug("FIPS-actions router added")
 
     # Secure routes (with /api prefix and JWT authentication required)
     logger.debug("Registering authenticated routes with /api prefix:")

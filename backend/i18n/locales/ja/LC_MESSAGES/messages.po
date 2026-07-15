@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-13 07:59-0400\n"
+"POT-Creation-Date: 2026-07-15 10:09-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -132,6 +132,7 @@ msgid "Invalid host ID format"
 msgstr "ホストIDの形式が無効です"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:897
@@ -469,6 +470,14 @@ msgstr "このアカウントではMFAが登録されていません。"
 #: backend/api/auth_mfa.py:553
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA 設定の編集には管理者権限が必要です。"
+
+#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+msgid "FIPS mode management requires a SysManage Enterprise license."
+msgstr "FIPS モード管理には SysManage Enterprise ライセンスが必要です。"
+
+#: backend/api/fips_actions.py:68
+msgid "The compliance module is not currently available."
+msgstr "現在、コンプライアンスモジュールは利用できません。"
 
 #: backend/api/third_party_repos.py:219
 #, python-format
@@ -2039,7 +2048,7 @@ msgstr "トークンを使用したホストの登録がありません。再登
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent 認証に失敗しました：無効なホスト ID"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID %s のホストは登録されていません。再登録をお願いします。"
@@ -2554,21 +2563,27 @@ msgstr "ホストは既に存在しています"
 msgid "Invalid or expired registration key"
 msgstr "無効または期限切れの登録キー"
 
-#: backend/api/host.py:719
+#: backend/api/host.py:726
 msgid "Invalid or expired enrollment token"
 msgstr "無効または期限切れの登録トークン"
 
-#: backend/api/host.py:809
+#: backend/api/host.py:769
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "このホストはすでにテナントに所属しています。サーバー範囲の登録ではなく、その登録トークンを使用して再登録してください。"
+
+#: backend/api/host.py:867
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:868
+#: backend/api/host.py:926
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' のホストはテナント %(tenant_id)s に登録トークンで登録されました"
 
-#: backend/api/host.py:885
+#: backend/api/host.py:943
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3522,48 +3537,48 @@ msgstr "recurrence は 'once', 'daily', または 'weekly' のいずれかでな
 msgid "Unknown timezone: %s"
 msgstr "未知のタイムゾーン: %s"
 
-#: backend/api/maintenance_windows.py:133
+#: backend/api/maintenance_windows.py:136
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "一回限りのウィンドウでは starts_at が ends_at より前に設定する必要があります。"
 
-#: backend/api/maintenance_windows.py:141
+#: backend/api/maintenance_windows.py:143
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "再発生ウィンドウには 'HH:MM' 形式の start_time が必要です。"
 
-#: backend/api/maintenance_windows.py:146
+#: backend/api/maintenance_windows.py:148
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "再発生ウィンドウには正の duration_minutes が必要です。"
 
-#: backend/api/maintenance_windows.py:153
+#: backend/api/maintenance_windows.py:155
 msgid "A weekly window needs valid days_of_week."
 msgstr "週間ウィンドウには有効な days_of_week が必要です。"
 
-#: backend/api/maintenance_windows.py:159
-msgid "A window needs at least one scope (all, host, or tag)."
-msgstr "ウィンドウには少なくとも 1 つのスコープ（all、host、または tag）が必要です。"
-
-#: backend/api/maintenance_windows.py:165
+#: backend/api/maintenance_windows.py:164
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type は 'all', 'host', または 'tag' のいずれかでなければなりません。"
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:167
 msgid "A host scope needs a host_id."
 msgstr "ホストスコープには host_id が必要です。"
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:169
 msgid "A tag scope needs a tag_id."
 msgstr "タグスコープには tag_id が必要です。"
 
-#: backend/api/maintenance_windows.py:292
-#: backend/api/maintenance_windows.py:315
+#: backend/api/maintenance_windows.py:179
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr "ウィンドウには少なくとも 1 つのスコープ（all、host、または tag）が必要です。"
+
+#: backend/api/maintenance_windows.py:300
+#: backend/api/maintenance_windows.py:323
 msgid "Maintenance window not found."
 msgstr "メンテナンスウィンドウが見つかりません。"
 
-#: backend/api/maintenance_windows.py:334
+#: backend/api/maintenance_windows.py:342
 msgid "An override reason is required."
 msgstr "オーバーライド理由を指定する必要があります。"
 
-#: backend/api/maintenance_windows.py:338
+#: backend/api/maintenance_windows.py:346
 msgid "Override duration must be positive."
 msgstr "オーバーライド期間は正数でなければなりません。"
 
@@ -3942,12 +3957,12 @@ msgstr "保存済みスクリプトの削除に失敗しました"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "商用アンチウイルスステータスの取得に失敗しました: %s"
 
-#: backend/websocket/message_router.py:282
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "キュー内の未知のメッセージタイプ: %s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "メッセージタイプ %(message_type)s のルーティングに失敗しました: %(error)s"

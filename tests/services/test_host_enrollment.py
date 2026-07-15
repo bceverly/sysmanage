@@ -45,9 +45,60 @@ def _clean_seam():
     seam.unregister_engine()
 
 
-def test_resolve_returns_none_without_token(db_session):
-    assert host_api._resolve_enrollment_tenant(None) is None
-    assert host_api._resolve_enrollment_tenant("") is None
+def test_resolve_returns_none_without_token_when_mt_disabled(db_session):
+    # Single-tenant bootstrap: no token, MT off → None (server-scoped host).
+    with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
+        assert host_api._resolve_enrollment_tenant(None) is None
+        assert host_api._resolve_enrollment_tenant("") is None
+
+
+def test_resolve_returns_none_for_missing_token_when_mt_enabled(db_session):
+    # A missing token is NOT itself an error, even under MT: it registers
+    # server-scoped ("No tenant").  The phantom-duplicate loophole is closed
+    # narrowly in register_host (see test_reject_if_fqdn_belongs_to_tenant), not
+    # by banning token-less registration wholesale.
+    with patch("backend.config.config.is_multitenancy_enabled", return_value=True):
+        assert host_api._resolve_enrollment_tenant(None) is None
+        assert host_api._resolve_enrollment_tenant("") is None
+
+
+def test_reject_if_fqdn_belongs_to_tenant_raises_403(db_session):
+    # Token-less registration for an fqdn that already lives in a tenant DB is the
+    # phantom case → 403 (agent must re-enroll with its token).
+    fake_host = MagicMock()
+    fake_host.fqdn = "gdr-t14.example.com"
+    fake_session = MagicMock()
+    with patch(
+        "backend.config.config.is_multitenancy_enabled", return_value=True
+    ), patch(
+        "backend.websocket.inbound_processor._find_host_in_tenant_dbs",
+        return_value=(fake_host, fake_session),
+    ):
+        with pytest.raises(HTTPException) as exc:
+            host_api._reject_if_fqdn_belongs_to_tenant("gdr-t14.example.com")
+    assert exc.value.status_code == 403
+    fake_session.close.assert_called_once()  # tenant session must not leak
+
+
+def test_reject_if_fqdn_belongs_to_tenant_allows_new_fqdn(db_session):
+    # Genuinely-new fqdn (not in any tenant DB) → server-scoped registration is
+    # still allowed.
+    with patch(
+        "backend.config.config.is_multitenancy_enabled", return_value=True
+    ), patch(
+        "backend.websocket.inbound_processor._find_host_in_tenant_dbs",
+        return_value=(None, None),
+    ):
+        assert (
+            host_api._reject_if_fqdn_belongs_to_tenant("brand-new.example.com") is None
+        )
+
+
+def test_reject_if_fqdn_belongs_to_tenant_noop_when_mt_off(db_session):
+    with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
+        assert (
+            host_api._reject_if_fqdn_belongs_to_tenant("anything.example.com") is None
+        )
 
 
 def test_resolve_ignored_when_multitenancy_disabled(db_session):

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-13 07:59-0400\n"
+"POT-Creation-Date: 2026-07-15 10:09-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -132,6 +132,7 @@ msgid "Invalid host ID format"
 msgstr "Ongeldige host-ID formaat"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:897
@@ -474,6 +475,14 @@ msgstr "Er is geen MFA ingeschreven voor dit account."
 #: backend/api/auth_mfa.py:553
 msgid "Editing MFA settings requires admin privileges."
 msgstr "Bijwerken van MFA-instellingen vereist admin-rechten."
+
+#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+msgid "FIPS mode management requires a SysManage Enterprise license."
+msgstr "Beheer van FIPS-modus vereist een SysManage Enterprise-licentie."
+
+#: backend/api/fips_actions.py:68
+msgid "The compliance module is not currently available."
+msgstr "De compatibiliteitsmodule is op dit moment niet beschikbaar."
 
 #: backend/api/third_party_repos.py:219
 #, python-format
@@ -2097,7 +2106,7 @@ msgstr "Host met token is niet geregistreerd. Registreer opnieuw."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agentverificatie mislukt: ongeldige host-ID"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host met ID %s is niet geregistreerd. Registreer opnieuw."
@@ -2641,22 +2650,30 @@ msgstr "Host bestaat al"
 msgid "Invalid or expired registration key"
 msgstr "Ongeldig of ontbrekend registratie-sleutel"
 
-#: backend/api/host.py:719
+#: backend/api/host.py:726
 msgid "Invalid or expired enrollment token"
 msgstr "Ongeldig of verlopen inschrijftoken"
 
-#: backend/api/host.py:809
+#: backend/api/host.py:769
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr ""
+"Deze host behoort al tot een tenant. Registreer jezelf in plaats daarvan met"
+" de inschrijftoken, niet met een serverscopelijke registratie."
+
+#: backend/api/host.py:867
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registratie opgepakt: host was recent verwijderd"
 
-#: backend/api/host.py:868
+#: backend/api/host.py:926
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' is aangemeld bij tenant %(tenant_id)s via aanmeldings-token"
 
-#: backend/api/host.py:885
+#: backend/api/host.py:943
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3653,48 +3670,48 @@ msgstr "recurrence moet 'once', 'daily' of 'weekly' zijn."
 msgid "Unknown timezone: %s"
 msgstr "Onbekende tijdzone: %s"
 
-#: backend/api/maintenance_windows.py:133
+#: backend/api/maintenance_windows.py:136
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "Een enkele-gebeurtenis venster moet starts_at vóór ends_at hebben."
 
-#: backend/api/maintenance_windows.py:141
+#: backend/api/maintenance_windows.py:143
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "Een herhalend venster moet een starttijd hebben als 'HH:MM'."
 
-#: backend/api/maintenance_windows.py:146
+#: backend/api/maintenance_windows.py:148
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "Een herhalend venster moet een positieve duur in minuten hebben."
 
-#: backend/api/maintenance_windows.py:153
+#: backend/api/maintenance_windows.py:155
 msgid "A weekly window needs valid days_of_week."
 msgstr "Een weeklijks venster moet geldige dagen van de week hebben."
 
-#: backend/api/maintenance_windows.py:159
-msgid "A window needs at least one scope (all, host, or tag)."
-msgstr "Een venster moet ten minste één scope hebben (all, host of tag)."
-
-#: backend/api/maintenance_windows.py:165
+#: backend/api/maintenance_windows.py:164
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type moet 'all', 'host' of 'tag' zijn."
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:167
 msgid "A host scope needs a host_id."
 msgstr "Een host-scope heeft een host_id nodig."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:169
 msgid "A tag scope needs a tag_id."
 msgstr "Een tag-scope heeft een tag_id nodig."
 
-#: backend/api/maintenance_windows.py:292
-#: backend/api/maintenance_windows.py:315
+#: backend/api/maintenance_windows.py:179
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr "Een venster moet ten minste één scope hebben (all, host of tag)."
+
+#: backend/api/maintenance_windows.py:300
+#: backend/api/maintenance_windows.py:323
 msgid "Maintenance window not found."
 msgstr "Maintenance venster niet gevonden."
 
-#: backend/api/maintenance_windows.py:334
+#: backend/api/maintenance_windows.py:342
 msgid "An override reason is required."
 msgstr "Een reden voor het overschrijven is vereist."
 
-#: backend/api/maintenance_windows.py:338
+#: backend/api/maintenance_windows.py:346
 msgid "Override duration must be positive."
 msgstr "De duur van het overschrijving moet positief zijn."
 
@@ -4075,12 +4092,12 @@ msgstr "Mislukt om opgeslagen script te verwijderen"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Mislukt om commerciële antivirusstatus op te halen: %s"
 
-#: backend/websocket/message_router.py:282
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Onbekend berichttype in wachtrij: %s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fout bij het routeren van berichttype %(message_type)s: %(error)s"

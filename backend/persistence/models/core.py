@@ -126,6 +126,17 @@ class Host(Base):
     os_details = Column(Text, nullable=True)
     os_version_updated_at = Column(DateTime, nullable=True)
 
+    # FIPS compliance mode (Phase 14.4). Detection ("is FIPS on?") is reported
+    # by every agent (OSS); enable/disable is Enterprise-gated (FIPS_MODE).
+    # fips_status: "enabled" | "available" | "disabled" | "not_applicable".
+    fips_status = Column(String(20), nullable=True)
+    fips_enabled = Column(Boolean, nullable=True)
+    fips_available = Column(Boolean, nullable=True)
+    fips_kernel_enforced = Column(Boolean, nullable=True)
+    fips_vendor = Column(String(50), nullable=True)  # ubuntu-pro | rhel | windows | ...
+    fips_package_version = Column(String(100), nullable=True)
+    fips_updated_at = Column(DateTime, nullable=True)
+
     # Hardware inventory fields
     cpu_vendor = Column(String(100), nullable=True)
     cpu_model = Column(String(200), nullable=True)

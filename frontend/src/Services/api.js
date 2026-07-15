@@ -53,6 +53,17 @@ function notifyNetworkFailure(err) {
     .catch(() => { /* monitor unavailable; bubble the error anyway */ });
 }
 
+// Redirect to the login page — but NEVER when we're already on it.  A protected
+// request that 401/403s while /login is open (e.g. a component that fetches before
+// the user has authenticated) would otherwise reload /login, remount the
+// component, refire the request, and loop forever.  Guarding on the current path
+// makes the redirect idempotent and breaks that loop regardless of the caller.
+function redirectToLogin() {
+  if (!globalThis.location.pathname.startsWith('/login')) {
+    globalThis.location.href = '/login';
+  }
+}
+
 // Pro+ license checks and role-based permission denials must not
 // redirect — let the calling code show an error toast.  Only redirect
 // to login for auth-related 403s (expired refresh token).
@@ -64,7 +75,7 @@ function handle403(response) {
   const isPermissionDenied = typeof detail === 'string' &&
                              detail.includes('Permission denied');
   if (!isProPlusError && !isPermissionDenied) {
-    globalThis.location.href = '/login';
+    redirectToLogin();
   }
 }
 
@@ -82,7 +93,7 @@ async function handle401Refresh(originalConfig) {
     console.log(error);
     localStorage.removeItem("userid");
     localStorage.removeItem("bearer_token");
-    globalThis.location.href = '/login';
+    redirectToLogin();
     throw error;
   }
 }

@@ -38,6 +38,7 @@ from backend.api.handlers.infrastructure_handlers import (
 
 # Import from os_hardware_handlers
 from backend.api.handlers.os_hardware_handlers import (
+    handle_fips_compliance_update,
     handle_hardware_update,
     handle_os_version_update,
     handle_ubuntu_pro_update,
@@ -83,6 +84,7 @@ __all__ = [
     "is_new_os_version_combination",
     "handle_os_version_update",
     "handle_hardware_update",
+    "handle_fips_compliance_update",
     "handle_ubuntu_pro_update",
     # User Access handlers
     "SYSTEM_USERNAMES",

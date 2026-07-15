@@ -1,7 +1,7 @@
 alembic>=1.16.5
 annotated-types==0.7.0
 aiofiles>=24.1.0
-aiohttp>=3.13.5  # 27 CVEs across the 3.9-3.13 series; 3.13.5 is latest patched
+aiohttp>=3.14.1  # 27 CVEs across 3.9-3.13; 3.14.1 patches the newer PYSEC-2026-2104..2113 chain (3.13.5 is affected)
 anyio>=4.5.0
 astroid>=3.3.8
 bandit==1.9.2
@@ -54,22 +54,23 @@ pydantic-extra-types==2.11.0
 pydantic-settings==2.14.2
 PyJWT==2.13.0  # CVE-2026-32597 + JWK/HS256/JWKS advisories; bumped 2.12.0->2.13.0
 pylint>=3.0.0
-pytest>=7.0.0
+pytest>=9.0.3  # 9.0.3 patches the tmp-dir advisory affecting <9.0.3
 pytest-asyncio>=0.21.0
 pytest-cov>=4.0.0
 pytest-xdist>=3.0.0
 python-dotenv==1.2.2  # CVE-2026-28684 (symlink following in set_key)
-python-multipart>=0.0.27  # 0.0.20 has DoS + form-parser bypass CVEs
+python-multipart>=0.0.31  # 0.0.20 DoS + form-parser bypass; 0.0.31 patches PYSEC-2026-3036..3040 (0.0.27 still affected)
 PyYAML==6.0.2
 setuptools>=82.0.1  # 80.9.0 had CVE in pkg_resources path traversal
 sniffio==1.3.1
 SQLAlchemy==2.0.43
-# SECURITY NOTE: starlette 1.0.1 is the first release with the CVE-2026-48710
-# fix (missing Host-header validation poisons request.url.path, bypassing
-# path-based security checks).  Earlier <1.0 releases (incl. 0.52.1) are all
-# affected.  FastAPI 0.136.3 dropped its starlette<1.0 cap (now >=0.46.0), so
-# the fixed 1.x line is permitted; validated against the full backend suite.
-starlette>=1.0.1
+# SECURITY NOTE: starlette 1.0.1 first fixed CVE-2026-48710 (missing Host-header
+# validation poisons request.url.path, bypassing path-based security checks);
+# earlier <1.0 releases (incl. 0.52.1) are all affected.  1.3.1 additionally
+# patches PYSEC-2026-2280/2281 (1.2.1 is affected).  FastAPI 0.136.3 dropped its
+# starlette<1.0 cap (now >=0.46.0), so the fixed 1.x line is permitted; validated
+# against the full backend suite.
+starlette>=1.3.1
 tomlkit==0.14.0
 typing_extensions>=4.12.2
 ujson==5.13.0  # 5.13.0 fixes CVE-2026-54911 (reject_bytes=False UTF-8 validation bypass); 5.12.1 covered prior memory-leak DoS / integer-overflow CVEs + Dependabot #115

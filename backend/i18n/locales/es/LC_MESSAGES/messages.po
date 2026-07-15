@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-13 07:59-0400\n"
+"POT-Creation-Date: 2026-07-15 10:09-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -132,6 +132,7 @@ msgid "Invalid host ID format"
 msgstr "Formato de ID de host inválido"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:897
@@ -477,6 +478,16 @@ msgstr "No está inscrito para MFA en esta cuenta."
 msgid "Editing MFA settings requires admin privileges."
 msgstr ""
 "La edición de configuraciones MFA requiere privilegios administrativos."
+
+#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+msgid "FIPS mode management requires a SysManage Enterprise license."
+msgstr ""
+"La administración en modo FIPS requiere una licencia de SysManage "
+"Enterprise."
+
+#: backend/api/fips_actions.py:68
+msgid "The compliance module is not currently available."
+msgstr "El módulo de cumplimiento no está disponible actualmente."
 
 #: backend/api/third_party_repos.py:219
 #, python-format
@@ -2119,7 +2130,7 @@ msgstr ""
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Fallo en la autenticación del agente: ID de host inválida"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr ""
@@ -2679,15 +2690,23 @@ msgstr "El host ya existe"
 msgid "Invalid or expired registration key"
 msgstr "Clave de registro inválida o expirada"
 
-#: backend/api/host.py:719
+#: backend/api/host.py:726
 msgid "Invalid or expired enrollment token"
 msgstr "Token de inscripción inválido o expirado"
 
-#: backend/api/host.py:809
+#: backend/api/host.py:769
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr ""
+"Este host ya pertenece a uninquilino. Vuelva a registrarse con su token de "
+"inscripción en lugar de registrar el servidor en unalcance."
+
+#: backend/api/host.py:867
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registro absorbido: el host fue recientemente eliminado"
 
-#: backend/api/host.py:868
+#: backend/api/host.py:926
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2695,7 +2714,7 @@ msgstr ""
 "El host '%(fqdn)s' se inscribió en el tenant %(tenant_id)s mediante token de"
 " inscripción"
 
-#: backend/api/host.py:885
+#: backend/api/host.py:943
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3721,48 +3740,48 @@ msgstr "recurrence debe ser 'once', 'daily' o 'weekly'."
 msgid "Unknown timezone: %s"
 msgstr "Zona horaria desconocida: %s"
 
-#: backend/api/maintenance_windows.py:133
+#: backend/api/maintenance_windows.py:136
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "Una ventana única requiere que starts_at sea anterior a ends_at."
 
-#: backend/api/maintenance_windows.py:141
+#: backend/api/maintenance_windows.py:143
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "Una ventana recurrente necesita un start_time en formato 'HH:MM'."
 
-#: backend/api/maintenance_windows.py:146
+#: backend/api/maintenance_windows.py:148
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "Una ventana recurrente necesita una duración positiva en minutos."
 
-#: backend/api/maintenance_windows.py:153
+#: backend/api/maintenance_windows.py:155
 msgid "A weekly window needs valid days_of_week."
 msgstr "Una ventana semanal necesita días válidos de la semana."
 
-#: backend/api/maintenance_windows.py:159
-msgid "A window needs at least one scope (all, host, or tag)."
-msgstr "Una ventana necesita al menos un ámbito (todos, host o etiqueta)."
-
-#: backend/api/maintenance_windows.py:165
+#: backend/api/maintenance_windows.py:164
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type debe ser 'all', 'host' o 'tag'."
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:167
 msgid "A host scope needs a host_id."
 msgstr "Un ámbito de host necesita un host_id."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:169
 msgid "A tag scope needs a tag_id."
 msgstr "Un ámbito de etiqueta necesita un tag_id."
 
-#: backend/api/maintenance_windows.py:292
-#: backend/api/maintenance_windows.py:315
+#: backend/api/maintenance_windows.py:179
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr "Una ventana necesita al menos un ámbito (todos, host o etiqueta)."
+
+#: backend/api/maintenance_windows.py:300
+#: backend/api/maintenance_windows.py:323
 msgid "Maintenance window not found."
 msgstr "Ventana de mantenimiento no encontrada."
 
-#: backend/api/maintenance_windows.py:334
+#: backend/api/maintenance_windows.py:342
 msgid "An override reason is required."
 msgstr "Se requiere una razón para el cambio."
 
-#: backend/api/maintenance_windows.py:338
+#: backend/api/maintenance_windows.py:346
 msgid "Override duration must be positive."
 msgstr "La duración del cambio debe ser positiva."
 
@@ -4147,12 +4166,12 @@ msgstr "No se pudo eliminar el script guardado"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "No se pudo recuperar el estado del antivirus comercial: %s"
 
-#: backend/websocket/message_router.py:282
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Tipo de mensaje desconocido en la cola: %s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Error enrutando tipo de mensaje %(message_type)s: %(error)s"

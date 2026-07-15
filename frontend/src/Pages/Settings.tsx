@@ -153,15 +153,18 @@ const Settings: React.FC = () => {
   // ``airgap-bundles`` that aren't tied to a specific engine but
   // still want to disappear on the Community edition.
   const [licenseModules, setLicenseModules] = useState<string[]>([]);
+  const [licenseFeatures, setLicenseFeatures] = useState<string[]>([]);
   const [licenseActive, setLicenseActive] = useState<boolean>(false);
   useEffect(() => {
     (async () => {
       try {
         const info = await refreshLicenseCache();
         setLicenseModules(info?.modules ?? []);
+        setLicenseFeatures(info?.features ?? []);
         setLicenseActive(!!info?.active);
       } catch {
         setLicenseModules([]);
+        setLicenseFeatures([]);
         setLicenseActive(false);
       }
     })();
@@ -303,15 +306,18 @@ const Settings: React.FC = () => {
     });
   }, [licenseModules, licenseActive]);
 
-  // Plugin-contributed Settings tabs honour the same ``moduleRequired``
-  // gate the hardcoded ``tabDefs`` use above (Phase 10.7 line 1822).
-  // Plugins that omit the field stay always-visible — pre-Phase-10.7
-  // behaviour.
+  // Plugin-contributed Settings tabs honour BOTH the ``moduleRequired`` gate
+  // (is the engine bundle licensed?) and the ``featureFlag`` gate (is this
+  // specific capability licensed?).  The feature gate hides an Enterprise
+  // capability that ships inside a Professional module.  Plugins that omit both
+  // fields stay always-visible (pre-Phase-10.7 behaviour).
   const visiblePluginSettingsTabs = useMemo(() => {
-    return pluginSettingsTabs.filter(
-      pt => !pt.moduleRequired || licenseModules.includes(pt.moduleRequired),
-    );
-  }, [pluginSettingsTabs, licenseModules]);
+    return pluginSettingsTabs.filter(pt => {
+      if (pt.moduleRequired && !licenseModules.includes(pt.moduleRequired)) return false;
+      if (pt.featureFlag && !licenseFeatures.includes(pt.featureFlag)) return false;
+      return true;
+    });
+  }, [pluginSettingsTabs, licenseModules, licenseFeatures]);
 
   // Tabs in display order: the hardcoded tabDefs, then plugin tabs — EXCEPT the
   // SysManage License ('proplus') tab, which is surfaced right after

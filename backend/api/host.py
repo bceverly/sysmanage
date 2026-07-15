@@ -694,14 +694,21 @@ def _validate_registration_key(session, raw_key):
 def _resolve_enrollment_tenant(raw_token):
     """Validate + consume a tenant enrollment token; return its tenant id.
 
-    Returns ``None`` when no token was supplied or multi-tenancy is disabled.
-    Raises 403 for a supplied-but-invalid token (unknown / revoked / expired /
-    out of uses) — a bad token rejects the registration before any host row is
-    created.  Consumes one use on success (bumps use_count / last_used_at).
+    Returns ``None`` when multi-tenancy is DISABLED or no token was supplied — a
+    token-less registration is still a legitimate server-scoped ("No tenant")
+    host while that concept exists.  Raises 403 for a supplied-but-invalid token
+    (unknown / revoked / expired / out of uses).  Consumes one use on success
+    (bumps use_count / last_used_at).
+
+    A MISSING token is NOT rejected here: the phantom-duplicate loophole is
+    closed narrowly in ``register_host`` via ``_reject_if_fqdn_belongs_to_tenant``
+    (which only fails a token-less registration when the fqdn already lives in a
+    tenant DB), so ordinary server-scoped registration keeps working.
     """
+    from backend.config import config as _config  # noqa: PLC0415
+
     if not raw_token:
         return None
-    from backend.config import config as _config  # noqa: PLC0415
 
     if not _config.is_multitenancy_enabled():
         return None
@@ -719,6 +726,50 @@ def _resolve_enrollment_tenant(raw_token):
             status_code=403, detail=_("Invalid or expired enrollment token")
         )
     return tenant_id
+
+
+def _reject_if_fqdn_belongs_to_tenant(fqdn):
+    """Close the phantom-duplicate loophole for a token-less registration.
+
+    A registration with no enrollment token writes to the no-tenant/bootstrap
+    database.  Dedup is per-partition (there is no cross-partition lookup), so if
+    this ``fqdn`` already lives in a TENANT database, creating a server-scoped row
+    here would be a cross-partition PHANTOM of a host that belongs to a tenant —
+    exactly the ghost-row bug we chased.  Reject loudly (403) so the agent
+    surfaces its missing/bad tenant binding and re-enrolls with its token instead
+    of accreting a duplicate.  No-op when multi-tenancy is off (no tenant DBs to
+    collide with) or the fqdn is genuinely new.
+    """
+    from backend.config import config as _config  # noqa: PLC0415
+
+    if not _config.is_multitenancy_enabled():
+        return
+
+    from backend.websocket.inbound_processor import (  # noqa: PLC0415
+        _find_host_in_tenant_dbs,
+    )
+
+    host, tenant_session = _find_host_in_tenant_dbs(None, fqdn)
+    if host is None:
+        return
+    try:
+        owner_fqdn = host.fqdn
+    finally:
+        tenant_session.close()
+
+    logger.warning(
+        "Rejected token-less registration for fqdn=%s: it already belongs to a "
+        "tenant database — a server-scoped row would be a phantom duplicate. The "
+        "agent must re-register with its enrollment token.",
+        sanitize_log(owner_fqdn),
+    )
+    raise HTTPException(
+        status_code=403,
+        detail=_(
+            "This host already belongs to a tenant. Re-register with its "
+            "enrollment token instead of registering server-scoped."
+        ),
+    )
 
 
 def _host_write_engine(enrollment_tenant_id):
@@ -786,6 +837,13 @@ async def register_host(registration_data: HostRegistration):
         )
         if existing_host:
             return _refresh_existing_host(session, existing_host, registration_data)
+
+        # Phantom-duplicate loophole close: no token routed us to the no-tenant DB
+        # and no server-scoped row exists for this fqdn — but if it already lives
+        # in a TENANT DB, creating one here would duplicate it across partitions.
+        # (Only reached on the token-less path; a token already picked the tenant.)
+        if enrollment_tenant_id is None:
+            _reject_if_fqdn_belongs_to_tenant(registration_data.fqdn)
 
         # Race guard: if this fqdn+ipv4 was just cascade-deleted by a
         # child-host delete, the doomed VM's agent is racing virsh

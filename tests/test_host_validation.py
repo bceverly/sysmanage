@@ -3,11 +3,15 @@ Tests for backend/utils/host_validation.py module.
 Tests host validation utilities for SysManage server.
 """
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from backend.utils.host_validation import validate_host_id
+
+# Where the not-found tests below stub cross-partition resolution so they stay
+# hermetic (the real helper would scan tenant databases).
+_OTHER_PARTITION = "backend.utils.host_validation._host_exists_in_other_partition"
 
 
 class TestValidateHostId:
@@ -75,9 +79,10 @@ class TestValidateHostId:
         mock_connection = MagicMock()
         mock_connection.send_message = AsyncMock()
 
-        result = await validate_host_id(
-            mock_db, mock_connection, "missing-host-id", None
-        )
+        with patch(_OTHER_PARTITION, return_value=False):
+            result = await validate_host_id(
+                mock_db, mock_connection, "missing-host-id", None
+            )
 
         assert result is False
         mock_connection.send_message.assert_called_once()
@@ -100,9 +105,10 @@ class TestValidateHostId:
         mock_connection = MagicMock()
         mock_connection.send_message = AsyncMock()
 
-        result = await validate_host_id(
-            mock_db, mock_connection, "missing-host-id", "unknown-hostname"
-        )
+        with patch(_OTHER_PARTITION, return_value=False):
+            result = await validate_host_id(
+                mock_db, mock_connection, "missing-host-id", "unknown-hostname"
+            )
 
         assert result is False
         mock_connection.send_message.assert_called_once()
@@ -117,8 +123,53 @@ class TestValidateHostId:
         mock_connection.send_message = AsyncMock()
 
         host_id = "specific-host-123"
-        await validate_host_id(mock_db, mock_connection, host_id, None)
+        with patch(_OTHER_PARTITION, return_value=False):
+            await validate_host_id(mock_db, mock_connection, host_id, None)
 
         call_args = mock_connection.send_message.call_args[0][0]
         assert host_id in call_args["message"]
         assert call_args["data"]["host_id"] == host_id
+
+    @pytest.mark.asyncio
+    async def test_validate_host_id_absent_locally_but_in_tenant_db(self):
+        """The root fix: a host missing from the handed (bootstrap) session but
+        present in a TENANT database is registered — return True and send NO
+        host_not_registered (otherwise the agent would churn its identity)."""
+        mock_db = MagicMock()
+        mock_filter = MagicMock()
+        mock_filter.first.return_value = None  # absent in the handed session
+        mock_db.query.return_value.filter.return_value = mock_filter
+
+        mock_connection = MagicMock()
+        mock_connection.send_message = AsyncMock()
+
+        with patch(_OTHER_PARTITION, return_value=True):
+            result = await validate_host_id(
+                mock_db, mock_connection, "tenant-host-id", "tenant-host"
+            )
+
+        assert result is True
+        mock_connection.send_message.assert_not_called()
+
+    def test_host_exists_in_other_partition_noop_when_mt_off(self):
+        """The cross-partition scan is a cheap no-op when multi-tenancy is off."""
+        from backend.utils.host_validation import _host_exists_in_other_partition
+
+        with patch("backend.config.config.is_multitenancy_enabled", return_value=False):
+            assert _host_exists_in_other_partition("any-id", "any-host") is False
+
+    def test_host_exists_in_other_partition_closes_session(self):
+        """When the resolver finds the host it must close the tenant session it
+        opened (no leak) and report existence."""
+        from backend.utils import host_validation
+
+        found_host = MagicMock()
+        session = MagicMock()
+        with patch(
+            "backend.config.config.is_multitenancy_enabled", return_value=True
+        ), patch(
+            "backend.websocket.inbound_processor._find_host_in_tenant_dbs",
+            return_value=(found_host, session),
+        ):
+            assert host_validation._host_exists_in_other_partition("h", "n") is True
+        session.close.assert_called_once()

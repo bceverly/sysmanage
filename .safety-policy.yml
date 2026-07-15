@@ -26,9 +26,12 @@ scanning-settings:
     # already pin the requirements; venv-resolved versions are downstream.
     - ".venv"
     - "venv"
-    # Build artifacts + caches
+    # Build artifacts + caches.  ``build-temp`` is a packaging staging dir that
+    # holds a STALE COPY of requirements.txt (e.g. build-temp/sysmanage-3.0.0.7/)
+    # — scanning it double-reports against pre-fix pins, so exclude it.
     - "dist"
     - "build"
+    - "build-temp"
     - "__pycache__"
     - ".tox"
     - ".pytest_cache"
@@ -37,13 +40,7 @@ report:
   dependency-vulnerabilities:
     enabled: true
     auto-ignore-in-report:
-      vulnerabilities:
-        # aiohttp >= 3.13.5 is the latest published patched release.
-        # Safety surfaces newer advisories filed against >=3.13.5 with
-        # no upstream fix yet — re-evaluate when 3.14 lands.
-        #   https://github.com/aio-libs/aiohttp/security/advisories
-        # NOTE: Replace the placeholder id below with the real advisory
-        # id shown in the safetycli.com web UI for this finding.
-        "66704":
-          reason: "aiohttp 3.13.5 is the latest patched release; no upstream fix for newer advisory bucket"
-          expires: "2026-09-01"
+      vulnerabilities: {}
+      # (aiohttp 3.13.5 auto-ignore removed: requirements.txt now pins
+      #  aiohttp>=3.14.1, which carries the PYSEC-2026-2104..2113 fix, so the
+      #  ignore is obsolete.)

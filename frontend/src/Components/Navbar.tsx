@@ -297,17 +297,18 @@ const Navbar = () => {
                 {t('nav.scripts')}
               </NavLink>
             </li>
-            {activeLicenseModules.includes('reporting_engine') && (
-              <li className="nav__item">
-                <NavLink
-                  to="/reports"
-                  className="nav__link"
-                  onClick={closeMenuOnMobile}
-                >
-                  {t('nav.reports')}
-                </NavLink>
-              </li>
-            )}
+            {activeLicenseModules.includes('reporting_engine') &&
+              activeLicenseFeatures.includes('reports') && (
+                <li className="nav__item">
+                  <NavLink
+                    to="/reports"
+                    className="nav__link"
+                    onClick={closeMenuOnMobile}
+                  >
+                    {t('nav.reports')}
+                  </NavLink>
+                </li>
+              )}
             {serverRole === 'repository' &&
               activeLicenseModules.includes('airgap_repository_engine') && (
                 <li className="nav__item">
@@ -347,10 +348,19 @@ const Navbar = () => {
         {/* Language selector, connection status, and notifications at toolbar level - only render when logged in */}
         {menuVisible === "visible" && (
           <div className="nav__language-toolbar">
-            {navbarWidgets.map((w) => {
-              const Widget = w.component;
-              return <Widget key={w.id} />;
-            })}
+            {navbarWidgets
+              .filter((w) => {
+                // Honour the widget's license gates (previously ignored). A
+                // widget with neither gate stays always-visible; when a gate is
+                // set it must pass. The widget component may still self-hide.
+                if (w.moduleRequired && !activeLicenseModules.includes(w.moduleRequired)) return false;
+                if (w.featureFlag && !activeLicenseFeatures.includes(w.featureFlag)) return false;
+                return true;
+              })
+              .map((w) => {
+                const Widget = w.component;
+                return <Widget key={w.id} />;
+              })}
             <ConnectionStatusIndicator />
             <NotificationBell />
             <IconButton

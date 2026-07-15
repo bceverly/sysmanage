@@ -31,6 +31,7 @@ class FeatureCode(str, Enum):
     OS_LIFECYCLE = "os_lifecycle"  # Phase 14.3 EOL tracking + release upgrades
     COMPLIANCE_REPORTS = "compliance"  # Matches license server feature code
     SECURITY_HARDENING = "security_hardening"
+    FIPS_MODE = "fips_mode"  # Phase 14.4 FIPS compliance mode management (Enterprise)
 
     # Automation Features
     AUTO_REMEDIATION = "auto_remediation"
@@ -272,6 +273,8 @@ TIER_FEATURES = {
         FeatureCode.OS_LIFECYCLE,
         FeatureCode.COMPLIANCE_REPORTS,
         FeatureCode.SECURITY_HARDENING,
+        # Phase 14.4 — FIPS mode enable/disable + fleet posture (Enterprise only)
+        FeatureCode.FIPS_MODE,
         FeatureCode.AUTO_REMEDIATION,
         FeatureCode.WORKFLOW_AUTOMATION,
         FeatureCode.SCHEDULED_TASKS,

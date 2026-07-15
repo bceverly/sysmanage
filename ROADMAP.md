@@ -5154,10 +5154,20 @@ First-class change windows so updates/commands only execute inside operator-defi
 
 Extends the existing Ubuntu Pro integration + `compliance_engine`.
 
-- [ ] Detect + report FIPS mode (enabled/disabled/kernel) per host
-- [ ] Enable/disable FIPS via Ubuntu Pro (`pro enable fips`) / RHEL (`fips-mode-setup`) where licensed
-- [ ] FIPS posture column in the compliance dashboard + per-host status
-- [ ] i18n/l10n
+- [x] Detect + report FIPS mode (enabled/disabled/kernel) per host — OSS agent
+      detection (`/proc/sys/crypto/fips_enabled`, `fips-mode-setup --check`,
+      Ubuntu Pro FIPS service, Windows `FipsAlgorithmPolicy`) → `fips_compliance_update`
+      → persisted on `host` (migration `r2fipsmode`)
+- [x] Enable/disable FIPS via Ubuntu Pro (`pro enable fips`) / RHEL
+      (`fips-mode-setup`) where licensed — Enterprise `compliance_engine.plan_fips_change`
+      (moat: OS→mechanism inference + pre-flight) → `backend/api/fips_actions.py`
+      (`FIPS_MODE`-gated) → store-and-forward `fips_enable`/`fips_disable` → agent
+      `system_control.fips_change`
+- [x] FIPS posture column in the compliance dashboard + per-host status —
+      Pro+ plugin `HostFipsCard` (host-detail tab) + `FipsCompliancePage` (fleet
+      posture) backed by `GET /fips/host/{id}` and `GET /fips/fleet`
+- [ ] i18n/l10n — English seed wrapped (backend/engine `_()`, plugin `enTranslations`);
+      14-language catalog fill (`make translate` + engine `.po`/`.mo`) still to run
 
 **Estimated Size:** ~1,500 lines
 

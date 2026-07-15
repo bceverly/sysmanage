@@ -73,7 +73,7 @@ function createTestStorage(): Storage {
     key(index: number) {
       return Object.keys(store)[index] ?? null;
     }
-  } as Storage;
+  };
 }
 Object.defineProperty(globalThis, 'localStorage', {
   configurable: true,

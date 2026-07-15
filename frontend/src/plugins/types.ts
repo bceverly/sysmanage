@@ -18,6 +18,15 @@ export interface PluginNavItem {
 export interface PluginRoute {
     path: string;
     component: ComponentType;
+    /**
+     * Optional license-feature gate (a FeatureCode). When set, navigating to
+     * this route directly by URL is only allowed if the active license grants
+     * the feature; otherwise the router redirects home. Prevents reaching a
+     * paid page by typing its URL even when its nav link is hidden.
+     */
+    featureFlag?: string;
+    /** Optional license-module gate (a ModuleCode); same redirect semantics. */
+    moduleRequired?: string;
 }
 
 /** Tab insertion position in host detail page. */
@@ -29,6 +38,16 @@ export interface PluginHostDetailTab {
     icon: ReactElement;
     labelKey: string;
     component: ComponentType<{ hostId: string }>;
+    /**
+     * Optional license-feature gate (a FeatureCode). When set, the tab is only
+     * shown if the active license grants the feature. This is finer-grained
+     * than ``moduleRequired``: an engine module can be licensed at a lower tier
+     * (e.g. Professional) while a specific capability inside it is higher-tier
+     * (e.g. the Enterprise ``fips_mode`` feature inside ``compliance_engine``),
+     * so gate on the feature to avoid showing a tab the user can't actually use.
+     * When both ``featureFlag`` and ``moduleRequired`` are set, BOTH must pass.
+     */
+    featureFlag?: string;
     moduleRequired?: string;
     position: TabInsertPosition;
 }
@@ -38,6 +57,12 @@ export interface PluginSettingsTab {
     id: string;
     labelKey: string;
     component: ComponentType;
+    /**
+     * Optional license-feature gate (a FeatureCode); finer-grained than
+     * ``moduleRequired``. When both are set, BOTH must pass. See the note on
+     * ``PluginHostDetailTab.featureFlag``.
+     */
+    featureFlag?: string;
     /**
      * Optional license-module gate.  When set, the tab is only
      * displayed if the active license includes this module code.
@@ -58,6 +83,8 @@ export interface PluginSettingsTab {
 export interface PluginNavbarWidget {
     id: string;
     component: ComponentType;
+    /** Optional license-feature gate (a FeatureCode); both gates must pass when set. */
+    featureFlag?: string;
     /** Optional license-module gate (same semantics as the tab gates). */
     moduleRequired?: string;
 }
@@ -69,6 +96,8 @@ export interface PluginNavbarWidget {
 export interface PluginAppBanner {
     id: string;
     component: ComponentType;
+    /** Optional license-feature gate (a FeatureCode); both gates must pass when set. */
+    featureFlag?: string;
     /** Optional license-module gate (same semantics as the tab gates). */
     moduleRequired?: string;
 }

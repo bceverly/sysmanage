@@ -15,6 +15,7 @@ from backend.api.handlers import (
     handle_child_hosts_list_update,
     handle_commercial_antivirus_status_update,
     handle_custom_metric_samples,
+    handle_fips_compliance_update,
     handle_firewall_status_update,
     handle_graylog_status_update,
     handle_hardware_update,
@@ -82,6 +83,10 @@ async def route_inbound_message(  # NOSONAR
             await handle_hardware_update(db, mock_connection, message_data)
             success = True
             print("Successfully processed hardware update", flush=True)
+
+        elif message_type == MessageType.FIPS_COMPLIANCE_UPDATE:
+            await handle_fips_compliance_update(db, mock_connection, message_data)
+            success = True
 
         elif message_type == MessageType.USER_ACCESS_UPDATE:
             print("About to call handle_user_access_update", flush=True)

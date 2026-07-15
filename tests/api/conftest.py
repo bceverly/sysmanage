@@ -112,6 +112,15 @@ def test_db():
         )  # Using String instead of Text for SQLite
         os_version_updated_at = Column(DateTime, nullable=True)
 
+        # FIPS compliance-mode fields (Phase 14.4)
+        fips_status = Column(String(20), nullable=True)
+        fips_enabled = Column(Boolean, nullable=True)
+        fips_available = Column(Boolean, nullable=True)
+        fips_kernel_enforced = Column(Boolean, nullable=True)
+        fips_vendor = Column(String(50), nullable=True)
+        fips_package_version = Column(String(100), nullable=True)
+        fips_updated_at = Column(DateTime, nullable=True)
+
         # Hardware inventory fields
         cpu_vendor = Column(String(100), nullable=True)
         cpu_model = Column(String(200), nullable=True)

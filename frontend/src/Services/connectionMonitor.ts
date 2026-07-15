@@ -158,8 +158,11 @@ class ConnectionMonitor {
     }
     
     try {
-      // Simple health check - try to fetch from the API
-      const response = await axiosInstance.head('/api/v1/health', {
+      // Simple health check - try to fetch from the API.  Health is a
+      // deliberately-UNVERSIONED infra endpoint (mounted at /api/health, not
+      // /api/v1/health) — same as the agent/auth/SCIM surfaces exempted from the
+      // Phase 13.2.1 /api/v1 migration.
+      const response = await axiosInstance.head('/api/health', {
         timeout: 15000,
       });
 
@@ -229,8 +232,8 @@ class ConnectionMonitor {
     this.notifyStatusChange();
 
     try {
-      // Try to connect to the server
-      const response = await axiosInstance.head('/api/v1/health', {
+      // Try to connect to the server (health is unversioned — /api/health).
+      const response = await axiosInstance.head('/api/health', {
         timeout: 15000,
       });
 

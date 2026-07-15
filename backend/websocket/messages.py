@@ -22,6 +22,7 @@ class MessageType(str, Enum):
     ERROR = "error"
     OS_VERSION_UPDATE = "os_version_update"
     HARDWARE_UPDATE = "hardware_update"
+    FIPS_COMPLIANCE_UPDATE = "fips_compliance_update"  # Phase 14.4
     USER_ACCESS_UPDATE = "user_access_update"
     SOFTWARE_INVENTORY_UPDATE = "software_inventory_update"
     PACKAGE_UPDATES_UPDATE = "package_updates_update"

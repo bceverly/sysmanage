@@ -19,19 +19,20 @@ vi.mock('../../Services/updates', () => ({
 
 // Mock the license service for Pro+ feature check.
 // Include the modules that gate /secrets (secrets_engine) and /reports
-// (reporting_engine) so all 9 navbar links render in the click-test below.
-// Navbar uses ``refreshLicenseCache`` (not ``getLicenseInfo``) to populate
-// its local state, so that's the function the test must mock.
+// (reporting_engine) AND the ``reports`` feature — /reports now requires BOTH
+// the reporting_engine module and the (Enterprise) ``reports`` feature, so a
+// full-access license grants both. Navbar uses ``refreshLicenseCache`` (not
+// ``getLicenseInfo``) to populate its local state, so that's what the test mocks.
 const mockLicenseInfo = {
   active: true,
-  features: [],
+  features: ['reports'],
   modules: ['secrets_engine', 'reporting_engine']
 };
 vi.mock('../../Services/license', () => ({
   getLicenseInfo: vi.fn(() => Promise.resolve(mockLicenseInfo)),
   refreshLicenseCache: vi.fn(() => Promise.resolve(mockLicenseInfo)),
   getCachedLicense: vi.fn(() => mockLicenseInfo),
-  isFeatureLicensed: vi.fn(() => false),
+  isFeatureLicensed: vi.fn((f: string) => mockLicenseInfo.features.includes(f)),
   isModuleLicensed: vi.fn((m: string) => mockLicenseInfo.modules.includes(m)),
   onLicenseChange: vi.fn(() => () => {}),
   clearLicenseCache: vi.fn()

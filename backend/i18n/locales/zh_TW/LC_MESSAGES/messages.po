@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-13 07:59-0400\n"
+"POT-Creation-Date: 2026-07-15 10:09-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -132,6 +132,7 @@ msgid "Invalid host ID format"
 msgstr "主機ID格式無效"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:897
@@ -469,6 +470,14 @@ msgstr "此帳戶未註冊MFA。"
 #: backend/api/auth_mfa.py:553
 msgid "Editing MFA settings requires admin privileges."
 msgstr "編輯 MFA 設定需要管理員權限。"
+
+#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+msgid "FIPS mode management requires a SysManage Enterprise license."
+msgstr "FIPS 模式管理需要 SysManage Enterprise 許可證。"
+
+#: backend/api/fips_actions.py:68
+msgid "The compliance module is not currently available."
+msgstr "當前合规模块不可用。"
 
 #: backend/api/third_party_repos.py:219
 #, python-format
@@ -2014,7 +2023,7 @@ msgstr "憑證主機尚未註冊。請重新註冊。"
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agent 認證失敗：無效的主機 ID"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 為 %s 的主機尚未註冊。請重新註冊。"
@@ -2527,21 +2536,27 @@ msgstr "主機已存在"
 msgid "Invalid or expired registration key"
 msgstr "無效或已過期的註冊密鑰"
 
-#: backend/api/host.py:719
+#: backend/api/host.py:726
 msgid "Invalid or expired enrollment token"
 msgstr "無效或已過期的入站令牌"
 
-#: backend/api/host.py:809
+#: backend/api/host.py:769
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
+
+#: backend/api/host.py:867
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:868
+#: backend/api/host.py:926
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
 
-#: backend/api/host.py:885
+#: backend/api/host.py:943
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3485,48 +3500,48 @@ msgstr "recurrence 必須是 'once'、'daily' 或 'weekly'。"
 msgid "Unknown timezone: %s"
 msgstr "未知時區： %s"
 
-#: backend/api/maintenance_windows.py:133
+#: backend/api/maintenance_windows.py:136
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "一次性窗口的 starts_at 需要在 ends_at 之前。"
 
-#: backend/api/maintenance_windows.py:141
+#: backend/api/maintenance_windows.py:143
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "重複性窗口需要一個 start_time，格式為 'HH:MM'。"
 
-#: backend/api/maintenance_windows.py:146
+#: backend/api/maintenance_windows.py:148
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "重複性窗口需要一個正數 duration_minutes。"
 
-#: backend/api/maintenance_windows.py:153
+#: backend/api/maintenance_windows.py:155
 msgid "A weekly window needs valid days_of_week."
 msgstr "週期性窗口需要有效的 days_of_week。"
 
-#: backend/api/maintenance_windows.py:159
-msgid "A window needs at least one scope (all, host, or tag)."
-msgstr "窗口至少需要一個範圍（all、host 或 tag）。"
-
-#: backend/api/maintenance_windows.py:165
+#: backend/api/maintenance_windows.py:164
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type 必須是 'all'、'host' 或 'tag'。"
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:167
 msgid "A host scope needs a host_id."
 msgstr "主機範圍需要一個 host_id。"
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:169
 msgid "A tag scope needs a tag_id."
 msgstr "標籤範圍需要一個 tag_id。"
 
-#: backend/api/maintenance_windows.py:292
-#: backend/api/maintenance_windows.py:315
+#: backend/api/maintenance_windows.py:179
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr "窗口至少需要一個範圍（all、host 或 tag）。"
+
+#: backend/api/maintenance_windows.py:300
+#: backend/api/maintenance_windows.py:323
 msgid "Maintenance window not found."
 msgstr "維護窗口未找到。"
 
-#: backend/api/maintenance_windows.py:334
+#: backend/api/maintenance_windows.py:342
 msgid "An override reason is required."
 msgstr "需要提供覆蓋理由。"
 
-#: backend/api/maintenance_windows.py:338
+#: backend/api/maintenance_windows.py:346
 msgid "Override duration must be positive."
 msgstr "覆蓋持續時間必須為正數。"
 
@@ -3903,12 +3918,12 @@ msgstr "無法刪除儲存的腳本"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "無法取得商業防毒狀態：%s"
 
-#: backend/websocket/message_router.py:282
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "隊列中未知的消息類型: %s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息類型 %(message_type)s 時發生錯誤：%(error)s"

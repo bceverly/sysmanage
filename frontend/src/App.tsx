@@ -51,6 +51,7 @@ import SitesMap from './Pages/SitesMap';
 import SitesTiles from './Pages/SitesTiles';
 import Logout from './Pages/Logout';
 import LicensedRoute from './Components/LicensedRoute';
+import { getLicenseInfo } from './Services/license';
 import { PluginProvider, usePlugins } from './plugins';
 
 function AppRoutes() {
@@ -93,13 +94,21 @@ function AppRoutes() {
       <Route path="/federation/hosts" element={<LicensedRoute module="federation_controller_engine"><FederationHosts /></LicensedRoute>} />
       <Route path="/federation/policies" element={<LicensedRoute module="federation_controller_engine"><FederationPolicies /></LicensedRoute>} />
       <Route path="/logout" element={<Logout />} />
-      {routes.map(route => (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={<route.component />}
-        />
-      ))}
+      {routes.map(route => {
+        // A plugin route that declares a feature/module gate is wrapped in the
+        // license guard so it can't be reached by direct URL without the
+        // license — even when its nav link is hidden. Ungated routes (neither
+        // field set) render as-is, preserving the pre-gate behaviour.
+        const RouteComponent = route.component;
+        const element = (route.featureFlag || route.moduleRequired) ? (
+          <LicensedRoute feature={route.featureFlag} module={route.moduleRequired}>
+            <RouteComponent />
+          </LicensedRoute>
+        ) : (
+          <RouteComponent />
+        );
+        return <Route key={route.path} path={route.path} element={element} />;
+      })}
       {!pluginsLoaded && <Route path="*" element={null} />}
     </Routes>
   );
@@ -111,12 +120,47 @@ function AppRoutes() {
  */
 function PluginAppBanners() {
   const { appBanners } = usePlugins();
+  const [license, setLicense] = useState<{ features: string[]; modules: string[] }>({
+    features: [],
+    modules: [],
+  });
+  useEffect(() => {
+    let cancelled = false;
+    // Don't fetch the license until the user is authenticated.  On /login there's
+    // no bearer token, so GET /api/v1/license 401s; the axios interceptor then
+    // runs its refresh→fail path and redirects to /login, remounting this banner
+    // and refetching — an infinite reload loop that makes the login page unusable
+    // (and broke the Playwright auth setup).  No banners render pre-login anyway.
+    if (!localStorage.getItem('bearer_token')) {
+      return;
+    }
+    getLicenseInfo()
+      .then((info) => {
+        if (!cancelled) {
+          setLicense({ features: info.features || [], modules: info.modules || [] });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLicense({ features: [], modules: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <>
-      {appBanners.map((b) => {
-        const Banner = b.component;
-        return <Banner key={b.id} />;
-      })}
+      {appBanners
+        .filter((b) => {
+          // Honour the banner's license gates (previously ignored). The banner
+          // component may still self-hide on top of this.
+          if (b.moduleRequired && !license.modules.includes(b.moduleRequired)) return false;
+          if (b.featureFlag && !license.features.includes(b.featureFlag)) return false;
+          return true;
+        })
+        .map((b) => {
+          const Banner = b.component;
+          return <Banner key={b.id} />;
+        })}
     </>
   );
 }

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-13 07:59-0400\n"
+"POT-Creation-Date: 2026-07-15 10:09-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -132,6 +132,7 @@ msgid "Invalid host ID format"
 msgstr "Ungültiges Host-ID-Format"
 
 #: backend/api/certificates.py:91 backend/api/certificates.py:161
+#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
 #: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
 #: backend/api/repository_mirroring.py:836
 #: backend/api/repository_mirroring.py:897
@@ -478,6 +479,14 @@ msgstr "MFA ist für dieses Konto nicht registriert."
 #: backend/api/auth_mfa.py:553
 msgid "Editing MFA settings requires admin privileges."
 msgstr "Die Bearbeitung der MFA-Einstellungen erfordert Administratorrechte."
+
+#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+msgid "FIPS mode management requires a SysManage Enterprise license."
+msgstr "Die FIPS-Modus-Verwaltung erfordert eine SysManage Enterprise-Lizenz."
+
+#: backend/api/fips_actions.py:68
+msgid "The compliance module is not currently available."
+msgstr "Der Kompatibilitätsmodul ist derzeit nicht verfügbar."
 
 #: backend/api/third_party_repos.py:219
 #, python-format
@@ -2147,7 +2156,7 @@ msgstr "Host mit Token ist nicht registriert. Bitte erneut anmelden."
 msgid "Agent authentication failed: invalid host ID"
 msgstr "Agentenauthentifizierung fehlgeschlagen: ungültige Host-ID"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:41
+#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "Host mit ID %s ist nicht registriert. Bitte erneut anmelden."
@@ -2704,22 +2713,30 @@ msgstr "Host existiert bereits"
 msgid "Invalid or expired registration key"
 msgstr "Ungültiger oder abgelaufener Registrierungsschlüssel"
 
-#: backend/api/host.py:719
+#: backend/api/host.py:726
 msgid "Invalid or expired enrollment token"
 msgstr "Ungültiger oder abgelaufener Anmelde-Token"
 
-#: backend/api/host.py:809
+#: backend/api/host.py:769
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr ""
+"Dieser Host gehört bereits einem Mandanten an. Registriere dich stattdessen "
+"mit seinem Anmelde-Token und nicht als Server-basierter Eintrag."
+
+#: backend/api/host.py:867
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:868
+#: backend/api/host.py:926
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' wurde über Anmelde-Token in Tenant %(tenant_id)s angemeldet"
 
-#: backend/api/host.py:885
+#: backend/api/host.py:943
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3736,52 +3753,52 @@ msgstr "recurrence muss 'once', 'daily' oder 'weekly' sein."
 msgid "Unknown timezone: %s"
 msgstr "Unbekannter Zeitzone: %s"
 
-#: backend/api/maintenance_windows.py:133
+#: backend/api/maintenance_windows.py:136
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "Für ein einmaliges Fenster muss starts_at vor ends_at liegen."
 
-#: backend/api/maintenance_windows.py:141
+#: backend/api/maintenance_windows.py:143
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr ""
 "Für ein wiederkehrendes Fenster ist eine Startzeit im Format 'HH:MM' "
 "erforderlich."
 
-#: backend/api/maintenance_windows.py:146
+#: backend/api/maintenance_windows.py:148
 msgid "A recurring window needs a positive duration_minutes."
 msgstr ""
 "Für ein wiederkehrendes Fenster ist eine positive Dauer in Minuten "
 "erforderlich."
 
-#: backend/api/maintenance_windows.py:153
+#: backend/api/maintenance_windows.py:155
 msgid "A weekly window needs valid days_of_week."
 msgstr "Ein wöchentliches Fenster muss gültige Tage der Woche haben."
 
-#: backend/api/maintenance_windows.py:159
-msgid "A window needs at least one scope (all, host, or tag)."
-msgstr "Ein Fenster benötigt mindestens einen Scope (all, host oder tag)."
-
-#: backend/api/maintenance_windows.py:165
+#: backend/api/maintenance_windows.py:164
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type muss 'all', 'host' oder 'tag' sein."
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:167
 msgid "A host scope needs a host_id."
 msgstr "Ein Host-Scope benötigt eine host_id."
 
-#: backend/api/maintenance_windows.py:173
+#: backend/api/maintenance_windows.py:169
 msgid "A tag scope needs a tag_id."
 msgstr "Ein Tag-Scope benötigt eine tag_id."
 
-#: backend/api/maintenance_windows.py:292
-#: backend/api/maintenance_windows.py:315
+#: backend/api/maintenance_windows.py:179
+msgid "A window needs at least one scope (all, host, or tag)."
+msgstr "Ein Fenster benötigt mindestens einen Scope (all, host oder tag)."
+
+#: backend/api/maintenance_windows.py:300
+#: backend/api/maintenance_windows.py:323
 msgid "Maintenance window not found."
 msgstr "Wartungsfenster nicht gefunden."
 
-#: backend/api/maintenance_windows.py:334
+#: backend/api/maintenance_windows.py:342
 msgid "An override reason is required."
 msgstr "Einen Überprüfungsgrund ist erforderlich."
 
-#: backend/api/maintenance_windows.py:338
+#: backend/api/maintenance_windows.py:346
 msgid "Override duration must be positive."
 msgstr "Die Dauer der Überprüfung muss positiv sein."
 
@@ -4167,12 +4184,12 @@ msgstr "Fehler beim Entfernen des gespeicherten Skripts"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Fehler beim Abrufen des Status für kommerzielle Antivirensoftware: %s"
 
-#: backend/websocket/message_router.py:282
+#: backend/websocket/message_router.py:287
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unbekannter Nachrichtentyp in Warteschlange: %s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:292
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fehler beim Routing der Nachrichtentyp %(message_type)s: %(error)s"

@@ -615,3 +615,52 @@ async def handle_ubuntu_pro_update(  # NOSONAR
             "Error processing Ubuntu Pro data for host %s: %s", host.id, e
         )
         # Don't re-raise - let the main OS update continue
+
+
+async def handle_fips_compliance_update(db: Session, connection, message_data: dict):
+    """Handle a FIPS compliance-mode status update from an agent (Phase 14.4).
+
+    Detection is OSS: every agent reports its FIPS posture; we persist it on the
+    host so the fleet dashboard + per-host tab can surface it.  Enabling/
+    disabling FIPS is the Enterprise-gated action (see backend/api/fips_actions).
+    """
+    from backend.utils.host_validation import validate_host_id
+
+    agent_host_id = message_data.get("host_id")
+    if agent_host_id and not await validate_host_id(db, connection, agent_host_id):
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": error_host_not_registered(),
+            "data": {},
+        }
+    if not hasattr(connection, "host_id") or not connection.host_id:
+        return {
+            "message_type": "error",
+            "error_type": "host_not_registered",
+            "message": error_host_not_registered(),
+            "data": {},
+        }
+
+    updates = {"fips_updated_at": datetime.now(timezone.utc).replace(tzinfo=None)}
+    for field in (
+        "fips_status",
+        "fips_enabled",
+        "fips_available",
+        "fips_kernel_enforced",
+        "fips_vendor",
+        "fips_package_version",
+    ):
+        # The agent sends keys without the "fips_" prefix (status, enabled, …).
+        value = message_data.get(field[len("fips_") :])
+        if value is not None:
+            updates[field] = value
+
+    db.execute(update(Host).where(Host.id == connection.host_id).values(**updates))
+    db.commit()
+    debug_logger.info(
+        "FIPS status updated for host %s: %s",
+        connection.host_id,
+        updates.get("fips_status"),
+    )
+    return {"message_type": "ack", "data": {"success": True}}
