@@ -1054,7 +1054,8 @@
       "engineMissing": "Required Pro+ federation engine not loaded; check license."
     },
     "scrollLeft": "Scroll left",
-    "scrollRight": "Scroll right"
+    "scrollRight": "Scroll right",
+    "search": "Search (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Application Updates",
@@ -3200,5 +3201,9 @@
     "syslogPort": "Syslog port",
     "syslogProtocol": "Protocol",
     "syslogFacility": "Facility"
+  },
+  "commandPalette": {
+    "noResults": "No matches.",
+    "placeholder": "Search pages…  (Esc to close)"
   }
 }

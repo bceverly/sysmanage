@@ -310,7 +310,7 @@ const Navbar = () => {
   return (
     <header className="header">
       <nav className="nav container">
-        <NavLink to="/" className="nav__logo">
+        <NavLink to="/" className="nav__logo" title={t('nav.dashboard', 'Dashboard')}>
           <img src={SysManageLogo} alt={t('nav.logoAlt', 'SysManage')} className="nav__logo-img" />
           {roleChip}
           {federationChip}

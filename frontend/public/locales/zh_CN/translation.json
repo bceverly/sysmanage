@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "向左滚动",
     "scrollRight": "向右滚动",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "搜索 (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -3200,5 +3201,9 @@
       "sat": "星期六",
       "sun": "星期日"
     }
+  },
+  "commandPalette": {
+    "noResults": "没有匹配项。",
+    "placeholder": "搜索页面…… (按 Esc 关闭)"
   }
 }

@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Faites défiler vers la gauche",
     "scrollRight": "Faites défiler vers la droite",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Rechercher (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Mises à jour d'Applications",
@@ -3200,5 +3201,9 @@
       "sat": "Sam",
       "sun": "Dim"
     }
+  },
+  "commandPalette": {
+    "noResults": "Aucun résultat.",
+    "placeholder": "Rechercher des pages…  (Appuez sur Esc pour fermer)"
   }
 }

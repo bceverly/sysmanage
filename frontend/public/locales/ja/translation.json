@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "左にスクロール",
     "scrollRight": "右にスクロール",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "検索 (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "アプリケーションアップデート",
@@ -3200,5 +3201,9 @@
       "sat": "土曜日",
       "sun": "日曜日"
     }
+  },
+  "commandPalette": {
+    "noResults": "一致する項目がありません。",
+    "placeholder": "ページを検索…  (Escで閉じる)"
   }
 }

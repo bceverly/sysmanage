@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "बाएं लॉन्ग",
     "scrollRight": "दाईं ओर लॉन्ग",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "खोज (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -3200,5 +3201,9 @@
       "sat": "शनि",
       "sun": "सोम"
     }
+  },
+  "commandPalette": {
+    "noResults": "कोई मेल खाने वाला परिणाम नहीं है।",
+    "placeholder": "पेज खोज…  (Esc के दबाएँ बंद करने के लिए)"
   }
 }

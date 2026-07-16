@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Nach links scrollen",
     "scrollRight": "Nach rechts scrollen",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Suchen (Strg+K)"
   },
   "notifications": {
     "applicationUpdates": "Anwendungs-Updates",
@@ -3200,5 +3201,9 @@
       "sat": "Sa",
       "sun": "So"
     }
+  },
+  "commandPalette": {
+    "noResults": "Keine Treffer.",
+    "placeholder": "Seiten durchsuchen…  (Esc zum Schließen)"
   }
 }

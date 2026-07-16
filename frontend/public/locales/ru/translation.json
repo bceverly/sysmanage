@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Прокрутить влево",
     "scrollRight": "Прокрутить вправо",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Поиск (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Обновления Приложений",
@@ -3200,5 +3201,9 @@
       "sat": "Сб",
       "sun": "Вс"
     }
+  },
+  "commandPalette": {
+    "noResults": "Нет совпадений.",
+    "placeholder": "Искать страницы…  (Esc для закрытия)"
   }
 }

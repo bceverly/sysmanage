@@ -1363,7 +1363,7 @@ const Settings: React.FC = () => {
       {/* Two-pane layout: grouped category rail on the left, content on the
           right — replaces the old overflowing horizontal tab strip. */}
       <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
-        <Box sx={navRailContainerSx}>
+        <Box component="nav" aria-label={t('settings.tabsAriaLabel', 'settings tabs')} sx={navRailContainerSx}>
           {settingsGroups.map(group => (
             <Box key={group.id} sx={navRailGroupSx}>
               <Typography variant="overline" sx={navRailGroupTitleSx}>

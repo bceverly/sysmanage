@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "انقل يميناً",
     "scrollRight": "انقل يساراً",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "بحث (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -3200,5 +3201,9 @@
       "sat": "سبت",
       "sun": "أحد"
     }
+  },
+  "commandPalette": {
+    "noResults": "لا توجد نتائج.",
+    "placeholder": "ابحث في الصفحات…  (Esc لإغلاق)"
   }
 }

@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Scroll naar links",
     "scrollRight": "Scroll naar rechts",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Zoeken (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Applicatie Updates",
@@ -3200,5 +3201,9 @@
       "sat": "Zat",
       "sun": "Zon"
     }
+  },
+  "commandPalette": {
+    "noResults": "Geen overeenkomsten.",
+    "placeholder": "Paginas zoeken...  (Esc om te sluiten)"
   }
 }

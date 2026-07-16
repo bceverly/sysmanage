@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Desplazar hacia la izquierda",
     "scrollRight": "Desplazar hacia la derecha",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Buscar (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Actualizaciones de Aplicaciones",
@@ -3200,5 +3201,9 @@
       "sat": "Sáb",
       "sun": "Dom"
     }
+  },
+  "commandPalette": {
+    "noResults": "Sin coincidencias.",
+    "placeholder": "Buscar páginas…  (Pulse Esc para cerrar)"
   }
 }

@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "왼쪽으로 스크롤",
     "scrollRight": "오른쪽으로 스크롤",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "검색 (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "애플리케이션 업데이트",
@@ -3200,5 +3201,9 @@
       "sat": "토요일",
       "sun": "일요일"
     }
+  },
+  "commandPalette": {
+    "noResults": "일치하는 항목이 없습니다.",
+    "placeholder": "페이지 검색…  (Esc로 닫기)"
   }
 }

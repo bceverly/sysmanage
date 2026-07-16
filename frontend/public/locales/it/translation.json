@@ -1054,7 +1054,8 @@
     },
     "scrollLeft": "Scorri a sinistra",
     "scrollRight": "Scorri a destra",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]"
+    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "search": "Ricerca (Ctrl+K)"
   },
   "notifications": {
     "applicationUpdates": "Aggiornamenti Applicazioni",
@@ -3200,5 +3201,9 @@
       "sat": "Sab",
       "sun": "Dom"
     }
+  },
+  "commandPalette": {
+    "noResults": "Nessun risultato.",
+    "placeholder": "Cerca pagine…  (Premi Esc per chiudere)"
   }
 }
