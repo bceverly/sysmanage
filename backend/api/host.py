@@ -757,7 +757,10 @@ def _reject_if_fqdn_belongs_to_tenant(fqdn):
     finally:
         tenant_session.close()
 
-    logger.warning(
+    # False positive: the only logged value is a sanitized FQDN (a hostname);
+    # the word "token" appears solely in the static advice text, not as a
+    # secret. See sanitize_log() and owner_fqdn = host.fqdn above.
+    logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         "Rejected token-less registration for fqdn=%s: it already belongs to a "
         "tenant database — a server-scoped row would be a phantom duplicate. The "
         "agent must re-register with its enrollment token.",
