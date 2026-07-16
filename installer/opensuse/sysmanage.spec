@@ -1,5 +1,5 @@
 Name:           sysmanage
-Version:        3.2.0.1
+Version:        3.2.0.2
 Release:        1
 Summary:        Centralized system management server with web-based interface
 
