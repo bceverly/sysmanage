@@ -147,7 +147,10 @@ class TestRegisterAppRoutes:
         response = client.get("/api/health")
 
         assert response.status_code == 200
-        assert response.json() == {"status": "healthy"}
+        body = response.json()
+        assert body["status"] == "healthy"
+        # Phase 15.1: /api/health also reports bootstrap-DB connectivity.
+        assert body["database"] == "up"
 
     @pytest.mark.asyncio
     async def test_health_endpoint_supports_head(self):

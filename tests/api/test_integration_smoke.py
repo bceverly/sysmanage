@@ -25,7 +25,9 @@ def test_health_endpoint_returns_healthy(client):
     resp = client.get("/api/health")
     assert resp.status_code == 200
     body = resp.json()
-    assert body == {"status": "healthy"}, f"unexpected health body: {body!r}"
+    # Phase 15.1: health also reports DB connectivity; status stays 'healthy'.
+    assert body["status"] == "healthy", f"unexpected health body: {body!r}"
+    assert body["database"] == "up", f"unexpected health body: {body!r}"
 
 
 @pytest.mark.integration
