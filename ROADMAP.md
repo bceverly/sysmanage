@@ -45,7 +45,8 @@ This document provides a detailed roadmap for realizing all features in both ope
 34. [Phase 19: Stabilization](#phase-19-stabilization)
 35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
 36. [Phase 21: Proactive Operations & Advisor (Enterprise)](#phase-21-proactive-operations--advisor-enterprise)
-37. [Phase 22: Stabilization & v4.0 GA](#phase-22-stabilization--v40-ga)
+37. [Phase 21.5: Mobile Device Management (Community / Pro+ / Enterprise)](#phase-215-mobile-device-management-community--pro--enterprise)
+38. [Phase 22: Stabilization & v4.0 GA](#phase-22-stabilization--v40-ga)
 38. [Release Schedule Summary](#release-schedule-summary)
 39. [Module Migration Plan](#module-migration-plan)
 
@@ -5606,6 +5607,121 @@ one-way ingestion connector only.
 
 ---
 
+## Phase 21.5: Mobile Device Management (Community / Pro+ / Enterprise)
+
+**Target Release:** v3.7.0.0
+**Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets — inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise — so the v4.0 "manage everything" promise covers every endpoint class.
+
+**Market gap addressed:** Microsoft Intune / Jamf Pro / VMware Workspace ONE / Kandji / Google Android Enterprise — the UEM/MDM slice, folded into the *same* single pane of glass (OS-lifecycle, compliance, advisory, alerting) as the rest of the fleet rather than a bolt-on.
+
+**Why here (and why 21.5):** phases 16–21 deepen *server/desktop* management toward Red Hat Satellite/Insights parity. Mobile is an orthogonal *device-class* expansion, so it slots in as a decimal phase (à la 12.5) right before the GA — where it makes v4.0's "manage everything" literally true (servers + desktops + BSD + mobile) without interrupting the parity arc, and without renumbering Phase 22 or anything above it.
+
+**Design note — this is NOT a ported agent.** iOS and Android forbid a persistent privileged daemon (sandboxing + background-execution limits), so there is no `sysmanage-agent` port. Management runs over vendor MDM/UEM channels and is mostly *server-side*; the only device-side pieces are an optional small companion app and/or an OS-native enrollment profile — separate codebases (Swift/Apple MDM, Android Enterprise) from the agent.
+
+> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (21.5.3) and the self-hosted companion app (21.5.2), both of which reach only the customer's own infra. Called out per sub-phase.
+
+> **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
+
+#### 21.5.1 Mobile device model + fleet visibility (Community / OSS)
+
+The OSS floor: mobile is a first-class, *visible* endpoint class — no automated management, but you can see what you know about.
+
+- [ ] `mobile_device` schema/migration (platform ios|ipados|android, model, OS version/build, Android `security_patch_level`, ownership corporate|byod, enrollment state, last-seen) — a device class distinct from `host` (no shell / package manager / privileged execution)
+- [ ] Fleet + dashboard surface mobile devices alongside hosts; read-only device-detail view
+- [ ] Manual + authenticated-API device registration + a self-report ingest endpoint (a device/app can POST OS version/build)
+- [ ] Basic "obsolete OS" flag from OSS OS metadata (no curated EOL feed — that's Pro+)
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+#### 21.5.2 Companion inventory app — BYOD self-report (Pro+)
+
+A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in — **visibility only, never enforcement.**
+
+- [ ] Minimal iOS + Android app: report OS version/build + Android `Build.VERSION.SECURITY_PATCH` + model on a schedule / push wake
+- [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
+- [ ] Air-gap-friendly (talks only to the customer's SysManage server)
+- [ ] i18n/l10n
+- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 21.5.1 one.
+
+**Estimated Size:** ~3,500 lines (app + server)
+
+#### 21.5.3 UEM/MDM ingestion — single pane of glass (Pro+) ⭐
+
+Highest value, lowest effort: don't *be* the MDM — **ingest from the one they already run.** Makes SysManage the single pane of glass across servers + desktops + mobile.
+
+- [ ] `mdm_ingest_engine`: pull device inventory + compliance from Microsoft Intune (Graph), Jamf Pro, VMware Workspace ONE, Kandji via their APIs; normalize into `mobile_device`
+- [ ] Per-tenant connector config + credentials (in OpenBAO); scheduled sync; host→tenant mapping
+- [ ] Map ingested OS version / patch state into the shared OS-lifecycle/EOL (14.3) + compliance + advisory + alerting surfaces
+- [ ] Air-gap: works when the incumbent UEM is on-prem/reachable
+- [ ] i18n/l10n
+
+**Estimated Size:** ~5,000 lines
+
+#### 21.5.4 Android native MDM — Android Management API (Pro+ inventory → Enterprise policy)
+
+Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
+
+- [ ] `android_management_engine`: enterprise registration, enrollment tokens, device-state read (OS version, `securityPatchLevel`, compliance, apps) — **inventory/read is Pro+**
+- [ ] Policies (password/compliance rules, app allow/deny, managed config), remote lock / reset-password, work-profile vs fully-managed, OS-update controls — **Enterprise**
+- [ ] Cloud dependency (Google) — **not air-gappable**
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,500 lines
+
+#### 21.5.5 iOS/iPadOS native MDM — Apple MDM protocol (Enterprise)
+
+Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
+
+- [ ] `mdm_engine`: Apple MDM server — APNs push, signed enrollment profiles, device queries (DeviceInformation, InstalledApplicationList, OS version, AvailableOSUpdates)
+- [ ] Enrollment: Automated Device Enrollment (ABM/ASM/DEP) for corporate + user-enrollment for BYOD
+- [ ] Restriction/compliance/configuration profiles; remote lock / wipe / clear-passcode; force OS update (supervised)
+- [ ] Apple MDM **push-certificate** dependency + APNs reachability — **not air-gappable**
+- [ ] i18n/l10n
+
+**Estimated Size:** ~10,000 lines
+
+#### 21.5.6 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
+
+Make the inventory *actionable* — reuse existing engines rather than rebuild.
+
+- [ ] Reuse `lifecycle_engine` (14.3) shared EOL registry to flag EOL / obsolete mobile OS versions — **Pro+**
+- [ ] Reuse advisory/compliance/alerting: "N months behind on security patches", "iOS < x.y", policy non-compliance → alert + report + dashboard — **Pro+**
+- [ ] Compliance *enforcement* actions (auto-quarantine, block-corporate-resource hook, force-update dispatch) tied to native MDM — **Enterprise**
+- [ ] Enrollment + compliance dashboards; per-device advisor-style tab
+- [ ] i18n/l10n
+
+**Estimated Size:** ~3,000 lines
+
+#### 21.5.7 Enrollment orchestration & zero-touch (Enterprise)
+
+The operational product: getting devices enrolled at scale.
+
+- [ ] Apple ABM/ASM (ADE) + Android Enterprise zero-touch bulk enrollment; BYOD work-profile / user-enrollment flows
+- [ ] Ownership (corporate vs BYOD), tenant / site / access-group assignment on enrollment; bulk token issuance
+- [ ] Federation-aware (enroll centrally, devices belong to a site) where applicable
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,000 lines
+
+### Licensing summary
+
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (21.5.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Pro+ (Professional):** aggregate **visibility & compliance** — companion app (21.5.2), ingest-from-existing-UEM (21.5.3 ⭐), Android inventory (21.5.4 read), and mobile EOL/patch compliance + alerting (21.5.6). The "single pane of glass over the mobile you already manage" tier — no device control.
+- **Enterprise:** **be the MDM** — native iOS (21.5.5) + Android policy (21.5.4 control), enrollment orchestration / zero-touch (21.5.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
+
+### Exit Criteria
+
+- [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector (21.5.3) **and** the native Android path (21.5.4)
+- [ ] iOS enroll + inventory validated on ≥1 supervised device via `mdm_engine` (21.5.5)
+- [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
+- [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
+- [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
+- [ ] Docs + 14-language i18n complete
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
 ## Phase 22: Stabilization & v4.0 GA
 
 **Target Release:** **v4.0.0.0**
@@ -5650,6 +5766,7 @@ one-way ingestion connector only.
 | 19 | v3.4.x | Stabilization | Content lifecycle + provisioning hardening |
 | 20 | v3.5.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
 | 21 | v3.6.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
+| 21.5 | v3.7.0.0 | Mobile Device Management | iOS/Android: ingest-from-UEM + native Apple/Android MDM; mobile OS/patch compliance across Community/Pro+/Enterprise |
 | 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
 
 ---
