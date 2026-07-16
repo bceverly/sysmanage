@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Add ipv4 and ipv6 columns to firewall_role_open_port table
 
 Revision ID: e5f6a7b8c9d0

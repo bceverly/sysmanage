@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Widen airgap_bundle.size_bytes to BigInteger.
 
 Revision ID: t0absize

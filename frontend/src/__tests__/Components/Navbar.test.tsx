@@ -1,7 +1,13 @@
+// Copyright (c) 2024-2026 Bryan Everly
+// Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+// See the LICENSE file in the project root for the full terms.
+
 import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, beforeEach, afterEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
 import Navbar from '../../Components/Navbar';
+import { server } from '../../mocks/node';
 
 // Mock the updates service for NotificationBell component
 vi.mock('../../Services/updates', () => ({
@@ -44,6 +50,23 @@ const NavbarWithRouter = () => (
 describe('Navbar Component (grouped menubar)', () => {
   beforeEach(() => {
     localStorage.setItem('bearer_token', 'test-token-for-navbar-tests');
+    // Navbar fires three authenticated fetches on mount that the shared
+    // handlers don't cover: the server-info role chip (raw fetch), the
+    // federation-licensed probe, and the user's security-role permissions.
+    // Mock them so nothing escapes to MSW. federation returns licensed:false
+    // to keep the "/sites" link gated OFF (asserted below), and permissions is
+    // an empty set so no role-gated destinations are surfaced.
+    server.use(
+      http.get('/api/v1/server-info', () =>
+        HttpResponse.json({ role: 'standard', federation_role: 'none' }),
+      ),
+      http.get('/api/v1/federation/sites', () =>
+        HttpResponse.json({ licensed: false }),
+      ),
+      http.get('/api/v1/user/permissions', () =>
+        HttpResponse.json({ is_admin: false, permissions: {} }),
+      ),
+    );
   });
 
   afterEach(() => {

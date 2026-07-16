@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """
 Unit tests for Ubuntu Pro settings API endpoints.
 Tests the /api/v1/ubuntu-pro/ endpoints with various scenarios.

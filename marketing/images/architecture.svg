@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="600" height="400" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="300" y="25" font-family="Arial, sans-serif" font-size="16" fill="#2c3e50" font-weight="bold" text-anchor="middle">SysManage Architecture</text>
+
+  <!-- Server Components (Top) -->
+  <rect x="50" y="50" width="500" height="120" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="8"/>
+  <text x="300" y="75" font-family="Arial, sans-serif" font-size="14" fill="#1976d2" font-weight="bold" text-anchor="middle">SysManage Server</text>
+
+  <!-- Frontend -->
+  <rect x="70" y="90" width="100" height="60" fill="#bbdefb" stroke="#1976d2" stroke-width="1" rx="4"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="11" fill="#1976d2" text-anchor="middle" font-weight="bold">React Frontend</text>
+  <text x="120" y="130" font-family="Arial, sans-serif" font-size="9" fill="#1976d2" text-anchor="middle">TypeScript</text>
+
+  <!-- Backend -->
+  <rect x="190" y="90" width="100" height="60" fill="#bbdefb" stroke="#1976d2" stroke-width="1" rx="4"/>
+  <text x="240" y="115" font-family="Arial, sans-serif" font-size="11" fill="#1976d2" text-anchor="middle" font-weight="bold">FastAPI Backend</text>
+  <text x="240" y="130" font-family="Arial, sans-serif" font-size="9" fill="#1976d2" text-anchor="middle">Python/Async</text>
+
+  <!-- Database -->
+  <rect x="310" y="90" width="100" height="60" fill="#bbdefb" stroke="#1976d2" stroke-width="1" rx="4"/>
+  <text x="360" y="115" font-family="Arial, sans-serif" font-size="11" fill="#1976d2" text-anchor="middle" font-weight="bold">PostgreSQL</text>
+  <text x="360" y="130" font-family="Arial, sans-serif" font-size="9" fill="#1976d2" text-anchor="middle">Database</text>
+
+  <!-- WebSocket -->
+  <rect x="430" y="90" width="100" height="60" fill="#bbdefb" stroke="#1976d2" stroke-width="1" rx="4"/>
+  <text x="480" y="115" font-family="Arial, sans-serif" font-size="11" fill="#1976d2" text-anchor="middle" font-weight="bold">WebSocket</text>
+  <text x="480" y="130" font-family="Arial, sans-serif" font-size="9" fill="#1976d2" text-anchor="middle">Real-time</text>
+
+  <!-- Network/Communication Layer -->
+  <line x1="50" y1="200" x2="550" y2="200" stroke="#6c757d" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="300" y="215" font-family="Arial, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle">Network (mTLS, WebSocket, REST API)</text>
+
+  <!-- Agents (Bottom) -->
+  <text x="300" y="245" font-family="Arial, sans-serif" font-size="14" fill="#388e3c" font-weight="bold" text-anchor="middle">SysManage Agents</text>
+
+  <!-- Linux Agent -->
+  <rect x="50" y="260" width="100" height="80" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="6"/>
+  <text x="100" y="285" font-family="Arial, sans-serif" font-size="11" fill="#388e3c" text-anchor="middle" font-weight="bold">Linux Agent</text>
+  <text x="100" y="300" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">Ubuntu, CentOS</text>
+  <text x="100" y="315" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">Debian, RHEL</text>
+
+  <!-- Windows Agent -->
+  <rect x="170" y="260" width="100" height="80" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="6"/>
+  <text x="220" y="285" font-family="Arial, sans-serif" font-size="11" fill="#388e3c" text-anchor="middle" font-weight="bold">Windows Agent</text>
+  <text x="220" y="300" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">Server 2019/2022</text>
+  <text x="220" y="315" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">Windows 10/11</text>
+
+  <!-- macOS Agent -->
+  <rect x="290" y="260" width="100" height="80" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="6"/>
+  <text x="340" y="285" font-family="Arial, sans-serif" font-size="11" fill="#388e3c" text-anchor="middle" font-weight="bold">macOS Agent</text>
+  <text x="340" y="300" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">Intel &amp; Apple Silicon</text>
+  <text x="340" y="315" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">10.15+</text>
+
+  <!-- BSD Agents -->
+  <rect x="410" y="260" width="100" height="80" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="6"/>
+  <text x="460" y="280" font-family="Arial, sans-serif" font-size="11" fill="#388e3c" text-anchor="middle" font-weight="bold">BSD Agents</text>
+  <text x="460" y="295" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">FreeBSD</text>
+  <text x="460" y="308" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">OpenBSD</text>
+  <text x="460" y="321" font-family="Arial, sans-serif" font-size="9" fill="#388e3c" text-anchor="middle">NetBSD</text>
+
+  <!-- Connection lines -->
+  <line x1="100" y1="260" x2="100" y2="200" stroke="#388e3c" stroke-width="2"/>
+  <line x1="220" y1="260" x2="220" y2="200" stroke="#388e3c" stroke-width="2"/>
+  <line x1="340" y1="260" x2="340" y2="200" stroke="#388e3c" stroke-width="2"/>
+  <line x1="460" y1="260" x2="460" y2="200" stroke="#388e3c" stroke-width="2"/>
+
+  <!-- Features Labels -->
+  <text x="50" y="370" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Auto-discovery</text>
+  <text x="150" y="370" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Certificate auth</text>
+  <text x="260" y="370" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Real-time updates</text>
+  <text x="380" y="370" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Package management</text>
+
+  <text x="50" y="385" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Cross-platform</text>
+  <text x="150" y="385" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Secure communication</text>
+  <text x="260" y="385" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• System monitoring</text>
+  <text x="380" y="385" font-family="Arial, sans-serif" font-size="10" fill="#6c757d">• Security scanning</text>
+</svg>

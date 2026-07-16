@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Prometheus exposition endpoint for user-defined Custom Metrics.
 
 This module exposes the LATEST successful sample of every user-defined custom

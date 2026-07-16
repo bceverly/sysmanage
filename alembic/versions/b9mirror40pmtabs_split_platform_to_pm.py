@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """rename mirror_platform_config.platform values to per-PM (Phase 10.4.3)
 
 Revision ID: b9mirror40pmtabs

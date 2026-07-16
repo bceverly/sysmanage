@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Federation site-side compliance + vulnerability rollup producers (Phase 12).
 
 Aggregates THIS site's local CVE findings and compliance-scan results into the

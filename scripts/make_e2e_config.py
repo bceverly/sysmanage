@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Generate a hermetic config for the Playwright E2E backend.
 
 E2E must NOT depend on the box's OpenBAO / secret-migration state — on a

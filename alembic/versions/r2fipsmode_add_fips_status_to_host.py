@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """add FIPS compliance-mode status to host (tenant partition) — Phase 14.4
 
 Per-host FIPS mode is operational state, so it lives on the ``host`` table in

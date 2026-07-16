@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Phase 13.1.E — SAML 2.0 external-IdP endpoints (OSS plumbing).
 
 The cryptographic verification lives in the Pro+ ``external_idp_engine``; here we

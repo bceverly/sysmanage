@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Add package_profiles, package_profile_constraints, host_package_compliance_status (Phase 8.3).
 
 Revision ID: p8a3p4k5g6c7

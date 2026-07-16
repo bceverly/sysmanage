@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Operator-configurable federation alert thresholds (Phase 12.1 follow-up).
 
 Persists overrides for the three built-in rollup-alert conditions in the

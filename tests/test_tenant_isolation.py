@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Phase 13.1.F — cross-tenant data-isolation harness.
 
 The enrollment e2e test (``test_tenant_enrollment_e2e.py``) proves ONE tenant's

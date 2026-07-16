@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 # buildFederationTestNetwork.sh — Provision four KVM VMs for sysmanage
 # multi-site federation testing on libvirt/KVM.
 #

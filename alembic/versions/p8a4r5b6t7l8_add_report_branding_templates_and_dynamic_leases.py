@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Add report_branding, report_template, dynamic_secret_lease (Phase 8.7).
 
 Revision ID: p8a4r5b6t7l8

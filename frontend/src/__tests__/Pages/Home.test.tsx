@@ -1,7 +1,13 @@
+// Copyright (c) 2024-2026 Bryan Everly
+// Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+// See the LICENSE file in the project root for the full terms.
+
 import { render, screen, act } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
 import Home from '../../Pages/Home';
+import { server } from '../../mocks/node';
 
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {
@@ -48,6 +54,24 @@ const HomeWithRouter = () => (
 );
 
 describe('Home Page', () => {
+  // The Dashboard fires three direct axiosInstance.get() calls that the shared
+  // handlers don't cover (dashboard-card prefs + antivirus/OpenTelemetry
+  // coverage). Mock them here so nothing escapes to MSW as an unhandled request;
+  // benign empty/zero payloads keep every assertion below unchanged.
+  beforeEach(() => {
+    server.use(
+      http.get('/api/v1/user-preferences/dashboard-cards', () =>
+        HttpResponse.json({ preferences: [] }),
+      ),
+      http.get('/api/v1/antivirus-coverage', () =>
+        HttpResponse.json({ coverage_percentage: 0 }),
+      ),
+      http.get('/api/v1/opentelemetry/opentelemetry-coverage', () =>
+        HttpResponse.json({ coverage_percentage: 0 }),
+      ),
+    );
+  });
+
   test('renders without crashing', async () => {
     await act(async () => {
       render(<HomeWithRouter />);

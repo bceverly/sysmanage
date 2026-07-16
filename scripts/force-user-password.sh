@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 # force-user-password.sh — Reset a sysmanage user's password directly in
 # the database AND grant the user every security role, when email-based
 # reset / UI-based role assignment isn't available (test VMs, lab

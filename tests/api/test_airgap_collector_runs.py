@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Tests for the one-shot air-gap collector runs API (Phase 11).
 
 These mirror the ``test_airgap_collection_schedule.py`` style: every

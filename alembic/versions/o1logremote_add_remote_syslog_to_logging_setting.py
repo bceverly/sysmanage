@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """add remote-syslog fields to logging_setting (Phase 14.5 — remote log routing)
 
 Adds ``syslog_host`` / ``syslog_port`` / ``syslog_facility`` / ``syslog_protocol``

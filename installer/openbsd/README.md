@@ -84,7 +84,10 @@ Required packages (automatically installed):
 - Python 3 with modules:
   - py3-sqlalchemy
   - py3-alembic
-  - py3-psycopg  <!-- VERIFY: confirm OpenBSD psycopg3 package name during testing -->
+  - psycopg (v3) — **pip-bundled, not a port.** OpenBSD has no psycopg 3 port
+    (only `databases/py-psycopg2`, a different module), so the pure-Python
+    `psycopg` is installed via pip and loads `libpq.so` at runtime from the
+    PostgreSQL client package (see the port Makefile's `RUN_DEPENDS`).
   - py3-websockets
   - py3-aiohttp
   - py3-fastapi

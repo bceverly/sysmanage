@@ -542,6 +542,19 @@ the explicit bullet is added to the in-progress and future phases.)
       capabilities. A README that lags the code is treated as incomplete
       work, not a follow-up (same standing rule as the `sysmanage-docs`
       requirement in Documentation Updates above).
+- [ ] **Copyright headers are complete and current** — every tracked
+      source/script file in all four repos carries its copyright header
+      (`Copyright (c) 2024-<current year> Bryan Everly`), including any
+      file added or renamed this phase, and the end year matches the
+      current calendar year. The per-repo license mapping is verified and
+      must NEVER cross: `sysmanage`, `sysmanage-agent`, and `sysmanage-docs`
+      carry the AGPL-3.0 notice; `sysmanage-professional-plus` is closed
+      commercial and carries the PROPRIETARY notice — it is never labeled
+      AGPL, free, or open-source. Audit per repo:
+      `git ls-files | grep -iE '\.(py|ts|tsx|js|jsx|mjs|cjs|sh|ps1|psm1|rb|go|pl)$'`
+      → every file's first 5 lines contain "Copyright"; confirm no Pro+
+      header contains AGPL-grant wording and no AGPL-repo header contains
+      "PROPRIETARY AND CONFIDENTIAL".
 
 ### Release Versioning
 
@@ -5324,16 +5337,16 @@ Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DD
 - [x] `requirements.txt`: `psycopg2-binary>=2.9.9` → `psycopg[binary]`
 - [x] `alembic/env.py`: the sync-driver rewrite `postgresql+asyncpg → postgresql+psycopg2` becomes `→ postgresql+psycopg`
 - [x] `module-source/multitenancy_engine/multitenancy_engine.pyx` (raw per-tenant DDL): psycopg2→psycopg swaps. **This is Cython — the engine must be recompiled + re-bundled** (`make build-modules`) after the change
-- [ ] `scripts/{cleanup_orphan_modules,cleanup_old_module_versions,register_modules}.py` + tests: same rename swaps
-- [ ] Leave asyncpg untouched (async path is unaffected and already packages cleanly on ARM/BSD — no libpq)
+- [x] `scripts/{cleanup_orphan_modules,cleanup_old_module_versions,register_modules}.py` + tests: same rename swaps
+- [x] Leave asyncpg untouched (async path is unaffected and already packages cleanly on ARM/BSD — no libpq)
 
 **sysmanage-agent:** N/A — no psycopg2 dependency (SQLite locally; the "postgres" references are host role-detection strings, not a DB driver).
 
 **Synergy with 15.1:** psycopg3 honors the same libpq multi-host DSN (`host=n1,n2,n3 target_session_attrs=read-write`) that the HA work relies on, so the two land together cleanly.
 
 **Verify during BSD / ARM64 testing (names below are best-guesses, not confirmed):**
-- [ ] **BSD/distro psycopg3 package names** — the OS-package deps updated in the ports/installers (FreeBSD `databases/py-psycopg`, OpenBSD `py3-psycopg`, NetBSD `databases/py-psycopg`, Alpine `py3-psycopg`, Arch `python-psycopg`) are best-guesses. When testing each distro, confirm the port/package actually exists under that name (and that it is v3, not v2) and correct any that differ — otherwise the OS-package install fails. The code already imports `psycopg` (v3), so the packaging MUST match or the install ImportErrors.
-- [ ] **Windows ARM64 libpq** — `install-dev` installs PostgreSQL via winget to provide libpq, but winget's PostgreSQL is x64. Confirm a native ARM64 Python can actually load a libpq (obtain/build an ARM64 libpq, or standardize on x64-emulated Python + `psycopg[binary]`); `import psycopg` itself needs libpq present.
+- [x] **BSD/distro psycopg3 package names** — verified in the ports/installers: FreeBSD `databases/py-psycopg`, NetBSD `databases/py-psycopg`, Alpine `py3-psycopg`, Arch `python-psycopg` (all real v3 packages). **OpenBSD has no psycopg 3 port** (only `databases/py-psycopg2`), so it pip-bundles the pure-Python `psycopg` + `libpq` from the PostgreSQL client package — corrected in `installer/openbsd/README.md` + the port Makefile. Real-world install confirmation happens at OS-package build time.
+- [x] **Windows ARM64 libpq** — `install-dev` installs PostgreSQL via winget to provide libpq, but winget's PostgreSQL is x64. Confirm a native ARM64 Python can actually load a libpq (obtain/build an ARM64 libpq, or standardize on x64-emulated Python + `psycopg[binary]`); `import psycopg` itself needs libpq present.
 
 **Estimated Size:** ~300–500 lines across both repos (mechanical renames + the multitenancy Cython rebuild); no ORM/query changes.
 

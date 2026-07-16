@@ -1,9 +1,21 @@
+// Copyright (c) 2024-2026 Bryan Everly
+// Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+// See the LICENSE file in the project root for the full terms.
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
 import yaml from 'yaml'
+
+// Vitest loads this config to read the `test` block, which fires the dev-server
+// startup banners below and clutters test output. Route the banners through a
+// helper that stays silent under Vitest but still prints for `vite`/`vite build`.
+const rawLog = console.log.bind(console)
+const banner = (...args: unknown[]) => {
+  if (!process.env.VITEST) rawLog(...args)
+}
 
 // Plugin to transform MUI icon barrel imports to individual imports
 // This prevents loading thousands of icon files and exhausting file descriptors
@@ -62,7 +74,7 @@ function loadConfig(): any {
       if (fs.existsSync(configPath)) {
         const configContent = fs.readFileSync(configPath, 'utf8');
         const config = yaml.parse(configContent);
-        console.log(`📋 Loaded config from: ${configPath}`);
+        banner(`📋 Loaded config from: ${configPath}`);
         return config;
       }
     } catch (error) {
@@ -71,7 +83,7 @@ function loadConfig(): any {
     }
   }
   
-  console.log('📋 No config file found, using defaults');
+  banner('📋 No config file found, using defaults');
   return {};
 }
 
@@ -104,13 +116,13 @@ const hasSSLCerts = !forceHTTP && configHasSSL &&
                    fs.existsSync(path.join(certPath, 'privkey.pem')) && 
                    fs.existsSync(path.join(certPath, 'cert.pem'));
 
-console.log('🔧 Vite configuration:');
-console.log('  - Force HTTP:', forceHTTP);
-console.log('  - Config allows SSL:', configHasSSL);
-console.log('  - SSL certificates available:', fs.existsSync(path.join(certPath, 'privkey.pem')) && fs.existsSync(path.join(certPath, 'cert.pem')));
-console.log('  - Using HTTPS:', hasSSLCerts);
-console.log('  - WebUI host from config:', config?.webui?.host);
-console.log('  - WebUI port from config:', config?.webui?.port);
+banner('🔧 Vite configuration:');
+banner('  - Force HTTP:', forceHTTP);
+banner('  - Config allows SSL:', configHasSSL);
+banner('  - SSL certificates available:', fs.existsSync(path.join(certPath, 'privkey.pem')) && fs.existsSync(path.join(certPath, 'cert.pem')));
+banner('  - Using HTTPS:', hasSSLCerts);
+banner('  - WebUI host from config:', config?.webui?.host);
+banner('  - WebUI port from config:', config?.webui?.port);
 
 // Dynamically discover network interfaces and hostname
 function getNetworkHosts(): string[] {
@@ -137,7 +149,7 @@ function getNetworkHosts(): string[] {
   });
   
   const uniqueHosts = [...new Set(hosts)]; // Remove duplicates
-  console.log('🌐 Vite allowed hosts:', uniqueHosts);
+  banner('🌐 Vite allowed hosts:', uniqueHosts);
   return uniqueHosts;
 }
 
@@ -269,6 +281,16 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    // Swallow i18next's Locize sponsor banner — a benign line printed on init
+    // in v25 (despite showSupportNotice:false) that only clutters test output.
+    // (jsdom's "Not implemented: navigation" notice can't be filtered here: its
+    // default VirtualConsole writes straight to process.stderr, below vitest's
+    // console-intercept layer.) Every other log passes through unchanged.
+    onConsoleLog(log: string): boolean | void {
+      if (log.includes('i18next is maintained with support from Locize')) {
+        return false;
+      }
+    },
     css: true,  // Enable CSS processing in vitest 4.x
     // Raised for slow environments: Windows CI, and especially an NFS-mounted
     // checkout where a cold dynamic ``import()`` of a module graph (e.g. the
@@ -291,14 +313,17 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'json-summary', 'html'],
       reportsDirectory: './coverage',
-      // Phase 13 GA ratchet: floors at today's measured coverage so it can only
-      // go up.  vitest fails the run if any metric drops below these — raise
-      // them as coverage improves (never lower).
+      // Ratchet: floors set a couple points below today's measured coverage so
+      // the run only fails on a regression.  vitest fails if any metric drops
+      // below these — raise them as coverage improves (never lower).
+      // Phase 15 coverage push (OSS 30% floor): measured lines 32.6% /
+      // statements 31.7% / functions 31.6% / branches 20.5% — floors below,
+      // with headroom for run-to-run variance.
       thresholds: {
-        lines: 12,
-        statements: 12,
-        functions: 9,
-        branches: 7,
+        lines: 30,
+        statements: 29,
+        functions: 29,
+        branches: 18,
       },
       exclude: [
         'node_modules/',

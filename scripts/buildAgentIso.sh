@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 # buildAgentIso.sh — Build an offline-install ISO for sysmanage-agent
 # containing:
 #   * the latest sysmanage-agent .deb from the Launchpad PPA

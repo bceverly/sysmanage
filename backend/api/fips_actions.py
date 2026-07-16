@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """
 FIPS compliance-mode action API (Phase 14.4) — "enable/disable FIPS on a host"
 and the fleet FIPS posture read.

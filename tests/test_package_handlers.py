@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """
 Unit tests for package data handlers.
 Tests the batch package handlers (handle_packages_batch_start, handle_packages_batch, handle_packages_batch_end).

@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 # SysManage server Homebrew cask — Phase 11.8 server-side stub.
 #
 # Cask form rather than formula because the server is a multi-component

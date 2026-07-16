@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """PostgreSQL-backed migration smoke test (Phase 13.1.D follow-up).
 
 The SQLite-only ``test_alembic_prefix_guard`` cannot catch dialect-specific

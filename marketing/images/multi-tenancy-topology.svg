@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1040" height="700" viewBox="0 0 1040 700" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <!-- Background -->
+  <rect width="1040" height="700" rx="14" fill="#f8f9fa"/>
+
+  <!-- Title -->
+  <text x="520" y="40" font-size="22" fill="#2c3e50" font-weight="bold" text-anchor="middle">SysManage Database Topology</text>
+  <text x="520" y="64" font-size="13" fill="#607d8b" text-anchor="middle">Single-Tenant (on-premises) vs Multi-Tenant (Enterprise SaaS)</text>
+
+  <!-- Center divider -->
+  <line x1="520" y1="86" x2="520" y2="664" stroke="#cfd8dc" stroke-width="2" stroke-dasharray="4 6"/>
+
+  <!-- Arrow + isolation markers -->
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#607d8b"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#f57c00"/>
+    </marker>
+    <marker id="arrowPurple" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#5e35b1"/>
+    </marker>
+  </defs>
+
+  <!-- ================= LEFT PANEL : SINGLE-TENANT ================= -->
+  <rect x="160" y="92" width="200" height="28" rx="14" fill="#eceff1" stroke="#b0bec5"/>
+  <text x="260" y="111" font-size="13" font-weight="bold" fill="#455a64" text-anchor="middle">SINGLE-TENANT</text>
+
+  <!-- Server -->
+  <rect x="150" y="150" width="220" height="76" rx="10" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="260" y="182" font-size="15" font-weight="bold" fill="#1565c0" text-anchor="middle">SysManage Server</text>
+  <text x="260" y="203" font-size="10.5" fill="#1976d2" text-anchor="middle">backend &#183; web UI &#183; one application DB</text>
+
+  <!-- Arrow to DB -->
+  <line x1="260" y1="226" x2="260" y2="268" stroke="#607d8b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Single database cylinder -->
+  <path d="M 185 282 L 185 346 A 75 15 0 0 0 335 346 L 335 282 Z" fill="#e8eaf6" stroke="#3f51b5" stroke-width="2"/>
+  <ellipse cx="260" cy="282" rx="75" ry="15" fill="#c5cae9" stroke="#3f51b5" stroke-width="2"/>
+  <text x="260" y="316" font-size="14" font-weight="bold" fill="#303f9f" text-anchor="middle">sysmanage</text>
+  <text x="260" y="334" font-size="10.5" fill="#3f51b5" text-anchor="middle">single database</text>
+
+  <!-- Caption -->
+  <rect x="70" y="392" width="380" height="104" rx="8" fill="#ffffff" stroke="#e0e0e0"/>
+  <text x="260" y="420" font-size="12.5" font-weight="bold" fill="#37474f" text-anchor="middle">One server &#8594; one PostgreSQL database.</text>
+  <text x="260" y="444" font-size="11" fill="#546e7a" text-anchor="middle">Community Edition &#183; Professional &#183; Enterprise</text>
+  <text x="260" y="466" font-size="11" fill="#546e7a" text-anchor="middle">All hosts, users and inventory live together.</text>
+  <text x="260" y="486" font-size="10.5" font-style="italic" fill="#78909c" text-anchor="middle">The air-gapped appliance is single-tenant by design.</text>
+
+  <!-- ================= RIGHT PANEL : MULTI-TENANT ================= -->
+  <rect x="618" y="92" width="324" height="28" rx="14" fill="#ede7f6" stroke="#b39ddb"/>
+  <text x="780" y="111" font-size="13" font-weight="bold" fill="#5e35b1" text-anchor="middle">MULTI-TENANT &#183; ENTERPRISE SaaS</text>
+
+  <!-- Control plane -->
+  <rect x="588" y="142" width="262" height="78" rx="10" fill="#ede7f6" stroke="#5e35b1" stroke-width="2"/>
+  <text x="719" y="170" font-size="14" font-weight="bold" fill="#4527a0" text-anchor="middle">Control Plane</text>
+  <text x="719" y="190" font-size="10" fill="#5e35b1" text-anchor="middle">SysManage Server + multitenancy_engine</text>
+  <text x="719" y="207" font-size="10" fill="#5e35b1" text-anchor="middle">resolves the caller &#8594; their tenant database</text>
+
+  <!-- OpenBAO vault -->
+  <rect x="868" y="142" width="118" height="78" rx="10" fill="#fff3e0" stroke="#fb8c00" stroke-width="2"/>
+  <text x="927" y="172" font-size="12.5" font-weight="bold" fill="#e65100" text-anchor="middle">OpenBAO</text>
+  <text x="927" y="189" font-size="11" fill="#ef6c00" text-anchor="middle">Vault</text>
+  <text x="927" y="207" font-size="9" fill="#f57c00" text-anchor="middle">dynamic creds</text>
+
+  <!-- Control-plane DBs : Registry + Shared -->
+  <path d="M 605 250 L 605 286 A 52 10 0 0 0 709 286 L 709 250 Z" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+  <ellipse cx="657" cy="250" rx="52" ry="10" fill="#b3e5fc" stroke="#0288d1" stroke-width="2"/>
+  <text x="657" y="272" font-size="11" font-weight="bold" fill="#0277bd" text-anchor="middle">Registry</text>
+  <text x="657" y="285" font-size="8.5" fill="#0288d1" text-anchor="middle">tenant index</text>
+
+  <path d="M 729 250 L 729 286 A 52 10 0 0 0 833 286 L 833 250 Z" fill="#e0f2f1" stroke="#00897b" stroke-width="2"/>
+  <ellipse cx="781" cy="250" rx="52" ry="10" fill="#b2dfdb" stroke="#00897b" stroke-width="2"/>
+  <text x="781" y="272" font-size="11" font-weight="bold" fill="#00695c" text-anchor="middle">Shared</text>
+  <text x="781" y="285" font-size="8.5" fill="#00897b" text-anchor="middle">reference data</text>
+
+  <text x="719" y="306" font-size="9" font-style="italic" fill="#90a4ae" text-anchor="middle">control-plane databases</text>
+
+  <!-- control plane to control-plane DBs -->
+  <line x1="690" y1="220" x2="665" y2="238" stroke="#607d8b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="748" y1="220" x2="773" y2="238" stroke="#607d8b" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Routing seam bar -->
+  <line x1="719" y1="220" x2="719" y2="322" stroke="#5e35b1" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <rect x="565" y="324" width="380" height="24" rx="6" fill="#d1c4e9" stroke="#9575cd"/>
+  <text x="755" y="340" font-size="10" font-weight="bold" fill="#4527a0" text-anchor="middle">active-tenant routing &#8594; per-tenant database</text>
+
+  <!-- Isolation container -->
+  <rect x="560" y="372" width="430" height="120" rx="10" fill="none" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <text x="570" y="389" font-size="9.5" font-style="italic" fill="#78909c">isolated tenant databases</text>
+
+  <!-- seam to each tenant -->
+  <line x1="635" y1="348" x2="635" y2="398" stroke="#5e35b1" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="775" y1="348" x2="775" y2="398" stroke="#5e35b1" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+  <line x1="915" y1="348" x2="915" y2="398" stroke="#5e35b1" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+
+  <!-- Tenant A (green) -->
+  <path d="M 575 410 L 575 462 A 60 13 0 0 0 695 462 L 695 410 Z" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2"/>
+  <ellipse cx="635" cy="410" rx="60" ry="13" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+  <text x="635" y="441" font-size="12" font-weight="bold" fill="#1b5e20" text-anchor="middle">Tenant A</text>
+  <text x="635" y="456" font-size="8.5" fill="#2e7d32" text-anchor="middle">isolated DB</text>
+
+  <!-- Tenant B (blue) -->
+  <path d="M 715 410 L 715 462 A 60 13 0 0 0 835 462 L 835 410 Z" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <ellipse cx="775" cy="410" rx="60" ry="13" fill="#bbdefb" stroke="#1976d2" stroke-width="2"/>
+  <text x="775" y="441" font-size="12" font-weight="bold" fill="#0d47a1" text-anchor="middle">Tenant B</text>
+  <text x="775" y="456" font-size="8.5" fill="#1976d2" text-anchor="middle">isolated DB</text>
+
+  <!-- Tenant C (purple) -->
+  <path d="M 855 410 L 855 462 A 60 13 0 0 0 975 462 L 975 410 Z" fill="#f3e5f5" stroke="#8e24aa" stroke-width="2"/>
+  <ellipse cx="915" cy="410" rx="60" ry="13" fill="#e1bee7" stroke="#8e24aa" stroke-width="2"/>
+  <text x="915" y="441" font-size="12" font-weight="bold" fill="#6a1b9a" text-anchor="middle">Tenant C</text>
+  <text x="915" y="456" font-size="8.5" fill="#8e24aa" text-anchor="middle">isolated DB</text>
+
+  <!-- OpenBAO dynamic creds (dashed) to each tenant -->
+  <path d="M 927 220 C 927 300, 1006 360, 980 432 C 968 462, 945 460, 940 458" stroke="#f57c00" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#arrowAmber)"/>
+  <text x="1012" y="392" font-size="9" fill="#ef6c00" text-anchor="middle" transform="rotate(90 1012 392)">leases short-lived per-tenant credentials</text>
+
+  <!-- Caption -->
+  <rect x="560" y="506" width="430" height="120" rx="8" fill="#ffffff" stroke="#e0e0e0"/>
+  <text x="775" y="532" font-size="12.5" font-weight="bold" fill="#37474f" text-anchor="middle">Each tenant&#8217;s data lives in its OWN database.</text>
+  <text x="775" y="555" font-size="10.5" fill="#546e7a" text-anchor="middle">No shared schema. No cross-tenant rows. No cross-partition</text>
+  <text x="775" y="571" font-size="10.5" fill="#546e7a" text-anchor="middle">foreign keys. Physical isolation &#8212; not a tenant_id column.</text>
+  <text x="775" y="593" font-size="10.5" fill="#546e7a" text-anchor="middle">OpenBAO brokers short-lived, least-privilege credentials,</text>
+  <text x="775" y="609" font-size="10.5" fill="#546e7a" text-anchor="middle">scoped per tenant. Identity &amp; audit stay server-global.</text>
+
+  <!-- Footer note -->
+  <text x="520" y="684" font-size="10" fill="#90a4ae" text-anchor="middle">Multi-tenancy is opt-in and licensed (Enterprise SaaS / MULTITENANT_SAAS). Disabled, SysManage runs exactly as the single-tenant topology on the left.</text>
+</svg>

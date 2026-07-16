@@ -156,8 +156,11 @@ single-line-if-stmt=no
 # List of optional constructs for which whitespace checking is disabled.
 # no-space-check=trailing-comma,dict-separator
 
-# Maximum number of lines in a module
-max-module-lines=1000
+# Maximum number of lines in a module.
+# 1004 = 1000 lines of code + the mandatory 4-line copyright/license header
+# (3 comment lines + 1 blank) that every source file now carries, so the
+# 1000-line code-size discipline is preserved rather than eroded by boilerplate.
+max-module-lines=1004
 
 # String used as indentation unit.
 indent-string='    '

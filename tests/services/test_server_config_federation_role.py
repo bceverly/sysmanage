@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """
 Tests for the Phase 12 federation-role accessors in server_config_service
 (separate axis from the air-gap server_role).  Drives ``db.get_session_local``

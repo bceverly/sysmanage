@@ -1,3 +1,7 @@
+# Copyright (c) 2024-2026 Bryan Everly
+# Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+# See the LICENSE file in the project root for the full terms.
+
 """Add out-of-band Ed25519 identity-key pinning columns (Phase 12 strict trust).
 
 Strict-by-default enrollment requires each party to prove its identity with an
