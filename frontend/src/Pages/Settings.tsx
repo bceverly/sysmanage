@@ -13,8 +13,9 @@ import {
   Stack,
   IconButton,
   Chip,
-  Tabs,
-  Tab,
+  List,
+  ListItemButton,
+  ListItemText,
   Card,
   CardContent,
   FormControl,
@@ -63,6 +64,12 @@ import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { refreshLicenseCache } from '../Services/license';
 import { usePlugins } from '../plugins';
+import {
+  navRailContainerSx,
+  navRailGroupSx,
+  navRailGroupTitleSx,
+  navRailItemSx,
+} from '../Components/navRailStyles';
 
 interface Tag {
   id: string;
@@ -124,6 +131,33 @@ interface QueueMessage {
   priority: string;
   data: Record<string, unknown>;
 }
+
+// Two-pane Settings: the (~20) tabs are grouped into a categorized left rail
+// instead of one long horizontal strip.  Unmapped tab ids fall into "System".
+const SETTINGS_CATEGORY_ORDER = [
+  'general', 'security', 'patching', 'integrations', 'reporting', 'secrets', 'airgap', 'system',
+] as const;
+const SETTINGS_CAT_LABEL = new Map<string, { key: string; def: string }>([
+  ['general', { key: 'settings.cat.general', def: 'General' }],
+  ['security', { key: 'settings.cat.security', def: 'Security & Access' }],
+  ['patching', { key: 'settings.cat.patching', def: 'Patching' }],
+  ['integrations', { key: 'settings.cat.integrations', def: 'Integrations & Logging' }],
+  ['reporting', { key: 'settings.cat.reporting', def: 'Reporting' }],
+  ['secrets', { key: 'settings.cat.secrets', def: 'Secrets' }],
+  ['airgap', { key: 'settings.cat.airgap', def: 'Air-Gap & Mirroring' }],
+  ['system', { key: 'settings.cat.system', def: 'System' }],
+]);
+const SETTINGS_TAB_CATEGORY = new Map<string, string>([
+  ['configuration', 'general'], ['tags', 'general'], ['host-defaults', 'general'], ['available-packages', 'general'],
+  ['authentication', 'security'], ['antivirus', 'security'], ['firewall-roles', 'security'],
+  ['compliance-profiles', 'security'], ['cve-refresh', 'security'], ['cve-database', 'security'], ['fips-compliance', 'security'],
+  ['update-profiles', 'patching'], ['distributions', 'patching'],
+  ['integrations', 'integrations'], ['logging', 'integrations'], ['ubuntu-pro', 'integrations'], ['alerting', 'integrations'],
+  ['report-branding', 'reporting'], ['report-templates', 'reporting'],
+  ['dynamic-secrets', 'secrets'],
+  ['airgap-bundles', 'airgap'], ['repository-mirroring', 'airgap'],
+  ['server-role', 'system'], ['queues', 'system'], ['license', 'system'],
+]);
 
 const Settings: React.FC = () => {
   const { t } = useTranslation();
@@ -347,6 +381,28 @@ const Settings: React.FC = () => {
     () => orderedSettingsTabs.map(x => x.id),
     [orderedSettingsTabs],
   );
+
+  // Group the visible tabs into the left-rail sections (empty categories drop
+  // out, so a Community user sees only the categories they have tabs in).
+  const settingsGroups = useMemo(() => {
+    const groups = new Map<string, { id: string; label: string }[]>();
+    for (const tab of orderedSettingsTabs) {
+      const cat = SETTINGS_TAB_CATEGORY.get(tab.id) ?? 'system';
+      const arr = groups.get(cat) ?? [];
+      arr.push(tab);
+      groups.set(cat, arr);
+    }
+    return SETTINGS_CATEGORY_ORDER
+      .filter(c => (groups.get(c)?.length ?? 0) > 0)
+      .map(c => {
+        const meta = SETTINGS_CAT_LABEL.get(c);
+        return {
+          id: c,
+          label: t(meta?.key ?? c, meta?.def ?? c),
+          tabs: groups.get(c) ?? [],
+        };
+      });
+  }, [orderedSettingsTabs, t]);
 
   // Initialize tab from URL hash
   const getInitialTab = () => {
@@ -1304,27 +1360,40 @@ const Settings: React.FC = () => {
         {t('nav.settings', 'Settings')}
       </Typography>
 
-      {/* Tabs — scrollable so labels never wrap and a narrow viewport
-          gets the same prev/next arrows as MUI's HostDetail tabs. */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          aria-label={t('settings.tabsAriaLabel', 'settings tabs')}
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-        >
-          {orderedSettingsTabs.map(tab => (
-            <Tab key={tab.id} label={tab.label} />
+      {/* Two-pane layout: grouped category rail on the left, content on the
+          right — replaces the old overflowing horizontal tab strip. */}
+      <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
+        <Box sx={navRailContainerSx}>
+          {settingsGroups.map(group => (
+            <Box key={group.id} sx={navRailGroupSx}>
+              <Typography variant="overline" sx={navRailGroupTitleSx}>
+                {group.label}
+              </Typography>
+              <List dense disablePadding>
+                {group.tabs.map(tab => {
+                  const idx = tabNames.indexOf(tab.id);
+                  return (
+                    <ListItemButton
+                      key={tab.id}
+                      selected={activeTab === idx}
+                      onClick={(e) => handleTabChange(e, idx)}
+                      sx={navRailItemSx}
+                    >
+                      <ListItemText
+                        primary={tab.label}
+                        primaryTypographyProps={{ variant: 'body2' }}
+                      />
+                    </ListItemButton>
+                  );
+                })}
+              </List>
+            </Box>
           ))}
-        </Tabs>
-      </Box>
+        </Box>
 
-      {/* Tab content — keyed off the tab ID at the active index so the
-          mapping is stable when a Pro+-gated tab is filtered out for
-          unlicensed users. */}
-      <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
+        {/* Content — keyed off the tab ID at the active index so the mapping is
+            stable when a Pro+-gated tab is filtered out for unlicensed users. */}
+        <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
         {tabNames[activeTab] === 'queues' && renderQueuesTab()}
@@ -1351,6 +1420,7 @@ const Settings: React.FC = () => {
             </Box>
           )
         ))}
+        </Box>
       </Box>
 
       {/* Add Tag Dialog */}

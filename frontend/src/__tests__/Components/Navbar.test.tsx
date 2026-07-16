@@ -17,12 +17,9 @@ vi.mock('../../Services/updates', () => ({
   }
 }));
 
-// Mock the license service for Pro+ feature check.
-// Include the modules that gate /secrets (secrets_engine) and /reports
-// (reporting_engine) AND the ``reports`` feature — /reports now requires BOTH
-// the reporting_engine module and the (Enterprise) ``reports`` feature, so a
-// full-access license grants both. Navbar uses ``refreshLicenseCache`` (not
-// ``getLicenseInfo``) to populate its local state, so that's what the test mocks.
+// Mock the license service for Pro+ feature check. Includes secrets_engine (gates
+// /secrets), reporting_engine + the ``reports`` feature (gates /reports). Navbar
+// uses ``refreshLicenseCache`` to populate its local state.
 const mockLicenseInfo = {
   active: true,
   features: ['reports'],
@@ -44,8 +41,7 @@ const NavbarWithRouter = () => (
   </BrowserRouter>
 );
 
-describe('Navbar Component', () => {
-  // Set up authentication before each test - navbar shows user menu only when logged in
+describe('Navbar Component (grouped menubar)', () => {
   beforeEach(() => {
     localStorage.setItem('bearer_token', 'test-token-for-navbar-tests');
   });
@@ -54,99 +50,72 @@ describe('Navbar Component', () => {
     localStorage.removeItem('bearer_token');
   });
 
-  test('renders navigation links', async () => {
+  test('renders logo, grouped category menus, and the user menu', async () => {
     await act(async () => {
       render(<NavbarWithRouter />);
     });
-    
+
     expect(screen.getByAltText('SysManage')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Hosts')).toBeInTheDocument();
-    expect(screen.getByText('nav.updates')).toBeInTheDocument();
-    // User profile dropdown should be present instead of direct logout link
+
+    // Categories are the new non-navigating top-level menus. Each label appears
+    // in both the desktop menubar trigger and the mobile drawer group title
+    // (jsdom renders both — no CSS media queries), hence getAllByText.
+    for (const cat of ['Fleet', 'Patching', 'Security', 'Automation', 'Insights', 'Administration']) {
+      expect(screen.getAllByText(cat).length).toBeGreaterThan(0);
+    }
+
+    // Dashboard is now reached via the logo, not a separate text nav link.
+    expect(screen.queryByText('Dashboard')).toBeNull();
+
+    // Account menu still present.
     expect(screen.getByLabelText('User menu')).toBeInTheDocument();
   });
 
-  test('has proper navigation structure', async () => {
+  test('is a header/banner element', async () => {
     await act(async () => {
       render(<NavbarWithRouter />);
     });
-    
     const nav = screen.getByRole('banner');
     expect(nav).toBeInTheDocument();
     expect(nav.tagName).toBe('HEADER');
   });
 
-  test('contains navigation menu', async () => {
+  test('navigation destinations are present with correct hrefs', async () => {
     await act(async () => {
       render(<NavbarWithRouter />);
     });
-    
-    // Check that navigation links are present in the DOM
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Users')).toBeInTheDocument();
-    expect(screen.getByText('Hosts')).toBeInTheDocument();
-    expect(screen.getByText('nav.updates')).toBeInTheDocument();
-    // User profile dropdown replaces direct logout link
-    expect(screen.getByLabelText('User menu')).toBeInTheDocument();
+
+    // Destinations render as links in the (always-mounted) mobile drawer; the
+    // desktop menubar exposes them as menu items only once opened, so we assert
+    // via the drawer links, which is viewport-independent.
+    const links = screen.getAllByRole('link', { hidden: true });
+    const byHref = (h: string) => links.find(l => l.getAttribute('href') === h);
+
+    expect(byHref('/')).toBeDefined(); // logo → dashboard
+    expect(byHref('/hosts')).toBeDefined();
+    expect(byHref('/map')).toBeDefined();
+    expect(byHref('/users')).toBeDefined();
+    expect(byHref('/updates')).toBeDefined();
+    expect(byHref('/os-upgrades')).toBeDefined();
+    expect(byHref('/maintenance-windows')).toBeDefined();
+    expect(byHref('/secrets')).toBeDefined(); // secrets_engine module in the mock
+    expect(byHref('/scripts')).toBeDefined();
+    expect(byHref('/reports')).toBeDefined(); // reporting_engine + reports feature
+    expect(byHref('/settings')).toBeDefined(); // Settings now lives under Administration
+
+    // Sites is gated OFF in tests (federation controller not licensed). Pinning
+    // this catches a refactor that accidentally always-renders it.
+    expect(byHref('/sites')).toBeUndefined();
   });
 
-  test('menu toggle functionality', async () => {
+  test('renders nothing at all when not authenticated', async () => {
+    localStorage.removeItem('bearer_token');
     await act(async () => {
       render(<NavbarWithRouter />);
     });
-    
-    // Check if menu toggle elements exist (mobile menu)
-    expect(screen.getByAltText('SysManage')).toBeInTheDocument();
-  });
-
-  test('navigation links are clickable', async () => {
-    await act(async () => {
-      render(<NavbarWithRouter />);
-    });
-    
-    // Navigation links exist in DOM but are hidden by CSS visibility
-    // Use getAllByRole to get all links including hidden ones
-    const allLinks = screen.getAllByRole('link', { hidden: true });
-    
-    // Verify we have the expected links (no more logout link in main nav).
-    // Phase 12.7: added /map (host geolocation world view).
-    // Phase 12.3: added /sites (federation sites page), gated on the
-    // federation controller engine being loaded.  In this test the
-    // MSW federation handler isn't installed, so the probe falls
-    // through to ``licensed: false`` and the Sites entry is hidden —
-    // exactly the OSS behaviour we want.  11 links: logo + Dashboard,
-    // Users, Hosts, Map, Updates, OS Upgrades, Maintenance Windows (Phase
-    // 14.2, OSS), Secrets, Scripts, Reports.
-    expect(allLinks).toHaveLength(11);
-
-    // Find links by their href attributes since they don't have accessible names when hidden
-    const dashboardLink = allLinks.find(link => link.getAttribute('href') === '/');
-    const usersLink = allLinks.find(link => link.getAttribute('href') === '/users');
-    const hostsLink = allLinks.find(link => link.getAttribute('href') === '/hosts');
-    const mapLink = allLinks.find(link => link.getAttribute('href') === '/map');
-    const sitesLink = allLinks.find(link => link.getAttribute('href') === '/sites');
-    const updatesLink = allLinks.find(link => link.getAttribute('href') === '/updates');
-    const osUpgradesLink = allLinks.find(link => link.getAttribute('href') === '/os-upgrades');
-    const maintenanceWindowsLink = allLinks.find(link => link.getAttribute('href') === '/maintenance-windows');
-    const secretsLink = allLinks.find(link => link.getAttribute('href') === '/secrets');
-    const scriptsLink = allLinks.find(link => link.getAttribute('href') === '/scripts');
-    const reportsLink = allLinks.find(link => link.getAttribute('href') === '/reports');
-
-    expect(dashboardLink).toHaveAttribute('href', '/');
-    expect(usersLink).toHaveAttribute('href', '/users');
-    expect(hostsLink).toHaveAttribute('href', '/hosts');
-    expect(mapLink).toHaveAttribute('href', '/map');
-    // Sites is OFF in tests — see the comment above.  Asserting
-    // ``undefined`` here pins the gated-out state so a future
-    // refactor that accidentally always-renders it gets caught.
-    expect(sitesLink).toBeUndefined();
-    expect(updatesLink).toHaveAttribute('href', '/updates');
-    expect(osUpgradesLink).toHaveAttribute('href', '/os-upgrades');
-    expect(maintenanceWindowsLink).toHaveAttribute('href', '/maintenance-windows');
-    expect(secretsLink).toHaveAttribute('href', '/secrets');
-    expect(scriptsLink).toHaveAttribute('href', '/scripts');
-    expect(reportsLink).toHaveAttribute('href', '/reports');
+    // Pre-login the whole navbar is hidden — no logo, no categories, no user menu.
+    expect(screen.queryByAltText('SysManage')).toBeNull();
+    expect(screen.queryByText('Fleet')).toBeNull();
+    expect(screen.queryByLabelText('User menu')).toBeNull();
   });
 });

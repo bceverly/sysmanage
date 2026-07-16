@@ -18,6 +18,7 @@ import '@fontsource/roboto/700.css';
 
 import Navbar from "./Components/Navbar"
 import ConnectionProvider from './Components/ConnectionProvider';
+import CommandPalette from './Components/CommandPalette';
 import SecurityWarningBanner from './Components/SecurityWarningBanner';
 import MigrationCompatBanner from './Components/MigrationCompatBanner';
 import Login from './Pages/Login';
@@ -235,6 +236,7 @@ function App() {
             <PluginProvider>
               <Router>
                 <Navbar />
+                <CommandPalette />
                 <MigrationCompatBanner />
                 <PluginAppBanners />
                 <SecurityWarningBanner />

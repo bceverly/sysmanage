@@ -1,0 +1,170 @@
+/* Grouped "File-menu" navigation — Radix Menubar styled to the SysManage dark
+   theme (#121212 header, rgb(36 157 239) accent).  Desktop only; the mobile
+   drawer below reuses the same category data as grouped sections. */
+
+.nav__menubar {
+  display: none; /* mobile-first: shown at >=1150px */
+}
+
+@media screen and (min-width: 1150px) {
+  .nav__menubar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 1.5rem;
+  }
+  .nav__drawer {
+    display: none; /* desktop uses the menubar, not the slide-in drawer */
+  }
+}
+
+/* Top-level category triggers — look like the old nav links (they just don't
+   navigate; they open a dropdown). */
+.menubar__trigger {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  color: var(--title-color);
+  font-weight: var(--font-semi-bold);
+  font-size: var(--normal-font-size, 1rem);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+.menubar__trigger:hover,
+.menubar__trigger:focus-visible,
+.menubar__trigger[data-state="open"] {
+  color: rgb(36 157 239);
+  background-color: rgba(36, 157, 239, 0.1);
+}
+
+/* The category that contains the current route — mirrors the old active link. */
+.menubar__trigger--active {
+  color: rgb(36 157 239);
+  font-weight: var(--font-bold);
+}
+
+.menubar__caret {
+  font-size: 0.7rem;
+  opacity: 0.65;
+  transition: transform 0.2s ease;
+}
+
+.menubar__trigger[data-state="open"] .menubar__caret {
+  transform: rotate(180deg);
+}
+
+/* Dropdown panel. */
+.menubar__content {
+  min-width: 210px;
+  background-color: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.35rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  z-index: 1100;
+  animation: menubar-fade-in 0.12s ease-out;
+}
+
+@keyframes menubar-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dropdown items — the real navigable destinations. */
+.menubar__item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  color: var(--title-color);
+  font-weight: var(--font-semi-bold);
+  font-size: var(--normal-font-size, 1rem);
+  cursor: pointer;
+  user-select: none;
+}
+
+.menubar__item[data-highlighted] {
+  background-color: rgba(36, 157, 239, 0.16);
+  color: rgb(36 157 239);
+  outline: none;
+}
+
+/* Current route — a small accent bar, echoing the old active underline. */
+.menubar__item--active {
+  color: rgb(36 157 239);
+}
+
+.menubar__item--active::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 1rem;
+  margin-right: 0.5rem;
+  margin-left: -0.2rem;
+  background-color: rgb(36 157 239);
+  border-radius: 2px;
+}
+
+/* --- Mobile slide-in drawer (grouped sections) ------------------------- */
+.nav__drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 82%;
+  height: 100%;
+  padding: 6rem 2rem 2rem;
+  background-color: hsl(0deg 0% 6% / 96%);
+  backdrop-filter: blur(16px);
+  transition: right 0.4s ease;
+  overflow-y: auto;
+  z-index: 1050;
+}
+
+.nav__drawer.show-menu {
+  right: 0;
+}
+
+[dir="rtl"] .nav__drawer {
+  right: auto;
+  left: -100%;
+  transition: left 0.4s ease;
+}
+
+[dir="rtl"] .nav__drawer.show-menu {
+  left: 0;
+}
+
+.nav__mobile-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav__mobile-group {
+  list-style: none;
+  margin-bottom: 1.6rem;
+}
+
+.nav__mobile-group-title {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.55;
+  margin-bottom: 0.6rem;
+}
+
+.nav__mobile-link {
+  display: block;
+  padding: 0.45rem 0;
+}

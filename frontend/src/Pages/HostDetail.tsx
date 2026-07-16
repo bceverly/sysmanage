@@ -1,6 +1,12 @@
 /* global Event */
 import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import {
+  navRailContainerSx,
+  navRailGroupSx,
+  navRailGroupTitleSx,
+  navRailItemSx,
+} from '../Components/navRailStyles';
 import AntivirusStatusCard from '../Components/AntivirusStatusCard';
 import MaintenanceWindowCard from '../Components/MaintenanceWindowCard';
 import CommercialAntivirusStatusCard from '../Components/CommercialAntivirusStatusCard';
@@ -19,8 +25,6 @@ import {
     CircularProgress,
     Paper,
     LinearProgress,
-    Tabs,
-    Tab,
     FormControl,
     InputLabel,
     Select,
@@ -44,6 +48,7 @@ import {
     TextField,
     List,
     ListItem,
+    ListItemButton,
     ListItemText,
     Divider,
     TableContainer,
@@ -163,6 +168,31 @@ interface ChildHost {
 }
 
 // Large page component that coordinates host details, hardware info, software, virtualization, and multiple interactive features
+// Two-pane Host Detail: the (~15) tabs are grouped into a categorized left rail
+// instead of one long horizontal strip.  Unmapped tab ids fall into "Overview".
+const HOST_CATEGORY_ORDER = [
+  'overview', 'software', 'security', 'operations', 'access', 'virtualization',
+] as const;
+const HOST_CAT_LABEL = new Map<string, { key: string; def: string }>([
+  ['overview', { key: 'hostDetail.cat.overview', def: 'Overview' }],
+  ['software', { key: 'hostDetail.cat.software', def: 'Software' }],
+  ['security', { key: 'hostDetail.cat.security', def: 'Security' }],
+  ['operations', { key: 'hostDetail.cat.operations', def: 'Operations' }],
+  ['access', { key: 'hostDetail.cat.access', def: 'Access' }],
+  ['virtualization', { key: 'hostDetail.cat.virtualization', def: 'Virtualization' }],
+]);
+const HOST_TAB_CATEGORY = new Map<string, string>([
+  ['info', 'overview'], ['hardware', 'overview'],
+  ['software', 'software'], ['software-changes', 'software'], ['third-party-repos', 'software'],
+  ['ubuntu-pro', 'software'], ['proplus-advisory', 'software'], ['proplus-lifecycle', 'software'],
+  ['security', 'security'], ['compliance', 'security'], ['proplus-compliance', 'security'],
+  ['fips-compliance', 'security'], ['certificates', 'security'], ['proplus-vuln', 'security'],
+  ['processes', 'operations'], ['server-roles', 'operations'], ['diagnostics', 'operations'],
+  ['proplus-health', 'operations'], ['proplus-alerting', 'operations'], ['proplus-audit', 'operations'],
+  ['access', 'access'], ['proplus-secrets', 'access'],
+  ['child-hosts', 'virtualization'], ['proplus-containers', 'virtualization'],
+]);
+
 const HostDetail = () => { // NOSONAR
     const { hostId } = useParams<{ hostId: string }>();
     const [host, setHost] = useState<SysManageHost | null>(null);
@@ -711,6 +741,28 @@ const HostDetail = () => { // NOSONAR
     const getTabNames = useCallback(() => {
         return tabDefinitions.map(td => td.id);
     }, [tabDefinitions]);
+
+    // Group the visible tabs into the left-rail sections (empty categories drop
+    // out, so a host shows only the categories it has tabs in).
+    const hostTabGroups = useMemo(() => {
+        const groups = new Map<string, { id: string; label: string }[]>();
+        for (const td of tabDefinitions) {
+            const cat = HOST_TAB_CATEGORY.get(td.id) ?? 'overview';
+            const arr = groups.get(cat) ?? [];
+            arr.push({ id: td.id, label: td.label });
+            groups.set(cat, arr);
+        }
+        return HOST_CATEGORY_ORDER
+            .filter(c => (groups.get(c)?.length ?? 0) > 0)
+            .map(c => {
+                const meta = HOST_CAT_LABEL.get(c);
+                return {
+                    id: c,
+                    label: t(meta?.key ?? c, meta?.def ?? c),
+                    tabs: groups.get(c) ?? [],
+                };
+            });
+    }, [tabDefinitions, t]);
 
     // Resolve initial tab from URL hash once tabDefinitions is ready
     useEffect(() => {
@@ -4166,23 +4218,40 @@ const HostDetail = () => { // NOSONAR
                 </Box>
             </Box>
 
-            {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
-                <Tabs value={currentTab} onChange={handleTabChange} aria-label="host detail tabs" variant="scrollable" scrollButtons="auto">
-                    {tabDefinitions.map(tabDef => (
-                        <Tab
-                            key={tabDef.id}
-                            icon={tabDef.icon}
-                            label={tabDef.label}
-                            iconPosition="start"
-                            sx={{ textTransform: 'none' }}
-                        />
+            {/* Two-pane layout: grouped category rail on the left, content on the
+                right — replaces the old overflowing horizontal tab strip. */}
+            <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
+                <Box sx={navRailContainerSx}>
+                    {hostTabGroups.map(group => (
+                        <Box key={group.id} sx={navRailGroupSx}>
+                            <Typography variant="overline" sx={navRailGroupTitleSx}>
+                                {group.label}
+                            </Typography>
+                            <List dense disablePadding>
+                                {group.tabs.map(tab => {
+                                    const idx = tabDefinitions.findIndex(td => td.id === tab.id);
+                                    return (
+                                        <ListItemButton
+                                            key={tab.id}
+                                            selected={currentTab === idx}
+                                            onClick={(e) => handleTabChange(e, idx)}
+                                            sx={navRailItemSx}
+                                        >
+                                            <ListItemText
+                                                primary={tab.label}
+                                                primaryTypographyProps={{ variant: 'body2' }}
+                                            />
+                                        </ListItemButton>
+                                    );
+                                })}
+                            </List>
+                        </Box>
                     ))}
-                </Tabs>
-            </Box>
+                </Box>
 
-            {/* Tab Content - flexGrow to fill available space */}
-            <Box sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
+                {/* Content — keyed off the tab ID at the active index so the
+                    mapping is stable when a Pro+-gated tab is filtered out. */}
+                <Box sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0 }}>
             {currentTabId === 'info' && (
                 <Grid container spacing={3}>
                 {/* Maintenance window status (Phase 14.2) */}
@@ -6953,6 +7022,7 @@ const HostDetail = () => { // NOSONAR
                     </Grid>
                 </Grid>
             )}
+            </Box>
             </Box>
 
             {/* Dialog for Additional Details */}
