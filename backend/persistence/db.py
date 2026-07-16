@@ -33,6 +33,34 @@ def _psycopg_url(url: str) -> str:
     return url
 
 
+def _apply_db_options(url: str, options) -> str:
+    """Append optional libpq connection parameters to a PostgreSQL URL.
+
+    ``options`` is a raw query-parameter fragment from ``database.options`` in
+    sysmanage.yaml (e.g. ``target_session_attrs=read-write``).  Returns ``url``
+    unchanged when empty.  Uses ``?`` or ``&`` depending on whether the URL
+    already carries a query string.
+    """
+    if not options:
+        return url
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}{options}"
+
+
+# PostgreSQL High-Availability (Phase 15.1).  After a primary failover the
+# pooled connections are dead sockets; ``pool_pre_ping`` issues a cheap liveness
+# check on checkout and transparently discards+reconnects (to the new primary
+# via the proxy/VIP or libpq multi-host DSN) instead of handing a stale socket
+# to the next request.  ``pool_recycle`` caps connection age below typical
+# proxy/server idle timeouts so long-lived connections don't accumulate.  These
+# are the single most important HA change and MUST be applied uniformly to every
+# engine: this module's bootstrap engine (which also backs the registry/shared
+# partitions in collapsed mode — see backend.persistence.partitions), and the
+# per-tenant engines built in the licensed multitenancy engine (which already
+# sets the same, keyed to its OpenBAO lease duration).  Harmless on SQLite.
+HA_ENGINE_KWARGS = {"pool_pre_ping": True, "pool_recycle": 1800}
+
+
 # Database context - determines whether we're in production or test mode
 IS_TEST_MODE = False
 TEST_ENGINE = None
@@ -59,6 +87,7 @@ def _init_production_database():
     db_host = the_config["database"]["host"]
     db_port = the_config["database"]["port"]
     db_name = the_config["database"]["name"]
+    db_options = the_config["database"].get("options")
 
     # Build the connection string based on database type
     if db_user == "sqlite" or not db_host:
@@ -69,10 +98,20 @@ def _init_production_database():
         PROD_DATABASE_URL = (
             f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         )
+        # Optional extra libpq connection parameters (Phase 15.1 HA).  The
+        # canonical case is ``options: "target_session_attrs=read-write"`` so a
+        # multi-host ``host`` list (``h1,h2``) connects only to the writable
+        # primary and re-resolves it after a failover.  Appended verbatim as URL
+        # query parameters (``_psycopg_url`` then adds client_encoding with the
+        # right separator).
+        PROD_DATABASE_URL = _apply_db_options(PROD_DATABASE_URL, db_options)
 
     # create the database connection
     PROD_ENGINE = create_engine(
-        _psycopg_url(PROD_DATABASE_URL), connect_args={}, echo=False
+        _psycopg_url(PROD_DATABASE_URL),
+        connect_args={},
+        echo=False,
+        **HA_ENGINE_KWARGS,
     )
     PROD_SESSION_LOCAL = sessionmaker(
         autocommit=False, autoflush=False, bind=PROD_ENGINE

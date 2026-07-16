@@ -5296,13 +5296,14 @@ bulk already exists.
 
 Deliberately scoped as *survive failover*, not *orchestrate it*: leader election, promotion, and split-brain protection stay in the cluster manager + a connection router (HAProxy/PgBouncer or libpq multi-host). The server must never reimplement primary discovery — that is a known anti-pattern. The work is therefore a handful of small, correct changes, not a subsystem.
 
-- [ ] **`pool_pre_ping=True` + sane `pool_recycle` on every engine** — the single most important change. After a failover the pooled connections are dead; pre-ping discards and reconnects transparently instead of handing a stale socket to the next request. Must be applied uniformly across **all** engines (registry / shared / tenant and the per-request engines from `get_request_engine()`), set once in the engine-factory helper.
-- [ ] **Stable endpoint strategy, documented not hard-coded** — support pointing the DSN at a proxy/VIP, or a libpq multi-host DSN (`host=n1,n2,n3 target_session_attrs=read-write`) so psycopg2 walks to the current primary with zero code changes. Pick one as the documented default.
-- [ ] **Bounded retry/backoff for transient `OperationalError`** at the request/unit-of-work boundary, for the few-second window during promotion when there is no primary. Idempotent/uncommitted operations only — never blindly replay a partially-applied transaction.
-- [ ] **OpenBAO DB secrets backend points at the cluster endpoint** (proxy/VIP), with the leased role present on all nodes via replication; verify a connection opened *after* failover leases fresh creds cleanly.
-- [ ] **`/api/health` reports DB connectivity** so an external LB / orchestrator can route around a server that has lost its database.
+- [x] **`pool_pre_ping=True` + sane `pool_recycle` on every engine** — the single most important change. After a failover the pooled connections are dead; pre-ping discards and reconnects transparently instead of handing a stale socket to the next request. Must be applied uniformly across **all** engines (registry / shared / tenant and the per-request engines from `get_request_engine()`), set once in the engine-factory helper.
+- [x] **Stable endpoint strategy, documented not hard-coded** — support pointing the DSN at a proxy/VIP, or a libpq multi-host DSN (`host=n1,n2,n3 target_session_attrs=read-write`) so psycopg2 walks to the current primary with zero code changes. Pick one as the documented default.
+- [x] **Bounded retry/backoff for transient `OperationalError`** at the request/unit-of-work boundary, for the few-second window during promotion when there is no primary. Idempotent/uncommitted operations only — never blindly replay a partially-applied transaction.
+- [ ] **OpenBAO DB secrets backend points at the cluster endpoint** (proxy/VIP), with the leased role present on all nodes via replication; verify a connection opened *after* failover leases fresh creds cleanly. (Deployment/verification only — see docs/administration/postgresql-ha.html; multi-tenant / Pro+ only.)
+- [x] **Lease-acquisition retry (second path)** — OpenBAO surfaces a mint failure during the promotion gap as a 5xx `VaultError`, NOT a driver `OperationalError`, so the app's DB retry does not cover it. `VaultError` now carries `status_code` + `transient` (5xx / connection / timeout = transient; 403 / 4xx = permanent), and the Pro+ `multitenancy_engine._acquire` wraps `lease_credentials` in `run_with_vault_retry` (transient-only, bounded backoff; mint-timeout can leak a TTL-bounded orphan lease). OSS + Pro+ (Cython rebuilt); tested in `test_vault_retry.py`.
+- [x] **`/api/health` reports DB connectivity** so an external LB / orchestrator can route around a server that has lost its database.
 - [ ] **Failover test** — kill the primary mid-load in CI/integration; assert the pool recovers and the retry path holds; document expected client-visible behavior during the gap.
-- [ ] Docs: reference HA topology (cluster manager + router), and state explicitly that the server does **not** do leader election. (Note: the federation coordinator already name-checks "HA via standard replication + a load balancer" — this makes the single-server case match.)
+- [x] Docs: reference HA topology (cluster manager + router), and state explicitly that the server does **not** do leader election. (Note: the federation coordinator already name-checks "HA via standard replication + a load balancer" — this makes the single-server case match.)
 
 **Estimated Size:** ~1,200 lines (mostly the retry wrapper, engine-factory wiring, and failover tests).
 
@@ -5313,15 +5314,15 @@ Deliberately scoped as *survive failover*, not *orchestrate it*: leader election
 Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DDL** driver — the async app path is untouched. Both repos are already on **SQLAlchemy 2.0** (sysmanage 2.0.43, Pro+ ≥ 2.0.25), which ships the `postgresql+psycopg` dialect, so **no SQLAlchemy upgrade is required**. Neither repo uses `RealDictCursor` / `execute_values` / `copy_from` / custom adapters, and psycopg3 is still DBAPI-2.0 — so ORM/query code is untouched.
 
 **sysmanage** (sync-SQLAlchemy on psycopg2; no asyncpg):
-- [ ] `requirements.txt`: `psycopg2-binary==2.9.10` → `psycopg[binary]`
-- [ ] Engine URL: select the `postgresql+psycopg` dialect (the default `postgresql://` picks psycopg2)
-- [ ] Port the ~5 raw spots — `scripts/provision_bootstrap.py`, `scripts/_sysmanage_secure_installation.py`, `tests/test_alembic_postgres.py`, 2× `alembic/versions/*.py`: `import psycopg2`→`import psycopg`, `from psycopg2 import sql`→`from psycopg import sql` (near drop-in), `ISOLATION_LEVEL_AUTOCOMMIT`→`autocommit=True`, `psycopg2.errors.*`→`psycopg.errors.*`
-- [ ] Audit each `with conn:` — psycopg3 **closes** the connection at block end (psycopg2 left it open); use `with conn.transaction():` where a transaction scope was intended
+- [x] `requirements.txt`: `psycopg2-binary==2.9.10` → `psycopg[binary]`
+- [x] Engine URL: select the `postgresql+psycopg` dialect (the default `postgresql://` picks psycopg2)
+- [x] Port the ~5 raw spots — `scripts/provision_bootstrap.py`, `scripts/_sysmanage_secure_installation.py`, `tests/test_alembic_postgres.py`, 2× `alembic/versions/*.py`: `import psycopg2`→`import psycopg`, `from psycopg2 import sql`→`from psycopg import sql` (near drop-in), `ISOLATION_LEVEL_AUTOCOMMIT`→`autocommit=True`, `psycopg2.errors.*`→`psycopg.errors.*`
+- [x] Audit each `with conn:` — psycopg3 **closes** the connection at block end (psycopg2 left it open); use `with conn.transaction():` where a transaction scope was intended
 
 **sysmanage-professional-plus** (async on asyncpg — unaffected; psycopg2 only sync/Alembic):
-- [ ] `requirements.txt`: `psycopg2-binary>=2.9.9` → `psycopg[binary]`
-- [ ] `alembic/env.py`: the sync-driver rewrite `postgresql+asyncpg → postgresql+psycopg2` becomes `→ postgresql+psycopg`
-- [ ] `module-source/multitenancy_engine/multitenancy_engine.pyx` (raw per-tenant DDL): psycopg2→psycopg swaps. **This is Cython — the engine must be recompiled + re-bundled** (`make build-modules`) after the change
+- [x] `requirements.txt`: `psycopg2-binary>=2.9.9` → `psycopg[binary]`
+- [x] `alembic/env.py`: the sync-driver rewrite `postgresql+asyncpg → postgresql+psycopg2` becomes `→ postgresql+psycopg`
+- [x] `module-source/multitenancy_engine/multitenancy_engine.pyx` (raw per-tenant DDL): psycopg2→psycopg swaps. **This is Cython — the engine must be recompiled + re-bundled** (`make build-modules`) after the change
 - [ ] `scripts/{cleanup_orphan_modules,cleanup_old_module_versions,register_modules}.py` + tests: same rename swaps
 - [ ] Leave asyncpg untouched (async path is unaffected and already packages cleanly on ARM/BSD — no libpq)
 
@@ -5341,7 +5342,7 @@ Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DD
 - [ ] Maintenance-window gating verified end-to-end (queue → window open → execute)
 - [ ] All new endpoints return 402 cleanly when the gating engine is unlicensed
 - [ ] **PostgreSQL HA (15.1):** pre-ping/recycle on all engines, transient-failover retry, and a passing kill-the-primary failover test
-- [ ] **Driver migration (15.2):** psycopg2 → psycopg3 (sync/Alembic/DDL only) in sysmanage + Pro+; `psycopg[binary]` installs wheel-only on Windows ARM64 + BSD (no compiler); asyncpg async path unchanged; multitenancy engine recompiled
+- [x] **Driver migration (15.2):** psycopg2 → psycopg3 (sync/Alembic/DDL only) in sysmanage + Pro+; `psycopg[binary]` installs wheel-only on Windows ARM64 + BSD (no compiler); asyncpg async path unchanged; multitenancy engine recompiled
 - [ ] Docs + 14-language i18n complete for Phase 14 surfaces
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** backend
       ≥ prior floor +5%; frontend floors raised to **OSS 30% /

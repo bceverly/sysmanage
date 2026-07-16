@@ -694,11 +694,39 @@ def register_app_routes(app: FastAPI):
     @app.get("/api/health")
     @app.head("/api/health")
     async def health_check():
-        """
-        Health check endpoint for connection monitoring.
+        """Health check for connection monitoring + HA routing (Phase 15.1).
+
+        Reports bootstrap-database connectivity so an upstream load balancer or
+        orchestrator can route around a server that has lost its database (e.g.
+        mid-failover, before the pool pre-ping has reconnected). Returns HTTP
+        503 when the database is unreachable, 200 otherwise. The probe runs in a
+        threadpool so a connect hang can't block the event loop, and never
+        raises — an unreachable DB is a reported state, not a 500.
         """
         logger.debug("Health check endpoint called")
-        return {"status": "healthy"}
+
+        from fastapi.concurrency import run_in_threadpool  # noqa: PLC0415
+        from fastapi.responses import JSONResponse  # noqa: PLC0415
+        from sqlalchemy import text  # noqa: PLC0415
+
+        from backend.persistence import db as db_module  # noqa: PLC0415
+
+        def _check_db() -> bool:
+            try:
+                engine = db_module.get_engine()
+                with engine.connect() as conn:
+                    conn.execute(text("SELECT 1"))
+                return True
+            except Exception:  # pylint: disable=broad-exception-caught
+                return False
+
+        if not await run_in_threadpool(_check_db):
+            logger.warning("Health check: database unreachable — reporting 503")
+            return JSONResponse(
+                status_code=503,
+                content={"status": "unhealthy", "database": "down"},
+            )
+        return {"status": "healthy", "database": "up"}
 
     logger.debug("Health check routes (/api/health) registered")
     logger.debug("=== APPLICATION ROUTES REGISTRATION COMPLETE ===")

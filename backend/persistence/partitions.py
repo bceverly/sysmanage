@@ -385,8 +385,13 @@ def tenant_engine_for_host(host_id):
         return None
     from backend.services import host_tenant_index  # noqa: PLC0415
 
+    from backend.persistence.db_retry import run_with_db_retry  # noqa: PLC0415
+
     try:
-        tenant_id = host_tenant_index.tenant_for_host(host_id)
+        # Idempotent, fresh-session read → safe to retry through the brief
+        # PostgreSQL-failover window (Phase 15.1) rather than routing this
+        # host's data to the wrong place because the primary was mid-promotion.
+        tenant_id = run_with_db_retry(host_tenant_index.tenant_for_host, host_id)
     except Exception:  # noqa: BLE001
         # The host→tenant lookup itself failed (e.g. registry unreachable, or the
         # licensed engine that backs the index isn't loaded).  Do NOT silently

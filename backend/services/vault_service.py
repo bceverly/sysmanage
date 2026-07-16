@@ -5,6 +5,7 @@ Service for interacting with OpenBAO vault to store and retrieve secrets.
 import json
 import logging
 import re
+import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
@@ -23,7 +24,73 @@ VAULT_DATA_PATH = "/data/"
 
 
 class VaultError(Exception):
-    """Exception raised for vault-related errors."""
+    """Exception raised for vault-related errors.
+
+    ``transient`` marks errors worth retrying through a brief outage — a 5xx
+    from OpenBAO (e.g. its database secrets engine could not reach the
+    PostgreSQL primary mid-failover) or a connection/timeout to OpenBAO itself.
+    Permanent errors (403 permission denied, 4xx client errors, engine not
+    mounted, no token) are ``transient=False`` and must NOT be retried.
+    ``status_code`` is the HTTP status when the error came from a response.
+    """
+
+    def __init__(self, message, *, status_code=None, transient=False):
+        super().__init__(message)
+        self.status_code = status_code
+        self.transient = transient
+
+
+def run_with_vault_retry(
+    func, *args, max_attempts=None, base_delay=None, max_delay=None, **kwargs
+):
+    """Bounded retry around an OpenBAO call, retrying only transient VaultErrors.
+
+    Covers the PostgreSQL-failover promotion gap (Phase 15.1) where OpenBAO's
+    database secrets engine can't reach the primary to mint a credential and
+    returns 5xx (or OpenBAO itself is briefly unreachable). A permanent
+    VaultError (permission denied, 4xx, engine not mounted) is re-raised on the
+    first occurrence.
+
+    NOTE: minting a credential is not perfectly idempotent — if OpenBAO created
+    the role but the response was lost (timeout), a retry mints a second,
+    short-lived lease. This is bounded: the orphan lease auto-expires at its
+    TTL. Lease lookups/renews are fully idempotent.
+    """
+    from backend.persistence.db_retry import (  # noqa: PLC0415
+        DEFAULT_BASE_DELAY,
+        DEFAULT_MAX_ATTEMPTS,
+        DEFAULT_MAX_DELAY,
+    )
+
+    max_attempts = DEFAULT_MAX_ATTEMPTS if max_attempts is None else max_attempts
+    base_delay = DEFAULT_BASE_DELAY if base_delay is None else base_delay
+    max_delay = DEFAULT_MAX_DELAY if max_delay is None else max_delay
+
+    attempt = 0
+    while True:
+        try:
+            return func(*args, **kwargs)
+        except VaultError as exc:
+            if not getattr(exc, "transient", False):
+                raise
+            attempt += 1
+            if attempt >= max_attempts:
+                logger.error(
+                    "OpenBAO call failed after %d attempt(s) (transient, likely "
+                    "failover window not yet closed): %s",
+                    attempt,
+                    exc,
+                )
+                raise
+            delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
+            logger.warning(
+                "Transient OpenBAO error (attempt %d/%d) — retrying in %.1fs: %s",
+                attempt,
+                max_attempts,
+                delay,
+                exc,
+            )
+            time.sleep(delay)
 
 
 class VaultService:
@@ -186,10 +253,21 @@ class VaultService:
             if response.status_code == 404:
                 return {}  # Not found is often expected in vault operations
             elif response.status_code == 403:
-                raise VaultError(_("vault.permission_denied", "Permission denied"))
+                raise VaultError(
+                    _("vault.permission_denied", "Permission denied"),
+                    status_code=403,
+                    transient=False,
+                )
             elif response.status_code >= 400:
                 error_msg = response.text or f"HTTP {response.status_code}"
-                raise VaultError(f"Vault API error: {error_msg}")
+                # 5xx = OpenBAO reached but its backend op failed (e.g. its DB
+                # secrets engine could not reach the primary mid-failover) →
+                # transient. 4xx = a client error that won't fix on retry.
+                raise VaultError(
+                    f"Vault API error: {error_msg}",
+                    status_code=response.status_code,
+                    transient=response.status_code >= 500,
+                )
 
             # Parse JSON response
             if response.content:
@@ -198,12 +276,15 @@ class VaultService:
 
         except requests.exceptions.ConnectionError as exc:
             raise VaultError(
-                _("vault.connection_error", "Cannot connect to vault server")
+                _("vault.connection_error", "Cannot connect to vault server"),
+                transient=True,
             ) from exc
         except requests.exceptions.Timeout as exc:
-            raise VaultError(_("vault.timeout", "Vault request timed out")) from exc
+            raise VaultError(
+                _("vault.timeout", "Vault request timed out"), transient=True
+            ) from exc
         except requests.exceptions.RequestException as e:
-            raise VaultError(f"Vault request failed: {str(e)}") from e
+            raise VaultError(f"Vault request failed: {str(e)}", transient=True) from e
         except json.JSONDecodeError as exc:
             raise VaultError(
                 _("vault.invalid_response", "Invalid response from vault")

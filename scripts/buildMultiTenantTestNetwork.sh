@@ -58,6 +58,23 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
+# Optional HA mode: give tenant-a a streaming-replication STANDBY so you can
+# test a PostgreSQL failover of a tenant database (Phase 15.1) — including the
+# OpenBAO dynamic-credential path, which reaches tenant DBs via leased creds.
+# Enable with the ``--ha`` flag (or HA=1).  Adds the ``failover`` / ``failback``
+# subcommands that drive that tenant-a primary/standby pair over SSH.
+# ---------------------------------------------------------------------------
+HA_MODE="${HA:-0}"
+_args=()
+for _a in "$@"; do
+  case "$_a" in
+    --ha) HA_MODE=1 ;;
+    *)    _args+=("$_a") ;;
+  esac
+done
+set -- ${_args[@]+"${_args[@]}"}
+
+# ---------------------------------------------------------------------------
 # Tunables
 # ---------------------------------------------------------------------------
 
@@ -121,6 +138,15 @@ TENANT_B_NAT_MAC="${TENANT_B_NAT_MAC:-52:54:00:80:50:04}"
 TENANT_B_MT_MAC="${TENANT_B_MT_MAC:-52:54:00:80:00:04}"
 TENANT_B_IP="${TENANT_B_IP:-10.80.0.4}"
 
+# HA mode only: a streaming standby of tenant-a, plus the replication role the
+# standby uses to clone + stream from the tenant-a primary.
+REPL_ROLE="${REPL_ROLE:-replicator}"
+REPL_PASS="${REPL_PASS:-ReplTest123}"
+TENANT_A_STANDBY_NAME="${TENANT_A_STANDBY_NAME:-sysmanage-mt-tenant-a-standby}"
+TENANT_A_STANDBY_NAT_MAC="${TENANT_A_STANDBY_NAT_MAC:-52:54:00:80:50:05}"
+TENANT_A_STANDBY_MT_MAC="${TENANT_A_STANDBY_MT_MAC:-52:54:00:80:00:05}"
+TENANT_A_STANDBY_IP="${TENANT_A_STANDBY_IP:-10.80.0.5}"
+
 CONTROL_NAME="${CONTROL_NAME:-sysmanage-mt-control}"
 CONTROL_VCPUS="${CONTROL_VCPUS:-2}"
 CONTROL_RAM="${CONTROL_RAM:-4096}"
@@ -131,6 +157,9 @@ CONTROL_IP="${CONTROL_IP:-10.80.0.10}"
 
 # The set of VMs to manage.  Control plane is appended only when enabled.
 VM_NAMES=("$REGISTRY_NAME" "$SHARED_NAME" "$TENANT_A_NAME" "$TENANT_B_NAME")
+if [[ "$HA_MODE" == "1" ]]; then
+  VM_NAMES+=("$TENANT_A_STANDBY_NAME")
+fi
 if [[ "$INCLUDE_CONTROL_PLANE" == "1" ]]; then
   VM_NAMES+=("$CONTROL_NAME")
 fi
@@ -273,8 +302,10 @@ EOF
 # role + database.  The role/db creation is idempotent (guarded by existence
 # checks) so a re-applied seed never errors.  Runtime shell ``$`` is escaped
 # (\$) so it survives this build-host heredoc into the guest unchanged.
+# mode = plain (role + db) | primary (role + db + replication config/role) |
+# standby (postgres + subnet only; it is cloned from the primary via basebackup).
 write_user_data_db() {
-  local host="$1" dbname="$2" out="$3"
+  local host="$1" dbname="$2" out="$3" mode="${4:-plain}"
   _user_data_header "$host" "$out" "true"
   cat >> "$out" <<EOF
 packages:
@@ -285,8 +316,20 @@ runcmd:
     for d in /etc/postgresql/*/main; do
       echo "listen_addresses = '*'" >> "\$d/postgresql.conf"
       echo "host all all ${MT_NET_CIDR} scram-sha-256" >> "\$d/pg_hba.conf"
+EOF
+  if [[ "$mode" == "primary" ]]; then
+    cat >> "$out" <<EOF
+      echo "wal_level = replica" >> "\$d/postgresql.conf"
+      echo "max_wal_senders = 10" >> "\$d/postgresql.conf"
+      echo "host replication ${REPL_ROLE} ${MT_NET_CIDR} scram-sha-256" >> "\$d/pg_hba.conf"
+EOF
+  fi
+  cat >> "$out" <<EOF
     done
   - systemctl restart postgresql
+EOF
+  if [[ "$mode" != "standby" ]]; then
+    cat >> "$out" <<EOF
   - |
     sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DB_ROLE}'" | grep -q 1 \\
       || sudo -u postgres psql -c "CREATE ROLE ${DB_ROLE} LOGIN PASSWORD '${DBPASS}' CREATEDB CREATEROLE;"
@@ -294,6 +337,14 @@ runcmd:
     sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${dbname}'" | grep -q 1 \\
       || sudo -u postgres createdb -O ${DB_ROLE} ${dbname}
 EOF
+  fi
+  if [[ "$mode" == "primary" ]]; then
+    cat >> "$out" <<EOF
+  - |
+    sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${REPL_ROLE}'" | grep -q 1 \\
+      || sudo -u postgres psql -c "CREATE ROLE ${REPL_ROLE} REPLICATION LOGIN PASSWORD '${REPL_PASS}';"
+EOF
+  fi
 }
 
 # The control-plane node: bare Ubuntu + ssh.  sysmanage + OpenBAO are installed
@@ -366,11 +417,12 @@ provision_vm() {
   local ud="$WORKDIR/${name}-user-data"
   local md="$WORKDIR/${name}-meta-data"
   local nc="$WORKDIR/${name}-network-config"
-  if [[ "$kind" == "db" ]]; then
-    write_user_data_db "$name" "$dbname" "$ud"
-  else
-    write_user_data_control "$name" "$ud"
-  fi
+  case "$kind" in
+    db)         write_user_data_db "$name" "$dbname" "$ud" "plain" ;;
+    db-primary) write_user_data_db "$name" "$dbname" "$ud" "primary" ;;
+    db-standby) write_user_data_db "$name" "$dbname" "$ud" "standby" ;;
+    *)          write_user_data_control "$name" "$ud" ;;
+  esac
   write_meta_data      "$name" "$md"
   write_network_config "$nat_mac" "$mt_mac" "$mt_ip" "$nc"
 
@@ -405,8 +457,16 @@ create_shared() {
     "$SHARED_NAT_MAC" "$SHARED_MT_MAC" "$SHARED_IP"
 }
 create_tenant_a() {
-  provision_vm "$TENANT_A_NAME" "db" "$TENANT_A_DBNAME" "$DB_VCPUS" "$DB_RAM" "$DB_DISK_GB" \
+  # In HA mode tenant-a is the replication PRIMARY (extra wal/repl config + a
+  # replication role); otherwise it is a plain single DB.
+  local kind="db"
+  [[ "$HA_MODE" == "1" ]] && kind="db-primary"
+  provision_vm "$TENANT_A_NAME" "$kind" "$TENANT_A_DBNAME" "$DB_VCPUS" "$DB_RAM" "$DB_DISK_GB" \
     "$TENANT_A_NAT_MAC" "$TENANT_A_MT_MAC" "$TENANT_A_IP"
+}
+create_tenant_a_standby() {
+  provision_vm "$TENANT_A_STANDBY_NAME" "db-standby" "$TENANT_A_DBNAME" "$DB_VCPUS" "$DB_RAM" "$DB_DISK_GB" \
+    "$TENANT_A_STANDBY_NAT_MAC" "$TENANT_A_STANDBY_MT_MAC" "$TENANT_A_STANDBY_IP"
 }
 create_tenant_b() {
   provision_vm "$TENANT_B_NAME" "db" "$TENANT_B_DBNAME" "$DB_VCPUS" "$DB_RAM" "$DB_DISK_GB" \
@@ -471,6 +531,11 @@ print_vm_summary() {
       echo "  db      : postgresql://${DB_ROLE}:${DBPASS}@${mt_ip}:5432/${dbname}"
       echo "  verify  : psql 'postgresql://${DB_ROLE}:${DBPASS}@${mt_ip}:5432/${dbname}' -c '\\conninfo'"
       ;;
+    db-standby)
+      echo "  ssh     : ssh ${USERNAME}@${mt_ip}      (password: ${PASSWORD})"
+      echo "  role    : streaming STANDBY of tenant-a (${TENANT_A_IP}); clone it once with"
+      echo "            '$0 failback', then use '$0 failover' to promote it in a test"
+      ;;
     control)
       echo "  ssh     : ssh ${USERNAME}@${mt_ip}      (password: ${PASSWORD})"
       echo "  install : sudo add-apt-repository -y ppa:bceverly/sysmanage \\"
@@ -483,6 +548,39 @@ print_vm_summary() {
 }
 
 # ---------------------------------------------------------------------------
+# Failover / failback helpers (HA mode — drive the tenant-a pair over SSH)
+# ---------------------------------------------------------------------------
+
+ha_ssh() {
+  local ip="$1"; shift
+  sshpass -p "$PASSWORD" ssh \
+    -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    -o ConnectTimeout=10 -o LogLevel=ERROR \
+    "${USERNAME}@${ip}" "$@"
+}
+
+check_ssh_deps() {
+  command -v sshpass >/dev/null 2>&1 \
+    || die "failover/failback drive the DB nodes over SSH and need 'sshpass'.
+Install with:  sudo apt install sshpass"
+}
+
+# pg_role <ip> -> primary | standby | down   (pg_is_in_recovery: f=primary t=standby)
+pg_role() {
+  local ip="$1" rec
+  rec="$(ha_ssh "$ip" "sudo -u postgres psql -tAc 'select pg_is_in_recovery();'" 2>/dev/null | tr -d '[:space:]')"
+  case "$rec" in
+    f) echo "primary" ;;
+    t) echo "standby" ;;
+    *) echo "down" ;;
+  esac
+}
+
+pg_version() {
+  ha_ssh "$1" "pg_lsclusters -h 2>/dev/null | awk 'NR==1{print \$1}'" 2>/dev/null | tr -d '[:space:]'
+}
+
+# ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
 
@@ -492,6 +590,7 @@ cmd_start() {
   log "libvirt image pool: $IMG_POOL"
   log "libvirt URI       : $LIBVIRT_URI"
   log "control plane     : $([[ "$INCLUDE_CONTROL_PLANE" == "1" ]] && echo "included ($CONTROL_NAME)" || echo "skipped (INCLUDE_CONTROL_PLANE=0)")"
+  log "HA mode           : $([[ "$HA_MODE" == "1" ]] && echo "on — tenant-a gets a standby ($TENANT_A_STANDBY_NAME)" || echo "off (pass --ha to enable)")"
 
   ensure_default_network
   ensure_mt_network
@@ -501,6 +600,9 @@ cmd_start() {
   ensure_vm "$SHARED_NAME"   create_shared
   ensure_vm "$TENANT_A_NAME" create_tenant_a
   ensure_vm "$TENANT_B_NAME" create_tenant_b
+  if [[ "$HA_MODE" == "1" ]]; then
+    ensure_vm "$TENANT_A_STANDBY_NAME" create_tenant_a_standby
+  fi
   if [[ "$INCLUDE_CONTROL_PLANE" == "1" ]]; then
     ensure_vm "$CONTROL_NAME" create_control
   fi
@@ -521,6 +623,9 @@ cmd_start() {
   print_vm_summary "$SHARED_NAME"   "db"      "$SHARED_IP"   "$SHARED_DBNAME"
   print_vm_summary "$TENANT_A_NAME" "db"      "$TENANT_A_IP" "$TENANT_A_DBNAME"
   print_vm_summary "$TENANT_B_NAME" "db"      "$TENANT_B_IP" "$TENANT_B_DBNAME"
+  if [[ "$HA_MODE" == "1" ]]; then
+    print_vm_summary "$TENANT_A_STANDBY_NAME" "db-standby" "$TENANT_A_STANDBY_IP" "$TENANT_A_DBNAME"
+  fi
   if [[ "$INCLUDE_CONTROL_PLANE" == "1" ]]; then
     print_vm_summary "$CONTROL_NAME" "control" "$CONTROL_IP"
   fi
@@ -533,11 +638,14 @@ cmd_start() {
   echo "  shared DB   : ${SHARED_IP}   db=${SHARED_DBNAME}   (forward-looking; collapses onto bootstrap in 13.1.A)"
   echo "  tenant-a DB : ${TENANT_A_IP}   db=${TENANT_A_DBNAME}"
   echo "  tenant-b DB : ${TENANT_B_IP}   db=${TENANT_B_DBNAME}"
+  [[ "$HA_MODE" == "1" ]] && \
+  echo "  tnt-a stdby : ${TENANT_A_STANDBY_IP}   (streaming standby of tenant-a — see HA guide below)"
   [[ "$INCLUDE_CONTROL_PLANE" == "1" ]] && \
   echo "  control     : ${CONTROL_IP}  (sysmanage server + OpenBAO)"
   echo "  host        : ${MT_NET_HOST_IP}    (SSH from here:  ssh ${USERNAME}@${REGISTRY_IP})"
   echo
   print_wiring_guide
+  [[ "$HA_MODE" == "1" ]] && print_ha_guide
   echo "Re-check status :  $0 status"
   echo "Tear everything :  $0 stop"
 }
@@ -638,7 +746,8 @@ cmd_stop() {
   # Stop every VM this script can manage, regardless of the current
   # INCLUDE_CONTROL_PLANE setting, so a control plane created in a prior run is
   # still torn down.
-  local all=("$REGISTRY_NAME" "$SHARED_NAME" "$TENANT_A_NAME" "$TENANT_B_NAME" "$CONTROL_NAME")
+  local all=("$REGISTRY_NAME" "$SHARED_NAME" "$TENANT_A_NAME" "$TENANT_B_NAME" \
+             "$TENANT_A_STANDBY_NAME" "$CONTROL_NAME")
   for name in "${all[@]}"; do
     # Always try destroy first (a transient/running domain that vm_running
     # mis-reports would otherwise survive undefine as an unrecreatable
@@ -710,24 +819,134 @@ cmd_status() {
   print_vm_status "$SHARED_NAME"   "$SHARED_IP"
   print_vm_status "$TENANT_A_NAME" "$TENANT_A_IP"
   print_vm_status "$TENANT_B_NAME" "$TENANT_B_IP"
+  if vm_exists "$TENANT_A_STANDBY_NAME"; then
+    print_vm_status "$TENANT_A_STANDBY_NAME" "$TENANT_A_STANDBY_IP"
+  fi
   print_vm_status "$CONTROL_NAME"  "$CONTROL_IP"
 
   echo
   echo "Login: user=${USERNAME}  password=${PASSWORD}   |   Postgres: ${DB_ROLE}/${DBPASS}"
 }
 
+# HA-mode addendum: how to bring up + exercise the tenant-a failover.  Printed
+# by cmd_start only when --ha is set.
+print_ha_guide() {
+  cat <<EOF
+==========================================================================
+  HA mode — tenant-a failover (Phase 15.1)
+==========================================================================
+tenant-a (${TENANT_A_IP}) is the replication PRIMARY; ${TENANT_A_STANDBY_NAME}
+(${TENANT_A_STANDBY_IP}) is a bare PostgreSQL box waiting to become its standby.
+
+1. CLONE the standby from the primary (one-time; needs 'sshpass' on this host):
+
+     $0 failback        # basebackups ${TENANT_A_STANDBY_IP} from ${TENANT_A_IP} and starts it streaming
+
+2. POINT tenant-a's access at BOTH nodes so the current primary is auto-selected:
+   - In the server / when provisioning tenant-a, use a multi-host DSN:
+       postgresql://${DB_ROLE}:${DBPASS}@${TENANT_A_IP},${TENANT_A_STANDBY_IP}:5432/${TENANT_A_DBNAME}?target_session_attrs=read-write
+   - For OpenBAO dynamic creds, set tenant-a's database secrets 'connection_url'
+     to the same comma-separated pair, so it can still mint creds after a failover.
+
+3. TEST the failover (with the agent reporting into tenant-a so a load runs):
+
+     $0 failover        # stops the primary + promotes the standby
+     # -> the server's pre-ping + multi-host DSN reconnect to the new primary,
+     #    and the OpenBAO lease-acquisition retry covers the dynamic-creds path.
+     $0 failback        # rebuild the other node as a standby again
+
+==========================================================================
+EOF
+}
+
+cmd_failover() {
+  check_deps
+  check_ssh_deps
+  [[ "$HA_MODE" == "1" ]] || warn "failover assumes the --ha topology (tenant-a + its standby)."
+  local a_role s_role primary_ip standby_ip
+  a_role="$(pg_role "$TENANT_A_IP")"
+  s_role="$(pg_role "$TENANT_A_STANDBY_IP")"
+  log "Roles: tenant-a=${a_role} (${TENANT_A_IP}), standby=${s_role} (${TENANT_A_STANDBY_IP})"
+
+  if [[ "$a_role" == "primary" && "$s_role" == "standby" ]]; then
+    primary_ip="$TENANT_A_IP"; standby_ip="$TENANT_A_STANDBY_IP"
+  elif [[ "$s_role" == "primary" && "$a_role" == "standby" ]]; then
+    primary_ip="$TENANT_A_STANDBY_IP"; standby_ip="$TENANT_A_IP"
+  else
+    die "Need one primary + one standby (got ${a_role}/${s_role}).  Run '$0 failback' first to build the standby."
+  fi
+
+  log "Stopping the primary at ${primary_ip} (simulating its loss)"
+  ha_ssh "$primary_ip" "sudo systemctl stop postgresql" \
+    || warn "primary stop returned non-zero (already down?)"
+  local ver
+  ver="$(pg_version "$standby_ip")"
+  [[ -n "$ver" ]] || die "couldn't determine PostgreSQL version on standby ${standby_ip}"
+  log "Promoting the standby at ${standby_ip} (pg ${ver})"
+  ha_ssh "$standby_ip" "sudo pg_ctlcluster ${ver} main promote" \
+    || die "promote failed on ${standby_ip}"
+
+  echo
+  log "Failover complete — ${standby_ip} is now tenant-a's primary."
+  log "Watch the server route the tenant's data there; the OpenBAO lease-acquisition"
+  log "retry (Phase 15.1) covers minting new tenant creds through the gap."
+  log "Repair replication when ready:  $0 failback"
+}
+
+cmd_failback() {
+  check_deps
+  check_ssh_deps
+  local a_role s_role primary_ip rebuild_ip ver
+  a_role="$(pg_role "$TENANT_A_IP")"
+  s_role="$(pg_role "$TENANT_A_STANDBY_IP")"
+  log "Roles: tenant-a=${a_role} (${TENANT_A_IP}), standby=${s_role} (${TENANT_A_STANDBY_IP})"
+
+  # Rebuild whichever node is NOT the current primary as a fresh streaming
+  # standby of the primary (also used for the one-time initial clone, where the
+  # standby is a bare fresh postgres).
+  if [[ "$a_role" == "primary" ]]; then
+    primary_ip="$TENANT_A_IP"; rebuild_ip="$TENANT_A_STANDBY_IP"
+  elif [[ "$s_role" == "primary" ]]; then
+    primary_ip="$TENANT_A_STANDBY_IP"; rebuild_ip="$TENANT_A_IP"
+  else
+    die "No primary is up (${a_role}/${s_role}) — start tenant-a before failback."
+  fi
+
+  ver="$(pg_version "$primary_ip")"
+  [[ -n "$ver" ]] || die "couldn't determine PostgreSQL version on primary ${primary_ip}"
+  log "Rebuilding ${rebuild_ip} as a streaming standby of ${primary_ip} (pg ${ver})"
+  ha_ssh "$rebuild_ip" "\
+    sudo systemctl stop postgresql; \
+    sudo -u postgres rm -rf /var/lib/postgresql/${ver}/main; \
+    sudo -u postgres bash -c 'PGPASSWORD=\"${REPL_PASS}\" pg_basebackup -h ${primary_ip} -U ${REPL_ROLE} -D /var/lib/postgresql/${ver}/main -R -P'; \
+    sudo systemctl start postgresql" \
+    || die "rebuild of ${rebuild_ip} failed (check the ${REPL_ROLE} role + pg_hba replication line on ${primary_ip})"
+
+  echo
+  log "Failback complete — primary=${primary_ip}, standby=${rebuild_ip}."
+  log "Verify streaming:  ssh ${USERNAME}@${primary_ip} sudo -u postgres psql -c 'select * from pg_stat_replication;'"
+}
+
 usage() {
   cat <<EOF
-Usage: $0 {start|stop|status}
+Usage: $0 [--ha] {start|stop|status|failover|failback}
 
-  start   Create and start the multi-tenant test VMs (idempotent — already
-          running VMs are reported, not re-created).  The four DB VMs come up
-          with PostgreSQL installed + a role/database created; the control-plane
-          VM is bare (install sysmanage + OpenBAO per the printed guide).
-  stop    Destroy every VM (incl. a control plane from a prior run), delete
-          disks + seed ISOs, and tear down the ${MT_NET_NAME} network.  The
-          Ubuntu base image is kept so the next 'start' is fast.
-  status  Show network + per-VM state, static MT IPs, and DHCP NAT IPs.
+  start     Create and start the multi-tenant test VMs (idempotent — already
+            running VMs are reported, not re-created).  The four DB VMs come up
+            with PostgreSQL installed + a role/database created; the control-plane
+            VM is bare (install sysmanage + OpenBAO per the printed guide).
+  stop      Destroy every VM (incl. a control plane / HA standby from a prior
+            run), delete disks + seed ISOs, and tear down the ${MT_NET_NAME}
+            network.  The Ubuntu base image is kept so the next 'start' is fast.
+  status    Show network + per-VM state, static MT IPs, and DHCP NAT IPs.
+  failover  (HA) Stop tenant-a's current primary and promote its standby.
+  failback  (HA) Rebuild the other node as a fresh streaming standby (also does
+            the one-time initial clone of the standby from tenant-a).
+
+Options:
+  --ha      Add a streaming standby for tenant-a and enable failover/failback,
+            so you can test a tenant-database PostgreSQL failover (Phase 15.1).
+            (Also settable with HA=1.)  failover/failback need 'sshpass'.
 
 Key environment overrides:
   INCLUDE_CONTROL_PLANE=0   Skip the server+OpenBAO VM (run sysmanage from your host).
@@ -738,9 +957,11 @@ EOF
 
 main() {
   case "${1:-}" in
-    start)  cmd_start ;;
-    stop)   cmd_stop ;;
-    status) cmd_status ;;
+    start)    cmd_start ;;
+    stop)     cmd_stop ;;
+    status)   cmd_status ;;
+    failover) cmd_failover ;;
+    failback) cmd_failback ;;
     -h|--help|help|"") usage ;;
     *) usage; exit 2 ;;
   esac

@@ -218,9 +218,14 @@ for (const tier of ['community', 'professional', 'enterprise'] as const) {
         }) => {
             await gotoSettingsAndWait(page);
 
+            // Settings is now a two-pane layout: the tab strip became a
+            // left-rail of buttons inside a <nav aria-label="settings tabs">.
+            const settingsRail = page.getByRole('navigation', {
+                name: /settings tabs/i,
+            });
             for (const tab of SETTINGS_TABS) {
                 const expectedVisible = shouldBeVisible(tab, tier);
-                const tabElement = page.getByRole('tab', {
+                const tabElement = settingsRail.getByRole('button', {
                     name: tab.labelRegex,
                 });
                 if (expectedVisible) {
@@ -268,11 +273,22 @@ test.describe('license matrix — nav items follow the license', () => {
         await page.goto('/hosts');
         await page.waitForLoadState('domcontentloaded');
 
+        // The flat nav is now a grouped menubar: Secrets lives under the
+        // "Security" category and Reports under "Insights". Open each category
+        // trigger and assert its destination item is reachable.
+        await page
+            .getByRole('menuitem', { name: /^Security$/i })
+            .click({ timeout: 20000 });
         await expect(
-            page.getByRole('link', { name: /^Secrets$/i }).first(),
+            page.getByRole('menuitem', { name: /^Secrets$/i }),
         ).toBeVisible({ timeout: 20000 });
+
+        await page.keyboard.press('Escape');
+        await page
+            .getByRole('menuitem', { name: /^Insights$/i })
+            .click({ timeout: 20000 });
         await expect(
-            page.getByRole('link', { name: /^Reports$/i }).first(),
+            page.getByRole('menuitem', { name: /^Reports$/i }),
         ).toBeVisible({ timeout: 20000 });
     });
 });
