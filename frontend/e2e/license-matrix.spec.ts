@@ -126,19 +126,22 @@ async function mockLicense(page: Page, fixture: object): Promise<void> {
 }
 
 /**
- * Helper that opens the Settings page and waits for the Tabs strip
+ * Helper that opens the Settings page and waits for the left-nav rail
  * to render so the visibility assertions don't race the React
  * render cycle.
  */
 async function gotoSettingsAndWait(page: Page): Promise<void> {
     await page.goto('/settings');
     await page.waitForLoadState('domcontentloaded');
-    // The Tags tab is always-on regardless of license — it's the
-    // anchor we use to know the Settings page rendered before
-    // checking the conditional ones.
-    await expect(page.getByRole('tab', { name: /^Tags$/i })).toBeVisible({
-        timeout: 30000,
-    });
+    // Settings is now a two-pane layout: the tab strip became a left-rail of
+    // buttons inside <nav aria-label="settings tabs">. The always-on Tags item
+    // is the anchor we use to know the page rendered before checking the
+    // conditional ones.
+    await expect(
+        page
+            .getByRole('navigation', { name: /settings tabs/i })
+            .getByRole('button', { name: /^Tags$/i }),
+    ).toBeVisible({ timeout: 30000 });
 }
 
 /**
