@@ -698,16 +698,32 @@ def register_app_routes(app: FastAPI):
     @app.get("/api/health")
     @app.head("/api/health")
     async def health_check():
-        """Health check for connection monitoring + HA routing (Phase 15.1).
+        """Liveness check — intentionally cheap, touches no backing service.
 
-        Reports bootstrap-database connectivity so an upstream load balancer or
-        orchestrator can route around a server that has lost its database (e.g.
-        mid-failover, before the pool pre-ping has reconnected). Returns HTTP
-        503 when the database is unreachable, 200 otherwise. The probe runs in a
-        threadpool so a connect hang can't block the event loop, and never
-        raises — an unreachable DB is a reported state, not a 500.
+        Every connected agent polls this every second and upstream load
+        balancers hit it for basic liveness, so it MUST stay dependency-free:
+        a database round-trip per request does not scale to thousands of
+        agents (it saturates the threadpool + connection pool and blows the
+        load-test SLA — see the ``agents`` scenario in tests/load/run.py).
+        Database connectivity for HA routing lives on ``/api/health/db``.
         """
-        logger.debug("Health check endpoint called")
+        return {"status": "healthy"}
+
+    @app.get("/api/health/db")
+    @app.head("/api/health/db")
+    async def health_check_db():
+        """Readiness check — reports bootstrap-database connectivity (Phase 15.1).
+
+        Lets an upstream load balancer or orchestrator route around a server
+        that has lost its database (e.g. mid-failover, before the pool
+        pre-ping has reconnected). Returns HTTP 503 when the database is
+        unreachable, 200 otherwise. The probe runs in a threadpool so a
+        connect hang can't block the event loop, and never raises — an
+        unreachable DB is a reported state, not a 500. This endpoint does a
+        real DB round-trip, so it is NOT for high-frequency polling; use
+        ``/api/health`` (liveness) for that.
+        """
+        logger.debug("DB readiness endpoint called")
 
         from fastapi.concurrency import run_in_threadpool  # noqa: PLC0415
         from fastapi.responses import JSONResponse  # noqa: PLC0415
@@ -725,12 +741,12 @@ def register_app_routes(app: FastAPI):
                 return False
 
         if not await run_in_threadpool(_check_db):
-            logger.warning("Health check: database unreachable — reporting 503")
+            logger.warning("DB readiness: database unreachable — reporting 503")
             return JSONResponse(
                 status_code=503,
                 content={"status": "unhealthy", "database": "down"},
             )
         return {"status": "healthy", "database": "up"}
 
-    logger.debug("Health check routes (/api/health) registered")
+    logger.debug("Health check routes (/api/health, /api/health/db) registered")
     logger.debug("=== APPLICATION ROUTES REGISTRATION COMPLETE ===")

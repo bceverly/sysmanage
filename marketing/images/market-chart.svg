@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="780" height="500" viewBox="0 0 780 500" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <rect width="780" height="500" fill="#ffffff"/>
+
+  <text x="390" y="30" font-size="17" font-weight="bold" fill="#2c3e50" text-anchor="middle">Enterprise Software Markets SysManage Spans</text>
+  <text x="390" y="50" font-size="11" fill="#6c757d" text-anchor="middle">Representative annual market size, ~2030 forecasts (USD, billions) — individual segments, not additive</text>
+
+  <!-- Enterprise GRC : 134.9 -->
+  <text x="270" y="97" font-size="12.5" fill="#2c3e50" text-anchor="end">Enterprise GRC</text>
+  <rect x="280" y="78" width="418" height="28" rx="3" fill="#1976d2"/>
+  <text x="706" y="97" font-size="12" font-weight="bold" fill="#1976d2">$134.9B</text>
+
+  <!-- IT Operations Management : 64.9 -->
+  <text x="270" y="145" font-size="12.5" fill="#2c3e50" text-anchor="end">IT Operations Mgmt</text>
+  <rect x="280" y="126" width="201" height="28" rx="3" fill="#1976d2"/>
+  <text x="489" y="145" font-size="12" font-weight="bold" fill="#1976d2">$64.9B</text>
+
+  <!-- IT Operations Analytics : 40.5 -->
+  <text x="270" y="193" font-size="12.5" fill="#2c3e50" text-anchor="end">IT Operations Analytics</text>
+  <rect x="280" y="174" width="126" height="28" rx="3" fill="#1976d2"/>
+  <text x="414" y="193" font-size="12" font-weight="bold" fill="#1976d2">$40.5B</text>
+
+  <!-- IT Service Management : 36.8 -->
+  <text x="270" y="241" font-size="12.5" fill="#2c3e50" text-anchor="end">IT Service Mgmt (ITSM)</text>
+  <rect x="280" y="222" width="114" height="28" rx="3" fill="#1976d2"/>
+  <text x="402" y="241" font-size="12" font-weight="bold" fill="#1976d2">$36.8B</text>
+
+  <!-- Security & Vulnerability Management : 24.1 -->
+  <text x="270" y="289" font-size="12.5" fill="#2c3e50" text-anchor="end">Security &amp; Vuln. Mgmt</text>
+  <rect x="280" y="270" width="75" height="28" rx="3" fill="#1976d2"/>
+  <text x="363" y="289" font-size="12" font-weight="bold" fill="#1976d2">$24.1B</text>
+
+  <!-- Unified Endpoint Management : 21.8 -->
+  <text x="270" y="337" font-size="12.5" fill="#2c3e50" text-anchor="end">Unified Endpoint Mgmt</text>
+  <rect x="280" y="318" width="68" height="28" rx="3" fill="#1976d2"/>
+  <text x="356" y="337" font-size="12" font-weight="bold" fill="#1976d2">$21.8B</text>
+
+  <!-- Config & Infra Automation : 12.2 -->
+  <text x="270" y="385" font-size="12.5" fill="#2c3e50" text-anchor="end">Config. &amp; Infra Automation</text>
+  <rect x="280" y="366" width="38" height="28" rx="3" fill="#1976d2"/>
+  <text x="326" y="385" font-size="12" font-weight="bold" fill="#1976d2">$12.2B</text>
+
+  <!-- Patch Management : 3.0 -->
+  <text x="270" y="433" font-size="12.5" fill="#2c3e50" text-anchor="end">Patch Management</text>
+  <rect x="280" y="414" width="9" height="28" rx="3" fill="#1976d2"/>
+  <text x="297" y="433" font-size="12" font-weight="bold" fill="#1976d2">~$3B</text>
+
+  <line x1="280" y1="452" x2="280" y2="70" stroke="#dfe4e8" stroke-width="1"/>
+
+  <text x="390" y="474" font-size="10" fill="#6c757d" text-anchor="middle">Segments overlap and are not additive. Sources listed in the References section; figures are representative public forecasts.</text>
+  <text x="390" y="489" font-size="10" fill="#6c757d" text-anchor="middle">Managed services (~$731B by 2030) is an adjacent delivery channel and is excluded from the chart to preserve scale.</text>
+</svg>

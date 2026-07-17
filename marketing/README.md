@@ -80,7 +80,18 @@ cached in `.build/` and only re-rendered when the source SVG changes. Requires
 - `> **CALLOUT** —` / `> **THESIS** —` blockquotes → shaded callout boxes.
 - Pipe tables with `:---:` alignment → styled tables (blue header, zebra rows).
 - `![alt](path)` → centered, width-fit image; `.svg` paths are auto-rasterized.
-- `**bold**`, `*italic*`, `` `code` ``, and `[text](url)` render as expected.
+- `**bold**`, `*italic*`, `` `code` ``, `[text](url)`, and `<https://autolink>` render
+  as expected.
+- **Trademark symbols are applied automatically at build time.** Every third-party
+  company/product name (Microsoft®, Windows®, Jamf®, Red Hat Satellite®, Tanium®, the
+  research firms, the OS names, etc.) gets the correct ® or ™ on every occurrence, so
+  the Markdown source stays clean and editable. The mapping lives in the `TRADEMARKS`
+  dict in `scripts/build-marketing-brief.py` — add a name there if you introduce one.
+  The global attribution lives in the "Trademarks & Legal Notice" section of the `.md`.
+  Caveat: names baked into the rasterized diagrams (e.g. PostgreSQL/Windows inside the
+  architecture image) are pixels, not text, so they're covered by the notice rather
+  than individually marked. Bryan's Berkeley degree is left unmarked (an institution,
+  not a referenced product).
 
 ### The PDF
 

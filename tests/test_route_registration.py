@@ -153,7 +153,27 @@ class TestRegisterAppRoutes:
         assert response.status_code == 200
         body = response.json()
         assert body["status"] == "healthy"
-        # Phase 15.1: /api/health also reports bootstrap-DB connectivity.
+        # Liveness is intentionally dependency-free — no DB round-trip, so no
+        # "database" field here (that lives on /api/health/db). Keeping it cheap
+        # is what lets it scale to thousands of polling agents.
+        assert "database" not in body
+
+    @pytest.mark.asyncio
+    async def test_db_readiness_endpoint_reports_database(self):
+        """/api/health/db does the DB probe and reports connectivity (Phase 15.1)."""
+        from backend.startup.route_registration import register_app_routes
+
+        from fastapi.testclient import TestClient
+
+        app = FastAPI()
+        register_app_routes(app)
+
+        client = TestClient(app)
+        response = client.get("/api/health/db")
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "healthy"
         assert body["database"] == "up"
 
     @pytest.mark.asyncio

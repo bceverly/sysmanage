@@ -40,7 +40,7 @@ from backend.i18n import _
 
 # Paths never subject to volume limiting (matched after version rewrite, so the
 # unversioned form covers ``/api/v1/...`` too).
-_EXEMPT_EXACT = frozenset({"/", "/api/health"})
+_EXEMPT_EXACT = frozenset({"/", "/api/health", "/api/health/db"})
 _EXEMPT_PREFIXES = ("/api/agent",)
 # Purge stale buckets once the table grows past this many distinct clients.
 _PURGE_THRESHOLD = 10_000

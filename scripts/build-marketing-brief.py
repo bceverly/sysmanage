@@ -195,6 +195,12 @@ def mark_trademarks(text):
     return _TM_RE.sub(lambda m: m.group(1) + TRADEMARKS[m.group(1)], text)
 
 
+# Trademark marking can be suspended for a region of the document — e.g. the
+# founder's biography, where employer names should read cleanly without ® marks.
+# Wrap such regions in <!-- NO-TM-START --> ... <!-- NO-TM-END --> in the source.
+_MARK_ENABLED = True
+
+
 # --------------------------------------------------------------------------- #
 # Inline markdown -> runs  (**bold**, *italic*, `code`, [text](url), <autolink>)
 # --------------------------------------------------------------------------- #
@@ -230,11 +236,12 @@ def _add_hyperlink(paragraph, url, text):
 
 
 def add_runs(paragraph, text, size=None, color=None, bold=None):
+    mark = mark_trademarks if _MARK_ENABLED else (lambda s: s)
     for piece in _INLINE.split(text):
         if not piece:
             continue
         if piece.startswith("**") and piece.endswith("**"):
-            r = paragraph.add_run(mark_trademarks(piece[2:-2]))
+            r = paragraph.add_run(mark(piece[2:-2]))
             r.bold = True
         elif piece.startswith("`") and piece.endswith("`"):
             r = paragraph.add_run(piece[1:-1])  # code spans left verbatim
@@ -248,10 +255,10 @@ def add_runs(paragraph, text, size=None, color=None, bold=None):
             _add_hyperlink(paragraph, url, url)
             continue
         elif piece.startswith("*") and piece.endswith("*"):
-            r = paragraph.add_run(mark_trademarks(piece[1:-1]))
+            r = paragraph.add_run(mark(piece[1:-1]))
             r.italic = True
         else:
-            r = paragraph.add_run(mark_trademarks(piece))
+            r = paragraph.add_run(mark(piece))
         if size is not None:
             r.font.size = Pt(size)
         if color is not None:
@@ -456,6 +463,10 @@ def strip_comments(lines):
             inner = s[a + 4:b - 3].strip()
             if inner == "PAGEBREAK":
                 out.append("\x00PAGEBREAK")
+            elif inner == "NO-TM-START":
+                out.append("\x00NOTM0")
+            elif inner == "NO-TM-END":
+                out.append("\x00NOTM1")
             s = s[:a] + s[b:]
         if "<!--" in s:  # a comment opens and does not close on this line
             s = s[:s.index("<!--")]
@@ -565,6 +576,12 @@ def render_body(doc, lines):
             doc.add_page_break()
             i += 1
             continue
+        if s in ("\x00NOTM0", "\x00NOTM1"):
+            flush()
+            global _MARK_ENABLED
+            _MARK_ENABLED = (s == "\x00NOTM1")
+            i += 1
+            continue
         if not stripped:
             flush()
             i += 1
@@ -671,7 +688,7 @@ def setup_document():
     tab.set(qn("w:pos"), str(int(tab_pos.twips)))
     tabs.append(tab)
     pPr.append(tabs)
-    r = fp.add_run("SysManage  ·  Executive Opportunity Brief")
+    r = fp.add_run("SysManage  ·  Executive Overview")
     r.font.size = Pt(8)
     r.font.color.rgb = MUTED
     fp.add_run("\t")

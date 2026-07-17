@@ -29,9 +29,20 @@ def test_health_endpoint_returns_healthy(client):
     resp = client.get("/api/health")
     assert resp.status_code == 200
     body = resp.json()
-    # Phase 15.1: health also reports DB connectivity; status stays 'healthy'.
     assert body["status"] == "healthy", f"unexpected health body: {body!r}"
-    assert body["database"] == "up", f"unexpected health body: {body!r}"
+    # Liveness is dependency-free (no DB round-trip) so it scales to thousands
+    # of polling agents; the DB-connectivity probe lives on /api/health/db.
+    assert "database" not in body, f"liveness must stay cheap: {body!r}"
+
+
+@pytest.mark.integration
+def test_db_readiness_reports_database(client):
+    """/api/health/db runs the DB probe and reports connectivity (Phase 15.1)."""
+    resp = client.get("/api/health/db")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "healthy", f"unexpected readiness body: {body!r}"
+    assert body["database"] == "up", f"unexpected readiness body: {body!r}"
 
 
 @pytest.mark.integration
