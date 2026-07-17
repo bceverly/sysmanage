@@ -167,8 +167,9 @@ TRADEMARKS = {
     # Red Hat
     "Red Hat Enterprise Linux": _R, "Red Hat Satellite": _R, "Red Hat": _R,
     "RHEL": _R, "Ansible": _R,
-    # Canonical
-    "Canonical Landscape": _T, "Canonical": _R, "Ubuntu": _R, "Landscape": _T,
+    # Canonical  (only the full "Canonical Landscape" — bare "Landscape" is generic
+    # English, e.g. the "Competitive Landscape" section heading)
+    "Canonical Landscape": _T, "Canonical": _R, "Ubuntu": _R,
     # SUSE
     "SUSE Linux Enterprise": _R, "SUSE Manager": _T, "SUSE": _R,
     # Operating systems / open-source components
