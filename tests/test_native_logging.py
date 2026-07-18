@@ -72,6 +72,25 @@ class TestBuildNativeHandler:
         """An unrecognised target yields no handler."""
         assert build_native_handler("smoke-signals", system="Linux") is None
 
+    def test_auto_resolves_via_platform_system(self):
+        """target='auto' consults _auto_target when no system override given."""
+        fake = MagicMock(spec=logging.Handler)
+        with patch.object(
+            native_logging.platform, "system", return_value="Linux"
+        ), patch.object(native_logging, "_journald_handler", return_value=fake):
+            handler = build_native_handler("auto", "ident")
+        assert handler is fake
+
+    def test_eventlog_dispatch(self):
+        """target='eventlog' routes to _eventlog_handler."""
+        fake = MagicMock(spec=logging.Handler)
+        with patch.object(
+            native_logging, "_eventlog_handler", return_value=fake
+        ) as mock_fn:
+            handler = build_native_handler("eventlog", "ident", system="Windows")
+        assert handler is fake
+        mock_fn.assert_called_once_with("ident", "Windows")
+
     def test_syslog_remote_dispatch(self):
         """syslog_remote routes to _syslog_remote_handler with the remote params."""
         fake = MagicMock(spec=logging.Handler)
@@ -199,6 +218,109 @@ class TestEventlogGuard:
             native_logging.logging.handlers,
             "NTEventLogHandler",
             return_value=degraded,
+        ):
+            assert native_logging._eventlog_handler("ident", "Windows") is None
+
+
+class TestJournaldHandler:
+    """_journald_handler: missing dep, construction failure, success."""
+
+    def test_import_error_returns_none(self):
+        """No python3-systemd installed → None (caller falls back)."""
+        import builtins
+
+        real_import = builtins.__import__
+
+        def _fail(name, *args, **kwargs):
+            if name.startswith("systemd"):
+                raise ImportError("no systemd")
+            return real_import(name, *args, **kwargs)
+
+        with patch.object(builtins, "__import__", side_effect=_fail):
+            assert native_logging._journald_handler("ident") is None
+
+    def test_construction_error_returns_none(self):
+        """JournalHandler raising is swallowed → None."""
+        import sys
+        import types
+
+        fake_mod = types.ModuleType("systemd.journal")
+        fake_mod.JournalHandler = MagicMock(side_effect=RuntimeError("boom"))
+        parent = types.ModuleType("systemd")
+        with patch.dict(sys.modules, {"systemd": parent, "systemd.journal": fake_mod}):
+            assert native_logging._journald_handler("ident") is None
+
+    def test_success_returns_handler(self):
+        """A working JournalHandler is returned as-is."""
+        import sys
+        import types
+
+        fake = MagicMock(spec=logging.Handler)
+        fake_mod = types.ModuleType("systemd.journal")
+        fake_mod.JournalHandler = MagicMock(return_value=fake)
+        parent = types.ModuleType("systemd")
+        with patch.dict(sys.modules, {"systemd": parent, "systemd.journal": fake_mod}):
+            assert native_logging._journald_handler("ident") is fake
+        fake_mod.JournalHandler.assert_called_once_with(SYSLOG_IDENTIFIER="ident")
+
+
+class TestSyslogHandler:
+    """_syslog_handler: socket fallback + OSError handling."""
+
+    def test_builds_with_local_socket(self):
+        """When the syslog socket exists, the handler binds to it."""
+        fake = MagicMock(spec=logging.Handler)
+        syslog_cls = _mock_syslog(fake)
+        with patch.object(
+            native_logging.os.path, "exists", return_value=True
+        ), patch.object(native_logging.logging.handlers, "SysLogHandler", syslog_cls):
+            handler = native_logging._syslog_handler("ident", "Linux")
+        assert handler is fake
+        assert syslog_cls.call_args.kwargs["address"] == "/dev/log"
+        fake.setFormatter.assert_called_once()
+
+    def test_missing_socket_falls_back_to_udp(self):
+        """A missing /dev/log falls back to the UDP localhost:514 tuple."""
+        fake = MagicMock(spec=logging.Handler)
+        syslog_cls = _mock_syslog(fake)
+        with patch.object(
+            native_logging.os.path, "exists", return_value=False
+        ), patch.object(native_logging.logging.handlers, "SysLogHandler", syslog_cls):
+            native_logging._syslog_handler("ident", "Linux")
+        assert syslog_cls.call_args.kwargs["address"] == ("localhost", 514)
+
+    def test_oserror_returns_none(self):
+        """A socket bind failure yields None, keeping file logging alive."""
+        with patch.object(
+            native_logging.os.path, "exists", return_value=True
+        ), patch.object(
+            native_logging.logging.handlers,
+            "SysLogHandler",
+            side_effect=OSError("no socket"),
+        ):
+            assert native_logging._syslog_handler("ident", "Linux") is None
+
+
+class TestEventlogHandlerSuccess:
+    """_eventlog_handler happy path + construction failure on Windows."""
+
+    def test_success_returns_handler(self):
+        """A working NTEventLogHandler (with _welu) is returned."""
+        good = MagicMock()
+        good._welu = object()
+        with patch.object(
+            native_logging.logging.handlers,
+            "NTEventLogHandler",
+            return_value=good,
+        ):
+            assert native_logging._eventlog_handler("ident", "Windows") is good
+
+    def test_construction_error_returns_none(self):
+        """NTEventLogHandler raising is swallowed → None."""
+        with patch.object(
+            native_logging.logging.handlers,
+            "NTEventLogHandler",
+            side_effect=RuntimeError("no win32"),
         ):
             assert native_logging._eventlog_handler("ident", "Windows") is None
 

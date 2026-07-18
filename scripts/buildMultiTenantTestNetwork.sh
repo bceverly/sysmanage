@@ -307,7 +307,8 @@ EOF
 # checks) so a re-applied seed never errors.  Runtime shell ``$`` is escaped
 # (\$) so it survives this build-host heredoc into the guest unchanged.
 # mode = plain (role + db) | primary (role + db + replication config/role) |
-# standby (postgres + subnet only; it is cloned from the primary via basebackup).
+# standby (postgres + subnet + replication config so it is promotable, but NO
+# role/db — those arrive when 'failback' clones it from the primary via basebackup).
 write_user_data_db() {
   local host="$1" dbname="$2" out="$3" mode="${4:-plain}"
   _user_data_header "$host" "$out" "true"
@@ -321,7 +322,15 @@ runcmd:
       echo "listen_addresses = '*'" >> "\$d/postgresql.conf"
       echo "host all all ${MT_NET_CIDR} scram-sha-256" >> "\$d/pg_hba.conf"
 EOF
-  if [[ "$mode" == "primary" ]]; then
+  # Apply the replication config to BOTH the primary AND the standby.  A base
+  # backup copies the data dir, not /etc, so these settings do not travel with
+  # the clone — and after a failover the promoted standby must itself be a valid
+  # replication PRIMARY (accept a 'host replication' connection so failback can
+  # rebuild the old primary streaming FROM it).  'host all all' does not match
+  # replication connections, so without this the first failover→failback cycle
+  # would wedge.  wal_level/max_wal_senders default sanely on modern PG but are
+  # set explicitly so the intent is on the node regardless of package defaults.
+  if [[ "$mode" == "primary" || "$mode" == "standby" ]]; then
     cat >> "$out" <<EOF
       echo "wal_level = replica" >> "\$d/postgresql.conf"
       echo "max_wal_senders = 10" >> "\$d/postgresql.conf"
@@ -919,16 +928,40 @@ cmd_failback() {
   ver="$(pg_version "$primary_ip")"
   [[ -n "$ver" ]] || die "couldn't determine PostgreSQL version on primary ${primary_ip}"
   log "Rebuilding ${rebuild_ip} as a streaming standby of ${primary_ip} (pg ${ver})"
+  # pg_basebackup -R writes primary_conninfo WITHOUT a password, so the ongoing
+  # WAL-streaming connection can't authenticate under scram-sha-256 even though
+  # PGPASSWORD covers the base backup itself.  A .pgpass for the postgres user,
+  # in place BEFORE postgresql starts, closes that gap.  Without it the base
+  # backup succeeds but streaming silently never starts — and a later 'failover'
+  # then promotes a frozen point-in-time snapshot that is missing every write
+  # made after the clone.  (This is the exact bug the single-server HA rig hit.)
   ha_ssh "$rebuild_ip" "\
     sudo systemctl stop postgresql; \
     sudo -u postgres rm -rf /var/lib/postgresql/${ver}/main; \
-    sudo -u postgres bash -c 'PGPASSWORD=\"${REPL_PASS}\" pg_basebackup -h ${primary_ip} -U ${REPL_ROLE} -D /var/lib/postgresql/${ver}/main -R -P'; \
+    sudo -u postgres bash -c 'umask 077; echo \"*:*:*:${REPL_ROLE}:${REPL_PASS}\" > ~/.pgpass'; \
+    sudo -u postgres bash -c 'PGPASSWORD=\"${REPL_PASS}\" pg_basebackup -h ${primary_ip} -U ${REPL_ROLE} -D /var/lib/postgresql/${ver}/main -R -X stream -P'; \
     sudo systemctl start postgresql" \
     || die "rebuild of ${rebuild_ip} failed (check the ${REPL_ROLE} role + pg_hba replication line on ${primary_ip})"
 
+  # Verify streaming actually established before declaring success — otherwise a
+  # later 'failover' would promote a standby that never caught up to the primary.
+  log "Waiting for ${rebuild_ip} to reach streaming replication..."
+  local st="" i
+  for i in $(seq 1 30); do
+    st="$(ha_ssh "$rebuild_ip" "sudo -u postgres psql -tAc \"SELECT status FROM pg_stat_wal_receiver\"" 2>/dev/null | tr -d '[:space:]')"
+    [[ "$st" == "streaming" ]] && break
+    sleep 2
+  done
+
   echo
-  log "Failback complete — primary=${primary_ip}, standby=${rebuild_ip}."
-  log "Verify streaming:  ssh ${USERNAME}@${primary_ip} sudo -u postgres psql -c 'select * from pg_stat_replication;'"
+  if [[ "$st" == "streaming" ]]; then
+    log "Failback complete — primary=${primary_ip}, standby=${rebuild_ip} (streaming verified)."
+  else
+    warn "Failback finished but ${rebuild_ip} is NOT streaming (pg_stat_wal_receiver='${st:-<empty>}')."
+    warn "A 'failover' now would lose post-clone writes.  Check the ${REPL_ROLE} password /"
+    warn ".pgpass on ${rebuild_ip} and the 'host replication' pg_hba line on ${primary_ip}."
+  fi
+  log "Inspect on the primary:  ssh ${USERNAME}@${primary_ip} sudo -u postgres psql -c 'select * from pg_stat_replication;'"
 }
 
 usage() {

@@ -63,3 +63,72 @@ def test_singleton_stays_one_row(isolated_db):
     svc.set_server_role("repository")
     with isolated_db() as session:
         assert session.query(ServerConfiguration).count() == 1
+
+
+def test_invalid_server_role_raises(isolated_db):
+    with pytest.raises(ValueError):
+        svc.set_server_role("overlord")
+
+
+def test_server_role_default_when_unset(isolated_db):
+    assert svc.get_server_role() == "standard"
+
+
+# ---------------------------------------------------------------------
+# air-gap import device accessors
+# ---------------------------------------------------------------------
+
+
+def test_import_device_default_none(isolated_db):
+    assert svc.get_import_device() is None
+
+
+def test_import_device_set_and_get(isolated_db):
+    assert svc.set_import_device("/dev/sr0") == "/dev/sr0"
+    assert svc.get_import_device() == "/dev/sr0"
+
+
+def test_import_device_clears_to_none(isolated_db):
+    svc.set_import_device("/dev/sr0")
+    svc.set_import_device(None)
+    assert svc.get_import_device() is None
+
+
+def test_import_device_set_creates_singleton_when_row_absent(isolated_db):
+    # Fresh DB with no row: set_import_device must create it (with the
+    # default air_gap_role) rather than crash.
+    with isolated_db() as session:
+        assert session.query(ServerConfiguration).count() == 0
+    svc.set_import_device("/dev/cd0")
+    assert svc.get_import_device() == "/dev/cd0"
+    with isolated_db() as session:
+        assert session.query(ServerConfiguration).count() == 1
+
+
+# ---------------------------------------------------------------------
+# graceful degradation on DB failure
+# ---------------------------------------------------------------------
+
+
+def test_get_server_role_degrades_on_db_error(monkeypatch):
+    def _boom():
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr("backend.persistence.db.get_session_local", _boom)
+    assert svc.get_server_role() == "standard"
+
+
+def test_get_federation_role_degrades_on_db_error(monkeypatch):
+    def _boom():
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr("backend.persistence.db.get_session_local", _boom)
+    assert svc.get_federation_role() == "none"
+
+
+def test_get_import_device_degrades_on_db_error(monkeypatch):
+    def _boom():
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr("backend.persistence.db.get_session_local", _boom)
+    assert svc.get_import_device() is None

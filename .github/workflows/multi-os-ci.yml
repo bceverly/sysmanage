@@ -99,7 +99,7 @@ jobs:
         # previously ran ONLY in the tag-gated ci.yml, so a PR could break it
         # and not find out until a release tag.
         python -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
-        python -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
+        python -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
       env:
         PYTHONPATH: .
         DATABASE_URL: postgresql://sysmanage:abc123@localhost:5432/sysmanage

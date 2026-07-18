@@ -1547,10 +1547,10 @@ endif
 # when the real number rises.
 ifeq ($(OS),Windows_NT)
 	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
-	@set OTEL_ENABLED=false && $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
+	@set OTEL_ENABLED=false && $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
 else
 	@OTEL_ENABLED=false $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
-	@OTEL_ENABLED=false $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=70
+	@OTEL_ENABLED=false $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
 endif
 	@echo "[OK] Python tests completed"
 
