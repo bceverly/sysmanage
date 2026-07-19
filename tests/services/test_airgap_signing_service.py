@@ -15,8 +15,18 @@ are monkeypatched to point inside ``tmp_path``.
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 import os
+import sys
 
 import pytest
+
+# POSIX file modes (0o600 / 0o644) aren't enforced on Windows — ``os.chmod``
+# only toggles the read-only bit there, so a hardened file still reports 0o666.
+# The service's chmod is best-effort POSIX hardening (Windows uses ACLs), so the
+# mode-assertion tests are POSIX-only.
+_skip_on_windows = pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="POSIX file modes are not enforced on Windows (os.chmod ignores group/other bits)",
+)
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
@@ -70,6 +80,7 @@ class TestEnsureCollectorKeypair:
             loaded = serialization.load_pem_private_key(fh.read(), password=None)
         assert isinstance(loaded, Ed25519PrivateKey)
 
+    @_skip_on_windows
     def test_private_key_is_0600(self, signing_paths):
         priv, _ = svc.ensure_collector_keypair()
         mode = os.stat(priv).st_mode & 0o777
@@ -283,6 +294,7 @@ class TestTrustedKeyring:
         # The existing key is untouched.
         assert len(svc.list_trusted_collectors()) == 1
 
+    @_skip_on_windows
     def test_import_written_0644(self, signing_paths):
         _, keyring_dir = signing_paths
         svc.import_trusted_collector("modecheck", _make_public_pem())
