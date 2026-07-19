@@ -42,7 +42,9 @@
 .menubar__trigger:focus-visible,
 .menubar__trigger[data-state="open"] {
   color: rgb(36 157 239);
-  background-color: rgba(36, 157, 239, 0.1);
+  /* Opaque dark blue-tint (not a translucent accent) so the accent-blue text
+     keeps a WCAG-AA contrast ratio against it on the dark header. */
+  background-color: #132029;
 }
 
 /* The category that contains the current route — mirrors the old active link. */
@@ -93,7 +95,9 @@
 }
 
 .menubar__item[data-highlighted] {
-  background-color: rgba(36, 157, 239, 0.16);
+  /* Opaque dark blue-tint so the accent-blue text keeps a WCAG-AA contrast
+     ratio against the highlighted background on the dark dropdown panel. */
+  background-color: #152530;
   color: rgb(36 157 239);
   outline: none;
 }

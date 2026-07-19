@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, AlertTitle, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import api from '../Services/api';
@@ -31,6 +31,21 @@ interface ModuleCompatibilityResponse {
 const MigrationCompatBanner: React.FC = () => {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ModuleCompatibilityEntry[]>([]);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Reserve layout space so the fixed banner pushes content down instead of
+  // overlaying it (and it sits BELOW the navbar — see the Box sx — so it never
+  // covers the menu bar).  Mirrors the tenant-migration banner.
+  useEffect(() => {
+    const root = document.documentElement;
+    const clear = () => root.style.setProperty('--migration-banner-height', '0px');
+    if (entries.length === 0 || !ref.current) {
+      clear();
+      return clear;
+    }
+    root.style.setProperty('--migration-banner-height', `${ref.current.offsetHeight}px`);
+    return clear;
+  }, [entries]);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,7 +82,19 @@ const MigrationCompatBanner: React.FC = () => {
   }
 
   return (
-    <Box sx={{ position: 'sticky', top: 0, zIndex: 1100, width: '100%' }}>
+    <Box
+      ref={ref}
+      sx={{
+        // Sit directly BELOW the fixed navbar (top: var(--security-banner-height),
+        // height ~7rem) instead of over it, at a z-index below the navbar's (1000).
+        position: 'fixed',
+        top: 'calc(var(--security-banner-height, 0px) + 7rem)',
+        left: 0,
+        right: 0,
+        zIndex: 999,
+        width: '100%',
+      }}
+    >
       <Alert severity="warning" variant="filled" sx={{ borderRadius: 0 }}>
         <AlertTitle>
           {t(

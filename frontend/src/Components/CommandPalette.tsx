@@ -75,11 +75,11 @@ const CommandPalette: React.FC = () => {
     const onOpen = () => {
       if (localStorage.getItem('bearer_token')) setOpen(true);
     };
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('open-command-palette', onOpen);
+    globalThis.addEventListener('keydown', onKey);
+    globalThis.addEventListener('open-command-palette', onOpen);
     return () => {
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('open-command-palette', onOpen);
+      globalThis.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('open-command-palette', onOpen);
     };
   }, []);
 
@@ -136,7 +136,7 @@ const CommandPalette: React.FC = () => {
       onClose={close}
       fullWidth
       maxWidth="sm"
-      PaperProps={{ sx: { position: 'fixed', top: '12vh', m: 0, borderRadius: 2 } }}
+      slotProps={{ paper: { sx: { position: 'fixed', top: '12vh', m: 0, borderRadius: 2 } } }}
     >
       <Box sx={{ p: 1.5 }}>
         <TextField
@@ -147,12 +147,14 @@ const CommandPalette: React.FC = () => {
           onChange={e => setQuery(e.target.value)}
           onKeyDown={onInputKeyDown}
           placeholder={t('commandPalette.placeholder', 'Search pages…  (Esc to close)')}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <IoSearch />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IoSearch />
+                </InputAdornment>
+              ),
+            },
           }}
         />
       </Box>
@@ -174,8 +176,10 @@ const CommandPalette: React.FC = () => {
             <ListItemText
               primary={cmd.label}
               secondary={cmd.group}
-              primaryTypographyProps={{ variant: 'body2' }}
-              secondaryTypographyProps={{ variant: 'caption' }}
+              slotProps={{
+                primary: { variant: 'body2' },
+                secondary: { variant: 'caption' },
+              }}
             />
           </ListItemButton>
         ))}

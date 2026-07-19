@@ -404,11 +404,17 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
     base = Path(extract_dir).resolve()
     base_prefix = str(base) + os.sep
     total = 0
+    # Apply the PEP 706 ``data`` extraction filter to every ``extract`` on this
+    # archive (available on every currently-patched Python 3.8+) as defence-in-
+    # depth on top of the per-member containment check below, and because 3.12+
+    # raises a DeprecationWarning for an unfiltered ``extract`` — which the test
+    # suite (warnings-as-errors) treats as a failure.  Set it on the object
+    # rather than passing a per-call ``filter=`` keyword, which some static
+    # analysers still flag as an unknown argument.
+    tar.extraction_filter = tarfile.data_filter
     # Extract member-by-member, validating EACH one's resolved path is contained
     # in ``extract_dir`` immediately before extracting it (and refusing regular
-    # files past the cumulative size cap).  No ``extractall`` and no
-    # version-specific ``filter=`` kwarg — the per-member containment check
-    # guards every write directly.
+    # files past the cumulative size cap).  No ``extractall``.
     for member in tar.getmembers():
         target = os.path.realpath(os.path.join(str(base), member.name))
         if target != str(base) and not target.startswith(base_prefix):
@@ -423,7 +429,9 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
                 _MAX_EXTRACT_BYTES,
             )
             return False
-        tar.extract(member, extract_dir)  # nosec B202  # path validated just above
+        tar.extract(
+            member, extract_dir
+        )  # nosec B202  # path validated above + data extraction_filter set
     return True
 
 

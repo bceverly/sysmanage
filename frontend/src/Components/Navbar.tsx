@@ -2,11 +2,12 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { IoClose, IoMenu, IoChevronDown, IoSearch } from "react-icons/io5";
 import * as Menubar from "@radix-ui/react-menubar";
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { IconButton } from '@mui/material';
 import "./css/Navbar.css";
 import "./css/MenuBar.css";
@@ -90,98 +91,33 @@ interface NavLeaf {
   label: string;
 }
 
-const Navbar = () => {
-  const [showMenu, setShowMenu] = useState(false);
-  const { t } = useTranslation();
-  // Phase 12.3: hide the Sites link entirely when the federation
-  // controller engine isn't loaded.  The Sites page itself remains
-  // reachable by direct URL (where it shows the Enterprise upsell),
-  // but it's not surfaced via the nav for OSS / unlicensed users.
-  const { licensed: federationLicensed } = useFederationLicensed();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { navItems, navbarWidgets } = usePlugins();
-  const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
-  const [activeLicenseModules, setActiveLicenseModules] = useState<string[]>([]);
-  // Bumped once the caller's security-role permissions load, to re-render the
-  // nav with any role-gated destinations now resolvable.
-  const [, setPermissionsVersion] = useState(0);
-  // Phase 11 — server role chip ("Collector" / "Repository").  Hidden on
-  // ``standard`` deployments so the OSS UI stays uncluttered.
-  const [serverRole, setServerRole] = useState<string>("standard");
-  const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
-  // Phase 12 — federation role chip ("Coordinator" / "Site").  Independent
-  // axis from the air-gap role above; hidden when federation_role is "none".
-  const [federationRole, setFederationRole] = useState<string>("none");
-  const [federationEngineLoaded, setFederationEngineLoaded] =
-    useState<boolean>(true);
+interface NavCategory {
+  id: CategoryId;
+  label: string;
+  items: NavLeaf[];
+}
 
-  // Refresh the license cache (shared with HostDetail / Hosts / Settings via
-  // ``getCachedLicense``) and mirror the result into local state so this
-  // component re-renders when it changes.
-  useEffect(() => {
-    const checkLicenseFeatures = async () => {
-      try {
-        const licenseInfo = await refreshLicenseCache();
-        if (licenseInfo?.active) {
-          setActiveLicenseFeatures(licenseInfo.features ?? []);
-          setActiveLicenseModules(licenseInfo.modules ?? []);
-        } else {
-          setActiveLicenseFeatures([]);
-          setActiveLicenseModules([]);
-        }
-      } catch {
-        setActiveLicenseFeatures([]);
-        setActiveLicenseModules([]);
-      }
-    };
-
-    if (localStorage.getItem('bearer_token')) {
-      checkLicenseFeatures();
-    }
-  }, []);
-
-  // Load the caller's security-role permissions so the nav can HIDE
-  // destinations they can't use (RBAC nav). ``hasPermissionSync`` reads the
-  // module-scope cache this populates; bump local state so the nav re-renders
-  // once permissions land. Only when authenticated — no perms pre-login.
-  useEffect(() => {
-    if (!localStorage.getItem('bearer_token')) return;
-    let cancelled = false;
-    fetchUserPermissions()
-      .then(() => { if (!cancelled) setPermissionsVersion(v => v + 1); })
-      .catch(() => { /* leave role-gated items hidden if perms can't load */ });
-    return () => { cancelled = true; };
-  }, []);
-
-  // Phase 11 — fetch the server-info once on mount so we can render the
-  // role chip.  Only fetch when authenticated: the air-gap role is
-  // operator-facing detail that must not leak to a pre-login visitor.
-  useEffect(() => {
-    if (!localStorage.getItem('bearer_token')) return;
-    let cancelled = false;
-    fetch('/api/v1/server-info')
-      .then(r => (r.ok ? r.json() : null))
-      .then(info => {
-        if (cancelled || !info) return;
-        setServerRole(info.role || 'standard');
-        setRoleEngineLoaded(Boolean(info.role_engine_loaded));
-        setFederationRole(info.federation_role || 'none');
-        setFederationEngineLoaded(Boolean(info.federation_engine_loaded));
-      })
-      .catch(() => {
-        // Endpoint may not be reachable yet during cold-start; default
-        // to standard so we don't render a stale chip.
-      });
-    return () => { cancelled = true; };
-  }, []);
-
-  const toggleMenu = () => setShowMenu(v => !v);
-  const closeMenuOnMobile = () => {
-    if (window.innerWidth <= 1150) setShowMenu(false);
-  };
-
-  const menuVisible = localStorage.getItem('bearer_token') ? 'visible' : 'hidden';
+// Build the visible, RBAC-filtered, grouped nav categories from the current
+// license / server-role inputs.  Extracted from <Navbar/> as a pure function to
+// keep the component's cognitive complexity down; it owns all the per-
+// destination gating conditionals.  Exported for unit testing.
+export function buildNavCategories(
+  t: TFunction,
+  opts: {
+    navItems: { path: string; labelKey: string; featureFlag?: string }[];
+    activeLicenseFeatures: string[];
+    activeLicenseModules: string[];
+    federationLicensed: boolean;
+    serverRole: string;
+  },
+): NavCategory[] {
+  const {
+    navItems,
+    activeLicenseFeatures,
+    activeLicenseModules,
+    federationLicensed,
+    serverRole,
+  } = opts;
 
   // Paths hardcoded here — plugins must not duplicate these.
   const hardcodedPaths = new Set(['/', '/hosts', '/users', '/updates', '/os-upgrades', '/maintenance-windows', '/secrets', '/scripts', '/reports', '/airgap/repositories', '/airgap/collections']);
@@ -253,13 +189,117 @@ const Navbar = () => {
   for (const leaf of accessibleLeaves) {
     grouped[PATH_CATEGORY[leaf.path] ?? 'insights'].push(leaf);
   }
-  const categories = CATEGORY_ORDER
+  return CATEGORY_ORDER
     .map(id => ({
       id,
       label: t(CATEGORY_META[id].key, CATEGORY_META[id].def),
       items: grouped[id],
     }))
     .filter(c => c.items.length > 0);
+}
+
+const Navbar = () => {
+  const [showMenu, setShowMenu] = useState(false);
+  const { t } = useTranslation();
+  // Phase 12.3: hide the Sites link entirely when the federation
+  // controller engine isn't loaded.  The Sites page itself remains
+  // reachable by direct URL (where it shows the Enterprise upsell),
+  // but it's not surfaced via the nav for OSS / unlicensed users.
+  const { licensed: federationLicensed } = useFederationLicensed();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { navItems, navbarWidgets } = usePlugins();
+  const [activeLicenseFeatures, setActiveLicenseFeatures] = useState<string[]>([]);
+  const [activeLicenseModules, setActiveLicenseModules] = useState<string[]>([]);
+  // Bumped once the caller's security-role permissions load, to re-render the
+  // nav with any role-gated destinations now resolvable.  useReducer (rather
+  // than a useState counter whose value is never read) is the idiomatic
+  // force-update.
+  const [, bumpPermissionsVersion] = useReducer((n: number) => n + 1, 0);
+  // Phase 11 — server role chip ("Collector" / "Repository").  Hidden on
+  // ``standard`` deployments so the OSS UI stays uncluttered.
+  const [serverRole, setServerRole] = useState<string>("standard");
+  const [roleEngineLoaded, setRoleEngineLoaded] = useState<boolean>(true);
+  // Phase 12 — federation role chip ("Coordinator" / "Site").  Independent
+  // axis from the air-gap role above; hidden when federation_role is "none".
+  const [federationRole, setFederationRole] = useState<string>("none");
+  const [federationEngineLoaded, setFederationEngineLoaded] =
+    useState<boolean>(true);
+
+  // Refresh the license cache (shared with HostDetail / Hosts / Settings via
+  // ``getCachedLicense``) and mirror the result into local state so this
+  // component re-renders when it changes.
+  useEffect(() => {
+    const checkLicenseFeatures = async () => {
+      try {
+        const licenseInfo = await refreshLicenseCache();
+        if (licenseInfo?.active) {
+          setActiveLicenseFeatures(licenseInfo.features ?? []);
+          setActiveLicenseModules(licenseInfo.modules ?? []);
+        } else {
+          setActiveLicenseFeatures([]);
+          setActiveLicenseModules([]);
+        }
+      } catch {
+        setActiveLicenseFeatures([]);
+        setActiveLicenseModules([]);
+      }
+    };
+
+    if (localStorage.getItem('bearer_token')) {
+      checkLicenseFeatures();
+    }
+  }, []);
+
+  // Load the caller's security-role permissions so the nav can HIDE
+  // destinations they can't use (RBAC nav). ``hasPermissionSync`` reads the
+  // module-scope cache this populates; bump local state so the nav re-renders
+  // once permissions land. Only when authenticated — no perms pre-login.
+  useEffect(() => {
+    if (!localStorage.getItem('bearer_token')) return;
+    let cancelled = false;
+    fetchUserPermissions()
+      .then(() => { if (!cancelled) bumpPermissionsVersion(); })
+      .catch(() => { /* leave role-gated items hidden if perms can't load */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Phase 11 — fetch the server-info once on mount so we can render the
+  // role chip.  Only fetch when authenticated: the air-gap role is
+  // operator-facing detail that must not leak to a pre-login visitor.
+  useEffect(() => {
+    if (!localStorage.getItem('bearer_token')) return;
+    let cancelled = false;
+    fetch('/api/v1/server-info')
+      .then(r => (r.ok ? r.json() : null))
+      .then(info => {
+        if (cancelled || !info) return;
+        setServerRole(info.role || 'standard');
+        setRoleEngineLoaded(Boolean(info.role_engine_loaded));
+        setFederationRole(info.federation_role || 'none');
+        setFederationEngineLoaded(Boolean(info.federation_engine_loaded));
+      })
+      .catch(() => {
+        // Endpoint may not be reachable yet during cold-start; default
+        // to standard so we don't render a stale chip.
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const toggleMenu = () => setShowMenu(v => !v);
+  const closeMenuOnMobile = () => {
+    if (window.innerWidth <= 1150) setShowMenu(false);
+  };
+
+  const menuVisible = localStorage.getItem('bearer_token') ? 'visible' : 'hidden';
+
+  const categories = buildNavCategories(t, {
+    navItems,
+    activeLicenseFeatures,
+    activeLicenseModules,
+    federationLicensed,
+    serverRole,
+  });
 
   const isItemActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/');
@@ -408,7 +448,7 @@ const Navbar = () => {
                 return <Widget key={w.id} />;
               })}
             <IconButton
-              onClick={() => window.dispatchEvent(new window.Event('open-command-palette'))}
+              onClick={() => globalThis.dispatchEvent(new globalThis.Event('open-command-palette'))}
               size="small"
               title={t('nav.search', 'Search (Ctrl+K)')}
               aria-label={t('nav.search', 'Search (Ctrl+K)')}

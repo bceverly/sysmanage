@@ -103,13 +103,16 @@ def _create_pg_provisioner_direct(args, provisioner_password):
             exists = cur.fetchone() is not None
             role = sql.Identifier(args.provisioner_user)
             verb = "ALTER" if exists else "CREATE"
-            # psycopg: ``verb`` is a fixed literal, the role name goes through
-            # sql.Identifier (safe quoting), and the password is a %s bind param.
+            # psycopg: ``verb`` is a fixed literal and the role name goes through
+            # sql.Identifier (safe quoting).  The password is inlined as a quoted
+            # sql.Literal, NOT a %s bind param: CREATE/ALTER ROLE is a utility
+            # statement, and psycopg3 sends %s as a server-side parameter ($1),
+            # which PostgreSQL rejects there ("syntax error at or near $1").
+            # sql.Literal does the safe escaping, so this is not an injection risk.
             cur.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
                 sql.SQL(
-                    verb + " ROLE {} WITH LOGIN CREATEDB CREATEROLE PASSWORD %s"
-                ).format(role),
-                (provisioner_password,),
+                    verb + " ROLE {} WITH LOGIN CREATEDB CREATEROLE PASSWORD {}"
+                ).format(role, sql.Literal(provisioner_password)),
             )
             print(
                 f"[ok] {'updated' if exists else 'created'} provisioner role "

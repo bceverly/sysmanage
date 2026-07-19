@@ -63,11 +63,10 @@ def run_with_db_retry(
         except TRANSIENT_DB_ERRORS as exc:
             attempt += 1
             if attempt >= max_attempts:
-                logger.error(
+                logger.exception(
                     "DB operation failed after %d attempt(s) (transient, likely "
-                    "failover window not yet closed): %s",
+                    "failover window not yet closed)",
                     attempt,
-                    exc,
                 )
                 raise
             delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
@@ -103,11 +102,10 @@ async def run_with_db_retry_async(
         except TRANSIENT_DB_ERRORS as exc:
             attempt += 1
             if attempt >= max_attempts:
-                logger.error(
+                logger.exception(
                     "Async DB operation failed after %d attempt(s) (transient, "
-                    "likely failover window not yet closed): %s",
+                    "likely failover window not yet closed)",
                     attempt,
-                    exc,
                 )
                 raise
             delay = min(base_delay * (2 ** (attempt - 1)), max_delay)

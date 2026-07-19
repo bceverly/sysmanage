@@ -4243,7 +4243,7 @@ const HostDetail = () => { // NOSONAR
                                         >
                                             <ListItemText
                                                 primary={tab.label}
-                                                primaryTypographyProps={{ variant: 'body2' }}
+                                                slotProps={{ primary: { variant: 'body2' } }}
                                             />
                                         </ListItemButton>
                                     );

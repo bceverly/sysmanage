@@ -1385,7 +1385,7 @@ const Settings: React.FC = () => {
                     >
                       <ListItemText
                         primary={tab.label}
-                        primaryTypographyProps={{ variant: 'body2' }}
+                        slotProps={{ primary: { variant: 'body2' } }}
                       />
                     </ListItemButton>
                   );

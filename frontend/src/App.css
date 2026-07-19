@@ -1,5 +1,5 @@
 .main-content {
-  padding-top: calc(7rem + var(--security-banner-height, 0px));
+  padding-top: calc(7rem + var(--security-banner-height, 0px) + var(--migration-banner-height, 0px));
   padding-left: 1rem;
   padding-right: 1rem;
   transition: padding-top 0.3s ease;

@@ -105,9 +105,12 @@ test("enabling the integration reveals the managed-server controls", async () =>
 
 test("saves settings via the save button", async () => {
   render(<GraylogIntegrationCard />);
-  await screen.findByText("Graylog Integration");
+  // The header renders while the card is still loading; wait for the Save
+  // button itself (which only appears once the async load resolves) rather
+  // than racing the loading spinner.
+  const saveButton = await screen.findByRole("button", { name: /^Save$/ });
 
-  fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
+  fireEvent.click(saveButton);
 
   await waitFor(() =>
     expect(m(axiosInstance.post)).toHaveBeenCalledWith(
