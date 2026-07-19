@@ -405,13 +405,16 @@ def _safe_extract_tarball(tar: tarfile.TarFile, extract_dir: str) -> bool:
     base_prefix = str(base) + os.sep
     total = 0
     # Apply the PEP 706 ``data`` extraction filter to every ``extract`` on this
-    # archive (available on every currently-patched Python 3.8+) as defence-in-
-    # depth on top of the per-member containment check below, and because 3.12+
-    # raises a DeprecationWarning for an unfiltered ``extract`` — which the test
-    # suite (warnings-as-errors) treats as a failure.  Set it on the object
-    # rather than passing a per-call ``filter=`` keyword, which some static
-    # analysers still flag as an unknown argument.
-    tar.extraction_filter = tarfile.data_filter
+    # archive as defence-in-depth on top of the per-member containment check
+    # below, and because 3.12+ raises a DeprecationWarning for an unfiltered
+    # ``extract`` — which the test suite (warnings-as-errors) treats as a
+    # failure.  Set it on the object rather than passing a per-call ``filter=``
+    # keyword, which some static analysers still flag as an unknown argument.
+    # ``data_filter`` and the warning both arrived together (PEP 706, 3.12 /
+    # backported to 3.8.17+); on an interpreter without it there is nothing to
+    # set and no warning to silence, so guard the assignment.
+    if hasattr(tarfile, "data_filter"):
+        tar.extraction_filter = tarfile.data_filter
     # Extract member-by-member, validating EACH one's resolved path is contained
     # in ``extract_dir`` immediately before extracting it (and refusing regular
     # files past the cumulative size cap).  No ``extractall``.
