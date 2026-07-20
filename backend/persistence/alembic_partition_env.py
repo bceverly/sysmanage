@@ -104,7 +104,7 @@ def run_migrations(
     # then point the run at it.  Importing the models package registers all
     # tables on the shared Base; the include filter scopes this chain.
     from backend.persistence.db import Base  # noqa: PLC0415
-    import backend.persistence.models  # noqa: F401, PLC0415
+    import backend.persistence.models  # noqa: F401, PLC0415  # pylint: disable=unused-import
 
     target_metadata = Base.metadata
 

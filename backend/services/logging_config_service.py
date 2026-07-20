@@ -253,7 +253,7 @@ def push_logging_to_all_agents(revert_families=None) -> int:
     from backend.persistence.partitions import iter_host_databases  # noqa: PLC0415
 
     count = 0
-    for _label, _tenant_id, session in iter_host_databases():
+    for _label, _, session in iter_host_databases():
         try:
             approved_hosts = (
                 session.query(Host)

@@ -477,7 +477,7 @@ async def tick():
     _check_automation_module()
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     fired = []
-    for label, _tenant_id, session in iter_host_databases():
+    for label, _tenant, session in iter_host_databases():
         try:
             fired.extend(_tick_profiles_one_db(session, now))
         except Exception:  # pylint: disable=broad-exception-caught

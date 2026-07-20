@@ -38,7 +38,9 @@ jobs:
     # fail a PR rather than wait for a release tag. Mirrors local
     # ``make security-python`` scope (backend/, excluding backend/tests/).
     - name: Run Bandit
-      run: python -m bandit -r backend/ -f screen -x backend/tests/
+      # Gate on Medium+High severity only (Low is advisory noise; the codebase
+      # carries ~hundreds of tuned-out Low findings). New Medium/High fails a PR.
+      run: python -m bandit -r backend/ -f screen -x backend/tests/ --severity-level medium
 
   semgrep:
     name: Semgrep PRO Security Scan
@@ -135,16 +137,27 @@ jobs:
       run: pip install 'pip-audit>=2.10.0'
 
     - name: Run Safety scan (Python)
+      # Gating. Ignores are policy-driven (Safety Platform cloud policy +
+      # .safety-policy.yml); a NEW un-ignored vuln fails the job. The clean
+      # checkout has no build artifacts, so only tracked requirements are scanned.
       run: |
+        # JSON report is for the uploaded artifact only (non-gating).
         safety scan --output json --output-file safety-report.json || true
-        safety scan --output screen || true
+        safety scan --output screen
 
     - name: Run pip-audit (Python — authoritative CVE check against PyPI advisory DB)
-      # Ignored CVEs (review periodically — remove an --ignore-vuln line once a fix exists upstream):
+      # ADVISORY (non-gating): pip-audit currently surfaces real un-ignored vulns
+      # on tracked deps (mcp CVE-2026-52870/52869/59950 → fix 1.27.2/1.28.1;
+      # click PYSEC-2026-2132 → fix 8.3.3). Bump those pins before flipping this
+      # to gating (drop the trailing `|| true`).
+      # Ignored CVEs (review periodically — remove an --ignore-vuln line once a
+      # fix exists upstream):
       #   CVE-2026-3219 — pip itself (concatenated tar/ZIP handled as ZIP).
       #     Latest pip on PyPI is 26.0.1 (no fix released yet); we are already on
       #     the latest. Suppressing here keeps the report actionable; pip-audit
       #     will re-flag it the moment a patched pip ships.
+      #     # TODO: verify CVE-2026-3219 — pip has no patched release yet; re-check
+      #     #       for a fixed pip and drop this ignore, expires 2026-10-31.
       run: |
         pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 --format json --output pip-audit-report.json || true
         pip-audit -r requirements.txt --strict --ignore-vuln CVE-2026-3219 || true

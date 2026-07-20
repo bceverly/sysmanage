@@ -124,6 +124,7 @@ def test_switch_account_success_remints_with_tenant(db_session, monkeypatch):
 
     import jwt as _jwt
 
+    # nosemgrep: python.jwt.security.unverified-jwt-decode.unverified-jwt-decode  # test fixture: inspecting claims of a token this test itself just issued; not a trust decision
     claims = _jwt.decode(new_token, options={"verify_signature": False})
     assert claims["tenant_id"] == str(tenant.id)
     assert claims["user_id"] == str(user.id)

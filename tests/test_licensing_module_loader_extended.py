@@ -581,10 +581,10 @@ class TestQueryServerVersions:
             ],
         }
         with patch(
-            "backend.licensing.module_loader.get_config",
+            "backend.licensing.module_loader_mixin.get_config",
             return_value=_config_with(),
         ), patch(
-            "backend.licensing.module_loader.aiohttp.ClientSession",
+            "backend.licensing.module_loader_mixin.aiohttp.ClientSession",
             return_value=_AioGetSession(_AioJsonResponse(200, payload)),
         ):
             out = await loader.query_server_versions()
@@ -597,10 +597,10 @@ class TestQueryServerVersions:
 
         loader = ModuleLoader()
         with patch(
-            "backend.licensing.module_loader.get_config",
+            "backend.licensing.module_loader_mixin.get_config",
             return_value=_config_with(),
         ), patch(
-            "backend.licensing.module_loader.aiohttp.ClientSession",
+            "backend.licensing.module_loader_mixin.aiohttp.ClientSession",
             return_value=_AioGetSession(_AioJsonResponse(503, {})),
         ):
             assert await loader.query_server_versions() == {}
@@ -620,10 +620,10 @@ class TestQueryServerVersions:
                 return False
 
         with patch(
-            "backend.licensing.module_loader.get_config",
+            "backend.licensing.module_loader_mixin.get_config",
             return_value=_config_with(),
         ), patch(
-            "backend.licensing.module_loader.aiohttp.ClientSession",
+            "backend.licensing.module_loader_mixin.aiohttp.ClientSession",
             return_value=_Boom(),
         ):
             assert await loader.query_server_versions() == {}
@@ -642,10 +642,10 @@ class TestQueryServerVersions:
                 return False
 
         with patch(
-            "backend.licensing.module_loader.get_config",
+            "backend.licensing.module_loader_mixin.get_config",
             return_value=_config_with(),
         ), patch(
-            "backend.licensing.module_loader.aiohttp.ClientSession",
+            "backend.licensing.module_loader_mixin.aiohttp.ClientSession",
             return_value=_Crash(),
         ):
             assert await loader.query_server_versions() == {}

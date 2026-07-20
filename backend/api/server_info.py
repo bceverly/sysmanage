@@ -356,7 +356,7 @@ def _resolve_version() -> str:
     when its file-system cache was stale at first request.
     """
     try:
-        from backend import __version__  # type: ignore
+        from backend import __version__  # type: ignore[attr-defined]
 
         return str(__version__)
     except Exception:  # pylint: disable=broad-exception-caught
@@ -373,7 +373,9 @@ def _resolve_license_tier() -> str:
     ``community`` even when a valid Pro+ license was loaded).
     """
     try:
-        from backend.licensing.license_service import (  # type: ignore
+        # TODO: mypy reports no error on this import; the bare "type: ignore"
+        # here is stale. Left in place (narrowed) pending removal.
+        from backend.licensing.license_service import (  # type: ignore[import]
             license_service,
         )
 

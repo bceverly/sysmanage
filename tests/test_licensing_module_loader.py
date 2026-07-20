@@ -357,7 +357,7 @@ class TestModuleLoaderQueryVersions:
         mock_config = {"license": {}}
 
         with patch(
-            "backend.licensing.module_loader.get_config", return_value=mock_config
+            "backend.licensing.module_loader_mixin.get_config", return_value=mock_config
         ):
             result = await loader.query_server_versions()
 
@@ -372,7 +372,7 @@ class TestModuleLoaderQueryVersions:
         mock_config = {"license": {"phone_home_url": "https://example.com"}}
 
         with patch(
-            "backend.licensing.module_loader.get_config", return_value=mock_config
+            "backend.licensing.module_loader_mixin.get_config", return_value=mock_config
         ):
             result = await loader.query_server_versions()
 

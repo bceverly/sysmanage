@@ -19,7 +19,7 @@ def get_api_version() -> str:
     and fall back to the current series if it's absent (dev checkouts).
     """
     try:
-        from backend import __version__  # type: ignore  # noqa: PLC0415
+        from backend import __version__  # type: ignore[attr-defined]  # noqa: PLC0415
 
         return str(__version__)
     except Exception:  # noqa: BLE001 - dev checkout without a generated version

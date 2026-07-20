@@ -45,7 +45,7 @@ def _resolve_version() -> str:
     try:
         # backend/__init__.py is generated at build time with __version__;
         # pylint can't see it statically, hence the disable.
-        from backend import (  # type: ignore  # noqa: PLC0415  # pylint: disable=no-name-in-module
+        from backend import (  # type: ignore[attr-defined]  # noqa: PLC0415  # pylint: disable=no-name-in-module
             __version__,
         )
 

@@ -86,7 +86,6 @@ from backend.api import (
     user,
     user_preferences,
 )
-from backend.config import config as config_module
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.routes")

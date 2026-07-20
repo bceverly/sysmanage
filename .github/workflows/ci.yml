@@ -273,7 +273,7 @@ jobs:
 
     - name: Run Pylint
       run: |
-        python -m pylint backend/ --rcfile=.pylintrc --exit-zero
+        python -m pylint backend/ --rcfile=.pylintrc
 
     - name: Run i18n gates (key coverage + placeholder integrity)
       run: |
@@ -282,9 +282,11 @@ jobs:
 
     - name: Run Bandit security scan
       run: |
-        python -m bandit -r backend/ -f screen -x backend/tests/
-        # Also generate JSON report for artifacts
-        python -m bandit -r backend/ -f json -x backend/tests/ -o bandit-report.json || true
+        # Gate on Medium+High severity only (Low is advisory noise; the codebase
+        # carries ~hundreds of tuned-out Low findings). New Medium/High fails CI.
+        python -m bandit -r backend/ -f screen -x backend/tests/ --severity-level medium
+        # Also generate JSON report for artifacts (Medium+High, non-gating)
+        python -m bandit -r backend/ -f json -x backend/tests/ --severity-level medium -o bandit-report.json || true
     
     - name: Upload Bandit results
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

@@ -33,7 +33,7 @@ Architectural constraint (see ROADMAP §12 "Data Architecture"):
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, List, Optional, Tuple
 from uuid import UUID
 

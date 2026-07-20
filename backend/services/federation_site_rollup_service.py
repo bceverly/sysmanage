@@ -114,7 +114,7 @@ def collect_compliance_rollups(session: Session) -> List[Dict[str, Any]]:
     )
 
     agg: Dict[Any, Dict[str, Any]] = {}
-    for (_host_id, profile_id), (score, failed) in latest.items():
+    for (_, profile_id), (score, failed) in latest.items():
         bucket = agg.setdefault(
             profile_id, {"scores": [], "compliant": 0, "noncompliant": 0}
         )

@@ -558,8 +558,8 @@ def _try_bhyve_plan_based_creation(command_params, host_id):
     if not vm_name:
         return False
 
-    raw_image_path, iso_path, _cloud_url, download_plan, ok = (
-        _bhyve_resolve_install_inputs(virt_engine, vm_name, command_params)
+    raw_image_path, iso_path, _, download_plan, ok = _bhyve_resolve_install_inputs(
+        virt_engine, vm_name, command_params
     )
     if not ok:
         return False

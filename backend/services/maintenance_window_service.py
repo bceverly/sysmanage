@@ -31,7 +31,7 @@ from typing import List, Optional
 try:  # stdlib on 3.9+; the server runs 3.14
     from zoneinfo import ZoneInfo
 except ImportError:  # pragma: no cover - defensive
-    ZoneInfo = None  # type: ignore
+    ZoneInfo = None  # type: ignore[misc, assignment]
 
 from sqlalchemy.orm import Session
 

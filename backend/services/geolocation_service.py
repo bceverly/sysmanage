@@ -231,8 +231,6 @@ def _lookup_via_geolite2(ip_str: str) -> Optional[GeoResult]:
     if reader is None:
         return None
     try:
-        import geoip2.errors  # noqa: PLC0415
-
         response = reader.city(ip_str)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         # geoip2.errors.AddressNotFoundError is the expected "no record"

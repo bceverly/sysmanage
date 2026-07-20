@@ -35,7 +35,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import and_, desc, select
+from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from backend.services import federation_retry_policy as retry_policy

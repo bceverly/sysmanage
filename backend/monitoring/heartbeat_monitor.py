@@ -45,7 +45,7 @@ async def check_host_heartbeats():  # NOSONAR
     """Mark approved hosts that missed the heartbeat window as down, across the
     bootstrap DB and every provisioned tenant DB.  Each database is handled
     independently so one failure can't stall the rest."""
-    for label, _tenant_id, db in iter_host_databases():
+    for label, _, db in iter_host_databases():
         try:
             timeout_minutes = get_heartbeat_timeout_minutes()
             # Naive UTC to match how last_access is stored.

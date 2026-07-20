@@ -312,7 +312,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
 
                     if create_result.returncode == 0:
                         # Run the task immediately
-                        _run_result = subprocess.run(  # nosec B603
+                        subprocess.run(  # nosec B603
                             [
                                 SCHTASKS_PATH,
                                 "/run",

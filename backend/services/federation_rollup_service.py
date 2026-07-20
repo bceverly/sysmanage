@@ -51,7 +51,6 @@ from backend.persistence.models.federation import (
     FederationVulnerabilityRollup,
 )
 from backend.services.federation_site_service import (
-    SiteNotFoundError,
     record_sync,
 )
 

@@ -23,7 +23,6 @@ SSO sign-in finds them.
 import logging
 import secrets as _secrets
 import uuid
-from typing import Optional
 
 from fastapi import APIRouter, Body, HTTPException, Request
 from fastapi.responses import JSONResponse, Response

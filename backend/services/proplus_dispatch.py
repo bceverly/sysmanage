@@ -28,7 +28,7 @@ import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from backend.licensing.module_loader import module_loader
-from backend.persistence import db, models
+from backend.persistence import models
 from backend.utils.verbosity_logger import sanitize_log
 
 # Re-exported here under the legacy private name so the sister test module

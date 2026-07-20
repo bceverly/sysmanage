@@ -45,7 +45,6 @@ question, not a platform-level one):
 """
 
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -392,7 +391,7 @@ async def tick_mirrors():
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     fired = []
     disabled = []
-    for label, _tenant_id, session in iter_host_databases():
+    for label, _tenant, session in iter_host_databases():
         try:
             db_fired, db_disabled = _tick_mirrors_one_db(
                 session, engine, automation, now

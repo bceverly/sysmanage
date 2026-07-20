@@ -69,6 +69,7 @@ def test_jwt_signed_with_wrong_secret_is_rejected(client, mock_config):
         "user_id": "admin@sysmanage.org",
         "expires": time.time() + 3600,
     }
+    # nosemgrep: python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret,python.pyjwt.python-pyjwt-hardcoded-secret.python-pyjwt-hardcoded-secret  # test fixture: forged JWT with a wrong secret to prove it is rejected
     forged = pyjwt.encode(
         payload,
         _WRONG_SECRET_SHORT,
@@ -198,6 +199,7 @@ def test_refresh_with_forged_cookie_signature_is_rejected(
     }
     # PyJWT >=2.10 warns on HMAC keys <32 bytes for HS256; pick a long
     # but obviously-not-the-real-secret value so the warning stays clean.
+    # nosemgrep: python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret,python.pyjwt.python-pyjwt-hardcoded-secret.python-pyjwt-hardcoded-secret  # test fixture: forged JWT with a wrong secret to prove it is rejected
     forged = pyjwt.encode(
         payload,
         _WRONG_SECRET_LONG,

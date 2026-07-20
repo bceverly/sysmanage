@@ -226,7 +226,7 @@ async def get_grafana_servers():
     identical to the prior single-query behaviour.
     """
     servers = []
-    for label, _tenant_id, session in iter_host_databases():
+    for label, _tenant, session in iter_host_databases():
         try:
             # Single query gets both the Host and its matching HostRole;
             # the previous code re-queried HostRole inside the loop (1+N
@@ -535,7 +535,7 @@ async def check_grafana_health():  # NOSONAR
                 health_response = await client.get(f"{grafana_url}/api/health")
 
                 if health_response.status_code == 200:
-                    _health_data = health_response.json()  # NOSONAR
+                    health_response.json()  # NOSONAR
 
                     # Try to get version info
                     version_info = None

@@ -174,7 +174,7 @@ async def broadcast_to_fleet(
     # iter_host_databases open a second, module-global session; only the extra
     # per-tenant sessions are opened (and closed) here.
     delivered = 0
-    for label, _tenant_id, host_session in iter_host_databases(bootstrap_session=db):
+    for label, _tenant, host_session in iter_host_databases(bootstrap_session=db):
         try:
             target_host_ids = _resolve_broadcast_targets(
                 host_session, tag_uuid, request.platform

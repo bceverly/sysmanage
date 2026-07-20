@@ -194,6 +194,7 @@ class TestDecodeJWT:
         # exists specifically to verify forged JWTs are rejected; the
         # key being obviously fake is the point of the test.
         wrong_key = "wrong_secret_key" + "_for_testing_purposes_32b"
+        # nosemgrep: python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret,python.pyjwt.python-pyjwt-hardcoded-secret.python-pyjwt-hardcoded-secret  # test fixture: forged JWT with a wrong secret to prove it is rejected
         wrong_secret_token = jwt.encode(
             payload,
             wrong_key,

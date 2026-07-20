@@ -84,7 +84,7 @@ async def get_graylog_servers():
     identical to the prior single-query behaviour.
     """
     servers = []
-    for label, _tenant_id, session in iter_host_databases():
+    for label, _tenant, session in iter_host_databases():
         try:
             # Single query gets both the Host and its matching HostRole;
             # the previous code re-queried HostRole inside the loop (1+N

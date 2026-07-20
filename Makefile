@@ -1260,22 +1260,26 @@ SEMGREP_CONFIGS := --config=p/default --config=p/security-audit --config=p/trail
 
 # Run Semgrep LOCALLY from the venv (auto-installs it if missing), so the
 # pre-push self-check matches what the cloud scan reports — no round-trip.
-# With SEMGREP_APP_TOKEN set it runs ``semgrep ci`` (Pro engine, same as CI);
-# without, it runs the registry packs above.  Informational (never aborts the
-# security chain); honors inline ``# nosemgrep`` either way.
+# The LOCAL scan (registry packs above over backend/ + tests/) GATES: it runs
+# with ``--error`` and no ``|| true``, so a NEW finding fails the security
+# chain. It is fast and measurable, unlike ``semgrep ci`` (the Pro cloud
+# engine, ~981 files × 20k rules) which times out and so stays ADVISORY
+# (``|| true``): SEMGREP_APP_TOKEN adds it as enrichment on top of the gate.
+# Honors inline ``# nosemgrep`` either way.
 security-semgrep: $(VENV_ACTIVATE)
 	@$(PYTHON) -c "import semgrep" 2>/dev/null || $(PIP) install --quiet semgrep
 	@echo "Running Semgrep static analysis (local venv)..."
-	@echo "Tip: export SEMGREP_APP_TOKEN to run the same Pro engine as CI."
+	@echo "Tip: export SEMGREP_APP_TOKEN to add the Pro cloud engine as advisory enrichment."
 ifeq ($(OS),Windows_NT)
-	-@if defined SEMGREP_APP_TOKEN ($(SEMGREP) ci) else ($(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) .) || echo "Semgrep scan completed"
+	@echo "Running gating local Semgrep scan (backend/ + tests/)..."
+	@$(SEMGREP) scan --error --metrics=off $(SEMGREP_CONFIGS) backend/ tests/
+	-@if defined SEMGREP_APP_TOKEN ($(SEMGREP) ci) else (echo "Set SEMGREP_APP_TOKEN for the advisory Pro cloud scan")
 else
+	@echo "Running gating local Semgrep scan (backend/ + tests/)..."
+	$(SEMGREP) scan --error --metrics=off $(SEMGREP_CONFIGS) backend/ tests/
 	@if [ -n "$$SEMGREP_APP_TOKEN" ]; then \
-		echo "Using Semgrep CI (Pro rules + supply chain)..."; \
+		echo "Adding Semgrep CI (Pro rules + supply chain) as advisory enrichment..."; \
 		$(SEMGREP) ci || true; \
-	else \
-		echo "Using local registry packs (set SEMGREP_APP_TOKEN for Pro parity)..."; \
-		$(SEMGREP) scan --metrics=off $(SEMGREP_CONFIGS) . || true; \
 	fi
 endif
 
@@ -1284,21 +1288,21 @@ security-python: $(VENV_ACTIVATE)
 	@echo "=== Python Security Analysis ==="
 	@echo "Running Bandit static security analysis..."
 ifeq ($(OS),Windows_NT)
-	-@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/
+	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ --severity-level medium
 else
-	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ || true
+	@$(PYTHON) -m bandit -r backend/ -f screen -x backend/tests/ --severity-level medium
 endif
 	@echo ""
 	@$(MAKE) security-semgrep
 	@echo ""
 	@echo "Running Safety dependency vulnerability scan..."
 ifeq ($(OS),Windows_NT)
-	-@$(PYTHON) -m safety scan --output screen || echo "Safety scan completed with issues"
-	-@echo ""
-	-@echo "=== Current dependency versions (for upgrade reference) ==="
+	@$(PYTHON) -m safety scan --output screen
+	@echo ""
+	@echo "=== Current dependency versions (for upgrade reference) ==="
 	-@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "Package list completed"
 else
-	@$(PYTHON) -m safety scan --output screen || echo "Safety scan completed with issues"
+	@$(PYTHON) -m safety scan --output screen
 	@echo ""
 	@echo "=== Current dependency versions (for upgrade reference) ==="
 	@$(PYTHON) -m pip list | grep -E "(cryptography|aiohttp|black|bandit|websockets|PyYAML|SQLAlchemy|alembic|safety|fastapi|starlette|jinja2|python-multipart|setuptools)" || echo "Package list completed"

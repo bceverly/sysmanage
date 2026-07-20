@@ -31,7 +31,7 @@ except ImportError:  # Windows
     grp = None  # type: ignore[assignment]
     pwd = None  # type: ignore[assignment]
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker

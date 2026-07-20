@@ -743,6 +743,6 @@ def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) 
         .all()
     )
     have = {row.role_id for row in existing}
-    for name, rid in role_ids.items():
+    for _rolename, rid in role_ids.items():
         if rid not in have:
             db.add(models.UserSecurityRole(user_id=user.id, role_id=rid))

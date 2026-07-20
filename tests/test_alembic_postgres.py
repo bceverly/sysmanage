@@ -56,7 +56,9 @@ def _create_scratch_db():
     conn.autocommit = True
     try:
         with conn.cursor() as cur:
+            # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query,python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # test fixture: DDL cannot be parameterized; _SCRATCH_DB is an internal constant, not user input
             cur.execute(f'DROP DATABASE IF EXISTS "{_SCRATCH_DB}"')
+            # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query,python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # test fixture: DDL cannot be parameterized; _SCRATCH_DB is an internal constant, not user input
             cur.execute(f'CREATE DATABASE "{_SCRATCH_DB}"')
     finally:
         conn.close()
@@ -73,6 +75,7 @@ def _drop_scratch_db():
                 "WHERE datname = %s AND pid <> pg_backend_pid()",
                 (_SCRATCH_DB,),
             )
+            # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query,python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # test fixture: DDL cannot be parameterized; _SCRATCH_DB is an internal constant, not user input
             cur.execute(f'DROP DATABASE IF EXISTS "{_SCRATCH_DB}"')
     finally:
         conn.close()

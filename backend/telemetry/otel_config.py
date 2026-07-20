@@ -42,8 +42,8 @@ except ImportError as e:
     )
     TELEMETRY_AVAILABLE = False
     # Define stub objects so the code doesn't break
-    metrics = None  # type: ignore
-    trace = None  # type: ignore
+    metrics = None  # type: ignore[assignment]
+    trace = None  # type: ignore[assignment]
 
 # Global state for telemetry
 _telemetry_enabled = False
