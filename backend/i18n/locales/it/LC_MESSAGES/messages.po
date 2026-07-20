@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 18:34-0400\n"
+"POT-Creation-Date: 2026-07-20 09:08-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1925,7 +1925,7 @@ msgstr "Disconnessione OpenTelemetry Grafana inserita nella coda con successo"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "Impossibile disconnettere OpenTelemetry da Grafana: %s"
 
-#: backend/api/content_lifecycle.py:42
+#: backend/api/content_lifecycle.py:44
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1933,6 +1933,34 @@ msgstr ""
 "La gestione del ciclo di vita dei contenuti richiede una licenza SysManage "
 "Professional+ (Enterprise). Per accedere a questa funzionalità, effettua "
 "l'aggiornamento."
+
+#: backend/api/content_lifecycle.py:101
+msgid "Environment name is required"
+msgstr "Il nome dell'ambiente è richiesto"
+
+#: backend/api/content_lifecycle.py:103
+msgid "Environment name is too long"
+msgstr "Il nome dell'ambiente è troppo lungo"
+
+#: backend/api/content_lifecycle.py:114
+msgid "Environment not found"
+msgstr "Ambiente non trovato"
+
+#: backend/api/content_lifecycle.py:129 backend/api/content_lifecycle.py:164
+msgid "An environment with that name already exists"
+msgstr "Un ambiente con quel nome esiste già"
+
+#: backend/api/content_lifecycle.py:183
+msgid "The Library environment cannot be deleted"
+msgstr "L'ambiente Library non può essere eliminato"
+
+#: backend/api/content_lifecycle.py:205
+msgid "ordered_ids must list every environment exactly once"
+msgstr "ordered_ids deve elencare ogni ambiente esattamente una volta"
+
+#: backend/api/content_lifecycle.py:209
+msgid "The Library environment must remain first"
+msgstr "L'ambiente Library deve rimanere il primo"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""

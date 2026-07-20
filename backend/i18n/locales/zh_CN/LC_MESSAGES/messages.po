@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 18:34-0400\n"
+"POT-Creation-Date: 2026-07-20 09:08-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1815,11 +1815,39 @@ msgstr "OpenTelemetry Grafana断开连接成功排队"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "断开 OpenTelemetry 与 Grafana 的连接失败：%s"
 
-#: backend/api/content_lifecycle.py:42
+#: backend/api/content_lifecycle.py:44
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
 msgstr "内容生命周期管理需要SysManage Professional+（企业版）许可证。请升级以访问此功能。"
+
+#: backend/api/content_lifecycle.py:101
+msgid "Environment name is required"
+msgstr "必须提供环境名称"
+
+#: backend/api/content_lifecycle.py:103
+msgid "Environment name is too long"
+msgstr "环境名称太长"
+
+#: backend/api/content_lifecycle.py:114
+msgid "Environment not found"
+msgstr "未找到环境"
+
+#: backend/api/content_lifecycle.py:129 backend/api/content_lifecycle.py:164
+msgid "An environment with that name already exists"
+msgstr "一个具有该名称的环境已经存在"
+
+#: backend/api/content_lifecycle.py:183
+msgid "The Library environment cannot be deleted"
+msgstr "不能删除Library环境"
+
+#: backend/api/content_lifecycle.py:205
+msgid "ordered_ids must list every environment exactly once"
+msgstr "ordered_ids必须恰好列出每个环境一次"
+
+#: backend/api/content_lifecycle.py:209
+msgid "The Library environment must remain first"
+msgstr "Library环境必须保持为第一个"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
