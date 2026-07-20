@@ -136,6 +136,10 @@ class FeatureCode(str, Enum):
     FEDERATION_COMMAND_DISPATCH = "federation_command_dispatch"
     FEDERATION_AUDIT_READ = "federation_audit_read"
 
+    # Content Lifecycle Management (Phase 16, Enterprise) — Satellite-style
+    # versioned/filtered content views + lifecycle environments + gated promotion.
+    CONTENT_LIFECYCLE_MANAGE = "content_lifecycle_manage"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -223,6 +227,10 @@ class ModuleCode(str, Enum):
     # Data Processing Modules
     LOG_ANALYZER = "log_analyzer"
     METRICS_AGGREGATOR = "metrics_aggregator"
+
+    # Phase 16 Enterprise module — Content Lifecycle Management (Satellite-style
+    # versioned/filtered content views promoted across lifecycle environments).
+    CONTENT_LIFECYCLE_ENGINE = "content_lifecycle_engine"
 
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
@@ -352,6 +360,8 @@ TIER_FEATURES = {
         FeatureCode.FEDERATION_POLICY_PUSH,
         FeatureCode.FEDERATION_COMMAND_DISPATCH,
         FeatureCode.FEDERATION_AUDIT_READ,
+        # Phase 16 — Content Lifecycle Management
+        FeatureCode.CONTENT_LIFECYCLE_MANAGE,
     },
 }
 
@@ -410,6 +420,8 @@ TIER_MODULES = {
         # sysmanage.yaml picks which one this server loads)
         ModuleCode.FEDERATION_CONTROLLER_ENGINE,
         ModuleCode.FEDERATION_SITE_ENGINE,
+        # Phase 16 — Content Lifecycle Management
+        ModuleCode.CONTENT_LIFECYCLE_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here — it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.

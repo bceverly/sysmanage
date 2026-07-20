@@ -26,6 +26,7 @@ from .report_branding import *
 from .advisory import *
 from .os_lifecycle import *
 from .repository_mirroring import *
+from .content_lifecycle import *
 from .upgrade_profiles import *
 from .gpg_key import *
 from .grafana_integration import *

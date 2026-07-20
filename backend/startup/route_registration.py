@@ -66,6 +66,7 @@ from backend.api import (
     queue,
     reboot_orchestration,
     report_branding,
+    content_lifecycle,
     report_templates,
     reports,
     repository_mirroring,
@@ -269,6 +270,10 @@ def register_routes(app: FastAPI):
     # Phase 13.2.1 — Slice 8: native /api/v1/mirror-* (+ deprecated /api alias).
     _include_versioned(app, repository_mirroring.router, tags=["repository-mirroring"])
     logger.debug("Repository mirroring router added")
+
+    # Phase 16 — Content Lifecycle Management (Enterprise; 402-gated in OSS).
+    _include_versioned(app, content_lifecycle.router, tags=["content-lifecycle"])
+    logger.debug("Content lifecycle router added")
 
     # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.
     logger.debug("Adding external IdP SSO callback router (unversioned /api/auth/*)")

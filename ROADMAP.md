@@ -5301,7 +5301,7 @@ bulk already exists.
 
 ## Phase 15: Stabilization
 
-**Target Release:** v3.1.x
+**Target Release:** v3.2.x
 **Focus:** Integration-test the advisory/window/release-upgrade paths; verify license gating on the new surfaces; i18n audit; docs.
 
 ### 15.1 PostgreSQL High-Availability Support
@@ -5372,7 +5372,7 @@ Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DD
 
 ## Phase 16: Content Lifecycle Management (Enterprise)
 
-**Target Release:** v3.2.0.0
+**Target Release:** v3.3.0.0
 **Focus:** The single largest market-parity gap — Satellite-style versioned, filtered, environment-gated content. Heavy enough to anchor its own phase.
 
 **Market gap addressed:** Red Hat Satellite Content Views + Lifecycle Environments + content promotion.
@@ -5401,7 +5401,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ## Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)
 
-**Target Release:** v3.3.0.0
+**Target Release:** v3.4.0.0
 **Focus:** Extend content management to snaps + container images, and add immutable/image-based host support.
 
 **Market gap addressed:** Landscape snap store proxy; Satellite container-image content views + image-mode (bootc/OSTree) hosts.
@@ -5441,7 +5441,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ## Phase 18: Provisioning & Discovery (Enterprise)
 
-**Target Release:** v3.4.0.0
+**Target Release:** v3.5.0.0
 **Focus:** Net-new host provisioning (bare-metal + cloud) — the other major Satellite gap. Today SysManage only provisions *child* hosts on already-managed hosts. Anchors its own phase.
 
 **Market gap addressed:** Red Hat Satellite provisioning, host discovery, compute resources.
@@ -5467,7 +5467,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ## Phase 19: Stabilization
 
-**Target Release:** v3.4.x
+**Target Release:** v3.5.x
 **Focus:** Harden content lifecycle + provisioning across distros/providers; air-gap + federation interplay; performance on large content sets.
 
 ### Exit Criteria
@@ -5485,7 +5485,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ## Phase 20: Configuration Management & Drift (Enterprise)
 
-**Target Release:** v3.5.0.0
+**Target Release:** v3.6.0.0
 **Focus:** Move from ad-hoc script execution to desired-state config + drift detection.
 
 **Market gap addressed:** Satellite Ansible/Puppet config management; Insights configuration drift.
@@ -5545,7 +5545,7 @@ not the moat.**
 
 ## Phase 21: Proactive Operations & Advisor (Enterprise)
 
-**Target Release:** v3.6.0.0
+**Target Release:** v3.7.0.0
 **Focus:** Insights-style proactive recommendations + malware detection — from reactive reporting to prescriptive guidance.
 
 **Market gap addressed:** Red Hat Insights advisor / recommendations + malware detection.
@@ -5626,7 +5626,7 @@ one-way ingestion connector only.
 
 ## Phase 21.5: Mobile Device Management (Community / Pro+ / Enterprise)
 
-**Target Release:** v3.7.0.0
+**Target Release:** v3.8.0.0
 **Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets — inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise — so the v4.0 "manage everything" promise covers every endpoint class.
 
 **Market gap addressed:** Microsoft Intune / Jamf Pro / VMware Workspace ONE / Kandji / Google Android Enterprise — the UEM/MDM slice, folded into the *same* single pane of glass (OS-lifecycle, compliance, advisory, alerting) as the rest of the fleet rather than a bolt-on.
@@ -5776,14 +5776,14 @@ The operational product: getting devices enrolled at scale.
 | 12 | v2.4.0.0 | Multi-Site Federation | Coordinator + site servers, rollup reporting, command dispatch |
 | 13 | **v3.0.0.0** | Enterprise GA | Multi-tenancy (+ per-tenant editions / "master of tenants"), API complete, full feature set |
 | 14 | v3.1.0.0 | Patch & Maintenance Lifecycle | Errata/advisory mgmt, maintenance windows, OS release-upgrade + EOL, FIPS mode |
-| 15 | v3.1.x | Stabilization | Advisory/window/release-upgrade integration testing |
-| 16 | v3.2.0.0 | Content Lifecycle Management | Content Views + Lifecycle Environments + gated promotion |
-| 17 | v3.3.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
-| 18 | v3.4.0.0 | Provisioning & Discovery | PXE/kickstart bare-metal + cloud compute provisioning, host discovery |
-| 19 | v3.4.x | Stabilization | Content lifecycle + provisioning hardening |
-| 20 | v3.5.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
-| 21 | v3.6.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
-| 21.5 | v3.7.0.0 | Mobile Device Management | iOS/Android: ingest-from-UEM + native Apple/Android MDM; mobile OS/patch compliance across Community/Pro+/Enterprise |
+| 15 | v3.2.x | Stabilization | Advisory/window/release-upgrade integration testing |
+| 16 | v3.3.0.0 | Content Lifecycle Management | Content Views + Lifecycle Environments + gated promotion |
+| 17 | v3.4.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
+| 18 | v3.5.0.0 | Provisioning & Discovery | PXE/kickstart bare-metal + cloud compute provisioning, host discovery |
+| 19 | v3.5.x | Stabilization | Content lifecycle + provisioning hardening |
+| 20 | v3.6.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
+| 21 | v3.7.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
+| 21.5 | v3.8.0.0 | Mobile Device Management | iOS/Android: ingest-from-UEM + native Apple/Android MDM; mobile OS/patch compliance across Community/Pro+/Enterprise |
 | 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
 
 ---

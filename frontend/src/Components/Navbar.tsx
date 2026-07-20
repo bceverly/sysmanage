@@ -60,6 +60,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/os-lifecycle': 'patching',
   '/os-upgrades': 'patching',
   '/maintenance-windows': 'patching',
+  '/content': 'patching',
   '/vulnerabilities': 'security',
   '/compliance': 'security',
   '/fips-compliance': 'security',

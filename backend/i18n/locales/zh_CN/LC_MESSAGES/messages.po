@@ -5,645 +5,645 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-15 13:27-0400\n"
+"POT-Creation-Date: 2026-07-19 18:34-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: backend/security/communication_security.py:119
+#: backend/security/communication_security.py:123
 msgid "Invalid token signature"
 msgstr "无效的令牌签名"
 
-#: backend/security/communication_security.py:125
+#: backend/security/communication_security.py:129
 msgid "Token expired"
 msgstr "令牌过期"
 
-#: backend/security/communication_security.py:147
+#: backend/security/communication_security.py:151
 msgid "Malformed token"
 msgstr "格式错误的令牌"
 
-#: backend/security/communication_security.py:387
+#: backend/security/communication_security.py:391
 msgid "Encrypted data expired"
 msgstr "加密数据过期"
 
-#: backend/security/communication_security.py:398
+#: backend/security/communication_security.py:402
 msgid "Invalid signature"
 msgstr "无效签名"
 
-#: backend/security/communication_security.py:405
+#: backend/security/communication_security.py:409
 msgid "Decryption failed"
 msgstr "解密失败"
 
-#: backend/auth/auth_bearer.py:37
+#: backend/auth/auth_bearer.py:41
 msgid "Invalid authentication scheme."
 msgstr "无效的身份验证方案。"
 
-#: backend/auth/auth_bearer.py:40
+#: backend/auth/auth_bearer.py:44
 msgid "Expired token."
 msgstr "过期的令牌。"
 
-#: backend/auth/auth_bearer.py:44
+#: backend/auth/auth_bearer.py:48
 msgid "Invalid authorization code."
 msgstr "无效的授权码。"
 
-#: backend/auth/auth_bearer.py:97
+#: backend/auth/auth_bearer.py:101
 msgid "Could not validate credentials"
 msgstr "无法验证凭据"
 
-#: backend/auth/auth_bearer.py:128 backend/api/api_keys.py:102
+#: backend/auth/auth_bearer.py:132 backend/api/api_keys.py:106
 msgid "User not found."
 msgstr "未找到用户。"
 
-#: backend/auth/auth_bearer.py:188 backend/api/auth.py:611
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
 msgid "You do not have access to the selected account."
 msgstr "您没有访问所选账户的权限。"
 
-#: backend/api/fleet.py:89
+#: backend/api/fleet.py:93
 #, python-format
 msgid "Agent with hostname %s not found"
 msgstr "未找到主机名为 %s 的代理"
 
-#: backend/api/fleet.py:128
+#: backend/api/fleet.py:132
 #, python-brace-format
 msgid "Command {command_type} sent to {hostname}"
 msgstr "命令 {command_type} 已发送到 {hostname}"
 
-#: backend/api/fleet.py:170
+#: backend/api/fleet.py:174
 #, python-brace-format
 msgid "Shell command sent to {hostname}"
 msgstr "Shell 命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:210
+#: backend/api/fleet.py:214
 #, python-brace-format
 msgid "Package installation command sent to {hostname}"
 msgstr "软件包安装命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:249
+#: backend/api/fleet.py:253
 #, python-brace-format
 msgid "Service restart command sent to {hostname}"
 msgstr "服务重启命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:284
+#: backend/api/fleet.py:288
 #, python-brace-format
 msgid "System update command sent to {hostname}"
 msgstr "系统更新命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:319
+#: backend/api/fleet.py:323
 #, python-brace-format
 msgid "Reboot command sent to {hostname}"
 msgstr "重启命令已发送到 {hostname}"
 
-#: backend/api/fleet.py:380
+#: backend/api/fleet.py:384
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
 msgstr "命令 {command_type} 已广播到 {sent_count} 个代理"
 
-#: backend/api/fleet.py:412
+#: backend/api/fleet.py:416
 #, python-brace-format
 msgid "Shell command broadcast to {sent_count} agents"
 msgstr "Shell 命令已广播到 {sent_count} 个代理"
 
-#: backend/api/fleet.py:438
+#: backend/api/fleet.py:442
 #, python-format
 msgid "No agents found for platform %s"
 msgstr "未找到平台 %s 的代理"
 
-#: backend/api/fleet.py:448
+#: backend/api/fleet.py:452
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
 msgstr "命令 {command_type} 已发送到 {sent_count} 个 {platform} 代理"
 
-#: backend/api/certificates.py:41
+#: backend/api/certificates.py:45
 #, python-format
 msgid "Failed to get server fingerprint: %s"
 msgstr "获取服务器指纹失败：%s"
 
-#: backend/api/certificates.py:60
+#: backend/api/certificates.py:64
 #, python-format
 msgid "Failed to get CA certificate: %s"
 msgstr "获取 CA 证书失败：%s"
 
-#: backend/api/certificates.py:80 backend/api/certificates.py:135
-#: backend/api/host_graylog.py:85 backend/api/diagnostics.py:83
-#: backend/api/diagnostics.py:218 backend/api/error_constants.py:44
-#: backend/api/antivirus_status.py:209 backend/api/firewall_roles.py:470
-#: backend/api/firewall_roles.py:541
-#: backend/api/commercial_antivirus_status.py:76
+#: backend/api/certificates.py:84 backend/api/certificates.py:139
+#: backend/api/host_graylog.py:89 backend/api/diagnostics.py:87
+#: backend/api/diagnostics.py:222 backend/api/error_constants.py:48
+#: backend/api/antivirus_status.py:213 backend/api/firewall_roles.py:474
+#: backend/api/firewall_roles.py:545
+#: backend/api/commercial_antivirus_status.py:80
 msgid "Invalid host ID format"
 msgstr "无效的主机ID格式"
 
-#: backend/api/certificates.py:91 backend/api/certificates.py:161
-#: backend/api/fips_actions.py:80 backend/api/fips_actions.py:170
-#: backend/api/graylog_integration.py:184 backend/api/package_handlers.py:56
-#: backend/api/repository_mirroring.py:836
-#: backend/api/repository_mirroring.py:897
-#: backend/api/package_compliance.py:315 backend/api/package_compliance.py:441
-#: backend/api/grafana_integration.py:326 backend/api/host_graylog.py:127
-#: backend/api/tag.py:495 backend/api/tag.py:649
-#: backend/api/airgap_repository_buckets.py:61
-#: backend/api/updates/report_routes.py:30
-#: backend/api/updates/os_upgrade_routes.py:50
-#: backend/api/updates/query_routes.py:119
-#: backend/api/updates/execution_routes.py:247 backend/api/diagnostics.py:98
-#: backend/api/diagnostics.py:231 backend/api/error_constants.py:29
-#: backend/api/antivirus_status.py:221 backend/api/child_host_utils.py:80
-#: backend/api/packages.py:389 backend/api/lifecycle_actions.py:98
-#: backend/api/scripts/routes_executions.py:74
-#: backend/api/commercial_antivirus_status.py:84
+#: backend/api/certificates.py:95 backend/api/certificates.py:165
+#: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
+#: backend/api/repository_mirroring.py:840
+#: backend/api/repository_mirroring.py:901
+#: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
+#: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
+#: backend/api/tag.py:499 backend/api/tag.py:653
+#: backend/api/airgap_repository_buckets.py:65
+#: backend/api/updates/report_routes.py:34
+#: backend/api/updates/os_upgrade_routes.py:54
+#: backend/api/updates/query_routes.py:123
+#: backend/api/updates/execution_routes.py:251 backend/api/diagnostics.py:102
+#: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
+#: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
+#: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/scripts/routes_executions.py:78
+#: backend/api/commercial_antivirus_status.py:88
 msgid "Host not found"
 msgstr "未找到主机"
 
-#: backend/api/certificates.py:94 backend/api/host_utils.py:44
+#: backend/api/certificates.py:98 backend/api/host_utils.py:48
 msgid "Host is not approved"
 msgstr "主机未经批准"
 
-#: backend/api/certificates.py:152 backend/api/security_roles.py:157
-#: backend/api/security_roles.py:200 backend/api/auth_mfa.py:153
-#: backend/api/airgap_collection_schedule.py:140
-#: backend/api/graylog_integration.py:168 backend/api/broadcast.py:124
-#: backend/api/queue.py:118 backend/api/airgap_collector_runs.py:90
-#: backend/api/access_groups.py:136 backend/api/grafana_integration.py:310
-#: backend/api/opentelemetry/deployment.py:63
-#: backend/api/opentelemetry/deployment.py:216
-#: backend/api/opentelemetry/eligibility.py:58
-#: backend/api/opentelemetry/grafana_connection.py:54
-#: backend/api/opentelemetry/grafana_connection.py:197 backend/api/scim.py:215
-#: backend/api/scim.py:225 backend/api/packages_operations.py:64
-#: backend/api/packages_operations.py:243
-#: backend/api/license_management.py:112
-#: backend/api/updates/os_upgrade_routes.py:185
-#: backend/api/updates/execution_routes.py:45
-#: backend/api/secrets/permissions.py:35 backend/api/error_constants.py:18
-#: backend/api/child_host_utils.py:29
+#: backend/api/certificates.py:156 backend/api/security_roles.py:161
+#: backend/api/security_roles.py:204 backend/api/auth_mfa.py:157
+#: backend/api/airgap_collection_schedule.py:144
+#: backend/api/graylog_integration.py:172 backend/api/broadcast.py:128
+#: backend/api/queue.py:122 backend/api/airgap_collector_runs.py:94
+#: backend/api/access_groups.py:140 backend/api/grafana_integration.py:314
+#: backend/api/opentelemetry/deployment.py:67
+#: backend/api/opentelemetry/deployment.py:220
+#: backend/api/opentelemetry/eligibility.py:62
+#: backend/api/opentelemetry/grafana_connection.py:58
+#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:219
+#: backend/api/scim.py:229 backend/api/packages_operations.py:68
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116
+#: backend/api/updates/os_upgrade_routes.py:189
+#: backend/api/updates/execution_routes.py:49
+#: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
+#: backend/api/child_host_utils.py:33
 msgid "User not found"
 msgstr "未找到用户"
 
-#: backend/api/advisory_actions.py:64
+#: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
 msgstr "系统补丁应用队列中"
 
-#: backend/api/advisory_actions.py:79
+#: backend/api/advisory_actions.py:83
 msgid "Advisory management requires a SysManage Professional license."
 msgstr "顾问管理需要 SysManage Professional 许可证。"
 
-#: backend/api/advisory_actions.py:110
+#: backend/api/advisory_actions.py:114
 msgid "No applicable packages for this advisory on this host."
 msgstr "此主机上没有与此咨询相关的适用软件包。"
 
-#: backend/api/security_roles.py:90 backend/api/security_roles.py:151
+#: backend/api/security_roles.py:94 backend/api/security_roles.py:155
 msgid "You do not have permission to view user security roles"
 msgstr "您没有查看用户安全角色的权限"
 
-#: backend/api/security_roles.py:194
+#: backend/api/security_roles.py:198
 msgid "You do not have permission to edit user security roles"
 msgstr "您没有编辑用户安全角色的权限"
 
-#: backend/api/security_roles.py:212
+#: backend/api/security_roles.py:216
 #, python-format
 msgid "Invalid UUID format: %s"
 msgstr "UUID 格式无效: %s"
 
-#: backend/api/security_roles.py:226
+#: backend/api/security_roles.py:230
 #, python-format
 msgid "Role with ID %s does not exist"
 msgstr "ID为%s的角色不存在"
 
-#: backend/api/handlers/hostname_handler.py:33
+#: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
 msgstr "收到没有 host_id 的主机名更改消息"
 
-#: backend/api/handlers/hostname_handler.py:44
+#: backend/api/handlers/hostname_handler.py:48
 #, python-format
 msgid "Hostname change failed for host %(host_id)s: %(error)s"
 msgstr "更改主机 %(host_id)s 的主机名失败：%(error)s"
 
-#: backend/api/handlers/hostname_handler.py:51
+#: backend/api/handlers/hostname_handler.py:55
 #, python-format
 msgid "Hostname changed message for host %s missing new_hostname"
 msgstr "缺少新主机名，无法发送主机 %s 更改后的消息"
 
-#: backend/api/handlers/hostname_handler.py:59
+#: backend/api/handlers/hostname_handler.py:63
 #, python-format
 msgid "Host %s not found for hostname update"
 msgstr "找不到主机 %s 进行主机名更新"
 
-#: backend/api/handlers/hostname_handler.py:68
+#: backend/api/handlers/hostname_handler.py:72
 #, python-format
 msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
 msgstr "更新了主机 %(host_id)s 的主机名，从 %(old_hostname)s 更改为 %(new_hostname)s"
 
-#: backend/api/handlers/hostname_handler.py:79
+#: backend/api/handlers/hostname_handler.py:83
 #, python-format
 msgid "Error handling hostname changed message: %s"
 msgstr "处理主机名更改消息时出错：%s"
 
-#: backend/api/handlers/process_handlers.py:117
+#: backend/api/handlers/process_handlers.py:121
 #, python-format
 msgid "Failed to process process status update: %s"
 msgstr "处理进程状态更新失败：%s"
 
-#: backend/api/handlers/user_access_handlers.py:258
-#: backend/api/handlers/user_access_handlers.py:266
-#: backend/api/message_handlers.py:437 backend/api/update_handlers.py:35
-#: backend/api/update_handlers.py:43 backend/api/error_constants.py:34
+#: backend/api/handlers/user_access_handlers.py:262
+#: backend/api/handlers/user_access_handlers.py:270
+#: backend/api/message_handlers.py:441 backend/api/update_handlers.py:39
+#: backend/api/update_handlers.py:47 backend/api/error_constants.py:38
 msgid "Host not registered"
 msgstr "主机未注册"
 
-#: backend/api/handlers/user_access_handlers.py:329
+#: backend/api/handlers/user_access_handlers.py:333
 msgid "Failed to update user access information"
 msgstr "更新用户访问信息失败"
 
-#: backend/api/handlers/infrastructure_handlers.py:49
+#: backend/api/handlers/infrastructure_handlers.py:53
 msgid "Execution ID is required"
 msgstr "需要提供执行ID"
 
-#: backend/api/handlers/infrastructure_handlers.py:74
+#: backend/api/handlers/infrastructure_handlers.py:78
 #, python-format
 msgid "Script execution result with UUID %s already processed"
 msgstr "UUID为%s的脚本执行结果已经处理过"
 
-#: backend/api/handlers/infrastructure_handlers.py:94
+#: backend/api/handlers/infrastructure_handlers.py:98
 msgid "Hostname is required"
 msgstr "必须提供主机名"
 
-#: backend/api/handlers/infrastructure_handlers.py:105
+#: backend/api/handlers/infrastructure_handlers.py:109
 #, python-format
 msgid "Host not found: %s"
 msgstr "未找到主机： %s"
 
-#: backend/api/handlers/infrastructure_handlers.py:202
+#: backend/api/handlers/infrastructure_handlers.py:206
 #, python-brace-format
 msgid "Script execution {status} on agent {hostname}"
 msgstr "代理{hostname}上的脚本执行状态为{status}"
 
-#: backend/api/handlers/infrastructure_handlers.py:235
+#: backend/api/handlers/infrastructure_handlers.py:239
 #, python-format
 msgid "Failed to store script execution result: %s"
 msgstr "无法存储脚本执行结果：%s"
 
-#: backend/api/handlers/infrastructure_handlers.py:282
+#: backend/api/handlers/infrastructure_handlers.py:286
 msgid "Host not found for reboot status update"
 msgstr "找不到主机进行重启状态更新"
 
-#: backend/api/handlers/infrastructure_handlers.py:348
+#: backend/api/handlers/infrastructure_handlers.py:352
 #, python-format
 msgid "Failed to update reboot status: %s"
 msgstr "更新重启状态失败：%s"
 
-#: backend/api/handlers/infrastructure_handlers.py:386
-#: backend/api/handlers/infrastructure_handlers.py:517
+#: backend/api/handlers/infrastructure_handlers.py:390
+#: backend/api/handlers/infrastructure_handlers.py:521
 msgid "Could not identify host"
 msgstr "无法识别主机"
 
-#: backend/api/handlers/infrastructure_handlers.py:482
+#: backend/api/handlers/infrastructure_handlers.py:486
 #, python-format
 msgid "Failed to process certificates update: %s"
 msgstr "处理证书更新失败：%s"
 
-#: backend/api/handlers/infrastructure_handlers.py:596
+#: backend/api/handlers/infrastructure_handlers.py:600
 #, python-format
 msgid "Failed to process role data update: %s"
 msgstr "处理角色数据更新失败：%s"
 
-#: backend/api/handlers/child_host/listing.py:37
-#: backend/api/handlers/child_host/control.py:38
-#: backend/api/handlers/child_host/virtualization.py:37
-#: backend/api/handlers/child_host/creation.py:37
+#: backend/api/handlers/child_host/listing.py:41
+#: backend/api/handlers/child_host/control.py:42
+#: backend/api/handlers/child_host/virtualization.py:41
+#: backend/api/handlers/child_host/creation.py:41
 msgid "Child host management requires a Professional+ license."
 msgstr "子主机管理需要 Professional+ 许可证。"
 
-#: backend/api/handlers/os_hardware_handlers.py:89
+#: backend/api/handlers/os_hardware_handlers.py:93
 msgid "No host identification available"
 msgstr "没有可用的主机标识信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:288
+#: backend/api/handlers/os_hardware_handlers.py:292
 msgid "os_version_updated"
 msgstr "操作系统版本已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:294
+#: backend/api/handlers/os_hardware_handlers.py:298
 msgid "No OS information provided"
 msgstr "没有提供操作系统信息"
 
-#: backend/api/handlers/os_hardware_handlers.py:304
+#: backend/api/handlers/os_hardware_handlers.py:308
 msgid "Failed to update OS version"
 msgstr "更新操作系统版本失败"
 
-#: backend/api/handlers/os_hardware_handlers.py:488
+#: backend/api/handlers/os_hardware_handlers.py:492
 msgid "hardware_updated"
 msgstr "硬件已更新"
 
-#: backend/api/handlers/os_hardware_handlers.py:497
+#: backend/api/handlers/os_hardware_handlers.py:501
 msgid "Failed to update hardware information"
 msgstr "更新硬件信息失败"
 
-#: backend/api/handlers/software_package_handlers.py:101
+#: backend/api/handlers/software_package_handlers.py:105
 msgid "software_inventory_updated"
 msgstr "软件清单已更新"
 
-#: backend/api/handlers/software_package_handlers.py:110
+#: backend/api/handlers/software_package_handlers.py:114
 msgid "Failed to update software inventory"
 msgstr "更新软件库存失败"
 
-#: backend/api/handlers/software_package_handlers.py:288
-#: backend/api/updates/report_routes.py:71
+#: backend/api/handlers/software_package_handlers.py:292
+#: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "存储更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:403
+#: backend/api/handlers/software_package_handlers.py:407
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "处理软件包收集结果失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:497
+#: backend/api/handlers/software_package_handlers.py:501
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr "处理第三方仓库更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:580
+#: backend/api/handlers/software_package_handlers.py:584
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "处理反病毒状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:711
+#: backend/api/handlers/software_package_handlers.py:715
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "处理商业反病毒状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:813
+#: backend/api/handlers/software_package_handlers.py:817
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "处理防火墙状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:899
+#: backend/api/handlers/software_package_handlers.py:903
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "处理Graylog状态更新失败：%s"
 
-#: backend/api/handlers/software_package_handlers.py:931
+#: backend/api/handlers/software_package_handlers.py:935
 msgid "Missing request_id in installation_complete"
 msgstr "在安装完成请求中缺少 request_id"
 
-#: backend/api/handlers/software_package_handlers.py:948
-#: backend/api/agent.py:743 backend/api/packages.py:465
+#: backend/api/handlers/software_package_handlers.py:952
+#: backend/api/agent.py:747 backend/api/packages.py:469
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安装请求: %s"
 
-#: backend/api/handlers/software_package_handlers.py:989
-#: backend/api/packages.py:485
+#: backend/api/handlers/software_package_handlers.py:993
+#: backend/api/packages.py:489
 #, python-format
 msgid "Failed to record installation completion: %s"
 msgstr "记录安装完成失败：%s"
 
-#: backend/api/report_templates.py:173 backend/api/repository_mirroring.py:162
-#: backend/api/package_compliance.py:137 backend/api/external_idp.py:72
-#: backend/api/dynamic_secrets.py:106 backend/api/upgrade_profiles.py:124
+#: backend/api/report_templates.py:177 backend/api/repository_mirroring.py:166
+#: backend/api/package_compliance.py:141 backend/api/external_idp.py:76
+#: backend/api/dynamic_secrets.py:110 backend/api/upgrade_profiles.py:128
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "字段 %(field)s 的无效 UUID：%(value)s"
 
-#: backend/api/report_templates.py:188 backend/api/report_templates.py:256
+#: backend/api/report_templates.py:192 backend/api/report_templates.py:260
 #, python-format
 msgid "Unknown base_report_type: %s"
 msgstr "未知的 base_report_type: %s"
 
-#: backend/api/report_templates.py:197
+#: backend/api/report_templates.py:201
 #, python-format
 msgid "Unknown field code(s) for %(base_report_type)s: %(codes)s"
 msgstr "未知的报告类型 %(base_report_type)s 的代码：%(codes)s"
 
-#: backend/api/report_templates.py:240
+#: backend/api/report_templates.py:244
 #, python-format
 msgid "Created report template '%s'"
 msgstr "已创建报告模板 '%s'"
 
-#: backend/api/report_templates.py:330
+#: backend/api/report_templates.py:334
 #, python-format
 msgid "Updated report template '%s'"
 msgstr "已更新报告模板 '%s'"
 
-#: backend/api/report_templates.py:363
+#: backend/api/report_templates.py:367
 #, python-format
 msgid "Deleted report template '%s'"
 msgstr "已删除报告模板 '%s'"
 
-#: backend/api/report_templates.py:368
+#: backend/api/report_templates.py:372
 msgid "Report template deleted"
 msgstr "报告模板已删除"
 
-#: backend/api/auth_mfa.py:250
+#: backend/api/auth_mfa.py:254
 msgid "Call enroll/start before enroll/complete."
 msgstr "请在 enroll/complete 之前调用 enroll/start。"
 
-#: backend/api/auth_mfa.py:262 backend/api/auth_mfa.py:503
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
 msgid "Invalid TOTP code."
 msgstr "无效的 TOTP 代码。"
 
-#: backend/api/auth_mfa.py:300 backend/api/auth_mfa.py:354
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA挑战已过期 — 请重新登录。"
 
-#: backend/api/auth_mfa.py:305
+#: backend/api/auth_mfa.py:309
 msgid "Invalid MFA challenge."
 msgstr "无效的 MFA 挑战。"
 
-#: backend/api/auth_mfa.py:317
+#: backend/api/auth_mfa.py:321
 msgid "Invalid MFA code."
 msgstr "无效的 MFA 代码。"
 
-#: backend/api/auth_mfa.py:400
+#: backend/api/auth_mfa.py:404
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "如果您帐户启用了 MFA，已通过电子邮件发送了验证码。"
 
-#: backend/api/auth_mfa.py:430
+#: backend/api/auth_mfa.py:434
 msgid "Invalid password."
 msgstr "无效的密码。"
 
-#: backend/api/auth_mfa.py:436
+#: backend/api/auth_mfa.py:440
 msgid "MFA disabled."
 msgstr "MFA已禁用。"
 
-#: backend/api/auth_mfa.py:491
+#: backend/api/auth_mfa.py:495
 msgid "MFA is not enrolled for this account."
 msgstr "此帐户未注册MFA。"
 
-#: backend/api/auth_mfa.py:553
+#: backend/api/auth_mfa.py:557
 msgid "Editing MFA settings requires admin privileges."
 msgstr "编辑多因素认证设置需要管理员权限。"
 
-#: backend/api/fips_actions.py:53 backend/api/fips_actions.py:62
+#: backend/api/fips_actions.py:57 backend/api/fips_actions.py:66
 msgid "FIPS mode management requires a SysManage Enterprise license."
 msgstr "FIPS 模式管理需要 SysManage 企业许可证。"
 
-#: backend/api/fips_actions.py:68
+#: backend/api/fips_actions.py:72
 msgid "The compliance module is not currently available."
 msgstr "当前合规模块不可用。"
 
-#: backend/api/third_party_repos.py:219
+#: backend/api/third_party_repos.py:223
 #, python-format
 msgid "Failed to list third-party repositories: %s"
 msgstr "列出第三方存储库失败：%s"
 
-#: backend/api/third_party_repos.py:243
+#: backend/api/third_party_repos.py:247
 msgid "Permission denied: ADD_THIRD_PARTY_REPOSITORY role required"
 msgstr "缺少 ADD_THIRD_PARTY_REPOSITORY 角色，无法执行操作"
 
-#: backend/api/third_party_repos.py:274
+#: backend/api/third_party_repos.py:278
 msgid "Repository identifier is required"
 msgstr "仓库标识符是必需的"
 
-#: backend/api/third_party_repos.py:324
+#: backend/api/third_party_repos.py:328
 msgid "Repository add request queued successfully"
 msgstr "仓库添加请求已成功排队"
 
-#: backend/api/third_party_repos.py:332
+#: backend/api/third_party_repos.py:336
 #, python-format
 msgid "Failed to queue repository addition: %s"
 msgstr "将仓库添加请求加入队列失败：%s"
 
-#: backend/api/third_party_repos.py:360
+#: backend/api/third_party_repos.py:364
 msgid "Permission denied: DELETE_THIRD_PARTY_REPOSITORY role required"
 msgstr "权限 denied: 需要 DELETE_THIRD_PARTY_REPOSITORY 角色"
 
-#: backend/api/third_party_repos.py:392
+#: backend/api/third_party_repos.py:396
 msgid "No repositories specified for deletion"
 msgstr "未指定要删除的仓库"
 
-#: backend/api/third_party_repos.py:470
+#: backend/api/third_party_repos.py:474
 msgid "Repository deletion request queued successfully"
 msgstr "仓库删除请求已成功排队"
 
-#: backend/api/third_party_repos.py:478
+#: backend/api/third_party_repos.py:482
 #, python-format
 msgid "Failed to queue repository deletion: %s"
 msgstr "将仓库删除请求加入队列失败：%s"
 
-#: backend/api/third_party_repos.py:506
+#: backend/api/third_party_repos.py:510
 msgid "Permission denied: ENABLE_THIRD_PARTY_REPOSITORY role required"
 msgstr "权限 denied: 需要 ENABLE_THIRD_PARTY_REPOSITORY 角色"
 
-#: backend/api/third_party_repos.py:538 backend/api/third_party_repos.py:656
+#: backend/api/third_party_repos.py:542 backend/api/third_party_repos.py:660
 msgid "No repositories specified"
 msgstr "未指定仓库"
 
-#: backend/api/third_party_repos.py:588
+#: backend/api/third_party_repos.py:592
 msgid "Repository enable request queued successfully"
 msgstr "仓库启用请求已成功排队"
 
-#: backend/api/third_party_repos.py:596
+#: backend/api/third_party_repos.py:600
 #, python-format
 msgid "Failed to queue repository enable: %s"
 msgstr "将仓库启用请求加入队列失败：%s"
 
-#: backend/api/third_party_repos.py:624
+#: backend/api/third_party_repos.py:628
 msgid "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
 msgstr "权限 denied: 需要 DISABLE_THIRD_PARTY_REPOSITORY 角色"
 
-#: backend/api/third_party_repos.py:706
+#: backend/api/third_party_repos.py:710
 msgid "Repository disable request queued successfully"
 msgstr "仓库禁用请求已成功排队"
 
-#: backend/api/third_party_repos.py:714
+#: backend/api/third_party_repos.py:718
 #, python-format
 msgid "Failed to queue repository disable: %s"
 msgstr "将仓库禁用请求加入队列失败：%s"
 
-#: backend/api/reports/endpoints.py:65
+#: backend/api/reports/endpoints.py:69
 msgid ""
 "Report generation requires a SysManage Professional+ license. Please upgrade"
 " to access this feature."
 msgstr "报告生成需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/reports/endpoints.py:144
+#: backend/api/reports/endpoints.py:148
 msgid "Registered Hosts"
 msgstr "已注册主机"
 
-#: backend/api/reports/endpoints.py:146
+#: backend/api/reports/endpoints.py:150
 msgid "Hosts with Tags"
 msgstr "带标签的主机"
 
-#: backend/api/reports/endpoints.py:154
+#: backend/api/reports/endpoints.py:158
 msgid "SysManage Users"
 msgstr "SysManage用户"
 
-#: backend/api/reports/endpoints.py:159
+#: backend/api/reports/endpoints.py:163
 msgid "Host Firewall Status"
 msgstr "主机防火墙状态"
 
-#: backend/api/reports/endpoints.py:165
+#: backend/api/reports/endpoints.py:169
 msgid "Open-Source Antivirus Status"
 msgstr "开源杀毒软件状态"
 
-#: backend/api/reports/endpoints.py:172
+#: backend/api/reports/endpoints.py:176
 msgid "Commercial Antivirus Status"
 msgstr "商业杀毒软件状态"
 
-#: backend/api/reports/endpoints.py:185
+#: backend/api/reports/endpoints.py:189
 msgid "User Security Roles (RBAC)"
 msgstr "用户安全角色 (RBAC)"
 
-#: backend/api/reports/endpoints.py:195 backend/api/audit_log.py:526
+#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "审计日志"
 
-#: backend/api/reports/endpoints.py:198 backend/api/reports/endpoints.py:335
+#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
 msgid "Unknown report type"
 msgstr "未知报告类型"
 
-#: backend/api/reports/endpoints.py:288
+#: backend/api/reports/endpoints.py:292
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成不可用。请安装reportlab包。"
 
-#: backend/api/reports/endpoints.py:360
+#: backend/api/reports/endpoints.py:364
 msgid "Report"
 msgstr "报告"
 
-#: backend/api/airgap_collection_schedule.py:59
+#: backend/api/airgap_collection_schedule.py:63
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr "气隙采集计划需要包含气隙采集器引擎的 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/airgap_collection_schedule.py:85
+#: backend/api/airgap_collection_schedule.py:89
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
 msgstr "无效的 cron 表达式：需要 5 个字段 (m h dom mon dow)"
 
-#: backend/api/airgap_collection_schedule.py:94
-#: backend/api/upgrade_profiles.py:144
+#: backend/api/airgap_collection_schedule.py:98
+#: backend/api/upgrade_profiles.py:148
 #, python-format
 msgid "Invalid cron expression: %s"
 msgstr "无效的 cron 表达式: %s"
 
-#: backend/api/airgap_collection_schedule.py:172
-#: backend/api/airgap_collection_schedule.py:255
+#: backend/api/airgap_collection_schedule.py:176
+#: backend/api/airgap_collection_schedule.py:259
 #, python-format
 msgid "Invalid target_request: %s"
 msgstr "无效的 target_request: %s"
 
-#: backend/api/airgap_collection_schedule.py:190
+#: backend/api/airgap_collection_schedule.py:194
 #, python-format
 msgid "Created air-gap collection schedule '%s'"
 msgstr "已创建气隙采集计划 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:266
+#: backend/api/airgap_collection_schedule.py:270
 #, python-format
 msgid "Updated air-gap collection schedule '%s'"
 msgstr "已更新气隙采集计划 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:305
+#: backend/api/airgap_collection_schedule.py:309
 #, python-format
 msgid "Deleted air-gap collection schedule '%s'"
 msgstr "已删除气隙采集计划 '%s'"
 
-#: backend/api/airgap_collection_schedule.py:310
+#: backend/api/airgap_collection_schedule.py:314
 msgid "Air-gap collection schedule deleted"
 msgstr "气隙采集计划已删除"
 
-#: backend/api/airgap_collection_schedule.py:374
+#: backend/api/airgap_collection_schedule.py:378
 msgid ""
 "automation_engine not loaded; next_run timestamps not advanced. Schedules "
 "will fire only on the current tick window until the Pro+ license includes "
@@ -652,459 +652,459 @@ msgstr ""
 "automation_engine 未加载；next_run 时间戳未推进。在 Pro+ 许可证包含 automation_engine "
 "之前，计划仅在当前 tick 窗口中触发。"
 
-#: backend/api/graylog_integration.py:174
+#: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
 msgstr "权限被拒绝：需要 ENABLE_GRAYLOG_INTEGRATION 角色"
 
-#: backend/api/graylog_integration.py:201
+#: backend/api/graylog_integration.py:205
 msgid "Selected host does not have Graylog server role"
 msgstr "所选主机没有 Graylog 服务器角色"
 
-#: backend/api/graylog_integration.py:261
+#: backend/api/graylog_integration.py:265
 msgid "Failed to securely store API token"
 msgstr "无法安全存储 API 令牌"
 
-#: backend/api/graylog_integration.py:297
+#: backend/api/graylog_integration.py:301
 msgid "Graylog integration settings updated successfully"
 msgstr "Graylog 集成设置已成功更新"
 
-#: backend/api/graylog_integration.py:322
+#: backend/api/graylog_integration.py:326
 msgid "Graylog integration has not been configured"
 msgstr "Graylog 集成尚未配置"
 
-#: backend/api/graylog_integration.py:326
+#: backend/api/graylog_integration.py:330
 msgid "Graylog integration is not enabled"
 msgstr "Graylog 集成未启用"
 
-#: backend/api/graylog_integration.py:333
+#: backend/api/graylog_integration.py:337
 #, python-format
 msgid "Error retrieving Graylog URL: %s"
 msgstr "检索 Graylog URL 时出错：%s"
 
-#: backend/api/graylog_integration.py:337
+#: backend/api/graylog_integration.py:341
 msgid "Graylog URL is not configured"
 msgstr "Graylog URL 未配置"
 
-#: backend/api/graylog_integration.py:539
+#: backend/api/graylog_integration.py:543
 msgid "Connection timeout - Graylog server may be unreachable"
 msgstr "连接超时 - Graylog 服务器可能无法访问"
 
-#: backend/api/graylog_integration.py:548
+#: backend/api/graylog_integration.py:552
 msgid "Connection failed - Graylog server may be down or unreachable"
 msgstr "连接失败 - Graylog 服务器可能已关闭或无法访问"
 
-#: backend/api/graylog_integration.py:554
+#: backend/api/graylog_integration.py:558
 msgid "Unexpected error checking Graylog health"
 msgstr "检查 Graylog 健康状态时出现意外错误"
 
-#: backend/api/openbao.py:59
+#: backend/api/openbao.py:63
 msgid "openbao.invalid_pid"
 msgstr "openbao.无效的进程ID"
 
-#: backend/api/openbao.py:100
+#: backend/api/openbao.py:104
 msgid "openbao.process_not_found"
 msgstr "openbao.未找到进程"
 
-#: backend/api/openbao.py:187
+#: backend/api/openbao.py:191
 msgid "openbao.running"
 msgstr "openbao.正在运行"
 
-#: backend/api/openbao.py:245
+#: backend/api/openbao.py:249
 msgid "openbao.already_running"
 msgstr "openbao.already_running"
 
-#: backend/api/openbao.py:271 backend/api/openbao.py:462
+#: backend/api/openbao.py:275 backend/api/openbao.py:466
 msgid "openbao.script_not_found"
 msgstr "openbao.脚本未找到"
 
-#: backend/api/openbao.py:366 backend/api/openbao.py:423
+#: backend/api/openbao.py:370 backend/api/openbao.py:427
 msgid "openbao.start_error"
 msgstr "openbao.启动错误"
 
-#: backend/api/openbao.py:401
+#: backend/api/openbao.py:405
 msgid "openbao.started"
 msgstr "openbao.已启动"
 
-#: backend/api/openbao.py:408 backend/api/openbao.py:766
+#: backend/api/openbao.py:412 backend/api/openbao.py:770
 msgid "openbao.start_failed"
 msgstr "openbao.启动失败"
 
-#: backend/api/openbao.py:415
+#: backend/api/openbao.py:419
 msgid "openbao.start_timeout"
 msgstr "openbao.启动超时"
 
-#: backend/api/openbao.py:517
+#: backend/api/openbao.py:521
 msgid "openbao.stopped"
 msgstr "openbao.已停止"
 
-#: backend/api/openbao.py:524 backend/api/openbao.py:792
+#: backend/api/openbao.py:528 backend/api/openbao.py:796
 msgid "openbao.stop_failed"
 msgstr "openbao.停止失败"
 
-#: backend/api/openbao.py:531
+#: backend/api/openbao.py:535
 msgid "openbao.stop_timeout"
 msgstr "openbao.停止超时"
 
-#: backend/api/openbao.py:564
+#: backend/api/openbao.py:568
 msgid "openbao.already_sealed"
 msgstr "openbao.already_sealed"
 
-#: backend/api/openbao.py:574 backend/api/openbao.py:680
+#: backend/api/openbao.py:578 backend/api/openbao.py:684
 msgid "openbao.binary_not_found"
 msgstr "openbao.binary_not_found"
 
-#: backend/api/openbao.py:610
+#: backend/api/openbao.py:614
 msgid "openbao.sealed"
 msgstr "openbao.已密封"
 
-#: backend/api/openbao.py:617 backend/api/openbao.py:839
+#: backend/api/openbao.py:621 backend/api/openbao.py:843
 msgid "openbao.seal_failed"
 msgstr "openbao.密封失败"
 
-#: backend/api/openbao.py:625
+#: backend/api/openbao.py:629
 msgid "openbao.seal_timeout"
 msgstr "openbao.密封超时"
 
-#: backend/api/openbao.py:634
+#: backend/api/openbao.py:638
 msgid "openbao.seal_error"
 msgstr "openbao.密封错误"
 
-#: backend/api/openbao.py:657
+#: backend/api/openbao.py:661
 msgid "openbao.already_unsealed"
 msgstr "openbao.already_unsealed"
 
-#: backend/api/openbao.py:668
+#: backend/api/openbao.py:672
 msgid "openbao.unseal_prod_mode"
 msgstr "openbao.进入生产模式"
 
-#: backend/api/openbao.py:718
+#: backend/api/openbao.py:722
 msgid "openbao.unsealed"
 msgstr "openbao.已解封"
 
-#: backend/api/openbao.py:725 backend/api/openbao.py:865
+#: backend/api/openbao.py:729 backend/api/openbao.py:869
 msgid "openbao.unseal_failed"
 msgstr "openbao.解封失败"
 
-#: backend/api/openbao.py:734
+#: backend/api/openbao.py:738
 msgid "openbao.unseal_timeout"
 msgstr "openbao.解封超时"
 
-#: backend/api/openbao.py:742
+#: backend/api/openbao.py:746
 msgid "openbao.unseal_error"
 msgstr "openbao.解封错误"
 
-#: backend/api/user_preferences.py:39
+#: backend/api/user_preferences.py:43
 msgid "Grid identifier is required"
 msgstr "网格标识符是必需的"
 
-#: backend/api/user_preferences.py:41
+#: backend/api/user_preferences.py:45
 msgid "Grid identifier must be 255 characters or less"
 msgstr "网格标识符必须为 255 个字符或更少"
 
-#: backend/api/user_preferences.py:113
+#: backend/api/user_preferences.py:117
 #, python-format
 msgid "Failed to retrieve column preferences: %s"
 msgstr "无法检索列偏好设置：%s"
 
-#: backend/api/user_preferences.py:198
+#: backend/api/user_preferences.py:202
 #, python-format
 msgid "Failed to update column preferences: %s"
 msgstr "更新列偏好设置失败：%s"
 
-#: backend/api/user_preferences.py:248
+#: backend/api/user_preferences.py:252
 msgid "Column preferences reset to defaults"
 msgstr "列偏好已重置为默认值"
 
-#: backend/api/user_preferences.py:250
+#: backend/api/user_preferences.py:254
 msgid "No preferences found to delete"
 msgstr "找不到要删除的偏好设置"
 
-#: backend/api/user_preferences.py:257
+#: backend/api/user_preferences.py:261
 #, python-format
 msgid "Failed to delete column preferences: %s"
 msgstr "删除列偏好设置失败：%s"
 
-#: backend/api/user_preferences.py:319
+#: backend/api/user_preferences.py:323
 #, python-format
 msgid "Failed to retrieve dashboard card preferences: %s"
 msgstr "无法检索仪表板卡片偏好设置：%s"
 
-#: backend/api/user_preferences.py:413
+#: backend/api/user_preferences.py:417
 #, python-format
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "更新仪表板卡片偏好设置失败：%s"
 
-#: backend/api/child_host_control.py:46
+#: backend/api/child_host_control.py:50
 msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr "容器生命周期管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 # Child host lifecycle control messages
-#: backend/api/child_host_control.py:302
+#: backend/api/child_host_control.py:306
 #, python-format
 msgid "Child host start requested: %s"
 msgstr "已请求启动子主机: %s"
 
-#: backend/api/child_host_control.py:309
+#: backend/api/child_host_control.py:313
 msgid "Child host start requested"
 msgstr "已请求启动子主机"
 
-#: backend/api/child_host_control.py:362
+#: backend/api/child_host_control.py:366
 #, python-format
 msgid "Child host stop requested: %s"
 msgstr "已请求停止子主机: %s"
 
-#: backend/api/child_host_control.py:369
+#: backend/api/child_host_control.py:373
 msgid "Child host stop requested"
 msgstr "已请求停止子主机"
 
-#: backend/api/child_host_control.py:422
+#: backend/api/child_host_control.py:426
 #, python-format
 msgid "Child host restart requested: %s"
 msgstr "已请求重启子主机: %s"
 
-#: backend/api/child_host_control.py:429
+#: backend/api/child_host_control.py:433
 msgid "Child host restart requested"
 msgstr "已请求重启子主机"
 
-#: backend/api/child_host_control.py:511
+#: backend/api/child_host_control.py:515
 #, python-format
 msgid "Child agent update requested: %s"
 msgstr "已请求子代理更新：%s"
 
-#: backend/api/child_host_control.py:518
+#: backend/api/child_host_control.py:522
 msgid "Child agent update requested"
 msgstr "已请求子代理更新"
 
-#: backend/api/airgap_keys.py:68
+#: backend/api/airgap_keys.py:72
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
 msgstr "未找到收集器签名密钥。将此服务器的角色设置为 'Air-Gap Collector' 以生成一个。"
 
-#: backend/api/airgap_keys.py:92 backend/api/federation_identity.py:165
+#: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
 msgid "Invalid public key: %s"
 msgstr "无效的公钥：%s"
 
-#: backend/api/airgap_keys.py:97 backend/api/federation_identity.py:170
+#: backend/api/airgap_keys.py:101 backend/api/federation_identity.py:174
 #, python-format
 msgid "Could not write key to keyring: %s"
 msgstr "无法将密钥写入 keyring：%s"
 
-#: backend/api/airgap_keys.py:106 backend/api/federation_identity.py:179
+#: backend/api/airgap_keys.py:110 backend/api/federation_identity.py:183
 msgid "Trusted key not found"
 msgstr "可信密钥未找到"
 
-#: backend/api/user.py:73
+#: backend/api/user.py:77
 msgid "Permission denied: DELETE_USER role required"
 msgstr "权限 denied: 需要 DELETE_USER 角色"
 
-#: backend/api/user.py:354
+#: backend/api/user.py:358
 msgid "Permission denied: ADD_USER role required"
 msgstr "缺少 ADD_USER 角色，无法执行操作"
 
-#: backend/api/user.py:364 backend/api/user.py:502
+#: backend/api/user.py:368 backend/api/user.py:506
 msgid "User already exists"
 msgstr "用户已存在"
 
-#: backend/api/user.py:458
+#: backend/api/user.py:462
 msgid "Permission denied: EDIT_USER role required"
 msgstr "权限 denied: 需要 EDIT_USER 角色"
 
-#: backend/api/user.py:547
+#: backend/api/user.py:551
 msgid "Permission denied: UNLOCK_USER role required"
 msgstr "权限 denied: 需要 UNLOCK_USER 角色"
 
-#: backend/api/user.py:597
+#: backend/api/user.py:601
 msgid "Permission denied: LOCK_USER role required"
 msgstr "权限 denied: 需要 LOCK_USER 角色"
 
-#: backend/api/user.py:635 backend/api/profile.py:284
-#: backend/api/report_branding.py:129
+#: backend/api/user.py:639 backend/api/profile.py:288
+#: backend/api/report_branding.py:133
 msgid "No file provided"
 msgstr "未提供文件"
 
-#: backend/api/user.py:642 backend/api/profile.py:291
+#: backend/api/user.py:646 backend/api/profile.py:295
 msgid "Error reading uploaded file"
 msgstr "读取上传文件时发生错误"
 
-#: backend/api/user.py:670 backend/api/profile.py:324
+#: backend/api/user.py:674 backend/api/profile.py:328
 msgid "Profile image uploaded successfully"
 msgstr "个人资料图片上传成功"
 
-#: backend/api/user.py:694 backend/api/profile.py:352
+#: backend/api/user.py:698 backend/api/profile.py:356
 msgid "No profile image found"
 msgstr "未找到个人资料图片"
 
-#: backend/api/user.py:735 backend/api/profile.py:393
+#: backend/api/user.py:739 backend/api/profile.py:397
 msgid "No profile image to delete"
 msgstr "没有可删除的个人资料图片"
 
-#: backend/api/user.py:744 backend/api/profile.py:403
+#: backend/api/user.py:748 backend/api/profile.py:407
 msgid "Profile image deleted successfully"
 msgstr "个人资料图片删除成功"
 
-#: backend/api/host_hostname.py:48
+#: backend/api/host_hostname.py:52
 msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
 msgstr "权限 denied: 需要 EDIT_HOST_HOSTNAME 角色"
 
-#: backend/api/host_hostname.py:71 backend/api/reboot_orchestration.py:115
-#: backend/api/error_constants.py:39 backend/api/child_host_utils.py:87
-#: backend/api/scripts/routes_executions.py:77
+#: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
+#: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
+#: backend/api/scripts/routes_executions.py:81
 msgid "Host is not active"
 msgstr "主机不处于活动状态"
 
-#: backend/api/host_hostname.py:78
+#: backend/api/host_hostname.py:82
 msgid "Host agent is not running in privileged mode"
 msgstr "主机代理没有以特权模式运行"
 
-#: backend/api/host_hostname.py:86
+#: backend/api/host_hostname.py:90
 msgid "Hostname cannot be empty"
 msgstr "主机名不能为空"
 
-#: backend/api/host_hostname.py:97
+#: backend/api/host_hostname.py:101
 msgid "Invalid hostname format"
 msgstr "无效的主机名格式"
 
-#: backend/api/host_hostname.py:143
+#: backend/api/host_hostname.py:147
 msgid "Hostname change requested"
 msgstr "请求更改主机名"
 
-#: backend/api/invitations.py:119
+#: backend/api/invitations.py:123
 msgid "Permission denied: Add User role required"
 msgstr "权限被拒绝：需要“添加用户”角色"
 
-#: backend/api/invitations.py:238 backend/api/invitations.py:256
+#: backend/api/invitations.py:242 backend/api/invitations.py:260
 msgid "No pending invitation found"
 msgstr "未找到待处理的邀请"
 
-#: backend/api/invitations.py:241
+#: backend/api/invitations.py:245
 msgid "Invitation revoked"
 msgstr "邀请已撤销"
 
-#: backend/api/invitations.py:265
+#: backend/api/invitations.py:269
 msgid "Failed to send invitation email. Please check email configuration."
 msgstr "发送邀请邮件失败。请检查邮件配置。"
 
-#: backend/api/invitations.py:269
+#: backend/api/invitations.py:273
 #, python-brace-format
 msgid "Invitation re-sent to {email}"
 msgstr "已将邀请重新发送至 {email}"
 
-#: backend/api/invitations.py:283
+#: backend/api/invitations.py:287
 msgid "Invalid or expired invitation"
 msgstr "邀请无效或已过期"
 
-#: backend/api/invitations.py:292 backend/api/password_reset.py:347
+#: backend/api/invitations.py:296 backend/api/password_reset.py:351
 msgid "Passwords do not match"
 msgstr "两次输入的密码不匹配"
 
-#: backend/api/invitations.py:296 backend/api/password_reset.py:352
+#: backend/api/invitations.py:300 backend/api/password_reset.py:356
 msgid "Password must be at least 8 characters long"
 msgstr "密码长度至少为8位"
 
-#: backend/api/invitations.py:313
+#: backend/api/invitations.py:317
 msgid "Your account is ready. You can now log in."
 msgstr "您的账户已就绪。您现在可以登录。"
 
-#: backend/api/server_info.py:245
+#: backend/api/server_info.py:249
 #, python-format
 msgid "Set server role to '%s'"
 msgstr "将服务器角色设置为'%s'"
 
-#: backend/api/server_info.py:331
+#: backend/api/server_info.py:335
 #, python-format
 msgid "Set federation role to '%s'"
 msgstr "将联邦角色设置为'%s'"
 
-#: backend/api/host_ubuntu_pro.py:60
+#: backend/api/host_ubuntu_pro.py:64
 msgid "Permission denied: ATTACH_UBUNTU_PRO role required"
 msgstr "缺少 ATTACH_UBUNTU_PRO 角色，无法执行操作"
 
-#: backend/api/host_ubuntu_pro.py:65
+#: backend/api/host_ubuntu_pro.py:69
 msgid "Ubuntu Pro token is required"
 msgstr "Ubuntu Pro令牌是必需的"
 
-#: backend/api/host_ubuntu_pro.py:100
+#: backend/api/host_ubuntu_pro.py:104
 msgid "Ubuntu Pro attach requested"
 msgstr "Ubuntu Pro附加请求"
 
-#: backend/api/host_ubuntu_pro.py:110
+#: backend/api/host_ubuntu_pro.py:114
 #, python-format
 msgid "Failed to request Ubuntu Pro attach: %s"
 msgstr "请求Ubuntu Pro附加失败：%s"
 
-#: backend/api/host_ubuntu_pro.py:127
+#: backend/api/host_ubuntu_pro.py:131
 msgid "Permission denied: DETACH_UBUNTU_PRO role required"
 msgstr "权限 denied: 需要 DETACH_UBUNTU_PRO 角色"
 
-#: backend/api/host_ubuntu_pro.py:163
+#: backend/api/host_ubuntu_pro.py:167
 msgid "Ubuntu Pro detach requested"
 msgstr "Ubuntu Pro分离请求"
 
-#: backend/api/host_ubuntu_pro.py:173
+#: backend/api/host_ubuntu_pro.py:177
 #, python-format
 msgid "Failed to request Ubuntu Pro detach: %s"
 msgstr "请求Ubuntu Pro分离失败：%s"
 
-#: backend/api/host_ubuntu_pro.py:186 backend/api/host_ubuntu_pro.py:246
+#: backend/api/host_ubuntu_pro.py:190 backend/api/host_ubuntu_pro.py:250
 msgid "Service name is required"
 msgstr "服务名称是必需的"
 
-#: backend/api/host_ubuntu_pro.py:223
+#: backend/api/host_ubuntu_pro.py:227
 msgid "Ubuntu Pro service enable requested"
 msgstr "Ubuntu Pro服务启用请求"
 
-#: backend/api/host_ubuntu_pro.py:233
+#: backend/api/host_ubuntu_pro.py:237
 #, python-format
 msgid "Failed to request Ubuntu Pro service enable: %s"
 msgstr "请求Ubuntu Pro服务启用失败：%s"
 
-#: backend/api/host_ubuntu_pro.py:283
+#: backend/api/host_ubuntu_pro.py:287
 msgid "Ubuntu Pro service disable requested"
 msgstr "Ubuntu Pro服务禁用请求"
 
-#: backend/api/host_ubuntu_pro.py:293
+#: backend/api/host_ubuntu_pro.py:297
 #, python-format
 msgid "Failed to request Ubuntu Pro service disable: %s"
 msgstr "请求Ubuntu Pro服务禁用失败：%s"
 
-#: backend/api/host_utils.py:691
+#: backend/api/host_utils.py:695
 msgid "Host limit reached for this tenant."
 msgstr "已达到此租户的主机数量上限。"
 
-#: backend/api/processes.py:82 backend/api/processes.py:128
+#: backend/api/processes.py:86 backend/api/processes.py:132
 msgid "Permission denied: View Host Details role required"
 msgstr "权限被拒绝：需要“查看主机详情”角色"
 
-#: backend/api/processes.py:145
+#: backend/api/processes.py:149
 msgid "Process refresh requested. The list will update shortly."
 msgstr "已请求刷新进程。列表将很快更新。"
 
-#: backend/api/processes.py:164
+#: backend/api/processes.py:168
 msgid "Permission denied: Kill Host Process role required"
 msgstr "权限被拒绝：需要“终止主机进程”角色"
 
-#: backend/api/processes.py:171
+#: backend/api/processes.py:175
 msgid "Agent must be running in privileged mode to terminate processes"
 msgstr "代理必须以特权模式运行才能终止进程"
 
-#: backend/api/processes.py:220
+#: backend/api/processes.py:224
 msgid "Process termination requested. The list will update shortly."
 msgstr "已请求终止进程。列表将很快更新。"
 
-#: backend/api/broadcast.py:106
+#: backend/api/broadcast.py:110
 #, python-format
 msgid "Invalid tag_id: %s"
 msgstr "无效的 tag_id: %s"
 
-#: backend/api/broadcast.py:133 backend/api/error_constants.py:132
+#: backend/api/broadcast.py:137 backend/api/error_constants.py:136
 msgid "Tag not found"
 msgstr "标签未找到"
 
-#: backend/api/broadcast.py:211
+#: backend/api/broadcast.py:215
 #, python-format
 msgid ""
 "Broadcast '%(action)s' delivered to %(delivered)d host(s) "
@@ -1112,11 +1112,11 @@ msgid ""
 msgstr ""
 "广播 '%(action)s' 已发送到 %(delivered)d 个主机（过滤器=%(filter)s，耗时%(elapsed).0fms毫秒）"
 
-#: backend/api/package_handlers.py:66
+#: backend/api/package_handlers.py:70
 msgid "Missing batch_id"
 msgstr "缺少 batch_id"
 
-#: backend/api/package_handlers.py:80
+#: backend/api/package_handlers.py:84
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1125,183 +1125,183 @@ msgstr ""
 "主机 %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 尝试报告 "
 "%(os_name)s %(os_version)s 的软件包"
 
-#: backend/api/package_handlers.py:143
+#: backend/api/package_handlers.py:147
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "无法启动软件包批处理：%s"
 
-#: backend/api/package_handlers.py:176 backend/api/package_handlers.py:300
+#: backend/api/package_handlers.py:180 backend/api/package_handlers.py:304
 msgid "Invalid or expired batch_id"
 msgstr "无效或已过期的batch_id"
 
-#: backend/api/package_handlers.py:187 backend/api/package_handlers.py:311
+#: backend/api/package_handlers.py:191 backend/api/package_handlers.py:315
 msgid "Batch belongs to different host"
 msgstr "批次属于不同的主机"
 
-#: backend/api/package_handlers.py:267
+#: backend/api/package_handlers.py:271
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "处理软件包批次失败：%s"
 
-#: backend/api/package_handlers.py:345
+#: backend/api/package_handlers.py:349
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "结束软件包批次失败：%s"
 
-#: backend/api/queue.py:124
+#: backend/api/queue.py:128
 msgid "Permission denied: DELETE_QUEUE_MESSAGE role required"
 msgstr "缺少 DELETE_QUEUE_MESSAGE 角色，无法执行操作"
 
-#: backend/api/queue.py:130
+#: backend/api/queue.py:134
 msgid "No message IDs provided"
 msgstr "未提供消息 ID"
 
-#: backend/api/queue.py:182
+#: backend/api/queue.py:186
 msgid "Message not found or not expired"
 msgstr "未找到消息或已过期"
 
 # Tag management messages
-#: backend/api/queue.py:245
+#: backend/api/queue.py:249
 msgid "Failed to fetch message details"
 msgstr "获取消息详细信息失败"
 
-#: backend/api/host_account_management.py:74
+#: backend/api/host_account_management.py:78
 msgid "Permission denied: ADD_HOST_ACCOUNT role required"
 msgstr "缺少 ADD_HOST_ACCOUNT 角色，无法执行操作"
 
-#: backend/api/host_account_management.py:98
+#: backend/api/host_account_management.py:102
 msgid "Agent must be running in privileged mode to manage user accounts"
 msgstr "代理必须以特权模式运行才能管理用户账户"
 
-#: backend/api/host_account_management.py:172
+#: backend/api/host_account_management.py:176
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
 msgstr "用户账户创建请求。创建后，用户列表将自动更新。"
 
-#: backend/api/host_account_management.py:196
+#: backend/api/host_account_management.py:200
 msgid "Permission denied: ADD_HOST_GROUP role required"
 msgstr "缺少 ADD_HOST_GROUP 角色，无法执行操作"
 
-#: backend/api/host_account_management.py:219
+#: backend/api/host_account_management.py:223
 msgid "Agent must be running in privileged mode to manage groups"
 msgstr "代理必须以特权模式运行才能管理组"
 
-#: backend/api/host_account_management.py:276
+#: backend/api/host_account_management.py:280
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
 msgstr "组创建请求。创建后，组列表将自动更新。"
 
-#: backend/api/host_account_management.py:303
+#: backend/api/host_account_management.py:307
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
 msgstr "缺少 DELETE_HOST_ACCOUNT 角色，无法执行操作"
 
-#: backend/api/host_account_management.py:327
+#: backend/api/host_account_management.py:331
 msgid "Agent must be running in privileged mode to delete user accounts"
 msgstr "代理必须以特权模式运行才能删除用户账户"
 
-#: backend/api/host_account_management.py:380
+#: backend/api/host_account_management.py:384
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr "删除用户账户请求。删除后，用户列表将自动更新。"
 
-#: backend/api/host_account_management.py:406
+#: backend/api/host_account_management.py:410
 msgid "Permission denied: DELETE_HOST_GROUP role required"
 msgstr "缺少 DELETE_HOST_GROUP 角色，无法执行操作"
 
-#: backend/api/host_account_management.py:429
+#: backend/api/host_account_management.py:433
 msgid "Agent must be running in privileged mode to delete groups"
 msgstr "代理必须以特权模式运行才能删除组"
 
-#: backend/api/host_account_management.py:479
+#: backend/api/host_account_management.py:483
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
 msgstr "组删除请求。删除后，组列表将自动更新。"
 
-#: backend/api/repository_mirroring.py:86
+#: backend/api/repository_mirroring.py:90
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "仓库镜像功能需要SysManage Professional+许可证。请升级以访问此功能。"
 
-#: backend/api/repository_mirroring.py:259
+#: backend/api/repository_mirroring.py:263
 msgid "Mirror host not found"
 msgstr "找不到镜像主机"
 
-#: backend/api/repository_mirroring.py:365
+#: backend/api/repository_mirroring.py:369
 msgid "Mirror deleted"
 msgstr "已删除镜像"
 
-#: backend/api/repository_mirroring.py:397
+#: backend/api/repository_mirroring.py:401
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "不支持的包管理器: %s"
 
-#: backend/api/repository_mirroring.py:410
+#: backend/api/repository_mirroring.py:414
 msgid "Mirror sync dispatched"
 msgstr "镜像同步已调度"
 
-#: backend/api/repository_mirroring.py:606
+#: backend/api/repository_mirroring.py:610
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "镜像 tick 需要 automation_engine 以进行 cron 评估。"
 
-#: backend/api/repository_mirroring.py:831
-#: backend/api/repository_mirroring.py:893
+#: backend/api/repository_mirroring.py:835
+#: backend/api/repository_mirroring.py:897
 #, python-format
 msgid "Invalid platform: %s"
 msgstr "无效的平台：%s"
 
-#: backend/api/repository_mirroring.py:848
+#: backend/api/repository_mirroring.py:852
 #, python-format
 msgid "A platform config for %s on this host already exists"
 msgstr "在此主机上已存在一个针对%s的平台配置"
 
-#: backend/api/repository_mirroring.py:940
+#: backend/api/repository_mirroring.py:944
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "平台配置仍然拥有 %d 个镜像；请先删除这些镜像"
 
-#: backend/api/repository_mirroring.py:1110
+#: backend/api/repository_mirroring.py:1114
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
 " before assigning it as a default."
 msgstr "镜像 %s 尚未完成成功的同步 —— 在分配为默认值之前请等待同步成功。"
 
-#: backend/api/repository_mirroring.py:1119
+#: backend/api/repository_mirroring.py:1123
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr "镜像 %(mirror_name)s 用于 %(package_manager)s，不能分配给 %(platform)s 默认值"
 
-#: backend/api/repository_mirroring.py:1202
+#: backend/api/repository_mirroring.py:1206
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "未知的 (平台, 版本, 操作系统类型) 组合"
 
-#: backend/api/airgap_collector_runs.py:79
+#: backend/api/airgap_collector_runs.py:83
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr "空气隔断收集运行需要具有空气隔断采集引擎的SysManage专业版+许可证。请升级以访问此功能。"
 
-#: backend/api/airgap_collector_runs.py:220
+#: backend/api/airgap_collector_runs.py:224
 msgid ""
 "Air-gap collection runs require the repository_mirroring_engine module to be"
 " loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr "空气间隙收集运行需要加载repository_mirroring_engine模块——采集器从其镜像树的快照中读取每个目标的捆绑包。"
 
-#: backend/api/airgap_collector_runs.py:231
+#: backend/api/airgap_collector_runs.py:235
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr "全局镜像设置缺失或 mirror_root_path 配置不完整。请配置镜像设置后再创建集合运行。"
 
-#: backend/api/airgap_collector_runs.py:291
+#: backend/api/airgap_collector_runs.py:295
 #, python-format
 msgid ""
 "Mirror %r has no known_version_id set; Option-B collection runs need the "
@@ -1311,90 +1311,90 @@ msgstr ""
 "镜像 %r 没有设置 known_version_id；选项-B "
 "收集需要将镜像绑定到目录版本，以便推导发行版/版本。编辑镜像并从下拉菜单中选择一个版本。"
 
-#: backend/api/airgap_collector_runs.py:322
+#: backend/api/airgap_collector_runs.py:326
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr "镜像 %r 引用了不再存在的目录版本。重新选择镜像上的版本。"
 
-#: backend/api/airgap_collector_runs.py:406
-#: backend/api/airgap_collector_runs.py:485
+#: backend/api/airgap_collector_runs.py:410
+#: backend/api/airgap_collector_runs.py:489
 msgid "At least one target is required to create a collection run."
 msgstr "至少需要一个目标来创建集合运行。"
 
-#: backend/api/airgap_collector_runs.py:416
+#: backend/api/airgap_collector_runs.py:420
 #, python-format
 msgid "Invalid UUID for mirror_id: %s"
 msgstr "镜像 ID 的 UUID 无效: %s"
 
-#: backend/api/airgap_collector_runs.py:426
+#: backend/api/airgap_collector_runs.py:430
 #, python-format
 msgid "Mirror %s not found"
 msgstr "找不到镜像 %s"
 
-#: backend/api/airgap_collector_runs.py:432
+#: backend/api/airgap_collector_runs.py:436
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
 msgstr "镜像 %r 已禁用；启用并同步后再使用它进行收集。"
 
-#: backend/api/airgap_collector_runs.py:443
+#: backend/api/airgap_collector_runs.py:447
 #, python-format
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr "所有目标镜像必须位于同一主机上（集合计划调度到单个代理）。所选镜像跨越%d个主机。"
 
-#: backend/api/airgap_collector_runs.py:539
+#: backend/api/airgap_collector_runs.py:543
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr "已创建一次性离线收集运行 '%(iso_label)s'，目标镜像数为 %(mirror_count)d；快照已分发。"
 
-#: backend/api/airgap_collector_runs.py:662
+#: backend/api/airgap_collector_runs.py:666
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr "ISO 尚不可下载（状态：%s）。请等待运行达到 ISO_BUILT 状态。"
 
-#: backend/api/airgap_collector_runs.py:672
+#: backend/api/airgap_collector_runs.py:676
 msgid ""
 "ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
 " the collection to rebuild."
 msgstr "ISO 文件已从磁盘中删除；可能已经清理了暂存卷。请重新运行收集以重建 ISO 文件系统。"
 
-#: backend/api/airgap_collector_runs.py:689
+#: backend/api/airgap_collector_runs.py:693
 msgid "ISO file not found."
 msgstr "未找到 ISO 文件。"
 
-#: backend/api/airgap_collector_runs.py:709
+#: backend/api/airgap_collector_runs.py:713
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
 msgstr "找不到磁盘 Disc %(disc)d。可用磁盘：%(available)s"
 
-#: backend/api/airgap_collector_runs.py:794
+#: backend/api/airgap_collector_runs.py:798
 msgid "Invalid or expired download token."
 msgstr "无效或已过期的下载令牌。"
 
-#: backend/api/airgap_collector_runs.py:827
+#: backend/api/airgap_collector_runs.py:831
 #, python-format
 msgid "Deleted air-gap collection run '%s'"
 msgstr "已删除离线集合运行 '%s'"
 
-#: backend/api/airgap_collector_runs.py:899
+#: backend/api/airgap_collector_runs.py:903
 #, python-format
 msgid "Run is not COMPLETE yet (status: %s)"
 msgstr "运行尚未完成（状态：%s）"
 
-#: backend/api/airgap_collector_runs.py:905
+#: backend/api/airgap_collector_runs.py:909
 #, python-format
 msgid "ISO file is no longer on disk: %s"
 msgstr "ISO 文件已不在磁盘上： %s"
 
-#: backend/api/package_compliance.py:72
+#: backend/api/package_compliance.py:76
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
@@ -1402,26 +1402,26 @@ msgstr ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
 
-#: backend/api/package_compliance.py:199
+#: backend/api/package_compliance.py:203
 #, python-format
 msgid "Created package profile '%s'"
 msgstr "已创建包配置文件 '%s'"
 
-#: backend/api/package_compliance.py:251
+#: backend/api/package_compliance.py:255
 #, python-format
 msgid "Updated package profile '%s'"
 msgstr "已更新包配置文件 '%s'"
 
-#: backend/api/package_compliance.py:281
+#: backend/api/package_compliance.py:285
 #, python-format
 msgid "Deleted package profile '%s'"
 msgstr "已删除包配置文件 '%s'"
 
-#: backend/api/package_compliance.py:286
+#: backend/api/package_compliance.py:290
 msgid "Package profile deleted"
 msgstr "包配置文件已删除"
 
-#: backend/api/package_compliance.py:373
+#: backend/api/package_compliance.py:377
 #, python-format
 msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
@@ -1430,499 +1430,505 @@ msgstr ""
 "根据配置文件 '%(profile_name)s' 扫描主机 '%(host_fqdn)s'：%(status)s "
 "(%(violation_count)d 条违规)"
 
-#: backend/api/package_compliance.py:499
+#: backend/api/package_compliance.py:503
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
 msgstr "已调度合规性检查到代理 '%(host_fqdn)s'，配置文件为 '%(profile_name)s'"
 
-#: backend/api/federation_identity.py:86
+#: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
 msgstr "无法加载或生成联邦 TLS 证书。"
 
-#: backend/api/federation_identity.py:143
+#: backend/api/federation_identity.py:147
 msgid "Could not load or generate the federation identity key."
 msgstr "无法加载或生成联邦身份密钥。"
 
-#: backend/api/access_groups.py:153
+#: backend/api/access_groups.py:157
 msgid "A group cannot be its own parent"
 msgstr "组不能是其自身的上级"
 
-#: backend/api/access_groups.py:163
+#: backend/api/access_groups.py:167
 msgid "Cycle detected in access-group hierarchy"
 msgstr "在访问组层级中检测到循环"
 
-#: backend/api/access_groups.py:168
+#: backend/api/access_groups.py:172
 msgid "Setting parent_id would create a cycle"
 msgstr "设置 parent_id 将创建循环"
 
-#: backend/api/access_groups.py:175
+#: backend/api/access_groups.py:179
 #, python-format
 msgid "Access-group hierarchy too deep (max %d levels)"
 msgstr "访问组层级过深 (最多 %d 层)"
 
-#: backend/api/access_groups.py:194
+#: backend/api/access_groups.py:198
 #, python-format
 msgid "Invalid UUID for %(field_name)s: %(value)s"
 msgstr "字段 %(field_name)s 的无效 UUID：%(value)s"
 
-#: backend/api/access_groups.py:229
+#: backend/api/access_groups.py:233
 msgid "Parent group not found"
 msgstr "未找到上级组"
 
-#: backend/api/access_groups.py:249
+#: backend/api/access_groups.py:253
 #, python-format
 msgid "Created access group '%s'"
 msgstr "已创建访问组 '%s'"
 
-#: backend/api/access_groups.py:305
+#: backend/api/access_groups.py:309
 #, python-format
 msgid "Updated access group '%s'"
 msgstr "已更新访问组 '%s'"
 
-#: backend/api/access_groups.py:335
+#: backend/api/access_groups.py:339
 #, python-format
 msgid "Deleted access group '%s'"
 msgstr "已删除访问组 '%s'"
 
-#: backend/api/access_groups.py:340
+#: backend/api/access_groups.py:344
 msgid "Access group deleted"
 msgstr "访问组已删除"
 
-#: backend/api/access_groups.py:389
+#: backend/api/access_groups.py:393
 msgid "Federation site not found"
 msgstr "未找到联邦站点"
 
-#: backend/api/access_groups.py:414
+#: backend/api/access_groups.py:418
 #, python-format
 msgid "Created registration key '%s'"
 msgstr "已创建注册密钥 '%s'"
 
-#: backend/api/access_groups.py:448
+#: backend/api/access_groups.py:452
 #, python-format
 msgid "Revoked registration key '%s'"
 msgstr "已撤销注册密钥 '%s'"
 
-#: backend/api/access_groups.py:453
+#: backend/api/access_groups.py:457
 msgid "Registration key revoked"
 msgstr "注册密钥已撤销"
 
-#: backend/api/access_groups.py:480
+#: backend/api/access_groups.py:484
 #, python-format
 msgid "Deleted registration key '%s'"
 msgstr "已删除注册密钥 '%s'"
 
-#: backend/api/access_groups.py:485
+#: backend/api/access_groups.py:489
 msgid "Registration key deleted"
 msgstr "注册密钥已删除"
 
-#: backend/api/external_idp.py:57
+#: backend/api/external_idp.py:61
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
 msgstr "外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
 
-#: backend/api/external_idp.py:85
+#: backend/api/external_idp.py:89
 msgid "IdP provider not found"
 msgstr "找不到身份提供者"
 
-#: backend/api/external_idp.py:287
+#: backend/api/external_idp.py:291
 msgid "IdP provider deleted"
 msgstr "身份提供者已删除"
 
-#: backend/api/external_idp.py:335
+#: backend/api/external_idp.py:339
 msgid "A default-for-unmapped mapping already exists for this provider."
 msgstr "对于此提供商，已经存在一个默认的未映射映射。"
 
-#: backend/api/external_idp.py:369
+#: backend/api/external_idp.py:373
 msgid "Role mapping not found"
 msgstr "角色映射未找到"
 
-#: backend/api/external_idp.py:372
+#: backend/api/external_idp.py:376
 msgid "Role mapping deleted"
 msgstr "角色映射删除成功"
 
-#: backend/api/external_idp.py:423
+#: backend/api/external_idp.py:427
 msgid "Provider is not an OIDC provider."
 msgstr "提供者不是OIDC提供者。"
 
-#: backend/api/external_idp.py:426
+#: backend/api/external_idp.py:430
 msgid "OIDC provider is disabled."
 msgstr "OIDC提供程序已禁用。"
 
-#: backend/api/external_idp.py:457
+#: backend/api/external_idp.py:461
 msgid "Missing code or state in callback."
 msgstr "回调中缺少 code 或 state"
 
-#: backend/api/external_idp.py:461
+#: backend/api/external_idp.py:465
 msgid "Invalid OIDC state."
 msgstr "无效的 OIDC 状态。"
 
-#: backend/api/external_idp.py:470
+#: backend/api/external_idp.py:474
 msgid "OIDC client secret could not be resolved."
 msgstr "无法解析OIDC客户端密钥。"
 
-#: backend/api/external_idp.py:477
+#: backend/api/external_idp.py:481
 #, python-format
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登录失败：%s"
 
-#: backend/api/external_idp.py:497 backend/api/external_idp.py:694
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr "没有与该身份提供商标识关联的SysManage帐户。请先让管理员为您配置帐户。"
 
-#: backend/api/external_idp.py:502 backend/api/external_idp.py:699
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
 msgid "Account is inactive."
 msgstr "账户处于非活动状态。"
 
-#: backend/api/external_idp.py:604 backend/api/external_idp.py:625
+#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
 msgid "Provider is not a SAML provider."
 msgstr "提供程序不是SAML提供程序。"
 
-#: backend/api/external_idp.py:610
+#: backend/api/external_idp.py:614
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "无法构建SP元数据：%s"
 
-#: backend/api/external_idp.py:628
+#: backend/api/external_idp.py:632
 msgid "SAML provider is disabled."
 msgstr "SAML提供程序已禁用。"
 
-#: backend/api/external_idp.py:634
+#: backend/api/external_idp.py:638
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "无法启动SAML登录：%s"
 
-#: backend/api/external_idp.py:662
+#: backend/api/external_idp.py:666
 msgid "Missing SAMLResponse or RelayState."
 msgstr "缺少SAMLResponse或RelayState。"
 
-#: backend/api/external_idp.py:667
+#: backend/api/external_idp.py:671
 msgid "Invalid or expired SAML RelayState."
 msgstr "无效或已过期的SAML RelayState。"
 
-#: backend/api/external_idp.py:677
+#: backend/api/external_idp.py:681
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAML登录失败：%s"
 
-#: backend/api/grafana_integration.py:316
+#: backend/api/grafana_integration.py:320
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
 msgstr "权限 denied: 需要 ENABLE_GRAFANA_INTEGRATION 角色"
 
-#: backend/api/grafana_integration.py:343
+#: backend/api/grafana_integration.py:347
 msgid "Selected host does not have Grafana server role"
 msgstr "所选主机没有Grafana服务器角色"
 
-#: backend/api/grafana_integration.py:400
+#: backend/api/grafana_integration.py:404
 msgid "Failed to securely store API key"
 msgstr "无法安全存储API密钥"
 
-#: backend/api/grafana_integration.py:451
+#: backend/api/grafana_integration.py:455
 msgid "Grafana integration settings updated successfully"
 msgstr "更新 Grafana 集成设置成功"
 
-#: backend/api/grafana_integration.py:475
+#: backend/api/grafana_integration.py:479
 msgid "Grafana integration has not been configured"
 msgstr "Grafana 集成尚未配置"
 
-#: backend/api/grafana_integration.py:480
-#: backend/api/opentelemetry/eligibility.py:160
+#: backend/api/grafana_integration.py:484
+#: backend/api/opentelemetry/eligibility.py:164
 msgid "Grafana integration is not enabled"
 msgstr "Grafana 集成未启用"
 
-#: backend/api/grafana_integration.py:488
+#: backend/api/grafana_integration.py:492
 #, python-format
 msgid "Error retrieving Grafana URL: %s"
 msgstr "获取Grafana URL时发生错误：%s"
 
-#: backend/api/grafana_integration.py:493
+#: backend/api/grafana_integration.py:497
 msgid "Grafana URL is not configured"
 msgstr "Grafana URL 未配置"
 
-#: backend/api/grafana_integration.py:574
+#: backend/api/grafana_integration.py:578
 msgid "Connection timeout - Grafana server may be unreachable"
 msgstr "超时 - Grafana 服务器可能不可达"
 
-#: backend/api/grafana_integration.py:583
+#: backend/api/grafana_integration.py:587
 msgid "Connection failed - Grafana server may be down or unreachable"
 msgstr "连接失败 - Grafana 服务器可能已关闭或不可达"
 
-#: backend/api/grafana_integration.py:589
+#: backend/api/grafana_integration.py:593
 msgid "Unexpected error checking Grafana health"
 msgstr "检查 Grafana 健康状态时出现意外错误"
 
-#: backend/api/opentelemetry/status.py:59
-#: backend/api/opentelemetry/deployment.py:93
-#: backend/api/opentelemetry/deployment.py:245
-#: backend/api/opentelemetry/eligibility.py:107
-#: backend/api/opentelemetry/grafana_connection.py:84
-#: backend/api/opentelemetry/grafana_connection.py:227
-#: backend/api/packages_operations.py:93
-#: backend/api/packages_operations.py:272 backend/api/error_constants.py:115
+#: backend/api/opentelemetry/status.py:63
+#: backend/api/opentelemetry/deployment.py:97
+#: backend/api/opentelemetry/deployment.py:249
+#: backend/api/opentelemetry/eligibility.py:111
+#: backend/api/opentelemetry/grafana_connection.py:88
+#: backend/api/opentelemetry/grafana_connection.py:231
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "未找到或不处于活动状态的主机"
 
-#: backend/api/opentelemetry/status.py:115
+#: backend/api/opentelemetry/status.py:119
 #, python-format
 msgid "Failed to get OpenTelemetry status: %s"
 msgstr "获取 OpenTelemetry 状态失败：%s"
 
-#: backend/api/opentelemetry/status.py:183
+#: backend/api/opentelemetry/status.py:187
 #, python-format
 msgid "Failed to retrieve OpenTelemetry coverage: %s"
 msgstr "检索OpenTelemetry覆盖范围失败：%s"
 
-#: backend/api/opentelemetry/deployment.py:72
-#: backend/api/opentelemetry/deployment.py:225
-#: backend/api/opentelemetry/eligibility.py:87
+#: backend/api/opentelemetry/deployment.py:76
+#: backend/api/opentelemetry/deployment.py:229
+#: backend/api/opentelemetry/eligibility.py:91
 msgid "Permission denied: DEPLOY_OPENTELEMETRY role required"
 msgstr "权限 denied: 需要 DEPLOY_OPENTELEMETRY 角色"
 
-#: backend/api/opentelemetry/deployment.py:107
+#: backend/api/opentelemetry/deployment.py:111
 #, python-format
 msgid "Host is not eligible for OpenTelemetry deployment: %s"
 msgstr "主机不符合 OpenTelemetry 部署条件：%s"
 
-#: backend/api/opentelemetry/deployment.py:121
-#: backend/api/opentelemetry/grafana_connection.py:99
+#: backend/api/opentelemetry/deployment.py:125
+#: backend/api/opentelemetry/grafana_connection.py:103
 msgid "Grafana integration is not configured"
 msgstr "Grafana 集成未配置"
 
-#: backend/api/opentelemetry/deployment.py:128
-#: backend/api/opentelemetry/grafana_connection.py:106
+#: backend/api/opentelemetry/deployment.py:132
+#: backend/api/opentelemetry/grafana_connection.py:110
 msgid "Grafana URL is not available"
 msgstr "Grafana URL 不可用"
 
-#: backend/api/opentelemetry/deployment.py:148
+#: backend/api/opentelemetry/deployment.py:152
 msgid ""
 "OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
 " on the server."
 msgstr "要进行OpenTelemetry部署，服务器上需要加载Pro+ observability_engine。"
 
-#: backend/api/opentelemetry/deployment.py:175
+#: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
 msgstr "OpenTelemetry部署成功排队"
 
-#: backend/api/opentelemetry/deployment.py:185
+#: backend/api/opentelemetry/deployment.py:189
 #, python-format
 msgid "Failed to deploy OpenTelemetry: %s"
 msgstr "部署 OpenTelemetry 失败：%s"
 
-#: backend/api/opentelemetry/deployment.py:260
+#: backend/api/opentelemetry/deployment.py:264
 msgid ""
 "OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
 " the server."
 msgstr "移除 OpenTelemetry 需要服务器上加载 Pro+ observability_engine"
 
-#: backend/api/opentelemetry/deployment.py:287
+#: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
 msgstr "OpenTelemetry 删除任务已成功排队"
 
-#: backend/api/opentelemetry/deployment.py:297
+#: backend/api/opentelemetry/deployment.py:301
 #, python-format
 msgid "Failed to remove OpenTelemetry: %s"
 msgstr "移除OpenTelemetry失败：%s"
 
-#: backend/api/opentelemetry/eligibility.py:162
+#: backend/api/opentelemetry/eligibility.py:166
 msgid "OpenTelemetry is already installed"
 msgstr "OpenTelemetry 已经安装"
 
-#: backend/api/opentelemetry/eligibility.py:164
+#: backend/api/opentelemetry/eligibility.py:168
 msgid "Agent is not running in privileged mode"
 msgstr "代理没有以特权模式运行"
 
-#: backend/api/opentelemetry/eligibility.py:166
+#: backend/api/opentelemetry/eligibility.py:170
 msgid "Operating system not supported (OpenBSD/NetBSD)"
 msgstr "操作系统不受支持（OpenBSD/NetBSD）"
 
-#: backend/api/opentelemetry/eligibility.py:186
+#: backend/api/opentelemetry/eligibility.py:190
 #, python-format
 msgid "Failed to check OpenTelemetry eligibility: %s"
 msgstr "检查 OpenTelemetry 合格性失败：%s"
 
-#: backend/api/opentelemetry/service_control.py:77
+#: backend/api/opentelemetry/service_control.py:81
 msgid "Permission denied: START_OPENTELEMETRY_SERVICE role required"
 msgstr "权限 denied: 需要 START_OPENTELEMETRY_SERVICE 角色"
 
-#: backend/api/opentelemetry/service_control.py:137
+#: backend/api/opentelemetry/service_control.py:141
 msgid "OpenTelemetry start command queued successfully"
 msgstr "启动 OpenTelemetry 命令已成功排队"
 
-#: backend/api/opentelemetry/service_control.py:147
+#: backend/api/opentelemetry/service_control.py:151
 #, python-format
 msgid "Failed to start OpenTelemetry: %s"
 msgstr "无法启动OpenTelemetry：%s"
 
-#: backend/api/opentelemetry/service_control.py:186
+#: backend/api/opentelemetry/service_control.py:190
 msgid "Permission denied: STOP_OPENTELEMETRY_SERVICE role required"
 msgstr "权限 denied: 需要 STOP_OPENTELEMETRY_SERVICE 角色"
 
-#: backend/api/opentelemetry/service_control.py:243
+#: backend/api/opentelemetry/service_control.py:247
 msgid "OpenTelemetry stop command queued successfully"
 msgstr "停止 OpenTelemetry 命令已成功排队"
 
-#: backend/api/opentelemetry/service_control.py:253
+#: backend/api/opentelemetry/service_control.py:257
 #, python-format
 msgid "Failed to stop OpenTelemetry: %s"
 msgstr "无法停止OpenTelemetry：%s"
 
-#: backend/api/opentelemetry/service_control.py:293
-#: backend/api/opentelemetry/grafana_connection.py:63
-#: backend/api/opentelemetry/grafana_connection.py:206
+#: backend/api/opentelemetry/service_control.py:297
+#: backend/api/opentelemetry/grafana_connection.py:67
+#: backend/api/opentelemetry/grafana_connection.py:210
 msgid "Permission denied: RESTART_OPENTELEMETRY_SERVICE role required"
 msgstr "权限 denied: 需要 RESTART_OPENTELEMETRY_SERVICE 角色"
 
-#: backend/api/opentelemetry/service_control.py:351
+#: backend/api/opentelemetry/service_control.py:355
 msgid "OpenTelemetry restart command queued successfully"
 msgstr "重启 OpenTelemetry 命令已成功排队"
 
-#: backend/api/opentelemetry/service_control.py:361
+#: backend/api/opentelemetry/service_control.py:365
 #, python-format
 msgid "Failed to restart OpenTelemetry: %s"
 msgstr "重启OpenTelemetry失败：%s"
 
-#: backend/api/opentelemetry/grafana_connection.py:123
+#: backend/api/opentelemetry/grafana_connection.py:127
 msgid ""
 "OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
 "be loaded on the server."
 msgstr "要进行OpenTelemetry Grafana连接，服务器上需要加载Pro+ observability_engine。"
 
-#: backend/api/opentelemetry/grafana_connection.py:156
+#: backend/api/opentelemetry/grafana_connection.py:160
 msgid "OpenTelemetry Grafana connection queued successfully"
 msgstr "OpenTelemetry Grafana连接成功排队"
 
-#: backend/api/opentelemetry/grafana_connection.py:166
+#: backend/api/opentelemetry/grafana_connection.py:170
 #, python-format
 msgid "Failed to connect OpenTelemetry to Grafana: %s"
 msgstr "将 OpenTelemetry 连接到 Grafana 失败：%s"
 
-#: backend/api/opentelemetry/grafana_connection.py:243
+#: backend/api/opentelemetry/grafana_connection.py:247
 msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
 msgstr "要进行OpenTelemetry Grafana断开连接，服务器上需要加载Pro+ observability_engine。"
 
-#: backend/api/opentelemetry/grafana_connection.py:273
+#: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
 msgstr "OpenTelemetry Grafana断开连接成功排队"
 
-#: backend/api/opentelemetry/grafana_connection.py:283
+#: backend/api/opentelemetry/grafana_connection.py:287
 #, python-format
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "断开 OpenTelemetry 与 Grafana 的连接失败：%s"
 
-#: backend/api/cve_refresh_settings.py:54
+#: backend/api/content_lifecycle.py:42
+msgid ""
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
+msgstr "内容生命周期管理需要SysManage Professional+（企业版）许可证。请升级以访问此功能。"
+
+#: backend/api/cve_refresh_settings.py:58
 msgid ""
 "CVE feed management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "CVE 数据源管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/cve_refresh_settings.py:118
+#: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
 msgstr "刷新间隔必须至少为1小时"
 
-#: backend/api/cve_refresh_settings.py:120
+#: backend/api/cve_refresh_settings.py:124
 msgid "Refresh interval cannot exceed 168 hours (1 week)"
 msgstr "刷新间隔不能超过168小时（1周）"
 
-#: backend/api/cve_refresh_settings.py:131
-#: backend/api/cve_refresh_settings.py:376
+#: backend/api/cve_refresh_settings.py:135
+#: backend/api/cve_refresh_settings.py:380
 #, python-format
 msgid "Invalid CVE source: %s"
 msgstr "无效的 CVE 源: %s"
 
-#: backend/api/cve_refresh_settings.py:222
+#: backend/api/cve_refresh_settings.py:226
 #, python-format
 msgid "Failed to retrieve CVE refresh settings: %s"
 msgstr "检索CVE刷新设置失败：%s"
 
-#: backend/api/cve_refresh_settings.py:289
+#: backend/api/cve_refresh_settings.py:293
 #, python-format
 msgid "Failed to update CVE refresh settings: %s"
 msgstr "更新 CVE 刷新设置失败：%s"
 
-#: backend/api/cve_refresh_settings.py:306
+#: backend/api/cve_refresh_settings.py:310
 #, python-format
 msgid "Failed to retrieve CVE database statistics: %s"
 msgstr "检索CVE数据库统计信息失败：%s"
 
-#: backend/api/cve_refresh_settings.py:321
+#: backend/api/cve_refresh_settings.py:325
 msgid "Limit must be between 1 and 100"
 msgstr "限制必须在1到100之间"
 
-#: backend/api/cve_refresh_settings.py:344
+#: backend/api/cve_refresh_settings.py:348
 #, python-format
 msgid "Failed to retrieve CVE ingestion history: %s"
 msgstr "检索CVE导入历史记录失败：%s"
 
-#: backend/api/cve_refresh_settings.py:418
+#: backend/api/cve_refresh_settings.py:422
 #, python-format
 msgid "Source %(source)s failed: %(error)s"
 msgstr "源 %(source)s 失败：%(error)s"
 
-#: backend/api/cve_refresh_settings.py:433
+#: backend/api/cve_refresh_settings.py:437
 #, python-format
 msgid "CVE refresh failed: %s"
 msgstr "CVE 刷新失败：%s"
 
-#: backend/api/cve_refresh_settings.py:438
+#: backend/api/cve_refresh_settings.py:442
 #, python-format
 msgid "Failed to trigger CVE refresh: %s"
 msgstr "无法触发CVE刷新：%s"
 
 # Secret deployment messages
-#: backend/api/cve_refresh_settings.py:476
+#: backend/api/cve_refresh_settings.py:480
 msgid "NVD API key cleared successfully"
 msgstr "NVD API 密钥已成功清除"
 
-#: backend/api/cve_refresh_settings.py:482
+#: backend/api/cve_refresh_settings.py:486
 msgid "Failed to clear NVD API key"
 msgstr "清除 NVD API 密钥失败"
 
-#: backend/api/firewall_status.py:153
+#: backend/api/firewall_status.py:157
 #, python-format
 msgid "Failed to retrieve firewall status: %s"
 msgstr "无法检索防火墙状态：%s"
 
-#: backend/api/firewall_status.py:204
+#: backend/api/firewall_status.py:208
 msgid "Firewall enable command sent successfully"
 msgstr "防火墙启用命令发送成功"
 
-#: backend/api/firewall_status.py:252
+#: backend/api/firewall_status.py:256
 msgid "Firewall disable command sent successfully"
 msgstr "防火墙禁用命令发送成功"
 
-#: backend/api/firewall_status.py:300
+#: backend/api/firewall_status.py:304
 msgid "Firewall restart command sent successfully"
 msgstr "防火墙重启命令发送成功"
 
-#: backend/api/firewall_status.py:363
+#: backend/api/firewall_status.py:367
 msgid "Firewall deploy command sent successfully"
 msgstr "防火墙部署命令发送成功"
 
-#: backend/api/default_repositories.py:269
-#: backend/api/antivirus_defaults.py:62
-#: backend/api/enabled_package_managers.py:109
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
+#: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "操作系统名称是必需的"
 
-#: backend/api/default_repositories.py:271
-#: backend/api/enabled_package_managers.py:111
+#: backend/api/default_repositories.py:275
+#: backend/api/enabled_package_managers.py:115
 #, python-format
 msgid "Unsupported operating system: %s"
 msgstr "不支持的操作系统: %s"
 
-#: backend/api/default_repositories.py:280
-#: backend/api/enabled_package_managers.py:120
+#: backend/api/default_repositories.py:284
+#: backend/api/enabled_package_managers.py:124
 msgid "Package manager is required"
 msgstr "需要包管理器"
 
-#: backend/api/default_repositories.py:287
-#: backend/api/enabled_package_managers.py:127
+#: backend/api/default_repositories.py:291
+#: backend/api/enabled_package_managers.py:131
 #, python-format
 msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
@@ -1930,2075 +1936,2075 @@ msgid ""
 msgstr ""
 "对于操作系统 '%(os_name)s'，无效的包管理器 '%(package_manager)s'。有效选项：%(valid_options)s"
 
-#: backend/api/default_repositories.py:304
+#: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
 msgstr "需要仓库URL"
 
-#: backend/api/default_repositories.py:306
+#: backend/api/default_repositories.py:310
 msgid "Repository URL must be 1000 characters or less"
 msgstr "仓库URL不得超过1000字符"
 
-#: backend/api/default_repositories.py:342
-#: backend/api/default_repositories.py:377
+#: backend/api/default_repositories.py:346
+#: backend/api/default_repositories.py:381
 msgid "Permission denied: VIEW_DEFAULT_REPOSITORIES role required"
 msgstr "权限 denied: 需要 VIEW_DEFAULT_REPOSITORIES 角色"
 
-#: backend/api/default_repositories.py:360
-#: backend/api/default_repositories.py:395
+#: backend/api/default_repositories.py:364
+#: backend/api/default_repositories.py:399
 #, python-format
 msgid "Failed to retrieve default repositories: %s"
 msgstr "无法检索默认存储库：%s"
 
-#: backend/api/default_repositories.py:414
+#: backend/api/default_repositories.py:418
 msgid "Permission denied: ADD_DEFAULT_REPOSITORY role required"
 msgstr "缺少 ADD_DEFAULT_REPOSITORY 角色，无法执行操作"
 
-#: backend/api/default_repositories.py:476
+#: backend/api/default_repositories.py:480
 #, python-format
 msgid "Failed to create default repository: %s"
 msgstr "创建默认存储库失败：%s"
 
-#: backend/api/default_repositories.py:495
+#: backend/api/default_repositories.py:499
 msgid "Permission denied: REMOVE_DEFAULT_REPOSITORY role required"
 msgstr "权限 denied: 需要 REMOVE_DEFAULT_REPOSITORY 角色"
 
-#: backend/api/default_repositories.py:510
+#: backend/api/default_repositories.py:514
 msgid "Invalid repository ID format"
 msgstr "无效的存储库ID格式"
 
-#: backend/api/default_repositories.py:523
+#: backend/api/default_repositories.py:527
 msgid "Default repository not found"
 msgstr "未找到默认存储库"
 
-#: backend/api/default_repositories.py:566
+#: backend/api/default_repositories.py:570
 msgid "Default repository deleted successfully"
 msgstr "默认存储库删除成功"
 
-#: backend/api/default_repositories.py:576
+#: backend/api/default_repositories.py:580
 #, python-format
 msgid "Failed to delete default repository: %s"
 msgstr "删除默认存储库失败：%s"
 
 # Pro+ feature gate messages
-#: backend/api/child_host_crud.py:66
-#: backend/api/child_host_virtualization.py:56
-#: backend/api/child_host_virtualization_status.py:34
-#: backend/api/child_host_virtualization_enable.py:36
+#: backend/api/child_host_crud.py:70
+#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization_status.py:38
+#: backend/api/child_host_virtualization_enable.py:40
 msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "容器/虚拟机管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/child_host_crud.py:185 backend/api/child_host_crud.py:359
+#: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
 msgid "Child host not found"
 msgstr "未找到子主机"
 
-#: backend/api/child_host_crud.py:407
+#: backend/api/child_host_crud.py:411
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "已请求删除子主机: %s"
 
-#: backend/api/child_host_crud.py:414
+#: backend/api/child_host_crud.py:418
 msgid "Child host deletion requested"
 msgstr "已请求删除子主机"
 
-#: backend/api/child_host_crud.py:473
+#: backend/api/child_host_crud.py:477
 msgid "Child host refresh requested"
 msgstr "已请求刷新子主机"
 
-#: backend/api/child_host_crud.py:665
+#: backend/api/child_host_crud.py:669
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr "类型 '%(child_type)s' 已存在发行版 '%(name)s %(version)s'"
 
-#: backend/api/child_host_crud.py:817
+#: backend/api/child_host_crud.py:821
 msgid "Distribution deleted"
 msgstr "发行版已删除"
 
-#: backend/api/message_handlers_core.py:52
+#: backend/api/message_handlers_core.py:56
 msgid "Agent authentication failed: invalid host token"
 msgstr "代理身份验证失败：无效的主机令牌"
 
-#: backend/api/message_handlers_core.py:61
+#: backend/api/message_handlers_core.py:65
 msgid "Host with token is not registered. Please re-register."
 msgstr "使用令牌的主机未注册，请重新注册。"
 
-#: backend/api/message_handlers_core.py:82
+#: backend/api/message_handlers_core.py:86
 msgid "Agent authentication failed: invalid host ID"
 msgstr "代理身份验证失败：无效的主机ID"
 
-#: backend/api/message_handlers_core.py:91 backend/utils/host_validation.py:95
+#: backend/api/message_handlers_core.py:95 backend/utils/host_validation.py:99
 #, python-format
 msgid "Host with ID %s is not registered. Please re-register."
 msgstr "ID 为 %s 的主机未注册，请重新注册。"
 
-#: backend/api/message_handlers_core.py:241 backend/api/agent.py:645
+#: backend/api/message_handlers_core.py:245 backend/api/agent.py:649
 msgid "Host registration pending approval"
 msgstr "主机注册待批准"
 
-#: backend/api/message_handlers_core.py:355
+#: backend/api/message_handlers_core.py:359
 msgid "Host auto-approved via child host creation"
 msgstr "主机自动批准，因为创建了子主机"
 
-#: backend/api/message_handlers_core.py:438
+#: backend/api/message_handlers_core.py:442
 msgid "Agent registered and connected successfully"
 msgstr "代理注册并连接成功"
 
-#: backend/api/message_handlers_core.py:743
+#: backend/api/message_handlers_core.py:747
 msgid "Failed to process heartbeat"
 msgstr "处理心跳失败"
 
-#: backend/api/logging_settings.py:67 backend/api/maintenance_windows.py:58
+#: backend/api/logging_settings.py:71 backend/api/maintenance_windows.py:62
 msgid "Permission denied: administrator required"
 msgstr "权限被拒绝：需要管理员"
 
-#: backend/api/logging_settings.py:107
+#: backend/api/logging_settings.py:111
 #, python-format
 msgid "Invalid native log target: %s"
 msgstr "无效的原生日志目标：%s"
 
-#: backend/api/logging_settings.py:112
+#: backend/api/logging_settings.py:116
 #, python-format
 msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "目标 '%(t)s' 对 %(f)s 无效"
 
-#: backend/api/logging_settings.py:130
+#: backend/api/logging_settings.py:134
 msgid ""
 "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr "远程 syslog 转发需要一个专业许可证（LOG_ROUTING）。"
 
-#: backend/api/logging_settings.py:137
+#: backend/api/logging_settings.py:141
 msgid "A syslog host is required for the remote-syslog target."
 msgstr "远程 syslog 目标需要一个 syslog 主机。"
 
-#: backend/api/logging_settings.py:141
+#: backend/api/logging_settings.py:145
 msgid "syslog port must be between 1 and 65535."
 msgstr "syslog 端口必须在 1 到 65535 范围内。"
 
-#: backend/api/logging_settings.py:145
+#: backend/api/logging_settings.py:149
 msgid "syslog protocol must be 'udp' or 'tcp'."
 msgstr "syslog 协议必须是 'udp' 或者 'tcp'。"
 
-#: backend/api/logging_settings.py:172
+#: backend/api/logging_settings.py:176
 #, python-format
 msgid "Unknown OS family: %s"
 msgstr "未知的操作系统系列：%s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:163
-#: backend/api/child_host_virtualization_enable.py:146
+#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL 只在 Windows 主机上受支持"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:169
-#: backend/api/error_constants.py:93
+#: backend/api/child_host_virtualization.py:173
+#: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM仅在Linux主机上受支持"
 
-#: backend/api/child_host_virtualization.py:178
+#: backend/api/child_host_virtualization.py:182
 msgid "Container name is required for LXD containers"
 msgstr "LXD 容器需要容器名称"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:186
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM虚拟机需要VM名称"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:190
 msgid "VM name is required for KVM virtual machines"
 msgstr "KVM虚拟机需要VM名称"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:194
 msgid "VM name is required for bhyve virtual machines"
 msgstr "bhyve 虚拟机需要指定 VM 名称"
 
-#: backend/api/child_host_virtualization.py:414
+#: backend/api/child_host_virtualization.py:418
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr "代理必须以管理员权限运行才能创建子主机"
 
-#: backend/api/child_host_virtualization.py:436
+#: backend/api/child_host_virtualization.py:440
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "此主机上已存在名为 '%s' 的子主机"
 
-#: backend/api/child_host_virtualization.py:510
+#: backend/api/child_host_virtualization.py:514
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr "请求创建子主机：%(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:533
+#: backend/api/child_host_virtualization.py:537
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr "请求创建子主机。当该主机连接时，它将自动获得批准。"
 
-#: backend/api/child_host_virtualization.py:538
+#: backend/api/child_host_virtualization.py:542
 msgid "Child host creation requested. This may take several minutes."
 msgstr "请求创建子主机。这可能需要几分钟时间。"
 
-#: backend/api/host_operations.py:77
+#: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
 msgstr "已请求软件清单更新"
 
-#: backend/api/host_operations.py:96
+#: backend/api/host_operations.py:100
 msgid "Permission denied: REBOOT_HOST role required"
 msgstr "权限 denied: 需要 REBOOT_HOST 角色"
 
-#: backend/api/host_operations.py:139
+#: backend/api/host_operations.py:143
 msgid "System reboot requested"
 msgstr "系统重启请求"
 
-#: backend/api/host_operations.py:158
+#: backend/api/host_operations.py:162
 msgid "Permission denied: SHUTDOWN_HOST role required"
 msgstr "权限 denied: 需要 SHUTDOWN_HOST 角色"
 
-#: backend/api/host_operations.py:201
+#: backend/api/host_operations.py:205
 msgid "System shutdown requested"
 msgstr "系统关机请求"
 
-#: backend/api/host_operations.py:220
+#: backend/api/host_operations.py:224
 msgid "Permission denied: UPDATE_AGENT role required"
 msgstr "权限被拒绝：需要 UPDATE_AGENT 角色"
 
-#: backend/api/host_operations.py:261
+#: backend/api/host_operations.py:265
 msgid "Agent update requested"
 msgstr "已请求代理更新"
 
-#: backend/api/host_operations.py:318
+#: backend/api/host_operations.py:322
 msgid "Package collection requested"
 msgstr "请求包集合"
 
-#: backend/api/host_graylog.py:147
+#: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
 "body."
 msgstr "Graylog 连接需要在请求体中提供机制、graylog_server 和端口。"
 
-#: backend/api/host_graylog.py:171
+#: backend/api/host_graylog.py:175
 msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
 msgstr "Graylog 连接要求服务器上加载 Pro+ observability_engine。"
 
-#: backend/api/host_graylog.py:184
+#: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
 msgstr "Graylog 附件命令已排队成功"
 
-#: backend/api/password_reset.py:335
+#: backend/api/password_reset.py:339
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
 msgstr "如果该电子邮件地址已存在账户，则已发送密码重置链接。"
 
-#: backend/api/password_reset.py:365 backend/api/password_reset.py:406
+#: backend/api/password_reset.py:369 backend/api/password_reset.py:410
 msgid "Invalid or expired password reset token"
 msgstr "无效或已过期的密码重置令牌"
 
-#: backend/api/password_reset.py:387
+#: backend/api/password_reset.py:391
 msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr "您的密码已成功重置。现在您可以使用新密码登录。"
 
-#: backend/api/password_reset.py:409
+#: backend/api/password_reset.py:413
 msgid "Token is valid"
 msgstr "令牌有效"
 
-#: backend/api/password_reset.py:442
+#: backend/api/password_reset.py:446
 msgid "Permission denied: RESET_USER_PASSWORD role required"
 msgstr "权限 denied: 需要 RESET_USER_PASSWORD 角色"
 
-#: backend/api/password_reset.py:460
+#: backend/api/password_reset.py:464
 msgid "Failed to send password reset email. Please check email configuration."
 msgstr "无法发送密码重置电子邮件。请检查邮件配置。"
 
-#: backend/api/password_reset.py:466
+#: backend/api/password_reset.py:470
 #, python-brace-format
 msgid "Password reset email has been sent to {email}"
 msgstr "重置密码的邮件已经发送到 {email}"
 
-#: backend/api/antivirus_defaults.py:64
+#: backend/api/antivirus_defaults.py:68
 msgid "OS name must be 100 characters or less"
 msgstr "操作系统名称必须少于100个字符"
 
-#: backend/api/antivirus_defaults.py:77
+#: backend/api/antivirus_defaults.py:81
 msgid "Antivirus package name must be 255 characters or less"
 msgstr "防病毒包名称不得超过255个字符"
 
-#: backend/api/antivirus_defaults.py:102
+#: backend/api/antivirus_defaults.py:106
 #, python-format
 msgid "Failed to retrieve antivirus defaults: %s"
 msgstr "检索反病毒默认值失败：%s"
 
-#: backend/api/antivirus_defaults.py:123
+#: backend/api/antivirus_defaults.py:127
 #, python-format
 msgid "No antivirus default found for OS: %s"
 msgstr "未在操作系统：%s 中找到默认的反病毒软件"
 
-#: backend/api/antivirus_defaults.py:136
+#: backend/api/antivirus_defaults.py:140
 #, python-format
 msgid "Failed to retrieve antivirus default: %s"
 msgstr "检索默认反病毒配置失败：%s"
 
-#: backend/api/antivirus_defaults.py:155 backend/api/antivirus_defaults.py:255
+#: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
 msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
 msgstr "权限 denied: 需要 MANAGE_ANTIVIRUS_DEFAULTS 角色"
 
-#: backend/api/antivirus_defaults.py:236
+#: backend/api/antivirus_defaults.py:240
 #, python-format
 msgid "Failed to update antivirus defaults: %s"
 msgstr "更新反病毒默认设置失败：%s"
 
-#: backend/api/antivirus_defaults.py:289
+#: backend/api/antivirus_defaults.py:293
 msgid "Antivirus default deleted successfully"
 msgstr "默认的反病毒设置已成功删除"
 
-#: backend/api/antivirus_defaults.py:291
+#: backend/api/antivirus_defaults.py:295
 msgid "No antivirus default found for this OS"
 msgstr "为当前操作系统未找到防病毒默认设置"
 
-#: backend/api/antivirus_defaults.py:299
+#: backend/api/antivirus_defaults.py:303
 #, python-format
 msgid "Failed to delete antivirus default: %s"
 msgstr "删除反病毒默认设置失败：%s"
 
-#: backend/api/scim.py:47
+#: backend/api/scim.py:51
 msgid "SCIM provisioning requires a SysManage Professional+ license."
 msgstr "SCIM配置需要SysManage Professional+许可证。"
 
-#: backend/api/scim.py:60 backend/api/scim.py:69
+#: backend/api/scim.py:64 backend/api/scim.py:73
 msgid "Unknown SCIM target"
 msgstr "未知的SCIM目标"
 
-#: backend/api/scim.py:81
+#: backend/api/scim.py:85
 msgid "Invalid or missing SCIM bearer token."
 msgstr "无效或缺少SCIM承载令牌。"
 
-#: backend/api/email.py:82
+#: backend/api/email.py:86
 msgid "Failed to get email configuration"
 msgstr "无法获取电子邮件配置"
 
-#: backend/api/email.py:98
+#: backend/api/email.py:102
 msgid "Email service is disabled. Enable it in the configuration file."
 msgstr "电子邮件服务已禁用。请在配置文件中启用。"
 
-#: backend/api/email.py:108
+#: backend/api/email.py:112
 #, python-brace-format
 msgid "Test email sent successfully to {address}"
 msgstr "测试电子邮件已成功发送至 {address}"
 
-#: backend/api/email.py:115
+#: backend/api/email.py:119
 msgid "Failed to send test email. Please check your SMTP configuration."
 msgstr "无法发送测试电子邮件。请检查您的 SMTP 配置。"
 
-#: backend/api/email.py:123
+#: backend/api/email.py:127
 #, python-brace-format
 msgid "Error sending test email: {error}"
 msgstr "发送测试电子邮件时出错: {error}"
 
-#: backend/api/airgap_bundles.py:465
+#: backend/api/airgap_bundles.py:469
 msgid "product must be one of: "
 msgstr "产品必须是以下之一： "
 
-#: backend/api/airgap_bundles.py:479
+#: backend/api/airgap_bundles.py:483
 msgid "Insufficient host resources to build a bundle: "
 msgstr "主机资源不足以构建捆绑包："
 
-#: backend/api/airgap_bundles.py:574
+#: backend/api/airgap_bundles.py:578
 #, python-format
 msgid "Bundle is not ready yet (status: %s)"
 msgstr "捆绑尚未准备好（状态：%s）"
 
-#: backend/api/airgap_bundles.py:578
+#: backend/api/airgap_bundles.py:582
 msgid "Bundle file is no longer on disk"
 msgstr "捆绑文件不再存在于磁盘上"
 
-#: backend/api/airgap_bundles.py:625
+#: backend/api/airgap_bundles.py:629
 msgid "Invalid or expired download token"
 msgstr "无效或已过期的下载令牌"
 
 # Tag management messages
-#: backend/api/tag.py:129
+#: backend/api/tag.py:133
 #, python-format
 msgid "Failed to fetch tags: %(error)s"
 msgstr "获取标签失败: %(error)s"
 
-#: backend/api/tag.py:215 backend/api/error_constants.py:137
+#: backend/api/tag.py:219 backend/api/error_constants.py:141
 msgid "Tag with this name already exists"
 msgstr "该名称的标签已存在"
 
-#: backend/api/tag.py:223
+#: backend/api/tag.py:227
 #, python-format
 msgid "Failed to create tag: %(error)s"
 msgstr "创建标签失败: %(error)s"
 
-#: backend/api/tag.py:306
+#: backend/api/tag.py:310
 #, python-format
 msgid "Failed to update tag: %(error)s"
 msgstr "更新标签失败: %(error)s"
 
-#: backend/api/tag.py:369
+#: backend/api/tag.py:373
 #, python-format
 msgid "Failed to delete tag: %(error)s"
 msgstr "删除标签失败: %(error)s"
 
-#: backend/api/tag.py:439
+#: backend/api/tag.py:443
 #, python-format
 msgid "Failed to fetch tag hosts: %(error)s"
 msgstr "获取标签主机失败: %(error)s"
 
-#: backend/api/tag.py:517
+#: backend/api/tag.py:521
 msgid "Tag already associated with this host"
 msgstr "标签已与此主机关联"
 
-#: backend/api/tag.py:550
+#: backend/api/tag.py:554
 msgid "Tag added to host successfully"
 msgstr "标签已成功添加到主机"
 
-#: backend/api/tag.py:557
+#: backend/api/tag.py:561
 #, python-format
 msgid "Failed to add tag to host: %(error)s"
 msgstr "添加标签到主机失败: %(error)s"
 
-#: backend/api/tag.py:593
+#: backend/api/tag.py:597
 msgid "Tag not associated with this host"
 msgstr "标签未与此主机关联"
 
-#: backend/api/tag.py:629
+#: backend/api/tag.py:633
 #, python-format
 msgid "Failed to remove tag from host: %(error)s"
 msgstr "从主机移除标签失败: %(error)s"
 
-#: backend/api/tag.py:692
+#: backend/api/tag.py:696
 #, python-format
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "获取主机标签失败: %(error)s"
 
-#: backend/api/security.py:100
+#: backend/api/security.py:104
 msgid "Email integration must be configured before creating new users"
 msgstr "在创建新用户之前必须配置电子邮件集成"
 
-#: backend/api/security.py:103
+#: backend/api/security.py:107
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr "在 YAML 配置文件中启用电子邮件并配置 SMTP 设置。如果没有电子邮件集成，新用户将无法收到密码设置说明，也无法登录。"
 
-#: backend/api/security.py:121
+#: backend/api/security.py:125
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "默认管理员凭据已在您的 YAML 文件中配置"
 
-#: backend/api/security.py:123
+#: backend/api/security.py:127
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr "从配置文件中删除 admin_userid 和 admin_password 并重新启动服务器"
 
-#: backend/api/security.py:138
+#: backend/api/security.py:142
 msgid "Default JWT secret is being used"
 msgstr "正在使用默认 JWT 密钥"
 
-#: backend/api/security.py:139 backend/api/security.py:169
+#: backend/api/security.py:143 backend/api/security.py:173
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "运行: {command}"
 
-#: backend/api/security.py:157 backend/api/security.py:168
+#: backend/api/security.py:161 backend/api/security.py:172
 msgid "Default password salt is being used"
 msgstr "正在使用默认密码盐"
 
-#: backend/api/security.py:158
+#: backend/api/security.py:162
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "运行: {command}（将迁移 {count} 个用户）"
 
-#: backend/api/security.py:182 backend/api/security.py:196
+#: backend/api/security.py:186 backend/api/security.py:200
 msgid "Inconsistent security configuration detected"
 msgstr "检测到不一致的安全配置"
 
-#: backend/api/security.py:184
+#: backend/api/security.py:188
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 msgstr "JWT 密钥使用默认值，但密码盐已更改。运行: {command}"
 
-#: backend/api/security.py:198
+#: backend/api/security.py:202
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
 msgstr "密码盐使用默认值，但 JWT 密钥已更改。运行: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:72
-#: backend/api/ubuntu_pro_settings.py:314
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "基于合同的Ubuntu Pro密钥必须以'C'开头"
 
-#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:80
 msgid "Ubuntu Pro key appears to be too short"
 msgstr "Ubuntu Pro密钥似乎太短"
 
-#: backend/api/ubuntu_pro_settings.py:87
+#: backend/api/ubuntu_pro_settings.py:91
 msgid "Organization name must be 255 characters or less"
 msgstr "组织名称必须不超过255个字符"
 
-#: backend/api/ubuntu_pro_settings.py:121
+#: backend/api/ubuntu_pro_settings.py:125
 #, python-format
 msgid "Failed to retrieve Ubuntu Pro settings: %s"
 msgstr "检索Ubuntu Pro设置失败：%s"
 
-#: backend/api/ubuntu_pro_settings.py:139
+#: backend/api/ubuntu_pro_settings.py:143
 msgid "Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"
 msgstr "缺少 CHANGE_UBUNTU_PRO_MASTER_KEY 角色，无法执行操作"
 
-#: backend/api/ubuntu_pro_settings.py:210
+#: backend/api/ubuntu_pro_settings.py:214
 #, python-format
 msgid "Failed to update Ubuntu Pro settings: %s"
 msgstr "更新 Ubuntu Pro 设置失败：%s"
 
-#: backend/api/ubuntu_pro_settings.py:250
+#: backend/api/ubuntu_pro_settings.py:254
 msgid "Master key cleared successfully"
 msgstr "主密钥清除成功"
 
-#: backend/api/ubuntu_pro_settings.py:252
+#: backend/api/ubuntu_pro_settings.py:256
 msgid "No settings found to clear"
 msgstr "未找到需要清除的设置"
 
-#: backend/api/ubuntu_pro_settings.py:258
+#: backend/api/ubuntu_pro_settings.py:262
 #, python-format
 msgid "Failed to clear master key: %s"
 msgstr "清除主密钥失败：%s"
 
-#: backend/api/ubuntu_pro_settings.py:285
+#: backend/api/ubuntu_pro_settings.py:289
 #, python-format
 msgid "Failed to get master key status: %s"
 msgstr "获取主密钥状态失败：%s"
 
-#: backend/api/ubuntu_pro_settings.py:302
+#: backend/api/ubuntu_pro_settings.py:306
 msgid "At least one host must be specified"
 msgstr "必须指定至少一个主机"
 
-#: backend/api/ubuntu_pro_settings.py:311
-#: backend/api/ubuntu_pro_settings.py:333
+#: backend/api/ubuntu_pro_settings.py:315
+#: backend/api/ubuntu_pro_settings.py:337
 msgid "Custom key must be provided when not using master key"
 msgstr "使用主密钥时必须提供自定义密钥"
 
-#: backend/api/ubuntu_pro_settings.py:346
+#: backend/api/ubuntu_pro_settings.py:350
 msgid "No master key configured. Please configure a master key first."
 msgstr "未配置主密钥。请先配置主密钥。"
 
-#: backend/api/ubuntu_pro_settings.py:377
-#: backend/api/updates/os_upgrade_routes.py:260
-#: backend/api/updates/execution_routes.py:99
+#: backend/api/ubuntu_pro_settings.py:381
+#: backend/api/updates/os_upgrade_routes.py:264
+#: backend/api/updates/execution_routes.py:103
 msgid "Host not found or inactive"
 msgstr "未找到或非活跃的主机"
 
-#: backend/api/ubuntu_pro_settings.py:407
+#: backend/api/ubuntu_pro_settings.py:411
 msgid "Ubuntu Pro enrollment initiated"
 msgstr "Ubuntu Pro注册已启动"
 
-#: backend/api/ubuntu_pro_settings.py:417
+#: backend/api/ubuntu_pro_settings.py:421
 #, python-format
 msgid "Failed to send enrollment command: %s"
 msgstr "无法发送入网命令：%s"
 
-#: backend/api/ubuntu_pro_settings.py:432
+#: backend/api/ubuntu_pro_settings.py:436
 #, python-format
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "启动 Ubuntu Pro 注册失败：%s"
 
-#: backend/api/packages_helpers.py:81
+#: backend/api/packages_helpers.py:85
 #, python-format
 msgid "Failed to retrieve package summary: %s"
 msgstr "无法检索软件包摘要：%s"
 
-#: backend/api/packages_helpers.py:179
+#: backend/api/packages_helpers.py:183
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "计算软件包数量失败：%s"
 
-#: backend/api/packages_helpers.py:240
+#: backend/api/packages_helpers.py:244
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "无法搜索软件包：%s"
 
-#: backend/api/host.py:142
+#: backend/api/host.py:146
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "缺少 DELETE_HOST 角色，无法执行操作"
 
-#: backend/api/host.py:206
+#: backend/api/host.py:210
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "权限 denied: 需要 VIEW_HOST_DETAILS 角色"
 
-#: backend/api/host.py:603
+#: backend/api/host.py:607
 msgid "Host already exists"
 msgstr "主机已存在"
 
-#: backend/api/host.py:689
+#: backend/api/host.py:693
 msgid "Invalid or expired registration key"
 msgstr "无效或缺失的注册密钥"
 
-#: backend/api/host.py:726
+#: backend/api/host.py:730
 msgid "Invalid or expired enrollment token"
 msgstr "无效或已过期的注册令牌"
 
-#: backend/api/host.py:769
+#: backend/api/host.py:776
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
 msgstr "此主机已属于一个租户。请使用其注册令牌重新注册，而不是进行服务器范围的注册。"
 
-#: backend/api/host.py:867
+#: backend/api/host.py:874
 msgid "Registration absorbed: host was recently deleted"
 msgstr "注册被吸收：主机最近已被删除"
 
-#: backend/api/host.py:926
+#: backend/api/host.py:933
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主机 '%(fqdn)s' 通过租户 %(tenant_id)s 的注册令牌加入租户"
 
-#: backend/api/host.py:943
+#: backend/api/host.py:950
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "主机 '%(fqdn)s' 通过注册密钥 '%(key_name)s' 加入（自动批准=%(auto_approve)s）"
 
-#: backend/api/config_management.py:118
+#: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
 msgstr "配置已推送到所有代理"
 
-#: backend/api/config_management.py:144
+#: backend/api/config_management.py:148
 msgid "Configuration pushed successfully"
 msgstr "配置推送成功"
 
-#: backend/api/config_management.py:148
+#: backend/api/config_management.py:152
 msgid "Agent not found or unreachable"
 msgstr "代理未找到或无法访问"
 
-#: backend/api/config_management.py:172
+#: backend/api/config_management.py:176
 msgid "Configuration pushed to platform agents"
 msgstr "配置已推送到平台代理"
 
-#: backend/api/config_management.py:180
+#: backend/api/config_management.py:184
 msgid "Must specify target_hostname, target_platform, or push_to_all"
 msgstr "必须指定 target_hostname、target_platform 或 push_to_all"
 
-#: backend/api/config_management.py:272
+#: backend/api/config_management.py:276
 msgid "Configuration acknowledgment processed"
 msgstr "配置确认已处理"
 
-#: backend/api/message_handlers.py:314
+#: backend/api/message_handlers.py:318
 #, python-format
 msgid "Failed to process diagnostic result: %s"
 msgstr "处理诊断结果失败：%s"
 
-#: backend/api/message_handlers.py:348
+#: backend/api/message_handlers.py:352
 msgid "Missing message_id in command acknowledgment"
 msgstr "命令确认中缺少 message_id"
 
-#: backend/api/message_handlers.py:461
+#: backend/api/message_handlers.py:465
 msgid "Missing installation_id in package installation status"
 msgstr "包安装状态中缺少 installation_id"
 
-#: backend/api/message_handlers.py:481
+#: backend/api/message_handlers.py:485
 #, python-format
 msgid "Installation log entry not found for ID: %s"
 msgstr "未找到 ID 为 %s 的安装日志条目"
 
-#: backend/api/message_handlers.py:527
+#: backend/api/message_handlers.py:531
 #, python-brace-format
 msgid "Package installation {status} on agent {hostname}"
 msgstr "代理 {hostname} 上的软件包安装状态为 {status}"
 
-#: backend/api/message_handlers.py:556
+#: backend/api/message_handlers.py:560
 #, python-format
 msgid "Failed to update package installation status: %s"
 msgstr "更新软件包安装状态失败：%s"
 
-#: backend/api/packages_operations.py:72
+#: backend/api/packages_operations.py:76
 msgid "Permission denied: ADD_PACKAGE role required"
 msgstr "缺少 ADD_PACKAGE 角色，无法执行操作"
 
-#: backend/api/packages_operations.py:100
+#: backend/api/packages_operations.py:104
 msgid "No packages specified for installation"
 msgstr "未指定要安装的包"
 
-#: backend/api/packages_operations.py:175
+#: backend/api/packages_operations.py:179
 #, python-format
 msgid ""
 "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr "在主机 %(host_fqdn)s 上排队安装 %(package_count)d 个软件包"
 
-#: backend/api/packages_operations.py:195
+#: backend/api/packages_operations.py:199
 #, python-format
 msgid "Successfully queued %d packages for installation"
 msgstr "成功排队等待安装%d个包"
 
-#: backend/api/packages_operations.py:206
+#: backend/api/packages_operations.py:210
 #, python-format
 msgid "Failed to queue package installation: %s"
 msgstr "将软件包安装请求加入队列失败：%s"
 
-#: backend/api/packages_operations.py:251
+#: backend/api/packages_operations.py:255
 msgid "Permission denied: REMOVE_PACKAGE role required"
 msgstr "权限 denied: 需要 REMOVE_PACKAGE 角色"
 
-#: backend/api/packages_operations.py:279
+#: backend/api/packages_operations.py:283
 msgid "No packages specified for uninstallation"
 msgstr "未指定要卸载的包"
 
-#: backend/api/packages_operations.py:354
+#: backend/api/packages_operations.py:358
 #, python-format
 msgid ""
 "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr "在主机 %(host_fqdn)s 上排队卸载 %(package_count)d 个软件包"
 
-#: backend/api/packages_operations.py:374
+#: backend/api/packages_operations.py:378
 #, python-format
 msgid "Successfully queued %d packages for uninstallation"
 msgstr "成功排队等待卸载%d个包"
 
-#: backend/api/packages_operations.py:385
+#: backend/api/packages_operations.py:389
 #, python-format
 msgid "Failed to queue package uninstallation: %s"
 msgstr "将软件包卸载请求加入队列失败：%s"
 
-#: backend/api/host_data_updates.py:124
+#: backend/api/host_data_updates.py:128
 msgid "Hardware information updated successfully"
 msgstr "硬件信息更新成功"
 
-#: backend/api/host_data_updates.py:181
+#: backend/api/host_data_updates.py:185
 msgid "Hardware update requested"
 msgstr "已请求硬件更新"
 
-#: backend/api/host_data_updates.py:307
+#: backend/api/host_data_updates.py:311
 msgid "User access update requested"
 msgstr "已请求用户访问更新"
 
-#: backend/api/host_data_updates.py:361
+#: backend/api/host_data_updates.py:365
 msgid "System info update requested"
 msgstr "系统信息更新请求"
 
-#: backend/api/airgap_devices.py:75
+#: backend/api/airgap_devices.py:79
 #, python-format
 msgid "Device %s is not an available import drive"
 msgstr "设备 %s 不是可用的导入驱动器"
 
-#: backend/api/airgap_devices.py:99
+#: backend/api/airgap_devices.py:103
 msgid "no import device selected"
 msgstr "未选择导入设备"
 
-#: backend/api/airgap_devices.py:119
+#: backend/api/airgap_devices.py:123
 msgid "No import device selected"
 msgstr "未选择导入设备"
 
-#: backend/api/airgap_devices.py:124
+#: backend/api/airgap_devices.py:128
 #, python-format
 msgid "Import device not ready: %s"
 msgstr "导入设备未准备好: %s"
 
-#: backend/api/license_management.py:117
+#: backend/api/license_management.py:121
 msgid "Administrator privileges required to install license"
 msgstr "安装许可证需要管理员权限"
 
-#: backend/api/license_management.py:127
+#: backend/api/license_management.py:131
 #, python-format
 msgid "License installation failed: %(error)s"
 msgstr "许可证安装失败：%(error)s"
 
-#: backend/api/license_management.py:133
+#: backend/api/license_management.py:137
 msgid "License validation failed"
 msgstr "许可证验证失败"
 
-#: backend/api/license_management.py:139
+#: backend/api/license_management.py:143
 msgid "License installed successfully"
 msgstr "许可证已成功安装"
 
-#: backend/api/child_host_virtualization_status.py:100
+#: backend/api/child_host_virtualization_status.py:104
 msgid ""
 "Virtualization support check requested. Results will be available shortly."
 msgstr "虚拟化支持检查请求。结果将在稍后提供。"
 
-#: backend/api/api_keys.py:79
+#: backend/api/api_keys.py:83
 msgid "API keys cannot be managed with API-key authentication."
 msgstr "无法使用API密钥身份验证管理API密钥。"
 
-#: backend/api/api_keys.py:182 backend/api/api_keys.py:211
+#: backend/api/api_keys.py:186 backend/api/api_keys.py:215
 msgid "API key not found."
 msgstr "API密钥未找到。"
 
-#: backend/api/update_handlers.py:203
+#: backend/api/update_handlers.py:207
 msgid "Failed to process update results"
 msgstr "处理更新结果失败"
 
-#: backend/api/auth.py:43
+#: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "无效的用户名或密码"
 
-#: backend/api/auth.py:277
+#: backend/api/auth.py:281
 msgid "Account is locked due to too many failed login attempts"
 msgstr "由于登录尝试失败次数过多，账户已被锁定"
 
-#: backend/api/auth.py:366
+#: backend/api/auth.py:370
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
 msgstr "此帐户需要多因素认证。请从个人资料页面进行注册后再登录。"
 
-#: backend/api/auth.py:455
+#: backend/api/auth.py:459
 msgid "Account locked due to too many failed login attempts"
 msgstr "由于登录尝试失败次数过多，账户被锁定"
 
-#: backend/api/auth.py:481
+#: backend/api/auth.py:485
 msgid "Invalid or missing refresh token"
 msgstr "无效或缺失的刷新令牌"
 
-#: backend/api/auth.py:544 backend/api/auth.py:593
+#: backend/api/auth.py:548 backend/api/auth.py:597
 msgid "Multi-tenancy is not enabled."
 msgstr "未启用多租户功能。"
 
-#: backend/api/auth.py:664
+#: backend/api/auth.py:668
 msgid "Logout successful"
 msgstr "注销成功"
 
-#: backend/api/profile.py:152
+#: backend/api/profile.py:156
 msgid "New password and confirmation do not match"
 msgstr "新密码和确认密码不匹配"
 
-#: backend/api/profile.py:183
+#: backend/api/profile.py:187
 msgid "Current password is incorrect"
 msgstr "当前密码不正确"
 
-#: backend/api/profile.py:195
+#: backend/api/profile.py:199
 msgid "Password changed successfully"
 msgstr "密码已成功更改"
 
-#: backend/api/profile.py:222
+#: backend/api/profile.py:226
 msgid "File size too large. Maximum allowed size is 5MB."
 msgstr "文件大小过大。最大允许大小为 5MB。"
 
-#: backend/api/profile.py:234
+#: backend/api/profile.py:238
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
 msgstr "不支持的图像格式。允许的格式：PNG、JPEG、JPG、GIF、WEBP"
 
-#: backend/api/profile.py:265
+#: backend/api/profile.py:269
 msgid "Invalid image file. Please upload a valid image."
 msgstr "无效的图像文件。请上传有效的图像。"
 
-#: backend/api/updates/os_upgrade_routes.py:193
+#: backend/api/updates/os_upgrade_routes.py:197
 msgid "Permission denied: APPLY_HOST_OS_UPGRADE role required"
 msgstr "缺少 APPLY_HOST_OS_UPGRADE 角色，无法执行操作"
 
 # OS Version Upgrade related strings
-#: backend/api/updates/os_upgrade_routes.py:210
+#: backend/api/updates/os_upgrade_routes.py:214
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "操作系统升级的无效包管理器：{}"
 
-#: backend/api/updates/os_upgrade_routes.py:272
+#: backend/api/updates/os_upgrade_routes.py:276
 msgid "No OS upgrades available for this host"
 msgstr "此主机没有可用的操作系统升级"
 
-#: backend/api/updates/os_upgrade_routes.py:334
+#: backend/api/updates/os_upgrade_routes.py:338
 #, python-format
 msgid ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "在主机 %(fqdn)s 上启动了操作系统升级，包含 %(upgrade_count)d 次升级"
 
-#: backend/api/updates/os_upgrade_routes.py:365
+#: backend/api/updates/os_upgrade_routes.py:369
 msgid "OS upgrade command queued for host"
 msgstr "主机的操作系统升级命令已排队"
 
-#: backend/api/updates/os_upgrade_routes.py:375
+#: backend/api/updates/os_upgrade_routes.py:379
 msgid "Failed to queue OS upgrade command"
 msgstr "将操作系统升级命令加入队列失败"
 
-#: backend/api/updates/query_routes.py:98
+#: backend/api/updates/query_routes.py:102
 #, python-format
 msgid "Failed to get update summary: %s"
 msgstr "获取更新摘要失败：%s"
 
-#: backend/api/updates/query_routes.py:194
+#: backend/api/updates/query_routes.py:198
 #, python-format
 msgid "Failed to get host updates: %s"
 msgstr "获取主机更新失败：%s"
 
-#: backend/api/updates/query_routes.py:295
+#: backend/api/updates/query_routes.py:299
 #, python-format
 msgid "Failed to get updates: %s"
 msgstr "获取更新失败：%s"
 
-#: backend/api/updates/query_routes.py:315
+#: backend/api/updates/query_routes.py:319
 #, python-format
 msgid "Failed to get update results: %s"
 msgstr "获取更新结果失败：%s"
 
-#: backend/api/updates/execution_routes.py:53
+#: backend/api/updates/execution_routes.py:57
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "缺少 APPLY_SOFTWARE_UPDATE 角色，无法执行操作"
 
-#: backend/api/updates/execution_routes.py:113
+#: backend/api/updates/execution_routes.py:117
 msgid "No matching updates found for specified packages"
 msgstr "未找到指定软件包的匹配更新"
 
-#: backend/api/updates/execution_routes.py:199
+#: backend/api/updates/execution_routes.py:203
 msgid "Update execution started"
 msgstr "更新执行已开始"
 
-#: backend/api/updates/execution_routes.py:208
+#: backend/api/updates/execution_routes.py:212
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "发送命令失败：%s"
 
-#: backend/api/updates/execution_routes.py:216
+#: backend/api/updates/execution_routes.py:220
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "发送更新命令失败：%s"
 
-#: backend/api/updates/execution_routes.py:229
+#: backend/api/updates/execution_routes.py:233
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "执行更新失败：%s"
 
-#: backend/api/updates/execution_routes.py:284
+#: backend/api/updates/execution_routes.py:288
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "获取执行日志失败：%s"
 
-#: backend/api/dynamic_secrets.py:129 backend/api/dynamic_secrets.py:191
+#: backend/api/dynamic_secrets.py:133 backend/api/dynamic_secrets.py:195
 #, python-format
 msgid "Unknown kind: %(kind)s (allowed: %(allowed)s)"
 msgstr "未知种类：%(kind)s (允许值：%(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:152
+#: backend/api/dynamic_secrets.py:156
 #, python-format
 msgid ""
 "Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
 "ttl=%(ttl)ds)"
 msgstr "已颁发动态密钥 '%(name)s'（类型=%(kind)s, 角色=%(role)s, 有效期=%(ttl)ds）"
 
-#: backend/api/dynamic_secrets.py:185
+#: backend/api/dynamic_secrets.py:189
 #, python-format
 msgid "Unknown status: %(status)s (allowed: %(allowed)s)"
 msgstr "未知状态：%(status)s (允许值：%(allowed)s)"
 
-#: backend/api/dynamic_secrets.py:213
+#: backend/api/dynamic_secrets.py:217
 msgid "Lease not found"
 msgstr "未找到租约"
 
-#: backend/api/dynamic_secrets.py:235
+#: backend/api/dynamic_secrets.py:239
 #, python-format
 msgid "Revoked dynamic secret lease '%s'"
 msgstr "已撤销动态密钥租约 '%s'"
 
-#: backend/api/child_host_virtualization_enable.py:154
+#: backend/api/child_host_virtualization_enable.py:158
 msgid "Agent must be running with administrator privileges to enable WSL"
 msgstr "代理必须以管理员权限运行才能启用WSL"
 
-#: backend/api/child_host_virtualization_enable.py:168
+#: backend/api/child_host_virtualization_enable.py:172
 msgid "WSL enablement requested"
 msgstr "WSL 启用请求"
 
-#: backend/api/child_host_virtualization_enable.py:176
+#: backend/api/child_host_virtualization_enable.py:180
 msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
 msgstr "WSL 启用请求。可能需要重新启动才能完成安装。"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization_enable.py:209
+#: backend/api/child_host_virtualization_enable.py:213
 msgid "LXD is only supported on Linux hosts"
 msgstr "LXD仅支持Linux主机"
 
-#: backend/api/child_host_virtualization_enable.py:217
+#: backend/api/child_host_virtualization_enable.py:221
 msgid "Agent must be running with root privileges to initialize LXD"
 msgstr "代理必须以root权限运行才能初始化LXD"
 
-#: backend/api/child_host_virtualization_enable.py:231
+#: backend/api/child_host_virtualization_enable.py:235
 msgid "LXD initialization requested"
 msgstr "已请求LXD初始化"
 
-#: backend/api/child_host_virtualization_enable.py:239
+#: backend/api/child_host_virtualization_enable.py:243
 msgid ""
 "LXD initialization requested. The agent will install and configure LXD "
 "automatically."
 msgstr "已请求LXD初始化。代理将自动安装和配置LXD。"
 
-#: backend/api/child_host_virtualization_enable.py:272
+#: backend/api/child_host_virtualization_enable.py:276
 msgid "VMM is only supported on OpenBSD hosts"
 msgstr "VMM仅支持OpenBSD主机"
 
-#: backend/api/child_host_virtualization_enable.py:280
+#: backend/api/child_host_virtualization_enable.py:284
 msgid "Agent must be running with root privileges to initialize VMM"
 msgstr "代理必须以root权限运行才能初始化VMM"
 
-#: backend/api/child_host_virtualization_enable.py:294
+#: backend/api/child_host_virtualization_enable.py:298
 msgid "VMM initialization requested"
 msgstr "已请求VMM初始化"
 
-#: backend/api/child_host_virtualization_enable.py:302
+#: backend/api/child_host_virtualization_enable.py:306
 msgid ""
 "VMM initialization requested. The agent will enable and start the vmd "
 "daemon."
 msgstr "已请求VMM初始化。代理将启用并启动vmd守护进程。"
 
-#: backend/api/child_host_virtualization_enable.py:344
+#: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
 msgstr "代理必须以root权限运行才能初始化KVM"
 
-#: backend/api/child_host_virtualization_enable.py:358
+#: backend/api/child_host_virtualization_enable.py:362
 msgid "KVM initialization requested"
 msgstr "已请求KVM初始化"
 
-#: backend/api/child_host_virtualization_enable.py:366
+#: backend/api/child_host_virtualization_enable.py:370
 msgid ""
 "KVM initialization requested. The agent will install libvirt and configure "
 "KVM for virtual machine management."
 msgstr "已请求KVM初始化。代理将安装libvirt并配置KVM以进行虚拟机管理。"
 
-#: backend/api/child_host_virtualization_enable.py:399
-#: backend/api/child_host_virtualization_enable.py:463
+#: backend/api/child_host_virtualization_enable.py:403
+#: backend/api/child_host_virtualization_enable.py:467
 msgid "bhyve is only supported on FreeBSD hosts"
 msgstr "bhyve 只在 FreeBSD 主机上受支持"
 
-#: backend/api/child_host_virtualization_enable.py:407
+#: backend/api/child_host_virtualization_enable.py:411
 msgid "Agent must be running with root privileges to initialize bhyve"
 msgstr "代理必须以root权限运行才能初始化bhyve"
 
-#: backend/api/child_host_virtualization_enable.py:421
+#: backend/api/child_host_virtualization_enable.py:425
 msgid "bhyve initialization requested"
 msgstr "bhyve 初始化请求"
 
-#: backend/api/child_host_virtualization_enable.py:429
+#: backend/api/child_host_virtualization_enable.py:433
 msgid ""
 "bhyve initialization requested. The agent will load vmm.ko and configure the"
 " system for bhyve virtual machines."
 msgstr "bhyve 初始化请求。代理将加载 vmm.ko 并为 bhyve 虚拟机配置系统。"
 
-#: backend/api/child_host_virtualization_enable.py:470
+#: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
 msgstr "代理必须以root权限运行才能禁用bhyve"
 
-#: backend/api/child_host_virtualization_enable.py:483
+#: backend/api/child_host_virtualization_enable.py:487
 msgid "bhyve disable requested"
 msgstr "bhyve 禁用请求"
 
-#: backend/api/child_host_virtualization_enable.py:491
+#: backend/api/child_host_virtualization_enable.py:495
 msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
 msgstr "bhyve 禁用请求。代理将卸载 vmm.ko 并更新系统配置。如果任何虚拟机正在运行，此操作将会失败。"
 
-#: backend/api/child_host_virtualization_enable.py:532
+#: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
 msgstr "代理必须以root权限运行才能启用KVM模块"
 
-#: backend/api/child_host_virtualization_enable.py:546
+#: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
 msgstr "请求启用KVM模块"
 
-#: backend/api/child_host_virtualization_enable.py:554
+#: backend/api/child_host_virtualization_enable.py:558
 msgid ""
 "KVM modules enable requested. The agent will load the KVM kernel modules via"
 " modprobe."
 msgstr "请求启用KVM模块。代理将通过modprobe加载KVM内核模块。"
 
-#: backend/api/child_host_virtualization_enable.py:596
+#: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
 msgstr "代理必须以root权限运行才能禁用KVM模块"
 
-#: backend/api/child_host_virtualization_enable.py:610
+#: backend/api/child_host_virtualization_enable.py:614
 msgid "KVM modules disable requested"
 msgstr "请求禁用KVM模块"
 
-#: backend/api/child_host_virtualization_enable.py:618
+#: backend/api/child_host_virtualization_enable.py:622
 msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr "请求禁用KVM模块。代理将通过modprobe -r卸载KVM内核模块。如果任何虚拟机正在运行，此操作将会失败。"
 
 # KVM Networking Configuration strings
-#: backend/api/child_host_virtualization_enable.py:693
+#: backend/api/child_host_virtualization_enable.py:697
 msgid "KVM networking is only supported on Linux hosts"
 msgstr "KVM 网络仅在 Linux 主机上受支持"
 
-#: backend/api/child_host_virtualization_enable.py:701
+#: backend/api/child_host_virtualization_enable.py:705
 msgid "Agent must be running with root privileges to configure KVM networking"
 msgstr "代理必须以 root 权限运行才能配置 KVM 网络"
 
-#: backend/api/child_host_virtualization_enable.py:710
+#: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
 msgstr "桥接网络模式需要桥接接口名称"
 
-#: backend/api/child_host_virtualization_enable.py:732
+#: backend/api/child_host_virtualization_enable.py:736
 #, python-format
 msgid "KVM networking configuration requested: %s mode"
 msgstr "已请求 KVM 网络配置：%s 模式"
 
-#: backend/api/child_host_virtualization_enable.py:740
+#: backend/api/child_host_virtualization_enable.py:744
 #, python-format
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
 msgstr "已请求 KVM 网络配置。代理将配置 %s 网络。"
 
-#: backend/api/child_host_virtualization_enable.py:774
+#: backend/api/child_host_virtualization_enable.py:778
 msgid "KVM networks are only available on Linux hosts"
 msgstr "KVM 网络仅在 Linux 主机上可用"
 
-#: backend/api/child_host_virtualization_enable.py:807
+#: backend/api/child_host_virtualization_enable.py:811
 msgid "KVM network list requested. Results will be returned shortly."
 msgstr "已请求 KVM 网络列表。结果将很快显示。"
 
-#: backend/api/firewall_roles_helpers.py:133
+#: backend/api/firewall_roles_helpers.py:137
 msgid "Port number must be between 0 and 65535 (0 means any port)"
 msgstr "端口号必须在 0 和 65535 之间（0 表示任意端口）"
 
-#: backend/api/firewall_roles_helpers.py:144
+#: backend/api/firewall_roles_helpers.py:148
 msgid "At least one protocol (TCP or UDP) must be selected"
 msgstr "至少必须选择一种协议（TCP 或 UDP）"
 
-#: backend/api/firewall_roles_helpers.py:155
+#: backend/api/firewall_roles_helpers.py:159
 msgid "At least one IP version (IPv4 or IPv6) must be selected"
 msgstr "至少必须选择一个IP版本（IPv4或IPv6）"
 
-#: backend/api/firewall_roles_helpers.py:172
+#: backend/api/firewall_roles_helpers.py:176
 msgid "Firewall role name is required"
 msgstr "需要指定防火墙角色名称"
 
-#: backend/api/firewall_roles_helpers.py:174
-#: backend/api/firewall_roles_helpers.py:193
+#: backend/api/firewall_roles_helpers.py:178
+#: backend/api/firewall_roles_helpers.py:197
 msgid "Firewall role name must be 100 characters or less"
 msgstr "防火墙角色名称必须为 100 个字符或更少"
 
-#: backend/api/firewall_roles_helpers.py:191
+#: backend/api/firewall_roles_helpers.py:195
 msgid "Firewall role name cannot be empty"
 msgstr "防火墙角色名称不能为空"
 
-#: backend/api/host_approval.py:50
+#: backend/api/host_approval.py:54
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
 msgstr "缺少 APPROVE_HOST_REGISTRATION 角色，无法执行操作"
 
-#: backend/api/host_approval.py:70 backend/api/host_approval.py:359
+#: backend/api/host_approval.py:74 backend/api/host_approval.py:363
 msgid "Host is not in pending status"
 msgstr "主机不处于待定状态"
 
-#: backend/api/host_approval.py:429
+#: backend/api/host_approval.py:433
 msgid "OS version update requested"
 msgstr "已请求操作系统版本更新"
 
-#: backend/api/host_approval.py:474
+#: backend/api/host_approval.py:478
 msgid "Updates check requested"
 msgstr "检查更新请求"
 
-#: backend/api/secrets/crud.py:31 backend/api/error_constants.py:162
+#: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
 msgid "Secret not found"
 msgstr "未找到密钥"
 
-#: backend/api/secrets/crud.py:42
+#: backend/api/secrets/crud.py:46
 msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "密钥管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/secrets/crud.py:124
+#: backend/api/secrets/crud.py:128
 msgid "Failed to retrieve secret content from vault"
 msgstr "从保险库检索密钥内容失败"
 
-#: backend/api/secrets/crud.py:156
+#: backend/api/secrets/crud.py:160
 msgid "Failed to store secret in vault"
 msgstr "将密钥存储到保险库失败"
 
-#: backend/api/secrets/crud.py:219
+#: backend/api/secrets/crud.py:223
 msgid "Failed to update secret in vault"
 msgstr "更新保险库中的密钥失败"
 
-#: backend/api/secrets/crud.py:262
+#: backend/api/secrets/crud.py:266
 msgid "Secret deleted successfully"
 msgstr "密钥删除成功"
 
-#: backend/api/secrets/crud.py:292
+#: backend/api/secrets/crud.py:296
 #, python-brace-format
 msgid "Deleted {count} secrets"
 msgstr "已删除 {count} 个密钥"
 
-#: backend/api/secrets/deployment.py:31
+#: backend/api/secrets/deployment.py:35
 msgid ""
 "Secrets deployment requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "密钥部署需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/secrets/deployment.py:52
+#: backend/api/secrets/deployment.py:56
 msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
 msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-ssh-keys"
 
-#: backend/api/secrets/deployment.py:71
+#: backend/api/secrets/deployment.py:75
 msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
 msgstr "使用 Pro+ 许可证访问 /api/v1/secrets/deploy-certificates"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
-#: backend/api/reboot_orchestration.py:39
+#: backend/api/reboot_orchestration.py:43
 msgid ""
 "Orchestrated reboot requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr "编排重启需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/reboot_orchestration.py:131
+#: backend/api/reboot_orchestration.py:135
 msgid ""
 "No running child hosts found. Use the standard reboot endpoint instead."
 msgstr "未找到正在运行的子主机。请改用标准重启端点。"
 
-#: backend/api/reboot_orchestration.py:200
+#: backend/api/reboot_orchestration.py:204
 #, python-format
 msgid "Orchestrated reboot initiated with %d running child host(s)"
 msgstr "已启动编排重启，包含 %d 个正在运行的子主机"
 
-#: backend/api/reboot_orchestration.py:246
+#: backend/api/reboot_orchestration.py:250
 msgid "Reboot orchestration not found"
 msgstr "未找到重启编排"
 
-#: backend/api/upgrade_profiles.py:70
+#: backend/api/upgrade_profiles.py:74
 msgid ""
 "Scheduled upgrade profiles require a SysManage Professional+ license. Please"
 " upgrade to access this feature."
 msgstr "计划升级配置文件需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/upgrade_profiles.py:192
+#: backend/api/upgrade_profiles.py:196
 #, python-format
 msgid "Created upgrade profile '%s'"
 msgstr "已创建升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:259
+#: backend/api/upgrade_profiles.py:263
 #, python-format
 msgid "Updated upgrade profile '%s'"
 msgstr "已更新升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:291
+#: backend/api/upgrade_profiles.py:295
 #, python-format
 msgid "Deleted upgrade profile '%s'"
 msgstr "已删除升级配置文件 '%s'"
 
-#: backend/api/upgrade_profiles.py:296
+#: backend/api/upgrade_profiles.py:300
 msgid "Upgrade profile deleted"
 msgstr "升级配置文件已删除"
 
-#: backend/api/upgrade_profiles.py:386
+#: backend/api/upgrade_profiles.py:390
 #, python-format
 msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 msgstr "触发升级配置文件 '%(profile_name)s'，应用于 %(host_count)d 个主机"
 
-#: backend/api/agent.py:60
+#: backend/api/agent.py:64
 msgid "Rate limit exceeded"
 msgstr "超出速率限制"
 
-#: backend/api/agent.py:120
+#: backend/api/agent.py:124
 #, python-format
 msgid "Agent WebSocket authentication failed from %s"
 msgstr "代理 WebSocket 认证失败来自 %s"
 
-#: backend/api/agent.py:130
+#: backend/api/agent.py:134
 #, python-format
 msgid "Authentication failed: %s"
 msgstr "认证失败：%s"
 
-#: backend/api/agent.py:146
+#: backend/api/agent.py:150
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
 msgstr "代理 WebSocket 连接尝试未携带令牌，来源：%s"
 
-#: backend/api/agent.py:155
+#: backend/api/agent.py:159
 msgid "Authentication token required"
 msgstr "需要认证令牌"
 
-#: backend/api/agent.py:252
+#: backend/api/agent.py:256
 msgid "Message failed security validation"
 msgstr "消息安全验证失败"
 
-#: backend/api/agent.py:281
+#: backend/api/agent.py:285
 msgid "Message must be valid JSON"
 msgstr "消息必须是有效的JSON"
 
-#: backend/api/agent.py:518
+#: backend/api/agent.py:522
 msgid "Agent message validation failed: missing hostname and host_id"
 msgstr "代理消息验证失败：缺少主机名和host_id"
 
-#: backend/api/agent.py:537
+#: backend/api/agent.py:541
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
 msgstr "未注册主机的消息：{hostname}"
 
-#: backend/api/agent.py:554
+#: backend/api/agent.py:558
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
 msgstr "来自未批准主机的代理消息：{hostname}"
 
-#: backend/api/agent.py:587
+#: backend/api/agent.py:591
 msgid "Message must include hostname or host_id for host validation"
 msgstr "消息必须包含主机名或host_id以进行主机验证"
 
-#: backend/api/agent.py:605
+#: backend/api/agent.py:609
 msgid "Host ID no longer valid - please re-register"
 msgstr "主机 ID 已失效，请重新注册"
 
-#: backend/api/agent.py:617
+#: backend/api/agent.py:621
 msgid "Host ID and hostname mismatch - please re-register"
 msgstr "主机 ID 和主机名不符，请重新注册"
 
-#: backend/api/agent.py:634
+#: backend/api/agent.py:638
 msgid "Host must register before sending inventory data"
 msgstr "主机必须先注册才能发送库存数据"
 
-#: backend/api/agent.py:705
+#: backend/api/agent.py:709
 msgid "Missing or invalid authorization header"
 msgstr "缺少或无效的授权头信息"
 
-#: backend/api/agent.py:730
+#: backend/api/agent.py:734
 msgid "Invalid host authentication"
 msgstr "无效的主机认证"
 
-#: backend/api/agent.py:771 backend/api/packages.py:477
+#: backend/api/agent.py:775 backend/api/packages.py:481
 msgid "Installation completion recorded"
 msgstr "安装完成记录"
 
-#: backend/api/agent.py:777 backend/api/error_constants.py:189
+#: backend/api/agent.py:781 backend/api/error_constants.py:193
 msgid "Internal server error"
 msgstr "内部服务器错误"
 
-#: backend/api/diagnostics.py:194
+#: backend/api/diagnostics.py:198
 msgid "Diagnostic collection requested"
 msgstr "请求诊断收集"
 
-#: backend/api/diagnostics.py:472
+#: backend/api/diagnostics.py:476
 msgid "Diagnostic report deleted"
 msgstr "已删除诊断报告"
 
-#: backend/api/diagnostics.py:483
+#: backend/api/diagnostics.py:487
 msgid "Missing collection_id"
 msgstr "缺少 collection_id"
 
-#: backend/api/error_constants.py:23
+#: backend/api/error_constants.py:27
 msgid "Permission denied"
 msgstr "权限被拒绝"
 
-#: backend/api/error_constants.py:50
+#: backend/api/error_constants.py:54
 msgid "Distribution not found"
 msgstr "发行版未找到"
 
-#: backend/api/error_constants.py:56
+#: backend/api/error_constants.py:60
 msgid "Invalid firewall role ID format"
 msgstr "无效的防火墙角色ID格式"
 
-#: backend/api/error_constants.py:61
+#: backend/api/error_constants.py:65
 msgid "Firewall role not found"
 msgstr "未找到防火墙角色"
 
-#: backend/api/error_constants.py:66
+#: backend/api/error_constants.py:70
 msgid "Permission denied: VIEW_FIREWALL_ROLES role required"
 msgstr "权限 denied: 需要 VIEW_FIREWALL_ROLES 角色"
 
-#: backend/api/error_constants.py:72
+#: backend/api/error_constants.py:76
 msgid "Invalid diagnostic ID format"
 msgstr "无效的诊断ID格式"
 
-#: backend/api/error_constants.py:77
+#: backend/api/error_constants.py:81
 msgid "Diagnostic report not found"
 msgstr "未找到诊断报告"
 
-#: backend/api/error_constants.py:83
+#: backend/api/error_constants.py:87
 msgid "Unknown error"
 msgstr "未知错误"
 
-#: backend/api/error_constants.py:88
+#: backend/api/error_constants.py:92
 msgid "WSL feature enablement pending"
 msgstr "待处理的 WSL 功能启用"
 
-#: backend/api/error_constants.py:120
+#: backend/api/error_constants.py:124
 msgid "Repository management requires privileged agent mode"
 msgstr "仓库管理需要特权代理模式"
 
-#: backend/api/error_constants.py:126
+#: backend/api/error_constants.py:130
 msgid "Current user not found"
 msgstr "找不到当前用户"
 
-#: backend/api/error_constants.py:142
+#: backend/api/error_constants.py:146
 msgid "Permission denied: EDIT_TAGS role required"
 msgstr "权限 denied: 需要 EDIT_TAGS 角色"
 
-#: backend/api/error_constants.py:148
+#: backend/api/error_constants.py:152
 msgid "Script not found"
 msgstr "脚本未找到"
 
-#: backend/api/error_constants.py:156
+#: backend/api/error_constants.py:160
 msgid "Unsupported shell type: {}"
 msgstr "不支持的 shell 类型: {}"
 
-#: backend/api/error_constants.py:167
+#: backend/api/error_constants.py:171
 msgid "Invalid secret ID"
 msgstr "无效的秘密ID"
 
-#: backend/api/error_constants.py:177
+#: backend/api/error_constants.py:181
 msgid "OpenBAO is not running"
 msgstr "OpenBAO未运行"
 
-#: backend/api/antivirus_status.py:132
+#: backend/api/antivirus_status.py:136
 #, python-format
 msgid "Failed to retrieve antivirus status: %s"
 msgstr "无法检索反病毒状态：%s"
 
-#: backend/api/antivirus_status.py:163
+#: backend/api/antivirus_status.py:167
 msgid "Permission denied: DEPLOY_ANTIVIRUS role required"
 msgstr "权限 denied: 需要 DEPLOY_ANTIVIRUS 角色"
 
-#: backend/api/antivirus_status.py:243
+#: backend/api/antivirus_status.py:247
 msgid "Unable to determine host operating system"
 msgstr "无法确定主机操作系统"
 
-#: backend/api/antivirus_status.py:265
+#: backend/api/antivirus_status.py:269
 #, python-format
 msgid "No antivirus default configured for OS: %s"
 msgstr "为操作系统：%s 未配置防病毒默认设置"
 
-#: backend/api/antivirus_status.py:331
+#: backend/api/antivirus_status.py:335
 #, python-format
 msgid "Antivirus deployment initiated for all %d hosts"
 msgstr "所有%d个主机的防病毒部署已启动"
 
-#: backend/api/antivirus_status.py:334
+#: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
 "Antivirus deployment initiated for %(success_count)d of %(total_count)d "
 "hosts"
 msgstr "已启动 %(success_count)d 个主机的防病毒部署（共 %(total_count)d 个主机）"
 
-#: backend/api/antivirus_status.py:340
+#: backend/api/antivirus_status.py:344
 msgid "Antivirus deployment failed for all hosts"
 msgstr "所有主机的防病毒部署失败"
 
-#: backend/api/antivirus_status.py:408
+#: backend/api/antivirus_status.py:412
 msgid "Antivirus enable command sent successfully"
 msgstr "防病毒启用命令发送成功"
 
-#: backend/api/antivirus_status.py:472
+#: backend/api/antivirus_status.py:476
 msgid "Antivirus disable command sent successfully"
 msgstr "禁用反病毒命令发送成功"
 
-#: backend/api/antivirus_status.py:547
+#: backend/api/antivirus_status.py:551
 msgid "Antivirus remove command sent successfully"
 msgstr "反病毒移除命令发送成功"
 
-#: backend/api/antivirus_status.py:616
+#: backend/api/antivirus_status.py:620
 #, python-format
 msgid "Failed to retrieve antivirus coverage: %s"
 msgstr "检索反病毒覆盖范围失败：%s"
 
-#: backend/api/child_host_utils.py:21
+#: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
 msgstr "子主机引擎无法调度此请求。"
 
-#: backend/api/child_host_utils.py:37
+#: backend/api/child_host_utils.py:41
 msgid "Permission denied: {} role required"
 msgstr "权限 denied: {} 角色需要"
 
-#: backend/api/host_monitoring.py:202
+#: backend/api/host_monitoring.py:206
 msgid "Certificate collection requested"
 msgstr "请求收集证书"
 
-#: backend/api/host_monitoring.py:341
+#: backend/api/host_monitoring.py:345
 msgid "Role collection requested"
 msgstr "角色集合请求"
 
-#: backend/api/host_monitoring.py:365
+#: backend/api/host_monitoring.py:369
 msgid "Invalid action. Must be 'start', 'stop', or 'restart'"
 msgstr "无效的操作。必须为 'start', 'stop' 或 'restart'"
 
-#: backend/api/host_monitoring.py:370
+#: backend/api/host_monitoring.py:374
 msgid "No services specified"
 msgstr "未指定服务"
 
-#: backend/api/host_monitoring.py:378
+#: backend/api/host_monitoring.py:382
 msgid "Permission denied: START_HOST_SERVICE role required"
 msgstr "权限 denied: 需要 START_HOST_SERVICE 角色"
 
-#: backend/api/host_monitoring.py:384
+#: backend/api/host_monitoring.py:388
 msgid "Permission denied: STOP_HOST_SERVICE role required"
 msgstr "权限 denied: 需要 STOP_HOST_SERVICE 角色"
 
-#: backend/api/host_monitoring.py:390
+#: backend/api/host_monitoring.py:394
 msgid "Permission denied: RESTART_HOST_SERVICE role required"
 msgstr "权限 denied: 需要 RESTART_HOST_SERVICE 角色"
 
-#: backend/api/host_monitoring.py:416
+#: backend/api/host_monitoring.py:420
 msgid "Host must be running in privileged mode for service control"
 msgstr "服务控制需要主机在特权模式下运行"
 
-#: backend/api/host_monitoring.py:450
+#: backend/api/host_monitoring.py:454
 msgid "Service {} requested for {} services"
 msgstr "请求了{}服务的服务{}"
 
-#: backend/api/packages.py:105
+#: backend/api/packages.py:109
 #, python-format
 msgid "Failed to retrieve package managers: %s"
 msgstr "无法检索软件包管理器：%s"
 
-#: backend/api/packages.py:222
+#: backend/api/packages.py:226
 #, python-format
 msgid "Failed to retrieve OS versions: %s"
 msgstr "无法检索操作系统版本：%s"
 
-#: backend/api/packages.py:273
+#: backend/api/packages.py:277
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
 msgstr "为主管 %(manager_name)s 获取软件包失败：%(error)s"
 
-#: backend/api/packages.py:296
+#: backend/api/packages.py:300
 #, python-format
 msgid "No active hosts found for %(os_name)s %(os_version)s"
 msgstr "未找到 %(os_name)s %(os_version)s 的活动主机"
 
-#: backend/api/packages.py:320
+#: backend/api/packages.py:324
 #, python-format
 msgid "Package collection requested from host %s"
 msgstr "从主机 %s 请求包集合"
 
-#: backend/api/packages.py:330
+#: backend/api/packages.py:334
 #, python-format
 msgid "Failed to request package refresh: %s"
 msgstr "请求软件包刷新失败：%s"
 
-#: backend/api/packages.py:437
+#: backend/api/packages.py:441
 #, python-format
 msgid "Failed to retrieve installation history: %s"
 msgstr "无法检索安装历史：%s"
 
-#: backend/api/packages.py:512
+#: backend/api/packages.py:516
 msgid "Installation record not found"
 msgstr "未找到安装记录"
 
-#: backend/api/packages.py:526
+#: backend/api/packages.py:530
 msgid "Installation record deleted successfully"
 msgstr "成功删除安装记录"
 
-#: backend/api/packages.py:535
+#: backend/api/packages.py:539
 #, python-format
 msgid "Failed to delete installation record: %s"
 msgstr "删除安装记录失败：%s"
 
-#: backend/api/maintenance_windows.py:107
+#: backend/api/maintenance_windows.py:111
 msgid "A window name is required."
 msgstr "窗口名称是必需的。"
 
-#: backend/api/maintenance_windows.py:110
+#: backend/api/maintenance_windows.py:114
 msgid "kind must be 'allow' or 'blackout'."
 msgstr "kind 必须是 'allow' 或者 'blackout'。"
 
-#: backend/api/maintenance_windows.py:115
+#: backend/api/maintenance_windows.py:119
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
 msgstr "recurrence 必须是 'once'、'daily' 或者 'weekly'。"
 
-#: backend/api/maintenance_windows.py:124
+#: backend/api/maintenance_windows.py:128
 #, python-format
 msgid "Unknown timezone: %s"
 msgstr "未知时区: %s"
 
-#: backend/api/maintenance_windows.py:136
+#: backend/api/maintenance_windows.py:140
 msgid "A one-time window needs starts_at before ends_at."
 msgstr "一次性窗口的 starts_at 需要在 ends_at 之前。"
 
-#: backend/api/maintenance_windows.py:143
+#: backend/api/maintenance_windows.py:147
 msgid "A recurring window needs a start_time as 'HH:MM'."
 msgstr "重复性窗口需要一个 start_time 格式为 'HH:MM' 的时间。"
 
-#: backend/api/maintenance_windows.py:148
+#: backend/api/maintenance_windows.py:152
 msgid "A recurring window needs a positive duration_minutes."
 msgstr "重复性窗口需要一个正数的 duration_minutes。"
 
-#: backend/api/maintenance_windows.py:155
+#: backend/api/maintenance_windows.py:159
 msgid "A weekly window needs valid days_of_week."
 msgstr "每周窗口需要有效的 days_of_week。"
 
-#: backend/api/maintenance_windows.py:164
+#: backend/api/maintenance_windows.py:168
 msgid "scope_type must be 'all', 'host', or 'tag'."
 msgstr "scope_type 必须是 'all'、'host' 或者 'tag'。"
 
-#: backend/api/maintenance_windows.py:167
+#: backend/api/maintenance_windows.py:171
 msgid "A host scope needs a host_id."
 msgstr "一个主机范围需要一个 host_id。"
 
-#: backend/api/maintenance_windows.py:169
+#: backend/api/maintenance_windows.py:173
 msgid "A tag scope needs a tag_id."
 msgstr "一个标签范围需要一个 tag_id。"
 
-#: backend/api/maintenance_windows.py:179
+#: backend/api/maintenance_windows.py:183
 msgid "A window needs at least one scope (all, host, or tag)."
 msgstr "窗口至少需要一个范围（all、host 或者 tag）。"
 
-#: backend/api/maintenance_windows.py:300
-#: backend/api/maintenance_windows.py:323
+#: backend/api/maintenance_windows.py:304
+#: backend/api/maintenance_windows.py:327
 msgid "Maintenance window not found."
 msgstr "维护窗口未找到。"
 
-#: backend/api/maintenance_windows.py:342
+#: backend/api/maintenance_windows.py:346
 msgid "An override reason is required."
 msgstr "必须提供覆盖原因。"
 
-#: backend/api/maintenance_windows.py:346
+#: backend/api/maintenance_windows.py:350
 msgid "Override duration must be positive."
 msgstr "覆盖持续时间必须为正数。"
 
-#: backend/api/report_branding.py:112
+#: backend/api/report_branding.py:116
 msgid "Updated report branding"
 msgstr "已更新报告品牌"
 
-#: backend/api/report_branding.py:135
+#: backend/api/report_branding.py:139
 msgid "Unsupported logo format (allowed: PNG, JPEG, SVG, WEBP)"
 msgstr "不支持的徽标格式 (允许: PNG, JPEG, SVG, WEBP)"
 
-#: backend/api/report_branding.py:140
+#: backend/api/report_branding.py:144
 msgid "Empty file"
 msgstr "空文件"
 
-#: backend/api/report_branding.py:144
+#: backend/api/report_branding.py:148
 msgid "Logo too large; max 1 MB"
 msgstr "徽标过大；最大 1 MB"
 
-#: backend/api/report_branding.py:161
+#: backend/api/report_branding.py:165
 #, python-format
 msgid "Uploaded report branding logo (%(size)d bytes, %(mime)s)"
 msgstr "上传报告品牌标识 (%(size)d 字节, %(mime)s)"
 
-#: backend/api/report_branding.py:180
+#: backend/api/report_branding.py:184
 msgid "No logo configured"
 msgstr "未配置徽标"
 
-#: backend/api/report_branding.py:208
+#: backend/api/report_branding.py:212
 msgid "Removed report branding logo"
 msgstr "已移除报告品牌徽标"
 
-#: backend/api/firewall_roles.py:97
+#: backend/api/firewall_roles.py:101
 #, python-format
 msgid "Failed to retrieve firewall roles: %s"
 msgstr "无法检索防火墙角色列表：%s"
 
-#: backend/api/firewall_roles.py:149
+#: backend/api/firewall_roles.py:153
 #, python-format
 msgid "Failed to retrieve firewall role: %s"
 msgstr "无法检索防火墙角色：%s"
 
-#: backend/api/firewall_roles.py:169
+#: backend/api/firewall_roles.py:173
 msgid "Permission denied: ADD_FIREWALL_ROLE role required"
 msgstr "缺少 ADD_FIREWALL_ROLE 角色，无法执行操作"
 
-#: backend/api/firewall_roles.py:185 backend/api/firewall_roles.py:302
+#: backend/api/firewall_roles.py:189 backend/api/firewall_roles.py:306
 #, python-format
 msgid "Firewall role '%s' already exists"
 msgstr "防火墙角色 '%s' 已存在"
 
-#: backend/api/firewall_roles.py:241
+#: backend/api/firewall_roles.py:245
 #, python-format
 msgid "Failed to create firewall role: %s"
 msgstr "创建防火墙角色失败：%s"
 
-#: backend/api/firewall_roles.py:262
+#: backend/api/firewall_roles.py:266
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
 msgstr "权限 denied: 需要 EDIT_FIREWALL_ROLE 角色"
 
-#: backend/api/firewall_roles.py:362
+#: backend/api/firewall_roles.py:366
 #, python-format
 msgid "Failed to update firewall role: %s"
 msgstr "更新防火墙角色失败：%s"
 
-#: backend/api/firewall_roles.py:382
+#: backend/api/firewall_roles.py:386
 msgid "Permission denied: DELETE_FIREWALL_ROLE role required"
 msgstr "缺少 DELETE_FIREWALL_ROLE 角色，无法执行操作"
 
-#: backend/api/firewall_roles.py:429
+#: backend/api/firewall_roles.py:433
 msgid "Firewall role deleted successfully"
 msgstr "删除防火墙角色成功"
 
-#: backend/api/firewall_roles.py:439
+#: backend/api/firewall_roles.py:443
 #, python-format
 msgid "Failed to delete firewall role: %s"
 msgstr "删除防火墙角色失败：%s"
 
-#: backend/api/firewall_roles.py:510
+#: backend/api/firewall_roles.py:514
 #, python-format
 msgid "Failed to retrieve host firewall roles: %s"
 msgstr "无法检索主机防火墙角色：%s"
 
-#: backend/api/firewall_roles.py:598
+#: backend/api/firewall_roles.py:602
 #, python-format
 msgid "Failed to retrieve expected ports: %s"
 msgstr "无法检索预期端口：%s"
 
-#: backend/api/firewall_roles.py:623 backend/api/firewall_roles.py:750
+#: backend/api/firewall_roles.py:627 backend/api/firewall_roles.py:754
 msgid "Permission denied: ASSIGN_HOST_FIREWALL_ROLES role required"
 msgstr "缺少 ASSIGN_HOST_FIREWALL_ROLES 角色，无法执行操作"
 
-#: backend/api/firewall_roles.py:635 backend/api/firewall_roles.py:762
+#: backend/api/firewall_roles.py:639 backend/api/firewall_roles.py:766
 msgid "Invalid ID format"
 msgstr "无效的 ID 格式"
 
-#: backend/api/firewall_roles.py:671
+#: backend/api/firewall_roles.py:675
 msgid "Firewall role already assigned to this host"
 msgstr "防火墙角色已分配给此主机"
 
-#: backend/api/firewall_roles.py:729
+#: backend/api/firewall_roles.py:733
 #, python-format
 msgid "Failed to assign firewall role: %s"
 msgstr "分配防火墙角色失败：%s"
 
-#: backend/api/firewall_roles.py:778
+#: backend/api/firewall_roles.py:782
 msgid "Firewall role assignment not found"
 msgstr "未找到防火墙角色分配"
 
-#: backend/api/firewall_roles.py:828
+#: backend/api/firewall_roles.py:832
 msgid "Firewall role removed from host successfully"
 msgstr "从主机中移除防火墙角色成功"
 
-#: backend/api/firewall_roles.py:840
+#: backend/api/firewall_roles.py:844
 #, python-format
 msgid "Failed to remove firewall role: %s"
 msgstr "移除防火墙角色失败：%s"
 
-#: backend/api/lifecycle_actions.py:54 backend/api/lifecycle_actions.py:65
+#: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
 msgstr "操作系统生命周期管理需要 SysManage Professional 许可证。"
 
-#: backend/api/lifecycle_actions.py:72
+#: backend/api/lifecycle_actions.py:76
 msgid "The OS lifecycle module is not currently available."
 msgstr "当前操作系统生命周期模块不可用。"
 
-#: backend/api/audit_log.py:131
+#: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
 msgstr "无效的用户 ID 格式"
 
-#: backend/api/audit_log.py:194
+#: backend/api/audit_log.py:198
 msgid "Number of entries to return"
 msgstr "要返回的条目数"
 
-#: backend/api/audit_log.py:196
+#: backend/api/audit_log.py:200
 msgid "Number of entries to skip"
 msgstr "要跳过的条目数"
 
-#: backend/api/audit_log.py:230
+#: backend/api/audit_log.py:234
 #, python-format
 msgid "Failed to retrieve audit logs: %s"
 msgstr "获取审计日志失败: %s"
 
-#: backend/api/audit_log.py:253
+#: backend/api/audit_log.py:257
 msgid "Invalid audit log ID format"
 msgstr "无效的审计日志 ID 格式"
 
-#: backend/api/audit_log.py:264
+#: backend/api/audit_log.py:268
 msgid "Audit log entry not found"
 msgstr "未找到审计日志条目"
 
-#: backend/api/audit_log.py:282
+#: backend/api/audit_log.py:286
 #, python-format
 msgid "Failed to retrieve audit log entry: %s"
 msgstr "获取审计日志条目失败: %s"
 
-#: backend/api/audit_log.py:295
+#: backend/api/audit_log.py:299
 #, python-format
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr "%s 导出需要 SysManage Professional+ 许可证。开源版本支持 CSV 导出。"
 
-#: backend/api/audit_log.py:302
+#: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
 msgstr "使用 /api/v1/audit/export（需要 Pro+ 许可证）"
 
-#: backend/api/audit_log.py:311
+#: backend/api/audit_log.py:315
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
 msgstr "导出格式：csv, pdf (OSS); json/cef/leef (Pro+)"
 
-#: backend/api/audit_log.py:334
+#: backend/api/audit_log.py:338
 #, python-format
 msgid "Unsupported export format: %s"
 msgstr "不支持的导出格式: %s"
 
 # Reports-related strings
-#: backend/api/audit_log.py:528
+#: backend/api/audit_log.py:532
 msgid "Generated"
 msgstr "已生成"
 
-#: backend/api/audit_log.py:530
+#: backend/api/audit_log.py:534
 msgid "Total Entries"
 msgstr "总条目数"
 
-#: backend/api/audit_log.py:537
+#: backend/api/audit_log.py:541
 msgid "No audit log entries found."
 msgstr "未找到审计日志条目。"
 
-#: backend/api/enabled_package_managers.py:248
+#: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
 msgstr "权限 denied: 需要 VIEW_ENABLED_PACKAGE_MANAGERS 角色"
 
-#: backend/api/enabled_package_managers.py:266
+#: backend/api/enabled_package_managers.py:270
 #, python-format
 msgid "Failed to retrieve enabled package managers: %s"
 msgstr "无法检索已启用的包管理器：%s"
 
-#: backend/api/enabled_package_managers.py:285
+#: backend/api/enabled_package_managers.py:289
 msgid "Permission denied: ADD_ENABLED_PACKAGE_MANAGER role required"
 msgstr "缺少 ADD_ENABLED_PACKAGE_MANAGER 角色，无法执行操作"
 
-#: backend/api/enabled_package_managers.py:303
+#: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
 "Package manager '%(package_manager)s' is already enabled for OS "
 "'%(os_name)s'"
 msgstr "包管理器 '%(package_manager)s' 已为操作系统 '%(os_name)s' 启用"
 
-#: backend/api/enabled_package_managers.py:378
+#: backend/api/enabled_package_managers.py:382
 #, python-format
 msgid "Failed to create enabled package manager: %s"
 msgstr "创建已启用的软件包管理器失败：%s"
 
-#: backend/api/enabled_package_managers.py:397
+#: backend/api/enabled_package_managers.py:401
 msgid "Permission denied: REMOVE_ENABLED_PACKAGE_MANAGER role required"
 msgstr "权限 denied: 需要 REMOVE_ENABLED_PACKAGE_MANAGER 角色"
 
 # OS Version Upgrade related strings
-#: backend/api/enabled_package_managers.py:408
+#: backend/api/enabled_package_managers.py:412
 msgid "Invalid package manager ID format"
 msgstr "无效的包管理器ID格式"
 
 # OS Version Upgrade related strings
-#: backend/api/enabled_package_managers.py:421
+#: backend/api/enabled_package_managers.py:425
 msgid "Enabled package manager not found"
 msgstr "未找到已启用的包管理器"
 
-#: backend/api/enabled_package_managers.py:454
+#: backend/api/enabled_package_managers.py:458
 msgid "Enabled package manager deleted successfully"
 msgstr "已启用的包管理器删除成功"
 
-#: backend/api/enabled_package_managers.py:464
+#: backend/api/enabled_package_managers.py:468
 #, python-format
 msgid "Failed to delete enabled package manager: %s"
 msgstr "删除已启用的软件包管理器失败：%s"
 
-#: backend/api/scripts/models.py:29 backend/api/scripts/models.py:68
+#: backend/api/scripts/models.py:33 backend/api/scripts/models.py:72
 msgid "Script name cannot be empty"
 msgstr "脚本名称不能为空"
 
-#: backend/api/scripts/models.py:31 backend/api/scripts/models.py:70
+#: backend/api/scripts/models.py:35 backend/api/scripts/models.py:74
 msgid "Script name cannot exceed 255 characters"
 msgstr "脚本名称不能超过255个字符"
 
-#: backend/api/scripts/models.py:48 backend/api/scripts/models.py:88
+#: backend/api/scripts/models.py:52 backend/api/scripts/models.py:92
 msgid "Script content cannot be empty"
 msgstr "脚本内容不能为空"
 
-#: backend/api/scripts/models.py:118
+#: backend/api/scripts/models.py:122
 msgid "Either saved_script_id or script_content must be provided"
 msgstr "必须提供saved_script_id或script_content"
 
-#: backend/api/scripts/models.py:128
+#: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
 msgstr "ad-hoc 脚本需要 shell_type"
 
-#: backend/api/scripts/routes_executions.py:63
+#: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
 msgstr "权限 denied: 需要 RUN_SCRIPT 角色"
 
-#: backend/api/scripts/routes_executions.py:96
+#: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
 msgstr "保存的脚本未找到"
 
-#: backend/api/scripts/routes_executions.py:101
+#: backend/api/scripts/routes_executions.py:105
 msgid "Script is not active"
 msgstr "脚本不是活动状态"
 
-#: backend/api/scripts/routes_executions.py:181
+#: backend/api/scripts/routes_executions.py:185
 #, python-brace-format
 msgid "Executed script '{script_name}' on host '{host_fqdn}'"
 msgstr "在主机'{host_fqdn}'上执行脚本'{script_name}'"
 
-#: backend/api/scripts/routes_executions.py:203
+#: backend/api/scripts/routes_executions.py:207
 msgid "Failed to queue script execution: {}"
 msgstr "执行脚本请求加入队列失败：{}"
 
-#: backend/api/scripts/routes_executions.py:213
+#: backend/api/scripts/routes_executions.py:217
 msgid "Failed to queue script execution"
 msgstr "执行脚本请求加入队列失败"
 
-#: backend/api/scripts/routes_executions.py:226
+#: backend/api/scripts/routes_executions.py:230
 msgid "Script execution queued for delivery"
 msgstr "脚本执行已排队等待交付"
 
-#: backend/api/scripts/routes_executions.py:234
+#: backend/api/scripts/routes_executions.py:238
 msgid "Failed to execute script"
 msgstr "执行脚本失败"
 
-#: backend/api/scripts/routes_executions.py:315
+#: backend/api/scripts/routes_executions.py:319
 msgid "Failed to fetch script executions"
 msgstr "获取多个脚本执行失败"
 
-#: backend/api/scripts/routes_executions.py:344
-#: backend/api/scripts/routes_executions.py:422
+#: backend/api/scripts/routes_executions.py:348
+#: backend/api/scripts/routes_executions.py:426
 msgid "Permission denied: DELETE_SCRIPT_EXECUTION role required"
 msgstr "缺少 DELETE_SCRIPT_EXECUTION 角色，无法执行操作"
 
-#: backend/api/scripts/routes_executions.py:356
-#: backend/api/scripts/routes_executions.py:491
+#: backend/api/scripts/routes_executions.py:360
+#: backend/api/scripts/routes_executions.py:495
 msgid "Script execution not found"
 msgstr "脚本执行未找到"
 
-#: backend/api/scripts/routes_executions.py:384
+#: backend/api/scripts/routes_executions.py:388
 msgid "Script execution deleted successfully"
 msgstr "脚本执行删除成功"
 
-#: backend/api/scripts/routes_executions.py:393
+#: backend/api/scripts/routes_executions.py:397
 msgid "Failed to delete script execution"
 msgstr "删除脚本执行失败"
 
-#: backend/api/scripts/routes_executions.py:462
+#: backend/api/scripts/routes_executions.py:466
 msgid "Script executions deleted successfully"
 msgstr "脚本执行删除成功"
 
-#: backend/api/scripts/routes_executions.py:469
+#: backend/api/scripts/routes_executions.py:473
 msgid "Failed to delete script executions"
 msgstr "删除多个脚本执行失败"
 
-#: backend/api/scripts/routes_executions.py:526
+#: backend/api/scripts/routes_executions.py:530
 msgid "Failed to fetch script execution"
 msgstr "获取脚本执行失败"
 
 # Tag management messages
-#: backend/api/scripts/routes_saved_scripts.py:76
+#: backend/api/scripts/routes_saved_scripts.py:80
 msgid "Failed to fetch saved scripts"
 msgstr "获取多个保存的脚本失败"
 
-#: backend/api/scripts/routes_saved_scripts.py:119
+#: backend/api/scripts/routes_saved_scripts.py:123
 msgid "Permission denied: ADD_SCRIPT role required"
 msgstr "缺少 ADD_SCRIPT 角色，无法执行操作"
 
-#: backend/api/scripts/routes_saved_scripts.py:131
-#: backend/api/scripts/routes_saved_scripts.py:293
+#: backend/api/scripts/routes_saved_scripts.py:135
+#: backend/api/scripts/routes_saved_scripts.py:297
 msgid "A script with this name already exists"
 msgstr "已存在同名脚本"
 
-#: backend/api/scripts/routes_saved_scripts.py:193
+#: backend/api/scripts/routes_saved_scripts.py:197
 msgid "Failed to create saved script"
 msgstr "删除保存的脚本失败"
 
 # Tag management messages
-#: backend/api/scripts/routes_saved_scripts.py:236
+#: backend/api/scripts/routes_saved_scripts.py:240
 msgid "Failed to fetch saved script"
 msgstr "获取保存的脚本失败"
 
-#: backend/api/scripts/routes_saved_scripts.py:265
+#: backend/api/scripts/routes_saved_scripts.py:269
 msgid "Permission denied: EDIT_SCRIPT role required"
 msgstr "权限 denied: 需要 EDIT_SCRIPT 角色"
 
-#: backend/api/scripts/routes_saved_scripts.py:350
+#: backend/api/scripts/routes_saved_scripts.py:354
 msgid "Failed to update saved script"
 msgstr "更新保存的脚本失败"
 
-#: backend/api/scripts/routes_saved_scripts.py:378
+#: backend/api/scripts/routes_saved_scripts.py:382
 msgid "Permission denied: DELETE_SCRIPT role required"
 msgstr "缺少 DELETE_SCRIPT 角色，无法执行操作"
 
-#: backend/api/scripts/routes_saved_scripts.py:412
+#: backend/api/scripts/routes_saved_scripts.py:416
 msgid "Cannot delete script with active executions"
 msgstr "无法删除具有活动执行的脚本"
 
-#: backend/api/scripts/routes_saved_scripts.py:440
+#: backend/api/scripts/routes_saved_scripts.py:444
 msgid "Script deleted successfully"
 msgstr "脚本删除成功"
 
-#: backend/api/scripts/routes_saved_scripts.py:449
+#: backend/api/scripts/routes_saved_scripts.py:453
 msgid "Failed to delete saved script"
 msgstr "删除保存的脚本失败"
 
-#: backend/api/commercial_antivirus_status.py:109
+#: backend/api/commercial_antivirus_status.py:113
 #, python-format
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "无法检索商业反病毒状态：%s"
 
-#: backend/websocket/message_router.py:287
+#: backend/websocket/message_router.py:291
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "队列中未知的消息类型: %s"
 
-#: backend/websocket/message_router.py:292
+#: backend/websocket/message_router.py:296
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "路由消息类型 %(message_type)s 时出错：%(error)s"
 
-#: backend/websocket/queue_maintenance.py:68
+#: backend/websocket/queue_maintenance.py:72
 #, python-format
 msgid "Cleaned up %d old messages"
 msgstr "清理了 %d 条旧消息"
 
-#: backend/websocket/queue_maintenance.py:76
+#: backend/websocket/queue_maintenance.py:80
 #, python-format
 msgid "Failed to cleanup old messages: %s"
 msgstr "清理旧消息失败：%s"
 
-#: backend/websocket/queue_maintenance.py:112
+#: backend/websocket/queue_maintenance.py:116
 #, python-format
 msgid "Deleted %(count)d messages for host %(host_id)s"
 msgstr "删除了主机 %(host_id)s 的 %(count)d 条消息"
 
-#: backend/websocket/queue_maintenance.py:121
+#: backend/websocket/queue_maintenance.py:125
 #, python-format
 msgid "Failed to delete messages for host %(host_id)s: %(error)s"
 msgstr "删除主机 %(host_id)s 的消息失败：%(error)s"
 
-#: backend/websocket/queue_maintenance.py:187
+#: backend/websocket/queue_maintenance.py:191
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
 msgstr "标记 %(count)d 条旧消息为过期（超过 %(timeout)d 分钟未使用）"
 
-#: backend/websocket/queue_maintenance.py:197
+#: backend/websocket/queue_maintenance.py:201
 #, python-format
 msgid "Failed to expire old messages: %s"
 msgstr "使旧消息过期失败：%s"
 
-#: backend/websocket/queue_maintenance.py:245
+#: backend/websocket/queue_maintenance.py:249
 #, python-format
 msgid "Deleted %d failed/expired messages"
 msgstr "删除了 %d 条失败/过期的消息"
 
-#: backend/websocket/queue_maintenance.py:252
+#: backend/websocket/queue_maintenance.py:256
 #, python-format
 msgid "Failed to delete failed messages: %s"
 msgstr "删除失败消息失败：%s"
 
-#: backend/websocket/mock_connection.py:36
+#: backend/websocket/mock_connection.py:40
 #, python-format
 msgid "Mock connection: would send message %s"
 msgstr "模拟连接：将发送消息 %s"
 
-#: backend/websocket/inbound_processor.py:124
+#: backend/websocket/inbound_processor.py:128
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr "在消息 %(message_id)s 中未找到主机 %(hostname)s，正在删除该消息"
 
-#: backend/websocket/inbound_processor.py:135
+#: backend/websocket/inbound_processor.py:139
 #, python-format
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr "对于消息 %(message_id)s，主机 %(hostname)s 不被批准（状态：%(status)s），正在删除该消息"
 
-#: backend/websocket/inbound_processor.py:152
+#: backend/websocket/inbound_processor.py:156
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr "处理 NULL 主机 ID 消息：已批准的主机 %(hostname)s (ID: %(host_id)s)"
 
-#: backend/websocket/inbound_processor.py:269
+#: backend/websocket/inbound_processor.py:273
 #, python-format
 msgid ""
 "Host %(host_id)s not found on this database; deferring %(count)d queued "
@@ -4007,93 +4013,93 @@ msgid ""
 msgstr ""
 "主机 %(host_id)s 在此数据库中未找到；推迟 %(count)d 条队列消息以进行重试（不会删除）——可能是正在进行的注册或已删除的主机"
 
-#: backend/websocket/inbound_processor.py:286
+#: backend/websocket/inbound_processor.py:290
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr "主机 %(host_id)s (FQDN: %(fqdn)s) 不再被批准（状态：%(status)s），删除其所有队列中的消息"
 
-#: backend/websocket/inbound_processor.py:296
+#: backend/websocket/inbound_processor.py:300
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr "删除了未批准的主机 %(host_id)s 的 %(count)d 条消息"
 
-#: backend/websocket/inbound_processor.py:303
+#: backend/websocket/inbound_processor.py:307
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
 msgstr "处理已批准主机 %(host_id)s 的消息 (FQDN: %(fqdn)s)"
 
-#: backend/websocket/inbound_processor.py:328
+#: backend/websocket/inbound_processor.py:332
 #, python-format
 msgid "Processing message with NULL host_id: %s"
 msgstr "正在处理带有 NULL host_id 的消息： %s"
 
-#: backend/websocket/inbound_processor.py:339
+#: backend/websocket/inbound_processor.py:343
 #, python-format
 msgid "Processing SYSTEM_INFO registration message %s"
 msgstr "正在处理 SYSTEM_INFO 注册消息 %s"
 
-#: backend/websocket/inbound_processor.py:362
+#: backend/websocket/inbound_processor.py:366
 #, python-format
 msgid "Message %s missing hostname and host_id, deleting"
 msgstr "消息%s缺少主机名和host_id，删除中"
 
-#: backend/websocket/inbound_processor.py:402
+#: backend/websocket/inbound_processor.py:406
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
 msgstr "处理 NULL 主机ID 消息 %(message_id)s 时出错：%(error)s"
 
-#: backend/websocket/inbound_processor.py:439
+#: backend/websocket/inbound_processor.py:443
 #, python-format
 msgid "Could not mark message %s as processing"
 msgstr "无法将消息 %s 标记为处理中"
 
-#: backend/websocket/inbound_processor.py:467
+#: backend/websocket/inbound_processor.py:471
 #, python-format
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr "处理队列中的消息：%(message_id)s (类型：%(message_type)s，主机：%(host)s)"
 
-#: backend/websocket/inbound_processor.py:500
+#: backend/websocket/inbound_processor.py:504
 #, python-format
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr "成功处理并完成消息：%(message_id)s，针对主机 %(host)s"
 
-#: backend/websocket/inbound_processor.py:518
+#: backend/websocket/inbound_processor.py:522
 #, python-format
 msgid "Failed to process message %s: unknown message type"
 msgstr "处理消息%s失败：未知的消息类型"
 
-#: backend/websocket/inbound_processor.py:539
+#: backend/websocket/inbound_processor.py:543
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr "为主机 %(host)s 处理消息 %(message_id)s 时出错：%(error)s"
 
-#: backend/websocket/inbound_processor.py:569
+#: backend/websocket/inbound_processor.py:573
 #, python-format
 msgid "Could not mark SYSTEM_INFO message %s as processing"
 msgstr "无法将 SYSTEM_INFO 消息 %s 标记为处理中"
 
-#: backend/websocket/inbound_processor.py:601
+#: backend/websocket/inbound_processor.py:605
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
 msgstr "处理 SYSTEM_INFO 消息 %(message_id)s 时出错：%(error)s"
 
-#: backend/websocket/queue_stats.py:119
+#: backend/websocket/queue_stats.py:123
 #, python-format
 msgid "Failed to get failed messages: %s"
 msgstr "获取失败的消息失败：%s"
 
-#: backend/websocket/queue_operations.py:102
+#: backend/websocket/queue_operations.py:106
 #, python-brace-format
 msgid "Host ID {host_id} not found"
 msgstr "未找到主机 ID {host_id}"
 
-#: backend/websocket/queue_operations.py:297
+#: backend/websocket/queue_operations.py:301
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4103,75 +4109,75 @@ msgstr ""
 "主机ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:479
+#: backend/websocket/queue_operations.py:483
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "将消息标记为正在处理：%s"
 
-#: backend/websocket/queue_operations.py:486
+#: backend/websocket/queue_operations.py:490
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "标记消息 %(message_id)s 为正在处理失败：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:521
+#: backend/websocket/queue_operations.py:525
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "将消息标记为已完成：%s"
 
-#: backend/websocket/queue_operations.py:528
+#: backend/websocket/queue_operations.py:532
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "标记消息 %(message_id)s 为已完成失败：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:566
+#: backend/websocket/queue_operations.py:570
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "消息已标记为已发送（等待确认）：%s"
 
-#: backend/websocket/queue_operations.py:573
+#: backend/websocket/queue_operations.py:577
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "标记消息 %(message_id)s 为已发送失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:602
+#: backend/websocket/queue_operations.py:606
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "无法确认未知消息：%s"
 
-#: backend/websocket/queue_operations.py:609
+#: backend/websocket/queue_operations.py:613
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "消息 %(message_id)s 不处于已发送状态（当前状态：%(status)s），跳过确认"
 
-#: backend/websocket/queue_operations.py:622
+#: backend/websocket/queue_operations.py:626
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "代理已确认消息：%s"
 
-#: backend/websocket/queue_operations.py:629
+#: backend/websocket/queue_operations.py:633
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "标记消息 %(message_id)s 为已确认失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:713
+#: backend/websocket/queue_operations.py:717
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "在 %d 秒内未收到确认"
 
-#: backend/websocket/queue_operations.py:725
+#: backend/websocket/queue_operations.py:729
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "已安排 %d 条未确认消息进行重试"
 
-#: backend/websocket/queue_operations.py:733
+#: backend/websocket/queue_operations.py:737
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "重试未确认消息时出错：%s"
 
-#: backend/websocket/queue_operations.py:788
+#: backend/websocket/queue_operations.py:792
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4179,122 +4185,122 @@ msgid ""
 msgstr ""
 "消息 %(message_id)s 失败（尝试次数 %(attempt)d/%(max_retries)d），将在 %(backoff)d 秒后重试"
 
-#: backend/websocket/queue_operations.py:804
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "消息 %(message_id)s 在经过 %(attempts)d 次尝试后永久失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:822
+#: backend/websocket/queue_operations.py:826
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "标记消息 %(message_id)s 为已失败失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:844
+#: backend/websocket/queue_operations.py:848
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "反序列化消息 %(message_id)s 失败：%(error)s"
 
-#: backend/websocket/message_processor.py:63
+#: backend/websocket/message_processor.py:67
 msgid "Message processor started"
 msgstr "消息处理程序已启动"
 
-#: backend/websocket/message_processor.py:84
+#: backend/websocket/message_processor.py:88
 #, python-format
 msgid "Error in message processing loop: %s"
 msgstr "消息处理循环中出现错误：%s"
 
-#: backend/websocket/message_processor.py:103
+#: backend/websocket/message_processor.py:107
 msgid "Message processor cancelled"
 msgstr "消息处理程序已取消"
 
-#: backend/websocket/message_processor.py:107
+#: backend/websocket/message_processor.py:111
 msgid "Message processor stopped"
 msgstr "消息处理程序已停止"
 
-#: backend/websocket/queue_manager.py:43
+#: backend/websocket/queue_manager.py:47
 msgid "Server message queue manager initialized"
 msgstr "服务器消息队列管理器已初始化"
 
-#: backend/startup/rate_limit_middleware.py:94
+#: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "超出速率限制。请稍后再试。"
 
-#: backend/services/reboot_orchestration_service.py:249
+#: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
 msgstr "%(failed_count)d of %(total_count)d 子主机重启失败"
 
-#: backend/services/airgap_device_service.py:145
+#: backend/services/airgap_device_service.py:149
 msgid "no device selected"
 msgstr "未选择设备"
 
-#: backend/services/airgap_device_service.py:151
+#: backend/services/airgap_device_service.py:155
 msgid "device not found (was it removed?)"
 msgstr "设备未找到（是否已被移除？）"
 
-#: backend/services/airgap_device_service.py:158
+#: backend/services/airgap_device_service.py:162
 msgid "ISO filesystem present"
 msgstr "存在 ISO 文件系统"
 
-#: backend/services/airgap_device_service.py:166
+#: backend/services/airgap_device_service.py:170
 msgid "drive present but no readable disc inserted"
 msgstr "驱动器存在但没有可读取的光盘插入"
 
-#: backend/services/airgap_device_service.py:171
+#: backend/services/airgap_device_service.py:175
 #, python-format
 msgid "no ISO filesystem on device (fstype=%s)"
 msgstr "设备上没有 ISO 文件系统 (fstype=%s)"
 
-#: backend/services/audit_service.py:184
+#: backend/services/audit_service.py:188
 #, python-brace-format
 msgid "Created {entity_type} '{entity_name}'"
 msgstr "创建了 {entity_type} '{entity_name}'"
 
-#: backend/services/audit_service.py:232
+#: backend/services/audit_service.py:236
 #, python-brace-format
 msgid "Updated {entity_type} '{entity_name}'"
 msgstr "已更新 {entity_type} '{entity_name}' 实体"
 
-#: backend/services/audit_service.py:280
+#: backend/services/audit_service.py:284
 #, python-brace-format
 msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "已删除 {entity_type} '{entity_name}'"
 
-#: backend/services/vault_service.py:149
+#: backend/services/vault_service.py:219
 msgid "vault.not_enabled"
 msgstr "vault.not_enabled"
 
-#: backend/services/vault_service.py:152
+#: backend/services/vault_service.py:222
 msgid "vault.no_token"
 msgstr "vault.no_token"
 
-#: backend/services/vault_service.py:161
+#: backend/services/vault_service.py:231
 msgid "vault.invalid_path"
 msgstr "vault.invalid_path"
 
-#: backend/services/vault_service.py:189
+#: backend/services/vault_service.py:260
 msgid "vault.permission_denied"
 msgstr "vault.permission_denied"
 
-#: backend/services/vault_service.py:201
+#: backend/services/vault_service.py:282
 msgid "vault.connection_error"
 msgstr "vault.connection_error"
 
-#: backend/services/vault_service.py:204
+#: backend/services/vault_service.py:287
 msgid "vault.timeout"
 msgstr "vault.timeout"
 
-#: backend/services/vault_service.py:209
+#: backend/services/vault_service.py:293
 msgid "vault.invalid_response"
 msgstr "vault.invalid_response"
 
-#: backend/services/vault_service.py:343
+#: backend/services/vault_service.py:427
 msgid "vault.secret_not_found"
 msgstr "vault.secret_not_found"
 
-#: backend/services/vault_service.py:349
+#: backend/services/vault_service.py:433
 msgid "vault.invalid_secret_format"
 msgstr "vault.invalid_secret_format"
 
