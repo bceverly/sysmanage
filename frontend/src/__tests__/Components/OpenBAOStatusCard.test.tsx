@@ -123,10 +123,12 @@ test("seals the vault via the Seal button", async () => {
 
 test("refresh button reloads data", async () => {
   render(<OpenBAOStatusCard />);
-  await screen.findByText("OpenBAO Vault");
+  // The header renders during loading; wait for the Refresh button (which only
+  // appears once the async load resolves) rather than racing the spinner.
+  const refreshButton = await screen.findByText("Refresh");
 
   m(openBAOService.getStatus).mockClear();
-  fireEvent.click(screen.getByText("Refresh"));
+  fireEvent.click(refreshButton);
 
   await waitFor(() => expect(m(openBAOService.getStatus)).toHaveBeenCalled());
 });

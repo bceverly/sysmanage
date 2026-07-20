@@ -378,7 +378,7 @@ c['security'] = {**c.get('security', {}), 'admin_userid': 'admin@sysmanage.org',
                  'jwt_secret': os.environ['JWT'], 'password_salt': os.environ['SALT'], 'jwt_algorithm': 'HS256'}
 c['email'] = {**c.get('email', {}), 'enabled': True}
 c['api'] = {**c.get('api', {}), 'host': '0.0.0.0', 'port': 8080}
-c['api'].pop('certFile', None); c['api'].pop('keyFile', None)  # plain HTTP:8080 so the agent (ws://:8080) connects
+c['api'].pop('certFile', None); c['api'].pop('keyFile', None)  # nosemgrep: javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket -- plain HTTP:8080 test VM; agent uses ws://:8080
 with open(p, 'w') as f: yaml.safe_dump(c, f, default_flow_style=False, sort_keys=False)
 print('patched', p)
 PY
@@ -395,6 +395,7 @@ apt-get install -y software-properties-common
 add-apt-repository -y ppa:bceverly/sysmanage-agent
 apt-get update -y
 apt-get install -y sysmanage-agent
+# nosemgrep: javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket -- local test rig: the agent connects over plain ws:// (HTTP:8080), not production
 # The agent builds ws://hostname:port/api/agent/connect from server.hostname /
 # server.port / server.use_https (it IGNORES a server.url key). The PPA ships a
 # stale sample with only server.url, so write a correct config from scratch.
@@ -444,7 +445,7 @@ database:
   path: "/var/lib/sysmanage-agent/agent.db"
 CFG
 systemctl enable --now sysmanage-agent 2>/dev/null || systemctl restart sysmanage-agent 2>/dev/null || true
-echo "=== agent config written -> ws://$SERVER_IP:8080/api/agent/connect; retries until the server is up ==="
+echo "=== agent config written -> ws://$SERVER_IP:8080/api/agent/connect; retries until the server is up ===" # nosemgrep: javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket -- local test rig: plain ws:// (HTTP:8080)
 BODY
     ;;
     *) echo 'echo "no automated setup for this role"' ;;
@@ -734,6 +735,7 @@ print_vm_summary() {
 # ssh into a VM over the HA bridge using its password (the cloud-init user).
 ha_ssh() {
   local ip="$1"; shift
+  # nosemgrep: generic.secrets.security.detected-ssh-password.detected-ssh-password -- test-VM password for the local libvirt rig, not a production secret
   sshpass -p "$PASSWORD" ssh \
     -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o ConnectTimeout=10 -o LogLevel=ERROR \

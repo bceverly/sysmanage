@@ -723,6 +723,7 @@ print_vm_summary() {
 
 ha_ssh() {
   local ip="$1"; shift
+  # nosemgrep: generic.secrets.security.detected-ssh-password.detected-ssh-password -- test-VM password for the local libvirt rig, not a production secret
   sshpass -p "$PASSWORD" ssh \
     -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o ConnectTimeout=10 -o LogLevel=ERROR \
@@ -762,6 +763,7 @@ pg_version() {
 # REMOTE rsync under sudo.  $1=local src, $2="<ip>:/abs/dest".
 ha_rsync() {
   local src="$1" dest="$2"; shift 2
+  # nosemgrep: generic.secrets.security.detected-ssh-password.detected-ssh-password -- test-VM password for the local libvirt rig, not a production secret
   sshpass -p "$PASSWORD" rsync -a --rsync-path="sudo rsync" \
     -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10" \
     "$@" "$src" "${USERNAME}@${dest}"
@@ -769,6 +771,7 @@ ha_rsync() {
 
 # scp a file into the ubuntu user's home on the VM.  $1=local file, $2=ip.
 ha_scp() {
+  # nosemgrep: generic.secrets.security.detected-ssh-password.detected-ssh-password -- test-VM password for the local libvirt rig, not a production secret
   sshpass -p "$PASSWORD" scp \
     -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=10 \
     "$1" "${USERNAME}@${2}:"
@@ -1186,6 +1189,7 @@ export DEBIAN_FRONTEND=noninteractive
 add-apt-repository -y ppa:bceverly/sysmanage-agent || true
 apt-get update -y
 apt-get install -y sysmanage-agent
+# nosemgrep: javascript.lang.security.detect-insecure-websocket.detect-insecure-websocket -- local test rig: the agent connects over plain ws:// (HTTP:8080), not production
 # The agent builds ws://hostname:port/api/agent/connect from server.hostname /
 # port / use_https (it ignores server.url).  security.enrollment_token is what
 # binds this host to its tenant at registration (the multitenancy engine
