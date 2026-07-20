@@ -116,7 +116,8 @@ class TestEnvironmentCrud:
         _create(client, "Library")
         dev = _create(client, "Dev").json()["id"]
         _create(client, "Prod")
-        assert client.put(f"{_ENV}/{dev}", json={"name": "Prod"}).status_code == 409
+        renamed = client.put(f"{_ENV}/{dev}", json={"name": "Prod"})
+        assert renamed.status_code == 409
 
     def test_update_missing_env_404(self, client):
         r = client.put(
@@ -127,12 +128,14 @@ class TestEnvironmentCrud:
     def test_delete_non_library(self, client):
         _create(client, "Library")
         dev = _create(client, "Dev").json()["id"]
-        assert client.delete(f"{_ENV}/{dev}").status_code == 200
+        deleted = client.delete(f"{_ENV}/{dev}")
+        assert deleted.status_code == 200
         assert [e["name"] for e in client.get(_ENV).json()] == ["Library"]
 
     def test_library_cannot_be_deleted(self, client):
         lib = _create(client, "Library").json()["id"]
-        assert client.delete(f"{_ENV}/{lib}").status_code == 400
+        deleted = client.delete(f"{_ENV}/{lib}")
+        assert deleted.status_code == 400
 
 
 class TestEnvironmentReorder:

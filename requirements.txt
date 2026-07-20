@@ -84,6 +84,10 @@ polib>=1.2.0  # PO file parsing for backend i18n validation
 reportlab==4.4.4
 safety==3.7.0
 safety-schemas==0.0.16
+# safety 3.7.0 requires typer>=0.16.0; pinned explicitly so a stale pre-0.16
+# typer can't crash safety's click shim ("no active click context"). Immune at
+# any click version, so this does not disturb semgrep's click~=8.1.8 need.
+typer>=0.16.0
 # semgrep ships a compiled OCaml core with Linux/macOS wheels only — there is no
 # OpenBSD/NetBSD/FreeBSD/Windows build, and pip would otherwise backtrack through
 # every sdist forever trying (and failing) to build it.  Gate it to the platforms

@@ -22,7 +22,7 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.15",
     "@types/react-dom": "^19.1.10",
-    "axios": "^1.17.0",
+    "axios": "^1.18.1",
     "esbuild": "^0.28.1",
     "i18next": "^25.8.9",
     "i18next-browser-languagedetector": "^8.2.1",
@@ -134,13 +134,14 @@
     "@eslint-community/regexpp": "^4.12.2",
     "@mui/styled-engine": "^7.3.6",
     "ast-v8-to-istanbul": "^0.3.8",
-    "js-yaml": "^4.1.1",
+    "brace-expansion": "^5.0.7",
+    "js-yaml": "^4.3.0",
     "lodash": "^4.17.23",
     "minimatch": "^10.2.1",
     "@oozcitak/dom": {
       "@oozcitak/url": "^4.0.0"
     },
-    "tar": ">=7.5.9",
+    "tar": ">=7.5.20",
     "libxmljs2": ">=0.37.0"
   },
   "msw": {

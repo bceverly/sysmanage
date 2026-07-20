@@ -305,7 +305,7 @@ export const resolveWithLegacyFallback = <TItem>(
         try {
             return JSON.parse(legacyJson) as TItem[];
         } catch (error) {
-            console.warn(`Failed to parse legacy ${label} data:`, error);
+            console.warn("Failed to parse legacy data for", label, error);
             return normalized;
         }
     }
@@ -321,6 +321,6 @@ export const runOptionalFetch = async (
         await fetcher();
     } catch (error) {
         // Optional data — log but don't fail the page load
-        console.log(`${label} not available or failed to load:`, error);
+        console.log("Optional data not available or failed to load:", label, error);
     }
 };
