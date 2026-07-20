@@ -23,6 +23,12 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
+import {
+    AccountFormValues,
+    validateAccountForm,
+    buildCreateUserPayload,
+    extractAccountErrorMessage,
+} from './addHostAccountHelpers';
 
 interface AddHostAccountModalProps {
     open: boolean;
@@ -122,50 +128,26 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
         }
     };
 
-    const validateForm = (): boolean => {
-        if (!username.trim()) {
-            setError(t('hostAccount.usernameRequired', 'Username is required'));
-            return false;
-        }
+    const getFormValues = (): AccountFormValues => ({
+        username,
+        fullName,
+        homeDirectory,
+        shell,
+        createHomeDir,
+        uid,
+        primaryGroup,
+        password,
+        confirmPassword,
+        passwordNeverExpires,
+        userMustChangePassword,
+        accountDisabled,
+    });
 
-        // Username validation - allow alphanumeric and underscore/dash
-        if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(username)) {
-            setError(t('hostAccount.invalidUsername', 'Username must start with a letter and contain only letters, numbers, underscores, and dashes'));
-            return false;
-        }
-
-        if (isWindows) {
-            // Windows password validation
-            if (!password) {
-                setError(t('hostAccount.passwordRequired', 'Password is required for Windows accounts'));
-                return false;
-            }
-            // Client-side confirm-password match on the user's OWN input — no
-            // stored secret and no attacker, so a constant-time compare isn't
-            // warranted. (The rule is off in the main lint; suppress it for the
-            // dedicated security scan too.)
-            // eslint-disable-next-line security/detect-possible-timing-attacks
-            if (password !== confirmPassword) {
-                setError(t('hostAccount.passwordMismatch', 'Passwords do not match'));
-                return false;
-            }
-            if (password.length < 8) {
-                setError(t('hostAccount.passwordTooShort', 'Password must be at least 8 characters'));
-                return false;
-            }
-        }
-
-        // UID validation if provided (platform-specific minimum)
-        if (uid && (Number.isNaN(Number(uid)) || Number(uid) < minUid)) {
-            setError(t('hostAccount.invalidUidPlatform', `UID must be a number >= ${minUid}`, { minUid }));
-            return false;
-        }
-
-        return true;
-    };
-
-    const handleSubmit = async () => {  // NOSONAR - cognitive complexity
-        if (!validateForm()) {
+    const handleSubmit = async () => {
+        const values = getFormValues();
+        const validationError = validateAccountForm(t, values, isWindows, minUid);
+        if (validationError) {
+            setError(validationError);
             return;
         }
 
@@ -173,52 +155,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
         setError(null);
 
         try {
-            // Build the request payload
-            interface CreateUserPayload {
-                username: string;
-                full_name?: string;
-                home_directory?: string;
-                shell?: string;
-                create_home_dir?: boolean;
-                uid?: number;
-                primary_group?: string;
-                password?: string;
-                password_never_expires?: boolean;
-                user_must_change_password?: boolean;
-                account_disabled?: boolean;
-            }
-
-            const payload: CreateUserPayload = {
-                username: username.trim(),
-            };
-
-            if (fullName.trim()) {
-                payload.full_name = fullName.trim();
-            }
-
-            if (isWindows) {
-                // Windows-specific fields
-                payload.password = password;
-                payload.password_never_expires = passwordNeverExpires;
-                payload.user_must_change_password = userMustChangePassword;
-                payload.account_disabled = accountDisabled;
-            } else {
-                // Unix-specific fields
-                if (homeDirectory) {
-                    payload.home_directory = homeDirectory;
-                }
-                if (shell) {
-                    payload.shell = shell;
-                }
-                payload.create_home_dir = createHomeDir;
-                if (uid) {
-                    payload.uid = Number(uid);
-                }
-                if (primaryGroup) {
-                    payload.primary_group = primaryGroup;
-                }
-            }
-
+            const payload = buildCreateUserPayload(values, isWindows);
             await axiosInstance.post(`/api/v1/host/${hostId}/accounts`, payload);
 
             // Call success callback and close modal
@@ -227,17 +164,7 @@ const AddHostAccountModal: React.FC<AddHostAccountModalProps> = ({
             }
             handleClose();
         } catch (err: unknown) {
-            // Extract error message from axios error response
-            let errorMessage = t('hostAccount.createFailed', 'Failed to create user account');
-            if (err && typeof err === 'object' && 'response' in err) {
-                const axiosError = err as { response?: { data?: { detail?: string } } };
-                if (axiosError.response?.data?.detail) {
-                    errorMessage = axiosError.response.data.detail;
-                }
-            } else if (err instanceof Error) {
-                errorMessage = err.message;
-            }
-            setError(errorMessage);
+            setError(extractAccountErrorMessage(t, err));
         } finally {
             setSubmitting(false);
         }

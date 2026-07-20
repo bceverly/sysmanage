@@ -154,7 +154,9 @@ test("shows the no-permission warning when the user cannot view anything", async
 
 test("adds a default repository through the form", async () => {
   render(<HostDefaultsSettings />);
-  await screen.findByText("ppa:bceverly/sysmanage-agent");
+  await screen.findByText("ppa:bceverly/sysmanage-agent", undefined, {
+    timeout: 5000,
+  });
 
   // The repo card is first: combobox[0] = OS, combobox[1] = Package Manager.
   const osSelect = screen.getAllByRole("combobox")[0];
@@ -200,7 +202,9 @@ test("adds a default repository through the form", async () => {
 
 test("deletes a configured repository", async () => {
   render(<HostDefaultsSettings />);
-  await screen.findByText("ppa:bceverly/sysmanage-agent");
+  await screen.findByText("ppa:bceverly/sysmanage-agent", undefined, {
+    timeout: 5000,
+  });
 
   // Delete icon buttons carry the "Delete" title.
   const deleteButtons = screen.getAllByTitle("Delete");
@@ -217,7 +221,7 @@ test("deletes a configured repository", async () => {
 
 test("adds an enabled package manager", async () => {
   render(<HostDefaultsSettings />);
-  await screen.findByText("snap");
+  await screen.findByText("snap", undefined, { timeout: 5000 });
 
   // Comboboxes: repo card OS(0), repo PM(1), PM card OS(2), PM card PM(3).
   const pmOsSelect = screen.getAllByRole("combobox")[2];

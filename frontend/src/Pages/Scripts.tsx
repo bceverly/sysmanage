@@ -8,41 +8,23 @@ import { formatUTCTimestamp } from '../utils/dateUtils';
 import {
   IoCode,
   IoPlay,
-  IoAdd,
-  IoSave,
   IoDocumentText,
-  IoEye,
-  IoTrash,
-  IoTime,
-  IoRefresh,
-  IoPencil
+  IoTime
 } from 'react-icons/io5';
-import Editor from '@monaco-editor/react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Button,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
   Tab,
   Tabs,
   Alert,
   Snackbar,
-  Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Stack
+  DialogActions
 } from '@mui/material';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
+import { GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import {
   scriptsService,
   Script,
@@ -52,36 +34,25 @@ import {
 } from '../Services/scripts';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useColumnVisibility } from '../hooks/useColumnVisibility';
-import SearchBox from '../Components/SearchBox';
-import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
+import TabPanel from '../Components/scripts/TabPanel';
+import ScriptLibraryTab from '../Components/scripts/ScriptLibraryTab';
+import ExecuteScriptTab from '../Components/scripts/ExecuteScriptTab';
+import ExecutionHistoryTab from '../Components/scripts/ExecutionHistoryTab';
+import ScriptViewDialog from '../Components/scripts/ScriptViewDialog';
+import ExecutionViewDialog from '../Components/scripts/ExecutionViewDialog';
+import AddEditScriptDialog from '../Components/scripts/AddEditScriptDialog';
+import {
+  buildAllShells,
+  buildPlatforms,
+  getShellsForPlatform,
+  getShellHeader,
+  getStatusColor,
+  isHostConnected,
+  isHostCompatibleWithScript,
+} from '../Components/scripts/scriptsHelpers';
+import { buildScriptColumns, buildExecutionColumns } from '../Components/scripts/scriptsColumns';
 import './css/Scripts.css';
-
-interface TabPanelProps {
-  readonly children?: React.ReactNode;
-  readonly index: number;
-  readonly value: number;
-}
-
-type ChipColor = 'success' | 'error' | 'warning' | 'info' | 'default';
-
-function TabPanel({ children, value, index, ...other }: TabPanelProps) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`scripts-tabpanel-${index}`}
-      aria-labelledby={`scripts-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
 
 const Scripts: React.FC = () => {
   const { t } = useTranslation();
@@ -92,7 +63,7 @@ const Scripts: React.FC = () => {
   const [executions, setExecutions] = useState<ScriptExecution[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [executionsLoading, setExecutionsLoading] = useState(false);
-  
+
   // Script editor state
   const [scriptName, setScriptName] = useState('');
   const [scriptDescription, setScriptDescription] = useState('');
@@ -104,19 +75,19 @@ const Scripts: React.FC = () => {
   const [savedScriptId, setSavedScriptId] = useState<string>('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
-  
+
   // Execution state
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentExecutionId, setCurrentExecutionId] = useState<string | null>(null);
   const [executionResult, setExecutionResult] = useState<ScriptExecution | null>(null);
-  
+
   // Script Library state
   const [selectedScripts, setSelectedScripts] = useState<GridRowSelectionModel>([]);
   const [viewingScript, setViewingScript] = useState<Script | null>(null);
   const [showAddScriptDialog, setShowAddScriptDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchColumn, setSearchColumn] = useState<string>('name');
-  
+
   // Execution History state
   const [selectedExecutions, setSelectedExecutions] = useState<GridRowSelectionModel>([]);
   const [viewingExecution, setViewingExecution] = useState<ScriptExecution | null>(null);
@@ -166,76 +137,7 @@ const Scripts: React.FC = () => {
   const [canRunScript, setCanRunScript] = useState<boolean>(false);
   const [canDeleteScriptExecution, setCanDeleteScriptExecution] = useState<boolean>(false);
 
-  const allShells = [
-    { value: 'bash', label: t('scripts.shells.bash'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
-    { value: 'sh', label: t('scripts.shells.sh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
-    { value: 'zsh', label: t('scripts.shells.zsh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
-    { value: 'ksh', label: t('scripts.shells.ksh'), platforms: ['linux', 'darwin', 'freebsd', 'openbsd', 'netbsd'] },
-    { value: 'powershell', label: t('scripts.shells.powershell'), platforms: ['windows', 'linux', 'darwin'] },
-    { value: 'cmd', label: t('scripts.shells.cmd'), platforms: ['windows'] }
-  ];
-
-  // Get shells available for the selected platform
-  const getShellsForPlatform = (platform: string) => {
-    return allShells.filter(shell => shell.platforms.includes(platform));
-  };
-
-  // Helper function to normalize platform names to standard values
-  const normalizePlatform = (platform: string): string => {
-    const lowerPlatform = platform.toLowerCase();
-    if (lowerPlatform.startsWith('win')) {
-      return 'windows';
-    }
-    if (lowerPlatform === 'darwin') {
-      return 'darwin';
-    }
-    if (lowerPlatform.includes('bsd')) {
-      return lowerPlatform;
-    }
-    return 'linux'; // Default to linux for other Unix-like systems
-  };
-
-  // Helper function to check if platforms match
-  const doPlatformsMatch = (scriptPlatform: string | undefined, hostPlatform: string | undefined): boolean => {
-    if (!scriptPlatform || !hostPlatform) {
-      return true; // If either is undefined, consider it a match
-    }
-    return scriptPlatform.toLowerCase() === normalizePlatform(hostPlatform);
-  };
-
-  // Helper function to check if host has the required shell enabled
-  const hostHasShellEnabled = (host: Host, shellType: string): boolean => {
-    if (!host.enabled_shells) {
-      return false;
-    }
-    try {
-      const hostShells = JSON.parse(host.enabled_shells) as string[];
-      return hostShells.some(shell => shell.toLowerCase() === shellType.toLowerCase());
-    } catch {
-      return false;
-    }
-  };
-
-  // Helper function to check if host is compatible with selected script
-  const isHostCompatibleWithScript = (host: Host, script: Script) => {
-    if (!host.script_execution_enabled) {
-      return false;
-    }
-    if (!doPlatformsMatch(script.platform, host.platform)) {
-      return false;
-    }
-    return hostHasShellEnabled(host, script.shell_type);
-  };
-
-  // Get compatible hosts for the selected script
-  const getCompatibleHosts = () => {
-    if (!savedScriptId) return [];
-    
-    const selectedScript = scripts.find(s => s.id === savedScriptId);
-    if (!selectedScript) return [];
-    
-    return hosts.filter(host => isHostCompatibleWithScript(host, selectedScript));
-  };
+  const allShells = useMemo(() => buildAllShells(t), [t]);
 
   // Reset function to clear all selections and outputs
   const handleReset = () => {
@@ -250,16 +152,19 @@ const Scripts: React.FC = () => {
     setHasUserEditedContent(false);
   };
 
-  const shells = getShellsForPlatform(selectedPlatform);
+  const shells = getShellsForPlatform(allShells, selectedPlatform);
 
-  const platforms = [
-    { value: 'linux', label: t('scripts.platforms.linux') },
-    { value: 'darwin', label: t('scripts.platforms.darwin') },
-    { value: 'windows', label: t('scripts.platforms.windows') },
-    { value: 'freebsd', label: t('scripts.platforms.freebsd') },
-    { value: 'openbsd', label: t('scripts.platforms.openbsd') },
-    { value: 'netbsd', label: t('scripts.platforms.netbsd') }
-  ];
+  const platforms = useMemo(() => buildPlatforms(t), [t]);
+
+  // Get compatible hosts for the selected script
+  const getCompatibleHosts = () => {
+    if (!savedScriptId) return [];
+
+    const selectedScript = scripts.find(s => s.id === savedScriptId);
+    if (!selectedScript) return [];
+
+    return hosts.filter(host => isHostCompatibleWithScript(host, selectedScript));
+  };
 
   // Search columns configuration (excluding irrelevant columns)
   const searchColumns = [
@@ -296,7 +201,7 @@ const Scripts: React.FC = () => {
       }
       return String(fieldValue).toLowerCase().includes(searchTerm.toLowerCase());
     });
-    
+
     setFilteredScripts(filtered);
   }, [searchTerm, searchColumn, scripts]);
 
@@ -390,14 +295,14 @@ const Scripts: React.FC = () => {
       try {
         const result = await scriptsService.getScriptExecution(currentExecutionId);
         setExecutionResult(result);
-        
+
         // Stop polling if execution is complete
         if (result.status === 'completed' || result.status === 'failed' || result.status === 'timeout') {
           setIsExecuting(false);
           showNotification(
-            result.status === 'completed' 
-              ? t('scripts.executionCompleted') 
-              : t('scripts.executionFailed'), 
+            result.status === 'completed'
+              ? t('scripts.executionCompleted')
+              : t('scripts.executionFailed'),
             result.status === 'completed' ? 'success' : 'error'
           );
           // Refresh executions list to show updated status
@@ -419,12 +324,12 @@ const Scripts: React.FC = () => {
     fetchExecutionResult();
 
     // Adaptive polling strategy:
-    // - First 2 minutes: poll every 3 seconds 
+    // - First 2 minutes: poll every 3 seconds
     // - After 2 minutes: poll every 15 seconds
     const scheduleNextPoll = () => {
       const elapsed = Date.now() - startTime;
       const interval = elapsed < 120000 ? 3000 : 15000; // 2 minutes threshold
-      
+
       const timeoutId = globalThis.setTimeout(() => {
         if (isExecuting && currentExecutionId) {
           fetchExecutionResult();
@@ -583,7 +488,7 @@ const Scripts: React.FC = () => {
     setLoading(true);
     setIsExecuting(true);
     setExecutionResult(null);
-    
+
     try {
       const response = await scriptsService.executeScript(executeRequest);
       setCurrentExecutionId(response.execution_id);
@@ -612,102 +517,31 @@ const Scripts: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string): ChipColor => {
-    switch (status) {
-      case 'pending':
-        return 'default';
-      case 'running':
-        return 'info';
-      case 'completed':
-        return 'success';
-      case 'failed':
-        return 'error';
-      case 'timeout':
-        return 'warning';
-      default:
-        return 'default';
+  // Execute-tab script dropdown change: mirror the original inline
+  // onChange — set the id, clear host + execution result, then load
+  // the script's details.
+  const handleExecuteScriptSelect = (scriptId: string) => {
+    setSavedScriptId(scriptId);
+    setSelectedHost('');
+    setExecutionResult(null);
+    setCurrentExecutionId(null);
+    if (scriptId) {
+      handleSavedScriptSelect(scriptId);
     }
   };
 
-  const getLanguageForShell = (shell: string): string => {
-    switch (shell) {
-      case 'bash':
-      case 'sh':
-      case 'zsh':
-      case 'ksh':
-        return 'shell';
-      case 'powershell':
-        return 'powershell';
-      case 'cmd':
-        return 'bat';
-      default:
-        return 'shell';
-    }
+  const handleExecuteHostSelect = (hostId: string) => {
+    setSelectedHost(hostId);
+    setExecutionResult(null);
+    setCurrentExecutionId(null);
   };
-
-  // Get the appropriate shebang/header for a shell type and platform
-  const getShellHeader = useCallback((shell: string, platform: string = selectedPlatform): string => {
-    switch (shell) {
-      case 'bash':
-        // bash locations vary by OS
-        switch (platform) {
-          case 'linux':
-          case 'darwin':
-            return '#!/bin/bash\n\n';
-          case 'freebsd':
-          case 'openbsd':
-          case 'netbsd':
-            return '#!/usr/local/bin/bash\n\n';
-          default:
-            return '#!/bin/bash\n\n';
-        }
-      case 'sh':
-        // sh is usually in /bin on all Unix-like systems
-        return '#!/bin/sh\n\n';
-      case 'zsh':
-        // zsh locations
-        switch (platform) {
-          case 'linux':
-            return '#!/bin/zsh\n\n';
-          case 'darwin':
-            return '#!/bin/zsh\n\n';
-          case 'freebsd':
-          case 'openbsd':
-          case 'netbsd':
-            return '#!/usr/local/bin/zsh\n\n';
-          default:
-            return '#!/bin/zsh\n\n';
-        }
-      case 'ksh':
-        // ksh locations
-        switch (platform) {
-          case 'linux':
-            return '#!/bin/ksh\n\n';
-          case 'darwin':
-            return '#!/bin/ksh\n\n';
-          case 'freebsd':
-          case 'netbsd':
-            return '#!/usr/local/bin/ksh\n\n';
-          case 'openbsd':
-            return '#!/bin/ksh\n\n'; // ksh is default shell on OpenBSD
-          default:
-            return '#!/bin/ksh\n\n';
-        }
-      case 'powershell':
-        return '# PowerShell Script\n\n';
-      case 'cmd':
-        return '@echo off\nREM Windows Batch Script\n\n';
-      default:
-        return '#!/bin/bash\n\n';
-    }
-  }, [selectedPlatform]);
 
   // Initialize script content with correct shebang on component mount
   useEffect(() => {
     if (!scriptContent) {
       setScriptContent(getShellHeader('bash', 'linux'));
     }
-  }, [scriptContent, getShellHeader]);
+  }, [scriptContent]);
 
   // Cleanup effect to clear execution result when component unmounts
   useEffect(() => {
@@ -722,11 +556,11 @@ const Scripts: React.FC = () => {
   // Handle platform change
   const handlePlatformChange = (newPlatform: string) => {
     setSelectedPlatform(newPlatform);
-    
+
     // Check if current shell is available for the new platform
-    const availableShells = getShellsForPlatform(newPlatform);
+    const availableShells = getShellsForPlatform(allShells, newPlatform);
     const currentShellAvailable = availableShells.some(shell => shell.value === selectedShell);
-    
+
     if (!currentShellAvailable && availableShells.length > 0) {
       // Switch to the first available shell for this platform
       const defaultShell = availableShells[0].value;
@@ -745,7 +579,7 @@ const Scripts: React.FC = () => {
   // Handle shell type change
   const handleShellChange = (newShell: string) => {
     setSelectedShell(newShell);
-    
+
     // Update script content if user hasn't edited it
     if (!hasUserEditedContent) {
       setScriptContent(getShellHeader(newShell, selectedPlatform));
@@ -763,185 +597,24 @@ const Scripts: React.FC = () => {
     return formatUTCTimestamp(timestamp, t('common.notAvailable'));
   };
 
-  const isHostConnected = (host: Host): boolean => {
-    // Use the actual status field from the database
-    return host.status === 'up' && host.active === true;
-  };
-
   // DataGrid columns definition
-  const columns: GridColDef[] = [
-    {
-      field: 'name',
-      headerName: t('scripts.scriptName'),
-      width: 200,
-      flex: 1,
-    },
-    {
-      field: 'description',
-      headerName: t('scripts.description'),
-      width: 300,
-      flex: 1,
-      renderCell: (params) => (
-        <Typography variant="body2" color="textSecondary">
-          {params.value || t('common.noDescription')}
-        </Typography>
-      ),
-    },
-    {
-      field: 'shell_type',
-      headerName: t('scripts.shellType'),
-      width: 120,
-      renderCell: (params) => (
-        <Chip 
-          label={allShells.find(s => s.value === params.value)?.label || params.value} 
-          size="small" 
-          variant="outlined"
-        />
-      ),
-    },
-    {
-      field: 'platform',
-      headerName: t('scripts.platform'),
-      width: 120,
-      renderCell: (params) => (
-        <Chip 
-          label={platforms.find(p => p.value === params.value)?.label || params.value} 
-          size="small" 
-          variant="outlined"
-        />
-      ),
-    },
-    {
-      field: 'updated_at',
-      headerName: t('scripts.updatedAt'),
-      width: 150,
-      renderCell: (params) => (
-        <Typography variant="caption">
-          {formatTimestamp(params.value)}
-        </Typography>
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: t('common.actions'),
-      width: 100,
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      renderCell: (params) => (
-        <>
-          {canEditScript && (
-            <IconButton
-              size="small"
-              onClick={() => handleEditFromLibrary(params.row as Script)}
-              title={t('scripts.edit')}
-              sx={{ color: 'primary.main' }}
-            >
-              <IoPencil />
-            </IconButton>
-          )}
-          <IconButton
-            size="small"
-            onClick={() => handleViewScript(params.row as Script)}
-            title={t('scripts.viewScript')}
-            sx={{ color: 'primary.main' }}
-          >
-            <IoEye />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
+  const columns: GridColDef[] = buildScriptColumns({
+    t,
+    allShells,
+    platforms,
+    canEditScript,
+    formatTimestamp,
+    onEdit: (script) => handleEditFromLibrary(script),
+    onView: (script) => handleViewScript(script),
+  });
 
   // Execution History DataGrid columns
-  const executionColumns: GridColDef[] = [
-    {
-      field: 'script_name',
-      headerName: t('scripts.scriptName'),
-      width: 200,
-      flex: 1,
-    },
-    {
-      field: 'host_fqdn',
-      headerName: t('scripts.hostFqdn'),
-      width: 200,
-      flex: 1,
-    },
-    {
-      field: 'status',
-      headerName: t('common.status'),
-      width: 120,
-      renderCell: (params) => (
-        <Chip
-          label={t(`scripts.status.${params.value}`)}
-          color={getStatusColor(params.value)}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: 'started_at',
-      headerName: t('scripts.startedAt'),
-      width: 180,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {formatTimestamp(params.value)}
-        </Typography>
-      ),
-    },
-    {
-      field: 'completed_at',
-      headerName: t('scripts.completedAt'),
-      width: 180,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value ? formatTimestamp(params.value) : '-'}
-        </Typography>
-      ),
-    },
-    {
-      field: 'exit_code',
-      headerName: t('scripts.exitCode'),
-      width: 100,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value ?? '-'}
-        </Typography>
-      ),
-    },
-    {
-      field: 'execution_time',
-      headerName: t('scripts.executionTime'),
-      width: 140,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value ? `${params.value}s` : '-'}
-        </Typography>
-      ),
-    },
-    {
-      field: 'actions',
-      headerName: t('common.actions'),
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleViewExecution(params.row)}
-          disabled={!params.row.stdout_output && !params.row.stderr_output && !params.row.error_message}
-          sx={{ 
-            color: 'primary.main',
-            '&:disabled': { 
-              color: 'grey.400' 
-            }
-          }}
-        >
-          <IoEye />
-        </IconButton>
-      ),
-    },
-  ];
+  const executionColumns: GridColDef[] = buildExecutionColumns({
+    t,
+    getStatusColor,
+    formatTimestamp,
+    onView: (execution) => handleViewExecution(execution),
+  });
 
   const handleViewScript = (script: Script) => {
     setViewingScript(script);
@@ -976,11 +649,11 @@ const Scripts: React.FC = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedScripts.length === 0) return;
-    
-    const confirmMessage = selectedScripts.length === 1 
-      ? t('scripts.delete') + '?' 
+
+    const confirmMessage = selectedScripts.length === 1
+      ? t('scripts.delete') + '?'
       : t('scripts.deleteSelected') + ` (${selectedScripts.length})?`;
-    
+
     if (!globalThis.confirm(confirmMessage)) {
       return;
     }
@@ -1018,9 +691,9 @@ const Scripts: React.FC = () => {
         }
       }
       showNotification(
-        selectedExecutions.length === 1 
-          ? t('scripts.deleteExecutionSuccess') 
-          : t('scripts.deleteExecutionsSuccess'), 
+        selectedExecutions.length === 1
+          ? t('scripts.deleteExecutionSuccess')
+          : t('scripts.deleteExecutionsSuccess'),
         'success'
       );
       setSelectedExecutions([]);
@@ -1092,789 +765,132 @@ const Scripts: React.FC = () => {
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab 
-            icon={<IoDocumentText />} 
+          <Tab
+            icon={<IoDocumentText />}
             iconPosition="start"
-            label={t('scripts.scriptLibrary')} 
+            label={t('scripts.scriptLibrary')}
           />
-          <Tab 
-            icon={<IoPlay />} 
+          <Tab
+            icon={<IoPlay />}
             iconPosition="start"
-            label={t('scripts.executeScript')} 
+            label={t('scripts.executeScript')}
           />
-          <Tab 
-            icon={<IoTime />} 
+          <Tab
+            icon={<IoTime />}
             iconPosition="start"
-            label={t('scripts.scriptExecutions')} 
+            label={t('scripts.scriptExecutions')}
           />
         </Tabs>
       </Box>
 
       {/* Script Library Tab */}
       <TabPanel value={tabValue} index={0}>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: 'calc(100vh - 250px)',
-          gap: 2,
-          p: 2
-        }}>
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-            <Typography variant="h6">
-              {t('scripts.scriptLibrary')}
-            </Typography>
-          </Box>
-
-          {/* Search Box */}
-          <Box sx={{ flexShrink: 0 }}>
-            <SearchBox
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              searchColumn={searchColumn}
-              setSearchColumn={setSearchColumn}
-              columns={searchColumns}
-              placeholder={t('search.searchScripts', 'Search scripts')}
-            />
-          </Box>
-
-          {/* Column Visibility Button */}
-          <Box sx={{ mb: 1, mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
-            <ColumnVisibilityButton
-              columns={columns
-                .filter(col => col.field !== 'actions')
-                .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
-              hiddenColumns={hiddenColumns}
-              onColumnsChange={setHiddenColumns}
-              onReset={resetPreferences}
-            />
-          </Box>
-
-          <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-            <DataGrid
-              rows={filteredScripts}
-              columns={columns}
-              loading={loading}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              columnVisibilityModel={{
-                ...getColumnVisibilityModel(),
-              }}
-              pageSizeOptions={safePageSizeOptions}
-              checkboxSelection
-              rowSelectionModel={selectedScripts}
-              onRowSelectionModelChange={setSelectedScripts}
-              disableRowSelectionOnClick
-              localeText={{
-                MuiTablePagination: {
-                  labelRowsPerPage: t('common.rowsPerPage'),
-                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
-                    const ofLabel = t('common.of');
-                    const countDisplay = count === -1 ? ofLabel + ' ' + to : count;
-                    return from + '-' + to + ' ' + ofLabel + ' ' + countDisplay;
-                  },
-                },
-                noRowsLabel: t('scripts.noScripts'),
-                noResultsOverlayLabel: t('scripts.noScripts'),
-                footerRowSelected: (count: number) => {
-                  const countStr = count.toLocaleString();
-                  return count === 1
-                    ? countStr + ' ' + t('common.rowSelected')
-                    : countStr + ' ' + t('common.rowsSelected');
-                },
-              }}
-            />
-          </Box>
-
-          <Stack direction="row" spacing={2} sx={{ flexShrink: 0 }}>
-            {canAddScript && (
-              <Button
-                variant="outlined"
-                startIcon={<IoAdd />}
-                onClick={handleAddNewScript}
-                disabled={selectedScripts.length > 0}
-              >
-                {t('scripts.addScript')}
-              </Button>
-            )}
-            {canDeleteScript && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<IoTrash />}
-                onClick={handleDeleteSelected}
-                disabled={selectedScripts.length === 0}
-              >
-                {t('scripts.deleteSelected')}
-              </Button>
-            )}
-          </Stack>
-        </Box>
+        <ScriptLibraryTab
+          filteredScripts={filteredScripts}
+          columns={columns}
+          loading={loading}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          searchColumn={searchColumn}
+          setSearchColumn={setSearchColumn}
+          searchColumns={searchColumns}
+          hiddenColumns={hiddenColumns}
+          setHiddenColumns={setHiddenColumns}
+          resetPreferences={resetPreferences}
+          columnVisibilityModel={{ ...getColumnVisibilityModel() }}
+          paginationModel={paginationModel}
+          setPaginationModel={setPaginationModel}
+          pageSizeOptions={safePageSizeOptions}
+          selectedScripts={selectedScripts}
+          setSelectedScripts={setSelectedScripts}
+          canAddScript={canAddScript}
+          canDeleteScript={canDeleteScript}
+          onAddScript={handleAddNewScript}
+          onDeleteSelected={handleDeleteSelected}
+        />
       </TabPanel>
 
       {/* Execute Script Tab */}
       <TabPanel value={tabValue} index={1}>
-        <Grid container spacing={3}>
-          {/* Left Card - Execute Script */}
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    {t('scripts.executeScript')}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {isExecuting && (
-                      <Chip 
-                        label={t('scripts.executing')} 
-                        color="success" 
-                        size="small"
-                        sx={{ animation: 'pulse 1.5s ease-in-out infinite' }}
-                      />
-                    )}
-                    <IconButton
-                      onClick={handleReset}
-                      disabled={!savedScriptId && !selectedHost}
-                      size="small"
-                      color="primary"
-                      title={t('scripts.reset')}
-                    >
-                      <IoRefresh />
-                    </IconButton>
-                  </Box>
-                </Box>
-                
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>{t('scripts.selectScript')}</InputLabel>
-                  <Select<string>
-                    value={savedScriptId}
-                    label={t('scripts.selectScript')}
-                    onChange={(e) => {
-                      const scriptId = e.target.value;
-                      setSavedScriptId(scriptId);
-                      // Clear host selection and execution result when script changes
-                      setSelectedHost('');
-                      setExecutionResult(null);
-                      setCurrentExecutionId(null);
-                      if (scriptId) {
-                        handleSavedScriptSelect(scriptId);
-                      }
-                    }}
-                    disabled={isExecuting || (savedScriptId !== '' && selectedHost !== '')}
-                  >
-                    {scripts.map((script) => (
-                      <MenuItem key={script.id} value={script.id}>
-                        {script.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>{t('scripts.selectHost')}</InputLabel>
-                  <Select<string>
-                    value={selectedHost}
-                    label={t('scripts.selectHost')}
-                    onChange={(e) => {
-                      setSelectedHost(e.target.value);
-                      // Clear execution result when host changes
-                      setExecutionResult(null);
-                      setCurrentExecutionId(null);
-                    }}
-                    disabled={isExecuting || !savedScriptId}
-                  >
-                    {getCompatibleHosts().map((host) => (
-                      <MenuItem key={host.id} value={host.id}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                          <Typography>{host.fqdn}</Typography>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Chip
-                              label={isHostConnected(host) ? t('scripts.connected', 'Connected') : t('scripts.offline', 'Offline')}
-                              size="small" 
-                              color={isHostConnected(host) ? 'success' : 'warning'}
-                              variant="outlined"
-                            />
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                {savedScriptId && (
-                  <Box sx={{ 
-                    mt: 2, 
-                    p: 2, 
-                    bgcolor: 'primary.50', 
-                    borderRadius: 1, 
-                    border: 1, 
-                    borderColor: 'primary.200' 
-                  }}>
-                    <Typography variant="subtitle2" gutterBottom color="primary">
-                      {t('scripts.selectedScript')}:
-                    </Typography>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{scriptName}</strong>
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {t('scripts.shellType')}: {allShells.find(s => s.value === selectedShell)?.label}
-                    </Typography>
-                  </Box>
-                )}
-
-                {canRunScript && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    size="large"
-                    startIcon={<IoPlay />}
-                    onClick={handleExecuteScript}
-                    disabled={loading || !savedScriptId || !selectedHost || isExecuting}
-                    sx={{ mt: 3, py: 1.5 }}
-                  >
-                    {isExecuting ? t('scripts.executing') : t('scripts.executeNow')}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Right Card - Execution Output */}
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Card sx={{ height: '100%', minHeight: 500 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  {t('scripts.executionOutput')}
-                </Typography>
-                
-                {(!executionResult || !savedScriptId || !selectedHost) && !isExecuting && (
-                  <Box sx={{ 
-                    height: 400, 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    bgcolor: 'background.default',
-                    borderRadius: 1,
-                    border: '2px dashed',
-                    borderColor: 'divider'
-                  }}>
-                    <IoCode style={{ fontSize: '3rem', color: '#9e9e9e', marginBottom: '1rem' }} />
-                    <Typography variant="h6" color="textSecondary" gutterBottom>
-                      {t('scripts.noExecutionSelected')}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center', maxWidth: '80%' }}>
-                      {t('scripts.selectScriptAndHost', 'Select a script and host, then click Execute Now to see output here')}
-                    </Typography>
-                  </Box>
-                )}
-
-                {isExecuting && !executionResult && (
-                  <Box sx={{ 
-                    height: 400, 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    bgcolor: 'background.default',
-                    borderRadius: 1,
-                    border: '2px dashed',
-                    borderColor: 'primary.light'
-                  }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <IoPlay style={{ 
-                        fontSize: '3rem', 
-                        color: '#1976d2', 
-                        marginBottom: '1rem',
-                        animation: 'pulse 1.5s ease-in-out infinite'
-                      }} />
-                      <Typography variant="h6" color="primary" gutterBottom>
-                        {t('scripts.waitingForResults')}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {t('scripts.refreshingFrequently')}
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-
-                {executionResult && savedScriptId && selectedHost && (
-                  <Box>
-                    {/* Execution Status */}
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                        <Chip 
-                          label={t(`scripts.status.${executionResult.status}`)} 
-                          color={getStatusColor(executionResult.status) }
-                          size="small"
-                        />
-                        {executionResult.exit_code !== undefined && (
-                          <Chip 
-                            label={t('scripts.exitCodeLabel', 'Exit Code: {{code}}', { code: executionResult.exit_code })}
-                            size="small"
-                            variant="outlined"
-                          />
-                        )}
-                      </Box>
-                      <Typography variant="caption" color="textSecondary">
-                        {t('scripts.startedAt')}: {formatTimestamp(executionResult.started_at)}
-                        {executionResult.completed_at && (
-                          <> | {t('scripts.completedAt')}: {formatTimestamp(executionResult.completed_at)}</>
-                        )}
-                      </Typography>
-                    </Box>
-
-                    {/* Output Display */}
-                    <Box sx={{ 
-                      bgcolor: '#1e1e1e', 
-                      color: '#d4d4d4',
-                      p: 2,
-                      borderRadius: 1,
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      maxHeight: 350,
-                      overflow: 'auto',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-all'
-                    }}>
-                      {executionResult.stdout_output && (
-                        <Box>
-                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
-                          <Typography sx={{ color: '#4ec9b0', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                            === STDOUT ===
-                          </Typography>
-                          <Typography sx={{ color: '#d4d4d4', fontFamily: 'monospace', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>
-                            {executionResult.stdout_output}
-                          </Typography>
-                        </Box>
-                      )}
-                      {executionResult.stderr_output && (
-                        <Box sx={{ mt: executionResult.stdout_output ? 2 : 0 }}>
-                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
-                          <Typography sx={{ color: '#f48771', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                            === STDERR ===
-                          </Typography>
-                          <Typography sx={{ color: '#f48771', fontFamily: 'monospace', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>
-                            {executionResult.stderr_output}
-                          </Typography>
-                        </Box>
-                      )}
-                      {executionResult.error_message && (
-                        <Box sx={{ mt: 2 }}>
-                          {/* eslint-disable-next-line i18next/no-literal-string -- stream delimiter */}
-                          <Typography sx={{ color: '#ff6b6b', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                            === ERROR ===
-                          </Typography>
-                          <Typography sx={{ color: '#ff6b6b', fontFamily: 'monospace', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>
-                            {executionResult.error_message}
-                          </Typography>
-                        </Box>
-                      )}
-                      {!executionResult.stdout_output && !executionResult.stderr_output && !executionResult.error_message && (
-                        <Typography sx={{ color: '#808080', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                          {t('scripts.noOutput')}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <ExecuteScriptTab
+          scripts={scripts}
+          compatibleHosts={getCompatibleHosts()}
+          allShells={allShells}
+          savedScriptId={savedScriptId}
+          selectedHost={selectedHost}
+          selectedShell={selectedShell}
+          scriptName={scriptName}
+          loading={loading}
+          isExecuting={isExecuting}
+          canRunScript={canRunScript}
+          executionResult={executionResult}
+          getStatusColor={getStatusColor}
+          formatTimestamp={formatTimestamp}
+          onReset={handleReset}
+          onScriptSelect={handleExecuteScriptSelect}
+          onHostSelect={handleExecuteHostSelect}
+          onExecute={handleExecuteScript}
+        />
       </TabPanel>
 
       {/* Script Executions Tab */}
       <TabPanel value={tabValue} index={2}>
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: 'calc(100vh - 250px)',
-          gap: 2,
-          p: 2
-        }}>
-          <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-            <DataGrid
-              rows={executions}
-              columns={executionColumns}
-              loading={executionsLoading}
-              paginationModel={paginationModel}
-              onPaginationModelChange={setPaginationModel}
-              pageSizeOptions={safePageSizeOptions}
-              initialState={{
-                sorting: { sortModel: [{ field: 'started_at', sort: 'desc' }] },
-              }}
-              checkboxSelection={true}
-              rowSelectionModel={selectedExecutions}
-              onRowSelectionModelChange={setSelectedExecutions}
-              disableRowSelectionOnClick
-              localeText={{
-                MuiTablePagination: {
-                  labelRowsPerPage: t('common.rowsPerPage'),
-                  labelDisplayedRows: ({ from, to, count }: { from: number, to: number, count: number }) => {
-                    const ofLabel = t('common.of');
-                    const countDisplay = count === -1 ? ofLabel + ' ' + to : count;
-                    return from + '-' + to + ' ' + ofLabel + ' ' + countDisplay;
-                  },
-                },
-                noRowsLabel: t('scripts.noExecutions'),
-                noResultsOverlayLabel: t('scripts.noExecutions'),
-                footerRowSelected: (count: number) => {
-                  const countStr = count.toLocaleString();
-                  return count === 1
-                    ? countStr + ' ' + t('common.rowSelected')
-                    : countStr + ' ' + t('common.rowsSelected');
-                },
-              }}
-            />
-          </Box>
-
-          {canDeleteScriptExecution && (
-            <Box sx={{ flexShrink: 0 }}>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<IoTrash />}
-                onClick={handleDeleteSelectedExecutions}
-                disabled={selectedExecutions.length === 0}
-              >
-                {t('scripts.deleteSelectedExecutions')}
-              </Button>
-            </Box>
-          )}
-        </Box>
+        <ExecutionHistoryTab
+          executions={executions}
+          executionColumns={executionColumns}
+          executionsLoading={executionsLoading}
+          paginationModel={paginationModel}
+          setPaginationModel={setPaginationModel}
+          pageSizeOptions={safePageSizeOptions}
+          selectedExecutions={selectedExecutions}
+          setSelectedExecutions={setSelectedExecutions}
+          canDeleteScriptExecution={canDeleteScriptExecution}
+          onDeleteSelected={handleDeleteSelectedExecutions}
+        />
       </TabPanel>
 
       {/* Script Viewing Dialog */}
-      <Dialog
-        open={!!viewingScript}
+      <ScriptViewDialog
+        viewingScript={viewingScript}
+        allShells={allShells}
+        platforms={platforms}
+        canDeleteScript={canDeleteScript}
+        canEditScript={canEditScript}
+        formatTimestamp={formatTimestamp}
         onClose={handleCloseScriptView}
-        maxWidth="md"
-        fullWidth
-      >
-        {viewingScript && (
-          <>
-            <DialogTitle>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                {viewingScript.name}
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  <strong>{t('scripts.description')}:</strong> {viewingScript.description || t('common.noDescription')}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                  <Chip 
-                    label={allShells.find(s => s.value === viewingScript.shell_type)?.label || viewingScript.shell_type} 
-                    size="small" 
-                    variant="outlined"
-                  />
-                  <Chip 
-                    label={platforms.find(p => p.value === viewingScript.platform)?.label || viewingScript.platform} 
-                    size="small" 
-                    variant="outlined"
-                  />
-                </Box>
-                <Typography variant="caption" display="block" gutterBottom>
-                  {t('scripts.updatedAt')}: {formatTimestamp(viewingScript.updated_at)}
-                </Typography>
-              </Box>
-              
-              <Typography variant="subtitle2" gutterBottom>
-                {t('scripts.scriptContent')}
-              </Typography>
-              <Box sx={{ border: 1, borderColor: 'grey.300', borderRadius: 1 }}>
-                <Editor
-                  height="400px"
-                  language={getLanguageForShell(viewingScript.shell_type)}
-                  value={viewingScript.content}
-                  theme="vs-dark"
-                  options={{
-                    readOnly: true,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    fontSize: 14,
-                    lineNumbers: 'on',
-                    automaticLayout: true
-                  }}
-                />
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              {canDeleteScript && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<IoTrash />}
-                  onClick={() => {
-                    if (viewingScript.id) {
-                      handleDeleteScript(viewingScript.id);
-                      handleCloseScriptView();
-                    }
-                  }}
-                >
-                  {t('scripts.delete')}
-                </Button>
-              )}
-              {canEditScript && (
-                <Button
-                  variant="contained"
-                  onClick={() => handleEditFromLibrary(viewingScript)}
-                >
-                  {t('scripts.edit')}
-                </Button>
-              )}
-              <Button onClick={handleCloseScriptView}>
-                {t('common.close')}
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+        onDelete={handleDeleteScript}
+        onEdit={handleEditFromLibrary}
+      />
 
       {/* Execution Viewing Dialog */}
-      <Dialog
+      <ExecutionViewDialog
         open={showExecutionDialog}
+        viewingExecution={viewingExecution}
+        getStatusColor={getStatusColor}
+        formatTimestamp={formatTimestamp}
         onClose={handleCloseExecutionView}
-        maxWidth="md"
-        fullWidth
-      >
-        {viewingExecution && (
-          <>
-            <DialogTitle>
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                {t('scripts.executionDetails')}
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <Box sx={{ mb: 3 }}>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{t('scripts.scriptName')}:</strong> {viewingExecution.script_name}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{t('scripts.hostFqdn')}:</strong> {viewingExecution.host_fqdn}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">
-                        <strong>{t('common.status')}:</strong>
-                      </Typography>
-                      <Chip
-                        label={t(`scripts.status.${viewingExecution.status}`)}
-                        color={getStatusColor(viewingExecution.status) }
-                        size="small"
-                      />
-                    </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{t('scripts.executionId')}:</strong> {viewingExecution.id}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{t('scripts.startedAt')}:</strong> {formatTimestamp(viewingExecution.started_at)}
-                    </Typography>
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" gutterBottom>
-                      <strong>{t('scripts.completedAt')}:</strong> {viewingExecution.completed_at ? formatTimestamp(viewingExecution.completed_at) : '-'}
-                    </Typography>
-                  </Grid>
-                  {viewingExecution.exit_code !== undefined && (
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Typography variant="body2" gutterBottom>
-                        <strong>{t('scripts.exitCode')}:</strong> {viewingExecution.exit_code}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {viewingExecution.execution_time && (
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <Typography variant="body2" gutterBottom>
-                        {/* eslint-disable-next-line i18next/no-literal-string -- seconds unit suffix */}
-                        <strong>{t('scripts.executionTime')}:</strong> {viewingExecution.execution_time}s
-                      </Typography>
-                    </Grid>
-                  )}
-                </Grid>
-              </Box>
-              
-              {viewingExecution.stdout_output && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('scripts.stdoutOutput')}
-                  </Typography>
-                  <Box sx={{ 
-                    bgcolor: '#1e1e1e', 
-                    color: '#d4d4d4',
-                    p: 2, 
-                    borderRadius: 1,
-                    fontFamily: 'monospace',
-                    fontSize: '0.875rem',
-                    maxHeight: '200px',
-                    overflow: 'auto',
-                    whiteSpace: 'pre-wrap'
-                  }}>
-                    {viewingExecution.stdout_output}
-                  </Box>
-                </Box>
-              )}
-              
-              {viewingExecution.stderr_output && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('scripts.stderrOutput')}
-                  </Typography>
-                  <Box sx={{ 
-                    bgcolor: '#1e1e1e', 
-                    color: '#f48771',
-                    p: 2, 
-                    borderRadius: 1,
-                    fontFamily: 'monospace',
-                    fontSize: '0.875rem',
-                    maxHeight: '200px',
-                    overflow: 'auto',
-                    whiteSpace: 'pre-wrap'
-                  }}>
-                    {viewingExecution.stderr_output}
-                  </Box>
-                </Box>
-              )}
-              
-              {viewingExecution.error_message && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('scripts.errorMessage')}
-                  </Typography>
-                  <Alert severity="error">
-                    {viewingExecution.error_message}
-                  </Alert>
-                </Box>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseExecutionView}>
-                {t('common.close')}
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+      />
 
       {/* Add Script Dialog */}
-      <Dialog
+      <AddEditScriptDialog
         open={showAddScriptDialog}
+        isEditMode={isEditMode}
+        loading={loading}
+        scriptName={scriptName}
+        scriptDescription={scriptDescription}
+        scriptContent={scriptContent}
+        selectedShell={selectedShell}
+        selectedPlatform={selectedPlatform}
+        shells={shells}
+        platforms={platforms}
+        onScriptNameChange={setScriptName}
+        onScriptDescriptionChange={setScriptDescription}
+        onScriptContentChange={handleScriptContentChange}
+        onShellChange={handleShellChange}
+        onPlatformChange={handlePlatformChange}
         onClose={handleCloseAddScriptDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {isEditMode ? t('scripts.edit') : t('scripts.addScript')}
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label={t('scripts.scriptName')}
-              value={scriptName}
-              onChange={(e) => setScriptName(e.target.value)}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
-              label={t('scripts.description')}
-              value={scriptDescription}
-              onChange={(e) => setScriptDescription(e.target.value)}
-              margin="normal"
-              multiline
-              rows={2}
-            />
-            
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="shell-type-label">
-                    {t('scripts.shellType')}
-                  </InputLabel>
-                  <Select
-                    labelId="shell-type-label"
-                    value={selectedShell}
-                    label={t('scripts.shellType')}
-                    onChange={(e) => handleShellChange(e.target.value)}
-                  >
-                    {shells.map((shell) => (
-                      <MenuItem key={shell.value} value={shell.value}>
-                        {shell.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth variant="outlined">
-                  <InputLabel id="platform-label">
-                    {t('scripts.platform')}
-                  </InputLabel>
-                  <Select
-                    labelId="platform-label"
-                    value={selectedPlatform}
-                    label={t('scripts.platform')}
-                    onChange={(e) => handlePlatformChange(e.target.value)}
-                  >
-                    {platforms.map((platform) => (
-                      <MenuItem key={platform.value} value={platform.value}>
-                        {platform.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Box>
-
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-            {t('scripts.scriptContent')}
-          </Typography>
-          <Box sx={{ border: 1, borderColor: 'grey.300', borderRadius: 1 }}>
-            <Editor
-              height="400px"
-              language={getLanguageForShell(selectedShell)}
-              value={scriptContent}
-              onChange={handleScriptContentChange}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 14,
-                lineNumbers: 'on',
-                roundedSelection: false,
-                automaticLayout: true
-              }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseAddScriptDialog}>
-            {t('scripts.cancel')}
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<IoSave />}
-            onClick={isEditMode ? handleSaveScript : handleSaveNewScript}
-            disabled={loading}
-          >
-            {isEditMode ? t('scripts.update') : t('scripts.save')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onSave={isEditMode ? handleSaveScript : handleSaveNewScript}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -1906,8 +922,8 @@ const Scripts: React.FC = () => {
         autoHideDuration={6000}
         onClose={handleCloseNotification}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
+        <Alert
+          onClose={handleCloseNotification}
           severity={notification.severity}
           sx={{ width: '100%' }}
         >

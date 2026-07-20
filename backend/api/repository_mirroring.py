@@ -2,7 +2,6 @@
 # Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 # See the LICENSE file in the project root for the full terms.
 
-# pylint: disable=too-many-lines
 """
 Repository Mirroring API (Phase 10.4 + 10.4.2 + 10.4.3 + 10.4.4).
 
@@ -51,7 +50,7 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
@@ -68,156 +67,27 @@ from backend.persistence.partitions import (
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# i18n message keys reused by multiple 404 raises.  Extracting them as
-# module constants both deduplicates the strings (Sonar S1192) and
-# keeps the translation catalog source consistent — every call site
-# produces the same locale lookup key.
-_MIRROR_NOT_FOUND = "Mirror not found"
-_PLATFORM_CONFIG_NOT_FOUND = "Platform config not found"
-
-
-# ---------------------------------------------------------------------
-# Module gate + dispatch helpers
-# ---------------------------------------------------------------------
-
-
-def _check_mirror_module():
-    engine = module_loader.get_module("repository_mirroring_engine")
-    if engine is None:
-        raise HTTPException(
-            status_code=402,
-            detail=_(
-                "Repository mirroring requires a SysManage Professional+ license. "
-                "Please upgrade to access this feature."
-            ),
-        )
-    return engine
-
-
-def _get_settings(db: Session) -> models.MirrorSettings:
-    row = (
-        db.query(models.MirrorSettings)
-        .filter(models.MirrorSettings.id == models.SINGLETON_MIRROR_SETTINGS_ID)
-        .first()
-    )
-    if row is not None:
-        return row
-    return models.MirrorSettings(
-        id=models.SINGLETON_MIRROR_SETTINGS_ID,
-        mirror_root_path="/var/mirror",
-        integrity_check_cadence_hours=24,
-        retention_window_days=30,
-        default_bandwidth_cap_kbps=0,
-        snapshot_count_to_keep=10,
-    )
-
-
-def _config_from_row(row: models.MirrorRepository) -> dict:
-    """Project a MirrorRepository row into the dict shape the engine accepts."""
-    return {
-        "name": row.name,
-        "package_manager": row.package_manager,
-        "upstream_url": row.upstream_url,
-        "suite": row.suite,
-        "components": row.components,
-        "architectures": row.architectures,
-        "repoid": row.repoid,
-        "gpgkey_url": row.gpgkey_url,
-        "repo_alias": row.repo_alias,
-        "release": row.release,
-        "signing_key_url": row.signing_key_url,
-        "bandwidth_cap_kbps": row.bandwidth_cap_kbps,
-    }
-
-
-def _dispatch_plan(
-    plan: dict, host_id: str, action: str = "", mirror_id: str = "", timeout: int = 8400
-) -> str:
-    """Enqueue the plan via the standard proplus_dispatch path and register
-    a result correlation so the agent's command_result lands back in the
-    right OSS row (mirror_repository or mirror_setup_status).
-
-    ``action`` and ``mirror_id`` are stamped into the correlation's
-    primary_id (``"<action>:<mirror_id>"``) so the result handler in
-    ``proplus_dispatch._apply_repo_mirror_op_result`` knows which row to
-    update.  ``mirror_id`` is empty for host-level setup operations.
-    """
-    from backend.services.proplus_dispatch import (
-        enqueue_apply_plan,
-        register_repo_mirror_correlation,
-    )
-
-    msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=timeout)
-    if action:
-        register_repo_mirror_correlation(
-            msg_id, action, str(host_id), str(mirror_id) if mirror_id else ""
-        )
-    return msg_id
-
-
-def _parse_uuid(value: Optional[str], field: str) -> Optional[uuid.UUID]:
-    if value is None:
-        return None
-    try:
-        return uuid.UUID(value)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=_("Invalid UUID for %(field)s: %(value)s")
-            % {"field": field, "value": value},
-        ) from exc
-
-
-# ---------------------------------------------------------------------
-# Request/response models
-# ---------------------------------------------------------------------
-
-
-class MirrorCreateRequest(BaseModel):
-    name: str = Field(..., min_length=1, max_length=120)
-    package_manager: str = Field(..., min_length=1, max_length=20)
-    upstream_url: str = Field(..., min_length=1, max_length=500)
-    host_id: str
-    suite: Optional[str] = None
-    components: Optional[str] = None
-    architectures: Optional[str] = None
-    repoid: Optional[str] = None
-    gpgkey_url: Optional[str] = None
-    repo_alias: Optional[str] = None
-    release: Optional[str] = None
-    signing_key_url: Optional[str] = None
-    bandwidth_cap_kbps: int = Field(default=0, ge=0)
-    sync_cron: str = Field(default="0 4 * * *")
-    network_tier: Optional[str] = None
-    enabled: bool = True
-    known_version_id: Optional[str] = None  # Phase 10.4.4 — set by the dropdown
-
-
-class MirrorUpdateRequest(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=120)
-    upstream_url: Optional[str] = Field(None, min_length=1, max_length=500)
-    suite: Optional[str] = None
-    components: Optional[str] = None
-    architectures: Optional[str] = None
-    repoid: Optional[str] = None
-    gpgkey_url: Optional[str] = None
-    repo_alias: Optional[str] = None
-    release: Optional[str] = None
-    signing_key_url: Optional[str] = None
-    bandwidth_cap_kbps: Optional[int] = Field(None, ge=0)
-    sync_cron: Optional[str] = None
-    network_tier: Optional[str] = None
-    enabled: Optional[bool] = None
-    known_version_id: Optional[str] = None  # Phase 10.4.4 — set by the dropdown
-
-
-class MirrorSettingsRequest(BaseModel):
-    mirror_root_path: Optional[str] = Field(None, min_length=1, max_length=500)
-    integrity_check_cadence_hours: Optional[int] = Field(None, ge=1, le=168)
-    retention_window_days: Optional[int] = Field(None, ge=0, le=365)
-    default_bandwidth_cap_kbps: Optional[int] = Field(None, ge=0)
-    snapshot_count_to_keep: Optional[int] = Field(None, ge=0, le=100)
-
+# Helpers + shared constants and the Pydantic request models live in sibling
+# modules (extracted to keep this file under the line-count cap); re-imported
+# here so this module's public surface is unchanged.
+from backend.api.repository_mirroring_helpers import (  # pylint: disable=unused-import,wrong-import-position
+    _MIRROR_MAX_SYNC_FAILURES,
+    _MIRROR_NOT_FOUND,
+    _PLATFORM_CONFIG_NOT_FOUND,
+    _check_mirror_module,
+    _config_from_row,
+    _dispatch_plan,
+    _get_settings,
+    _parse_uuid,
+    _platform_for_pm,
+    _tick_mirrors_one_db,
+)
+from backend.api.repository_mirroring_schemas import (  # pylint: disable=unused-import,wrong-import-position
+    MirrorCreateRequest,
+    MirrorSettingsRequest,
+    MirrorSetupInstallRequest,
+    MirrorUpdateRequest,
+)
 
 # ---------------------------------------------------------------------
 # CRUD
@@ -235,14 +105,6 @@ async def list_mirrors(
         q = q.filter(models.MirrorRepository.platform_config_id == cfg_uuid)
     rows = q.order_by(models.MirrorRepository.name).all()
     return [r.to_dict() for r in rows]
-
-
-def _platform_for_pm(pm: str) -> str:
-    """Phase 10.4.3: platform == package_manager.  Each tab in the new
-    UI is keyed to one PM (Ubuntu/Debian → apt, RHEL/Fedora → dnf,
-    openSUSE/SLES → zypper, FreeBSD → pkg) so the platform_config
-    vocabulary mirrors that 1:1."""
-    return (pm or "").lower()
 
 
 @router.post("/mirror-repositories", dependencies=[Depends(JWTBearer())])
@@ -505,88 +367,6 @@ async def list_snapshots(mirror_id: str, db: Session = Depends(get_tenant_db)):
     return [r.to_dict() for r in rows]
 
 
-# A mirror that fails this many syncs in a row is auto-disabled by the
-# tick so it stops re-dispatching every cron cycle — a mirror too large
-# to sync without OOMing its host would otherwise fail forever.  The
-# counter resets to 0 on any successful sync (see proplus_dispatch).
-_MIRROR_MAX_SYNC_FAILURES = 5
-
-
-def _tick_mirrors_one_db(session, engine, automation, now):
-    """Run the mirror tick against a SINGLE host database.
-
-    Returns ``(fired, disabled)`` for this database.  Selecting due mirrors,
-    dispatching, and recomputing ``next_sync_at`` all happen on ``session`` so a
-    tenant host's mirror rows update in that tenant's DB and the sync plan is
-    enqueued into that tenant's queue (``_dispatch_plan`` → ``enqueue_apply_plan``
-    routes the outbound message by host_id).  Commits ``session`` on the way out.
-    """
-    settings = _get_settings(session)
-    due = (
-        session.query(models.MirrorRepository)
-        .filter(models.MirrorRepository.enabled.is_(True))
-        .all()
-    )
-    fired = []
-    disabled = []
-    for row in due:
-        if row.next_sync_at is not None and row.next_sync_at > now:
-            continue
-        if (row.consecutive_sync_failures or 0) >= _MIRROR_MAX_SYNC_FAILURES:
-            # Too many consecutive failures — stop re-dispatching.
-            # Disable the mirror and surface why; an operator must fix
-            # the root cause and re-enable it to resume syncing.
-            row.enabled = False
-            row.last_sync_status = "DISABLED"
-            row.last_sync_error = (
-                f"Auto-disabled after {row.consecutive_sync_failures} consecutive "
-                "sync failures; re-enable once the cause is addressed (check host "
-                "resources / prior last_sync_error)."
-            )
-            row.last_sync_message_id = None
-            row.next_sync_at = None
-            disabled.append({"mirror_id": str(row.id), "name": row.name})
-            continue
-        try:
-            config = _config_from_row(row)
-            builder = {
-                "apt": engine.build_apt_mirror_sync_plan,
-                "dnf": engine.build_dnf_mirror_sync_plan,
-                "zypper": engine.build_zypper_mirror_sync_plan,
-                "pkg": engine.build_pkg_mirror_sync_plan,
-            }.get(row.package_manager)
-            if builder is None:
-                row.last_sync_status = "FAILURE"
-                row.last_sync_error = (
-                    f"unsupported package_manager: {row.package_manager}"
-                )
-                continue
-            plan = builder(config, settings.mirror_root_path)
-            msg_id = _dispatch_plan(
-                plan, row.host_id, action="sync", mirror_id=str(row.id)
-            )
-            row.last_sync_at = now
-            row.last_sync_status = "DISPATCHED"
-            row.last_sync_error = None
-            row.next_sync_at = automation.next_run_from_cron(
-                row.sync_cron, datetime.now(timezone.utc)
-            )
-            fired.append(
-                {
-                    "mirror_id": str(row.id),
-                    "name": row.name,
-                    "message_id": msg_id,
-                    "next_sync_at": row.next_sync_at.isoformat(),
-                }
-            )
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            logger.exception("Mirror tick failed for %s: %s", row.name, exc)
-            row.last_sync_status = "FAILURE"
-            row.last_sync_error = str(exc)
-    session.commit()
-    return fired, disabled
-
-
 @router.post("/mirror-repositories/tick", dependencies=[Depends(JWTBearer())])
 async def tick_mirrors():
     """Driver hook for an external scheduler.  Selects every enabled
@@ -658,295 +438,6 @@ async def update_mirror_settings(
     db.commit()
     db.refresh(row)
     return row.to_dict()
-
-
-# ---------------------------------------------------------------------
-# Setup-status card (Phase 10.4.1)
-# ---------------------------------------------------------------------
-#
-# These three routes back the "Mirror Setup Status" card on the
-# Repository Mirroring settings tab.  All agent communication goes
-# through the existing message queue: the GET returns the cached
-# row immediately (or a synthetic ``unknown`` payload when no probe
-# has run yet); the two POSTs queue a deployment plan and stamp the
-# in-flight message_id.  The agent's command_result lands in
-# ``proplus_dispatch._apply_repo_mirror_op_result`` (via the
-# ``repo_mirror_op`` correlation registered in ``_dispatch_plan``)
-# which clears the message_id and updates the row asynchronously.
-# The card polls this GET while ``last_check_message_id`` (or
-# ``last_install_message_id``) is non-NULL.
-
-
-@router.get(
-    "/mirror-repositories/setup-status/{host_id}",
-    dependencies=[Depends(JWTBearer())],
-)
-async def get_mirror_setup_status(host_id: str, db: Session = Depends(get_tenant_db)):
-    _check_mirror_module()
-    pid = _parse_uuid(host_id, "host_id")
-    row = (
-        db.query(models.MirrorSetupStatus)
-        .filter(models.MirrorSetupStatus.host_id == pid)
-        .first()
-    )
-    if row is None:
-        # Synthetic "never probed" payload — saves the frontend from
-        # branching on 404 vs row.  ``ready_*`` are all false until a
-        # probe lands.
-        return {
-            "host_id": str(pid),
-            "tools": {},
-            "platform": None,
-            "distro": None,
-            "last_check_at": None,
-            "last_check_message_id": None,
-            "last_check_error": None,
-            "install_status": "idle",
-            "last_install_at": None,
-            "last_install_message_id": None,
-            "last_install_error": None,
-            "ready_apt": False,
-            "ready_dnf": False,
-            "ready_zypper": False,
-            "ready_pkg": False,
-        }
-    return row.to_dict()
-
-
-@router.post(
-    "/mirror-repositories/setup-status/{host_id}/refresh",
-    dependencies=[Depends(JWTBearer())],
-)
-async def refresh_mirror_setup_status(
-    host_id: str, db: Session = Depends(get_tenant_db)
-):
-    """Queue a tool-presence probe.  The probe's command_result lands
-    asynchronously in the inbound queue handler and updates the row.
-    """
-    engine = _check_mirror_module()
-    pid = _parse_uuid(host_id, "host_id")
-    plan = engine.build_mirror_setup_check_plan()
-    msg_id = _dispatch_plan(plan, pid, action="setup_check", mirror_id="", timeout=60)
-    row = (
-        db.query(models.MirrorSetupStatus)
-        .filter(models.MirrorSetupStatus.host_id == pid)
-        .first()
-    )
-    if row is None:
-        row = models.MirrorSetupStatus(host_id=pid)
-        db.add(row)
-    row.last_check_message_id = msg_id
-    db.commit()
-    return {"host_id": str(pid), "message_id": msg_id, "status": "dispatched"}
-
-
-class MirrorSetupInstallRequest(BaseModel):
-    """Body for POST /setup-install/{host_id}."""
-
-    package_manager: str = Field(
-        ...,
-        description="apt | dnf | zypper | pkg — drives which install plan is emitted",
-    )
-
-
-@router.post(
-    "/mirror-repositories/setup-install/{host_id}",
-    dependencies=[Depends(JWTBearer())],
-)
-async def install_mirror_tools(
-    host_id: str,
-    request: MirrorSetupInstallRequest = Body(...),
-    db: Session = Depends(get_tenant_db),
-):
-    """Queue an install plan for the named package manager's mirror tools.
-    Result-routing flips ``install_status`` to succeeded / failed and
-    auto-chains a setup_check so the card refreshes without manual action.
-    """
-    engine = _check_mirror_module()
-    pid = _parse_uuid(host_id, "host_id")
-    try:
-        plan = engine.build_mirror_setup_install_plan(request.package_manager)
-    except Exception as exc:  # engine raises MirrorConfigError on unknown PM
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    msg_id = _dispatch_plan(
-        plan, pid, action="setup_install", mirror_id="", timeout=900
-    )
-    row = (
-        db.query(models.MirrorSetupStatus)
-        .filter(models.MirrorSetupStatus.host_id == pid)
-        .first()
-    )
-    if row is None:
-        row = models.MirrorSetupStatus(host_id=pid)
-        db.add(row)
-    row.install_status = "dispatched"
-    row.last_install_message_id = msg_id
-    row.last_install_error = None
-    db.commit()
-    return {
-        "host_id": str(pid),
-        "message_id": msg_id,
-        "package_manager": request.package_manager,
-        "status": "dispatched",
-    }
-
-
-# ---------------------------------------------------------------------
-# Platform-config CRUD (Phase 10.4.2)
-# ---------------------------------------------------------------------
-
-
-_VALID_PLATFORMS = {"apt", "dnf", "zypper", "pkg"}
-
-
-class PlatformConfigRequest(BaseModel):
-    """Body for create / update of a per-platform mirror config."""
-
-    platform: str = Field(..., description="linux | freebsd")
-    host_id: str = Field(..., description="UUID of the host that hosts the mirror tree")
-    mirror_root_path: Optional[str] = None
-    integrity_check_cadence_hours: Optional[int] = Field(None, ge=1, le=168)
-    retention_window_days: Optional[int] = Field(None, ge=0, le=365)
-    default_bandwidth_cap_kbps: Optional[int] = Field(None, ge=0)
-    snapshot_count_to_keep: Optional[int] = Field(None, ge=0, le=100)
-
-
-@router.get("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
-async def list_platform_configs(db: Session = Depends(get_tenant_db)):
-    _check_mirror_module()
-    rows = (
-        db.query(models.MirrorPlatformConfig)
-        .order_by(models.MirrorPlatformConfig.platform)
-        .all()
-    )
-    return [r.to_dict() for r in rows]
-
-
-@router.post("/mirror-platform-configs", dependencies=[Depends(JWTBearer())])
-async def create_platform_config(
-    request: PlatformConfigRequest = Body(...),
-    db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
-):
-    _check_mirror_module()
-    if request.platform not in _VALID_PLATFORMS:
-        raise HTTPException(
-            status_code=400,
-            detail=_("Invalid platform: %s") % request.platform,
-        )
-    host_uuid = _parse_uuid(request.host_id, "host_id")
-    host = db.query(models.Host).filter(models.Host.id == host_uuid).first()
-    if not host:
-        raise HTTPException(status_code=404, detail=_("Host not found"))
-    existing = (
-        db.query(models.MirrorPlatformConfig)
-        .filter(
-            models.MirrorPlatformConfig.platform == request.platform,
-            models.MirrorPlatformConfig.host_id == host_uuid,
-        )
-        .first()
-    )
-    if existing is not None:
-        raise HTTPException(
-            status_code=409,
-            detail=_("A platform config for %s on this host already exists")
-            % request.platform,
-        )
-    payload = request.model_dump(exclude_unset=True, exclude={"host_id", "platform"})
-    cfg = models.MirrorPlatformConfig(
-        platform=request.platform, host_id=host_uuid, **payload
-    )
-    db.add(cfg)
-    db.commit()
-    db.refresh(cfg)
-    return cfg.to_dict()
-
-
-@router.get("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def get_platform_config(cfg_id: str, db: Session = Depends(get_tenant_db)):
-    _check_mirror_module()
-    pid = _parse_uuid(cfg_id, "cfg_id")
-    row = (
-        db.query(models.MirrorPlatformConfig)
-        .filter(models.MirrorPlatformConfig.id == pid)
-        .first()
-    )
-    if row is None:
-        raise HTTPException(status_code=404, detail=_(_PLATFORM_CONFIG_NOT_FOUND))
-    return row.to_dict()
-
-
-@router.put("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def update_platform_config(
-    cfg_id: str,
-    request: PlatformConfigRequest = Body(...),
-    db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
-):
-    _check_mirror_module()
-    pid = _parse_uuid(cfg_id, "cfg_id")
-    row = (
-        db.query(models.MirrorPlatformConfig)
-        .filter(models.MirrorPlatformConfig.id == pid)
-        .first()
-    )
-    if row is None:
-        raise HTTPException(status_code=404, detail=_(_PLATFORM_CONFIG_NOT_FOUND))
-    if request.platform not in _VALID_PLATFORMS:
-        raise HTTPException(
-            status_code=400, detail=_("Invalid platform: %s") % request.platform
-        )
-    new_host_uuid = _parse_uuid(request.host_id, "host_id")
-    if not db.query(models.Host).filter(models.Host.id == new_host_uuid).first():
-        raise HTTPException(status_code=404, detail=_("Host not found"))
-    row.platform = request.platform
-    row.host_id = new_host_uuid
-    for field in (
-        "mirror_root_path",
-        "integrity_check_cadence_hours",
-        "retention_window_days",
-        "default_bandwidth_cap_kbps",
-        "snapshot_count_to_keep",
-    ):
-        value = getattr(request, field)
-        if value is not None:
-            setattr(row, field, value)
-    db.commit()
-    db.refresh(row)
-    return row.to_dict()
-
-
-@router.delete("/mirror-platform-configs/{cfg_id}", dependencies=[Depends(JWTBearer())])
-async def delete_platform_config(
-    cfg_id: str,
-    db: Session = Depends(get_tenant_db),
-    current_user: str = Depends(get_current_user),  # pylint: disable=unused-argument
-):
-    _check_mirror_module()
-    pid = _parse_uuid(cfg_id, "cfg_id")
-    row = (
-        db.query(models.MirrorPlatformConfig)
-        .filter(models.MirrorPlatformConfig.id == pid)
-        .first()
-    )
-    if row is None:
-        raise HTTPException(status_code=404, detail=_(_PLATFORM_CONFIG_NOT_FOUND))
-    # Refuse to delete a config that still owns mirrors — caller has to
-    # delete or reassign the mirrors first.
-    in_use = (
-        db.query(models.MirrorRepository)
-        .filter(models.MirrorRepository.platform_config_id == pid)
-        .count()
-    )
-    if in_use:
-        raise HTTPException(
-            status_code=409,
-            detail=_("Platform config still owns %d mirror(s); delete those first")
-            % in_use,
-        )
-    db.delete(row)
-    db.commit()
-    return {"deleted": str(pid)}
 
 
 # ---------------------------------------------------------------------
@@ -1367,3 +858,13 @@ def apply_default_mirrors_for_new_host(host_id: str) -> List[dict]:
                 }
             )
     return dispatched
+
+
+# The setup-status card + platform-config CRUD endpoint groups live in a sibling
+# module (extracted to keep this file under the line-count cap).  Importing it
+# here — after ``router`` is defined and all other routes are registered —
+# registers those routes on the SAME ``router`` object, so every route that
+# existed before is still registered identically.
+from backend.api import (  # pylint: disable=wrong-import-position,unused-import
+    repository_mirroring_setup,
+)

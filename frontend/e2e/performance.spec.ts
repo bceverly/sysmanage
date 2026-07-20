@@ -136,8 +136,11 @@ test.describe('Performance - Network', () => {
     // chunk-heavy.  Bump the cap whenever a new plugin lands rather
     // than over-tightening — the budget exists to catch accidental
     // request storms (polling loops, redirect cycles), not to gate
-    // legitimate growth.
-    expect(requests.length).toBeLessThan(600);
+    // legitimate growth.  The 1000-line-per-file refactor decomposed the
+    // frontend into many smaller modules (e.g. HostDetail -> ~35 files);
+    // Vite dev mode fetches each module as its own request, so the
+    // initial-load count grew — that's legitimate, so the cap moves with it.
+    expect(requests.length).toBeLessThan(750);
   });
 
   test('should not have critical failed requests', async ({ page }) => {

@@ -157,10 +157,9 @@ single-line-if-stmt=no
 # no-space-check=trailing-comma,dict-separator
 
 # Maximum number of lines in a module.
-# 1004 = 1000 lines of code + the mandatory 4-line copyright/license header
-# (3 comment lines + 1 blank) that every source file now carries, so the
-# 1000-line code-size discipline is preserved rather than eroded by boilerplate.
-max-module-lines=1004
+# 1000 total lines — the maintainability limit applied uniformly across all
+# SysManage repositories (copyright header included in the count).
+max-module-lines=1000
 
 # String used as indentation unit.
 indent-string='    '

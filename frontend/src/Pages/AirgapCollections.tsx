@@ -22,22 +22,10 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
-  Chip,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Snackbar,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -56,179 +44,22 @@ import { useTranslation } from 'react-i18next';
 
 import axiosInstance from '../Services/api';
 import { formatUTCTimestamp } from '../utils/dateUtils';
-
-type RunStatus =
-  | 'QUEUED'
-  | 'MIRRORING'
-  | 'STAGING_COMPLETE'
-  | 'BUILDING_ISO'
-  | 'ISO_BUILT'
-  | 'BURNING'
-  | 'COMPLETE'
-  | 'FAILED';
-
-const IN_FLIGHT_STATUSES = new Set<RunStatus>([
-  'QUEUED',
-  'MIRRORING',
-  'STAGING_COMPLETE',
-  'BUILDING_ISO',
-  'ISO_BUILT',
-  'BURNING',
-]);
-
-interface RunTarget {
-  // Option-B: operator picks a mirror; backend derives distro/version.
-  mirror_id: string;
-  distro?: string | null;
-  version?: string | null;
-  repos: string[];
-  mirror_name?: string | null;
-  source_snapshot_id?: string | null;
-}
-
-// Trimmed projection of a MirrorRepository row — just what the
-// run-create dialog needs to render its picker.
-interface MirrorPickItem {
-  id: string;
-  name: string;
-  package_manager: string;
-  host_id: string;
-  enabled: boolean;
-  known_version_id: string | null;
-}
-
-interface CollectionRun {
-  id: string;
-  iso_label: string;
-  media_size_bytes: number;
-  // Actual on-disk ISO size (sum across discs); null until built.  The
-  // Size column shows this, falling back to media_size_bytes when absent.
-  iso_size_bytes?: number | null;
-  include_cve: boolean;
-  include_compliance: boolean;
-  status: string;
-  started_at: string | null;
-  completed_at: string | null;
-  error_message: string | null;
-  cron_schedule: string | null;
-  parent_run_id: string | null;
-  created_at: string | null;
-  worker_message_id?: string | null;
-  burn_device?: string | null;
-  targets?: RunTarget[];
-}
-
-// Distros the Pro+ engine accepts (validate_collection_request gate).
-// Keep in sync with airgap_collector_engine.SUPPORTED_DISTROS.
-// SUPPORTED_DISTROS used to drive the picker; now the picker reads
-// mirrors from /api/mirror-repositories so this constant has no
-// runtime consumer.  Kept as a doc-style reference of what the Pro+
-// engine accepts in case a future feature needs it again.
-
-interface Manifest {
-  id: string;
-  disc_index: number;
-  disc_count: number;
-  iso_path: string;
-  iso_sha256: string;
-  iso_size_bytes: number;
-  signer_fingerprint: string;
-  signature_algorithm: string;
-  format_version: number;
-  created_at: string | null;
-}
-
-interface DiscInfo {
-  disc_index: number;
-  filename: string;
-  size_bytes: number;
-}
-
-interface ServerInfo {
-  role?: string;
-}
-
-const RUNS_URL = '/api/v1/airgap/collector/runs';
-
-const statusColor = (
-  s: string,
-): 'default' | 'info' | 'success' | 'error' => {
-  switch (s) {
-    case 'QUEUED':
-      return 'default';
-    case 'MIRRORING':
-    case 'STAGING_COMPLETE':
-    case 'BUILDING_ISO':
-    case 'ISO_BUILT':
-    case 'BURNING':
-      return 'info';
-    case 'COMPLETE':
-      return 'success';
-    case 'FAILED':
-      return 'error';
-    default:
-      return 'default';
-  }
-};
-
-const formatBytes = (n: number | null | undefined): string => {
-  if (n === null || n === undefined) return '—';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let v = n;
-  let u = 0;
-  while (v >= 1024 && u < units.length - 1) {
-    v /= 1024;
-    u += 1;
-  }
-  return `${v.toFixed(u === 0 ? 0 : 1)} ${units[u]}`;
-};
-
-const formatElapsed = (since: Date): string => {
-  const ms = Date.now() - since.getTime();
-  if (ms < 60_000) return `${Math.max(1, Math.round(ms / 1000))}s`;
-  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
-  return `${Math.round(ms / 3_600_000)}h`;
-};
-
-/**
- * Status cell for a collection run.  For in-flight runs (QUEUED →
- * BURNING) it shows the status chip plus a live elapsed-time that
- * ticks every second — same UX as the mirror ActionStatusChip — so the
- * operator can see at a glance that a run is progressing (or how long
- * it's been wedged at QUEUED, which is the symptom that says the
- * orchestrator isn't advancing it).  Self-tickers per in-flight row
- * avoid rebuilding the whole DataGrid column array every second.
- */
-const RunStatusCell: React.FC<{ row: CollectionRun }> = ({ row }) => {
-  const inFlight = IN_FLIGHT_STATUSES.has(row.status as RunStatus);
-  // Throwaway tick state forces a 1s re-render while in-flight; the
-  // interval is torn down the moment the run settles.  Only the setter
-  // is needed (the value is meaningless), hence the unused first slot.
-  const [, setTick] = useState(0); // NOSONAR S6754 - re-render tick; value intentionally unused
-  useEffect(() => {
-    if (!inFlight) return undefined;
-    const h = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(h);
-  }, [inFlight]);
-
-  // Anchor elapsed on started_at (set when the orchestrator dispatches
-  // the first plan) and fall back to created_at for runs still sitting
-  // at QUEUED before the orchestrator has touched them.
-  const anchorRaw = row.started_at || row.created_at;
-  const anchor = anchorRaw ? new Date(anchorRaw) : null;
-  const elapsed = inFlight && anchor ? formatElapsed(anchor) : '';
-
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-      <Chip size="small" label={row.status} color={statusColor(row.status)} />
-      {elapsed && (
-        <Typography variant="caption" color="text.secondary">
-          {elapsed}
-        </Typography>
-      )}
-    </Box>
-  );
-};
+import {
+  CollectionRun,
+  DiscInfo,
+  IN_FLIGHT_STATUSES,
+  Manifest,
+  MirrorPickItem,
+  RUNS_URL,
+  RunStatus,
+  RunStatusCell,
+  ServerInfo,
+  formatBytes,
+} from '../Components/AirgapCollectionsHelpers';
+import {
+  DiscPickerDialog,
+  NewRunDialog,
+} from '../Components/AirgapCollectionsDialogs';
 
 const AirgapCollections: React.FC = () => {
   const { t } = useTranslation();
@@ -779,220 +610,38 @@ const AirgapCollections: React.FC = () => {
         )}
       </Box>
 
-      <Dialog
+      <NewRunDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>
-          {t('airgapCollections.dialog.title', 'New Collection Run')}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              autoFocus
-              required
-              fullWidth
-              label={t('airgapCollections.dialog.isoLabel', 'ISO Label')}
-              value={formIsoLabel}
-              onChange={(e) => setFormIsoLabel(e.target.value)}
-              slotProps={{ htmlInput: { maxLength: 80 } }}
-              helperText={t(
-                'airgapCollections.dialog.isoLabelHelper',
-                'Short identifier embedded in the produced ISO (e.g. "monthly-2026-05").',
-              )}
-            />
-            <TextField
-              required
-              fullWidth
-              type="number"
-              label={t('airgapCollections.dialog.mediaSizeMb', 'Media Size (MB)')}
-              value={formMediaSizeMB}
-              onChange={(e) =>
-                setFormMediaSizeMB(Math.max(1, Number.parseInt(e.target.value, 10) || 0))
-              }
-              helperText={t(
-                'airgapCollections.dialog.mediaSizeHelper',
-                'Maximum size per disc in MB. Defaults to 4700 (DVD-5).',
-              )}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formIncludeCve}
-                  onChange={(e) => setFormIncludeCve(e.target.checked)}
-                />
-              }
-              label={t(
-                'airgapCollections.dialog.includeCve',
-                'Include CVE feed snapshot',
-              )}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formIncludeCompliance}
-                  onChange={(e) => setFormIncludeCompliance(e.target.checked)}
-                />
-              }
-              label={t(
-                'airgapCollections.dialog.includeCompliance',
-                'Include compliance bundle',
-              )}
-            />
-
-            {/* Mirror picker.  Option-B sources the bundle from
-                snapshots of configured mirror_repository rows — the
-                operator picks which ones to bundle and the backend
-                handles snapshot dispatch + distro/version derivation. */}
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              {t('airgapCollections.dialog.mirrorsTitle', 'Mirrors')}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {t(
-                'airgapCollections.dialog.mirrorsHelper',
-                'Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.',
-              )}
-            </Typography>
-            {availableMirrors.length === 0 ? (
-              <Alert severity="info" sx={{ mt: 1 }}>
-                {t(
-                  'airgapCollections.dialog.noMirrors',
-                  'No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.',
-                )}
-              </Alert>
-            ) : (
-              <FormControl size="small" fullWidth>
-                <InputLabel id="mirror-picker-label">
-                  {t('airgapCollections.dialog.mirrorPicker', 'Pick mirrors')}
-                </InputLabel>
-                <Select
-                  labelId="mirror-picker-label"
-                  multiple
-                  value={formMirrorIds}
-                  label={t(
-                    'airgapCollections.dialog.mirrorPicker',
-                    'Pick mirrors',
-                  )}
-                  onChange={(e) =>
-                    setFormMirrorIds(
-                      typeof e.target.value === 'string'
-                        ? e.target.value.split(',')
-                        : e.target.value,
-                    )
-                  }
-                  renderValue={(selected) =>
-                    selected
-                      .map(
-                        (id) =>
-                          availableMirrors.find((m) => m.id === id)?.name ?? id,
-                      )
-                      .join(', ')
-                  }
-                >
-                  {availableMirrors.map((m) => (
-                    <MenuItem key={m.id} value={m.id}>
-                      <Checkbox checked={formMirrorIds.includes(m.id)} />
-                      <Typography variant="body2">
-                        {m.name}{' '}
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          component="span"
-                        >
-                          ({m.package_manager}
-                          {m.known_version_id ? '' : ' — no catalog version!'})
-                        </Typography>
-                      </Typography>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-            {pickedHostMismatch && (
-              <Alert severity="warning" sx={{ mt: 1 }}>
-                {t(
-                  'airgapCollections.dialog.hostMismatchWarning',
-                  'The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.',
-                )}
-              </Alert>
-            )}
-
-            <TextField
-              fullWidth
-              size="small"
-              label={t(
-                'airgapCollections.dialog.burnDevice',
-                'Optical burn device (optional)',
-              )}
-              placeholder="/dev/sr0"
-              value={formBurnDevice}
-              onChange={(e) => setFormBurnDevice(e.target.value)}
-              helperText={t(
-                'airgapCollections.dialog.burnDeviceHelper',
-                'Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT.',
-              )}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={submitting}>
-            {t('airgapCollections.dialog.cancel', 'Cancel')}
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            disabled={submitting}
-            startIcon={submitting ? <CircularProgress size={16} /> : undefined}
-          >
-            {t('airgapCollections.dialog.submit', 'Queue Run')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        submitting={submitting}
+        onCreate={handleCreate}
+        isoLabel={formIsoLabel}
+        onIsoLabelChange={setFormIsoLabel}
+        mediaSizeMB={formMediaSizeMB}
+        onMediaSizeMBChange={setFormMediaSizeMB}
+        includeCve={formIncludeCve}
+        onIncludeCveChange={setFormIncludeCve}
+        includeCompliance={formIncludeCompliance}
+        onIncludeComplianceChange={setFormIncludeCompliance}
+        mirrorIds={formMirrorIds}
+        onMirrorIdsChange={setFormMirrorIds}
+        availableMirrors={availableMirrors}
+        pickedHostMismatch={pickedHostMismatch}
+        burnDevice={formBurnDevice}
+        onBurnDeviceChange={setFormBurnDevice}
+      />
 
       {/* Multi-disc picker.  Opens when handleDownloadClick sees the
           run produced >1 disc; closes on disc selection or cancel. */}
-      <Dialog
-        open={discPickerRun !== null}
+      <DiscPickerDialog
+        run={discPickerRun}
+        entries={discPickerEntries}
         onClose={() => setDiscPickerRun(null)}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>
-          {t(
-            'airgapCollections.discPicker.title',
-            'Pick a disc to download',
-          )}
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={1} sx={{ mt: 1 }}>
-            {discPickerEntries.map((d) => (
-              <Button
-                key={d.disc_index}
-                variant="outlined"
-                startIcon={<DownloadIcon />}
-                onClick={async () => {
-                  if (!discPickerRun) return;
-                  const run = discPickerRun;
-                  setDiscPickerRun(null);
-                  await handleDownload(run, d.disc_index);
-                }}
-              >
-                {t('airgapCollections.discPicker.row', 'Disc {{n}} — {{size}}', {
-                  n: d.disc_index,
-                  size: formatBytes(d.size_bytes),
-                })}
-              </Button>
-            ))}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDiscPickerRun(null)}>
-            {t('airgapCollections.discPicker.cancel', 'Cancel')}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onSelect={(run, discIndex) => {
+          setDiscPickerRun(null);
+          void handleDownload(run, discIndex);
+        }}
+      />
 
       <Snackbar
         open={snackbarOpen}

@@ -122,47 +122,42 @@ const Profile: React.FC = () => {
         }
     };
 
+    // Helper: evaluate a single required character-type rule. Returns 1 when the
+    // rule is satisfied (or not required); pushes an error and returns 0 otherwise.
+    const countCharacterType = (
+        required: boolean,
+        satisfied: boolean,
+        errorMessage: string,
+        errors: string[]
+    ): number => {
+        if (!required) {
+            return 0;
+        }
+        if (satisfied) {
+            return 1;
+        }
+        errors.push(errorMessage);
+        return 0;
+    };
+
     // Helper function to validate character types in password
     const validateCharacterTypes = (
         password: string,
         config: { require_uppercase: boolean; require_lowercase: boolean; require_numbers: boolean; require_special_chars: boolean; special_chars: string; min_character_types: number },
         errors: string[]
-    ): void => { // NOSONAR
-        let charTypes = 0;
+    ): void => {
         const defaultSpecialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
         const allowedSpecialChars = config.special_chars || defaultSpecialChars;
 
-        if (config.require_uppercase) {
-            if (/[A-Z]/.test(password)) {
-                charTypes++;
-            } else {
-                errors.push(t('userProfile.passwordNeedsUppercase', 'Password must contain at least one uppercase letter'));
-            }
-        }
-
-        if (config.require_lowercase) {
-            if (/[a-z]/.test(password)) {
-                charTypes++;
-            } else {
-                errors.push(t('userProfile.passwordNeedsLowercase', 'Password must contain at least one lowercase letter'));
-            }
-        }
-
-        if (config.require_numbers) {
-            if (/\d/.test(password)) {
-                charTypes++;
-            } else {
-                errors.push(t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'));
-            }
-        }
-
-        if (config.require_special_chars) {
-            if (hasSpecialCharacter(password, allowedSpecialChars)) {
-                charTypes++;
-            } else {
-                errors.push(t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'));
-            }
-        }
+        let charTypes = 0;
+        charTypes += countCharacterType(config.require_uppercase, /[A-Z]/.test(password),
+            t('userProfile.passwordNeedsUppercase', 'Password must contain at least one uppercase letter'), errors);
+        charTypes += countCharacterType(config.require_lowercase, /[a-z]/.test(password),
+            t('userProfile.passwordNeedsLowercase', 'Password must contain at least one lowercase letter'), errors);
+        charTypes += countCharacterType(config.require_numbers, /\d/.test(password),
+            t('userProfile.passwordNeedsNumber', 'Password must contain at least one number'), errors);
+        charTypes += countCharacterType(config.require_special_chars, hasSpecialCharacter(password, allowedSpecialChars),
+            t('userProfile.passwordNeedsSpecial', 'Password must contain at least one special character'), errors);
 
         if (charTypes < config.min_character_types) {
             errors.push(t('userProfile.passwordNeedsCharTypes', `Password must contain at least ${config.min_character_types} different character types`, { count: config.min_character_types }));

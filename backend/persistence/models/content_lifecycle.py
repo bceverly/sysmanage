@@ -50,6 +50,10 @@ from sqlalchemy.orm import relationship
 from backend.persistence.db import Base
 from backend.persistence.models.core import GUID
 
+# Reused SQLAlchemy literals (constants avoid duplicating each string 3x).
+_CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
+_SHARED_CONTENT_VIEW_FK = "shared_content_view.id"
+
 # Content-view filter kinds (drive the publish-time materialize job).
 FILTER_ALLOW = "allow"  # package allow-list
 FILTER_DENY = "deny"  # package deny-list
@@ -142,17 +146,17 @@ class SharedContentView(Base):
     repos = relationship(
         "SharedContentViewRepo",
         back_populates="content_view",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     filters = relationship(
         "SharedContentViewFilter",
         back_populates="content_view",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
     versions = relationship(
         "SharedContentViewVersion",
         back_populates="content_view",
-        cascade="all, delete-orphan",
+        cascade=_CASCADE_ALL_DELETE_ORPHAN,
     )
 
     def to_dict(self) -> dict:
@@ -173,7 +177,7 @@ class SharedContentViewRepo(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     content_view_id = Column(
         GUID(),
-        ForeignKey("shared_content_view.id", ondelete="CASCADE"),
+        ForeignKey(_SHARED_CONTENT_VIEW_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -196,7 +200,7 @@ class SharedContentViewFilter(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     content_view_id = Column(
         GUID(),
-        ForeignKey("shared_content_view.id", ondelete="CASCADE"),
+        ForeignKey(_SHARED_CONTENT_VIEW_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -218,7 +222,7 @@ class SharedContentViewVersion(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
     content_view_id = Column(
         GUID(),
-        ForeignKey("shared_content_view.id", ondelete="CASCADE"),
+        ForeignKey(_SHARED_CONTENT_VIEW_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )

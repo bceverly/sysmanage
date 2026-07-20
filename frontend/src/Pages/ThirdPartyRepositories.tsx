@@ -52,6 +52,59 @@ interface ThirdPartyRepositoriesProps {
     osName: string;
 }
 
+interface RepoFieldValues {
+    ppaOwner: string;
+    ppaName: string;
+    coprOwner: string;
+    coprProject: string;
+    obsUrl: string;
+    obsProjectPath: string;
+    obsDistroVersion: string;
+    obsRepoName: string;
+    tapUser: string;
+    tapRepo: string;
+    pkgRepoName: string;
+    pkgRepoUrl: string;
+    pkgsrcName: string;
+    pkgsrcUrl: string;
+    windowsRepoName: string;
+    windowsRepoUrl: string;
+}
+
+// Per-OS-family builders for the constructed repository string. Each returns
+// the identifier (or '' when required fields are missing). Split out so the
+// dispatcher below stays flat.
+const buildObsRepo = (f: RepoFieldValues): string => {
+    if (f.obsUrl && f.obsProjectPath && f.obsDistroVersion && f.obsRepoName) {
+        const cleanUrl = f.obsUrl.endsWith('/') ? f.obsUrl : f.obsUrl + '/';
+        return `${cleanUrl}${f.obsProjectPath}/${f.obsDistroVersion}/${f.obsRepoName}`;
+    }
+    return '';
+};
+
+// Ordered dispatch table: the first matcher whose keyword appears in osName wins.
+const REPO_BUILDERS: ReadonlyArray<{
+    match: readonly string[];
+    build: (f: RepoFieldValues) => string;
+}> = [
+    { match: ['Ubuntu', 'Debian'], build: (f) => (f.ppaOwner && f.ppaName ? `ppa:${f.ppaOwner}/${f.ppaName}` : '') },
+    { match: ['Fedora', 'RHEL', 'CentOS'], build: (f) => (f.coprOwner && f.coprProject ? `${f.coprOwner}/${f.coprProject}` : '') },
+    { match: ['SUSE', 'openSUSE'], build: buildObsRepo },
+    { match: ['macOS', 'Darwin'], build: (f) => (f.tapUser && f.tapRepo ? `${f.tapUser}/${f.tapRepo}` : '') },
+    { match: ['FreeBSD'], build: (f) => (f.pkgRepoName && f.pkgRepoUrl ? f.pkgRepoName : '') },
+    { match: ['NetBSD'], build: (f) => (f.pkgsrcName && f.pkgsrcUrl ? f.pkgsrcName : '') },
+    { match: ['Windows'], build: (f) => (f.windowsRepoName && f.windowsRepoUrl ? f.windowsRepoName : '') },
+];
+
+// Build the constructed repository string for the current OS from the entered
+// field values. Extracted to module scope to keep the effect below simple.
+// Returns undefined when the OS matches no known family, so the caller can
+// leave the existing value unchanged (preserving the original behavior).
+const buildConstructedRepo = (osName: string, f: RepoFieldValues): string | undefined => {
+    const entry = REPO_BUILDERS.find((b) => b.match.some((kw) => osName.includes(kw)));
+    return entry ? entry.build(f) : undefined;
+};
+
 const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     hostId,
     privilegedMode,
@@ -215,50 +268,15 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
     }, [hostId, privilegedMode, t]);
 
     // Build constructed repository string based on OS
-    useEffect(() => { // NOSONAR
-        if (osName.includes('Ubuntu') || osName.includes('Debian')) {
-            if (ppaOwner && ppaName) {
-                setConstructedRepo(`ppa:${ppaOwner}/${ppaName}`);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('Fedora') || osName.includes('RHEL') || osName.includes('CentOS')) {
-            if (coprOwner && coprProject) {
-                setConstructedRepo(`${coprOwner}/${coprProject}`);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('SUSE') || osName.includes('openSUSE')) {
-            if (obsUrl && obsProjectPath && obsDistroVersion && obsRepoName) {
-                const cleanUrl = obsUrl.endsWith('/') ? obsUrl : obsUrl + '/';
-                setConstructedRepo(`${cleanUrl}${obsProjectPath}/${obsDistroVersion}/${obsRepoName}`);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('macOS') || osName.includes('Darwin')) {
-            if (tapUser && tapRepo) {
-                setConstructedRepo(`${tapUser}/${tapRepo}`);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('FreeBSD')) {
-            if (pkgRepoName && pkgRepoUrl) {
-                setConstructedRepo(pkgRepoName);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('NetBSD')) {
-            if (pkgsrcName && pkgsrcUrl) {
-                setConstructedRepo(pkgsrcName);
-            } else {
-                setConstructedRepo('');
-            }
-        } else if (osName.includes('Windows')) {
-            if (windowsRepoName && windowsRepoUrl) {
-                setConstructedRepo(windowsRepoName);
-            } else {
-                setConstructedRepo('');
-            }
+    useEffect(() => {
+        const constructed = buildConstructedRepo(osName, {
+            ppaOwner, ppaName, coprOwner, coprProject,
+            obsUrl, obsProjectPath, obsDistroVersion, obsRepoName,
+            tapUser, tapRepo, pkgRepoName, pkgRepoUrl,
+            pkgsrcName, pkgsrcUrl, windowsRepoName, windowsRepoUrl,
+        });
+        if (constructed !== undefined) {
+            setConstructedRepo(constructed);
         }
     }, [ppaOwner, ppaName, coprOwner, coprProject, obsUrl, obsProjectPath, obsDistroVersion, obsRepoName, tapUser, tapRepo, pkgRepoName, pkgRepoUrl, pkgsrcName, pkgsrcUrl, windowsRepoName, windowsRepoUrl, osName]);
 

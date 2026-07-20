@@ -4,21 +4,9 @@
 
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { parseUTCTimestamp } from '../utils/dateUtils';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckIcon from '@mui/icons-material/Check';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import SyncIcon from '@mui/icons-material/Sync';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
-import SecurityIcon from '@mui/icons-material/Security';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { Chip, IconButton, Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
+import { Autocomplete, TextField, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 import { SysManageHost, doDeleteHost, doGetHosts, doApproveHost, doRefreshAllHostData, doRebootHost, doShutdownHost, doUpdateAgent, doRequestHostDiagnostics } from '../Services/hosts'
@@ -31,58 +19,10 @@ import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { getLicenseInfo } from '../Services/license';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import CampaignIcon from '@mui/icons-material/Campaign';
 import { broadcastService } from '../Services/broadcast';
-import ScrollableButtonBar from '../Components/ScrollableButtonBar';
-
-/** Check whether a host qualifies as a virtualization parent. */
-function isParentHost(host: SysManageHost): boolean {
-    if (host.parent_host_id) return false;
-    if (!host.virtualization_capabilities) return false;
-    try {
-        const caps = JSON.parse(host.virtualization_capabilities);
-        return !!(caps.lxd?.initialized || caps.wsl?.enabled || caps.vmm?.running);
-    } catch {
-        return false;
-    }
-}
-
-/** Sort hosts so children are grouped directly below their parent. */
-function sortHostsGrouped(hosts: SysManageHost[]): SysManageHost[] {
-    const topLevelHosts = hosts
-        .filter(h => !h.parent_host_id)
-        .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
-
-    const childrenByParent = new Map<string, SysManageHost[]>();
-    for (const child of hosts.filter(h => !!h.parent_host_id)) {
-        const parentId = child.parent_host_id!;
-        if (!childrenByParent.has(parentId)) {
-            childrenByParent.set(parentId, []);
-        }
-        childrenByParent.get(parentId)!.push(child);
-    }
-
-    childrenByParent.forEach(children => {
-        children.sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || ''));
-    });
-
-    const sorted: SysManageHost[] = [];
-    for (const parent of topLevelHosts) {
-        sorted.push(parent);
-        const children = childrenByParent.get(parent.id);
-        if (children) {
-            sorted.push(...children);
-            childrenByParent.delete(parent.id);
-        }
-    }
-
-    childrenByParent.forEach(children => {
-        sorted.push(...children);
-    });
-
-    return sorted;
-}
+import HostsActionBar from '../Components/HostsActionBar';
+import { buildHostColumns } from '../Components/hostsColumns';
+import { isParentHost, sortHostsGrouped } from '../Components/hostGrouping';
 
 const Hosts = () => {
     const [tableData, setTableData] = useState<SysManageHost[]>([]);
@@ -207,327 +147,10 @@ const Hosts = () => {
     } = useColumnVisibility('hosts-grid');
 
     // Memoize columns to prevent recreation on every render
-    const columns: GridColDef[] = useMemo(() => [
-        { field: 'id', headerName: t('common.id', 'ID'), width: 70 },
-        {
-            field: 'fqdn',
-            headerName: t('hosts.fqdn'),
-            width: 220,
-            renderCell: (params) => {
-                const row = params.row;
-                const isChildHost = !!row.parent_host_id;
-                // Find parent hostname for tooltip
-                const parentHost = isChildHost ? tableData.find(h => h.id === row.parent_host_id) : null;
-
-                return (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        {isChildHost && (
-                            <Tooltip title={t('hosts.childHostOf', 'Child host of {{parent}}', { parent: parentHost?.fqdn || row.parent_host_id })}>
-                                <AccountTreeIcon
-                                    sx={{
-                                        fontSize: 16,
-                                        color: 'info.main',
-                                        ml: 1
-                                    }}
-                                />
-                            </Tooltip>
-                        )}
-                        <span>{row.fqdn}</span>
-                    </Box>
-                );
-            }
-        },
-        { field: 'platform', headerName: t('hosts.platform'), width: 120 },
-        { field: 'ipv4', headerName: t('hosts.ipv4'), width: 150 },
-        { field: 'ipv6', headerName: t('hosts.ipv6'), width: 200 },
-        {
-            field: 'status',
-            headerName: t('hosts.status'),
-            width: 280,  // Increased width for status and update chips
-            display: 'flex',
-            renderCell: (params) => {
-                const row = params.row;
-                const lastAccess = parseUTCTimestamp(row.last_access);
-                const now = new Date();
-                const diffMinutes = lastAccess ? Math.floor((now.getTime() - lastAccess.getTime()) / 60000) : Infinity;
-                
-                // Consider host "up" if last access was within 5 minutes
-                const isRecentlyActive = diffMinutes <= 5;
-                const displayStatus = isRecentlyActive ? 'up' : 'down';
-                
-                // Check if approval is needed
-                const needsApproval = row.approval_status === 'pending';
-                
-                return (
-                    <Box component="span" sx={{ display: 'inline-flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
-                        <Chip
-                            label={displayStatus === 'up' ? t('hosts.up') : t('hosts.down')}
-                            color={displayStatus === 'up' ? 'success' : 'error'}
-                            size="small"
-                            title={t('hosts.lastSeen', 'Last seen {{minutes}} minutes ago', { minutes: diffMinutes })}
-                        />
-                        {needsApproval && (
-                            <Chip
-                                label={t('hosts.approvalNeeded')}
-                                color="warning"
-                                size="small"
-                                variant="outlined"
-                            />
-                        )}
-                        {row.reboot_required && (
-                            <Chip
-                                label={t('hosts.rebootRequired')}
-                                color="error"
-                                size="small"
-                                variant="outlined"
-                            />
-                        )}
-                        {(row.security_updates_count > 0 || row.system_updates_count > 0) && (() => {
-                            const hasBothUpdates = row.security_updates_count > 0 && row.system_updates_count > 0;
-                            const hasSecurityOnly = row.security_updates_count > 0;
-                            let updatesTitle: string;
-                            if (hasBothUpdates) {
-                                updatesTitle = t('hosts.securityAndSystemUpdates', '{{security}} security, {{system}} system updates', {
-                                    security: row.security_updates_count,
-                                    system: row.system_updates_count
-                                });
-                            } else if (hasSecurityOnly) {
-                                updatesTitle = t('hosts.securityUpdatesOnly', '{{count}} security updates', { count: row.security_updates_count });
-                            } else {
-                                updatesTitle = t('hosts.systemUpdatesOnly', '{{count}} system updates', { count: row.system_updates_count });
-                            }
-                            return (
-                                <Chip
-                                    label={t('hosts.swUpdates', 'SW Updates')}
-                                    color={row.security_updates_count > 0 ? 'error' : 'warning'}
-                                    size="small"
-                                    variant="outlined"
-                                    title={updatesTitle}
-                                />
-                            );
-                        })()}
-                        {(row.os_upgrades_count && row.os_upgrades_count > 0) && (
-                            <Chip
-                                label={t('hosts.osUpgrade', 'OS Upgrade')}
-                                color="info"
-                                size="small"
-                                variant="outlined"
-                                title={t('hosts.osUpgradeAvailable', 'OS upgrade available for this host')}
-                            />
-                        )}
-                    </Box>
-                );
-            }
-        },
-        {
-            field: 'is_agent_privileged',
-            headerName: t('hosts.privileged'),
-            width: 100,
-            renderCell: (params) => {
-                // Don't show anything if host is down
-                if (params.row.status === 'down') {
-                    return null;
-                }
-                const isPrivileged = params.value;
-                if (isPrivileged === undefined || isPrivileged === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
-                }
-                return (
-                    <Chip
-                        label={isPrivileged ? t('common.yes') : t('common.no')}
-                        color={isPrivileged ? 'success' : 'error'}
-                        size="small"
-                        variant="filled"
-                        title={isPrivileged ? t('hosts.runningPrivileged') : t('hosts.runningUnprivileged')}
-                    />
-                );
-            }
-        },
-        {
-            field: 'agent_version',
-            headerName: t('hosts.agentVersion', 'Agent Version'),
-            width: 130,
-        },
-        {
-            field: 'script_execution_enabled',
-            headerName: t('hosts.scriptsEnabled'),
-            width: 120,
-            renderCell: (params) => {
-                // Don't show anything if host is down
-                if (params.row.status === 'down') {
-                    return null;
-                }
-                const scriptsEnabled = params.value;
-                if (scriptsEnabled === undefined || scriptsEnabled === null) {
-                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
-                }
-                return (
-                    <Chip
-                        label={scriptsEnabled ? t('common.yes') : t('common.no')}
-                        color={scriptsEnabled ? 'success' : 'error'}
-                        size="small"
-                        variant="filled"
-                        title={scriptsEnabled ? t('hosts.scriptsEnabledTooltip') : t('hosts.scriptsDisabledTooltip')}
-                    />
-                );
-            }
-        },
-        {
-            field: 'last_access',
-            headerName: t('hosts.lastCheckin'),
-            width: 200,
-            renderCell: (params) => {
-                // Backend stores naive UTC; parseUTCTimestamp appends "Z" if needed
-                const date = parseUTCTimestamp(params.value) || new Date(Number.NaN);
-                const now = new Date();
-
-                // Check if date is valid
-                if (Number.isNaN(date.getTime())) {
-                    return <span style={{ color: '#f44336' }}>{t('hosts.invalidDate', 'Invalid date')}</span>;
-                }
-
-                const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-                // Handle negative differences (clock skew)
-                const absDiff = Math.abs(diffSeconds);
-                let timeText = '';
-
-                if (absDiff < 60) {
-                    timeText = diffSeconds < 0 ? t('hosts.justNow', 'Just now') : t('hosts.secondsAgo', '{{seconds}}s ago', { seconds: absDiff });
-                } else if (absDiff < 3600) {
-                    timeText = t('hosts.minutesAgo', '{{minutes}}m ago', { minutes: Math.floor(absDiff / 60) });
-                } else if (absDiff < 86400) {
-                    timeText = t('hosts.hoursAgo', '{{hours}}h ago', { hours: Math.floor(absDiff / 3600) });
-                } else {
-                    timeText = t('hosts.daysAgo', '{{days}}d ago', { days: Math.floor(absDiff / 86400) });
-                }
-
-                // Determine status color based on time difference
-                let statusColor: string;
-                if (absDiff < 120) {
-                    statusColor = '#4caf50'; // green - very recent
-                } else if (absDiff < 300) {
-                    statusColor = '#ff9800'; // orange - somewhat recent
-                } else {
-                    statusColor = '#f44336'; // red - stale
-                }
-
-                return (
-                    <div title={date.toLocaleString()}>
-                        <div style={{ fontSize: '0.85em', color: statusColor }}>
-                            {timeText}
-                        </div>
-                        <div style={{ fontSize: '0.7em', color: '#666' }}>
-                            {date.toLocaleTimeString()}
-                        </div>
-                    </div>
-                );
-            }
-        },
-        {
-            field: 'tags',
-            headerName: t('hosts.tags', 'Tags'),
-            width: 200,
-            sortable: false,
-            renderCell: (params) => {
-                const tags = params.row.tags || [];
-                if (tags.length === 0) {
-                    return null;
-                }
-                return (
-                    <Box sx={{
-                        display: 'flex',
-                        gap: 0.5,
-                        flexWrap: 'wrap',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%'
-                    }}>
-                        {tags.map((tag: { id: string; name: string }) => (
-                            <Chip
-                                key={tag.id}
-                                label={tag.name}
-                                size="small"
-                                variant="filled"
-                                sx={{
-                                    fontSize: '0.75rem',
-                                    backgroundColor: '#1976d2',
-                                    color: '#ffffff',
-                                    '&:hover': {
-                                        backgroundColor: '#1565c0'
-                                    }
-                                }}
-                            />
-                        ))}
-                    </Box>
-                );
-            }
-        },
-        ...(hasHealthData ? [{
-            field: 'health_grade',
-            headerName: t('hosts.healthGrade', 'Health'),
-            width: 90,
-            renderCell: (params: { row: { health_grade?: string; health_score?: number } }) => {
-                const grade = params.row.health_grade;
-                const score = params.row.health_score;
-                if (!grade) {
-                    return (
-                        <Chip
-                            icon={<HealthAndSafetyIcon sx={{ fontSize: 16 }} />}
-                            label="-"
-                            size="small"
-                            variant="outlined"
-                            sx={{ color: 'text.secondary' }}
-                        />
-                    );
-                }
-                const getGradeColor = () => {
-                    switch (grade) {
-                        case 'A+':
-                        case 'A':
-                            return 'success';
-                        case 'B':
-                            return 'info';
-                        case 'C':
-                            return 'warning';
-                        case 'D':
-                        case 'F':
-                            return 'error';
-                        default:
-                            return 'default';
-                    }
-                };
-                return (
-                    <Chip
-                        icon={<HealthAndSafetyIcon sx={{ fontSize: 16 }} />}
-                        label={grade}
-                        size="small"
-                        color={getGradeColor()}
-                        title={score === undefined ? undefined : t('hosts.healthScore', 'Health Score: {{score}}', { score })}
-                    />
-                );
-            }
-        }] : []),
-        {
-            field: 'actions',
-            headerName: t('common.actions'),
-            width: 100,
-            sortable: false,
-            filterable: false,
-            renderCell: (params) => (
-                canViewHostDetails ? (
-                    <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={() => navigate(`/hosts/${params.row.id}`)}
-                        title={t('common.view')}
-                    >
-                        <VisibilityIcon />
-                    </IconButton>
-                ) : null
-            )
-        }
-    ], [t, navigate, canViewHostDetails, tableData, hasHealthData]);
+    const columns: GridColDef[] = useMemo(
+        () => buildHostColumns({ t, navigate, canViewHostDetails, tableData, hasHealthData }),
+        [t, navigate, canViewHostDetails, tableData, hasHealthData]
+    );
 
     // Search columns configuration (excluding irrelevant columns)
     const searchColumns = [
@@ -1103,105 +726,27 @@ const Hosts = () => {
             {/* Action Buttons - scrollable so labels never wrap and
                 a narrow viewport gets prev/next arrows.  Container
                 still flexShrink: 0 so it stays pinned to the bottom. */}
-            <ScrollableButtonBar sx={{ flexShrink: 0, pb: 2 }}>
-                {canApproveHosts && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<CheckIcon />}
-                        disabled={!hasPendingSelection}
-                        onClick={handleApprove}
-                        color="success"
-                    >
-                        {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
-                    </Button>
-                )}
-                <Button
-                    variant="outlined"
-                    startIcon={<SyncIcon />}
-                    disabled={selection.length === 0}
-                    onClick={handleRefreshData}
-                    color="info"
-                >
-                    {t('hosts.refreshAllData', 'Refresh All Data')}
-                </Button>
-                <Tooltip title={t('broadcast.refreshTooltip', 'Send a refresh-inventory broadcast to every connected agent')}>
-                    <Button
-                        variant="outlined"
-                        startIcon={<CampaignIcon />}
-                        onClick={handleBroadcastRefresh}
-                        color="info"
-                    >
-                        {t('broadcast.refresh', 'Broadcast Refresh')}
-                    </Button>
-                </Tooltip>
-                <Button
-                    variant="outlined"
-                    startIcon={<MedicalServicesIcon />}
-                    disabled={selection.length !== 1}
-                    onClick={handleGetDiagnostics}
-                    color="secondary"
-                >
-                    {t('hosts.getDiagnostics', 'Get Diagnostics')}
-                </Button>
-                <Button
-                    variant="outlined"
-                    startIcon={<SystemUpdateAltIcon />}
-                    disabled={selection.length === 0}
-                    onClick={handleDeployOpenTelemetry}
-                    color="success"
-                >
-                    {t('hosts.deployOpenTelemetry', 'Deploy OpenTelemetry')}
-                </Button>
-                {canDeployAntivirus && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<SecurityIcon />}
-                        disabled={selection.length === 0}
-                        onClick={handleDeployAntivirus}
-                        color="success"
-                    >
-                        {t('hosts.deployAntivirus', 'Deploy Antivirus')}
-                    </Button>
-                )}
-                {canRebootHost && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<RestartAltIcon />}
-                        disabled={!hasActivePrivilegedSelection}
-                        onClick={handleRebootSelected}
-                        color="warning"
-                    >
-                        {t('hosts.rebootSelected', 'Reboot Selected')}
-                    </Button>
-                )}
-                {canShutdownHost && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<PowerSettingsNewIcon />}
-                        disabled={!hasActivePrivilegedSelection}
-                        onClick={handleShutdownSelected}
-                        color="error"
-                    >
-                        {t('hosts.shutdownSelected', 'Shutdown Selected')}
-                    </Button>
-                )}
-                {canUpdateAgent && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<SystemUpdateAltIcon />}
-                        disabled={!hasActivePrivilegedSelection}
-                        onClick={handleUpdateAgentSelected}
-                        color="info"
-                    >
-                        {t('hosts.updateAgentSelected', 'Update Agent on Selected')}
-                    </Button>
-                )}
-                {canDeleteHost && (
-                    <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                        {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
-                    </Button>
-                )}
-            </ScrollableButtonBar>
+            <HostsActionBar
+                canApproveHosts={canApproveHosts}
+                canDeployAntivirus={canDeployAntivirus}
+                canRebootHost={canRebootHost}
+                canShutdownHost={canShutdownHost}
+                canUpdateAgent={canUpdateAgent}
+                canDeleteHost={canDeleteHost}
+                selectionCount={selection.length}
+                hasPendingSelection={hasPendingSelection}
+                hasActivePrivilegedSelection={hasActivePrivilegedSelection}
+                onApprove={handleApprove}
+                onRefreshData={handleRefreshData}
+                onBroadcastRefresh={handleBroadcastRefresh}
+                onGetDiagnostics={handleGetDiagnostics}
+                onDeployOpenTelemetry={handleDeployOpenTelemetry}
+                onDeployAntivirus={handleDeployAntivirus}
+                onRebootSelected={handleRebootSelected}
+                onShutdownSelected={handleShutdownSelected}
+                onUpdateAgentSelected={handleUpdateAgentSelected}
+                onDelete={handleDelete}
+            />
         </Box>
     );
 }

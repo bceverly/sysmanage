@@ -13,7 +13,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField,
   Button,
   Stack,
   IconButton,
@@ -32,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import DefaultPackageMirrorsCard from './DefaultPackageMirrorsCard';
+import RepositoryOSFields from './RepositoryOSFields';
 
 interface DefaultRepository {
   id: string;
@@ -624,197 +624,47 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
                   </FormControl>
                 </Stack>
 
-                {/* Ubuntu/Debian PPA Fields */}
-                {(selectedOS.includes('Ubuntu') || selectedOS.includes('Debian')) && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.ppaOwner', 'PPA Owner')}
-                      value={ppaOwner}
-                      onChange={(e) => setPpaOwner(e.target.value)}
-                      placeholder={t('thirdPartyRepos.ppaOwnerPlaceholder', 'e.g., bceverly')}
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.ppaName', 'PPA Name')}
-                      value={ppaName}
-                      onChange={(e) => setPpaName(e.target.value)}
-                      placeholder={t('thirdPartyRepos.ppaNamePlaceholder', 'e.g., sysmanage-agent')}
-                    />
-                  </Stack>
-                )}
-
-                {/* CentOS/RHEL/Fedora COPR Fields */}
-                {(selectedOS.includes('Fedora') || selectedOS.includes('RHEL') || selectedOS.includes('CentOS')) && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.coprOwner', 'COPR Owner')}
-                      value={coprOwner}
-                      onChange={(e) => setCoprOwner(e.target.value)}
-                      placeholder={t('thirdPartyRepos.coprOwnerPlaceholder', 'e.g., @dotnet-sig')}
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.coprProject', 'COPR Project')}
-                      value={coprProject}
-                      onChange={(e) => setCoprProject(e.target.value)}
-                      placeholder={t('thirdPartyRepos.coprProjectPlaceholder', 'e.g., dotnet-6.0')}
-                    />
-                  </Stack>
-                )}
-
-                {/* SUSE OBS Fields */}
-                {(selectedOS.includes('SUSE') || selectedOS.includes('openSUSE')) && (
-                  <Stack spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.obsUrl', 'OBS Base URL')}
-                      value={obsUrl}
-                      onChange={(e) => setObsUrl(e.target.value)}
-                      placeholder="https://download.opensuse.org/repositories/"
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.obsProjectPath', 'Project Path')}
-                      value={obsProjectPath}
-                      onChange={(e) => setObsProjectPath(e.target.value)}
-                      placeholder="home:/username:/project"
-                    />
-                    <Stack direction="row" spacing={2}>
-                      <TextField
-                        fullWidth
-                        label={t('thirdPartyRepos.obsDistroVersion', 'Distribution/Version')}
-                        value={obsDistroVersion}
-                        onChange={(e) => setObsDistroVersion(e.target.value)}
-                        placeholder="openSUSE_Tumbleweed"
-                      />
-                      <TextField
-                        fullWidth
-                        label={t('thirdPartyRepos.obsRepoName', 'Repository Name')}
-                        value={obsRepoName}
-                        onChange={(e) => setObsRepoName(e.target.value)}
-                        placeholder="myrepo"
-                      />
-                    </Stack>
-                  </Stack>
-                )}
-
-                {/* macOS Homebrew Tap Fields */}
-                {(selectedOS.includes('macOS') || selectedOS.includes('Darwin')) && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.tapUser', 'Tap User')}
-                      value={tapUser}
-                      onChange={(e) => setTapUser(e.target.value)}
-                      placeholder="homebrew"
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.tapRepo', 'Tap Repository')}
-                      value={tapRepo}
-                      onChange={(e) => setTapRepo(e.target.value)}
-                      placeholder="core"
-                    />
-                  </Stack>
-                )}
-
-                {/* FreeBSD pkg Fields */}
-                {selectedOS.includes('FreeBSD') && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.pkgRepoName', 'Repository Name')}
-                      value={pkgRepoName}
-                      onChange={(e) => setPkgRepoName(e.target.value)}
-                      placeholder="custom-repo"
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.pkgRepoUrl', 'Repository URL')}
-                      value={pkgRepoUrl}
-                      onChange={(e) => setPkgRepoUrl(e.target.value)}
-                      placeholder="https://pkg.example.com/${ABI}"
-                    />
-                  </Stack>
-                )}
-
-                {/* NetBSD pkgsrc Fields */}
-                {selectedOS.includes('NetBSD') && (
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.pkgsrcName', 'Repository Name')}
-                      value={pkgsrcName}
-                      onChange={(e) => setPkgsrcName(e.target.value)}
-                      placeholder="custom-pkgsrc"
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.pkgsrcUrl', 'Repository URL')}
-                      value={pkgsrcUrl}
-                      onChange={(e) => setPkgsrcUrl(e.target.value)}
-                      placeholder="https://pkgsrc.example.com"
-                    />
-                  </Stack>
-                )}
-
-                {/* Windows Package Manager Fields */}
-                {selectedOS.includes('Windows') && (
-                  <Stack spacing={2}>
-                    <FormControl fullWidth>
-                      <InputLabel>{t('thirdPartyRepos.windowsRepoType', 'Repository Type')}</InputLabel>
-                      <Select
-                        value={windowsRepoType}
-                        label={t('thirdPartyRepos.windowsRepoType', 'Repository Type')}
-                        onChange={(e) => setWindowsRepoType(e.target.value)}
-                      >
-                        {/* eslint-disable i18next/no-literal-string -- package manager brand names */}
-                        <MenuItem value="chocolatey">Chocolatey</MenuItem>
-                        <MenuItem value="scoop">Scoop</MenuItem>
-                        {/* eslint-enable i18next/no-literal-string */}
-                      </Select>
-                    </FormControl>
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.windowsRepoName', 'Repository Name')}
-                      value={windowsRepoName}
-                      onChange={(e) => setWindowsRepoName(e.target.value)}
-                      placeholder="custom-repo"
-                    />
-                    <TextField
-                      fullWidth
-                      label={t('thirdPartyRepos.windowsRepoUrl', 'Repository URL')}
-                      value={windowsRepoUrl}
-                      onChange={(e) => setWindowsRepoUrl(e.target.value)}
-                      placeholder="https://chocolatey.example.com/api/v2"
-                    />
-                  </Stack>
-                )}
-
-                {/* Show constructed repository */}
-                {constructedRepo && (
-                  <Box sx={{ p: 2, bgcolor: 'action.hover', border: 1, borderColor: 'divider', borderRadius: 1 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                      {t('thirdPartyRepos.constructedIdentifier', 'Repository Identifier')}:
-                    </Typography>
-                    <Typography variant="body2" color="text.primary" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
-                      {constructedRepo}
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Fallback: Manual repository URL entry for unsupported OS */}
-                {selectedPackageManager && !/Ubuntu|Debian|Fedora|RHEL|CentOS|SUSE|openSUSE|macOS|Darwin|FreeBSD|NetBSD|Windows/.test(selectedOS) && (
-                  <TextField
-                    fullWidth
-                    label={t('hostDefaults.repositoryUrl', 'Repository URL / PPA')}
-                    value={repositoryUrl}
-                    onChange={(e) => setRepositoryUrl(e.target.value)}
-                    placeholder={t('hostDefaults.repositoryUrlPlaceholder', 'e.g., ppa:example/ppa or https://...')}
-                  />
-                )}
+                <RepositoryOSFields
+                  selectedOS={selectedOS}
+                  selectedPackageManager={selectedPackageManager}
+                  constructedRepo={constructedRepo}
+                  repositoryUrl={repositoryUrl}
+                  setRepositoryUrl={setRepositoryUrl}
+                  ppaOwner={ppaOwner}
+                  setPpaOwner={setPpaOwner}
+                  ppaName={ppaName}
+                  setPpaName={setPpaName}
+                  coprOwner={coprOwner}
+                  setCoprOwner={setCoprOwner}
+                  coprProject={coprProject}
+                  setCoprProject={setCoprProject}
+                  obsUrl={obsUrl}
+                  setObsUrl={setObsUrl}
+                  obsProjectPath={obsProjectPath}
+                  setObsProjectPath={setObsProjectPath}
+                  obsDistroVersion={obsDistroVersion}
+                  setObsDistroVersion={setObsDistroVersion}
+                  obsRepoName={obsRepoName}
+                  setObsRepoName={setObsRepoName}
+                  tapUser={tapUser}
+                  setTapUser={setTapUser}
+                  tapRepo={tapRepo}
+                  setTapRepo={setTapRepo}
+                  pkgRepoName={pkgRepoName}
+                  setPkgRepoName={setPkgRepoName}
+                  pkgRepoUrl={pkgRepoUrl}
+                  setPkgRepoUrl={setPkgRepoUrl}
+                  pkgsrcName={pkgsrcName}
+                  setPkgsrcName={setPkgsrcName}
+                  pkgsrcUrl={pkgsrcUrl}
+                  setPkgsrcUrl={setPkgsrcUrl}
+                  windowsRepoType={windowsRepoType}
+                  setWindowsRepoType={setWindowsRepoType}
+                  windowsRepoName={windowsRepoName}
+                  setWindowsRepoName={setWindowsRepoName}
+                  windowsRepoUrl={windowsRepoUrl}
+                  setWindowsRepoUrl={setWindowsRepoUrl}
+                />
 
                 <Button
                   variant="contained"

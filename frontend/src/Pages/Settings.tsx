@@ -5,51 +5,28 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { 
-  Typography, 
-  Button, 
-  Dialog, 
-  DialogActions, 
-  DialogContent, 
-  DialogTitle,
-  TextField,
+import {
+  Typography,
+  Button,
   Box,
   Stack,
   IconButton,
-  Chip,
   List,
   ListItemButton,
   ListItemText,
-  Card,
-  CardContent,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   Visibility as VisibilityIcon,
-  Search as SearchIcon,
-  Storage as StorageIcon,
-  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useTablePageSize } from '../hooks/useTablePageSize';
 import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
-import OpenBAOStatusCard from '../Components/OpenBAOStatusCard';
-import GrafanaIntegrationCard from '../Components/GrafanaIntegrationCard';
-import GraylogIntegrationCard from '../Components/GraylogIntegrationCard';
-import OpenTelemetryStatusCard from '../Components/OpenTelemetryStatusCard';
-import PrometheusStatusCard from '../Components/PrometheusStatusCard';
 import ConfigurationSettings from '../Components/ConfigurationSettings';
-import UbuntuProSettings from '../Components/UbuntuProSettings';
 import AntivirusDefaultsSettings from '../Components/AntivirusDefaultsSettings';
 import HostDefaultsSettings from '../Components/HostDefaultsSettings';
 import FirewallRolesSettings from '../Components/FirewallRolesSettings';
@@ -74,94 +51,24 @@ import {
   navRailGroupTitleSx,
   navRailItemSx,
 } from '../Components/navRailStyles';
-
-interface Tag {
-  id: string;
-  name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
-  host_count: number;
-}
-
-interface TagWithHosts extends Tag {
-  hosts: Array<{
-    id: string;
-    fqdn: string;
-    ipv4: string;
-    ipv6: string;
-    active: boolean;
-    status: string;
-  }>;
-}
-
-interface PackageInfo {
-  name: string;
-  version: string;
-  description?: string;
-  package_manager: string;
-}
-
-interface PackageManagerSummary {
-  package_manager: string;
-  package_count: number;
-}
-
-interface OSPackageSummary {
-  os_name: string;
-  os_version: string;
-  package_managers: PackageManagerSummary[];
-  total_packages: number;
-}
-
-interface Host {
-  id: string;
-  fqdn: string;
-  ipv4: string;
-  ipv6: string;
-  active: boolean;
-  approval_status: string;
-  platform?: string;
-  platform_version?: string;
-}
-
-interface QueueMessage {
-  id: string;
-  type: string;
-  direction: string;
-  timestamp: string;
-  created_at: string;
-  host_id: string | null;
-  priority: string;
-  data: Record<string, unknown>;
-}
-
-// Two-pane Settings: the (~20) tabs are grouped into a categorized left rail
-// instead of one long horizontal strip.  Unmapped tab ids fall into "System".
-const SETTINGS_CATEGORY_ORDER = [
-  'general', 'security', 'patching', 'integrations', 'reporting', 'secrets', 'airgap', 'system',
-] as const;
-const SETTINGS_CAT_LABEL = new Map<string, { key: string; def: string }>([
-  ['general', { key: 'settings.cat.general', def: 'General' }],
-  ['security', { key: 'settings.cat.security', def: 'Security & Access' }],
-  ['patching', { key: 'settings.cat.patching', def: 'Patching' }],
-  ['integrations', { key: 'settings.cat.integrations', def: 'Integrations & Logging' }],
-  ['reporting', { key: 'settings.cat.reporting', def: 'Reporting' }],
-  ['secrets', { key: 'settings.cat.secrets', def: 'Secrets' }],
-  ['airgap', { key: 'settings.cat.airgap', def: 'Air-Gap & Mirroring' }],
-  ['system', { key: 'settings.cat.system', def: 'System' }],
-]);
-const SETTINGS_TAB_CATEGORY = new Map<string, string>([
-  ['configuration', 'general'], ['tags', 'general'], ['host-defaults', 'general'], ['available-packages', 'general'],
-  ['authentication', 'security'], ['antivirus', 'security'], ['firewall-roles', 'security'],
-  ['compliance-profiles', 'security'], ['cve-refresh', 'security'], ['cve-database', 'security'], ['fips-compliance', 'security'],
-  ['update-profiles', 'patching'], ['distributions', 'patching'],
-  ['integrations', 'integrations'], ['logging', 'integrations'], ['ubuntu-pro', 'integrations'], ['alerting', 'integrations'],
-  ['report-branding', 'reporting'], ['report-templates', 'reporting'],
-  ['dynamic-secrets', 'secrets'],
-  ['airgap-bundles', 'airgap'], ['repository-mirroring', 'airgap'],
-  ['server-role', 'system'], ['queues', 'system'], ['license', 'system'],
-]);
+import {
+  Tag,
+  TagWithHosts,
+  PackageInfo,
+  OSPackageSummary,
+  Host,
+  QueueMessage,
+} from '../Components/settings/settingsTypes';
+import {
+  SETTINGS_CATEGORY_ORDER,
+  SETTINGS_CAT_LABEL,
+  SETTINGS_TAB_CATEGORY,
+  SETTINGS_TAB_DEFS,
+} from '../Components/settings/settingsCategories';
+import AvailablePackagesTab from '../Components/settings/AvailablePackagesTab';
+import IntegrationsTab from '../Components/settings/IntegrationsTab';
+import UbuntuProTab from '../Components/settings/UbuntuProTab';
+import SettingsDialogs from '../Components/settings/SettingsDialogs';
 
 const Settings: React.FC = () => {
   const { t } = useTranslation();
@@ -208,136 +115,12 @@ const Settings: React.FC = () => {
     })();
   }, []);
 
-  // Tab definitions — each entry declares its hash id, label key, and the
-  // module that must be licensed for the tab to be visible.  ``moduleRequired``
-  // is undefined for OSS-appropriate tabs.  The order here is the visible
-  // order in the UI.
+  // Tab definitions live in ``settingsCategories`` (SETTINGS_TAB_DEFS);
+  // here we just apply the per-user license filter.  ``moduleRequired``
+  // is undefined for OSS-appropriate tabs.  The order there is the
+  // visible order in the UI.
   const tabDefs = useMemo(() => {
-    const defs: Array<{
-      id: string;
-      labelKey: string;
-      labelDefault: string;
-      moduleRequired?: string;
-      requiresLicense?: boolean;
-    }> = [
-      // Fixed leading order (Bryan): Configuration, Server Role, Host
-      // Defaults — the most-used settings, with Configuration as the default
-      // landing tab for the settings gear.
-      {
-        id: 'configuration',
-        labelKey: 'configuration.title',
-        labelDefault: 'Configuration',
-      },
-      // Server Role (air-gap topology) — ungated: every deployment,
-      // including standalone Community, can pick its role.  Replaces
-      // the old sysmanage.yaml ``role:`` key.  The page hosts BOTH the
-      // air-gap and federation role cards, so the menu item is "Server
-      // Role" — distinct from ``serverRole.heading`` (the air-gap card's
-      // own "Air-Gap Role" title).
-      {
-        id: 'server-role',
-        labelKey: 'serverRole.menuTitle',
-        labelDefault: 'Server Role',
-      },
-      { id: 'logging', labelKey: 'logging.title', labelDefault: 'Logging' },
-      { id: 'host-defaults', labelKey: 'hostDefaults.title', labelDefault: 'Host Defaults' },
-      { id: 'tags', labelKey: 'tags.title', labelDefault: 'Tags' },
-      { id: 'queues', labelKey: 'queues.title', labelDefault: 'Queues' },
-      {
-        id: 'integrations',
-        labelKey: 'integrations.title',
-        labelDefault: 'Integrations',
-        moduleRequired: 'observability_engine',
-      },
-      { id: 'ubuntu-pro', labelKey: 'ubuntuPro.title', labelDefault: 'Ubuntu Pro' },
-      {
-        id: 'antivirus',
-        labelKey: 'antivirus.title',
-        labelDefault: 'Antivirus',
-        moduleRequired: 'av_management_engine',
-      },
-      {
-        id: 'available-packages',
-        labelKey: 'availablePackages.title',
-        labelDefault: 'Available Packages',
-      },
-      {
-        id: 'firewall-roles',
-        labelKey: 'firewallRoles.title',
-        labelDefault: 'Firewall Roles',
-        moduleRequired: 'firewall_orchestration_engine',
-      },
-      { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
-      // Dynamic Secrets: visibility deferred until its Pro+ fold-in
-      // lands.  Stays visible (and OSS-functional) until then.
-      //
-      // Access Groups + Registration Keys (Phase 12.4): contributed at
-      // runtime via the federation controller plugin bundle (see
-      // ``sysmanage-professional-plus/frontend/plugin-src/entries/federation-controller-entry.ts``).
-      // Picked up by the ``pluginSettingsTabs`` loop further down with
-      // ``moduleRequired: 'federation_controller_engine'`` gating.
-      {
-        id: 'update-profiles',
-        labelKey: 'upgradeProfiles.tabLabel',
-        labelDefault: 'Update Profiles',
-        // Phase 10.6: scheduled upgrade profiles moved to the Pro+
-        // ``automation_engine`` (cron + per-host dispatch live there).
-        // The OSS server returns 402 from every /api/v1/upgrade-profiles
-        // route without it, so the tab simply hides.
-        moduleRequired: 'automation_engine',
-      },
-      {
-        id: 'compliance-profiles',
-        labelKey: 'packageProfiles.tabLabel',
-        labelDefault: 'Compliance Profiles',
-        // Phase 11.5: package compliance profiles moved to the Pro+
-        // ``compliance_engine`` (evaluator + remediation-plan builder
-        // live there).  The OSS server returns 402 from every
-        // /api/v1/package-profiles route without it, so the tab simply
-        // hides for unlicensed deployments.
-        moduleRequired: 'compliance_engine',
-      },
-      {
-        id: 'report-branding',
-        labelKey: 'reportBranding.tabLabel',
-        labelDefault: 'Report Branding',
-        moduleRequired: 'reporting_engine',
-      },
-      {
-        id: 'report-templates',
-        labelKey: 'reportTemplates.tabLabel',
-        labelDefault: 'Report Templates',
-        moduleRequired: 'reporting_engine',
-      },
-      {
-        id: 'airgap-bundles',
-        labelKey: 'airgapBundles.tabLabel',
-        labelDefault: 'Air-Gap Bundles',
-        // Air-gap is an ENTERPRISE feature (features.py: AIRGAP_* live in the
-        // Enterprise tier, paired with the airgap_collector_engine). Gate on
-        // that engine so the tab hides on Community AND Professional — a bare
-        // ``requiresLicense`` leaked it onto Professional, which has no air-gap.
-        moduleRequired: 'airgap_collector_engine',
-      },
-      {
-        id: 'repository-mirroring',
-        labelKey: 'mirror.tabLabel',
-        labelDefault: 'Repository Mirroring',
-        // Phase 10.4: gated on the Pro+ engine that owns the plan
-        // builders.  Without it loaded every /api/mirror-repositories
-        // route returns 402, so the tab simply hides.
-        moduleRequired: 'repository_mirroring_engine',
-      },
-      {
-        id: 'authentication',
-        labelKey: 'idp.tabLabel',
-        labelDefault: 'Authentication',
-        // Phase 10.5: external IdP integration (LDAP/AD + OIDC).
-        // Routes 402 without ``external_idp_engine`` loaded.
-        moduleRequired: 'external_idp_engine',
-      },
-    ];
-    return defs.filter(d => {
+    return SETTINGS_TAB_DEFS.filter(d => {
       if (d.moduleRequired && !licenseModules.includes(d.moduleRequired)) return false;
       if (d.requiresLicense && !licenseActive) return false;
       return true;
@@ -1088,270 +871,6 @@ const Settings: React.FC = () => {
   );
 
   // Render Integrations tab content
-  const renderIntegrationsTab = () => (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {t('integrations.title', 'Integrations')}
-      </Typography>
-
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        {t('integrations.description', 'Configure external service integrations and settings.')}
-      </Typography>
-
-      {/* Email configuration now lives on the Configuration tab (Phase 13.1.H). */}
-
-      <Box sx={{ mb: 3 }}>
-        <OpenBAOStatusCard />
-      </Box>
-
-      <Box sx={{ mb: 3 }}>
-        <GrafanaIntegrationCard />
-      </Box>
-
-      <Box sx={{ mb: 3 }}>
-        <GraylogIntegrationCard />
-      </Box>
-
-      <Box sx={{ mb: 3 }}>
-        <OpenTelemetryStatusCard />
-      </Box>
-
-      <Box>
-        <PrometheusStatusCard />
-      </Box>
-    </Box>
-  );
-
-  const renderUbuntuProTab = () => (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {t('ubuntuPro.title', 'Ubuntu Pro')}
-      </Typography>
-
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        {t('ubuntuPro.description', 'Configure Ubuntu Pro subscription management and master keys for bulk enrollment.')}
-      </Typography>
-
-      <UbuntuProSettings />
-    </Box>
-  );
-
-  const renderAvailablePackagesTab = () => (
-    <Box>
-      {/* Header with title and refresh button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">
-          {t('availablePackages.title', 'Available Packages')}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<RefreshIcon />}
-          onClick={refreshAllPackages}
-          sx={{ minWidth: 150 }}
-        >
-          {t('availablePackages.refreshAll', 'Refresh All')}
-        </Button>
-      </Box>
-
-      {/* Package Summary Cards */}
-      {packageSummary.length > 0 && (
-        <Box sx={{ mb: 4 }}>
-          <Grid container spacing={2}>
-            {packageSummary.map((summary) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`${summary.os_name}:${summary.os_version}`}>
-                <Card>
-                  <CardContent>
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <StorageIcon sx={{ mr: 1, color: 'primary.main' }} />
-                      <Typography variant="h6">
-                        {summary.os_name} {summary.os_version}
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {t('availablePackages.totalPackages', 'Total Packages')}: {summary.total_packages.toLocaleString()}
-                    </Typography>
-                    <Box>
-                      {summary.package_managers.map((manager) => (
-                        <Chip
-                          key={manager.package_manager}
-                          label={`${manager.package_manager}: ${manager.package_count.toLocaleString()}`}
-                          size="small"
-                          variant="outlined"
-                          sx={{ mr: 0.5, mb: 0.5 }}
-                        />
-                      ))}
-                    </Box>
-                    <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<RefreshIcon />}
-                        onClick={() => refreshPackagesForOS(summary.os_name, summary.os_version)}
-                        sx={{ fontSize: '0.75rem' }}
-                      >
-                        {t('availablePackages.refresh', 'Refresh')}
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-
-      {/* Search Controls */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          {t('availablePackages.search', 'Search Packages')}
-        </Typography>
-        <Grid container spacing={2} alignItems="end">
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField
-              fullWidth
-              label={t('availablePackages.searchTerm', 'Package name')}
-              value={packageSearchTerm}
-              onChange={(e) => setPackageSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && searchPackages(0, 25)}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <IconButton onClick={() => searchPackages(0, 25)}>
-                      <SearchIcon />
-                    </IconButton>
-                  ),
-                },
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>{t('availablePackages.filterByOS', 'Operating System / Version')}</InputLabel>
-              <Select
-                value={selectedOS}
-                label={t('availablePackages.filterByOS', 'Operating System / Version')}
-                onChange={(e) => setSelectedOS(e.target.value)}
-              >
-                <MenuItem value="">
-                  <em>{t('common.all', 'All')}</em>
-                </MenuItem>
-                {packageSummary.map((summary) => (
-                  <MenuItem key={`${summary.os_name}:${summary.os_version}`} value={`${summary.os_name}:${summary.os_version}`}>
-                    {summary.os_name} {summary.os_version}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>{t('availablePackages.filterByManager', 'Package Manager')}</InputLabel>
-              <Select
-                value={selectedManager}
-                label={t('availablePackages.filterByManager', 'Package Manager')}
-                onChange={(e) => setSelectedManager(e.target.value)}
-              >
-                <MenuItem value="">
-                  <em>{t('updates.filters.allManagers', 'All Package Managers')}</em>
-                </MenuItem>
-                {/* eslint-disable i18next/no-literal-string -- package manager brand names */}
-                <MenuItem value="apt">APT</MenuItem>
-                <MenuItem value="snap">Snap</MenuItem>
-                <MenuItem value="flatpak">Flatpak</MenuItem>
-                <MenuItem value="fwupd">fwupd</MenuItem>
-                <MenuItem value="homebrew">Homebrew</MenuItem>
-                <MenuItem value="winget">Winget</MenuItem>
-                <MenuItem value="chocolatey">Chocolatey</MenuItem>
-                <MenuItem value="pkg">PKG</MenuItem>
-                <MenuItem value="yum">YUM</MenuItem>
-                <MenuItem value="dnf">DNF</MenuItem>
-                <MenuItem value="zypper">Zypper</MenuItem>
-                <MenuItem value="pacman">Pacman</MenuItem>
-                {/* eslint-enable i18next/no-literal-string */}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 2 }}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => searchPackages(0, 25)}
-              disabled={!packageSearchTerm.trim()}
-              startIcon={<SearchIcon />}
-              sx={{ height: '56px' }}
-            >
-              {t('common.search', 'Search')}
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* Search Results */}
-      {packages.length > 0 && (
-        <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {t('availablePackages.results', 'Search Results')}{' '}
-            {/* eslint-disable-next-line i18next/no-literal-string -- result count summary uses interpolated values */}
-            ({packageTotalCount.toLocaleString()} total, showing {packages.length})
-          </Typography>
-          <div style={{ height: 400 }}>
-            <DataGrid
-              rows={packages.map((pkg, index) => ({ id: index, ...pkg }))}
-              columns={[
-                { field: 'name', headerName: t('availablePackages.packageName', 'Package Name'), width: 250 },
-                { field: 'version', headerName: t('availablePackages.version', 'Version'), width: 150 },
-                { field: 'package_manager', headerName: t('availablePackages.manager', 'Manager'), width: 120 },
-                {
-                  field: 'description',
-                  headerName: t('availablePackages.description', 'Description'),
-                  width: 400,
-                  renderCell: (params) => (
-                    <Typography variant="body2" noWrap title={params.value}>
-                      {params.value || t('common.noDescription', 'No description')}
-                    </Typography>
-                  )
-                }
-              ]}
-              loading={packageLoading}
-              rowCount={packageTotalCount}
-              paginationMode="server"
-              onPaginationModelChange={(model) => {
-                searchPackages(model.page, model.pageSize);
-              }}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 25 },
-                },
-              }}
-              pageSizeOptions={[25, 50, 100]}
-            />
-          </div>
-        </Box>
-      )}
-
-      {/* Empty State */}
-      {hasSearched && packages.length === 0 && !packageLoading && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {t('availablePackages.noResults', 'No packages found matching your search criteria.')}
-        </Alert>
-      )}
-
-      {/* Initial State */}
-      {!packageSearchTerm && packageSummary.length === 0 && !packageSummaryLoading && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {t('availablePackages.noData', 'No package data available. Packages will be collected from your managed hosts automatically.')}
-        </Alert>
-      )}
-
-      {/* Loading State */}
-      {packageSummaryLoading && packageSummary.length === 0 && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {t('availablePackages.loading', 'Loading package data...')}
-        </Alert>
-      )}
-    </Box>
-  );
-
   return (
     <Box sx={{
       display: 'flex',
@@ -1403,10 +922,28 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'queues' && renderQueuesTab()}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'logging' && <LoggingSettings />}
-        {tabNames[activeTab] === 'integrations' && renderIntegrationsTab()}
-        {tabNames[activeTab] === 'ubuntu-pro' && renderUbuntuProTab()}
+        {tabNames[activeTab] === 'integrations' && <IntegrationsTab />}
+        {tabNames[activeTab] === 'ubuntu-pro' && <UbuntuProTab />}
         {tabNames[activeTab] === 'antivirus' && <AntivirusDefaultsSettings />}
-        {tabNames[activeTab] === 'available-packages' && renderAvailablePackagesTab()}
+        {tabNames[activeTab] === 'available-packages' && (
+          <AvailablePackagesTab
+            packageSummary={packageSummary}
+            packages={packages}
+            selectedOS={selectedOS}
+            setSelectedOS={setSelectedOS}
+            selectedManager={selectedManager}
+            setSelectedManager={setSelectedManager}
+            packageSearchTerm={packageSearchTerm}
+            setPackageSearchTerm={setPackageSearchTerm}
+            packageLoading={packageLoading}
+            packageSummaryLoading={packageSummaryLoading}
+            packageTotalCount={packageTotalCount}
+            hasSearched={hasSearched}
+            onRefreshAll={refreshAllPackages}
+            onRefreshOS={refreshPackagesForOS}
+            onSearch={searchPackages}
+          />
+        )}
         {tabNames[activeTab] === 'host-defaults' && <HostDefaultsSettings />}
         {tabNames[activeTab] === 'firewall-roles' && <FirewallRolesSettings />}
         {tabNames[activeTab] === 'distributions' && <DistributionsSettings />}
@@ -1427,149 +964,24 @@ const Settings: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Add Tag Dialog */}
-      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('tags.addTag', 'Add Tag')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label={t('tags.name', 'Name')}
-            fullWidth
-            variant="outlined"
-            value={tagName}
-            onChange={(e) => setTagName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label={t('tags.description', 'Description')}
-            fullWidth
-            variant="outlined"
-            multiline
-            rows={3}
-            value={tagDescription}
-            onChange={(e) => setTagDescription(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAddDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
-          <Button onClick={handleCreateTag} variant="contained">{t('common.add', 'Add')}</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Edit Tag Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('tags.editTag', 'Edit Tag')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label={t('tags.name', 'Name')}
-            fullWidth
-            variant="outlined"
-            value={tagName}
-            onChange={(e) => setTagName(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label={t('tags.description', 'Description')}
-            fullWidth
-            variant="outlined"
-            multiline
-            rows={3}
-            value={tagDescription}
-            onChange={(e) => setTagDescription(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
-          <Button onClick={handleUpdateTag} variant="contained">{t('common.save', 'Save')}</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* View Hosts Dialog */}
-      <Dialog open={viewHostsDialogOpen} onClose={() => setViewHostsDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {t('tags.hostsAssociatedWith', 'Hosts associated with')} "{viewingTag?.name}"
-        </DialogTitle>
-        <DialogContent>
-          {viewingTag?.hosts && viewingTag.hosts.length > 0 ? (
-            <Box sx={{ mt: 1 }}>
-              {viewingTag.hosts.map(host => (
-                <Chip
-                  key={host.id}
-                  label={`${host.fqdn} (${host.ipv4})`}
-                  variant="outlined"
-                  sx={{ m: 0.5 }}
-                  color={host.active ? 'primary' : 'default'}
-                />
-              ))}
-            </Box>
-          ) : (
-            <Typography>{t('tags.noHostsAssociated', 'No hosts are associated with this tag.')}</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewHostsDialogOpen(false)}>{t('common.close', 'Close')}</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Message Details Dialog */}
-      <Dialog open={messageDetailOpen} onClose={() => setMessageDetailOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>
-          {t('queues.messageDetails', 'Message Details')}
-        </DialogTitle>
-        <DialogContent>
-          {selectedMessage && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.messageId', 'Message ID')}:</strong> {selectedMessage.id}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.messageType', 'Type')}:</strong> {selectedMessage.type}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.direction', 'Direction')}:</strong> {selectedMessage.direction}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.priority', 'Priority')}:</strong> {selectedMessage.priority}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || t('common.notAvailable', 'N/A')}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, t('common.notAvailable', 'N/A'))}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, t('common.notAvailable', 'N/A'))}
-              </Typography>
-              
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('queues.messageContent', 'Message Content')}:
-              </Typography>
-              <Box 
-                component="pre" 
-                sx={{ 
-                  backgroundColor: '#2d2d2d', 
-                  color: '#ffffff',
-                  p: 2, 
-                  borderRadius: 1, 
-                  overflow: 'auto',
-                  fontSize: '0.875rem',
-                  fontFamily: 'monospace'
-                }}
-              >
-                {JSON.stringify(selectedMessage.data, null, 2)}
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMessageDetailOpen(false)}>{t('common.close', 'Close')}</Button>
-        </DialogActions>
-      </Dialog>
+      <SettingsDialogs
+        addDialogOpen={addDialogOpen}
+        onAddDialogClose={() => setAddDialogOpen(false)}
+        onCreateTag={handleCreateTag}
+        editDialogOpen={editDialogOpen}
+        onEditDialogClose={() => setEditDialogOpen(false)}
+        onUpdateTag={handleUpdateTag}
+        tagName={tagName}
+        setTagName={setTagName}
+        tagDescription={tagDescription}
+        setTagDescription={setTagDescription}
+        viewHostsDialogOpen={viewHostsDialogOpen}
+        onViewHostsClose={() => setViewHostsDialogOpen(false)}
+        viewingTag={viewingTag}
+        messageDetailOpen={messageDetailOpen}
+        onMessageDetailClose={() => setMessageDetailOpen(false)}
+        selectedMessage={selectedMessage}
+      />
     </Box>
   );
 };

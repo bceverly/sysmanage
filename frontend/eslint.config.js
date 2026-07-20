@@ -9,6 +9,7 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import security from 'eslint-plugin-security';
 import i18next from 'eslint-plugin-i18next';
+import sonarjs from 'eslint-plugin-sonarjs';
 
 export default [
   {
@@ -95,7 +96,8 @@ export default [
       'react': react,
       'react-hooks': reactHooks,
       'security': security,
-      'i18next': i18next
+      'i18next': i18next,
+      'sonarjs': sonarjs
     },
     rules: {
       ...typescript.configs.recommended.rules,
@@ -106,6 +108,12 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react/no-unescaped-entities': 'off',
+      // Maintainability limit: 1000 total lines per file (uniform across all
+      // SysManage repos; matches the pylint max-module-lines / make lint gate).
+      'max-lines': ['error', { max: 1000, skipBlankLines: false, skipComments: false }],
+      // Cognitive-complexity cap (matches SonarQube's threshold) so over-complex
+      // functions surface in `make lint` rather than a later SonarQube scan.
+      'sonarjs/cognitive-complexity': ['error', 15],
       '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/ban-ts-comment': 'warn',
