@@ -121,16 +121,17 @@ jobs:
     
     # Backend dependency check with Safety
     - name: Install Safety
-      # Install safety in a DEDICATED venv, isolated from the GitHub
-      # hosted-tool-cache site-packages. That shared env can drift into a
-      # typer/click state that crashes safety ("There is no active click
-      # context") even though a clean install of the same versions works fine;
-      # a fresh venv guarantees a consistent safety+typer+click toolchain every
-      # run. Verified: safety==3.7.0 in a clean venv dispatches without the crash.
+      # Install safety in a DEDICATED venv (isolated from the main env, which
+      # keeps semgrep's click~=8.1.8 pin out of safety's way). The typer<0.26
+      # pin is the crux: typer 0.26+ vendors its own `_click`, and safety
+      # dispatches its CLI through the REAL click — so typer's callback wrapper
+      # reads a vendored click context that was never pushed, crashing with
+      # "There is no active click context". Reproduced + fixed on Python 3.12:
+      # floating typer resolves 0.27.0 (crashes); typer<0.26 -> 0.25.1 (works).
       run: |
         python -m venv /tmp/safety-venv
         /tmp/safety-venv/bin/pip install --upgrade pip
-        /tmp/safety-venv/bin/pip install 'safety==3.7.0' 'safety-schemas==0.0.16'
+        /tmp/safety-venv/bin/pip install 'safety==3.7.0' 'safety-schemas==0.0.16' 'typer<0.26'
 
     - name: Install backend dependencies
       run: |
