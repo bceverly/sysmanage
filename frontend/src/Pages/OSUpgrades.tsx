@@ -246,6 +246,7 @@ const OSUpgrades: React.FC = () => {
         <h1 className="updates__title">{t('osUpgrades.title', 'Operating System Upgrades')}</h1>
         <div className="updates__refresh-section">
           <button
+            type="button"
             className={`updates__refresh ${isRefreshing ? 'refreshing' : ''}`}
             onClick={refreshAll}
             disabled={isRefreshing}
@@ -328,6 +329,7 @@ const OSUpgrades: React.FC = () => {
 
           {selectedUpgrades.size > 0 && (
             <button
+              type="button"
               className="updates__execute"
               onClick={executeSelectedUpgrades}
             >

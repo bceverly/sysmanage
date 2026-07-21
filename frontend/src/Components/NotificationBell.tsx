@@ -217,6 +217,7 @@ const NotificationBell: React.FC = () => {
   return (
     <div className="notification-bell" ref={dropdownRef}>
       <button
+        type="button"
         className={`notification-bell__button ${hasUpdates ? 'has-notifications' : ''}`}
         onClick={handleBellClick}
         title={t('notifications.bell.tooltip', 'View available updates')}
@@ -249,6 +250,7 @@ const NotificationBell: React.FC = () => {
               <div className="notification-bell__actions">
                 {hasSecurityUpdates && (
                   <button
+                    type="button"
                     className="notification-bell__action security"
                     onClick={handleViewSecurityUpdates}
                   >
@@ -256,6 +258,7 @@ const NotificationBell: React.FC = () => {
                   </button>
                 )}
                 <button
+                  type="button"
                   className="notification-bell__action"
                   onClick={handleViewAllUpdates}
                 >

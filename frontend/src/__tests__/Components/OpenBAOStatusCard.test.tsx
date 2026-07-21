@@ -135,9 +135,10 @@ test("refresh button reloads data", async () => {
 
 test("toggles the recent logs panel", async () => {
   render(<OpenBAOStatusCard />);
-  await screen.findByText("OpenBAO Vault");
-
-  fireEvent.click(screen.getByText("Show Logs"));
+  // "Show Logs" only appears once the async load resolves; the header renders
+  // during loading, so wait for the button itself rather than racing the
+  // spinner (same pattern as the refresh-button test above).
+  fireEvent.click(await screen.findByText("Show Logs"));
 
   await waitFor(() =>
     expect(screen.getByText("log line one")).toBeInTheDocument(),

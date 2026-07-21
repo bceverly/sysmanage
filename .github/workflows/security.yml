@@ -121,12 +121,16 @@ jobs:
     
     # Backend dependency check with Safety
     - name: Install Safety
-      # Pin safety and FORCE-upgrade typer. The GitHub hosted-tool-cache Python
-      # can carry a stale pre-0.16 typer whose click shim crashes safety with
-      # "There is no active click context". safety 3.7.0 requires typer>=0.16.0
-      # (which is immune at any click version); --upgrade guarantees the cached
-      # copy is actually replaced rather than left in place.
-      run: pip install --upgrade 'safety==3.7.0' 'safety-schemas==0.0.16' 'typer>=0.16.0'
+      # Install safety in a DEDICATED venv, isolated from the GitHub
+      # hosted-tool-cache site-packages. That shared env can drift into a
+      # typer/click state that crashes safety ("There is no active click
+      # context") even though a clean install of the same versions works fine;
+      # a fresh venv guarantees a consistent safety+typer+click toolchain every
+      # run. Verified: safety==3.7.0 in a clean venv dispatches without the crash.
+      run: |
+        python -m venv /tmp/safety-venv
+        /tmp/safety-venv/bin/pip install --upgrade pip
+        /tmp/safety-venv/bin/pip install 'safety==3.7.0' 'safety-schemas==0.0.16'
 
     - name: Install backend dependencies
       run: |
@@ -152,8 +156,8 @@ jobs:
         SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       run: |
         # JSON report is for the uploaded artifact only (non-gating).
-        safety scan --output json --output-file safety-report.json || true
-        safety scan --output screen
+        /tmp/safety-venv/bin/safety scan --output json --output-file safety-report.json || true
+        /tmp/safety-venv/bin/safety scan --output screen
 
     - name: Run pip-audit (Python — authoritative CVE check against PyPI advisory DB)
       # ADVISORY (non-gating): pip-audit currently surfaces real un-ignored vulns

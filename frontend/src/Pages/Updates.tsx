@@ -561,7 +561,8 @@ const Updates: React.FC = () => {
       <div className="updates__header">
         <h1 className="updates__title">{t('updates.title', 'Package Updates')}</h1>
         <div className="updates__refresh-section">
-          <button 
+          <button
+            type="button"
             className={`updates__refresh ${isRefreshing ? 'refreshing' : ''}`}
             onClick={handleManualRefresh}
             disabled={isRefreshing}
@@ -639,6 +640,7 @@ const Updates: React.FC = () => {
         />
         {searchQuery && (
           <button
+            type="button"
             className="updates__search-clear"
             onClick={() => setSearchQuery('')}
             aria-label={t('updates.clearSearch', 'Clear search')}
@@ -733,6 +735,7 @@ const Updates: React.FC = () => {
 
           {selectedUpdates.size > 0 && canApplySoftwareUpdate && (
             <button
+              type="button"
               className="updates__execute"
               onClick={executeSelectedUpdates}
             >
@@ -805,7 +808,8 @@ const Updates: React.FC = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="updates__pagination">
-          <button 
+          <button
+            type="button"
             onClick={() => fetchUpdates(currentPage - 1)}
             disabled={currentPage === 0}
           >
@@ -819,7 +823,8 @@ const Updates: React.FC = () => {
             })}
           </span>
           
-          <button 
+          <button
+            type="button"
             onClick={() => fetchUpdates(currentPage + 1)}
             disabled={currentPage >= totalPages - 1}
           >

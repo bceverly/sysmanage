@@ -373,9 +373,7 @@ def _resolve_license_tier() -> str:
     ``community`` even when a valid Pro+ license was loaded).
     """
     try:
-        # TODO: mypy reports no error on this import; the bare "type: ignore"
-        # here is stale. Left in place (narrowed) pending removal.
-        from backend.licensing.license_service import (  # type: ignore[import]
+        from backend.licensing.license_service import (
             license_service,
         )
 
