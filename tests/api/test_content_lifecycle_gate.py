@@ -50,3 +50,32 @@ class TestContentLifecycleProplusGate:
         self._assert_402(
             client.get("/api/v1/content-lifecycle/content-views", headers=auth_headers)
         )
+
+    def test_create_content_view_returns_402(
+        self, client, auth_headers, _engine_absent
+    ):
+        self._assert_402(
+            client.post(
+                "/api/v1/content-lifecycle/content-views",
+                json={"name": "x"},
+                headers=auth_headers,
+            )
+        )
+
+    def test_publish_returns_402(self, client, auth_headers, _engine_absent):
+        self._assert_402(
+            client.post(
+                "/api/v1/content-lifecycle/content-views/"
+                "00000000-0000-0000-0000-000000000000/publish",
+                headers=auth_headers,
+            )
+        )
+
+    def test_list_versions_returns_402(self, client, auth_headers, _engine_absent):
+        self._assert_402(
+            client.get(
+                "/api/v1/content-lifecycle/content-views/"
+                "00000000-0000-0000-0000-000000000000/versions",
+                headers=auth_headers,
+            )
+        )

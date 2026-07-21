@@ -85,6 +85,9 @@ from backend.services.repo_mirror_result_handlers import (  # pylint: disable=un
     _post_snapshot_outcome,
     _queue_followup_setup_check,
 )
+from backend.services.content_lifecycle_result_handlers import (  # pylint: disable=unused-import
+    _apply_content_lifecycle_op_result,
+)
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -290,6 +293,23 @@ def register_repo_mirror_correlation(
         message_id,
         "repo_mirror_op",
         f"{action}:{mirror_id}",
+        host_id,
+    )
+
+
+def register_content_lifecycle_correlation(
+    message_id: str, action: str, host_id: str, cv_version_id: str = ""
+) -> None:
+    """Register a ``content_lifecycle_engine`` plan for result-routing.
+
+    The ``primary_id`` encodes ``"<action>:<cv_version_id>"`` so the result
+    handler knows which ``SharedContentViewVersion`` row to stamp published /
+    failed.  Today the only action is ``publish_materialize``.
+    """
+    _register_correlation(
+        message_id,
+        "content_lifecycle_op",
+        f"{action}:{cv_version_id}",
         host_id,
     )
 
@@ -827,6 +847,7 @@ _SIMPLE_RESULT_HANDLERS = {
     "repo_mirror_op": _apply_repo_mirror_op_result,
     "airgap_run": _apply_airgap_run_result,
     "airgap_ingest": _apply_airgap_ingest_result,
+    "content_lifecycle_op": _apply_content_lifecycle_op_result,
 }
 
 

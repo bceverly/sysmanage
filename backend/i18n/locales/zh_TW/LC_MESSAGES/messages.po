@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 09:08-0400\n"
+"POT-Creation-Date: 2026-07-21 09:53-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -134,8 +134,6 @@ msgstr "主機ID格式無效"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/repository_mirroring.py:840
-#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
 #: backend/api/tag.py:499 backend/api/tag.py:653
@@ -147,6 +145,8 @@ msgstr "主機ID格式無效"
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/repository_mirroring_setup.py:202
+#: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
 #: backend/api/commercial_antivirus_status.py:88
 msgid "Host not found"
@@ -166,8 +166,8 @@ msgstr "主機尚未被批准"
 #: backend/api/opentelemetry/deployment.py:220
 #: backend/api/opentelemetry/eligibility.py:62
 #: backend/api/opentelemetry/grafana_connection.py:58
-#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:219
-#: backend/api/scim.py:229 backend/api/packages_operations.py:68
+#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
+#: backend/api/scim.py:228 backend/api/packages_operations.py:68
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
@@ -397,9 +397,10 @@ msgstr "未找到安裝請求：%s"
 msgid "Failed to record installation completion: %s"
 msgstr "無法記錄安裝完成：%s"
 
-#: backend/api/report_templates.py:177 backend/api/repository_mirroring.py:166
-#: backend/api/package_compliance.py:141 backend/api/external_idp.py:76
-#: backend/api/dynamic_secrets.py:110 backend/api/upgrade_profiles.py:128
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/upgrade_profiles.py:128
+#: backend/api/repository_mirroring_helpers.py:128
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "對於字段 '%(field)s' 的無效 UUID：%(value)s"
@@ -651,6 +652,20 @@ msgid ""
 msgstr ""
 "automation_engine 未載入；next_run 時間戳記未推進。在 Pro+ 授權包含 automation_engine "
 "之前，排程僅在目前 tick 視窗中觸發。"
+
+#: backend/api/host_registration.py:65
+msgid "Invalid or expired registration key"
+msgstr "無效或已過期的註冊密鑰"
+
+#: backend/api/host_registration.py:102
+msgid "Invalid or expired enrollment token"
+msgstr "無效或已過期的入站令牌"
+
+#: backend/api/host_registration.py:148
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1221,64 +1236,42 @@ msgid ""
 "deletion."
 msgstr "群組刪除請求。刪除後，群組列表將自動更新。"
 
-#: backend/api/repository_mirroring.py:90
-msgid ""
-"Repository mirroring requires a SysManage Professional+ license. Please "
-"upgrade to access this feature."
-msgstr "存儲庫鏡像需要SysManage Professional+許可證。請升級以訪問此功能。"
-
-#: backend/api/repository_mirroring.py:263
+#: backend/api/repository_mirroring.py:124
 msgid "Mirror host not found"
 msgstr "找不到鏡像主機"
 
-#: backend/api/repository_mirroring.py:369
+#: backend/api/repository_mirroring.py:230
 msgid "Mirror deleted"
 msgstr "鏡像已刪除"
 
-#: backend/api/repository_mirroring.py:401
+#: backend/api/repository_mirroring.py:262
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "不支援的包管理器：%s"
 
-#: backend/api/repository_mirroring.py:414
+#: backend/api/repository_mirroring.py:275
 msgid "Mirror sync dispatched"
 msgstr "鏡像同步已發送"
 
-#: backend/api/repository_mirroring.py:610
+#: backend/api/repository_mirroring.py:389
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "鏡像tick需要automation_engine進行cron評估。"
 
-#: backend/api/repository_mirroring.py:835
-#: backend/api/repository_mirroring.py:897
-#, python-format
-msgid "Invalid platform: %s"
-msgstr "無效的平台： %s"
-
-#: backend/api/repository_mirroring.py:852
-#, python-format
-msgid "A platform config for %s on this host already exists"
-msgstr "在此主機上已存在 %s 的平台配置"
-
-#: backend/api/repository_mirroring.py:944
-#, python-format
-msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr "平台配置仍然擁有 %d 個鏡像；請先刪除這些鏡像"
-
-#: backend/api/repository_mirroring.py:1114
+#: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
 " before assigning it as a default."
 msgstr "鏡像%s尚未完成成功的同步——等待同步成功後再設置為默認值。"
 
-#: backend/api/repository_mirroring.py:1123
+#: backend/api/repository_mirroring.py:613
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr "鏡像 %(mirror_name)s 是為 %(package_manager)s 準備的，不能分配給 %(platform)s 預設值"
 
-#: backend/api/repository_mirroring.py:1206
+#: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "未知的 (平台, 版本, 操作系統類型) 元組"
 
@@ -1814,39 +1807,89 @@ msgstr "OpenTelemetry Grafana斷開連接成功排隊"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "將 OpenTelemetry 從 Grafana 斷開時失敗：%s"
 
-#: backend/api/content_lifecycle.py:44
+#: backend/api/content_lifecycle.py:51
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
 msgstr "內容生命周期管理需要SysManage Professional+（Enterprise）許可證。請升級以訪問此功能。"
 
-#: backend/api/content_lifecycle.py:101
+#: backend/api/content_lifecycle.py:108
 msgid "Environment name is required"
 msgstr "環境名稱為必填欄位"
 
-#: backend/api/content_lifecycle.py:103
+#: backend/api/content_lifecycle.py:110
 msgid "Environment name is too long"
 msgstr "環境名稱太長"
 
-#: backend/api/content_lifecycle.py:114
+#: backend/api/content_lifecycle.py:121
 msgid "Environment not found"
 msgstr "未找到環境"
 
-#: backend/api/content_lifecycle.py:129 backend/api/content_lifecycle.py:164
+#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
 msgid "An environment with that name already exists"
 msgstr "已有同名的環境存在"
 
-#: backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:190
 msgid "The Library environment cannot be deleted"
 msgstr "Library 環境不能被刪除"
 
-#: backend/api/content_lifecycle.py:205
+#: backend/api/content_lifecycle.py:212
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids 必須恰好列出每個環境一次"
 
-#: backend/api/content_lifecycle.py:209
+#: backend/api/content_lifecycle.py:216
 msgid "The Library environment must remain first"
 msgstr "Library 環境必須保持在第一個位置"
+
+#: backend/api/content_lifecycle.py:269
+msgid "Content view name is required"
+msgstr "需要指定內容視圖名稱"
+
+#: backend/api/content_lifecycle.py:271
+msgid "Content view name is too long"
+msgstr "內容視圖名稱太長"
+
+#: backend/api/content_lifecycle.py:289
+msgid "Content view not found"
+msgstr "未找到內容視圖"
+
+#: backend/api/content_lifecycle.py:300
+msgid "Each content-view member needs a mirror or component CV"
+msgstr "每個內容視圖成員都需要一個鏡像或組件CV"
+
+#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+msgid "A content view with that name already exists"
+msgstr "一個名稱相同的內容視圖已經存在"
+
+#: backend/api/content_lifecycle.py:465
+msgid "Composite content views cannot be published yet"
+msgstr "組合內容視圖尚不能發佈"
+
+#: backend/api/content_lifecycle.py:470
+msgid "Content view has no repositories to publish"
+msgstr "內容視圖沒有可發佈的倉庫"
+
+#: backend/api/content_lifecycle.py:475
+msgid "Mirror settings are not configured"
+msgstr "鏡像設置尚未配置"
+
+#: backend/api/content_lifecycle.py:488
+msgid "A referenced mirror no longer exists"
+msgstr "引用的鏡像已不再存在"
+
+#: backend/api/content_lifecycle.py:493
+#, python-format
+msgid "Mirror '%s' has no host assigned"
+msgstr "鏡像 '%s' 沒有分配主機"
+
+#: backend/api/content_lifecycle.py:501
+msgid "All mirrors in a content view must share one host in this release"
+msgstr "在此版本中，內容視圖中的所有鏡像必須共享同一主機"
+
+#: backend/api/content_lifecycle.py:514
+#, python-format
+msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
+msgstr "鏡像 '%s' 尚未創建快照；請在發佈之前先創建快照"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -2296,15 +2339,15 @@ msgstr "找不到此操作系統的防病毒默認值"
 msgid "Failed to delete antivirus default: %s"
 msgstr "刪除防毒預設值時失敗：%s"
 
-#: backend/api/scim.py:51
+#: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
 msgstr "SCIM 權限配置需要 SysManage Professional+ 許可證。"
 
-#: backend/api/scim.py:64 backend/api/scim.py:73
+#: backend/api/scim.py:63 backend/api/scim.py:72
 msgid "Unknown SCIM target"
 msgstr "未知的 SCIM 目標"
 
-#: backend/api/scim.py:85
+#: backend/api/scim.py:84
 msgid "Invalid or missing SCIM bearer token."
 msgstr "無效或缺少 SCIM 承載令牌。"
 
@@ -2558,43 +2601,29 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:146
+#: backend/api/host.py:153
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:210
+#: backend/api/host.py:217
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:607
+#: backend/api/host.py:614
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:693
-msgid "Invalid or expired registration key"
-msgstr "無效或已過期的註冊密鑰"
-
-#: backend/api/host.py:730
-msgid "Invalid or expired enrollment token"
-msgstr "無效或已過期的入站令牌"
-
-#: backend/api/host.py:776
-msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
-msgstr "此主機已屬於一個租戶。請使用其入駐令牌重新註冊，而不是進行伺服器範圍的註冊。"
-
-#: backend/api/host.py:874
+#: backend/api/host.py:720
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:933
+#: backend/api/host.py:779
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
 
-#: backend/api/host.py:950
+#: backend/api/host.py:796
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3705,6 +3734,28 @@ msgstr "操作系統生命周期管理需要 SysManage Professional 許可證。
 #: backend/api/lifecycle_actions.py:76
 msgid "The OS lifecycle module is not currently available."
 msgstr "操作系統生命周期模組目前不可用。"
+
+#: backend/api/repository_mirroring_helpers.py:52
+msgid ""
+"Repository mirroring requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr "存儲庫鏡像需要SysManage Professional+許可證。請升級以訪問此功能。"
+
+#: backend/api/repository_mirroring_setup.py:197
+#: backend/api/repository_mirroring_setup.py:259
+#, python-format
+msgid "Invalid platform: %s"
+msgstr "無效的平台： %s"
+
+#: backend/api/repository_mirroring_setup.py:214
+#, python-format
+msgid "A platform config for %s on this host already exists"
+msgstr "在此主機上已存在 %s 的平台配置"
+
+#: backend/api/repository_mirroring_setup.py:306
+#, python-format
+msgid "Platform config still owns %d mirror(s); delete those first"
+msgstr "平台配置仍然擁有 %d 個鏡像；請先刪除這些鏡像"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"

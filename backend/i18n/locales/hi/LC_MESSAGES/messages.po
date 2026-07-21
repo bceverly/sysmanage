@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 09:08-0400\n"
+"POT-Creation-Date: 2026-07-21 09:53-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -134,8 +134,6 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/repository_mirroring.py:840
-#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
 #: backend/api/tag.py:499 backend/api/tag.py:653
@@ -147,6 +145,8 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/repository_mirroring_setup.py:202
+#: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
 #: backend/api/commercial_antivirus_status.py:88
 msgid "Host not found"
@@ -166,8 +166,8 @@ msgstr "होस्ट की पार्सनल है"
 #: backend/api/opentelemetry/deployment.py:220
 #: backend/api/opentelemetry/eligibility.py:62
 #: backend/api/opentelemetry/grafana_connection.py:58
-#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:219
-#: backend/api/scim.py:229 backend/api/packages_operations.py:68
+#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
+#: backend/api/scim.py:228 backend/api/packages_operations.py:68
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
@@ -409,9 +409,10 @@ msgstr "इनस्टॉलेशन अनुरोध %s के लिए �
 msgid "Failed to record installation completion: %s"
 msgstr "इंस्टॉलेशन पूर्णता रिकॉर्ड करने में विफल: %s"
 
-#: backend/api/report_templates.py:177 backend/api/repository_mirroring.py:166
-#: backend/api/package_compliance.py:141 backend/api/external_idp.py:76
-#: backend/api/dynamic_secrets.py:110 backend/api/upgrade_profiles.py:128
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/upgrade_profiles.py:128
+#: backend/api/repository_mirroring_helpers.py:128
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "%(field)s के लिए गलत UUID: %(value)s"
@@ -670,6 +671,22 @@ msgstr ""
 "automation_engine लोड नहीं है; next_run टाइमस्टैम्प आगे नहीं बढ़ाए गए हैं। "
 "Pro+ लाइसेंस में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक"
 " विंडो में सक्रिय होंगी।"
+
+#: backend/api/host_registration.py:65
+msgid "Invalid or expired registration key"
+msgstr "अमान्य या सक्रिय की संरेखित रजिस्ट्रेशन कुंजी"
+
+#: backend/api/host_registration.py:102
+msgid "Invalid or expired enrollment token"
+msgstr "अमान्य या सक्रिय की संपत्ति टोकन"
+
+#: backend/api/host_registration.py:148
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr ""
+"यह होस्ट पहले से एक टेनेंट का हिस्सा है। इसका रजिस्ट्रेशन टेनेंट-स्कोप की "
+"बजाय इनरोलमेंट टोकन के साथ करें"
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1261,53 +1278,28 @@ msgid ""
 msgstr ""
 "ग्रुप हटाने का अनुरोध किया गया। हटाव के बाद ग्रुप सूची स्वतः अद्ययन होंगी।"
 
-#: backend/api/repository_mirroring.py:90
-msgid ""
-"Repository mirroring requires a SysManage Professional+ license. Please "
-"upgrade to access this feature."
-msgstr ""
-"रिपोज़िट्री माइरिंग SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। कृपया "
-"अपग्रेड करके इस सुविधा के लिए पहुंच प्राप्त करें"
-
-#: backend/api/repository_mirroring.py:263
+#: backend/api/repository_mirroring.py:124
 msgid "Mirror host not found"
 msgstr "माइरर होस्ट पाया नहीं गया"
 
-#: backend/api/repository_mirroring.py:369
+#: backend/api/repository_mirroring.py:230
 msgid "Mirror deleted"
 msgstr "माइरर हटा दिया गया"
 
-#: backend/api/repository_mirroring.py:401
+#: backend/api/repository_mirroring.py:262
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "निषेधित package_manager: %s"
 
-#: backend/api/repository_mirroring.py:414
+#: backend/api/repository_mirroring.py:275
 msgid "Mirror sync dispatched"
 msgstr "माइरर संकेतिका भेजने के लिए फैलाई गई"
 
-#: backend/api/repository_mirroring.py:610
+#: backend/api/repository_mirroring.py:389
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "माइरर टिक क्रोन मूल्यांकन के लिए automation_engine की आवश्यकता है।"
 
-#: backend/api/repository_mirroring.py:835
-#: backend/api/repository_mirroring.py:897
-#, python-format
-msgid "Invalid platform: %s"
-msgstr "अमान्य प्लेटफ़ॉर्म: %s"
-
-#: backend/api/repository_mirroring.py:852
-#, python-format
-msgid "A platform config for %s on this host already exists"
-msgstr "इस होस्ट पर %s के लिए पлатफॉर्म सेटTINGS अनुपस्थित हैं"
-
-#: backend/api/repository_mirroring.py:944
-#, python-format
-msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr ""
-"प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
-
-#: backend/api/repository_mirroring.py:1114
+#: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
@@ -1316,7 +1308,7 @@ msgstr ""
 "माइरर %s कभी भी सफलता से संकेतिका नहीं कर लिया है — संकेतिका को सफलता "
 "प्राप्त करने से पहले इसे डिफ़ॉल्ट मानकर निर्दिष्ट करने के लिए इंतजार करें"
 
-#: backend/api/repository_mirroring.py:1123
+#: backend/api/repository_mirroring.py:613
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
@@ -1325,7 +1317,7 @@ msgstr ""
 "%(mirror_name)s मिरर %(package_manager)s के लिए है, इसे %(platform)s "
 "प्राथमिक में संबोधित नहीं किया जा सकता"
 
-#: backend/api/repository_mirroring.py:1206
+#: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "अज्ञात (प्लेटफอร्म, वर्झन, os_family) संयुक्त क्रम"
 
@@ -1903,7 +1895,7 @@ msgstr "OpenTelemetry Grafana डिसकनेक्शन पहलू बु
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "OpenTelemetry को Grafana से अटकल बांधने में विफल: %s"
 
-#: backend/api/content_lifecycle.py:44
+#: backend/api/content_lifecycle.py:51
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1911,34 +1903,87 @@ msgstr ""
 "सामग्री जीवन चक्र प्रबंधन के लिए SysManage Professional+ (Enterprise) "
 "लाइसेंस की आवश्यकता है। इस सुविधा को देखने के लिए अपग्रेड करें।"
 
-#: backend/api/content_lifecycle.py:101
+#: backend/api/content_lifecycle.py:108
 msgid "Environment name is required"
 msgstr "पर्यावरण का नाम आवश्यक है"
 
-#: backend/api/content_lifecycle.py:103
+#: backend/api/content_lifecycle.py:110
 msgid "Environment name is too long"
 msgstr "पर्यावरण का नाम बहुत लंबा है"
 
-#: backend/api/content_lifecycle.py:114
+#: backend/api/content_lifecycle.py:121
 msgid "Environment not found"
 msgstr "पर्यावरण पाया नहीं गया"
 
-#: backend/api/content_lifecycle.py:129 backend/api/content_lifecycle.py:164
+#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
 msgid "An environment with that name already exists"
 msgstr "इस नाम के साथ पर्यावरण पहले से मौजूद है"
 
-#: backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:190
 msgid "The Library environment cannot be deleted"
 msgstr "Library पर्यावरण को हटा देने की सक्षमता उपलब्ध नहीं है"
 
-#: backend/api/content_lifecycle.py:205
+#: backend/api/content_lifecycle.py:212
 msgid "ordered_ids must list every environment exactly once"
 msgstr ""
 "ordered_ids में प्रत्येक पर्यावरण को बस एक बार ही उल्लिखित करना होता है"
 
-#: backend/api/content_lifecycle.py:209
+#: backend/api/content_lifecycle.py:216
 msgid "The Library environment must remain first"
 msgstr "Library पर्यावरण पहले स्थान पर रहना चाहिए"
+
+#: backend/api/content_lifecycle.py:269
+msgid "Content view name is required"
+msgstr "कन्टेंट विच्वरण का नाम आवश्यक है"
+
+#: backend/api/content_lifecycle.py:271
+msgid "Content view name is too long"
+msgstr "कन्टेंट विच्वरण का नाम बहुत लंबा है"
+
+#: backend/api/content_lifecycle.py:289
+msgid "Content view not found"
+msgstr "कन्टेंट विच्वरण पाया नहीं गया"
+
+#: backend/api/content_lifecycle.py:300
+msgid "Each content-view member needs a mirror or component CV"
+msgstr ""
+"प्रत्येक कन्टेंट विच्वरण सदस्य को एक माइरोर या कम्पोनेंट CV होना चाहिए"
+
+#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+msgid "A content view with that name already exists"
+msgstr "इस नाम के साथ पहले से ही एक कन्टेंट विच्वरण मौजूद है"
+
+#: backend/api/content_lifecycle.py:465
+msgid "Composite content views cannot be published yet"
+msgstr "यहाँ तक प्रतिरूपित कन्टेंट विच्वरण अभी पब्लिश नहीं किए जा सकते हैं"
+
+#: backend/api/content_lifecycle.py:470
+msgid "Content view has no repositories to publish"
+msgstr "इस कन्टेंट विच्वरण में पब्लिश करने के लिए कोई रिपोज़िट्री नहीं है"
+
+#: backend/api/content_lifecycle.py:475
+msgid "Mirror settings are not configured"
+msgstr "माइरोर सेटिंग्स सेट किए नहीं गए हैं"
+
+#: backend/api/content_lifecycle.py:488
+msgid "A referenced mirror no longer exists"
+msgstr "उपयोग किए गए ब्रिज का अस्तित्व नहीं है"
+
+#: backend/api/content_lifecycle.py:493
+#, python-format
+msgid "Mirror '%s' has no host assigned"
+msgstr "माइरोर '%s' के पास कोई होस्ट नहीं अनुवादित है"
+
+#: backend/api/content_lifecycle.py:501
+msgid "All mirrors in a content view must share one host in this release"
+msgstr "इस संस्करण में सभी माइरोर एक ही होस्ट शेयर करने चाहिए"
+
+#: backend/api/content_lifecycle.py:514
+#, python-format
+msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
+msgstr ""
+"माइरोर '%s' के पास कोई स्नॉपशट नहीं है; पब्लिश करने से पहले इसका स्नॉपशट "
+"बनाएँ"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -2416,16 +2461,16 @@ msgstr "इस OS के लिए कोई antivirus मानक नहीं
 msgid "Failed to delete antivirus default: %s"
 msgstr "वायरस निषेधक प्रत्यक्षित मूल्य को हटाने में विफल: %s"
 
-#: backend/api/scim.py:51
+#: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
 msgstr ""
 "SCIM प्रोवाइज़िंग के लिए SysManage Professional+ लाइसेंस की आवश्यकता है।"
 
-#: backend/api/scim.py:64 backend/api/scim.py:73
+#: backend/api/scim.py:63 backend/api/scim.py:72
 msgid "Unknown SCIM target"
 msgstr "अज्ञात SCIM लक्ष्य।"
 
-#: backend/api/scim.py:85
+#: backend/api/scim.py:84
 msgid "Invalid or missing SCIM bearer token."
 msgstr "वैध या अनुपस्थित SCIM bearer token।"
 
@@ -2690,39 +2735,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:146
+#: backend/api/host.py:153
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:210
+#: backend/api/host.py:217
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:607
+#: backend/api/host.py:614
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:693
-msgid "Invalid or expired registration key"
-msgstr "अमान्य या सक्रिय की संरेखित रजिस्ट्रेशन कुंजी"
-
-#: backend/api/host.py:730
-msgid "Invalid or expired enrollment token"
-msgstr "अमान्य या सक्रिय की संपत्ति टोकन"
-
-#: backend/api/host.py:776
-msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
-msgstr ""
-"यह होस्ट पहले से एक टेनेंट का हिस्सा है। इसका रजिस्ट्रेशन टेनेंट-स्कोप की "
-"बजाय इनरोलमेंट टोकन के साथ करें"
-
-#: backend/api/host.py:874
+#: backend/api/host.py:720
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:933
+#: backend/api/host.py:779
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2734,7 +2763,7 @@ msgstr ""
 "\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
 " \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
-#: backend/api/host.py:950
+#: backend/api/host.py:796
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3910,6 +3939,31 @@ msgstr ""
 #: backend/api/lifecycle_actions.py:76
 msgid "The OS lifecycle module is not currently available."
 msgstr "OS लाइफसायकल मॉड्यूल वर्तमान में उपलब्ध नहीं है।"
+
+#: backend/api/repository_mirroring_helpers.py:52
+msgid ""
+"Repository mirroring requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"रिपोज़िट्री माइरिंग SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। कृपया "
+"अपग्रेड करके इस सुविधा के लिए पहुंच प्राप्त करें"
+
+#: backend/api/repository_mirroring_setup.py:197
+#: backend/api/repository_mirroring_setup.py:259
+#, python-format
+msgid "Invalid platform: %s"
+msgstr "अमान्य प्लेटफ़ॉर्म: %s"
+
+#: backend/api/repository_mirroring_setup.py:214
+#, python-format
+msgid "A platform config for %s on this host already exists"
+msgstr "इस होस्ट पर %s के लिए पлатफॉर्म सेटTINGS अनुपस्थित हैं"
+
+#: backend/api/repository_mirroring_setup.py:306
+#, python-format
+msgid "Platform config still owns %d mirror(s); delete those first"
+msgstr ""
+"प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"

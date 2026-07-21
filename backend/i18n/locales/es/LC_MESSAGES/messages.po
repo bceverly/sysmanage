@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 09:08-0400\n"
+"POT-Creation-Date: 2026-07-21 09:53-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -134,8 +134,6 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/repository_mirroring.py:840
-#: backend/api/repository_mirroring.py:901
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
 #: backend/api/tag.py:499 backend/api/tag.py:653
@@ -147,6 +145,8 @@ msgstr "Formato de ID de host inválido"
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/repository_mirroring_setup.py:202
+#: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
 #: backend/api/commercial_antivirus_status.py:88
 msgid "Host not found"
@@ -166,8 +166,8 @@ msgstr "El host no está aprobado"
 #: backend/api/opentelemetry/deployment.py:220
 #: backend/api/opentelemetry/eligibility.py:62
 #: backend/api/opentelemetry/grafana_connection.py:58
-#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:219
-#: backend/api/scim.py:229 backend/api/packages_operations.py:68
+#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
+#: backend/api/scim.py:228 backend/api/packages_operations.py:68
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
@@ -401,9 +401,10 @@ msgstr "Solicitud de instalación no encontrada: %s"
 msgid "Failed to record installation completion: %s"
 msgstr "No se pudo registrar la finalización de instalación: %s"
 
-#: backend/api/report_templates.py:177 backend/api/repository_mirroring.py:166
-#: backend/api/package_compliance.py:141 backend/api/external_idp.py:76
-#: backend/api/dynamic_secrets.py:110 backend/api/upgrade_profiles.py:128
+#: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
+#: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
+#: backend/api/upgrade_profiles.py:128
+#: backend/api/repository_mirroring_helpers.py:128
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "UUID inválido para %(field)s: %(value)s"
@@ -669,6 +670,22 @@ msgstr ""
 "automation_engine no cargado; las marcas de tiempo next_run no se avanzan. "
 "Los programas se activarán solo en la ventana de tick actual hasta que la "
 "licencia Pro+ incluya automation_engine."
+
+#: backend/api/host_registration.py:65
+msgid "Invalid or expired registration key"
+msgstr "Clave de registro inválida o expirada"
+
+#: backend/api/host_registration.py:102
+msgid "Invalid or expired enrollment token"
+msgstr "Token de inscripción inválido o expirado"
+
+#: backend/api/host_registration.py:148
+msgid ""
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr ""
+"Este host ya pertenece a uninquilino. Vuelva a registrarse con su token de "
+"inscripción en lugar de registrar el servidor en unalcance."
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -1267,54 +1284,28 @@ msgstr ""
 "Solicitud de eliminación del grupo. La lista de grupos se actualizará "
 "autométicamente después de la eliminación."
 
-#: backend/api/repository_mirroring.py:90
-msgid ""
-"Repository mirroring requires a SysManage Professional+ license. Please "
-"upgrade to access this feature."
-msgstr ""
-"El espejo del repositorio requiere una licencia SysManage Professional+. Por"
-" favor, actualice para acceder a esta función."
-
-#: backend/api/repository_mirroring.py:263
+#: backend/api/repository_mirroring.py:124
 msgid "Mirror host not found"
 msgstr "Host del espejo no encontrado"
 
-#: backend/api/repository_mirroring.py:369
+#: backend/api/repository_mirroring.py:230
 msgid "Mirror deleted"
 msgstr "Espejo eliminado"
 
-#: backend/api/repository_mirroring.py:401
+#: backend/api/repository_mirroring.py:262
 #, python-format
 msgid "Unsupported package_manager: %s"
 msgstr "Gestor de paquetes no compatible: %s"
 
-#: backend/api/repository_mirroring.py:414
+#: backend/api/repository_mirroring.py:275
 msgid "Mirror sync dispatched"
 msgstr "Sincronización del espejo enviada"
 
-#: backend/api/repository_mirroring.py:610
+#: backend/api/repository_mirroring.py:389
 msgid "Mirror tick requires automation_engine for cron evaluation."
 msgstr "La tarea tick requiere automation_engine para la evaluación cron."
 
-#: backend/api/repository_mirroring.py:835
-#: backend/api/repository_mirroring.py:897
-#, python-format
-msgid "Invalid platform: %s"
-msgstr "Plataforma no válida: %s"
-
-#: backend/api/repository_mirroring.py:852
-#, python-format
-msgid "A platform config for %s on this host already exists"
-msgstr "Ya existe una configuración de plataforma para %s en este host"
-
-#: backend/api/repository_mirroring.py:944
-#, python-format
-msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr ""
-"La configuración de la plataforma aún posee %d espejo(s); elimine esos "
-"primero"
-
-#: backend/api/repository_mirroring.py:1114
+#: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
 "Mirror %s has not completed a successful sync yet — wait for sync to succeed"
@@ -1323,7 +1314,7 @@ msgstr ""
 "El espejo %s aún no ha completado una sincronización exitosa — espere a que "
 "la sincronización tenga éxito antes de asignarlo como predeterminado."
 
-#: backend/api/repository_mirroring.py:1123
+#: backend/api/repository_mirroring.py:613
 #, python-format
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
@@ -1332,7 +1323,7 @@ msgstr ""
 "El espejo %(mirror_name)s es para %(package_manager)s, no se puede asignar a"
 " una predeterminada de %(platform)s"
 
-#: backend/api/repository_mirroring.py:1206
+#: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "Desconocida (plataforma, versión, os_family) tupla"
 
@@ -1913,7 +1904,7 @@ msgstr "Desconexión OpenTelemetry Grafana programada con éxito"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "No se pudo desconectar OpenTelemetry de Grafana: %s"
 
-#: backend/api/content_lifecycle.py:44
+#: backend/api/content_lifecycle.py:51
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1922,33 +1913,87 @@ msgstr ""
 "Professional+ (Enterprise). Por favor, actualice para acceder a esta "
 "función."
 
-#: backend/api/content_lifecycle.py:101
+#: backend/api/content_lifecycle.py:108
 msgid "Environment name is required"
 msgstr "El nombre del entorno es requerido"
 
-#: backend/api/content_lifecycle.py:103
+#: backend/api/content_lifecycle.py:110
 msgid "Environment name is too long"
 msgstr "El nombre del entorno es demasiado largo"
 
-#: backend/api/content_lifecycle.py:114
+#: backend/api/content_lifecycle.py:121
 msgid "Environment not found"
 msgstr "Entorno no encontrado"
 
-#: backend/api/content_lifecycle.py:129 backend/api/content_lifecycle.py:164
+#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
 msgid "An environment with that name already exists"
 msgstr "Un entorno con ese nombre ya existe"
 
-#: backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:190
 msgid "The Library environment cannot be deleted"
 msgstr "No se puede eliminar el entorno Library"
 
-#: backend/api/content_lifecycle.py:205
+#: backend/api/content_lifecycle.py:212
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids debe listar cada entorno exactamente una vez"
 
-#: backend/api/content_lifecycle.py:209
+#: backend/api/content_lifecycle.py:216
 msgid "The Library environment must remain first"
 msgstr "El entorno Library debe permanecer como el primero"
+
+#: backend/api/content_lifecycle.py:269
+msgid "Content view name is required"
+msgstr "Se requiere un nombre para la vista de contenido"
+
+#: backend/api/content_lifecycle.py:271
+msgid "Content view name is too long"
+msgstr "El nombre de la vista de contenido es demasiado largo"
+
+#: backend/api/content_lifecycle.py:289
+msgid "Content view not found"
+msgstr "Vista de contenido no encontrada"
+
+#: backend/api/content_lifecycle.py:300
+msgid "Each content-view member needs a mirror or component CV"
+msgstr ""
+"Cada miembro de la vista de contenido necesita un espejo o una CV componente"
+
+#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+msgid "A content view with that name already exists"
+msgstr "Ya existe una vista de contenido con ese nombre"
+
+#: backend/api/content_lifecycle.py:465
+msgid "Composite content views cannot be published yet"
+msgstr "Las vistas de contenido compuestas aún no pueden ser publicadas"
+
+#: backend/api/content_lifecycle.py:470
+msgid "Content view has no repositories to publish"
+msgstr "La vista de contenido no tiene repositorios para publicar"
+
+#: backend/api/content_lifecycle.py:475
+msgid "Mirror settings are not configured"
+msgstr "No están configuradas las opciones del espejo"
+
+#: backend/api/content_lifecycle.py:488
+msgid "A referenced mirror no longer exists"
+msgstr "El espejo referenciado ya no existe"
+
+#: backend/api/content_lifecycle.py:493
+#, python-format
+msgid "Mirror '%s' has no host assigned"
+msgstr "El espejo '%s' no tiene un host asignado"
+
+#: backend/api/content_lifecycle.py:501
+msgid "All mirrors in a content view must share one host in this release"
+msgstr ""
+"Todos los espejos en una vista de contenido deben compartir un host en esta "
+"versión"
+
+#: backend/api/content_lifecycle.py:514
+#, python-format
+msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
+msgstr ""
+"El espejo '%s' aún no tiene una instantánea; cárguela antes de publicarla"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -2429,15 +2474,15 @@ msgstr ""
 msgid "Failed to delete antivirus default: %s"
 msgstr "No se pudo borrar la configuración predeterminada de antivirus: %s"
 
-#: backend/api/scim.py:51
+#: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
 msgstr "La provisión SCIM requiere una licencia SysManage Professional+"
 
-#: backend/api/scim.py:64 backend/api/scim.py:73
+#: backend/api/scim.py:63 backend/api/scim.py:72
 msgid "Unknown SCIM target"
 msgstr "Destino SCIM desconocido"
 
-#: backend/api/scim.py:85
+#: backend/api/scim.py:84
 msgid "Invalid or missing SCIM bearer token."
 msgstr "Token SCIM portador inválido o faltante."
 
@@ -2715,39 +2760,23 @@ msgstr "No se pudo contar paquetes: %s"
 msgid "Failed to search packages: %s"
 msgstr "Error al buscar paquetes: %s"
 
-#: backend/api/host.py:146
+#: backend/api/host.py:153
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Permiso denegado: se requiere el rol DELETE_HOST"
 
-#: backend/api/host.py:210
+#: backend/api/host.py:217
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Permiso denegado: se requiere el rol VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:607
+#: backend/api/host.py:614
 msgid "Host already exists"
 msgstr "El host ya existe"
 
-#: backend/api/host.py:693
-msgid "Invalid or expired registration key"
-msgstr "Clave de registro inválida o expirada"
-
-#: backend/api/host.py:730
-msgid "Invalid or expired enrollment token"
-msgstr "Token de inscripción inválido o expirado"
-
-#: backend/api/host.py:776
-msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token"
-" instead of registering server-scoped."
-msgstr ""
-"Este host ya pertenece a uninquilino. Vuelva a registrarse con su token de "
-"inscripción en lugar de registrar el servidor en unalcance."
-
-#: backend/api/host.py:874
+#: backend/api/host.py:720
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registro absorbido: el host fue recientemente eliminado"
 
-#: backend/api/host.py:933
+#: backend/api/host.py:779
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2755,7 +2784,7 @@ msgstr ""
 "El host '%(fqdn)s' se inscribió en el tenant %(tenant_id)s mediante token de"
 " inscripción"
 
-#: backend/api/host.py:950
+#: backend/api/host.py:796
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3952,6 +3981,32 @@ msgid "The OS lifecycle module is not currently available."
 msgstr ""
 "El módulo de ciclo de vida del sistema operativo no está disponible "
 "actualmente."
+
+#: backend/api/repository_mirroring_helpers.py:52
+msgid ""
+"Repository mirroring requires a SysManage Professional+ license. Please "
+"upgrade to access this feature."
+msgstr ""
+"El espejo del repositorio requiere una licencia SysManage Professional+. Por"
+" favor, actualice para acceder a esta función."
+
+#: backend/api/repository_mirroring_setup.py:197
+#: backend/api/repository_mirroring_setup.py:259
+#, python-format
+msgid "Invalid platform: %s"
+msgstr "Plataforma no válida: %s"
+
+#: backend/api/repository_mirroring_setup.py:214
+#, python-format
+msgid "A platform config for %s on this host already exists"
+msgstr "Ya existe una configuración de plataforma para %s en este host"
+
+#: backend/api/repository_mirroring_setup.py:306
+#, python-format
+msgid "Platform config still owns %d mirror(s); delete those first"
+msgstr ""
+"La configuración de la plataforma aún posee %d espejo(s); elimine esos "
+"primero"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
