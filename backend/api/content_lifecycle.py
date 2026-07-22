@@ -695,15 +695,67 @@ def _resolve_cv_publish_targets(cv, tenant_db: Session):
     return host_id, settings.mirror_root_path, targets
 
 
-def _resolve_cv_serving_host(cv, tenant_db: Session):
+def _mirror_host(current_host, mirror):
+    """Validate a mirror exists, has a host, and shares that host with the CV's
+    other mirrors (design decision #1: one serving host per CV)."""
+    if mirror is None:
+        raise HTTPException(
+            status_code=400, detail=_("A referenced mirror no longer exists")
+        )
+    if mirror.host_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Mirror '%s' has no host assigned") % mirror.name,
+        )
+    if current_host is not None and str(mirror.host_id) != str(current_host):
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "All mirrors in a content view must share one host in this release"
+            ),
+        )
+    return mirror.host_id
+
+
+def _component_cvs(cv, shared_db: Session):
+    """The component content views of a composite CV (via component refs)."""
+    ids = [m.component_content_view_id for m in cv.repos if m.component_content_view_id]
+    if not ids:
+        return []
+    return (
+        shared_db.query(models.SharedContentView)
+        .filter(models.SharedContentView.id.in_(ids))
+        .all()
+    )
+
+
+def _effective_mirror_members(cv, shared_db: Session):
+    """The mirror members a CV serves: its own for a regular CV, or -- for a
+    composite -- its components' mirrors (deduped by id, order-preserving)."""
+    if not cv.composite:
+        return sorted([m for m in cv.repos if m.mirror_id], key=lambda m: m.position)
+    seen, members = set(), []
+    for comp in _component_cvs(cv, shared_db):
+        for member in sorted(
+            [r for r in comp.repos if r.mirror_id], key=lambda r: r.position
+        ):
+            key = str(member.mirror_id)
+            if key not in seen:
+                seen.add(key)
+                members.append(member)
+    return members
+
+
+def _resolve_cv_serving_host(cv, shared_db: Session, tenant_db: Session):
     """(host_id, mirror_root, [MirrorRepository]) for a CV's single serving host.
 
     Lighter than ``_resolve_cv_publish_targets`` (Slice 5): promote/rollback/
     serve/repoint act on already-published content, so this does NOT require a
     snapshot -- it only resolves the host + mirror rows (which carry the
     suite/components/repoid the client-repoint plans reuse) and enforces the
-    single-host invariant (design decision #1)."""
-    members = [m for m in cv.repos if m.mirror_id]
+    single-host invariant.  Composite CVs (Slice 6) resolve through their
+    components' mirrors, so serve/repoint work uniformly."""
+    members = _effective_mirror_members(cv, shared_db)
     if not members:
         raise HTTPException(
             status_code=400, detail=_("Content view has no repositories")
@@ -715,32 +767,67 @@ def _resolve_cv_serving_host(cv, tenant_db: Session):
         )
     host_id = None
     mirrors = []
-    for member in sorted(members, key=lambda m: m.position):
+    for member in members:
         mirror = (
             tenant_db.query(models.MirrorRepository)
             .filter(models.MirrorRepository.id == member.mirror_id)
             .first()
         )
-        if mirror is None:
-            raise HTTPException(
-                status_code=400, detail=_("A referenced mirror no longer exists")
-            )
-        if mirror.host_id is None:
-            raise HTTPException(
-                status_code=400,
-                detail=_("Mirror '%s' has no host assigned") % mirror.name,
-            )
-        if host_id is None:
-            host_id = mirror.host_id
-        elif str(mirror.host_id) != str(host_id):
-            raise HTTPException(
-                status_code=400,
-                detail=_(
-                    "All mirrors in a content view must share one host in this release"
-                ),
-            )
+        host_id = _mirror_host(host_id, mirror)
         mirrors.append(mirror)
     return host_id, settings.mirror_root_path, mirrors
+
+
+def _resolve_composite_publish(cv, shared_db: Session, tenant_db: Session):
+    """(host_id, mirror_root, [component]) for publishing a COMPOSITE CV (Slice 6).
+
+    Each ``component`` is ``{"cv_id", "version", "mirrors": [{"name",
+    "package_manager"}]}`` -- the newest PUBLISHED version of each component CV
+    and the mirrors it carries.  All components (and the composite) must share one
+    serving host."""
+    settings = tenant_db.query(models.MirrorSettings).first()
+    if settings is None:
+        raise HTTPException(
+            status_code=400, detail=_("Mirror settings are not configured")
+        )
+    comps = _component_cvs(cv, shared_db)
+    if not comps:
+        raise HTTPException(
+            status_code=400,
+            detail=_("Composite content view has no component content views"),
+        )
+    host_id = None
+    components = []
+    for comp in comps:
+        published = [v for v in comp.versions if v.status == CVV_PUBLISHED]
+        if not published:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Component '%s' has no published version yet") % comp.name,
+            )
+        latest = max(published, key=lambda v: v.version)
+        mirrors = []
+        for member in sorted(
+            [r for r in comp.repos if r.mirror_id], key=lambda r: r.position
+        ):
+            mirror = (
+                tenant_db.query(models.MirrorRepository)
+                .filter(models.MirrorRepository.id == member.mirror_id)
+                .first()
+            )
+            host_id = _mirror_host(host_id, mirror)
+            mirrors.append(
+                {"name": mirror.name, "package_manager": mirror.package_manager}
+            )
+        if not mirrors:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Component '%s' has no repositories") % comp.name,
+            )
+        components.append(
+            {"cv_id": str(comp.id), "version": latest.version, "mirrors": mirrors}
+        )
+    return host_id, settings.mirror_root_path, components
 
 
 def _host_fqdn(tenant_db: Session, host_id) -> Optional[str]:
@@ -772,37 +859,13 @@ def _dispatch_publish_plan(plan: dict, host_id, cv_version_id: str) -> str:
     return msg_id
 
 
-@router.post(
-    "/content-lifecycle/content-views/{cv_id}/publish",
-    dependencies=[Depends(JWTBearer())],
-)
-async def publish_content_view(
-    cv_id: str,
-    shared_db: Session = Depends(get_shared_db),
-    tenant_db: Session = Depends(get_tenant_db),
-):
-    """Publish an immutable version of a content view (async materialize job).
-
-    Returns the new version at status ``publishing``; the result handler flips
-    it to ``published`` / ``failed`` when the mirror host finishes the plan.
-    """
-    engine = _check_clm_module()
-    cv = _get_cv_or_404(shared_db, cv_id)
+def _build_regular_publish(engine, cv, shared_db, tenant_db, next_version):
+    """Build (host_id, store_path, commands, manifest) for a non-composite CV:
+    materialize each mirror snapshot, merged into one host plan."""
     host_id, mirror_root, targets = _resolve_cv_publish_targets(cv, tenant_db)
-
-    # Resolve the CV's filters to engine primitives (advisory-coupled filters
-    # resolved against shared_advisory, scoped to the CV's package managers).
+    # Advisory-coupled filters resolve against shared_advisory, scoped to PMs.
     package_managers = {mc["package_manager"] for mc, _ in targets}
     filter_primitives = _resolve_cv_filters(shared_db, cv, package_managers)
-
-    next_version = 1 + max((v.version for v in cv.versions), default=0)
-    cvv = models.SharedContentViewVersion(
-        content_view_id=cv.id, version=next_version, status=CVV_PUBLISHING
-    )
-    shared_db.add(cvv)
-    shared_db.flush()  # assign cvv.id before dispatch/correlation
-
-    # Merge each mirror's per-mirror materialize commands into ONE host plan.
     commands: List[dict] = []
     store_parent = None
     for mirror_config, snapshot_id in targets:
@@ -817,6 +880,60 @@ async def publish_content_view(
         commands.extend(plan.get("commands", []))
         if store_parent is None:
             store_parent = os.path.dirname(plan.get("store_path", "")) or None
+    return host_id, store_parent, commands, None
+
+
+def _build_composite_publish(engine, cv, shared_db, tenant_db, next_version):
+    """Build (host_id, store_path, commands, manifest) for a COMPOSITE CV (Slice
+    6): compose each component's newest published version into one store, and
+    record the resolved component versions in the manifest."""
+    host_id, mirror_root, components = _resolve_composite_publish(
+        cv, shared_db, tenant_db
+    )
+    package_managers = {m["package_manager"] for c in components for m in c["mirrors"]}
+    filter_primitives = _resolve_cv_filters(shared_db, cv, package_managers)
+    plan = engine.build_compose_materialize_plan(
+        mirror_root, str(cv.id), next_version, components, filter_primitives
+    )
+    manifest = {
+        "components": [
+            {"content_view_id": c["cv_id"], "version": c["version"]} for c in components
+        ]
+    }
+    return host_id, plan.get("store_path"), plan.get("commands", []), manifest
+
+
+@router.post(
+    "/content-lifecycle/content-views/{cv_id}/publish",
+    dependencies=[Depends(JWTBearer())],
+)
+async def publish_content_view(
+    cv_id: str,
+    shared_db: Session = Depends(get_shared_db),
+    tenant_db: Session = Depends(get_tenant_db),
+):
+    """Publish an immutable version of a content view (async materialize job).
+
+    Returns the new version at status ``publishing``; the result handler flips
+    it to ``published`` / ``failed`` when the mirror host finishes the plan.
+    Composite CVs compose their components' newest published versions (Slice 6).
+    """
+    engine = _check_clm_module()
+    cv = _get_cv_or_404(shared_db, cv_id)
+    next_version = 1 + max((v.version for v in cv.versions), default=0)
+    builder = _build_composite_publish if cv.composite else _build_regular_publish
+    host_id, store_path, commands, manifest = builder(
+        engine, cv, shared_db, tenant_db, next_version
+    )
+
+    cvv = models.SharedContentViewVersion(
+        content_view_id=cv.id,
+        version=next_version,
+        status=CVV_PUBLISHING,
+        manifest=manifest,
+    )
+    shared_db.add(cvv)
+    shared_db.flush()  # assign cvv.id before dispatch/correlation
 
     combined_plan = {
         "engine": "content_lifecycle_engine",
@@ -825,7 +942,7 @@ async def publish_content_view(
         "version": next_version,
         "commands": commands,
     }
-    cvv.store_path = store_parent
+    cvv.store_path = store_path
     _dispatch_publish_plan(combined_plan, host_id, str(cvv.id))
     shared_db.commit()
     shared_db.refresh(cvv)

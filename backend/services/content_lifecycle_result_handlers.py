@@ -42,18 +42,22 @@ from backend.persistence.partitions import shared_sessionmaker
 logger = logging.getLogger(__name__)
 
 
-def _publish_manifest(outcome: Dict[str, Any]) -> Dict[str, Any]:
+def _publish_manifest(
+    outcome: Dict[str, Any], existing: Dict[str, Any] = None
+) -> Dict[str, Any]:
     """Compact record stored on the published version's ``manifest`` column.
 
     The per-file SHA manifest is materialized on the mirror host; here we keep a
     lightweight summary (command count + terminal status) so the UI/audit can
-    show what ran without hauling the full file list back over the wire.
+    show what ran without hauling the full file list back over the wire.  Merges
+    over any manifest set at publish-request time (e.g. a composite version's
+    resolved component list, Slice 6), so that context survives.
     """
     commands = outcome.get("commands") or []
-    return {
-        "command_count": len(commands),
-        "outcome_status": outcome.get("status"),
-    }
+    data = dict(existing or {})
+    data["command_count"] = len(commands)
+    data["outcome_status"] = outcome.get("status")
+    return data
 
 
 def _tenant_session_for_host(host_id: str):
@@ -299,7 +303,7 @@ def _apply_publish_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) ->
             row.status = CVV_PUBLISHED
             row.published_at = _now_naive()
             row.publish_error = None
-            row.manifest = _publish_manifest(outcome)
+            row.manifest = _publish_manifest(outcome, row.manifest)
             session.commit()
             _finalize_publish(session, row, host_id)
         else:

@@ -51,7 +51,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def _repoint_env_symlink(cv, tenant_db: Session, env_name: str, version: int) -> None:
+def _repoint_env_symlink(
+    cv, shared_db: Session, tenant_db: Session, env_name: str, version: int
+) -> None:
     """Physically repoint an environment's serving symlink after a DB rebind.
 
     Best-effort: promote/rollback already committed, so ANY resolve/dispatch
@@ -59,7 +61,9 @@ def _repoint_env_symlink(cv, tenant_db: Session, env_name: str, version: int) ->
     not fail the response -- it is logged and reconciled on the next
     publish/promote (the serving symlink is idempotent)."""
     try:
-        host_id, mirror_root, _mirrors = _resolve_cv_serving_host(cv, tenant_db)
+        host_id, mirror_root, _mirrors = _resolve_cv_serving_host(
+            cv, shared_db, tenant_db
+        )
         dispatch_env_symlink(host_id, mirror_root, str(cv.id), env_name, version)
     except Exception:  # noqa: BLE001 - serving repoint is best-effort, never fatal
         logger.warning(
@@ -273,7 +277,7 @@ async def promote_content_view(
     )
     tenant_db.commit()
     tenant_db.refresh(binding)
-    _repoint_env_symlink(cv, tenant_db, to_env.name, cvv.version)
+    _repoint_env_symlink(cv, shared_db, tenant_db, to_env.name, cvv.version)
     return binding.to_dict()
 
 
@@ -328,7 +332,7 @@ async def rollback_environment(
     )
     tenant_db.commit()
     tenant_db.refresh(binding)
-    _repoint_env_symlink(cv, tenant_db, env.name, prev.version)
+    _repoint_env_symlink(cv, shared_db, tenant_db, env.name, prev.version)
     return binding.to_dict()
 
 
@@ -445,7 +449,7 @@ async def enable_content_serving(
     are reachable over LAN HTTP -- the URLs clients repoint at."""
     engine = _check_clm_module()
     cv = _get_cv_or_404(shared_db, cv_id)
-    host_id, mirror_root, mirrors = _resolve_cv_serving_host(cv, tenant_db)
+    host_id, mirror_root, mirrors = _resolve_cv_serving_host(cv, shared_db, tenant_db)
     fqdn = _host_fqdn(tenant_db, host_id)
     plan = engine.build_serve_content_plan(
         mirror_root, mirrors[0].package_manager, fqdn
@@ -481,7 +485,7 @@ async def repoint_host_to_environment(
             status_code=400,
             detail=_("That environment has no content for this content view"),
         )
-    serving = _resolve_cv_serving_host(cv, tenant_db)
+    serving = _resolve_cv_serving_host(cv, shared_db, tenant_db)
     host_id, mirrors = serving[0], serving[2]
     fqdn = _host_fqdn(tenant_db, host_id)
     if not fqdn:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-22 18:02-0400\n"
+"POT-Creation-Date: 2026-07-22 18:34-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1884,20 +1884,21 @@ msgstr ""
 msgid "Content view has no repositories to publish"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:766
+#: backend/api/content_lifecycle.py:791
 msgid "Mirror settings are not configured"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:703
 msgid "A referenced mirror no longer exists"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:708
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:714
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 
@@ -1906,8 +1907,22 @@ msgstr ""
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:709
+#: backend/api/content_lifecycle.py:761
 msgid "Content view has no repositories"
+msgstr ""
+
+#: backend/api/content_lifecycle.py:797
+msgid "Composite content view has no component content views"
+msgstr ""
+
+#: backend/api/content_lifecycle.py:806
+#, python-format
+msgid "Component '%s' has no published version yet"
+msgstr ""
+
+#: backend/api/content_lifecycle.py:825
+#, python-format
+msgid "Component '%s' has no repositories"
 msgstr ""
 
 #: backend/api/cve_refresh_settings.py:58
@@ -3818,49 +3833,49 @@ msgstr ""
 msgid "No audit log entries found."
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:110
+#: backend/api/content_lifecycle_promotion.py:114
 msgid "Only a published content-view version can be promoted"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:247
+#: backend/api/content_lifecycle_promotion.py:251
 msgid "Source and target environments must differ"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:252
+#: backend/api/content_lifecycle_promotion.py:256
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:259
+#: backend/api/content_lifecycle_promotion.py:263
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:301
+#: backend/api/content_lifecycle_promotion.py:305
 msgid "This environment has no previous version to roll back to"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:312
+#: backend/api/content_lifecycle_promotion.py:316
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:408
+#: backend/api/content_lifecycle_promotion.py:412
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:418
+#: backend/api/content_lifecycle_promotion.py:422
 #, python-format
 msgid "Cannot repoint mirror '%s': %s"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:482
+#: backend/api/content_lifecycle_promotion.py:486
 msgid "That environment has no content for this content view"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:489
+#: backend/api/content_lifecycle_promotion.py:493
 msgid "The serving host has no resolvable address"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:495
+#: backend/api/content_lifecycle_promotion.py:499
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 

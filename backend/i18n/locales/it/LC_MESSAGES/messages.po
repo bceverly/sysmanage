@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 18:02-0400\n"
+"POT-Creation-Date: 2026-07-22 18:34-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2003,20 +2003,21 @@ msgstr "Le viste composite di contenuti non possono essere pubblicate ancora"
 msgid "Content view has no repositories to publish"
 msgstr "La vista di contenuto non ha repository da pubblicare"
 
-#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:766
+#: backend/api/content_lifecycle.py:791
 msgid "Mirror settings are not configured"
 msgstr "Le impostazioni del mirror non sono configurate"
 
-#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:703
 msgid "A referenced mirror no longer exists"
 msgstr "Un mirror riferito non esiste più"
 
-#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:708
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Il mirror '%s' non ha un host assegnato"
 
-#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:714
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 "Tutti i mirror in una vista di contenuto devono condividere un host in "
@@ -2028,9 +2029,24 @@ msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""
 "Il mirror '%s' non ha ancora uno snapshot; creane uno prima di pubblicare"
 
-#: backend/api/content_lifecycle.py:709
+#: backend/api/content_lifecycle.py:761
 msgid "Content view has no repositories"
 msgstr "La vista del contenuto non ha repository"
+
+#: backend/api/content_lifecycle.py:797
+msgid "Composite content view has no component content views"
+msgstr ""
+"La vista di contenuto composta non ha viste di contenuto dei componenti"
+
+#: backend/api/content_lifecycle.py:806
+#, python-format
+msgid "Component '%s' has no published version yet"
+msgstr "Il componente '%s' non ha ancora una versione pubblicata"
+
+#: backend/api/content_lifecycle.py:825
+#, python-format
+msgid "Component '%s' has no repositories"
+msgstr "Il componente '%s' non ha repository"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -4098,55 +4114,55 @@ msgstr "Totale voci"
 msgid "No audit log entries found."
 msgstr "Nessuna voce nel registro di audit trovata."
 
-#: backend/api/content_lifecycle_promotion.py:110
+#: backend/api/content_lifecycle_promotion.py:114
 msgid "Only a published content-view version can be promoted"
 msgstr ""
 "Solo una versione della visualizzazione dei contenuti pubblicata può essere "
 "promossa"
 
-#: backend/api/content_lifecycle_promotion.py:247
+#: backend/api/content_lifecycle_promotion.py:251
 msgid "Source and target environments must differ"
 msgstr "L'ambiente sorgente e l'ambiente destinazione devono differire"
 
-#: backend/api/content_lifecycle_promotion.py:252
+#: backend/api/content_lifecycle_promotion.py:256
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr ""
 "Il contenuto può essere promosso solo lungo il percorso del ciclo di vita"
 
-#: backend/api/content_lifecycle_promotion.py:259
+#: backend/api/content_lifecycle_promotion.py:263
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 "L'ambiente sorgente non ha contenuto per questa visualizzazione dei "
 "contenuti da promuovere"
 
-#: backend/api/content_lifecycle_promotion.py:301
+#: backend/api/content_lifecycle_promotion.py:305
 msgid "This environment has no previous version to roll back to"
 msgstr "Questo ambiente non ha una versione precedente a cui tornare indietro"
 
-#: backend/api/content_lifecycle_promotion.py:312
+#: backend/api/content_lifecycle_promotion.py:316
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 "La versione precedente è stata reclamata e non può più essere ripristinata"
 
-#: backend/api/content_lifecycle_promotion.py:408
+#: backend/api/content_lifecycle_promotion.py:412
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "Lo specchio '%s' ha un gestore di pacchetti non supportato"
 
-#: backend/api/content_lifecycle_promotion.py:418
+#: backend/api/content_lifecycle_promotion.py:422
 #, python-format
 msgid "Cannot repoint mirror '%s': %s"
 msgstr "Impossibile riorientare lo specchio '%s': %s"
 
-#: backend/api/content_lifecycle_promotion.py:482
+#: backend/api/content_lifecycle_promotion.py:486
 msgid "That environment has no content for this content view"
 msgstr "Quell'ambiente non contiene contenuti per questa vista del contenuto"
 
-#: backend/api/content_lifecycle_promotion.py:489
+#: backend/api/content_lifecycle_promotion.py:493
 msgid "The serving host has no resolvable address"
 msgstr "Il server host di servizio non ha indirizzi risolvibili"
 
-#: backend/api/content_lifecycle_promotion.py:495
+#: backend/api/content_lifecycle_promotion.py:499
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 "È richiesta la sincronizzazione del repository per riorientare il server "

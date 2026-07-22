@@ -256,11 +256,14 @@ class TestPublish:
         cv_id = _make_cv(env, "Empty", [])
         assert env.client.post(f"{_CV}/{cv_id}/publish").status_code == 400
 
-    def test_composite_rejected(self, env):
+    def test_composite_without_components_rejected(self, env):
+        # Composite publish is implemented (Slice 6), but one with no component
+        # content views has nothing to compose.
+        _seed_mirror(env, host_id=str(uuid.uuid4()))  # seeds MirrorSettings
         cv_id = _make_cv(env, "Comp", [], composite=True)
         r = env.client.post(f"{_CV}/{cv_id}/publish")
         assert r.status_code == 400
-        assert "omposite" in r.json()["detail"]
+        assert "component" in r.json()["detail"].lower()
 
     def test_versions_listed_newest_first(self, env):
         host = str(uuid.uuid4())
