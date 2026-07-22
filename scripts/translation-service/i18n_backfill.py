@@ -159,6 +159,44 @@ def _accept(source: str, translated: str) -> bool:
     return not (_HAS_LETTER.search(source) and _PLACEHOLDER_RE.search(source))
 
 
+# Extra passes to re-translate strings that come back as the English fallback.
+# The GPU service is non-deterministic, so a transient miss (a placeholder the
+# model didn't handle on the first try) usually resolves on a re-request — retry
+# in-process so a single miss doesn't fail the whole `make translate` run.
+_GAP_RETRIES = 2
+
+
+def _translate_uniq(
+    service: str, uniq: List[str], lang: str, client_batch: int
+) -> Dict[str, str]:
+    """Translate unique source strings into ``lang``, retrying only the ones that
+    come back as the (un-accepted) English fallback, up to ``_GAP_RETRIES`` extra
+    passes.  Returns ``{source: translation}`` for the strings that resolved;
+    sources still unresolved after all passes are omitted (the caller counts them
+    as remaining gaps)."""
+    pending = list(uniq)
+    resolved: Dict[str, str] = {}
+    for attempt in range(_GAP_RETRIES + 1):
+        if not pending:
+            break
+        got = dict(zip(pending, translate_to(service, pending, lang, client_batch)))
+        still: List[str] = []
+        for src in pending:
+            cand = got.get(src, src)
+            if _accept(src, cand):
+                resolved[src] = cand
+            else:
+                still.append(src)
+        if still and attempt < _GAP_RETRIES:
+            print(
+                f"      retry {attempt + 1}/{_GAP_RETRIES}: "
+                f"{len(still)} transient miss(es)",
+                flush=True,
+            )
+        pending = still
+    return resolved
+
+
 # ---------------------------------------------------------------------------
 # JSON driver  (nested dict, dotted keys, [TODO] placeholders)
 # ---------------------------------------------------------------------------
@@ -214,9 +252,9 @@ def run_json(base: Path, template: str, langs: List[str], service: Optional[str]
         if not gaps or service is None:
             continue
 
-        # Dedup identical English strings; translate once each.
+        # Dedup identical English strings; translate once each (with retry).
         uniq = sorted({src for _, src in gaps})
-        translations = dict(zip(uniq, translate_to(service, uniq, lang, client_batch)))
+        translations = _translate_uniq(service, uniq, lang, client_batch)
 
         wrote = skipped = 0
         for key, en_src in gaps:
@@ -261,7 +299,7 @@ def run_po(base: Path, template: str, langs: List[str], service: Optional[str],
             continue
 
         uniq = sorted({e.msgid for e in gap_entries})
-        translations = dict(zip(uniq, translate_to(service, uniq, lang, client_batch)))
+        translations = _translate_uniq(service, uniq, lang, client_batch)
 
         wrote = skipped = 0
         for e in gap_entries:
@@ -317,23 +355,23 @@ def enforce_no_gaps(project: str, base: Path, template: str, langs: List[str], f
         print(f"[OK] {project}: all {len(langs)} locale(s) fully translated — 0 gaps.", flush=True)
         return
     total = sum(len(ks) for ks in offenders.values())
-    bar = "=" * 72
+    sep = "=" * 72
     lines = [
-        "", bar,
+        "", sep,
         f"  ✗✗✗  TRANSLATION INCOMPLETE — {project}: {total} untranslated string(s) "
         f"in {len(offenders)} locale(s)  ✗✗✗",
-        bar,
+        sep,
     ]
     for lang in sorted(offenders):
         ks = offenders[lang]
         sample = ", ".join(ks[:4]) + (" …" if len(ks) > 4 else "")
         lines.append(f"    {lang}: {len(ks):>5} gap(s)   {sample}")
     lines += [
-        bar,
+        sep,
         "  These locales are NOT fully translated.  Fill them with:",
         "      make translate SERVICE=http://<gpu-box>:8765",
         "  or translate the remaining keys by hand.  Locales must be 100%.",
-        bar, "",
+        sep, "",
     ]
     print("\n".join(lines), file=sys.stderr, flush=True)
     sys.exit(1)

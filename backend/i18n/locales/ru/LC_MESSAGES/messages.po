@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 09:53-0400\n"
+"POT-Creation-Date: 2026-07-21 10:43-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1891,7 +1891,7 @@ msgstr "Успешно добавлено отключение OpenTelemetry Gra
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "Не удалось отключить OpenTelemetry от Grafana: %s"
 
-#: backend/api/content_lifecycle.py:51
+#: backend/api/content_lifecycle.py:62
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1900,84 +1900,104 @@ msgstr ""
 "Professional+ (Enterprise). Пожалуйста, обновите лицензию для доступа к этой"
 " функции."
 
-#: backend/api/content_lifecycle.py:108
+#: backend/api/content_lifecycle.py:119
 msgid "Environment name is required"
 msgstr "Требуется имя среды"
 
-#: backend/api/content_lifecycle.py:110
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is too long"
 msgstr "Имя среды слишком длинное"
 
-#: backend/api/content_lifecycle.py:121
+#: backend/api/content_lifecycle.py:132
 msgid "Environment not found"
 msgstr "Среда не найдена"
 
-#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
+#: backend/api/content_lifecycle.py:147 backend/api/content_lifecycle.py:182
 msgid "An environment with that name already exists"
 msgstr "Среда с таким именем уже существует"
 
-#: backend/api/content_lifecycle.py:190
+#: backend/api/content_lifecycle.py:201
 msgid "The Library environment cannot be deleted"
 msgstr "Среду Library нельзя удалить"
 
-#: backend/api/content_lifecycle.py:212
+#: backend/api/content_lifecycle.py:223
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids должна содержать каждую среду ровно один раз"
 
-#: backend/api/content_lifecycle.py:216
+#: backend/api/content_lifecycle.py:227
 msgid "The Library environment must remain first"
 msgstr "Среда Library должна оставаться первой"
 
-#: backend/api/content_lifecycle.py:269
+#: backend/api/content_lifecycle.py:287
 msgid "Content view name is required"
 msgstr "Имя представления содержимого обязательно"
 
-#: backend/api/content_lifecycle.py:271
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is too long"
 msgstr "Имя представления содержимого слишком длинное"
 
-#: backend/api/content_lifecycle.py:289
+#: backend/api/content_lifecycle.py:307
 msgid "Content view not found"
 msgstr "Представление содержимого не найдено"
 
-#: backend/api/content_lifecycle.py:300
+#: backend/api/content_lifecycle.py:318
 msgid "Each content-view member needs a mirror or component CV"
 msgstr ""
 "Каждый элемент представления содержимого должен иметь зеркало или компонент "
 "CV"
 
-#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+#: backend/api/content_lifecycle.py:363
+#, python-format
+msgid "Unknown filter type: %s"
+msgstr "Неизвестный тип фильтра: %s"
+
+#: backend/api/content_lifecycle.py:369
+#, python-format
+msgid "The '%s' filter requires the Advisory engine, which is not loaded"
+msgstr "Фильтру '%s' необходим движок Advisory, который не загружен"
+
+#: backend/api/content_lifecycle.py:379
+#, python-format
+msgid "The '%s' filter needs a non-empty 'packages' list"
+msgstr "Фильтру '%s' требуется непустой список пакетов 'packages'"
+
+#: backend/api/content_lifecycle.py:389
+#, python-format
+msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
+msgstr "Фильтр '%s' требует указание даты ('date', формат YYYY-MM-DD)"
+
+#: backend/api/content_lifecycle.py:451 backend/api/content_lifecycle.py:499
 msgid "A content view with that name already exists"
 msgstr "Содержимое с таким именем уже существует"
 
-#: backend/api/content_lifecycle.py:465
+#: backend/api/content_lifecycle.py:636
 msgid "Composite content views cannot be published yet"
 msgstr "Композитные представления содержимого еще нельзя публиковать"
 
-#: backend/api/content_lifecycle.py:470
+#: backend/api/content_lifecycle.py:641
 msgid "Content view has no repositories to publish"
 msgstr "Представление содержимого не содержит репозиториев для публикации"
 
-#: backend/api/content_lifecycle.py:475
+#: backend/api/content_lifecycle.py:646
 msgid "Mirror settings are not configured"
 msgstr "Настройки зеркала не настроены"
 
-#: backend/api/content_lifecycle.py:488
+#: backend/api/content_lifecycle.py:659
 msgid "A referenced mirror no longer exists"
 msgstr "Указанный зеркало больше не существует"
 
-#: backend/api/content_lifecycle.py:493
+#: backend/api/content_lifecycle.py:664
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Зеркало '%s' не имеет назначенного хоста"
 
-#: backend/api/content_lifecycle.py:501
+#: backend/api/content_lifecycle.py:672
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 "Все зеркала в представлении содержимого должны использовать одну хост-машину"
 " в этой версии"
 
-#: backend/api/content_lifecycle.py:514
+#: backend/api/content_lifecycle.py:685
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "У зеркала '%s' еще нет снимка; сделайте снимок перед публикацией"

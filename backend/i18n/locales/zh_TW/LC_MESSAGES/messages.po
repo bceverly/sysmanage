@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 09:53-0400\n"
+"POT-Creation-Date: 2026-07-21 10:43-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1807,86 +1807,110 @@ msgstr "OpenTelemetry Grafana斷開連接成功排隊"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "將 OpenTelemetry 從 Grafana 斷開時失敗：%s"
 
-#: backend/api/content_lifecycle.py:51
+#: backend/api/content_lifecycle.py:62
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
 msgstr "內容生命周期管理需要SysManage Professional+（Enterprise）許可證。請升級以訪問此功能。"
 
-#: backend/api/content_lifecycle.py:108
+#: backend/api/content_lifecycle.py:119
 msgid "Environment name is required"
 msgstr "環境名稱為必填欄位"
 
-#: backend/api/content_lifecycle.py:110
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is too long"
 msgstr "環境名稱太長"
 
-#: backend/api/content_lifecycle.py:121
+#: backend/api/content_lifecycle.py:132
 msgid "Environment not found"
 msgstr "未找到環境"
 
-#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
+#: backend/api/content_lifecycle.py:147 backend/api/content_lifecycle.py:182
 msgid "An environment with that name already exists"
 msgstr "已有同名的環境存在"
 
-#: backend/api/content_lifecycle.py:190
+#: backend/api/content_lifecycle.py:201
 msgid "The Library environment cannot be deleted"
 msgstr "Library 環境不能被刪除"
 
-#: backend/api/content_lifecycle.py:212
+#: backend/api/content_lifecycle.py:223
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids 必須恰好列出每個環境一次"
 
-#: backend/api/content_lifecycle.py:216
+#: backend/api/content_lifecycle.py:227
 msgid "The Library environment must remain first"
 msgstr "Library 環境必須保持在第一個位置"
 
-#: backend/api/content_lifecycle.py:269
+#: backend/api/content_lifecycle.py:287
 msgid "Content view name is required"
 msgstr "需要指定內容視圖名稱"
 
-#: backend/api/content_lifecycle.py:271
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is too long"
 msgstr "內容視圖名稱太長"
 
-#: backend/api/content_lifecycle.py:289
+#: backend/api/content_lifecycle.py:307
 msgid "Content view not found"
 msgstr "未找到內容視圖"
 
-#: backend/api/content_lifecycle.py:300
+#: backend/api/content_lifecycle.py:318
 msgid "Each content-view member needs a mirror or component CV"
 msgstr "每個內容視圖成員都需要一個鏡像或組件CV"
 
-#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+#: backend/api/content_lifecycle.py:363
+#, python-format
+msgid "Unknown filter type: %s"
+msgstr "未知的過濾類型：%s"
+
+#: backend/api/content_lifecycle.py:369
+#, python-format
+msgid "The '%s' filter requires the Advisory engine, which is not loaded"
+msgstr ""
+"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 Advisory \\u人民服务, \\u4e14 "
+"\\u5b83 \\u6ca1\\u6709 \\u88c5\\u4e0a"
+
+#: backend/api/content_lifecycle.py:379
+#, python-format
+msgid "The '%s' filter needs a non-empty 'packages' list"
+msgstr ""
+"\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u975e\\u7a7a"
+" \\u2018packages\\u2019 \\u5217\\u8868"
+
+#: backend/api/content_lifecycle.py:389
+#, python-format
+msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
+msgstr "\\u2018%s\\u2019 \\u63d0\\u5240 \\u9700\\u8981 \\u4e00\\u4e2a \\u65e5\\u671f (YYYY-MM-DD)"
+
+#: backend/api/content_lifecycle.py:451 backend/api/content_lifecycle.py:499
 msgid "A content view with that name already exists"
 msgstr "一個名稱相同的內容視圖已經存在"
 
-#: backend/api/content_lifecycle.py:465
+#: backend/api/content_lifecycle.py:636
 msgid "Composite content views cannot be published yet"
 msgstr "組合內容視圖尚不能發佈"
 
-#: backend/api/content_lifecycle.py:470
+#: backend/api/content_lifecycle.py:641
 msgid "Content view has no repositories to publish"
 msgstr "內容視圖沒有可發佈的倉庫"
 
-#: backend/api/content_lifecycle.py:475
+#: backend/api/content_lifecycle.py:646
 msgid "Mirror settings are not configured"
 msgstr "鏡像設置尚未配置"
 
-#: backend/api/content_lifecycle.py:488
+#: backend/api/content_lifecycle.py:659
 msgid "A referenced mirror no longer exists"
 msgstr "引用的鏡像已不再存在"
 
-#: backend/api/content_lifecycle.py:493
+#: backend/api/content_lifecycle.py:664
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "鏡像 '%s' 沒有分配主機"
 
-#: backend/api/content_lifecycle.py:501
+#: backend/api/content_lifecycle.py:672
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "在此版本中，內容視圖中的所有鏡像必須共享同一主機"
 
-#: backend/api/content_lifecycle.py:514
+#: backend/api/content_lifecycle.py:685
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "鏡像 '%s' 尚未創建快照；請在發佈之前先創建快照"

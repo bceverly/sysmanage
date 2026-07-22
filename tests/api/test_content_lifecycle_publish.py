@@ -14,6 +14,7 @@ covers the result handler that stamps a version published / failed.
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 import uuid
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -36,11 +37,16 @@ _CV = "/api/v1/content-lifecycle/content-views"
 
 
 class _FakeEngine:
-    """Stands in for content_lifecycle_engine: returns a materialize plan."""
+    """Stands in for content_lifecycle_engine: returns a materialize plan and
+    records the ``filters`` it was handed (into a shared capture dict)."""
+
+    def __init__(self, capture):
+        self._capture = capture
 
     def build_publish_materialize_plan(
-        self, mirror_config, mirror_root, snapshot_id, cv_id, version
+        self, mirror_config, mirror_root, snapshot_id, cv_id, version, filters=None
     ):
+        self._capture["filters"] = filters
         name = mirror_config["name"]
         store = f"{mirror_root}/.content-views/{cv_id}/v{version}/{name}"
         return {
@@ -68,6 +74,8 @@ def env():
             models.SharedContentViewRepo.__table__,
             models.SharedContentViewFilter.__table__,
             models.SharedContentViewVersion.__table__,
+            models.SharedAdvisory.__table__,
+            models.SharedAdvisoryPackage.__table__,
         ],
     )
     Base.metadata.create_all(
@@ -113,9 +121,11 @@ def env():
     def _fake_register(message_id, action, host_id, cv_version_id=""):
         dispatched.update(msg_id=message_id, action=action, cvv_id=cv_version_id)
 
+    fake_engine = _FakeEngine(dispatched)
+
     try:
         with patch.object(
-            content_lifecycle.module_loader, "get_module", return_value=_FakeEngine()
+            content_lifecycle.module_loader, "get_module", return_value=fake_engine
         ), patch.object(JWTBearer, "__call__", _bypass_auth), patch(
             "backend.services.proplus_dispatch.enqueue_apply_plan", _fake_enqueue
         ), patch(
@@ -152,13 +162,44 @@ def _seed_mirror(env, *, host_id, name="rhel9", pm="dnf", snapshot="20260101T000
         db.close()
 
 
-def _make_cv(env, name, mirror_ids, composite=False):
+def _make_cv(env, name, mirror_ids, composite=False, filters=None):
     repos = [{"mirror_id": m} for m in mirror_ids]
-    r = env.client.post(
-        _CV, json={"name": name, "composite": composite, "repos": repos}
-    )
+    body = {"name": name, "composite": composite, "repos": repos}
+    if filters is not None:
+        body["filters"] = filters
+    r = env.client.post(_CV, json=body)
     assert r.status_code == 200, r.text
     return r.json()["id"]
+
+
+def _seed_advisory(
+    env,
+    *,
+    package_name,
+    package_manager="dnf",
+    advisory_type="security",
+    published="2026-06-01",
+):
+    db = env.shared_s()
+    try:
+        adv = models.SharedAdvisory(
+            advisory_id=f"ADV-{package_name}-{advisory_type}",
+            source="test",
+            advisory_type=advisory_type,
+            published_date=datetime.strptime(published, "%Y-%m-%d"),
+        )
+        db.add(adv)
+        db.flush()
+        db.add(
+            models.SharedAdvisoryPackage(
+                advisory_row_id=adv.id,
+                package_name=package_name,
+                package_manager=package_manager,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
 
 
 class TestPublish:
@@ -286,3 +327,65 @@ class TestResultHandler:
                 "host-1",
                 {"status": "succeeded"},
             )
+
+
+class TestPublishFilters:
+    def test_passes_allow_deny_bydate_primitives(self, env):
+        mirror = _seed_mirror(env, host_id=str(uuid.uuid4()))
+        cv_id = _make_cv(
+            env,
+            "Filtered",
+            [mirror],
+            filters=[
+                {
+                    "filter_type": "allow",
+                    "rule_json": {"packages": ["bash", "coreutils"]},
+                },
+                {"filter_type": "deny", "rule_json": {"packages": ["telnet"]}},
+                {"filter_type": "by_date", "rule_json": {"date": "2026-01-01"}},
+            ],
+        )
+        assert env.client.post(f"{_CV}/{cv_id}/publish").status_code == 200
+        prims = env.dispatched["filters"]
+        assert [p["type"] for p in prims] == ["allow", "deny", "by_date"]
+        assert prims[0]["packages"] == ["bash", "coreutils"]
+        assert prims[2]["date"] == "2026-01-01"
+
+    def test_security_only_resolves_to_allow(self, env):
+        mirror = _seed_mirror(env, host_id=str(uuid.uuid4()), pm="dnf")
+        _seed_advisory(env, package_name="openssl")
+        _seed_advisory(env, package_name="kernel")
+        _seed_advisory(env, package_name="nano", advisory_type="bugfix")  # not security
+        cv_id = _make_cv(
+            env, "SecOnly", [mirror], filters=[{"filter_type": "security_only"}]
+        )
+        env.client.post(f"{_CV}/{cv_id}/publish")
+        prims = env.dispatched["filters"]
+        assert len(prims) == 1 and prims[0]["type"] == "allow"
+        assert prims[0]["packages"] == ["kernel", "openssl"]  # security only, sorted
+
+    def test_security_only_empty_is_skipped(self, env):
+        mirror = _seed_mirror(env, host_id=str(uuid.uuid4()), pm="dnf")
+        cv_id = _make_cv(
+            env, "SecEmpty", [mirror], filters=[{"filter_type": "security_only"}]
+        )
+        env.client.post(f"{_CV}/{cv_id}/publish")
+        # No security advisories -> skip, never emit an empty allow-list.
+        assert env.dispatched["filters"] == []
+
+    def test_advisory_cutoff_denies_newer(self, env):
+        mirror = _seed_mirror(env, host_id=str(uuid.uuid4()), pm="dnf")
+        _seed_advisory(env, package_name="newpkg", published="2026-09-01")  # after
+        _seed_advisory(env, package_name="oldpkg", published="2026-01-01")  # before
+        cv_id = _make_cv(
+            env,
+            "Cutoff",
+            [mirror],
+            filters=[
+                {"filter_type": "advisory_cutoff", "rule_json": {"date": "2026-06-01"}}
+            ],
+        )
+        env.client.post(f"{_CV}/{cv_id}/publish")
+        prims = env.dispatched["filters"]
+        assert len(prims) == 1 and prims[0]["type"] == "deny"
+        assert prims[0]["packages"] == ["newpkg"]

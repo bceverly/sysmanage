@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 09:53-0400\n"
+"POT-Creation-Date: 2026-07-21 10:43-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1916,7 +1916,7 @@ msgstr "Disconnessione OpenTelemetry Grafana inserita nella coda con successo"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "Impossibile disconnettere OpenTelemetry da Grafana: %s"
 
-#: backend/api/content_lifecycle.py:51
+#: backend/api/content_lifecycle.py:62
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1925,84 +1925,104 @@ msgstr ""
 "Professional+ (Enterprise). Per accedere a questa funzionalità, effettua "
 "l'aggiornamento."
 
-#: backend/api/content_lifecycle.py:108
+#: backend/api/content_lifecycle.py:119
 msgid "Environment name is required"
 msgstr "Il nome dell'ambiente è richiesto"
 
-#: backend/api/content_lifecycle.py:110
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is too long"
 msgstr "Il nome dell'ambiente è troppo lungo"
 
-#: backend/api/content_lifecycle.py:121
+#: backend/api/content_lifecycle.py:132
 msgid "Environment not found"
 msgstr "Ambiente non trovato"
 
-#: backend/api/content_lifecycle.py:136 backend/api/content_lifecycle.py:171
+#: backend/api/content_lifecycle.py:147 backend/api/content_lifecycle.py:182
 msgid "An environment with that name already exists"
 msgstr "Un ambiente con quel nome esiste già"
 
-#: backend/api/content_lifecycle.py:190
+#: backend/api/content_lifecycle.py:201
 msgid "The Library environment cannot be deleted"
 msgstr "L'ambiente Library non può essere eliminato"
 
-#: backend/api/content_lifecycle.py:212
+#: backend/api/content_lifecycle.py:223
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids deve elencare ogni ambiente esattamente una volta"
 
-#: backend/api/content_lifecycle.py:216
+#: backend/api/content_lifecycle.py:227
 msgid "The Library environment must remain first"
 msgstr "L'ambiente Library deve rimanere il primo"
 
-#: backend/api/content_lifecycle.py:269
+#: backend/api/content_lifecycle.py:287
 msgid "Content view name is required"
 msgstr "Il nome della vista di contenuto è richiesto"
 
-#: backend/api/content_lifecycle.py:271
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is too long"
 msgstr "Il nome della vista di contenuto è troppo lungo"
 
-#: backend/api/content_lifecycle.py:289
+#: backend/api/content_lifecycle.py:307
 msgid "Content view not found"
 msgstr "Vista di contenuto non trovata"
 
-#: backend/api/content_lifecycle.py:300
+#: backend/api/content_lifecycle.py:318
 msgid "Each content-view member needs a mirror or component CV"
 msgstr ""
 "Ogni membro della vista di contenuto deve avere un mirror o una componente "
 "CV"
 
-#: backend/api/content_lifecycle.py:364 backend/api/content_lifecycle.py:410
+#: backend/api/content_lifecycle.py:363
+#, python-format
+msgid "Unknown filter type: %s"
+msgstr "Tipo di filtro sconosciuto: %s"
+
+#: backend/api/content_lifecycle.py:369
+#, python-format
+msgid "The '%s' filter requires the Advisory engine, which is not loaded"
+msgstr "Il filtro '%s' richiede il motore Advisory, che non è caricato"
+
+#: backend/api/content_lifecycle.py:379
+#, python-format
+msgid "The '%s' filter needs a non-empty 'packages' list"
+msgstr "Il filtro '%s' richiede una lista non vuota di 'packages'"
+
+#: backend/api/content_lifecycle.py:389
+#, python-format
+msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
+msgstr "Il filtro '%s' necessita di una data ('date', formato YYYY-MM-DD)"
+
+#: backend/api/content_lifecycle.py:451 backend/api/content_lifecycle.py:499
 msgid "A content view with that name already exists"
 msgstr "Una vista di contenuto con questo nome esiste già"
 
-#: backend/api/content_lifecycle.py:465
+#: backend/api/content_lifecycle.py:636
 msgid "Composite content views cannot be published yet"
 msgstr "Le viste composite di contenuti non possono essere pubblicate ancora"
 
-#: backend/api/content_lifecycle.py:470
+#: backend/api/content_lifecycle.py:641
 msgid "Content view has no repositories to publish"
 msgstr "La vista di contenuto non ha repository da pubblicare"
 
-#: backend/api/content_lifecycle.py:475
+#: backend/api/content_lifecycle.py:646
 msgid "Mirror settings are not configured"
 msgstr "Le impostazioni del mirror non sono configurate"
 
-#: backend/api/content_lifecycle.py:488
+#: backend/api/content_lifecycle.py:659
 msgid "A referenced mirror no longer exists"
 msgstr "Un mirror riferito non esiste più"
 
-#: backend/api/content_lifecycle.py:493
+#: backend/api/content_lifecycle.py:664
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Il mirror '%s' non ha un host assegnato"
 
-#: backend/api/content_lifecycle.py:501
+#: backend/api/content_lifecycle.py:672
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 "Tutti i mirror in una vista di contenuto devono condividere un host in "
 "questa versione"
 
-#: backend/api/content_lifecycle.py:514
+#: backend/api/content_lifecycle.py:685
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""

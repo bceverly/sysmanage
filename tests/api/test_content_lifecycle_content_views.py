@@ -161,5 +161,106 @@ class TestContentViewCrud:
         rows = client.get(_CV).json()
         assert rows[0]["name"] == "Alpha"
         assert rows[0]["repo_count"] == 1
+        assert rows[0]["filter_count"] == 0
         assert rows[0]["version_count"] == 0
         assert rows[0]["latest_published_version"] is None
+
+
+class TestContentViewFilters:
+    def test_create_with_allow_deny_filters(self, client):
+        r = _create(
+            client,
+            "Filtered",
+            filters=[
+                {"filter_type": "allow", "rule_json": {"packages": ["bash"]}},
+                {"filter_type": "deny", "rule_json": {"packages": ["telnet", "ftp"]}},
+            ],
+        )
+        assert r.status_code == 200, r.text
+        filters = r.json()["filters"]
+        assert {f["filter_type"] for f in filters} == {"allow", "deny"}
+
+    def test_by_date_filter(self, client):
+        r = _create(
+            client,
+            "Dated",
+            filters=[{"filter_type": "by_date", "rule_json": {"date": "2026-01-01"}}],
+        )
+        assert r.status_code == 200
+        assert r.json()["filters"][0]["rule_json"]["date"] == "2026-01-01"
+
+    def test_allow_needs_nonempty_packages(self, client):
+        r = _create(
+            client,
+            "Bad",
+            filters=[{"filter_type": "allow", "rule_json": {"packages": []}}],
+        )
+        assert r.status_code == 400
+
+    def test_unknown_filter_type_rejected(self, client):
+        r = _create(client, "Bad2", filters=[{"filter_type": "bogus"}])
+        assert r.status_code == 400
+
+    def test_bad_date_rejected(self, client):
+        r = _create(
+            client,
+            "Bad3",
+            filters=[{"filter_type": "by_date", "rule_json": {"date": "nope"}}],
+        )
+        assert r.status_code == 400
+
+    def test_update_replaces_filters(self, client):
+        cv_id = _create(
+            client,
+            "Repl",
+            filters=[{"filter_type": "deny", "rule_json": {"packages": ["x"]}}],
+        ).json()["id"]
+        r = client.put(
+            f"{_CV}/{cv_id}",
+            json={
+                "filters": [{"filter_type": "allow", "rule_json": {"packages": ["y"]}}]
+            },
+        )
+        assert r.status_code == 200
+        filters = r.json()["filters"]
+        assert len(filters) == 1 and filters[0]["filter_type"] == "allow"
+
+    def test_summary_filter_count(self, client):
+        _create(
+            client,
+            "Counted",
+            filters=[
+                {"filter_type": "deny", "rule_json": {"packages": ["a"]}},
+                {"filter_type": "by_date", "rule_json": {"date": "2026-02-02"}},
+            ],
+        )
+        rows = client.get(_CV).json()
+        assert rows[0]["filter_count"] == 2
+
+    def test_advisory_filters_gated_on_advisory_engine(self, client):
+        # Advisory engine absent -> security_only / advisory_cutoff are rejected.
+        with patch.object(
+            content_lifecycle.module_loader,
+            "get_module",
+            side_effect=lambda n: None if n == "advisory_engine" else object(),
+        ):
+            sec = _create(client, "Sec", filters=[{"filter_type": "security_only"}])
+            assert sec.status_code == 400
+            assert "Advisory engine" in sec.json()["detail"]
+            cut = _create(
+                client,
+                "Cut",
+                filters=[
+                    {
+                        "filter_type": "advisory_cutoff",
+                        "rule_json": {"date": "2026-01-01"},
+                    }
+                ],
+            )
+            assert cut.status_code == 400
+
+    def test_advisory_filter_allowed_when_engine_present(self, client):
+        # The default fixture stubs every module present -> advisory filters ok.
+        r = _create(client, "SecOk", filters=[{"filter_type": "security_only"}])
+        assert r.status_code == 200
+        assert r.json()["filters"][0]["filter_type"] == "security_only"

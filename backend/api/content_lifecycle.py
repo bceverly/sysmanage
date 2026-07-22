@@ -19,6 +19,7 @@ in later slices.
 
 import logging
 import os
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -29,13 +30,23 @@ from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
+from backend.persistence.models.advisory import ADVISORY_TYPE_SECURITY
 from backend.persistence.models.content_lifecycle import (
     CVV_PUBLISHED,
     CVV_PUBLISHING,
     DEFAULT_KEEP_VERSIONS,
+    FILTER_ADVISORY_CUTOFF,
+    FILTER_ALLOW,
+    FILTER_BY_DATE,
+    FILTER_DENY,
+    FILTER_SECURITY_ONLY,
+    FILTER_TYPES,
     MAX_KEEP_VERSIONS,
 )
 from backend.persistence.partitions import get_shared_db, get_tenant_db
+
+# Filter types whose resolution needs the advisory catalog (advisory_engine).
+_ADVISORY_FILTER_TYPES = (FILTER_ADVISORY_CUTOFF, FILTER_SECURITY_ONLY)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -248,12 +259,18 @@ class ContentViewRepoIn(BaseModel):
     position: int = 0
 
 
+class ContentViewFilterIn(BaseModel):
+    filter_type: str  # one of FILTER_TYPES
+    rule_json: Optional[dict] = None  # {"packages": [...]} / {"date": "..."} / {}
+
+
 class ContentViewCreate(BaseModel):
     name: str
     description: Optional[str] = None
     composite: bool = False
     keep_versions: int = DEFAULT_KEEP_VERSIONS
     repos: List[ContentViewRepoIn] = []
+    filters: List[ContentViewFilterIn] = []
 
 
 class ContentViewUpdate(BaseModel):
@@ -261,6 +278,7 @@ class ContentViewUpdate(BaseModel):
     description: Optional[str] = None
     keep_versions: Optional[int] = None
     repos: Optional[List[ContentViewRepoIn]] = None
+    filters: Optional[List[ContentViewFilterIn]] = None
 
 
 def _norm_cv_name(name: Optional[str]) -> str:
@@ -326,21 +344,90 @@ def _cv_repos_list(cv) -> list:
     ]
 
 
+# --- Filters (Slice 3) -------------------------------------------------------
+# A CV filter (SharedContentViewFilter) narrows the published content. allow/deny
+# carry {"packages": [...]}; advisory_cutoff/by_date carry {"date": "YYYY-MM-DD"};
+# security_only carries no rule. advisory_cutoff/security_only need the advisory
+# catalog, so creating them requires advisory_engine loaded (design doc §7 #3).
+
+
+def _advisory_engine_loaded() -> bool:
+    return module_loader.get_module("advisory_engine") is not None
+
+
+def _validated_filter(f: ContentViewFilterIn) -> tuple:
+    """Validate one filter; return (filter_type, rule_json) or raise 400."""
+    ftype = (f.filter_type or "").strip()
+    if ftype not in FILTER_TYPES:
+        raise HTTPException(
+            status_code=400, detail=_("Unknown filter type: %s") % ftype
+        )
+    if ftype in _ADVISORY_FILTER_TYPES and not _advisory_engine_loaded():
+        raise HTTPException(
+            status_code=400,
+            detail=_(
+                "The '%s' filter requires the Advisory engine, which is not loaded"
+            )
+            % ftype,
+        )
+    rule = f.rule_json or {}
+    if ftype in (FILTER_ALLOW, FILTER_DENY):
+        pkgs = rule.get("packages")
+        if not isinstance(pkgs, list) or not pkgs:
+            raise HTTPException(
+                status_code=400,
+                detail=_("The '%s' filter needs a non-empty 'packages' list") % ftype,
+            )
+        rule = {"packages": [str(p).strip() for p in pkgs if str(p).strip()]}
+    elif ftype in (FILTER_ADVISORY_CUTOFF, FILTER_BY_DATE):
+        date = str(rule.get("date") or "").strip()
+        try:
+            datetime.strptime(date, "%Y-%m-%d")
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=_("The '%s' filter needs a 'date' (YYYY-MM-DD)") % ftype,
+            ) from exc
+        rule = {"date": date}
+    else:  # security_only — no rule payload
+        rule = {}
+    return ftype, rule
+
+
+def _cv_filter_rows(cv, body_filters: List[ContentViewFilterIn]):
+    """Validate + build SharedContentViewFilter rows (replaced wholesale)."""
+    return [
+        models.SharedContentViewFilter(
+            content_view_id=cv.id, filter_type=ftype, rule_json=rule
+        )
+        for ftype, rule in (_validated_filter(f) for f in body_filters)
+    ]
+
+
+def _cv_filters_list(cv) -> list:
+    return [
+        {"id": str(f.id), "filter_type": f.filter_type, "rule_json": f.rule_json or {}}
+        for f in cv.filters
+    ]
+
+
 def _cv_summary_dict(cv) -> dict:
     """List-view shape: base fields + counts + latest published version."""
     published = [v for v in cv.versions if v.status == CVV_PUBLISHED]
     latest = max((v.version for v in published), default=None)
     data = cv.to_dict()
     data["repo_count"] = len(cv.repos)
+    data["filter_count"] = len(cv.filters)
     data["version_count"] = len(cv.versions)
     data["latest_published_version"] = latest
     return data
 
 
 def _cv_detail_dict(cv) -> dict:
-    """Detail-view shape: base + membership + full version history."""
+    """Detail-view shape: base + membership + filters + full version history."""
     data = cv.to_dict()
     data["repos"] = _cv_repos_list(cv)
+    data["filters"] = _cv_filters_list(cv)
     data["versions"] = [
         v.to_dict() for v in sorted(cv.versions, key=lambda v: v.version, reverse=True)
     ]
@@ -370,8 +457,10 @@ async def create_content_view(
         keep_versions=_clamp_keep_versions(body.keep_versions),
     )
     db.add(cv)
-    db.flush()  # assign cv.id before building the membership rows
+    db.flush()  # assign cv.id before building the membership/filter rows
     for row in _cv_repo_rows(cv, body.repos):
+        db.add(row)
+    for row in _cv_filter_rows(cv, body.filters):
         db.add(row)
     db.commit()
     db.refresh(cv)
@@ -420,6 +509,12 @@ async def update_content_view(
         db.flush()
         for row in _cv_repo_rows(cv, body.repos):
             db.add(row)
+    if body.filters is not None:
+        for existing in list(cv.filters):
+            db.delete(existing)
+        db.flush()
+        for row in _cv_filter_rows(cv, body.filters):
+            db.add(row)
     db.commit()
     db.refresh(cv)
     return _cv_detail_dict(cv)
@@ -444,13 +539,89 @@ async def delete_content_view(cv_id: str, db: Session = Depends(get_shared_db)):
 # Publishing snapshots the CV's mirrors into an immutable, physically-
 # materialized version on the mirror host, via an async agent plan (the engine
 # supplies the plan-builder; the agent runs it; a result handler stamps the
-# version published/failed).  Filters are pass-through here (full content); S3
-# inserts the filter step into the same materialize job.
+# version published/failed).  The CV's filters (Slice 3) are resolved to engine
+# primitives here and applied during the materialize job.
 #
 # Release constraint (single-mirror-host, per the design doc): every mirror in a
 # content view must live on the same host; we merge each mirror's materialize
 # commands into ONE plan dispatched to that host, tracked by one version row.
 # =============================================================================
+
+
+def _advisory_security_pkgs(shared_db: Session, package_managers) -> list:
+    """Distinct package names fixed by SECURITY advisories, scoped to the CV's
+    package managers (drives the security_only allow-list)."""
+    query = (
+        shared_db.query(models.SharedAdvisoryPackage.package_name)
+        .join(
+            models.SharedAdvisory,
+            models.SharedAdvisoryPackage.advisory_row_id == models.SharedAdvisory.id,
+        )
+        .filter(models.SharedAdvisory.advisory_type == ADVISORY_TYPE_SECURITY)
+    )
+    if package_managers:
+        query = query.filter(
+            models.SharedAdvisoryPackage.package_manager.in_(list(package_managers))
+        )
+    return sorted({row[0] for row in query.distinct().all()})
+
+
+def _advisory_after_cutoff_pkgs(
+    shared_db: Session, package_managers, cutoff: str
+) -> list:
+    """Distinct package names fixed by advisories PUBLISHED AFTER ``cutoff``
+    (drives the advisory_cutoff deny-list — freeze content at the date)."""
+    cutoff_dt = datetime.strptime(cutoff, "%Y-%m-%d")
+    query = (
+        shared_db.query(models.SharedAdvisoryPackage.package_name)
+        .join(
+            models.SharedAdvisory,
+            models.SharedAdvisoryPackage.advisory_row_id == models.SharedAdvisory.id,
+        )
+        .filter(models.SharedAdvisory.published_date > cutoff_dt)
+    )
+    if package_managers:
+        query = query.filter(
+            models.SharedAdvisoryPackage.package_manager.in_(list(package_managers))
+        )
+    return sorted({row[0] for row in query.distinct().all()})
+
+
+def _resolve_cv_filters(shared_db: Session, cv, package_managers) -> List[dict]:
+    """Reduce the CV's stored filters to engine primitives (allow/deny/by_date),
+    resolving the advisory-coupled ones against ``shared_advisory``.  A
+    security_only that resolves to zero packages is SKIPPED with a loud log —
+    never emit an empty allow-list, which the engine would read as 'keep nothing'
+    and wipe the repo."""
+    primitives: List[dict] = []
+    for flt in cv.filters:
+        ftype = flt.filter_type
+        rule = flt.rule_json or {}
+        if ftype == FILTER_ALLOW:
+            primitives.append({"type": "allow", "packages": rule.get("packages", [])})
+        elif ftype == FILTER_DENY:
+            primitives.append({"type": "deny", "packages": rule.get("packages", [])})
+        elif ftype == FILTER_BY_DATE:
+            primitives.append({"type": "by_date", "date": rule.get("date")})
+        elif ftype == FILTER_SECURITY_ONLY:
+            names = _advisory_security_pkgs(shared_db, package_managers)
+            if names:
+                primitives.append({"type": "allow", "packages": names})
+            else:
+                logger.warning(
+                    "content view %s: security_only resolved to 0 packages for %s "
+                    "(no security advisories ingested?); skipping to avoid wiping "
+                    "the published content",
+                    cv.id,
+                    sorted(package_managers),
+                )
+        elif ftype == FILTER_ADVISORY_CUTOFF:
+            names = _advisory_after_cutoff_pkgs(
+                shared_db, package_managers, rule.get("date")
+            )
+            if names:
+                primitives.append({"type": "deny", "packages": names})
+    return primitives
 
 
 def _resolve_cv_publish_targets(cv, tenant_db: Session):
@@ -558,6 +729,11 @@ async def publish_content_view(
     cv = _get_cv_or_404(shared_db, cv_id)
     host_id, mirror_root, targets = _resolve_cv_publish_targets(cv, tenant_db)
 
+    # Resolve the CV's filters to engine primitives (advisory-coupled filters
+    # resolved against shared_advisory, scoped to the CV's package managers).
+    package_managers = {mc["package_manager"] for mc, _ in targets}
+    filter_primitives = _resolve_cv_filters(shared_db, cv, package_managers)
+
     next_version = 1 + max((v.version for v in cv.versions), default=0)
     cvv = models.SharedContentViewVersion(
         content_view_id=cv.id, version=next_version, status=CVV_PUBLISHING
@@ -570,7 +746,12 @@ async def publish_content_view(
     store_parent = None
     for mirror_config, snapshot_id in targets:
         plan = engine.build_publish_materialize_plan(
-            mirror_config, mirror_root, snapshot_id, str(cv.id), next_version
+            mirror_config,
+            mirror_root,
+            snapshot_id,
+            str(cv.id),
+            next_version,
+            filter_primitives,
         )
         commands.extend(plan.get("commands", []))
         if store_parent is None:
