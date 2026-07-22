@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 10:43-0400\n"
+"POT-Creation-Date: 2026-07-22 17:19-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3843,6 +3843,30 @@ msgstr "總條目數"
 #: backend/api/audit_log.py:541
 msgid "No audit log entries found."
 msgstr "未找到稽核日誌條目。"
+
+#: backend/api/content_lifecycle_promotion.py:83
+msgid "Only a published content-view version can be promoted"
+msgstr "只有已發布的內容視圖版本才能被推廣"
+
+#: backend/api/content_lifecycle_promotion.py:220
+msgid "Source and target environments must differ"
+msgstr "源環境和目標環境必須不同"
+
+#: backend/api/content_lifecycle_promotion.py:225
+msgid "Content can only be promoted forward along the lifecycle path"
+msgstr "內容只能沿著生命週期路徑向前推廣"
+
+#: backend/api/content_lifecycle_promotion.py:232
+msgid "The source environment has no content for this content view to promote"
+msgstr "源環境沒有此內容視圖可以推廣的內容"
+
+#: backend/api/content_lifecycle_promotion.py:273
+msgid "This environment has no previous version to roll back to"
+msgstr "此環境無先前版本可回退到"
+
+#: backend/api/content_lifecycle_promotion.py:284
+msgid "The previous version has been reclaimed and can no longer be restored"
+msgstr "前一版本已被收回，無法再恢復"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

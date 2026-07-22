@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 10:43-0400\n"
+"POT-Creation-Date: 2026-07-22 17:19-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4092,6 +4092,34 @@ msgstr "Total de entradas"
 #: backend/api/audit_log.py:541
 msgid "No audit log entries found."
 msgstr "No se encontraron entradas en el registro de auditoría."
+
+#: backend/api/content_lifecycle_promotion.py:83
+msgid "Only a published content-view version can be promoted"
+msgstr "Solo una versión de vista de contenido publicada puede ser promovida"
+
+#: backend/api/content_lifecycle_promotion.py:220
+msgid "Source and target environments must differ"
+msgstr "Los entornos de origen y destino deben diferir"
+
+#: backend/api/content_lifecycle_promotion.py:225
+msgid "Content can only be promoted forward along the lifecycle path"
+msgstr ""
+"El contenido solo puede ser promovido hacia adelante a lo largo del camino "
+"de ciclo de vida"
+
+#: backend/api/content_lifecycle_promotion.py:232
+msgid "The source environment has no content for this content view to promote"
+msgstr ""
+"El entorno de origen no tiene contenido para promover en esta vista de "
+"contenido"
+
+#: backend/api/content_lifecycle_promotion.py:273
+msgid "This environment has no previous version to roll back to"
+msgstr "Este entorno no tiene una versión previa a la que volver"
+
+#: backend/api/content_lifecycle_promotion.py:284
+msgid "The previous version has been reclaimed and can no longer be restored"
+msgstr "La versión anterior ha sido reclamada y ya no se puede restaurar"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

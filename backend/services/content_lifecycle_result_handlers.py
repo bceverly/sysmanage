@@ -9,11 +9,18 @@ Extracted from ``backend.services.proplus_dispatch`` to keep that module under
 pylint's max-module-lines cap; re-imported there and registered in
 ``_SIMPLE_RESULT_HANDLERS`` under ``"content_lifecycle_op"``.
 
-These handlers translate a completed ``content_lifecycle_engine`` publish plan
-``outcome`` into a ``SharedContentViewVersion`` row update.  Unlike the
-repository-mirroring handlers (which write the TENANT ``mirror_repository``),
-content-view versions live in the SHARED partition, so we acquire a
-``shared_sessionmaker()`` session rather than the default request session.
+These handlers translate a completed ``content_lifecycle_engine`` plan
+``outcome`` into database state.  Two actions are defined:
+
+* ``publish_materialize`` — stamp a ``SharedContentViewVersion``
+  published/failed and, on success, bind the Library environment to the new
+  version (the entry point of the promotion path) + run pin-aware retention GC.
+* ``reclaim`` — a best-effort store removal for a GC'd version; the row was
+  already marked ``deprecated`` at dispatch time, so we only log the outcome.
+
+Content-view versions live in the SHARED partition, so we acquire a
+``shared_sessionmaker()`` session; the promotion bindings/audit live in the
+TENANT partition, resolved from the reporting host (Slice 4).
 
 A couple of dispatch primitives (``_now_naive``, ``_best_failure_text``) live in
 ``proplus_dispatch`` and are imported lazily to avoid a circular import at load.
@@ -22,8 +29,14 @@ A couple of dispatch primitives (``_now_naive``, ``_best_failure_text``) live in
 import logging
 from typing import Any, Dict
 
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
-from backend.persistence.models.content_lifecycle import CVV_FAILED, CVV_PUBLISHED
+from backend.persistence.models.content_lifecycle import (
+    CVV_DEPRECATED,
+    CVV_FAILED,
+    CVV_PUBLISHED,
+    PROMOTION_PUBLISH,
+)
 from backend.persistence.partitions import shared_sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -43,29 +56,177 @@ def _publish_manifest(outcome: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _apply_content_lifecycle_op_result(
-    primary_id: str, host_id: str, outcome: Dict[str, Any]
-) -> None:
-    """Handle completion of a ``content_lifecycle_engine`` plan.
+def _tenant_session_for_host(host_id: str):
+    """Open a session on the database that actually holds ``host_id``.
 
-    ``primary_id`` is ``"<action>:<cvv_id>"``.  Only ``publish_materialize`` is
-    defined today: stamp the ``SharedContentViewVersion`` published/failed.
+    Mirrors ``proplus_dispatch``'s outbound routing: resolve the host's tenant
+    engine (the host->tenant index works in background context) and fall back to
+    the request engine, which collapses to the bootstrap engine in single-tenant
+    mode.  The promotion bindings/audit are TENANT-partition rows.
     """
-    if ":" not in primary_id:
-        action, cvv_id = primary_id, ""
-    else:
-        action, cvv_id = primary_id.split(":", 1)
+    from sqlalchemy.orm import sessionmaker  # noqa: PLC0415
 
-    if action != "publish_materialize" or not cvv_id:
-        # Never silently drop an unroutable result — log it with context.
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        get_request_engine,
+        tenant_engine_for_host,
+    )
+
+    engine = tenant_engine_for_host(host_id) or get_request_engine()
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)()
+
+
+def _pinned_version_ids(tenant_session, cv_id) -> set:
+    """Every version id a binding references for this CV — both the currently
+    bound version AND each binding's ``previous_version_id`` (the rollback
+    target).  A pinned version is NEVER reclaimed."""
+    pinned = set()
+    rows = (
+        tenant_session.query(models.EnvironmentContentBinding)
+        .filter(models.EnvironmentContentBinding.content_view_id == cv_id)
+        .all()
+    )
+    for binding in rows:
+        pinned.add(str(binding.content_view_version_id))
+        if binding.previous_version_id:
+            pinned.add(str(binding.previous_version_id))
+    return pinned
+
+
+def _bind_library(tenant_session, shared_session, row) -> None:
+    """Bind the Library environment to the freshly published version (the path
+    root / promotion source) and append a publish audit row.  Flushes so the new
+    binding is visible to the pin-aware GC that follows."""
+    library = (
+        shared_session.query(models.SharedLifecycleEnvironment)
+        .filter(models.SharedLifecycleEnvironment.is_library.is_(True))
+        .first()
+    )
+    if library is None:
         logger.warning(
-            "content_lifecycle result: unhandled primary_id %r (host %s)",
-            primary_id,
-            host_id,
+            "content_lifecycle publish: no Library environment; cannot bind cv %s",
+            row.content_view_id,
         )
         return
 
-    from backend.services.proplus_dispatch import _best_failure_text, _now_naive
+    from backend.services.proplus_dispatch import _now_naive  # noqa: PLC0415
+
+    binding = (
+        tenant_session.query(models.EnvironmentContentBinding)
+        .filter(models.EnvironmentContentBinding.environment_id == library.id)
+        .filter(models.EnvironmentContentBinding.content_view_id == row.content_view_id)
+        .first()
+    )
+    if binding is None:
+        binding = models.EnvironmentContentBinding(
+            environment_id=library.id,
+            content_view_id=row.content_view_id,
+            content_view_version_id=row.id,
+        )
+        tenant_session.add(binding)
+    else:
+        if str(binding.content_view_version_id) != str(row.id):
+            binding.previous_version_id = binding.content_view_version_id
+        binding.content_view_version_id = row.id
+        binding.promoted_at = _now_naive()
+
+    tenant_session.add(
+        models.ContentPromotionAudit(
+            content_view_id=row.content_view_id,
+            to_environment_id=library.id,
+            content_view_version_id=row.id,
+            action=PROMOTION_PUBLISH,
+            at=_now_naive(),
+        )
+    )
+    tenant_session.flush()
+
+
+def _reclaim_version(shared_session, engine, version, host_id) -> None:
+    """Deprecate one version and dispatch a best-effort store removal.  The row
+    is marked ``deprecated`` immediately; the physical ``rm`` is fire-and-schedule
+    (its result only logs — the version history row is retained)."""
+    store_path = version.store_path
+    version.status = CVV_DEPRECATED
+    version.store_path = None
+    shared_session.commit()
+    if not store_path or engine is None:
+        return
+    try:
+        plan = engine.build_reclaim_version_plan(store_path)
+        from backend.services.proplus_dispatch import (  # noqa: PLC0415
+            enqueue_apply_plan,
+            register_content_lifecycle_correlation,
+        )
+
+        msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=1800)
+        register_content_lifecycle_correlation(
+            msg_id, "reclaim", str(host_id), str(version.id)
+        )
+        logger.info(
+            "content view version %s reclaimed (store removal dispatched, host %s)",
+            version.id,
+            host_id,
+        )
+    except Exception:  # noqa: BLE001 - GC is best-effort; never fail the publish
+        logger.exception(
+            "content_lifecycle: failed to dispatch reclaim for version %s",
+            version.id,
+        )
+
+
+def _reap_unpinned_versions(shared_session, tenant_session, row, host_id) -> None:
+    """Retention GC: reclaim published versions beyond the CV's ``keep_versions``
+    that no binding pins.  Never touches the newest ``keep_versions`` and never a
+    pinned (bound or rollback-target) version — that is the rollback guarantee."""
+    cv = (
+        shared_session.query(models.SharedContentView)
+        .filter(models.SharedContentView.id == row.content_view_id)
+        .first()
+    )
+    if cv is None:
+        return
+    published = sorted(
+        (v for v in cv.versions if v.status == CVV_PUBLISHED),
+        key=lambda v: v.version,
+        reverse=True,
+    )
+    candidates = published[cv.keep_versions :]
+    if not candidates:
+        return
+    pinned = _pinned_version_ids(tenant_session, cv.id)
+    engine = module_loader.get_module("content_lifecycle_engine")
+    for version in candidates:
+        if str(version.id) in pinned:
+            continue
+        _reclaim_version(shared_session, engine, version, host_id)
+
+
+def _finalize_publish(shared_session, row, host_id) -> None:
+    """Post-publish side effects: bind Library -> new version + pin-aware GC.
+
+    Best-effort and heavily logged — the version is already committed
+    ``published`` before we get here, so a hiccup binding or reaping must never
+    unwind that."""
+    try:
+        with _tenant_session_for_host(host_id) as tenant_session:
+            _bind_library(tenant_session, shared_session, row)
+            _reap_unpinned_versions(shared_session, tenant_session, row, host_id)
+            tenant_session.commit()
+    except Exception:  # noqa: BLE001 - side effects must not corrupt published state
+        logger.exception(
+            "content_lifecycle: publish finalize failed for version %s (host %s)",
+            row.id,
+            host_id,
+        )
+
+
+def _apply_publish_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Stamp the ``SharedContentViewVersion`` published/failed; on success run the
+    Library-binding + retention finalize."""
+    from backend.services.proplus_dispatch import (  # noqa: PLC0415
+        _best_failure_text,
+        _now_naive,
+    )
 
     session_local = shared_sessionmaker()
     with session_local() as session:
@@ -87,13 +248,58 @@ def _apply_content_lifecycle_op_result(
             row.published_at = _now_naive()
             row.publish_error = None
             row.manifest = _publish_manifest(outcome)
+            session.commit()
+            _finalize_publish(session, row, host_id)
         else:
             row.status = CVV_FAILED
             row.publish_error = _best_failure_text(outcome)[:8000]
-        session.commit()
+            session.commit()
         logger.info(
             "content view version %s publish -> %s (host %s)",
             cvv_id,
             row.status,
+            host_id,
+        )
+
+
+def _log_reclaim_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) -> None:
+    """A reclaim plan finished; the row is already ``deprecated`` so we only log
+    (loudly on failure — orphaned bytes are worth a warning)."""
+    if outcome.get("status") == "succeeded":
+        logger.info(
+            "content view version %s store reclaimed on host %s", cvv_id, host_id
+        )
+        return
+    from backend.services.proplus_dispatch import _best_failure_text  # noqa: PLC0415
+
+    logger.warning(
+        "content view version %s store reclaim FAILED on host %s: %s",
+        cvv_id,
+        host_id,
+        _best_failure_text(outcome)[:500],
+    )
+
+
+def _apply_content_lifecycle_op_result(
+    primary_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Route a completed ``content_lifecycle_engine`` plan by its action.
+
+    ``primary_id`` is ``"<action>:<cvv_id>"``.
+    """
+    if ":" not in primary_id:
+        action, cvv_id = primary_id, ""
+    else:
+        action, cvv_id = primary_id.split(":", 1)
+
+    if action == "publish_materialize" and cvv_id:
+        _apply_publish_result(cvv_id, host_id, outcome)
+    elif action == "reclaim" and cvv_id:
+        _log_reclaim_result(cvv_id, host_id, outcome)
+    else:
+        # Never silently drop an unroutable result — log it with context.
+        logger.warning(
+            "content_lifecycle result: unhandled primary_id %r (host %s)",
+            primary_id,
             host_id,
         )

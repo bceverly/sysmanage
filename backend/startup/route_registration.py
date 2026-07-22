@@ -33,6 +33,8 @@ from backend.api import (
     child_host,
     commercial_antivirus_status,
     config_management,
+    content_lifecycle,
+    content_lifecycle_promotion,
     custom_metric_exporter,
     cve_refresh_settings,
     default_repositories,
@@ -66,7 +68,6 @@ from backend.api import (
     queue,
     reboot_orchestration,
     report_branding,
-    content_lifecycle,
     report_templates,
     reports,
     repository_mirroring,
@@ -272,6 +273,9 @@ def register_routes(app: FastAPI):
 
     # Phase 16 — Content Lifecycle Management (Enterprise; 402-gated in OSS).
     _include_versioned(app, content_lifecycle.router, tags=["content-lifecycle"])
+    _include_versioned(
+        app, content_lifecycle_promotion.router, tags=["content-lifecycle"]
+    )
     logger.debug("Content lifecycle router added")
 
     # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.

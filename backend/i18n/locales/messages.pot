@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-21 10:43-0400\n"
+"POT-Creation-Date: 2026-07-22 17:19-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3812,6 +3812,30 @@ msgstr ""
 
 #: backend/api/audit_log.py:541
 msgid "No audit log entries found."
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:83
+msgid "Only a published content-view version can be promoted"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:220
+msgid "Source and target environments must differ"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:225
+msgid "Content can only be promoted forward along the lifecycle path"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:232
+msgid "The source environment has no content for this content view to promote"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:273
+msgid "This environment has no previous version to roll back to"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:284
+msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 
 #: backend/api/enabled_package_managers.py:252

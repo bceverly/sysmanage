@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-21 10:43-0400\n"
+"POT-Creation-Date: 2026-07-22 17:19-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3869,6 +3869,30 @@ msgstr "총 항목 수"
 #: backend/api/audit_log.py:541
 msgid "No audit log entries found."
 msgstr "감사 로그 항목을 찾을 수 없습니다."
+
+#: backend/api/content_lifecycle_promotion.py:83
+msgid "Only a published content-view version can be promoted"
+msgstr "컨텐트 뷰 버전을 프로모션 할 수 있는 조건은 반드시 발행된 상태여야 합니다"
+
+#: backend/api/content_lifecycle_promotion.py:220
+msgid "Source and target environments must differ"
+msgstr "소스 환경과 대상 환경은 서로 다를 수 있어야 합니다"
+
+#: backend/api/content_lifecycle_promotion.py:225
+msgid "Content can only be promoted forward along the lifecycle path"
+msgstr "콘텐츠는 라이프사이클 경로를 따라 앞으로만 진보할 수 있습니다"
+
+#: backend/api/content_lifecycle_promotion.py:232
+msgid "The source environment has no content for this content view to promote"
+msgstr "소스 환경에는 이 컨텐트 뷰를 프로모션 할 콘텐츠가 없습니다"
+
+#: backend/api/content_lifecycle_promotion.py:273
+msgid "This environment has no previous version to roll back to"
+msgstr "이 환경에서는 롤백할 이전 버전이 없습니다"
+
+#: backend/api/content_lifecycle_promotion.py:284
+msgid "The previous version has been reclaimed and can no longer be restored"
+msgstr "이전 버전은 회수되었으며 복구할 수 없습니다"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

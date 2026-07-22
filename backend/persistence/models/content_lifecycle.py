@@ -306,6 +306,23 @@ class ContentPromotionAudit(Base):
     note = Column(Text, nullable=True)
     at = Column(DateTime, nullable=False, default=_utcnow, index=True)
 
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "content_view_id": str(self.content_view_id),
+            "from_environment_id": (
+                str(self.from_environment_id) if self.from_environment_id else None
+            ),
+            "to_environment_id": (
+                str(self.to_environment_id) if self.to_environment_id else None
+            ),
+            "content_view_version_id": str(self.content_view_version_id),
+            "action": self.action,
+            "actor": str(self.actor) if self.actor else None,
+            "note": self.note,
+            "at": self.at.isoformat() if self.at else None,
+        }
+
 
 class EnvironmentSiteSubscription(Base):
     """A federation site subscribes to an environment (orthogonal to topology)."""
