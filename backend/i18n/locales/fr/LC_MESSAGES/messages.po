@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 17:19-0400\n"
+"POT-Creation-Date: 2026-07-22 18:02-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2008,20 +2008,20 @@ msgstr "Les vues de contenu composées ne peuvent pas encore être publiées"
 msgid "Content view has no repositories to publish"
 msgstr "La vue de contenu n'a aucun dépôt à publier"
 
-#: backend/api/content_lifecycle.py:646
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
 msgid "Mirror settings are not configured"
 msgstr "Les paramètres du miroir ne sont pas configurés"
 
-#: backend/api/content_lifecycle.py:659
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
 msgid "A referenced mirror no longer exists"
 msgstr "Le miroir référencé n'existe plus"
 
-#: backend/api/content_lifecycle.py:664
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Le miroir '%s' n'a aucun hôte assigné"
 
-#: backend/api/content_lifecycle.py:672
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 "Tous les miroirs dans une vue de contenu doivent partager un hôte dans cette"
@@ -2033,6 +2033,10 @@ msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""
 "Le miroir '%s' n'a pas encore de snapshot ; prenez un snapshot avant de "
 "publier"
+
+#: backend/api/content_lifecycle.py:709
+msgid "Content view has no repositories"
+msgstr "La vue d’contenu n’a aucun répertoire"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -4124,32 +4128,54 @@ msgstr "Total des entrées"
 msgid "No audit log entries found."
 msgstr "Aucune entrée dans le journal d'audit trouvée."
 
-#: backend/api/content_lifecycle_promotion.py:83
+#: backend/api/content_lifecycle_promotion.py:110
 msgid "Only a published content-view version can be promoted"
 msgstr "Seule une version de vue de contenu publiée peut être promue"
 
-#: backend/api/content_lifecycle_promotion.py:220
+#: backend/api/content_lifecycle_promotion.py:247
 msgid "Source and target environments must differ"
 msgstr "Les environnements source et cible doivent être différents"
 
-#: backend/api/content_lifecycle_promotion.py:225
+#: backend/api/content_lifecycle_promotion.py:252
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr "Le contenu ne peut être promu que dans le sens de la chaînne de vie"
 
-#: backend/api/content_lifecycle_promotion.py:232
+#: backend/api/content_lifecycle_promotion.py:259
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 "L'environnement source n'a aucun contenu pour cette vue de contenu à "
 "promouvoir"
 
-#: backend/api/content_lifecycle_promotion.py:273
+#: backend/api/content_lifecycle_promotion.py:301
 msgid "This environment has no previous version to roll back to"
 msgstr ""
 "Cet environnement n'a aucune version précédente vers laquelle rétrograder"
 
-#: backend/api/content_lifecycle_promotion.py:284
+#: backend/api/content_lifecycle_promotion.py:312
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "La version précédente a été récupérée et ne peut plus être restaurée"
+
+#: backend/api/content_lifecycle_promotion.py:408
+#, python-format
+msgid "Mirror '%s' has an unsupported package manager"
+msgstr "Le miroir ‘%s’ utilise un gestionnaire de paquets non pris en charge"
+
+#: backend/api/content_lifecycle_promotion.py:418
+#, python-format
+msgid "Cannot repoint mirror '%s': %s"
+msgstr "Impossible de rediriger le miroir ‘%s’ : %s"
+
+#: backend/api/content_lifecycle_promotion.py:482
+msgid "That environment has no content for this content view"
+msgstr "Cet environnement n’a aucun contenu pour cette vue d’contenu"
+
+#: backend/api/content_lifecycle_promotion.py:489
+msgid "The serving host has no resolvable address"
+msgstr "L’hôte de distribution n’a aucune adresse résoluble"
+
+#: backend/api/content_lifecycle_promotion.py:495
+msgid "Repository mirroring is required to repoint a host"
+msgstr "Le miroitement du répertoire est requis pour rediriger un hôte"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

@@ -695,6 +695,67 @@ def _resolve_cv_publish_targets(cv, tenant_db: Session):
     return host_id, settings.mirror_root_path, targets
 
 
+def _resolve_cv_serving_host(cv, tenant_db: Session):
+    """(host_id, mirror_root, [MirrorRepository]) for a CV's single serving host.
+
+    Lighter than ``_resolve_cv_publish_targets`` (Slice 5): promote/rollback/
+    serve/repoint act on already-published content, so this does NOT require a
+    snapshot -- it only resolves the host + mirror rows (which carry the
+    suite/components/repoid the client-repoint plans reuse) and enforces the
+    single-host invariant (design decision #1)."""
+    members = [m for m in cv.repos if m.mirror_id]
+    if not members:
+        raise HTTPException(
+            status_code=400, detail=_("Content view has no repositories")
+        )
+    settings = tenant_db.query(models.MirrorSettings).first()
+    if settings is None:
+        raise HTTPException(
+            status_code=400, detail=_("Mirror settings are not configured")
+        )
+    host_id = None
+    mirrors = []
+    for member in sorted(members, key=lambda m: m.position):
+        mirror = (
+            tenant_db.query(models.MirrorRepository)
+            .filter(models.MirrorRepository.id == member.mirror_id)
+            .first()
+        )
+        if mirror is None:
+            raise HTTPException(
+                status_code=400, detail=_("A referenced mirror no longer exists")
+            )
+        if mirror.host_id is None:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Mirror '%s' has no host assigned") % mirror.name,
+            )
+        if host_id is None:
+            host_id = mirror.host_id
+        elif str(mirror.host_id) != str(host_id):
+            raise HTTPException(
+                status_code=400,
+                detail=_(
+                    "All mirrors in a content view must share one host in this release"
+                ),
+            )
+        mirrors.append(mirror)
+    return host_id, settings.mirror_root_path, mirrors
+
+
+def _host_fqdn(tenant_db: Session, host_id) -> Optional[str]:
+    """The serving host's FQDN (for building the content-view URL clients hit).
+
+    Hosts live in the tenant partition; a repointed client reaches the mirror
+    host by this name over plain LAN HTTP."""
+    host = (
+        tenant_db.query(models.Host).filter(models.Host.id == host_id).first()
+        if host_id is not None
+        else None
+    )
+    return host.fqdn if host is not None else None
+
+
 def _dispatch_publish_plan(plan: dict, host_id, cv_version_id: str) -> str:
     """Enqueue the combined materialize plan and register the result correlation
     so the agent's command_result lands back on this version row."""

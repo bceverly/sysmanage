@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 17:19-0400\n"
+"POT-Creation-Date: 2026-07-22 18:02-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1890,20 +1890,20 @@ msgstr "组合内容视图尚不能发布"
 msgid "Content view has no repositories to publish"
 msgstr "内容视图没有可发布的仓库"
 
-#: backend/api/content_lifecycle.py:646
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
 msgid "Mirror settings are not configured"
 msgstr "镜像设置尚未配置"
 
-#: backend/api/content_lifecycle.py:659
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
 msgid "A referenced mirror no longer exists"
 msgstr "引用的镜像不再存在"
 
-#: backend/api/content_lifecycle.py:664
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "镜像 '%s' 没有分配主机"
 
-#: backend/api/content_lifecycle.py:672
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "在此版本中，内容视图中的所有镜像必须共享一个主机"
 
@@ -1911,6 +1911,10 @@ msgstr "在此版本中，内容视图中的所有镜像必须共享一个主机
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "镜像 '%s' 尚未创建快照；请在发布前创建快照"
+
+#: backend/api/content_lifecycle.py:709
+msgid "Content view has no repositories"
+msgstr "内容视图没有任何仓库"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -3841,29 +3845,51 @@ msgstr "总条目数"
 msgid "No audit log entries found."
 msgstr "未找到审计日志条目。"
 
-#: backend/api/content_lifecycle_promotion.py:83
+#: backend/api/content_lifecycle_promotion.py:110
 msgid "Only a published content-view version can be promoted"
 msgstr "只有已发布的ContentView版本才能被推广"
 
-#: backend/api/content_lifecycle_promotion.py:220
+#: backend/api/content_lifecycle_promotion.py:247
 msgid "Source and target environments must differ"
 msgstr "源环境和目标环境必须不同"
 
-#: backend/api/content_lifecycle_promotion.py:225
+#: backend/api/content_lifecycle_promotion.py:252
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr "内容只能沿生命周期路径向前推广"
 
-#: backend/api/content_lifecycle_promotion.py:232
+#: backend/api/content_lifecycle_promotion.py:259
 msgid "The source environment has no content for this content view to promote"
 msgstr "源环境中没有此ContentView的内容可以推广"
 
-#: backend/api/content_lifecycle_promotion.py:273
+#: backend/api/content_lifecycle_promotion.py:301
 msgid "This environment has no previous version to roll back to"
 msgstr "该环境中没有可回滚到的前一版本"
 
-#: backend/api/content_lifecycle_promotion.py:284
+#: backend/api/content_lifecycle_promotion.py:312
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "前一版本已被回收，无法恢复"
+
+#: backend/api/content_lifecycle_promotion.py:408
+#, python-format
+msgid "Mirror '%s' has an unsupported package manager"
+msgstr "镜像 '%s' 使用不受支持的包管理器"
+
+#: backend/api/content_lifecycle_promotion.py:418
+#, python-format
+msgid "Cannot repoint mirror '%s': %s"
+msgstr "无法重新指向镜像 '%s': %s"
+
+#: backend/api/content_lifecycle_promotion.py:482
+msgid "That environment has no content for this content view"
+msgstr "该环境中没有此内容视图的内容"
+
+#: backend/api/content_lifecycle_promotion.py:489
+msgid "The serving host has no resolvable address"
+msgstr "提供服务的主机没有任何可解析地址"
+
+#: backend/api/content_lifecycle_promotion.py:495
+msgid "Repository mirroring is required to repoint a host"
+msgstr "必须启用仓库镜像才能重新指向主机"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-22 17:19-0400\n"
+"POT-Creation-Date: 2026-07-22 18:02-0400\n"
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1953,20 +1953,20 @@ msgstr "Composite content views cannot be published yet"
 msgid "Content view has no repositories to publish"
 msgstr "Content view has no repositories to publish"
 
-#: backend/api/content_lifecycle.py:646
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
 msgid "Mirror settings are not configured"
 msgstr "Mirror settings are not configured"
 
-#: backend/api/content_lifecycle.py:659
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
 msgid "A referenced mirror no longer exists"
 msgstr "A referenced mirror no longer exists"
 
-#: backend/api/content_lifecycle.py:664
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Mirror '%s' has no host assigned"
 
-#: backend/api/content_lifecycle.py:672
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "All mirrors in a content view must share one host in this release"
 
@@ -1974,6 +1974,10 @@ msgstr "All mirrors in a content view must share one host in this release"
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "Mirror '%s' has no snapshot yet; snapshot it before publishing"
+
+#: backend/api/content_lifecycle.py:709
+msgid "Content view has no repositories"
+msgstr "Content view has no repositories"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -3962,29 +3966,51 @@ msgstr "Total Entries"
 msgid "No audit log entries found."
 msgstr "No audit log entries found."
 
-#: backend/api/content_lifecycle_promotion.py:83
+#: backend/api/content_lifecycle_promotion.py:110
 msgid "Only a published content-view version can be promoted"
 msgstr "Only a published content-view version can be promoted"
 
-#: backend/api/content_lifecycle_promotion.py:220
+#: backend/api/content_lifecycle_promotion.py:247
 msgid "Source and target environments must differ"
 msgstr "Source and target environments must differ"
 
-#: backend/api/content_lifecycle_promotion.py:225
+#: backend/api/content_lifecycle_promotion.py:252
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr "Content can only be promoted forward along the lifecycle path"
 
-#: backend/api/content_lifecycle_promotion.py:232
+#: backend/api/content_lifecycle_promotion.py:259
 msgid "The source environment has no content for this content view to promote"
 msgstr "The source environment has no content for this content view to promote"
 
-#: backend/api/content_lifecycle_promotion.py:273
+#: backend/api/content_lifecycle_promotion.py:301
 msgid "This environment has no previous version to roll back to"
 msgstr "This environment has no previous version to roll back to"
 
-#: backend/api/content_lifecycle_promotion.py:284
+#: backend/api/content_lifecycle_promotion.py:312
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "The previous version has been reclaimed and can no longer be restored"
+
+#: backend/api/content_lifecycle_promotion.py:408
+#, python-format
+msgid "Mirror '%s' has an unsupported package manager"
+msgstr "Mirror '%s' has an unsupported package manager"
+
+#: backend/api/content_lifecycle_promotion.py:418
+#, python-format
+msgid "Cannot repoint mirror '%s': %s"
+msgstr "Cannot repoint mirror '%s': %s"
+
+#: backend/api/content_lifecycle_promotion.py:482
+msgid "That environment has no content for this content view"
+msgstr "That environment has no content for this content view"
+
+#: backend/api/content_lifecycle_promotion.py:489
+msgid "The serving host has no resolvable address"
+msgstr "The serving host has no resolvable address"
+
+#: backend/api/content_lifecycle_promotion.py:495
+msgid "Repository mirroring is required to repoint a host"
+msgstr "Repository mirroring is required to repoint a host"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

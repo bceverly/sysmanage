@@ -92,10 +92,11 @@ def _pinned_version_ids(tenant_session, cv_id) -> set:
     return pinned
 
 
-def _bind_library(tenant_session, shared_session, row) -> None:
+def _bind_library(tenant_session, shared_session, row):
     """Bind the Library environment to the freshly published version (the path
     root / promotion source) and append a publish audit row.  Flushes so the new
-    binding is visible to the pin-aware GC that follows."""
+    binding is visible to the pin-aware GC that follows.  Returns the Library
+    environment name (so the caller can repoint its serving symlink), or None."""
     library = (
         shared_session.query(models.SharedLifecycleEnvironment)
         .filter(models.SharedLifecycleEnvironment.is_library.is_(True))
@@ -106,7 +107,7 @@ def _bind_library(tenant_session, shared_session, row) -> None:
             "content_lifecycle publish: no Library environment; cannot bind cv %s",
             row.content_view_id,
         )
-        return
+        return None
 
     from backend.services.proplus_dispatch import _now_naive  # noqa: PLC0415
 
@@ -139,6 +140,49 @@ def _bind_library(tenant_session, shared_session, row) -> None:
         )
     )
     tenant_session.flush()
+    return library.name
+
+
+def dispatch_env_symlink(host_id, mirror_root, cv_id, env_name, version) -> None:
+    """Repoint an environment's serving symlink to a version on the mirror host.
+
+    The physical half of a DB rebind (publish/promote/rollback, Slice 5): the
+    stable URL ``/content-views/{cv}/{env}`` is a symlink the mirror host swaps to
+    the newly-bound version.  Best-effort + loudly logged -- the store-and-forward
+    queue delivers it and a re-promote reconciles, so a dispatch hiccup must not
+    fail the (already-committed) rebind."""
+    engine = module_loader.get_module("content_lifecycle_engine")
+    if engine is None:
+        logger.warning(
+            "content_lifecycle: engine not loaded; cannot repoint cv=%s env=%s",
+            cv_id,
+            env_name,
+        )
+        return
+    try:
+        plan = engine.build_set_env_symlink_plan(mirror_root, cv_id, env_name, version)
+        from backend.services.proplus_dispatch import (  # noqa: PLC0415
+            enqueue_apply_plan,
+            register_content_lifecycle_correlation,
+        )
+
+        msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=120)
+        register_content_lifecycle_correlation(
+            msg_id, "set_env_symlink", str(host_id), str(cv_id)
+        )
+        logger.info(
+            "content_lifecycle: env repoint dispatched cv=%s env=%s -> v%s (host %s)",
+            cv_id,
+            env_name,
+            version,
+            host_id,
+        )
+    except Exception:  # noqa: BLE001 - serving repoint is best-effort
+        logger.exception(
+            "content_lifecycle: failed to dispatch env symlink cv=%s env=%s",
+            cv_id,
+            env_name,
+        )
 
 
 def _reclaim_version(shared_session, engine, version, host_id) -> None:
@@ -209,9 +253,17 @@ def _finalize_publish(shared_session, row, host_id) -> None:
     unwind that."""
     try:
         with _tenant_session_for_host(host_id) as tenant_session:
-            _bind_library(tenant_session, shared_session, row)
+            library_name = _bind_library(tenant_session, shared_session, row)
             _reap_unpinned_versions(shared_session, tenant_session, row, host_id)
             tenant_session.commit()
+        # Repoint the Library serving symlink at the freshly published version so
+        # the content is actually served (Slice 5).  ``store_path`` is
+        # ``{mirror_root}/.content-views/{cv}/v{n}`` -> recover the mirror root.
+        if library_name and row.store_path:
+            mirror_root = row.store_path.rsplit("/.content-views/", 1)[0]
+            dispatch_env_symlink(
+                host_id, mirror_root, row.content_view_id, library_name, row.version
+            )
     except Exception:  # noqa: BLE001 - side effects must not corrupt published state
         logger.exception(
             "content_lifecycle: publish finalize failed for version %s (host %s)",
@@ -280,6 +332,37 @@ def _log_reclaim_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) -> N
     )
 
 
+# Serving-side ops (Slice 5) carry no DB state to update on completion -- the
+# authoritative state (binding / assignment) was committed before dispatch -- so
+# their result handling is log-only, loud on failure.
+_LOG_ONLY_OPS = {
+    "set_env_symlink": "environment serving repoint",
+    "serve_content": "mirror-host serving provision",
+    "repoint": "client repoint",
+}
+
+
+def _log_op_result(
+    action: str, ref: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Log the outcome of a serving-side op (symlink repoint / serve / repoint)."""
+    label = _LOG_ONLY_OPS.get(action, action)
+    if outcome.get("status") == "succeeded":
+        logger.info(
+            "content_lifecycle: %s succeeded (%s, host %s)", label, ref, host_id
+        )
+        return
+    from backend.services.proplus_dispatch import _best_failure_text  # noqa: PLC0415
+
+    logger.warning(
+        "content_lifecycle: %s FAILED (%s, host %s): %s",
+        label,
+        ref,
+        host_id,
+        _best_failure_text(outcome)[:500],
+    )
+
+
 def _apply_content_lifecycle_op_result(
     primary_id: str, host_id: str, outcome: Dict[str, Any]
 ) -> None:
@@ -296,6 +379,8 @@ def _apply_content_lifecycle_op_result(
         _apply_publish_result(cvv_id, host_id, outcome)
     elif action == "reclaim" and cvv_id:
         _log_reclaim_result(cvv_id, host_id, outcome)
+    elif action in _LOG_ONLY_OPS:
+        _log_op_result(action, cvv_id, host_id, outcome)
     else:
         # Never silently drop an unroutable result — log it with context.
         logger.warning(

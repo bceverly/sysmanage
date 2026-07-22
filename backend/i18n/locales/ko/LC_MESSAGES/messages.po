@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 17:19-0400\n"
+"POT-Creation-Date: 2026-07-22 18:02-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1908,20 +1908,20 @@ msgstr "복합 콘텐츠 뷰는 아직 발행할 수 없습니다"
 msgid "Content view has no repositories to publish"
 msgstr "콘텐츠 뷰에 발행할 리포지토리가 없습니다"
 
-#: backend/api/content_lifecycle.py:646
+#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:714
 msgid "Mirror settings are not configured"
 msgstr "미러 설정이 구성되지 않았습니다"
 
-#: backend/api/content_lifecycle.py:659
+#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:726
 msgid "A referenced mirror no longer exists"
 msgstr "참조된 미러가 더 이상 존재하지 않습니다"
 
-#: backend/api/content_lifecycle.py:664
+#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:731
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "미러 '%s'에 호스트가 할당되어 있지 않습니다"
 
-#: backend/api/content_lifecycle.py:672
+#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:739
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "이 버전에서는 모든 미러가 하나의 호스트를 공유해야 합니다"
 
@@ -1929,6 +1929,10 @@ msgstr "이 버전에서는 모든 미러가 하나의 호스트를 공유해야
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "미러 '%s'에는 아직 스냅샷이 없음; 발행하기 전에 스냅샷을 생성하세요"
+
+#: backend/api/content_lifecycle.py:709
+msgid "Content view has no repositories"
+msgstr "콘텐츠 뷰에 리포지토리가 없습니다"
 
 #: backend/api/cve_refresh_settings.py:58
 msgid ""
@@ -3870,29 +3874,51 @@ msgstr "총 항목 수"
 msgid "No audit log entries found."
 msgstr "감사 로그 항목을 찾을 수 없습니다."
 
-#: backend/api/content_lifecycle_promotion.py:83
+#: backend/api/content_lifecycle_promotion.py:110
 msgid "Only a published content-view version can be promoted"
 msgstr "컨텐트 뷰 버전을 프로모션 할 수 있는 조건은 반드시 발행된 상태여야 합니다"
 
-#: backend/api/content_lifecycle_promotion.py:220
+#: backend/api/content_lifecycle_promotion.py:247
 msgid "Source and target environments must differ"
 msgstr "소스 환경과 대상 환경은 서로 다를 수 있어야 합니다"
 
-#: backend/api/content_lifecycle_promotion.py:225
+#: backend/api/content_lifecycle_promotion.py:252
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr "콘텐츠는 라이프사이클 경로를 따라 앞으로만 진보할 수 있습니다"
 
-#: backend/api/content_lifecycle_promotion.py:232
+#: backend/api/content_lifecycle_promotion.py:259
 msgid "The source environment has no content for this content view to promote"
 msgstr "소스 환경에는 이 컨텐트 뷰를 프로모션 할 콘텐츠가 없습니다"
 
-#: backend/api/content_lifecycle_promotion.py:273
+#: backend/api/content_lifecycle_promotion.py:301
 msgid "This environment has no previous version to roll back to"
 msgstr "이 환경에서는 롤백할 이전 버전이 없습니다"
 
-#: backend/api/content_lifecycle_promotion.py:284
+#: backend/api/content_lifecycle_promotion.py:312
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "이전 버전은 회수되었으며 복구할 수 없습니다"
+
+#: backend/api/content_lifecycle_promotion.py:408
+#, python-format
+msgid "Mirror '%s' has an unsupported package manager"
+msgstr "'%s' 미러에는 지원되지 않는 패키지 매니저가 있습니다"
+
+#: backend/api/content_lifecycle_promotion.py:418
+#, python-format
+msgid "Cannot repoint mirror '%s': %s"
+msgstr "'%s' 미러를 재지정할 수 없습니다: %s"
+
+#: backend/api/content_lifecycle_promotion.py:482
+msgid "That environment has no content for this content view"
+msgstr "그 환경은 해당 콘텐츠 뷰에 대한 내용이 없습니다"
+
+#: backend/api/content_lifecycle_promotion.py:489
+msgid "The serving host has no resolvable address"
+msgstr "서빙 호스트는 해결할 수 있는 주소가 없습니다"
+
+#: backend/api/content_lifecycle_promotion.py:495
+msgid "Repository mirroring is required to repoint a host"
+msgstr "호스트를 재지정하려면 리포지토리를 미러링해야 합니다"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

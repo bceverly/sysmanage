@@ -18,6 +18,7 @@ Split out of ``backend.api.content_lifecycle`` (which owns environment + content
 that module's gate + lookup helpers and mounts on its own router.
 """
 
+import logging
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -29,9 +30,12 @@ from backend.api.content_lifecycle import (
     _check_clm_module,
     _get_cv_or_404,
     _get_env_or_404,
+    _host_fqdn,
+    _resolve_cv_serving_host,
 )
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
 from backend.i18n import _
+from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.models.content_lifecycle import (
     CVV_DEPRECATED,
@@ -40,8 +44,31 @@ from backend.persistence.models.content_lifecycle import (
     PROMOTION_ROLLBACK,
 )
 from backend.persistence.partitions import get_shared_db, get_tenant_db
+from backend.services.content_lifecycle_result_handlers import dispatch_env_symlink
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _repoint_env_symlink(cv, tenant_db: Session, env_name: str, version: int) -> None:
+    """Physically repoint an environment's serving symlink after a DB rebind.
+
+    Best-effort: promote/rollback already committed, so ANY resolve/dispatch
+    failure (serving host unresolved, mirror settings absent, queue hiccup) must
+    not fail the response -- it is logged and reconciled on the next
+    publish/promote (the serving symlink is idempotent)."""
+    try:
+        host_id, mirror_root, _mirrors = _resolve_cv_serving_host(cv, tenant_db)
+        dispatch_env_symlink(host_id, mirror_root, str(cv.id), env_name, version)
+    except Exception:  # noqa: BLE001 - serving repoint is best-effort, never fatal
+        logger.warning(
+            "content_lifecycle: env %s serving symlink not repointed for cv %s "
+            "(serving host unresolved or dispatch failed)",
+            env_name,
+            cv.id,
+            exc_info=True,
+        )
 
 
 def _now_naive() -> datetime:
@@ -246,6 +273,7 @@ async def promote_content_view(
     )
     tenant_db.commit()
     tenant_db.refresh(binding)
+    _repoint_env_symlink(cv, tenant_db, to_env.name, cvv.version)
     return binding.to_dict()
 
 
@@ -300,6 +328,7 @@ async def rollback_environment(
     )
     tenant_db.commit()
     tenant_db.refresh(binding)
+    _repoint_env_symlink(cv, tenant_db, env.name, prev.version)
     return binding.to_dict()
 
 
@@ -323,3 +352,150 @@ async def list_content_view_audit(
         .all()
     )
     return [r.to_dict() for r in rows]
+
+
+# =============================================================================
+# Serving + client repoint (Phase 16, Slice 5)
+# =============================================================================
+
+
+class RepointRequest(BaseModel):
+    environment_id: str
+    host_id: str  # the CONSUMING host whose package manager to repoint
+
+
+# pm -> client-repoint builder (reuses repository_mirroring_engine, pointed at
+# the content-view env URL instead of the raw mirror).  Each mirror carries its
+# own suite/components/repoid/alias, falling back to the mirror name.
+_REPOINT_BUILDERS = {
+    "apt": lambda eng, m, url: eng.build_apt_apply_default_mirror_plan(
+        url, m.suite or "", m.components or "main"
+    ),
+    "dnf": lambda eng, m, url: eng.build_dnf_apply_default_mirror_plan(
+        m.repoid or m.name, url, m.gpgkey_url or ""
+    ),
+    "zypper": lambda eng, m, url: eng.build_zypper_apply_default_mirror_plan(
+        m.repo_alias or m.name, url
+    ),
+    "pkg": lambda eng, m, url: eng.build_pkg_apply_default_mirror_plan(url),
+}
+
+
+def _dispatch_serving_plan(plan: dict, host_id, action: str, ref: str) -> str:
+    """Enqueue a serving/repoint plan + register a (log-only) result correlation."""
+    from backend.services.proplus_dispatch import (
+        enqueue_apply_plan,
+        register_content_lifecycle_correlation,
+    )
+
+    msg_id = enqueue_apply_plan(host_id=str(host_id), plan=plan, timeout=1800)
+    register_content_lifecycle_correlation(msg_id, action, str(host_id), str(ref))
+    return msg_id
+
+
+def _build_repoint_plan(
+    repo_engine, clm_engine, fqdn, cv_id, env_name, mirrors
+) -> dict:
+    """One combined plan that repoints a host's package manager(s) at a content
+    view's per-environment URL -- ``{env_url}/{mirror_name}`` for each mirror."""
+    env_url = clm_engine.resolve_content_view_url(fqdn, cv_id, env_name)
+    files, commands = [], []
+    for mirror in mirrors:
+        builder = _REPOINT_BUILDERS.get((mirror.package_manager or "").lower())
+        if builder is None:
+            raise HTTPException(
+                status_code=400,
+                detail=_("Mirror '%s' has an unsupported package manager")
+                % mirror.name,
+            )
+        mirror_url = f"{env_url}/{mirror.name}"
+        try:
+            sub = builder(repo_engine, mirror, mirror_url)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            # Missing suite/repoid etc. -- surface which mirror, not a 500.
+            raise HTTPException(
+                status_code=400,
+                detail=_("Cannot repoint mirror '%s': %s") % (mirror.name, exc),
+            ) from exc
+        files.extend(sub.get("files", []))
+        commands.extend(sub.get("commands", []))
+    return {
+        "engine": "content_lifecycle_engine",
+        "action": "repoint",
+        "cv_id": cv_id,
+        "env_name": env_name,
+        "env_url": env_url,
+        "files": files,
+        "commands": commands,
+    }
+
+
+@router.post(
+    "/content-lifecycle/content-views/{cv_id}/serve",
+    dependencies=[Depends(JWTBearer())],
+)
+async def enable_content_serving(
+    cv_id: str,
+    shared_db: Session = Depends(get_shared_db),
+    tenant_db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """Provision HTTP serving (nginx) on the mirror host backing this CV, so its
+    content-view versions (``/content-views/``) and raw mirrors (``/mirror/``)
+    are reachable over LAN HTTP -- the URLs clients repoint at."""
+    engine = _check_clm_module()
+    cv = _get_cv_or_404(shared_db, cv_id)
+    host_id, mirror_root, mirrors = _resolve_cv_serving_host(cv, tenant_db)
+    fqdn = _host_fqdn(tenant_db, host_id)
+    plan = engine.build_serve_content_plan(
+        mirror_root, mirrors[0].package_manager, fqdn
+    )
+    msg_id = _dispatch_serving_plan(plan, host_id, "serve_content", str(cv.id))
+    return {
+        "dispatched": True,
+        "host_id": str(host_id),
+        "server_name": fqdn,
+        "message_id": msg_id,
+    }
+
+
+@router.post(
+    "/content-lifecycle/content-views/{cv_id}/repoint",
+    dependencies=[Depends(JWTBearer())],
+)
+async def repoint_host_to_environment(
+    cv_id: str,
+    body: RepointRequest,
+    shared_db: Session = Depends(get_shared_db),
+    tenant_db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """Point a host's package manager at a content view's environment URL, so it
+    installs the promoted, filtered content served at that env instead of the raw
+    upstream.  Reuses the repository-mirroring apply-default-mirror builders."""
+    clm_engine = _check_clm_module()
+    cv = _get_cv_or_404(shared_db, cv_id)
+    env = _get_env_or_404(shared_db, body.environment_id)
+    if _binding_for(tenant_db, env.id, cv.id) is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_("That environment has no content for this content view"),
+        )
+    serving = _resolve_cv_serving_host(cv, tenant_db)
+    host_id, mirrors = serving[0], serving[2]
+    fqdn = _host_fqdn(tenant_db, host_id)
+    if not fqdn:
+        raise HTTPException(
+            status_code=400, detail=_("The serving host has no resolvable address")
+        )
+    repo_engine = module_loader.get_module("repository_mirroring_engine")
+    if repo_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_("Repository mirroring is required to repoint a host"),
+        )
+    plan = _build_repoint_plan(
+        repo_engine, clm_engine, fqdn, str(cv.id), env.name, mirrors
+    )
+    msg_id = _dispatch_serving_plan(plan, body.host_id, "repoint", str(cv.id))
+    return {"dispatched": True, "host_id": body.host_id, "message_id": msg_id}
