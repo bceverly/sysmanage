@@ -65,11 +65,30 @@ def _repoint_env_symlink(
             cv, shared_db, tenant_db
         )
         dispatch_env_symlink(host_id, mirror_root, str(cv.id), env_name, version)
-    except Exception:  # noqa: BLE001 - serving repoint is best-effort, never fatal
+    # serving repoint is best-effort, never fatal: logged and reconciled next run
+    except Exception:  # noqa: BLE001
         logger.warning(
             "content_lifecycle: env %s serving symlink not repointed for cv %s "
             "(serving host unresolved or dispatch failed)",
             env_name,
+            cv.id,
+            exc_info=True,
+        )
+
+
+def _announce_to_subscribed_sites(cv, to_env, version, shared_db, tenant_db) -> None:
+    """Federated site sync (Slice 7b): announce a promoted version to any sites
+    subscribed to the target env.  Best-effort -- the promotion already
+    committed, so a coordinator/announce hiccup must never fail the response."""
+    try:
+        from backend.services.content_lifecycle_federation_sync import (
+            announce_promotion_to_sites,
+        )
+
+        announce_promotion_to_sites(cv, to_env, version, shared_db, tenant_db)
+    except Exception:  # noqa: BLE001 - announcement is best-effort
+        logger.warning(
+            "content_lifecycle: failed to announce cv %s promotion to sites",
             cv.id,
             exc_info=True,
         )
@@ -278,6 +297,7 @@ async def promote_content_view(
     tenant_db.commit()
     tenant_db.refresh(binding)
     _repoint_env_symlink(cv, shared_db, tenant_db, to_env.name, cvv.version)
+    _announce_to_subscribed_sites(cv, to_env, cvv.version, shared_db, tenant_db)
     return binding.to_dict()
 
 
@@ -417,9 +437,11 @@ def _build_repoint_plan(
             sub = builder(repo_engine, mirror, mirror_url)
         except Exception as exc:  # pylint: disable=broad-exception-caught
             # Missing suite/repoid etc. -- surface which mirror, not a 500.
+            # Named placeholders so translators can reorder (gettext-friendly).
             raise HTTPException(
                 status_code=400,
-                detail=_("Cannot repoint mirror '%s': %s") % (mirror.name, exc),
+                detail=_("Cannot repoint mirror '%(name)s': %(err)s")
+                % {"name": mirror.name, "err": exc},
             ) from exc
         files.extend(sub.get("files", []))
         commands.extend(sub.get("commands", []))

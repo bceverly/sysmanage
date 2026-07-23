@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 18:34-0400\n"
+"POT-Creation-Date: 2026-07-23 07:38-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2407,6 +2407,20 @@ msgstr "Actualización del agente solicitada"
 msgid "Package collection requested"
 msgstr "Se ha solicitado la recopilación de paquetes"
 
+#: backend/api/content_lifecycle_diff.py:79
+#, python-format
+msgid "No published version %s to diff"
+msgstr "No existe ninguna versión publicada %s para diferenciar"
+
+#: backend/api/content_lifecycle_diff.py:85
+msgid "No earlier published version to diff against"
+msgstr "No hay versión publicada anterior con la que diferenciar"
+
+#: backend/api/content_lifecycle_diff.py:120
+#, python-format
+msgid "No published version %s"
+msgstr "No existe ninguna versión publicada %s"
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -2951,6 +2965,12 @@ msgstr "Actualización de acceso de usuarios solicitada"
 #: backend/api/host_data_updates.py:365
 msgid "System info update requested"
 msgstr "Se ha solicitado la actualización de la información del sistema"
+
+#: backend/api/content_lifecycle_federation.py:51
+msgid "Environment subscriptions are managed on the federation coordinator"
+msgstr ""
+"Las suscripciones del entorno son gestionadas en el coordinador de "
+"federación"
 
 #: backend/api/airgap_devices.py:79
 #, python-format
@@ -3783,6 +3803,23 @@ msgstr ""
 msgid "Service {} requested for {} services"
 msgstr "Servicio {} solicitado para {} servicios"
 
+#: backend/api/content_lifecycle_export.py:60
+msgid ""
+"Air-gap media export requires the air-gap collector engine (Enterprise). "
+"Please upgrade to access this feature."
+msgstr ""
+"La exportación de medios en aislamiento requiere el motor de recolección en "
+"aislamiento (Enterprise). Actualice para acceder a esta función."
+
+#: backend/api/content_lifecycle_export.py:84
+#, python-format
+msgid "No published version %s to export"
+msgstr "No existe ninguna versión publicada %s para exportar"
+
+#: backend/api/content_lifecycle_export.py:146
+msgid "ensure ISO output dir exists"
+msgstr "asegurar que exista el directorio de salida ISO"
+
 #: backend/api/packages.py:109
 #, python-format
 msgid "Failed to retrieve package managers: %s"
@@ -4113,53 +4150,53 @@ msgstr "Total de entradas"
 msgid "No audit log entries found."
 msgstr "No se encontraron entradas en el registro de auditoría."
 
-#: backend/api/content_lifecycle_promotion.py:114
+#: backend/api/content_lifecycle_promotion.py:132
 msgid "Only a published content-view version can be promoted"
 msgstr "Solo una versión de vista de contenido publicada puede ser promovida"
 
-#: backend/api/content_lifecycle_promotion.py:251
+#: backend/api/content_lifecycle_promotion.py:269
 msgid "Source and target environments must differ"
 msgstr "Los entornos de origen y destino deben diferir"
 
-#: backend/api/content_lifecycle_promotion.py:256
+#: backend/api/content_lifecycle_promotion.py:274
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr ""
 "El contenido solo puede ser promovido hacia adelante a lo largo del camino "
 "de ciclo de vida"
 
-#: backend/api/content_lifecycle_promotion.py:263
+#: backend/api/content_lifecycle_promotion.py:281
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 "El entorno de origen no tiene contenido para promover en esta vista de "
 "contenido"
 
-#: backend/api/content_lifecycle_promotion.py:305
+#: backend/api/content_lifecycle_promotion.py:324
 msgid "This environment has no previous version to roll back to"
 msgstr "Este entorno no tiene una versión previa a la que volver"
 
-#: backend/api/content_lifecycle_promotion.py:316
+#: backend/api/content_lifecycle_promotion.py:335
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "La versión anterior ha sido reclamada y ya no se puede restaurar"
 
-#: backend/api/content_lifecycle_promotion.py:412
+#: backend/api/content_lifecycle_promotion.py:431
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "El espejo '%s' tiene un administrador de paquetes no compatible"
 
-#: backend/api/content_lifecycle_promotion.py:422
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
-msgid "Cannot repoint mirror '%s': %s"
-msgstr "No se puede reorientar el espejo '%s': %s"
+msgid "Cannot repoint mirror '%(name)s': %(err)s"
+msgstr "No se puede reorientar el espejo '%(name)s': %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:486
+#: backend/api/content_lifecycle_promotion.py:507
 msgid "That environment has no content for this content view"
 msgstr "Ese entorno no tiene contenido para esta vista de contenido"
 
-#: backend/api/content_lifecycle_promotion.py:493
+#: backend/api/content_lifecycle_promotion.py:514
 msgid "The serving host has no resolvable address"
 msgstr "El host que sirve no tiene una dirección resoluble"
 
-#: backend/api/content_lifecycle_promotion.py:499
+#: backend/api/content_lifecycle_promotion.py:520
 msgid "Repository mirroring is required to repoint a host"
 msgstr "Es necesario el espeleado del repositorio para reorientar un host"
 
@@ -4750,6 +4787,10 @@ msgstr "vault.secreto_no_encontrado"
 #: backend/services/vault_service.py:433
 msgid "vault.invalid_secret_format"
 msgstr "vault.formato_de_secreto_no_válido"
+
+#, python-format
+#~ msgid "Cannot repoint mirror '%s': %s"
+#~ msgstr "No se puede reorientar el espejo '%s': %s"
 
 #, python-format
 #~ msgid "Hostname change failed for host %s: %s"

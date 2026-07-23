@@ -34,6 +34,9 @@ from backend.api import (
     commercial_antivirus_status,
     config_management,
     content_lifecycle,
+    content_lifecycle_diff,
+    content_lifecycle_export,
+    content_lifecycle_federation,
     content_lifecycle_promotion,
     custom_metric_exporter,
     cve_refresh_settings,
@@ -276,6 +279,11 @@ def register_routes(app: FastAPI):
     _include_versioned(
         app, content_lifecycle_promotion.router, tags=["content-lifecycle"]
     )
+    _include_versioned(app, content_lifecycle_export.router, tags=["content-lifecycle"])
+    _include_versioned(
+        app, content_lifecycle_federation.router, tags=["content-lifecycle"]
+    )
+    _include_versioned(app, content_lifecycle_diff.router, tags=["content-lifecycle"])
     logger.debug("Content lifecycle router added")
 
     # SSO/ACS/metadata callbacks — IdP-configured URLs, kept unversioned.

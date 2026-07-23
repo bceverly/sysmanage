@@ -555,10 +555,20 @@ the explicit bullet is added to the in-progress and future phases.)
       → every file's first 5 lines contain "Copyright"; confirm no Pro+
       header contains AGPL-grant wording and no AGPL-repo header contains
       "PROPRIETARY AND CONFIDENTIAL".
+- [ ] **Version is bumped to the phase's Target Release** — the phase ships
+      at the `vX.Y.Z.W` it names under Release Versioning. Because on-disk
+      version markers are **git-tag-derived, never hand-edited**, the bump is:
+      tag `vX.Y.Z.W`, then run `make lint-version-fix` in **`sysmanage`** and
+      **`sysmanage-agent`** so every tracked marker (`frontend/package.json`,
+      `package-lock.json`, the RPM `.spec` files, and `APKBUILD`) matches the
+      tag. Hand-editing a marker instead of tagging just makes the drift check
+      flag it. (`sysmanage-professional-plus` has no product-version marker —
+      its Cython engines bump independently via `make lint-modules-version-fix`;
+      `sysmanage-docs` resolves the agent version at build time and has none.)
 
 ### Release Versioning
 
-**Current Version:** v2.4.0.0
+**Current Version:** v3.3.0.0
 
 We use four-part versioning: `major.minor.patch.build`
 
@@ -5381,21 +5391,21 @@ Scope is small and low-risk: psycopg2 is only ever the **sync / Alembic / raw-DD
 
 Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate: turn flat mirrors into versioned, promotable content.
 
-- [ ] Lifecycle Environment model (ordered path, e.g. Library → Dev → Test → Prod) + schema/migration
-- [ ] Content View = named, filtered, versioned selection of repos/packages; publish creates an immutable version
-- [ ] Content View *filters* (package allow/deny, advisory cut-off date, "security only", by-date)
-- [ ] Promotion: publish a CV version, promote env-to-env with gating + audit + rollback to a prior version
-- [ ] Per-environment repo URLs the agent repoint targets (an env is a content snapshot served at a stable URL)
-- [ ] Composite Content Views (compose multiple CVs)
-- [ ] Integration with the air-gap collector (a CV version is what gets burned to media) and federation (promote centrally, sync to sites)
-- [ ] Frontend: Content Views page (create/filter/publish/promote/diff versions), Environments lane view
-- [ ] i18n/l10n
+- [x] Lifecycle Environment model (ordered path, e.g. Library → Dev → Test → Prod) + schema/migration
+- [x] Content View = named, filtered, versioned selection of repos/packages; publish creates an immutable version
+- [x] Content View *filters* (package allow/deny, advisory cut-off date, "security only", by-date)
+- [x] Promotion: publish a CV version, promote env-to-env with gating + audit + rollback to a prior version
+- [x] Per-environment repo URLs the agent repoint targets (an env is a content snapshot served at a stable URL)
+- [x] Composite Content Views (compose multiple CVs)
+- [x] Integration with the air-gap collector (a CV version is what gets burned to media) and federation (promote centrally, sync to sites)
+- [x] Frontend: Content Views page (create/filter/publish/promote/diff versions), Environments lane view
+- [x] i18n/l10n
 
 **Estimated Size:** ~9,000 lines
 
 ### Exit Criteria
 
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
 

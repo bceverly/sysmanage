@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     Boolean,
     Column,
     DateTime,
@@ -80,6 +81,16 @@ CVV_STATUSES = (CVV_DRAFT, CVV_PUBLISHING, CVV_PUBLISHED, CVV_FAILED, CVV_DEPREC
 PROMOTION_PUBLISH = "publish"
 PROMOTION_PROMOTE = "promote"
 PROMOTION_ROLLBACK = "rollback"
+
+# Air-gap export-run lifecycle (S7a) — mirrors AirgapCollectionRun's shape:
+# QUEUED -> BUILDING_ISO -> COMPLETE | FAILED.
+EXPORT_QUEUED = "QUEUED"
+EXPORT_BUILDING_ISO = "BUILDING_ISO"
+EXPORT_COMPLETE = "COMPLETE"
+EXPORT_FAILED = "FAILED"
+EXPORT_STATUSES = (EXPORT_QUEUED, EXPORT_BUILDING_ISO, EXPORT_COMPLETE, EXPORT_FAILED)
+# Default air-gap media size (single DVD; matches AirgapCollectionRun default).
+DEFAULT_EXPORT_MEDIA_BYTES = 4_700_000_000
 
 # Retention: keep this many published versions per content view by default; the
 # API caps operator overrides at this maximum (see the design doc §8).
@@ -336,3 +347,58 @@ class EnvironmentSiteSubscription(Base):
     environment_id = Column(GUID(), nullable=False, index=True)  # soft ref
     site_id = Column(GUID(), nullable=False, index=True)  # soft ref
     created_at = Column(DateTime, nullable=False, default=_utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "environment_id": str(self.environment_id),
+            "site_id": str(self.site_id),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class ContentViewExportRun(Base):
+    """One air-gap media export of a published content-view version (S7a).
+
+    A per-tenant job that materializes a signed, immutable ISO of a CVV's store
+    (reusing the air-gap collector's ISO builders), which the air-gap repository
+    server can ingest + serve unchanged."""
+
+    __tablename__ = "content_view_export_run"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4, index=True)
+    # Soft cross-partition refs to the shared catalog.
+    content_view_id = Column(GUID(), nullable=False, index=True)
+    content_view_version_id = Column(GUID(), nullable=False)
+    version = Column(Integer, nullable=False)  # denormalized for display
+    iso_label = Column(String(80), nullable=False)
+    status = Column(String(40), nullable=False, default=EXPORT_QUEUED, index=True)
+    # The in-flight ISO-build command's message_id (dispatch correlation).
+    worker_message_id = Column(String(80), nullable=True)
+    iso_path = Column(String(500), nullable=True)
+    iso_sha256 = Column(String(64), nullable=True)
+    media_size_bytes = Column(
+        BigInteger, nullable=False, default=DEFAULT_EXPORT_MEDIA_BYTES
+    )
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    created_by = Column(GUID(), nullable=True)  # soft ref to user
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "content_view_id": str(self.content_view_id),
+            "content_view_version_id": str(self.content_view_version_id),
+            "version": self.version,
+            "iso_label": self.iso_label,
+            "status": self.status,
+            "iso_path": self.iso_path,
+            "iso_sha256": self.iso_sha256,
+            "error_message": self.error_message,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
+        }

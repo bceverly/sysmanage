@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 18:34-0400\n"
+"POT-Creation-Date: 2026-07-23 07:38-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2379,6 +2379,20 @@ msgstr "Agent-update aangevraagd"
 msgid "Package collection requested"
 msgstr "Pakketverzameling aanvraag verstuurd"
 
+#: backend/api/content_lifecycle_diff.py:79
+#, python-format
+msgid "No published version %s to diff"
+msgstr "Geen gepubliceerde versie %s om te vergelijken met"
+
+#: backend/api/content_lifecycle_diff.py:85
+msgid "No earlier published version to diff against"
+msgstr "Geen eerder gepubliceerde versie om te vergelijken met"
+
+#: backend/api/content_lifecycle_diff.py:120
+#, python-format
+msgid "No published version %s"
+msgstr "Geen gepubliceerde versie %s"
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -2912,6 +2926,10 @@ msgstr "Gebruikerstoegang update aangevraagd"
 #: backend/api/host_data_updates.py:365
 msgid "System info update requested"
 msgstr "Update van systeeminformatie aangevraagd"
+
+#: backend/api/content_lifecycle_federation.py:51
+msgid "Environment subscriptions are managed on the federation coordinator"
+msgstr "Omgevingabonnementen worden beheerd op de federatiecoördinator"
 
 #: backend/api/airgap_devices.py:79
 #, python-format
@@ -3715,6 +3733,23 @@ msgstr "Host moet in bevoegde modus draaien om dienscontrole te ondersteunen"
 msgid "Service {} requested for {} services"
 msgstr "Service {} aangevraagd voor {} services"
 
+#: backend/api/content_lifecycle_export.py:60
+msgid ""
+"Air-gap media export requires the air-gap collector engine (Enterprise). "
+"Please upgrade to access this feature."
+msgstr ""
+"Luchtgebrek-export vereist de luchtgebrek-collectorengine (Enterprise). "
+"Upgrade voor toegang tot deze functie."
+
+#: backend/api/content_lifecycle_export.py:84
+#, python-format
+msgid "No published version %s to export"
+msgstr "Geen gepubliceerde versie %s om te exporteren naar"
+
+#: backend/api/content_lifecycle_export.py:146
+msgid "ensure ISO output dir exists"
+msgstr "zorg ervoor dat de ISO-uitvoermap bestaat"
+
 #: backend/api/packages.py:109
 #, python-format
 msgid "Failed to retrieve package managers: %s"
@@ -4037,51 +4072,51 @@ msgstr "Totaal aantal vermeldingen"
 msgid "No audit log entries found."
 msgstr "Geen auditlogboekvermeldingen gevonden."
 
-#: backend/api/content_lifecycle_promotion.py:114
+#: backend/api/content_lifecycle_promotion.py:132
 msgid "Only a published content-view version can be promoted"
 msgstr "Alleen een gepubliceerde inhoudweergaveversie kan worden gepromoveerd"
 
-#: backend/api/content_lifecycle_promotion.py:251
+#: backend/api/content_lifecycle_promotion.py:269
 msgid "Source and target environments must differ"
 msgstr "Het bron- en doelmilieu moeten verschillend zijn"
 
-#: backend/api/content_lifecycle_promotion.py:256
+#: backend/api/content_lifecycle_promotion.py:274
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr ""
 "De inhoud kan alleen vooruit worden gepromoveerd langs de levenscycluspad"
 
-#: backend/api/content_lifecycle_promotion.py:263
+#: backend/api/content_lifecycle_promotion.py:281
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 "Het bronomgeving heeft geen inhoud voor deze inhoudweergave om te promoveren"
 
-#: backend/api/content_lifecycle_promotion.py:305
+#: backend/api/content_lifecycle_promotion.py:324
 msgid "This environment has no previous version to roll back to"
 msgstr "Dit milieu heeft geen eerdere versie om terug te rollen naar"
 
-#: backend/api/content_lifecycle_promotion.py:316
+#: backend/api/content_lifecycle_promotion.py:335
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "De vorige versie is ingerekend en kan niet meer hersteld worden"
 
-#: backend/api/content_lifecycle_promotion.py:412
+#: backend/api/content_lifecycle_promotion.py:431
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "Spiegel '%s' heeft een onondersteunde pakketbeheerder"
 
-#: backend/api/content_lifecycle_promotion.py:422
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
-msgid "Cannot repoint mirror '%s': %s"
-msgstr "Kan spiegel '%s' niet omleiden: %s"
+msgid "Cannot repoint mirror '%(name)s': %(err)s"
+msgstr "Kan spiegel '%(name)s' niet omleiden: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:486
+#: backend/api/content_lifecycle_promotion.py:507
 msgid "That environment has no content for this content view"
 msgstr "Die omgeving heeft geen inhoud voor deze content view"
 
-#: backend/api/content_lifecycle_promotion.py:493
+#: backend/api/content_lifecycle_promotion.py:514
 msgid "The serving host has no resolvable address"
 msgstr "De serverende host heeft geen resolvable adres"
 
-#: backend/api/content_lifecycle_promotion.py:499
+#: backend/api/content_lifecycle_promotion.py:520
 msgid "Repository mirroring is required to repoint a host"
 msgstr "Repositoryspiegeling is vereist om een host te omleiden"
 
@@ -4673,6 +4708,10 @@ msgstr "vault.secret_niet_gevonden"
 #: backend/services/vault_service.py:433
 msgid "vault.invalid_secret_format"
 msgstr "vault.ongeldig_secret_format"
+
+#, python-format
+#~ msgid "Cannot repoint mirror '%s': %s"
+#~ msgstr "Kan spiegel '%s' niet omleiden: %s"
 
 #, python-format
 #~ msgid "Hostname change failed for host %s: %s"

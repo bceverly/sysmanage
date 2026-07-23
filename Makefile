@@ -1885,6 +1885,11 @@ else
 	@find . -name "*.pyc" -delete 2>/dev/null || true
 	@rm -rf htmlcov/ .coverage
 	@cd frontend && rm -rf coverage/ dist/ 2>/dev/null || true
+	# Packaging staging scratch: build-temp holds a STALE copy of
+	# requirements.txt (build-temp/sysmanage-<ver>/) that an authenticated
+	# `safety scan` double-reports against pre-fix pins. Remove the scratch
+	# only — NOT installer/dist itself, which holds built release artifacts.
+	@rm -rf installer/dist/build-temp/ 2>/dev/null || true
 endif
 	@echo "[OK] Clean completed"
 

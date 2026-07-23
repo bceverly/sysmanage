@@ -168,6 +168,99 @@ def _enqueue_local_command(
     return cmd_message.message_id
 
 
+def _try_content_view_sync(session: Session, cmd, summary: Dict[str, Any]) -> bool:
+    """Handle a ``content_view_sync`` command (CLM Slice 7b) if that's what it is.
+
+    Such a command builds an HTTP-pull PLAN on the site's mirror host rather than
+    forwarding a bare agent command, so it's owned by the CLM service (lazy import
+    to avoid coupling federation core to CLM).  Returns True when handled — the
+    caller should then ``continue`` — or False for any other command type.
+    """
+    if cmd.command_type != "content_view_sync":
+        return False
+    from backend.services.content_lifecycle_federation_sync import (  # pylint: disable=import-outside-toplevel
+        handle_content_view_sync,
+    )
+
+    try:
+        handle_content_view_sync(session, cmd)
+        summary["dispatched"] += 1
+    except Exception:  # pylint: disable=broad-exception-caught
+        _fail_command(session, cmd, error="content_view_sync dispatch failed")
+        summary["failed"] += 1
+    return True
+
+
+def _dispatch_federated_command(
+    session: Session,
+    cmd,
+    *,
+    default_timeout: int,
+    queue_ops: Any,
+    register_correlation,
+    summary: Dict[str, Any],
+) -> None:
+    """Fan one non-CLM federated command out to its local target agents.
+
+    Best-effort: an unresolvable command type or an all-unresolvable target set
+    fails just this command (recorded in ``summary``) and returns without
+    raising, so one bad command never blocks the rest of the tick.
+    """
+    fed_id = str(cmd.id)
+    try:
+        command_type = _resolve_command_type(cmd.command_type)
+    except UnsupportedFederatedCommandError as exc:
+        _fail_command(session, cmd, error=str(exc))
+        summary["failed"] += 1
+        return
+
+    try:
+        parameters = json.loads(cmd.parameters_json or "{}")
+    except (ValueError, TypeError):
+        parameters = {}
+
+    target_ids = _parse_target_ids(cmd)
+    hosts, missing = _resolve_target_hosts(session, target_ids)
+
+    if not hosts and not missing:
+        _fail_command(session, cmd, error="no target hosts resolved")
+        summary["failed"] += 1
+        return
+
+    # Move to in_progress and seed progress BEFORE dispatching so a
+    # result that races back finds a consistent target set.
+    dispatched_ids = [str(h.id) for h in hosts]
+    progress = {
+        "target_host_ids": dispatched_ids + missing,
+        "results": {
+            hid: {"success": False, "detail": "host not found"} for hid in missing
+        },
+    }
+    cmd.result_json = json.dumps(progress, sort_keys=True)
+    inbox_svc.update_command_status(
+        session, cmd.id, new_status=inbox_svc.CMD_STATUS_IN_PROGRESS
+    )
+
+    for host in hosts:
+        message_id = _enqueue_local_command(
+            session,
+            host_id=str(host.id),
+            command_type=command_type,
+            parameters=parameters,
+            timeout=default_timeout,
+            queue_ops=queue_ops,
+        )
+        register_correlation(message_id, fed_id, str(host.id))
+        summary["messages"] += 1
+
+    summary["dispatched"] += 1
+
+    # A command whose only targets were all unresolvable is already
+    # fully "reported" — settle it immediately.
+    if not hosts and missing:
+        _settle_if_complete(session, cmd.id)
+
+
 def fanout_queued_commands(
     session: Session,
     *,
@@ -198,59 +291,16 @@ def fanout_queued_commands(
     summary = {"dispatched": 0, "messages": 0, "failed": 0}
     queued = inbox_svc.list_queued_commands(session, limit=limit)
     for cmd in queued:
-        fed_id = str(cmd.id)
-        try:
-            command_type = _resolve_command_type(cmd.command_type)
-        except UnsupportedFederatedCommandError as exc:
-            _fail_command(session, cmd, error=str(exc))
-            summary["failed"] += 1
+        if _try_content_view_sync(session, cmd, summary):
             continue
-
-        try:
-            parameters = json.loads(cmd.parameters_json or "{}")
-        except (ValueError, TypeError):
-            parameters = {}
-
-        target_ids = _parse_target_ids(cmd)
-        hosts, missing = _resolve_target_hosts(session, target_ids)
-
-        if not hosts and not missing:
-            _fail_command(session, cmd, error="no target hosts resolved")
-            summary["failed"] += 1
-            continue
-
-        # Move to in_progress and seed progress BEFORE dispatching so a
-        # result that races back finds a consistent target set.
-        dispatched_ids = [str(h.id) for h in hosts]
-        progress = {
-            "target_host_ids": dispatched_ids + missing,
-            "results": {
-                hid: {"success": False, "detail": "host not found"} for hid in missing
-            },
-        }
-        cmd.result_json = json.dumps(progress, sort_keys=True)
-        inbox_svc.update_command_status(
-            session, cmd.id, new_status=inbox_svc.CMD_STATUS_IN_PROGRESS
+        _dispatch_federated_command(
+            session,
+            cmd,
+            default_timeout=default_timeout,
+            queue_ops=queue_ops,
+            register_correlation=register_federation_command_correlation,
+            summary=summary,
         )
-
-        for host in hosts:
-            message_id = _enqueue_local_command(
-                session,
-                host_id=str(host.id),
-                command_type=command_type,
-                parameters=parameters,
-                timeout=default_timeout,
-                queue_ops=queue_ops,
-            )
-            register_federation_command_correlation(message_id, fed_id, str(host.id))
-            summary["messages"] += 1
-
-        summary["dispatched"] += 1
-
-        # A command whose only targets were all unresolvable is already
-        # fully "reported" — settle it immediately.
-        if not hosts and missing:
-            _settle_if_complete(session, cmd.id)
 
     session.commit()
     logger.info(

@@ -367,6 +367,139 @@ def _log_op_result(
     )
 
 
+def _apply_cv_export_result(
+    export_id: str, host_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Flip a ``ContentViewExportRun`` COMPLETE/FAILED when its ISO build finishes
+    on the mirror host (Slice 7a)."""
+    from backend.persistence.models.content_lifecycle import (  # noqa: PLC0415
+        EXPORT_COMPLETE,
+        EXPORT_FAILED,
+    )
+    from backend.services.proplus_dispatch import (  # noqa: PLC0415
+        _best_failure_text,
+        _now_naive,
+    )
+
+    with _tenant_session_for_host(host_id) as session:
+        run = (
+            session.query(models.ContentViewExportRun)
+            .filter(models.ContentViewExportRun.id == export_id)
+            .first()
+        )
+        if run is None:
+            logger.info(
+                "ContentViewExportRun %s no longer exists; dropping export result",
+                export_id,
+            )
+            return
+        run.worker_message_id = None
+        run.completed_at = _now_naive()
+        if outcome.get("status") == "succeeded":
+            run.status = EXPORT_COMPLETE
+            run.error_message = None
+        else:
+            run.status = EXPORT_FAILED
+            run.error_message = _best_failure_text(outcome)[:8000]
+        session.commit()
+        logger.info(
+            "content view export %s -> %s (host %s)", export_id, run.status, host_id
+        )
+
+
+def _apply_cv_pull_result(cmd_id: str, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Site side (Slice 7b): flip the ``content_view_sync`` received-command
+    COMPLETE/FAILED when its HTTP-pull plan finishes on the site's mirror host.
+    The site's report-back worker then acks the coordinator."""
+    from backend.services import federation_inbox_service as inbox  # noqa: PLC0415
+
+    with _tenant_session_for_host(host_id) as session:
+        try:
+            if outcome.get("status") == "succeeded":
+                inbox.update_command_status(
+                    session,
+                    cmd_id,
+                    new_status=inbox.CMD_STATUS_COMPLETED,
+                    result={"ok": True},
+                )
+            else:
+                from backend.services.proplus_dispatch import (
+                    _best_failure_text,
+                )  # noqa: PLC0415
+
+                inbox.update_command_status(
+                    session,
+                    cmd_id,
+                    new_status=inbox.CMD_STATUS_FAILED,
+                    result={"error": _best_failure_text(outcome)[:500]},
+                )
+            session.commit()
+            logger.info(
+                "content_lifecycle: site pull for command %s -> %s (host %s)",
+                cmd_id,
+                outcome.get("status"),
+                host_id,
+            )
+        except Exception:  # noqa: BLE001 - result routing must not crash the tick
+            logger.exception(
+                "content_lifecycle: cv_pull result update failed for command %s",
+                cmd_id,
+            )
+
+
+def _packages(stdout) -> set:
+    """Package basenames from a ``list packages`` command's stdout."""
+    return {line.strip() for line in (stdout or "").splitlines() if line.strip()}
+
+
+def _apply_cv_diff_result(cvv_id: str, host_id: str, outcome: Dict[str, Any]) -> None:
+    """Version diff (Slice 8): the plan listed the previous + current version
+    stores' packages (commands ``[previous, current]``); compare their stdouts
+    and store added/removed on the current version's ``manifest``."""
+    commands = outcome.get("commands") or []
+    if len(commands) < 2:
+        logger.warning(
+            "content_lifecycle diff: expected 2 command outputs, got %d (cvv %s)",
+            len(commands),
+            cvv_id,
+        )
+        return
+    prev = _packages(commands[0].get("stdout"))
+    cur = _packages(commands[1].get("stdout"))
+    added = sorted(cur - prev)[:2000]
+    removed = sorted(prev - cur)[:2000]
+
+    from backend.services.proplus_dispatch import _now_naive  # noqa: PLC0415
+
+    session_local = shared_sessionmaker()
+    with session_local() as session:
+        row = (
+            session.query(models.SharedContentViewVersion)
+            .filter(models.SharedContentViewVersion.id == cvv_id)
+            .first()
+        )
+        if row is None:
+            logger.info("SharedContentViewVersion %s gone; dropping diff", cvv_id)
+            return
+        manifest = dict(row.manifest or {})
+        manifest["diff_from_prev"] = {
+            "added": added,
+            "removed": removed,
+            "added_count": len(added),
+            "removed_count": len(removed),
+            "at": _now_naive().isoformat(),
+        }
+        row.manifest = manifest  # reassign so SQLAlchemy tracks the JSON change
+        session.commit()
+        logger.info(
+            "content view version %s diff: +%d -%d (host %s)",
+            cvv_id,
+            len(added),
+            len(removed),
+            host_id,
+        )
+
+
 def _apply_content_lifecycle_op_result(
     primary_id: str, host_id: str, outcome: Dict[str, Any]
 ) -> None:
@@ -383,6 +516,12 @@ def _apply_content_lifecycle_op_result(
         _apply_publish_result(cvv_id, host_id, outcome)
     elif action == "reclaim" and cvv_id:
         _log_reclaim_result(cvv_id, host_id, outcome)
+    elif action == "cv_export" and cvv_id:
+        _apply_cv_export_result(cvv_id, host_id, outcome)
+    elif action == "cv_pull" and cvv_id:
+        _apply_cv_pull_result(cvv_id, host_id, outcome)
+    elif action == "cv_diff" and cvv_id:
+        _apply_cv_diff_result(cvv_id, host_id, outcome)
     elif action in _LOG_ONLY_OPS:
         _log_op_result(action, cvv_id, host_id, outcome)
     else:

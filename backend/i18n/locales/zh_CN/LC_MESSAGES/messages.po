@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 18:34-0400\n"
+"POT-Creation-Date: 2026-07-23 07:38-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -2286,6 +2286,20 @@ msgstr "已请求代理更新"
 msgid "Package collection requested"
 msgstr "请求包集合"
 
+#: backend/api/content_lifecycle_diff.py:79
+#, python-format
+msgid "No published version %s to diff"
+msgstr "没有可与之进行比较的已发布版本 %s"
+
+#: backend/api/content_lifecycle_diff.py:85
+msgid "No earlier published version to diff against"
+msgstr "没有更早的已发布版本可以进行比较"
+
+#: backend/api/content_lifecycle_diff.py:120
+#, python-format
+msgid "No published version %s"
+msgstr "未发布版本 %s"
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -2785,6 +2799,10 @@ msgstr "已请求用户访问更新"
 #: backend/api/host_data_updates.py:365
 msgid "System info update requested"
 msgstr "系统信息更新请求"
+
+#: backend/api/content_lifecycle_federation.py:51
+msgid "Environment subscriptions are managed on the federation coordinator"
+msgstr "环境订阅由联邦协调器管理"
 
 #: backend/api/airgap_devices.py:79
 #, python-format
@@ -3542,6 +3560,21 @@ msgstr "服务控制需要主机在特权模式下运行"
 msgid "Service {} requested for {} services"
 msgstr "请求了{}服务的服务{}"
 
+#: backend/api/content_lifecycle_export.py:60
+msgid ""
+"Air-gap media export requires the air-gap collector engine (Enterprise). "
+"Please upgrade to access this feature."
+msgstr "空气隔断介质导出需要使用空气隔断收集器引擎（企业版）。请升级以访问此功能。"
+
+#: backend/api/content_lifecycle_export.py:84
+#, python-format
+msgid "No published version %s to export"
+msgstr "没有可用于导出的已发布版本 %s"
+
+#: backend/api/content_lifecycle_export.py:146
+msgid "ensure ISO output dir exists"
+msgstr "确保 ISO 输出目录存在"
+
 #: backend/api/packages.py:109
 #, python-format
 msgid "Failed to retrieve package managers: %s"
@@ -3860,49 +3893,49 @@ msgstr "总条目数"
 msgid "No audit log entries found."
 msgstr "未找到审计日志条目。"
 
-#: backend/api/content_lifecycle_promotion.py:114
+#: backend/api/content_lifecycle_promotion.py:132
 msgid "Only a published content-view version can be promoted"
 msgstr "只有已发布的ContentView版本才能被推广"
 
-#: backend/api/content_lifecycle_promotion.py:251
+#: backend/api/content_lifecycle_promotion.py:269
 msgid "Source and target environments must differ"
 msgstr "源环境和目标环境必须不同"
 
-#: backend/api/content_lifecycle_promotion.py:256
+#: backend/api/content_lifecycle_promotion.py:274
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr "内容只能沿生命周期路径向前推广"
 
-#: backend/api/content_lifecycle_promotion.py:263
+#: backend/api/content_lifecycle_promotion.py:281
 msgid "The source environment has no content for this content view to promote"
 msgstr "源环境中没有此ContentView的内容可以推广"
 
-#: backend/api/content_lifecycle_promotion.py:305
+#: backend/api/content_lifecycle_promotion.py:324
 msgid "This environment has no previous version to roll back to"
 msgstr "该环境中没有可回滚到的前一版本"
 
-#: backend/api/content_lifecycle_promotion.py:316
+#: backend/api/content_lifecycle_promotion.py:335
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "前一版本已被回收，无法恢复"
 
-#: backend/api/content_lifecycle_promotion.py:412
+#: backend/api/content_lifecycle_promotion.py:431
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "镜像 '%s' 使用不受支持的包管理器"
 
-#: backend/api/content_lifecycle_promotion.py:422
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
-msgid "Cannot repoint mirror '%s': %s"
-msgstr "无法重新指向镜像 '%s': %s"
+msgid "Cannot repoint mirror '%(name)s': %(err)s"
+msgstr "无法重新指向镜像 '%(name)s'：%(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:486
+#: backend/api/content_lifecycle_promotion.py:507
 msgid "That environment has no content for this content view"
 msgstr "该环境中没有此内容视图的内容"
 
-#: backend/api/content_lifecycle_promotion.py:493
+#: backend/api/content_lifecycle_promotion.py:514
 msgid "The serving host has no resolvable address"
 msgstr "提供服务的主机没有任何可解析地址"
 
-#: backend/api/content_lifecycle_promotion.py:499
+#: backend/api/content_lifecycle_promotion.py:520
 msgid "Repository mirroring is required to repoint a host"
 msgstr "必须启用仓库镜像才能重新指向主机"
 
@@ -4467,6 +4500,10 @@ msgstr "vault.secret_not_found"
 #: backend/services/vault_service.py:433
 msgid "vault.invalid_secret_format"
 msgstr "vault.invalid_secret_format"
+
+#, python-format
+#~ msgid "Cannot repoint mirror '%s': %s"
+#~ msgstr "无法重新指向镜像 '%s': %s"
 
 #, python-format
 #~ msgid "Hostname change failed for host %s: %s"

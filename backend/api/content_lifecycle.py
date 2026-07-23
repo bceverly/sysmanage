@@ -504,13 +504,13 @@ async def update_content_view(
     if body.keep_versions is not None:
         cv.keep_versions = _clamp_keep_versions(body.keep_versions)
     if body.repos is not None:
-        for existing in list(cv.repos):
+        for existing in cv.repos:
             db.delete(existing)
         db.flush()
         for row in _cv_repo_rows(cv, body.repos):
             db.add(row)
     if body.filters is not None:
-        for existing in list(cv.filters):
+        for existing in cv.filters:
             db.delete(existing)
         db.flush()
         for row in _cv_filter_rows(cv, body.filters):
@@ -624,6 +624,20 @@ def _resolve_cv_filters(shared_db: Session, cv, package_managers) -> List[dict]:
     return primitives
 
 
+def _mirror_settings_or_400(tenant_db: Session):
+    """Return the singleton MirrorSettings row, or raise HTTP 400 if unset.
+
+    Keeps the gettext msgid in one place (evaluated at call time, so the active
+    request locale still applies) while removing the duplicated query/None-check.
+    """
+    settings = tenant_db.query(models.MirrorSettings).first()
+    if settings is None:
+        raise HTTPException(
+            status_code=400, detail=_("Mirror settings are not configured")
+        )
+    return settings
+
+
 def _resolve_cv_publish_targets(cv, tenant_db: Session):
     """Resolve a CV's members to (host_id, mirror_root, [(mirror_config, snap)]).
 
@@ -640,11 +654,7 @@ def _resolve_cv_publish_targets(cv, tenant_db: Session):
         raise HTTPException(
             status_code=400, detail=_("Content view has no repositories to publish")
         )
-    settings = tenant_db.query(models.MirrorSettings).first()
-    if settings is None:
-        raise HTTPException(
-            status_code=400, detail=_("Mirror settings are not configured")
-        )
+    settings = _mirror_settings_or_400(tenant_db)
 
     host_id = None
     targets = []
@@ -760,11 +770,7 @@ def _resolve_cv_serving_host(cv, shared_db: Session, tenant_db: Session):
         raise HTTPException(
             status_code=400, detail=_("Content view has no repositories")
         )
-    settings = tenant_db.query(models.MirrorSettings).first()
-    if settings is None:
-        raise HTTPException(
-            status_code=400, detail=_("Mirror settings are not configured")
-        )
+    settings = _mirror_settings_or_400(tenant_db)
     host_id = None
     mirrors = []
     for member in members:
@@ -785,11 +791,7 @@ def _resolve_composite_publish(cv, shared_db: Session, tenant_db: Session):
     "package_manager"}]}`` -- the newest PUBLISHED version of each component CV
     and the mirrors it carries.  All components (and the composite) must share one
     serving host."""
-    settings = tenant_db.query(models.MirrorSettings).first()
-    if settings is None:
-        raise HTTPException(
-            status_code=400, detail=_("Mirror settings are not configured")
-        )
+    settings = _mirror_settings_or_400(tenant_db)
     comps = _component_cvs(cv, shared_db)
     if not comps:
         raise HTTPException(
