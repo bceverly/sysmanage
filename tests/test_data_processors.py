@@ -329,6 +329,46 @@ class TestProcessSoftwarePackages:
         mock_db.add.assert_called_once()
 
     @patch("backend.websocket.data_processors.SoftwarePackage")
+    def test_process_software_packages_snap_channel_fields(self, mock_package):
+        """Snap channel/revision/confinement are persisted (Phase 17.1)."""
+        from backend.websocket.data_processors import process_software_packages
+
+        mock_db = MagicMock()
+        packages_data = [
+            {
+                "package_name": "code",
+                "version": "1.52.1",
+                "package_manager": "snap",
+                "channel": "latest/stable",
+                "revision": "54",
+                "confinement": "classic",
+            }
+        ]
+
+        process_software_packages(mock_db, "test-host-id", packages_data)
+
+        kwargs = mock_package.call_args.kwargs
+        assert kwargs["channel"] == "latest/stable"
+        assert kwargs["revision"] == "54"
+        assert kwargs["confinement"] == "classic"
+
+    @patch("backend.websocket.data_processors.SoftwarePackage")
+    def test_process_software_packages_non_snap_leaves_channel_none(self, mock_package):
+        """A non-snap package leaves the snap-only columns NULL."""
+        from backend.websocket.data_processors import process_software_packages
+
+        mock_db = MagicMock()
+        process_software_packages(
+            mock_db,
+            "h",
+            [{"package_name": "vim", "version": "8.2", "package_manager": "apt"}],
+        )
+        kwargs = mock_package.call_args.kwargs
+        assert kwargs["channel"] is None
+        assert kwargs["revision"] is None
+        assert kwargs["confinement"] is None
+
+    @patch("backend.websocket.data_processors.SoftwarePackage")
     def test_process_software_packages_multiple(self, mock_package):
         """Test processing multiple software packages."""
         from backend.websocket.data_processors import process_software_packages

@@ -79,6 +79,9 @@ async def handle_software_update(db: Session, connection, message_data: dict):
                     package_description=package.get("description"),
                     architecture=package.get("architecture"),
                     install_path=package.get("installation_path"),
+                    channel=package.get("channel"),
+                    revision=package.get("revision"),
+                    confinement=package.get("confinement"),
                     created_at=now,
                     updated_at=now,
                 )
