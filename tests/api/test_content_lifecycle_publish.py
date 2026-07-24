@@ -58,6 +58,27 @@ class _FakeEngine:
             "commands": [{"argv": ["echo", name, snapshot_id]}],
         }
 
+    def build_snap_materialize_plan(self, mirror_root, mirror_names, store_parent):
+        """Also stands in for snap_proxy_engine (single fake for all modules)."""
+        self._capture["snap_mirror_names"] = list(mirror_names)
+        return {
+            "engine": "snap_proxy_engine",
+            "action": "snap_materialize",
+            "store_path": f"{store_parent}/snaps",
+            "commands": [
+                {
+                    "argv": [
+                        "sudo",
+                        "rsync",
+                        "-aH",
+                        f"{mirror_root}/{n}/snaps/",
+                        f"{store_parent}/snaps/",
+                    ]
+                }
+                for n in mirror_names
+            ],
+        }
+
 
 @pytest.fixture
 def env():
@@ -84,6 +105,7 @@ def env():
             models.MirrorRepository.__table__,
             models.MirrorSnapshot.__table__,
             models.MirrorSettings.__table__,
+            models.MirrorSnapContent.__table__,
         ],
     )
     shared_s = sessionmaker(bind=shared_engine)
@@ -221,6 +243,53 @@ class TestPublish:
         ]
         assert env.dispatched["action"] == "publish_materialize"
         assert env.dispatched["cvv_id"] == body["id"]
+
+    def _add_snap(self, env, mirror_id, *, status):
+        db = env.tenant_s()
+        try:
+            db.add(
+                models.MirrorSnapContent(
+                    repository_id=uuid.UUID(mirror_id),
+                    snap_name="hello",
+                    channel="latest/stable",
+                    capture_status=status,
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+
+    def test_publish_materializes_captured_snaps(self, env):
+        # Phase 17.1: a CAPTURED snap on a member mirror rides into the store.
+        host = str(uuid.uuid4())
+        mirror = _seed_mirror(env, host_id=host)
+        self._add_snap(env, mirror, status="CAPTURED")
+        cv_id = _make_cv(env, "RHEL9+snap", [mirror])
+
+        r = env.client.post(f"{_CV}/{cv_id}/publish")
+        assert r.status_code == 200, r.text
+        argvs = [c["argv"] for c in env.dispatched["plan"]["commands"]]
+        # repo-materialize echo first, then the snap rsync into the store's snaps.
+        assert argvs[0] == ["echo", "rhel9", "20260101T000000"]
+        assert any(
+            a[:3] == ["sudo", "rsync", "-aH"] and a[-1].endswith("/snaps/")
+            for a in argvs
+        )
+        assert env.dispatched["snap_mirror_names"] == ["rhel9"]
+
+    def test_publish_ignores_uncaptured_snaps(self, env):
+        # A merely-TRACKED (not yet captured) snap must NOT be materialized.
+        host = str(uuid.uuid4())
+        mirror = _seed_mirror(env, host_id=host)
+        self._add_snap(env, mirror, status="TRACKED")
+        cv_id = _make_cv(env, "RHEL9", [mirror])
+
+        r = env.client.post(f"{_CV}/{cv_id}/publish")
+        assert r.status_code == 200
+        assert env.dispatched["plan"]["commands"] == [
+            {"argv": ["echo", "rhel9", "20260101T000000"]}
+        ]
+        assert "snap_mirror_names" not in env.dispatched
 
     def test_version_increments(self, env):
         host = str(uuid.uuid4())

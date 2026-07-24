@@ -56,6 +56,19 @@ def _check_mirror_module():
     return engine
 
 
+def _check_snap_proxy_module():
+    engine = module_loader.get_module("snap_proxy_engine")
+    if engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Snap store proxy requires a SysManage Professional+ license. "
+                "Please upgrade to access this feature."
+            ),
+        )
+    return engine
+
+
 def _get_settings(db: Session) -> models.MirrorSettings:
     row = (
         db.query(models.MirrorSettings)

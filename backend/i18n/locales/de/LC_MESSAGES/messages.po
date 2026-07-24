@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-23 07:38-0400\n"
+"POT-Creation-Date: 2026-07-24 08:57-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -189,6 +189,22 @@ msgstr "Die Beratungsverwaltung erfordert eine SysManage Professional Lizenz."
 msgid "No applicable packages for this advisory on this host."
 msgstr "Keine anwendbaren Pakete für diese Beratung auf diesem Host."
 
+#: backend/api/repository_mirroring_snaps.py:121
+msgid "Tracked snap not found"
+msgstr "Verfolgter Snap nicht gefunden"
+
+#: backend/api/repository_mirroring_snaps.py:124
+msgid "Snap untracked"
+msgstr "Verfolgter Snap nicht gefunden"
+
+#: backend/api/repository_mirroring_snaps.py:142
+msgid "No snaps are tracked for this mirror"
+msgstr "Keine Snaps werden für diesen Spiegel verfolgt"
+
+#: backend/api/repository_mirroring_snaps.py:178
+msgid "Snap capture dispatched"
+msgstr "Snap-Aufnahme ausgelöst"
+
 #: backend/api/security_roles.py:94 backend/api/security_roles.py:155
 msgid "You do not have permission to view user security roles"
 msgstr "Sie haben keine Berechtigung, Benutzer-Sicherheitsrollen anzuzeigen"
@@ -343,62 +359,62 @@ msgstr "Hardware aktualisiert"
 msgid "Failed to update hardware information"
 msgstr "Hardwareinformation konnte nicht aktualisiert werden"
 
-#: backend/api/handlers/software_package_handlers.py:105
+#: backend/api/handlers/software_package_handlers.py:108
 msgid "software_inventory_updated"
 msgstr "Software-Inventar aktualisiert"
 
-#: backend/api/handlers/software_package_handlers.py:114
+#: backend/api/handlers/software_package_handlers.py:117
 msgid "Failed to update software inventory"
 msgstr "Fehler beim Aktualisieren der Software-Inventarliste"
 
-#: backend/api/handlers/software_package_handlers.py:292
+#: backend/api/handlers/software_package_handlers.py:295
 #: backend/api/updates/report_routes.py:75
 #, python-format
 msgid "Failed to store updates: %s"
 msgstr "Fehler beim Speichern der Updates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:407
+#: backend/api/handlers/software_package_handlers.py:410
 #, python-format
 msgid "Failed to process package collection result: %s"
 msgstr "Fehler beim Verarbeiten des Paket-Sammlergebnisses: %s"
 
-#: backend/api/handlers/software_package_handlers.py:501
+#: backend/api/handlers/software_package_handlers.py:504
 #, python-format
 msgid "Failed to process third-party repository update: %s"
 msgstr ""
 "Fehler beim Verarbeiten der Drittanbieter-Repository-Aktualisierung: %s"
 
-#: backend/api/handlers/software_package_handlers.py:584
+#: backend/api/handlers/software_package_handlers.py:587
 #, python-format
 msgid "Failed to process antivirus status update: %s"
 msgstr "Fehler beim Verarbeiten des Antivirus-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:715
+#: backend/api/handlers/software_package_handlers.py:718
 #, python-format
 msgid "Failed to process commercial antivirus status update: %s"
 msgstr "Fehler beim Verarbeiten des kommerziellen Antivirus-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:817
+#: backend/api/handlers/software_package_handlers.py:820
 #, python-format
 msgid "Failed to process firewall status update: %s"
 msgstr "Fehler beim Verarbeiten des Firewall-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:903
+#: backend/api/handlers/software_package_handlers.py:906
 #, python-format
 msgid "Failed to process Graylog status update: %s"
 msgstr "Fehler beim Verarbeiten des Graylog-Statusupdates: %s"
 
-#: backend/api/handlers/software_package_handlers.py:935
+#: backend/api/handlers/software_package_handlers.py:938
 msgid "Missing request_id in installation_complete"
 msgstr "Fehlender request_id in installation_complete"
 
-#: backend/api/handlers/software_package_handlers.py:952
+#: backend/api/handlers/software_package_handlers.py:955
 #: backend/api/agent.py:747 backend/api/packages.py:469
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "Installationsanfrage nicht gefunden: %s"
 
-#: backend/api/handlers/software_package_handlers.py:993
+#: backend/api/handlers/software_package_handlers.py:996
 #: backend/api/packages.py:489
 #, python-format
 msgid "Failed to record installation completion: %s"
@@ -407,7 +423,7 @@ msgstr "Fehler beim Aufnehmen der Installationserfolgsnachricht: %s"
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:128
+#: backend/api/repository_mirroring_helpers.py:141
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "Ungültige UUID für %(field)s: %(value)s"
@@ -1931,7 +1947,7 @@ msgstr ""
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "Fehler beim Trennen von OpenTelemetry von Grafana: %s"
 
-#: backend/api/content_lifecycle.py:62
+#: backend/api/content_lifecycle.py:63
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise)"
 " license. Please upgrade to access this feature."
@@ -1940,126 +1956,125 @@ msgstr ""
 "(Enterprise)-Lizenz. Bitte aktualisieren Sie die Lizenz, um diese Funktion "
 "zu nutzen."
 
-#: backend/api/content_lifecycle.py:119
+#: backend/api/content_lifecycle.py:120
 msgid "Environment name is required"
 msgstr "Der Umgebungsname ist erforderlich"
 
-#: backend/api/content_lifecycle.py:121
+#: backend/api/content_lifecycle.py:122
 msgid "Environment name is too long"
 msgstr "Der Umgebungsname ist zu lang"
 
-#: backend/api/content_lifecycle.py:132
+#: backend/api/content_lifecycle.py:133
 msgid "Environment not found"
 msgstr "Umgebung nicht gefunden"
 
-#: backend/api/content_lifecycle.py:147 backend/api/content_lifecycle.py:182
+#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
 msgid "An environment with that name already exists"
 msgstr "Eine Umgebung mit diesem Namen existiert bereits"
 
-#: backend/api/content_lifecycle.py:201
+#: backend/api/content_lifecycle.py:202
 msgid "The Library environment cannot be deleted"
 msgstr "Die Library-Umgebung kann nicht gelöscht werden"
 
-#: backend/api/content_lifecycle.py:223
+#: backend/api/content_lifecycle.py:224
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids müssen jede Umgebung genau einmal auflisten"
 
-#: backend/api/content_lifecycle.py:227
+#: backend/api/content_lifecycle.py:228
 msgid "The Library environment must remain first"
 msgstr "Die Library-Umgebung muss die erste bleiben"
 
-#: backend/api/content_lifecycle.py:287
+#: backend/api/content_lifecycle.py:288
 msgid "Content view name is required"
 msgstr "Der Name der Inhaltsansicht ist erforderlich"
 
-#: backend/api/content_lifecycle.py:289
+#: backend/api/content_lifecycle.py:290
 msgid "Content view name is too long"
 msgstr "Der Inhalt der Ansicht ist zu lang"
 
-#: backend/api/content_lifecycle.py:307
+#: backend/api/content_lifecycle.py:308
 msgid "Content view not found"
 msgstr "Inhaltansicht nicht gefunden"
 
-#: backend/api/content_lifecycle.py:318
+#: backend/api/content_lifecycle.py:319
 msgid "Each content-view member needs a mirror or component CV"
 msgstr ""
 "Jedes Mitglied der Inhaltsansicht benötigt ein Spiegel- oder Komponenten-CV"
 
-#: backend/api/content_lifecycle.py:363
+#: backend/api/content_lifecycle.py:364
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr "Unbekannter Filtertyp: %s"
 
-#: backend/api/content_lifecycle.py:369
+#: backend/api/content_lifecycle.py:370
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
 msgstr "Der '%s'-Filter erfordert den Advisory-Engine, die nicht geladen ist"
 
-#: backend/api/content_lifecycle.py:379
+#: backend/api/content_lifecycle.py:380
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr "Der '%s'-Filter benötigt eine nicht leere 'Pakete'-Liste"
 
-#: backend/api/content_lifecycle.py:389
+#: backend/api/content_lifecycle.py:390
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr "Der '%s'-Filter benötigt ein 'Datum' (JJTT-MM-TT)"
 
-#: backend/api/content_lifecycle.py:451 backend/api/content_lifecycle.py:499
+#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
 msgid "A content view with that name already exists"
 msgstr "Eine Inhaltsansicht mit diesem Namen existiert bereits"
 
-#: backend/api/content_lifecycle.py:636
-msgid "Composite content views cannot be published yet"
-msgstr "Kompositionssichter können derzeit noch nicht veröffentlicht werden"
-
-#: backend/api/content_lifecycle.py:641
-msgid "Content view has no repositories to publish"
-msgstr "Inhaltansicht hat keine zu veröffentlichenden Repositories"
-
-#: backend/api/content_lifecycle.py:646 backend/api/content_lifecycle.py:766
-#: backend/api/content_lifecycle.py:791
+#: backend/api/content_lifecycle.py:637
 msgid "Mirror settings are not configured"
 msgstr "Spiegel-Einstellungen sind nicht konfiguriert"
 
-#: backend/api/content_lifecycle.py:659 backend/api/content_lifecycle.py:703
+#: backend/api/content_lifecycle.py:651
+msgid "Composite content views cannot be published yet"
+msgstr "Kompositionssichter können derzeit noch nicht veröffentlicht werden"
+
+#: backend/api/content_lifecycle.py:656
+msgid "Content view has no repositories to publish"
+msgstr "Inhaltansicht hat keine zu veröffentlichenden Repositories"
+
+#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
 msgid "A referenced mirror no longer exists"
 msgstr "Eine referenzierte Spiegelung existiert nicht mehr"
 
-#: backend/api/content_lifecycle.py:664 backend/api/content_lifecycle.py:708
+#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "Spiegel '%s' hat keine Host-Zuordnung"
 
-#: backend/api/content_lifecycle.py:672 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 "Alle Spiegel in einer Inhaltsansicht müssen in dieser Version einen "
 "gemeinsamen Host teilen"
 
-#: backend/api/content_lifecycle.py:685
+#: backend/api/content_lifecycle.py:696
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""
 "\"%s\"-Spiegel hat noch keine Momentaufnahme; für ein Ver\\u00f6ffentlichen "
 "erstellen Sie eine Momentaufnahme"
 
-#: backend/api/content_lifecycle.py:761
+#: backend/api/content_lifecycle.py:772
 msgid "Content view has no repositories"
 msgstr "Die Inhaltsansicht enthält keine Repositories"
 
-#: backend/api/content_lifecycle.py:797
+#: backend/api/content_lifecycle.py:800
 msgid "Composite content view has no component content views"
 msgstr ""
 "Die zusammengesetzte Inhaltsansicht enthält keine Komponenten-"
 "Inhaltsansichten"
 
-#: backend/api/content_lifecycle.py:806
+#: backend/api/content_lifecycle.py:809
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr "Komponente '%s' hat noch keine veröffentlichte Version"
 
-#: backend/api/content_lifecycle.py:825
+#: backend/api/content_lifecycle.py:828
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr "Komponente '%s' hat keine Repositorys"
@@ -4082,6 +4097,14 @@ msgstr ""
 "Repository-Spiegelung erfordert eine SysManage Professional+ Lizenz. Bitte "
 "aktualisieren Sie, um diese Funktion zu nutzen."
 
+#: backend/api/repository_mirroring_helpers.py:65
+msgid ""
+"Snap store proxy requires a SysManage Professional+ license. Please upgrade "
+"to access this feature."
+msgstr ""
+"Der Snap-Store-Proxy erfordert eine SysManage Professional+ Lizenz. Bitte "
+"aktualisieren Sie, um diese Funktion zu nutzen."
+
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
 #, python-format
@@ -4164,59 +4187,59 @@ msgstr "Einträge gesamt"
 msgid "No audit log entries found."
 msgstr "Keine Auditprotokolleinträge gefunden."
 
-#: backend/api/content_lifecycle_promotion.py:132
+#: backend/api/content_lifecycle_promotion.py:133
 msgid "Only a published content-view version can be promoted"
 msgstr ""
 "Nur eine veröffentlichte Inhaltsansichts-Version kann promoviert werden"
 
-#: backend/api/content_lifecycle_promotion.py:269
+#: backend/api/content_lifecycle_promotion.py:270
 msgid "Source and target environments must differ"
 msgstr "Quell- und Zielumgebungen müssen sich unterscheiden"
 
-#: backend/api/content_lifecycle_promotion.py:274
+#: backend/api/content_lifecycle_promotion.py:275
 msgid "Content can only be promoted forward along the lifecycle path"
 msgstr ""
 "Der Inhalt kann nur entlang des Lebenszyklus-Pfades vorwärts promoviert "
 "werden"
 
-#: backend/api/content_lifecycle_promotion.py:281
+#: backend/api/content_lifecycle_promotion.py:282
 msgid "The source environment has no content for this content view to promote"
 msgstr ""
 "Die Quelsumgebung enthält keinen Inhalt für diese Inhaltsansicht zur "
 "Promotion"
 
-#: backend/api/content_lifecycle_promotion.py:324
+#: backend/api/content_lifecycle_promotion.py:325
 msgid "This environment has no previous version to roll back to"
 msgstr ""
 "Diese Umgebung hat keine vorherige Version, auf die zurückgeschaltet werden "
 "kann"
 
-#: backend/api/content_lifecycle_promotion.py:335
+#: backend/api/content_lifecycle_promotion.py:336
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 "Die vorherige Version wurde zurückgefordert und kann nicht mehr restauriert "
 "werden"
 
-#: backend/api/content_lifecycle_promotion.py:431
+#: backend/api/content_lifecycle_promotion.py:432
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr ""
 "Der Spiegel ‘%s’ hat einen nicht unterstützten Paketverwaltungsmanager"
 
-#: backend/api/content_lifecycle_promotion.py:442
+#: backend/api/content_lifecycle_promotion.py:443
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Kann Spiegel '%(name)s' nicht neu bestimmen: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:507
+#: backend/api/content_lifecycle_promotion.py:508
 msgid "That environment has no content for this content view"
 msgstr "Diese Umgebung enthält für diese Inhaltsansicht keine Inhalte"
 
-#: backend/api/content_lifecycle_promotion.py:514
+#: backend/api/content_lifecycle_promotion.py:515
 msgid "The serving host has no resolvable address"
 msgstr "Der dienstbietende Host hat keine auflösbare Adresse"
 
-#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:521
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 "Das Synchronisieren des Repository-Spiegels ist erforderlich, um den Host "

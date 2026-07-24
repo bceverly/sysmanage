@@ -202,6 +202,7 @@ __all__ = [
     # Repository mirroring (Phase 10.4)
     "MirrorRepository",
     "MirrorSnapshot",
+    "MirrorSnapContent",
     "MirrorSettings",
     "MirrorSetupStatus",
     "MirrorPlatformConfig",

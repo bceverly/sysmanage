@@ -59,6 +59,8 @@ def _apply_repo_mirror_op_result(
     with session_local() as session:
         if action in ("sync", "snapshot", "restore", "integrity_check", "gc"):
             _apply_mirror_sync_status(session, action, mirror_id, outcome)
+        elif action == "snap_capture":
+            _apply_snap_capture_result(session, mirror_id, outcome)
         elif action == "setup_check":
             _apply_mirror_setup_check(session, host_id, outcome)
         elif action == "setup_install":
@@ -139,6 +141,44 @@ _ACTION_COLUMN_PREFIX = {
     "integrity_check": "last_integrity",
     "gc": "last_gc",
 }
+
+
+def _apply_snap_capture_result(
+    session, mirror_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Flip a mirror's in-flight (DISPATCHED) ``mirror_snap_content`` rows to
+    CAPTURED / FAILED after a ``snap_proxy_engine`` capture plan completes.
+
+    The capture plan captures all of a mirror's tracked snaps in one dispatch,
+    so the whole DISPATCHED set for the mirror moves together.  On success the
+    blobs + assertions are on disk under the mirror's ``snaps`` dir (a later
+    content-view publish materializes them into the version store); on failure
+    the error text is recorded so the UI can surface it.
+    """
+    # pylint: disable=import-outside-toplevel
+    from backend.services.proplus_dispatch import _best_failure_text, _now_naive
+
+    if not mirror_id:
+        return
+    rows = (
+        session.query(models.MirrorSnapContent)
+        .filter(
+            models.MirrorSnapContent.repository_id == mirror_id,
+            models.MirrorSnapContent.capture_status == "DISPATCHED",
+        )
+        .all()
+    )
+    if not rows:
+        return
+    now = _now_naive()
+    succeeded = outcome["status"] == "succeeded"
+    error_value = None if succeeded else _best_failure_text(outcome)[:8000]
+    for row in rows:
+        row.capture_status = "CAPTURED" if succeeded else "FAILED"
+        row.last_capture_at = now
+        row.error_message = error_value
+        row.last_capture_message_id = None
+        row.updated_at = now
 
 
 def _apply_mirror_sync_status(

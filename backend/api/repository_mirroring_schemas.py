@@ -14,6 +14,25 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+class SnapTrackRequest(BaseModel):
+    """Track a snap for capture into a mirror (Phase 17.1).
+
+    ``snap_name`` follows the Snapcraft naming rule (lowercase alnum + single
+    hyphens); ``channel`` is a ``track/risk/branch`` spec.  The snap_proxy_engine
+    re-validates both defensively at capture time.
+    """
+
+    snap_name: str = Field(
+        ..., min_length=1, max_length=100, pattern=r"^[a-z0-9](?:-?[a-z0-9])*$"
+    )
+    channel: str = Field(
+        default="latest/stable",
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9._/-]+$",
+    )
+
+
 class MirrorCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     package_manager: str = Field(..., min_length=1, max_length=20)

@@ -41,6 +41,7 @@ from sqlalchemy import (
     JSON,
     String,
     Text,
+    UniqueConstraint,
 )
 
 from backend.persistence.db import Base
@@ -248,6 +249,59 @@ class MirrorSnapshot(Base):
                 self.retention_until.isoformat() if self.retention_until else None
             ),
             "notes": self.notes,
+        }
+
+
+class MirrorSnapContent(Base):
+    """A snap tracked for capture into a mirror (Phase 17.1, Slice 3).
+
+    One row per (mirror, snap): the snap name + channel to capture, plus
+    capture bookkeeping.  The captured blobs + assertions physically land under
+    ``{mirror_root}/{mirror_name}/snaps`` via the ``snap_proxy_engine`` capture
+    plan; these rows record WHAT to capture and the status of the last capture,
+    so a later content-view publish can materialize them into the version store.
+    """
+
+    __tablename__ = "mirror_snap_content"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    repository_id = Column(
+        GUID(),
+        ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    snap_name = Column(String(100), nullable=False)
+    channel = Column(String(100), nullable=False, default="latest/stable")
+    confinement = Column(String(20), nullable=True)
+    # TRACKED -> DISPATCHED -> CAPTURED / FAILED
+    capture_status = Column(String(20), nullable=False, default="TRACKED")
+    last_capture_message_id = Column(String(80), nullable=True)
+    last_capture_at = Column(DateTime, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+
+    __table_args__ = (
+        UniqueConstraint("repository_id", "snap_name", name="uq_mirror_snap_content"),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "repository_id": str(self.repository_id),
+            "snap_name": self.snap_name,
+            "channel": self.channel,
+            "confinement": self.confinement,
+            "capture_status": self.capture_status,
+            "last_capture_at": (
+                self.last_capture_at.isoformat() if self.last_capture_at else None
+            ),
+            "error_message": self.error_message,
         }
 
 

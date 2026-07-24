@@ -866,4 +866,5 @@ def apply_default_mirrors_for_new_host(host_id: str) -> List[dict]:
 # existed before is still registered identically.
 from backend.api import (  # pylint: disable=wrong-import-position,unused-import
     repository_mirroring_setup,
+    repository_mirroring_snaps,
 )
