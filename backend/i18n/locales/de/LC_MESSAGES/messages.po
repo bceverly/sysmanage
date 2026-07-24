@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 08:57-0400\n"
+"POT-Creation-Date: 2026-07-24 09:31-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4220,30 +4220,38 @@ msgstr ""
 "Die vorherige Version wurde zurückgefordert und kann nicht mehr restauriert "
 "werden"
 
-#: backend/api/content_lifecycle_promotion.py:432
+#: backend/api/content_lifecycle_promotion.py:437
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr ""
 "Der Spiegel ‘%s’ hat einen nicht unterstützten Paketverwaltungsmanager"
 
-#: backend/api/content_lifecycle_promotion.py:443
+#: backend/api/content_lifecycle_promotion.py:448
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Kann Spiegel '%(name)s' nicht neu bestimmen: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:508
+#: backend/api/content_lifecycle_promotion.py:513
+#: backend/api/content_lifecycle_promotion.py:561
 msgid "That environment has no content for this content view"
 msgstr "Diese Umgebung enthält für diese Inhaltsansicht keine Inhalte"
 
-#: backend/api/content_lifecycle_promotion.py:515
+#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:568
 msgid "The serving host has no resolvable address"
 msgstr "Der dienstbietende Host hat keine auflösbare Adresse"
 
-#: backend/api/content_lifecycle_promotion.py:521
+#: backend/api/content_lifecycle_promotion.py:526
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 "Das Synchronisieren des Repository-Spiegels ist erforderlich, um den Host "
 "neu zu bestimmen"
+
+#: backend/api/content_lifecycle_promotion.py:554
+msgid "Snap store proxy is required to repoint a host's snaps"
+msgstr ""
+"Ein Snap-Store-Proxy ist erforderlich, um die Snaps eines Hosts "
+"umzupositionieren"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 08:57-0400\n"
+"POT-Creation-Date: 2026-07-24 09:31-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3911,26 +3911,32 @@ msgstr ""
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:432
+#: backend/api/content_lifecycle_promotion.py:437
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:443
+#: backend/api/content_lifecycle_promotion.py:448
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:508
+#: backend/api/content_lifecycle_promotion.py:513
+#: backend/api/content_lifecycle_promotion.py:561
 msgid "That environment has no content for this content view"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:515
+#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:568
 msgid "The serving host has no resolvable address"
 msgstr ""
 
-#: backend/api/content_lifecycle_promotion.py:521
+#: backend/api/content_lifecycle_promotion.py:526
 msgid "Repository mirroring is required to repoint a host"
+msgstr ""
+
+#: backend/api/content_lifecycle_promotion.py:554
+msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr ""
 
 #: backend/api/enabled_package_managers.py:252

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 08:57-0400\n"
+"POT-Creation-Date: 2026-07-24 09:31-0400\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4163,27 +4163,33 @@ msgstr "Este ambiente não tem uma versão anterior para rolar de volta"
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "A versão anterior foi recuperada e não pode mais ser restaurada"
 
-#: backend/api/content_lifecycle_promotion.py:432
+#: backend/api/content_lifecycle_promotion.py:437
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "O espelho '%s' tem um gerenciador de pacotes não suportado"
 
-#: backend/api/content_lifecycle_promotion.py:443
+#: backend/api/content_lifecycle_promotion.py:448
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Não é possível redefinir espelho '%(name)s': %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:508
+#: backend/api/content_lifecycle_promotion.py:513
+#: backend/api/content_lifecycle_promotion.py:561
 msgid "That environment has no content for this content view"
 msgstr "Esse ambiente não possui conteùdo para essa visualização de conteùido"
 
-#: backend/api/content_lifecycle_promotion.py:515
+#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:568
 msgid "The serving host has no resolvable address"
 msgstr "O servidor que está fornecendo não tem um endereço resolvível"
 
-#: backend/api/content_lifecycle_promotion.py:521
+#: backend/api/content_lifecycle_promotion.py:526
 msgid "Repository mirroring is required to repoint a host"
 msgstr "A sincronização do repositôrio é necessária para redefinir o host"
+
+#: backend/api/content_lifecycle_promotion.py:554
+msgid "Snap store proxy is required to repoint a host's snaps"
+msgstr "O proxy da loja Snap é requerido para redefinir os snaps de um host"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

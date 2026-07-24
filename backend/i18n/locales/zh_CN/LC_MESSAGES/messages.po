@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 08:57-0400\n"
+"POT-Creation-Date: 2026-07-24 09:31-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -3938,27 +3938,33 @@ msgstr "该环境中没有可回滚到的前一版本"
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "前一版本已被回收，无法恢复"
 
-#: backend/api/content_lifecycle_promotion.py:432
+#: backend/api/content_lifecycle_promotion.py:437
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "镜像 '%s' 使用不受支持的包管理器"
 
-#: backend/api/content_lifecycle_promotion.py:443
+#: backend/api/content_lifecycle_promotion.py:448
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "无法重新指向镜像 '%(name)s'：%(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:508
+#: backend/api/content_lifecycle_promotion.py:513
+#: backend/api/content_lifecycle_promotion.py:561
 msgid "That environment has no content for this content view"
 msgstr "该环境中没有此内容视图的内容"
 
-#: backend/api/content_lifecycle_promotion.py:515
+#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:568
 msgid "The serving host has no resolvable address"
 msgstr "提供服务的主机没有任何可解析地址"
 
-#: backend/api/content_lifecycle_promotion.py:521
+#: backend/api/content_lifecycle_promotion.py:526
 msgid "Repository mirroring is required to repoint a host"
 msgstr "必须启用仓库镜像才能重新指向主机"
+
+#: backend/api/content_lifecycle_promotion.py:554
+msgid "Snap store proxy is required to repoint a host's snaps"
+msgstr "需要 Snap 应用商店代理来重新指向主机的 snaps"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

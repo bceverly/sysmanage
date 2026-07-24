@@ -77,6 +77,19 @@ class _FakeRepoEngine:
         }
 
 
+class _FakeSnapEngine:
+    def build_snap_repoint_plan(
+        self, content_url, staging_dir="/var/lib/sysmanage/snap-content"
+    ):
+        return {
+            "engine": "snap_proxy_engine",
+            "action": "repoint_snaps",
+            "content_url": content_url,
+            "staging_dir": staging_dir,
+            "commands": [{"argv": ["echo", content_url]}],
+        }
+
+
 @pytest.fixture
 def env():
     shared_engine = create_engine(
@@ -143,17 +156,15 @@ def env():
     def _fake_register(message_id, action, host_id, cv_version_id=""):
         dispatched["correlations"].append({"action": action, "ref": cv_version_id})
 
-    fake_clm, fake_repo = _FakeClmEngine(), _FakeRepoEngine()
-
-    def _get_module(name):
-        return {
-            "content_lifecycle_engine": fake_clm,
-            "repository_mirroring_engine": fake_repo,
-        }.get(name)
+    modules = {
+        "content_lifecycle_engine": _FakeClmEngine(),
+        "repository_mirroring_engine": _FakeRepoEngine(),
+        "snap_proxy_engine": _FakeSnapEngine(),
+    }
 
     try:
         with patch.object(
-            content_lifecycle.module_loader, "get_module", side_effect=_get_module
+            content_lifecycle.module_loader, "get_module", side_effect=modules.get
         ), patch.object(JWTBearer, "__call__", _bypass_auth), patch(
             "backend.services.proplus_dispatch.enqueue_apply_plan", _fake_enqueue
         ), patch(
@@ -168,6 +179,7 @@ def env():
                     shared_s=shared_s,
                     tenant_s=tenant_s,
                     dispatched=dispatched,
+                    modules=modules,
                 )
     finally:
         shared_engine.dispose()
@@ -331,6 +343,61 @@ class TestRepoint:
         )
         assert r.status_code == 400
         assert "no content" in r.json()["detail"].lower()
+
+
+# --- repoint snaps (Phase 17.1) ---------------------------------------------
+
+
+class TestRepointSnaps:
+    def test_installs_served_snaps_on_consumer(self, env):
+        host = str(uuid.uuid4())
+        consumer = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        _seed_serving(env, cv, host=host, pm="apt")
+        v1 = _seed_version(env, cv, 1)
+        _bind(env, envs["Library"], cv, v1)
+
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-snaps",
+            json={"environment_id": envs["Library"], "host_id": consumer},
+        )
+        assert r.status_code == 200, r.text
+        plan = _last_plan(env)
+        # Dispatched to the CONSUMING host with the snap pull+ack+install plan.
+        assert plan["host_id"] == consumer
+        assert plan["plan"]["action"] == "repoint_snaps"
+        # Points at the env's served /snaps dir.
+        assert (
+            plan["plan"]["content_url"]
+            == f"http://{_FQDN}/content-views/{cv}/Library/snaps"
+        )
+        assert env.dispatched["correlations"][-1]["action"] == "repoint_snaps"
+
+    def test_gate_402_when_snap_engine_unlicensed(self, env):
+        env.modules.pop("snap_proxy_engine")
+        host = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        _seed_serving(env, cv, host=host, pm="apt")
+        v1 = _seed_version(env, cv, 1)
+        _bind(env, envs["Library"], cv, v1)
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-snaps",
+            json={"environment_id": envs["Library"], "host_id": str(uuid.uuid4())},
+        )
+        assert r.status_code == 402
+
+    def test_unbound_env_rejected(self, env):
+        host = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        _seed_serving(env, cv, host=host)
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-snaps",
+            json={"environment_id": envs["Dev"], "host_id": str(uuid.uuid4())},
+        )
+        assert r.status_code == 400
 
 
 # --- env symlink repoint on promote / rollback ------------------------------

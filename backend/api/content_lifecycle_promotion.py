@@ -388,6 +388,11 @@ class RepointRequest(BaseModel):
     host_id: str  # the CONSUMING host whose package manager to repoint
 
 
+class RepointSnapsRequest(BaseModel):
+    environment_id: str
+    host_id: str  # the CONSUMING host to install the served snaps onto
+
+
 # pm -> client-repoint builder (reuses repository_mirroring_engine, pointed at
 # the content-view env URL instead of the raw mirror).  Each mirror carries its
 # own suite/components/repoid/alias, falling back to the mirror name.
@@ -524,4 +529,45 @@ async def repoint_host_to_environment(
         repo_engine, clm_engine, fqdn, str(cv.id), env.name, mirrors
     )
     msg_id = _dispatch_serving_plan(plan, body.host_id, "repoint", str(cv.id))
+    return {"dispatched": True, "host_id": body.host_id, "message_id": msg_id}
+
+
+@router.post(
+    "/content-lifecycle/content-views/{cv_id}/repoint-snaps",
+    dependencies=[Depends(JWTBearer())],
+)
+async def repoint_host_snaps(
+    cv_id: str,
+    body: RepointSnapsRequest,
+    shared_db: Session = Depends(get_shared_db),
+    tenant_db: Session = Depends(get_tenant_db),
+    current_user=Depends(require_authenticated_user),
+):
+    """Install a content view's served snaps on a consuming host (Phase 17.1):
+    pull the environment's ``/snaps`` bundle, ``snap ack`` the assertions, and
+    install offline.  No snap-store-proxy service required (the Slice-0 model)."""
+    clm_engine = _check_clm_module()
+    snap_engine = module_loader.get_module("snap_proxy_engine")
+    if snap_engine is None:
+        raise HTTPException(
+            status_code=402,
+            detail=_("Snap store proxy is required to repoint a host's snaps"),
+        )
+    cv = _get_cv_or_404(shared_db, cv_id)
+    env = _get_env_or_404(shared_db, body.environment_id)
+    if _binding_for(tenant_db, env.id, cv.id) is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_("That environment has no content for this content view"),
+        )
+    serving = _resolve_cv_serving_host(cv, shared_db, tenant_db)
+    host_id = serving[0]
+    fqdn = _host_fqdn(tenant_db, host_id)
+    if not fqdn:
+        raise HTTPException(
+            status_code=400, detail=_("The serving host has no resolvable address")
+        )
+    env_url = clm_engine.resolve_content_view_url(fqdn, str(cv.id), env.name)
+    plan = snap_engine.build_snap_repoint_plan(f"{env_url}/snaps")
+    msg_id = _dispatch_serving_plan(plan, body.host_id, "repoint_snaps", str(cv.id))
     return {"dispatched": True, "host_id": body.host_id, "message_id": msg_id}

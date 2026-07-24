@@ -343,6 +343,7 @@ _LOG_ONLY_OPS = {
     "set_env_symlink": "environment serving repoint",
     "serve_content": "mirror-host serving provision",
     "repoint": "client repoint",
+    "repoint_snaps": "client snap repoint",
 }
 
 

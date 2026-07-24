@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 08:57-0400\n"
+"POT-Creation-Date: 2026-07-24 09:31-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4154,27 +4154,35 @@ msgstr ""
 "पिछला वर्झन को reclaim कर लिया गया है और अब इसे पुन: स्थापित किया नहीं जा "
 "सकता"
 
-#: backend/api/content_lifecycle_promotion.py:432
+#: backend/api/content_lifecycle_promotion.py:437
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "'%s' एक अनुमति नहीं दिए गए पैकेज मैनेजर के साथ है"
 
-#: backend/api/content_lifecycle_promotion.py:443
+#: backend/api/content_lifecycle_promotion.py:448
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "mirror '%(name)s' को repoint नहीं किया जा सकता: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:508
+#: backend/api/content_lifecycle_promotion.py:513
+#: backend/api/content_lifecycle_promotion.py:561
 msgid "That environment has no content for this content view"
 msgstr "उस परिस्थिति में इस संवाद व्यू के लिए कोई संवाद नहीं है"
 
-#: backend/api/content_lifecycle_promotion.py:515
+#: backend/api/content_lifecycle_promotion.py:520
+#: backend/api/content_lifecycle_promotion.py:568
 msgid "The serving host has no resolvable address"
 msgstr "सर्विंग होस्ट का कोई प्रतिस्थापन-धारक पता नहीं है"
 
-#: backend/api/content_lifecycle_promotion.py:521
+#: backend/api/content_lifecycle_promotion.py:526
 msgid "Repository mirroring is required to repoint a host"
 msgstr "यूनिट मरीन को पुन: स्थापित करने के लिए रिपोज़िट्री मरीनिंग आवश्यक है"
+
+#: backend/api/content_lifecycle_promotion.py:554
+msgid "Snap store proxy is required to repoint a host's snaps"
+msgstr ""
+"स्नैप स्टोर प्रक्षेपक की आवश्यकता होती है एक होस्ट के स्नैप्स को फिर से "
+"दिशांतरित करने के लिए"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
