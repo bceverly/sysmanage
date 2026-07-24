@@ -79,6 +79,27 @@ class _FakeEngine:
             ],
         }
 
+    def build_image_materialize_plan(self, mirror_root, mirror_names, store_parent):
+        """Also stands in for oci_proxy_engine (single fake for all modules)."""
+        self._capture["image_mirror_names"] = list(mirror_names)
+        return {
+            "engine": "oci_proxy_engine",
+            "action": "image_materialize",
+            "store_path": f"{store_parent}/images",
+            "commands": [
+                {
+                    "argv": [
+                        "sudo",
+                        "rsync",
+                        "-aH",
+                        f"{mirror_root}/{n}/images/",
+                        f"{store_parent}/images/",
+                    ]
+                }
+                for n in mirror_names
+            ],
+        }
+
 
 @pytest.fixture
 def env():
@@ -106,6 +127,7 @@ def env():
             models.MirrorSnapshot.__table__,
             models.MirrorSettings.__table__,
             models.MirrorSnapContent.__table__,
+            models.MirrorImageContent.__table__,
         ],
     )
     shared_s = sessionmaker(bind=shared_engine)
@@ -290,6 +312,52 @@ class TestPublish:
             {"argv": ["echo", "rhel9", "20260101T000000"]}
         ]
         assert "snap_mirror_names" not in env.dispatched
+
+    def _add_image(self, env, mirror_id, *, status):
+        db = env.tenant_s()
+        try:
+            db.add(
+                models.MirrorImageContent(
+                    repository_id=uuid.UUID(mirror_id),
+                    registry="docker.io",
+                    repository="library/nginx",
+                    tag="1.27",
+                    capture_status=status,
+                )
+            )
+            db.commit()
+        finally:
+            db.close()
+
+    def test_publish_materializes_captured_images(self, env):
+        # Phase 17.2: a CAPTURED image on a member mirror rides into the store.
+        host = str(uuid.uuid4())
+        mirror = _seed_mirror(env, host_id=host)
+        self._add_image(env, mirror, status="CAPTURED")
+        cv_id = _make_cv(env, "RHEL9+img", [mirror])
+
+        r = env.client.post(f"{_CV}/{cv_id}/publish")
+        assert r.status_code == 200, r.text
+        argvs = [c["argv"] for c in env.dispatched["plan"]["commands"]]
+        assert argvs[0] == ["echo", "rhel9", "20260101T000000"]
+        assert any(
+            a[:3] == ["sudo", "rsync", "-aH"] and a[-1].endswith("/images/")
+            for a in argvs
+        )
+        assert env.dispatched["image_mirror_names"] == ["rhel9"]
+
+    def test_publish_ignores_uncaptured_images(self, env):
+        host = str(uuid.uuid4())
+        mirror = _seed_mirror(env, host_id=host)
+        self._add_image(env, mirror, status="TRACKED")
+        cv_id = _make_cv(env, "RHEL9", [mirror])
+
+        r = env.client.post(f"{_CV}/{cv_id}/publish")
+        assert r.status_code == 200
+        assert env.dispatched["plan"]["commands"] == [
+            {"argv": ["echo", "rhel9", "20260101T000000"]}
+        ]
+        assert "image_mirror_names" not in env.dispatched
 
     def test_version_increments(self, env):
         host = str(uuid.uuid4())

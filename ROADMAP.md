@@ -5418,10 +5418,10 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 #### 17.1 Snap Store Proxy / Offline Snap Content (Enterprise)
 
-- [ ] Snap content capture into the mirror/air-gap pipeline (snap proxy / offline assertions + blobs)
-- [ ] Channel-aware snap management (track/refresh by channel) beyond current detection
-- [ ] Serve snaps to repointed agents (snap store proxy URL), incl. air-gapped
-- [ ] i18n/l10n
+- [x] Snap content capture into the mirror/air-gap pipeline (snap proxy / offline assertions + blobs)
+- [x] Channel-aware snap management (track/refresh by channel) beyond current detection
+- [x] Serve snaps to repointed agents (snap store proxy URL), incl. air-gapped
+- [x] i18n/l10n
 
 **Estimated Size:** ~3,000 lines
 

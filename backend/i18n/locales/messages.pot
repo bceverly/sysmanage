@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SysManage\n"
 "Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 12:08-0400\n"
+"POT-Creation-Date: 2026-07-24 15:25-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -423,7 +423,7 @@ msgstr ""
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:141
+#: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr ""
@@ -910,6 +910,22 @@ msgstr ""
 
 #: backend/api/child_host_control.py:522
 msgid "Child agent update requested"
+msgstr ""
+
+#: backend/api/repository_mirroring_images.py:123
+msgid "Tracked image not found"
+msgstr ""
+
+#: backend/api/repository_mirroring_images.py:126
+msgid "Image untracked"
+msgstr ""
+
+#: backend/api/repository_mirroring_images.py:144
+msgid "No images are tracked for this mirror"
+msgstr ""
+
+#: backend/api/repository_mirroring_images.py:168
+msgid "Image capture dispatched"
 msgstr ""
 
 #: backend/api/airgap_keys.py:72
@@ -1818,124 +1834,124 @@ msgstr ""
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:63
+#: backend/api/content_lifecycle.py:64
 msgid ""
 "Content lifecycle management requires a SysManage Professional+ (Enterprise) "
 "license. Please upgrade to access this feature."
 msgstr ""
 
-#: backend/api/content_lifecycle.py:120
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:122
+#: backend/api/content_lifecycle.py:123
 msgid "Environment name is too long"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:133
+#: backend/api/content_lifecycle.py:134
 msgid "Environment not found"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:149 backend/api/content_lifecycle.py:184
 msgid "An environment with that name already exists"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:202
+#: backend/api/content_lifecycle.py:203
 msgid "The Library environment cannot be deleted"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:224
+#: backend/api/content_lifecycle.py:225
 msgid "ordered_ids must list every environment exactly once"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:228
+#: backend/api/content_lifecycle.py:229
 msgid "The Library environment must remain first"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:288
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:290
+#: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:308
+#: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:319
+#: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:364
+#: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:370
+#: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:380
+#: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:390
+#: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
+#: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:637
+#: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:651
+#: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:656
+#: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
+#: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
+#: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:696
+#: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:772
+#: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:800
+#: backend/api/content_lifecycle.py:801
 msgid "Composite content view has no component content views"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:809
+#: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr ""
 
-#: backend/api/content_lifecycle.py:828
+#: backend/api/content_lifecycle.py:829
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr ""
@@ -3807,6 +3823,12 @@ msgstr ""
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
+msgstr ""
+
+#: backend/api/repository_mirroring_helpers.py:78
+msgid ""
+"Container image registry proxy requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
 msgstr ""
 
 #: backend/api/repository_mirroring_setup.py:197

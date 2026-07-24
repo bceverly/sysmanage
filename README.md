@@ -58,6 +58,7 @@ SysManage is a comprehensive system management solution that allows you to monit
 - 🛰️ Air-gapped (offline) operation: key/device management, optical/USB media transfer, offline CVE & repository sync
 - 🌐 Multi-site federation: coordinator/site Server Roles with rollup reporting and command dispatch
 - 📦 Content lifecycle management: Satellite-style content views + lifecycle environments (Library → Dev → Test → Prod) with gated promotion, rollback, composites, air-gap export, and federated site sync
+- 🅢 Snap store proxy: capture Snapcraft packages by channel (offline assertions + blobs), promote them through content-view environments, and serve/install them on repointed agents — including air-gapped
 
 ## Prerequisites
 

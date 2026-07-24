@@ -203,6 +203,7 @@ __all__ = [
     "MirrorRepository",
     "MirrorSnapshot",
     "MirrorSnapContent",
+    "MirrorImageContent",
     "MirrorSettings",
     "MirrorSetupStatus",
     "MirrorPlatformConfig",

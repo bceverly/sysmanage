@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 12:08-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-24 15:25-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -168,7 +168,8 @@ msgstr "主机未经批准"
 #: backend/api/opentelemetry/grafana_connection.py:58
 #: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
 #: backend/api/updates/execution_routes.py:49
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
@@ -246,8 +247,7 @@ msgstr "找不到主机 %s 进行主机名更新"
 msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
-msgstr ""
-"更新了主机 %(host_id)s 的主机名，从 %(old_hostname)s 更改为 %(new_hostname)s"
+msgstr "更新了主机 %(host_id)s 的主机名，从 %(old_hostname)s 更改为 %(new_hostname)s"
 
 #: backend/api/handlers/hostname_handler.py:83
 #, python-format
@@ -416,7 +416,7 @@ msgstr "记录安装完成失败：%s"
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:141
+#: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "字段 %(field)s 的无效 UUID：%(value)s"
@@ -571,8 +571,8 @@ msgstr "将仓库禁用请求加入队列失败：%s"
 
 #: backend/api/reports/endpoints.py:69
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr "报告生成需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/reports/endpoints.py:148
@@ -623,9 +623,7 @@ msgstr "报告"
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
-msgstr ""
-"气隙采集计划需要包含气隙采集器引擎的 SysManage Professional+ 许可证。请升级以"
-"访问此功能。"
+msgstr "气隙采集计划需要包含气隙采集器引擎的 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/airgap_collection_schedule.py:89
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
@@ -668,8 +666,8 @@ msgid ""
 "will fire only on the current tick window until the Pro+ license includes "
 "automation_engine."
 msgstr ""
-"automation_engine 未加载；next_run 时间戳未推进。在 Pro+ 许可证包含 "
-"automation_engine 之前，计划仅在当前 tick 窗口中触发。"
+"automation_engine 未加载；next_run 时间戳未推进。在 Pro+ 许可证包含 automation_engine "
+"之前，计划仅在当前 tick 窗口中触发。"
 
 #: backend/api/host_registration.py:65
 msgid "Invalid or expired registration key"
@@ -681,10 +679,9 @@ msgstr "无效或已过期的注册令牌"
 
 #: backend/api/host_registration.py:148
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
-msgstr ""
-"此主机已属于一个租户。请使用其注册令牌重新注册，而不是进行服务器范围的注册。"
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "此主机已属于一个租户。请使用其注册令牌重新注册，而不是进行服务器范围的注册。"
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -872,8 +869,7 @@ msgstr "更新仪表板卡片偏好设置失败：%s"
 msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
-msgstr ""
-"容器生命周期管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+msgstr "容器生命周期管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 # Child host lifecycle control messages
 #: backend/api/child_host_control.py:306
@@ -912,12 +908,27 @@ msgstr "已请求子代理更新：%s"
 msgid "Child agent update requested"
 msgstr "已请求子代理更新"
 
+#: backend/api/repository_mirroring_images.py:123
+msgid "Tracked image not found"
+msgstr "未找到已跟踪的图像"
+
+#: backend/api/repository_mirroring_images.py:126
+msgid "Image untracked"
+msgstr "已取消跟踪图像"
+
+#: backend/api/repository_mirroring_images.py:144
+msgid "No images are tracked for this mirror"
+msgstr "在此镜像中没有被跟踪的任何图像"
+
+#: backend/api/repository_mirroring_images.py:168
+msgid "Image capture dispatched"
+msgstr "已调度图像捕获"
+
 #: backend/api/airgap_keys.py:72
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
-msgstr ""
-"未找到收集器签名密钥。将此服务器的角色设置为 'Air-Gap Collector' 以生成一个。"
+msgstr "未找到收集器签名密钥。将此服务器的角色设置为 'Air-Gap Collector' 以生成一个。"
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1146,8 +1157,7 @@ msgid ""
 "Broadcast '%(action)s' delivered to %(delivered)d host(s) "
 "(filter=%(filter)s, %(elapsed).0fms)"
 msgstr ""
-"广播 '%(action)s' 已发送到 %(delivered)d 个主机（过滤器=%(filter)s，耗"
-"时%(elapsed).0fms毫秒）"
+"广播 '%(action)s' 已发送到 %(delivered)d 个主机（过滤器=%(filter)s，耗时%(elapsed).0fms毫秒）"
 
 #: backend/api/package_handlers.py:70
 msgid "Missing batch_id"
@@ -1282,8 +1292,8 @@ msgstr "镜像 tick 需要 automation_engine 以进行 cron 评估。"
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
 msgstr "镜像 %s 尚未完成成功的同步 —— 在分配为默认值之前请等待同步成功。"
 
 #: backend/api/repository_mirroring.py:613
@@ -1291,8 +1301,7 @@ msgstr "镜像 %s 尚未完成成功的同步 —— 在分配为默认值之前
 msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
-msgstr ""
-"镜像 %(mirror_name)s 用于 %(package_manager)s，不能分配给 %(platform)s 默认值"
+msgstr "镜像 %(mirror_name)s 用于 %(package_manager)s，不能分配给 %(platform)s 默认值"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1302,26 +1311,20 @@ msgstr "未知的 (平台, 版本, 操作系统类型) 组合"
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
-msgstr ""
-"空气隔断收集运行需要具有空气隔断采集引擎的SysManage专业版+许可证。请升级以访"
-"问此功能。"
+msgstr "空气隔断收集运行需要具有空气隔断采集引擎的SysManage专业版+许可证。请升级以访问此功能。"
 
 #: backend/api/airgap_collector_runs.py:224
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
-msgstr ""
-"空气间隙收集运行需要加载repository_mirroring_engine模块——采集器从其镜像树的快"
-"照中读取每个目标的捆绑包。"
+msgstr "空气间隙收集运行需要加载repository_mirroring_engine模块——采集器从其镜像树的快照中读取每个目标的捆绑包。"
 
 #: backend/api/airgap_collector_runs.py:235
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
-msgstr ""
-"全局镜像设置缺失或 mirror_root_path 配置不完整。请配置镜像设置后再创建集合运"
-"行。"
+msgstr "全局镜像设置缺失或 mirror_root_path 配置不完整。请配置镜像设置后再创建集合运行。"
 
 #: backend/api/airgap_collector_runs.py:295
 #, python-format
@@ -1330,8 +1333,8 @@ msgid ""
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
-"镜像 %r 没有设置 known_version_id；选项-B 收集需要将镜像绑定到目录版本，以便"
-"推导发行版/版本。编辑镜像并从下拉菜单中选择一个版本。"
+"镜像 %r 没有设置 known_version_id；选项-B "
+"收集需要将镜像绑定到目录版本，以便推导发行版/版本。编辑镜像并从下拉菜单中选择一个版本。"
 
 #: backend/api/airgap_collector_runs.py:326
 #, python-format
@@ -1366,18 +1369,14 @@ msgstr "镜像 %r 已禁用；启用并同步后再使用它进行收集。"
 msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
-msgstr ""
-"所有目标镜像必须位于同一主机上（集合计划调度到单个代理）。所选镜像跨越%d个主"
-"机。"
+msgstr "所有目标镜像必须位于同一主机上（集合计划调度到单个代理）。所选镜像跨越%d个主机。"
 
 #: backend/api/airgap_collector_runs.py:543
 #, python-format
 msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
-msgstr ""
-"已创建一次性离线收集运行 '%(iso_label)s'，目标镜像数为 %(mirror_count)d；快照"
-"已分发。"
+msgstr "已创建一次性离线收集运行 '%(iso_label)s'，目标镜像数为 %(mirror_count)d；快照已分发。"
 
 #: backend/api/airgap_collector_runs.py:666
 #, python-format
@@ -1388,11 +1387,9 @@ msgstr "ISO 尚不可下载（状态：%s）。请等待运行达到 ISO_BUILT �
 
 #: backend/api/airgap_collector_runs.py:676
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
-msgstr ""
-"ISO 文件已从磁盘中删除；可能已经清理了暂存卷。请重新运行收集以重建 ISO 文件系"
-"统。"
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
+msgstr "ISO 文件已从磁盘中删除；可能已经清理了暂存卷。请重新运行收集以重建 ISO 文件系统。"
 
 #: backend/api/airgap_collector_runs.py:693
 msgid "ISO file not found."
@@ -1424,11 +1421,11 @@ msgstr "ISO 文件已不在磁盘上： %s"
 
 #: backend/api/package_compliance.py:76
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:203
 #, python-format
@@ -1549,8 +1546,7 @@ msgstr "注册密钥已删除"
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
-msgstr ""
-"外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
+msgstr "外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -1599,8 +1595,8 @@ msgstr "OIDC登录失败：%s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:698
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr "没有与该身份提供商标识关联的SysManage帐户。请先让管理员为您配置帐户。"
 
 #: backend/api/external_idp.py:506 backend/api/external_idp.py:703
@@ -1690,8 +1686,8 @@ msgstr "检查 Grafana 健康状态时出现意外错误"
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "未找到或不处于活动状态的主机"
 
@@ -1728,8 +1724,8 @@ msgstr "Grafana URL 不可用"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr "要进行OpenTelemetry部署，服务器上需要加载Pro+ observability_engine。"
 
 #: backend/api/opentelemetry/deployment.py:179
@@ -1743,8 +1739,8 @@ msgstr "部署 OpenTelemetry 失败：%s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr "移除 OpenTelemetry 需要服务器上加载 Pro+ observability_engine"
 
 #: backend/api/opentelemetry/deployment.py:291
@@ -1818,8 +1814,7 @@ msgstr "重启OpenTelemetry失败：%s"
 msgid ""
 "OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
 "be loaded on the server."
-msgstr ""
-"要进行OpenTelemetry Grafana连接，服务器上需要加载Pro+ observability_engine。"
+msgstr "要进行OpenTelemetry Grafana连接，服务器上需要加载Pro+ observability_engine。"
 
 #: backend/api/opentelemetry/grafana_connection.py:160
 msgid "OpenTelemetry Grafana connection queued successfully"
@@ -1834,9 +1829,7 @@ msgstr "将 OpenTelemetry 连接到 Grafana 失败：%s"
 msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
-msgstr ""
-"要进行OpenTelemetry Grafana断开连接，服务器上需要加载Pro+ "
-"observability_engine。"
+msgstr "要进行OpenTelemetry Grafana断开连接，服务器上需要加载Pro+ observability_engine。"
 
 #: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
@@ -1847,126 +1840,124 @@ msgstr "OpenTelemetry Grafana断开连接成功排队"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "断开 OpenTelemetry 与 Grafana 的连接失败：%s"
 
-#: backend/api/content_lifecycle.py:63
+#: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
-msgstr ""
-"内容生命周期管理需要SysManage Professional+（企业版）许可证。请升级以访问此功"
-"能。"
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
+msgstr "内容生命周期管理需要SysManage Professional+（企业版）许可证。请升级以访问此功能。"
 
-#: backend/api/content_lifecycle.py:120
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
 msgstr "必须提供环境名称"
 
-#: backend/api/content_lifecycle.py:122
+#: backend/api/content_lifecycle.py:123
 msgid "Environment name is too long"
 msgstr "环境名称太长"
 
-#: backend/api/content_lifecycle.py:133
+#: backend/api/content_lifecycle.py:134
 msgid "Environment not found"
 msgstr "未找到环境"
 
-#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:149 backend/api/content_lifecycle.py:184
 msgid "An environment with that name already exists"
 msgstr "一个具有该名称的环境已经存在"
 
-#: backend/api/content_lifecycle.py:202
+#: backend/api/content_lifecycle.py:203
 msgid "The Library environment cannot be deleted"
 msgstr "不能删除Library环境"
 
-#: backend/api/content_lifecycle.py:224
+#: backend/api/content_lifecycle.py:225
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids必须恰好列出每个环境一次"
 
-#: backend/api/content_lifecycle.py:228
+#: backend/api/content_lifecycle.py:229
 msgid "The Library environment must remain first"
 msgstr "Library环境必须保持为第一个"
 
-#: backend/api/content_lifecycle.py:288
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
 msgstr "需要指定内容视图名称"
 
-#: backend/api/content_lifecycle.py:290
+#: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
 msgstr "内容视图名称太长"
 
-#: backend/api/content_lifecycle.py:308
+#: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
 msgstr "未找到内容视图"
 
-#: backend/api/content_lifecycle.py:319
+#: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
 msgstr "每个内容视图成员都需要一个镜像或组件CV"
 
-#: backend/api/content_lifecycle.py:364
+#: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr "未知过滤器类型: %s"
 
-#: backend/api/content_lifecycle.py:370
+#: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
 msgstr "\"%s\" 过滤器需要 Advisory 引擎，但该引擎未加载"
 
-#: backend/api/content_lifecycle.py:380
+#: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr "\"%s\" 过滤器需要一个非空的 'packages' 列表"
 
-#: backend/api/content_lifecycle.py:390
+#: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr "\"%s\" 过滤器需要一个 'date' (YYYY-MM-DD)"
 
-#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
+#: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
 msgstr "一个具有该名称的内容视图已经存在"
 
-#: backend/api/content_lifecycle.py:637
+#: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
 msgstr "镜像设置尚未配置"
 
-#: backend/api/content_lifecycle.py:651
+#: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
 msgstr "组合内容视图尚不能发布"
 
-#: backend/api/content_lifecycle.py:656
+#: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
 msgstr "内容视图没有可发布的仓库"
 
-#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
 msgstr "引用的镜像不再存在"
 
-#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
+#: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "镜像 '%s' 没有分配主机"
 
-#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
+#: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "在此版本中，内容视图中的所有镜像必须共享一个主机"
 
-#: backend/api/content_lifecycle.py:696
+#: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "镜像 '%s' 尚未创建快照；请在发布前创建快照"
 
-#: backend/api/content_lifecycle.py:772
+#: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
 msgstr "内容视图没有任何仓库"
 
-#: backend/api/content_lifecycle.py:800
+#: backend/api/content_lifecycle.py:801
 msgid "Composite content view has no component content views"
 msgstr "组合内容视图没有组件内容视图"
 
-#: backend/api/content_lifecycle.py:809
+#: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr "组件 \"%s\" 尚未发布任何版本"
 
-#: backend/api/content_lifecycle.py:828
+#: backend/api/content_lifecycle.py:829
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr "组件 \"%s\" 没有仓库"
@@ -1975,8 +1966,7 @@ msgstr "组件 \"%s\" 没有仓库"
 msgid ""
 "CVE feed management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
-msgstr ""
-"CVE 数据源管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+msgstr "CVE 数据源管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
@@ -2061,7 +2051,8 @@ msgstr "防火墙重启命令发送成功"
 msgid "Firewall deploy command sent successfully"
 msgstr "防火墙部署命令发送成功"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "操作系统名称是必需的"
@@ -2084,8 +2075,7 @@ msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
 "options: %(valid_options)s"
 msgstr ""
-"对于操作系统 '%(os_name)s'，无效的包管理器 '%(package_manager)s'。有效选项："
-"%(valid_options)s"
+"对于操作系统 '%(os_name)s'，无效的包管理器 '%(package_manager)s'。有效选项：%(valid_options)s"
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
@@ -2144,8 +2134,7 @@ msgstr "删除默认存储库失败：%s"
 msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
-msgstr ""
-"容器/虚拟机管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+msgstr "容器/虚拟机管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
 msgid "Child host not found"
@@ -2222,7 +2211,8 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "目标 '%(t)s' 对 %(f)s 无效"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
 msgstr "远程 syslog 转发需要一个专业许可证（LOG_ROUTING）。"
 
 #: backend/api/logging_settings.py:141
@@ -2555,9 +2545,7 @@ msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
-msgstr ""
-"在 YAML 配置文件中启用电子邮件并配置 SMTP 设置。如果没有电子邮件集成，新用户"
-"将无法收到密码设置说明，也无法登录。"
+msgstr "在 YAML 配置文件中启用电子邮件并配置 SMTP 设置。如果没有电子邮件集成，新用户将无法收到密码设置说明，也无法登录。"
 
 #: backend/api/security.py:125
 msgid "Default admin credentials are configured in your YAML file"
@@ -2605,7 +2593,8 @@ msgid ""
 "{command}"
 msgstr "密码盐使用默认值，但 JWT 密钥已更改。运行: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "基于合同的Ubuntu Pro密钥必须以'C'开头"
 
@@ -2715,7 +2704,8 @@ msgstr "注册被吸收：主机最近已被删除"
 
 #: backend/api/host.py:779
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主机 '%(fqdn)s' 通过租户 %(tenant_id)s 的注册令牌加入租户"
 
 #: backend/api/host.py:796
@@ -2723,8 +2713,7 @@ msgstr "主机 '%(fqdn)s' 通过租户 %(tenant_id)s 的注册令牌加入租户
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
-msgstr ""
-"主机 '%(fqdn)s' 通过注册密钥 '%(key_name)s' 加入（自动批准=%(auto_approve)s）"
+msgstr "主机 '%(fqdn)s' 通过注册密钥 '%(key_name)s' 加入（自动批准=%(auto_approve)s）"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -2788,7 +2777,8 @@ msgstr "未指定要安装的包"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
 msgstr "在主机 %(host_fqdn)s 上排队安装 %(package_count)d 个软件包"
 
 #: backend/api/packages_operations.py:199
@@ -2966,7 +2956,8 @@ msgstr "此主机没有可用的操作系统升级"
 
 #: backend/api/updates/os_upgrade_routes.py:338
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "在主机 %(fqdn)s 上启动了操作系统升级，包含 %(upgrade_count)d 次升级"
 
 #: backend/api/updates/os_upgrade_routes.py:369
@@ -3037,9 +3028,9 @@ msgstr "未知种类：%(kind)s (允许值：%(allowed)s)"
 #: backend/api/dynamic_secrets.py:156
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
-msgstr ""
-"已颁发动态密钥 '%(name)s'（类型=%(kind)s, 角色=%(role)s, 有效期=%(ttl)ds）"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
+msgstr "已颁发动态密钥 '%(name)s'（类型=%(kind)s, 角色=%(role)s, 有效期=%(ttl)ds）"
 
 #: backend/api/dynamic_secrets.py:189
 #, python-format
@@ -3102,7 +3093,8 @@ msgstr "已请求VMM初始化"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr "已请求VMM初始化。代理将启用并启动vmd守护进程。"
 
 #: backend/api/child_host_virtualization_enable.py:348
@@ -3134,8 +3126,8 @@ msgstr "bhyve 初始化请求"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr "bhyve 初始化请求。代理将加载 vmm.ko 并为 bhyve 虚拟机配置系统。"
 
 #: backend/api/child_host_virtualization_enable.py:474
@@ -3150,9 +3142,7 @@ msgstr "bhyve 禁用请求"
 msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
-msgstr ""
-"bhyve 禁用请求。代理将卸载 vmm.ko 并更新系统配置。如果任何虚拟机正在运行，此"
-"操作将会失败。"
+msgstr "bhyve 禁用请求。代理将卸载 vmm.ko 并更新系统配置。如果任何虚拟机正在运行，此操作将会失败。"
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -3164,8 +3154,8 @@ msgstr "请求启用KVM模块"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr "请求启用KVM模块。代理将通过modprobe加载KVM内核模块。"
 
 #: backend/api/child_host_virtualization_enable.py:600
@@ -3180,9 +3170,7 @@ msgstr "请求禁用KVM模块"
 msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
-msgstr ""
-"请求禁用KVM模块。代理将通过modprobe -r卸载KVM内核模块。如果任何虚拟机正在运"
-"行，此操作将会失败。"
+msgstr "请求禁用KVM模块。代理将通过modprobe -r卸载KVM内核模块。如果任何虚拟机正在运行，此操作将会失败。"
 
 # KVM Networking Configuration strings
 #: backend/api/child_host_virtualization_enable.py:697
@@ -3311,7 +3299,8 @@ msgid ""
 msgstr "编排重启需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
 msgstr "未找到正在运行的子主机。请改用标准重启端点。"
 
 #: backend/api/reboot_orchestration.py:204
@@ -3325,10 +3314,9 @@ msgstr "未找到重启编排"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
-msgstr ""
-"计划升级配置文件需要 SysManage Professional+ 许可证。请升级以访问此功能。"
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
+msgstr "计划升级配置文件需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -3534,9 +3522,9 @@ msgstr "所有%d个主机的防病毒部署已启动"
 #: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
-msgstr ""
-"已启动 %(success_count)d 个主机的防病毒部署（共 %(total_count)d 个主机）"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
+msgstr "已启动 %(success_count)d 个主机的防病毒部署（共 %(total_count)d 个主机）"
 
 #: backend/api/antivirus_status.py:344
 msgid "Antivirus deployment failed for all hosts"
@@ -3607,8 +3595,7 @@ msgstr "请求了{}服务的服务{}"
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
-msgstr ""
-"空气隔断介质导出需要使用空气隔断收集器引擎（企业版）。请升级以访问此功能。"
+msgstr "空气隔断介质导出需要使用空气隔断收集器引擎（企业版）。请升级以访问此功能。"
 
 #: backend/api/content_lifecycle_export.py:84
 #, python-format
@@ -3862,8 +3849,13 @@ msgstr "仓库镜像功能需要SysManage Professional+许可证。请升级以�
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
-msgstr ""
-"Snap商店代理需要SysManage专业版或更高版本的许可证。请升级以访问此功能。"
+msgstr "Snap商店代理需要SysManage专业版或更高版本的许可证。请升级以访问此功能。"
+
+#: backend/api/repository_mirroring_helpers.py:78
+msgid ""
+"Container image registry proxy requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr "容器镜像注册表代理需要SysManage专业版或更高级别的许可证。请升级以访问此功能。"
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -4012,7 +4004,8 @@ msgstr "缺少 ADD_ENABLED_PACKAGE_MANAGER 角色，无法执行操作"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
 msgstr "包管理器 '%(package_manager)s' 已为操作系统 '%(os_name)s' 启用"
 
 #: backend/api/enabled_package_managers.py:382
@@ -4248,9 +4241,7 @@ msgstr "在消息 %(message_id)s 中未找到主机 %(hostname)s，正在删除�
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
-msgstr ""
-"对于消息 %(message_id)s，主机 %(hostname)s 不被批准（状态：%(status)s），正在"
-"删除该消息"
+msgstr "对于消息 %(message_id)s，主机 %(hostname)s 不被批准（状态：%(status)s），正在删除该消息"
 
 #: backend/websocket/inbound_processor.py:156
 #, python-format
@@ -4266,17 +4257,14 @@ msgid ""
 "message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"主机 %(host_id)s 在此数据库中未找到；推迟 %(count)d 条队列消息以进行重试（不"
-"会删除）——可能是正在进行的注册或已删除的主机"
+"主机 %(host_id)s 在此数据库中未找到；推迟 %(count)d 条队列消息以进行重试（不会删除）——可能是正在进行的注册或已删除的主机"
 
 #: backend/websocket/inbound_processor.py:290
 #, python-format
 msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
-msgstr ""
-"主机 %(host_id)s (FQDN: %(fqdn)s) 不再被批准（状态：%(status)s），删除其所有"
-"队列中的消息"
+msgstr "主机 %(host_id)s (FQDN: %(fqdn)s) 不再被批准（状态：%(status)s），删除其所有队列中的消息"
 
 #: backend/websocket/inbound_processor.py:300
 #, python-format
@@ -4318,8 +4306,7 @@ msgstr "无法将消息 %s 标记为处理中"
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
-msgstr ""
-"处理队列中的消息：%(message_id)s (类型：%(message_type)s，主机：%(host)s)"
+msgstr "处理队列中的消息：%(message_id)s (类型：%(message_type)s，主机：%(host)s)"
 
 #: backend/websocket/inbound_processor.py:504
 #, python-format
@@ -4364,8 +4351,8 @@ msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
 "direction=%(direction)s, host_id=%(host_id)s"
 msgstr ""
-"入队消息：id=%(message_id)s, 类型=%(message_type)s, 方向=%(direction)s, 主机"
-"ID=%(host_id)s"
+"入队消息：id=%(message_id)s, 类型=%(message_type)s, 方向=%(direction)s, "
+"主机ID=%(host_id)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:483
@@ -4407,7 +4394,8 @@ msgstr "无法确认未知消息：%s"
 
 #: backend/websocket/queue_operations.py:613
 #, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgid ""
+"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "消息 %(message_id)s 不处于已发送状态（当前状态：%(status)s），跳过确认"
 
 #: backend/websocket/queue_operations.py:626
@@ -4441,8 +4429,7 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"消息 %(message_id)s 失败（尝试次数 %(attempt)d/%(max_retries)d），将在 "
-"%(backoff)d 秒后重试"
+"消息 %(message_id)s 失败（尝试次数 %(attempt)d/%(max_retries)d），将在 %(backoff)d 秒后重试"
 
 #: backend/websocket/queue_operations.py:808
 #, python-format
@@ -4716,18 +4703,15 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) — may be an in-flight enrollment or a deleted host"
-#~ msgstr ""
-#~ "主机 '%s' 不在此数据库中；推迟处理 %d 条队列中的消息（不进行删除）——可能是"
-#~ "正在进行的注册或已删除的主机"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ msgstr "主机 '%s' 不在此数据库中；推迟处理 %d 条队列中的消息（不进行删除）——可能是正在进行的注册或已删除的主机"
 
 #, python-format
 #~ msgid ""
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
-#~ msgstr ""
-#~ "主机 %s (FQDN: %s) 不再被批准（状态：%s），正在从队列中删除所有其消息"
+#~ msgstr "主机 %s (FQDN: %s) 不再被批准（状态：%s），正在从队列中删除所有其消息"
 
 #, python-format
 #~ msgid "Deleted %d messages for unapproved host %s"
@@ -4952,8 +4936,8 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "确认操作系统升级"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr "此操作将升级操作系统并需要系统重启。继续？"
 
 #~ msgid "OS upgrades are always security updates"
@@ -5068,11 +5052,9 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirt初始化成功"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
-#~ msgstr ""
-#~ "审计日志导出需要 SysManage Professional+ 许可证。请升级以访问 CSV、JSON、"
-#~ "CEF 和 LEEF 导出格式。"
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
+#~ msgstr "审计日志导出需要 SysManage Professional+ 许可证。请升级以访问 CSV、JSON、CEF 和 LEEF 导出格式。"
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

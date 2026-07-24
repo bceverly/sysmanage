@@ -305,6 +305,69 @@ class MirrorSnapContent(Base):
         }
 
 
+class MirrorImageContent(Base):
+    """A container image tracked for capture into a mirror (Phase 17.2).
+
+    One row per (mirror, image ref): the registry / repository / tag to capture,
+    and — once captured — the pinned ``digest`` (the reproducible OCI manifest
+    digest).  The captured OCI layouts physically land under
+    ``{mirror_root}/{mirror_name}/images/{slug}`` via the ``oci_proxy_engine``
+    capture plan (``skopeo copy``); these rows record WHAT to capture and the
+    status of the last capture, so a later content-view publish can materialize
+    them into the version store.
+    """
+
+    __tablename__ = "mirror_image_content"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    repository_id = Column(
+        GUID(),
+        ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    registry = Column(String(255), nullable=False)  # docker.io, quay.io, ...
+    repository = Column(String(255), nullable=False)  # library/nginx, org/app
+    tag = Column(String(128), nullable=False)
+    digest = Column(String(255), nullable=True)  # sha256:... — the captured pin
+    # TRACKED -> DISPATCHED -> CAPTURED / FAILED
+    capture_status = Column(String(20), nullable=False, default="TRACKED")
+    last_capture_message_id = Column(String(80), nullable=True)
+    last_capture_at = Column(DateTime, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+
+    __table_args__ = (
+        UniqueConstraint(
+            "repository_id",
+            "registry",
+            "repository",
+            "tag",
+            name="uq_mirror_image_content",
+        ),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "repository_id": str(self.repository_id),
+            "registry": self.registry,
+            "repository": self.repository,
+            "tag": self.tag,
+            "digest": self.digest,
+            "capture_status": self.capture_status,
+            "last_capture_at": (
+                self.last_capture_at.isoformat() if self.last_capture_at else None
+            ),
+            "error_message": self.error_message,
+        }
+
+
 class MirrorSettings(Base):
     """Singleton row of admin-controlled mirror defaults."""
 

@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 12:08-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-24 15:25-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -95,9 +95,7 @@ msgstr "再起動コマンドを {hostname} に送信しました"
 #: backend/api/fleet.py:384
 #, python-brace-format
 msgid "Command {command_type} broadcast to {sent_count} agents"
-msgstr ""
-"コマンド {command_type} を {sent_count} エージェントにブロードキャストしまし"
-"た"
+msgstr "コマンド {command_type} を {sent_count} エージェントにブロードキャストしました"
 
 #: backend/api/fleet.py:416
 #, python-brace-format
@@ -112,8 +110,7 @@ msgstr "プラットフォーム %s のエージェントが見つかりませ�
 #: backend/api/fleet.py:452
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr ""
-"コマンド {command_type} を {sent_count} {platform} エージェントに送信しました"
+msgstr "コマンド {command_type} を {sent_count} {platform} エージェントに送信しました"
 
 #: backend/api/certificates.py:45
 #, python-format
@@ -171,7 +168,8 @@ msgstr "ホストは承認されていません"
 #: backend/api/opentelemetry/grafana_connection.py:58
 #: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
 #: backend/api/updates/execution_routes.py:49
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
@@ -185,8 +183,7 @@ msgstr "システムパッチ適用：待機中"
 
 #: backend/api/advisory_actions.py:83
 msgid "Advisory management requires a SysManage Professional license."
-msgstr ""
-"アドバイザリーマネジメントは SysManage Professional ライセンスが必要です。"
+msgstr "アドバイザリーマネジメントは SysManage Professional ライセンスが必要です。"
 
 #: backend/api/advisory_actions.py:114
 msgid "No applicable packages for this advisory on this host."
@@ -250,9 +247,7 @@ msgstr "ホスト %s を見つけることができません。ホスト名の�
 msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
-msgstr ""
-"ホスト %(host_id)s のホスト名を %(old_hostname)s から %(new_hostname)s に更新"
-"しました"
+msgstr "ホスト %(host_id)s のホスト名を %(old_hostname)s から %(new_hostname)s に更新しました"
 
 #: backend/api/handlers/hostname_handler.py:83
 #, python-format
@@ -421,7 +416,7 @@ msgstr "インストール完了の記録に失敗しました: %s"
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:141
+#: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "'%(field)s' の無効な UUID: '%(value)s'"
@@ -479,8 +474,7 @@ msgstr "無効なMFAコードです。"
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
-msgstr ""
-"アカウントにMFAが設定されている場合は、認証コード付きのメールを送信しました。"
+msgstr "アカウントにMFAが設定されている場合は、認証コード付きのメールを送信しました。"
 
 #: backend/api/auth_mfa.py:434
 msgid "Invalid password."
@@ -577,11 +571,9 @@ msgstr "リポジトリ無効化をキューに追加できませんでした: %
 
 #: backend/api/reports/endpoints.py:69
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
-msgstr ""
-"レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセ"
-"スするにはアップグレードしてください。"
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
+msgstr "レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/reports/endpoints.py:148
 msgid "Registered Hosts"
@@ -621,8 +613,7 @@ msgstr "未知のレポートタイプ"
 
 #: backend/api/reports/endpoints.py:292
 msgid "PDF generation is not available. Please install reportlab package."
-msgstr ""
-"PDF生成は利用できません。reportlabパッケージをインストールしてください。"
+msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"
 
 #: backend/api/reports/endpoints.py:364
 msgid "Report"
@@ -633,8 +624,8 @@ msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"エアギャップ収集スケジュールには、エアギャップコレクターエンジン付きの "
-"SysManage Professional+ ライセンスが必要です。アップグレードしてください。"
+"エアギャップ収集スケジュールには、エアギャップコレクターエンジン付きの SysManage Professional+ "
+"ライセンスが必要です。アップグレードしてください。"
 
 #: backend/api/airgap_collection_schedule.py:89
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
@@ -677,9 +668,8 @@ msgid ""
 "will fire only on the current tick window until the Pro+ license includes "
 "automation_engine."
 msgstr ""
-"automation_engine が読み込まれていないため、next_run タイムスタンプは進められ"
-"ません。Pro+ ライセンスに automation_engine が含まれるまで、スケジュールは現"
-"在のティックウィンドウでのみ実行されます。"
+"automation_engine が読み込まれていないため、next_run タイムスタンプは進められません。Pro+ ライセンスに "
+"automation_engine が含まれるまで、スケジュールは現在のティックウィンドウでのみ実行されます。"
 
 #: backend/api/host_registration.py:65
 msgid "Invalid or expired registration key"
@@ -691,11 +681,9 @@ msgstr "無効または期限切れの登録トークン"
 
 #: backend/api/host_registration.py:148
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
-msgstr ""
-"このホストはすでにテナントに所属しています。サーバー範囲の登録ではなく、その"
-"登録トークンを使用して再登録してください。"
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "このホストはすでにテナントに所属しています。サーバー範囲の登録ではなく、その登録トークンを使用して再登録してください。"
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -736,8 +724,7 @@ msgstr "接続タイムアウト - Graylogサーバーに到達できない可�
 
 #: backend/api/graylog_integration.py:552
 msgid "Connection failed - Graylog server may be down or unreachable"
-msgstr ""
-"接続失敗 - Graylogサーバーがダウンしているか到達できない可能性があります"
+msgstr "接続失敗 - Graylogサーバーがダウンしているか到達できない可能性があります"
 
 #: backend/api/graylog_integration.py:558
 msgid "Unexpected error checking Graylog health"
@@ -885,8 +872,7 @@ msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr ""
-"コンテナライフサイクル管理にはSysManage Professional+ライセンスが必要です。こ"
-"の機能にアクセスするにはアップグレードしてください。"
+"コンテナライフサイクル管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 # Child host lifecycle control messages
 #: backend/api/child_host_control.py:306
@@ -925,13 +911,27 @@ msgstr "子エージェントの更新がリクエストされました：%s"
 msgid "Child agent update requested"
 msgstr "子エージェントの更新がリクエストされました"
 
+#: backend/api/repository_mirroring_images.py:123
+msgid "Tracked image not found"
+msgstr "追跡されているイメージが見つかりませんでした"
+
+#: backend/api/repository_mirroring_images.py:126
+msgid "Image untracked"
+msgstr "イメージの追跡を解除しました"
+
+#: backend/api/repository_mirroring_images.py:144
+msgid "No images are tracked for this mirror"
+msgstr "このミラーに対して追跡されているイメージはありません"
+
+#: backend/api/repository_mirroring_images.py:168
+msgid "Image capture dispatched"
+msgstr "イメージキャプチャを実行しました"
+
 #: backend/api/airgap_keys.py:72
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
-msgstr ""
-"署名キーが見つかりません。このサーバーの役割を 'Air-Gap Collector' に設定して"
-"生成してください。"
+msgstr "署名キーが見つかりません。このサーバーの役割を 'Air-Gap Collector' に設定して生成してください。"
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1139,9 +1139,7 @@ msgstr "アクセスが拒否されました: 「ホストプロセスの終了�
 
 #: backend/api/processes.py:175
 msgid "Agent must be running in privileged mode to terminate processes"
-msgstr ""
-"プロセスを終了するには、エージェントが特権モードで実行されている必要がありま"
-"す"
+msgstr "プロセスを終了するには、エージェントが特権モードで実行されている必要があります"
 
 #: backend/api/processes.py:224
 msgid "Process termination requested. The list will update shortly."
@@ -1162,8 +1160,8 @@ msgid ""
 "Broadcast '%(action)s' delivered to %(delivered)d host(s) "
 "(filter=%(filter)s, %(elapsed).0fms)"
 msgstr ""
-"ブロードキャスト '%(action)s' を %(delivered)d ホストに配信 (フィルター"
-"=%(filter)s, %(elapsed).0fms)"
+"ブロードキャスト '%(action)s' を %(delivered)d ホストに配信 (フィルター=%(filter)s, "
+"%(elapsed).0fms)"
 
 #: backend/api/package_handlers.py:70
 msgid "Missing batch_id"
@@ -1230,9 +1228,7 @@ msgstr "特権モードで実行されている Agent はユーザーアカウ�
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
-msgstr ""
-"ユーザー アカウント作成が要求されました。作成後、ユーザー リストは自動的に更"
-"新されます。"
+msgstr "ユーザー アカウント作成が要求されました。作成後、ユーザー リストは自動的に更新されます。"
 
 #: backend/api/host_account_management.py:200
 msgid "Permission denied: ADD_HOST_GROUP role required"
@@ -1260,9 +1256,7 @@ msgstr "特権モードで実行されている Agent はユーザーアカウ�
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
-msgstr ""
-"ユーザー アカウント削除が要求されました。削除後、ユーザー リストは自動的に更"
-"新されます。"
+msgstr "ユーザー アカウント削除が要求されました。削除後、ユーザー リストは自動的に更新されます。"
 
 #: backend/api/host_account_management.py:410
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1302,11 +1296,9 @@ msgstr "Mirror tick は cron 評価のために automation_engine を必要と�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
-msgstr ""
-"ミラー %s はまだ成功した同期を完了していません — 同期が成功するまでデフォルト"
-"に割り当てないようにしてください。"
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
+msgstr "ミラー %s はまだ成功した同期を完了していません — 同期が成功するまでデフォルトに割り当てないようにしてください。"
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1314,8 +1306,7 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"%(mirror_name)s ミラーは %(package_manager)s 用です、%(platform)s のデフォル"
-"トには割り当てられません"
+"%(mirror_name)s ミラーは %(package_manager)s 用です、%(platform)s のデフォルトには割り当てられません"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1326,27 +1317,24 @@ msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"オフライン収集の実行には SysManage Professional+ ライセンスが必要です。air-"
-"gap collector engine も必要です。ライセンスをアップグレードしてこの機能を利用"
-"してください。"
+"オフライン収集の実行には SysManage Professional+ ライセンスが必要です。air-gap collector engine "
+"も必要です。ライセンスをアップグレードしてこの機能を利用してください。"
 
 #: backend/api/airgap_collector_runs.py:224
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"オフライン収集の実行には repository_mirroring_engine モジュールがロードされて"
-"いる必要があります — コレクタは各ターゲットのバンドルをミラーツリーからのス"
-"ナップショットから読み取ります。"
+"オフライン収集の実行には repository_mirroring_engine モジュールがロードされている必要があります — "
+"コレクタは各ターゲットのバンドルをミラーツリーからのスナップショットから読み取ります。"
 
 #: backend/api/airgap_collector_runs.py:235
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr ""
-"グローバルミラーセッティングが欠落またはmirror_root_pathが設定されていませ"
-"ん。コレクションランを作成する前に、ミラー設定を構成してください。"
+"グローバルミラーセッティングが欠落またはmirror_root_pathが設定されていません。コレクションランを作成する前に、ミラー設定を構成してください。"
 
 #: backend/api/airgap_collector_runs.py:295
 #, python-format
@@ -1355,18 +1343,15 @@ msgid ""
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
-"ミラー %r には known_version_id が設定されていません；オプションBのコレクショ"
-"ン実行では、ミラーをカタログバージョンに結びつける必要があります。ミラーを編"
-"集し、ドロップダウンからバージョンを選択してください。"
+"ミラー %r には known_version_id "
+"が設定されていません；オプションBのコレクション実行では、ミラーをカタログバージョンに結びつける必要があります。ミラーを編集し、ドロップダウンからバージョンを選択してください。"
 
 #: backend/api/airgap_collector_runs.py:326
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
-msgstr ""
-"ミラー %r が参照しているカタログバージョンは存在しません。ミラーのバージョン"
-"を再選択してください。"
+msgstr "ミラー %r が参照しているカタログバージョンは存在しません。ミラーのバージョンを再選択してください。"
 
 #: backend/api/airgap_collector_runs.py:410
 #: backend/api/airgap_collector_runs.py:489
@@ -1387,8 +1372,7 @@ msgstr "ミラー %s が見つかりません"
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
-msgstr ""
-"ミラー %r は無効になっています；使用する前に有効にして同期させてください。"
+msgstr "ミラー %r は無効になっています；使用する前に有効にして同期させてください。"
 
 #: backend/api/airgap_collector_runs.py:447
 #, python-format
@@ -1396,9 +1380,8 @@ msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr ""
-"すべてのターゲットミラーは同じホスト上に存在する必要があり、収集計画は単一の "
-"Agent に対してディスパッチされます。選択されたミラーが %d ホストを跨いでいま"
-"す。"
+"すべてのターゲットミラーは同じホスト上に存在する必要があり、収集計画は単一の Agent に対してディスパッチされます。選択されたミラーが %d "
+"ホストを跨いでいます。"
 
 #: backend/api/airgap_collector_runs.py:543
 #, python-format
@@ -1406,25 +1389,21 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"一時的なオフライン収集実行 '%(iso_label)s' を %(mirror_count)d のターゲットミ"
-"ラーで作成し、スナップショットを配信しました"
+"一時的なオフライン収集実行 '%(iso_label)s' を %(mirror_count)d "
+"のターゲットミラーで作成し、スナップショットを配信しました"
 
 #: backend/api/airgap_collector_runs.py:666
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
-msgstr ""
-"ISOはまだダウンロード可能ではありません（ステータス：%s）。ISO_BUILTに達する"
-"まで待ってください。"
+msgstr "ISOはまだダウンロード可能ではありません（ステータス：%s）。ISO_BUILTに達するまで待ってください。"
 
 #: backend/api/airgap_collector_runs.py:676
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
-msgstr ""
-"ステージングボリュームのクリーニングにより、ISOファイルがディスクから削除され"
-"ました。収集を再実行して再構築してください。"
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
+msgstr "ステージングボリュームのクリーニングにより、ISOファイルがディスクから削除されました。収集を再実行して再構築してください。"
 
 #: backend/api/airgap_collector_runs.py:693
 msgid "ISO file not found."
@@ -1433,9 +1412,7 @@ msgstr "ISOファイルが見つかりません。"
 #: backend/api/airgap_collector_runs.py:713
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
-msgstr ""
-"ディスク %(disc)d を見つけることができません。利用可能なディスク: "
-"%(available)s"
+msgstr "ディスク %(disc)d を見つけることができません。利用可能なディスク: %(available)s"
 
 #: backend/api/airgap_collector_runs.py:798
 msgid "Invalid or expired download token."
@@ -1458,11 +1435,11 @@ msgstr "ISOファイルがディスク上に存在しません：%s"
 
 #: backend/api/package_compliance.py:76
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:203
 #, python-format
@@ -1489,8 +1466,8 @@ msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
 "(%(violation_count)d violation(s))"
 msgstr ""
-"プロファイル '%(profile_name)s' を使用してスキャンしたホスト "
-"'%(host_fqdn)s': %(status)s (%(violation_count)d の違反)"
+"プロファイル '%(profile_name)s' を使用してスキャンしたホスト '%(host_fqdn)s': %(status)s "
+"(%(violation_count)d の違反)"
 
 #: backend/api/package_compliance.py:503
 #, python-format
@@ -1498,8 +1475,7 @@ msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
 msgstr ""
-"エージェント '%(host_fqdn)s' に対してプロファイル '%(profile_name)s' のコンプ"
-"ライアンスチェックを配信しました"
+"エージェント '%(host_fqdn)s' に対してプロファイル '%(profile_name)s' のコンプライアンスチェックを配信しました"
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
@@ -1586,8 +1562,8 @@ msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
 msgstr ""
-"外部 ID プロバイダーの統合には SysManage Professional+ ライセンスが必要です。"
-"この機能にアクセスするにはアップグレードしてください。"
+"外部 ID プロバイダーの統合には SysManage Professional+ "
+"ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -1636,11 +1612,10 @@ msgstr "OIDCサインインに失敗しました: %s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:698
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
-"このIdPアイデンティティにSysManageアカウントがリンクされていません。アカウン"
-"トをプロビジョニングするために管理者に問い合わせてください。"
+"このIdPアイデンティティにSysManageアカウントがリンクされていません。アカウントをプロビジョニングするために管理者に問い合わせてください。"
 
 #: backend/api/external_idp.py:506 backend/api/external_idp.py:703
 msgid "Account is inactive."
@@ -1717,9 +1692,7 @@ msgstr "接続タイムアウト - Grafanaサーバーが到達不能である�
 
 #: backend/api/grafana_integration.py:587
 msgid "Connection failed - Grafana server may be down or unreachable"
-msgstr ""
-"接続が失敗しました - Grafanaサーバーがダウンまたは到達不能である可能性があり"
-"ます"
+msgstr "接続が失敗しました - Grafanaサーバーがダウンまたは到達不能である可能性があります"
 
 #: backend/api/grafana_integration.py:593
 msgid "Unexpected error checking Grafana health"
@@ -1731,8 +1704,8 @@ msgstr "Grafanaのヘルスチェックで予期しないエラー"
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "ホストが見つからないか、アクティブではありません"
 
@@ -1769,11 +1742,9 @@ msgstr "Grafana URL は利用できません"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
-msgstr ""
-"OpenTelemetry 配置には、サーバーで Pro+ observability_engine を読み込む必要が"
-"あります。"
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
+msgstr "OpenTelemetry 配置には、サーバーで Pro+ observability_engine を読み込む必要があります。"
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -1786,11 +1757,9 @@ msgstr "OpenTelemetry のデプロイに失敗しました: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
-msgstr ""
-"OpenTelemetry の削除には、サーバーで Pro+ observability_engine を読み込む必要"
-"があります。"
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
+msgstr "OpenTelemetry の削除には、サーバーで Pro+ observability_engine を読み込む必要があります。"
 
 #: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
@@ -1864,8 +1833,7 @@ msgid ""
 "OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
 "be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana 接続には、サーバーで Pro+ observability_engine を読み込"
-"む必要があります。"
+"OpenTelemetry Grafana 接続には、サーバーで Pro+ observability_engine を読み込む必要があります。"
 
 #: backend/api/opentelemetry/grafana_connection.py:160
 msgid "OpenTelemetry Grafana connection queued successfully"
@@ -1881,8 +1849,7 @@ msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana 切断には、サーバーで Pro+ observability_engine を読み込"
-"む必要があります。"
+"OpenTelemetry Grafana 切断には、サーバーで Pro+ observability_engine を読み込む必要があります。"
 
 #: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
@@ -1893,131 +1860,126 @@ msgstr "OpenTelemetry Grafana 切断がキューに成功して追加されま�
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "Grafana との OpenTelemetry 接続を解除できませんでした: %s"
 
-#: backend/api/content_lifecycle.py:63
+#: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
-"コンテンツライフサイクル管理には、SysManage Professional+ (Enterprise) ライセ"
-"ンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+"コンテンツライフサイクル管理には、SysManage Professional+ (Enterprise) "
+"ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/content_lifecycle.py:120
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
 msgstr "環境名は必須です"
 
-#: backend/api/content_lifecycle.py:122
+#: backend/api/content_lifecycle.py:123
 msgid "Environment name is too long"
 msgstr "環境名が長すぎます"
 
-#: backend/api/content_lifecycle.py:133
+#: backend/api/content_lifecycle.py:134
 msgid "Environment not found"
 msgstr "環境が見つかりません"
 
-#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:149 backend/api/content_lifecycle.py:184
 msgid "An environment with that name already exists"
 msgstr "その名前の環境はすでに存在しています"
 
-#: backend/api/content_lifecycle.py:202
+#: backend/api/content_lifecycle.py:203
 msgid "The Library environment cannot be deleted"
 msgstr "Library 環境は削除できません"
 
-#: backend/api/content_lifecycle.py:224
+#: backend/api/content_lifecycle.py:225
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids には各環境を正確に1回だけリストしてください"
 
-#: backend/api/content_lifecycle.py:228
+#: backend/api/content_lifecycle.py:229
 msgid "The Library environment must remain first"
 msgstr "Library 環境は最初に必ず配置する必要があります"
 
-#: backend/api/content_lifecycle.py:288
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
 msgstr "コンテンツビュー名は必須です"
 
-#: backend/api/content_lifecycle.py:290
+#: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
 msgstr "コンテンツビュー名が長すぎます"
 
-#: backend/api/content_lifecycle.py:308
+#: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
 msgstr "コンテンツビューが見つかりません"
 
-#: backend/api/content_lifecycle.py:319
+#: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
-msgstr ""
-"各コンテンツビュー メンバーにはミラーまたはコンポーネント CV が必要です"
+msgstr "各コンテンツビュー メンバーにはミラーまたはコンポーネント CV が必要です"
 
-#: backend/api/content_lifecycle.py:364
+#: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr "未知のフィルタータイプ: %s"
 
-#: backend/api/content_lifecycle.py:370
+#: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
-msgstr ""
-"\"%s\" フィルターは Advisory エンジンを必要としますが、ロードされていません"
+msgstr "\"%s\" フィルターは Advisory エンジンを必要としますが、ロードされていません"
 
-#: backend/api/content_lifecycle.py:380
+#: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr "\"%s\" フィルターには非空の \"packages\" リストが必要です"
 
-#: backend/api/content_lifecycle.py:390
+#: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr "\"%s\" フィルターには \"date\" (YYYY-MM-DD) が必要です"
 
-#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
+#: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
 msgstr "その名前のコンテンツビューはすでに存在しています"
 
-#: backend/api/content_lifecycle.py:637
+#: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
 msgstr "ミラー設定は構成されていません"
 
-#: backend/api/content_lifecycle.py:651
+#: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
 msgstr "コンポジットコンテンツビューはまだ公開できません"
 
-#: backend/api/content_lifecycle.py:656
+#: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
 msgstr "コンテンツビューには公開するためのレポジトリがありません"
 
-#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
 msgstr "参照されているミラーが存在しません"
 
-#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
+#: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "ミラー '%s' にホストが割り当てられていません"
 
-#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
+#: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
-msgstr ""
-"このリリースでは、コンテンツビューのすべてのミラーに1つのホストが必要です"
+msgstr "このリリースでは、コンテンツビューのすべてのミラーに1つのホストが必要です"
 
-#: backend/api/content_lifecycle.py:696
+#: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
-msgstr ""
-"ミラー '%s' のスナップショットがまだ存在しません；公開する前にスナップショッ"
-"トをとる必要があります"
+msgstr "ミラー '%s' のスナップショットがまだ存在しません；公開する前にスナップショットをとる必要があります"
 
-#: backend/api/content_lifecycle.py:772
+#: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
 msgstr "コンテンツビューにはリポジトリがありません"
 
-#: backend/api/content_lifecycle.py:800
+#: backend/api/content_lifecycle.py:801
 msgid "Composite content view has no component content views"
 msgstr "複合コンテンツビューのコンポーネントコンテンツビューがありません"
 
-#: backend/api/content_lifecycle.py:809
+#: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr "コンポーネント \"%s\" にはまだ公開版がありません"
 
-#: backend/api/content_lifecycle.py:828
+#: backend/api/content_lifecycle.py:829
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr "コンポーネント \"%s\" にリポジトリがありません"
@@ -2027,8 +1989,7 @@ msgid ""
 "CVE feed management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"CVEフィード管理にはSysManage Professional+ライセンスが必要です。この機能にア"
-"クセスするにはアップグレードしてください。"
+"CVEフィード管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
@@ -2113,7 +2074,8 @@ msgstr "ファイアウォール再起動コマンドが正常に送信されま
 msgid "Firewall deploy command sent successfully"
 msgstr "ファイアウォール展開コマンドが正常に送信されました"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS名が必要です"
@@ -2136,8 +2098,8 @@ msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
 "options: %(valid_options)s"
 msgstr ""
-"OS '%(os_name)s' に対して無効なパッケージマネージャー '%(package_manager)s': "
-"有効なオプション: %(valid_options)s"
+"OS '%(os_name)s' に対して無効なパッケージマネージャー '%(package_manager)s': 有効なオプション: "
+"%(valid_options)s"
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
@@ -2197,8 +2159,7 @@ msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"コンテナ/VM管理にはSysManage Professional+ライセンスが必要です。この機能にア"
-"クセスするにはアップグレードしてください。"
+"コンテナ/VM管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
 msgid "Child host not found"
@@ -2221,9 +2182,7 @@ msgstr "子ホストの更新がリクエストされました"
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
-msgstr ""
-"'%(name)s %(version)s' のディストリビューションが既に '%(child_type)s' 型で存"
-"在しています"
+msgstr "'%(name)s %(version)s' のディストリビューションが既に '%(child_type)s' 型で存在しています"
 
 #: backend/api/child_host_crud.py:821
 msgid "Distribution deleted"
@@ -2277,9 +2236,9 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "出力先 '%(t)s' は %(f)s では無効です"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
-msgstr ""
-"リモート Syslog 送信は、Professional ライセンス（LOG_ROUTING）が必要です。"
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgstr "リモート Syslog 送信は、Professional ライセンス（LOG_ROUTING）が必要です。"
 
 #: backend/api/logging_settings.py:141
 msgid "A syslog host is required for the remote-syslog target."
@@ -2291,8 +2250,7 @@ msgstr "syslog ポートは 1 から 65535 の範囲内である必要があり�
 
 #: backend/api/logging_settings.py:149
 msgid "syslog protocol must be 'udp' or 'tcp'."
-msgstr ""
-"syslog プロトコルは 'udp' もしくは 'tcp' のいずれかでなければなりません。"
+msgstr "syslog プロトコルは 'udp' もしくは 'tcp' のいずれかでなければなりません。"
 
 #: backend/api/logging_settings.py:176
 #, python-format
@@ -2402,17 +2360,13 @@ msgstr "公開バージョン %s が存在しません"
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
 "body."
-msgstr ""
-"Graylogのアタッチには、リクエストボディにmechanism、graylog_server、および"
-"portが必要です。"
+msgstr "Graylogのアタッチには、リクエストボディにmechanism、graylog_server、およびportが必要です。"
 
 #: backend/api/host_graylog.py:175
 msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
-msgstr ""
-"Graylog attach には、サーバーに Pro+ observability_engine がロードされている"
-"必要があります。"
+msgstr "Graylog attach には、サーバーに Pro+ observability_engine がロードされている必要があります。"
 
 #: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
@@ -2421,9 +2375,7 @@ msgstr "Graylog アタッチメント コマンド が 成功して キュー �
 #: backend/api/password_reset.py:339
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
-msgstr ""
-"そのメールアドレスを持つアカウントが存在する場合、パスワードリセットリンクを"
-"送信しました。"
+msgstr "そのメールアドレスを持つアカウントが存在する場合、パスワードリセットリンクを送信しました。"
 
 #: backend/api/password_reset.py:369 backend/api/password_reset.py:410
 msgid "Invalid or expired password reset token"
@@ -2433,8 +2385,7 @@ msgstr "無効または期限切れのパスワードリセットトークン"
 msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
-msgstr ""
-"パスワードは正常にリセットされました。新しいパスワードでログインできます。"
+msgstr "パスワードは正常にリセットされました。新しいパスワードでログインできます。"
 
 #: backend/api/password_reset.py:413
 msgid "Token is valid"
@@ -2446,8 +2397,7 @@ msgstr "許可が拒否されました: RESET_USER_PASSWORD ロールが必要�
 
 #: backend/api/password_reset.py:464
 msgid "Failed to send password reset email. Please check email configuration."
-msgstr ""
-"パスワードリセットメールの送信に失敗しました。メール設定をご確認ください。"
+msgstr "パスワードリセットメールの送信に失敗しました。メール設定をご確認ください。"
 
 #: backend/api/password_reset.py:470
 #, python-brace-format
@@ -2621,9 +2571,8 @@ msgid ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
-"YAML 設定ファイルでメールを有効にし、SMTP 設定を構成してください。メール統合"
-"がないと、新しいユーザーはパスワード設定の指示を受け取れず、ログインできなく"
-"なります。"
+"YAML 設定ファイルでメールを有効にし、SMTP "
+"設定を構成してください。メール統合がないと、新しいユーザーはパスワード設定の指示を受け取れず、ログインできなくなります。"
 
 #: backend/api/security.py:125
 msgid "Default admin credentials are configured in your YAML file"
@@ -2633,9 +2582,7 @@ msgstr "デフォルトの管理者資格情報が YAML ファイルに設定さ
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
-msgstr ""
-"設定ファイルから admin_userid と admin_password を削除し、サーバーを再起動し"
-"てください"
+msgstr "設定ファイルから admin_userid と admin_password を削除し、サーバーを再起動してください"
 
 #: backend/api/security.py:142
 msgid "Default JWT secret is being used"
@@ -2664,23 +2611,19 @@ msgstr "一貫性のないセキュリティ設定が検出されました"
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
-msgstr ""
-"JWT シークレットはデフォルト値を使用していますが、パスワードソルトは変更され"
-"ています。実行: {command}"
+msgstr "JWT シークレットはデフォルト値を使用していますが、パスワードソルトは変更されています。実行: {command}"
 
 #: backend/api/security.py:202
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
-msgstr ""
-"パスワードソルトはデフォルト値を使用していますが、JWT シークレットは変更され"
-"ています。実行: {command}"
+msgstr "パスワードソルトはデフォルト値を使用していますが、JWT シークレットは変更されています。実行: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
-msgstr ""
-"Ubuntu Proキーは、契約に基づくキーの場合、'C'で始まらなければなりません"
+msgstr "Ubuntu Proキーは、契約に基づくキーの場合、'C'で始まらなければなりません"
 
 #: backend/api/ubuntu_pro_settings.py:80
 msgid "Ubuntu Pro key appears to be too short"
@@ -2697,8 +2640,7 @@ msgstr "Ubuntu Pro 設定を取得できませんでした: %s"
 
 #: backend/api/ubuntu_pro_settings.py:143
 msgid "Permission denied: CHANGE_UBUNTU_PRO_MASTER_KEY role required"
-msgstr ""
-"アクセス権限がありません: CHANGE_UBUNTU_PRO_MASTER_KEY ロールが必要です"
+msgstr "アクセス権限がありません: CHANGE_UBUNTU_PRO_MASTER_KEY ロールが必要です"
 
 #: backend/api/ubuntu_pro_settings.py:214
 #, python-format
@@ -2734,8 +2676,7 @@ msgstr "マスターキーを使用しない場合、カスタムキーを提供
 
 #: backend/api/ubuntu_pro_settings.py:350
 msgid "No master key configured. Please configure a master key first."
-msgstr ""
-"マスターキーが構成されていません。最初にマスターキーを構成してください。"
+msgstr "マスターキーが構成されていません。最初にマスターキーを構成してください。"
 
 #: backend/api/ubuntu_pro_settings.py:381
 #: backend/api/updates/os_upgrade_routes.py:264
@@ -2790,9 +2731,9 @@ msgstr "登録が吸収されました: ホストは最近削除されました"
 
 #: backend/api/host.py:779
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
-msgstr ""
-"'%(fqdn)s' のホストはテナント %(tenant_id)s に登録トークンで登録されました"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgstr "'%(fqdn)s' のホストはテナント %(tenant_id)s に登録トークンで登録されました"
 
 #: backend/api/host.py:796
 #, python-format
@@ -2800,8 +2741,8 @@ msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr ""
-"'%(fqdn)s' のホストは、レジストレーションキー '%(key_name)s' を使用して登録さ"
-"れました（自動承認=%(auto_approve)s）"
+"'%(fqdn)s' のホストは、レジストレーションキー '%(key_name)s' "
+"を使用して登録されました（自動承認=%(auto_approve)s）"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -2821,8 +2762,7 @@ msgstr "設定をプラットフォームエージェントにプッシュしま
 
 #: backend/api/config_management.py:184
 msgid "Must specify target_hostname, target_platform, or push_to_all"
-msgstr ""
-"target_hostname、target_platform、またはpush_to_allを指定する必要があります"
+msgstr "target_hostname、target_platform、またはpush_to_allを指定する必要があります"
 
 #: backend/api/config_management.py:276
 msgid "Configuration acknowledgment processed"
@@ -2866,10 +2806,9 @@ msgstr "インストールするパッケージが指定されていません"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr ""
-"%(package_count)d 個のパッケージをホスト %(host_fqdn)s でインストールする"
-"キューに入れました"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgstr "%(package_count)d 個のパッケージをホスト %(host_fqdn)s でインストールするキューに入れました"
 
 #: backend/api/packages_operations.py:199
 #, python-format
@@ -2893,9 +2832,7 @@ msgstr "アンインストールするパッケージが指定されていませ
 #, python-format
 msgid ""
 "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr ""
-"%(package_count)d 個のパッケージをホスト %(host_fqdn)s でアンインストールする"
-"キューに入れました"
+msgstr "%(package_count)d 個のパッケージをホスト %(host_fqdn)s でアンインストールするキューに入れました"
 
 #: backend/api/packages_operations.py:378
 #, python-format
@@ -2965,9 +2902,7 @@ msgstr "ライセンスのインストールに成功しました"
 #: backend/api/child_host_virtualization_status.py:104
 msgid ""
 "Virtualization support check requested. Results will be available shortly."
-msgstr ""
-"バーチャライゼーションサポートの確認が要求されました。結果はすぐに利用可能で"
-"す。"
+msgstr "バーチャライゼーションサポートの確認が要求されました。結果はすぐに利用可能です。"
 
 #: backend/api/api_keys.py:83
 msgid "API keys cannot be managed with API-key authentication."
@@ -2993,9 +2928,7 @@ msgstr "ログイン試行の失敗が多すぎるためアカウントがロッ
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
-msgstr ""
-"このアカウントには多要素認証が必要です。ログインする前にプロフィールページか"
-"ら登録してください。"
+msgstr "このアカウントには多要素認証が必要です。ログインする前にプロフィールページから登録してください。"
 
 #: backend/api/auth.py:459
 msgid "Account locked due to too many failed login attempts"
@@ -3031,14 +2964,11 @@ msgstr "ファイルサイズが大きすぎます。最大許可サイズは5MB
 
 #: backend/api/profile.py:238
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
-msgstr ""
-"サポートされていない画像形式。許可されている形式: PNG, JPEG, JPG, GIF, WEBP"
+msgstr "サポートされていない画像形式。許可されている形式: PNG, JPEG, JPG, GIF, WEBP"
 
 #: backend/api/profile.py:269
 msgid "Invalid image file. Please upload a valid image."
-msgstr ""
-"無効なイメージファイルです。有効なイメージファイルをアップロードしてくださ"
-"い。"
+msgstr "無効なイメージファイルです。有効なイメージファイルをアップロードしてください。"
 
 #: backend/api/updates/os_upgrade_routes.py:197
 msgid "Permission denied: APPLY_HOST_OS_UPGRADE role required"
@@ -3055,10 +2985,9 @@ msgstr "このホストには利用可能なOSアップグレードがありま�
 
 #: backend/api/updates/os_upgrade_routes.py:338
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
-msgstr ""
-"%(fqdn)s で OS アップグレードを開始しました (%(upgrade_count)d のアップグレー"
-"ド)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgstr "%(fqdn)s で OS アップグレードを開始しました (%(upgrade_count)d のアップグレード)"
 
 #: backend/api/updates/os_upgrade_routes.py:369
 msgid "OS upgrade command queued for host"
@@ -3128,10 +3057,9 @@ msgstr "未知の種類: %(kind)s (許可された値: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:156
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
-msgstr ""
-"動的シークレット '%(name)s' (種類=%(kind)s, ロール=%(role)s, TTL=%(ttl)ds) を"
-"発行しました"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
+msgstr "動的シークレット '%(name)s' (種類=%(kind)s, ロール=%(role)s, TTL=%(ttl)ds) を発行しました"
 
 #: backend/api/dynamic_secrets.py:189
 #, python-format
@@ -3159,9 +3087,7 @@ msgstr "WSL有効化が要求されました"
 msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
-msgstr ""
-"WSL有効化が要求されました。インストールを完了するには再起動が必要になる場合が"
-"あります。"
+msgstr "WSL有効化が要求されました。インストールを完了するには再起動が必要になる場合があります。"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization_enable.py:213
@@ -3170,8 +3096,7 @@ msgstr "LXDはLinuxホストでのみサポートされています"
 
 #: backend/api/child_host_virtualization_enable.py:221
 msgid "Agent must be running with root privileges to initialize LXD"
-msgstr ""
-"LXDを初期化するにはエージェントがroot権限で実行されている必要があります"
+msgstr "LXDを初期化するにはエージェントがroot権限で実行されている必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:235
 msgid "LXD initialization requested"
@@ -3181,9 +3106,7 @@ msgstr "LXDの初期化がリクエストされました"
 msgid ""
 "LXD initialization requested. The agent will install and configure LXD "
 "automatically."
-msgstr ""
-"LXDの初期化がリクエストされました。エージェントがLXDを自動的にインストールし"
-"て設定します。"
+msgstr "LXDの初期化がリクエストされました。エージェントがLXDを自動的にインストールして設定します。"
 
 #: backend/api/child_host_virtualization_enable.py:276
 msgid "VMM is only supported on OpenBSD hosts"
@@ -3191,8 +3114,7 @@ msgstr "VMMはOpenBSDホストでのみサポートされています"
 
 #: backend/api/child_host_virtualization_enable.py:284
 msgid "Agent must be running with root privileges to initialize VMM"
-msgstr ""
-"VMMを初期化するにはエージェントがroot権限で実行されている必要があります"
+msgstr "VMMを初期化するにはエージェントがroot権限で実行されている必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:298
 msgid "VMM initialization requested"
@@ -3200,15 +3122,13 @@ msgstr "VMMの初期化がリクエストされました"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
-msgstr ""
-"VMMの初期化がリクエストされました。エージェントがvmdデーモンを有効化して起動"
-"します。"
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
+msgstr "VMMの初期化がリクエストされました。エージェントがvmdデーモンを有効化して起動します。"
 
 #: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
-msgstr ""
-"KVMを初期化するには、エージェントがroot権限で実行されている必要があります"
+msgstr "KVMを初期化するには、エージェントがroot権限で実行されている必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:362
 msgid "KVM initialization requested"
@@ -3218,9 +3138,7 @@ msgstr "KVMの初期化がリクエストされました"
 msgid ""
 "KVM initialization requested. The agent will install libvirt and configure "
 "KVM for virtual machine management."
-msgstr ""
-"KVMの初期化がリクエストされました。エージェントはlibvirtをインストールし、仮"
-"想マシン管理用にKVMを設定します。"
+msgstr "KVMの初期化がリクエストされました。エージェントはlibvirtをインストールし、仮想マシン管理用にKVMを設定します。"
 
 #: backend/api/child_host_virtualization_enable.py:403
 #: backend/api/child_host_virtualization_enable.py:467
@@ -3237,11 +3155,9 @@ msgstr "bhyve初期化が要求されました"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
-msgstr ""
-"bhyve初期化が要求されました。エージェントはvmm.koを読み込み、bhyve仮想マシン"
-"用のシステム設定を行います。"
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
+msgstr "bhyve初期化が要求されました。エージェントはvmm.koを読み込み、bhyve仮想マシン用のシステム設定を行います。"
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -3256,14 +3172,11 @@ msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
 msgstr ""
-"bhyve無効化が要求されました。エージェントはvmm.koをアンロードし、システム設定"
-"を更新します。仮想マシンが動作している場合、この操作は失敗する可能性がありま"
-"す。"
+"bhyve無効化が要求されました。エージェントはvmm.koをアンロードし、システム設定を更新します。仮想マシンが動作している場合、この操作は失敗する可能性があります。"
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
-msgstr ""
-"KVM モジュールを有効にするにはルート権限で Agent を実行する必要があります"
+msgstr "KVM モジュールを有効にするにはルート権限で Agent を実行する必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
@@ -3271,16 +3184,13 @@ msgstr "KVM モジュールを有効にします"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
-msgstr ""
-"KVM モジュールの有効化が要求されました。エージェントは modprobe を使用して "
-"KVM カーネルモジュールを読み込みます。"
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
+msgstr "KVM モジュールの有効化が要求されました。エージェントは modprobe を使用して KVM カーネルモジュールを読み込みます。"
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
-msgstr ""
-"KVM モジュールを無効にするにはルート権限で Agent を実行する必要があります"
+msgstr "KVM モジュールを無効にするにはルート権限で Agent を実行する必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:614
 msgid "KVM modules disable requested"
@@ -3291,9 +3201,8 @@ msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr ""
-"KVM モジュールの無効化が要求されました。エージェントは modprobe -r を使用し"
-"て KVM カーネルモジュールをアンロードします。これには実行中の仮想マシンがある"
-"場合に失敗する可能性があります。"
+"KVM モジュールの無効化が要求されました。エージェントは modprobe -r を使用して KVM "
+"カーネルモジュールをアンロードします。これには実行中の仮想マシンがある場合に失敗する可能性があります。"
 
 # KVM Networking Configuration strings
 #: backend/api/child_host_virtualization_enable.py:697
@@ -3302,8 +3211,7 @@ msgstr "KVMネットワークはLinuxホストでのみサポートされてい�
 
 #: backend/api/child_host_virtualization_enable.py:705
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr ""
-"KVMネットワークを設定するには、エージェントをroot権限で実行する必要があります"
+msgstr "KVMネットワークを設定するには、エージェントをroot権限で実行する必要があります"
 
 #: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
@@ -3319,9 +3227,7 @@ msgstr "KVMネットワーク設定がリクエストされました: %sモー�
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
-msgstr ""
-"KVMネットワーク設定がリクエストされました。エージェントが%sネットワークを設定"
-"します。"
+msgstr "KVMネットワーク設定がリクエストされました。エージェントが%sネットワークを設定します。"
 
 #: backend/api/child_host_virtualization_enable.py:778
 msgid "KVM networks are only available on Linux hosts"
@@ -3329,14 +3235,11 @@ msgstr "KVMネットワークはLinuxホストでのみ利用可能です"
 
 #: backend/api/child_host_virtualization_enable.py:811
 msgid "KVM network list requested. Results will be returned shortly."
-msgstr ""
-"KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
+msgstr "KVMネットワーク一覧がリクエストされました。まもなく結果が表示されます。"
 
 #: backend/api/firewall_roles_helpers.py:137
 msgid "Port number must be between 0 and 65535 (0 means any port)"
-msgstr ""
-"ポート番号は 0 と 65535 の間でなければなりません (0 は任意のポートを意味しま"
-"す)"
+msgstr "ポート番号は 0 と 65535 の間でなければなりません (0 は任意のポートを意味します)"
 
 #: backend/api/firewall_roles_helpers.py:148
 msgid "At least one protocol (TCP or UDP) must be selected"
@@ -3384,8 +3287,7 @@ msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"シークレット管理にはSysManage Professional+ライセンスが必要です。この機能にア"
-"クセスするにはアップグレードしてください。"
+"シークレット管理にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/secrets/crud.py:128
 msgid "Failed to retrieve secret content from vault"
@@ -3413,8 +3315,7 @@ msgid ""
 "Secrets deployment requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"シークレットのデプロイにはSysManage Professional+ライセンスが必要です。この機"
-"能にアクセスするにはアップグレードしてください。"
+"シークレットのデプロイにはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/secrets/deployment.py:56
 msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
@@ -3422,8 +3323,7 @@ msgstr "Pro+ライセンスで /api/v1/secrets/deploy-ssh-keys を使用して�
 
 #: backend/api/secrets/deployment.py:75
 msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
-msgstr ""
-"Pro+ライセンスで /api/v1/secrets/deploy-certificates を使用してください"
+msgstr "Pro+ライセンスで /api/v1/secrets/deploy-certificates を使用してください"
 
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
 #: backend/api/reboot_orchestration.py:43
@@ -3431,14 +3331,12 @@ msgid ""
 "Orchestrated reboot requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"オーケストレーション再起動にはSysManage Professional+ライセンスが必要です。こ"
-"の機能にアクセスするにはアップグレードしてください。"
+"オーケストレーション再起動にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr ""
-"実行中の子ホストが見つかりません。代わりに標準の再起動エンドポイントを使用し"
-"てください。"
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "実行中の子ホストが見つかりません。代わりに標準の再起動エンドポイントを使用してください。"
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -3451,11 +3349,11 @@ msgstr "再起動オーケストレーションが見つかりません"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
-"スケジュールされたアップグレードプロファイルにはSysManage Professional+ライセ"
-"ンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+"スケジュールされたアップグレードプロファイルにはSysManage "
+"Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -3480,9 +3378,7 @@ msgstr "アップグレードプロファイルを削除しました"
 #, python-format
 msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-msgstr ""
-"%(host_count)d 台のホストに対してアップグレードプロファイル "
-"'%(profile_name)s' をトリガーしました"
+msgstr "%(host_count)d 台のホストに対してアップグレードプロファイル '%(profile_name)s' をトリガーしました"
 
 #: backend/api/agent.py:64
 msgid "Rate limit exceeded"
@@ -3517,9 +3413,7 @@ msgstr "メッセージは有効なJSONである必要があります"
 
 #: backend/api/agent.py:522
 msgid "Agent message validation failed: missing hostname and host_id"
-msgstr ""
-"Agent メッセージ検証に失敗しました：ホスト名と host_id のいずれも欠落していま"
-"す"
+msgstr "Agent メッセージ検証に失敗しました：ホスト名と host_id のいずれも欠落しています"
 
 #: backend/api/agent.py:541
 #, python-brace-format
@@ -3533,8 +3427,7 @@ msgstr "{hostname} からの未承認ホストの Agent メッセージ"
 
 #: backend/api/agent.py:591
 msgid "Message must include hostname or host_id for host validation"
-msgstr ""
-"ホスト検証のためにメッセージにホスト名またはhost_idを含める必要があります"
+msgstr "ホスト検証のためにメッセージにホスト名またはhost_idを含める必要があります"
 
 #: backend/api/agent.py:609
 msgid "Host ID no longer valid - please re-register"
@@ -3666,10 +3559,9 @@ msgstr "すべての %d ホストに対してアンチウイルス展開が開�
 #: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
-msgstr ""
-"アンチウイルス展開を %(success_count)d つのホストのうち %(total_count)d つで"
-"開始しました"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
+msgstr "アンチウイルス展開を %(success_count)d つのホストのうち %(total_count)d つで開始しました"
 
 #: backend/api/antivirus_status.py:344
 msgid "Antivirus deployment failed for all hosts"
@@ -3710,8 +3602,7 @@ msgstr "ロールコレクション要求が行われました"
 
 #: backend/api/host_monitoring.py:369
 msgid "Invalid action. Must be 'start', 'stop', or 'restart'"
-msgstr ""
-"無効なアクションです。'start', 'stop', または'restart'でなければなりません。"
+msgstr "無効なアクションです。'start', 'stop', または'restart'でなければなりません。"
 
 #: backend/api/host_monitoring.py:374
 msgid "No services specified"
@@ -3731,8 +3622,7 @@ msgstr "許可が拒否されました: RESTART_HOST_SERVICE ロールが必要�
 
 #: backend/api/host_monitoring.py:420
 msgid "Host must be running in privileged mode for service control"
-msgstr ""
-"サービスコントロールを行うにはprivilegedモードで実行している必要があります"
+msgstr "サービスコントロールを行うにはprivilegedモードで実行している必要があります"
 
 #: backend/api/host_monitoring.py:454
 msgid "Service {} requested for {} services"
@@ -3743,8 +3633,8 @@ msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
 msgstr ""
-"Air-gap メディアエクスポートには air-gap コレクタエンジン（Enterprise）が必要"
-"です。この機能にアクセスするにはアップグレードしてください。"
+"Air-gap メディアエクスポートには air-gap "
+"コレクタエンジン（Enterprise）が必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/content_lifecycle_export.py:84
 #, python-format
@@ -3768,15 +3658,12 @@ msgstr "OSバージョンの取得に失敗しました: %s"
 #: backend/api/packages.py:277
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
-msgstr ""
-"マネージャー %(manager_name)s に対するパッケージの取得に失敗しました: "
-"%(error)s"
+msgstr "マネージャー %(manager_name)s に対するパッケージの取得に失敗しました: %(error)s"
 
 #: backend/api/packages.py:300
 #, python-format
 msgid "No active hosts found for %(os_name)s %(os_version)s"
-msgstr ""
-"アクティブなホストが %(os_name)s %(os_version)s に対して見つかりませんでした"
+msgstr "アクティブなホストが %(os_name)s %(os_version)s に対して見つかりませんでした"
 
 #: backend/api/packages.py:324
 #, python-format
@@ -3816,9 +3703,7 @@ msgstr "kind は 'allow' もしくは 'blackout' のいずれかでなければ�
 
 #: backend/api/maintenance_windows.py:119
 msgid "recurrence must be 'once', 'daily', or 'weekly'."
-msgstr ""
-"recurrence は 'once', 'daily', または 'weekly' のいずれかでなければなりませ"
-"ん。"
+msgstr "recurrence は 'once', 'daily', または 'weekly' のいずれかでなければなりません。"
 
 #: backend/api/maintenance_windows.py:128
 #, python-format
@@ -3827,9 +3712,7 @@ msgstr "未知のタイムゾーン: %s"
 
 #: backend/api/maintenance_windows.py:140
 msgid "A one-time window needs starts_at before ends_at."
-msgstr ""
-"一回限りのウィンドウでは starts_at が ends_at より前に設定する必要がありま"
-"す。"
+msgstr "一回限りのウィンドウでは starts_at が ends_at より前に設定する必要があります。"
 
 #: backend/api/maintenance_windows.py:147
 msgid "A recurring window needs a start_time as 'HH:MM'."
@@ -3845,8 +3728,7 @@ msgstr "週間ウィンドウには有効な days_of_week が必要です。"
 
 #: backend/api/maintenance_windows.py:168
 msgid "scope_type must be 'all', 'host', or 'tag'."
-msgstr ""
-"scope_type は 'all', 'host', または 'tag' のいずれかでなければなりません。"
+msgstr "scope_type は 'all', 'host', または 'tag' のいずれかでなければなりません。"
 
 #: backend/api/maintenance_windows.py:171
 msgid "A host scope needs a host_id."
@@ -3858,8 +3740,7 @@ msgstr "タグスコープには tag_id が必要です。"
 
 #: backend/api/maintenance_windows.py:183
 msgid "A window needs at least one scope (all, host, or tag)."
-msgstr ""
-"ウィンドウには少なくとも 1 つのスコープ（all、host、または tag）が必要です。"
+msgstr "ウィンドウには少なくとも 1 つのスコープ（all、host、または tag）が必要です。"
 
 #: backend/api/maintenance_windows.py:304
 #: backend/api/maintenance_windows.py:327
@@ -3893,8 +3774,7 @@ msgstr "ロゴが大きすぎます。最大 1 MB"
 #: backend/api/report_branding.py:165
 #, python-format
 msgid "Uploaded report branding logo (%(size)d bytes, %(mime)s)"
-msgstr ""
-"レポートブランドロゴ (%(size)d バイト, %(mime)s) をアップロードしました"
+msgstr "レポートブランドロゴ (%(size)d バイト, %(mime)s) をアップロードしました"
 
 #: backend/api/report_branding.py:184
 msgid "No logo configured"
@@ -4003,16 +3883,22 @@ msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"リポジトリミラーリングはSysManage Professional+ライセンスが必要です。この機能"
-"にアクセスするにはアップグレードしてください。"
+"リポジトリミラーリングはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/repository_mirroring_helpers.py:65
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
 msgstr ""
-"Snap ストアプロキシは SysManage Professional+ ライセンスが必要です。この機能"
-"にアクセスするにはアップグレードしてください。"
+"Snap ストアプロキシは SysManage Professional+ ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
+
+#: backend/api/repository_mirroring_helpers.py:78
+msgid ""
+"Container image registry proxy requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"コンテナイメージレジストリプロキシーはSysManage "
+"Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -4028,9 +3914,7 @@ msgstr "%s のプラットフォーム設定はこのホストで既に存在し
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr ""
-"プラットフォーム設定はまだ %d のミラーを所有しています; それらから始めてくだ"
-"さい"
+msgstr "プラットフォーム設定はまだ %d のミラーを所有しています; それらから始めてください"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
@@ -4068,8 +3952,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"%s エクスポートには SysManage Professional+ ライセンスが必要です。OSS ティア"
-"では CSV エクスポートがサポートされています。"
+"%s エクスポートには SysManage Professional+ ライセンスが必要です。OSS ティアでは CSV "
+"エクスポートがサポートされています。"
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4111,8 +3995,7 @@ msgstr "コンテンツはライフサイクルパスを進む方向にのみプ
 
 #: backend/api/content_lifecycle_promotion.py:282
 msgid "The source environment has no content for this content view to promote"
-msgstr ""
-"このコンテンツビューをプロモートするためのコンテンツがソース環境にありません"
+msgstr "このコンテンツビューをプロモートするためのコンテンツがソース環境にありません"
 
 #: backend/api/content_lifecycle_promotion.py:325
 msgid "This environment has no previous version to roll back to"
@@ -4166,10 +4049,9 @@ msgstr "アクセス権限がありません: ADD_ENABLED_PACKAGE_MANAGER ロー
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
-msgstr ""
-"パッケージマネージャ '%(package_manager)s' は既に OS '%(os_name)s' で有効に"
-"なっています"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
+msgstr "パッケージマネージャ '%(package_manager)s' は既に OS '%(os_name)s' で有効になっています"
 
 #: backend/api/enabled_package_managers.py:382
 #, python-format
@@ -4346,8 +4228,7 @@ msgstr "キュー内の未知のメッセージタイプ: %s"
 #: backend/websocket/message_router.py:296
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
-msgstr ""
-"メッセージタイプ %(message_type)s のルーティングに失敗しました: %(error)s"
+msgstr "メッセージタイプ %(message_type)s のルーティングに失敗しました: %(error)s"
 
 #: backend/websocket/queue_maintenance.py:72
 #, python-format
@@ -4373,9 +4254,7 @@ msgstr "ホスト %(host_id)s に対してメッセージを削除できませ�
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
-msgstr ""
-"%(timeout)d 分以上前の %(count)d の古いメッセージを期限切れとしてマークしまし"
-"た"
+msgstr "%(timeout)d 分以上前の %(count)d の古いメッセージを期限切れとしてマークしました"
 
 #: backend/websocket/queue_maintenance.py:201
 #, python-format
@@ -4401,8 +4280,7 @@ msgstr "モック接続：メッセージ %s を送信します"
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
 msgstr ""
-"メッセージ %(message_id)s に該当するホスト '%(hostname)s' を見つけることがで"
-"きません。メッセージを削除します"
+"メッセージ %(message_id)s に該当するホスト '%(hostname)s' を見つけることができません。メッセージを削除します"
 
 #: backend/websocket/inbound_processor.py:139
 #, python-format
@@ -4410,17 +4288,15 @@ msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr ""
-"ステータス：%(status)s のホスト '%(hostname)s' がメッセージ %(message_id)s に"
-"対して承認されていません。メッセージを削除します"
+"ステータス：%(status)s のホスト '%(hostname)s' がメッセージ %(message_id)s "
+"に対して承認されていません。メッセージを削除します"
 
 #: backend/websocket/inbound_processor.py:156
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
-msgstr ""
-"承認済みホスト %(hostname)s (ID: %(host_id)s) の NULL host_id メッセージを処"
-"理しています"
+msgstr "承認済みホスト %(hostname)s (ID: %(host_id)s) の NULL host_id メッセージを処理しています"
 
 #: backend/websocket/inbound_processor.py:273
 #, python-format
@@ -4429,9 +4305,8 @@ msgid ""
 "message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"ホスト %(host_id)s がこのデータベースに存在しません；%(count)d件のキューされ"
-"たメッセージを再試行のために保留します（削除はしない）——登録処理中か、または"
-"既に削除されたホストかもしれません"
+"ホスト %(host_id)s "
+"がこのデータベースに存在しません；%(count)d件のキューされたメッセージを再試行のために保留します（削除はしない）——登録処理中か、または既に削除されたホストかもしれません"
 
 #: backend/websocket/inbound_processor.py:290
 #, python-format
@@ -4439,21 +4314,18 @@ msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr ""
-"ホスト %(host_id)s (FQDN: %(fqdn)s) の承認が解除されました（ステータス："
-"%(status)s）。キューからそのメッセージをすべて削除します"
+"ホスト %(host_id)s (FQDN: %(fqdn)s) "
+"の承認が解除されました（ステータス：%(status)s）。キューからそのメッセージをすべて削除します"
 
 #: backend/websocket/inbound_processor.py:300
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
-msgstr ""
-"承認されていないホスト %(host_id)s に属する %(count)d のメッセージを削除しま"
-"した"
+msgstr "承認されていないホスト %(host_id)s に属する %(count)d のメッセージを削除しました"
 
 #: backend/websocket/inbound_processor.py:307
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-msgstr ""
-"承認済みホスト %(host_id)s (FQDN: %(fqdn)s) のメッセージを処理しています"
+msgstr "承認済みホスト %(host_id)s (FQDN: %(fqdn)s) のメッセージを処理しています"
 
 #: backend/websocket/inbound_processor.py:332
 #, python-format
@@ -4473,9 +4345,7 @@ msgstr "メッセージ %s にホスト名と host_id が欠落しているた�
 #: backend/websocket/inbound_processor.py:406
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
-msgstr ""
-"NULL ホスト ID のメッセージ %(message_id)s の処理中にエラーが発生しました: "
-"%(error)s"
+msgstr "NULL ホスト ID のメッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"
 
 #: backend/websocket/inbound_processor.py:443
 #, python-format
@@ -4488,8 +4358,8 @@ msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr ""
-"キューに登録されたメッセージ %(message_id)s (タイプ: %(message_type)s, ホス"
-"ト: %(host)s) を処理しています"
+"キューに登録されたメッセージ %(message_id)s (タイプ: %(message_type)s, ホスト: %(host)s) "
+"を処理しています"
 
 #: backend/websocket/inbound_processor.py:504
 #, python-format
@@ -4506,9 +4376,7 @@ msgstr "メッセージ%sの処理に失敗しました: 知らないメッセ�
 #: backend/websocket/inbound_processor.py:543
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
-msgstr ""
-"ホスト %(host)s に対するメッセージ %(message_id)s の処理中にエラーが発生しま"
-"した: %(error)s"
+msgstr "ホスト %(host)s に対するメッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"
 
 #: backend/websocket/inbound_processor.py:573
 #, python-format
@@ -4518,9 +4386,7 @@ msgstr "SYSTEM_INFOメッセージ %s を処理中としてマークすること
 #: backend/websocket/inbound_processor.py:605
 #, python-format
 msgid "Error processing SYSTEM_INFO message %(message_id)s: %(error)s"
-msgstr ""
-"SYSTEM_INFO メッセージ %(message_id)s の処理中にエラーが発生しました: "
-"%(error)s"
+msgstr "SYSTEM_INFO メッセージ %(message_id)s の処理中にエラーが発生しました: %(error)s"
 
 #: backend/websocket/queue_stats.py:123
 #, python-format
@@ -4538,8 +4404,8 @@ msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
 "direction=%(direction)s, host_id=%(host_id)s"
 msgstr ""
-"メッセージ: id=%(message_id)s, type=%(message_type)s, "
-"direction=%(direction)s, host_id=%(host_id)s をキューに追加しました"
+"メッセージ: id=%(message_id)s, type=%(message_type)s, direction=%(direction)s, "
+"host_id=%(host_id)s をキューに追加しました"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:483
@@ -4550,8 +4416,7 @@ msgstr "メッセージを処理中としてマーク: %s"
 #: backend/websocket/queue_operations.py:490
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
-msgstr ""
-"メッセージ %(message_id)s を処理中としてマークできませんでした: %(error)s"
+msgstr "メッセージ %(message_id)s を処理中としてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:525
@@ -4562,8 +4427,7 @@ msgstr "メッセージを完了済みとしてマークしました: %s"
 #: backend/websocket/queue_operations.py:532
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
-msgstr ""
-"メッセージ %(message_id)s を完了済みとしてマークできませんでした: %(error)s"
+msgstr "メッセージ %(message_id)s を完了済みとしてマークできませんでした: %(error)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:570
@@ -4574,8 +4438,7 @@ msgstr "メッセージを送信済みとしてマーク（確認待ち）: %s"
 #: backend/websocket/queue_operations.py:577
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
-msgstr ""
-"メッセージ %(message_id)s を送信済みとしてマークできませんでした: %(error)s"
+msgstr "メッセージ %(message_id)s を送信済みとしてマークできませんでした: %(error)s"
 
 #: backend/websocket/queue_operations.py:606
 #, python-format
@@ -4584,10 +4447,9 @@ msgstr "不明なメッセージを確認できません: %s"
 
 #: backend/websocket/queue_operations.py:613
 #, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"メッセージ %(message_id)s は送信ステータスではありません (現在のステータス："
-"%(status)s)。承認をスキップします"
+msgid ""
+"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgstr "メッセージ %(message_id)s は送信ステータスではありません (現在のステータス：%(status)s)。承認をスキップします"
 
 #: backend/websocket/queue_operations.py:626
 #, python-format
@@ -4597,8 +4459,7 @@ msgstr "エージェントによりメッセージが確認されました: %s"
 #: backend/websocket/queue_operations.py:633
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
-msgstr ""
-"メッセージ %(message_id)s を承認済みとしてマークできませんでした: %(error)s"
+msgstr "メッセージ %(message_id)s を承認済みとしてマークできませんでした: %(error)s"
 
 #: backend/websocket/queue_operations.py:717
 #, python-format
@@ -4621,17 +4482,15 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"メッセージ %(message_id)s が失敗しました（%(attempt)d/%(max_retries)d 回"
-"目）: 再試行は %(backoff)d 秒後にスケジュールされます"
+"メッセージ %(message_id)s が失敗しました（%(attempt)d/%(max_retries)d 回目）: 再試行は "
+"%(backoff)d 秒後にスケジュールされます"
 
 #: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
-msgstr ""
-"メッセージ %(message_id)s が %(attempts)d 回の試行後永久的に失敗しました: "
-"%(error)s"
+msgstr "メッセージ %(message_id)s が %(attempts)d 回の試行後永久的に失敗しました: %(error)s"
 
 #: backend/websocket/queue_operations.py:826
 #, python-format
@@ -4775,17 +4634,13 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
-#~ msgstr ""
-#~ "ミラー %s は %s のために作成されています — デフォルトには %s を指定できま"
-#~ "せん"
+#~ msgstr "ミラー %s は %s のために作成されています — デフォルトには %s を指定できません"
 
 #, python-format
 #~ msgid ""
 #~ "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
 #~ "snapshots dispatched."
-#~ msgstr ""
-#~ "%dターゲットミラーを使用して一時的な空き収集実行 '%s' を作成しました；ス"
-#~ "ナップショットが配信されました。"
+#~ msgstr "%dターゲットミラーを使用して一時的な空き収集実行 '%s' を作成しました；スナップショットが配信されました。"
 
 #, python-format
 #~ msgid "Disc %d not found for this run.  Available discs: %s"
@@ -4797,8 +4652,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Dispatched compliance check to agent '%s' for profile '%s'"
-#~ msgstr ""
-#~ "エージェント '%s' にプロファイル '%s' のコンプライアンスチェックを送信"
+#~ msgstr "エージェント '%s' にプロファイル '%s' のコンプライアンスチェックを送信"
 
 #, python-format
 #~ msgid "Source %s failed: %s"
@@ -4807,8 +4661,7 @@ msgstr "vault.invalid_secret_format"
 # OS Version Upgrade related strings
 #, python-format
 #~ msgid "Invalid package manager '%s' for OS '%s'. Valid options: %s"
-#~ msgstr ""
-#~ "OS '%s'に対して無効なパッケージマネージャー '%s'。有効なオプション: %s"
+#~ msgstr "OS '%s'に対して無効なパッケージマネージャー '%s'。有効なオプション: %s"
 
 #, python-format
 #~ msgid "Distribution '%s %s' already exists for type '%s'"
@@ -4820,15 +4673,11 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Host '%s' enrolled into tenant %s via enrollment token"
-#~ msgstr ""
-#~ "ホスト '%s' がテナント %s を通じてエンロールメントトークンで登録されまし"
-#~ "た。"
+#~ msgstr "ホスト '%s' がテナント %s を通じてエンロールメントトークンで登録されました。"
 
 #, python-format
 #~ msgid "Host '%s' enrolled via registration key '%s' (auto_approve=%s)"
-#~ msgstr ""
-#~ "ホスト '%s' がレジストレーションキー '%s' （auto_approve=%s）を通じて登録"
-#~ "されました。"
+#~ msgstr "ホスト '%s' がレジストレーションキー '%s' （auto_approve=%s）を通じて登録されました。"
 
 #, python-format
 #~ msgid "Queued installation of %d packages on host %s"
@@ -4840,8 +4689,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Initiated OS upgrade on host %s with %d upgrade(s)"
-#~ msgstr ""
-#~ "ホスト%sでOSアップグレードを開始し、%d個のアップグレードを行いました。"
+#~ msgstr "ホスト%sでOSアップグレードを開始し、%d個のアップグレードを行いました。"
 
 #, python-format
 #~ msgid "Unknown kind: %s (allowed: %s)"
@@ -4893,8 +4741,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Marked %d old messages as expired (older than %d minutes)"
-#~ msgstr ""
-#~ "%d件の古いメッセージを期限切れとしてマークしました（%d分以上前のもの）"
+#~ msgstr "%d件の古いメッセージを期限切れとしてマークしました（%d分以上前のもの）"
 
 #, python-format
 #~ msgid "Host %s not found for message %s, deleting"
@@ -4902,8 +4749,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Host %s not approved (status: %s) for message %s, deleting"
-#~ msgstr ""
-#~ "ホスト %s はメッセージ %s の承認がありません。削除します（ステータス：%s）"
+#~ msgstr "ホスト %s はメッセージ %s の承認がありません。削除します（ステータス：%s）"
 
 #, python-format
 #~ msgid "Processing NULL host_id message for approved host %s (ID: %s)"
@@ -4911,20 +4757,17 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "データベースにホスト '%s' が存在しません；キューにある %d のメッセージを再"
-#~ "試行のために保留（削除は行われません） — 新規登録の途中か、または既に削除"
-#~ "されたホストかもしれません"
+#~ "データベースにホスト '%s' が存在しません；キューにある %d のメッセージを再試行のために保留（削除は行われません） — "
+#~ "新規登録の途中か、または既に削除されたホストかもしれません"
 
 #, python-format
 #~ msgid ""
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
-#~ msgstr ""
-#~ "ホスト %s (FQDN: %s) の承認が解除されたため、そのメッセージをキューから削"
-#~ "除します（ステータス：%s）"
+#~ msgstr "ホスト %s (FQDN: %s) の承認が解除されたため、そのメッセージをキューから削除します（ステータス：%s）"
 
 #, python-format
 #~ msgid "Deleted %d messages for unapproved host %s"
@@ -4980,8 +4823,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
-#~ msgstr ""
-#~ "メッセージ%sが失敗しました（試行%d/%d）、%d秒後に再試行を予定しています"
+#~ msgstr "メッセージ%sが失敗しました（試行%d/%d）、%d秒後に再試行を予定しています"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
@@ -5150,11 +4992,9 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "OSアップグレードの確認"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
-#~ msgstr ""
-#~ "この操作はオペレーティングシステムをアップグレードし、システムの再起動が必"
-#~ "要です。続行しますか？"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
+#~ msgstr "この操作はオペレーティングシステムをアップグレードし、システムの再起動が必要です。続行しますか？"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "OSアップグレードは常にセキュリティ更新です"
@@ -5268,21 +5108,18 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirtが正常に初期化されました"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "監査ログのエクスポートにはSysManage Professional+ライセンスが必要です。"
-#~ "CSV、JSON、CEF、LEEFエクスポート形式にアクセスするにはアップグレードしてく"
-#~ "ださい。"
+#~ "監査ログのエクスポートにはSysManage "
+#~ "Professional+ライセンスが必要です。CSV、JSON、CEF、LEEFエクスポート形式にアクセスするにはアップグレードしてください。"
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
-#~ msgstr ""
-#~ "Pro+ライセンスで /api/v1/reports/view/{report_type} を使用してください"
+#~ msgstr "Pro+ライセンスで /api/v1/reports/view/{report_type} を使用してください"
 
 #~ msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
-#~ msgstr ""
-#~ "Pro+ライセンスで /api/v1/reports/generate/{report_type} を使用してください"
+#~ msgstr "Pro+ライセンスで /api/v1/reports/generate/{report_type} を使用してください"
 
 #~ msgid "Use /api/v1/secrets with Pro+ license"
 #~ msgstr "Pro+ライセンスで /api/v1/secrets を使用してください"
@@ -5291,8 +5128,7 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "Pro+ライセンスで /api/v1/secrets/{secret_id} を使用してください"
 
 #~ msgid "Use /api/v1/secrets/{secret_id}/content with Pro+ license"
-#~ msgstr ""
-#~ "Pro+ライセンスで /api/v1/secrets/{secret_id}/content を使用してください"
+#~ msgstr "Pro+ライセンスで /api/v1/secrets/{secret_id}/content を使用してください"
 
 #~ msgid "Use /api/v1/secrets/ssh-keys with Pro+ license"
 #~ msgstr "Pro+ライセンスで /api/v1/secrets/ssh-keys を使用してください"
@@ -5335,8 +5171,7 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "Pro+ライセンスで /api/v1/reports/schedules を使用してください"
 
 #~ msgid "Use /api/v1/audit/retention-policies with Pro+ license"
-#~ msgstr ""
-#~ "Pro+ライセンスで /api/v1/audit/retention-policies を使用してください"
+#~ msgstr "Pro+ライセンスで /api/v1/audit/retention-policies を使用してください"
 
 #~ msgid "Use /api/v1/audit/archive with Pro+ license"
 #~ msgstr "Pro+ライセンスで /api/v1/audit/archive を使用してください"
@@ -5390,8 +5225,7 @@ msgstr "vault.invalid_secret_format"
 
 # Pro+ redirect messages for new features
 #~ msgid "Use /api/v1/secrets/rotation-schedules with Pro+ license"
-#~ msgstr ""
-#~ "Pro+ライセンスで /api/v1/secrets/rotation-schedules を使用してください"
+#~ msgstr "Pro+ライセンスで /api/v1/secrets/rotation-schedules を使用してください"
 
 #~ msgid "Use /api/v1/containers/create with Pro+ license"
 #~ msgstr "Pro+ライセンスで /api/v1/containers/create を使用してください"

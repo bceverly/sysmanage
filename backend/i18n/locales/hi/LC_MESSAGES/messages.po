@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 12:08-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-24 15:25-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -168,7 +168,8 @@ msgstr "होस्ट की पार्सनल है"
 #: backend/api/opentelemetry/grafana_connection.py:58
 #: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
 #: backend/api/updates/execution_routes.py:49
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
@@ -210,7 +211,8 @@ msgstr "आपको उपयोगकर्ता सुरक्षा भू
 
 #: backend/api/security_roles.py:198
 msgid "You do not have permission to edit user security roles"
-msgstr "आपको उपयोगकर्ता सुरक्षा भूमिकाओं को संशोधित करने के लिए प्रवेश नहीं है।"
+msgstr ""
+"आपको उपयोगकर्ता सुरक्षा भूमिकाओं को संशोधित करने के लिए प्रवेश नहीं है।"
 
 #: backend/api/security_roles.py:216
 #, python-format
@@ -239,8 +241,8 @@ msgstr "कॉन्फिगरेशन बदलाव %(host_id)s होस�
 #, python-format
 msgid "Hostname changed message for host %s missing new_hostname"
 msgstr ""
-"HostException: \\u092f\\u0947 \\u0938\\u094d\\u0915\\u0947 %s \\u0915\\u093e "
-"\\u092a\\u094d\\u0924\\u093f\\u092c\\u0964 \\u0938\\u0947 "
+"HostException: \\u092f\\u0947 \\u0938\\u094d\\u0915\\u0947 %s \\u0915\\u093e"
+" \\u092a\\u094d\\u0924\\u093f\\u092c\\u0964 \\u0938\\u0947 "
 "\\u0905\\u0915\\u094b\\u0902 \\u0939\\u094d\\u092f\\u093e\\u0924\\u0964"
 
 #: backend/api/handlers/hostname_handler.py:63
@@ -256,7 +258,8 @@ msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
 msgstr ""
-"%(host_id)s के होस्टनेम को %(old_hostname)s से %(new_hostname)s तक अपडेट किया गया"
+"%(host_id)s के होस्टनेम को %(old_hostname)s से %(new_hostname)s तक अपडेट "
+"किया गया"
 
 #: backend/api/handlers/hostname_handler.py:83
 #, python-format
@@ -425,7 +428,7 @@ msgstr "इंस्टॉलेशन पूर्णता रिकॉर्�
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:141
+#: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "%(field)s के लिए गलत UUID: %(value)s"
@@ -484,8 +487,8 @@ msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr ""
-"अगर अपने खाते में MFA सेट किया गया है, तो आपको एक ऑटोथीटिकेशन कोड वाला ईमेल प्राप्त हुआ "
-"है।"
+"अगर अपने खाते में MFA सेट किया गया है, तो आपको एक ऑटोथीटिकेशन कोड वाला ईमेल "
+"प्राप्त हुआ है।"
 
 #: backend/api/auth_mfa.py:434
 msgid "Invalid password."
@@ -582,11 +585,11 @@ msgstr "प्रतिष्ठान दisable करने में वि�
 
 #: backend/api/reports/endpoints.py:69
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
 msgstr ""
-"रिपोर्ट जनरेशन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के "
-"लिए कृपया अपग्रेड करें।"
+"रिपोर्ट जनरेशन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा "
+"तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/reports/endpoints.py:148
 msgid "Registered Hosts"
@@ -637,8 +640,8 @@ msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"एयर-गैप संग्रह अनुसूचियों के लिए एयर-गैप संग्राहक इंजन के साथ SysManage Professional+ "
-"लाइसेंस आवश्यक है। कृपया अपग्रेड करें।"
+"एयर-गैप संग्रह अनुसूचियों के लिए एयर-गैप संग्राहक इंजन के साथ SysManage "
+"Professional+ लाइसेंस आवश्यक है। कृपया अपग्रेड करें।"
 
 #: backend/api/airgap_collection_schedule.py:89
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
@@ -681,8 +684,9 @@ msgid ""
 "will fire only on the current tick window until the Pro+ license includes "
 "automation_engine."
 msgstr ""
-"automation_engine लोड नहीं है; next_run टाइमस्टैम्प आगे नहीं बढ़ाए गए हैं। Pro+ लाइसेंस "
-"में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक विंडो में सक्रिय होंगी।"
+"automation_engine लोड नहीं है; next_run टाइमस्टैम्प आगे नहीं बढ़ाए गए हैं। "
+"Pro+ लाइसेंस में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक"
+" विंडो में सक्रिय होंगी।"
 
 #: backend/api/host_registration.py:65
 msgid "Invalid or expired registration key"
@@ -694,11 +698,11 @@ msgstr "अमान्य या सक्रिय की संपत्त�
 
 #: backend/api/host_registration.py:148
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
 msgstr ""
-"यह होस्ट पहले से एक टेनेंट का हिस्सा है। इसका रजिस्ट्रेशन टेनेंट-स्कोप की बजाय इनरोलमेंट टोकन "
-"के साथ करें"
+"यह होस्ट पहले से एक टेनेंट का हिस्सा है। इसका रजिस्ट्रेशन टेनेंट-स्कोप की "
+"बजाय इनरोलमेंट टोकन के साथ करें"
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -887,8 +891,8 @@ msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr ""
-"कंटेनर जीवनचक्र प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक "
-"पहुँचने के लिए कृपया अपग्रेड करें।"
+"कंटेनर जीवनचक्र प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस"
+" सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 # Child host lifecycle control messages
 #: backend/api/child_host_control.py:306
@@ -927,13 +931,29 @@ msgstr "चाइल्ड एजेंट अपडेट का अनुर�
 msgid "Child agent update requested"
 msgstr "चाइल्ड एजेंट अपडेट का अनुरोध किया गया"
 
+#: backend/api/repository_mirroring_images.py:123
+msgid "Tracked image not found"
+msgstr "ट्रैक्टेड इमेज नहीं पाया गया"
+
+#: backend/api/repository_mirroring_images.py:126
+msgid "Image untracked"
+msgstr "इमेज अनट्रैक्टेड"
+
+#: backend/api/repository_mirroring_images.py:144
+msgid "No images are tracked for this mirror"
+msgstr "यह माइरोर के लिए कोई ट्रैक्टेड इमेज नहीं है"
+
+#: backend/api/repository_mirroring_images.py:168
+msgid "Image capture dispatched"
+msgstr "इमेज कैपचर डिप्चार्टेड"
+
 #: backend/api/airgap_keys.py:72
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
 msgstr ""
-"कोई कॉलेक्टर साइनिंग कुंजी नहीं पाई गई। इस सर्वर के रोल को 'Air-Gap Collector' मानकर "
-"सेट करें ताकि एक जनरेट किया जा सके"
+"कोई कॉलेक्टर साइनिंग कुंजी नहीं पाई गई। इस सर्वर के रोल को 'Air-Gap "
+"Collector' मानकर सेट करें ताकि एक जनरेट किया जा सके"
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1141,7 +1161,8 @@ msgstr "अनुमति अस्वीकृत: होस्ट प्र�
 
 #: backend/api/processes.py:175
 msgid "Agent must be running in privileged mode to terminate processes"
-msgstr "प्रक्रियाओं को समाप्त करने के लिए एजेंट को विशेषाधिकार मोड में चलना चाहिए"
+msgstr ""
+"प्रक्रियाओं को समाप्त करने के लिए एजेंट को विशेषाधिकार मोड में चलना चाहिए"
 
 #: backend/api/processes.py:224
 msgid "Process termination requested. The list will update shortly."
@@ -1178,8 +1199,8 @@ msgstr ""
 "\\u0e2b\\u0e19\\u0e48\\u0e35\\u0e1a "
 "\\u0e40\\u0e17\\u0e2d\\u0e36\\u0e48\\u0e01 %(host_fqdn)s (%(host_platform)s "
 "%(host_platform_release)s) "
-"\\u0e1b\\u0e49\\u0e25\\u0e47\\u0e0a\\u0e36\\u0e2d\\u0e1c\\u0e48\\u0e2d\\u0e21 "
-"\\u0e2b\\u0e19\\u0e48\\u0e35\\u0e1a %(os_name)s %(os_version)s"
+"\\u0e1b\\u0e49\\u0e25\\u0e47\\u0e0a\\u0e36\\u0e2d\\u0e1c\\u0e48\\u0e2d\\u0e21"
+" \\u0e2b\\u0e19\\u0e48\\u0e35\\u0e1a %(os_name)s %(os_version)s"
 
 #: backend/api/package_handlers.py:147
 #, python-format
@@ -1227,14 +1248,17 @@ msgstr "प्रवेश नहीं: ADD_HOST_ACCOUNT भूमिका क
 
 #: backend/api/host_account_management.py:102
 msgid "Agent must be running in privileged mode to manage user accounts"
-msgstr "एजेंट को यूजर खातों प्रबंधन करने के लिए प्राइवीलेज्ड मोड में चलता हुआ होना आवश्यक है"
+msgstr ""
+"एजेंट को यूजर खातों प्रबंधन करने के लिए प्राइवीलेज्ड मोड में चलता हुआ होना "
+"आवश्यक है"
 
 #: backend/api/host_account_management.py:176
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
 msgstr ""
-"उपयोगकर्ता खाता निर्माण की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके बदलाव करेगी।"
+"उपयोगकर्ता खाता निर्माण की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके बदलाव"
+" करेगी।"
 
 #: backend/api/host_account_management.py:200
 msgid "Permission denied: ADD_HOST_GROUP role required"
@@ -1242,13 +1266,16 @@ msgstr "प्रवेश नहीं: ADD_HOST_GROUP भूमिका क�
 
 #: backend/api/host_account_management.py:223
 msgid "Agent must be running in privileged mode to manage groups"
-msgstr "एजेंट को ग्रुप्स पर नियंत्रण लगाने के लिए प्राइवीलेज्ड मॉड में चलना होगा"
+msgstr ""
+"एजेंट को ग्रुप्स पर नियंत्रण लगाने के लिए प्राइवीलेज्ड मॉड में चलना होगा"
 
 #: backend/api/host_account_management.py:280
 msgid ""
 "Group creation requested. The group list will update automatically after "
 "creation."
-msgstr "ग्रुप निर्माण की प्रतीक्षा है। ग्रुप सूची को निर्माण के बाद स्वयं अपडेट करेगी।"
+msgstr ""
+"ग्रुप निर्माण की प्रतीक्षा है। ग्रुप सूची को निर्माण के बाद स्वयं अपडेट "
+"करेगी।"
 
 #: backend/api/host_account_management.py:307
 msgid "Permission denied: DELETE_HOST_ACCOUNT role required"
@@ -1256,14 +1283,17 @@ msgstr "प्रवेश नहीं: DELETE_HOST_ACCOUNT भूमिका 
 
 #: backend/api/host_account_management.py:331
 msgid "Agent must be running in privileged mode to delete user accounts"
-msgstr "एजेंट को यूजर खातों को हटाने के लिए प्राइवीलेज्ड मोड में चल रहा होना आवश्यक है"
+msgstr ""
+"एजेंट को यूजर खातों को हटाने के लिए प्राइवीलेज्ड मोड में चल रहा होना आवश्यक "
+"है"
 
 #: backend/api/host_account_management.py:384
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
 msgstr ""
-"उपयोगकर्ता खाता को हटाने की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके बदलाव करेगी।"
+"उपयोगकर्ता खाता को हटाने की आवश्यकता है। उपयोगकर्ता सूची को अनुसरण करके "
+"बदलाव करेगी।"
 
 #: backend/api/host_account_management.py:410
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1277,7 +1307,8 @@ msgstr "एजेंट को ग्रुप्स हटाने के ल�
 msgid ""
 "Group deletion requested. The group list will update automatically after "
 "deletion."
-msgstr "ग्रुप हटाने का अनुरोध किया गया। हटाव के बाद ग्रुप सूची स्वतः अद्ययन होंगी।"
+msgstr ""
+"ग्रुप हटाने का अनुरोध किया गया। हटाव के बाद ग्रुप सूची स्वतः अद्ययन होंगी।"
 
 #: backend/api/repository_mirroring.py:124
 msgid "Mirror host not found"
@@ -1303,11 +1334,11 @@ msgstr "माइरर टिक क्रोन मूल्यांकन �
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
 msgstr ""
-"माइरर %s कभी भी सफलता से संकेतिका नहीं कर लिया है — संकेतिका को सफलता प्राप्त करने से "
-"पहले इसे डिफ़ॉल्ट मानकर निर्दिष्ट करने के लिए इंतजार करें"
+"माइरर %s कभी भी सफलता से संकेतिका नहीं कर लिया है — संकेतिका को सफलता "
+"प्राप्त करने से पहले इसे डिफ़ॉल्ट मानकर निर्दिष्ट करने के लिए इंतजार करें"
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1315,8 +1346,8 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"%(mirror_name)s मिरर %(package_manager)s के लिए है, इसे %(platform)s प्राथमिक में "
-"संबोधित नहीं किया जा सकता"
+"%(mirror_name)s मिरर %(package_manager)s के लिए है, इसे %(platform)s "
+"प्राथमिक में संबोधित नहीं किया जा सकता"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1327,25 +1358,27 @@ msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"वायरलेस संग्रह चलने के लिए SysManage Professional+ पते की आवश्यकता है जो air-gap "
-"संग्रहकर्ता इंजन को समर्थित करता है। कृपया अपडेट करके इस विशेषण की पहुँच पाएं।"
+"वायरलेस संग्रह चलने के लिए SysManage Professional+ पते की आवश्यकता है जो "
+"air-gap संग्रहकर्ता इंजन को समर्थित करता है। कृपया अपडेट करके इस विशेषण की "
+"पहुँच पाएं।"
 
 #: backend/api/airgap_collector_runs.py:224
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"वायरलेस संग्रह चलने के लिए repository_mirroring_engine मॉड्यूल को लोड करना आवश्यक है "
-"— संग्रहकर्ता प्रत्येक लक्षण के बंडल को इसकी माइरोर ट्री की एक संपीड़ित छवि से पढ़ता है।"
+"वायरलेस संग्रह चलने के लिए repository_mirroring_engine मॉड्यूल को लोड करना "
+"आवश्यक है — संग्रहकर्ता प्रत्येक लक्षण के बंडल को इसकी माइरोर ट्री की एक "
+"संपीड़ित छवि से पढ़ता है।"
 
 #: backend/api/airgap_collector_runs.py:235
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr ""
-"ग्लोबल माइरर सेटिंग्स नहीं मिले या mirror_root_path की सेटिंग नहीं की गई है।  माइरर "
-"सेटिंग्स को सेट करने से पहले संकलन चलाएं।"
+"ग्लोबल माइरर सेटिंग्स नहीं मिले या mirror_root_path की सेटिंग नहीं की गई है।"
+"  माइरर सेटिंग्स को सेट करने से पहले संकलन चलाएं।"
 
 #: backend/api/airgap_collector_runs.py:295
 #, python-format
@@ -1354,9 +1387,9 @@ msgid ""
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
-"माइरर %r में known_version_id सेट नहीं किया गया; Option-B संग्रहण चलने के लिए माइरर "
-"को कैटलोग वर्सन से जोड़ना होता है ताकि डिस्ट्रो / वर्सन की परिकल्पना की जा सके। माइरर "
-"को संपादित करें और ड्रॉडाउन में एक वर्सन चुनें"
+"माइरर %r में known_version_id सेट नहीं किया गया; Option-B संग्रहण चलने के "
+"लिए माइरर को कैटलोग वर्सन से जोड़ना होता है ताकि डिस्ट्रो / वर्सन की "
+"परिकल्पना की जा सके। माइरर को संपादित करें और ड्रॉडाउन में एक वर्सन चुनें"
 
 #: backend/api/airgap_collector_runs.py:326
 #, python-format
@@ -1364,8 +1397,8 @@ msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
 msgstr ""
-"माइरर %r एक कैटलोग वर्सन संदर्भित करता है जो अब नहीं मौजूद है। माइरर पर फिर से एक "
-"वर्सन चुनें"
+"माइरर %r एक कैटलोग वर्सन संदर्भित करता है जो अब नहीं मौजूद है। माइरर पर फिर "
+"से एक वर्सन चुनें"
 
 #: backend/api/airgap_collector_runs.py:410
 #: backend/api/airgap_collector_runs.py:489
@@ -1386,7 +1419,8 @@ msgstr "माइरर %s पाया नहीं गया"
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
-msgstr "माइरर %r अक्षम है; प्रयोग से पहले यह सक्रिय करें + संकेतिका लाने के लिए"
+msgstr ""
+"माइरर %r अक्षम है; प्रयोग से पहले यह सक्रिय करें + संकेतिका लाने के लिए"
 
 #: backend/api/airgap_collector_runs.py:447
 #, python-format
@@ -1394,8 +1428,8 @@ msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr ""
-"सभी लक्ष माइरोर्स समान होस्ट पर रहने चाहिए (संग्रह कार्यक्रम एकल एजेंट को डिपचेस्ट करता "
-"है)। चयनित माइरोर्स %d होस्टों को पारिभाषित करते हैं।"
+"सभी लक्ष माइरोर्स समान होस्ट पर रहने चाहिए (संग्रह कार्यक्रम एकल एजेंट को "
+"डिपचेस्ट करता है)। चयनित माइरोर्स %d होस्टों को पारिभाषित करते हैं।"
 
 #: backend/api/airgap_collector_runs.py:543
 #, python-format
@@ -1403,8 +1437,8 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"'%(iso_label)s' एअर-गैप कलेक्शन चलानी को बनाई गई है; %(mirror_count)d लक्ष मिरर "
-"संपर्क के लिए स्नैपशट डिस्पच किया गया है।"
+"'%(iso_label)s' एअर-गैप कलेक्शन चलानी को बनाई गई है; %(mirror_count)d लक्ष "
+"मिरर संपर्क के लिए स्नैपशट डिस्पच किया गया है।"
 
 #: backend/api/airgap_collector_runs.py:666
 #, python-format
@@ -1412,14 +1446,16 @@ msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
 msgstr ""
-"ISO अभी तक डाउनलोड के लिए तैयर नहीं है (स्थिति: %s)। ISO_BUILT तक रन पहुँच जाने दें।"
+"ISO अभी तक डाउनलोड के लिए तैयर नहीं है (स्थिति: %s)। ISO_BUILT तक रन पहुँच "
+"जाने दें।"
 
 #: backend/api/airgap_collector_runs.py:676
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
 msgstr ""
-"ISO फाइल नहीं है; स्टेजिंग वोल्यूम को सफाई दे दिया गया हो सकता है। संग्रहण पुनः करें।"
+"ISO फाइल नहीं है; स्टेजिंग वोल्यूम को सफाई दे दिया गया हो सकता है। संग्रहण "
+"पुनः करें।"
 
 #: backend/api/airgap_collector_runs.py:693
 msgid "ISO file not found."
@@ -1451,11 +1487,11 @@ msgstr "ISO फाइल नहीं है: %s"
 
 #: backend/api/package_compliance.py:76
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:203
 #, python-format
@@ -1482,8 +1518,8 @@ msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
 "(%(violation_count)d violation(s))"
 msgstr ""
-"'%(profile_name)s' प्रोफाइल के लिए '%(host_fqdn)s' होस्ट की स्कैनिंग: %(status)s "
-"(%(violation_count)d विपरीत)"
+"'%(profile_name)s' प्रोफाइल के लिए '%(host_fqdn)s' होस्ट की स्कैनिंग: "
+"%(status)s (%(violation_count)d विपरीत)"
 
 #: backend/api/package_compliance.py:503
 #, python-format
@@ -1491,8 +1527,8 @@ msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
 msgstr ""
-"%(host_fqdn)s निर्देशक '%(profile_name)s' प्रोफाइल के लिए संपादक को सुसूचना जारी कर "
-"दी गई है"
+"%(host_fqdn)s निर्देशक '%(profile_name)s' प्रोफाइल के लिए संपादक को सुसूचना "
+"जारी कर दी गई है"
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
@@ -1579,8 +1615,8 @@ msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
 msgstr ""
-"बाहरी पहचान प्रदाता सम्बंधित समर्थन के लिए SysManage Professional+ लाइसेंस आवश्यक है। "
-"कृपया अपग्रेड करके इस विशेषता को पहुंचने के लिए जारी बनें।"
+"बाहरी पहचान प्रदाता सम्बंधित समर्थन के लिए SysManage Professional+ लाइसेंस "
+"आवश्यक है। कृपया अपग्रेड करके इस विशेषता को पहुंचने के लिए जारी बनें।"
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -1592,7 +1628,9 @@ msgstr "IdP प्रोवाइडर की हटा दी गई"
 
 #: backend/api/external_idp.py:339
 msgid "A default-for-unmapped mapping already exists for this provider."
-msgstr "यह प्रोवाइडर के लिए पहले से ही एक अनिर्दिष्ट-मैपिंग के लिए डिफ़ॉल्ट मैपिंग मौजूद है।"
+msgstr ""
+"यह प्रोवाइडर के लिए पहले से ही एक अनिर्दिष्ट-मैपिंग के लिए डिफ़ॉल्ट मैपिंग "
+"मौजूद है।"
 
 #: backend/api/external_idp.py:373
 msgid "Role mapping not found"
@@ -1629,11 +1667,11 @@ msgstr "OIDC साइन-इन फ़ेयल: %s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:698
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
 msgstr ""
-"इस IdP पहचान के लिए कोई SysManage खाता जुड़ा नहीं है। पहले एडमिनिस्ट्रेटर से आपकी खाते "
-"का प्रबंधन करवाएं।"
+"इस IdP पहचान के लिए कोई SysManage खाता जुड़ा नहीं है। पहले एडमिनिस्ट्रेटर से"
+" आपकी खाते का प्रबंधन करवाएं।"
 
 #: backend/api/external_idp.py:506 backend/api/external_idp.py:703
 msgid "Account is inactive."
@@ -1706,7 +1744,9 @@ msgstr "Grafana URL सेट नहीं किया गया है"
 
 #: backend/api/grafana_integration.py:578
 msgid "Connection timeout - Grafana server may be unreachable"
-msgstr "ग्राफना सर्वर के लिए समय सीमा अधिक है - इसकी संभावना है कि यह पहुँच नहीं पड़ता"
+msgstr ""
+"ग्राफना सर्वर के लिए समय सीमा अधिक है - इसकी संभावना है कि यह पहुँच नहीं "
+"पड़ता"
 
 #: backend/api/grafana_integration.py:587
 msgid "Connection failed - Grafana server may be down or unreachable"
@@ -1722,8 +1762,8 @@ msgstr "Grafana स्वास्थ्य जांच करने में 
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "होस्ट नहीं पाया गया है या इसकी सक्रियता नहीं है"
 
@@ -1763,11 +1803,11 @@ msgstr "Grafana URL उपलब्ध नहीं है"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
 msgstr ""
-"OpenTelemetry इनस्टॉल करने की Pro+ observability_engine को सर्वर पर लोड करने की "
-"आवश्यकता है।"
+"OpenTelemetry इनस्टॉल करने की Pro+ observability_engine को सर्वर पर लोड करने"
+" की आवश्यकता है।"
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -1780,11 +1820,11 @@ msgstr "OpenTelemetry इनस्टॉल करने में विफल 
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
 msgstr ""
-"OpenTelemetry की हटाई के लिए सर्वर पर Pro+ observability_engine लोड होना आवश्यक "
-"है।"
+"OpenTelemetry की हटाई के लिए सर्वर पर Pro+ observability_engine लोड होना "
+"आवश्यक है।"
 
 #: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
@@ -1858,8 +1898,8 @@ msgid ""
 "OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
 "be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana कनेक्शन Pro+ observability_engine को सर्वर पर लोड करने की "
-"आवश्यकता है।"
+"OpenTelemetry Grafana कनेक्शन Pro+ observability_engine को सर्वर पर लोड करने"
+" की आवश्यकता है।"
 
 #: backend/api/opentelemetry/grafana_connection.py:160
 msgid "OpenTelemetry Grafana connection queued successfully"
@@ -1875,8 +1915,8 @@ msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana डिसकनेक्शन Pro+ observability_engine को सर्वर पर लोड करने "
-"की आवश्यकता है।"
+"OpenTelemetry Grafana डिसकनेक्शन Pro+ observability_engine को सर्वर पर लोड "
+"करने की आवश्यकता है।"
 
 #: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
@@ -1887,126 +1927,130 @@ msgstr "OpenTelemetry Grafana डिसकनेक्शन पहलू बु
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "OpenTelemetry को Grafana से अटकल बांधने में विफल: %s"
 
-#: backend/api/content_lifecycle.py:63
+#: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
-"सामग्री जीवन चक्र प्रबंधन के लिए SysManage Professional+ (Enterprise) लाइसेंस की "
-"आवश्यकता है। इस सुविधा को देखने के लिए अपग्रेड करें।"
+"सामग्री जीवन चक्र प्रबंधन के लिए SysManage Professional+ (Enterprise) "
+"लाइसेंस की आवश्यकता है। इस सुविधा को देखने के लिए अपग्रेड करें।"
 
-#: backend/api/content_lifecycle.py:120
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
 msgstr "पर्यावरण का नाम आवश्यक है"
 
-#: backend/api/content_lifecycle.py:122
+#: backend/api/content_lifecycle.py:123
 msgid "Environment name is too long"
 msgstr "पर्यावरण का नाम बहुत लंबा है"
 
-#: backend/api/content_lifecycle.py:133
+#: backend/api/content_lifecycle.py:134
 msgid "Environment not found"
 msgstr "पर्यावरण पाया नहीं गया"
 
-#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:149 backend/api/content_lifecycle.py:184
 msgid "An environment with that name already exists"
 msgstr "इस नाम के साथ पर्यावरण पहले से मौजूद है"
 
-#: backend/api/content_lifecycle.py:202
+#: backend/api/content_lifecycle.py:203
 msgid "The Library environment cannot be deleted"
 msgstr "Library पर्यावरण को हटा देने की सक्षमता उपलब्ध नहीं है"
 
-#: backend/api/content_lifecycle.py:224
+#: backend/api/content_lifecycle.py:225
 msgid "ordered_ids must list every environment exactly once"
-msgstr "ordered_ids में प्रत्येक पर्यावरण को बस एक बार ही उल्लिखित करना होता है"
+msgstr ""
+"ordered_ids में प्रत्येक पर्यावरण को बस एक बार ही उल्लिखित करना होता है"
 
-#: backend/api/content_lifecycle.py:228
+#: backend/api/content_lifecycle.py:229
 msgid "The Library environment must remain first"
 msgstr "Library पर्यावरण पहले स्थान पर रहना चाहिए"
 
-#: backend/api/content_lifecycle.py:288
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
 msgstr "कन्टेंट विच्वरण का नाम आवश्यक है"
 
-#: backend/api/content_lifecycle.py:290
+#: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
 msgstr "कन्टेंट विच्वरण का नाम बहुत लंबा है"
 
-#: backend/api/content_lifecycle.py:308
+#: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
 msgstr "कन्टेंट विच्वरण पाया नहीं गया"
 
-#: backend/api/content_lifecycle.py:319
+#: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
-msgstr "प्रत्येक कन्टेंट विच्वरण सदस्य को एक माइरोर या कम्पोनेंट CV होना चाहिए"
+msgstr ""
+"प्रत्येक कन्टेंट विच्वरण सदस्य को एक माइरोर या कम्पोनेंट CV होना चाहिए"
 
-#: backend/api/content_lifecycle.py:364
+#: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr "दोंपस्ट व्मार बेश: %s"
 
-#: backend/api/content_lifecycle.py:370
+#: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
 msgstr "'%s' व्मार Advisory पेजेय ाॆनान, हो भुवे जेव्मार"
 
-#: backend/api/content_lifecycle.py:380
+#: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr "'%s' व्मार जेव्मार 'packages' सोते है"
 
-#: backend/api/content_lifecycle.py:390
+#: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr "'‘%s’ व्मार पेय सोते जेव्मार (YYYY-MM-DD)"
 
-#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
+#: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
 msgstr "इस नाम के साथ पहले से ही एक कन्टेंट विच्वरण मौजूद है"
 
-#: backend/api/content_lifecycle.py:637
+#: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
 msgstr "माइरोर सेटिंग्स सेट किए नहीं गए हैं"
 
-#: backend/api/content_lifecycle.py:651
+#: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
 msgstr "यहाँ तक प्रतिरूपित कन्टेंट विच्वरण अभी पब्लिश नहीं किए जा सकते हैं"
 
-#: backend/api/content_lifecycle.py:656
+#: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
 msgstr "इस कन्टेंट विच्वरण में पब्लिश करने के लिए कोई रिपोज़िट्री नहीं है"
 
-#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
 msgstr "उपयोग किए गए ब्रिज का अस्तित्व नहीं है"
 
-#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
+#: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "माइरोर '%s' के पास कोई होस्ट नहीं अनुवादित है"
 
-#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
+#: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "इस संस्करण में सभी माइरोर एक ही होस्ट शेयर करने चाहिए"
 
-#: backend/api/content_lifecycle.py:696
+#: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
-msgstr "माइरोर '%s' के पास कोई स्नॉपशट नहीं है; पब्लिश करने से पहले इसका स्नॉपशट बनाएँ"
+msgstr ""
+"माइरोर '%s' के पास कोई स्नॉपशट नहीं है; पब्लिश करने से पहले इसका स्नॉपशट "
+"बनाएँ"
 
-#: backend/api/content_lifecycle.py:772
+#: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
 msgstr "संवाद व्यू में कोई रिपोज़िट्री नहीं है"
 
-#: backend/api/content_lifecycle.py:800
+#: backend/api/content_lifecycle.py:801
 msgid "Composite content view has no component content views"
 msgstr "कंपाउंड कन्टेंट व्यू में कोई कम्पनी कन्टेंट व्यू नहीं है"
 
-#: backend/api/content_lifecycle.py:809
+#: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr "'%s' कंपनी कोई पब्लिश वर्झन हाल ही तक नहीं है"
 
-#: backend/api/content_lifecycle.py:828
+#: backend/api/content_lifecycle.py:829
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr "'%s' कंपनी कोई रिपोजिट्री नहीं है"
@@ -2016,8 +2060,8 @@ msgid ""
 "CVE feed management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"CVE फ़ीड प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। कृपया इस सुविधा तक "
-"पहुँचने के लिए अपग्रेड करें।"
+"CVE फ़ीड प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। कृपया इस "
+"सुविधा तक पहुँचने के लिए अपग्रेड करें।"
 
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
@@ -2102,7 +2146,8 @@ msgstr "फाइरवॉल रीस्टार्ट कमेंड सफ
 msgid "Firewall deploy command sent successfully"
 msgstr "फाइरवॉल डिप्लोइंट कमेंड सफलतापूर्वक प्रसारित किया गया"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS नाम आवश्यक है"
@@ -2125,8 +2170,8 @@ msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
 "options: %(valid_options)s"
 msgstr ""
-"'%(package_manager)s' पैकेज मैनेजर लाइब्रेरी के लिए '%(os_name)s' ऑपरेटिंग सिस्टम के "
-"लिए गलत है। योजना: %(valid_options)s"
+"'%(package_manager)s' पैकेज मैनेजर लाइब्रेरी के लिए '%(os_name)s' ऑपरेटिंग "
+"सिस्टम के लिए गलत है। योजना: %(valid_options)s"
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
@@ -2186,8 +2231,8 @@ msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"कंटेनर/VM प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने "
-"के लिए कृपया अपग्रेड करें।"
+"कंटेनर/VM प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस "
+"सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
 msgid "Child host not found"
@@ -2211,8 +2256,8 @@ msgstr "चाइल्ड होस्ट रिफ्रेश का अन�
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
-"'बेस्य को 'पमीमारी ॥॰ नाज्य' %(name)s %(version)s 'चरत्देक को मेस्य 'पमीमारी ॥॰ "
-"नाज्य' %(child_type)s ॥॰ पकरनान"
+"'बेस्य को 'पमीमारी ॥॰ नाज्य' %(name)s %(version)s 'चरत्देक को मेस्य 'पमीमारी"
+" ॥॰ नाज्य' %(child_type)s ॥॰ पकरनान"
 
 #: backend/api/child_host_crud.py:821
 msgid "Distribution deleted"
@@ -2241,7 +2286,9 @@ msgstr "होस्ट रजिस्ट्रेशन पार्टी क
 
 #: backend/api/message_handlers_core.py:359
 msgid "Host auto-approved via child host creation"
-msgstr "HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया गया"
+msgstr ""
+"HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया "
+"गया"
 
 #: backend/api/message_handlers_core.py:442
 msgid "Agent registered and connected successfully"
@@ -2266,8 +2313,11 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "लक्ष्य '%(t)s' %(f)s के लिए मान्य नहीं है"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
-msgstr "रिमोट सिसलग फ़ॉरवर्डिंग के लिए प्रोफेशनल लाइसेंस (LOG_ROUTING) की आवश्यकता है।"
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgstr ""
+"रिमोट सिसलग फ़ॉरवर्डिंग के लिए प्रोफेशनल लाइसेंस (LOG_ROUTING) की आवश्यकता "
+"है।"
 
 #: backend/api/logging_settings.py:141
 msgid "A syslog host is required for the remote-syslog target."
@@ -2317,7 +2367,9 @@ msgstr "bhyve के लिए VM नाम आवश्यक है"
 #: backend/api/child_host_virtualization.py:418
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
-msgstr "एजेंट को बच्चे होस्ट्स बनाने के लिए प्रबंधक प्रивिलेज मैं चला हुआ होना आवश्यक है"
+msgstr ""
+"एजेंट को बच्चे होस्ट्स बनाने के लिए प्रबंधक प्रивिलेज मैं चला हुआ होना "
+"आवश्यक है"
 
 #: backend/api/child_host_virtualization.py:440
 #, python-format
@@ -2327,19 +2379,22 @@ msgstr "'%s' नाम का एक चाइल्ड होस्ट इस �
 #: backend/api/child_host_virtualization.py:514
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
-msgstr "बच्चा होस्ट निर्माण की प्रति-अर्जन की गई: %(child_name)s (%(distribution)s)"
+msgstr ""
+"बच्चा होस्ट निर्माण की प्रति-अर्जन की गई: %(child_name)s (%(distribution)s)"
 
 #: backend/api/child_host_virtualization.py:537
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr ""
-"बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता है. जब यह "
-"जोड़ा जाता है, तो यह स्वचालित रूप से प्रमाणित कर दिया जाएगा."
+"बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता "
+"है. जब यह जोड़ा जाता है, तो यह स्वचालित रूप से प्रमाणित कर दिया जाएगा."
 
 #: backend/api/child_host_virtualization.py:542
 msgid "Child host creation requested. This may take several minutes."
-msgstr "बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता है."
+msgstr ""
+"बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता "
+"है."
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
@@ -2391,14 +2446,16 @@ msgstr "प्रकाशित संस्करण %s नहीं है"
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
 "body."
-msgstr "Graylog attach में mechanism, graylog_server और port की आवश्यकता होती है।"
+msgstr ""
+"Graylog attach में mechanism, graylog_server और port की आवश्यकता होती है।"
 
 #: backend/api/host_graylog.py:175
 msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
 msgstr ""
-"Graylog attach Pro+ observability_engine के साथ server पर load होना जरूरी है।"
+"Graylog attach Pro+ observability_engine के साथ server पर load होना जरूरी "
+"है।"
 
 #: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
@@ -2407,7 +2464,9 @@ msgstr "Graylog टिकट कमेंड सफलतापूर्वक q
 #: backend/api/password_reset.py:339
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
-msgstr "यदि वह पते का एक खाता मौजूद है, तो आपको एक पासवर्ड रीसेट लिंक प्राप्त हुई है।"
+msgstr ""
+"यदि वह पते का एक खाता मौजूद है, तो आपको एक पासवर्ड रीसेट लिंक प्राप्त हुई "
+"है।"
 
 #: backend/api/password_reset.py:369 backend/api/password_reset.py:410
 msgid "Invalid or expired password reset token"
@@ -2418,8 +2477,8 @@ msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr ""
-"अपने नए पासवर्ड के साथ आपका पासवर्ड सफलतापूर्वक रिसेट किया गया है। अब आप अपने नए "
-"पासवर्ड के साथ लॉग इन कर सकते हैं।"
+"अपने नए पासवर्ड के साथ आपका पासवर्ड सफलतापूर्वक रिसेट किया गया है। अब आप "
+"अपने नए पासवर्ड के साथ लॉग इन कर सकते हैं।"
 
 #: backend/api/password_reset.py:413
 msgid "Token is valid"
@@ -2488,7 +2547,8 @@ msgstr "वायरस निषेधक प्रत्यक्षित म
 
 #: backend/api/scim.py:50
 msgid "SCIM provisioning requires a SysManage Professional+ license."
-msgstr "SCIM प्रोवाइज़िंग के लिए SysManage Professional+ लाइसेंस की आवश्यकता है।"
+msgstr ""
+"SCIM प्रोवाइज़िंग के लिए SysManage Professional+ लाइसेंस की आवश्यकता है।"
 
 #: backend/api/scim.py:63 backend/api/scim.py:72
 msgid "Unknown SCIM target"
@@ -2600,7 +2660,8 @@ msgstr "होस्ट टैग प्राप्त करने में �
 
 #: backend/api/security.py:104
 msgid "Email integration must be configured before creating new users"
-msgstr "नए उपयोगकर्ताओं को बनाने से पहले ईमेल एकीकरण को कॉन्फ़िगर किया जाना चाहिए"
+msgstr ""
+"नए उपयोगकर्ताओं को बनाने से पहले ईमेल एकीकरण को कॉन्फ़िगर किया जाना चाहिए"
 
 #: backend/api/security.py:107
 msgid ""
@@ -2608,9 +2669,9 @@ msgid ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
-"अपनी YAML कॉन्फ़िगरेशन फ़ाइल में ईमेल सक्षम करें और SMTP सेटिंग्स कॉन्फ़िगर करें। ईमेल एकीकरण "
-"के बिना, नए उपयोगकर्ता पासवर्ड सेटअप निर्देश प्राप्त नहीं कर सकते हैं और लॉग इन करने में "
-"असमर्थ होंगे।"
+"अपनी YAML कॉन्फ़िगरेशन फ़ाइल में ईमेल सक्षम करें और SMTP सेटिंग्स कॉन्फ़िगर "
+"करें। ईमेल एकीकरण के बिना, नए उपयोगकर्ता पासवर्ड सेटअप निर्देश प्राप्त नहीं "
+"कर सकते हैं और लॉग इन करने में असमर्थ होंगे।"
 
 #: backend/api/security.py:125
 msgid "Default admin credentials are configured in your YAML file"
@@ -2621,8 +2682,8 @@ msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr ""
-"अपनी कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं और सर्वर को पुनरारंभ "
-"करें"
+"अपनी कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं और सर्वर को "
+"पुनरारंभ करें"
 
 #: backend/api/security.py:142
 msgid "Default JWT secret is being used"
@@ -2652,8 +2713,8 @@ msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 msgstr ""
-"JWT रहस्य डिफ़ॉल्ट मान का उपयोग करता है लेकिन पासवर्ड सॉल्ट बदल दिया गया है। चलाएँ: "
-"{command}"
+"JWT रहस्य डिफ़ॉल्ट मान का उपयोग करता है लेकिन पासवर्ड सॉल्ट बदल दिया गया है।"
+" चलाएँ: {command}"
 
 #: backend/api/security.py:202
 #, python-brace-format
@@ -2661,10 +2722,11 @@ msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
 msgstr ""
-"पासवर्ड सॉल्ट डिफ़ॉल्ट मान का उपयोग करता है लेकिन JWT रहस्य बदल दिया गया है। चलाएँ: "
-"{command}"
+"पासवर्ड सॉल्ट डिफ़ॉल्ट मान का उपयोग करता है लेकिन JWT रहस्य बदल दिया गया है।"
+" चलाएँ: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "Ubuntu Pro कुंजी 'C' से शुरू होनी चाहिए (contract-based keys के लिए)"
 
@@ -2715,7 +2777,8 @@ msgstr "कम से कम एक होस्ट नामित करना
 #: backend/api/ubuntu_pro_settings.py:315
 #: backend/api/ubuntu_pro_settings.py:337
 msgid "Custom key must be provided when not using master key"
-msgstr "स्वचालित कुंजी का इस्तेमाल न करने पर आवश्यकता है कि एक विशिष्ट कुंजी दी जाए"
+msgstr ""
+"स्वचालित कुंजी का इस्तेमाल न करने पर आवश्यकता है कि एक विशिष्ट कुंजी दी जाए"
 
 #: backend/api/ubuntu_pro_settings.py:350
 msgid "No master key configured. Please configure a master key first."
@@ -2774,14 +2837,15 @@ msgstr "रजिस्ट्रेशन अवशोषित: होस्ट
 
 #: backend/api/host.py:779
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "\\u092f\\u0947\\u0938 \\u0915\\u094b '%(fqdn)s' "
 "\\u0915\\u093e\\u0930\\u094d\\u0924\\u0940 "
 "\\u0926\\u0947\\u0938\\u094d\\u092f\\u094b %(tenant_id)s \\u0915\\u093e "
 "\\u0905\\u092a\\u0926\\u0940 "
-"\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902 "
-"\\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
+"\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
+" \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
 #: backend/api/host.py:796
 #, python-format
@@ -2856,8 +2920,10 @@ msgstr "इनस्टॉलेशन के लिए कोई पैके�
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr "%(package_count)d पैकेजज़ के लिए %(host_fqdn)s होस्ट पर संस्थापना प्यूशड"
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgstr ""
+"%(package_count)d पैकेजज़ के लिए %(host_fqdn)s होस्ट पर संस्थापना प्यूशड"
 
 #: backend/api/packages_operations.py:199
 #, python-format
@@ -2881,7 +2947,8 @@ msgstr "इनस्टॉलेशन से हटाव के लिए क�
 #, python-format
 msgid ""
 "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr "%(package_count)d पैकेजज़ के लिए %(host_fqdn)s होस्ट पर संस्थापना रद्द की गई"
+msgstr ""
+"%(package_count)d पैकेजज़ के लिए %(host_fqdn)s होस्ट पर संस्थापना रद्द की गई"
 
 #: backend/api/packages_operations.py:378
 #, python-format
@@ -2978,7 +3045,8 @@ msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
 msgstr ""
-"इस खाते के लिए बहु-तनाव परीक्षण है। कृपया अपने प्रोफाइल पेज से पंजीकरण करें फिर साइन इन करें"
+"इस खाते के लिए बहु-तनाव परीक्षण है। कृपया अपने प्रोफाइल पेज से पंजीकरण करें "
+"फिर साइन इन करें"
 
 #: backend/api/auth.py:459
 msgid "Account locked due to too many failed login attempts"
@@ -3014,7 +3082,9 @@ msgstr "फाइल आकार बहुत बड़ा है। सबस�
 
 #: backend/api/profile.py:238
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
-msgstr "निषेधित छवि वर्णन की फ़ार्मेट। अनुमति हेतु फ़ार्मेट: PNG, JPEG, JPG, GIF, WEBP"
+msgstr ""
+"निषेधित छवि वर्णन की फ़ार्मेट। अनुमति हेतु फ़ार्मेट: PNG, JPEG, JPG, GIF, "
+"WEBP"
 
 #: backend/api/profile.py:269
 msgid "Invalid image file. Please upload a valid image."
@@ -3035,9 +3105,11 @@ msgstr "इस होस्ट के लिए कोई OS अपग्रे�
 
 #: backend/api/updates/os_upgrade_routes.py:338
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr ""
-"%(fqdn)s पर ऑसीडब्ल्यू अपग्रेड शुरू किया गया है, जिसमें %(upgrade_count)d अपग्रेड(स) हैं"
+"%(fqdn)s पर ऑसीडब्ल्यू अपग्रेड शुरू किया गया है, जिसमें %(upgrade_count)d "
+"अपग्रेड(स) हैं"
 
 #: backend/api/updates/os_upgrade_routes.py:369
 msgid "OS upgrade command queued for host"
@@ -3107,7 +3179,8 @@ msgstr "अज्ञात प्रकार: %(kind)s (संभव: %(allowed
 #: backend/api/dynamic_secrets.py:156
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
 msgstr ""
 "प्रदान की गई डायनामिक सेक्रेट '%(name)s' (काइंड=%(kind)s, रोल=%(role)s, "
 "ttl=%(ttl)ds)"
@@ -3138,7 +3211,9 @@ msgstr "WSL सक्षमता की आवश्यकता है"
 msgid ""
 "WSL enablement requested. A reboot may be required to complete the "
 "installation."
-msgstr "WSL सक्षमता की आवश्यकता है. प्रोग्राम को पुनर्शुरू करने की आवश्यकता हो सकती है।"
+msgstr ""
+"WSL सक्षमता की आवश्यकता है. प्रोग्राम को पुनर्शुरू करने की आवश्यकता हो सकती "
+"है।"
 
 # LXD Container Management strings
 #: backend/api/child_host_virtualization_enable.py:213
@@ -3147,7 +3222,8 @@ msgstr "LXD केवल Linux होस्ट पर समर्थित ह�
 
 #: backend/api/child_host_virtualization_enable.py:221
 msgid "Agent must be running with root privileges to initialize LXD"
-msgstr "LXD को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+msgstr ""
+"LXD को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
 
 #: backend/api/child_host_virtualization_enable.py:235
 msgid "LXD initialization requested"
@@ -3158,8 +3234,8 @@ msgid ""
 "LXD initialization requested. The agent will install and configure LXD "
 "automatically."
 msgstr ""
-"LXD इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट स्वचालित रूप से LXD इंस्टॉल और कॉन्फ़िगर "
-"करेगा।"
+"LXD इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट स्वचालित रूप से LXD इंस्टॉल और "
+"कॉन्फ़िगर करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:276
 msgid "VMM is only supported on OpenBSD hosts"
@@ -3167,7 +3243,8 @@ msgstr "VMM केवल OpenBSD होस्ट पर समर्थित �
 
 #: backend/api/child_host_virtualization_enable.py:284
 msgid "Agent must be running with root privileges to initialize VMM"
-msgstr "VMM को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+msgstr ""
+"VMM को इनिशियलाइज़ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
 
 #: backend/api/child_host_virtualization_enable.py:298
 msgid "VMM initialization requested"
@@ -3175,13 +3252,16 @@ msgstr "VMM इनिशियलाइज़ेशन का अनुरोध
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
 msgstr ""
-"VMM इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट vmd डेमॉन को सक्षम और प्रारंभ करेगा।"
+"VMM इनिशियलाइज़ेशन का अनुरोध किया गया। एजेंट vmd डेमॉन को सक्षम और प्रारंभ "
+"करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
-msgstr "KVM को प्रारंभ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+msgstr ""
+"KVM को प्रारंभ करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
 
 #: backend/api/child_host_virtualization_enable.py:362
 msgid "KVM initialization requested"
@@ -3192,8 +3272,8 @@ msgid ""
 "KVM initialization requested. The agent will install libvirt and configure "
 "KVM for virtual machine management."
 msgstr ""
-"KVM प्रारंभीकरण का अनुरोध किया गया। एजेंट libvirt इंस्टॉल करेगा और वर्चुअल मशीन प्रबंधन "
-"के लिए KVM कॉन्फ़िगर करेगा।"
+"KVM प्रारंभीकरण का अनुरोध किया गया। एजेंट libvirt इंस्टॉल करेगा और वर्चुअल "
+"मशीन प्रबंधन के लिए KVM कॉन्फ़िगर करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:403
 #: backend/api/child_host_virtualization_enable.py:467
@@ -3203,8 +3283,8 @@ msgstr "bhyve केवल FreeBSD होस्ट पर संरचित ह
 #: backend/api/child_host_virtualization_enable.py:411
 msgid "Agent must be running with root privileges to initialize bhyve"
 msgstr ""
-"एजेंट को बहवीव (bhyve) की इनिशियलाइज़ेशन करने के लिए रूट प्रивिलेज्स के साथ चला होना "
-"आवश्यक है"
+"एजेंट को बहवीव (bhyve) की इनिशियलाइज़ेशन करने के लिए रूट प्रивिलेज्स के साथ "
+"चला होना आवश्यक है"
 
 #: backend/api/child_host_virtualization_enable.py:425
 msgid "bhyve initialization requested"
@@ -3212,15 +3292,16 @@ msgstr "bhyve संस्थापन की आवश्यकता है"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
 msgstr ""
-"bhyve संस्थापन की आवश्यकता है. एजेंट vmm.ko को लोड करेगा और प्रणालि के लिए bhyve "
-"वर्चुअल मशीन संस्थापित करेगा।"
+"bhyve संस्थापन की आवश्यकता है. एजेंट vmm.ko को लोड करेगा और प्रणालि के लिए "
+"bhyve वर्चुअल मशीन संस्थापित करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
-msgstr "एजेंट को बहवे डिसैबल करने के लिए रूट प्राविलिटीज़ के साथ चला होना आवश्यक है"
+msgstr ""
+"एजेंट को बहवे डिसैबल करने के लिए रूट प्राविलिटीज़ के साथ चला होना आवश्यक है"
 
 #: backend/api/child_host_virtualization_enable.py:487
 msgid "bhyve disable requested"
@@ -3231,12 +3312,13 @@ msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
 msgstr ""
-"bhyve विरोधिता की आवश्यकता है. एजेंट vmm.ko को अपलोड करेगा और प्रणालि के लिए bhyve "
-"वर्चुअल मशीन संस्थापित करेगा।"
+"bhyve विरोधिता की आवश्यकता है. एजेंट vmm.ko को अपलोड करेगा और प्रणालि के लिए"
+" bhyve वर्चुअल मशीन संस्थापित करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
-msgstr "एजेंट को KVM मॉड्यूल एनबल करने के लिए रूट प्राविधिकता के साथ चलना होगा"
+msgstr ""
+"एजेंट को KVM मॉड्यूल एनबल करने के लिए रूट प्राविधिकता के साथ चलना होगा"
 
 #: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
@@ -3244,16 +3326,17 @@ msgstr "KVM मॉड्यूल अनुरोधित कार्यक्
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
 msgstr ""
-"KVM मॉड्यूल आवश्यकता के अनुसार सक्रिय करवाए जा रहे हैं। एजेंट KVM कर्नल मॉड्यूल को "
-"modprobe की मदद से लोड करेगा।"
+"KVM मॉड्यूल आवश्यकता के अनुसार सक्रिय करवाए जा रहे हैं। एजेंट KVM कर्नल "
+"मॉड्यूल को modprobe की मदद से लोड करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
 msgstr ""
-"एजेंट को किउवीम मॉड्यूल्स अक्षम करने के लिए रूट प्राविधिकताओं के साथ चला हुआ होना आवश्यक है"
+"एजेंट को किउवीम मॉड्यूल्स अक्षम करने के लिए रूट प्राविधिकताओं के साथ चला हुआ"
+" होना आवश्यक है"
 
 #: backend/api/child_host_virtualization_enable.py:614
 msgid "KVM modules disable requested"
@@ -3264,9 +3347,9 @@ msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr ""
-"KVM मॉड्यूल अनिवार्य रूप से बंद करने की प्रतीक्षा है। एजेंट modprobe -r का इस्तेमाल करके "
-"KVM कर्नल मॉड्यूलों को अपलोड से बाहर करेगा। यदि किसी भी VMs चल रहे हों, तो यह विफल "
-"होगा।"
+"KVM मॉड्यूल अनिवार्य रूप से बंद करने की प्रतीक्षा है। एजेंट modprobe -r का "
+"इस्तेमाल करके KVM कर्नल मॉड्यूलों को अपलोड से बाहर करेगा। यदि किसी भी VMs चल"
+" रहे हों, तो यह विफल होगा।"
 
 # KVM Networking Configuration strings
 #: backend/api/child_host_virtualization_enable.py:697
@@ -3275,7 +3358,9 @@ msgstr "KVM नेटवर्किंग केवल Linux होस्ट �
 
 #: backend/api/child_host_virtualization_enable.py:705
 msgid "Agent must be running with root privileges to configure KVM networking"
-msgstr "KVM नेटवर्किंग कॉन्फ़िगर करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना चाहिए"
+msgstr ""
+"KVM नेटवर्किंग कॉन्फ़िगर करने के लिए एजेंट को रूट विशेषाधिकारों के साथ चलना "
+"चाहिए"
 
 #: backend/api/child_host_virtualization_enable.py:714
 msgid "Bridge interface name is required for bridged networking mode"
@@ -3291,7 +3376,9 @@ msgstr "KVM नेटवर्क कॉन्फ़िगरेशन का �
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
-msgstr "KVM नेटवर्क कॉन्फ़िगरेशन का अनुरोध किया गया। एजेंट %s नेटवर्क को कॉन्फ़िगर करेगा।"
+msgstr ""
+"KVM नेटवर्क कॉन्फ़िगरेशन का अनुरोध किया गया। एजेंट %s नेटवर्क को कॉन्फ़िगर "
+"करेगा।"
 
 #: backend/api/child_host_virtualization_enable.py:778
 msgid "KVM networks are only available on Linux hosts"
@@ -3351,8 +3438,8 @@ msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"सीक्रेट प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने के "
-"लिए कृपया अपग्रेड करें।"
+"सीक्रेट प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा "
+"तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/secrets/crud.py:128
 msgid "Failed to retrieve secret content from vault"
@@ -3380,8 +3467,8 @@ msgid ""
 "Secrets deployment requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"सीक्रेट डिप्लॉयमेंट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने "
-"के लिए कृपया अपग्रेड करें।"
+"सीक्रेट डिप्लॉयमेंट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस "
+"सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/secrets/deployment.py:56
 msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
@@ -3397,12 +3484,15 @@ msgid ""
 "Orchestrated reboot requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"ऑर्केस्ट्रेटेड रीबूट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा तक पहुँचने "
-"के लिए कृपया अपग्रेड करें।"
+"ऑर्केस्ट्रेटेड रीबूट के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस "
+"सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr "कोई चल रहे चाइल्ड होस्ट नहीं मिले। इसके बजाय मानक रीबूट एंडपॉइंट का उपयोग करें।"
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr ""
+"कोई चल रहे चाइल्ड होस्ट नहीं मिले। इसके बजाय मानक रीबूट एंडपॉइंट का उपयोग "
+"करें।"
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -3415,11 +3505,11 @@ msgstr "रीबूट ऑर्केस्ट्रेशन नहीं म
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
-"अनुसूचित अपग्रेड प्रोफ़ाइलों के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा "
-"तक पहुंचने के लिए कृपया अपग्रेड करें।"
+"अनुसूचित अपग्रेड प्रोफ़ाइलों के लिए SysManage Professional+ लाइसेंस आवश्यक "
+"है। इस सुविधा तक पहुंचने के लिए कृपया अपग्रेड करें।"
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -3445,8 +3535,8 @@ msgstr "अपग्रेड प्रोफ़ाइल हटाई गई"
 msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
 msgstr ""
-"'%(profile_name)s' अपग्रेड प्रोफाइल को %(host_count)d होस्ट(स) के लिए संकेतित किया "
-"गया"
+"'%(profile_name)s' अपग्रेड प्रोफाइल को %(host_count)d होस्ट(स) के लिए "
+"संकेतित किया गया"
 
 #: backend/api/agent.py:64
 msgid "Rate limit exceeded"
@@ -3481,7 +3571,8 @@ msgstr "संदेश वैध JSON होना चाहिए"
 
 #: backend/api/agent.py:522
 msgid "Agent message validation failed: missing hostname and host_id"
-msgstr "एजेंट मैसेज वैलिडेशन फ़ैल हो गई: hostname और host_id की प्रत्याशा की गई"
+msgstr ""
+"एजेंट मैसेज वैलिडेशन फ़ैल हो गई: hostname और host_id की प्रत्याशा की गई"
 
 #: backend/api/agent.py:541
 #, python-brace-format
@@ -3503,7 +3594,9 @@ msgstr "होस्ट ID अकारात्मक नहीं है - क
 
 #: backend/api/agent.py:621
 msgid "Host ID and hostname mismatch - please re-register"
-msgstr "HostException और होस्टनेम मतलब असाइन करने से भिन्न हैं - कृपया पुनः रजिस्त्र करें"
+msgstr ""
+"HostException और होस्टनेम मतलब असाइन करने से भिन्न हैं - कृपया पुनः रजिस्त्र"
+" करें"
 
 #: backend/api/agent.py:638
 msgid "Host must register before sending inventory data"
@@ -3627,7 +3720,8 @@ msgstr "सभी %d होस्ट्स पर एन्टीवायरस
 #: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
 msgstr ""
 "%(success_count)d \\u092c\\u0947\\u0938\\u094d\\u0924 \\u0915\\u094b "
 "\\u0906\\u092a\\u0928\\u0940 \\u0939\\u0948 "
@@ -3944,7 +4038,8 @@ msgstr "%s के फायरवॉल रोल हटाने में व�
 
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
-msgstr "OS लाइफसायकल प्रबंधन के लिए SysManage Professional लाइसेंस की आवश्यकता है।"
+msgstr ""
+"OS लाइफसायकल प्रबंधन के लिए SysManage Professional लाइसेंस की आवश्यकता है।"
 
 #: backend/api/lifecycle_actions.py:76
 msgid "The OS lifecycle module is not currently available."
@@ -3955,16 +4050,24 @@ msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"रिपोज़िट्री माइरिंग SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। कृपया अपग्रेड करके इस "
-"सुविधा के लिए पहुंच प्राप्त करें"
+"रिपोज़िट्री माइरिंग SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। कृपया "
+"अपग्रेड करके इस सुविधा के लिए पहुंच प्राप्त करें"
 
 #: backend/api/repository_mirroring_helpers.py:65
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
 msgstr ""
-"स्नैप स्टोर प्रोक्सी के लिए SysManage Professional+ लाइसेंस की आवश्यकता है। कृपया अपग्रेड "
-"करके इस सुविधा को पहुंचने के लिए"
+"स्नैप स्टोर प्रोक्सी के लिए SysManage Professional+ लाइसेंस की आवश्यकता है। "
+"कृपया अपग्रेड करके इस सुविधा को पहुंचने के लिए"
+
+#: backend/api/repository_mirroring_helpers.py:78
+msgid ""
+"Container image registry proxy requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"कंटेनर इमेज रजिस्ट्री प्रोक्सी के लिए SysManage Professional+ लाइसेंस की "
+"आवश्यकता है। इस सुविधा के लिए अपग्रेड करें।"
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -3980,7 +4083,8 @@ msgstr "इस होस्ट पर %s के लिए पлатफॉर्�
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr "प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
+msgstr ""
+"प्लेटफ़ोर्म सेटिंग में %d माइरोर(स) अभी तक निर्दिष्ट; पहले उन्हें हटा दें"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
@@ -4018,8 +4122,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"%s एक्सपोर्ट के लिए SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। OSS संस्करण CSV "
-"एक्सपोर्ट का समर्थन करता है।"
+"%s एक्सपोर्ट के लिए SysManage प्रोफेशनल+ लाइसेंस की आवश्यकता है। OSS संस्करण"
+" CSV एक्सपोर्ट का समर्थन करता है।"
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4061,7 +4165,8 @@ msgstr "सामग्री को सिलेक्टर पथ के अ�
 
 #: backend/api/content_lifecycle_promotion.py:282
 msgid "The source environment has no content for this content view to promote"
-msgstr "इस परिस्थिति में इस content view को promotion करने के लिए सामग्री नहीं है"
+msgstr ""
+"इस परिस्थिति में इस content view को promotion करने के लिए सामग्री नहीं है"
 
 #: backend/api/content_lifecycle_promotion.py:325
 msgid "This environment has no previous version to roll back to"
@@ -4070,7 +4175,8 @@ msgstr "यह परिस्थिति में roll back करने क�
 #: backend/api/content_lifecycle_promotion.py:336
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
-"पिछला वर्झन को reclaim कर लिया गया है और अब इसे पुन: स्थापित किया नहीं जा सकता"
+"पिछला वर्झन को reclaim कर लिया गया है और अब इसे पुन: स्थापित किया नहीं जा "
+"सकता"
 
 #: backend/api/content_lifecycle_promotion.py:437
 #, python-format
@@ -4099,7 +4205,8 @@ msgstr "यूनिट मरीन को पुन: स्थापित क
 #: backend/api/content_lifecycle_promotion.py:554
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr ""
-"स्नैप स्टोर प्रक्षेपक की आवश्यकता होती है एक होस्ट के स्नैप्स को फिर से दिशांतरित करने के लिए"
+"स्नैप स्टोर प्रक्षेपक की आवश्यकता होती है एक होस्ट के स्नैप्स को फिर से "
+"दिशांतरित करने के लिए"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
@@ -4117,8 +4224,10 @@ msgstr "प्रवेश नहीं: ADD_ENABLED_PACKAGE_MANAGER भूम�
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
-msgstr "'%(package_manager)s' पैकेज मैनेजर OS '%(os_name)s' के लिए अलरेडी सक्रिय है"
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
+msgstr ""
+"'%(package_manager)s' पैकेज मैनेजर OS '%(os_name)s' के लिए अलरेडी सक्रिय है"
 
 #: backend/api/enabled_package_managers.py:382
 #, python-format
@@ -4162,7 +4271,8 @@ msgstr "स्क्रिप्ट कार्यवहीन नहीं ह
 
 #: backend/api/scripts/models.py:122
 msgid "Either saved_script_id or script_content must be provided"
-msgstr "saved_script_id या script_content में से किसी भी एक को प्रदान करना होता है"
+msgstr ""
+"saved_script_id या script_content में से किसी भी एक को प्रदान करना होता है"
 
 #: backend/api/scripts/models.py:132
 msgid "shell_type is required for ad-hoc scripts"
@@ -4321,7 +4431,8 @@ msgstr "%(host_id)s वाले होस्ट के संदेशों �
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
-msgstr "%(count)d पुराने संदेश को %(timeout)d मिनट बीमारी से प्राइम घोषित किया"
+msgstr ""
+"%(count)d पुराने संदेश को %(timeout)d मिनट बीमारी से प्राइम घोषित किया"
 
 #: backend/websocket/queue_maintenance.py:201
 #, python-format
@@ -4346,7 +4457,8 @@ msgstr "मोक कनेक्शन: message %s को भेजने क�
 #: backend/websocket/inbound_processor.py:128
 #, python-format
 msgid "Host %(hostname)s not found for message %(message_id)s, deleting"
-msgstr "होस्ट %(hostname)s के लिए मेसेज %(message_id)s पाया नहीं गया, हटा देते हैं"
+msgstr ""
+"होस्ट %(hostname)s के लिए मेसेज %(message_id)s पाया नहीं गया, हटा देते हैं"
 
 #: backend/websocket/inbound_processor.py:139
 #, python-format
@@ -4354,8 +4466,8 @@ msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
 msgstr ""
-"होस्ट %(hostname)s की प्रतिष्ठा नहीं मिली (साथ: %(status)s) संदेश %(message_id)s के "
-"लिए, हटा देते हैं"
+"होस्ट %(hostname)s की प्रतिष्ठा नहीं मिली (साथ: %(status)s) संदेश "
+"%(message_id)s के लिए, हटा देते हैं"
 
 #: backend/websocket/inbound_processor.py:156
 #, python-format
@@ -4363,8 +4475,8 @@ msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
 msgstr ""
-"NULL host_id संदेश के लिए %(hostname)s (ID: %(host_id)s) को प्रोसेसिंग किया जा रहा "
-"है"
+"NULL host_id संदेश के लिए %(hostname)s (ID: %(host_id)s) को प्रोसेसिंग किया "
+"जा रहा है"
 
 #: backend/websocket/inbound_processor.py:273
 #, python-format
@@ -4373,9 +4485,9 @@ msgid ""
 "message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"होस्ट %(host_id)s इस डेब्स के पर नहीं मिला; %(count)d संदेश(स) को फँड करके दोबारा "
-"प्रयास करने के लिए इंतजार कर रहा हूँ (हटाने से पहले नहीं) — यह एक अधिकतम ट्रांसफर ऑर्डर "
-"या हटा दिया गया होस्ट हो सकता है"
+"होस्ट %(host_id)s इस डेब्स के पर नहीं मिला; %(count)d संदेश(स) को फँड करके "
+"दोबारा प्रयास करने के लिए इंतजार कर रहा हूँ (हटाने से पहले नहीं) — यह एक "
+"अधिकतम ट्रांसफर ऑर्डर या हटा दिया गया होस्ट हो सकता है"
 
 #: backend/websocket/inbound_processor.py:290
 #, python-format
@@ -4383,19 +4495,21 @@ msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr ""
-"होस्ट %(host_id)s (FQDN: %(fqdn)s) अधिकृत नहीं है (साथ: %(status)s), काउन्टर से "
-"सभी इसके मेसेजज़ को हटा रहा है"
+"होस्ट %(host_id)s (FQDN: %(fqdn)s) अधिकृत नहीं है (साथ: %(status)s), काउन्टर"
+" से सभी इसके मेसेजज़ को हटा रहा है"
 
 #: backend/websocket/inbound_processor.py:300
 #, python-format
 msgid "Deleted %(count)d messages for unapproved host %(host_id)s"
 msgstr ""
-"%(count)d संदेश अनुमोदित न होकर बाध्यता से %(host_id)s इनहोस्ट के लिए हटा दिए गए"
+"%(count)d संदेश अनुमोदित न होकर बाध्यता से %(host_id)s इनहोस्ट के लिए हटा "
+"दिए गए"
 
 #: backend/websocket/inbound_processor.py:307
 #, python-format
 msgid "Processing messages for approved host %(host_id)s (FQDN: %(fqdn)s)"
-msgstr "%(host_id)s (FQDN: %(fqdn)s) के लिए संदेश को प्रोसेसिंग किया जा रहा है"
+msgstr ""
+"%(host_id)s (FQDN: %(fqdn)s) के लिए संदेश को प्रोसेसिंग किया जा रहा है"
 
 #: backend/websocket/inbound_processor.py:332
 #, python-format
@@ -4415,7 +4529,8 @@ msgstr "संदेश %s में होस्टनेम और होस�
 #: backend/websocket/inbound_processor.py:406
 #, python-format
 msgid "Error processing NULL host_id message %(message_id)s: %(error)s"
-msgstr "%(message_id)s इनपुट में NULL host_id के साथ एरोर प्रोसेसिंग: %(error)s"
+msgstr ""
+"%(message_id)s इनपुट में NULL host_id के साथ एरोर प्रोसेसिंग: %(error)s"
 
 #: backend/websocket/inbound_processor.py:443
 #, python-format
@@ -4428,7 +4543,8 @@ msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
 msgstr ""
-"प्यूशड मेसेज प्रोसेसिंग: %(message_id)s (टाइप: %(message_type)s, होस्ट: %(host)s)"
+"प्यूशड मेसेज प्रोसेसिंग: %(message_id)s (टाइप: %(message_type)s, होस्ट: "
+"%(host)s)"
 
 #: backend/websocket/inbound_processor.py:504
 #, python-format
@@ -4436,8 +4552,8 @@ msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
 msgstr ""
-"होस्ट %(host)s के लिए मेसेज ID %(message_id)s को सफलतापूर्वक प्रोसेसिंग और पूरा किया "
-"गया"
+"होस्ट %(host)s के लिए मेसेज ID %(message_id)s को सफलतापूर्वक प्रोसेसिंग और "
+"पूरा किया गया"
 
 #: backend/websocket/inbound_processor.py:522
 #, python-format
@@ -4448,7 +4564,8 @@ msgstr "%s संदेश प्रोसेस करने में वि�
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
 msgstr ""
-"%(message_id)s के लिए %(host)s होस्ट के लिए मेसेज प्रोसेसिंग करने में त्रुटि: %(error)s"
+"%(message_id)s के लिए %(host)s होस्ट के लिए मेसेज प्रोसेसिंग करने में "
+"त्रुटि: %(error)s"
 
 #: backend/websocket/inbound_processor.py:573
 #, python-format
@@ -4476,8 +4593,8 @@ msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
 "direction=%(direction)s, host_id=%(host_id)s"
 msgstr ""
-"संदेश इनक्वी: id=%(message_id)s, प्रकार=%(message_type)s, दिशा=%(direction)s, "
-"होस्ट ID=%(host_id)s"
+"संदेश इनक्वी: id=%(message_id)s, प्रकार=%(message_type)s, "
+"दिशा=%(direction)s, होस्ट ID=%(host_id)s"
 
 # Message acknowledgment strings
 #: backend/websocket/queue_operations.py:483
@@ -4519,10 +4636,11 @@ msgstr "अज्ञात संदेश की पुष्टि नही�
 
 #: backend/websocket/queue_operations.py:613
 #, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgid ""
+"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr ""
-"%(message_id)s के संदेश भेजे गए (SENT) स्थिति में नहीं है (संदेश की सबसे बड़ी स्थिति "
-"%(status)s है), पुष्टि के लिए छोड़ दिया जाएगा"
+"%(message_id)s के संदेश भेजे गए (SENT) स्थिति में नहीं है (संदेश की सबसे "
+"बड़ी स्थिति %(status)s है), पुष्टि के लिए छोड़ दिया जाएगा"
 
 #: backend/websocket/queue_operations.py:626
 #, python-format
@@ -4564,8 +4682,8 @@ msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr ""
-"%(message_id)s की संदेश प्रतिक्रिया %(attempts)d बार प्रयास करने के बाद अन्तिम रूप से "
-"विफल हो गई: %(error)s"
+"%(message_id)s की संदेश प्रतिक्रिया %(attempts)d बार प्रयास करने के बाद "
+"अन्तिम रूप से विफल हो गई: %(error)s"
 
 #: backend/websocket/queue_operations.py:826
 #, python-format
@@ -4605,7 +4723,8 @@ msgstr "रेट लिमिट अतिक्रांत हो गया�
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format
 msgid "%(failed_count)d of %(total_count)d child host(s) failed to restart"
-msgstr "%(failed_count)d आयामी होस्ट(s) में से %(total_count)d का पुनरारंभ विफल रहा"
+msgstr ""
+"%(failed_count)d आयामी होस्ट(s) में से %(total_count)d का पुनरारंभ विफल रहा"
 
 #: backend/services/airgap_device_service.py:149
 msgid "no device selected"
@@ -4707,8 +4826,7 @@ msgstr "vault.invalid_secret_format"
 #~ msgid "Host %s (%s %s) attempted to report packages for %s %s"
 #~ msgstr ""
 #~ "\\u0025s \\u0025s (\\u0025s \\u0025s) \\u003cHost\\u003e \\u003cneka "
-#~ "package\\u003e \\u003cinstall hoane ka report karne ke liye %s %s "
-#~ "ko\\u003e"
+#~ "package\\u003e \\u003cinstall hoane ka report karne ke liye %s %s ko\\u003e"
 
 #, python-format
 #~ msgid "Mirror %s is for %s, can't assign to a %s default"
@@ -4719,8 +4837,8 @@ msgstr "vault.invalid_secret_format"
 #~ "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
 #~ "snapshots dispatched."
 #~ msgstr ""
-#~ "एक बार का एयर-गैप संग्रह चलाना '%s' के साथ %d लक्ष्य मिडर(s) को बनाया; स्नेहशट्स "
-#~ "व्यवस्थित किए गए हैं."
+#~ "एक बार का एयर-गैप संग्रह चलाना '%s' के साथ %d लक्ष्य मिडर(s) को बनाया; "
+#~ "स्नेहशट्स व्यवस्थित किए गए हैं."
 
 #, python-format
 #~ msgid "Disc %d not found for this run.  Available discs: %s"
@@ -4742,7 +4860,8 @@ msgstr "vault.invalid_secret_format"
 #, python-format
 #~ msgid "Invalid package manager '%s' for OS '%s'. Valid options: %s"
 #~ msgstr ""
-#~ "'%s' के लिए '%s' परिणामस्थिति के लिये गलत सॉफ़्टवेअर पैकेज मैनेजर। संभव विकल्प: %s"
+#~ "'%s' के लिए '%s' परिणामस्थिति के लिये गलत सॉफ़्टवेअर पैकेज मैनेजर। संभव "
+#~ "विकल्प: %s"
 
 #, python-format
 #~ msgid "Distribution '%s %s' already exists for type '%s'"
@@ -4778,7 +4897,9 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Initiated OS upgrade on host %s with %d upgrade(s)"
-#~ msgstr "प्रत्यक्ष में होस्ट %s पर OS अपग्रेड की सुचना दी गई है, जिसमें %d अपग्रेड(स) हैं"
+#~ msgstr ""
+#~ "प्रत्यक्ष में होस्ट %s पर OS अपग्रेड की सुचना दी गई है, जिसमें %d अपग्रेड(स)"
+#~ " हैं"
 
 #, python-format
 #~ msgid "Unknown kind: %s (allowed: %s)"
@@ -4838,23 +4959,24 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Host %s not approved (status: %s) for message %s, deleting"
-#~ msgstr "होस्ट %s की पारित अनुमति नहीं है (स्थिति: %s) संदेश %s के लिए, हटा देने वाला"
+#~ msgstr ""
+#~ "होस्ट %s की पारित अनुमति नहीं है (स्थिति: %s) संदेश %s के लिए, हटा देने वाला"
 
 #, python-format
 #~ msgid "Processing NULL host_id message for approved host %s (ID: %s)"
-#~ msgstr "NULL host_id मेसेज को प्रक्रिया कर रहे हैं; %s (ID: %s) स्वीकृत होस्ट के लिए"
+#~ msgstr ""
+#~ "NULL host_id मेसेज को प्रक्रिया कर रहे हैं; %s (ID: %s) स्वीकृत होस्ट के लिए"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
 #~ "\\u092f\\u0947\\u0020%s \\u0915\\u093e\\u0938\\u094d\\u0915\\u0947 "
 #~ "\\u0939\\u094b \\u0906\\u092a\\u0926\\u0940 \\u0915\\u093e "
-#~ "\\u0915\\u093f\\u0932\\u0947; \\u091c\\u0938\\u094d\\u0924 %d "
-#~ "\\u0939\\u094b \\u092a\\u094d\\u092f\\u0964 \\u0915\\u0947 "
-#~ "\\u092c\\u0948\\u093e\\u0928 (NOT "
-#~ "\\u0926\\u094b\\u0928\\u094d\\u0938\\u0915) — "
+#~ "\\u0915\\u093f\\u0932\\u0947; \\u091c\\u0938\\u094d\\u0924 %d \\u0939\\u094b"
+#~ " \\u092a\\u094d\\u092f\\u0964 \\u0915\\u0947 \\u092c\\u0948\\u093e\\u0928 "
+#~ "(NOT \\u0926\\u094b\\u0928\\u094d\\u0938\\u0915) — "
 #~ "\\u091a\\u093f\\u0932\\u0947 \\u091c\\u093e\\u0926\\u094b "
 #~ "\\u0915\\u094d\\u0928\\u093e\\u0930\\u094d\\u092f\\u093e "
 #~ "\\u092a\\u0947\\u0902 \\u0915\\u094b "
@@ -4865,8 +4987,8 @@ msgstr "vault.invalid_secret_format"
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
 #~ msgstr ""
-#~ "\\u092f\\u0947\\u0915\\u093e \\u0938\\u094d\\u092a\\u093e\\u0930 (FQDN: "
-#~ "%s) \\u091c\\u094b \\u0939\\u0948 \\u0915\\u0947\\u0924\\u093f\\u0928 "
+#~ "\\u092f\\u0947\\u0915\\u093e \\u0938\\u094d\\u092a\\u093e\\u0930 (FQDN: %s) "
+#~ "\\u091c\\u094b \\u0939\\u0948 \\u0915\\u0947\\u0924\\u093f\\u0928 "
 #~ "\\u0915\\u094d\\u0936\\u0947\\u0902, \\u0938\\u094b "
 #~ "\\u092a\\u092c\\u093e\\u0930\\u094d\\u091f \\u0926\\u0947\\u0915\\u0938 "
 #~ "\\u0932\\u094b \\u092a\\u093e\\u0930\\u094d\\u091f "
@@ -4927,12 +5049,13 @@ msgstr "vault.invalid_secret_format"
 #, python-format
 #~ msgid "Message %s failed (attempt %d/%d), scheduled for retry in %d seconds"
 #~ msgstr ""
-#~ "संदेश %s विफल हो गया (प्रयास %d/%d), पुन: प्रयास करने के लिए %d सेकंड में योजित किया "
-#~ "गया"
+#~ "संदेश %s विफल हो गया (प्रयास %d/%d), पुन: प्रयास करने के लिए %d सेकंड में "
+#~ "योजित किया गया"
 
 #, python-format
 #~ msgid "Message %s permanently failed after %d attempts: %s"
-#~ msgstr "संदेश %s को %d प्रयासों के बाद स्थाई रूप से विफल होने में विफल रहा: %s"
+#~ msgstr ""
+#~ "संदेश %s को %d प्रयासों के बाद स्थाई रूप से विफल होने में विफल रहा: %s"
 
 #, python-format
 #~ msgid "Failed to mark message %s as failed: %s"
@@ -5097,11 +5220,11 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "OS अपग्रेड की पुष्टि करें"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
 #~ msgstr ""
-#~ "यह क्रिया ऑपरेटिंग सिस्टम को अपग्रेड करेगी और सिस्टम रीबूट की आवश्यकता होगी। जारी "
-#~ "रखें?"
+#~ "यह क्रिया ऑपरेटिंग सिस्टम को अपग्रेड करेगी और सिस्टम रीबूट की आवश्यकता होगी।"
+#~ " जारी रखें?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "OS अपग्रेड हमेशा सुरक्षा अपडेट होते हैं"
@@ -5215,18 +5338,19 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirt सफलतापूर्वक इनिशियलाइज़ किया गया"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है। CSV, JSON, "
-#~ "CEF और LEEF निर्यात प्रारूपों तक पहुँचने के लिए कृपया अपग्रेड करें।"
+#~ "ऑडिट लॉग निर्यात के लिए SysManage Professional+ लाइसेंस आवश्यक है। CSV, "
+#~ "JSON, CEF और LEEF निर्यात प्रारूपों तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"
 #~ msgstr "Pro+ लाइसेंस के साथ /api/v1/reports/view/{report_type} का उपयोग करें"
 
 #~ msgid "Use /api/v1/reports/generate/{report_type} with Pro+ license"
-#~ msgstr "Pro+ लाइसेंस के साथ /api/v1/reports/generate/{report_type} का उपयोग करें"
+#~ msgstr ""
+#~ "Pro+ लाइसेंस के साथ /api/v1/reports/generate/{report_type} का उपयोग करें"
 
 #~ msgid "Use /api/v1/secrets with Pro+ license"
 #~ msgstr "Pro+ लाइसेंस के साथ /api/v1/secrets का उपयोग करें"

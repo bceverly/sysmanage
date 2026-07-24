@@ -4,8 +4,8 @@
 #
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To:  \n"
-"POT-Creation-Date: 2026-07-24 12:08-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-24 15:25-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -110,8 +110,7 @@ msgstr "플랫폼 %s에 대한 에이전트를 찾을 수 없습니다"
 #: backend/api/fleet.py:452
 #, python-brace-format
 msgid "Command {command_type} sent to {sent_count} {platform} agents"
-msgstr ""
-"명령 {command_type}을 {sent_count}개 {platform} 에이전트에 전송했습니다"
+msgstr "명령 {command_type}을 {sent_count}개 {platform} 에이전트에 전송했습니다"
 
 #: backend/api/certificates.py:45
 #, python-format
@@ -169,7 +168,8 @@ msgstr "호스트가 승인이 되지 않았습니다."
 #: backend/api/opentelemetry/grafana_connection.py:58
 #: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
-#: backend/api/packages_operations.py:247 backend/api/license_management.py:116
+#: backend/api/packages_operations.py:247
+#: backend/api/license_management.py:116
 #: backend/api/updates/os_upgrade_routes.py:189
 #: backend/api/updates/execution_routes.py:49
 #: backend/api/secrets/permissions.py:39 backend/api/error_constants.py:22
@@ -235,8 +235,7 @@ msgstr "%(host_id)s 호스트의 호스트 이름 변경 실패: %(error)s"
 #: backend/api/handlers/hostname_handler.py:55
 #, python-format
 msgid "Hostname changed message for host %s missing new_hostname"
-msgstr ""
-"호스트 %s에 대한 호스트명 변경 메시지에서 새로운 호스트명이 누락되었습니다."
+msgstr "호스트 %s에 대한 호스트명 변경 메시지에서 새로운 호스트명이 누락되었습니다."
 
 #: backend/api/handlers/hostname_handler.py:63
 #, python-format
@@ -249,8 +248,7 @@ msgid ""
 "Updated hostname for host %(host_id)s from %(old_hostname)s to "
 "%(new_hostname)s"
 msgstr ""
-"호스트 %(host_id)s의 호스트 이름을 %(old_hostname)s에서 %(new_hostname)s로 업"
-"데이트했습니다."
+"호스트 %(host_id)s의 호스트 이름을 %(old_hostname)s에서 %(new_hostname)s로 업데이트했습니다."
 
 #: backend/api/handlers/hostname_handler.py:83
 #, python-format
@@ -419,7 +417,7 @@ msgstr "_INSTALLATION_COMPLETION_ 기록에 실패했습니다: %s"
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
-#: backend/api/repository_mirroring_helpers.py:141
+#: backend/api/repository_mirroring_helpers.py:154
 #, python-format
 msgid "Invalid UUID for %(field)s: %(value)s"
 msgstr "'%(field)s' 필드에 유효하지 않은 UUID: '%(value)s'"
@@ -477,8 +475,7 @@ msgstr "유효하지 않은 MFA 코드."
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
-msgstr ""
-"계정에 MFA 설정이 되어 있다면 인증 코드를 포함한 이메일이 발송되었습니다."
+msgstr "계정에 MFA 설정이 되어 있다면 인증 코드를 포함한 이메일이 발송되었습니다."
 
 #: backend/api/auth_mfa.py:434
 msgid "Invalid password."
@@ -575,11 +572,9 @@ msgstr "저장소 비활성화를 대기열에 추가하는 데 실패했습니�
 
 #: backend/api/reports/endpoints.py:69
 msgid ""
-"Report generation requires a SysManage Professional+ license. Please upgrade "
-"to access this feature."
-msgstr ""
-"보고서 생성에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세"
-"스하려면 업그레이드하세요."
+"Report generation requires a SysManage Professional+ license. Please upgrade"
+" to access this feature."
+msgstr "보고서 생성에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/reports/endpoints.py:148
 msgid "Registered Hosts"
@@ -630,8 +625,7 @@ msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
 "the air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"에어갭 수집 스케줄에는 에어갭 수집기 엔진이 포함된 SysManage Professional+ 라"
-"이선스가 필요합니다. 업그레이드하세요."
+"에어갭 수집 스케줄에는 에어갭 수집기 엔진이 포함된 SysManage Professional+ 라이선스가 필요합니다. 업그레이드하세요."
 
 #: backend/api/airgap_collection_schedule.py:89
 msgid "Invalid cron expression: expected 5 fields (m h dom mon dow)"
@@ -674,9 +668,8 @@ msgid ""
 "will fire only on the current tick window until the Pro+ license includes "
 "automation_engine."
 msgstr ""
-"automation_engine이 로드되지 않았습니다; next_run 타임스탬프가 진행되지 않습"
-"니다. Pro+ 라이선스에 automation_engine이 포함될 때까지 스케줄은 현재 틱 창에"
-"서만 실행됩니다."
+"automation_engine이 로드되지 않았습니다; next_run 타임스탬프가 진행되지 않습니다. Pro+ 라이선스에 "
+"automation_engine이 포함될 때까지 스케줄은 현재 틱 창에서만 실행됩니다."
 
 #: backend/api/host_registration.py:65
 msgid "Invalid or expired registration key"
@@ -688,11 +681,9 @@ msgstr "잘못된 또는 만료된 등록 토큰"
 
 #: backend/api/host_registration.py:148
 msgid ""
-"This host already belongs to a tenant. Re-register with its enrollment token "
-"instead of registering server-scoped."
-msgstr ""
-"이 호스트는 이미 테넌트에 속해 있습니다. 서버 범위로 등록하는 대신 그 인"
-"rollment 토큰으로 재등록하십시오."
+"This host already belongs to a tenant. Re-register with its enrollment token"
+" instead of registering server-scoped."
+msgstr "이 호스트는 이미 테넌트에 속해 있습니다. 서버 범위로 등록하는 대신 그 인rollment 토큰으로 재등록하십시오."
 
 #: backend/api/graylog_integration.py:178
 msgid "Permission denied: ENABLE_GRAYLOG_INTEGRATION role required"
@@ -881,8 +872,7 @@ msgid ""
 "Container lifecycle management requires a SysManage Professional+ license. "
 "Please upgrade to access this feature."
 msgstr ""
-"컨테이너 수명 주기 관리에는 SysManage Professional+ 라이선스가 필요합니다. "
-"이 기능에 액세스하려면 업그레이드하세요."
+"컨테이너 수명 주기 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 # Child host lifecycle control messages
 #: backend/api/child_host_control.py:306
@@ -921,13 +911,27 @@ msgstr "자식 에이전트 업데이트가 요청되었습니다: %s"
 msgid "Child agent update requested"
 msgstr "자식 에이전트 업데이트가 요청되었습니다"
 
+#: backend/api/repository_mirroring_images.py:123
+msgid "Tracked image not found"
+msgstr "추적된 이미지를 찾을 수 없습니다"
+
+#: backend/api/repository_mirroring_images.py:126
+msgid "Image untracked"
+msgstr "이미지를 추적 중인 상태에서 해제했습니다"
+
+#: backend/api/repository_mirroring_images.py:144
+msgid "No images are tracked for this mirror"
+msgstr "이러한 미러에 대한 추적된 이미지가 없습니다"
+
+#: backend/api/repository_mirroring_images.py:168
+msgid "Image capture dispatched"
+msgstr "이미지 캡처를 실행했습니다"
+
 #: backend/api/airgap_keys.py:72
 msgid ""
 "No collector signing key found. Set this server's role to 'Air-Gap "
 "Collector' to generate one."
-msgstr ""
-"수집 키가 없습니다. 이 서버의 역할을 '오프라인 수집기(Air-Gap Collector)'로 "
-"설정하여 하나를 생성하세요."
+msgstr "수집 키가 없습니다. 이 서버의 역할을 '오프라인 수집기(Air-Gap Collector)'로 설정하여 하나를 생성하세요."
 
 #: backend/api/airgap_keys.py:96 backend/api/federation_identity.py:169
 #, python-format
@@ -1156,8 +1160,8 @@ msgid ""
 "Broadcast '%(action)s' delivered to %(delivered)d host(s) "
 "(filter=%(filter)s, %(elapsed).0fms)"
 msgstr ""
-"브로드캐스트 '%(action)s'가 %(delivered)d 호스트에게 전달됨 (필터"
-"=%(filter)s, %(elapsed).0fms)"
+"브로드캐스트 '%(action)s'가 %(delivered)d 호스트에게 전달됨 (필터=%(filter)s, "
+"%(elapsed).0fms)"
 
 #: backend/api/package_handlers.py:70
 msgid "Missing batch_id"
@@ -1169,8 +1173,8 @@ msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
 "to report packages for %(os_name)s %(os_version)s"
 msgstr ""
-"%(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 호스트가 "
-"%(os_name)s %(os_version)s 운영 체제의 패키지를 보고하려 시도함"
+"%(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 호스트가 %(os_name)s"
+" %(os_version)s 운영 체제의 패키지를 보고하려 시도함"
 
 #: backend/api/package_handlers.py:147
 #, python-format
@@ -1224,8 +1228,7 @@ msgstr "агент은 사용자 계정을 관리하려면 특권 모드에서 �
 msgid ""
 "User account creation requested. The user list will update automatically "
 "after creation."
-msgstr ""
-"사용자 계정 생성 요청됨. 생성 후 사용자 목록이 자동으로 업데이트됩니다."
+msgstr "사용자 계정 생성 요청됨. 생성 후 사용자 목록이 자동으로 업데이트됩니다."
 
 #: backend/api/host_account_management.py:200
 msgid "Permission denied: ADD_HOST_GROUP role required"
@@ -1253,8 +1256,7 @@ msgstr "агент은 사용자 계정을 삭제하려면 특권 모드에서 �
 msgid ""
 "User account deletion requested. The user list will update automatically "
 "after deletion."
-msgstr ""
-"사용자 계정 삭제 요청됨. 삭제 후 사용자 목록이 자동으로 업데이트됩니다."
+msgstr "사용자 계정 삭제 요청됨. 삭제 후 사용자 목록이 자동으로 업데이트됩니다."
 
 #: backend/api/host_account_management.py:410
 msgid "Permission denied: DELETE_HOST_GROUP role required"
@@ -1294,11 +1296,9 @@ msgstr "미러 틱은 크론 평가를 위해 automation_engine이 필요합니�
 #: backend/api/repository_mirroring.py:604
 #, python-format
 msgid ""
-"Mirror %s has not completed a successful sync yet — wait for sync to succeed "
-"before assigning it as a default."
-msgstr ""
-"미러 %s는 아직 성공적인 동기화를 완료하지 않았습니다 — 기본 미러로 지정하기 "
-"전에 동기화가 성공할 때까지 기다려주세요."
+"Mirror %s has not completed a successful sync yet — wait for sync to succeed"
+" before assigning it as a default."
+msgstr "미러 %s는 아직 성공적인 동기화를 완료하지 않았습니다 — 기본 미러로 지정하기 전에 동기화가 성공할 때까지 기다려주세요."
 
 #: backend/api/repository_mirroring.py:613
 #, python-format
@@ -1306,8 +1306,8 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"%(mirror_name)s 미러는 %(package_manager)s을 위한 것입니다. %(platform)s 기본"
-"값으로 할당할 수 없습니다."
+"%(mirror_name)s 미러는 %(package_manager)s을 위한 것입니다. %(platform)s 기본값으로 할당할 수 "
+"없습니다."
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1318,26 +1318,24 @@ msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
 "air-gap collector engine. Please upgrade to access this feature."
 msgstr ""
-"공기 격리 수집 실행을 위해서는 공기 격리 수집 엔진이 포함된 SysManage 프로페"
-"셔널+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드해 주세요."
+"공기 격리 수집 실행을 위해서는 공기 격리 수집 엔진이 포함된 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능에 "
+"액세스하려면 업그레이드해 주세요."
 
 #: backend/api/airgap_collector_runs.py:224
 msgid ""
-"Air-gap collection runs require the repository_mirroring_engine module to be "
-"loaded — the collector reads each target's bundle from a snapshot of its "
+"Air-gap collection runs require the repository_mirroring_engine module to be"
+" loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"공기 격리 수집 실행은 repository_mirroring_engine 모듈이 로드되어야 합니다 — "
-"수집기는 각 대상의バンドルをそのミラーツリーのスナップショットから読み取りま"
-"す。"
+"공기 격리 수집 실행은 repository_mirroring_engine 모듈이 로드되어야 합니다 — 수집기는 각 "
+"대상의バンドルをそのミラーツリーのスナップショットから読み取ります。"
 
 #: backend/api/airgap_collector_runs.py:235
 msgid ""
 "Global mirror settings missing or mirror_root_path not configured.  "
 "Configure mirror settings before creating a collection run."
 msgstr ""
-"전역 미러 설정 또는 mirror_root_path가 구성되지 않았습니다. 수집 실행을 생성"
-"하기 전에 미러 설정을 구성해야 합니다."
+"전역 미러 설정 또는 mirror_root_path가 구성되지 않았습니다. 수집 실행을 생성하기 전에 미러 설정을 구성해야 합니다."
 
 #: backend/api/airgap_collector_runs.py:295
 #, python-format
@@ -1346,18 +1344,15 @@ msgid ""
 "mirror to be tied to a catalog version so distro / version can be derived.  "
 "Edit the mirror and pick a version from the dropdown."
 msgstr ""
-"미러 %r의 known_version_id가 설정되어 있지 않습니다; 옵션-B 수집 작업은 미러"
-"가 카탈로그 버전에 연결되어 있어야 합니다. 이로써 배포판 / 버전을 파악할 수 "
-"있습니다. 미러를 편집하고 드롭다운에서 버전을 선택하세요."
+"미러 %r의 known_version_id가 설정되어 있지 않습니다; 옵션-B 수집 작업은 미러가 카탈로그 버전에 연결되어 있어야 "
+"합니다. 이로써 배포판 / 버전을 파악할 수 있습니다. 미러를 편집하고 드롭다운에서 버전을 선택하세요."
 
 #: backend/api/airgap_collector_runs.py:326
 #, python-format
 msgid ""
 "Mirror %r references a catalog version that no longer exists.  Re-pick a "
 "version on the mirror."
-msgstr ""
-"미러 %r이 더 이상 존재하지 않는 카탈로그 버전을 참조합니다. 미러의 버전을 다"
-"시 선택하세요."
+msgstr "미러 %r이 더 이상 존재하지 않는 카탈로그 버전을 참조합니다. 미러의 버전을 다시 선택하세요."
 
 #: backend/api/airgap_collector_runs.py:410
 #: backend/api/airgap_collector_runs.py:489
@@ -1378,9 +1373,7 @@ msgstr "미러 %s을 찾을 수 없습니다"
 #, python-format
 msgid ""
 "Mirror %r is disabled; enable + sync it before using it in a collection run."
-msgstr ""
-"미러 %r이 비활성화되어 있습니다; 수집 실행에서 사용하기 전에 활성화하고 동기"
-"화하세요."
+msgstr "미러 %r이 비활성화되어 있습니다; 수집 실행에서 사용하기 전에 활성화하고 동기화하세요."
 
 #: backend/api/airgap_collector_runs.py:447
 #, python-format
@@ -1388,8 +1381,8 @@ msgid ""
 "All target mirrors must live on the same host (the collection plan "
 "dispatches to a single agent). Selected mirrors span %d hosts."
 msgstr ""
-"모든 대상 미러는 동일한 호스트에 존재해야 합니다(수집 계획은 단일 에이전트로 "
-"디스패치됩니다). 선택된 미러가 %d개의 호스트를 포함합니다."
+"모든 대상 미러는 동일한 호스트에 존재해야 합니다(수집 계획은 단일 에이전트로 디스패치됩니다). 선택된 미러가 %d개의 호스트를 "
+"포함합니다."
 
 #: backend/api/airgap_collector_runs.py:543
 #, python-format
@@ -1397,25 +1390,20 @@ msgid ""
 "Created one-shot air-gap collection run '%(iso_label)s' with "
 "%(mirror_count)d target mirror(s); snapshots dispatched."
 msgstr ""
-"'%(iso_label)s' 일회성 공기 격리 수집 실행을 생성함; %(mirror_count)d 개의 대"
-"상 미러로 스냅샷 전송됨."
+"'%(iso_label)s' 일회성 공기 격리 수집 실행을 생성함; %(mirror_count)d 개의 대상 미러로 스냅샷 전송됨."
 
 #: backend/api/airgap_collector_runs.py:666
 #, python-format
 msgid ""
 "ISO is not ready for download yet (status: %s). Wait until the run reaches "
 "ISO_BUILT."
-msgstr ""
-"ISO가 아직 다운로드 준비가 되지 않았습니다(상태: %s). ISO_BUILT 상태까지 기다"
-"려주세요."
+msgstr "ISO가 아직 다운로드 준비가 되지 않았습니다(상태: %s). ISO_BUILT 상태까지 기다려주세요."
 
 #: backend/api/airgap_collector_runs.py:676
 msgid ""
-"ISO file no longer on disk; the staging volume may have been cleaned. Re-run "
-"the collection to rebuild."
-msgstr ""
-"ISO 파일이 더 이상 디스크에 존재하지 않음; 스테이징 볼륨이 정리되었을 수 있습"
-"니다. 수집을 다시 실행하여 재구축하세요."
+"ISO file no longer on disk; the staging volume may have been cleaned. Re-run"
+" the collection to rebuild."
+msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음; 스테이징 볼륨이 정리되었을 수 있습니다. 수집을 다시 실행하여 재구축하세요."
 
 #: backend/api/airgap_collector_runs.py:693
 msgid "ISO file not found."
@@ -1424,9 +1412,7 @@ msgstr "ISO 파일을 찾을 수 없습니다."
 #: backend/api/airgap_collector_runs.py:713
 #, python-format
 msgid "Disc %(disc)d not found for this run.  Available discs: %(available)s"
-msgstr ""
-"디스크 %(disc)d이 이 실행에서 찾을 수 없습니다. 사용 가능한 디스크: "
-"%(available)s"
+msgstr "디스크 %(disc)d이 이 실행에서 찾을 수 없습니다. 사용 가능한 디스크: %(available)s"
 
 #: backend/api/airgap_collector_runs.py:798
 msgid "Invalid or expired download token."
@@ -1449,11 +1435,11 @@ msgstr "ISO 파일이 더 이상 디스크에 존재하지 않음: %s"
 
 #: backend/api/package_compliance.py:76
 msgid ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please "
-"upgrade to access this feature."
+"Package compliance profiles require a SysManage Professional license. Please"
+" upgrade to access this feature."
 
 #: backend/api/package_compliance.py:203
 #, python-format
@@ -1480,17 +1466,15 @@ msgid ""
 "Scanned host '%(host_fqdn)s' against profile '%(profile_name)s': %(status)s "
 "(%(violation_count)d violation(s))"
 msgstr ""
-"프로필 '%(profile_name)s'을 사용하여 호스트 '%(host_fqdn)s'를 스캔했습니다: "
-"%(status)s (%(violation_count)d 위반사항)"
+"프로필 '%(profile_name)s'을 사용하여 호스트 '%(host_fqdn)s'를 스캔했습니다: %(status)s "
+"(%(violation_count)d 위반사항)"
 
 #: backend/api/package_compliance.py:503
 #, python-format
 msgid ""
 "Dispatched compliance check to agent '%(host_fqdn)s' for profile "
 "'%(profile_name)s'"
-msgstr ""
-"'%(profile_name)s' 프로필을 위한 에이전트 '%(host_fqdn)s'에게 준수 확인을 배"
-"포함"
+msgstr "'%(profile_name)s' 프로필을 위한 에이전트 '%(host_fqdn)s'에게 준수 확인을 배포함"
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
@@ -1576,8 +1560,7 @@ msgstr "등록 키가 삭제되었습니다"
 msgid ""
 "External Identity Provider integration requires a SysManage Professional+ "
 "license. Please upgrade to access this feature."
-msgstr ""
-"外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
+msgstr "外部身份提供商集成需要SysManage Professional+许可证。请升级以访问此功能。"
 
 #: backend/api/external_idp.py:89
 msgid "IdP provider not found"
@@ -1626,11 +1609,9 @@ msgstr "OIDC 로그인 실패: %s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:698
 msgid ""
-"No sysmanage account is linked to this IdP identity. Ask an administrator to "
-"provision your account first."
-msgstr ""
-"이 IdP 인식에 연결된 SysManage 계정이 없습니다. 관리자에게 먼저 계정을 제공받"
-"으세요."
+"No sysmanage account is linked to this IdP identity. Ask an administrator to"
+" provision your account first."
+msgstr "이 IdP 인식에 연결된 SysManage 계정이 없습니다. 관리자에게 먼저 계정을 제공받으세요."
 
 #: backend/api/external_idp.py:506 backend/api/external_idp.py:703
 msgid "Account is inactive."
@@ -1719,8 +1700,8 @@ msgstr "Grafana 상태 확인 중 예상치 못한 오류"
 #: backend/api/opentelemetry/eligibility.py:111
 #: backend/api/opentelemetry/grafana_connection.py:88
 #: backend/api/opentelemetry/grafana_connection.py:231
-#: backend/api/packages_operations.py:97 backend/api/packages_operations.py:276
-#: backend/api/error_constants.py:119
+#: backend/api/packages_operations.py:97
+#: backend/api/packages_operations.py:276 backend/api/error_constants.py:119
 msgid "Host not found or not active"
 msgstr "호스트가 찾을 수 없거나 활성화되어 있지 않음"
 
@@ -1757,11 +1738,9 @@ msgstr "Grafana URL이 사용할 수 없습니다"
 
 #: backend/api/opentelemetry/deployment.py:152
 msgid ""
-"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded "
-"on the server."
-msgstr ""
-"OpenTelemetry 배포를 위해 서버에 Pro+ observability_engine이 로드되어 있어야 "
-"합니다."
+"OpenTelemetry deployment requires the Pro+ observability_engine to be loaded"
+" on the server."
+msgstr "OpenTelemetry 배포를 위해 서버에 Pro+ observability_engine이 로드되어 있어야 합니다."
 
 #: backend/api/opentelemetry/deployment.py:179
 msgid "OpenTelemetry deployment queued successfully"
@@ -1774,11 +1753,9 @@ msgstr "오픈 telemetry 배포 실패: %s"
 
 #: backend/api/opentelemetry/deployment.py:264
 msgid ""
-"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on "
-"the server."
-msgstr ""
-"OpenTelemetry 제거를 위해서는 서버에 Pro+ observability_engine이 로드되어 있"
-"어야 합니다."
+"OpenTelemetry removal requires the Pro+ observability_engine to be loaded on"
+" the server."
+msgstr "OpenTelemetry 제거를 위해서는 서버에 Pro+ observability_engine이 로드되어 있어야 합니다."
 
 #: backend/api/opentelemetry/deployment.py:291
 msgid "OpenTelemetry removal queued successfully"
@@ -1852,8 +1829,7 @@ msgid ""
 "OpenTelemetry Grafana connection requires the Pro+ observability_engine to "
 "be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana 연결을 위해 서버에 Pro+ observability_engine이 로드되"
-"어 있어야 합니다."
+"OpenTelemetry Grafana 연결을 위해 서버에 Pro+ observability_engine이 로드되어 있어야 합니다."
 
 #: backend/api/opentelemetry/grafana_connection.py:160
 msgid "OpenTelemetry Grafana connection queued successfully"
@@ -1869,8 +1845,7 @@ msgid ""
 "OpenTelemetry Grafana disconnection requires the Pro+ observability_engine "
 "to be loaded on the server."
 msgstr ""
-"OpenTelemetry Grafana 연결 해제를 위해 서버에 Pro+ observability_engine이 로"
-"드되어 있어야 합니다."
+"OpenTelemetry Grafana 연결 해제를 위해 서버에 Pro+ observability_engine이 로드되어 있어야 합니다."
 
 #: backend/api/opentelemetry/grafana_connection.py:277
 msgid "OpenTelemetry Grafana disconnection queued successfully"
@@ -1881,127 +1856,126 @@ msgstr "OpenTelemetry Grafana 연결 해제 요청 성공"
 msgid "Failed to disconnect OpenTelemetry from Grafana: %s"
 msgstr "오픈 telemetry를 그래파나에서 분리할 수 없습니다: %s"
 
-#: backend/api/content_lifecycle.py:63
+#: backend/api/content_lifecycle.py:64
 msgid ""
-"Content lifecycle management requires a SysManage Professional+ (Enterprise) "
-"license. Please upgrade to access this feature."
+"Content lifecycle management requires a SysManage Professional+ (Enterprise)"
+" license. Please upgrade to access this feature."
 msgstr ""
-"콘텐츠 라이프사이클 관리에는 SysManage 프로페셔널+(엔터프라이즈) 라이선스가 "
-"필요합니다. 이 기능에 액세스하려면 업그레이드해 주세요."
+"콘텐츠 라이프사이클 관리에는 SysManage 프로페셔널+(엔터프라이즈) 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드해 "
+"주세요."
 
-#: backend/api/content_lifecycle.py:120
+#: backend/api/content_lifecycle.py:121
 msgid "Environment name is required"
 msgstr "환경 이름은 필수입니다"
 
-#: backend/api/content_lifecycle.py:122
+#: backend/api/content_lifecycle.py:123
 msgid "Environment name is too long"
 msgstr "환경 이름이 너무 깁니다"
 
-#: backend/api/content_lifecycle.py:133
+#: backend/api/content_lifecycle.py:134
 msgid "Environment not found"
 msgstr "환경을 찾을 수 없습니다"
 
-#: backend/api/content_lifecycle.py:148 backend/api/content_lifecycle.py:183
+#: backend/api/content_lifecycle.py:149 backend/api/content_lifecycle.py:184
 msgid "An environment with that name already exists"
 msgstr "이 이름의 환경이 이미 존재합니다"
 
-#: backend/api/content_lifecycle.py:202
+#: backend/api/content_lifecycle.py:203
 msgid "The Library environment cannot be deleted"
 msgstr "Library 환경은 삭제할 수 없습니다"
 
-#: backend/api/content_lifecycle.py:224
+#: backend/api/content_lifecycle.py:225
 msgid "ordered_ids must list every environment exactly once"
 msgstr "ordered_ids는 모든 환경을 정확히 한 번만 나열해야 합니다"
 
-#: backend/api/content_lifecycle.py:228
+#: backend/api/content_lifecycle.py:229
 msgid "The Library environment must remain first"
 msgstr "Library 환경은 첫 번째로 유지되어야 합니다"
 
-#: backend/api/content_lifecycle.py:288
+#: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
 msgstr "콘텐츠 뷰 이름은 필수 항목입니다"
 
-#: backend/api/content_lifecycle.py:290
+#: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
 msgstr "콘텐츠 뷰 이름이 너무 깁니다"
 
-#: backend/api/content_lifecycle.py:308
+#: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
 msgstr "콘텐츠 뷰를 찾을 수 없습니다"
 
-#: backend/api/content_lifecycle.py:319
+#: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
 msgstr "각 콘텐츠 뷰 멤버는 미러 또는 구성 요소 CV가 필요합니다"
 
-#: backend/api/content_lifecycle.py:364
+#: backend/api/content_lifecycle.py:365
 #, python-format
 msgid "Unknown filter type: %s"
 msgstr "알 수 없는 필터 유형: %s"
 
-#: backend/api/content_lifecycle.py:370
+#: backend/api/content_lifecycle.py:371
 #, python-format
 msgid "The '%s' filter requires the Advisory engine, which is not loaded"
-msgstr ""
-"'%s' 필터는 Advisory 엔진을 요구하지만, 이 엔진은 로드되어 있지 않습니다."
+msgstr "'%s' 필터는 Advisory 엔진을 요구하지만, 이 엔진은 로드되어 있지 않습니다."
 
-#: backend/api/content_lifecycle.py:380
+#: backend/api/content_lifecycle.py:381
 #, python-format
 msgid "The '%s' filter needs a non-empty 'packages' list"
 msgstr "'%s' 필터는 비어있지 않은 'packages' 목록이 필요합니다."
 
-#: backend/api/content_lifecycle.py:390
+#: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
 msgstr "'%s' 필터는 'date'(YYYY-MM-DD)가 필요합니다."
 
-#: backend/api/content_lifecycle.py:452 backend/api/content_lifecycle.py:500
+#: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
 msgstr "이 이름의 콘텐츠 뷰가 이미 존재합니다"
 
-#: backend/api/content_lifecycle.py:637
+#: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
 msgstr "미러 설정이 구성되지 않았습니다"
 
-#: backend/api/content_lifecycle.py:651
+#: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
 msgstr "복합 콘텐츠 뷰는 아직 발행할 수 없습니다"
 
-#: backend/api/content_lifecycle.py:656
+#: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
 msgstr "콘텐츠 뷰에 발행할 리포지토리가 없습니다"
 
-#: backend/api/content_lifecycle.py:670 backend/api/content_lifecycle.py:714
+#: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
 msgstr "참조된 미러가 더 이상 존재하지 않습니다"
 
-#: backend/api/content_lifecycle.py:675 backend/api/content_lifecycle.py:719
+#: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
 msgstr "미러 '%s'에 호스트가 할당되어 있지 않습니다"
 
-#: backend/api/content_lifecycle.py:683 backend/api/content_lifecycle.py:725
+#: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr "이 버전에서는 모든 미러가 하나의 호스트를 공유해야 합니다"
 
-#: backend/api/content_lifecycle.py:696
+#: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
 msgstr "미러 '%s'에는 아직 스냅샷이 없음; 발행하기 전에 스냅샷을 생성하세요"
 
-#: backend/api/content_lifecycle.py:772
+#: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
 msgstr "콘텐츠 뷰에 리포지토리가 없습니다"
 
-#: backend/api/content_lifecycle.py:800
+#: backend/api/content_lifecycle.py:801
 msgid "Composite content view has no component content views"
 msgstr "복합 콘텐츠 보기에는 구성 요소 콘텐츠 보기가 없습니다"
 
-#: backend/api/content_lifecycle.py:809
+#: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
 msgstr "'%s' 구성 요소는 아직 공개된 버전이 없습니다"
 
-#: backend/api/content_lifecycle.py:828
+#: backend/api/content_lifecycle.py:829
 #, python-format
 msgid "Component '%s' has no repositories"
 msgstr "'%s' 구성 요소에 레포지토리가 없습니다"
@@ -2011,8 +1985,7 @@ msgid ""
 "CVE feed management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"CVE 피드 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액"
-"세스하려면 업그레이드하십시오."
+"CVE 피드 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하십시오."
 
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
@@ -2097,7 +2070,8 @@ msgstr "방화벽 재시작 명령을 성공적으로 전송했습니다"
 msgid "Firewall deploy command sent successfully"
 msgstr "방화벽 배포 명령을 성공적으로 전송했습니다"
 
-#: backend/api/default_repositories.py:273 backend/api/antivirus_defaults.py:66
+#: backend/api/default_repositories.py:273
+#: backend/api/antivirus_defaults.py:66
 #: backend/api/enabled_package_managers.py:113
 msgid "OS name is required"
 msgstr "OS 이름은 필수 항목입니다"
@@ -2120,8 +2094,8 @@ msgid ""
 "Invalid package manager '%(package_manager)s' for OS '%(os_name)s'. Valid "
 "options: %(valid_options)s"
 msgstr ""
-"OS '%(os_name)s'에 대한 패키지 매니저 '%(package_manager)s'가 유효하지 않음. "
-"옵션: %(valid_options)s"
+"OS '%(os_name)s'에 대한 패키지 매니저 '%(package_manager)s'가 유효하지 않음. 옵션: "
+"%(valid_options)s"
 
 #: backend/api/default_repositories.py:308
 msgid "Repository URL is required"
@@ -2181,8 +2155,7 @@ msgid ""
 "Container/VM management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"컨테이너/VM 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능"
-"에 액세스하려면 업그레이드하세요."
+"컨테이너/VM 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
 msgid "Child host not found"
@@ -2259,9 +2232,9 @@ msgid "Target '%(t)s' is not valid for %(f)s"
 msgstr "대상 '%(t)s'은(는) %(f)s에 유효하지 않습니다"
 
 #: backend/api/logging_settings.py:134
-msgid "Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
-msgstr ""
-"리모트 시스로그 포워딩은 Professional 라이선스(LOG_ROUTING)가 필요합니다."
+msgid ""
+"Remote syslog forwarding requires a Professional license (LOG_ROUTING)."
+msgstr "리모트 시스로그 포워딩은 Professional 라이선스(LOG_ROUTING)가 필요합니다."
 
 #: backend/api/logging_settings.py:141
 msgid "A syslog host is required for the remote-syslog target."
@@ -2383,16 +2356,13 @@ msgstr "공개된 버전 %s이 없습니다"
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
 "body."
-msgstr ""
-"Graylog 연결은 메커니즘, graylog_server 및 포트가 요청 본문에 있는 경우에만 "
-"필요합니다."
+msgstr "Graylog 연결은 메커니즘, graylog_server 및 포트가 요청 본문에 있는 경우에만 필요합니다."
 
 #: backend/api/host_graylog.py:175
 msgid ""
 "Graylog attach requires the Pro+ observability_engine to be loaded on the "
 "server."
-msgstr ""
-"Graylog 연결은 서버에서 Pro+ observability_engine이 로드되어 있어야 합니다."
+msgstr "Graylog 연결은 서버에서 Pro+ observability_engine이 로드되어 있어야 합니다."
 
 #: backend/api/host_graylog.py:188
 msgid "Graylog attachment command queued successfully"
@@ -2401,8 +2371,7 @@ msgstr "Graylog 연결 명령을 성공적으로 대기열에 추가했습니다
 #: backend/api/password_reset.py:339
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
-msgstr ""
-"해당 이메일을 가진 계정이 존재하면 비밀번호 재설정 링크가 발송되었습니다."
+msgstr "해당 이메일을 가진 계정이 존재하면 비밀번호 재설정 링크가 발송되었습니다."
 
 #: backend/api/password_reset.py:369 backend/api/password_reset.py:410
 msgid "Invalid or expired password reset token"
@@ -2412,9 +2381,7 @@ msgstr "잘못된 또는 만료된 비밀번호 재설정 토큰"
 msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
-msgstr ""
-"비밀번호가 성공적으로 재설정되었습니다. 새로운 비밀번호로 로그인할 수 있습니"
-"다."
+msgstr "비밀번호가 성공적으로 재설정되었습니다. 새로운 비밀번호로 로그인할 수 있습니다."
 
 #: backend/api/password_reset.py:413
 msgid "Token is valid"
@@ -2426,8 +2393,7 @@ msgstr "퍼미션 denied: RESET_USER_PASSWORD 역할 필요"
 
 #: backend/api/password_reset.py:464
 msgid "Failed to send password reset email. Please check email configuration."
-msgstr ""
-"비밀번호 재설정 이메일을 보내는데 실패했습니다. 이메일 설정을 확인해주세요."
+msgstr "비밀번호 재설정 이메일을 보내는데 실패했습니다. 이메일 설정을 확인해주세요."
 
 #: backend/api/password_reset.py:470
 #, python-brace-format
@@ -2601,8 +2567,8 @@ msgid ""
 "Without email integration, new users cannot receive password setup "
 "instructions and will be unable to log in."
 msgstr ""
-"YAML 구성 파일에서 이메일을 활성화하고 SMTP 설정을 구성하세요. 이메일 통합이 "
-"없으면 새 사용자가 비밀번호 설정 지침을 받을 수 없으며 로그인할 수 없습니다."
+"YAML 구성 파일에서 이메일을 활성화하고 SMTP 설정을 구성하세요. 이메일 통합이 없으면 새 사용자가 비밀번호 설정 지침을 받을 수 "
+"없으며 로그인할 수 없습니다."
 
 #: backend/api/security.py:125
 msgid "Default admin credentials are configured in your YAML file"
@@ -2612,8 +2578,7 @@ msgstr "기본 관리자 자격 증명이 YAML 파일에 구성되어 있습니�
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
-msgstr ""
-"구성 파일에서 admin_userid와 admin_password를 제거하고 서버를 다시 시작하세요"
+msgstr "구성 파일에서 admin_userid와 admin_password를 제거하고 서버를 다시 시작하세요"
 
 #: backend/api/security.py:142
 msgid "Default JWT secret is being used"
@@ -2642,20 +2607,17 @@ msgstr "일관되지 않은 보안 구성이 감지되었습니다"
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
-msgstr ""
-"JWT 시크릿이 기본값을 사용하지만 비밀번호 솔트가 변경되었습니다. 실행: "
-"{command}"
+msgstr "JWT 시크릿이 기본값을 사용하지만 비밀번호 솔트가 변경되었습니다. 실행: {command}"
 
 #: backend/api/security.py:202
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
 "{command}"
-msgstr ""
-"비밀번호 솔트가 기본값을 사용하지만 JWT 시크릿이 변경되었습니다. 실행: "
-"{command}"
+msgstr "비밀번호 솔트가 기본값을 사용하지만 JWT 시크릿이 변경되었습니다. 실행: {command}"
 
-#: backend/api/ubuntu_pro_settings.py:76 backend/api/ubuntu_pro_settings.py:318
+#: backend/api/ubuntu_pro_settings.py:76
+#: backend/api/ubuntu_pro_settings.py:318
 msgid "Ubuntu Pro key must start with 'C' for contract-based keys"
 msgstr "Ubuntu Pro 키의 길이가 너무 짧습니다"
 
@@ -2765,7 +2727,8 @@ msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
 #: backend/api/host.py:779
 #, python-format
-msgid "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
+msgid ""
+"Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' 호스트가 '%(tenant_id)s' 테넌트로 등록됨 (등록 토큰 사용)"
 
 #: backend/api/host.py:796
@@ -2773,9 +2736,7 @@ msgstr "'%(fqdn)s' 호스트가 '%(tenant_id)s' 테넌트로 등록됨 (등록 �
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
-msgstr ""
-"'%(key_name)s' 등록 키를 통해 '%(fqdn)s' 호스트가 등록됨 (자동 승인"
-"=%(auto_approve)s)"
+msgstr "'%(key_name)s' 등록 키를 통해 '%(fqdn)s' 호스트가 등록됨 (자동 승인=%(auto_approve)s)"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -2839,10 +2800,9 @@ msgstr "패키지 설치를 위한 패키지가 지정되지 않았습니다"
 
 #: backend/api/packages_operations.py:179
 #, python-format
-msgid "Queued installation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr ""
-"%(package_count)d개 패키지를 호스트 %(host_fqdn)s에 설치 대기열에 추가했습니"
-"다."
+msgid ""
+"Queued installation of %(package_count)d packages on host %(host_fqdn)s"
+msgstr "%(package_count)d개 패키지를 호스트 %(host_fqdn)s에 설치 대기열에 추가했습니다."
 
 #: backend/api/packages_operations.py:199
 #, python-format
@@ -2866,9 +2826,7 @@ msgstr "패키지 언설트를 위한 패키지가 지정되지 않았습니다"
 #, python-format
 msgid ""
 "Queued uninstallation of %(package_count)d packages on host %(host_fqdn)s"
-msgstr ""
-"%(package_count)d개 패키지를 호스트 %(host_fqdn)s에서 제거 대기열에 추가했습"
-"니다."
+msgstr "%(package_count)d개 패키지를 호스트 %(host_fqdn)s에서 제거 대기열에 추가했습니다."
 
 #: backend/api/packages_operations.py:378
 #, python-format
@@ -2964,9 +2922,7 @@ msgstr "로그인 시도 실패가 너무 많아 계정이 잠겼습니다"
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
-msgstr ""
-"이 계정은 다중 인증 요소가 필요합니다. 로그인 전에 프로필 페이지에서 등록해 "
-"주세요."
+msgstr "이 계정은 다중 인증 요소가 필요합니다. 로그인 전에 프로필 페이지에서 등록해 주세요."
 
 #: backend/api/auth.py:459
 msgid "Account locked due to too many failed login attempts"
@@ -3002,8 +2958,7 @@ msgstr "파일 크기가 너무 큽니다. 허용된 최대 크기는 5MB입니�
 
 #: backend/api/profile.py:238
 msgid "Unsupported image format. Allowed formats: PNG, JPEG, JPG, GIF, WEBP"
-msgstr ""
-"지원되지 않는 이미지 형식입니다. 허용된 형식: PNG, JPEG, JPG, GIF, WEBP"
+msgstr "지원되지 않는 이미지 형식입니다. 허용된 형식: PNG, JPEG, JPG, GIF, WEBP"
 
 #: backend/api/profile.py:269
 msgid "Invalid image file. Please upload a valid image."
@@ -3024,10 +2979,9 @@ msgstr "이 호스트에 사용 가능한 OS 업그레이드가 없습니다"
 
 #: backend/api/updates/os_upgrade_routes.py:338
 #, python-format
-msgid "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
-msgstr ""
-"호스트 %(fqdn)s에 대한 OS 업그레이드 시작됨 (%(upgrade_count)d 개의 업그레이"
-"드 포함)"
+msgid ""
+"Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
+msgstr "호스트 %(fqdn)s에 대한 OS 업그레이드 시작됨 (%(upgrade_count)d 개의 업그레이드 포함)"
 
 #: backend/api/updates/os_upgrade_routes.py:369
 msgid "OS upgrade command queued for host"
@@ -3097,10 +3051,9 @@ msgstr "알려지지 않은 종류: %(kind)s (허용된 값: %(allowed)s)"
 #: backend/api/dynamic_secrets.py:156
 #, python-format
 msgid ""
-"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, ttl=%(ttl)ds)"
-msgstr ""
-"동적 비밀번호 '%(name)s' (종류=%(kind)s, 역할=%(role)s, 만료 시간=%(ttl)ds)"
-"를 발급함"
+"Issued dynamic secret '%(name)s' (kind=%(kind)s, role=%(role)s, "
+"ttl=%(ttl)ds)"
+msgstr "동적 비밀번호 '%(name)s' (종류=%(kind)s, 역할=%(role)s, 만료 시간=%(ttl)ds)를 발급함"
 
 #: backend/api/dynamic_secrets.py:189
 #, python-format
@@ -3147,8 +3100,7 @@ msgstr "LXD 초기화가 요청되었습니다"
 msgid ""
 "LXD initialization requested. The agent will install and configure LXD "
 "automatically."
-msgstr ""
-"LXD 초기화가 요청되었습니다. 에이전트가 자동으로 LXD를 설치하고 구성합니다."
+msgstr "LXD 초기화가 요청되었습니다. 에이전트가 자동으로 LXD를 설치하고 구성합니다."
 
 #: backend/api/child_host_virtualization_enable.py:276
 msgid "VMM is only supported on OpenBSD hosts"
@@ -3164,9 +3116,9 @@ msgstr "VMM 초기화가 요청되었습니다"
 
 #: backend/api/child_host_virtualization_enable.py:306
 msgid ""
-"VMM initialization requested. The agent will enable and start the vmd daemon."
-msgstr ""
-"VMM 초기화가 요청되었습니다. 에이전트가 vmd 데몬을 활성화하고 시작합니다."
+"VMM initialization requested. The agent will enable and start the vmd "
+"daemon."
+msgstr "VMM 초기화가 요청되었습니다. 에이전트가 vmd 데몬을 활성화하고 시작합니다."
 
 #: backend/api/child_host_virtualization_enable.py:348
 msgid "Agent must be running with root privileges to initialize KVM"
@@ -3180,9 +3132,7 @@ msgstr "KVM 초기화가 요청되었습니다"
 msgid ""
 "KVM initialization requested. The agent will install libvirt and configure "
 "KVM for virtual machine management."
-msgstr ""
-"KVM 초기화가 요청되었습니다. 에이전트가 libvirt를 설치하고 가상 머신 관리를 "
-"위해 KVM을 구성합니다."
+msgstr "KVM 초기화가 요청되었습니다. 에이전트가 libvirt를 설치하고 가상 머신 관리를 위해 KVM을 구성합니다."
 
 #: backend/api/child_host_virtualization_enable.py:403
 #: backend/api/child_host_virtualization_enable.py:467
@@ -3199,11 +3149,9 @@ msgstr "bhyve 초기화 요청됨"
 
 #: backend/api/child_host_virtualization_enable.py:433
 msgid ""
-"bhyve initialization requested. The agent will load vmm.ko and configure the "
-"system for bhyve virtual machines."
-msgstr ""
-"bhyve 초기화 요청됨. 에이전트는 vmm.ko를 로드하고 bhyve 가상 머신을 위한 시스"
-"템 구성에 설정합니다."
+"bhyve initialization requested. The agent will load vmm.ko and configure the"
+" system for bhyve virtual machines."
+msgstr "bhyve 초기화 요청됨. 에이전트는 vmm.ko를 로드하고 bhyve 가상 머신을 위한 시스템 구성에 설정합니다."
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
@@ -3218,8 +3166,8 @@ msgid ""
 "bhyve disable requested. The agent will unload vmm.ko and update the system "
 "configuration. This will fail if any VMs are running."
 msgstr ""
-"bhyve 비활성화 요청됨. 에이전트는 vmm.ko를 언로드하고 시스템 구성에 업데이트"
-"를 적용합니다. 실행 중인 가상 머신이 있는 경우 실패할 수 있습니다."
+"bhyve 비활성화 요청됨. 에이전트는 vmm.ko를 언로드하고 시스템 구성에 업데이트를 적용합니다. 실행 중인 가상 머신이 있는 경우 "
+"실패할 수 있습니다."
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
@@ -3231,11 +3179,9 @@ msgstr "KVM 모듈 활성화 요청됨"
 
 #: backend/api/child_host_virtualization_enable.py:558
 msgid ""
-"KVM modules enable requested. The agent will load the KVM kernel modules via "
-"modprobe."
-msgstr ""
-"KVM 모듈 활성화 요청됨. 에이전트는 modprobe를 사용하여 KVM 커널 모듈을 로드"
-"할 것입니다."
+"KVM modules enable requested. The agent will load the KVM kernel modules via"
+" modprobe."
+msgstr "KVM 모듈 활성화 요청됨. 에이전트는 modprobe를 사용하여 KVM 커널 모듈을 로드할 것입니다."
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
@@ -3250,8 +3196,8 @@ msgid ""
 "KVM modules disable requested. The agent will unload the KVM kernel modules "
 "via modprobe -r. This will fail if any VMs are running."
 msgstr ""
-"KVM 모듈 비활성화 요청됨. 에이전트는 modprobe -r을 사용하여 KVM 커널 모듈을 "
-"언로드할 것입니다. 가상 머신이 실행 중인 경우 실패할 수 있습니다."
+"KVM 모듈 비활성화 요청됨. 에이전트는 modprobe -r을 사용하여 KVM 커널 모듈을 언로드할 것입니다. 가상 머신이 실행 중인 "
+"경우 실패할 수 있습니다."
 
 # KVM Networking Configuration strings
 #: backend/api/child_host_virtualization_enable.py:697
@@ -3276,8 +3222,7 @@ msgstr "KVM 네트워크 구성이 요청되었습니다: %s 모드"
 msgid ""
 "KVM networking configuration requested. The agent will configure the %s "
 "network."
-msgstr ""
-"KVM 네트워크 구성이 요청되었습니다. 에이전트가 %s 네트워크를 구성합니다."
+msgstr "KVM 네트워크 구성이 요청되었습니다. 에이전트가 %s 네트워크를 구성합니다."
 
 #: backend/api/child_host_virtualization_enable.py:778
 msgid "KVM networks are only available on Linux hosts"
@@ -3336,9 +3281,7 @@ msgstr "시크릿을 찾을 수 없습니다"
 msgid ""
 "Secrets management requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
-msgstr ""
-"시크릿 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세"
-"스하려면 업그레이드하세요."
+msgstr "시크릿 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/secrets/crud.py:128
 msgid "Failed to retrieve secret content from vault"
@@ -3365,9 +3308,7 @@ msgstr "{count}개의 비밀이 삭제되었습니다"
 msgid ""
 "Secrets deployment requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
-msgstr ""
-"시크릿 배포에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세"
-"스하려면 업그레이드하세요."
+msgstr "시크릿 배포에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/secrets/deployment.py:56
 msgid "Use /api/v1/secrets/deploy-ssh-keys with Pro+ license"
@@ -3383,14 +3324,12 @@ msgid ""
 "Orchestrated reboot requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
 msgstr ""
-"오케스트레이션 재부팅에는 SysManage Professional+ 라이선스가 필요합니다. 이 "
-"기능에 액세스하려면 업그레이드하세요."
+"오케스트레이션 재부팅에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/reboot_orchestration.py:135
-msgid "No running child hosts found. Use the standard reboot endpoint instead."
-msgstr ""
-"실행 중인 자식 호스트를 찾을 수 없습니다. 대신 표준 재부팅 엔드포인트를 사용"
-"하세요."
+msgid ""
+"No running child hosts found. Use the standard reboot endpoint instead."
+msgstr "실행 중인 자식 호스트를 찾을 수 없습니다. 대신 표준 재부팅 엔드포인트를 사용하세요."
 
 #: backend/api/reboot_orchestration.py:204
 #, python-format
@@ -3403,11 +3342,10 @@ msgstr "재부팅 오케스트레이션을 찾을 수 없습니다"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
-"Scheduled upgrade profiles require a SysManage Professional+ license. Please "
-"upgrade to access this feature."
+"Scheduled upgrade profiles require a SysManage Professional+ license. Please"
+" upgrade to access this feature."
 msgstr ""
-"예약된 업그레이드 프로필에는 SysManage Professional+ 라이선스가 필요합니다. "
-"이 기능에 액세스하려면 업그레이드하세요."
+"예약된 업그레이드 프로필에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
 #: backend/api/upgrade_profiles.py:196
 #, python-format
@@ -3432,9 +3370,7 @@ msgstr "업그레이드 프로필이 삭제되었습니다"
 #, python-format
 msgid ""
 "Triggered upgrade profile '%(profile_name)s' against %(host_count)d host(s)"
-msgstr ""
-"%(profile_name)s 업그레이드 프로필을 호스트 %(host_count)d개에 트리거했습니"
-"다."
+msgstr "%(profile_name)s 업그레이드 프로필을 호스트 %(host_count)d개에 트리거했습니다."
 
 #: backend/api/agent.py:64
 msgid "Rate limit exceeded"
@@ -3483,8 +3419,7 @@ msgstr "미승인 호스트에서의 에이전트 메시지: {hostname}"
 
 #: backend/api/agent.py:591
 msgid "Message must include hostname or host_id for host validation"
-msgstr ""
-"메시지에는 호스트 검증을 위한 호스트명 또는 host_id가 포함되어야 합니다"
+msgstr "메시지에는 호스트 검증을 위한 호스트명 또는 host_id가 포함되어야 합니다"
 
 #: backend/api/agent.py:609
 msgid "Host ID no longer valid - please re-register"
@@ -3616,9 +3551,9 @@ msgstr "전체 %d 호스트에 대한 안티바이러스 배포가 시작되었�
 #: backend/api/antivirus_status.py:338
 #, python-format
 msgid ""
-"Antivirus deployment initiated for %(success_count)d of %(total_count)d hosts"
-msgstr ""
-"%(success_count)d 개의 %(total_count)d 호스트에 대한 Antivirus 배포 시작됨"
+"Antivirus deployment initiated for %(success_count)d of %(total_count)d "
+"hosts"
+msgstr "%(success_count)d 개의 %(total_count)d 호스트에 대한 Antivirus 배포 시작됨"
 
 #: backend/api/antivirus_status.py:344
 msgid "Antivirus deployment failed for all hosts"
@@ -3927,8 +3862,7 @@ msgstr "방화벽 역할 제거에 실패했습니다: %s"
 
 #: backend/api/lifecycle_actions.py:58 backend/api/lifecycle_actions.py:69
 msgid "OS lifecycle management requires a SysManage Professional license."
-msgstr ""
-"OS 라이프사이클 관리를 위한 SysManage Professional 라이선스가 필요합니다."
+msgstr "OS 라이프사이클 관리를 위한 SysManage Professional 라이선스가 필요합니다."
 
 #: backend/api/lifecycle_actions.py:76
 msgid "The OS lifecycle module is not currently available."
@@ -3938,17 +3872,21 @@ msgstr "OS 라이프사이클 모듈은 현재 사용할 수 없습니다."
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
 "upgrade to access this feature."
-msgstr ""
-"저장소 미러링은 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능을 사용하"
-"려면 업그레이드하세요."
+msgstr "저장소 미러링은 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능을 사용하려면 업그레이드하세요."
 
 #: backend/api/repository_mirroring_helpers.py:65
 msgid ""
 "Snap store proxy requires a SysManage Professional+ license. Please upgrade "
 "to access this feature."
 msgstr ""
-"Snap 저장소 프록시는 SysManage Professional+ 라이선스가 필요합니다. 이 기능"
-"을 사용하려면 업그레이드하세요."
+"Snap 저장소 프록시는 SysManage Professional+ 라이선스가 필요합니다. 이 기능을 사용하려면 업그레이드하세요."
+
+#: backend/api/repository_mirroring_helpers.py:78
+msgid ""
+"Container image registry proxy requires a SysManage Professional+ license. "
+"Please upgrade to access this feature."
+msgstr ""
+"컨테이너 이미지 레지스트리 프록시는 SysManage 프로페셔널+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드해 주세요."
 
 #: backend/api/repository_mirroring_setup.py:197
 #: backend/api/repository_mirroring_setup.py:259
@@ -3964,8 +3902,7 @@ msgstr "이 호스트上的平台配置%s已经存在"
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
-msgstr ""
-"플랫폼 설정은 여전히 %d 미러를 소유하고 있습니다; 먼저 이를 삭제해야 합니다"
+msgstr "플랫폼 설정은 여전히 %d 미러를 소유하고 있습니다; 먼저 이를 삭제해야 합니다"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
@@ -4002,9 +3939,7 @@ msgstr "감사 로그 항목을 가져오지 못했습니다: %s"
 msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
-msgstr ""
-"'%s'导출은 SysManage 프로페셔널+ 라이선스가 필요합니다. 오픈소스 티어는 CSV导"
-"出。"
+msgstr "'%s'导출은 SysManage 프로페셔널+ 라이선스가 필요합니다. 오픈소스 티어는 CSV导出。"
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4034,8 +3969,7 @@ msgstr "감사 로그 항목을 찾을 수 없습니다."
 
 #: backend/api/content_lifecycle_promotion.py:133
 msgid "Only a published content-view version can be promoted"
-msgstr ""
-"컨텐트 뷰 버전을 프로모션 할 수 있는 조건은 반드시 발행된 상태여야 합니다"
+msgstr "컨텐트 뷰 버전을 프로모션 할 수 있는 조건은 반드시 발행된 상태여야 합니다"
 
 #: backend/api/content_lifecycle_promotion.py:270
 msgid "Source and target environments must differ"
@@ -4101,10 +4035,9 @@ msgstr "퍼미션 denied: ADD_ENABLED_PACKAGE_MANAGER 역할 필요"
 #: backend/api/enabled_package_managers.py:307
 #, python-format
 msgid ""
-"Package manager '%(package_manager)s' is already enabled for OS '%(os_name)s'"
-msgstr ""
-"'%(package_manager)s' 패키지 매니저는 이미 OS '%(os_name)s'에서 사용 중입니"
-"다."
+"Package manager '%(package_manager)s' is already enabled for OS "
+"'%(os_name)s'"
+msgstr "'%(package_manager)s' 패키지 매니저는 이미 OS '%(os_name)s'에서 사용 중입니다."
 
 #: backend/api/enabled_package_managers.py:382
 #, python-format
@@ -4307,8 +4240,7 @@ msgstr "%(host_id)s 호스트에 대한 메시지 삭제 실패: %(error)s"
 #, python-format
 msgid ""
 "Marked %(count)d old messages as expired (older than %(timeout)d minutes)"
-msgstr ""
-"%(timeout)d 분 이상 된 %(count)d 개의 오래된 메시지를 만료됨으로 표시함"
+msgstr "%(timeout)d 분 이상 된 %(count)d 개의 오래된 메시지를 만료됨으로 표시함"
 
 #: backend/websocket/queue_maintenance.py:201
 #, python-format
@@ -4340,18 +4272,14 @@ msgstr "메시지 %(message_id)s에서 %(hostname)s 호스트가 존재하지 �
 msgid ""
 "Host %(hostname)s not approved (status: %(status)s) for message "
 "%(message_id)s, deleting"
-msgstr ""
-"%(status)s 상태로 승인이 거부된 %(hostname)s 호스트에 대한 메시지 "
-"%(message_id)s를 삭제함"
+msgstr "%(status)s 상태로 승인이 거부된 %(hostname)s 호스트에 대한 메시지 %(message_id)s를 삭제함"
 
 #: backend/websocket/inbound_processor.py:156
 #, python-format
 msgid ""
 "Processing NULL host_id message for approved host %(hostname)s (ID: "
 "%(host_id)s)"
-msgstr ""
-"승인된 호스트 %(hostname)s (ID: %(host_id)s)의 NULL host_id 메시지를 처리합니"
-"다."
+msgstr "승인된 호스트 %(hostname)s (ID: %(host_id)s)의 NULL host_id 메시지를 처리합니다."
 
 #: backend/websocket/inbound_processor.py:273
 #, python-format
@@ -4360,9 +4288,8 @@ msgid ""
 "message(s) for retry (NOT deleting) — may be an in-flight enrollment or a "
 "deleted host"
 msgstr ""
-"호스트 %(host_id)s이(가) 이 데이터베이스에 존재하지 않음; %(count)d개의 대기 "
-"중인 메시지(들)을 재시도로 미루기(삭제하지 않음) — 등록 중일 수 있거나 삭제"
-"된 호스트일 수 있습니다"
+"호스트 %(host_id)s이(가) 이 데이터베이스에 존재하지 않음; %(count)d개의 대기 중인 메시지(들)을 재시도로 "
+"미루기(삭제하지 않음) — 등록 중일 수 있거나 삭제된 호스트일 수 있습니다"
 
 #: backend/websocket/inbound_processor.py:290
 #, python-format
@@ -4370,8 +4297,7 @@ msgid ""
 "Host %(host_id)s (FQDN: %(fqdn)s) no longer approved (status: %(status)s), "
 "deleting all its messages from queue"
 msgstr ""
-"%(status)s 상태로 승인되지 않은 %(host_id)s 호스트 (FQDN: %(fqdn)s)의 모든 메"
-"시지 대기열에서 삭제됨"
+"%(status)s 상태로 승인되지 않은 %(host_id)s 호스트 (FQDN: %(fqdn)s)의 모든 메시지 대기열에서 삭제됨"
 
 #: backend/websocket/inbound_processor.py:300
 #, python-format
@@ -4413,8 +4339,7 @@ msgstr "메시지 %s 를 처리 중으로 표시할 수 없습니다."
 msgid ""
 "Processing queued message: %(message_id)s (type: %(message_type)s, host: "
 "%(host)s)"
-msgstr ""
-"대기열 메시지 처리: %(message_id)s (type: %(message_type)s, host: %(host)s)"
+msgstr "대기열 메시지 처리: %(message_id)s (type: %(message_type)s, host: %(host)s)"
 
 #: backend/websocket/inbound_processor.py:504
 #, python-format
@@ -4431,8 +4356,7 @@ msgstr "메시지 %s 처리에 실패했습니다: 알 수 없는 메시지 유�
 #: backend/websocket/inbound_processor.py:543
 #, python-format
 msgid "Error processing message %(message_id)s for host %(host)s: %(error)s"
-msgstr ""
-"%(host)s 호스트에 대한 메시지 %(message_id)s 처리 중 오류 발생: %(error)s"
+msgstr "%(host)s 호스트에 대한 메시지 %(message_id)s 처리 중 오류 발생: %(error)s"
 
 #: backend/websocket/inbound_processor.py:573
 #, python-format
@@ -4503,10 +4427,9 @@ msgstr "알 수 없는 메시지를 확인할 수 없습니다: %s"
 
 #: backend/websocket/queue_operations.py:613
 #, python-format
-msgid "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
-msgstr ""
-"메시지 %(message_id)s가 SENT 상태가 아님 (현재 상태: %(status)s)으로 확인 무"
-"시됨"
+msgid ""
+"Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
+msgstr "메시지 %(message_id)s가 SENT 상태가 아님 (현재 상태: %(status)s)으로 확인 무시됨"
 
 #: backend/websocket/queue_operations.py:626
 #, python-format
@@ -4539,8 +4462,8 @@ msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
 "scheduled for retry in %(backoff)d seconds"
 msgstr ""
-"메시지 %(message_id)s가 실패 (재시도 횟수: %(attempt)d/%(max_retries)d), "
-"%(backoff)d 초 후 재시도 예정"
+"메시지 %(message_id)s가 실패 (재시도 횟수: %(attempt)d/%(max_retries)d), %(backoff)d 초 "
+"후 재시도 예정"
 
 #: backend/websocket/queue_operations.py:808
 #, python-format
@@ -4697,9 +4620,7 @@ msgstr "vault.invalid_secret_format"
 #~ msgid ""
 #~ "Created one-shot air-gap collection run '%s' with %d target mirror(s); "
 #~ "snapshots dispatched."
-#~ msgstr ""
-#~ "%d 개의 대상 미러로 일회성 오프라인 수집 실행 '%s' 생성됨; 스냅샷이 배포되"
-#~ "었습니다."
+#~ msgstr "%d 개의 대상 미러로 일회성 오프라인 수집 실행 '%s' 생성됨; 스냅샷이 배포되었습니다."
 
 #, python-format
 #~ msgid "Disc %d not found for this run.  Available discs: %s"
@@ -4808,8 +4729,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Host %s not approved (status: %s) for message %s, deleting"
-#~ msgstr ""
-#~ "호스트 %s가 메시지 %s에 대해 승인이 되지 않음(status: %s), 삭제합니다"
+#~ msgstr "호스트 %s가 메시지 %s에 대해 승인이 되지 않음(status: %s), 삭제합니다"
 
 #, python-format
 #~ msgid "Processing NULL host_id message for approved host %s (ID: %s)"
@@ -4817,20 +4737,17 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid ""
-#~ "Host %s not found on this database; deferring %d queued message(s) for "
-#~ "retry (NOT deleting) — may be an in-flight enrollment or a deleted host"
+#~ "Host %s not found on this database; deferring %d queued message(s) for retry"
+#~ " (NOT deleting) — may be an in-flight enrollment or a deleted host"
 #~ msgstr ""
-#~ "호스트 '%s'가 이 데이터베이스에 존재하지 않음; %d개의 대기 중인 메시지를 "
-#~ "재시도로 미루어 놓습니다(삭제하지 않음) — 등록 중일 가능성이 있거나 삭제"
-#~ "된 호스트일 수 있습니다."
+#~ "호스트 '%s'가 이 데이터베이스에 존재하지 않음; %d개의 대기 중인 메시지를 재시도로 미루어 놓습니다(삭제하지 않음) — 등록 중일 "
+#~ "가능성이 있거나 삭제된 호스트일 수 있습니다."
 
 #, python-format
 #~ msgid ""
 #~ "Host %s (FQDN: %s) no longer approved (status: %s), deleting all its "
 #~ "messages from queue"
-#~ msgstr ""
-#~ "호스트 %s (FQDN: %s)가 더 이상 승인되지 않았습니다(status: %s), 모든 메시"
-#~ "지를 큐에서 삭제합니다"
+#~ msgstr "호스트 %s (FQDN: %s)가 더 이상 승인되지 않았습니다(status: %s), 모든 메시지를 큐에서 삭제합니다"
 
 #, python-format
 #~ msgid "Deleted %d messages for unapproved host %s"
@@ -4862,8 +4779,7 @@ msgstr "vault.invalid_secret_format"
 
 #, python-format
 #~ msgid "Enqueued message: id=%s, type=%s, direction=%s, host_id=%s"
-#~ msgstr ""
-#~ "큐에 메시지를 추가했습니다: id=%s, type=%s, direction=%s, host_id=%s"
+#~ msgstr "큐에 메시지를 추가했습니다: id=%s, type=%s, direction=%s, host_id=%s"
 
 #, python-format
 #~ msgid "Failed to mark message %s as processing: %s"
@@ -5056,11 +4972,9 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "OS 업그레이드 확인"
 
 #~ msgid ""
-#~ "This action will upgrade the operating system and require a system "
-#~ "reboot. Continue?"
-#~ msgstr ""
-#~ "이 작업은 운영 체제를 업그레이드하고 시스템 재부팅이 필요합니다. 계속하시"
-#~ "겠습니까?"
+#~ "This action will upgrade the operating system and require a system reboot. "
+#~ "Continue?"
+#~ msgstr "이 작업은 운영 체제를 업그레이드하고 시스템 재부팅이 필요합니다. 계속하시겠습니까?"
 
 #~ msgid "OS upgrades are always security updates"
 #~ msgstr "OS 업그레이드는 항상 보안 업데이트입니다"
@@ -5174,11 +5088,11 @@ msgstr "vault.invalid_secret_format"
 #~ msgstr "KVM/libvirt가 성공적으로 초기화되었습니다"
 
 #~ msgid ""
-#~ "Audit log export requires a SysManage Professional+ license. Please "
-#~ "upgrade to access CSV, JSON, CEF, and LEEF export formats."
+#~ "Audit log export requires a SysManage Professional+ license. Please upgrade "
+#~ "to access CSV, JSON, CEF, and LEEF export formats."
 #~ msgstr ""
-#~ "감사 로그 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. "
-#~ "CSV, JSON, CEF 및 LEEF 내보내기 형식에 액세스하려면 업그레이드하세요."
+#~ "감사 로그 내보내기에는 SysManage Professional+ 라이선스가 필요합니다. CSV, JSON, CEF 및 LEEF 내보내기"
+#~ " 형식에 액세스하려면 업그레이드하세요."
 
 # Pro+ redirect messages
 #~ msgid "Use /api/v1/reports/view/{report_type} with Pro+ license"

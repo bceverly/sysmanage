@@ -61,6 +61,8 @@ def _apply_repo_mirror_op_result(
             _apply_mirror_sync_status(session, action, mirror_id, outcome)
         elif action == "snap_capture":
             _apply_snap_capture_result(session, mirror_id, outcome)
+        elif action == "image_capture":
+            _apply_image_capture_result(session, mirror_id, outcome)
         elif action == "setup_check":
             _apply_mirror_setup_check(session, host_id, outcome)
         elif action == "setup_install":
@@ -179,6 +181,67 @@ def _apply_snap_capture_result(
         row.error_message = error_value
         row.last_capture_message_id = None
         row.updated_at = now
+
+
+def _parse_image_digests(outcome: Dict[str, Any]) -> Dict[tuple, str]:
+    """Extract ``{(registry, repository, tag): digest}`` from the ``IMGDIGEST``
+    marker lines the oci_proxy_engine capture plan echoes on each image
+    (``IMGDIGEST registry|repository|tag|sha256:...``).  ``|`` is a safe
+    delimiter because the engine validates the ref components."""
+    digests: Dict[tuple, str] = {}
+    for cmd in outcome.get("commands") or []:
+        for line in (cmd.get("stdout") or "").splitlines():
+            line = line.strip()
+            if not line.startswith("IMGDIGEST "):
+                continue
+            parts = line[len("IMGDIGEST ") :].split("|")
+            if len(parts) == 4 and parts[3].startswith("sha256:"):
+                digests[(parts[0], parts[1], parts[2])] = parts[3]
+    return digests
+
+
+def _apply_image_capture_result(
+    session, mirror_id: str, outcome: Dict[str, Any]
+) -> None:
+    """Flip a mirror's in-flight (DISPATCHED) ``mirror_image_content`` rows to
+    CAPTURED / FAILED after an ``oci_proxy_engine`` capture plan completes.
+
+    The capture plan captures all of a mirror's tracked images in one dispatch,
+    so the whole DISPATCHED set for the mirror moves together.  On success the
+    OCI layouts are on disk under the mirror's ``images`` dir (a later
+    content-view publish materializes them into the version store) and each
+    row's ``digest`` is filled from the plan's IMGDIGEST markers (the pin); on
+    failure the error text is recorded so the UI can surface it.
+    """
+    # pylint: disable=import-outside-toplevel
+    from backend.services.proplus_dispatch import _best_failure_text, _now_naive
+
+    if not mirror_id:
+        return
+    rows = (
+        session.query(models.MirrorImageContent)
+        .filter(
+            models.MirrorImageContent.repository_id == mirror_id,
+            models.MirrorImageContent.capture_status == "DISPATCHED",
+        )
+        .all()
+    )
+    if not rows:
+        return
+    now = _now_naive()
+    succeeded = outcome["status"] == "succeeded"
+    error_value = None if succeeded else _best_failure_text(outcome)[:8000]
+    digests = _parse_image_digests(outcome) if succeeded else {}
+    for row in rows:
+        row.capture_status = "CAPTURED" if succeeded else "FAILED"
+        row.last_capture_at = now
+        row.error_message = error_value
+        row.last_capture_message_id = None
+        row.updated_at = now
+        if succeeded:
+            pin = digests.get((row.registry, row.repository, row.tag))
+            if pin:
+                row.digest = pin
 
 
 def _apply_mirror_sync_status(

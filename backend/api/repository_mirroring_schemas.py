@@ -33,6 +33,28 @@ class SnapTrackRequest(BaseModel):
     )
 
 
+class ImageTrackRequest(BaseModel):
+    """Track a container image for capture into a mirror (Phase 17.2).
+
+    ``registry`` is a host[:port]; ``repository`` is an OCI repo path
+    (lowercase); ``tag`` follows the OCI tag rule.  The oci_proxy_engine
+    re-validates all three defensively at capture time.
+    """
+
+    registry: str = Field(
+        ..., min_length=1, max_length=255, pattern=r"^[A-Za-z0-9.\-:]+$"
+    )
+    repository: str = Field(
+        ..., min_length=1, max_length=255, pattern=r"^[a-z0-9]+(?:[._\-/][a-z0-9]+)*$"
+    )
+    tag: str = Field(
+        default="latest",
+        min_length=1,
+        max_length=128,
+        pattern=r"^[A-Za-z0-9_][A-Za-z0-9_.\-]*$",
+    )
+
+
 class MirrorCreateRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=120)
     package_manager: str = Field(..., min_length=1, max_length=20)

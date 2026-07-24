@@ -26,6 +26,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from backend.api.content_lifecycle_images import append_image_materialize
 from backend.api.content_lifecycle_snaps import append_snap_materialize
 from backend.auth.auth_bearer import JWTBearer
 from backend.i18n import _
@@ -884,9 +885,11 @@ def _build_regular_publish(engine, cv, shared_db, tenant_db, next_version):
         if store_parent is None:
             store_parent = os.path.dirname(plan.get("store_path", "")) or None
 
-    # Phase 17.1: materialize any CAPTURED snaps into the same version store so
-    # they ride the air-gap ISO unchanged (no-op unless licensed + captured).
+    # Phase 17.1/17.2: materialize any CAPTURED snaps + container images into the
+    # same version store so they ride the air-gap ISO unchanged (each a no-op
+    # unless its Pro+ engine is licensed and that content was captured).
     append_snap_materialize(commands, cv, tenant_db, mirror_root, store_parent)
+    append_image_materialize(commands, cv, tenant_db, mirror_root, store_parent)
     return host_id, store_parent, commands, None
 
 
