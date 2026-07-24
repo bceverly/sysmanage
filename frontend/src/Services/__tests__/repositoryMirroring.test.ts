@@ -29,6 +29,10 @@ import {
   getMirrorSetupStatus,
   refreshMirrorSetupStatus,
   installMirrorTools,
+  listTrackedSnaps,
+  trackSnap,
+  untrackSnap,
+  captureSnaps,
   type MirrorRepositoryCreate,
   type MirrorPlatformConfigPayload,
 } from '../repositoryMirroring';
@@ -437,6 +441,55 @@ describe('repositoryMirroring service', () => {
       await expect(installMirrorTools('h!1', 'dnf')).rejects.toThrow(
         'Invalid identifier: h!1',
       );
+    });
+  });
+
+  describe('snap store proxy', () => {
+    it('listTrackedSnaps GETs the id-scoped /snaps URL', async () => {
+      const rows = [{ id: 's1', snap_name: 'hello', capture_status: 'TRACKED' }];
+      vi.mocked(axiosInstance.get).mockResolvedValueOnce(ok(rows));
+      const result = await listTrackedSnaps('m1');
+      expect(result).toEqual(rows);
+      expect(axiosInstance.get).toHaveBeenCalledWith(
+        '/api/v1/mirror-repositories/m1/snaps',
+      );
+    });
+
+    it('trackSnap POSTs the {snap_name, channel} body', async () => {
+      const created = { id: 's1', snap_name: 'hello', channel: 'latest/edge' };
+      vi.mocked(axiosInstance.post).mockResolvedValueOnce(ok(created));
+      const result = await trackSnap('m1', {
+        snap_name: 'hello',
+        channel: 'latest/edge',
+      });
+      expect(result).toEqual(created);
+      expect(axiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/mirror-repositories/m1/snaps',
+        { snap_name: 'hello', channel: 'latest/edge' },
+      );
+    });
+
+    it('untrackSnap DELETEs the id + snap-content-id URL', async () => {
+      vi.mocked(axiosInstance.delete).mockResolvedValueOnce(ok(undefined));
+      await untrackSnap('m1', 's1');
+      expect(axiosInstance.delete).toHaveBeenCalledWith(
+        '/api/v1/mirror-repositories/m1/snaps/s1',
+      );
+    });
+
+    it('captureSnaps POSTs to /capture-snaps and returns data', async () => {
+      const resp = { message: 'ok', mirror_id: 'm1', message_id: 'x', snap_count: 2 };
+      vi.mocked(axiosInstance.post).mockResolvedValueOnce(ok(resp));
+      const result = await captureSnaps('m1');
+      expect(result).toEqual(resp);
+      expect(axiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/mirror-repositories/m1/capture-snaps',
+      );
+    });
+
+    it('rejects invalid identifiers before calling axios', async () => {
+      await expect(listTrackedSnaps('a b')).rejects.toThrow('Invalid identifier');
+      await expect(untrackSnap('m1', 'a b')).rejects.toThrow('Invalid identifier');
     });
   });
 });

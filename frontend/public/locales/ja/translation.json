@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "トラッキングされたスナップをキャプチャ",
+        "tracked": "追跡されたスナップ"
+      },
+      "channel": "チャンネル",
+      "col": {
+        "actions": "アクション",
+        "channel": "チャンネル",
+        "name": "スナップ",
+        "status": "キャプチャ"
+      },
+      "empty": "まだスナップが追跡されていません。上部に1つ追加し、次に \"スナップをキャプチャ\" を使用してください。",
+      "loadError": "トラッキングされたスナップの読み込みに失敗しました。",
+      "name": "スナップ名",
+      "title": "トラッキングされたスナップ ({{name}} 用)",
+      "track": "追跡",
+      "trackError": "そのスナップを追跡できませんでした。名前は小文字のアルファベット、数字、およびハイフンのみを使用できます。",
+      "untrack": "このスナップの追跡を停止する",
+      "untrackError": "そのスナップの追跡を解除できませんでした。"
     }
   },
   "integrations": {

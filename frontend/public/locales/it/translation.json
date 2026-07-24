@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Cattura le immagini di controllo monitorate",
+        "tracked": "Immagini di controllo monitorate"
+      },
+      "channel": "Canale",
+      "col": {
+        "actions": "Azioni",
+        "channel": "Canale",
+        "name": "Immagine di controllo",
+        "status": "Cattura"
+      },
+      "empty": "Non ci sono ancora immagini di controllo monitorate. Aggiungi una sopra, quindi usa \"Cattura le immagini di controllo\".",
+      "loadError": "Impossibile caricare le immagini di controllo monitorate.",
+      "name": "Nome dell'immagine di controllo",
+      "title": "Immagini di controllo monitorate per {{name}}",
+      "track": "Monitora",
+      "trackError": "Impossibile monitorare quell'immagine di controllo. I nomi possono contenere solo lettere minuscole, cifre e trattini.",
+      "untrack": "Smetti di monitorare questa immagine di controllo",
+      "untrackError": "Impossibile smettere di monitorare quell'immagine di controllo."
     }
   },
   "integrations": {

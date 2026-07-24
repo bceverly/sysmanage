@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "चपटे हस्ताक्षर चपटा करो",
+        "tracked": "प्रत्यक्ष हस्ताक्षर"
+      },
+      "channel": "चैनल",
+      "col": {
+        "actions": "क्रियाएं",
+        "channel": "चैनल",
+        "name": "हस्ताक्षर",
+        "status": "चपटा करो"
+      },
+      "empty": "अभी तक कोई हस्ताक्षर प्रत्यक्ष नहीं किए गए हैं। ऊपर एक जोड़ें, फिर \\\"चपटे हस्ताक्षर\\\" का उपयोग करें।",
+      "loadError": "चपटे हस्ताक्षर लोड नहीं किए जा सके।",
+      "name": "हस्ताक्षर का नाम",
+      "title": "{{name}} के लिए प्रत्यक्ष हस्ताक्षर",
+      "track": "प्रत्यक्ष करें",
+      "trackError": "उस हस्ताक्षर को प्रत्यक्ष नहीं किया जा सका। नाम छूट, अंक, और टिहरी में होने चाहिए।",
+      "untrack": "इस हस्ताक्षर को प्रत्यक्ष नहीं करने के लिए रुको",
+      "untrackError": "उस हस्ताक्षर को प्रत्यक्ष नहीं किया जा सका।"
     }
   },
   "integrations": {

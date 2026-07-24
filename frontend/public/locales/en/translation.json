@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Capture tracked snaps",
+        "tracked": "Tracked snaps"
+      },
+      "channel": "Channel",
+      "col": {
+        "actions": "Actions",
+        "channel": "Channel",
+        "name": "Snap",
+        "status": "Capture"
+      },
+      "empty": "No snaps tracked yet. Add one above, then use \"Capture snaps\".",
+      "loadError": "Could not load tracked snaps.",
+      "name": "Snap name",
+      "title": "Tracked snaps for {{name}}",
+      "track": "Track",
+      "trackError": "Could not track that snap. Names are lowercase letters, digits, and hyphens.",
+      "untrack": "Stop tracking this snap",
+      "untrackError": "Could not untrack that snap."
     }
   },
   "integrations": {

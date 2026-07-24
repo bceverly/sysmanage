@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Gevolgd gesnapte momenten opnemen",
+        "tracked": "Gevolgd gesnapte momenten"
+      },
+      "channel": "Kanaal",
+      "col": {
+        "actions": "Acties",
+        "channel": "Kanaal",
+        "name": "Gesnapte moment",
+        "status": "Opnemen"
+      },
+      "empty": "Er zijn nog geen gevolgde gesnapte momenten. Voeg erboven een toe, dan gebruik je \"Gesnapte momenten opnemen\".",
+      "loadError": "Gevolgd gesnapte momenten konden niet worden geladen.",
+      "name": "Naam van het gesnapte moment",
+      "title": "Gevolgd gesnapte momenten voor {{name}}",
+      "track": "Volgen",
+      "trackError": "Kon dat gesnapte moment niet volgen. Namen bestaan uit kleine letters, cijfers en streepjes.",
+      "untrack": "Volgen stoppen voor dit gesnapte moment",
+      "untrackError": "Kon dat gesnapte moment niet onvolgen."
     }
   },
   "integrations": {

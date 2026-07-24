@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Capturar instantâneas rastreadas",
+        "tracked": "Instantâneas rastreadas"
+      },
+      "channel": "Canal",
+      "col": {
+        "actions": "Aóes",
+        "channel": "Canal",
+        "name": "Instantânea",
+        "status": "Capturar"
+      },
+      "empty": "Ainda não há instantâneas rastreadas. Adicione uma acima, em seguida use “Capturar instantâneas”.",
+      "loadError": "Não foi possível carregar as instantâneas rastreadas.",
+      "name": "Nome da instantânea",
+      "title": "Instantâneas rastreadas para {{name}}",
+      "track": "Rastrear",
+      "trackError": "Não foi possível rastrear essa instantânea. Os nomes são letras minúsculas, números e hifens.",
+      "untrack": "Parar de rastrear esta instantânea",
+      "untrackError": "Não foi possível deixar de rastrear essa instantânea."
     }
   },
   "integrations": {

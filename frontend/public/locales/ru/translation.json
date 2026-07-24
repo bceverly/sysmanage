@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Захват отслеживаемых снимков",
+        "tracked": "Отслеживаемые снимки"
+      },
+      "channel": "Канал",
+      "col": {
+        "actions": "Действия",
+        "channel": "Канал",
+        "name": "Снимок",
+        "status": "Захват"
+      },
+      "empty": "Пока нет отслеживаемых снимков. Добавьте один выше, затем используйте \"Захват снимков\".",
+      "loadError": "Не удалось загрузить отслеживаемые снимки.",
+      "name": "Имя снимка",
+      "title": "Отслеживаемые снимки для {{name}}",
+      "track": "Отслеживать",
+      "trackError": "Не удалось отслеживать этот снимок. Имена должны содержать только строчные буквы, цифры и дефисы.",
+      "untrack": "Прекратить отслеживание этого снимка",
+      "untrackError": "Не удалось прекратить отслеживание этого снимка."
     }
   },
   "integrations": {

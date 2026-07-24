@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "捕捉追蹤的快照",
+        "tracked": "已追蹤的快照"
+      },
+      "channel": "頻道",
+      "col": {
+        "actions": "動作",
+        "channel": "頻道",
+        "name": "快照",
+        "status": "捕捉"
+      },
+      "empty": "目前沒有追蹤任何快照。請在上方新增一個，然後使用「捕捉快照」。",
+      "loadError": "無法載入追蹤的快照。",
+      "name": "快照名稱",
+      "title": "為 {{name}} 追蹤的快照",
+      "track": "追蹤",
+      "trackError": "無法追蹤該快照。名稱只能包含小寫字母、數字和連字符。",
+      "untrack": "停止追蹤此快照",
+      "untrackError": "無法取消追蹤該快照。"
     }
   },
   "integrations": {

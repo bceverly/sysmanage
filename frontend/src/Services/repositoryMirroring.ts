@@ -178,6 +178,64 @@ export const listSnapshots = async (
   return r.data;
 };
 
+// --- Snap store proxy (Phase 17.1) — gated on the Pro+ snap_proxy_engine ---
+
+export type SnapCaptureStatus = 'TRACKED' | 'DISPATCHED' | 'CAPTURED' | 'FAILED';
+
+export interface MirrorSnapContent {
+  id: string;
+  repository_id: string;
+  snap_name: string;
+  channel: string;
+  confinement?: string | null;
+  capture_status: SnapCaptureStatus;
+  last_capture_at?: string | null;
+  error_message?: string | null;
+}
+
+export const listTrackedSnaps = async (
+  id: string,
+): Promise<MirrorSnapContent[]> => {
+  const r = await axiosInstance.get<MirrorSnapContent[]>(
+    `/api/v1/mirror-repositories/${safeId(id)}/snaps`,
+  );
+  return r.data;
+};
+
+export const trackSnap = async (
+  id: string,
+  payload: { snap_name: string; channel?: string },
+): Promise<MirrorSnapContent> => {
+  const r = await axiosInstance.post<MirrorSnapContent>(
+    `/api/v1/mirror-repositories/${safeId(id)}/snaps`,
+    payload,
+  );
+  return r.data;
+};
+
+export const untrackSnap = async (
+  id: string,
+  snapContentId: string,
+): Promise<void> => {
+  await axiosInstance.delete(
+    `/api/v1/mirror-repositories/${safeId(id)}/snaps/${safeId(snapContentId)}`,
+  );
+};
+
+export const captureSnaps = async (
+  id: string,
+): Promise<{
+  message: string;
+  mirror_id: string;
+  message_id: string;
+  snap_count: number;
+}> => {
+  const r = await axiosInstance.post(
+    `/api/v1/mirror-repositories/${safeId(id)}/capture-snaps`,
+  );
+  return r.data;
+};
+
 export const getMirrorSettings = async (): Promise<MirrorSettings> => {
   const r = await axiosInstance.get<MirrorSettings>('/api/v1/settings/mirror');
   return r.data;

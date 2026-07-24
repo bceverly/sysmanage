@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Gefüttelte Snaps festlegen",
+        "tracked": "Gefüttelte Snaps"
+      },
+      "channel": "Kanal",
+      "col": {
+        "actions": "Aktionen",
+        "channel": "Kanal",
+        "name": "Snap",
+        "status": "Festlegen"
+      },
+      "empty": "Noch keine Snaps verfolgt. Füg einen oben hinzu, dann benutze \"Festlegen von Snaps\".",
+      "loadError": "Gefüttelte Snaps konnten nicht geladen werden.",
+      "name": "Snap-Name",
+      "title": "Gefüttelte Snaps für {{name}}",
+      "track": "Verfolgen",
+      "trackError": "Konnte diesen Snap nicht verfolgen. Namen bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen.",
+      "untrack": "Verfolgung dieses Snaps beenden",
+      "untrackError": "Konnte diesen Snap nicht mehr verfolgen."
     }
   },
   "integrations": {

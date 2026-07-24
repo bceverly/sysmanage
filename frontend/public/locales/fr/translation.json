@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "Capturer les snapshots suivis",
+        "tracked": "Snapshots suivis"
+      },
+      "channel": "Canal",
+      "col": {
+        "actions": "Actions",
+        "channel": "Canal",
+        "name": "Snapshot",
+        "status": "Capture"
+      },
+      "empty": "Aucun snapshot suivé encore. Ajoutez-en un ci-dessus, puis utilisez “Capturer les snapshots”.",
+      "loadError": "Impossible de charger les snapshots suivis.",
+      "name": "Nom du snapshot",
+      "title": "Snapshots suivis pour {{name}}",
+      "track": "Suivre",
+      "trackError": "Impossible de suivre ce snapshot. Les noms sont des lettres minuscules, des chiffres et des tirets.",
+      "untrack": "Arrêter le suivi de ce snapshot",
+      "untrackError": "Impossible d’arrêter le suivi de ce snapshot."
     }
   },
   "integrations": {

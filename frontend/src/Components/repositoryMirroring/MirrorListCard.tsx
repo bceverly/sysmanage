@@ -33,10 +33,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SyncIcon from '@mui/icons-material/Sync';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import InventoryIcon from '@mui/icons-material/Inventory2';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useTranslation } from 'react-i18next';
 import {
+  captureSnaps,
   createMirror,
   deleteMirror,
   listKnownVersions,
@@ -49,10 +52,12 @@ import {
   syncMirror,
   updateMirror,
 } from '../../Services/repositoryMirroring';
+import useModuleLicensed from '../../hooks/useModuleLicensed';
 import { EMPTY_DRAFT_FOR, isDraftValid } from './helpers';
 import ActionStatusChip from './ActionStatusChip';
 import ComponentsMultiSelect from './ComponentsMultiSelect';
 import SnapshotsExpandRow from './SnapshotsExpandRow';
+import TrackedSnapsExpandRow from './TrackedSnapsExpandRow';
 
 // ---------------------------------------------------------------------
 // Mirror list card with Add/Edit dialog
@@ -84,6 +89,22 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
   const [expandedSnapshots, setExpandedSnapshots] = useState<Set<string>>(() => new Set());
   const toggleSnapshots = (id: string) =>
     setExpandedSnapshots((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  // Snap store proxy (Phase 17.1) is a separate Pro+ module — the tracked-snaps
+  // panel + capture action only appear when snap_proxy_engine is licensed
+  // (mirroring the backend's 402 gate).
+  const snapLicensed = useModuleLicensed('snap_proxy_engine');
+  const [expandedSnaps, setExpandedSnaps] = useState<Set<string>>(() => new Set());
+  const toggleSnaps = (id: string) =>
+    setExpandedSnaps((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -297,6 +318,25 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                       onClick={() => handleAction(snapshotMirror, m.id, 'mirror.snapshotError')}>
                       <CameraAltIcon fontSize="small" />
                     </IconButton>
+                    {snapLicensed && (
+                      <>
+                        <IconButton
+                          size="small"
+                          color={expandedSnaps.has(m.id) ? 'primary' : 'default'}
+                          title={t('mirror.snap.action.tracked', 'Tracked snaps')}
+                          onClick={() => toggleSnaps(m.id)}
+                        >
+                          <InventoryIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          title={t('mirror.snap.action.capture', 'Capture tracked snaps')}
+                          onClick={() => handleAction(captureSnaps, m.id, 'mirror.snap.captureError')}
+                        >
+                          <CloudDownloadIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                     <IconButton size="small" title={t('mirror.action.edit', 'Edit')} onClick={() => openEdit(m)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
@@ -319,6 +359,13 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                   expanded={expandedSnapshots.has(m.id)}
                   onRestoreDispatched={onChange}
                 />
+                {snapLicensed && (
+                  <TrackedSnapsExpandRow
+                    mirror={m}
+                    colSpan={9}
+                    expanded={expandedSnaps.has(m.id)}
+                  />
+                )}
                 </React.Fragment>
               ))}
               {mirrors.length === 0 && (

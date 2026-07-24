@@ -2322,6 +2322,27 @@
     "setupGate": {
       "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
       "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+    },
+    "snap": {
+      "action": {
+        "capture": "추적된 스냅 캡처",
+        "tracked": "추적된 스냅"
+      },
+      "channel": "채널",
+      "col": {
+        "actions": "액션",
+        "channel": "채널",
+        "name": "스냅",
+        "status": "캡처"
+      },
+      "empty": "아직 추적된 스냅이 없습니다. 위에 하나를 추가한 다음 \"스냅 캡처\"를 사용하세요.",
+      "loadError": "추적된 스냅을 불러오는데 실패했습니다.",
+      "name": "스냅 이름",
+      "title": "{{name}}을 위한 추적된 스냅",
+      "track": "추적",
+      "trackError": "그 스냅을 추적할 수 없습니다. 이름은 소문자, 숫자 및 하이픈만 사용해야 합니다.",
+      "untrack": "이 스냅의 추적 중지",
+      "untrackError": "그 스냅의 추적을 취소할 수 없습니다."
     }
   },
   "integrations": {
