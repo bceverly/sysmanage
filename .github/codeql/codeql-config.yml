@@ -114,6 +114,16 @@ query-filters:
   # distinguish executables from data files.
   - exclude:
       id: py/overly-permissive-file
+  # Fires on the content-lifecycle result handlers (and similar dispatch
+  # code) logging entity IDs + status — cvv_id, host_id, export_id, cmd_id,
+  # primary_id, run.status, package add/remove counts. CodeQL's taint model
+  # classifies these identifiers as "sensitive", but they are non-secret
+  # operational IDs: the flagged sinks log no token/credential/secret/URL
+  # (real secrets live in OpenBAO and are never logged). 17 FPs across one
+  # file with no path to a real-world fix; the value of the query here is
+  # purely noise on identifier logging.
+  - exclude:
+      id: py/clear-text-logging-sensitive-data
   # ``for x in EnumClass`` is iterable at runtime (CPython enums
   # implement ``__iter__``), but CodeQL's flow analysis flags it.
   - exclude:
