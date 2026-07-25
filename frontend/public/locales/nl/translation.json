@@ -2343,6 +2343,29 @@
       "trackError": "Kon dat gesnapte moment niet volgen. Namen bestaan uit kleine letters, cijfers en streepjes.",
       "untrack": "Volgen stoppen voor dit gesnapte moment",
       "untrackError": "Kon dat gesnapte moment niet onvolgen."
+    },
+    "image": {
+      "action": {
+        "capture": "Gefollowde afbeeldingen catureeren",
+        "tracked": "Gefollowde afbeeldingen"
+      },
+      "col": {
+        "actions": "Acties",
+        "digest": "Digest",
+        "image": "Afbeelding",
+        "status": "Catureer",
+        "tag": "Tag"
+      },
+      "empty": "Geen gefollowde afbeeldingen. Voeg erboven eentje toe, dan gebruik \"Gefollowde afbeeldingen catureeren\".",
+      "loadError": "Kan gefollowde afbeeldingen niet laden.",
+      "registry": "Registry",
+      "repository": "Repository",
+      "tag": "Tag",
+      "title": "Gefollowde afbeeldingen voor {{name}}",
+      "track": "Volg",
+      "trackError": "Kon die afbeelding niet volgen. Gebruik de registry-host, kleine lettertjes voor het repository en een geldige tag.",
+      "untrack": "Stop met volgen van deze afbeelding",
+      "untrackError": "Kon die afbeelding niet onvolgen."
     }
   },
   "integrations": {

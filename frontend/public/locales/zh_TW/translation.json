@@ -2343,6 +2343,29 @@
       "trackError": "無法追蹤該快照。名稱只能包含小寫字母、數字和連字符。",
       "untrack": "停止追蹤此快照",
       "untrackError": "無法取消追蹤該快照。"
+    },
+    "image": {
+      "action": {
+        "capture": "擷取追蹤的影像",
+        "tracked": "已追蹤的影像"
+      },
+      "col": {
+        "actions": "動作",
+        "digest": "摘要",
+        "image": "影像",
+        "status": "擷取",
+        "tag": "標籤"
+      },
+      "empty": "目前沒有追蹤任何影像。上方新增一個，然後使用「擷取影像」。",
+      "loadError": "無法載入追蹤的影像。",
+      "registry": "Registry",
+      "repository": "Repository",
+      "tag": "標籤",
+      "title": "已追蹤的影像（{{name}}）",
+      "track": "追蹤",
+      "trackError": "無法追蹤該影像。請使用 registry 主機、小寫 repository 和有效的 tag。",
+      "untrack": "停止追蹤此影像",
+      "untrackError": "無法取消追蹤該影像。"
     }
   },
   "integrations": {

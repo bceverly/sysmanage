@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 15:25-0400\n"
+"POT-Creation-Date: 2026-07-25 07:08-0400\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4187,33 +4187,45 @@ msgstr "Este ambiente não tem uma versão anterior para rolar de volta"
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "A versão anterior foi recuperada e não pode mais ser restaurada"
 
-#: backend/api/content_lifecycle_promotion.py:437
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "O espelho '%s' tem um gerenciador de pacotes não suportado"
 
-#: backend/api/content_lifecycle_promotion.py:448
+#: backend/api/content_lifecycle_promotion.py:453
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Não é possível redefinir espelho '%(name)s': %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:513
-#: backend/api/content_lifecycle_promotion.py:561
+#: backend/api/content_lifecycle_promotion.py:518
+#: backend/api/content_lifecycle_promotion.py:566
+#: backend/api/content_lifecycle_promotion.py:627
 msgid "That environment has no content for this content view"
 msgstr "Esse ambiente não possui conteùdo para essa visualização de conteùido"
 
-#: backend/api/content_lifecycle_promotion.py:520
-#: backend/api/content_lifecycle_promotion.py:568
+#: backend/api/content_lifecycle_promotion.py:525
+#: backend/api/content_lifecycle_promotion.py:573
+#: backend/api/content_lifecycle_promotion.py:639
 msgid "The serving host has no resolvable address"
 msgstr "O servidor que está fornecendo não tem um endereço resolvível"
 
-#: backend/api/content_lifecycle_promotion.py:526
+#: backend/api/content_lifecycle_promotion.py:531
 msgid "Repository mirroring is required to repoint a host"
 msgstr "A sincronização do repositôrio é necessária para redefinir o host"
 
-#: backend/api/content_lifecycle_promotion.py:554
+#: backend/api/content_lifecycle_promotion.py:559
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr "O proxy da loja Snap é requerido para redefinir os snaps de um host"
+
+#: backend/api/content_lifecycle_promotion.py:620
+msgid "Container image registry proxy is required to repoint images"
+msgstr ""
+"Um proxy de registro de imagem de contêiner é requerido para reencaminhar "
+"imagens"
+
+#: backend/api/content_lifecycle_promotion.py:632
+msgid "This content view has no captured images"
+msgstr "Esta visualização de conteúdo não possui imagens capturadas"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

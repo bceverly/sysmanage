@@ -2343,6 +2343,29 @@
       "trackError": "Impossibile monitorare quell'immagine di controllo. I nomi possono contenere solo lettere minuscole, cifre e trattini.",
       "untrack": "Smetti di monitorare questa immagine di controllo",
       "untrackError": "Impossibile smettere di monitorare quell'immagine di controllo."
+    },
+    "image": {
+      "action": {
+        "capture": "Cattura le immagini tracciate",
+        "tracked": "Immagini tracciate"
+      },
+      "col": {
+        "actions": "Azioni",
+        "digest": "Digest",
+        "image": "Immagine",
+        "status": "Cattura",
+        "tag": "Tag"
+      },
+      "empty": "Non ci sono immagini tracciate ancora. Aggiungi una sopra, quindi usa \"Cattura immagini\".",
+      "loadError": "Impossibile caricare le immagini tracciate.",
+      "registry": "Registro",
+      "repository": "Repository",
+      "tag": "Tag",
+      "title": "Immagini tracciate per {{name}}",
+      "track": "Traccia",
+      "trackError": "Impossibile tracciare quell'immagine. Usa l'host del registro, il repository in minuscolo e un tag valido.",
+      "untrack": "Smetti di tracciare questa immagine",
+      "untrackError": "Impossibile smettere di tracciare quell'immagine."
     }
   },
   "integrations": {

@@ -236,6 +236,69 @@ export const captureSnaps = async (
   return r.data;
 };
 
+// --- OCI image content (Phase 17.2) — gated on the Pro+ oci_proxy_engine ---
+
+export type ImageCaptureStatus =
+  | 'TRACKED'
+  | 'DISPATCHED'
+  | 'CAPTURED'
+  | 'FAILED';
+
+export interface MirrorImageContent {
+  id: string;
+  repository_id: string;
+  registry: string;
+  repository: string;
+  tag: string;
+  digest?: string | null;
+  capture_status: ImageCaptureStatus;
+  last_capture_at?: string | null;
+  error_message?: string | null;
+}
+
+export const listTrackedImages = async (
+  id: string,
+): Promise<MirrorImageContent[]> => {
+  const r = await axiosInstance.get<MirrorImageContent[]>(
+    `/api/v1/mirror-repositories/${safeId(id)}/images`,
+  );
+  return r.data;
+};
+
+export const trackImage = async (
+  id: string,
+  payload: { registry: string; repository: string; tag?: string },
+): Promise<MirrorImageContent> => {
+  const r = await axiosInstance.post<MirrorImageContent>(
+    `/api/v1/mirror-repositories/${safeId(id)}/images`,
+    payload,
+  );
+  return r.data;
+};
+
+export const untrackImage = async (
+  id: string,
+  imageContentId: string,
+): Promise<void> => {
+  await axiosInstance.delete(
+    `/api/v1/mirror-repositories/${safeId(id)}/images/${safeId(imageContentId)}`,
+  );
+};
+
+export const captureImages = async (
+  id: string,
+): Promise<{
+  message: string;
+  mirror_id: string;
+  message_id: string;
+  image_count: number;
+}> => {
+  const r = await axiosInstance.post(
+    `/api/v1/mirror-repositories/${safeId(id)}/capture-images`,
+  );
+  return r.data;
+};
+
 export const getMirrorSettings = async (): Promise<MirrorSettings> => {
   const r = await axiosInstance.get<MirrorSettings>('/api/v1/settings/mirror');
   return r.data;

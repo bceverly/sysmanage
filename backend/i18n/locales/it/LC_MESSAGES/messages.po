@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 15:25-0400\n"
+"POT-Creation-Date: 2026-07-25 07:08-0400\n"
 "Language: it\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4229,36 +4229,48 @@ msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr ""
 "La versione precedente è stata reclamata e non può più essere ripristinata"
 
-#: backend/api/content_lifecycle_promotion.py:437
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "Lo specchio '%s' ha un gestore di pacchetti non supportato"
 
-#: backend/api/content_lifecycle_promotion.py:448
+#: backend/api/content_lifecycle_promotion.py:453
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Impossibile riindirizzare lo specchio '%(name)s': %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:513
-#: backend/api/content_lifecycle_promotion.py:561
+#: backend/api/content_lifecycle_promotion.py:518
+#: backend/api/content_lifecycle_promotion.py:566
+#: backend/api/content_lifecycle_promotion.py:627
 msgid "That environment has no content for this content view"
 msgstr "Quell'ambiente non contiene contenuti per questa vista del contenuto"
 
-#: backend/api/content_lifecycle_promotion.py:520
-#: backend/api/content_lifecycle_promotion.py:568
+#: backend/api/content_lifecycle_promotion.py:525
+#: backend/api/content_lifecycle_promotion.py:573
+#: backend/api/content_lifecycle_promotion.py:639
 msgid "The serving host has no resolvable address"
 msgstr "Il server host di servizio non ha indirizzi risolvibili"
 
-#: backend/api/content_lifecycle_promotion.py:526
+#: backend/api/content_lifecycle_promotion.py:531
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 "È richiesta la sincronizzazione del repository per riorientare il server "
 "host"
 
-#: backend/api/content_lifecycle_promotion.py:554
+#: backend/api/content_lifecycle_promotion.py:559
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr ""
 "È richiesto un proxy del negozio Snap per reindirizzare le snap di un host"
+
+#: backend/api/content_lifecycle_promotion.py:620
+msgid "Container image registry proxy is required to repoint images"
+msgstr ""
+"È richiesto un proxy del registro immagini container per ripuntare le "
+"immagini"
+
+#: backend/api/content_lifecycle_promotion.py:632
+msgid "This content view has no captured images"
+msgstr "Questa vista contenuti non ha immagini catturate"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

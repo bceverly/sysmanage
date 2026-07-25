@@ -344,6 +344,7 @@ _LOG_ONLY_OPS = {
     "serve_content": "mirror-host serving provision",
     "repoint": "client repoint",
     "repoint_snaps": "client snap repoint",
+    "repoint_images": "client image repoint",
 }
 
 

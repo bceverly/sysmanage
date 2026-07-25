@@ -2343,6 +2343,29 @@
       "trackError": "Could not track that snap. Names are lowercase letters, digits, and hyphens.",
       "untrack": "Stop tracking this snap",
       "untrackError": "Could not untrack that snap."
+    },
+    "image": {
+      "action": {
+        "capture": "Capture tracked images",
+        "tracked": "Tracked images"
+      },
+      "col": {
+        "actions": "Actions",
+        "digest": "Digest",
+        "image": "Image",
+        "status": "Capture",
+        "tag": "Tag"
+      },
+      "empty": "No images tracked yet. Add one above, then use \"Capture images\".",
+      "loadError": "Could not load tracked images.",
+      "registry": "Registry",
+      "repository": "Repository",
+      "tag": "Tag",
+      "title": "Tracked images for {{name}}",
+      "track": "Track",
+      "trackError": "Could not track that image. Use registry host, lowercase repository, and a valid tag.",
+      "untrack": "Stop tracking this image",
+      "untrackError": "Could not untrack that image."
     }
   },
   "integrations": {

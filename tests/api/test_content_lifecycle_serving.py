@@ -90,6 +90,20 @@ class _FakeSnapEngine:
         }
 
 
+class _FakeOciEngine:
+    def build_image_repoint_plan(
+        self, content_url, images, staging_dir="/var/lib/sysmanage/image-content"
+    ):
+        return {
+            "engine": "oci_proxy_engine",
+            "action": "repoint_images",
+            "content_url": content_url,
+            "staging_dir": staging_dir,
+            "images": list(images),
+            "commands": [{"argv": ["echo", content_url]}],
+        }
+
+
 @pytest.fixture
 def env():
     shared_engine = create_engine(
@@ -115,6 +129,7 @@ def env():
             models.ContentPromotionAudit.__table__,
             models.MirrorRepository.__table__,
             models.MirrorSettings.__table__,
+            models.MirrorImageContent.__table__,
         ],
     )
     shared_s = sessionmaker(bind=shared_engine)
@@ -160,6 +175,7 @@ def env():
         "content_lifecycle_engine": _FakeClmEngine(),
         "repository_mirroring_engine": _FakeRepoEngine(),
         "snap_proxy_engine": _FakeSnapEngine(),
+        "oci_proxy_engine": _FakeOciEngine(),
     }
 
     try:
@@ -396,6 +412,81 @@ class TestRepointSnaps:
         r = env.client.post(
             f"{_CV}/{cv}/repoint-snaps",
             json={"environment_id": envs["Dev"], "host_id": str(uuid.uuid4())},
+        )
+        assert r.status_code == 400
+
+
+# --- repoint images (Phase 17.2) --------------------------------------------
+
+
+def _seed_captured_image(env, mirror_id, *, repository="library/nginx", tag="1.27"):
+    db = env.tenant_s()
+    try:
+        db.add(
+            models.MirrorImageContent(
+                repository_id=uuid.UUID(mirror_id),
+                registry="docker.io",
+                repository=repository,
+                tag=tag,
+                capture_status="CAPTURED",
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
+class TestRepointImages:
+    def test_loads_served_images_on_consumer(self, env):
+        host = str(uuid.uuid4())
+        consumer = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        mid = _seed_serving(env, cv, host=host, pm="apt")
+        _seed_captured_image(env, mid)
+        v1 = _seed_version(env, cv, 1)
+        _bind(env, envs["Library"], cv, v1)
+
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-images",
+            json={"environment_id": envs["Library"], "host_id": consumer},
+        )
+        assert r.status_code == 200, r.text
+        plan = _last_plan(env)
+        assert plan["host_id"] == consumer
+        assert plan["plan"]["action"] == "repoint_images"
+        assert (
+            plan["plan"]["content_url"]
+            == f"http://{_FQDN}/content-views/{cv}/Library/images"
+        )
+        assert plan["plan"]["images"][0]["repository"] == "library/nginx"
+        assert env.dispatched["correlations"][-1]["action"] == "repoint_images"
+
+    def test_gate_402_when_oci_engine_unlicensed(self, env):
+        env.modules.pop("oci_proxy_engine")
+        host = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        mid = _seed_serving(env, cv, host=host, pm="apt")
+        _seed_captured_image(env, mid)
+        v1 = _seed_version(env, cv, 1)
+        _bind(env, envs["Library"], cv, v1)
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-images",
+            json={"environment_id": envs["Library"], "host_id": str(uuid.uuid4())},
+        )
+        assert r.status_code == 402
+
+    def test_400_when_no_captured_images(self, env):
+        host = str(uuid.uuid4())
+        envs = _make_envs(env)
+        cv = _seed_cv(env)
+        _seed_serving(env, cv, host=host, pm="apt")
+        v1 = _seed_version(env, cv, 1)
+        _bind(env, envs["Library"], cv, v1)
+        r = env.client.post(
+            f"{_CV}/{cv}/repoint-images",
+            json={"environment_id": envs["Library"], "host_id": str(uuid.uuid4())},
         )
         assert r.status_code == 400
 

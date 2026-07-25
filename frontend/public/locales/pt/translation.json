@@ -2343,6 +2343,29 @@
       "trackError": "Não foi possível rastrear essa instantânea. Os nomes são letras minúsculas, números e hifens.",
       "untrack": "Parar de rastrear esta instantânea",
       "untrackError": "Não foi possível deixar de rastrear essa instantânea."
+    },
+    "image": {
+      "action": {
+        "capture": "Capturar imagens rastreadas",
+        "tracked": "Imagens rastreadas"
+      },
+      "col": {
+        "actions": "Aóes",
+        "digest": "Digesto",
+        "image": "Imagem",
+        "status": "Capturar",
+        "tag": "Tag"
+      },
+      "empty": "Ainda não há imagens rastreadas. Adicione uma acima, em seguida use “Capturar imagens”.",
+      "loadError": "Não foi possível carregar as imagens rastreadas.",
+      "registry": "Registry",
+      "repository": "Repositório",
+      "tag": "Tag",
+      "title": "Imagens rastreadas para {{name}}",
+      "track": "Rastrear",
+      "trackError": "Não foi possível rastrear essa imagem. Use o host do registry, repositório em minúsculo e uma tag válida.",
+      "untrack": "Parar de rastrear essa imagem",
+      "untrackError": "Não foi possível deixar de rastrear essa imagem."
     }
   },
   "integrations": {

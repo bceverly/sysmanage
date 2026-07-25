@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 15:25-0400\n"
+"POT-Creation-Date: 2026-07-25 07:08-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -4145,33 +4145,45 @@ msgstr "Dit milieu heeft geen eerdere versie om terug te rollen naar"
 msgid "The previous version has been reclaimed and can no longer be restored"
 msgstr "De vorige versie is ingerekend en kan niet meer hersteld worden"
 
-#: backend/api/content_lifecycle_promotion.py:437
+#: backend/api/content_lifecycle_promotion.py:442
 #, python-format
 msgid "Mirror '%s' has an unsupported package manager"
 msgstr "Spiegel '%s' heeft een onondersteunde pakketbeheerder"
 
-#: backend/api/content_lifecycle_promotion.py:448
+#: backend/api/content_lifecycle_promotion.py:453
 #, python-format
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Kan spiegel '%(name)s' niet omleiden: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:513
-#: backend/api/content_lifecycle_promotion.py:561
+#: backend/api/content_lifecycle_promotion.py:518
+#: backend/api/content_lifecycle_promotion.py:566
+#: backend/api/content_lifecycle_promotion.py:627
 msgid "That environment has no content for this content view"
 msgstr "Die omgeving heeft geen inhoud voor deze content view"
 
-#: backend/api/content_lifecycle_promotion.py:520
-#: backend/api/content_lifecycle_promotion.py:568
+#: backend/api/content_lifecycle_promotion.py:525
+#: backend/api/content_lifecycle_promotion.py:573
+#: backend/api/content_lifecycle_promotion.py:639
 msgid "The serving host has no resolvable address"
 msgstr "De serverende host heeft geen resolvable adres"
 
-#: backend/api/content_lifecycle_promotion.py:526
+#: backend/api/content_lifecycle_promotion.py:531
 msgid "Repository mirroring is required to repoint a host"
 msgstr "Repositoryspiegeling is vereist om een host te omleiden"
 
-#: backend/api/content_lifecycle_promotion.py:554
+#: backend/api/content_lifecycle_promotion.py:559
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr "Snap-store-proxy is vereist om de snaps van een host te herwijzen"
+
+#: backend/api/content_lifecycle_promotion.py:620
+msgid "Container image registry proxy is required to repoint images"
+msgstr ""
+"Een containerafbeelding registersproxy is vereist om afbeeldingen te "
+"herwijzen"
+
+#: backend/api/content_lifecycle_promotion.py:632
+msgid "This content view has no captured images"
+msgstr "Deze inhoudsweergave heeft geen opgevangen afbeeldingen"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"

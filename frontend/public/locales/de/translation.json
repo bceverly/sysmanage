@@ -2343,6 +2343,29 @@
       "trackError": "Konnte diesen Snap nicht verfolgen. Namen bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen.",
       "untrack": "Verfolgung dieses Snaps beenden",
       "untrackError": "Konnte diesen Snap nicht mehr verfolgen."
+    },
+    "image": {
+      "action": {
+        "capture": "Gefüttelte Bilder festhalten",
+        "tracked": "Verfolgte Bilder"
+      },
+      "col": {
+        "actions": "Aktionen",
+        "digest": "Digest",
+        "image": "Bild",
+        "status": "Festhalten",
+        "tag": "Tag"
+      },
+      "empty": "Noch keine Bilder verfolgt. Fügen Sie oben eines hinzu, dann verwenden Sie “Gefüttelte Bilder festhalten”.",
+      "loadError": "Könnte die gefüttelten Bilder nicht laden.",
+      "registry": "Registry",
+      "repository": "Repository",
+      "tag": "Tag",
+      "title": "Verfolgte Bilder für {{name}}",
+      "track": "Verfolgen",
+      "trackError": "Dieses Bild konnte nicht verfolgt werden. Verwenden Sie den Registry-Host, einen kleingeschriebenen Repository-Namen und eine gültige Tag.",
+      "untrack": "Verfolgung dieses Bildes beenden",
+      "untrackError": "Dieses Bild konnte nicht mehr verfolgt werden."
     }
   },
   "integrations": {

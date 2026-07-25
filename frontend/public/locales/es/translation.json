@@ -2343,6 +2343,29 @@
       "trackError": "No se pudo rastrear esa instantánea. Los nombres son letras minúsculas, números y guiones.",
       "untrack": "Dejar de rastrear esta instantánea",
       "untrackError": "No se pudo dejar de rastrear esa instantánea."
+    },
+    "image": {
+      "action": {
+        "capture": "Capturar imágenes rastreadas",
+        "tracked": "Imágenes rastreadas"
+      },
+      "col": {
+        "actions": "Acciones",
+        "digest": "Digesto",
+        "image": "Imagen",
+        "status": "Capturar",
+        "tag": "Etiqueta"
+      },
+      "empty": "Aún no hay imágenes rastreadas. Agregue una arriba, luego use \"Capturar imágenes\".",
+      "loadError": "No se pudieron cargar las imágenes rastreadas.",
+      "registry": "Registro",
+      "repository": "Repositorio",
+      "tag": "Etiqueta",
+      "title": "Imágenes rastreadas para {{name}}",
+      "track": "Rastrear",
+      "trackError": "No se pudo rastrear esa imagen. Utilice el host del registro, el repositorio en minúsculas y una etiqueta válida.",
+      "untrack": "Dejar de rastrear esta imagen",
+      "untrackError": "No se pudo dejar de rastrear esa imagen."
     }
   },
   "integrations": {

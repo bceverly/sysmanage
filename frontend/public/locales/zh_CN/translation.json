@@ -2343,6 +2343,29 @@
       "trackError": "无法跟踪该快照。名称只能包含小写字母、数字和连字符。",
       "untrack": "停止跟踪此快照",
       "untrackError": "无法取消跟踪该快照。"
+    },
+    "image": {
+      "action": {
+        "capture": "捕获跟踪的图像",
+        "tracked": "已跟踪的图像"
+      },
+      "col": {
+        "actions": "操作",
+        "digest": "摘要",
+        "image": "镜像",
+        "status": "捕获",
+        "tag": "标签"
+      },
+      "empty": "目前没有跟踪任何图像。在上方添加一个，然后使用“捕获图像”。",
+      "loadError": "无法加载跟踪的图像。",
+      "registry": "注册表",
+      "repository": "仓库",
+      "tag": "标签",
+      "title": "{{name}} 的已跟踪图像",
+      "track": "跟踪",
+      "trackError": "无法跟踪该图像。请使用注册主机，小写仓库，并且有效的标签。",
+      "untrack": "停止跟踪此镜像",
+      "untrackError": "无法取消跟踪该图像。"
     }
   },
   "integrations": {

@@ -35,10 +35,12 @@ import SyncIcon from '@mui/icons-material/Sync';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import InventoryIcon from '@mui/icons-material/Inventory2';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useTranslation } from 'react-i18next';
 import {
+  captureImages,
   captureSnaps,
   createMirror,
   deleteMirror,
@@ -58,6 +60,7 @@ import ActionStatusChip from './ActionStatusChip';
 import ComponentsMultiSelect from './ComponentsMultiSelect';
 import SnapshotsExpandRow from './SnapshotsExpandRow';
 import TrackedSnapsExpandRow from './TrackedSnapsExpandRow';
+import TrackedImagesExpandRow from './TrackedImagesExpandRow';
 
 // ---------------------------------------------------------------------
 // Mirror list card with Add/Edit dialog
@@ -105,6 +108,24 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
   const [expandedSnaps, setExpandedSnaps] = useState<Set<string>>(() => new Set());
   const toggleSnaps = (id: string) =>
     setExpandedSnaps((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  // OCI image content (Phase 17.2) is a separate Pro+ module — the tracked-
+  // images panel + capture action only appear when oci_proxy_engine is licensed
+  // (mirroring the backend's 402 gate).
+  const imageLicensed = useModuleLicensed('oci_proxy_engine');
+  const [expandedImages, setExpandedImages] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const toggleImages = (id: string) =>
+    setExpandedImages((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -337,6 +358,25 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                         </IconButton>
                       </>
                     )}
+                    {imageLicensed && (
+                      <>
+                        <IconButton
+                          size="small"
+                          color={expandedImages.has(m.id) ? 'primary' : 'default'}
+                          title={t('mirror.image.action.tracked', 'Tracked images')}
+                          onClick={() => toggleImages(m.id)}
+                        >
+                          <ViewInArIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          title={t('mirror.image.action.capture', 'Capture tracked images')}
+                          onClick={() => handleAction(captureImages, m.id, 'mirror.image.captureError')}
+                        >
+                          <CloudDownloadIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                     <IconButton size="small" title={t('mirror.action.edit', 'Edit')} onClick={() => openEdit(m)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
@@ -364,6 +404,13 @@ const MirrorListCard: React.FC<MirrorListCardProps> = ({
                     mirror={m}
                     colSpan={9}
                     expanded={expandedSnaps.has(m.id)}
+                  />
+                )}
+                {imageLicensed && (
+                  <TrackedImagesExpandRow
+                    mirror={m}
+                    colSpan={9}
+                    expanded={expandedImages.has(m.id)}
                   />
                 )}
                 </React.Fragment>
