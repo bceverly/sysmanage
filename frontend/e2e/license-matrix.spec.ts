@@ -290,7 +290,17 @@ test.describe('license matrix — nav items follow the license', () => {
             page.getByRole('menuitem', { name: /^Secrets$/i }),
         ).toBeVisible({ timeout: 20000 });
 
+        // Close the Security menu and WAIT for it to fully unmount before
+        // opening the next category. Clicking the Insights trigger while the
+        // Security menu is still mid-close is racy under load — the Radix
+        // menubar swallows the click during the close transition, so Insights
+        // never opens and Reports never mounts (manifests as a 20s timeout on
+        // the assertion below). Gating on the Security destination being hidden
+        // makes the next open deterministic.
         await page.keyboard.press('Escape');
+        await expect(
+            page.getByRole('menuitem', { name: /^Secrets$/i }),
+        ).toBeHidden({ timeout: 20000 });
         await page
             .getByRole('menuitem', { name: /^Insights$/i })
             .click({ timeout: 20000 });
