@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import axiosInstance from '../Services/api';
 import {

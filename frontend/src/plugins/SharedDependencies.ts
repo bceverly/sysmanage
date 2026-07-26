@@ -11,7 +11,7 @@
  */
 
 import * as React from 'react';
-import * as ReactRouterDOM from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router';
 import * as ReactI18next from 'react-i18next';
 
 // MUI Material components used by plugins

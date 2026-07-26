@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { DataGrid, GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';

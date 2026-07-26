@@ -12,8 +12,8 @@ vi.mock('../../Services/license', () => ({
   isFeatureLicensed: vi.fn(),
 }));
 
-// Mock react-router-dom's Navigate so a redirect is observable.
-vi.mock('react-router-dom', () => ({
+// Mock react-router's Navigate so a redirect is observable.
+vi.mock('react-router', () => ({
   Navigate: ({ to }: { to: string }) => <div data-testid="redirect">{to}</div>,
 }));
 

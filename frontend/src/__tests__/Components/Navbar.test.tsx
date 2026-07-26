@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { render, screen, act } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { vi, beforeEach, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import Navbar from '../../Components/Navbar';

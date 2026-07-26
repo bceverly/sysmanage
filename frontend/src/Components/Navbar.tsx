@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useState, useEffect, useReducer } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router";
 import { IoClose, IoMenu, IoChevronDown, IoSearch } from "react-icons/io5";
 import * as Menubar from "@radix-ui/react-menubar";
 import { useTranslation } from 'react-i18next';

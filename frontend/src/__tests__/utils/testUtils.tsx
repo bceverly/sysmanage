@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 // Custom render function that includes providers
 interface AllTheProvidersProps {

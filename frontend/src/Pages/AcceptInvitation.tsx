@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
     Container,

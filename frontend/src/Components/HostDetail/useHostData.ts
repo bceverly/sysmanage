@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import type { TFunction } from 'i18next';
-import type { NavigateFunction } from 'react-router-dom';
+import type { NavigateFunction } from 'react-router';
 import axiosInstance from '../../Services/api';
 import {
     SysManageHost,

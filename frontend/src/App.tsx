@@ -4,7 +4,7 @@
 
 import './App.css';
 import './plugins/SharedDependencies';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 

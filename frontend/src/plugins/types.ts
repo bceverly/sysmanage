@@ -128,7 +128,7 @@ export interface PluginRegistration {
 /** Shape of the shared dependencies exposed on window. */
 export interface SysManageShared {
     React: typeof import('react');
-    ReactRouterDOM: typeof import('react-router-dom');
+    ReactRouterDOM: typeof import('react-router');
     ReactI18next: typeof import('react-i18next');
     MuiMaterial: Record<string, unknown>;
     MuiXDataGrid: Record<string, unknown>;

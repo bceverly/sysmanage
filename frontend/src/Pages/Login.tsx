@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useTranslation } from 'react-i18next';
 
 import Button from "@mui/material/Button";

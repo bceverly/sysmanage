@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { render, screen, act, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import CommandPalette from '../../Components/CommandPalette';
 
@@ -14,8 +14,8 @@ const h = vi.hoisted(() => ({
   perms: {} as Record<string, boolean>,
 }));
 
-vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('react-router-dom')>();
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router')>();
   return { ...actual, useNavigate: () => h.navigate };
 });
 vi.mock('../../Services/license', () => ({

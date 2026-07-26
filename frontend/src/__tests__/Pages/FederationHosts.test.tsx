@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router";
 import { vi, beforeEach, test, expect } from "vitest";
 
 // NB: `t` and the returned object MUST be stable across renders.  The real

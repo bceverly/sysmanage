@@ -13,7 +13,7 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AppsIcon from '@mui/icons-material/Apps';
 import EditIcon from '@mui/icons-material/Edit';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { hasPermissionSync, SecurityRoles } from '../../Services/permissions';
 import { SysManageHost } from '../../Services/hosts';

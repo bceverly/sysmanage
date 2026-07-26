@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import Profile from '../Profile';
 import * as profileService from '../../Services/profile';

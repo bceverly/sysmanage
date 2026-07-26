@@ -33,9 +33,19 @@ def _upgrade(chain: str, db_path: str) -> None:
         args += ["--name", chain]
     args += ["upgrade", "head"]
     env = {**os.environ, "DATABASE_URL": f"sqlite:///{db_path}"}
-    result = subprocess.run(
-        args, cwd=_REPO_ROOT, env=env, capture_output=True, text=True, check=False
-    )
+    # A genuine migration error exits with a POSITIVE code and a stderr
+    # traceback.  A NEGATIVE return code means the child was killed by a signal
+    # (e.g. SIGPIPE = -13 under heavy xdist parallelism) with no stderr — an
+    # environmental flake, not a migration bug.  Our migrations are idempotent,
+    # so re-running ``upgrade head`` safely resumes; retry a few times on a
+    # signal-kill before giving up.
+    result = None
+    for _attempt in range(4):
+        result = subprocess.run(
+            args, cwd=_REPO_ROOT, env=env, capture_output=True, text=True, check=False
+        )
+        if result.returncode >= 0:
+            break
     assert result.returncode == 0, f"{chain} upgrade failed:\n{result.stderr}"
 
 

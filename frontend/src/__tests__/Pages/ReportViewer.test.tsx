@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 import { vi, type Mock } from 'vitest';
 import ReportViewer from '../../Pages/ReportViewer';
 
@@ -90,8 +90,8 @@ Object.defineProperty(window, 'alert', {
 
 // Mock React Router
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual('react-router');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -107,7 +107,7 @@ const ReportViewerWithRouter = ({ reportId = 'hosts' }) => (
 
 // Import the mocked api
 import api from '../../Services/api';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 // Type the mock properly - cast to Mock for proper method access
 const mockApiGet = api.get as Mock;

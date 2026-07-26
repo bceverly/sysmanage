@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 import { vi } from 'vitest';
 import Login from '../../Pages/Login';
 

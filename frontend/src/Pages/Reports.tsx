@@ -4,7 +4,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import api from '../Services/api';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import FederationReportPanel from '../Components/FederationReportPanel';

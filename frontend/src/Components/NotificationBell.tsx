@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { IoNotifications, IoNotificationsOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { updatesService, UpdateStatsSummary } from '../Services/updates';
 import { useNotificationRefresh } from '../hooks/useNotificationRefresh';
 import './css/NotificationBell.css';

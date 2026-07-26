@@ -33,14 +33,22 @@ _TENANT_PRE_DROP = "f1apikey01"
 
 def _alembic(args, db_path):
     env = {**os.environ, "DATABASE_URL": f"sqlite:///{db_path}"}
-    result = subprocess.run(
-        [sys.executable, "-m", "alembic", *args],
-        cwd=_REPO_ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    # A real alembic error exits with a POSITIVE code + stderr traceback; a
+    # NEGATIVE return code is a signal-kill (e.g. SIGPIPE = -13 under heavy xdist
+    # parallelism) with no stderr — an environmental flake. Migrations are
+    # idempotent, so retry a signal-kill a few times before giving up.
+    result = None
+    for _attempt in range(4):
+        result = subprocess.run(
+            [sys.executable, "-m", "alembic", *args],
+            cwd=_REPO_ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode >= 0:
+            break
     assert result.returncode == 0, f"alembic {args} failed:\n{result.stderr}"
 
 
