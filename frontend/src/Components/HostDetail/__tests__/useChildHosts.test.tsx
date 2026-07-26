@@ -266,7 +266,7 @@ describe('useChildHosts', () => {
             mockPost.mockResolvedValueOnce({ status: 200 });
             const { result, setSnackbarSeverity } = setup();
             await act(async () => {
-                await (result.current[fnName] as (c: ChildHost) => Promise<void>)(makeChild());
+                await Reflect.apply(result.current[fnName] as () => Promise<void>, undefined, [makeChild()]);
             });
             expect(mockPost).toHaveBeenCalledWith(url);
             expect(setSnackbarSeverity).toHaveBeenCalledWith('success');
@@ -278,7 +278,7 @@ describe('useChildHosts', () => {
         test('no hostId → noop', async () => {
             const { result } = setup({ hostId: undefined });
             await act(async () => {
-                await (result.current[fnName] as (c: ChildHost) => Promise<void>)(makeChild());
+                await Reflect.apply(result.current[fnName] as () => Promise<void>, undefined, [makeChild()]);
             });
             expect(mockPost).not.toHaveBeenCalled();
         });
@@ -287,7 +287,7 @@ describe('useChildHosts', () => {
             mockPost.mockRejectedValueOnce(new Error('boom'));
             const { result, setSnackbarSeverity } = setup();
             await act(async () => {
-                await (result.current[fnName] as (c: ChildHost) => Promise<void>)(makeChild());
+                await Reflect.apply(result.current[fnName] as () => Promise<void>, undefined, [makeChild()]);
             });
             expect(setSnackbarSeverity).toHaveBeenCalledWith('error');
         });
