@@ -20,6 +20,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import SourceIcon from '@mui/icons-material/Source';
 import ShieldIcon from '@mui/icons-material/Shield';
 import RuleIcon from '@mui/icons-material/Rule';
+import LayersIcon from '@mui/icons-material/Layers';
 
 import { useTranslation } from 'react-i18next';
 
@@ -259,7 +260,7 @@ const HostDetail = () => { // NOSONAR
             'info', 'hardware', 'processes', 'software', 'software-changes',
             'third-party-repos', 'access', 'security', 'compliance',
             'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
-            'diagnostics',
+            'image-mode', 'diagnostics',
         ]);
         const safePluginTabs = visiblePluginTabs.filter(
             p => !HARDCODED_IDS.has(p.id),
@@ -285,11 +286,12 @@ const HostDetail = () => { // NOSONAR
             ...safePluginTabs.filter(p => p.position === 'before-diagnostics').map(pt => ({ id: pt.id, icon: pt.icon, label: t(pt.labelKey) })),
             ...(supportsChildHosts() ? [{ id: 'child-hosts', icon: <ComputerIcon />, label: t('hostDetail.childHostsTab', 'Child Hosts') }] : []),
             ...((isUbuntu() && ubuntuProInfo?.available) ? [{ id: 'ubuntu-pro', icon: <VerifiedUserIcon />, label: t('hostDetail.ubuntuProTab', 'Ubuntu Pro') }] : []),
+            ...(host?.is_image_mode ? [{ id: 'image-mode', icon: <LayersIcon />, label: t('hostDetail.imageModeTab', 'Image Mode') }] : []),
             { id: 'diagnostics', icon: <MedicalServicesIcon />, label: t('hostDetail.diagnosticsTab', 'Diagnostics') },
         ];
 
         return tabs;
-    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, licenseFeatures, t]);
+    }, [visiblePluginTabs, supportsThirdPartyRepos, supportsChildHosts, isUbuntu, ubuntuProInfo, licenseModules, licenseFeatures, host, t]);
 
     // Get tab ID for current numeric index
     const currentTabId = tabDefinitions[currentTab]?.id || 'info';

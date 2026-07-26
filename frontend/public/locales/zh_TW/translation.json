@@ -126,7 +126,8 @@
     "copy": "複製",
     "create": "建立",
     "done": "完成",
-    "loading": "載入中..."
+    "loading": "載入中...",
+    "confirm": "確認"
   },
   "connectionStatus": {
     "connected": "已連線",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "修補版本",
     "livepatchClientVersion": "用戶端版本",
     "livepatchLastCheck": "上次簽入",
-    "livepatchFixes": "已套用的修正"
+    "livepatchFixes": "已套用的修正",
+    "imageMode": {
+      "apply": "應用",
+      "applyError": "應用影像失敗",
+      "applySuccess": "影像套用請求（主機將重新啟動）",
+      "backend": "後端",
+      "badge": "影像模式",
+      "bootedImage": "啟動的影像",
+      "confirmApplyMessage": "這將套用已排程的影像並重新啟動主機。繼續嗎？",
+      "confirmApplyTitle": "應用已排程的影像？",
+      "confirmRollbackMessage": "這將把主機還原到先前的影像並重新啟動它。繼續嗎？",
+      "confirmRollbackTitle": "還原影像？",
+      "digest": "摘要",
+      "enterpriseNotice": "排程、套用和還原影像是企業功能。當前影像詳細資訊如下。",
+      "enterpriseOnly": "影像操作需要企業許可證",
+      "imageRef": "影像引用",
+      "noStagedImage": "沒有已排程的影像",
+      "pendingReboot": "待處理 — 重新啟動以套用",
+      "rollback": "還原",
+      "rollbackAvailable": "還原可用",
+      "rollbackError": "還原影像失敗",
+      "rollbackSuccess": "影像還原請求（主機將重新啟動）",
+      "stage": "排程",
+      "stageError": "排程影像失敗",
+      "stageSuccess": "排程影像請求",
+      "stagedImage": "已排程的影像",
+      "title": "影像模式"
+    },
+    "imageModeTab": "影像模式"
   },
   "hostGroup": {
     "add": "新增",

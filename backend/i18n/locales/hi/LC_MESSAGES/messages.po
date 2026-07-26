@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-25 07:08-0400\n"
+"POT-Creation-Date: 2026-07-26 07:06-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -135,13 +135,13 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
-#: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
-#: backend/api/tag.py:499 backend/api/tag.py:653
-#: backend/api/airgap_repository_buckets.py:65
+#: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
+#: backend/api/host_graylog.py:131 backend/api/tag.py:499
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
-#: backend/api/updates/execution_routes.py:251 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
@@ -341,27 +341,27 @@ msgstr "रोल डेटा अपडेट प्रक्रिया म�
 msgid "Child host management requires a Professional+ license."
 msgstr "बच्चे मेंस प्रबंधन के लिए एक प्रोफेशनल+ लाइसेंस की आवश्यकता है."
 
-#: backend/api/handlers/os_hardware_handlers.py:93
+#: backend/api/handlers/os_hardware_handlers.py:120
 msgid "No host identification available"
 msgstr "होस्ट पहचान उपलब्ध नहीं है"
 
-#: backend/api/handlers/os_hardware_handlers.py:292
+#: backend/api/handlers/os_hardware_handlers.py:325
 msgid "os_version_updated"
 msgstr "ओएस संस्करण अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:298
+#: backend/api/handlers/os_hardware_handlers.py:331
 msgid "No OS information provided"
 msgstr "कोई OS जानकारी नहीं प्रदान की गई"
 
-#: backend/api/handlers/os_hardware_handlers.py:308
+#: backend/api/handlers/os_hardware_handlers.py:341
 msgid "Failed to update OS version"
 msgstr "OS भविष्यवाणी का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/os_hardware_handlers.py:492
+#: backend/api/handlers/os_hardware_handlers.py:525
 msgid "hardware_updated"
 msgstr "हार्डवेयर अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:501
+#: backend/api/handlers/os_hardware_handlers.py:534
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
@@ -2442,6 +2442,18 @@ msgstr "इससे पहले कोई प्रकाशित संस�
 msgid "No published version %s"
 msgstr "प्रकाशित संस्करण %s नहीं है"
 
+#: backend/api/image_mode_actions.py:58
+msgid ""
+"Image-mode host management requires a SysManage Enterprise license. Please "
+"upgrade to access this feature."
+msgstr ""
+"Image-mode host management के लिए SysManage Enterprise license की आवश्यकता "
+"होती है। इस सुविधा को प्राप्त करने के लिए अपग्रेड करें।"
+
+#: backend/api/image_mode_actions.py:73
+msgid "This host is not an image-mode (bootc / rpm-ostree) host."
+msgstr "यह होस्ट image-mode (bootc / rpm-ostree) होस्ट नहीं है।"
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -3099,11 +3111,19 @@ msgstr "प्रवेश नहीं: APPLY_HOST_OS_UPGRADE भूमिक�
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "OS अपग्रेड के लिए अमान्य पैकेज प्रबंधक: {}"
 
-#: backend/api/updates/os_upgrade_routes.py:276
+#: backend/api/updates/os_upgrade_routes.py:277
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"upgrades."
+msgstr ""
+"यह एक image-mode होस्ट है; OS इमेज का अपग्रेड करें, पैकेज अपग्रेड लागू करने "
+"की बजाय।"
+
+#: backend/api/updates/os_upgrade_routes.py:291
 msgid "No OS upgrades available for this host"
 msgstr "इस होस्ट के लिए कोई OS अपग्रेड उपलब्ध नहीं"
 
-#: backend/api/updates/os_upgrade_routes.py:338
+#: backend/api/updates/os_upgrade_routes.py:353
 #, python-format
 msgid ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
@@ -3111,11 +3131,11 @@ msgstr ""
 "%(fqdn)s पर ऑसीडब्ल्यू अपग्रेड शुरू किया गया है, जिसमें %(upgrade_count)d "
 "अपग्रेड(स) हैं"
 
-#: backend/api/updates/os_upgrade_routes.py:369
+#: backend/api/updates/os_upgrade_routes.py:384
 msgid "OS upgrade command queued for host"
 msgstr "OS अपग्रेड कमांड में होस्ट के लिए पहलू बुक किया गया है"
 
-#: backend/api/updates/os_upgrade_routes.py:379
+#: backend/api/updates/os_upgrade_routes.py:394
 msgid "Failed to queue OS upgrade command"
 msgstr "OS अपग्रेड कमांड को क्वी में संरक्षण नहीं हुई"
 
@@ -3143,30 +3163,38 @@ msgstr "अपडेट परिणाम प्राप्त करने �
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "प्रवेश नहीं: APPLY_SOFTWARE_UPDATE भूमिका की आवश्यकता है"
 
-#: backend/api/updates/execution_routes.py:117
+#: backend/api/updates/execution_routes.py:118
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"updates."
+msgstr ""
+"यह एक image-mode होस्ट है; OS इमेज का अपडेट करें, पैकेज अपडेट लागू करने की "
+"बजाय।"
+
+#: backend/api/updates/execution_routes.py:134
 msgid "No matching updates found for specified packages"
 msgstr "निर्दिष्ट पैकेज के लिए कोई मिलान अपडेट नहीं मिला"
 
-#: backend/api/updates/execution_routes.py:203
+#: backend/api/updates/execution_routes.py:220
 msgid "Update execution started"
 msgstr "अपडेट निष्पादन शुरू"
 
-#: backend/api/updates/execution_routes.py:212
+#: backend/api/updates/execution_routes.py:229
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "कमांड भेजने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:220
+#: backend/api/updates/execution_routes.py:237
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "अपडेट कमांड भेजने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:233
+#: backend/api/updates/execution_routes.py:250
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "अपडेट निष्पादित करने में असफल: %s"
 
-#: backend/api/updates/execution_routes.py:288
+#: backend/api/updates/execution_routes.py:305
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "निष्पादन लॉग प्राप्त करने में असफल: %s"

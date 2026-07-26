@@ -5427,25 +5427,25 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 #### 17.2 Container Image Content Lifecycle (Enterprise)
 
-- [ ] Container image registry/proxy integrated with Content Views (image content view, tag/digest pinning)
-- [ ] Promote image content through Lifecycle Environments alongside packages
-- [ ] Air-gap: include image content in collection media
-- [ ] i18n/l10n
+- [x] Container image registry/proxy integrated with Content Views (image content view, tag/digest pinning)
+- [x] Promote image content through Lifecycle Environments alongside packages
+- [x] Air-gap: include image content in collection media
+- [x] i18n/l10n
 
 **Estimated Size:** ~3,000 lines
 
 #### 17.3 Image-Mode / bootc / OSTree Host Management (Enterprise)
 
-- [ ] Detect + manage image-based hosts (rpm-ostree / bootc): deployed image digest, pending/rolled-back deployments
-- [ ] Stage/apply image updates + rollback as first-class actions (distinct from package updates)
-- [ ] Surface image-mode status in HostDetail; gate the package-update UI off for image-mode hosts
-- [ ] i18n/l10n
+- [x] Detect + manage image-based hosts (rpm-ostree / bootc): deployed image digest, pending/rolled-back deployments
+- [x] Stage/apply image updates + rollback as first-class actions (distinct from package updates)
+- [x] Surface image-mode status in HostDetail; gate the package-update UI off for image-mode hosts
+- [x] i18n/l10n
 
 **Estimated Size:** ~3,000 lines
 
 ### Exit Criteria
 
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
 

@@ -126,7 +126,8 @@
     "copy": "نسخ",
     "create": "إنشاء",
     "done": "انتهى",
-    "loading": "جارٍ التحميل..."
+    "loading": "جارٍ التحميل...",
+    "confirm": "تأكيد"
   },
   "connectionStatus": {
     "connected": "متصل",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "إصدار التصحيح",
     "livepatchClientVersion": "إصدار العميل",
     "livepatchLastCheck": "آخر اتصال",
-    "livepatchFixes": "الإصلاحات المطبَّقة"
+    "livepatchFixes": "الإصلاحات المطبَّقة",
+    "imageMode": {
+      "apply": "تطبيق",
+      "applyError": "فشل في تطبيق الصورة",
+      "applySuccess": "تم طلب تطبيق الصورة (سيقوم الجهاز بإعادة التشغيل)",
+      "backend": "الخادم الخلفي",
+      "badge": "وضع الصورة",
+      "bootedImage": "صورة التشغيل",
+      "confirmApplyMessage": "هذا يطبق الصورة المدّخرة ويقوم بإعادة تشغيل الجهاز. هل تريد الاستمرار؟",
+      "confirmApplyTitle": "هل تريد تطبيق الصورة المدّخرة؟",
+      "confirmRollbackMessage": "هذا يقوم بالرجوع بالصوره إلى وضعها السابق وإعادة تشغيل الجهاز. هل تريد الاستمرار؟",
+      "confirmRollbackTitle": "هل تريد رجوع الصورة؟",
+      "digest": "ملخص",
+      "enterpriseNotice": "تخزين، تطبيق، ورجوع الصور هو ميزة Enterprise. يتم عرض التفاصيل الحالية للصورة أدناه.",
+      "enterpriseOnly": "تحتاج إجراءات وضع الصورة إلى رخصة Enterprise",
+      "imageRef": "مرجع الصورة",
+      "noStagedImage": "لا توجد صورة مخزنة",
+      "pendingReboot": "قيد الانتظار - إعادة تشغيل لتطبيق الصورة",
+      "rollback": "الرجوع بالصوره إلى وضعها السابق",
+      "rollbackAvailable": "متوفر الرجوع بالصوره إلى وضعها السابق",
+      "rollbackError": "فشل في الرجوع بالصوره إلى وضعها السابق",
+      "rollbackSuccess": "تم طلب الرجوع بالصوره إلى وضعها السابق (سيقوم الجهاز بإعادة التشغيل)",
+      "stage": "تخزين",
+      "stageError": "فشل في تخزين الصورة",
+      "stageSuccess": "تم طلب تخزين الصورة",
+      "stagedImage": "صورة المدّخرة",
+      "title": "وضع الصورة"
+    },
+    "imageModeTab": "وضع الصورة"
   },
   "hostGroup": {
     "add": "إضافة",

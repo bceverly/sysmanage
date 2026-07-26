@@ -73,6 +73,16 @@ class Host(TestBase):
     fips_package_version = Column(String(100), nullable=True)
     fips_updated_at = Column(DateTime, nullable=True)
 
+    # Image-mode (bootc / rpm-ostree) fields (Phase 17.3)
+    is_image_mode = Column(Boolean, nullable=False, server_default="0")
+    image_backend = Column(String(20), nullable=True)
+    booted_image_ref = Column(String(255), nullable=True)
+    booted_image_digest = Column(String(80), nullable=True)
+    staged_image_ref = Column(String(255), nullable=True)
+    staged_image_digest = Column(String(80), nullable=True)
+    rollback_available = Column(Boolean, nullable=True)
+    image_mode_updated_at = Column(DateTime, nullable=True)
+
     # Hardware inventory fields
     cpu_vendor = Column(String(100), nullable=True)
     cpu_model = Column(String(200), nullable=True)

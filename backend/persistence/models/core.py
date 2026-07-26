@@ -141,6 +141,19 @@ class Host(Base):
     fips_package_version = Column(String(100), nullable=True)
     fips_updated_at = Column(DateTime, nullable=True)
 
+    # Image-mode (bootc / rpm-ostree / OSTree) host state (Phase 17.3).
+    # Detection ("is this an image-mode host + which deployment is booted?") is
+    # reported by every agent (OSS, rides os_version_update); stage/apply/rollback
+    # of the image is Enterprise-gated (image_mode_manage / image_mode_engine).
+    is_image_mode = Column(Boolean, nullable=False, server_default="0")
+    image_backend = Column(String(20), nullable=True)  # bootc | rpm-ostree
+    booted_image_ref = Column(String(255), nullable=True)
+    booted_image_digest = Column(String(80), nullable=True)  # sha256:<hex>
+    staged_image_ref = Column(String(255), nullable=True)
+    staged_image_digest = Column(String(80), nullable=True)
+    rollback_available = Column(Boolean, nullable=True)
+    image_mode_updated_at = Column(DateTime, nullable=True)
+
     # Hardware inventory fields
     cpu_vendor = Column(String(100), nullable=True)
     cpu_model = Column(String(200), nullable=True)

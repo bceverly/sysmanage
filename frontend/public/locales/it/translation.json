@@ -126,7 +126,8 @@
     "copy": "Copia",
     "create": "Crea",
     "done": "Completato",
-    "loading": "Caricamento..."
+    "loading": "Caricamento...",
+    "confirm": "Conferma"
   },
   "connectionStatus": {
     "connected": "Connesso",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Versione della patch",
     "livepatchClientVersion": "Versione del client",
     "livepatchLastCheck": "Ultimo controllo",
-    "livepatchFixes": "Correzioni applicate"
+    "livepatchFixes": "Correzioni applicate",
+    "imageMode": {
+      "apply": "Applica",
+      "applyError": "Impossibile applicare l'immagine",
+      "applySuccess": "Richiesta di applicazione dell'immagine (il sistema verrá riavviato)",
+      "backend": "Backend",
+      "badge": "Modalità immagine",
+      "bootedImage": "Immagine avviata",
+      "confirmApplyMessage": "Questa applica l'immagine in stato di staging e riavvia il sistema. Continuare?",
+      "confirmApplyTitle": "Confermi di applicare l'immagine in stato di staging?",
+      "confirmRollbackMessage": "Questo ripristina il sistema alla precedente immagine e la riavvia. Continuare?",
+      "confirmRollbackTitle": "Confermi di ripristinare l'immagine?",
+      "digest": "Digest",
+      "enterpriseNotice": "La preparazione, l'applicazione e il ripristino delle immagini sono funzionalità Enterprise. I dettagli dell'attuale immagine sono mostrati di seguito.",
+      "enterpriseOnly": "Le azioni relative alla modalità immagine richiedono una licenza Enterprise",
+      "imageRef": "Riferimento immagine",
+      "noStagedImage": "Nessuna immagine in stato di staging",
+      "pendingReboot": "In attesa — il sistema deve essere riavviato per applicare l'immagine",
+      "rollback": "Ripristina",
+      "rollbackAvailable": "Ripristino disponibile",
+      "rollbackError": "Impossibile ripristinare l'immagine",
+      "rollbackSuccess": "Richiesta di ripristino dell'immagine (il sistema verrá riavviato)",
+      "stage": "Prepara",
+      "stageError": "Impossibile preparare l'immagine",
+      "stageSuccess": "Richiesta di preparazione dell'immagine",
+      "stagedImage": "Immagine in stato di staging",
+      "title": "Modalità immagine"
+    },
+    "imageModeTab": "Modalità immagine"
   },
   "hostGroup": {
     "add": "Aggiungi",

@@ -126,7 +126,8 @@
     "copy": "复制",
     "create": "创建",
     "done": "完成",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "confirm": "确认"
   },
   "connectionStatus": {
     "connected": "已连接",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "补丁版本",
     "livepatchClientVersion": "客户端版本",
     "livepatchLastCheck": "上次签入",
-    "livepatchFixes": "已应用的修复"
+    "livepatchFixes": "已应用的修复",
+    "imageMode": {
+      "apply": "应用",
+      "applyError": "应用镜像失败",
+      "applySuccess": "请求应用镜像（主机将重启）",
+      "backend": "后端",
+      "badge": "镜像模式",
+      "bootedImage": "启动的镜像",
+      "confirmApplyMessage": "这将应用已阶段化的镜像并重新启动主机。继续吗？",
+      "confirmApplyTitle": "应用已阶段化的镜像？",
+      "confirmRollbackMessage": "这将把主机回滚到先前的镜像并重新启动它。继续吗？",
+      "confirmRollbackTitle": "回滚镜像？",
+      "digest": "摘要信息",
+      "enterpriseNotice": "阶段化、应用和回滚镜像是企业版功能。当前的镜像详情如下。",
+      "enterpriseOnly": "镜像操作需要企业版许可证",
+      "imageRef": "镜像引用",
+      "noStagedImage": "没有已阶段化的镜像",
+      "pendingReboot": "待处理 — 重启以应用",
+      "rollback": "回滚",
+      "rollbackAvailable": "可回滚",
+      "rollbackError": "回滚镜像失败",
+      "rollbackSuccess": "请求回滚到先前的镜像（主机将重启）",
+      "stage": "阶段化",
+      "stageError": "阶段化镜像失败",
+      "stageSuccess": "请求阶段化镜像",
+      "stagedImage": "已阶段化的镜像",
+      "title": "镜像模式"
+    },
+    "imageModeTab": "镜像模式"
   },
   "hostGroup": {
     "add": "添加",

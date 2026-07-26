@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-25 07:08-0400\n"
+"POT-Creation-Date: 2026-07-26 07:06-0400\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -135,13 +135,13 @@ msgstr "Format d'ID hôte incorrect"
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
-#: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
-#: backend/api/tag.py:499 backend/api/tag.py:653
-#: backend/api/airgap_repository_buckets.py:65
+#: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
+#: backend/api/host_graylog.py:131 backend/api/tag.py:499
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
-#: backend/api/updates/execution_routes.py:251 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
@@ -336,27 +336,27 @@ msgstr "Échec du traitement de la mise à jour des données de rôle : %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "La gestion d'un hôte enfant requiert une licence Professional+"
 
-#: backend/api/handlers/os_hardware_handlers.py:93
+#: backend/api/handlers/os_hardware_handlers.py:120
 msgid "No host identification available"
 msgstr "Aucune identification d'hôte disponible"
 
-#: backend/api/handlers/os_hardware_handlers.py:292
+#: backend/api/handlers/os_hardware_handlers.py:325
 msgid "os_version_updated"
 msgstr "Version de l'OS mise à jour"
 
-#: backend/api/handlers/os_hardware_handlers.py:298
+#: backend/api/handlers/os_hardware_handlers.py:331
 msgid "No OS information provided"
 msgstr "Aucune information sur le système d'exploitation fournie"
 
-#: backend/api/handlers/os_hardware_handlers.py:308
+#: backend/api/handlers/os_hardware_handlers.py:341
 msgid "Failed to update OS version"
 msgstr "Échec de la mise à jour de la version du système d'exploitation"
 
-#: backend/api/handlers/os_hardware_handlers.py:492
+#: backend/api/handlers/os_hardware_handlers.py:525
 msgid "hardware_updated"
 msgstr "Matériel mis à jour"
 
-#: backend/api/handlers/os_hardware_handlers.py:501
+#: backend/api/handlers/os_hardware_handlers.py:534
 msgid "Failed to update hardware information"
 msgstr "Échec de la mise à jour des informations matérielles"
 
@@ -2475,6 +2475,18 @@ msgstr "Aucune version publiée antérieure avec laquelle faire la différence"
 msgid "No published version %s"
 msgstr "Aucune version publiée %s"
 
+#: backend/api/image_mode_actions.py:58
+msgid ""
+"Image-mode host management requires a SysManage Enterprise license. Please "
+"upgrade to access this feature."
+msgstr ""
+"La gestion d'hétiorne en mode image requiert une licence SysManage "
+"Enterprise. Veuillez mettre à niveau pour accéder à cette fonctionnalité."
+
+#: backend/api/image_mode_actions.py:73
+msgid "This host is not an image-mode (bootc / rpm-ostree) host."
+msgstr "Ce hétiorne n'est pas un hétiorne en mode image (bootc / rpm-ostree)."
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -3161,11 +3173,19 @@ msgstr "Accès refusé : rôle APPLY_HOST_OS_UPGRADE requis"
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "Gestionnaires de paquets invalides pour les mises à jour d'OS : {}"
 
-#: backend/api/updates/os_upgrade_routes.py:276
+#: backend/api/updates/os_upgrade_routes.py:277
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"upgrades."
+msgstr ""
+"Il s'agit d'un hétiorne en mode image ; mettez à jour l'image du système "
+"d'exploitation au lieu d'éffectuer des mises à niveau de paquets."
+
+#: backend/api/updates/os_upgrade_routes.py:291
 msgid "No OS upgrades available for this host"
 msgstr "Aucune mise à jour d'OS disponible pour cet hôte"
 
-#: backend/api/updates/os_upgrade_routes.py:338
+#: backend/api/updates/os_upgrade_routes.py:353
 #, python-format
 msgid ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
@@ -3173,13 +3193,13 @@ msgstr ""
 "L’mise à jour du système d'exploitation a été initiée sur l'hote %(fqdn)s "
 "avec %(upgrade_count)d mise(s) à jour"
 
-#: backend/api/updates/os_upgrade_routes.py:369
+#: backend/api/updates/os_upgrade_routes.py:384
 msgid "OS upgrade command queued for host"
 msgstr ""
 "La commande d'upgrade du système d'exploitation a été ajoutée à la file "
 "d'exécution pour le hôte"
 
-#: backend/api/updates/os_upgrade_routes.py:379
+#: backend/api/updates/os_upgrade_routes.py:394
 msgid "Failed to queue OS upgrade command"
 msgstr ""
 "Échec de l’enregistrement de la commande d’mise à niveau du Système "
@@ -3209,30 +3229,38 @@ msgstr "Échec de la récupération des résultats d'actualisation : %s"
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "Accès refusé : rôle APPLY_SOFTWARE_UPDATE requis"
 
-#: backend/api/updates/execution_routes.py:117
+#: backend/api/updates/execution_routes.py:118
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"updates."
+msgstr ""
+"Il s'agit d'un hétiorne en mode image ; mettez à jour l'image du système "
+"d'exploitation au lieu d'éffectuer des mises à jour de paquets."
+
+#: backend/api/updates/execution_routes.py:134
 msgid "No matching updates found for specified packages"
 msgstr "Aucune mise à jour correspondante trouvée pour les paquets spécifiés"
 
-#: backend/api/updates/execution_routes.py:203
+#: backend/api/updates/execution_routes.py:220
 msgid "Update execution started"
 msgstr "Exécution de mise à jour démarrée"
 
-#: backend/api/updates/execution_routes.py:212
+#: backend/api/updates/execution_routes.py:229
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "Échec de l'envoi de la commande: %s"
 
-#: backend/api/updates/execution_routes.py:220
+#: backend/api/updates/execution_routes.py:237
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "Échec de l'envoi de la commande de mise à jour: %s"
 
-#: backend/api/updates/execution_routes.py:233
+#: backend/api/updates/execution_routes.py:250
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "Échec de l'exécution des mises à jour: %s"
 
-#: backend/api/updates/execution_routes.py:288
+#: backend/api/updates/execution_routes.py:305
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "Échec de l'obtention du journal d'exécution: %s"

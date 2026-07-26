@@ -3,9 +3,10 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React from 'react';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import { Box, Typography, Button, IconButton, Chip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ComputerIcon from '@mui/icons-material/Computer';
+import LayersIcon from '@mui/icons-material/Layers';
 import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -66,6 +67,15 @@ const HostDetailHeader: React.FC<HostDetailHeaderProps> = ({
                             </IconButton>
                         )}
                     </Typography>
+                    {host.is_image_mode && (
+                        <Chip
+                            icon={<LayersIcon />}
+                            label={t('hostDetail.imageMode.badge', 'Image Mode')}
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                        />
+                    )}
                     {host.parent_host_id && (
                         <Button
                             variant="outlined"
@@ -79,24 +89,30 @@ const HostDetailHeader: React.FC<HostDetailHeaderProps> = ({
                     )}
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<SystemUpdateAltIcon />}
-                        onClick={() => navigate(`/updates?host=${hostId}&securityOnly=false`)}
-                        disabled={!host.active || (host.security_updates_count || 0) + (host.system_updates_count || 0) === 0}
-                    >
-                        {t('hosts.updates', 'Updates')}
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<AppsIcon />}
-                        onClick={handleRequestPackages}
-                        disabled={!host.active}
-                    >
-                        {t('hosts.requestPackages', 'Request Avail. Packages')}
-                    </Button>
+                    {/* Image-mode hosts get their OS as an immutable image, so the
+                        per-package update / available-packages flows do not apply. */}
+                    {!host.is_image_mode && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<SystemUpdateAltIcon />}
+                            onClick={() => navigate(`/updates?host=${hostId}&securityOnly=false`)}
+                            disabled={!host.active || (host.security_updates_count || 0) + (host.system_updates_count || 0) === 0}
+                        >
+                            {t('hosts.updates', 'Updates')}
+                        </Button>
+                    )}
+                    {!host.is_image_mode && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<AppsIcon />}
+                            onClick={handleRequestPackages}
+                            disabled={!host.active}
+                        >
+                            {t('hosts.requestPackages', 'Request Avail. Packages')}
+                        </Button>
+                    )}
                     <Button
                         variant="outlined"
                         color="warning"

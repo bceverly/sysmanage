@@ -266,6 +266,21 @@ async def execute_os_upgrades(  # NOSONAR
                     )
                     continue
 
+                # Phase 17.3: image-mode (bootc / rpm-ostree) hosts don't apply
+                # package upgrades — update the atomic OS image instead.
+                if getattr(host, "is_image_mode", False):
+                    results.append(
+                        {
+                            "host_id": host_id,
+                            "status": "error",
+                            "message": _(
+                                "This is an image-mode host; update the OS image "
+                                "instead of applying package upgrades."
+                            ),
+                        }
+                    )
+                    continue
+
                 available_upgrades = upgrades_by_host.get(str(host_id), [])
 
                 if not available_upgrades:

@@ -126,7 +126,8 @@
     "copy": "Copiar",
     "create": "Crear",
     "done": "Listo",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "confirm": "Confirmar"
   },
   "connectionStatus": {
     "connected": "Conectado",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Versión del parche",
     "livepatchClientVersion": "Versión del cliente",
     "livepatchLastCheck": "Última comprobación",
-    "livepatchFixes": "Correcciones aplicadas"
+    "livepatchFixes": "Correcciones aplicadas",
+    "imageMode": {
+      "apply": "Aplicar",
+      "applyError": "No se pudo aplicar la imagen",
+      "applySuccess": "Se ha solicitado aplicar una imagen (el host se reiniciará)",
+      "backend": "Backend",
+      "badge": "Modo de Imagen",
+      "bootedImage": "Imagen arrancada",
+      "confirmApplyMessage": "Esto aplica la imagen en staging y REINICIARÁ el host. ¿Continuar?",
+      "confirmApplyTitle": "¿Aplicar imagen en staging?",
+      "confirmRollbackMessage": "Esto deshace al host a su imagen anterior y lo REINICIARÁ. ¿Continuar?",
+      "confirmRollbackTitle": "¿Deshacer la imagen?",
+      "digest": "Digesto",
+      "enterpriseNotice": "La preparación, aplicación y deshacido de imágenes es una característica Enterprise. Los detalles de la imagen actual se muestran a continuación.",
+      "enterpriseOnly": "Las acciones de modo de imagen requieren una licencia Enterprise",
+      "imageRef": "Referencia de Imagen",
+      "noStagedImage": "No hay ninguna imagen en staging",
+      "pendingReboot": "Pendiente — reiniciar para aplicar",
+      "rollback": "Deshacer",
+      "rollbackAvailable": "Deshecho disponible",
+      "rollbackError": "No se pudo deshacer la imagen",
+      "rollbackSuccess": "Se ha solicitado deshacer la imagen (el host se reiniciará)",
+      "stage": "Preparar",
+      "stageError": "No se pudo preparar la imagen",
+      "stageSuccess": "Se ha solicitado preparar la imagen",
+      "stagedImage": "Imagen en staging",
+      "title": "Modo de Imagen"
+    },
+    "imageModeTab": "Modo de Imagen"
   },
   "hostGroup": {
     "add": "Agregar",

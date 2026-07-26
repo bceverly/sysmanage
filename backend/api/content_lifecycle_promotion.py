@@ -495,6 +495,26 @@ async def enable_content_serving(
     }
 
 
+def _require_env_binding(tenant_db: Session, env, cv) -> None:
+    """400 if the environment has no promoted content for this content view."""
+    if _binding_for(tenant_db, env.id, cv.id) is None:
+        raise HTTPException(
+            status_code=400,
+            detail=_("That environment has no content for this content view"),
+        )
+
+
+def _serving_fqdn_or_400(tenant_db: Session, host_id) -> str:
+    """The serving host's FQDN, or 400 if it has no resolvable address."""
+    fqdn = _host_fqdn(tenant_db, host_id)
+    if not fqdn:
+        raise HTTPException(
+            status_code=400,
+            detail=_("The serving host has no resolvable address"),
+        )
+    return fqdn
+
+
 @router.post(
     "/content-lifecycle/content-views/{cv_id}/repoint",
     dependencies=[Depends(JWTBearer())],
@@ -512,18 +532,10 @@ async def repoint_host_to_environment(
     clm_engine = _check_clm_module()
     cv = _get_cv_or_404(shared_db, cv_id)
     env = _get_env_or_404(shared_db, body.environment_id)
-    if _binding_for(tenant_db, env.id, cv.id) is None:
-        raise HTTPException(
-            status_code=400,
-            detail=_("That environment has no content for this content view"),
-        )
+    _require_env_binding(tenant_db, env, cv)
     serving = _resolve_cv_serving_host(cv, shared_db, tenant_db)
     host_id, mirrors = serving[0], serving[2]
-    fqdn = _host_fqdn(tenant_db, host_id)
-    if not fqdn:
-        raise HTTPException(
-            status_code=400, detail=_("The serving host has no resolvable address")
-        )
+    fqdn = _serving_fqdn_or_400(tenant_db, host_id)
     repo_engine = module_loader.get_module("repository_mirroring_engine")
     if repo_engine is None:
         raise HTTPException(
@@ -560,18 +572,10 @@ async def repoint_host_snaps(
         )
     cv = _get_cv_or_404(shared_db, cv_id)
     env = _get_env_or_404(shared_db, body.environment_id)
-    if _binding_for(tenant_db, env.id, cv.id) is None:
-        raise HTTPException(
-            status_code=400,
-            detail=_("That environment has no content for this content view"),
-        )
+    _require_env_binding(tenant_db, env, cv)
     serving = _resolve_cv_serving_host(cv, shared_db, tenant_db)
     host_id = serving[0]
-    fqdn = _host_fqdn(tenant_db, host_id)
-    if not fqdn:
-        raise HTTPException(
-            status_code=400, detail=_("The serving host has no resolvable address")
-        )
+    fqdn = _serving_fqdn_or_400(tenant_db, host_id)
     env_url = clm_engine.resolve_content_view_url(fqdn, str(cv.id), env.name)
     plan = snap_engine.build_snap_repoint_plan(f"{env_url}/snaps")
     msg_id = _dispatch_serving_plan(plan, body.host_id, "repoint_snaps", str(cv.id))
@@ -621,11 +625,7 @@ async def repoint_host_images(
         )
     cv = _get_cv_or_404(shared_db, cv_id)
     env = _get_env_or_404(shared_db, body.environment_id)
-    if _binding_for(tenant_db, env.id, cv.id) is None:
-        raise HTTPException(
-            status_code=400,
-            detail=_("That environment has no content for this content view"),
-        )
+    _require_env_binding(tenant_db, env, cv)
     images = _cv_captured_images(cv, tenant_db)
     if not images:
         raise HTTPException(
@@ -633,11 +633,7 @@ async def repoint_host_images(
         )
     serving = _resolve_cv_serving_host(cv, shared_db, tenant_db)
     host_id = serving[0]
-    fqdn = _host_fqdn(tenant_db, host_id)
-    if not fqdn:
-        raise HTTPException(
-            status_code=400, detail=_("The serving host has no resolvable address")
-        )
+    fqdn = _serving_fqdn_or_400(tenant_db, host_id)
     env_url = clm_engine.resolve_content_view_url(fqdn, str(cv.id), env.name)
     plan = oci_engine.build_image_repoint_plan(f"{env_url}/images", images)
     msg_id = _dispatch_serving_plan(plan, body.host_id, "repoint_images", str(cv.id))

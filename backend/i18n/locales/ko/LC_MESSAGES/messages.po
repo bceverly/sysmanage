@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-25 07:08-0400\n"
+"POT-Creation-Date: 2026-07-26 07:06-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -135,13 +135,13 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
 #: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
 #: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
-#: backend/api/grafana_integration.py:330 backend/api/host_graylog.py:131
-#: backend/api/tag.py:499 backend/api/tag.py:653
-#: backend/api/airgap_repository_buckets.py:65
+#: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
+#: backend/api/host_graylog.py:131 backend/api/tag.py:499
+#: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
 #: backend/api/updates/report_routes.py:34
 #: backend/api/updates/os_upgrade_routes.py:54
 #: backend/api/updates/query_routes.py:123
-#: backend/api/updates/execution_routes.py:251 backend/api/diagnostics.py:102
+#: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
 #: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
@@ -330,27 +330,27 @@ msgstr "_ROLE_DATA_UPDATE_ 처리에 실패했습니다: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "자식 호스트 관리에는 프로페셔널+ 라이선스가 필요합니다."
 
-#: backend/api/handlers/os_hardware_handlers.py:93
+#: backend/api/handlers/os_hardware_handlers.py:120
 msgid "No host identification available"
 msgstr "호스트 식별 정보가 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:292
+#: backend/api/handlers/os_hardware_handlers.py:325
 msgid "os_version_updated"
 msgstr "OS 버전이 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:298
+#: backend/api/handlers/os_hardware_handlers.py:331
 msgid "No OS information provided"
 msgstr "OS 정보가 제공되지 않았습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:308
+#: backend/api/handlers/os_hardware_handlers.py:341
 msgid "Failed to update OS version"
 msgstr "OS 버전을 업데이트할 수 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:492
+#: backend/api/handlers/os_hardware_handlers.py:525
 msgid "hardware_updated"
 msgstr "하드웨어가 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:501
+#: backend/api/handlers/os_hardware_handlers.py:534
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
@@ -2352,6 +2352,18 @@ msgstr "비교할 이전에 공개된 버전이 없습니다"
 msgid "No published version %s"
 msgstr "공개된 버전 %s이 없습니다"
 
+#: backend/api/image_mode_actions.py:58
+msgid ""
+"Image-mode host management requires a SysManage Enterprise license. Please "
+"upgrade to access this feature."
+msgstr ""
+"이미지 모드 호스트 관리는 SysManage Enterprise 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드를 진행해 "
+"주세요."
+
+#: backend/api/image_mode_actions.py:73
+msgid "This host is not an image-mode (bootc / rpm-ostree) host."
+msgstr "이 호스트는 이미지 모드(bootc / rpm-ostree) 호스트가 아닙니다."
+
 #: backend/api/host_graylog.py:151
 msgid ""
 "Graylog attach requires mechanism, graylog_server, and port in the request "
@@ -2973,21 +2985,27 @@ msgstr "퍼미션 denied: APPLY_HOST_OS_UPGRADE 역할 필요"
 msgid "Invalid package managers for OS upgrades: {}"
 msgstr "OS 업그레이드에 유효하지 않은 패키지 관리자: {}"
 
-#: backend/api/updates/os_upgrade_routes.py:276
+#: backend/api/updates/os_upgrade_routes.py:277
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"upgrades."
+msgstr "이것은 이미지 모드 호스트입니다; 패키지 업그레이드 대신 운영 체제 이미지를 업데이트해야 합니다."
+
+#: backend/api/updates/os_upgrade_routes.py:291
 msgid "No OS upgrades available for this host"
 msgstr "이 호스트에 사용 가능한 OS 업그레이드가 없습니다"
 
-#: backend/api/updates/os_upgrade_routes.py:338
+#: backend/api/updates/os_upgrade_routes.py:353
 #, python-format
 msgid ""
 "Initiated OS upgrade on host %(fqdn)s with %(upgrade_count)d upgrade(s)"
 msgstr "호스트 %(fqdn)s에 대한 OS 업그레이드 시작됨 (%(upgrade_count)d 개의 업그레이드 포함)"
 
-#: backend/api/updates/os_upgrade_routes.py:369
+#: backend/api/updates/os_upgrade_routes.py:384
 msgid "OS upgrade command queued for host"
 msgstr "호스트용 OS 업그레이드 명령이 대기열에 추가됨"
 
-#: backend/api/updates/os_upgrade_routes.py:379
+#: backend/api/updates/os_upgrade_routes.py:394
 msgid "Failed to queue OS upgrade command"
 msgstr "OS 업그레이드 명령을 대기열에 추가하는 데 실패했습니다"
 
@@ -3015,30 +3033,36 @@ msgstr "업데이트 결과 가져오기 실패: %s"
 msgid "Permission denied: APPLY_SOFTWARE_UPDATE role required"
 msgstr "퍼미션 denied: APPLY_SOFTWARE_UPDATE 역할 필요"
 
-#: backend/api/updates/execution_routes.py:117
+#: backend/api/updates/execution_routes.py:118
+msgid ""
+"This is an image-mode host; update the OS image instead of applying package "
+"updates."
+msgstr "이것은 이미지 모드 호스트입니다; 패키지 업데이트 대신 운영 체제 이미지를 업데이트해야 합니다."
+
+#: backend/api/updates/execution_routes.py:134
 msgid "No matching updates found for specified packages"
 msgstr "지정된 패키지에 대한 일치하는 업데이트를 찾을 수 없습니다"
 
-#: backend/api/updates/execution_routes.py:203
+#: backend/api/updates/execution_routes.py:220
 msgid "Update execution started"
 msgstr "업데이트 실행이 시작되었습니다"
 
-#: backend/api/updates/execution_routes.py:212
+#: backend/api/updates/execution_routes.py:229
 #, python-format
 msgid "Failed to send command: %s"
 msgstr "명령 전송 실패: %s"
 
-#: backend/api/updates/execution_routes.py:220
+#: backend/api/updates/execution_routes.py:237
 #, python-format
 msgid "Failed to send update command: %s"
 msgstr "업데이트 명령 전송 실패: %s"
 
-#: backend/api/updates/execution_routes.py:233
+#: backend/api/updates/execution_routes.py:250
 #, python-format
 msgid "Failed to execute updates: %s"
 msgstr "업데이트 실행 실패: %s"
 
-#: backend/api/updates/execution_routes.py:288
+#: backend/api/updates/execution_routes.py:305
 #, python-format
 msgid "Failed to get execution log: %s"
 msgstr "실행 로그 가져오기 실패: %s"

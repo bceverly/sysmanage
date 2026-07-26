@@ -126,7 +126,8 @@
     "copy": "Copiar",
     "create": "Criar",
     "done": "Concluído",
-    "loading": "Carregando..."
+    "loading": "Carregando...",
+    "confirm": "Confirmar"
   },
   "connectionStatus": {
     "connected": "Conectado",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Versão do patch",
     "livepatchClientVersion": "Versão do cliente",
     "livepatchLastCheck": "Última verificação",
-    "livepatchFixes": "Correções aplicadas"
+    "livepatchFixes": "Correções aplicadas",
+    "imageMode": {
+      "apply": "Aplicar",
+      "applyError": "Falha ao aplicar a imagem",
+      "applySuccess": "Aplicação da imagem solicitada (o host será reiniciado)",
+      "backend": "Backend",
+      "badge": "Modo de Imagem",
+      "bootedImage": "Imagem Inicializada",
+      "confirmApplyMessage": "Isso aplica a imagem em estágio e REINICIA o host. Continuar?",
+      "confirmApplyTitle": "Aplicar imagem em estágio?",
+      "confirmRollbackMessage": "Isso reverte o host para sua imagem anterior e REINICIA-o. Continuar?",
+      "confirmRollbackTitle": "Desfazer imagem?",
+      "digest": "Digesto",
+      "enterpriseNotice": "A estadia, aplicação e desfazimento de imagens é uma funcionalidade Enterprise. Os detalhes da imagem atual são mostrados abaixo.",
+      "enterpriseOnly": "Ações do modo de imagem exigem uma licença Enterprise",
+      "imageRef": "Referência da Imagem",
+      "noStagedImage": "Nenhuma imagem em estágio",
+      "pendingReboot": "Pendente — reinicie para aplicar",
+      "rollback": "Rollback",
+      "rollbackAvailable": "Rollback Disponível",
+      "rollbackError": "Falha ao desfazer a imagem",
+      "rollbackSuccess": "Rollback da imagem solicitado (o host será reiniciado)",
+      "stage": "Estagiar",
+      "stageError": "Falha ao preparar a imagem",
+      "stageSuccess": "Preparar a imagem solicitado",
+      "stagedImage": "Imagem Estagiada",
+      "title": "Modo de Imagem"
+    },
+    "imageModeTab": "Modo de Imagem"
   },
   "hostGroup": {
     "add": "Adicionar",

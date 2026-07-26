@@ -105,6 +105,23 @@ async def execute_updates(  # NOSONAR
                     )
                     continue
 
+                # Phase 17.3: image-mode (bootc / rpm-ostree) hosts don't apply
+                # package updates — the OS is an atomic image. Stage/apply the
+                # image instead (Image Mode tab). Skip rather than dispatch.
+                if getattr(host, "is_image_mode", False):
+                    results.append(
+                        {
+                            "host_id": host_id,
+                            "hostname": host.fqdn,
+                            "success": False,
+                            "error": _(
+                                "This is an image-mode host; update the OS image "
+                                "instead of applying package updates."
+                            ),
+                        }
+                    )
+                    continue
+
                 updates = updates_by_host.get(str(host_id), [])
 
                 if not updates:

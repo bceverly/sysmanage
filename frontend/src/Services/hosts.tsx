@@ -123,6 +123,15 @@ type SysManageHost = {
     geo_city?: string | null;
     geo_latitude?: number | null;
     geo_longitude?: number | null;
+    // Phase 17.3: image-mode host management (bootc / rpm-ostree)
+    is_image_mode?: boolean;
+    image_backend?: 'bootc' | 'rpm-ostree';
+    booted_image_ref?: string;
+    booted_image_digest?: string;
+    staged_image_ref?: string;
+    staged_image_digest?: string;
+    rollback_available?: boolean;
+    image_mode_updated_at?: string;
 }
 
 type StorageDevice = {

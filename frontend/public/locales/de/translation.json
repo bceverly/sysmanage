@@ -126,7 +126,8 @@
     "copy": "Kopieren",
     "create": "Erstellen",
     "done": "Fertig",
-    "loading": "Wird geladen..."
+    "loading": "Wird geladen...",
+    "confirm": "Bestätigen"
   },
   "connectionStatus": {
     "connected": "Verbunden",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Patch-Version",
     "livepatchClientVersion": "Client-Version",
     "livepatchLastCheck": "Letzte Prüfung",
-    "livepatchFixes": "Angewendete Fixes"
+    "livepatchFixes": "Angewendete Fixes",
+    "imageMode": {
+      "apply": "Anwenden",
+      "applyError": "Bildanwendung fehlgeschlagen",
+      "applySuccess": "Bildanwendung angefordert (der Host wird neu gestartet)",
+      "backend": "Backend",
+      "badge": "Bildmodus",
+      "bootedImage": "Geladenes Bild",
+      "confirmApplyMessage": "Dies wendet das vorbereitete Bild an und startet den Host neu. Fortfahren?",
+      "confirmApplyTitle": "Stagedes Bild anwenden?",
+      "confirmRollbackMessage": "Dies rollt den Host zur vorigen Version des Bilds zurück und startet ihn neu. Fortfahren?",
+      "confirmRollbackTitle": "Bild rürckstapeln?",
+      "digest": "Digest",
+      "enterpriseNotice": "Das Vorbereiten, Anwenden und Rübckstapeln von Bildern ist eine Enterprise-Funktion. Die aktuellen Bilddetails sind unten angezeigt.",
+      "enterpriseOnly": "Bildmodusanweisungen erfordern eine Enterprise-Lizenz",
+      "imageRef": "Bildreferenz",
+      "noStagedImage": "Kein Bild vorbereitet",
+      "pendingReboot": "Ausstehend — Neustart zum Anwenden erforderlich",
+      "rollback": "Rübckstapelung",
+      "rollbackAvailable": "Rübckstapelschaltfläche verfügbar",
+      "rollbackError": "Rürckstapeln des Bilds fehlgeschlagen",
+      "rollbackSuccess": "Rürckstapeln des Bilds angefordert (der Host wird neu gestartet)",
+      "stage": "Vorbereiten",
+      "stageError": "Vorbereiten des Bilds fehlgeschlagen",
+      "stageSuccess": "Vorbereiten des Bilds angefordert",
+      "stagedImage": "Geladenes Bild",
+      "title": "Bildmodus"
+    },
+    "imageModeTab": "Bildmodus"
   },
   "hostGroup": {
     "add": "Hinzufügen",

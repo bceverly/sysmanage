@@ -34,6 +34,33 @@ debug_logger = logging.getLogger("debug_logger")
 queue_ops = QueueOperations()
 
 
+def _apply_image_mode_fields(host, os_info) -> None:
+    """Persist image-mode (bootc / rpm-ostree) state onto the host row (Phase 17.3).
+
+    The agent reports these inside the nested ``os_info`` payload. Only a Linux
+    host that ran detection carries the ``is_image_mode`` key, so its absence
+    leaves the columns untouched (non-Linux / older agents). When present but
+    False (a host that left image mode) the image fields are cleared.
+    """
+    if not isinstance(os_info, dict) or "is_image_mode" not in os_info:
+        return
+    is_image_mode = bool(os_info.get("is_image_mode"))
+    host.is_image_mode = is_image_mode
+    host.image_backend = os_info.get("image_backend") if is_image_mode else None
+    host.booted_image_ref = os_info.get("booted_image_ref") if is_image_mode else None
+    host.booted_image_digest = (
+        os_info.get("booted_image_digest") if is_image_mode else None
+    )
+    host.staged_image_ref = os_info.get("staged_image_ref") if is_image_mode else None
+    host.staged_image_digest = (
+        os_info.get("staged_image_digest") if is_image_mode else None
+    )
+    host.rollback_available = (
+        os_info.get("rollback_available") if is_image_mode else None
+    )
+    host.image_mode_updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 async def is_new_os_version_combination(  # NOSONAR
     db: Session, os_name: str, os_version: str
 ) -> bool:
@@ -175,6 +202,12 @@ async def handle_os_version_update(  # NOSONAR
                 host.os_version_updated_at = datetime.now(timezone.utc).replace(
                     tzinfo=None
                 )
+
+                # Phase 17.3: persist image-mode (bootc / rpm-ostree) state that
+                # the agent reports inside the nested os_info payload onto
+                # dedicated host columns, so the UI and the package-update gate
+                # can read it without parsing JSON.
+                _apply_image_mode_fields(host, os_details)
 
                 # Process Ubuntu Pro information if present
                 await handle_ubuntu_pro_update(db, connection, message_data, host)

@@ -126,7 +126,8 @@
     "copy": "Kopiéren",
     "create": "Maken",
     "done": "Klaar",
-    "loading": "Laden..."
+    "loading": "Laden...",
+    "confirm": "Bevestigen"
   },
   "connectionStatus": {
     "connected": "Verbonden",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Patchversie",
     "livepatchClientVersion": "Clientversie",
     "livepatchLastCheck": "Laatste check-in",
-    "livepatchFixes": "Toegepaste fixes"
+    "livepatchFixes": "Toegepaste fixes",
+    "imageMode": {
+      "apply": "Toepassen",
+      "applyError": "Kan de afbeelding niet toepassen",
+      "applySuccess": "Afbeeldingstoepassing aanvraag (host zal herstarten)",
+      "backend": "Backend",
+      "badge": "Afbeeldingsmodus",
+      "bootedImage": "Gebooteerde Afbeelding",
+      "confirmApplyMessage": "Dit past de gevorbereide afbeelding toe en HERSTART de host. Doorgaan?",
+      "confirmApplyTitle": "Stagede afbeelding toepassen?",
+      "confirmRollbackMessage": "Dit draait de host terug naar zijn vorige afbeelding en HERSTART het systeem. Doorgaan?",
+      "confirmRollbackTitle": "Afbeelding ongedaan maken?",
+      "digest": "Digest",
+      "enterpriseNotice": "Het voorbereiden, toepassen en terugdraaien van afbeeldingen is een Enterprise-functie. De huidige afbeeldingdetails worden hieronder weergegeven.",
+      "enterpriseOnly": "Afbeeldingsmodus acties vereisen een Enterprise-licentie",
+      "imageRef": "Afbeeldingshandleiding",
+      "noStagedImage": "Geen afbeelding voorbereid",
+      "pendingReboot": "Wachtend – herstart om toe te passen",
+      "rollback": "Terugdraaien",
+      "rollbackAvailable": "Terugdraaien beschikbaar",
+      "rollbackError": "Kan de afbeelding niet ongedaan maken",
+      "rollbackSuccess": "Terugdraaien naar vorige afbeelding (host zal herstarten). Doorgaan?",
+      "stage": "Voorbereiden",
+      "stageError": "Kan de afbeelding niet voorbereiden",
+      "stageSuccess": "Staging van afbeelding aanvraag",
+      "stagedImage": "Gevoorbereide Afbeelding",
+      "title": "Afbeeldingsmodus"
+    },
+    "imageModeTab": "Afbeeldingsmodus"
   },
   "hostGroup": {
     "add": "Toevoegen",

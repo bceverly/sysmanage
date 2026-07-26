@@ -126,7 +126,8 @@
     "copy": "コピー",
     "create": "作成",
     "done": "完了",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "confirm": "確認"
   },
   "connectionStatus": {
     "connected": "接続済み",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "パッチバージョン",
     "livepatchClientVersion": "クライアントバージョン",
     "livepatchLastCheck": "最終チェックイン",
-    "livepatchFixes": "適用済みの修正"
+    "livepatchFixes": "適用済みの修正",
+    "imageMode": {
+      "apply": "適用",
+      "applyError": "イメージの適用に失敗しました",
+      "applySuccess": "イメージ適用が要求されました（ホストは再起動します）",
+      "backend": "バックエンド",
+      "badge": "イメージモード",
+      "bootedImage": "起動イメージ",
+      "confirmApplyMessage": "この操作でステージ済みのイメージを適用し、ホストを再起動します。続行しますか？",
+      "confirmApplyTitle": "ステージ済みイメージを適用しますか？",
+      "confirmRollbackMessage": "この操作でホストを前のイメージに戻し、再起動します。続行しますか？",
+      "confirmRollbackTitle": "イメージをロールバックしますか？",
+      "digest": "ダイジェスト",
+      "enterpriseNotice": "イメージのステージング、適用、およびロールバックはエンタープライズ機能です。現在のイメージの詳細が以下に表示されています。",
+      "enterpriseOnly": "イメージモード操作にはエンタープライズライセンスが必要です",
+      "imageRef": "イメージ参照",
+      "noStagedImage": "ステージ済みのイメージはありません",
+      "pendingReboot": "保留中 — 適用するための再起動が必要です",
+      "rollback": "ロールバック",
+      "rollbackAvailable": "ロールバック可能",
+      "rollbackError": "イメージのロールバックに失敗しました",
+      "rollbackSuccess": "イメージロールバックが要求されました（ホストは再起動します）",
+      "stage": "ステージ",
+      "stageError": "イメージのステージングに失敗しました",
+      "stageSuccess": "イメージステージングが要求されました",
+      "stagedImage": "ステージ済みイメージ",
+      "title": "イメージモード"
+    },
+    "imageModeTab": "イメージモード"
   },
   "hostGroup": {
     "add": "追加",

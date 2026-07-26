@@ -126,7 +126,8 @@
     "copy": "कॉपी",
     "create": "बनाएं",
     "done": "किया गया",
-    "loading": "लोड हो रहा है..."
+    "loading": "लोड हो रहा है...",
+    "confirm": "निश्चित करें"
   },
   "connectionStatus": {
     "connected": "कनेक्टेड",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "पैच संस्करण",
     "livepatchClientVersion": "क्लाइंट संस्करण",
     "livepatchLastCheck": "अंतिम जाँच",
-    "livepatchFixes": "लागू किए गए सुधार"
+    "livepatchFixes": "लागू किए गए सुधार",
+    "imageMode": {
+      "apply": "अनुपात",
+      "applyError": "इमेज को लागू करने में विफलता",
+      "applySuccess": "स्टेग किए गए इमेज को लागू करने की संकेतन",
+      "backend": "बैकएंड",
+      "badge": "इमेज मोड",
+      "bootedImage": "बूट किया गया इमेज",
+      "confirmApplyMessage": "यह स्टेग किए गए इमेज को लागू करता है और होस्ट को पुनः बूट करता है। अग्रसर हों?",
+      "confirmApplyTitle": "स्टेज किए गए इमेज को लागू करें?",
+      "confirmRollbackMessage": "यह होस्ट को इसके पिछले इमेज में रोलबैक करता है और इसे पुनः बूट करता है। अग्रसर हों?",
+      "confirmRollbackTitle": "इमेज को रोलबैक करें?",
+      "digest": "दाग",
+      "enterpriseNotice": "इमेज को स्टेग, लागू करना और रोलबैक करना एंटरप्राइज विशेषता है। वर्तमान इमेज के विवरण नीचे दिखाए गए हैं",
+      "enterpriseOnly": "इमेज मोड ऑपरेशन करने के लिए एंटरप्राइज लाइसेंस होता है",
+      "imageRef": "इमेज प्रतीक",
+      "noStagedImage": "किसी भी इमेज को स्टेग नहीं किया गया है",
+      "pendingReboot": "प्रतीक — पुनः बूट करके लागू करें",
+      "rollback": "रोलबैक",
+      "rollbackAvailable": "रोलबैक उपलब्ध है",
+      "rollbackError": "इमेज को रोलबैक करने में विफलता",
+      "rollbackSuccess": "इमेज को रोलबैक करने की संकेतन (होस्ट बूट करेगा)",
+      "stage": "स्टेग",
+      "stageError": "इमेज को स्टेज करने में विफलता",
+      "stageSuccess": "इमेज को स्टेग करने की संकेतन",
+      "stagedImage": "स्टेग किए गए इमेज",
+      "title": "इमेज मोड"
+    },
+    "imageModeTab": "इमेज मोड"
   },
   "hostGroup": {
     "add": "जोड़ें",

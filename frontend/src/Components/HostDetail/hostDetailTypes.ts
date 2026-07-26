@@ -170,6 +170,7 @@ export const HOST_TAB_CATEGORY = new Map<string, string>([
   ['security', 'security'], ['compliance', 'security'], ['proplus-compliance', 'security'],
   ['fips-compliance', 'security'], ['certificates', 'security'], ['proplus-vuln', 'security'],
   ['processes', 'operations'], ['server-roles', 'operations'], ['diagnostics', 'operations'],
+  ['image-mode', 'operations'],
   ['proplus-health', 'operations'], ['proplus-alerting', 'operations'], ['proplus-audit', 'operations'],
   ['access', 'access'], ['proplus-secrets', 'access'],
   ['child-hosts', 'virtualization'], ['proplus-containers', 'virtualization'],

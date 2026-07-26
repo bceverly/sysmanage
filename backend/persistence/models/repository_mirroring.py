@@ -54,6 +54,7 @@ SINGLETON_MIRROR_SETTINGS_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 # future change to either is a one-line edit.
 _HOST_ID_FK = "host.id"
 _FK_SET_NULL = "SET NULL"
+_MIRROR_REPO_FK = "mirror_repository.id"
 
 
 class MirrorRepository(Base):
@@ -219,7 +220,7 @@ class MirrorSnapshot(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     repository_id = Column(
         GUID(),
-        ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+        ForeignKey(_MIRROR_REPO_FK, ondelete="CASCADE"),
         nullable=False,
     )
     snapshot_id = Column(String(80), nullable=False)  # YYYYMMDDTHHMMSS
@@ -267,7 +268,7 @@ class MirrorSnapContent(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     repository_id = Column(
         GUID(),
-        ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+        ForeignKey(_MIRROR_REPO_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -322,7 +323,7 @@ class MirrorImageContent(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     repository_id = Column(
         GUID(),
-        ForeignKey("mirror_repository.id", ondelete="CASCADE"),
+        ForeignKey(_MIRROR_REPO_FK, ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -461,7 +462,7 @@ class HostDefaultMirror(Base):
     os_family = Column(String(40), nullable=False)
     mirror_id = Column(
         GUID(),
-        ForeignKey("mirror_repository.id", ondelete=_FK_SET_NULL),
+        ForeignKey(_MIRROR_REPO_FK, ondelete=_FK_SET_NULL),
         nullable=True,
     )
     updated_at = Column(

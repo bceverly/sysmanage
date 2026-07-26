@@ -55,6 +55,7 @@ from backend.api import (
     graylog_integration,
     host,
     host_hostname,
+    image_mode_actions,
     invitations,
     license_management,
     lifecycle_actions,
@@ -349,6 +350,7 @@ def register_routes(app: FastAPI):
 
     logger.debug("Adding lifecycle-actions router (native /api/v1)")
     _include_versioned(app, lifecycle_actions.router, tags=["os-lifecycle"])
+    _include_versioned(app, image_mode_actions.router, tags=["image-mode"])
     logger.debug("Lifecycle-actions router added")
 
     logger.debug("Adding fips-actions router (native /api/v1)")

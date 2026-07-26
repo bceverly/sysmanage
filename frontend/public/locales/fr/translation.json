@@ -126,7 +126,8 @@
     "copy": "Copier",
     "create": "Créer",
     "done": "Terminé",
-    "loading": "Chargement..."
+    "loading": "Chargement...",
+    "confirm": "Confirmer"
   },
   "connectionStatus": {
     "connected": "Connecté",
@@ -866,7 +867,35 @@
     "livepatchPatchVersion": "Version du correctif",
     "livepatchClientVersion": "Version du client",
     "livepatchLastCheck": "Dernière vérification",
-    "livepatchFixes": "Correctifs appliqués"
+    "livepatchFixes": "Correctifs appliqués",
+    "imageMode": {
+      "apply": "Appliquer",
+      "applyError": "Echec de l'application de l'image",
+      "applySuccess": "Application de l'image demandée (le hote redemarrera)",
+      "backend": "Backend",
+      "badge": "Mode image",
+      "bootedImage": "Image démarrée",
+      "confirmApplyMessage": "Cela applique l'image enregistrée et redemarre le hote. Continuer ?",
+      "confirmApplyTitle": "Appliquer l'image enregistrée ?",
+      "confirmRollbackMessage": "Cela retourne le hote à son image précédente et la redemarre. Continuer ?",
+      "confirmRollbackTitle": "Retour arrière vers l'image ?",
+      "digest": "Digest",
+      "enterpriseNotice": "La mise en attente, l'application et le retour arrière des images sont une fonctionnalité Enterprise. Les détails de l'image actuelle sont affichés ci-dessous.",
+      "enterpriseOnly": "Les actions sur le mode image exigent une licence Enterprise",
+      "imageRef": "Référence d'image",
+      "noStagedImage": "Aucune image mise en attente",
+      "pendingReboot": "En attente — redemarrer pour appliquer",
+      "rollback": "Rollback",
+      "rollbackAvailable": "Retour arrière disponible",
+      "rollbackError": "Echec du rétablissement de l'image",
+      "rollbackSuccess": "Retour arrière vers l'image précédente demandée (le hote redemarrera)",
+      "stage": "Stager",
+      "stageError": "Echec de la mise en attente de l'image",
+      "stageSuccess": "Mise en attente de l'image demandée",
+      "stagedImage": "Image enregistrée",
+      "title": "Mode image"
+    },
+    "imageModeTab": "Mode image"
   },
   "hostGroup": {
     "add": "Ajouter",

@@ -17,6 +17,7 @@ import HostSoftwareChangesTab from './HostSoftwareChangesTab';
 import HostServerRolesTab from './HostServerRolesTab';
 import HostChildHostsTab from './HostChildHostsTab';
 import HostUbuntuProTab from './HostUbuntuProTab';
+import HostImageModeTab from './HostImageModeTab';
 import HostDiagnosticsTab from './HostDiagnosticsTab';
 import { DiagnosticReport, PaginationInfo, SoftwarePackage, SysManageHost, UbuntuProInfo, UserAccount, UserGroup, StorageDevice as StorageDeviceType, NetworkInterface as NetworkInterfaceType } from '../../Services/hosts';
 import { Certificate, ChildHost, HostFilterMode, HostRole, InstallationHistoryItem, OpenTelemetryStatus, VirtualizationStatus } from './hostDetailTypes';
@@ -537,7 +538,7 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
                     'info', 'hardware', 'software', 'software-changes',
                     'third-party-repos', 'access', 'security', 'compliance',
                     'certificates', 'server-roles', 'child-hosts', 'ubuntu-pro',
-                    'diagnostics',
+                    'image-mode', 'diagnostics',
                 ]).has(pt.id))
                 .map(pt => (
                     currentTabId === pt.id && hostId && (
@@ -675,6 +676,11 @@ const HostDetailTabContent: React.FC<HostDetailTabContentProps> = (props) => {
                     handleServiceToggle={handleServiceToggle}
                     getEditedServiceLabel={getEditedServiceLabel}
                 />
+            )}
+
+            {/* Image Mode Tab */}
+            {currentTabId === 'image-mode' && (
+                <HostImageModeTab host={host} />
             )}
 
             {/* Diagnostics Tab */}
