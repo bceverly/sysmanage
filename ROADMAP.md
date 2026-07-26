@@ -485,9 +485,28 @@ the ladder front-loads gains then tapers:
 |---|---|---|---|
 | **Baseline (2026-06)** | ~9% | ~23% | ~7% |
 | **Phase 13 (Enterprise GA)** — install the ratchet | ≥12% floor ✅ | ≥25% target → **~50% achieved, floor ≥48** ✅ | ≥25% target → **~54% achieved, floor ≥53** ✅ |
-| **Phase 15 (Stabilization)** | 30% | 40% ✅ (already met) | 30% ✅ (already met) |
+| **Phase 15 (Stabilization)** | 30% ✅ (measured ~34%) | 40% ✅ (already met) | 30% ✅ (already met) |
 | **Phase 19 (Stabilization)** | 50% | 55% | 50% ✅ (already met) |
 | **Phase 22 (Stabilization & v4.0 GA)** | **70%** | **70%** | **70%** |
+
+**OSS frontend line-coverage ramp to Python parity (revised):** rather than
+the coarse table rungs above, the OSS frontend now climbs its enforced **line**
+floor **+10 percentage points per stabilization phase until it is in sync with
+the Python backend's 75% gate** (`--cov-fail-under=75`, a line-coverage number).
+The floor follows measured coverage — each rung is a test-writing push first,
+then the floor bump — so `make test` never goes red on the ratchet itself:
+
+| Phase | Target line floor | Notes |
+|---|---|---|
+| **Phase 16** | **40% ✅** | HostDetail-hooks test push lifted measured lines 34% → **44.2%**; `lines` floor locked at **40** |
+| Next stabilization | 50% | push measured lines past ~52%, then raise floor to 50 |
+| +1 | 60% | |
+| +1 | 70% | |
+| **Parity phase** | **75%** | in sync with the Python `--cov-fail-under=75` gate |
+
+`statements` / `functions` / `branches` trail on their own tracks (as they do
+for the backend, whose gate is also line coverage) and are ratcheted to just
+under measured — they are not required to hit 75%.
 
 **Mechanism (mirrors the backend `--cov-fail-under` ratchet):**
 
@@ -498,7 +517,9 @@ the ladder front-loads gains then tapers:
   and `plugin-src/**` (Pro+ components) — since they climb on separate
   tracks.
 - Each stabilization phase raises the threshold to that phase's milestone;
-  the floor only ever moves up.
+  the floor only ever moves up.  For the **OSS frontend** specifically, that
+  milestone climbs **+10 points per phase (line coverage) until it equals the
+  Python backend's 75% gate** — see the ramp table above.
 - **New code ships with tests** — the standing rule that actually stops
   the drift: a new Page/Service/Component lands with a test that keeps the
   project at-or-above its current floor.  This is the frontend equivalent
@@ -534,7 +555,12 @@ the explicit bullet is added to the in-progress and future phases.)
 - [ ] **SonarQube/SonarCloud scans are issue-free** — 0 new bugs, 0
       vulnerabilities, 0 code smells above threshold, security hotspots
       reviewed, and the coverage ratchet (backend `--cov-fail-under` +
-      frontend `coverage.thresholds`) is green and not lowered.
+      frontend `coverage.thresholds`) is green and not lowered.  The **OSS
+      frontend line-coverage floor must ramp +10 points this phase** (never
+      down) on its climb to parity with the Python 75% gate — a phase is not
+      "done" until that phase's rung (see "Frontend Test Coverage") is both
+      reached in measured coverage and locked in as the enforced `lines`
+      floor in `frontend/vite.config.ts`.
 - [ ] **READMEs are current** — the four project READMEs
       (`sysmanage`, `sysmanage-agent`, `sysmanage-professional-plus`,
       `sysmanage-docs`) reflect what shipped this phase: feature lists,

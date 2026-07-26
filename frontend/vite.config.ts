@@ -316,14 +316,28 @@ export default defineConfig({
       // Ratchet: floors set a couple points below today's measured coverage so
       // the run only fails on a regression.  vitest fails if any metric drops
       // below these — raise them as coverage improves (never lower).
-      // Phase 15 coverage push (OSS 30% floor): measured lines 32.6% /
-      // statements 31.7% / functions 31.6% / branches 20.5% — floors below,
-      // with headroom for run-to-run variance.
+      //
+      // RAMP PLAN: the LINE floor climbs ~10 points per phase until it is in
+      // sync with the Python suite's 75% gate (which is a line-coverage number,
+      // `--cov-fail-under=75`).  A floor can never exceed *actual* coverage
+      // (vitest fails the run otherwise), so each rung is a test-writing push
+      // first, then a floor bump — the floor FOLLOWS coverage, never leads it:
+      //     line floor →   40  →  50  →  60  →  70  →  75  (== Python)
+      // Raise to the next rung only once actual coverage clears it with headroom.
+      // statements/functions/branches trail on their own tracks (like the backend,
+      // whose gate is also lines) and are ratcheted to just under measured.
+      //
+      // Phase 16 (current): line floor 40 REACHED.  A HostDetail-hooks test push
+      // (useChildHosts, useHostObservability, useHostLifecycle,
+      // useHostAccessManagement, useHostSoftware, useHostUbuntuPro) lifted measured
+      // lines 34.0% -> 44.2% / statements 33.1% -> 43.2% / functions 31.7% -> 37.2%
+      // / branches 21.3% -> 26.3%.  Floors locked ~2-4pts under measured (green).
+      // Next phase: push measured lines past ~52% then raise the `lines` floor to 50.
       thresholds: {
-        lines: 30,
-        statements: 29,
-        functions: 29,
-        branches: 18,
+        lines: 40,
+        statements: 40,
+        functions: 35,
+        branches: 24,
       },
       exclude: [
         'node_modules/',

@@ -1816,10 +1816,13 @@ else
 			kill $$BACKEND_PID 2>/dev/null || true; \
 			exit 1; \
 		fi; \
-		echo "[INFO] Starting frontend dev server on port 3000..."; \
-		cd frontend && FORCE_HTTP=true VITE_HOST=127.0.0.1 npm start > ../logs/frontend-e2e.log 2>&1 & \
+		echo "[INFO] Building frontend bundle for E2E (vite build)..."; \
+		(cd frontend && NODE_ENV=production npm run build > ../logs/frontend-e2e-build.log 2>&1) || { echo "[ERROR] Frontend build failed - see logs/frontend-e2e-build.log"; kill $$BACKEND_PID 2>/dev/null || true; lsof -ti:8080 | xargs kill -9 2>/dev/null || true; exit 1; }; \
+		echo "[INFO] Starting frontend preview server on port 3000..."; \
+		echo "[INFO] (E2E serves the bundled build via vite preview, not the dev server: the dev server transforms modules on the fly via esbuild, whose service deadlocks under concurrent Playwright-worker load and hangs page.goto(/login). The prebuilt bundle has no on-the-fly transforms; mirrors CI - see the preview block in frontend/vite.config.ts.)"; \
+		cd frontend && FORCE_HTTP=true VITE_HOST=127.0.0.1 VITE_PORT=3000 npm run preview > ../logs/frontend-e2e.log 2>&1 & \
 		VITE_PID=$$!; \
-		echo "[INFO] Frontend dev server PID: $$VITE_PID"; \
+		echo "[INFO] Frontend preview server PID: $$VITE_PID"; \
 		echo "$$VITE_PID" > logs/frontend-e2e.pid; \
 		echo "[INFO] Waiting for frontend to be ready on port 3000..."; \
 		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do \
@@ -1833,7 +1836,7 @@ else
 		echo "[INFO] Running E2E tests..."; \
 		E2E_EXIT=0; \
 		(cd frontend && PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000 npm run test:e2e) || E2E_EXIT=$$?; \
-		echo "[INFO] Stopping frontend dev server (PID: $$VITE_PID)..."; \
+		echo "[INFO] Stopping frontend preview server (PID: $$VITE_PID)..."; \
 		kill $$VITE_PID 2>/dev/null || true; \
 		if [ -f logs/frontend-e2e.pid ]; then kill $$(cat logs/frontend-e2e.pid) 2>/dev/null || true; fi; \
 		lsof -ti:3000 | xargs kill -9 2>/dev/null || true; \
