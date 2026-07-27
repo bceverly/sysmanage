@@ -296,6 +296,9 @@ class TestTierFeatures:
             FeatureCode.ADVISORY_MANAGEMENT,
             # Phase 14.3 — OS lifecycle / EOL + release upgrades.
             FeatureCode.OS_LIFECYCLE,
+            # Phase 18 — provisioning TEMPLATE authoring is Pro+ (the act of
+            # provisioning is Enterprise-gated via PROVISIONING_MANAGE).
+            FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
         }
         assert pro_features == expected
 
@@ -366,6 +369,9 @@ class TestTierModules:
             ModuleCode.ADVISORY_ENGINE,
             # Phase 14.3 — OS lifecycle / release-upgrade engine.
             ModuleCode.LIFECYCLE_ENGINE,
+            # Phase 18 — provisioning engine loads at Professional so Pro+ can
+            # author templates; provisioning actions are Enterprise-gated.
+            ModuleCode.PROVISIONING_ENGINE,
         }
         assert pro_modules == expected
 

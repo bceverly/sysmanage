@@ -249,6 +249,7 @@ class TestMountProplusRoutes:
             "vuln_engine",
             "advisory_engine",
             "lifecycle_engine",
+            "provisioning_engine",
             "health_engine",
             "compliance_engine",
             "alerting_engine",

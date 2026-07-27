@@ -23,6 +23,7 @@ from .federation import *
 from .mfa import *
 from .package_compliance import *
 from .report_branding import *
+from .provisioning import *
 from .advisory import *
 from .os_lifecycle import *
 from .repository_mirroring import *
@@ -194,6 +195,12 @@ __all__ = [
     "ReportBranding",
     "ReportTemplate",
     "SINGLETON_BRANDING_ID",
+    # Provisioning (Phase 18.1)
+    "ComputeResource",
+    "ProvisioningTemplate",
+    "ProvisioningJob",
+    "COMPUTE_PROVIDER_KINDS",
+    "PROVISIONING_TEMPLATE_KINDS",
     # Multi-factor authentication (Phase 10.3)
     "UserMfaEnrollment",
     "MfaSettings",

@@ -5491,28 +5491,51 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ---
 
-## Phase 18: Provisioning & Discovery (Enterprise)
+## Phase 18: Provisioning & Discovery
 
-**Target Release:** v3.5.0.0
-**Focus:** Net-new host provisioning (bare-metal + cloud) — the other major Satellite gap. Today SysManage only provisions *child* hosts on already-managed hosts. Anchors its own phase.
+**Focus:** Net-new host provisioning — the other major Satellite gap. Today SysManage only provisions *child* hosts on already-managed hosts; Phase 18 provisions brand-new hosts (compute VMs + bare metal) that auto-enroll into the fleet on first boot. Split into **18.1 (compute + auto-enroll)** and **18.2 (bare-metal PXE + discovery)** so the testable compute core ships first.
 
 **Market gap addressed:** Red Hat Satellite provisioning, host discovery, compute resources.
 
-#### 18.1 provisioning_engine (Enterprise)
+**Tier split (both sub-phases):** one `provisioning_engine` module loads at **Professional** so Pro+ can author provisioning templates (`provisioning_templates_manage`); the act of provisioning + compute + discovery is **Enterprise**-gated (`provisioning_manage`).
 
-- [ ] Bare-metal provisioning: PXE/iPXE + kickstart/preseed/AutoYaST/cloud-init template generation
+**Architecture note (recon-settled):** every existing create path assumes an already-running agent executes an `APPLY_DEPLOYMENT_PLAN`. The *target* being provisioned has no agent yet, so control-plane actuation is new (server→provider API for compute; a designated provisioning-server host for PXE), while both converge on the same finish line — first-boot **auto-enroll via enrollment token**. The token is extended to carry `site_id` + `access_group_id` (today it is tenant-only) so one embedded token expresses tenant + site + access-group.
+
+#### 18.1 Compute Provisioning & Auto-Enroll
+
+**Target Release:** v3.5.0.0
+**Focus:** Provision VMs on external hypervisors via a pluggable provider model, and auto-enroll them. The testable, demo-able core (validated locally on remote libvirt).
+
+- [ ] `provisioning_engine` scaffold + dual-repo licensing (module Professional; features `provisioning_templates_manage` Pro+ / `provisioning_manage` Enterprise) + provider registry + OpenBAO credential store + models (`compute_resource`/provider, `provisioning_job`) + migration
+- [ ] Pluggable **compute-provider model** (`create`/`status`/`destroy`/`console` + capability descriptor); **remote libvirt** provider first (extends the existing virsh plan-building), then **Proxmox** (proves the model generalizes)
+- [ ] Provisioning, partition, and finish templates (parameterized, versioned) — Pro+; reuse the existing autoinstall/preseed/cloud-init renderers via the reporting-style "OSS row + engine render" split
+- [ ] Auto-enroll: extend the enrollment token with `site_id`/`access_group_id`, bind host→site on the register path, and add a "provisioning bundle" endpoint that emits ready-to-embed first-boot cloud-init user-data (server + token + optional CA)
+- [ ] Frontend: compute resources, provisioning templates, and a "provision host" **wizard** (first MUI Stepper in the plugin)
+- [ ] Docs page + wired screenshots + roadmap update + i18n/l10n (per the phase exit gate)
+
+**Estimated Size:** ~5,500 lines
+
+#### 18.2 Bare-Metal PXE & Discovery
+
+**Target Release:** v3.5.x
+**Focus:** PXE/iPXE bare-metal provisioning + discovery of unmanaged hardware. Infra-heavy; validated behind a provisioning-network VM harness.
+
+- [ ] **Provisioning readiness preflight + config advisor FIRST** — a per-host probe (model on `MirrorSetupStatus`/`REQUIRED_TOOLS_BY_ROLE`) gates PXE until TFTP/DHCP/HTTP are present; a per-platform config advisor (model on `firewall_plan_builder.detect_firewall_flavor`) suggests/apply dnsmasq/isc-dhcp/kea/tftpd config, with **own-DHCP vs proxyDHCP** modes so it can coexist with a corporate DHCP it cannot change
+- [ ] Bare-metal provisioning: PXE/iPXE + kickstart/preseed/AutoYaST/cloud-init on a designated provisioning-server host
 - [ ] Host discovery (PXE-boot unprovisioned hardware → discovered-hosts inventory → provision)
-- [ ] Compute resources: provision VMs on external hypervisors/clouds (remote libvirt, VMware, Proxmox, EC2/Azure/GCE) via a pluggable provider model
-- [ ] Provisioning, partition, and finish templates (parameterized, versioned)
 - [ ] Bootdisk / ISO-based provisioning for networks without PXE
-- [ ] Auto-enroll the provisioned host into SysManage (+ optional site / access-group assignment) on first boot
-- [ ] Frontend: provisioning templates, compute resources, discovered hosts, "provision host" wizard
-- [ ] i18n/l10n
+- [ ] Bare-metal → first-boot → auto-enroll end-to-end on the VM harness
+- [ ] Frontend (discovered hosts, wizard extended for bare-metal) + docs + screenshots + i18n/l10n
 
-**Estimated Size:** ~10,000 lines
+**Estimated Size:** ~4,500 lines
+
+**Deferred to Phase 19 exit** (matching the image-mode discipline): EC2/Azure/GCE + VMware/vSphere providers (mock-tested in 18.x) and real bare-metal hardware validation.
 
 ### Exit Criteria
 
+- [ ] Compute provisioning validated end-to-end on ≥2 providers (remote libvirt + Proxmox): provision → cloud-init → auto-enroll → managed host in the correct tenant/site
+- [ ] Bare-metal preflight gates correctly; ≥1 PXE path validated on the VM harness in both own-DHCP and proxyDHCP modes
+- [ ] Every capability 402-clean when unlicensed; Pro+ can author templates but not provision
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -5809,6 +5832,71 @@ The operational product: getting devices enrolled at scale.
 
 ---
 
+## Phase 23: Expanded Agent Architecture Support (Community / OSS)
+
+**Target Release:** v4.1.0.0
+**Focus:** Run the `sysmanage-agent` on CPU architectures beyond x86-64 and arm64 — **IBM Power (ppc64le)**, **IBM Z (s390x)**, and **RISC-V (riscv64)** — so SysManage manages the enterprise iron and emerging silicon our competitors reach but we currently don't. The agent is AGPL, so this lands entirely in Community/OSS; no new Pro+ engine — it's portability, packaging, and build-matrix work.
+
+**Market gap addressed:** Red Hat Satellite / Canonical Landscape / IBM BigFix manage ppc64le + s390x fleets (RHEL, SLES, Ubuntu on Power/Z) — mainframe & Power shops are exactly the regulated enterprises we target. RISC-V is the forward bet on emerging server/edge silicon.
+
+**Why post-GA (Phase 23):** the parity arc (14–22) is about *features*; this is a *reach* expansion of an existing capability. It slots after the v4.0 GA as v4.1 without disturbing any phase numbering, and it builds directly on the arm64/QEMU cross-arch work already in place.
+
+> **⚠️ Endianness — s390x is big-endian.** x86-64, arm64, ppc64le, and riscv64 are all little-endian; **s390x is big-endian** — the one place latent byte-order bugs surface. Every `struct.pack`/`ctypes`/binary-protocol/hash-of-packed-bytes assumption in the agent (and the store-and-forward queue serialization) must be endian-audited, not assumed. JSON/text paths are safe; raw-binary paths are the risk. It gets its own slice so it isn't hand-waved.
+
+> **⚠️ Native-dependency wheels.** The agent's compiled deps (notably `cryptography`'s Rust core, `psutil`) don't always ship manylinux wheels for ppc64le/s390x/riscv64 — so these arches may need a source-build toolchain (Rust + dev headers) in the package build, or vendored/pinned floors. That's the real effort, not the Python. Must preserve the Py3.9-floor and no-eager-asyncio agent constraints.
+
+#### 23.1 Portability foundation — endian audit + CI matrix (OSS)
+
+- [ ] Endianness/portability audit of the agent + store-and-forward serialization; make any binary byte order explicit (no implicit native order); add a big-endian regression test leg
+- [ ] Extend `make build-all-architectures` QEMU cross-arch matrix to ppc64le / s390x / riscv64 (binfmt/QEMU already used for arm64)
+- [ ] Native-dep strategy: detect wheel availability, fall back to source build (Rust toolchain + dev headers) per arch; keep bare-floor runtime deps (no `python_version` markers, per the COPR pitfall)
+- [ ] Emulated CI test leg per arch (accepting QEMU slowness — gate a smoke subset per push, full suite nightly)
+
+**Estimated Size:** ~2,500 lines (build/CI + audit fixes)
+
+#### 23.2 IBM Power — ppc64le packaging (OSS)
+
+- [ ] deb (Debian/Ubuntu ppc64el) + rpm (RHEL/Fedora el9 ppc64le, SLES) + Alpine (ppc64le) agent packages; `control`/spec arch toggles like the arm64 work
+- [ ] Launchpad PPA + COPR ppc64le arch enablement
+- [ ] Validate enroll → inventory → command dispatch on an emulated ppc64le RHEL/Ubuntu guest
+
+**Estimated Size:** ~1,500 lines
+
+#### 23.3 IBM Z — s390x packaging + big-endian correctness (OSS)
+
+- [ ] deb (Debian/Ubuntu s390x) + rpm (RHEL/SLES s390x) agent packages
+- [ ] Big-endian correctness (23.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
+- [ ] Confirm TLS + message signing produce identical results big- vs little-endian
+
+**Estimated Size:** ~1,500 lines
+
+#### 23.4 RISC-V — riscv64 packaging (OSS)
+
+- [ ] deb (Debian/Ubuntu riscv64) + Alpine (riscv64) + Fedora riscv64 (as available) agent packages
+- [ ] Handle the still-maturing wheel/toolchain story (source-build `cryptography` where no wheel exists)
+- [ ] Validate enroll → inventory → command dispatch on an emulated riscv64 guest
+
+**Estimated Size:** ~1,500 lines
+
+#### 23.5 Server-side arch awareness + docs (OSS)
+
+- [ ] Server recognizes / normalizes / displays the new `machine_architecture` values (fleet, host detail, reports); package/repo + OS-lifecycle/EOL selection keyed by arch where relevant
+- [ ] Install docs + a supported-architecture matrix updated; agent download / repo pages list the new arches
+- [ ] i18n/l10n
+
+**Estimated Size:** ~1,000 lines
+
+### Exit Criteria
+
+- [ ] Agent enroll → inventory → command dispatch validated on emulated ppc64le, s390x (big-endian), and riscv64 guests
+- [ ] Store-and-forward queue round-trips correctly across an outage on big-endian s390x
+- [ ] Packages build + install on each arch via the QEMU matrix; download/repo pages + supported-arch matrix updated
+- [ ] Real-hardware validation (where obtainable) tracked as a follow-up; emulated guests are the phase bar
+- [ ] Docs + 14-language i18n complete
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
 ## Release Schedule Summary
 
 | Phase | Version | Focus | Key Deliverables |
@@ -5831,12 +5919,14 @@ The operational product: getting devices enrolled at scale.
 | 15 | v3.2.x | Stabilization | Advisory/window/release-upgrade integration testing |
 | 16 | v3.3.0.0 | Content Lifecycle Management | Content Views + Lifecycle Environments + gated promotion |
 | 17 | v3.4.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
-| 18 | v3.5.0.0 | Provisioning & Discovery | PXE/kickstart bare-metal + cloud compute provisioning, host discovery |
+| 18.1 | v3.5.0.0 | Compute Provisioning & Auto-Enroll | Pluggable compute-provider model (remote libvirt, Proxmox), templates, first-boot auto-enroll |
+| 18.2 | v3.5.x | Bare-Metal PXE & Discovery | Readiness preflight + config advisor, PXE/kickstart, host discovery, ISO provisioning |
 | 19 | v3.5.x | Stabilization | Content lifecycle + provisioning hardening |
 | 20 | v3.6.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
 | 21 | v3.7.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
 | 21.5 | v3.8.0.0 | Mobile Device Management | iOS/Android: ingest-from-UEM + native Apple/Android MDM; mobile OS/patch compliance across Community/Pro+/Enterprise |
 | 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
+| 23 | v4.1.0.0 | Expanded Agent Architectures | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI (Community/OSS) |
 
 ---
 

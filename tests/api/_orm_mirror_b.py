@@ -626,3 +626,48 @@ class ExternalIdpSettings(TestBase):
         ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
     )
+
+
+class ComputeResource(TestBase):
+    __tablename__ = "compute_resource"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    kind = Column(String(50), nullable=False)
+    connection_uri = Column(String(500), nullable=False)
+    credential_ref = Column(String(500), nullable=True)
+    enabled = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
+
+class ProvisioningTemplate(TestBase):
+    __tablename__ = "provisioning_template"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    kind = Column(String(50), nullable=False)
+    body = Column(Text, nullable=False)
+    params = Column(_JSON, nullable=False)
+    version = Column(Integer, nullable=False, default=1)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
+
+class ProvisioningJob(TestBase):
+    __tablename__ = "provisioning_job"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    compute_resource_id = Column(
+        GUID(),
+        ForeignKey("compute_resource.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    template_id = Column(
+        GUID(),
+        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    target_name = Column(String(255), nullable=False)
+    state = Column(String(30), nullable=False, default="pending")
+    provider_id = Column(String(255), nullable=True)
+    detail = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)

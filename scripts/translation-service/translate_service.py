@@ -446,6 +446,28 @@ def _gpu_info() -> List[str]:
     return lines or ["GPU        : nvidia-smi reported no devices"]
 
 
+def _remediation_lines() -> List[str]:
+    """Operator hint lines when we're on the CPU fallback model (no GPU seen).
+
+    The CPU-tier model translates poorly enough that it often echoes the source
+    (which silently fails the downstream ``translate-check`` gate), so surface
+    the exact recovery commands right in the service's own output instead of
+    making the operator reverse-engineer it from a failed ``make lint``.
+    """
+    largest = _MODEL_TIERS[2][1]  # qwen2.5:14b-instruct — the usual GPU pick
+    return [
+        "no GPU detected -> using the CPU model, which may ECHO the source",
+        "  to recover if this box HAS a GPU:",
+        "    1. nvidia-smi                     # confirm the GPU is visible",
+        "    2. ollama ps                      # is a model stuck loaded on CPU?",
+        f"    3. ollama stop {TRANSLATION_MODEL}   # unload it "
+        "(or: sudo systemctl restart ollama)",
+        "    4. restart this service           # re-detects VRAM, picks the GPU model",
+        f"  or force a specific pulled model:  TRANSLATION_MODEL={largest} "
+        "python3 ./translate_service.py",
+    ]
+
+
 def _print_startup_banner() -> None:
     print("=" * 64, flush=True)
     print("SysManage translation service", flush=True)
@@ -454,6 +476,9 @@ def _print_startup_banner() -> None:
     print(f"  listening  : {SERVICE_HOST}:{SERVICE_PORT}", flush=True)
     for line in _gpu_info():
         print(f"  {line}", flush=True)
+    if _VRAM_GIB is None and not _MODEL_ENV:
+        for line in _remediation_lines():
+            print(f"  {line}", flush=True)
     print("=" * 64, flush=True)
 
 

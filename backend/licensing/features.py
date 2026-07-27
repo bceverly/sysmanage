@@ -146,6 +146,13 @@ class FeatureCode(str, Enum):
     OCI_PROXY_MANAGE = "oci_proxy_manage"
     IMAGE_MODE_MANAGE = "image_mode_manage"
 
+    # Provisioning & Discovery (Phase 18) — split-tier gate: template authoring
+    # is Pro+ (Professional), actual provisioning / compute / discovery is
+    # Enterprise.  Both are served by the single PROVISIONING_ENGINE module,
+    # which loads at the Professional tier so Pro+ can manage templates.
+    PROVISIONING_TEMPLATES_MANAGE = "provisioning_templates_manage"  # 18.x Pro+
+    PROVISIONING_MANAGE = "provisioning_manage"  # 18.x Enterprise
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -243,6 +250,12 @@ class ModuleCode(str, Enum):
     OCI_PROXY_ENGINE = "oci_proxy_engine"  # 17.2 container image content
     IMAGE_MODE_ENGINE = "image_mode_engine"  # 17.3 bootc / rpm-ostree hosts
 
+    # Phase 18 — Provisioning & Discovery.  One engine serves both the Pro+
+    # template surface and the Enterprise provisioning/compute/discovery surface;
+    # it loads at the Professional tier (see TIER_MODULES) and the Enterprise-only
+    # capabilities are feature-gated (PROVISIONING_MANAGE) inside it.
+    PROVISIONING_ENGINE = "provisioning_engine"
+
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
         """Convert string to ModuleCode enum."""
@@ -281,6 +294,9 @@ TIER_FEATURES = {
         FeatureCode.CVE_FEED_MANAGEMENT,
         # Phase 14.5 — remote syslog forwarding of SysManage's own logs
         FeatureCode.LOG_ROUTING,
+        # Phase 18 — provisioning template authoring is Pro+ (the act of
+        # provisioning is Enterprise-gated separately, below)
+        FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
     },
     LicenseTier.ENTERPRISE: {
         # All professional features
@@ -377,6 +393,10 @@ TIER_FEATURES = {
         FeatureCode.SNAP_PROXY_MANAGE,
         FeatureCode.OCI_PROXY_MANAGE,
         FeatureCode.IMAGE_MODE_MANAGE,
+        # Phase 18 — Provisioning & Discovery (Enterprise gets both the
+        # template surface and the provisioning/compute/discovery surface)
+        FeatureCode.PROVISIONING_TEMPLATES_MANAGE,
+        FeatureCode.PROVISIONING_MANAGE,
     },
 }
 
@@ -396,6 +416,9 @@ TIER_MODULES = {
         ModuleCode.SECRETS_ENGINE,
         ModuleCode.CONTAINER_ENGINE,
         ModuleCode.PROPLUS_CORE,
+        # Phase 18 — provisioning engine loads at Professional so Pro+ can
+        # author templates; Enterprise-only actions are feature-gated within it
+        ModuleCode.PROVISIONING_ENGINE,
     },
     LicenseTier.ENTERPRISE: {
         ModuleCode.HEALTH_ENGINE,
@@ -441,6 +464,8 @@ TIER_MODULES = {
         ModuleCode.SNAP_PROXY_ENGINE,
         ModuleCode.OCI_PROXY_ENGINE,
         ModuleCode.IMAGE_MODE_ENGINE,
+        # Phase 18 — Provisioning & Discovery
+        ModuleCode.PROVISIONING_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here — it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.
