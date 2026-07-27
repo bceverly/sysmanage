@@ -124,9 +124,9 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     """Render a report's HTML in a worker thread (see ``view_report_html``).
 
     Opens its own sessions because the request session can't cross the thread
-    boundary.  Host data is tenant-scoped, so it is fetched from the active
-    tenant's database (``tenant_id`` threaded in from the handler); users / RBAC
-    / audit / branding / templates are server-global and stay on bootstrap."""
+    boundary.  Host data AND report branding are tenant-scoped, so both come
+    from the active tenant's database (``tenant_id`` threaded in from the
+    handler); users / RBAC / audit are server-global and stay on bootstrap."""
     from backend.persistence import models
 
     bootstrap_local = sessionmaker(
@@ -134,12 +134,15 @@ def _build_report_html(reporting_engine, report_type, template_id, tenant_id):
     )
     tenant_local = request_sessionmaker(tenant_id=tenant_id)
     with bootstrap_local() as db, tenant_local() as tenant_db:
-        # The generator's ``db`` resolves server-global branding (ReportBranding)
-        # at render time → bootstrap.  Host rows are fetched below on tenant_db
-        # and passed in as data.
-        html_gen = reporting_engine.HtmlReportGeneratorImpl(db, _, models=models)
+        # ReportBranding is PER-TENANT (the branding CRUD writes it via
+        # get_tenant_db), so the generator must resolve it from tenant_db — not
+        # bootstrap, which every tenant's report would otherwise share. Host rows
+        # are fetched below on tenant_db and passed in as data.
+        html_gen = reporting_engine.HtmlReportGeneratorImpl(tenant_db, _, models=models)
+        # Report templates are per-tenant (their CRUD writes via get_tenant_db),
+        # so resolve the selected template from the tenant DB, not bootstrap.
         selected_fields = _resolve_template_fields(
-            reporting_engine, db, models, template_id
+            reporting_engine, tenant_db, models, template_id
         )
 
         if report_type in (ReportType.REGISTERED_HOSTS, ReportType.HOSTS_WITH_TAGS):
@@ -281,8 +284,10 @@ def _build_report_pdf(reporting_engine, report_type, template_id, tenant_id):
         users_gen = reporting_engine.UsersReportGeneratorImpl(
             db, i18n_func=_, models=models
         )
+        # Report templates are per-tenant (their CRUD writes via get_tenant_db),
+        # so resolve the selected template from the tenant DB, not bootstrap.
         selected_fields = _resolve_template_fields(
-            reporting_engine, db, models, template_id
+            reporting_engine, tenant_db, models, template_id
         )
 
         if not hosts_gen.reportlab_available:
