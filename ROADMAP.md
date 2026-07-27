@@ -561,6 +561,22 @@ the explicit bullet is added to the in-progress and future phases.)
       "done" until that phase's rung (see "Frontend Test Coverage") is both
       reached in measured coverage and locked in as the enforced `lines`
       floor in `frontend/vite.config.ts`.
+- [ ] **`sysmanage-docs` documents EVERYTHING this phase added** — every
+      user-visible feature shipped this phase has matching documentation on
+      the docs site, landed *in the same phase*, not deferred:
+      **(a)** a new or updated feature page under `docs/` for each
+      capability (e.g. a Pro+ page per new engine/feature), linked from the
+      relevant docs index; **(b)** reproducible **screenshots** wired into
+      the pipeline — new `screenshots/shotlist.json` entries plus any
+      `seed_pro.py` / `seed_ent.py` demo data they need — so `make
+      screenshots` regenerates them (screenshots are never hand-captured);
+      **(c)** the **roadmap page** (`sysmanage-docs/roadmap/`) moved from
+      "coming" to shipped; and **(d)** the 14-language `data-i18n` seed +
+      `make translate` for all new strings.  A feature that shipped without
+      its docs page and screenshots is **INCOMPLETE work, not a follow-up**
+      — this hard gate exists because Phase 17's docs were missed, and it
+      must never happen again (see the standing "Documentation Updates"
+      rule above, of which this is the enforced exit-gate form).
 - [ ] **READMEs are current** — the four project READMEs
       (`sysmanage`, `sysmanage-agent`, `sysmanage-professional-plus`,
       `sysmanage-docs`) reflect what shipped this phase: feature lists,

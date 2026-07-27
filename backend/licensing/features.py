@@ -140,6 +140,12 @@ class FeatureCode(str, Enum):
     # versioned/filtered content views + lifecycle environments + gated promotion.
     CONTENT_LIFECYCLE_MANAGE = "content_lifecycle_manage"
 
+    # Content Distribution (Phase 17, Enterprise) — snap store proxy (17.1),
+    # container-image content lifecycle (17.2), image-mode host management (17.3).
+    SNAP_PROXY_MANAGE = "snap_proxy_manage"
+    OCI_PROXY_MANAGE = "oci_proxy_manage"
+    IMAGE_MODE_MANAGE = "image_mode_manage"
+
     @classmethod
     def from_string(cls, value: str) -> "FeatureCode":
         """Convert string to FeatureCode enum."""
@@ -231,6 +237,11 @@ class ModuleCode(str, Enum):
     # Phase 16 Enterprise module — Content Lifecycle Management (Satellite-style
     # versioned/filtered content views promoted across lifecycle environments).
     CONTENT_LIFECYCLE_ENGINE = "content_lifecycle_engine"
+
+    # Phase 17 Enterprise modules — Content Distribution & Image-Mode Hosts.
+    SNAP_PROXY_ENGINE = "snap_proxy_engine"  # 17.1 snap store proxy
+    OCI_PROXY_ENGINE = "oci_proxy_engine"  # 17.2 container image content
+    IMAGE_MODE_ENGINE = "image_mode_engine"  # 17.3 bootc / rpm-ostree hosts
 
     @classmethod
     def from_string(cls, value: str) -> "ModuleCode":
@@ -362,6 +373,10 @@ TIER_FEATURES = {
         FeatureCode.FEDERATION_AUDIT_READ,
         # Phase 16 — Content Lifecycle Management
         FeatureCode.CONTENT_LIFECYCLE_MANAGE,
+        # Phase 17 — Content Distribution & Image-Mode Hosts
+        FeatureCode.SNAP_PROXY_MANAGE,
+        FeatureCode.OCI_PROXY_MANAGE,
+        FeatureCode.IMAGE_MODE_MANAGE,
     },
 }
 
@@ -422,6 +437,10 @@ TIER_MODULES = {
         ModuleCode.FEDERATION_SITE_ENGINE,
         # Phase 16 — Content Lifecycle Management
         ModuleCode.CONTENT_LIFECYCLE_ENGINE,
+        # Phase 17 — Content Distribution & Image-Mode Hosts
+        ModuleCode.SNAP_PROXY_ENGINE,
+        ModuleCode.OCI_PROXY_ENGINE,
+        ModuleCode.IMAGE_MODE_ENGINE,
         # NOTE: MULTITENANCY_ENGINE is intentionally NOT here — it is exclusive
         # to the MULTITENANT_SAAS tier (defined just below as an Enterprise
         # superset).  That exclusivity is the moat.
