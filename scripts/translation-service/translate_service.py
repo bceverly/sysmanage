@@ -415,7 +415,7 @@ async def _translate(texts: List[str], targets: List[str]) -> List[Dict[str, str
 def _gpu_info() -> List[str]:
     """Best-effort GPU/VRAM lines via nvidia-smi (no torch/CUDA dependency)."""
     try:
-        out = subprocess.run(
+        proc = subprocess.run(
             [
                 "nvidia-smi",
                 "--query-gpu=index,name,memory.total,memory.free",
@@ -424,10 +424,26 @@ def _gpu_info() -> List[str]:
             capture_output=True,
             text=True,
             timeout=10,
-            check=True,
-        ).stdout.strip()
+            check=False,
+        )
     except (FileNotFoundError, subprocess.SubprocessError):
         return ["GPU        : none detected via nvidia-smi (CPU or non-NVIDIA)"]
+    if proc.returncode != 0:
+        # nvidia-smi exists but failed. The common cause on a box that DOES have
+        # a GPU is a driver/library version mismatch after an unrebooted driver
+        # update — name it explicitly with the fix, since the generic "no GPU"
+        # line sent the operator on a hunt last time.
+        err = (proc.stderr or proc.stdout or "").strip().splitlines()
+        detail = err[0] if err else f"nvidia-smi exited {proc.returncode}"
+        out_lines = [f"GPU        : nvidia-smi FAILED — {detail}"]
+        low = detail.lower()
+        if "mismatch" in low or "nvml" in low or "failed to initialize" in low:
+            out_lines.append(
+                "             -> NVIDIA driver/library version mismatch: REBOOT "
+                "this box (or reload the nvidia kernel modules) to fix"
+            )
+        return out_lines
+    out = proc.stdout.strip()
     lines: List[str] = []
     for row in out.splitlines():
         parts = [c.strip() for c in row.split(",")]
