@@ -192,6 +192,60 @@ def mount_lifecycle_routes(app: FastAPI) -> bool:
         return False
 
 
+def _provisioning_secret_resolver(credential_ref):
+    """Resolve a compute resource's ``credential_ref`` (an OpenBAO KV path) to an
+    SSH private key for ``qemu+ssh`` provider connections (Phase 18.1).
+
+    Returns the key as ``bytes``, or ``None`` on any failure so provisioning
+    falls back to the server's ambient SSH auth.  NEVER logs the ref or the
+    secret — only the failure type — since both are sensitive (matches
+    ``secrets_service``'s clear-text-logging discipline).
+    """
+    try:
+        from backend.services.vault_service import (  # noqa: PLC0415
+            VaultService,
+        )
+
+        data = VaultService().retrieve_secret(credential_ref)
+        for field in ("private_key", "ssh_private_key", "key", "value"):
+            val = data.get(field)
+            if val:
+                return val if isinstance(val, bytes) else str(val).encode()
+        logger.warning(
+            "Provisioning credential has no SSH-key field; "
+            "falling back to ambient SSH auth"
+        )
+        return None
+    except Exception as exc:  # noqa: BLE001  (fall back; never leak ref/secret)
+        logger.warning(
+            "Provisioning credential resolution failed (%s); "
+            "falling back to ambient SSH auth",
+            type(exc).__name__,
+        )
+        return None
+
+
+def _provisioning_session_factory_dependency():
+    """FastAPI dependency for the provisioning router (Phase 18.1).
+
+    Captures the active tenant IN the request context and returns a sessionmaker
+    bound to that tenant's engine.  Provisioning dispatches to a background task
+    (a slow first-image download must not block the request), which runs off the
+    request's async context where the tenant ContextVar wouldn't survive — so we
+    capture the tenant here and hand back a factory the worker can call to open a
+    fresh, correctly-scoped session (per ``request_sessionmaker`` guidance in
+    persistence/partitions.py).  Works with multi-tenancy on or off.
+    """
+    from backend.persistence.partitions import (  # noqa: PLC0415
+        request_sessionmaker,
+    )
+    from backend.persistence.tenant_context import (  # noqa: PLC0415
+        get_active_tenant,
+    )
+
+    return request_sessionmaker(tenant_id=get_active_tenant())
+
+
 def mount_provisioning_routes(app: FastAPI) -> bool:
     """
     Mount net-new host provisioning routes from the provisioning_engine
@@ -226,6 +280,8 @@ def mount_provisioning_routes(app: FastAPI) -> bool:
                 http_exception=HTTPException,
                 status_codes=status,
                 logger=logger,
+                secret_resolver=_provisioning_secret_resolver,
+                session_factory_dependency=_provisioning_session_factory_dependency,
             )
             app.include_router(router, prefix="/api")
         logger.info(

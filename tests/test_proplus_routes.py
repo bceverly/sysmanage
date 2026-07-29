@@ -463,3 +463,32 @@ class TestStubsSkippedWhenModuleLoaded:
             },
         )
         assert len(app.routes) == before
+
+
+class TestProvisioningSecretResolver:
+    """The OpenBAO SSH-key resolver injected into the provisioning router
+    (Phase 18.1). Must fail safe to ambient SSH auth and never leak the ref."""
+
+    def test_returns_key_bytes_on_success(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            vault.return_value.retrieve_secret.return_value = {
+                "private_key": "PRIVKEYDATA"
+            }
+            out = proplus_routes._provisioning_secret_resolver("secret/data/kvm")
+        assert out == b"PRIVKEYDATA"
+
+    def test_accepts_alternate_key_fields(self):
+        for field in ("ssh_private_key", "key", "value"):
+            with patch("backend.services.vault_service.VaultService") as vault:
+                vault.return_value.retrieve_secret.return_value = {field: "K"}
+                assert proplus_routes._provisioning_secret_resolver("p") == b"K"
+
+    def test_missing_key_field_returns_none(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            vault.return_value.retrieve_secret.return_value = {"note": "x"}
+            assert proplus_routes._provisioning_secret_resolver("p") is None
+
+    def test_vault_error_falls_back_to_none(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            vault.return_value.retrieve_secret.side_effect = RuntimeError("down")
+            assert proplus_routes._provisioning_secret_resolver("p") is None
