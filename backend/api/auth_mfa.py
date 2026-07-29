@@ -328,7 +328,15 @@ async def mfa_verify(
         success=True,
         details={"method": method},
     )
-    return {"Authorization": sign_jwt(user.userid), "method": method}
+    # Land the user in their sticky/default tenant, same as the password path
+    # (MFA completion is where the final token is minted for MFA users).
+    from backend.api.auth import _default_tenant_id_for_user  # noqa: PLC0415
+
+    tenant_id = _default_tenant_id_for_user(user.userid)
+    return {
+        "Authorization": sign_jwt(user.userid, tenant_id=tenant_id),
+        "method": method,
+    }
 
 
 @router.post("/api/auth/mfa/email/request")

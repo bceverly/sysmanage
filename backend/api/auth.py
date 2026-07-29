@@ -505,12 +505,48 @@ def _open_registry_session():
     return get_sessionmaker(partition=PARTITION_REGISTRY)()
 
 
+def _bootstrap_user_session():
+    """A session on the server-global (bootstrap) DB where ``user`` lives."""
+    return sessionmaker(autocommit=False, autoflush=False, bind=db.get_engine())()
+
+
+def _get_user_last_tenant(userid: str) -> Optional[str]:
+    """The user's stored sticky tenant id (or ``None``).  Best-effort."""
+    session = _bootstrap_user_session()
+    try:
+        user = session.query(models.User).filter(models.User.userid == userid).first()
+        return str(user.last_tenant_id) if user and user.last_tenant_id else None
+    finally:
+        session.close()
+
+
+def _set_user_last_tenant(userid: str, tenant_id: Optional[str]) -> None:
+    """Persist the user's sticky tenant id.  Best-effort; never raises, so a
+    sticky-tenant write can't break login or account switching."""
+    try:
+        session = _bootstrap_user_session()
+        try:
+            user = (
+                session.query(models.User).filter(models.User.userid == userid).first()
+            )
+            if user is not None:
+                user.last_tenant_id = tenant_id
+                session.commit()
+        finally:
+            session.close()
+    except Exception:  # noqa: BLE001 - a sticky write must never break auth
+        pass
+
+
 def _default_tenant_id_for_user(userid: str) -> Optional[str]:
     """Resolve the tenant a user should land in at login (multi-tenancy only).
 
-    Picks the grant flagged ``is_default``; if none is flagged, falls back to
-    the user's first grant, so a user with any tenant access lands *inside* a
-    tenant after login instead of the bare "no tenant" server scope.  Returns
+    Sticky last-tenant: prefer the user's stored ``last_tenant_id`` when it is
+    still a live grant; otherwise the ``is_default`` grant, else the user's
+    first grant — so a user with any tenant access lands *inside* a tenant after
+    login instead of the bare "no tenant" server scope.  The landed tenant is
+    written back to ``User.last_tenant_id`` so it is populated on first login
+    and self-heals if a previously-stored tenant is later revoked.  Returns
     ``None`` when multi-tenancy is off, the principal isn't a registry identity,
     or has no grants (e.g. the control-plane operator) — those keep server
     scope.  Best-effort: any failure yields ``None`` so login never breaks.
@@ -530,8 +566,19 @@ def _default_tenant_id_for_user(userid: str) -> Optional[str]:
             grants = registry_service.list_user_grants(session, registry_user_id)
             if not grants:
                 return None
-            chosen = next((g for g in grants if g.is_default), grants[0])
-            return str(chosen.tenant_id)
+            stored = _get_user_last_tenant(userid)
+            if stored and registry_service.has_active_grant(
+                session, registry_user_id, stored
+            ):
+                chosen = stored
+            else:
+                chosen = str(
+                    next((g for g in grants if g.is_default), grants[0]).tenant_id
+                )
+            # Keep the sticky current: populate on first login, heal on revoke.
+            if chosen and stored != chosen:
+                _set_user_last_tenant(userid, chosen)
+            return chosen
         finally:
             session.close()
     except Exception:  # noqa: BLE001 - login must never fail on tenant resolution
@@ -616,6 +663,10 @@ async def switch_account(
                 )
         finally:
             session.close()
+        # Remember this as the user's sticky tenant so their next login lands
+        # here.  Only real tenants are remembered — switching to server scope
+        # (target_tenant is None) leaves the previous sticky untouched.
+        _set_user_last_tenant(current_user, target_tenant)
 
     the_config = config.get_config()
     jwt_refresh_timeout = config.get_jwt_refresh_timeout()

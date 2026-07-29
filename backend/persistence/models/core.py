@@ -343,6 +343,13 @@ class User(Base):
     external_idp_provider_id = Column(GUID(), nullable=True, index=True)
     external_subject = Column(String(500), nullable=True)
 
+    # Sticky last-selected tenant (Phase 13 convenience).  A SOFT reference to
+    # ``registry_tenant.id`` (cross-partition — no FK).  Written whenever the
+    # user switches tenants and populated on first login, so a multi-tenant user
+    # lands back in the tenant they usually work in; NULL for single-tenant /
+    # non-multi-tenant users.  Validated against a live grant before use.
+    last_tenant_id = Column(GUID(), nullable=True)
+
     # Relationships
     security_roles = relationship(
         "SecurityRole",

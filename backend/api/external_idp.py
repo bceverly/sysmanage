@@ -516,7 +516,10 @@ async def oidc_callback(
     _apply_role_mappings(db, user, role_names)
     db.commit()
 
-    return {"Authorization": sign_jwt(user.userid)}
+    from backend.api.auth import _default_tenant_id_for_user  # noqa: PLC0415
+
+    tenant_id = _default_tenant_id_for_user(user.userid)
+    return {"Authorization": sign_jwt(user.userid, tenant_id=tenant_id)}
 
 
 def _jit_provision_user(db: Session, provider, email: Optional[str], subject: str):
@@ -712,7 +715,10 @@ async def saml_acs(provider_id: str, request: Request, db: Session = Depends(get
     _apply_role_mappings(db, user, role_names)
     db.commit()
 
-    return {"Authorization": sign_jwt(user.userid)}
+    from backend.api.auth import _default_tenant_id_for_user  # noqa: PLC0415
+
+    tenant_id = _default_tenant_id_for_user(user.userid)
+    return {"Authorization": sign_jwt(user.userid, tenant_id=tenant_id)}
 
 
 def _apply_role_mappings(db: Session, user: models.User, role_names: List[str]) -> None:

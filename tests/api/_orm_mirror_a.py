@@ -194,6 +194,8 @@ class User(TestBase):
     updated_at = Column(
         DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
+    # Sticky last-selected tenant (soft ref to registry_tenant.id; no FK)
+    last_tenant_id = Column(GUID(), nullable=True)
 
     # Runtime role cache (not stored in database)
     _role_cache = None

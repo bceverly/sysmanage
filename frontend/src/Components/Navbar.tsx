@@ -53,6 +53,7 @@ const PATH_CATEGORY: Record<string, CategoryId> = {
   '/map': 'fleet',
   '/sites': 'fleet',
   '/tenants': 'fleet',
+  '/provisioning': 'fleet',
   '/airgap/repositories': 'fleet',
   '/airgap/collections': 'fleet',
   '/updates': 'patching',
