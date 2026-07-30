@@ -489,9 +489,14 @@ class TestHostRegisterTenantRouting:
             return db_module.get_engine()
 
         # A valid token resolves to a tenant (the licensed engine's job).
+        # S4 (Phase 18.1): resolution is a placement dict, not a bare tenant id.
         monkeypatch.setattr(
             "backend.api.host._resolve_enrollment_tenant",
-            lambda token: "tenant-abc" if token else None,
+            lambda token: (
+                {"tenant_id": "tenant-abc", "site_id": None, "access_group_id": None}
+                if token
+                else None
+            ),
         )
         monkeypatch.setattr(partitions, "resolve_engine", spy_resolve_engine)
         monkeypatch.setattr(

@@ -204,6 +204,12 @@ class Host(Base):
     # NULL for standalone hosts, populated for child hosts
     parent_host_id = Column(GUID(), nullable=True, index=True)
 
+    # Phase 18.1 S4 — federation site placement.  A SOFT reference to
+    # ``federation_sites.id`` (coordinator-scoped; no cross-partition FK).  Set
+    # at registration when an enrollment token (or, later, a registration key)
+    # carries a site; NULL for hosts not assigned to a site.
+    site_id = Column(GUID(), nullable=True, index=True)
+
     # Phase 12.7: Public IP + GeoLite2 geo-location.
     #
     # The agent fetches its public-facing IP at startup + on a 24h

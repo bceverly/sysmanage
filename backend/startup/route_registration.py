@@ -69,6 +69,7 @@ from backend.api import (
     plugin_bundle,
     processes,
     profile,
+    provisioning_bundle,
     queue,
     reboot_orchestration,
     report_branding,
@@ -351,6 +352,7 @@ def register_routes(app: FastAPI):
     logger.debug("Adding lifecycle-actions router (native /api/v1)")
     _include_versioned(app, lifecycle_actions.router, tags=["os-lifecycle"])
     _include_versioned(app, image_mode_actions.router, tags=["image-mode"])
+    _include_versioned(app, provisioning_bundle.router, tags=["provisioning"])
     logger.debug("Lifecycle-actions router added")
 
     logger.debug("Adding fips-actions router (native /api/v1)")

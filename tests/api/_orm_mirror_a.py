@@ -145,6 +145,8 @@ class Host(TestBase):
     parent_host_id = Column(
         GUID(), ForeignKey("host.id", ondelete="SET NULL"), nullable=True
     )
+    # Phase 18.1 S4 — federation site placement (soft ref; no FK)
+    site_id = Column(GUID(), nullable=True)
 
     # Phase 12.7: agent-reported public IP + GeoLite2 resolution
     public_ip = Column(String(45), nullable=True)

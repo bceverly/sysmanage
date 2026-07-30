@@ -117,7 +117,7 @@ def test_resolve_valid_token_returns_tenant_and_consumes(real_engine, db_session
     plaintext, _row = enrollment_service.generate_token(db_session, tenant.id)
     with patch("backend.config.config.is_multitenancy_enabled", return_value=True):
         resolved = host_api._resolve_enrollment_tenant(plaintext)
-    assert resolved == str(tenant.id)
+    assert resolved["tenant_id"] == str(tenant.id)
     # One use was consumed (committed by the helper's own registry session;
     # expire our session's identity map so we re-read the fresh value).
     db_session.expire_all()
@@ -131,3 +131,39 @@ def test_resolve_invalid_token_rejects(db_session):
         with pytest.raises(HTTPException) as exc:
             host_api._resolve_enrollment_tenant("sme_bogus")
     assert exc.value.status_code == 403
+
+
+def test_apply_enrollment_token_placement_sets_site_and_group():
+    """S4: the consumed token's site/access-group are applied to the host."""
+    from unittest.mock import MagicMock
+
+    from backend.api import host_registration as hr
+
+    host = MagicMock()
+    host.id = "h1"
+    host.site_id = None
+    session = MagicMock()
+    hr._apply_enrollment_token_placement(
+        session,
+        host,
+        {"tenant_id": "t", "site_id": "site-1", "access_group_id": "grp-1"},
+    )
+    assert host.site_id == "site-1"
+    session.add.assert_called_once()  # a HostAccessGroup was inserted
+
+
+def test_apply_enrollment_token_placement_noops_without_placement():
+    from unittest.mock import MagicMock
+
+    from backend.api import host_registration as hr
+
+    host = MagicMock()
+    host.site_id = None
+    session = MagicMock()
+    # None resolution (token-less) and a placement-less token are both no-ops.
+    hr._apply_enrollment_token_placement(session, host, None)
+    hr._apply_enrollment_token_placement(
+        session, host, {"tenant_id": "t", "site_id": None, "access_group_id": None}
+    )
+    session.add.assert_not_called()
+    assert host.site_id is None

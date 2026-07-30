@@ -76,6 +76,10 @@ class ComputeResource(Base):
     # OpenBAO path to the credential (e.g. an SSH key for qemu+ssh://).  The
     # secret is brokered from OpenBAO at connect time; only the path lives here.
     credential_ref = Column(String(500), nullable=True)
+    # Non-secret provider settings (e.g. node_ssh_user, snippet_storage,
+    # node_ssh_host for cluster targeting).  NEVER holds credentials — secrets
+    # live only in OpenBAO, referenced by credential_ref.
+    config = Column(JSON, nullable=True)
     enabled = Column(Boolean, nullable=False, default=True)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -97,6 +101,7 @@ class ComputeResource(Base):
             "kind": self.kind,
             "connection_uri": self.connection_uri,
             "credential_ref": self.credential_ref,
+            "config": self.config or {},
             "enabled": self.enabled,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

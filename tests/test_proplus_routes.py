@@ -466,29 +466,94 @@ class TestStubsSkippedWhenModuleLoaded:
 
 
 class TestProvisioningSecretResolver:
-    """The OpenBAO SSH-key resolver injected into the provisioning router
-    (Phase 18.1). Must fail safe to ambient SSH auth and never leak the ref."""
+    """The OpenBAO secret resolver injected into the provisioning router
+    (Phase 18.1). Returns the stored field dict (the engine picks the fields it
+    needs per provider kind), and fails safe to ambient SSH without leaking the
+    ref."""
 
-    def test_returns_key_bytes_on_success(self):
+    def test_returns_field_dict_on_success(self):
         with patch("backend.services.vault_service.VaultService") as vault:
             vault.return_value.retrieve_secret.return_value = {
                 "private_key": "PRIVKEYDATA"
             }
             out = proplus_routes._provisioning_secret_resolver("secret/data/kvm")
-        assert out == b"PRIVKEYDATA"
+        assert out == {"private_key": "PRIVKEYDATA"}
 
-    def test_accepts_alternate_key_fields(self):
-        for field in ("ssh_private_key", "key", "value"):
-            with patch("backend.services.vault_service.VaultService") as vault:
-                vault.return_value.retrieve_secret.return_value = {field: "K"}
-                assert proplus_routes._provisioning_secret_resolver("p") == b"K"
-
-    def test_missing_key_field_returns_none(self):
+    def test_returns_proxmox_token_plus_node_key(self):
         with patch("backend.services.vault_service.VaultService") as vault:
-            vault.return_value.retrieve_secret.return_value = {"note": "x"}
+            vault.return_value.retrieve_secret.return_value = {
+                "value": "root@pam!t=secret",
+                "node_ssh_private_key": "NODEKEY",
+            }
+            out = proplus_routes._provisioning_secret_resolver("p")
+        assert out["value"] == "root@pam!t=secret"
+        assert out["node_ssh_private_key"] == "NODEKEY"
+
+    def test_empty_secret_returns_none(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            vault.return_value.retrieve_secret.return_value = {}
             assert proplus_routes._provisioning_secret_resolver("p") is None
 
     def test_vault_error_falls_back_to_none(self):
         with patch("backend.services.vault_service.VaultService") as vault:
             vault.return_value.retrieve_secret.side_effect = RuntimeError("down")
             assert proplus_routes._provisioning_secret_resolver("p") is None
+
+
+class TestProvisioningSecretWriterDeleter:
+    """The OpenBAO writer/deleter injected into the provisioning router
+    (Phase 18.1 secret-capture): raw secrets pasted in the UI are written to a
+    tenant-namespaced path on create and purged on delete."""
+
+    def test_writer_stores_fields_and_returns_namespaced_path(self):
+        with patch("backend.services.vault_service.VaultService") as vault, patch(
+            "backend.persistence.tenant_context.get_active_tenant",
+            return_value="tenant-abc",
+        ), patch(
+            "backend.services.vault_service.run_with_vault_retry",
+            side_effect=lambda fn, *a, **k: fn(*a, **k),
+        ):
+            vault.return_value.mount_path = "secret"
+            ref = proplus_routes._provisioning_secret_writer(
+                "res-123", {"value": "tok", "node_ssh_private_key": "NK"}
+            )
+            assert ref == (
+                "secret/data/sysmanage/tenant/tenant-abc/provisioning/res-123"
+            )
+            vault.return_value.make_raw_request.assert_called_once_with(
+                "POST", ref, {"data": {"value": "tok", "node_ssh_private_key": "NK"}}
+            )
+
+    def test_writer_path_without_tenant(self):
+        with patch("backend.services.vault_service.VaultService") as vault, patch(
+            "backend.persistence.tenant_context.get_active_tenant",
+            return_value=None,
+        ), patch(
+            "backend.services.vault_service.run_with_vault_retry",
+            side_effect=lambda fn, *a, **k: fn(*a, **k),
+        ):
+            vault.return_value.mount_path = "secret"
+            ref = proplus_routes._provisioning_secret_writer("res-1", {"value": "t"})
+            assert ref == "secret/data/sysmanage/provisioning/res-1"
+
+    def test_deleter_purges_our_namespace(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            proplus_routes._provisioning_secret_deleter(
+                "secret/data/sysmanage/provisioning/res-9"
+            )
+            vault.return_value.delete_secret.assert_called_once_with(
+                "secret/data/sysmanage/provisioning/res-9"
+            )
+
+    def test_deleter_skips_bring_your_own_path(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            proplus_routes._provisioning_secret_deleter("secret/data/shared/kvm")
+            vault.return_value.delete_secret.assert_not_called()
+
+    def test_deleter_swallows_vault_error(self):
+        with patch("backend.services.vault_service.VaultService") as vault:
+            vault.return_value.delete_secret.side_effect = RuntimeError("down")
+            # must not raise (the row is already gone)
+            proplus_routes._provisioning_secret_deleter(
+                "secret/data/sysmanage/provisioning/res-9"
+            )

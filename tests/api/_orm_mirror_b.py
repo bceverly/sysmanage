@@ -635,6 +635,7 @@ class ComputeResource(TestBase):
     kind = Column(String(50), nullable=False)
     connection_uri = Column(String(500), nullable=False)
     credential_ref = Column(String(500), nullable=True)
+    config = Column(_JSON, nullable=True)
     enabled = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)

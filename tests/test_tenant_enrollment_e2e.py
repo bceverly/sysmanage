@@ -90,7 +90,11 @@ def mt_chain(
     monkeypatch.setattr(
         enrollment_service,
         "validate_and_consume",
-        lambda session, token: TENANT_ID if token == TOKEN else None,
+        lambda session, token: (
+            {"tenant_id": TENANT_ID, "site_id": None, "access_group_id": None}
+            if token == TOKEN
+            else None
+        ),
     )
 
     return {"tenant_engine": tenant_engine, "bindings": bindings}

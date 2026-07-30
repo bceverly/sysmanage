@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "لا يمكن التحقق من بيانات الاعتماد"
 msgid "User not found."
 msgstr "المستخدم غير موجود."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
 
@@ -456,11 +456,11 @@ msgstr "تم حذف قالب التقرير"
 msgid "Call enroll/start before enroll/complete."
 msgstr " gọi enroll/start قبل enroll/complete ."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "رمز TOTP غير صالح."
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "انتهى وقت تحدي MFA — يرجى تسجيل الدخول مرة أخرى."
 
@@ -472,7 +472,7 @@ msgstr "تحدي MFA غير صالح."
 msgid "Invalid MFA code."
 msgstr "رمز MFA غير صالح."
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
@@ -480,19 +480,19 @@ msgstr ""
 "إذا كانت لديك مكونات التحقق متعددة الأعطال (MFA)، تم إرسال كود التحقق عبر "
 "البريد الإلكتروني."
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "كلمة المرور غير صالحة."
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "تم تعطيل MFA."
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "لم يتم توثيق MFA لهذا الحساب."
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr ""
 "تحتاج إلى صلاحيات المسؤول لإدارة إعدادات مزود الأجهزة متعددة عوامل التحقق "
@@ -583,47 +583,47 @@ msgstr ""
 "يتطلب إنشاء التقارير ترخيص SysManage Professional+. يرجى الترقية للوصول إلى "
 "هذه الميزة."
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "المضيفات المسجلة"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "المضيفات مع العلامات"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "مستخدمو SysManage"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "حالة جدار الحماية للمضيف"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "حالة مكافحة الفيروسات مفتوحة المصدر"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "حالة مكافحة الفيروسات التجارية"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "أدوار أمان المستخدم (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "سجل التدقيق"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "نوع التقرير غير المعروف"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab."
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "تقرير"
 
@@ -684,11 +684,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "مفتاح التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "رمز التسجيل غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1640,7 +1640,7 @@ msgstr "لا يمكن حل سرシーOIDC客户端密钥。"
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登录失败：%s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1648,37 +1648,37 @@ msgstr ""
 "لا يوجد حساب SysManage مرتبط بهذا الهوية IdP. اطلب من المسؤول توفير الحساب "
 "أولاً."
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "الحساب غير نشط."
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "الموفر ليس موفرًا لـ SAML."
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "لم يتم بناء بيانات SP الوصفية: %s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "تم تعطيل موفر SAML."
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "لا يمكن بدء تسجيل الدخول باستخدام SAML: %s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "SAMLResponse أو RelayState مفقود."
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "SAML RelayState غير صالح أو منتهي الصلاحية."
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
@@ -2786,29 +2786,29 @@ msgstr "فشل في إحصاء الحزم: %s"
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "الصلاحية ممنوعة: требуется роль VIEW_HOST_DETAILS"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "المضيف موجود بالفعل"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "التسجيل تم امتصاصه: كان المضيف قد حُذف مؤخرا"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "تم تسجيل مستضياف '%(fqdn)s' في المستأجر %(tenant_id)s عبر رمز التسجيل"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2989,6 +2989,26 @@ msgstr " ключ API غير موجود."
 msgid "Failed to process update results"
 msgstr "فشل في معالجة نتائج التحديث"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "يحتاج التجهيز إلى رخصة SysManage Enterprise."
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "وحدة التجهيز غير متوفرة حاليًا."
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "يجب أن يكون expires_in_days 3650 (10 سنوات) أو أقل."
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "تتطلب ورقة التسجيل تمكين متعددة المستأجرين."
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "لم يتم تشكيل ورقة تسجيل ل那個租戶。"
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
@@ -3013,11 +3033,11 @@ msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاش
 msgid "Invalid or missing refresh token"
 msgstr "رمز التجديد غير صالح أو مفقود"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "لم يتم تمكين متعددة المستخدمين."
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
@@ -4126,27 +4146,23 @@ msgstr "المرآة '%s' تحتوي على مدير حزم غير مدعوم"
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "لا يمكن إعادة توجيه المرآة '%(name)s': %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "هذا البيئة ليس لديه محتوى لهذه النافذة المحتوى"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "المضيف المقدم ليس لديه عنوان قابل للحل"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr "يجب تمكين معادلة المستودع لإعادة توجيه العقدة"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr " требуется متجر Snap للوكيل لإعادة توجيه خرائط العُقد"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr " требуется كتلة مستودع الصور للسماكية إعادة توجيه الصور"
 

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "Anmeldedaten konnten nicht validiert werden"
 msgid "User not found."
 msgstr "Benutzer nicht gefunden."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "Sie haben keinen Zugriff auf das gewählte Konto."
 
@@ -461,11 +461,11 @@ msgstr "Berichtsvorlage gelöscht"
 msgid "Call enroll/start before enroll/complete."
 msgstr "Rufen Sie enroll/start vor enroll/complete auf."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "Ungültiger TOTP-Code."
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA-Ausforderung abgelaufen - bitte melden Sie sich erneut an."
 
@@ -477,7 +477,7 @@ msgstr "Ungültiger MFA-Auswahl."
 msgid "Invalid MFA code."
 msgstr "Ungültiger MFA-Code."
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
@@ -485,19 +485,19 @@ msgstr ""
 "Wenn Ihr Konto MFA konfiguriert hat, wurde eine E-Mail mit einem "
 "Bestätigungscode verschickt."
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "Ungültiges Passwort."
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "MFA deaktiviert."
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "MFA ist für dieses Konto nicht registriert."
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr "Die Bearbeitung der MFA-Einstellungen erfordert Administratorrechte."
 
@@ -593,49 +593,49 @@ msgstr ""
 "Berichtsgenerierung erfordert eine SysManage Professional+-Lizenz. Bitte "
 "upgraden Sie, um auf diese Funktion zuzugreifen."
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "Registrierte Hosts"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "Hosts mit Tags"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "SysManage-Benutzer"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "Host-Firewall-Status"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "Open-Source-Antivirus-Status"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "Kommerzieller Antivirus-Status"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "Benutzersicherheitsrollen (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "Auditprotokoll"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "Unbekannter Berichtstyp"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr ""
 "PDF-Generierung ist nicht verfügbar. Bitte installieren Sie das reportlab-"
 "Paket."
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "Bericht"
 
@@ -696,11 +696,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "Ungültiger oder abgelaufener Registrierungsschlüssel"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "Ungültiger oder abgelaufener Anmelde-Token"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1692,7 +1692,7 @@ msgstr "OIDC-Client-Secret konnte nicht aufgelöst werden."
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC-Anmeldung fehlgeschlagen: %s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1700,37 +1700,37 @@ msgstr ""
 "Es ist kein SysManage-Konto mit dieser IdP-Identität verknüpft. Bitte bitten"
 " Sie einen Administrator, Ihr Konto zu erstellen."
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "Konto ist inaktiv."
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "Provider ist kein SAML-Provider."
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "Konnte SP-Metadaten nicht erstellen: %s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "SAML-Provider ist deaktiviert."
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "Kann SAML-Anmeldung nicht starten: %s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "SAMLResponse oder RelayState fehlt."
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "Ungültiger oder abgelaufener SAML RelayState."
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAML-Anmeldung fehlgeschlagen: %s"
@@ -2883,30 +2883,30 @@ msgstr "Fehler beim Zählen der Pakete: %s"
 msgid "Failed to search packages: %s"
 msgstr "Fehler beim Suchen von Paketen: %s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Zugriff verweigert: DELETE_HOST-Rolle erforderlich"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Berechtigung abgelehnt: VIEW_HOST_DETAILS Rolle erforderlich"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "Host existiert bereits"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' wurde über Anmelde-Token in Tenant %(tenant_id)s angemeldet"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3095,6 +3095,26 @@ msgstr "API-Schlüssel nicht gefunden."
 msgid "Failed to process update results"
 msgstr "Fehler beim Verarbeiten der Aktualisierergebnisse"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "Die Bereitstellung erfordert eine SysManage Enterprise-Lizenz."
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "Das Bereitstellungsmodul ist derzeit nicht verfügbar."
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "expires_in_days muss 3650 (10 Jahre) oder weniger sein."
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "Anmelde-Tokens erfordern, dass die Mehrmandantigkeit aktiviert ist."
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "Könnte keinen Anmelde-Token für diesen Mandanten ausstellen."
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "Ungültiger Benutzername oder Passwort"
@@ -3119,11 +3139,11 @@ msgstr "Konto wegen zu vieler fehlgeschlagener Anmeldeversuche gesperrt"
 msgid "Invalid or missing refresh token"
 msgstr "Ungültiger oder fehlender Aktualisierungsschlüssel"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "Die Mehrmietendeaktivierung ist nicht aktiviert."
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "Abmeldung erfolgreich"
 
@@ -4283,31 +4303,27 @@ msgstr ""
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Kann Spiegel '%(name)s' nicht neu bestimmen: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "Diese Umgebung enthält für diese Inhaltsansicht keine Inhalte"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "Der dienstbietende Host hat keine auflösbare Adresse"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr ""
 "Das Synchronisieren des Repository-Spiegels ist erforderlich, um den Host "
 "neu zu bestimmen"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr ""
 "Ein Snap-Store-Proxy ist erforderlich, um die Snaps eines Hosts "
 "umzupositionieren"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr ""
 "Der Container-Image-Registry-Proxy ist erforderlich, um die Bilder neu zu "

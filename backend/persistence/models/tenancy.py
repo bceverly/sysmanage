@@ -384,6 +384,12 @@ class RegistryEnrollmentToken(Base):
     use_count = Column(Integer, nullable=False, default=0)
     last_used_at = Column(DateTime, nullable=True)
     revoked = Column(Boolean, nullable=False, default=False)
+    # Phase 18.1 S4 — auto-enroll placement.  SOFT references (no FK — these
+    # rows live outside the registry partition): when set, a host enrolled with
+    # this token is also bound to the access group and/or site.  NULL = tenant
+    # scope only, the pre-18.1 behavior.
+    site_id = Column(GUID(), nullable=True)
+    access_group_id = Column(GUID(), nullable=True)
 
     __table_args__ = (
         Index("ix_registry_enrollment_token_tenant", "tenant_id"),

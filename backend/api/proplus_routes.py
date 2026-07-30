@@ -193,13 +193,16 @@ def mount_lifecycle_routes(app: FastAPI) -> bool:
 
 
 def _provisioning_secret_resolver(credential_ref):
-    """Resolve a compute resource's ``credential_ref`` (an OpenBAO KV path) to an
-    SSH private key for ``qemu+ssh`` provider connections (Phase 18.1).
+    """Resolve a compute resource's ``credential_ref`` (an OpenBAO KV path) to the
+    stored secret FIELDS (Phase 18.1).
 
-    Returns the key as ``bytes``, or ``None`` on any failure so provisioning
-    falls back to the server's ambient SSH auth.  NEVER logs the ref or the
-    secret — only the failure type — since both are sensitive (matches
-    ``secrets_service``'s clear-text-logging discipline).
+    Returns the full field dict — e.g. an SSH ``private_key`` for a ``qemu+ssh``
+    libvirt target, or a Proxmox API token in ``value`` plus an optional
+    ``node_ssh_private_key`` for the S5 auto-enroll snippet.  The engine's
+    ``_resolve_connection`` picks the fields it needs per provider kind.  Returns
+    ``None`` on any failure so provisioning falls back to the server's ambient
+    SSH auth.  NEVER logs the ref or the secret — only the failure type — since
+    both are sensitive (matches ``secrets_service``'s clear-text discipline).
     """
     try:
         from backend.services.vault_service import (  # noqa: PLC0415
@@ -207,15 +210,7 @@ def _provisioning_secret_resolver(credential_ref):
         )
 
         data = VaultService().retrieve_secret(credential_ref)
-        for field in ("private_key", "ssh_private_key", "key", "value"):
-            val = data.get(field)
-            if val:
-                return val if isinstance(val, bytes) else str(val).encode()
-        logger.warning(
-            "Provisioning credential has no SSH-key field; "
-            "falling back to ambient SSH auth"
-        )
-        return None
+        return data or None
     except Exception as exc:  # noqa: BLE001  (fall back; never leak ref/secret)
         logger.warning(
             "Provisioning credential resolution failed (%s); "
@@ -223,6 +218,64 @@ def _provisioning_secret_resolver(credential_ref):
             type(exc).__name__,
         )
         return None
+
+
+def _provisioning_secret_path(resource_id):
+    """The OpenBAO KV path a compute resource's captured secret is stored at.
+
+    Namespaced per active tenant so a tenant's credential is isolated by path
+    (the shared ``VaultService`` token has no per-tenant scope of its own).  The
+    ``/provisioning/`` segment is also the guard the deleter uses to avoid ever
+    purging a bring-your-own credential path.
+    """
+    from backend.persistence.tenant_context import (  # noqa: PLC0415
+        get_active_tenant,
+    )
+    from backend.services.vault_service import VaultService  # noqa: PLC0415
+
+    mount = VaultService().mount_path
+    tenant_id = get_active_tenant()
+    if tenant_id:
+        subpath = f"sysmanage/tenant/{tenant_id}/provisioning/{resource_id}"
+    else:
+        subpath = f"sysmanage/provisioning/{resource_id}"
+    return f"{mount}/data/{subpath}"
+
+
+def _provisioning_secret_writer(resource_id, fields):
+    """Store a compute resource's raw secret material in OpenBAO and return the
+    ``credential_ref`` (KV path) to persist (Phase 18.1).
+
+    The secret never touches the DB row — only its path does.  Raises on a vault
+    failure so the create surfaces an error rather than silently persisting a
+    resource whose credential wasn't saved.  NEVER logs the fields.
+    """
+    from backend.services.vault_service import (  # noqa: PLC0415
+        VaultService,
+        run_with_vault_retry,
+    )
+
+    path = _provisioning_secret_path(resource_id)
+    vault = VaultService()
+    run_with_vault_retry(vault.make_raw_request, "POST", path, {"data": fields})
+    return path
+
+
+def _provisioning_secret_deleter(credential_ref):
+    """Purge a provisioning secret we minted when its resource is deleted
+    (best-effort).  Only touches paths in our own ``/provisioning/`` namespace so
+    an operator-supplied bring-your-own ``credential_ref`` (a path to a shared
+    secret) is never destroyed."""
+    if not credential_ref or "/provisioning/" not in credential_ref:
+        return
+    try:
+        from backend.services.vault_service import (  # noqa: PLC0415
+            VaultService,
+        )
+
+        VaultService().delete_secret(credential_ref)
+    except Exception as exc:  # noqa: BLE001  (row already gone; never leak ref)
+        logger.warning("Provisioning secret purge failed (%s)", type(exc).__name__)
 
 
 def _provisioning_session_factory_dependency():
@@ -281,6 +334,8 @@ def mount_provisioning_routes(app: FastAPI) -> bool:
                 status_codes=status,
                 logger=logger,
                 secret_resolver=_provisioning_secret_resolver,
+                secret_writer=_provisioning_secret_writer,
+                secret_deleter=_provisioning_secret_deleter,
                 session_factory_dependency=_provisioning_session_factory_dependency,
             )
             app.include_router(router, prefix="/api")

@@ -31,6 +31,7 @@ from backend.api import (
 )
 from backend.api.error_constants import error_host_not_found, error_user_not_found
 from backend.api.host_registration import (  # pylint: disable=unused-import
+    _apply_enrollment_token_placement,
     _apply_registration_key_enrollment,
     _host_write_engine,
     _refresh_existing_host,
@@ -668,8 +669,11 @@ async def register_host(registration_data: HostRegistration):
     # it both rejects a bad registration (403) and selects which database the
     # host lives in.  None when MT is off / no token → server-scoped (bootstrap).
     # A token is consumed even if the host already exists in the target tenant DB.
-    enrollment_tenant_id = _resolve_enrollment_tenant(
+    enrollment_resolution = _resolve_enrollment_tenant(
         registration_data.enrollment_token
+    )
+    enrollment_tenant_id = (
+        enrollment_resolution["tenant_id"] if enrollment_resolution else None
     )
 
     # host + access-group join + reg-key bump + audit are all tenant-scoped
@@ -758,6 +762,10 @@ async def register_host(registration_data: HostRegistration):
         # Phase 8.1: enroll into the key's access group + bump usage.  Atomic
         # with the host create — one commit below.
         _apply_registration_key_enrollment(session, host, validated_key)
+
+        # Phase 18.1 S4: apply the enrollment token's site / access-group
+        # placement onto the host (same commit → atomic with the host create).
+        _apply_enrollment_token_placement(session, host, enrollment_resolution)
 
         session.commit()
         session.refresh(host)

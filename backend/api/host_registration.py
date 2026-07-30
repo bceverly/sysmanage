@@ -68,9 +68,11 @@ def _validate_registration_key(session, raw_key):
 
 
 def _resolve_enrollment_tenant(raw_token):
-    """Validate + consume a tenant enrollment token; return its tenant id.
+    """Validate + consume a tenant enrollment token; return its placement.
 
-    Returns ``None`` when multi-tenancy is DISABLED or no token was supplied — a
+    Returns a dict ``{"tenant_id", "site_id", "access_group_id"}`` on success
+    (site / access-group ``None`` unless the token carries them — Phase 18.1 S4),
+    or ``None`` when multi-tenancy is DISABLED or no token was supplied — a
     token-less registration is still a legitimate server-scoped ("No tenant")
     host while that concept exists.  Raises 403 for a supplied-but-invalid token
     (unknown / revoked / expired / out of uses).  Consumes one use on success
@@ -96,12 +98,32 @@ def _resolve_enrollment_tenant(raw_token):
     from backend.services import enrollment_service  # noqa: PLC0415
 
     with partition_session(partition=PARTITION_REGISTRY) as session:
-        tenant_id = enrollment_service.validate_and_consume(session, raw_token)
-    if tenant_id is None:
+        resolution = enrollment_service.validate_and_consume(session, raw_token)
+    if resolution is None:
         raise HTTPException(
             status_code=403, detail=_("Invalid or expired enrollment token")
         )
-    return tenant_id
+    return resolution
+
+
+def _apply_enrollment_token_placement(session, host, resolution):
+    """Phase 18.1 S4: bind the host to the token's site / access group, if the
+    consumed enrollment token carried them.  ``host.id`` must already be flushed;
+    the caller commits.  Mirrors ``_apply_registration_key_enrollment``'s
+    HostAccessGroup insert.  No-op for a token-less / placement-less token."""
+    if not resolution:
+        return
+    site_id = resolution.get("site_id")
+    if site_id:
+        host.site_id = site_id
+    access_group_id = resolution.get("access_group_id")
+    if access_group_id:
+        session.add(
+            models.HostAccessGroup(
+                host_id=host.id,
+                access_group_id=access_group_id,
+            )
+        )
 
 
 def _reject_if_fqdn_belongs_to_tenant(fqdn):

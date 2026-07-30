@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "प्रमाणीकरण की पुष्टि नहीं �
 msgid "User not found."
 msgstr "उपयोगकर्ता पाया नहीं जा सकता."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "आपके पास चयनित खाते के लिए पहुंच नहीं है।"
 
@@ -466,11 +466,11 @@ msgstr "रिपोर्ट टेम्पलेट हटाया गया
 msgid "Call enroll/start before enroll/complete."
 msgstr "enroll/start से पहले enroll/complete करना होता है."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "गलत TOTP कोड।"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA चालेंज समाप्त हो गया — कृपया पुनः लॉग इन करें।"
 
@@ -482,7 +482,7 @@ msgstr "गलत MFA चेलेंज।"
 msgid "Invalid MFA code."
 msgstr "गलत MFA कोड।"
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
@@ -490,19 +490,19 @@ msgstr ""
 "अगर अपने खाते में MFA सेट किया गया है, तो आपको एक ऑटोथीटिकेशन कोड वाला ईमेल "
 "प्राप्त हुआ है।"
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "अमान्य पासवर्ड।"
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "MFA विलग कर दिया गया।"
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "इस खाते के लिए MFA सक्रिय नहीं है।"
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA सेटिंग्स को संपादित करने के लिए प्रबंधक अधिकार आवश्यक है।"
 
@@ -591,47 +591,47 @@ msgstr ""
 "रिपोर्ट जनरेशन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस सुविधा "
 "तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "पंजीकृत होस्ट"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "टैग के साथ होस्ट"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "SysManage उपयोगकर्ता"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "होस्ट फ़ायरवॉल स्थिति"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "ओपन-सोर्स एंटीवायरस स्थिति"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "वाणिज्यिक एंटीवायरस स्थिति"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "उपयोगकर्ता सुरक्षा भूमिकाएँ (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "ऑडिट लॉग"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "अज्ञात रिपोर्ट प्रकार"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF उत्पादन उपलब्ध नहीं है। कृपया reportlab पैकेज इंस्टॉल करें।"
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "रिपोर्ट"
 
@@ -692,11 +692,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "अमान्य या सक्रिय की संरेखित रजिस्ट्रेशन कुंजी"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "अमान्य या सक्रिय की संपत्ति टोकन"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1665,7 +1665,7 @@ msgstr "OIDC क्लाइंट सीक्रिट हल किया न
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC साइन-इन फ़ेयल: %s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1673,37 +1673,37 @@ msgstr ""
 "इस IdP पहचान के लिए कोई SysManage खाता जुड़ा नहीं है। पहले एडमिनिस्ट्रेटर से"
 " आपकी खाते का प्रबंधन करवाएं।"
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "खाता गैरकार्यान्वित है।"
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "प्रोवाइडर एक SAML प्रोवाइडर नहीं है।"
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "SP metadata बनाने में विफल: %s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "SAML प्रोवाइडर विध्द किया गया है।"
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "SAML साइन-इन शुरू करने में विफल: %s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "SAMLResponse या RelayState नहीं मिला।"
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "वैध या समय सीमा पर होने वाला SAML RelayState।"
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAML साइन-इन विफल: %s"
@@ -2831,23 +2831,23 @@ msgstr "पैकेज गिने फ़ालतू हुई: %s"
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2859,7 +2859,7 @@ msgstr ""
 "\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
 " \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3044,6 +3044,26 @@ msgstr "API कुंजी नहीं मिली।"
 msgid "Failed to process update results"
 msgstr "अपडेट परिणामों का प्रसंस्करण विफल हुआ"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "प्रोवाइज़निंग के लिए SysManage Enterprise लाइसेंस की आवश्यकता है।"
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "प्रोवाइज़निंग मॉड्यूल वर्तमान में उपलब्ध नहीं है।"
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "expires_in_days 3650 (10 साल) या कम होना चाहिए।"
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "एनरोलमेंट टॉकन्स के लिए मल्टी-टेनेंसी को सक्रिय करना होता है।"
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "उस टेनेंट के लिए एनरोलमेंट टॉकन मिंट करना नहीं सकता।"
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "अवैध उपयोगकर्ता नाम या पासवर्ड"
@@ -3068,11 +3088,11 @@ msgstr "बहुत सारे असफल लॉगिन प्रया�
 msgid "Invalid or missing refresh token"
 msgstr "अमान्य या उपलब्ध परीक्षण टोकन"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "बहु-तनाव नहीं है।"
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "लॉगआउट सफल"
 
@@ -4216,29 +4236,25 @@ msgstr "'%s' एक अनुमति नहीं दिए गए पैक�
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "mirror '%(name)s' को repoint नहीं किया जा सकता: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "उस परिस्थिति में इस संवाद व्यू के लिए कोई संवाद नहीं है"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "सर्विंग होस्ट का कोई प्रतिस्थापन-धारक पता नहीं है"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr "यूनिट मरीन को पुन: स्थापित करने के लिए रिपोज़िट्री मरीनिंग आवश्यक है"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr ""
 "स्नैप स्टोर प्रक्षेपक की आवश्यकता होती है एक होस्ट के स्नैप्स को फिर से "
 "दिशांतरित करने के लिए"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr ""
 "कंटेनर इमेज रजिस्ट्री प्रोक्सी के साथ इमेजों का दाईं ओर मुड़ना आवश्यक है"

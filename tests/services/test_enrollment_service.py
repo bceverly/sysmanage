@@ -93,7 +93,8 @@ def test_validate_and_consume_happy_path(real_engine, db_session):
     tenant = _tenant(db_session)
     plaintext, _ = enrollment_service.generate_token(db_session, tenant.id)
     resolved = enrollment_service.validate_and_consume(db_session, plaintext)
-    assert resolved == str(tenant.id)
+    assert resolved["tenant_id"] == str(tenant.id)
+    assert resolved["site_id"] is None and resolved["access_group_id"] is None
     tokens = enrollment_service.list_tokens(db_session, tenant.id)
     assert tokens[0].use_count == 1
     assert tokens[0].last_used_at is not None
@@ -123,12 +124,29 @@ def test_expired_token_is_rejected(real_engine, db_session):
 def test_max_uses_enforced(real_engine, db_session):
     tenant = _tenant(db_session)
     plaintext, _ = enrollment_service.generate_token(db_session, tenant.id, max_uses=1)
-    assert enrollment_service.validate_and_consume(db_session, plaintext) == str(
-        tenant.id
-    )
+    assert enrollment_service.validate_and_consume(db_session, plaintext)[
+        "tenant_id"
+    ] == str(tenant.id)
     assert enrollment_service.validate_and_consume(db_session, plaintext) is None
 
 
 def test_revoke_unknown_returns_false(real_engine, db_session):
     tenant = _tenant(db_session)
     assert enrollment_service.revoke_token(db_session, tenant.id, "no-such-id") is False
+
+
+def test_token_carries_site_and_access_group(real_engine, db_session):
+    """S4: generate_token persists site/access-group and validate_and_consume
+    returns them (needs the rebuilt engine that accepts the kwargs)."""
+    tenant = _tenant(db_session)
+    site = "11111111-1111-1111-1111-111111111111"
+    group = "22222222-2222-2222-2222-222222222222"
+    plaintext, _ = enrollment_service.generate_token(
+        db_session, tenant.id, site_id=site, access_group_id=group
+    )
+    resolved = enrollment_service.validate_and_consume(db_session, plaintext)
+    assert resolved == {
+        "tenant_id": str(tenant.id),
+        "site_id": site,
+        "access_group_id": group,
+    }

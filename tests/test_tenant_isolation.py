@@ -83,10 +83,16 @@ def two_tenants(engine, monkeypatch):  # noqa: ARG001 - engine sets bootstrap
         lambda host_id: bindings.get(str(host_id)),
         raising=False,
     )
+    # validate_and_consume returns the S4 placement dict (Phase 18.1), not the
+    # bare tenant_id string — host registration reads resolution["tenant_id"].
+    _resolutions = {
+        TOKEN_A: {"tenant_id": TENANT_A, "site_id": None, "access_group_id": None},
+        TOKEN_B: {"tenant_id": TENANT_B, "site_id": None, "access_group_id": None},
+    }
     monkeypatch.setattr(
         enrollment_service,
         "validate_and_consume",
-        lambda session, token: {TOKEN_A: TENANT_A, TOKEN_B: TENANT_B}.get(token),
+        lambda session, token: _resolutions.get(token),
     )
 
     try:

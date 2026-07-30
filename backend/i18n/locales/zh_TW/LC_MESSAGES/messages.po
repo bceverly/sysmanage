@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "無法驗證憑證"
 msgid "User not found."
 msgstr "找不到用戶。"
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "您沒有權限訪問所選的帳戶"
 
@@ -454,11 +454,11 @@ msgstr "報告範本已刪除"
 msgid "Call enroll/start before enroll/complete."
 msgstr "請在 enroll/complete 之前呼叫 enroll/start。"
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "無效的 TOTP 碼。"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA挑戰已過期 — 請重新登錄。"
 
@@ -470,25 +470,25 @@ msgstr "無效的 MFA 挑戰。"
 msgid "Invalid MFA code."
 msgstr "無效的 MFA 碼。"
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "如果您帳戶啟用了多重因素驗證 (MFA)，已發送包含驗證碼的郵件。"
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "無效的密碼。"
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "MFA已禁用。"
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "此帳戶未註冊MFA。"
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr "編輯 MFA 設定需要管理員權限。"
 
@@ -575,47 +575,47 @@ msgid ""
 " to access this feature."
 msgstr "報告產生需要 SysManage Professional+ 授權。請升級以存取此功能。"
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "已註冊主機"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "帶標籤的主機"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "SysManage使用者"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "主機防火牆狀態"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "開源防毒軟體狀態"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "商業防毒軟體狀態"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "使用者安全角色 (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "稽核日誌"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "未知報告類型"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF產生不可用。請安裝reportlab套件。"
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "報告"
 
@@ -673,11 +673,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "無效或已過期的註冊密鑰"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "無效或已過期的入站令牌"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1592,43 +1592,43 @@ msgstr "OIDC客戶端密鑰無法解析。"
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC登入失敗：%s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr "沒有與此身份提供者身份相關聯的SysManage帳戶。請先要求管理員為您建立帳戶。"
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "帳戶處於非活動狀態。"
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "提供者不是 SAML 提供者。"
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "無法建立 SP 元數據：%s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "SAML 提供者已停用。"
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "無法啟動 SAML 登入：%s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "缺少 SAMLResponse 或 RelayState。"
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "無效或已過期的 SAML RelayState。"
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAML 登入失敗：%s"
@@ -2699,29 +2699,29 @@ msgstr "計算套件數量時失敗：%s"
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "權限被拒絕：需要 DELETE_HOST 角色"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "權限 denied: VIEW_HOST_DETAILS 角色所需"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "主機已存在"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "註冊被吸收：主機最近已被刪除"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "主機 '%(fqdn)s' 通過入網令牌加入租戶 %(tenant_id)s"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2900,6 +2900,26 @@ msgstr "API 金鑰未找到。"
 msgid "Failed to process update results"
 msgstr "無法處理更新結果"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "佈署需要 SysManage Enterprise 許可證。"
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "佈署模組目前不可用。"
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "expires_in_days 必須為 3650（10 年）或更少。"
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "入學令牌需要啟用多租戶功能。"
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "無法為該租戶生成入學令牌。"
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "無效的使用者名稱或密碼"
@@ -2922,11 +2942,11 @@ msgstr "由於登入嘗試失敗次數過多，帳戶被鎖定"
 msgid "Invalid or missing refresh token"
 msgstr "無效或缺少刷新令牌"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "不支持多租戶。"
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "登出成功"
 
@@ -3995,27 +4015,23 @@ msgstr "鏡像 '%s' 使用不受支援的程式管理員"
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "無法重新指向鏡像 '%(name)s'：%(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "該環境對於此內容視圖沒有任何內容"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "提供服務的主機沒有可解析的地址"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr "需要進行倉庫鏡像才能重新指向主機"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr "Snap 儲存庫代理是重新指向主機的 Snaps 所必需的"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr "容器圖像Registry代理是重新指向圖像所需的"
 

@@ -40,8 +40,14 @@ def generate_token(
     expires_at=None,
     max_uses: Optional[int] = None,
     created_by: Optional[str] = None,
+    site_id: Optional[str] = None,
+    access_group_id: Optional[str] = None,
 ):
-    """Create a token for ``tenant_id``; return (plaintext, row)."""
+    """Create a token for ``tenant_id``; return (plaintext, row).
+
+    ``site_id`` / ``access_group_id`` (Phase 18.1 S4) optionally make the token
+    place the enrolled host into that site / access group.
+    """
     return _engine_or_raise().generate_token(
         session,
         tenant_id,
@@ -49,6 +55,8 @@ def generate_token(
         expires_at=expires_at,
         max_uses=max_uses,
         created_by=created_by,
+        site_id=site_id,
+        access_group_id=access_group_id,
     )
 
 
@@ -62,11 +70,13 @@ def revoke_token(session, tenant_id: str, token_id: str) -> bool:
     return _engine_or_raise().revoke_token(session, tenant_id, token_id)
 
 
-def validate_and_consume(session, plaintext: str) -> Optional[str]:
-    """Resolve a plaintext token to its tenant_id, consuming one use.
+def validate_and_consume(session, plaintext: str) -> Optional[dict]:
+    """Resolve a plaintext token to its placement, consuming one use.
 
-    Returns None when multi-tenancy isn't active (no tokens exist) or the token
-    is unknown/invalid; the engine handles the valid case.
+    Returns a dict ``{"tenant_id", "site_id", "access_group_id"}`` (site /
+    access-group ``None`` unless the token carries them — Phase 18.1 S4), or
+    ``None`` when multi-tenancy isn't active (no tokens exist) or the token is
+    unknown/invalid; the engine handles the valid case.
     """
     engine = seam.engine_module()
     if engine is None:

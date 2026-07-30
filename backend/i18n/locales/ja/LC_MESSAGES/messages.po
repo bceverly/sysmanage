@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "認証情報を検証できませんでした"
 msgid "User not found."
 msgstr "ユーザーが見つかりません。"
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "選択したアカウントにアクセス権限がありません"
 
@@ -454,11 +454,11 @@ msgstr "レポートテンプレートを削除しました"
 msgid "Call enroll/start before enroll/complete."
 msgstr "enroll/startを呼び出す前にenroll/completeを呼び出してください。"
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "無効なTOTPコードです。"
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA シャレンジが期限切れです — 再びログインしてください。"
 
@@ -470,25 +470,25 @@ msgstr "無効なMFAチャレンジです。"
 msgid "Invalid MFA code."
 msgstr "無効なMFAコードです。"
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
 msgstr "アカウントにMFAが設定されている場合は、認証コード付きのメールを送信しました。"
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "無効なパスワード。"
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "MFA無効化。"
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "このアカウントではMFAが登録されていません。"
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr "MFA 設定の編集には管理者権限が必要です。"
 
@@ -575,47 +575,47 @@ msgid ""
 " to access this feature."
 msgstr "レポート生成にはSysManage Professional+ライセンスが必要です。この機能にアクセスするにはアップグレードしてください。"
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "登録済みホスト"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "タグ付きホスト"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "SysManageユーザー"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "ホストファイアウォールステータス"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "オープンソースアンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "商用アンチウイルスステータス"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "ユーザーセキュリティロール (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "監査ログ"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "未知のレポートタイプ"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF生成は利用できません。reportlabパッケージをインストールしてください。"
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "レポート"
 
@@ -675,11 +675,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "無効または期限切れの登録キー"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "無効または期限切れの登録トークン"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1610,44 +1610,44 @@ msgstr "OIDCクライアントシークレットの解決に失敗しました�
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDCサインインに失敗しました: %s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
 msgstr ""
 "このIdPアイデンティティにSysManageアカウントがリンクされていません。アカウントをプロビジョニングするために管理者に問い合わせてください。"
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "アカウントが無効です。"
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "プロバイダーはSAMLプロバイダーではありません。"
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "SPメタデータの作成に失敗しました: %s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "SAMLプロバイダーが無効になっています。"
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "SAMLサインインを開始できませんでした: %s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "SAMLResponseまたはRelayStateがありません。"
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "無効または期限切れのSAML RelayStateです。"
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAMLサインインに失敗しました: %s"
@@ -2724,29 +2724,29 @@ msgstr "パッケージのカウントに失敗しました: %s"
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "アクセス権限がありません: DELETE_HOST ロールが必要です"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "許可が拒否されました: VIEW_HOST_DETAILS ロールが必要です"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "ホストは既に存在しています"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "登録が吸収されました: ホストは最近削除されました"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' のホストはテナント %(tenant_id)s に登録トークンで登録されました"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -2927,6 +2927,26 @@ msgstr "APIキーが見つかりません。"
 msgid "Failed to process update results"
 msgstr "更新結果の処理に失敗しました"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "プロビジョニングにはSysManage Enterpriseライセンスが必要です。"
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "プロビジョニングモジュールは現在利用できません。"
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "expires_in_daysは3650（10年）以下でなければなりません。"
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "エンロールメントトークンはマルチテナNCYが有効になっている必要があります。"
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "そのテナントに対してエンロールメントトークンを発行できませんでした。"
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "無効なユーザー名またはパスワード"
@@ -2949,11 +2969,11 @@ msgstr "ログイン試行の失敗が多すぎるためアカウントがロッ
 msgid "Invalid or missing refresh token"
 msgstr "無効または欠落したリフレッシュトークン"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "マルチテナント機能は有効になっていません。"
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "ログアウト成功"
 
@@ -4038,27 +4058,23 @@ msgstr "'%s'のパッケージマネージャは非対応です"
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "ミラー '%(name)s' を再設定できません: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "その環境にはこのコンテンツビュー用のコンテンツがありません"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "サーバーホストに解決可能なアドレスがありません"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr "ホストの再ポイントにはリポジトリミラリングが必要です"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr "snap ストアプロキシは、ホストの snaps を再ポイントするために必要です"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr "コンテナイメージレジストリプロキシーが画像の再ポイントに必要です"
 

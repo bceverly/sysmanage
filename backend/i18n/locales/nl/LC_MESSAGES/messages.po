@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-26 07:06-0400\n"
+"POT-Creation-Date: 2026-07-29 11:35-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -53,7 +53,7 @@ msgstr "Kon inloggegevens niet valideren"
 msgid "User not found."
 msgstr "Gebruiker niet gevonden."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:615
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
 msgid "You do not have access to the selected account."
 msgstr "U heeft geen toegang tot het geselecteerde account."
 
@@ -457,11 +457,11 @@ msgstr "Rapportsjabloon verwijderd"
 msgid "Call enroll/start before enroll/complete."
 msgstr "Voer enroll/start uit voordat je enroll/complete gebruikt."
 
-#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:507
+#: backend/api/auth_mfa.py:266 backend/api/auth_mfa.py:515
 msgid "Invalid TOTP code."
 msgstr "Ongeldige TOTP-code."
 
-#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:358
+#: backend/api/auth_mfa.py:304 backend/api/auth_mfa.py:366
 msgid "MFA challenge expired — please log in again."
 msgstr "MFA-uitdaging verlopen — log in opnieuw."
 
@@ -473,7 +473,7 @@ msgstr "Ongeldige MFA-uitdaging."
 msgid "Invalid MFA code."
 msgstr "Ongeldige MFA-code."
 
-#: backend/api/auth_mfa.py:404
+#: backend/api/auth_mfa.py:412
 msgid ""
 "If your account has MFA configured, an email with a verification code has "
 "been dispatched."
@@ -481,19 +481,19 @@ msgstr ""
 "Indien uw account MFA (Multi-Factor Authentication) heeft geconfigureerd, is"
 " er een e-mail verzonden met een verificatiecode."
 
-#: backend/api/auth_mfa.py:434
+#: backend/api/auth_mfa.py:442
 msgid "Invalid password."
 msgstr "Ongeldig wachtwoord."
 
-#: backend/api/auth_mfa.py:440
+#: backend/api/auth_mfa.py:448
 msgid "MFA disabled."
 msgstr "MFA is uitgeschakeld."
 
-#: backend/api/auth_mfa.py:495
+#: backend/api/auth_mfa.py:503
 msgid "MFA is not enrolled for this account."
 msgstr "Er is geen MFA ingeschreven voor dit account."
 
-#: backend/api/auth_mfa.py:557
+#: backend/api/auth_mfa.py:565
 msgid "Editing MFA settings requires admin privileges."
 msgstr "Bijwerken van MFA-instellingen vereist admin-rechten."
 
@@ -582,47 +582,47 @@ msgstr ""
 "Rapportgeneratie vereist een SysManage Professional+-licentie. Upgrade om "
 "toegang te krijgen tot deze functie."
 
-#: backend/api/reports/endpoints.py:148
+#: backend/api/reports/endpoints.py:151
 msgid "Registered Hosts"
 msgstr "Geregistreerde hosts"
 
-#: backend/api/reports/endpoints.py:150
+#: backend/api/reports/endpoints.py:153
 msgid "Hosts with Tags"
 msgstr "Hosts met tags"
 
-#: backend/api/reports/endpoints.py:158
+#: backend/api/reports/endpoints.py:161
 msgid "SysManage Users"
 msgstr "SysManage-gebruikers"
 
-#: backend/api/reports/endpoints.py:163
+#: backend/api/reports/endpoints.py:166
 msgid "Host Firewall Status"
 msgstr "Host Firewall Status"
 
-#: backend/api/reports/endpoints.py:169
+#: backend/api/reports/endpoints.py:172
 msgid "Open-Source Antivirus Status"
 msgstr "Open-Source Antivirus Status"
 
-#: backend/api/reports/endpoints.py:176
+#: backend/api/reports/endpoints.py:179
 msgid "Commercial Antivirus Status"
 msgstr "Commerciële Antivirus Status"
 
-#: backend/api/reports/endpoints.py:189
+#: backend/api/reports/endpoints.py:192
 msgid "User Security Roles (RBAC)"
 msgstr "Gebruikersbeveiligingsrollen (RBAC)"
 
-#: backend/api/reports/endpoints.py:199 backend/api/audit_log.py:530
+#: backend/api/reports/endpoints.py:202 backend/api/audit_log.py:530
 msgid "Audit Log"
 msgstr "Auditlogboek"
 
-#: backend/api/reports/endpoints.py:202 backend/api/reports/endpoints.py:339
+#: backend/api/reports/endpoints.py:205 backend/api/reports/endpoints.py:344
 msgid "Unknown report type"
 msgstr "Onbekend rapporttype"
 
-#: backend/api/reports/endpoints.py:292
+#: backend/api/reports/endpoints.py:297
 msgid "PDF generation is not available. Please install reportlab package."
 msgstr "PDF-generatie is niet beschikbaar. Installeer het reportlab-pakket."
 
-#: backend/api/reports/endpoints.py:364
+#: backend/api/reports/endpoints.py:369
 msgid "Report"
 msgstr "Rapport"
 
@@ -683,11 +683,11 @@ msgstr ""
 msgid "Invalid or expired registration key"
 msgstr "Ongeldig of ontbrekend registratie-sleutel"
 
-#: backend/api/host_registration.py:102
+#: backend/api/host_registration.py:104
 msgid "Invalid or expired enrollment token"
 msgstr "Ongeldig of verlopen inschrijftoken"
 
-#: backend/api/host_registration.py:148
+#: backend/api/host_registration.py:170
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1657,7 +1657,7 @@ msgstr "Het OIDC-clientgeheim kon niet worden opgelost."
 msgid "OIDC sign-in failed: %s"
 msgstr "OIDC-inloggen mislukt: %s"
 
-#: backend/api/external_idp.py:501 backend/api/external_idp.py:698
+#: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
 "No sysmanage account is linked to this IdP identity. Ask an administrator to"
 " provision your account first."
@@ -1665,37 +1665,37 @@ msgstr ""
 "Er is geen SysManage-account gekoppeld aan deze IdP-identiteit. Neem contact"
 " op met een beheerder om uw account eerst in te richten."
 
-#: backend/api/external_idp.py:506 backend/api/external_idp.py:703
+#: backend/api/external_idp.py:506 backend/api/external_idp.py:706
 msgid "Account is inactive."
 msgstr "Het account is inactief."
 
-#: backend/api/external_idp.py:608 backend/api/external_idp.py:629
+#: backend/api/external_idp.py:611 backend/api/external_idp.py:632
 msgid "Provider is not a SAML provider."
 msgstr "Provider is geen SAML provider."
 
-#: backend/api/external_idp.py:614
+#: backend/api/external_idp.py:617
 #, python-format
 msgid "Could not build SP metadata: %s"
 msgstr "Kan SP metadata niet bouwen: %s"
 
-#: backend/api/external_idp.py:632
+#: backend/api/external_idp.py:635
 msgid "SAML provider is disabled."
 msgstr "SAML provider is uitgeschakeld."
 
-#: backend/api/external_idp.py:638
+#: backend/api/external_idp.py:641
 #, python-format
 msgid "Could not start SAML sign-in: %s"
 msgstr "Kon SAML inloggen niet starten: %s"
 
-#: backend/api/external_idp.py:666
+#: backend/api/external_idp.py:669
 msgid "Missing SAMLResponse or RelayState."
 msgstr "Ontbreekt SAMLResponse of RelayState."
 
-#: backend/api/external_idp.py:671
+#: backend/api/external_idp.py:674
 msgid "Invalid or expired SAML RelayState."
 msgstr "Ongeldig of verlopen SAML RelayState."
 
-#: backend/api/external_idp.py:681
+#: backend/api/external_idp.py:684
 #, python-format
 msgid "SAML sign-in failed: %s"
 msgstr "SAML inloggen mislukt: %s"
@@ -2817,30 +2817,30 @@ msgstr "Mislukt om het aantal pakketten te tellen: %s"
 msgid "Failed to search packages: %s"
 msgstr "Pakketten zoeken mislukt: %s"
 
-#: backend/api/host.py:153
+#: backend/api/host.py:154
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Toegang geweigerd: rol DELETE_HOST vereist"
 
-#: backend/api/host.py:217
+#: backend/api/host.py:218
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Toegang geweigerd: VIEW_HOST_DETAILS rol vereist"
 
-#: backend/api/host.py:614
+#: backend/api/host.py:615
 msgid "Host already exists"
 msgstr "Host bestaat al"
 
-#: backend/api/host.py:720
+#: backend/api/host.py:724
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registratie opgepakt: host was recent verwijderd"
 
-#: backend/api/host.py:779
+#: backend/api/host.py:787
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' is aangemeld bij tenant %(tenant_id)s via aanmeldings-token"
 
-#: backend/api/host.py:796
+#: backend/api/host.py:804
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -3028,6 +3028,26 @@ msgstr "API-sleutel niet gevonden."
 msgid "Failed to process update results"
 msgstr "Mislukt om de update resultaten te verwerken"
 
+#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+msgid "Provisioning requires a SysManage Enterprise license."
+msgstr "Provisioning vereist een SysManage Enterprise licentie."
+
+#: backend/api/provisioning_bundle.py:88
+msgid "The provisioning module is not currently available."
+msgstr "Het provisioning module is momenteel niet beschikbaar."
+
+#: backend/api/provisioning_bundle.py:99
+msgid "expires_in_days must be 3650 (10 years) or fewer."
+msgstr "expires_in_days moet 3650 (10 jaar) of minder zijn."
+
+#: backend/api/provisioning_bundle.py:120
+msgid "Enrollment tokens require multi-tenancy to be enabled."
+msgstr "Inschrijftokens vereisen dat multi-tenancy is ingeschakeld."
+
+#: backend/api/provisioning_bundle.py:148
+msgid "Could not mint an enrollment token for that tenant."
+msgstr "Kan geen inschrijftoken genereren voor die tenant."
+
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
 msgstr "Ongeldige gebruikersnaam of wachtwoord"
@@ -3052,11 +3072,11 @@ msgstr "Account vergrendeld wegens te veel mislukte inlogpogingen"
 msgid "Invalid or missing refresh token"
 msgstr "Ongeldig of ontbrekend refresh-token"
 
-#: backend/api/auth.py:548 backend/api/auth.py:597
+#: backend/api/auth.py:595 backend/api/auth.py:644
 msgid "Multi-tenancy is not enabled."
 msgstr "Multi-tenantie is niet ingeschakeld."
 
-#: backend/api/auth.py:668
+#: backend/api/auth.py:719
 msgid "Logout successful"
 msgstr "Uitloggen succesvol"
 
@@ -4183,27 +4203,23 @@ msgstr "Spiegel '%s' heeft een onondersteunde pakketbeheerder"
 msgid "Cannot repoint mirror '%(name)s': %(err)s"
 msgstr "Kan spiegel '%(name)s' niet omleiden: %(err)s"
 
-#: backend/api/content_lifecycle_promotion.py:518
-#: backend/api/content_lifecycle_promotion.py:566
-#: backend/api/content_lifecycle_promotion.py:627
+#: backend/api/content_lifecycle_promotion.py:503
 msgid "That environment has no content for this content view"
 msgstr "Die omgeving heeft geen inhoud voor deze content view"
 
-#: backend/api/content_lifecycle_promotion.py:525
-#: backend/api/content_lifecycle_promotion.py:573
-#: backend/api/content_lifecycle_promotion.py:639
+#: backend/api/content_lifecycle_promotion.py:513
 msgid "The serving host has no resolvable address"
 msgstr "De serverende host heeft geen resolvable adres"
 
-#: backend/api/content_lifecycle_promotion.py:531
+#: backend/api/content_lifecycle_promotion.py:543
 msgid "Repository mirroring is required to repoint a host"
 msgstr "Repositoryspiegeling is vereist om een host te omleiden"
 
-#: backend/api/content_lifecycle_promotion.py:559
+#: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
 msgstr "Snap-store-proxy is vereist om de snaps van een host te herwijzen"
 
-#: backend/api/content_lifecycle_promotion.py:620
+#: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
 msgstr ""
 "Een containerafbeelding registersproxy is vereist om afbeeldingen te "
