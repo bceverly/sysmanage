@@ -5506,12 +5506,12 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 **Target Release:** v3.5.0.0
 **Focus:** Provision VMs on external hypervisors via a pluggable provider model, and auto-enroll them. The testable, demo-able core (validated locally on remote libvirt).
 
-- [ ] `provisioning_engine` scaffold + dual-repo licensing (module Professional; features `provisioning_templates_manage` Pro+ / `provisioning_manage` Enterprise) + provider registry + OpenBAO credential store + models (`compute_resource`/provider, `provisioning_job`) + migration
-- [ ] Pluggable **compute-provider model** (`create`/`status`/`destroy`/`console` + capability descriptor); **remote libvirt** provider first (extends the existing virsh plan-building), then **Proxmox** (proves the model generalizes)
-- [ ] Provisioning, partition, and finish templates (parameterized, versioned) — Pro+; reuse the existing autoinstall/preseed/cloud-init renderers via the reporting-style "OSS row + engine render" split
-- [ ] Auto-enroll: extend the enrollment token with `site_id`/`access_group_id`, bind host→site on the register path, and add a "provisioning bundle" endpoint that emits ready-to-embed first-boot cloud-init user-data (server + token + optional CA)
-- [ ] Frontend: compute resources, provisioning templates, and a "provision host" **wizard** (first MUI Stepper in the plugin)
-- [ ] Docs page + wired screenshots + roadmap update + i18n/l10n (per the phase exit gate)
+- [x] `provisioning_engine` scaffold + dual-repo licensing (module Professional; features `provisioning_templates_manage` Pro+ / `provisioning_manage` Enterprise) + provider registry + OpenBAO credential store + models (`compute_resource`/provider, `provisioning_job`) + migration
+- [x] Pluggable **compute-provider model** (`create`/`status`/`destroy`/`console` + capability descriptor); **remote libvirt** provider first (extends the existing virsh plan-building), then **Proxmox** (proves the model generalizes)
+- [x] Provisioning, partition, and finish templates (parameterized, versioned) — Pro+; reuse the existing autoinstall/preseed/cloud-init renderers via the reporting-style "OSS row + engine render" split
+- [x] Auto-enroll: extend the enrollment token with `site_id`/`access_group_id`, bind host→site on the register path, and add a "provisioning bundle" endpoint that emits ready-to-embed first-boot cloud-init user-data (server + token + optional CA)
+- [x] Frontend: compute resources, provisioning templates, and a "provision host" **wizard** (first MUI Stepper in the plugin)
+- [x] Docs page + wired screenshots + roadmap update + i18n/l10n (per the phase exit gate)
 
 **Estimated Size:** ~5,500 lines
 
@@ -5533,7 +5533,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ### Exit Criteria
 
-- [ ] Compute provisioning validated end-to-end on ≥2 providers (remote libvirt + Proxmox): provision → cloud-init → auto-enroll → managed host in the correct tenant/site
+- [x] Compute provisioning validated end-to-end on ≥2 providers (remote libvirt + Proxmox): provision → cloud-init → auto-enroll → managed host in the correct tenant/site
 - [ ] Bare-metal preflight gates correctly; ≥1 PXE path validated on the VM harness in both own-DHCP and proxyDHCP modes
 - [ ] Every capability 402-clean when unlicensed; Pro+ can author templates but not provision
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
@@ -5886,11 +5886,27 @@ The operational product: getting devices enrolled at scale.
 
 **Estimated Size:** ~1,000 lines
 
+#### 23.6 Agent capability advertisement + limited-capability surfacing (OSS)
+
+Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
+
+- [ ] Agent exposes a queryable **capability API** (a local endpoint plus a field carried in the enrollment / `SYSTEM_INFO` payload) that lists the capabilities the running build actually supports — its collectors, action handlers, and feature groups (e.g. package management, hardware inventory, AV/firewall actuation, virtualization, container ops, script execution, image-mode, secrets, etc.) — on this OS/arch
+- [ ] **Baseline population:** existing agents/versions advertise the FULL capability set (nothing regresses); the capability schema is versioned so new capabilities can be added without breaking older agents, and unknown capabilities from a newer agent degrade gracefully server-side
+- [ ] **Reduced-capability builds:** an agent lacking a feature (missing native library for an arch, unsupported old OS) advertises only the subset it supports — the mechanism to build/ship such trimmed agents is the enabling piece this phase sets up
+- [ ] Server **stores + normalizes** each host's capability set (persisted on the host record, refreshed on re-enroll / `SYSTEM_INFO`); a host whose set is a strict subset of the current baseline is flagged **limited**
+- [ ] **Host-detail** screen shows the host's capability list (supported vs. unavailable, with the reason where known — e.g. "no build for riscv64", "OS too old")
+- [ ] **Hosts list** surfaces a **"limited"** badge/column so a fleet with mixed-capability agents is visible at a glance; filterable/sortable by it
+- [ ] **Gate actions on advertised capability** — don't dispatch a command a host can't run; surface a clear "not supported on this agent" instead of a runtime failure
+- [ ] Docs + i18n/l10n
+
+**Estimated Size:** ~2,000 lines (agent capability API + server model/migration + host-detail & hosts-list UI + action gating)
+
 ### Exit Criteria
 
 - [ ] Agent enroll → inventory → command dispatch validated on emulated ppc64le, s390x (big-endian), and riscv64 guests
 - [ ] Store-and-forward queue round-trips correctly across an outage on big-endian s390x
 - [ ] Packages build + install on each arch via the QEMU matrix; download/repo pages + supported-arch matrix updated
+- [ ] Agents advertise their capability set; the server flags + displays **limited** hosts on the hosts list and host-detail screen, and gates feature actions on advertised capability
 - [ ] Real-hardware validation (where obtainable) tracked as a follow-up; emulated guests are the phase bar
 - [ ] Docs + 14-language i18n complete
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free

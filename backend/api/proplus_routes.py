@@ -212,7 +212,8 @@ def _provisioning_secret_resolver(credential_ref):
         data = VaultService().retrieve_secret(credential_ref)
         return data or None
     except Exception as exc:  # noqa: BLE001  (fall back; never leak ref/secret)
-        logger.warning(
+        # Logs only the exception CLASS name, never credential_ref or the secret.
+        logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
             "Provisioning credential resolution failed (%s); "
             "falling back to ambient SSH auth",
             type(exc).__name__,
@@ -275,7 +276,10 @@ def _provisioning_secret_deleter(credential_ref):
 
         VaultService().delete_secret(credential_ref)
     except Exception as exc:  # noqa: BLE001  (row already gone; never leak ref)
-        logger.warning("Provisioning secret purge failed (%s)", type(exc).__name__)
+        # Logs only the exception CLASS name, never credential_ref or the secret.
+        logger.warning(  # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+            "Provisioning secret purge failed (%s)", type(exc).__name__
+        )
 
 
 def _provisioning_session_factory_dependency():

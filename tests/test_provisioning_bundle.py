@@ -33,6 +33,7 @@ def test_bundle_mints_placement_token_and_renders():
     engine = MagicMock()
     engine.render_agent_config_yaml.return_value = "server:\n  hostname: srv\n"
     engine.render_cloud_init_user_data.return_value = "#cloud-config\nruncmd:\n"
+    engine.agent_install_runcmd.return_value = ["dnf install -y sysmanage-agent"]
     captured = {}
 
     def fake_gen(session, tenant_id, **kw):
@@ -53,10 +54,15 @@ def test_bundle_mints_placement_token_and_renders():
     ) as psess:
         psess.return_value.__enter__.return_value = MagicMock()
         psess.return_value.__exit__.return_value = False
-        resp = _run(_body())
+        resp = _run(_body(os_family="rocky"))
 
     assert resp.token == "sme_TOKEN"
     assert resp.user_data.startswith("#cloud-config")
+    # os_family selects the per-distro install runcmd, which is handed to render
+    engine.agent_install_runcmd.assert_called_once_with("rocky")
+    assert engine.render_cloud_init_user_data.call_args.args[2] == [
+        "dnf install -y sysmanage-agent"
+    ]
     # placement forwarded to the token mint
     assert captured["site_id"] == "site-1"
     assert captured["access_group_id"] == "grp-1"

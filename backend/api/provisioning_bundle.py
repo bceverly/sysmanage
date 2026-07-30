@@ -53,6 +53,10 @@ class ProvisioningBundleRequest(BaseModel):
     use_https: bool = True
     hostname: Optional[str] = None
     registration_key: Optional[str] = None
+    # OS family of the target image (debian/ubuntu, rhel, fedora, suse, arch,
+    # alpine, freebsd) selecting the per-distro agent-install recipe; defaults
+    # to debian/ubuntu when omitted.
+    os_family: Optional[str] = None
     # Token bounds (mirrors the control-plane token create).
     label: Optional[str] = None
     expires_in_days: Optional[int] = None
@@ -156,9 +160,17 @@ async def create_provisioning_bundle(
         enrollment_token=plaintext,
         registration_key=body.registration_key or "",
     )
-    user_data = engine.render_cloud_init_user_data(
-        hostname, agent_yaml, list(_DEFAULT_INSTALL)
-    )
+    # Per-distro agent-install (Phase 18.1): the engine builds the full runcmd
+    # sequence for the target OS family.  Guarded so an older engine .so (no
+    # dispatch fn, render bakes the systemd install) still works during a
+    # rebuild window.
+    if hasattr(engine, "agent_install_runcmd"):
+        runcmd = engine.agent_install_runcmd(body.os_family or "")
+        user_data = engine.render_cloud_init_user_data(hostname, agent_yaml, runcmd)
+    else:
+        user_data = engine.render_cloud_init_user_data(
+            hostname, agent_yaml, list(_DEFAULT_INSTALL)
+        )
     return ProvisioningBundleResponse(
         token=plaintext, hostname=hostname, user_data=user_data
     )
