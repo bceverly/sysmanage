@@ -557,3 +557,94 @@ class TestProvisioningSecretWriterDeleter:
             proplus_routes._provisioning_secret_deleter(
                 "secret/data/sysmanage/provisioning/res-9"
             )
+
+
+class TestProvisioningRouterVersionSkew:
+    """mount_provisioning_routes must survive an engine .so that predates the
+    Phase 18.2 router seams.
+
+    Regression: passing the 18.2 keywords unconditionally raised TypeError on an
+    older ``provisioning_engine`` build, which failed the mount outright — and
+    that also removed the 18.1 compute-provisioning routes the old .so DID
+    support.  A whole feature area disappeared with only a stack trace in the
+    log to explain it.
+    """
+
+    _NEW_KWARGS = (
+        "dispatch_plan_fn",
+        "register_correlation_fn",
+        "boot_session_iterator_fn",
+        "enrollment_token_fn",
+    )
+
+    def _engine(self, *, accepts_new):
+        engine = MagicMock()
+        engine.get_module_info.return_value = {
+            "provides_routes": True,
+            "version": "1.0.6",
+        }
+
+        def _factory(**kwargs):
+            if not accepts_new:
+                for name in self._NEW_KWARGS:
+                    if name in kwargs:
+                        raise TypeError(
+                            "get_provisioning_router() got an unexpected "
+                            "keyword argument %r" % name
+                        )
+            return MagicMock(name="router")
+
+        engine.get_provisioning_router.side_effect = _factory
+        return engine
+
+    def test_old_engine_still_mounts_the_18_1_routes(self):
+        app = MagicMock()
+        with patch.object(
+            proplus_routes.module_loader,
+            "get_module",
+            return_value=self._engine(accepts_new=False),
+        ):
+            assert proplus_routes.mount_provisioning_routes(app) is True
+        app.include_router.assert_called_once()
+
+    def test_old_engine_retry_drops_only_the_18_2_kwargs(self):
+        app = MagicMock()
+        engine = self._engine(accepts_new=False)
+        with patch.object(
+            proplus_routes.module_loader, "get_module", return_value=engine
+        ):
+            proplus_routes.mount_provisioning_routes(app)
+        # First attempt with the seams, second without — and the 18.1 arguments
+        # must survive the retry.
+        assert engine.get_provisioning_router.call_count == 2
+        retry_kwargs = engine.get_provisioning_router.call_args_list[1].kwargs
+        for name in self._NEW_KWARGS:
+            assert name not in retry_kwargs
+        assert retry_kwargs["models"] is proplus_routes.models
+        assert "secret_resolver" in retry_kwargs
+
+    def test_new_engine_receives_the_18_2_seams(self):
+        app = MagicMock()
+        engine = self._engine(accepts_new=True)
+        with patch.object(
+            proplus_routes.module_loader, "get_module", return_value=engine
+        ):
+            assert proplus_routes.mount_provisioning_routes(app) is True
+        assert engine.get_provisioning_router.call_count == 1
+        kwargs = engine.get_provisioning_router.call_args.kwargs
+        for name in self._NEW_KWARGS:
+            assert name in kwargs
+
+    def test_a_real_failure_still_reports_unmounted(self):
+        """The fallback must not swallow genuine breakage."""
+        app = MagicMock()
+        engine = MagicMock()
+        engine.get_module_info.return_value = {
+            "provides_routes": True,
+            "version": "1.0.7",
+        }
+        engine.get_provisioning_router.side_effect = RuntimeError("engine exploded")
+        with patch.object(
+            proplus_routes.module_loader, "get_module", return_value=engine
+        ):
+            assert proplus_routes.mount_provisioning_routes(app) is False

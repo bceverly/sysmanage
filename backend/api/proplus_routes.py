@@ -12,6 +12,8 @@ The actual route implementations, service logic, and business rules
 are all contained within the compiled modules.
 """
 
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Depends, FastAPI, HTTPException, status
 
 from backend.auth.auth_bearer import get_current_user
@@ -303,6 +305,82 @@ def _provisioning_session_factory_dependency():
     return request_sessionmaker(tenant_id=get_active_tenant())
 
 
+def _provisioning_boot_session_iterator():
+    """Yield a session per host-bearing database for the PXE boot endpoints
+    (Phase 18.2 S2).
+
+    Those endpoints are unauthenticated — a machine PXE-booting from bare metal
+    has no credentials — so there is no JWT, and therefore no active tenant, to
+    scope the lookup with.  The MAC (or boot token) must instead be searched for
+    across the bootstrap database and every provisioned tenant database, the
+    same way agent registration resolves a host it has not seen before.
+
+    With multi-tenancy off this yields exactly one database, unchanged.  The
+    ENGINE owns closing every session it is handed (matching the
+    ``iter_host_databases`` contract).
+    """
+    from backend.persistence.partitions import (  # pylint: disable=import-outside-toplevel
+        iter_host_databases,
+    )
+
+    return iter_host_databases()
+
+
+def _provisioning_enrollment_token_fn(
+    tenant_id=None, site_id=None, access_group_id=None, hostname=None
+):
+    """Mint a placement-bearing enrollment token for a bare-metal install
+    (Phase 18.2 S4).
+
+    Called from the unauthenticated bootstrap endpoint while a machine is
+    installing itself, so it is the same mint as ``/provisioning/bundle`` but
+    without an operator in the loop: ``tenant_id`` is whichever tenant database
+    the assignment was found in, and site / access-group come off the
+    assignment.
+
+    Returns the plaintext token (shown exactly once, embedded in the agent
+    config) or ``None`` when multi-tenancy is off — a token-less install still
+    enrolls as a server-scoped host.
+    """
+    from backend.config import config  # pylint: disable=import-outside-toplevel
+
+    if not config.is_multitenancy_enabled():
+        return None
+    if not tenant_id:
+        # Loud: with multi-tenancy ON, an assignment we cannot attribute to a
+        # tenant would enroll into the wrong place, so decline instead.
+        logger.error(
+            "provisioning: cannot mint an enrollment token for host %s — the "
+            "install assignment is not attributable to a tenant",
+            hostname,
+        )
+        return None
+
+    from backend.persistence.partitions import (  # pylint: disable=import-outside-toplevel
+        PARTITION_REGISTRY,
+        partition_session,
+    )
+    from backend.services import (  # pylint: disable=import-outside-toplevel
+        enrollment_service,
+    )
+
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
+    with partition_session(partition=PARTITION_REGISTRY) as session:
+        plaintext, _row = enrollment_service.generate_token(
+            session,
+            str(tenant_id),
+            label=f"bare-metal provisioning: {hostname or 'unnamed'}",
+            expires_at=expires_at,
+            # Single use: this token exists for exactly one machine's first
+            # boot.  A reinstall mints a new one via the rearm path.
+            max_uses=1,
+            created_by="provisioning",
+            site_id=str(site_id) if site_id else None,
+            access_group_id=str(access_group_id) if access_group_id else None,
+        )
+    return plaintext
+
+
 def mount_provisioning_routes(app: FastAPI) -> bool:
     """
     Mount net-new host provisioning routes from the provisioning_engine
@@ -326,22 +404,56 @@ def mount_provisioning_routes(app: FastAPI) -> bool:
         logger.debug("provisioning_engine module does not provide routes")
         return False
 
+    # Phase 18.2 S1: the bare-metal readiness preflight runs ON a managed host,
+    # so it needs the ordinary agent deployment-plan path (compute provisioning
+    # actuates a provider API from the control plane instead).
+    from backend.services.proplus_dispatch import (  # pylint: disable=import-outside-toplevel
+        enqueue_apply_plan,
+        register_provisioning_correlation,
+    )
+
+    # Split 18.1 args from the 18.2 seams so a version skew degrades instead of
+    # taking the whole module down.  An engine .so built before Phase 18.2
+    # raises TypeError on the newer keywords, and passing them unconditionally
+    # made mounting fail outright — which also killed the 18.1 routes that .so
+    # DID support.  Same defensive shape as the ``agent_install_runcmd``
+    # hasattr guard in provisioning_bundle.py.
+    base_kwargs = {
+        "db_dependency": Depends(get_db),
+        "auth_dependency": Depends(get_current_user),
+        "feature_gate": _feature_dependency,
+        "module_gate": _module_dependency,
+        "models": models,
+        "http_exception": HTTPException,
+        "status_codes": status,
+        "logger": logger,
+        "secret_resolver": _provisioning_secret_resolver,
+        "secret_writer": _provisioning_secret_writer,
+        "secret_deleter": _provisioning_secret_deleter,
+        "session_factory_dependency": _provisioning_session_factory_dependency,
+    }
+    phase_18_2_kwargs = {
+        "dispatch_plan_fn": enqueue_apply_plan,
+        "register_correlation_fn": register_provisioning_correlation,
+        "boot_session_iterator_fn": _provisioning_boot_session_iterator,
+        "enrollment_token_fn": _provisioning_enrollment_token_fn,
+    }
+
     try:
         with _cython_compat():
-            router = provisioning_engine.get_provisioning_router(
-                db_dependency=Depends(get_db),
-                auth_dependency=Depends(get_current_user),
-                feature_gate=_feature_dependency,
-                module_gate=_module_dependency,
-                models=models,
-                http_exception=HTTPException,
-                status_codes=status,
-                logger=logger,
-                secret_resolver=_provisioning_secret_resolver,
-                secret_writer=_provisioning_secret_writer,
-                secret_deleter=_provisioning_secret_deleter,
-                session_factory_dependency=_provisioning_session_factory_dependency,
-            )
+            try:
+                router = provisioning_engine.get_provisioning_router(
+                    **base_kwargs, **phase_18_2_kwargs
+                )
+            except TypeError as exc:
+                logger.warning(
+                    "provisioning_engine v%s predates the Phase 18.2 router "
+                    "seams (%s); mounting the compute-provisioning routes only. "
+                    "Run 'make build-modules' to enable bare-metal provisioning.",
+                    module_info.get("version", "unknown"),
+                    exc,
+                )
+                router = provisioning_engine.get_provisioning_router(**base_kwargs)
             app.include_router(router, prefix="/api")
         logger.info(
             "Mounted provisioning routes from provisioning_engine v%s",

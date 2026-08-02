@@ -5521,10 +5521,37 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 **Focus:** PXE/iPXE bare-metal provisioning + discovery of unmanaged hardware. Infra-heavy; validated behind a provisioning-network VM harness.
 
 - [ ] **Provisioning readiness preflight + config advisor FIRST** — a per-host probe (model on `MirrorSetupStatus`/`REQUIRED_TOOLS_BY_ROLE`) gates PXE until TFTP/DHCP/HTTP are present; a per-platform config advisor (model on `firewall_plan_builder.detect_firewall_flavor`) suggests/apply dnsmasq/isc-dhcp/kea/tftpd config, with **own-DHCP vs proxyDHCP** modes so it can coexist with a corporate DHCP it cannot change
-- [ ] Bare-metal provisioning: PXE/iPXE + kickstart/preseed/AutoYaST/cloud-init on a designated provisioning-server host
-- [ ] Host discovery (PXE-boot unprovisioned hardware → discovered-hosts inventory → provision)
+- [ ] Bare-metal provisioning: **per-MAC iPXE boot selection** (each machine chainloads `boot.ipxe?mac=…` → its assigned OS) + kickstart/preseed/AutoYaST/cloud-init **and FreeBSD `bsdinstall`** (FreeBSD netboot needs `pxeboot` + an mfsroot, not the Linux kernel+initrd shape) on a designated provisioning-server host
+- [ ] Host discovery: PXE-boot unprovisioned hardware into an **ephemeral RAM/live probe** (no disk install) that registers hardware facts → a **"discovered hosts" parking lot** → operator (or policy) assigns an OS → provision
+- [ ] **OS install-source catalog + per-host OS assignment** — a catalog of bootable install sources (`os_family`/`version`/`arch` → kernel/initrd/install-tree/template-type, sourced from repository mirroring / air-gap install trees) plus a per-discovered-host assignment (host → install-source + partition/finish templates) that the **per-MAC iPXE endpoint** resolves at boot. This is what makes "Ubuntu 22.04 on this box, 24.04 on that one, FreeBSD on a third" a first-class choice rather than an emergent side effect
 - [ ] Bootdisk / ISO-based provisioning for networks without PXE
 - [ ] Bare-metal → first-boot → auto-enroll end-to-end on the VM harness
+- [ ] **Verify published package repos against a REAL package manager, in CI.**
+      `repo.sysmanage.org/agent/deb` shipped a `Release` with no
+      `Suite`/`Components`/`Architectures` and checksums that did not match the
+      served `Packages.gz` — apt refused the repo entirely, so the documented
+      Debian install line was broken for every customer, and bare-metal
+      auto-enroll failed with it. It had **no test of any kind**. The check is
+      cheap and needs no root: point `apt-get update` at the repo with
+      `Dir::State::lists` in a temp dir, assert zero errors, then assert
+      `apt-cache policy` resolves the expected version. Wanted in two places —
+      a unit test over a `file://` fixture repo (catches Release/hash/gzip
+      regressions in seconds) and a post-publish smoke test against the live
+      URL. Same shape for rpm (`dnf repoquery`) and apk once Alpine becomes a
+      real repo rather than direct downloads.
+      **Root causes to keep fixed:** three divergent metadata generators
+      (release / `deploy-docs-repo` / the R2 prune job, which runs last and
+      wins); `apt-ftparchive release .` with no `-o APT::FTPArchive::Release::*`
+      omitting every header; gzip's embedded timestamp making indexes
+      byte-different at the same size, which `aws s3 sync --size-only` then
+      refuses to upload.
+- [ ] **Stop caching package-repo INDEX files at the CDN.** Cloudflare serves
+      `dists/**` with `max-age=14400`, so after every publish there is a
+      window of up to 4h where a fresh `Release` is paired with a stale cached
+      `Packages.gz` and `apt-get update` fails with `Hash Sum mismatch` for
+      real users. Index files change on every publish and must not be cached
+      (or must be purged on publish); the immutable `pool/**` packages should
+      keep their long TTL — that is where the bandwidth is.
 - [ ] Frontend (discovered hosts, wizard extended for bare-metal) + docs + screenshots + i18n/l10n
 
 **Estimated Size:** ~4,500 lines
@@ -5545,11 +5572,68 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 **Target Release:** v3.5.x
 **Focus:** Harden content lifecycle + provisioning across distros/providers; air-gap + federation interplay; performance on large content sets.
 
+### Provisioning hardening — lessons from the Phase 18.2 harness
+
+Six real defects reached the 18.2 VM harness with **every unit test green**, and
+all six would have shipped. They share one cause: our tests assert what we
+*wrote*, not what the consumer *accepts*. The proxy-DHCP test asserted
+`dhcp-boot` was present — it was; dnsmasq ignores it in proxy mode. The Debian
+test asserted the PPA command string — it was there; `ppa:` cannot work on
+Debian. That class of test can never fail for the right reason. These items
+close the gap between our output and the parsers that consume it.
+
+- [ ] **Report WHY a provisioned host failed, from the host.** A machine
+      installed, silently did not enroll, and the reason (a broken apt repo)
+      was three layers away and only findable by inference. The install
+      callback should carry a status payload plus the tail of the bootstrap
+      log, so the assignment row reads *"agent install failed: Unable to locate
+      package sysmanage-agent"*. Also split the state: `installed` currently
+      means "the bootstrap script ran", not "the agent is up" — those must be
+      distinguishable **without** weakening the netboot disarm, since the
+      script deliberately continues past failure so a machine cannot reinstall
+      itself forever.
+- [ ] **Validate generated artifacts with each tool's own validator, plus a
+      must-answer checklist.** `dnsmasq --test -C <config>` and
+      `debconf-set-selections --checkonly` both reject files we would otherwise
+      publish. Neither catches semantics, so pair them with the d-i
+      must-answer checklist already in the engine tests (username, root
+      password + confirmation, partition overview, write-new-label, grub
+      device, tasksel) — each entry cost a full boot cycle to discover, and the
+      checklist is the durable artifact. Extend the same idea to kickstart /
+      AutoYaST / bsdinstall, which have had no live validation at all.
+- [ ] **Make the bare-metal harness cheap enough to run casually.** Most of the
+      18.2 cost was 15-minute cycles with a manual restart in the middle, not
+      diagnosis. The stale-engine guard is in; still wanted:
+      `PXE_DEBUG_PASSWORD` (the installed host locks root and creates no user,
+      so a failed install is undiagnosable from the console), VM snapshot after
+      install so post-install debugging skips the install, and a local package
+      mirror to cut download time. A cycle under five minutes changes how often
+      it gets run.
+- [ ] **Treat duplicated tables as a defect.** `agent_install.pxi` exists
+      verbatim in `virtualization_engine`, `container_engine` and
+      `provisioning_engine`, and the broken Debian channel had to be fixed in
+      all three; the apt-metadata generator existed three times and the copies
+      drifted into an outage. Where a shared file is genuinely impossible
+      (separate repos), the mitigation is self-checks that fail loudly on
+      divergence — as `build-apt-repo.sh` now does — rather than trusting
+      copies to stay in step.
+
 ### Exit Criteria
 
 - [ ] Content View publish/promote validated on apt + dnf + snap + container content
 - [ ] Provisioning validated on ≥1 bare-metal path + ≥2 compute providers
 - [ ] Image-mode update/rollback validated on bootc + rpm-ostree
+- [ ] **Sign `repo.sysmanage.org` and drop `[trusted=yes]`** — the agent apt
+      repo is currently consumed with signature verification DISABLED, both in
+      the documented install line and in the agent-install commands the
+      provisioning engines generate (Debian's channel, since the Launchpad PPA
+      is Ubuntu-only). Every unattended install therefore trusts the repo
+      without verifying it. Publish a signing key, ship it as a keyring, and
+      switch the generated commands + docs to
+      `deb [signed-by=/usr/share/keyrings/sysmanage-archive-keyring.gpg] …`.
+      Touches `agent_install.pxi` in `virtualization_engine`,
+      `container_engine` and `provisioning_engine` (three verbatim copies of
+      the same table), plus the sysmanage-docs install instructions.
 - [ ] Docs + 14-language i18n complete
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**

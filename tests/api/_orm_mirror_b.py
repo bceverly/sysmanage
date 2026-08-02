@@ -672,3 +672,99 @@ class ProvisioningJob(TestBase):
     detail = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+
+
+class InstallSource(TestBase):
+    __tablename__ = "install_source"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    name = Column(String(255), nullable=False, unique=True)
+    os_family = Column(String(40), nullable=False)
+    version = Column(String(40), nullable=False)
+    arch = Column(String(20), nullable=False, default="x86_64")
+    kernel_path = Column(String(500), nullable=False)
+    initrd_path = Column(String(500), nullable=True)
+    install_tree_url = Column(String(1000), nullable=False)
+    template_type = Column(String(30), nullable=False)
+    purpose = Column(String(20), nullable=False, default="install")
+    boot_args = Column(Text, nullable=True)
+    mirror_repository_id = Column(GUID(), nullable=True)
+    enabled = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
+
+class HostInstallAssignment(TestBase):
+    __tablename__ = "host_install_assignment"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    mac_address = Column(String(17), nullable=False, unique=True)
+    install_source_id = Column(
+        GUID(), ForeignKey("install_source.id", ondelete="CASCADE"), nullable=False
+    )
+    partition_template_id = Column(
+        GUID(),
+        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    finish_template_id = Column(
+        GUID(),
+        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    hostname = Column(String(255), nullable=True)
+    site_id = Column(GUID(), nullable=True)
+    access_group_id = Column(GUID(), nullable=True)
+    state = Column(String(20), nullable=False, default="assigned")
+    params = Column(_JSON, nullable=False, default=dict)
+    boot_token = Column(String(64), nullable=True)
+    boot_token_expires_at = Column(DateTime, nullable=True)
+    last_boot_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
+
+class DiscoveredHost(TestBase):
+    __tablename__ = "discovered_host"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    mac_address = Column(String(17), nullable=False, unique=True)
+    state = Column(String(20), nullable=False, default="discovered")
+    ip_address = Column(String(45), nullable=True)
+    hostname = Column(String(255), nullable=True)
+    cpu_model = Column(String(255), nullable=True)
+    cpu_count = Column(Integer, nullable=True)
+    memory_mb = Column(Integer, nullable=True)
+    disk_count = Column(Integer, nullable=True)
+    primary_disk = Column(String(120), nullable=True)
+    manufacturer = Column(String(120), nullable=True)
+    product_name = Column(String(255), nullable=True)
+    serial_number = Column(String(120), nullable=True)
+    facts = Column(_JSON, nullable=False, default=dict)
+    first_seen_at = Column(DateTime, nullable=True)
+    last_seen_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)
+
+
+class ProvisioningReadiness(TestBase):
+    __tablename__ = "provisioning_readiness"
+    host_id = Column(
+        GUID(), ForeignKey("host.id", ondelete="CASCADE"), primary_key=True
+    )
+    tools = Column(_JSON, nullable=False, default=dict)
+    services = Column(_JSON, nullable=False, default=dict)
+    platform = Column(String(40), nullable=True)
+    distro = Column(String(40), nullable=True)
+    firewall_flavor = Column(String(20), nullable=True)
+    dhcp_mode = Column(String(10), nullable=True)
+    last_check_at = Column(DateTime, nullable=True)
+    last_check_message_id = Column(String(36), nullable=True)
+    last_check_error = Column(Text, nullable=True)
+    install_status = Column(String(20), nullable=False, default="idle")
+    last_install_at = Column(DateTime, nullable=True)
+    last_install_message_id = Column(String(36), nullable=True)
+    last_install_error = Column(Text, nullable=True)
+    apply_status = Column(String(20), nullable=False, default="idle")
+    last_apply_at = Column(DateTime, nullable=True)
+    last_apply_message_id = Column(String(36), nullable=True)
+    last_apply_error = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)

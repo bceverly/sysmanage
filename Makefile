@@ -561,6 +561,29 @@ else
 				echo "✓ Flathub repository already configured (user)"; \
 			fi; \
 		fi; \
+		echo "[INFO] Checking for bare-metal provisioning tooling (Phase 18.2 - PXE/iPXE + bootdisk ISOs)..."; \
+		MISSING_PXE=""; \
+		[ -f /usr/share/syslinux/pxelinux.0 ] || MISSING_PXE="$$MISSING_PXE syslinux-tftpboot"; \
+		[ -f /usr/share/syslinux/isolinux.bin ] || MISSING_PXE="$$MISSING_PXE syslinux"; \
+		[ -f /usr/share/ipxe/ipxe.lkrn ] || MISSING_PXE="$$MISSING_PXE ipxe-bootimgs"; \
+		command -v xorriso >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE xorriso"; \
+		command -v qemu-img >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE qemu-img"; \
+		if [ -n "$$MISSING_PXE" ]; then \
+			echo "Missing bare-metal provisioning tools:$$MISSING_PXE"; \
+			echo "Only needed on a dev box that runs the provisioning tests"; \
+			echo "or the Phase 18.2 VM harness."; \
+			if command -v dnf >/dev/null 2>&1; then \
+				echo "Running: sudo dnf install -y$$MISSING_PXE"; \
+				sudo dnf install -y $$MISSING_PXE || \
+				echo "[WARNING] Could not install provisioning tools. Run manually: sudo dnf install -y$$MISSING_PXE"; \
+			else \
+				echo "Running: sudo yum install -y$$MISSING_PXE"; \
+				sudo yum install -y $$MISSING_PXE || \
+				echo "[WARNING] Could not install provisioning tools. Run manually: sudo yum install -y$$MISSING_PXE"; \
+			fi; \
+		else \
+			echo "✓ All bare-metal provisioning tools already installed"; \
+		fi; \
 	elif [ -f /etc/os-release ] && grep -qE "^ID=\"?(opensuse-leap|opensuse-tumbleweed|sles)\"?" /etc/os-release; then \
 		echo "[INFO] openSUSE/SLES detected - checking for RPM build tools..."; \
 		MISSING_PKGS=""; \
@@ -606,6 +629,22 @@ else
 				echo "✓ Flathub repository already configured (user)"; \
 			fi; \
 		fi; \
+		echo "[INFO] Checking for bare-metal provisioning tooling (Phase 18.2 - PXE/iPXE + bootdisk ISOs)..."; \
+		MISSING_PXE=""; \
+		[ -f /usr/share/syslinux/pxelinux.0 ] || MISSING_PXE="$$MISSING_PXE syslinux"; \
+		[ -f /usr/share/ipxe/ipxe.lkrn ] || MISSING_PXE="$$MISSING_PXE ipxe-bootimgs"; \
+		command -v xorriso >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE xorriso"; \
+		command -v qemu-img >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE qemu-tools"; \
+		if [ -n "$$MISSING_PXE" ]; then \
+			echo "Missing bare-metal provisioning tools:$$MISSING_PXE"; \
+			echo "Only needed on a dev box that runs the provisioning tests"; \
+			echo "or the Phase 18.2 VM harness."; \
+			echo "Running: sudo zypper install -y$$MISSING_PXE"; \
+			sudo zypper install -y $$MISSING_PXE || \
+			echo "[WARNING] Could not install provisioning tools. Run manually: sudo zypper install -y$$MISSING_PXE"; \
+		else \
+			echo "✓ All bare-metal provisioning tools already installed"; \
+		fi; \
 	elif [ "$$(uname -s)" = "Linux" ] && [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release 2>/dev/null; then \
 		echo "[INFO] Ubuntu/Debian detected - checking for packaging build tools..."; \
 		MISSING_PKGS=""; \
@@ -639,6 +678,27 @@ else
 			echo "[WARNING] Could not install KVM host tools. Run manually: sudo apt-get install -y$$MISSING_KVM"; \
 		else \
 			echo "✓ All KVM host tools already installed"; \
+		fi; \
+		echo "[INFO] Checking for bare-metal provisioning tooling (Phase 18.2 - PXE/iPXE + bootdisk ISOs)..."; \
+		MISSING_PXE=""; \
+		[ -f /usr/lib/PXELINUX/pxelinux.0 ] || [ -f /usr/lib/syslinux/pxelinux.0 ] || MISSING_PXE="$$MISSING_PXE pxelinux"; \
+		[ -f /usr/lib/syslinux/modules/bios/ldlinux.c32 ] || MISSING_PXE="$$MISSING_PXE syslinux-common"; \
+		[ -f /usr/lib/ipxe/ipxe.lkrn ] || MISSING_PXE="$$MISSING_PXE ipxe"; \
+		[ -f /usr/lib/ISOLINUX/isolinux.bin ] || MISSING_PXE="$$MISSING_PXE isolinux"; \
+		command -v xorriso >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE xorriso"; \
+		command -v qemu-img >/dev/null 2>&1 || MISSING_PXE="$$MISSING_PXE qemu-utils"; \
+		if [ -n "$$MISSING_PXE" ]; then \
+			echo "Missing bare-metal provisioning tools:$$MISSING_PXE"; \
+			echo "pxelinux/syslinux + ipxe provide the netboot loaders the"; \
+			echo "provisioning server hands out; isolinux + xorriso build the"; \
+			echo "bootdisk ISOs for networks without PXE; qemu-utils backs the"; \
+			echo "VM harness.  Only needed on a dev box that runs the"; \
+			echo "provisioning tests or the 18.2 VM harness."; \
+			echo "Running: sudo apt-get install -y$$MISSING_PXE"; \
+			sudo apt-get install -y $$MISSING_PXE || \
+			echo "[WARNING] Could not install provisioning tools. Run manually: sudo apt-get install -y$$MISSING_PXE"; \
+		else \
+			echo "✓ All bare-metal provisioning tools already installed"; \
 		fi; \
 		echo "[INFO] Checking for Snap build tools..."; \
 		if ! command -v snap >/dev/null 2>&1; then \

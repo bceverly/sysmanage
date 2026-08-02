@@ -88,6 +88,9 @@ from backend.services.repo_mirror_result_handlers import (  # pylint: disable=un
 from backend.services.content_lifecycle_result_handlers import (  # pylint: disable=unused-import
     _apply_content_lifecycle_op_result,
 )
+from backend.services.provisioning_result_handlers import (  # pylint: disable=unused-import
+    _apply_provisioning_op_result,
+)
 from backend.websocket.messages import CommandType, Message, MessageType
 from backend.websocket.queue_enums import QueueDirection
 from backend.websocket.queue_operations import QueueOperations
@@ -293,6 +296,24 @@ def register_repo_mirror_correlation(
         message_id,
         "repo_mirror_op",
         f"{action}:{mirror_id}",
+        host_id,
+    )
+
+
+def register_provisioning_correlation(
+    message_id: str, action: str, host_id: str
+) -> None:
+    """Register a provisioning_engine readiness plan for result-routing.
+
+    ``primary_id`` is the bare action (``provisioning_preflight`` /
+    ``provisioning_install`` / ``provisioning_apply``) — ``provisioning_readiness``
+    is keyed by host alone, so there is no second id to encode the way
+    repo-mirror ops encode a mirror_id.
+    """
+    _register_correlation(
+        message_id,
+        "provisioning_op",
+        action,
         host_id,
     )
 
@@ -848,6 +869,7 @@ _SIMPLE_RESULT_HANDLERS = {
     "airgap_run": _apply_airgap_run_result,
     "airgap_ingest": _apply_airgap_ingest_result,
     "content_lifecycle_op": _apply_content_lifecycle_op_result,
+    "provisioning_op": _apply_provisioning_op_result,
 }
 
 
