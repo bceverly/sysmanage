@@ -5561,7 +5561,26 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 ### Exit Criteria
 
 - [x] Compute provisioning validated end-to-end on ≥2 providers (remote libvirt + Proxmox): provision → cloud-init → auto-enroll → managed host in the correct tenant/site
-- [ ] Bare-metal preflight gates correctly; ≥1 PXE path validated on the VM harness in both own-DHCP and proxyDHCP modes
+- [x] Bare-metal preflight gates correctly; ≥1 PXE path validated on the VM harness in **own-DHCP** (2026-08-02: blank VM → PXE → unattended Debian install → agent install → **enrolled** → rebooted from its own disk, hostname and tenant both verified)
+- [ ] **proxyDHCP validated on REAL HARDWARE** — it cannot be validated on the
+      QEMU harness, and that is a property of the harness, not of our config.
+      QEMU's boot ROM *is* iPXE, so it runs the full PXE flow itself and hits a
+      dead end in dnsmasq either way (both measured 2026-08-03 with an iPXE
+      `DEBUG=dhcp:3` build narrating its own state machine):
+        * with a `pxe-service` for the iPXE tag → the boot item makes the offer
+          a MENU (`DHCPOFFER ... pxe`), the client runs PXEBS, and that times
+          out no matter how correctly dnsmasq answers — verified in a capture
+          showing dnsmasq replying to every 4011 request with a named file.
+        * without one → the client stays in plain ProxyDHCP
+          (`DHCPOFFER ... proxy`) and ACCEPTS our 4011 ACK, but that ACK has no
+          filename, so it halts with `Nothing to boot`.
+      On real hardware the ROM is the vendor's: it takes the `!ipxe` menu path,
+      loads our first stage over TFTP, and *that* iPXE does an ordinary DHCP
+      where `dhcp-boot=tag:ipxe` applies — no ProxyDHCP, no PXEBS. iPXE is a
+      second stage in the real world and only ever the ROM under QEMU. Validate
+      on a physical machine, or on a hypervisor whose NIC ROM is not iPXE.
+- [ ] **The published agent package repos install cleanly, verified against a real package manager** — `apt-get update` + `apt-cache policy` (and the rpm equivalent) against `repo.sysmanage.org`, in CI, on every publish. Promoted to an exit criterion because a malformed `Release` silently broke the documented Debian install for **every customer** and was only found by bare-metal provisioning failing three layers downstream; the phase must not close with that unguarded.
+- [ ] **Package-repo index files are not CDN-cached** (or are purged on publish). With `dists/*` on a 4h TTL, every publish leaves a window where a fresh `Release` is paired with a stale `Packages.gz` and `apt-get update` fails for real users; completing the 18.2 validation required a manual purge. Immutable `pool/**` keeps its long TTL.
 - [ ] Every capability 402-clean when unlicensed; Pro+ can author templates but not provision
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
@@ -5617,6 +5636,22 @@ close the gap between our output and the parsers that consume it.
       (separate repos), the mitigation is self-checks that fail loudly on
       divergence — as `build-apt-repo.sh` now does — rather than trusting
       copies to stay in step.
+- [ ] **UEFI PXE has no embedded-iPXE first stage.** `build-embedded-ipxe.sh`
+      produces the BIOS image but the UEFI one does not build: iPXE's last
+      release is v1.21.1 (2022) and its `arch/x86/core/patch_cf.S` opens with
+      `.arch i386`, which binutils >= 2.4x rejects under `as --64`
+      (`Error: 64bit mode not supported on i386`). There is no newer tag to
+      bump to. Options: build from iPXE master, carry a small patch, or ship a
+      stock `ipxe.efi` and chain via the two-stage TFTP script. Until then
+      UEFI clients only have the two-stage path — which is exactly the path
+      proxyDHCP cannot serve, so **UEFI + proxyDHCP is unproven**.
+- [ ] **Verify the agent is actually privileged after a provisioned install.**
+      `is_privileged` is computed from a sudo probe that treats any exit code
+      except 255 as success, so a *denied* sudo reads as privileged; and the
+      shipped sudoers grants systemctl only as `/bin/systemctl` while merged-
+      `/usr` distros resolve it to `/usr/bin/systemctl`. The flag drives whether
+      the server believes a host can patch, restart services, or reboot for a
+      re-provision, so a false positive is worse than a false negative.
 
 ### Exit Criteria
 

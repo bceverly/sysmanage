@@ -648,3 +648,78 @@ class TestProvisioningRouterVersionSkew:
             proplus_routes.module_loader, "get_module", return_value=engine
         ):
             assert proplus_routes.mount_provisioning_routes(app) is False
+
+
+class TestProvisioningEnrollmentTokenSkew:
+    """The token minter must not lose the whole token over an optional hint.
+
+    Regression: ``site_id``/``access_group_id`` arrived with Phase 18.1 S4.  A
+    ``multitenancy_engine`` built before that raises TypeError on them, the mint
+    failed, no token reached the bootstrap — and a bare-metal host completed a
+    25-minute install only to enroll with NO TENANT.  Enrolling into the right
+    tenant without a site is strictly better than that, so degrade and warn.
+    """
+
+    def _mint(self, *, accepts_placement, **call_kwargs):
+        calls = []
+
+        def _generate_token(session, tenant_id, **kwargs):
+            calls.append(kwargs)
+            if not accepts_placement and (
+                "site_id" in kwargs or "access_group_id" in kwargs
+            ):
+                raise TypeError(
+                    "generate_token() got an unexpected keyword argument 'site_id'"
+                )
+            return "plaintext-token", MagicMock()
+
+        cfg = MagicMock()
+        cfg.is_multitenancy_enabled.return_value = True
+        enrollment = MagicMock()
+        enrollment.generate_token.side_effect = _generate_token
+
+        with patch.dict(
+            "sys.modules",
+            {
+                "backend.config": MagicMock(config=cfg),
+                "backend.services": MagicMock(enrollment_service=enrollment),
+            },
+        ), patch("backend.persistence.partitions.partition_session"):
+            token = proplus_routes._provisioning_enrollment_token_fn(
+                tenant_id="tenant-1", hostname="pxe-1", **call_kwargs
+            )
+        return token, calls
+
+    def test_current_engine_gets_the_placement(self):
+        token, calls = self._mint(
+            accepts_placement=True, site_id="site-9", access_group_id="ag-3"
+        )
+        assert token == "plaintext-token"
+        assert len(calls) == 1
+        assert calls[0]["site_id"] == "site-9"
+        assert calls[0]["access_group_id"] == "ag-3"
+        assert calls[0]["max_uses"] == 1
+
+    def test_old_engine_still_yields_a_tenant_scoped_token(self):
+        token, calls = self._mint(
+            accepts_placement=False, site_id="site-9", access_group_id="ag-3"
+        )
+        # The point of the fix: a token, so the host lands in tenant-1 rather
+        # than nowhere.
+        assert token == "plaintext-token"
+        assert len(calls) == 2  # first attempt raised, retry succeeded
+        assert "site_id" not in calls[1]
+        assert "access_group_id" not in calls[1]
+        assert calls[1]["max_uses"] == 1
+        assert calls[1]["created_by"] == "provisioning"
+
+    def test_no_tenant_declines_rather_than_guessing(self):
+        cfg = MagicMock()
+        cfg.is_multitenancy_enabled.return_value = True
+        with patch.dict("sys.modules", {"backend.config": MagicMock(config=cfg)}):
+            assert (
+                proplus_routes._provisioning_enrollment_token_fn(
+                    tenant_id=None, hostname="pxe-1"
+                )
+                is None
+            )

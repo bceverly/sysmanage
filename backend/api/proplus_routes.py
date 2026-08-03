@@ -365,19 +365,40 @@ def _provisioning_enrollment_token_fn(
     )
 
     expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
+    kwargs = {
+        "label": f"bare-metal provisioning: {hostname or 'unnamed'}",
+        "expires_at": expires_at,
+        # Single use: this token exists for exactly one machine's first
+        # boot.  A reinstall mints a new one via the rearm path.
+        "max_uses": 1,
+        "created_by": "provisioning",
+    }
+    # site_id/access_group_id arrived with Phase 18.1 S4.  A multitenancy_engine
+    # built before that raises TypeError on them, and losing the whole token
+    # over an OPTIONAL placement hint is a bad trade: without a token the host
+    # still installs but enrolls with no tenant at all, which is far worse than
+    # enrolling into the right tenant without a site.  Degrade, loudly.
+    placement = {
+        "site_id": str(site_id) if site_id else None,
+        "access_group_id": str(access_group_id) if access_group_id else None,
+    }
     with partition_session(partition=PARTITION_REGISTRY) as session:
-        plaintext, _row = enrollment_service.generate_token(
-            session,
-            str(tenant_id),
-            label=f"bare-metal provisioning: {hostname or 'unnamed'}",
-            expires_at=expires_at,
-            # Single use: this token exists for exactly one machine's first
-            # boot.  A reinstall mints a new one via the rearm path.
-            max_uses=1,
-            created_by="provisioning",
-            site_id=str(site_id) if site_id else None,
-            access_group_id=str(access_group_id) if access_group_id else None,
-        )
+        try:
+            plaintext, _row = enrollment_service.generate_token(
+                session, str(tenant_id), **kwargs, **placement
+            )
+        except TypeError:
+            logger.warning(
+                "provisioning: the loaded multitenancy_engine does not accept "
+                "site_id/access_group_id (pre-18.1-S4 build) — minting the "
+                "token for tenant %s WITHOUT placement for host %s; rebuild "
+                "and reinstall multitenancy_engine to restore site placement",
+                tenant_id,
+                hostname,
+            )
+            plaintext, _row = enrollment_service.generate_token(
+                session, str(tenant_id), **kwargs
+            )
     return plaintext
 
 
