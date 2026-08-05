@@ -42,7 +42,7 @@ from backend.auth.auth_handler import (
     sign_airgap_bundle_token,
 )
 from backend.config import config
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.feature_gate import requires_pro_plus
 from backend.persistence import db, models
 from backend.services import airgap_bundle_builder
@@ -129,7 +129,7 @@ _SOFT_BUILD_DISK_GB = 10  # free disk below this -> warn
 _STAGING_PARENT = "/var/tmp"  # nosec B108  # NOSONAR S5443 - read-only disk_usage probe, never written to
 
 # Reused 404 detail for missing-bundle lookups.
-_BUNDLE_NOT_FOUND = "Bundle not found"
+_BUNDLE_NOT_FOUND = N_("Bundle not found")
 
 
 def _read_meminfo_mb():

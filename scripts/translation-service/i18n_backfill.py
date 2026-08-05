@@ -66,8 +66,19 @@ from typing import Dict, List, Optional, Tuple
 
 # The 13 translation targets (English is the source, never a target).
 TARGET_LANGS = [
-    "ar", "de", "es", "fr", "hi", "it", "ja", "ko", "nl", "pt", "ru",
-    "zh_CN", "zh_TW",
+    "ar",
+    "de",
+    "es",
+    "fr",
+    "hi",
+    "it",
+    "ja",
+    "ko",
+    "nl",
+    "pt",
+    "ru",
+    "zh_CN",
+    "zh_TW",
 ]
 
 # A string with no letters (pure placeholder/code/punctuation) is correct to
@@ -107,7 +118,9 @@ def _post(url: str, payload: dict, timeout: float = 1800.0) -> dict:
         url, data=data, headers={"Content-Type": "application/json"}, method="POST"
     )
     # nosemgrep: dynamic-urllib-use-detected -- service URL is operator config (trusted LAN), not request input
-    with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (trusted LAN)
+    with urllib.request.urlopen(
+        req, timeout=timeout
+    ) as resp:  # noqa: S310 (trusted LAN)
         return json.loads(resp.read().decode("utf-8"))
 
 
@@ -123,7 +136,9 @@ def _service_ok(service: str) -> bool:
         return False
 
 
-def translate_to(service: str, texts: List[str], lang: str, client_batch: int) -> List[str]:
+def translate_to(
+    service: str, texts: List[str], lang: str, client_batch: int
+) -> List[str]:
     """Translate ``texts`` into a single ``lang``, aligned with the input."""
     out: List[str] = []
     for i in range(0, len(texts), client_batch):
@@ -131,7 +146,10 @@ def translate_to(service: str, texts: List[str], lang: str, client_batch: int) -
         try:
             resp = _post(
                 f"{service.rstrip('/')}/translate/batch",
-                {"texts": chunk, "targets": [lang]},
+                {"texts": chunk, "targets": [lang], "require_change": True},
+                # We already filtered our intentionally-English strings
+                # through i18n-allow.txt, so anything still here MUST
+                # change; identical output is a failure, not a result.
             )
         except (urllib.error.URLError, OSError) as exc:
             sys.exit(
@@ -139,67 +157,16 @@ def translate_to(service: str, texts: List[str], lang: str, client_batch: int) -
                 "  Already-finished languages are saved; re-run to resume."
             )
         for item in resp["results"]:
-            out.append(item["translations"][lang])
+            # Take the service's OWN verdict rather than inferring one by
+            # comparing output to input.  Comparing cannot distinguish "the
+            # model legitimately kept this as-is" (IPv4, FQDN) from "the
+            # service gave up and returned the English", which is why such
+            # strings used to be re-sent over the network forever.
+            # An older service omits "status"; assume ok so this still works.
+            status = (item.get("status") or {}).get(lang, "ok")
+            out.append((item["translations"][lang], status == "ok"))
         print(f"      …{min(i + client_batch, len(texts))}/{len(texts)}", flush=True)
     return out
-
-
-def _accept(source: str, translated: str) -> bool:
-    """Decide whether to write a translation back.
-
-    Write it when it actually changed.  When it comes back identical, only hold
-    it back (leave a [TODO] gap to retry) if the source is a letter-bearing
-    string that ALSO contains a placeholder/markup token — that combination is
-    the service's English fallback for a {{…}}/%s/<tag> it couldn't translate
-    safely.  An identical result with no placeholder is a term the model
-    legitimately keeps as-is (acronyms like URL/IPv4, or words such as
-    "Details") and IS written, so it doesn't linger as a gap forever."""
-    if translated != source:
-        return True
-    return not (_HAS_LETTER.search(source) and _PLACEHOLDER_RE.search(source))
-
-
-# Extra passes to re-translate strings that come back as the English fallback.
-# The GPU service is non-deterministic, so a transient miss (a placeholder the
-# model didn't handle on the first try) usually resolves on a re-request — retry
-# in-process so a single miss doesn't fail the whole `make translate` run.
-_GAP_RETRIES = 2
-
-
-def _translate_uniq(
-    service: str, uniq: List[str], lang: str, client_batch: int
-) -> Dict[str, str]:
-    """Translate unique source strings into ``lang``, retrying only the ones that
-    come back as the (un-accepted) English fallback, up to ``_GAP_RETRIES`` extra
-    passes.  Returns ``{source: translation}`` for the strings that resolved;
-    sources still unresolved after all passes are omitted (the caller counts them
-    as remaining gaps)."""
-    pending = list(uniq)
-    resolved: Dict[str, str] = {}
-    for attempt in range(_GAP_RETRIES + 1):
-        if not pending:
-            break
-        got = dict(zip(pending, translate_to(service, pending, lang, client_batch)))
-        still: List[str] = []
-        for src in pending:
-            cand = got.get(src, src)
-            if _accept(src, cand):
-                resolved[src] = cand
-            else:
-                still.append(src)
-        if still and attempt < _GAP_RETRIES:
-            print(
-                f"      retry {attempt + 1}/{_GAP_RETRIES}: "
-                f"{len(still)} transient miss(es)",
-                flush=True,
-            )
-        pending = still
-    return resolved
-
-
-# ---------------------------------------------------------------------------
-# JSON driver  (nested dict, dotted keys, [TODO] placeholders)
-# ---------------------------------------------------------------------------
 
 
 def _flatten(obj: dict, prefix: str = "") -> Dict[str, str]:
@@ -214,10 +181,10 @@ def _flatten(obj: dict, prefix: str = "") -> Dict[str, str]:
 
 
 def _set_dotted(obj: dict, dotted: str, value: str) -> None:
-    parts = dotted.split(".")
     cur = obj
-    for p in parts[:-1]:
-        cur = cur.setdefault(p, {})
+    parts = dotted.split(".")
+    for part in parts[:-1]:
+        cur = cur.setdefault(part, {})
     cur[parts[-1]] = value
 
 
@@ -225,8 +192,104 @@ def _is_json_gap(value: Optional[str]) -> bool:
     return value is None or (isinstance(value, str) and value.startswith("[TODO]"))
 
 
-def run_json(base: Path, template: str, langs: List[str], service: Optional[str],
-             client_batch: int, limit: Optional[int]) -> None:
+# --- allow-list --------------------------------------------------------------
+# Shared with scripts/i18n_strict.py so the translate pass and the gate agree on
+# which values may legitimately stay English.  Without this the pass re-sends
+# every proper noun on every run.
+def _allow():
+    """Load and return the i18n_strict module, or die trying.
+
+    Returning None here silently disabled the allow-list for the WHOLE pass.
+    On 2026-08-05 this resolver probed ``scripts/scripts/i18n_strict.py`` (the
+    parent was already ``scripts/``), found nothing, and fell back to None — so
+    every intentionally-English value was re-sent to the service on every run
+    AND counted as a permanent gap by ``--check``, while ``i18n_strict.py``,
+    which reads the same list correctly, reported OK.  Two gates, two answers,
+    no error message anywhere.  An unresolvable allow-list means a broken
+    checkout, not a soft condition: fail loudly instead of degrading.
+    """
+    import importlib.util  # noqa: PLC0415
+
+    here = Path(__file__).resolve().parent
+    tried = []
+    for base in (here, *list(here.parents)[:3]):
+        cand = base / "i18n_strict.py"
+        tried.append(cand)
+        if cand.exists():
+            spec = importlib.util.spec_from_file_location("_i18n_strict", cand)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+    raise SystemExit(
+        "FATAL: cannot locate i18n_strict.py, the shared i18n-allow.txt "
+        "reader.\n  Looked in:\n"
+        + "".join(f"    {p}\n" for p in tried)
+        + "  Without it every intentionally-English value is re-translated on\n"
+        "  every run and reported as an unfixable gap.  Run from a full checkout."
+    )
+
+
+_STRICT = _allow()  # the i18n_strict module itself
+_ALLOW = _STRICT.Allow(_STRICT.ALLOW_FILE)
+
+
+def _needs_translation(key: str, en_src: str, value, lang: str) -> bool:
+    """True if this leaf still needs the service.
+
+    A gap ([TODO]/missing/empty) OR a value left byte-identical to the English.
+    The second half is the whole point: `make translate` used to look ONLY for
+    gaps, so a string that came back English once was invisible to every
+    subsequent run and stayed English forever.  There is deliberately NO
+    minimum length — a short label is as user-facing as a paragraph, and a
+    length floor is an invisible exemption nobody reviews.  Values that should
+    stay English belong in i18n-allow.txt, where the decision is explicit.
+    """
+    if _is_json_gap(value):
+        return True
+    if not isinstance(value, str) or value != en_src:
+        return False
+    if _ALLOW is not None and _ALLOW.allows(key, en_src, lang):
+        return False
+    # ONE definition of "translatable", shared with i18n_strict.is_prose.
+    # Keeping a second, looser test here (any letter) is what left
+    # "https://grafana.example.com" as a permanent gap the strict gate did not
+    # even consider a string: the pass demanded a translation the gate never
+    # wanted.  Diverging predicates are how these two tools disagree.
+    return bool(_STRICT.is_prose(en_src))
+
+
+# NO client-side retry passes.  The service retries a bad reply ITSELF, next to
+# the model, and then reports the outcome per string via ``status``.  Re-sending
+# from here was pure waste: a LAN round-trip to ask the same model the same
+# question, driven by a guess ("the output equals the input, so it must have
+# failed") that is wrong for every term whose correct translation IS the
+# English — which is exactly how {{seconds}}s and `pkg_info stderr: %s` looped
+# forever.
+
+
+def _translate_uniq(
+    service: str, uniq: List[str], lang: str, client_batch: int
+) -> Dict[str, str]:
+    """``{source: translation}`` for the strings the service translated.
+
+    Sources the service reports as a fallback are omitted, so the caller leaves
+    them as gaps for a later pass — no re-request from here.
+    """
+    resolved: Dict[str, str] = {}
+    for src, (text, ok) in zip(uniq, translate_to(service, uniq, lang, client_batch)):
+        if ok:
+            resolved[src] = text
+    return resolved
+
+
+def run_json(
+    base: Path,
+    template: str,
+    langs: List[str],
+    service: Optional[str],
+    client_batch: int,
+    limit: Optional[int],
+) -> None:
     en_path = base / template.format(lang="en")
     if not en_path.exists():
         sys.exit(f"ERROR: source file not found: {en_path}")
@@ -240,11 +303,35 @@ def run_json(base: Path, template: str, langs: List[str], service: Optional[str]
         doc = json.loads(path.read_text(encoding="utf-8"))
         lang_flat = _flatten(doc)
 
+        # Self-heal allow-listed gaps.  A value flagged intentionally-English in
+        # i18n-allow.txt is deliberately never sent to the service, so if it is
+        # sitting as a [TODO] (or was requeued into one) that placeholder can
+        # never be cleared and the gate can never close.  Resolve it to its
+        # intended final value — plain English — up front.
+        if service is not None and _ALLOW is not None:
+            healed = 0
+            for key, en_src in en_flat.items():
+                if _ALLOW.allows(key, en_src, lang) and _is_json_gap(
+                    lang_flat.get(key)
+                ):
+                    _set_dotted(doc, key, en_src)
+                    healed += 1
+            if healed:
+                lang_flat = _flatten(doc)
+                path.write_text(
+                    json.dumps(doc, ensure_ascii=False, indent=2) + "\n",
+                    encoding="utf-8",
+                )
+                print(
+                    f"  {lang}: resolved {healed} intentionally-English leaf/leaves",
+                    flush=True,
+                )
+
         # Gather (key, english) for every gap in this language.
         gaps: List[Tuple[str, str]] = [
             (key, en_src)
             for key, en_src in en_flat.items()
-            if _is_json_gap(lang_flat.get(key))
+            if _needs_translation(key, en_src, lang_flat.get(key), lang)
         ]
         if limit:
             gaps = gaps[:limit]
@@ -258,8 +345,8 @@ def run_json(base: Path, template: str, langs: List[str], service: Optional[str]
 
         wrote = skipped = 0
         for key, en_src in gaps:
-            cand = translations.get(en_src, en_src)
-            if _accept(en_src, cand):
+            cand = translations.get(en_src)
+            if cand is not None:
                 _set_dotted(doc, key, cand)
                 wrote += 1
             else:
@@ -275,8 +362,14 @@ def run_json(base: Path, template: str, langs: List[str], service: Optional[str]
 # ---------------------------------------------------------------------------
 
 
-def run_po(base: Path, template: str, langs: List[str], service: Optional[str],
-           client_batch: int, limit: Optional[int]) -> None:
+def run_po(
+    base: Path,
+    template: str,
+    langs: List[str],
+    service: Optional[str],
+    client_batch: int,
+    limit: Optional[int],
+) -> None:
     try:
         import polib  # noqa: PLC0415
     except ImportError:
@@ -289,8 +382,44 @@ def run_po(base: Path, template: str, langs: List[str], service: Optional[str],
             continue
         po = polib.pofile(str(path))
         # Gap = a real message with an empty translation (skip header + obsolete).
+        # Same self-heal for gettext: an allow-listed msgid with an empty
+        # msgstr can never be filled by the service (we never send it), so it
+        # would stay a permanent gap.  Its intended value IS the msgid.
+        if service is not None and _ALLOW is not None:
+            healed = 0
+            for entry in po:
+                if (
+                    entry.msgid
+                    and not entry.obsolete
+                    and not entry.msgstr
+                    and _ALLOW.allows(entry.msgid, entry.msgid, lang)
+                ):
+                    entry.msgstr = entry.msgid
+                    healed += 1
+            if healed:
+                po.save(str(path))
+                print(
+                    f"  {lang}: resolved {healed} intentionally-English msgid(s)",
+                    flush=True,
+                )
+
+        # Empty msgstr OR one left identical to the msgid — the latter was
+        # invisible to every previous run, so it stayed English forever.
         gap_entries = [
-            e for e in po if e.msgid and not e.obsolete and not e.msgstr
+            e
+            for e in po
+            if e.msgid
+            and not e.obsolete
+            and (
+                not e.msgstr
+                or (
+                    e.msgstr == e.msgid
+                    and _HAS_LETTER.search(e.msgid)
+                    and not (
+                        _ALLOW is not None and _ALLOW.allows(e.msgid, e.msgid, lang)
+                    )
+                )
+            )
         ]
         if limit:
             gap_entries = gap_entries[:limit]
@@ -303,8 +432,8 @@ def run_po(base: Path, template: str, langs: List[str], service: Optional[str],
 
         wrote = skipped = 0
         for e in gap_entries:
-            cand = translations.get(e.msgid, e.msgid)
-            if _accept(e.msgid, cand):
+            cand = translations.get(e.msgid)
+            if cand is not None:
                 e.msgstr = cand
                 wrote += 1
             else:
@@ -318,46 +447,81 @@ def run_po(base: Path, template: str, langs: List[str], service: Optional[str],
 # ---------------------------------------------------------------------------
 
 
-def scan_gaps(base: Path, template: str, langs: List[str], fmt: str) -> Dict[str, List[str]]:
+def scan_gaps(
+    base: Path, template: str, langs: List[str], fmt: str
+) -> Dict[str, List[str]]:
     """Re-read the locale files on disk and return {lang: [untranslated keys]}.
 
     Authoritative — reads what was actually written, so it reflects strings the
     service held back (placeholder fallbacks) as well as any never filled."""
     result: Dict[str, List[str]] = {}
     if fmt == "json":
-        en_flat = _flatten(json.loads((base / template.format(lang="en")).read_text(encoding="utf-8")))
+        en_flat = _flatten(
+            json.loads((base / template.format(lang="en")).read_text(encoding="utf-8"))
+        )
         for lang in langs:
             path = base / template.format(lang=lang)
             if not path.exists():
                 result[lang] = ["<file missing>"]
                 continue
             lf = _flatten(json.loads(path.read_text(encoding="utf-8")))
-            result[lang] = [k for k in en_flat if _is_json_gap(lf.get(k))]
+            # SAME definition the pass uses.  Counting only [TODO]/missing
+            # here is how the run could print 'left 71 gap(s)' and then
+            # '0 untranslated gaps' in the same breath.
+            result[lang] = [
+                k
+                for k, en_src in en_flat.items()
+                if _needs_translation(k, en_src, lf.get(k), lang)
+            ]
     else:
         import polib  # noqa: PLC0415
+
         for lang in langs:
             path = base / template.format(lang=lang)
             if not path.exists():
                 result[lang] = ["<file missing>"]
                 continue
             po = polib.pofile(str(path))
-            result[lang] = [e.msgid for e in po if e.msgid and not e.obsolete and not e.msgstr]
+            result[lang] = [
+                e.msgid
+                for e in po
+                if e.msgid
+                and not e.obsolete
+                and (
+                    not e.msgstr
+                    or (
+                        e.msgstr == e.msgid
+                        and _HAS_LETTER.search(e.msgid)
+                        and not (
+                            _ALLOW is not None and _ALLOW.allows(e.msgid, e.msgid, lang)
+                        )
+                    )
+                )
+            ]
     return result
 
 
-def enforce_no_gaps(project: str, base: Path, template: str, langs: List[str], fmt: str) -> None:
+def enforce_no_gaps(
+    project: str, base: Path, template: str, langs: List[str], fmt: str
+) -> None:
     """Exit NON-ZERO, loudly, if any locale still has untranslated strings.
 
     Wired into ``make translate`` so an incomplete locale set fails the build
     instead of quietly sliding through — translations must be 100%."""
     offenders = {l: ks for l, ks in scan_gaps(base, template, langs, fmt).items() if ks}
     if not offenders:
-        print(f"[OK] {project}: all {len(langs)} locale(s) fully translated — 0 gaps.", flush=True)
+        print(
+            f"[OK] {project}: 0 untranslated gaps in {len(langs)} locale(s).\n"
+            "  (Gaps only — this does NOT check translation QUALITY.  Run\n"
+            "   `make i18n-strict` for English-identical / stale / wrong-language.)",
+            flush=True,
+        )
         return
     total = sum(len(ks) for ks in offenders.values())
     sep = "=" * 72
     lines = [
-        "", sep,
+        "",
+        sep,
         f"  ✗✗✗  TRANSLATION INCOMPLETE — {project}: {total} untranslated string(s) "
         f"in {len(offenders)} locale(s)  ✗✗✗",
         sep,
@@ -368,10 +532,11 @@ def enforce_no_gaps(project: str, base: Path, template: str, langs: List[str], f
         lines.append(f"    {lang}: {len(ks):>5} gap(s)   {sample}")
     lines += [
         sep,
-        "  These locales are NOT fully translated.  Fill them with:",
+        "  These locales still have untranslated gaps.  Fill them with:",
         "      make translate SERVICE=http://<gpu-box>:8765",
         "  or translate the remaining keys by hand.  Locales must be 100%.",
-        sep, "",
+        sep,
+        "",
     ]
     print("\n".join(lines), file=sys.stderr, flush=True)
     sys.exit(1)
@@ -383,9 +548,13 @@ def enforce_no_gaps(project: str, base: Path, template: str, langs: List[str], f
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--project", required=True, choices=sorted(PRESETS))
-    ap.add_argument("--root", default=None, help="sysmanage repo root (default: auto-detected)")
+    ap.add_argument(
+        "--root", default=None, help="sysmanage repo root (default: auto-detected)"
+    )
     ap.add_argument(
         "--service",
         default=os.getenv("TRANSLATION_SERVICE_URL", "http://localhost:8765"),
@@ -403,7 +572,7 @@ def main() -> None:
         "--check",
         action="store_true",
         help="offline completeness gate: scan locales and exit non-zero if any gap "
-             "remains. NO service calls, NO writes — safe for CI / release hooks.",
+        "remains. NO service calls, NO writes — safe for CI / release hooks.",
     )
     args = ap.parse_args()
 
@@ -415,7 +584,9 @@ def main() -> None:
     root = Path(args.root) if args.root else Path(__file__).resolve().parents[2]
     base = root / rel
     if not base.exists():
-        sys.exit(f"ERROR: locale dir not found: {base}\n  (is this the sysmanage repo root?)")
+        sys.exit(
+            f"ERROR: locale dir not found: {base}\n  (is this the sysmanage repo root?)"
+        )
 
     langs = (
         [x.strip() for x in args.langs.split(",") if x.strip()]

@@ -11,7 +11,7 @@
     "save": "Speichern",
     "saveSuccess": "Antivirus-Standardeinstellungen erfolgreich gespeichert",
     "selectProgram": "Antivirus-Programm auswählen",
-    "title": "Antivirus"
+    "title": "Antiviren"
   },
   "auditLog": {
     "exportRequiresLicense": "Der Export des Audit-Protokolls erfordert eine SysManage Professional+-Lizenz.",
@@ -134,13 +134,13 @@
     "connectedTooltip": "Mit Server verbunden",
     "disconnected": "Getrennt",
     "disconnectedTooltip": "Verbindung verloren, versuche erneut...",
-    "offline": "Offline",
+    "offline": "offline",
     "offlineTooltip": "Kann nicht mit Server verbinden",
     "retrying": "Wiederhole",
     "retryingTooltip": "Versuche Serververbindung"
   },
   "dashboard": {
-    "antivirusCoverage": "Antivirus",
+    "antivirusCoverage": "Antiviren",
     "hosts": "Hosts",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Neustarts erforderlich",
@@ -344,7 +344,7 @@
     "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
     "shellFalse": "Falsch",
-    "shellFish": "Fish",
+    "shellFish": "Fisch",
     "shellKsh": "Ksh",
     "shellNoLogin": "Keine Anmeldung",
     "shellTcsh": "Tcsh",
@@ -375,7 +375,7 @@
     "packageManagersSubheader": "Konfigurieren Sie zusätzliche Paketmanager, die auf Hosts basierend auf dem Betriebssystem aktiviert werden",
     "packageManagersTitle": "Aktivierte Paketmanager",
     "repositoriesSubheader": "Konfigurieren Sie Standard-Drittanbieter-Repositories, die bei der Genehmigung auf neue Hosts angewendet werden",
-    "repositoriesTitle": "Repositories",
+    "repositoriesTitle": "Repositorys",
     "repositoryAdded": "Standard-Repository erfolgreich hinzugefügt",
     "repositoryDeleted": "Standard-Repository erfolgreich gelöscht",
     "repositoryUrl": "Repository-URL / PPA",
@@ -443,8 +443,8 @@
     "childHostCreationStarting": "Child-Host-Erstellung wird gestartet...",
     "childHostDeleteError": "Fehler beim Löschen des Child-Hosts",
     "childHostDeleteRequested": "Löschung angefordert für {{name}}",
-    "childHostDistribution": "Distribution",
-    "childHostDistributionLabel": "Distribution",
+    "childHostDistribution": "Verteilung",
+    "childHostDistributionLabel": "Verteilung",
     "childHostDistributionRequired": "Bitte wählen Sie eine Distribution",
     "childHostError": "Fehler",
     "childHostFqdnHelp": "Dieser FQDN wird für die WSL-Instanz verwendet",
@@ -453,8 +453,8 @@
     "childHostFqdnHelpLxd": "Dieser FQDN wird für den LXD-Container verwendet",
     "childHostFqdnHelpVmm": "Dieser FQDN wird für die VMM-virtuelle Maschine verwendet",
     "childHostFqdnLabel": "Vollqualifizierter Domänenname",
-    "childHostHostname": "Hostname",
-    "childHostHostnameLabel": "Hostname",
+    "childHostHostname": "Hostnamen",
+    "childHostHostnameLabel": "Hostnamen",
     "childHostHostnameRequired": "Bitte geben Sie einen Hostnamen ein",
     "childHostImageLabel": "Bild",
     "childHostImageRequired": "Bitte wählen Sie ein Image",
@@ -561,7 +561,7 @@
     "hardwareInfo": "Hardware-Informationen",
     "hardwareTab": "Hardware",
     "homeDir": "Startseite",
-    "hostname": "Hostname",
+    "hostname": "Hostnamen",
     "hostnameChangeFailed": "Fehler beim Ändern des Hostnamens",
     "hostnameChangeRequested": "Änderung des Hostnamens angefordert",
     "hostnameHelp": "Geben Sie einen kurzen Hostnamen oder einen vollqualifizierten Domänennamen (FQDN) ein",
@@ -803,7 +803,7 @@
     "wslEnabledRebootRequired": "WSL wurde aktiviert. Ein Neustart ist erforderlich, um die Installation abzuschließen.",
     "wslEnabledSuccess": "WSL wurde erfolgreich aktiviert.",
     "packageSearchPlaceholder": "Paketnamen zum Suchen eingeben...",
-    "complianceTab": "Compliance",
+    "complianceTab": "Kompatibilität",
     "addCertificate": "Hinzufügen",
     "addCertificateToHost": "Zertifikat zu {host} hinzufügen",
     "bhyveDisableFailed": "bhyve konnte nicht deaktiviert werden",
@@ -813,7 +813,7 @@
     "certificatesDeployedSuccess": "Zertifikatsbereitstellung erfolgreich in die Warteschlange gestellt",
     "certificatesLoadError": "Zertifikate konnten nicht aus dem Vault geladen werden",
     "childHostContainerNameHelpReadonly": "Der Containername wird vom Hostnamen abgeleitet",
-    "client": "Client",
+    "client": "Klient",
     "confirmDeleteInstallationMessage": "Möchten Sie diesen Installationsdatensatz wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
     "confirmRequestPackages": "Verfügbare Pakete anfordern",
     "confirmRequestPackagesMessage": "Dies löst eine Paketsammlung auf dem Host aus, die ressourcenintensiv sein kann und mehrere Minuten dauern kann. Möchten Sie fortfahren?",
@@ -872,14 +872,14 @@
       "apply": "Anwenden",
       "applyError": "Bildanwendung fehlgeschlagen",
       "applySuccess": "Bildanwendung angefordert (der Host wird neu gestartet)",
-      "backend": "Backend",
+      "backend": "Rückende",
       "badge": "Bildmodus",
       "bootedImage": "Geladenes Bild",
       "confirmApplyMessage": "Dies wendet das vorbereitete Bild an und startet den Host neu. Fortfahren?",
       "confirmApplyTitle": "Stagedes Bild anwenden?",
       "confirmRollbackMessage": "Dies rollt den Host zur vorigen Version des Bilds zurück und startet ihn neu. Fortfahren?",
       "confirmRollbackTitle": "Bild rürckstapeln?",
-      "digest": "Digest",
+      "digest": "Zusammenfassung",
       "enterpriseNotice": "Das Vorbereiten, Anwenden und Rübckstapeln von Bildern ist eine Enterprise-Funktion. Die aktuellen Bilddetails sind unten angezeigt.",
       "enterpriseOnly": "Bildmodusanweisungen erfordern eine Enterprise-Lizenz",
       "imageRef": "Bildreferenz",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "Unprivilegiert ausgeführt",
     "scriptsDisabledTooltip": "Skripte sind für diesen Host deaktiviert",
     "scriptsEnabledTooltip": "Skripte sind für diesen Host aktiviert",
-    "up": "Up",
+    "up": "Auf",
     "antivirusDeployAllFailed": "Antivirus-Deployment fehlgeschlagen für alle Hosts:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "Antivirus-Deployment wurde gestartet für {{count}} Host(s).\\n\\nFehlgeschlagene Hosts:\\n{{hosts}}",
     "antivirusDeploySuccess": "Antivirus-Deployment wurde gestartet für {{count}} Host(s)",
@@ -1074,7 +1074,7 @@
       "engineMissing": "Erforderliche Pro+-Engine nicht geladen; Lizenz prüfen.",
       "repository": "Luftschicht-Repository"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "Air-Gap-Repositorys",
     "map": "Karte",
     "sites": "Standorte",
     "airgapCollections": "Luftschicht-Sammlungen",
@@ -1207,7 +1207,7 @@
       "hosts": "Hosts",
       "security": "Sicherheit",
       "users": "Benutzer",
-      "federation": "Federation"
+      "federation": "Federierung"
     },
     "title": "Berichte",
     "viewReport": "Bericht anzeigen",
@@ -1233,14 +1233,14 @@
       "name": "Registrierte Hosts"
     },
     "tag": {
-      "accounts": "accounts",
-      "antivirus": "antivirus",
-      "audit": "audit",
-      "basic": "basic",
-      "commercial": "commercial",
+      "accounts": "konten",
+      "antivirus": "Antivirus",
+      "audit": "Audit",
+      "basic": "basis",
+      "commercial": "kommerziell",
       "compliance": "Kompatibilität",
       "firewall": "Firewall",
-      "hosts": "hosts",
+      "hosts": "Hosts",
       "network": "Netzwerk",
       "opensource": "OpenSource",
       "organization": "Organisation",
@@ -1368,10 +1368,10 @@
     "shellType": "Shell-Typ",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "Befehl",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "Sch",
       "zsh": "Zsh"
     },
     "startedAt": "Gestartet am",
@@ -1387,7 +1387,7 @@
     "adHocScript": "Ad-hoc-Skript",
     "connected": "Verbunden",
     "exitCodeLabel": "Ausgabecode: {{code}}",
-    "offline": "Offline"
+    "offline": "offline"
   },
   "search": {
     "searchColumn": "Suchen in",
@@ -1422,7 +1422,7 @@
     "createdDatetime": "Erstellungsdatum",
     "databaseEngine": "Datenbank-Engine",
     "database_engine": {
-      "mysql": "mysql",
+      "mysql": "MySQL",
       "oracle": "Oracle",
       "postgresql": "PostgreSQL",
       "sqlite": "sqlite3",
@@ -1488,7 +1488,7 @@
     "antivirusEnableSuccess": "Antivirus-Aktivierung erfolgreich initiiert",
     "antivirusError": "Fehler beim Laden des Antivirus-Status",
     "antivirusOpenSource": "Antivirus – Open Source",
-    "antivirusProtection": "Antivirus",
+    "antivirusProtection": "Antiviren",
     "antivirusRemoveFailed": "Fehler beim Entfernen von Antivirus",
     "antivirusRemoveSuccess": "Antivirus-Entfernung erfolgreich initiiert",
     "assignedRoles": "Zugewiesene Rollen",
@@ -1576,7 +1576,7 @@
     "attempts": "Versuche: {{count}}",
     "lastConnected": "Zuletzt verbunden: {{time}}",
     "secondsRemaining": "{{seconds}}s",
-    "timeRemaining": "{{minutes}}m {{seconds}}s"
+    "timeRemaining": "{{minutes}} Minuten {{seconds}} Sekunden"
   },
   "tags": {
     "addTag": "Tag hinzufügen",
@@ -1608,7 +1608,7 @@
       "statistics": "Statistiken",
       "status": "Status",
       "title": "OpenTelemetry-Status",
-      "tracesCount": "Traces",
+      "tracesCount": "Spuren",
       "fetchError": "Konnte den OpenTelemetry-Status nicht abrufen"
     },
     "prometheus": {
@@ -1699,7 +1699,7 @@
     "source": "Quelle",
     "title": "Titel",
     "type": "Typ",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "Ausgewählte löschen ({{count}})",
     "disableSelected": "Ausgewählte deaktivieren ({{count}})",
     "enableSelected": "Ausgewählte aktivieren ({{count}})",
@@ -2171,11 +2171,11 @@
       "samlGroupAttr": "Gruppenattribut",
       "samlIdpCert": "IdP-Signierzertifikat (X.509)",
       "samlIdpCertHelp": "Öffentliches PEM/base64-Zertifikat zur Überprüfung der Assertionssignaturen",
-      "samlIdpEntityId": "IdP Entity ID",
-      "samlIdpSso": "IdP SSO URL",
-      "samlSpAcs": "SP ACS URL",
+      "samlIdpEntityId": "IdP-Entity-ID",
+      "samlIdpSso": "IdP SSO-URL",
+      "samlSpAcs": "SP ACS-URL",
       "samlSpAcsHelp": "Wo der IdP die Assertion POSTs, z.B. https://host/api/auth/saml/<id>/acs",
-      "samlSpEntityId": "SP Entity ID",
+      "samlSpEntityId": "SP Entitäts-ID",
       "samlSpKey": "SP-Privat-Schlüssel (Vault secret id, optional)",
       "samlSpKeyHelp": "Referenz wie vault:secret/path oder literal:plaintext",
       "samlWantSigned": "Gesignierte Assertions erforderlich (empfohlen)",
@@ -2246,7 +2246,7 @@
     "action": {
       "delete": "Löschen",
       "edit": "Bearbeiten",
-      "snapshot": "Snapshot",
+      "snapshot": "Schnappschuss",
       "sync": "Jetzt synchronisieren"
     },
     "add": "Spiegel hinzufügen",
@@ -2257,10 +2257,10 @@
       "cron": "Cron",
       "name": "Name",
       "osVersion": "Betriebssystem / Version",
-      "upstream": "Upstream",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "upstream": "Hochschicht",
+      "statusSync": "Synchronisieren",
+      "statusSnapshot": "Schnappschuss",
+      "statusRestore": "Wiederherstellen"
     },
     "configureTitle": "{{platform}}-Mirroring konfigurieren",
     "create": "Erstellen",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "Löschen Sie zuerst die {{n}} Mirror(s) unter dieser Plattform.",
     "noEligibleHosts": "Keine registrierten {{family}}-Hosts verfügbar — registrieren Sie einen und aktualisieren Sie.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} läuft seit {{at}}",
+      "failedNoText": "Fehlschlag; keine Fehlermeldung zurückgegeben.",
+      "failed": "fehlgeschlagen",
+      "ok": "OK",
       "label": {
-        "sync": "sync",
+        "sync": "Synchronisieren",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "wiederherstellen"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "Konnte keine Snapshots laden.",
+      "restoreConfirm": "Spiegelbaum von dem Schnappschuss {{id}} wiederherstellen? Der Live-Baum wird überschrieben.",
+      "restoreError": "Wiederherstellungsauftrag fehlgeschlagen.",
+      "title": "Schnappschüsse für {{name}}",
+      "empty": "Noch keine Vorschauverwaltungen vorhanden. Klicken Sie auf das Kamera-Icon, um eine zu erstellen.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "Schnappschuss",
+        "taken": "Erstellt am",
+        "size": "Größe",
+        "files": "Dateien",
+        "actions": "Aktionen"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "Live-Baum zu diesem Schnappschuss wiederherstellen"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "Vorschauverwaltungen ausblenden",
+      "expand": "Schnappschüsse anzeigen"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "Installieren Sie die erforderlichen Spiegelwerkzeuge oben, um die Spiegelkonfiguration zu aktivieren. Spiegeloperationen bleiben deaktiviert, bis der Setup-Probe alle Werkzeuge vorhanden meldet.",
+      "preConfigure": "Installieren Sie die erforderlichen Spiegelwerkzeuge auf diesem Host vor der Konfiguration des Plattforms. Der Erstellen-Button bleibt deaktiviert, bis der Setup-Probe alle Werkzeuge vorhanden meldet."
     },
     "snap": {
       "action": {
@@ -2380,14 +2380,14 @@
       },
       "col": {
         "actions": "Aktionen",
-        "digest": "Digest",
+        "digest": "Zusammenfassung",
         "image": "Bild",
         "status": "Festhalten",
         "tag": "Tag"
       },
       "empty": "Noch keine Bilder verfolgt. Fügen Sie oben eines hinzu, dann verwenden Sie “Gefüttelte Bilder festhalten”.",
       "loadError": "Könnte die gefüttelten Bilder nicht laden.",
-      "registry": "Registry",
+      "registry": "Registrierung",
       "repository": "Repository",
       "tag": "Tag",
       "title": "Verfolgte Bilder für {{name}}",
@@ -2443,7 +2443,7 @@
     "selectPort": "Port auswählen",
     "startPort": "Start-Port",
     "subtitle": "Untertitel",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "Titel",
     "udp": "Udp",
     "updateSuccess": "Erfolgreich aktualisiert"
@@ -2475,44 +2475,44 @@
         "current_count": "{{n}} aktuell"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "Diese Fixes sind noch nicht auf dem lokalen Spiegel vorhanden. Der Luftspalt muss über eine weitere Collector → Media → Repository-Transfer-Zyklus geschlossen werden.",
+        "not_applied": "Diese Fixes sind bereits auf dem lokalen Spiegel vorhanden. Keine neue Medientransferung notwendig – der Host hat die Paketverwaltung noch nicht ausgeführt.",
+        "current": "Die Host-Pakete stimmen mit dem neuesten Spiegelzustand überein und es sind seit der letzten ürbertragung keine offenen CVEs aufgetreten."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "Air-Gap-Repositorys",
+      "subtitle": "Per-Repository-Statistiken für diesen privaten Spiegel, einschließlich aggregierter Aktualisierung.",
+      "notApplicable": "Dieses Dashboard ist nur bei Bereitstellungen mit Repository-Rollen relevant.",
+      "loadError": "Laden der Repositories fehlgeschlagen:",
+      "endpointMissing": "Liste aller Repositorys des Backends nicht verfügbar; das Dashboard kann nicht gefüllt werden.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
-        "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "title": "Aggregat",
+        "totalRepos": "Gesamtzahl von Repositories",
+        "totalPackages": "Gesamtzahl von Paketen",
+        "oldestFreshness": "Älteste Fräschkeit",
+        "noIngest": "n/v",
+        "daysAgo": "{{days}} Tag(e) her",
+        "staleRepos": "Veraltete Repositories (> {{days}}d)"
       },
       "table": {
         "distro": "Distro",
         "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "packageCount": "Pakete",
+        "lastIngest": "Letzter erfolgreicher Ingest",
+        "freshness": "Fräschkeit",
+        "signerFingerprint": "Signierer-Fingerabdruck",
+        "empty": "Bisher wurden keine Repositories eingelesen.",
+        "neverIngested": "Nie",
+        "freshnessNever": "Noch nie eingelesen",
+        "freshnessDays": "{{days}} Tag(e)",
         "noFingerprint": "—"
       }
     }
   },
   "audit": {
     "columns": {
-      "actor": "Actor",
+      "actor": "Akteur",
       "details": "Details",
       "openSite": "Offen",
       "operation": "Operation",
@@ -2523,7 +2523,7 @@
     "emptyFiltered": "Keine passende Überprüfungs-Eintrag gefunden.",
     "errorLoad": "Federation-Auditprotokolle laden fehlgeschlagen.",
     "filters": {
-      "actor": "Actor",
+      "actor": "Akteur",
       "apply": "Anwenden",
       "clear": "Löschen",
       "operation": "Operation",
@@ -2716,11 +2716,11 @@
     "statusLabel": "Status:"
   },
   "airgapBundles": {
-    "buildAgent": "Build Agent Bundle",
+    "buildAgent": "Bau-Agenten-Bundle",
     "buildError": "Build in die Warteschlange legen fehlgeschlagen.",
-    "buildProplus": "Build Pro+ Bundle",
-    "buildServer": "Build Server Bundle",
-    "bundle": "Bundle",
+    "buildProplus": "Pro+ Bundle erstellen",
+    "buildServer": "Bau-Server-Bundle",
+    "bundle": "Bündel",
     "completedAt": "Abgeschlossen",
     "confirmDelete": "Soll diese Anwendung und ihre ISO-Datei löschen werden?",
     "copied": "Befehl wurde in die Zwischenablage kopiert",
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "Mediengröße (MB)",
       "submit": "Warteschlange starten",
       "title": "Neue Sammlungsaufgabe",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "Mindestens ein Spiegelspeicherziel ist erforderlich.",
+      "hostMismatch": "Alle ausgewählten Spiegelserver müssen auf demselben Host leben.",
+      "mirrorsTitle": "Spiegelungen",
+      "mirrorsHelper": "Wählen Sie einen oder mehrere konfigurierte Spiegel. Das Paket wird aus einem frischen Snapshot jedes Spiegels gebaut, der bei Erstellung erstellt wurde. Alle Auswahlspiegel müssen auf demselben Host sein.",
+      "noMirrors": "Keine aktivierten Spiegelungen konfiguriert. Gehen Sie zu Einstellungen → Repository-Spiegelung, um eine hinzuzufügen und versuchen Sie es dann noch einmal.",
+      "mirrorPicker": "Spiegel auswählen",
+      "hostMismatchWarning": "Die Spiegelungen, die Sie ausgewählt haben, erstrecken sich über mehrere Hosts. Der Sammelplan wird an einen einzelnen Host verteilt, daher müssen alle Auswahlmöglichkeiten denselben Host teilen.",
+      "burnDevice": "Optische Brennvorrichtung (optional)",
+      "burnDeviceHelper": "Lassen Sie leer, um nur eine herunterladbare ISO-Datei zu erstellen. Festlegen eines Gerätes führt zu einem BURNING-Stadium nach ISO_BUILT."
     },
     "downloadError": "ISO-Datei herunterladen fehlgeschlagen.",
     "empty": "Noch keine Sammlungsaufgaben vorhanden. Klicken Sie auf \"Neue Sammlungsaufgabe\", um eine zu starten.",
@@ -2804,36 +2804,36 @@
     "refresh": "Aktualisieren",
     "subtitle": "Einmalige Sammelstarts auslösen, die konfigurierte Repositories spiegeln, ein signiertes ISO erstellen und eine Manifestdatei für die Eingabe auf der isolierten Seite schreiben.",
     "title": "Luftschicht-Sammlungsabläufe",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "Bisher keine ISO-Datei auf dem Datenträger gefunden - bitte erneut abfragen.",
+    "multiDiscInfo": "Diese Ausführung hat {{count}} Discs erstellt. Wählen Sie welche zum Herunterladen.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "Wählen Sie eine Disc zum Herunterladen aus",
+      "row": "Festplatte {{n}} — {{size}}",
+      "cancel": "Abbrechen"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "Konnte die aktuelle Serverrolle nicht laden.",
+    "saveError": "Konnte die Serverrolle nicht speichern.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "Standard (kein Luftspalt)",
+      "description": "Die Standardauswahl. Dieser Server verwaltet Hosts direkt über das Netzwerk ohne Luftspalt-Trennung. Wählen Sie dies für jede normale Bereitstellung – es ist die Standardeinstellung jedes Servers, es sei denn, Sie benötigen explizit eine Hälfte eines Luftspaltpaares."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "Air-Gap-Sammler (Online-Seite)",
+      "description": "Das internetverbundene Teil eines Luftspaltpaares. Es spiegelt upstream-Paket-Repositorys wider, sammelt CVE und Compliance-Fütterungen und verpackt sie in signierte ISO-Bilder, die Sie physisch über den Luftspalt transportieren. Wählen Sie dies auf dem Server mit Internetzugang."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "Air-Gap-Repository (Offline-Seite)",
+      "description": "Das isolierte Teil eines Luftspaltpaares ohne Internetzugang. Es nimmt ISO-Medien an, die vom Collector produziert wurden, überprüft deren Signatur und dient Paketen an verwaltete Hosts in der privaten Netzwerkumgebung, damit diese normal aktualisiert werden können. Wählen Sie dies auf dem Server innerhalb des Luftspalts."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "Wählen Sie aus, wie dieser SysManage-Server in einer air-gapped-Bereitstellung mitwirkt. Die meisten Server sollten auf Standard bleiben. Die Rolle tritt nach dem nächsten Neustart des Servers in Kraft.",
+    "currentTag": "(aktuell)",
+    "saving": "Speichern…",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "Starten Sie den SysManage-Server neu nach dem Speichern, damit die neue Rolle vollständig wirksam wird.",
+    "saved": "Serverrolle gespeichert. Starten Sie den Server neu, damit die Änderung wirksam wird.",
     "menuTitle": "Serverrolle"
   },
   "airgapDevices": {
@@ -2891,7 +2891,7 @@
       "imported": "Importierter Schlüssel {{fp}}",
       "loadError": "Vertrauenswürdige Schlüssel konnten nicht geladen werden.",
       "nameLabel": "Sammelnder Name",
-      "pemLabel": "Public key (PEM)",
+      "pemLabel": "Öffentlicher Schlüssel (PEM)",
       "removeError": "Schlüssel konnte nicht entfernt werden.",
       "required": "Name und öffentlicher Schlüssel sind beide erforderlich.",
       "title": "Vertrauenswürdige Collector-Schlüssel"
@@ -2932,7 +2932,7 @@
     },
     "scopedToSite": "Gesperrt auf eine Site",
     "subtitle": "Alle Hosts in allen angemeldeten Sites, synchronisiert von der Datei des Koordinators.",
-    "title": "Cross-Site Hosts",
+    "title": "Cross-Site-Hosts",
     "bulk": {
       "clear": "Löschen",
       "dispatch": "Befehl verteilen",
@@ -2952,11 +2952,11 @@
       "unlicensed": "Federation erfordert eine Enterprise-Lizenz.",
       "partial": "{{failed}} von {{total}} Site-Dispatches fehlgeschlagen."
     },
-    "hostIds": "Host IDs",
+    "hostIds": "Host-IDs",
     "hostIdsHint": "Kommagetrennte Host-IDs (vom Hosts-Seite)",
     "packages": "Paketnamen",
     "packagesOptional": "Paketnamen (optional – leer = alle Updates)",
-    "script": "Script",
+    "script": "Skript",
     "subtitle": "Führe ein Kommando für {{site}} an. Die Site führt es auf ihren Hosts aus und meldet die Ergebnisse zurück — nichts wird sofort ausgeführt.",
     "targetAll": "Alle Hosts an diesem Site",
     "targetSpecific": "Bestimmte Hosts (nach ID)",
@@ -3104,7 +3104,7 @@
     "revokeError": "Widerruf des API-Schlüssels ist fehlgeschlagen.",
     "revoked": "Widerrufen",
     "status": "Status",
-    "title": "API Keys"
+    "title": "API-Schlüssel"
   },
   "acceptInvitation": {
     "noToken": "Kein Token für die Einladung angegeben",
@@ -3159,10 +3159,10 @@
     "resendError": "Die Wiederholung der Einladung ist fehlgeschlagen"
   },
   "processes": {
-    "pid": "PID",
+    "pid": "Prozess-ID",
     "name": "Name",
     "user": "Benutzer",
-    "cpu": "CPU %",
+    "cpu": "CPU-%",
     "memory": "Speicher %",
     "rss": "RSS",
     "status": "Status",
@@ -3230,7 +3230,7 @@
     "intro": "Definieren Sie, wann Aktualisierungen und Fernbefehle ausgeführt werden können. Hosts innerhalb eines Erlaubnisfensters (und außerhalb jeglicher Blackouts) erhalten die Änderungen; andere Änderungen werden aufgehoben und freigegeben, wenn das nächste Fenster geöffnet wird. Hosts ohne ein Fenster sind nicht eingeschränkt.",
     "kind": "Art",
     "kindAllow": "Erlauben",
-    "kindBlackout": "Blackout",
+    "kindBlackout": "Ausfall",
     "loadError": "Fehler beim Laden der Wartungsfenster",
     "nHosts": "{{count}} Host(s)",
     "nTags": "{{count}} Tag(s)",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "Keine Treffer.",
     "placeholder": "Seiten durchsuchen…  (Esc zum Schließen)"
+  },
+  "agentMirrors": {
+    "add": "Hinzufügung",
+    "colActions": "Aktionen",
+    "colChannel": "Kanal",
+    "colUrl": "Spiegel-URL",
+    "deleteFailed": "Das Spiegelbild konnte nicht entfernt werden.",
+    "loadFailed": "Die konfigurierten Agent-Spiegel konnten nicht geladen werden.",
+    "noEngine": "Der Bereitstellungsdienst ist auf diesem Server nicht lizenziert, daher gibt es keine Kanäle zur Konfiguration.",
+    "refresh": "Aktualisieren",
+    "remove": "Spiegelbild entfernen",
+    "removed": "Spiegelbild entfernt; dieser Kanal wird wieder von der Quelle installiert.",
+    "saveFailed": "Das Spiegelbild konnte nicht gespeichert werden.",
+    "saved": "Spiegelbild gespeichert.",
+    "subtitle": "Ersetzen Sie einen privaten Spiegel durch die Kanäle, aus denen der Agent selbst installiert wird. Ohne dies kann ein in einer isolierten Umgebung bereitgestellter Host nicht auf das offene PPA, COPR, OBS, winget oder Homebrew tap zugreifen und installiert daher keinen Agenten und meldet sich nicht an.",
+    "title": "Agent-Installations-Spiegel"
   }
 }

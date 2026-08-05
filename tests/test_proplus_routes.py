@@ -460,6 +460,10 @@ class TestStubsSkippedWhenModuleLoaded:
                 "observability_engine": True,
                 "federation_controller_engine": True,
                 "federation_site_engine": True,
+                # Phase 18 — the provisioning surface has 402 stubs too, so a
+                # licensed server must not mount them either. This test caught
+                # the omission when they were added, which is exactly its job.
+                "provisioning_engine": True,
             },
         )
         assert len(app.routes) == before

@@ -17,7 +17,7 @@ from backend.api.error_constants import (
 )
 from backend.api.host_utils import validate_host_approval_status
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import N_, _
 from backend.persistence import models
 from backend.persistence.db import get_db
 from backend.persistence.partitions import request_sessionmaker
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # the same "engine required" detail when the Pro+ engine path
 # isn't available.  Hoisted to a module constant so we only have
 # one source-of-truth string to update if the wording ever changes.
-_ENGINE_REQUIRED_DETAIL = (
+_ENGINE_REQUIRED_DETAIL = N_(
     "OpenTelemetry service control requires the Pro+ "
     "observability_engine to be loaded on the server."
 )

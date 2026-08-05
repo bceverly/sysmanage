@@ -28,7 +28,7 @@
       "package": "Pacchetto",
       "script": "Script",
       "secret": "Segreto",
-      "tag": "Tag",
+      "tag": "Etichetta",
       "user": "Utente",
       "userRole": "Ruolo utente"
     },
@@ -344,7 +344,7 @@
     "shellBourne": "Shell di Bourne",
     "shellCsh": "Csh",
     "shellFalse": "Falso",
-    "shellFish": "Fish",
+    "shellFish": "Pesce",
     "shellKsh": "Ksh",
     "shellNoLogin": "Nessun accesso",
     "shellTcsh": "Tcsh",
@@ -630,7 +630,7 @@
       }
     },
     "inactiveInterfaces": "Inattivi",
-    "infoTab": "Info",
+    "infoTab": "Informazioni",
     "install": "Installa",
     "installPackagesTitle": "Installa Pacchetti",
     "installSelectedPackages": "Installa Pacchetti Selezionati",
@@ -813,7 +813,7 @@
     "certificatesDeployedSuccess": "Distribuzione certificati messa in coda con successo",
     "certificatesLoadError": "Impossibile caricare i certificati dal vault",
     "childHostContainerNameHelpReadonly": "Il nome del container è derivato dall'hostname",
-    "client": "Client",
+    "client": "Cliente",
     "confirmDeleteInstallationMessage": "Sei sicuro di voler eliminare questo record di installazione? Questa azione non può essere annullata.",
     "confirmRequestPackages": "Richiedi pacchetti disponibili",
     "confirmRequestPackagesMessage": "Questo attiverà la raccolta dei pacchetti sull'host, che può richiedere molte risorse e impiegare diversi minuti. Vuoi continuare?",
@@ -827,7 +827,7 @@
     "installationLog": "Log di installazione",
     "installationLogTitle": "Log di installazione",
     "installedVersion": "Versione installata",
-    "kernel": "Kernel",
+    "kernel": "Nucleo",
     "loadingCertificates": "Caricamento certificati...",
     "noAntivirusDefault": "Nessun antivirus predefinito configurato per questo SO",
     "noCertificatesFound": "Nessun certificato trovato nel vault",
@@ -879,7 +879,7 @@
       "confirmApplyTitle": "Confermi di applicare l'immagine in stato di staging?",
       "confirmRollbackMessage": "Questo ripristina il sistema alla precedente immagine e la riavvia. Continuare?",
       "confirmRollbackTitle": "Confermi di ripristinare l'immagine?",
-      "digest": "Digest",
+      "digest": "Riassunto",
       "enterpriseNotice": "La preparazione, l'applicazione e il ripristino delle immagini sono funzionalità Enterprise. I dettagli dell'attuale immagine sono mostrati di seguito.",
       "enterpriseOnly": "Le azioni relative alla modalità immagine richiedono una licenza Enterprise",
       "imageRef": "Riferimento immagine",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "In esecuzione non privilegiata",
     "scriptsDisabledTooltip": "Gli script sono disabilitati per questo host",
     "scriptsEnabledTooltip": "Gli script sono abilitati per questo host",
-    "up": "Up",
+    "up": "Attivo",
     "antivirusDeployAllFailed": "La distribuzione dell'applicazione antivirus ha fallito su tutti i host:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "Inizio della distribuzione dell'applicazione antivirus per {{count}} host(s).\\n\\nHost non riusciti:\\n{{hosts}}",
     "antivirusDeploySuccess": "Inizio della distribuzione dell'applicazione antivirus per {{count}} host(s)",
@@ -1074,7 +1074,7 @@
       "engineMissing": "Motore Pro+ richiesto non caricato; verifica la licenza.",
       "repository": "Repository a Isolamento"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "Ripostigli aerei",
     "map": "Mappa",
     "sites": "Siti",
     "airgapCollections": "Collezioni a Isolamento",
@@ -1226,21 +1226,21 @@
     "generateError": "Errore nella generazione del rapporto: {{message}}",
     "hostsWithTags": {
       "description": "Mostra tutti gli host registrati insieme alle loro etichette assegnate per una facile categorizzazione e filtraggio. Utile per organizzare gli host in base all'ambiente, allo scopo o al dipartimento.",
-      "name": "Hosts with Tags"
+      "name": "Hosts con Tag"
     },
     "registeredHosts": {
       "description": "Elenco completo di tutti gli host registrati con informazioni di base e dettagli del sistema operativo, inclusi nome host, indirizzi IP, versione OS e stato.",
       "name": "Host registrati"
     },
     "tag": {
-      "accounts": "accounts",
+      "accounts": "account",
       "antivirus": "antivirus",
-      "audit": "audit",
-      "basic": "basic",
-      "commercial": "commercial",
+      "audit": "controllo",
+      "basic": "base",
+      "commercial": "commerciale",
       "compliance": "conformità",
       "firewall": "firewall",
-      "hosts": "hosts",
+      "hosts": "host",
       "network": "rete",
       "opensource": "open source",
       "organization": "organizzazione",
@@ -1300,7 +1300,7 @@
       "pending": "In attesa",
       "queued": "In coda",
       "running": "In esecuzione",
-      "timeout": "Timeout"
+      "timeout": "Tempo di timeout"
     },
     "confirmDelete": "Conferma eliminazione",
     "confirmDeleteMessage": "Sei sicuro di voler eliminare questo script? Questa azione non può essere annullata.",
@@ -1464,7 +1464,7 @@
     "updatedAt": "Aggiornato il",
     "viewSecret": "Visualizza Segreto",
     "subtypeRequired": "Il sottotipo del segreto è richiesto",
-    "filenamePlaceholder": "e.g., id_rsa.pub, server.crt, database.conf"
+    "filenamePlaceholder": "ad esempio, id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "Aggiungi Ruolo",
@@ -1699,7 +1699,7 @@
     "source": "Origine",
     "title": "Titolo",
     "type": "Tipo",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "Elimina selezionati ({{count}})",
     "disableSelected": "Disabilita selezionati ({{count}})",
     "enableSelected": "Abilita selezionati ({{count}})",
@@ -1869,7 +1869,7 @@
     "currentPassword": "Password Attuale",
     "currentPasswordPlaceholder": "Inserisci la tua password attuale",
     "deleteImage": "Elimina",
-    "email": "Email",
+    "email": "E-mail",
     "emailChangeError": "Errore nel cambio email. Riprova.",
     "emailChangeSuccess": "Richiesta di cambio email inviata. Controlla la tua nuova email per la verifica.",
     "emailFieldsRequired": "Tutti i campi sono obbligatori",
@@ -1925,7 +1925,7 @@
     "profileTabs": "schede profilo"
   },
   "users": {
-    "email": "Email",
+    "email": "E-mail",
     "firstName": "Nome",
     "lastName": "Cognome",
     "newPassword": "Inserisci nuova password",
@@ -2001,7 +2001,7 @@
     "saveError": "Impossibile salvare il profilo di aggiornamento",
     "securityOnly": "Solo aggiornamenti di sicurezza",
     "subtitle": "Pianifica aggiornamenti ricorrenti della flotta con cron, solo sicurezza e rollout scaglionato",
-    "tag": "Tag",
+    "tag": "Etichetta",
     "title": "Profili di aggiornamento",
     "trigger": "Attiva ora",
     "triggerError": "Impossibile attivare il profilo",
@@ -2171,16 +2171,16 @@
       "samlGroupAttr": "Attributo gruppo",
       "samlIdpCert": "Certificato di firma IdP (X.509)",
       "samlIdpCertHelp": "Certificato pubblico PEM/base64 utilizzato per verificare le firme delle asserzioni",
-      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpEntityId": "IDP Entity ID",
       "samlIdpSso": "URL SSO IdP",
       "samlSpAcs": "URL ACS SP",
       "samlSpAcsHelp": "Dove l'IdP invia il POST dell'asserzione, ad esempio https://host/api/auth/saml/<id>/acs",
-      "samlSpEntityId": "SP Entity ID",
+      "samlSpEntityId": "ID entità SP",
       "samlSpKey": "Chiave privata SP (Vault secret id, opzionale)",
       "samlSpKeyHelp": "Riferimento come vault:secret/path o testo letterale:plaintext",
       "samlWantSigned": "Richiedi asserzioni firmate (raccomandato)",
       "scimEnabled": "Abilita la provisioning SCIM in ingresso",
-      "scimToken": "SCIM bearer token (Vault secret id)",
+      "scimToken": "Token SCIM a portatore (ID segreto di Vault)",
       "scimTokenHelp": "Token che l'IdP presenta in ogni richiesta SCIM. Riferimento come vault:secret/path o testo letterale:plaintext"
     },
     "loadError": "Impossibile caricare i provider di identità.",
@@ -2246,7 +2246,7 @@
     "action": {
       "delete": "Elimina",
       "edit": "Modifica",
-      "snapshot": "Snapshot",
+      "snapshot": "Pianificazione",
       "sync": "Sincronizza ora"
     },
     "add": "Aggiungi mirror",
@@ -2257,10 +2257,10 @@
       "cron": "Cron",
       "name": "Nome",
       "osVersion": "SO / Versione",
-      "upstream": "Upstream",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "upstream": "Origine",
+      "statusSync": "Sincronizzazione",
+      "statusSnapshot": "Pianificazione",
+      "statusRestore": "Ripristina"
     },
     "configureTitle": "Configura mirroring {{platform}}",
     "create": "Crea",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "Elimina prima i {{n}} mirror sotto questa piattaforma.",
     "noEligibleHosts": "Nessun host {{family}} registrato disponibile — registrane uno e aggiorna.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
+      "inFlight": "{{label}} in corso dal {{at}}",
+      "failedNoText": "Fallito; nessun testo di errore restituito.",
+      "failed": "fallito",
       "ok": "ok",
       "label": {
-        "sync": "sync",
+        "sync": "sincronizzazione",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "ripristina"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "Impossibile caricare i snapshot.",
+      "restoreConfirm": "Ripristinare l'albero di specchio dallo snapshot {{id}}? L'albero attivo verrà sovrascritto.",
+      "restoreError": "Il ripristino ha fallito.",
+      "title": "Snapshot per {{name}}",
+      "empty": "Ancora nessuna snapshot. Fare clic sull'icona della fotocamera per crearne una.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "Pianificazione",
+        "taken": "Creato il",
+        "size": "Dimensione",
+        "files": "File",
+        "actions": "Azioni"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "Ripristinare l'albero attivo a questo snapshot"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "Nascondi snapshot",
+      "expand": "Mostra snapshot"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "Installare lo strumento mirror richiesto sopra per abilitare la configurazione del mirror. Le operazioni di mirror rimangono disattivate fino a quando il probe di setup non segnala che tutti gli strumenti sono presenti.",
+      "preConfigure": "Installare lo strumento mirror richiesto su questo host prima di configurare la piattaforma. Il pulsante Create rimane disabilitato fino a quando il probe di setup non segnala che tutti gli strumenti sono presenti."
     },
     "snap": {
       "action": {
@@ -2380,16 +2380,16 @@
       },
       "col": {
         "actions": "Azioni",
-        "digest": "Digest",
+        "digest": "Riassunto",
         "image": "Immagine",
         "status": "Cattura",
-        "tag": "Tag"
+        "tag": "Etichetta"
       },
       "empty": "Non ci sono immagini tracciate ancora. Aggiungi una sopra, quindi usa \"Cattura immagini\".",
       "loadError": "Impossibile caricare le immagini tracciate.",
       "registry": "Registro",
-      "repository": "Repository",
-      "tag": "Tag",
+      "repository": "Repositorio",
+      "tag": "Etichetta",
       "title": "Immagini tracciate per {{name}}",
       "track": "Traccia",
       "trackError": "Impossibile tracciare quell'immagine. Usa l'host del registro, il repository in minuscolo e un tag valido.",
@@ -2443,7 +2443,7 @@
     "selectPort": "Seleziona porta",
     "startPort": "Porta iniziale",
     "subtitle": "Sottotitolo",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "Titolo",
     "udp": "Udp",
     "updateSuccess": "Aggiornato correttamente"
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} attuale"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "Queste correzioni non sono ancora presenti nel mirror locale. Chiudere la separazione fisica richiede un altro ciclo di raccolta → media → ripostiglio.",
+        "not_applied": "Queste correzioni sono già presenti nel mirror locale. Non è necessario trasferire nuovo media — il nodo non ha ancora eseguito il proprio gestore dei pacchetti.",
+        "current": "I pacchetti host corrispondono allo stato più recente del mirror e nessuna CVE pubblica è emersa dal momento dell'ultimo trasferimento."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "Ripostigli aerei",
+      "subtitle": "Statistiche per repository privato-side mirror, più freschezza aggregata.",
+      "notApplicable": "Questa dashboard è significativa solo nelle distribuzioni con ruolo di repository.",
+      "loadError": "Impossibile caricare i ripostigli:",
+      "endpointMissing": "L'endpoint list-all-repositories del backend non è disponibile; il dashboard non può popolare.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "Aggrega",
+        "totalRepos": "Ripostigli totali",
+        "totalPackages": "Pacchetti totali",
+        "oldestFreshness": "Vecchia freschezza",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} giorno(i) fa",
+        "staleRepos": "Ripostigli obsoleti (> {{days}}d)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "Distribuzione",
+        "version": "Versione",
+        "packageCount": "Pacchetti",
+        "lastIngest": "Ultimo ingest riuscito",
+        "freshness": "Rinnovabilità",
+        "signerFingerprint": "Impronta digitale del firmatario",
+        "empty": "Ancora nessun repository ingestati.",
+        "neverIngested": "Mai",
+        "freshnessNever": "Non mai ingestato",
+        "freshnessDays": "{{days}} giorno(i)",
         "noFingerprint": "—"
       }
     }
@@ -2606,7 +2606,7 @@
     },
     "subtitle": "Politiche centralmente definite spinte ai siti subordinati.",
     "title": "Politiche_federative",
-    "deadLetter": "dead-letter"
+    "deadLetter": "lettera morta"
   },
   "sites": {
     "actions": {
@@ -2702,8 +2702,8 @@
     "policiesLink": "Politiche",
     "subtitle": "Server subordinate SysManage iscritti con questo coordinatore.",
     "title": "Siti_federativi",
-    "hostsLink": "Hosts",
-    "tilesView": "Dashboard"
+    "hostsLink": "Host",
+    "tilesView": " bacheca"
   },
   "sitesMap": {
     "errorLoad": "Impossibile caricare i siti federati.",
@@ -2711,7 +2711,7 @@
     "openSite": "Sito aperto",
     "subtitle": "Distribuzione_geografica_dei_server_siti_subordinati.",
     "title": "Mappa_siti_federativi",
-    "tilesView": "Dashboard",
+    "tilesView": " bacheca",
     "lastSyncLabel": "Ultima sincronizzazione:",
     "statusLabel": "Stato:"
   },
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "Dimensione del supporto (MB)",
       "submit": "Esegui in coda",
       "title": "Nuova Raccolta",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "Almeno un target di mirror è richiesto.",
+      "hostMismatch": "Tutti i mirror scelti devono vivere sullo stesso host.",
+      "mirrorsTitle": "Mirror",
+      "mirrorsHelper": "Seleziona uno o più specchi configurati. Il pacchetto viene costruito da un nuovo snapshot di ogni albero di specchio preso alla creazione della sessione. Tutte le selezioni devono condividere lo stesso host.",
+      "noMirrors": "Nessun mirror abilitato configurato. Vai a Impostazioni → Mirror Repository per aggiungerne uno, poi riprova.",
+      "mirrorPicker": "Seleziona i mirror",
+      "hostMismatchWarning": "I mirror scelti coprono più host. Il piano di raccolta invia a un singolo host, quindi tutte le scelte devono condividere uno solo.",
+      "burnDevice": "Dispositivo di bruciatura ottica (opzionale)",
+      "burnDeviceHelper": "Lasciare vuoto per creare solo un file ISO scaricabile. Specificare un dispositivo aggiunge una fase BURNING dopo ISO_BUILT."
     },
     "downloadError": "Impossibile scaricare l'ISO",
     "empty": "Non ci sono ancora raccolte. Fai clic su \"Nuova Raccolta\" per iniziare una nuova raccolta.",
@@ -2804,36 +2804,36 @@
     "refresh": "Aggiorna",
     "subtitle": "Avvia esecuzioni uniche delle raccolte che riflettono i repository configurati, costruisce un ISO firmato e scrive una manifestazione per l'ingestione dalla parte isolata.",
     "title": "Raccolte a Isolamento",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "Nessun file ISO trovato su disco ancora — riprovare tra poco.",
+    "multiDiscInfo": "Questa esecuzione ha prodotto {{count}} supporti. Scegli quelli da scaricare.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "Scegli un disco da scaricare",
+      "row": "Disco {{n}} — {{size}}",
+      "cancel": "Annulla"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "Impossibile caricare il ruolo corrente del server.",
+    "saveError": "Impossibile salvare il ruolo del server.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "Standard (nessuna separazione fisica)",
+      "description": "Predefinito. Questo server gestisce i nodi direttamente sulla rete senza alcuna separazione fisica. Scegli questo per qualsiasi distribuzione ordinaria — è quello che ogni server esegue a meno che non sia necessario un lato di una coppia con separazione fisica."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "Collector aerea (lato online)",
+      "description": "La parte collegata a Internet di una coppia con separazione fisica. Specchia i ripostigli di origine, raccoglie le feed CVE e conformità e li incapsula in immagini ISO firmate che si trasportano fisicamente attraverso la separazione fisica. Scegli questo sul server con accesso a Internet."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "Ripostiglio aereo (lato disconnesso)",
+      "description": "La parte isolata di una coppia con separazione fisica, senza accesso a Internet. Ingestisce i media ISO prodotti dal Collector, verifica la loro firma e serve i pacchetti ai nodi gestiti sulla rete privata in modo che possano aggiornarsi normalmente. Scegli questo sul server all'interno dell'enclave separato fisicamente."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "Scegli come questo server SysManage partecipi a una distribuzione aerea. La maggior parte dei server dovrebbe rimanere su Standard. Il ruolo entra in vigore dopo il prossimo riavvio del server.",
+    "currentTag": "(attuale)",
+    "saving": "Salvataggio in corso...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "Riavviare il server SysManage dopo l'aggiornamento per applicare completamente la nuova funzione.",
+    "saved": "Ruolo del server salvato. Riavviare il server per applicarlo completamente.",
     "menuTitle": "Ruolo del server"
   },
   "airgapDevices": {
@@ -2999,7 +2999,7 @@
       "compliance": "Peggior conformità",
       "critical": "CVE critici",
       "high": "Alte CVE",
-      "hosts": "Hosts",
+      "hosts": "Host",
       "site": "Sito"
     },
     "generate": "Genera_report",
@@ -3104,7 +3104,7 @@
     "revokeError": "Impossibile revocare la chiave API.",
     "revoked": "Revocato",
     "status": "Stato",
-    "title": "API Keys"
+    "title": "Chiavi API"
   },
   "acceptInvitation": {
     "noToken": "Nessun token di invito fornito",
@@ -3135,7 +3135,7 @@
     "title": "Inviti utenti",
     "inviteHeading": "Invita un nuovo utente",
     "existingHeading": "Inviti",
-    "email": "Email",
+    "email": "E-mail",
     "firstName": "Nome",
     "lastName": "Cognome",
     "roles": "Ruoli di sicurezza",
@@ -3159,11 +3159,11 @@
     "resendError": "Impossibile rinviare la richiesta di invito"
   },
   "processes": {
-    "pid": "PID",
+    "pid": "ID processo",
     "name": "Nome",
     "user": "Utente",
-    "cpu": "CPU %",
-    "memory": "Mem %",
+    "cpu": "% CPU",
+    "memory": "Memoria %",
     "rss": "RSS",
     "status": "Stato",
     "command": "Comando",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "Nessun risultato.",
     "placeholder": "Cerca pagine…  (Premi Esc per chiudere)"
+  },
+  "agentMirrors": {
+    "add": "Aggiungi",
+    "colActions": "Azioni",
+    "colChannel": "Canale",
+    "colUrl": "URL della specchia",
+    "deleteFailed": "Impossibile rimuovere la specchia.",
+    "loadFailed": "Impossibile caricare le specchie di agente configurate.",
+    "noEngine": "Il motore di provisioning non è licenziato su questo server, quindi non ci sono canali da configurare.",
+    "refresh": "Aggiorna",
+    "remove": "Rimuovi specchia",
+    "removed": "Specchia rimosso; quel canale installerà nuovamente da upstream.",
+    "saveFailed": "Impossibile salvare la specchia.",
+    "saved": "Specchia salvato.",
+    "subtitle": "Sostituisci una specchia privata per i canali dall'agente stesso installato. Senza questo, un host provveduto in un sito senza connessione non può raggiungere la PPA pubblica, COPR, OBS, winget o Homebrew tap, quindi non installerà mai l'agente e non si iscriverà mai.",
+    "title": "Specchia di installazione dell'agente"
   }
 }

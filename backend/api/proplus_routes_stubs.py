@@ -16,9 +16,10 @@ When a Pro+ module isn't licensed/loaded, these stubs answer with
 "license required" message instead of a 404.
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend.auth.auth_bearer import get_current_user
+from backend.i18n import _
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.api.proplus_routes")
@@ -37,12 +38,78 @@ def mount_proplus_stub_routes(app, results: dict) -> None:
 
     stubs_mounted = _mount_stub_group_a(app, results)
     stubs_mounted += _mount_stub_group_b(app, results)
+    stubs_mounted += _mount_provisioning_stubs(app, results)
 
     if stubs_mounted > 0:
         logger.info(
             "Mounted %d Pro+ stub route group(s) for unlicensed modules",
             stubs_mounted,
         )
+
+
+def _mount_provisioning_stubs(app, results: dict) -> int:
+    """Mount 402 stubs for the whole provisioning surface (Phase 18.1 + 18.2).
+
+    These answer 402 rather than the ``{"licensed": false}`` / HTTP 200 shape the
+    other stub groups use, and the difference is deliberate.  That shape exists
+    so an OSS-tier PAGE can render a clean "license required" state instead of a
+    404; the provisioning UI ships only in the Pro+ plugin, so nothing in the
+    open-source frontend ever calls these.  What does call them is a script or an
+    operator with curl — and answering a POST that was meant to assign a machine
+    an OS with ``200 {"licensed": false}`` would tell them it worked.  402 with a
+    reason is the honest answer, and it matches the convention already used by
+    the OSS-side gates in child_host_crud.py and airgap_collector_runs.py.
+
+    Without these the endpoints simply are not mounted, so an unlicensed server
+    answers 404 — indistinguishable from a typo in the URL.
+
+    Returns the number of stub route groups mounted.
+    """
+    if results.get("provisioning_engine"):
+        return 0
+
+    def _unlicensed():
+        raise HTTPException(
+            status_code=402,
+            detail=_(
+                "Host provisioning requires a SysManage Professional+ license "
+                "with the provisioning engine. Please upgrade to access this "
+                "feature."
+            ),
+        )
+
+    router = APIRouter(prefix="/v1/provisioning", tags=["provisioning-stubs"])
+
+    # 18.1 — compute provisioning
+    @router.get("/providers")
+    @router.get("/compute-resources")
+    @router.get("/templates")
+    @router.get("/jobs")
+    async def provisioning_read_stub(current_user=Depends(get_current_user)):
+        _unlicensed()
+
+    @router.post("/compute-resources")
+    @router.post("/templates")
+    @router.post("/provision")
+    async def provisioning_write_stub(current_user=Depends(get_current_user)):
+        _unlicensed()
+
+    # 18.2 — bare metal: catalog, per-MAC assignment, discovery, boot media
+    @router.get("/install-sources")
+    @router.get("/install-assignments")
+    @router.get("/discovered-hosts")
+    @router.get("/bootdisk/status")
+    async def baremetal_read_stub(current_user=Depends(get_current_user)):
+        _unlicensed()
+
+    @router.post("/install-sources")
+    @router.post("/install-assignments")
+    async def baremetal_write_stub(current_user=Depends(get_current_user)):
+        _unlicensed()
+
+    app.include_router(router, prefix="/api")
+    logger.debug("Mounted provisioning engine 402 stub routes")
+    return 1
 
 
 def _mount_stub_group_a(app, results: dict) -> int:

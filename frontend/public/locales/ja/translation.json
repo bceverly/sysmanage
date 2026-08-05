@@ -344,7 +344,7 @@
     "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
     "shellFalse": "False",
-    "shellFish": "Fish",
+    "shellFish": "魚",
     "shellKsh": "Ksh",
     "shellNoLogin": "ログインなし",
     "shellTcsh": "Tcsh",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "非特権で実行中",
     "scriptsDisabledTooltip": "このホストではスクリプトが無効です",
     "scriptsEnabledTooltip": "このホストではスクリプトが有効です",
-    "up": "Up",
+    "up": "上へ",
     "antivirusDeployAllFailed": "すべてのホストでアンチウイルス展開に失敗しました:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。\\n\\n失敗したホスト:\\n{{hosts}}",
     "antivirusDeploySuccess": "アンチウイルス展開を {{count}} ホストに対して開始しました。",
@@ -1074,7 +1074,7 @@
       "engineMissing": "必要なPro+エンジンが読み込まれていません。ライセンスを確認してください。",
       "repository": "オフラインリポジトリ"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "エアギャップ リポジトリ",
     "map": "マップ",
     "sites": "サイト",
     "airgapCollections": "オフライン収集",
@@ -1245,7 +1245,7 @@
       "opensource": "オープンソース",
       "organization": "組織",
       "permissions": "権限",
-      "rbac": "rbac",
+      "rbac": "RBAC",
       "roles": "役割",
       "security": "セキュリティ",
       "systemInfo": "システム情報",
@@ -1368,7 +1368,7 @@
     "shellType": "シェルタイプ",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "コマンド",
       "ksh": "Ksh",
       "powershell": "PowerShell",
       "sh": "Sh",
@@ -1464,7 +1464,7 @@
     "updatedAt": "更新日",
     "viewSecret": "シークレットを表示",
     "subtypeRequired": "シークレットのサブタイプは必須です",
-    "filenamePlaceholder": "e.g., id_rsa.pub, server.crt, database.conf"
+    "filenamePlaceholder": "例: id_rsa.pub, server.crt, database.conf"
   },
   "security": {
     "addRole": "ロールを追加",
@@ -1699,7 +1699,7 @@
     "source": "ソース",
     "title": "タイトル",
     "type": "タイプ",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "選択項目を削除 ({{count}})",
     "disableSelected": "選択項目を無効化 ({{count}})",
     "enableSelected": "選択項目を有効化 ({{count}})",
@@ -1815,7 +1815,7 @@
       "snap": "Snap",
       "winget": "Winget (Windows)",
       "yum": "YUM (RHEL/CentOS 7)",
-      "zypper": "Zypper (openSUSE/SUSE)"
+      "zypper": "Zypper (openSUSE/SLES)"
     }
   },
   "userDetail": {
@@ -2171,11 +2171,11 @@
       "samlGroupAttr": "グループ属性",
       "samlIdpCert": "IdP 署名証明書（X.509）",
       "samlIdpCertHelp": "署名されたアサーションを検証するために使用される公開 PEM/ベース64 証明書",
-      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpEntityId": "IdPエンティティID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
       "samlSpAcsHelp": "IdP がアサーションを POST する場所、例：https://host/api/auth/saml/<id>/acs",
-      "samlSpEntityId": "SP Entity ID",
+      "samlSpEntityId": "SPエンティティID",
       "samlSpKey": "SP 秘密キー（オプション；Vault secret id）",
       "samlSpKeyHelp": "vault:secret/path のような参照または文字列:平文の文字列",
       "samlWantSigned": "署名付きアサーションが必要（推奨）",
@@ -2258,9 +2258,9 @@
       "name": "名前",
       "osVersion": "OS / バージョン",
       "upstream": "アップストリーム",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "同期",
+      "statusSnapshot": "スナップショット",
+      "statusRestore": "復元"
     },
     "configureTitle": "{{platform}} ミラーリングの設定",
     "create": "作成",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "まずこのプラットフォーム配下の{{n}}個のミラーを削除してください。",
     "noEligibleHosts": "登録された{{family}}ホストがありません — 登録して更新してください。",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} が {{at}} から実行中",
+      "failedNoText": "失敗;エラーテキストが返されませんでした。",
+      "failed": "失敗",
+      "ok": "OK",
       "label": {
-        "sync": "sync",
+        "sync": "同期",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "復元"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "スナップショットの読み込みに失敗しました。",
+      "restoreConfirm": "{{id}}のスナップショットからミラーツリーを復元しますか？ライブツリーが上書きされます。",
+      "restoreError": "復元ディスPATCHが失敗しました。",
+      "title": "{{name}}のスナップショット",
+      "empty": "スナップショットはまだありません。スナップショットを取るにはカメラアイコンをクリックしてください。",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "スナップショット",
+        "taken": "作成日時",
+        "size": "サイズ",
+        "files": "ファイル",
+        "actions": "アクション"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "このスナップショットにライブツリーを復元"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "スナップショットを非表示にする",
+      "expand": "スナップショットを表示"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "必要なミラーツールを上記にインストールして、ミラー設定を有効化します。ミラー操作は、セットアッププローブがすべてのツールが存在することを報告するまで無効なままです。",
+      "preConfigure": "このホスト上でプラットフォームを設定する前に、必要なミラーツールをインストールしてください。セットアッププローブがすべてのツールが存在することを報告するまで、Createボタンは無効なままです。"
     },
     "snap": {
       "action": {
@@ -2443,9 +2443,9 @@
     "selectPort": "ポートを選択",
     "startPort": "開始ポート",
     "subtitle": "サブタイトル",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "タイトル",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "更新に成功"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} 件最新"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "これらの修正プログラムはまだローカルミラーにありません。ギャップを閉じるには、コレクタ → メディア → リポジトリの転送サイクルが必要です。",
+        "not_applied": "これらの修正プログラムは既にローカルミラーにあります。新しいメディア転送は不要です — ホストがパッケージマネージャーをまだ実行していないだけです。",
+        "current": "ホストパッケージは最新のミラー状態と一致し、最後の転送以来公開されたCVEはありません。"
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "エアギャップ リポジトリ",
+      "subtitle": "このプライベートサイドミラーのリポジトリごとの統計情報および全体の新鮮度。",
+      "notApplicable": "このダッシュボードはリポジトリ役割展開でのみ意味があります。",
+      "loadError": "リポジトリの読み込みに失敗しました:",
+      "endpointMissing": "バックエンド list-all-repositories エンドポイントが利用できません;ダッシュボードを表示できません。",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "集約",
+        "totalRepos": "合計リポジトリ",
+        "totalPackages": "パッケージの合計数",
+        "oldestFreshness": "最古の新鮮度",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} 日前",
+        "staleRepos": "古いリポジトリ (> {{days}}日)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "ディストリビューション",
+        "version": "バージョン",
+        "packageCount": "パッケージ",
+        "lastIngest": "最後の成功したインGEST",
+        "freshness": "新鮮さ",
+        "signerFingerprint": "署名者の指紋",
+        "empty": "まだリポジトリがインGESTされていません。",
+        "neverIngested": "決して",
+        "freshnessNever": "まだインGESTされたことない",
+        "freshnessDays": "{{days}} 日",
         "noFingerprint": "—"
       }
     }
@@ -2718,7 +2718,7 @@
   "airgapBundles": {
     "buildAgent": "ビルドエージェントバンドル",
     "buildError": "ビルドキューに追加できませんでした。",
-    "buildProplus": "Build Pro+ Bundle",
+    "buildProplus": "Pro+バンドルを作成",
     "buildServer": "ビルドサーバーバンドル",
     "bundle": "バンドル",
     "completedAt": "完了済み",
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "メディアサイズ (MB)",
       "submit": "キューに追加して実行",
       "title": "新しいコレクション実行",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "少なくとも1つのミラーターゲットが必要です。",
+      "hostMismatch": "すべてのミラーミラーは同じホスト上に存在する必要があります。",
+      "mirrorsTitle": "ミラーリング",
+      "mirrorsHelper": "1つまたは複数の構成されたミラーリポジトリを選択してください。バンドルは、各ミラー木のフレッシュなスナップショットから作成されます（実行が作成されるときに取得）。すべての選択肢は同じホストに属している必要があります。",
+      "noMirrors": "アクティブなミラーリングが設定されていません。設定 → レポジトリミラーリングにミラーを追加してから、再度試行してください。",
+      "mirrorPicker": "ミラーを選択",
+      "hostMismatchWarning": "あなたが選んだミラーリングは複数のホストをカバーしています。収集計画は単一のホストに配信されるため、すべての選択肢は同じホストで共有する必要があります。",
+      "burnDevice": "光学焼刻装置（オプション）",
+      "burnDeviceHelper": "空白に保つと、ダウンロード可能なISOファイルのみをビルドします。デバイスを設定すると、ISO_BUILTの後にBURNINGステージが追加されます。"
     },
     "downloadError": "ISOファイルのダウンロードに失敗しました。",
     "empty": "まだコレクション実行がありません。\"新しいコレクション実行\"をクリックして開始します。",
@@ -2804,36 +2804,36 @@
     "refresh": "更新する",
     "subtitle": "設定されたリポジトリをミラーリングし、署名付きISOを作成し、エアギャップ側でインジェスト可能なマニフェストを書き込む一発目収集ランをトリガーします。",
     "title": "オフライン収集実行",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "ディスク上にまだISOファイルが見つかりません — 数秒後に再チェックしてください。",
+    "multiDiscInfo": "この実行で{{count}}枚のディスクが生成されました。ダウンロードするものを選択してください。",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "ダウンロードするディスクを選択してください",
+      "row": "ディスク {{n}} — {{size}}",
+      "cancel": "キャンセル"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "現在のサーバーロールの読み込みに失敗しました。",
+    "saveError": "サーバーロールの保存に失敗しました。",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "標準 (エアギャップなし)",
+      "description": "デフォルト。このサーバーはネットワーク経由でホストを直接管理します（エアギャップがない場合）。通常の展開ではこれが選択されます — すべてのサーバーがこれを使用するか、エアギャップが必要な場合はその半分を選択します。"
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "オフライン側のエアギャップ コレクター",
+      "description": "インターネットに接続されているエアギャップペアの一方です。このサーバーはアップストリームパッケージリポジトリをミラーリングし、CVEとコンプライアンスフィードを集め、それらを署名付きISOイメージにバンドルして物理的にエアギャップを越えて運びます。インターネットアクセスがあるサーバーでこれを選択します。"
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "ディスコンNECTED サイドのエアギャップ リポジトリ",
+      "description": "インターネットアクセスがないエアギャップペアの一方です。このサーバーはコレクタによって生成されたISOメディアをインジェストし、その署名を検証してプライベートネットワーク上の管理ホストにパッケージを提供します。エアギャップ内にあるサーバーでこれを選択します。"
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "この SysManage サーバーがエアギャップ展開にどのように参加するかを選択します。ほとんどのサーバーは標準のままにしておいてください。役割は次のサーバー再起動後に効果を発揮します。",
+    "currentTag": "(現在)",
+    "saving": "保存中…",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "SysManageサーバーを保存後に再起動してください。新しい役割が完全に効果を発揮するように",
+    "saved": "サーバーロールが保存されました。効果を完全に反映させるにはサーバーを再起動してください。",
     "menuTitle": "サーバーロール"
   },
   "airgapDevices": {
@@ -3104,7 +3104,7 @@
     "revokeError": "API キーを無効にできませんでした。",
     "revoked": "無効にしました",
     "status": "ステータス",
-    "title": "API Keys"
+    "title": "API キー"
   },
   "acceptInvitation": {
     "noToken": "招待トークンが提供されていません",
@@ -3162,7 +3162,7 @@
     "pid": "プロセスID (PID)",
     "name": "名前",
     "user": "ユーザー",
-    "cpu": "CPU %",
+    "cpu": "CPU ％",
     "memory": "メモリ使用率 (%)",
     "rss": "RSS",
     "status": "状態",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "一致する項目がありません。",
     "placeholder": "ページを検索…  (Escで閉じる)"
+  },
+  "agentMirrors": {
+    "add": "追加",
+    "colActions": "アクション",
+    "colChannel": "チャンネル",
+    "colUrl": "ミラーアドレス",
+    "deleteFailed": "ミラーを削除できませんでした。",
+    "loadFailed": "構成されたエージェントミラーの読み込みに失敗しました。",
+    "noEngine": "このサーバーではプロビジョニングエンジンがライセンスされていないため、設定するチャンネルはありません。",
+    "refresh": "更新",
+    "remove": "ミラーの削除",
+    "removed": "ミラーが削除されました；そのチャンネルはアップストリームからインストールされます。",
+    "saveFailed": "ミラーの保存に失敗しました。",
+    "saved": "ミラーが保存されました。",
+    "subtitle": "プライベートミラーをエージェント自体がインストールされるチャンネルに置き換えます。これがないと、エアギャップサイトでプロビジョニングされたホストはパブリックPPA、COPR、OBS、wingetまたはHomebrewタップにアクセスできず、エージェントをインストールせず、登録もされません。",
+    "title": "エージェントインストールミラー"
   }
 }

@@ -17,8 +17,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.error_constants import (
     error_openbao_not_running,
-    OPENBAO_GENERIC_ERROR_KEY,
-    OPENBAO_NOT_RUNNING_KEY,
     SCHTASKS_PATH,
 )
 from backend.auth.auth_bearer import JWTBearer
@@ -45,7 +43,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
         return {
             "running": False,
             "status": "stopped",
-            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
+            "message": error_openbao_not_running(),
             "pid": None,
             "server_url": None,
             "health": None,
@@ -60,7 +58,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
         return {
             "running": False,
             "status": "error",
-            "message": _("openbao.invalid_pid", "Invalid PID file"),
+            "message": _("Invalid PID file"),
             "pid": None,
             "server_url": None,
             "health": None,
@@ -101,7 +99,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
         return {
             "running": False,
             "status": "stopped",
-            "message": _("openbao.process_not_found", "OpenBAO process not found"),
+            "message": _("OpenBAO process not found"),
             "pid": None,
             "server_url": None,
             "health": None,
@@ -188,7 +186,7 @@ def get_openbao_status() -> Dict[str, Any]:  # NOSONAR
     return {
         "running": process_running,
         "status": "running",
-        "message": _("openbao.running", "OpenBAO is running"),
+        "message": _("OpenBAO is running"),
         "pid": pid,
         "server_url": server_url,
         "health": health_info,
@@ -246,7 +244,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
     if status["running"]:
         return {
             "success": True,
-            "message": _("openbao.already_running", "OpenBAO is already running"),
+            "message": _("OpenBAO is already running"),
             "status": status,
         }
 
@@ -272,7 +270,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
         else:
             raise HTTPException(
                 status_code=500,
-                detail=_("openbao.script_not_found", "OpenBAO start script not found"),
+                detail=_("OpenBAO start script not found"),
             )
 
     try:
@@ -367,8 +365,7 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
                             self.returncode = 1
                             self.stdout = ""
                             self.stderr = _(
-                                "openbao.start_error",
-                                "Internal error occurred while starting OpenBAO",
+                                "Internal error occurred while starting OpenBAO"
                             )
 
                     result = Result()
@@ -402,30 +399,28 @@ def start_openbao() -> Dict[str, Any]:  # NOSONAR
 
             return {
                 "success": True,
-                "message": _("openbao.started", "OpenBAO started successfully"),
+                "message": _("OpenBAO started successfully"),
                 "status": new_status,
                 "output": result.stdout,
             }
         else:
             return {
                 "success": False,
-                "message": _("openbao.start_failed", "Failed to start OpenBAO"),
+                "message": _("Failed to start OpenBAO"),
                 "error": result.stderr or result.stdout,
                 "status": get_openbao_status(),
             }
     except subprocess.TimeoutExpired:
         return {
             "success": False,
-            "message": _("openbao.start_timeout", "OpenBAO start timed out"),
+            "message": _("OpenBAO start timed out"),
             "status": get_openbao_status(),
         }
     except Exception:  # NOSONAR
         logger.exception("Exception occurred while starting OpenBAO", exc_info=True)
         return {
             "success": False,
-            "message": _(
-                "openbao.start_error", "An error occurred while starting OpenBAO"
-            ),
+            "message": _("An error occurred while starting OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -439,7 +434,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
     if not status["running"]:
         return {
             "success": True,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
+            "message": error_openbao_not_running(),
             "status": status,
         }
 
@@ -463,7 +458,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
         else:
             raise HTTPException(
                 status_code=500,
-                detail=_("openbao.script_not_found", "OpenBAO stop script not found"),
+                detail=_("OpenBAO stop script not found"),
             )
 
     try:
@@ -518,21 +513,21 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
 
             return {
                 "success": True,
-                "message": _("openbao.stopped", "OpenBAO stopped successfully"),
+                "message": _("OpenBAO stopped successfully"),
                 "status": new_status,
                 "output": result.stdout,
             }
         else:
             return {
                 "success": False,
-                "message": _("openbao.stop_failed", "Failed to stop OpenBAO"),
+                "message": _("Failed to stop OpenBAO"),
                 "error": result.stderr or result.stdout,
                 "status": get_openbao_status(),
             }
     except subprocess.TimeoutExpired:
         return {
             "success": False,
-            "message": _("openbao.stop_timeout", "OpenBAO stop timed out"),
+            "message": _("OpenBAO stop timed out"),
             "status": get_openbao_status(),
         }
     except Exception as e:
@@ -541,9 +536,7 @@ def stop_openbao() -> Dict[str, Any]:  # NOSONAR
         )
         return {
             "success": False,
-            "message": _(
-                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while stopping OpenBAO"
-            ),
+            "message": _("An error occurred while stopping OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -557,7 +550,7 @@ def seal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
+            "message": error_openbao_not_running(),
             "status": status,
         }
 
@@ -565,7 +558,7 @@ def seal_openbao() -> Dict[str, Any]:
     if status.get("sealed") is True:
         return {
             "success": True,
-            "message": _("openbao.already_sealed", "OpenBAO is already sealed"),
+            "message": _("OpenBAO is already sealed"),
             "status": status,
         }
 
@@ -575,7 +568,7 @@ def seal_openbao() -> Dict[str, Any]:
         if not bao_cmd:
             return {
                 "success": False,
-                "message": _("openbao.binary_not_found", "OpenBAO binary not found"),
+                "message": _("OpenBAO binary not found"),
                 "status": status,
             }
 
@@ -611,14 +604,14 @@ def seal_openbao() -> Dict[str, Any]:
 
             return {
                 "success": True,
-                "message": _("openbao.sealed", "OpenBAO sealed successfully"),
+                "message": _("OpenBAO sealed successfully"),
                 "status": new_status,
                 "output": result.stdout,
             }
         else:
             return {
                 "success": False,
-                "message": _("openbao.seal_failed", "Failed to seal OpenBAO"),
+                "message": _("Failed to seal OpenBAO"),
                 # "error": result.stderr or result.stdout,  # Commented out to avoid exposing details
                 "status": get_openbao_status(),
             }
@@ -626,7 +619,7 @@ def seal_openbao() -> Dict[str, Any]:
     except subprocess.TimeoutExpired:
         return {
             "success": False,
-            "message": _("openbao.seal_timeout", "OpenBAO seal operation timed out"),
+            "message": _("OpenBAO seal operation timed out"),
             "status": get_openbao_status(),
         }
     except Exception:  # NOSONAR
@@ -635,7 +628,7 @@ def seal_openbao() -> Dict[str, Any]:
         )  # Log full traceback for server-side debugging
         return {
             "success": False,
-            "message": _("openbao.seal_error", "Error sealing OpenBAO"),
+            "message": _("Error sealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -650,7 +643,7 @@ def unseal_openbao() -> Dict[str, Any]:
     if not status["running"]:
         return {
             "success": False,
-            "message": _(OPENBAO_NOT_RUNNING_KEY, error_openbao_not_running()),
+            "message": error_openbao_not_running(),
             "status": status,
         }
 
@@ -658,7 +651,7 @@ def unseal_openbao() -> Dict[str, Any]:
     if status.get("sealed") is False:
         return {
             "success": True,
-            "message": _("openbao.already_unsealed", "OpenBAO is already unsealed"),
+            "message": _("OpenBAO is already unsealed"),
             "status": status,
         }
 
@@ -668,10 +661,7 @@ def unseal_openbao() -> Dict[str, Any]:
     if not vault_config.get("dev_mode", False):
         return {
             "success": False,
-            "message": _(
-                "openbao.unseal_prod_mode",
-                "Automatic unseal is only supported in development mode",
-            ),
+            "message": _("Automatic unseal is only supported in development mode"),
             "status": status,
         }
 
@@ -681,7 +671,7 @@ def unseal_openbao() -> Dict[str, Any]:
         if not bao_cmd:
             return {
                 "success": False,
-                "message": _("openbao.binary_not_found", "OpenBAO binary not found"),
+                "message": _("OpenBAO binary not found"),
                 "status": status,
             }
 
@@ -719,14 +709,14 @@ def unseal_openbao() -> Dict[str, Any]:
 
             return {
                 "success": True,
-                "message": _("openbao.unsealed", "OpenBAO unsealed successfully"),
+                "message": _("OpenBAO unsealed successfully"),
                 "status": new_status,
                 "output": result.stdout,
             }
         else:
             return {
                 "success": False,
-                "message": _("openbao.unseal_failed", "Failed to unseal OpenBAO"),
+                "message": _("Failed to unseal OpenBAO"),
                 "error": result.stderr or result.stdout,
                 "status": get_openbao_status(),
             }
@@ -734,16 +724,14 @@ def unseal_openbao() -> Dict[str, Any]:
     except subprocess.TimeoutExpired:
         return {
             "success": False,
-            "message": _(
-                "openbao.unseal_timeout", "OpenBAO unseal operation timed out"
-            ),
+            "message": _("OpenBAO unseal operation timed out"),
             "status": get_openbao_status(),
         }
     except Exception:  # NOSONAR
         logger.exception("Exception occurred while unsealing OpenBAO")
         return {
             "success": False,
-            "message": _("openbao.unseal_error", "Error unsealing OpenBAO"),
+            "message": _("Error unsealing OpenBAO"),
             "status": get_openbao_status(),
         }
 
@@ -766,9 +754,7 @@ async def start_server():
         # Sanitize potentially sensitive information from response
         sanitized_result = {"success": result.get("success", False)}
         if not sanitized_result["success"]:
-            sanitized_result["error"] = _(
-                "openbao.start_failed", "Failed to start OpenBAO"
-            )
+            sanitized_result["error"] = _("Failed to start OpenBAO")
         return sanitized_result
     except HTTPException:
         raise
@@ -776,9 +762,7 @@ async def start_server():
         # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
-            detail=_(
-                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while starting OpenBAO"
-            ),
+            detail=_("An error occurred while starting OpenBAO"),
         )
 
 
@@ -792,9 +776,7 @@ async def stop_server():
         # Sanitize potentially sensitive information from response
         sanitized_result = {"success": result.get("success", False)}
         if not sanitized_result["success"]:
-            sanitized_result["error"] = _(
-                "openbao.stop_failed", "Failed to stop OpenBAO"
-            )
+            sanitized_result["error"] = _("Failed to stop OpenBAO")
         return sanitized_result
     except HTTPException:
         raise
@@ -802,9 +784,7 @@ async def stop_server():
         # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
-            detail=_(
-                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while stopping OpenBAO"
-            ),
+            detail=_("An error occurred while stopping OpenBAO"),
         )
 
 
@@ -839,9 +819,7 @@ async def seal_vault():
         # Sanitize potentially sensitive information from response
         sanitized_result = {"success": result.get("success", False)}
         if not sanitized_result["success"]:
-            sanitized_result["error"] = _(
-                "openbao.seal_failed", "Failed to seal OpenBAO"
-            )
+            sanitized_result["error"] = _("Failed to seal OpenBAO")
         return sanitized_result
     except HTTPException:
         raise
@@ -849,9 +827,7 @@ async def seal_vault():
         # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
-            detail=_(
-                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while sealing OpenBAO"
-            ),
+            detail=_("An error occurred while sealing OpenBAO"),
         )
 
 
@@ -865,9 +841,7 @@ async def unseal_vault():
         # Sanitize potentially sensitive information from response
         sanitized_result = {"success": result.get("success", False)}
         if not sanitized_result["success"]:
-            sanitized_result["error"] = _(
-                "openbao.unseal_failed", "Failed to unseal OpenBAO"
-            )
+            sanitized_result["error"] = _("Failed to unseal OpenBAO")
         return sanitized_result
     except HTTPException:
         raise
@@ -875,7 +849,5 @@ async def unseal_vault():
         # Don't log exception details to avoid information disclosure
         raise HTTPException(  # pylint: disable=raise-missing-from
             status_code=500,
-            detail=_(
-                OPENBAO_GENERIC_ERROR_KEY, "An error occurred while unsealing OpenBAO"
-            ),
+            detail=_("An error occurred while unsealing OpenBAO"),
         )

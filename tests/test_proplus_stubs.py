@@ -606,3 +606,72 @@ class TestAuditLogIntegrityHashColumn:
         mapper = AuditLog.__table__
         column_names = [c.name for c in mapper.columns]
         assert "integrity_hash" in column_names
+
+
+class TestProvisioningStubs:
+    """The provisioning surface must answer 402 when unlicensed, not 404.
+
+    Every provisioning endpoint lives inside the Pro+ engine, so on an
+    unlicensed server nothing was mounted at all and callers got a 404 —
+    indistinguishable from a typo in the URL, and for the 18.2 bare-metal
+    endpoints that meant a script could not tell "you need a licence" from
+    "that endpoint does not exist".  These stubs close that.
+    """
+
+    def _client(self, loaded=False):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        from backend.api.proplus_routes_stubs import _mount_provisioning_stubs
+        from backend.auth.auth_bearer import get_current_user
+
+        app = FastAPI()
+        app.dependency_overrides[get_current_user] = lambda: "admin@example.com"
+        mounted = _mount_provisioning_stubs(
+            app, {"provisioning_engine": True} if loaded else {}
+        )
+        return TestClient(app), mounted
+
+    def test_compute_provisioning_reads_return_402(self):
+        client, mounted = self._client()
+        assert mounted == 1
+        for path in (
+            "/api/v1/provisioning/providers",
+            "/api/v1/provisioning/compute-resources",
+            "/api/v1/provisioning/templates",
+            "/api/v1/provisioning/jobs",
+        ):
+            response = client.get(path)
+            assert response.status_code == 402, path
+            assert "Professional+" in response.json()["detail"]
+
+    def test_bare_metal_reads_return_402(self):
+        """Phase 18.2 — the catalog, assignments, discovery and boot media."""
+        client, _ = self._client()
+        for path in (
+            "/api/v1/provisioning/install-sources",
+            "/api/v1/provisioning/install-assignments",
+            "/api/v1/provisioning/discovered-hosts",
+            "/api/v1/provisioning/bootdisk/status",
+        ):
+            response = client.get(path)
+            assert response.status_code == 402, path
+
+    def test_writes_return_402_rather_than_pretending_to_succeed(self):
+        """The important half: a POST that would assign a machine an OS must not
+        answer 200 with {"licensed": false} — a caller would read that as done."""
+        client, _ = self._client()
+        for path in (
+            "/api/v1/provisioning/compute-resources",
+            "/api/v1/provisioning/provision",
+            "/api/v1/provisioning/install-sources",
+            "/api/v1/provisioning/install-assignments",
+        ):
+            response = client.post(path, json={})
+            assert response.status_code == 402, path
+            assert "Professional+" in response.json()["detail"]
+
+    def test_licensed_server_mounts_no_stubs(self):
+        """The stubs must never shadow the real engine routes."""
+        _client, mounted = self._client(loaded=True)
+        assert mounted == 0

@@ -30,7 +30,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.persistence import models
 from backend.persistence.partitions import get_tenant_db
 from backend.services.audit_service import ActionType, AuditService, EntityType, Result
@@ -47,7 +47,7 @@ router = APIRouter(
 
 # Reused 404 detail string — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
-_ERR_TEMPLATE_NOT_FOUND = "Report template not found"
+_ERR_TEMPLATE_NOT_FOUND = N_("Report template not found")
 
 # Column labels reused across multiple base report types (firewall +
 # antivirus reports all carry an IP Address / OS Version column).

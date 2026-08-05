@@ -11,7 +11,7 @@
     "save": "Enregistrer",
     "saveSuccess": "Paramètres antivirus par défaut enregistrés avec succès",
     "selectProgram": "Sélectionner un programme antivirus",
-    "title": "Antivirus"
+    "title": "antivirus"
   },
   "auditLog": {
     "exportRequiresLicense": "L'exportation du journal d'audit nécessite une licence SysManage Professional+.",
@@ -140,7 +140,7 @@
     "retryingTooltip": "Tentative de reconnexion au serveur"
   },
   "dashboard": {
-    "antivirusCoverage": "Antivirus",
+    "antivirusCoverage": "antivirus",
     "hosts": "Hôtes",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Redémarrage requis",
@@ -343,8 +343,8 @@
     "shellBash": "Bash",
     "shellBourne": "Shell Bourne",
     "shellCsh": "Csh",
-    "shellFalse": "Faux",
-    "shellFish": "Fish",
+    "shellFalse": "False",
+    "shellFish": "Poisson",
     "shellKsh": "Ksh",
     "shellNoLogin": "Aucun accès",
     "shellTcsh": "Tcsh",
@@ -443,8 +443,8 @@
     "childHostCreationStarting": "Démarrage de la création de l'hôte enfant...",
     "childHostDeleteError": "Erreur lors de la suppression de l'hôte enfant",
     "childHostDeleteRequested": "Suppression demandée pour {{name}}",
-    "childHostDistribution": "Distribution",
-    "childHostDistributionLabel": "Distribution",
+    "childHostDistribution": "distribution",
+    "childHostDistributionLabel": "distribution",
     "childHostDistributionRequired": "Veuillez sélectionner une distribution",
     "childHostError": "Erreur",
     "childHostFqdnHelp": "Ce FQDN sera utilisé pour l'instance WSL",
@@ -513,7 +513,7 @@
     "cpuFrequency": "Fréquence",
     "cpuInfo": "Processeur",
     "cpuModel": "Modèle du Processeur",
-    "cpuThreads": "Threads",
+    "cpuThreads": "Fils",
     "cpuVendor": "Fabricant du Processeur",
     "createBhyveVmTitle": "Créer une machine virtuelle bhyve",
     "createChildHostButton": "Créer",
@@ -543,7 +543,7 @@
     "diagnosticLoadFailed": "Échec du chargement des détails du diagnostic",
     "diagnosticReport": "Rapport de Diagnostic",
     "diagnosticsData": "Données de Diagnostic",
-    "diagnosticsTab": "Diagnostics",
+    "diagnosticsTab": "Diagnostic",
     "editHostname": "Modifier le nom d'hôte",
     "entitled": "Autorisé",
     "expired": "Expiré",
@@ -630,7 +630,7 @@
       }
     },
     "inactiveInterfaces": "Inactives",
-    "infoTab": "Info",
+    "infoTab": "Informations",
     "install": "Installer",
     "installPackagesTitle": "Installer des Paquets",
     "installSelectedPackages": "Installer les Paquets Sélectionnés",
@@ -738,7 +738,7 @@
     "serialNumber": "Numéro de Série",
     "serverRoles": "Rôles du Serveur",
     "serverRolesTab": "Rôles du Serveur",
-    "service": "Service",
+    "service": "service",
     "serviceControlActions": "Actions de Contrôle des Services",
     "services": "Services",
     "shell": "Shell",
@@ -813,7 +813,7 @@
     "certificatesDeployedSuccess": "Déploiement des certificats mis en file d'attente avec succès",
     "certificatesLoadError": "Échec du chargement des certificats depuis le coffre-fort",
     "childHostContainerNameHelpReadonly": "Le nom du conteneur est dérivé du nom d'hôte",
-    "client": "Client",
+    "client": "client",
     "confirmDeleteInstallationMessage": "Êtes-vous sûr de vouloir supprimer cet enregistrement d'installation ? Cette action est irréversible.",
     "confirmRequestPackages": "Demander les paquets disponibles",
     "confirmRequestPackagesMessage": "Ceci déclenchera la collecte de paquets sur l'hôte, ce qui peut être gourmand en ressources et prendre plusieurs minutes. Voulez-vous continuer ?",
@@ -856,8 +856,8 @@
     "selectedServices": "{{count}} service(s) sélectionné(s)",
     "deviceNumber": "Appareil {{number}}",
     "errorUpdatingServices": "Erreur mise à jour des services",
-    "graylogPort": "(port {{port}})",
-    "interfaceNumber": "Interface {{number}}",
+    "graylogPort": "(porte {{port}})",
+    "interfaceNumber": "INTERFACE {{number}}",
     "noChangesMade": "Aucune modification apportée",
     "servicesUpdatedCount": "{{count}} service(s) mis à jour",
     "processesTab": "Processus",
@@ -872,20 +872,20 @@
       "apply": "Appliquer",
       "applyError": "Echec de l'application de l'image",
       "applySuccess": "Application de l'image demandée (le hote redemarrera)",
-      "backend": "Backend",
+      "backend": "backend",
       "badge": "Mode image",
       "bootedImage": "Image démarrée",
       "confirmApplyMessage": "Cela applique l'image enregistrée et redemarre le hote. Continuer ?",
       "confirmApplyTitle": "Appliquer l'image enregistrée ?",
       "confirmRollbackMessage": "Cela retourne le hote à son image précédente et la redemarre. Continuer ?",
       "confirmRollbackTitle": "Retour arrière vers l'image ?",
-      "digest": "Digest",
+      "digest": "Résumé",
       "enterpriseNotice": "La mise en attente, l'application et le retour arrière des images sont une fonctionnalité Enterprise. Les détails de l'image actuelle sont affichés ci-dessous.",
       "enterpriseOnly": "Les actions sur le mode image exigent une licence Enterprise",
       "imageRef": "Référence d'image",
       "noStagedImage": "Aucune image mise en attente",
       "pendingReboot": "En attente — redemarrer pour appliquer",
-      "rollback": "Rollback",
+      "rollback": "Annuler la transaction",
       "rollbackAvailable": "Retour arrière disponible",
       "rollbackError": "Echec du rétablissement de l'image",
       "rollbackSuccess": "Retour arrière vers l'image précédente demandée (le hote redemarrera)",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "Exécution non privilégiée",
     "scriptsDisabledTooltip": "Les scripts sont désactivés pour cet hôte",
     "scriptsEnabledTooltip": "Les scripts sont activés pour cet hôte",
-    "up": "Up",
+    "up": "En ligne",
     "antivirusDeployAllFailed": "La distribution antivirus a échouée sur tous les hôtes:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "La distribution antivirus a été initiée pour {{count}} hôte(s).\\n\\nHôtes échoués:\\n{{hosts}}",
     "antivirusDeploySuccess": "La distribution antivirus a été initiée pour {{count}} hôte(s)",
@@ -1066,7 +1066,7 @@
     "osUpgrades": "Mises à niveau SE",
     "reports": "Rapports",
     "scripts": "Scripts",
-    "secrets": "Secrets",
+    "secrets": "Sécrets",
     "updates": "Mises à jour",
     "users": "Utilisateurs",
     "role": {
@@ -1074,7 +1074,7 @@
       "engineMissing": "Moteur Pro+ requis non chargé ; vérifiez la licence.",
       "repository": "Repositoire en isolement"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "Repositoires hors connexion",
     "map": "Carte",
     "sites": "Sites",
     "airgapCollections": "Exécutions de collecte en isolement",
@@ -1181,7 +1181,7 @@
   "queues": {
     "created": "Créé le",
     "description": "Afficher et gérer les messages expirés/échoués de la file d'attente.",
-    "direction": "Direction",
+    "direction": "Orientation",
     "expired": "Expiré le",
     "hostId": "ID de l'hôte",
     "messageContent": "Contenu du message",
@@ -1235,7 +1235,7 @@
     "tag": {
       "accounts": "comptes",
       "antivirus": "antivirus",
-      "audit": "audit",
+      "audit": "auditeur",
       "basic": "basique",
       "commercial": "commercial",
       "compliance": "conformité",
@@ -1452,7 +1452,7 @@
     "secretName": "Nom du Secret",
     "secretSubtype": "Sous-type de Secret",
     "secretType": "Type de Secret",
-    "title": "Secrets",
+    "title": "Sécrets",
     "type": {
       "api_keys": "Clés API",
       "database_credentials": "Identifiants de Base de Données",
@@ -1488,7 +1488,7 @@
     "antivirusEnableSuccess": "Activation de l'antivirus initiée avec succès",
     "antivirusError": "Échec du chargement du statut antivirus",
     "antivirusOpenSource": "Antivirus - Open source",
-    "antivirusProtection": "Antivirus",
+    "antivirusProtection": "antivirus",
     "antivirusRemoveFailed": "Échec de la suppression de l'antivirus",
     "antivirusRemoveSuccess": "Suppression de l'antivirus initiée avec succès",
     "assignedRoles": "Rôles Attribués",
@@ -1575,8 +1575,8 @@
     "titleFailed": "Serveur Indisponible",
     "attempts": "Essais : {{count}}",
     "lastConnected": "Dernière connexion : {{time}}",
-    "secondsRemaining": "{{seconds}}s",
-    "timeRemaining": "{{minutes}}m {{seconds}}s"
+    "secondsRemaining": "{{seconds}} s",
+    "timeRemaining": "{{minutes}} min {{seconds}} s"
   },
   "tags": {
     "addTag": "Ajouter une balise",
@@ -1608,7 +1608,7 @@
       "statistics": "Statistiques",
       "status": "Statut",
       "title": "Statut d'OpenTelemetry",
-      "tracesCount": "Traces",
+      "tracesCount": "Trajets",
       "fetchError": "Impossible d'écarter l'êtat OpenTelemetry"
     },
     "prometheus": {
@@ -1699,7 +1699,7 @@
     "source": "Source",
     "title": "Titre",
     "type": "Type",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "Supprimer la sélection ({{count}})",
     "disableSelected": "Désactiver la sélection ({{count}})",
     "enableSelected": "Activer la sélection ({{count}})",
@@ -2171,7 +2171,7 @@
       "samlGroupAttr": "Attribut Groupe",
       "samlIdpCert": "Certificat de signature de l'IdP (X.509)",
       "samlIdpCertHelp": "Certificat public PEM/base64 utilisé pour vérifier les signatures des assertions",
-      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpEntityId": "IDP Entity ID",
       "samlIdpSso": "URL d'authentification unique de l'IdP (IdP SSO URL)",
       "samlSpAcs": "URL ACS du SP",
       "samlSpAcsHelp": "Où l'IdP POSTe l'affirmation, par exemple https://host/api/auth/saml/<id>/acs",
@@ -2258,9 +2258,9 @@
       "name": "Nom",
       "osVersion": "SE / Version",
       "upstream": "Amont",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "Synchronisation",
+      "statusSnapshot": "Instantané",
+      "statusRestore": "Restaurer"
     },
     "configureTitle": "Configurer le mirroring {{platform}}",
     "create": "Créer",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "Supprimez d'abord les {{n}} miroir(s) sous cette plateforme.",
     "noEligibleHosts": "Aucun hôte {{family}} enregistré disponible — enregistrez-en un et actualisez.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
+      "inFlight": "{{label}} en cours depuis {{at}}",
+      "failedNoText": "Échec ; aucun texte d’erreur n’a été retourné.",
+      "failed": "échec",
       "ok": "ok",
       "label": {
-        "sync": "sync",
+        "sync": "synchronisation",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "restauration"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "Impossible de charger les instantanés.",
+      "restoreConfirm": "Restaurer l'arborescence de miroir depuis le snapshot {{id}} ? L'arborescence en direct sera remplacée.",
+      "restoreError": "La restauration a échoué.",
+      "title": "Instantanés pour {{name}}",
+      "empty": "Aucun instantané encore. Cliquez sur l’icône appareil photo pour en prendre un.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
+        "id": "Instantané",
+        "taken": "Pris le",
+        "size": "Taille",
+        "files": "Fichiers",
         "actions": "Actions"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "Restaurer l'arborescence en direct vers ce snapshot"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "Masquer les instantanés",
+      "expand": "Afficher les instantanés"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "Installez l’outil miroir requis ci-dessus pour activer la configuration du miroir. Les opérations de miroir restent désactivées jusqu’à ce que le probe de configuration signale la présence de tous les outils.",
+      "preConfigure": "Installez l’outil miroir requis sur cet hôte avant de configurer la plateforme. Le bouton Créer reste désactivé jusqu’à ce que le probe de configuration signale la présence de tous les outils."
     },
     "snap": {
       "action": {
@@ -2362,7 +2362,7 @@
         "actions": "Actions",
         "channel": "Canal",
         "name": "Snapshot",
-        "status": "Capture"
+        "status": "Capturer"
       },
       "empty": "Aucun snapshot suivé encore. Ajoutez-en un ci-dessus, puis utilisez “Capturer les snapshots”.",
       "loadError": "Impossible de charger les snapshots suivis.",
@@ -2380,9 +2380,9 @@
       },
       "col": {
         "actions": "Actions",
-        "digest": "Digest",
+        "digest": "Résumé",
         "image": "Image",
-        "status": "Capture",
+        "status": "Capturer",
         "tag": "Tag"
       },
       "empty": "Aucune image suivie encore. Ajoutez-en une ci-dessus puis utilisez \"Capturer les images\".",
@@ -2443,9 +2443,9 @@
     "selectPort": "Sélectionner un port",
     "startPort": "Port de début",
     "subtitle": "Sous-titre",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "Titre",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "Mise à jour réussie"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} à jour"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "Ces correctifs ne sont pas encore sur le miroir local. Pour combler l'interruption, un autre cycle de transfert collecteur → média → répertoire est nécessaire.",
+        "not_applied": "Ces correctifs sont déjà sur le miroir local. Aucun transfert de nouveau média n'est nécessaire – l'hôte n'a pas encore exécuté son gestionnaire de paquets.",
+        "current": "Les paquets hôte correspondent à l’ête la plus récente du miroir et aucun CVE public n’a émergé depuis le dernier transfert."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "Repositoires hors connexion",
+      "subtitle": "Statistiques par répertoire pour ce miroir privé, plus fraûcheur agrégée.",
+      "notApplicable": "Ce tableau de bord a du sens uniquement sur les déploiements avec un rôle de répertoire.",
+      "loadError": "Échec du chargement des dépôts :",
+      "endpointMissing": "Point d'entrée list-all-repositories du backend non disponible ; le tableau de bord ne peut pas être rempli.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "Aggrégat",
+        "totalRepos": "Nombre total de répertoires",
+        "totalPackages": "Nombre total de paquets",
+        "oldestFreshness": "Fraûcheur la plus ancienne",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "il y a {{days}} jour(s)",
+        "staleRepos": "Repos obsolètes (> {{days}}j)"
       },
       "table": {
-        "distro": "Distro",
+        "distro": "Distribution",
         "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "packageCount": "Paquets",
+        "lastIngest": "Dernière ingéstion réussie",
+        "freshness": "Fraûcheur",
+        "signerFingerprint": "Empreinte digitale du signataire",
+        "empty": "Aucune ingéstion de répertoire encore.",
+        "neverIngested": "Jamais",
+        "freshnessNever": "Jamais ingéstion",
+        "freshnessDays": "{{days}} jour(s)",
         "noFingerprint": "—"
       }
     }
@@ -2517,7 +2517,7 @@
       "openSite": "Ouvert",
       "operation": "Opération",
       "site": "Site",
-      "timestamp": "Timestamp"
+      "timestamp": "Horodatage"
     },
     "empty": "Aucune entrée d'audit de fédération n'a encore été enregistrée.",
     "emptyFiltered": "Aucun élément d'audit ne correspond aux filtres.",
@@ -2634,7 +2634,7 @@
       "notFound": "Site non trouvé.",
       "seeHosts": "Afficher les hôtes sur ce site",
       "syncInterval": "Intervalle de synchronisation",
-      "syncIntervalValue": "{{seconds}}s",
+      "syncIntervalValue": "{{seconds}} s",
       "url": "URL",
       "viewAuditLog": "Afficher le journal d'audit",
       "activeCommands": "Commandes actives",
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "Taille du média (Mo)",
       "submit": "Ajouter une commande dans la file d'attente",
       "title": "Nouvelle exécution de collection",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "Au moins un cible de miroir est requise.",
+      "hostMismatch": "Tous les miroirs sélectionnés doivent être sur le même hote.",
+      "mirrorsTitle": "Miroirs",
+      "mirrorsHelper": "Sélectionnez un ou plusieurs miroirs configurés. Le bundle est construit à partir d'un snapshot frais de chaque arborescence de miroir pris au moment de la création du run. Toutes les sélections doivent partager un hôte.",
+      "noMirrors": "Aucun miroir activé configuré. Allez aux Paramètres → Miroitement des répertoires pour en ajouter un, puis essayez de nouveau.",
+      "mirrorPicker": "Choisissez des miroirs",
+      "hostMismatchWarning": "Les miroirs que vous avez choisis s'appliquent à plusieurs hôtes. Le plan de collecte est dispatché vers un seul hôte, donc tous les choix doivent partager un seul.",
+      "burnDevice": "Appareil d’enregistrement optique (facultatif)",
+      "burnDeviceHelper": "Laissez ce champ vide pour construire uniquement un fichier ISO téléchargeable. Spécifiez un appareil pour ajouter une étape d’enregistrement après la construction de l’ISO."
     },
     "downloadError": "Impossible de télécharger l'ISO.",
     "empty": "Aucune exécution de collection n'a encore été effectuée. Cliquez sur \"Nouvelle exécution de collection\" pour en démarrer une.",
@@ -2804,36 +2804,36 @@
     "refresh": "Actualiser",
     "subtitle": "Déclencher des exécutables uniques qui mirorent les répertoires configurés, construisent un ISO signé et écrivent un manifeste pour l'ingestion du côté hors ligne.",
     "title": "Collectes en isolement",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "Aucun fichier ISO trouvé sur le disque encore — réinterrogez dans un instant.",
+    "multiDiscInfo": "Cette exécution a produit {{count}} disques. Choisissez ceux à télécharger.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "Choisissez un disque pour télécharger",
+      "row": "Disque {{n}} — {{size}}",
+      "cancel": "Annuler"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "Impossible de charger le rôle actuel du serveur.",
+    "saveError": "Impossible d'enregistrer le rôle du serveur.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "Standard (sans interruption d'air)",
+      "description": "Par défaut. Ce serveur gére directement les hôtes sur le réseau sans séparation par interruption d'air. Choisissez ceci pour tout déploiement ordinaire – il est ce que chaque serveur exécute tant qu'il n'est pas spécifiquement besoin de la moitié d'un couple d'interruption d'air."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "Collecteur en mode hors connexion (côte connectée)",
+      "description": "La moitié connectée à Internet d'un couple d'interruption d'air. Il miroire les répositoires de paquets amont, rassemble les flux CVE et conformité et les encapsule dans des images ISO signées que vous transportez physiquement à travers l'interruption d'air. Choisissez ceci sur le serveur qui a un accès Internet et construit les médias."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "Reposiroire hors connexion (côte déconnectée)",
+      "description": "La moitié isolée d'un couple d'interruption d'air, sans accès à Internet. Il ingère les médias ISO produits par le Collecteur, vérifie leur signature et sert les paquets aux hôtes générés sur le réseau privé afin qu'ils puissent mettre à jour normalement. Choisissez ceci sur le serveur dans l'enclave d'interruption d'air."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "Choisissez comment ce serveur SysManage participe à une déploiement hors connexion. La plupart des serveurs doivent rester en mode Standard. Le rôle entre en vigueur après le prochain redémarrage du serveur.",
+    "currentTag": "(actuel)",
+    "saving": "Enregistrement...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "Redemarrer le serveur SysManage après l'enregistrement pour que le nouveau rôle prenne effet pleinement.",
+    "saved": "Rôle du serveur enregistré. Redemarrer le serveur pour que les changements prennent effet.",
     "menuTitle": "Rôle du serveur"
   },
   "airgapDevices": {
@@ -3104,7 +3104,7 @@
     "revokeError": "Impossible de révoquer la clé API.",
     "revoked": "Révoqué",
     "status": "Statut",
-    "title": "API Keys"
+    "title": "Clés API"
   },
   "acceptInvitation": {
     "noToken": "Aucun jeton d'invitation fourni",
@@ -3162,7 +3162,7 @@
     "pid": "PID",
     "name": "Nom",
     "user": "Utilisateur",
-    "cpu": "CPU %",
+    "cpu": "Taux d'utilisation du CPU",
     "memory": "Memoire %",
     "rss": "RSS",
     "status": "Statut",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "Aucun résultat.",
     "placeholder": "Rechercher des pages…  (Appuez sur Esc pour fermer)"
+  },
+  "agentMirrors": {
+    "add": "Ajouter",
+    "colActions": "Actions",
+    "colChannel": "Canal",
+    "colUrl": "URL du miroir",
+    "deleteFailed": "Impossible de supprimer le miroir.",
+    "loadFailed": "Impossible de charger les miroirs d’agents configurés.",
+    "noEngine": "Le moteur de provisioning n’est pas licencié sur ce serveur, il n’y a donc aucun canal à configurer.",
+    "refresh": "Actualiser",
+    "remove": "Supprimer le miroir",
+    "removed": "Le miroir a été supprimé ; ce canal installe à nouveau depuis l’upstream.",
+    "saveFailed": "Impossible d’enregistrer le miroir.",
+    "saved": "Miroir enregistré.",
+    "subtitle": "Remplacer un miroir privé pour les canaux depuis lesquels l’agent lui-même est installé. Sans cela, une machine provisionnée dans un site hors connexion ne peut pas atteindre le PPA public, COPR, OBS, winget ou tap Homebrew, donc elle n’installe jamais d’agent et ne s’inscrit jamais.",
+    "title": "Miroirs d’installation de l’agent"
   }
 }

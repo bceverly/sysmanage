@@ -36,6 +36,7 @@ import PackageProfilesSettings from '../Components/PackageProfilesSettings';
 import ReportBrandingSettings from '../Components/ReportBrandingSettings';
 import ReportTemplatesSettings from '../Components/ReportTemplatesSettings';
 import AirGapBundlesSettings from '../Components/AirGapBundlesSettings';
+import AgentMirrorsSettings from '../Components/AgentMirrorsSettings';
 import RepositoryMirroringSettings from '../Components/RepositoryMirroringSettings';
 import AuthenticationProvidersSettings from '../Components/AuthenticationProvidersSettings';
 import ServerRoleSettings from '../Components/ServerRoleSettings';
@@ -952,6 +953,7 @@ const Settings: React.FC = () => {
         {tabNames[activeTab] === 'report-branding' && <ReportBrandingSettings />}
         {tabNames[activeTab] === 'report-templates' && <ReportTemplatesSettings />}
         {tabNames[activeTab] === 'airgap-bundles' && <AirGapBundlesSettings />}
+        {tabNames[activeTab] === 'agent-mirrors' && <AgentMirrorsSettings />}
         {tabNames[activeTab] === 'repository-mirroring' && <RepositoryMirroringSettings />}
         {tabNames[activeTab] === 'authentication' && <AuthenticationProvidersSettings />}
         {visiblePluginSettingsTabs.map(pt => (

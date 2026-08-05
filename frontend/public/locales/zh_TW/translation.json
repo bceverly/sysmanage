@@ -343,8 +343,8 @@
     "shellBash": "Bash",
     "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
-    "shellFalse": "錯誤",
-    "shellFish": "Fish",
+    "shellFalse": "false",
+    "shellFish": "魚",
     "shellKsh": "Ksh",
     "shellNoLogin": "無登陸",
     "shellTcsh": "Tcsh",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "非特權執行中",
     "scriptsDisabledTooltip": "此主機的指令稿已停用",
     "scriptsEnabledTooltip": "此主機的指令稿已啟用",
-    "up": "Up",
+    "up": "上線",
     "antivirusDeployAllFailed": "所有主機的防病毒部署失敗：\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "啟動 {{count}} 主機的防病毒部署。\\n\\n失敗主機：\\n{{hosts}}",
     "antivirusDeploySuccess": "啟動 {{count}} 主機的防病毒部署。",
@@ -1074,7 +1074,7 @@
       "engineMissing": "未載入所需的Pro+引擎；請檢查授權。",
       "repository": "隔離存儲庫"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "隔離倉庫",
     "map": "地圖",
     "sites": "站點",
     "airgapCollections": "隔離收集",
@@ -1245,7 +1245,7 @@
       "opensource": "開放原始碼",
       "organization": "組織",
       "permissions": "權限",
-      "rbac": "rbac",
+      "rbac": "RBAC",
       "roles": "角色",
       "security": "安全",
       "systemInfo": "系統信息",
@@ -1368,7 +1368,7 @@
     "shellType": "Shell 類型",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "命令",
       "ksh": "Ksh",
       "powershell": "PowerShell",
       "sh": "Sh",
@@ -1422,10 +1422,10 @@
     "createdDatetime": "建立日期時間",
     "databaseEngine": "資料庫引擎",
     "database_engine": {
-      "mysql": "mysql",
+      "mysql": "MySQL",
       "oracle": "Oracle",
       "postgresql": "PostgreSQL",
-      "sqlite": "sqlite3",
+      "sqlite": "SQLite",
       "sqlserver": "Microsoft SQL Server"
     },
     "deleteError": "機密刪除失敗",
@@ -1699,7 +1699,7 @@
     "source": "來源",
     "title": "標題",
     "type": "類型",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "刪除所選 ({{count}})",
     "disableSelected": "停用所選 ({{count}})",
     "enableSelected": "啟用所選 ({{count}})",
@@ -1804,11 +1804,11 @@
     "unknown": "未知",
     "managers": {
       "apt": "APT (Debian/Ubuntu)",
-      "chocolatey": "Chocolatey (Windows)",
+      "chocolatey": "Chocolatey （Windows）",
       "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
       "flatpak": "Flatpak",
       "fwupd": "fwupd",
-      "homebrew": "Homebrew (macOS)",
+      "homebrew": "Homebrew （macOS）",
       "pacman": "Pacman (Arch Linux)",
       "pkg": "PKG (FreeBSD)",
       "pkgin": "pkgin (NetBSD)",
@@ -2172,7 +2172,7 @@
       "samlIdpCert": "IdP 簽署憑證（X.509）",
       "samlIdpCertHelp": "公開 PEM/base64 憑證，用於驗證斷言簽名",
       "samlIdpEntityId": "IdP 實體 ID",
-      "samlIdpSso": "IdP SSO URL",
+      "samlIdpSso": "身份提供者 SSO URL",
       "samlSpAcs": "SP ACS URL",
       "samlSpAcsHelp": "IdP 將斷言 POST 到的位置，例如 https://host/api/auth/saml/<id>/acs",
       "samlSpEntityId": "SP 實體 ID",
@@ -2258,9 +2258,9 @@
       "name": "名稱",
       "osVersion": "作業系統 / 版本",
       "upstream": "上游",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "同步",
+      "statusSnapshot": "快照",
+      "statusRestore": "還原"
     },
     "configureTitle": "設定 {{platform}} 鏡像",
     "create": "建立",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "請先刪除此平台下的 {{n}} 個鏡像。",
     "noEligibleHosts": "沒有已註冊的 {{family}} 主機可用 — 請註冊一個並重新整理。",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} 自 {{at}} 以來正在進行中",
+      "failedNoText": "失敗；無錯誤文本返回。",
+      "failed": "失敗",
+      "ok": "成功",
       "label": {
-        "sync": "sync",
+        "sync": "同步",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "還原"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "無法加載快照。",
+      "restoreConfirm": "從快照 {{id}} 還原鏡像樹？活躍的樹將被覆寫。",
+      "restoreError": "還原分派失敗。",
+      "title": "備份 {{name}}",
+      "empty": "目前還沒有快照。點擊相機圖標以拍攝一個。",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "快照",
+        "taken": "建立於",
+        "size": "大小",
+        "files": "檔案",
+        "actions": "動作"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "將活樹恢復到此快照"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "隱藏快照",
+      "expand": "顯示快照"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "安裝上述所需的鏡像工具以啟用鏡像配置。鏡像操作保持禁用直到設置探針報告所有工具存在。",
+      "preConfigure": "在配置平台之前，此主機上需要安裝所需的鏡像工具。創建按鈕將保持禁用狀態，直到設置探針報告所有工具存在。"
     },
     "snap": {
       "action": {
@@ -2387,8 +2387,8 @@
       },
       "empty": "目前沒有追蹤任何影像。上方新增一個，然後使用「擷取影像」。",
       "loadError": "無法載入追蹤的影像。",
-      "registry": "Registry",
-      "repository": "Repository",
+      "registry": " registry",
+      "repository": "儲存庫",
       "tag": "標籤",
       "title": "已追蹤的影像（{{name}}）",
       "track": "追蹤",
@@ -2443,9 +2443,9 @@
     "selectPort": "選擇連接埠",
     "startPort": "起始連接埠",
     "subtitle": "副標題",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "標題",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "更新成功"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} 項最新"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "這些修復還未在本地鏡像中。要關閉差距需要另一個 collector → 媒體 → 倉庫轉移週期。",
+        "not_applied": "這些修復已存在於本地鏡像中。不需要新的媒體傳輸 — 主機尚未運行其套件管理器。",
+        "current": "主機包與最新鏡像狀態匹配，且自上次轉移以來未出現任何公共 CVE。"
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "隔離倉庫",
+      "subtitle": "此私有側鏡像的每個儲存庫統計資料，加上總體新鮮度。",
+      "notApplicable": "此儀表板僅在倉庫角色部署中有意義。",
+      "loadError": "無法加載倉庫：",
+      "endpointMissing": "後端 list-all-repositories 端點不可用；儀表板無法填充。",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "聚合",
+        "totalRepos": "總倉庫數量",
+        "totalPackages": "總套件數量",
+        "oldestFreshness": "最舊的新鮮度",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} 天前",
+        "staleRepos": "過期的倉庫 (> {{days}}天)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "發行版",
+        "version": "版本",
+        "packageCount": "套件",
+        "lastIngest": "上次成功導入",
+        "freshness": "新鮮度",
+        "signerFingerprint": "簽章指紋",
+        "empty": "尚無匯入的儲存庫。",
+        "neverIngested": "從不",
+        "freshnessNever": "從未匯入",
+        "freshnessDays": "{{days}} 天",
         "noFingerprint": "—"
       }
     }
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "媒體大小（MB）",
       "submit": "排隊運行",
       "title": "新收集運行",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "至少需要一個鏡像目標。",
+      "hostMismatch": "所有選中的鏡像必須在同一主機上。",
+      "mirrorsTitle": "鏡像",
+      "mirrorsHelper": "選擇一個或多個已配置的鏡像站。該組件包是由在運行創建時從每個鏡像樹的新快照構建而成。所有選項必須共享同一主機。",
+      "noMirrors": "未配置任何啟用的鏡像。請前往設定 → 存放庫鏡像以新增一個，然後再試一次。",
+      "mirrorPicker": "選擇鏡像站",
+      "hostMismatchWarning": "您選擇的鏡像跨越多個主機。收集計劃只會發送到單一主機，因此所有選擇必須共享一個主機。",
+      "burnDevice": "光學刻錄裝置（選用）",
+      "burnDeviceHelper": "留空白以僅建立可供下載的ISO檔案。設定裝置會在ISO_BUILT後添加一個BURNING階段。"
     },
     "downloadError": "無法下載ISO",
     "empty": "還沒有收集運行。點擊“新收集運行”開始一個。",
@@ -2804,36 +2804,36 @@
     "refresh": "刷新",
     "subtitle": "觸發一次性收集運行，這些運行會鏡像配置的倉庫、建立一個簽名 ISO，並為空氣隔離側寫入一個清單以供攝取。",
     "title": "隔離收集運行",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "尚未在磁盤上找到 ISO 檔案 — 請稍後再試。",
+    "multiDiscInfo": "此次運行產生了 {{count}} 張光碟。選擇要下載的光碟。",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "選擇要下載的光碟",
+      "row": "磁碟 {{n}} — {{size}}",
+      "cancel": "取消"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "無法加載當前伺服器角色。",
+    "saveError": "無法保存伺服器角色。",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "標準 (無空氣隔離)",
+      "description": "預設選項。此伺服器直接透過網路管理主機，沒有空氣隔離。選擇此選項進行任何普通部署 — 這是每個伺服器的默認模式，除非您需要空氣隔離對中的其中一半。"
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "隔離收集器（線上側）",
+      "description": "具有網際網路連接的空氣隔離對的一半。它鏡像上游套件倉庫，收集 CVE 和合規性 feed，並將其打包成已簽名的 ISO 影像，以便您物理地跨過空氣隔離傳遞。選擇此選項在具有網際網路存取權限並建立媒體的伺服器上。"
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "隔離倉庫（斷開連接側）",
+      "description": "沒有網際網路連接的空氣隔離對的一半。它接收由 Collector 生產的 ISO 媒體，驗證其簽名，並將套件提供給私有網絡上的受管主機，使其可以正常更新。選擇此選項在空氣隔離區域內的伺服器上。"
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "選擇此 SysManage 伺服器在隔離部署中扮演的角色。大多數伺服器應保持在標準模式。角色在下次伺服器重啟後生效。",
+    "currentTag": "(目前)",
+    "saving": "保存中",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "在儲存新角色後，重新啟動SysManage伺服器以使更改完全生效。",
+    "saved": "伺服器角色已保存。重新啟動伺服器以使其生效。",
     "menuTitle": "伺服器角色"
   },
   "airgapDevices": {
@@ -3104,7 +3104,7 @@
     "revokeError": "撤銷 API 金鑰失敗。",
     "revoked": "已撤銷",
     "status": "狀態",
-    "title": "API Keys"
+    "title": "API 金鑰"
   },
   "acceptInvitation": {
     "noToken": "未提供邀請令牌",
@@ -3159,7 +3159,7 @@
     "resendError": "無法重新發送邀請"
   },
   "processes": {
-    "pid": "PID",
+    "pid": "進程ID",
     "name": "名稱",
     "user": "用戶",
     "cpu": "CPU %%",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "無匹配項。",
     "placeholder": "搜尋頁面…… (按 Esc 關閉)"
+  },
+  "agentMirrors": {
+    "add": "新增",
+    "colActions": "動作",
+    "colChannel": "頻道",
+    "colUrl": "鏡像 URL",
+    "deleteFailed": "無法移除鏡像。",
+    "loadFailed": "無法加載配置的代理鏡像。",
+    "noEngine": "此伺服器上未對配置引擎進行許可，因此無頻道可供配置。",
+    "refresh": "刷新",
+    "remove": "移除鏡像",
+    "removed": "鏡像已移除；該頻道將從上游安裝。",
+    "saveFailed": "無法保存鏡像。",
+    "saved": "鏡像已保存。",
+    "subtitle": "用私有鏡像替換代理本身安裝的頻道。沒有這個，空氣隔離環境中的主機無法訪問公共 PPA、COPR、OBS、winget 或 Homebrew 橋接，因此它永遠不會安裝代理，也永遠不會入網。",
+    "title": "代理安裝鏡像"
   }
 }

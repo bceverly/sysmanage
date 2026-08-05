@@ -216,10 +216,10 @@ class VaultService:
     ) -> Dict[str, Any]:
         """Make a request to the vault API with error handling."""
         if not self.vault_config.get("enabled", False):
-            raise VaultError(_("vault.not_enabled", "Vault is not enabled"))
+            raise VaultError(_("Vault is not enabled"))
 
         if not self.token:
-            raise VaultError(_("vault.no_token", "Vault token not configured"))
+            raise VaultError(_("Vault token not configured"))
 
         # SSRF / path-traversal barrier.  ``path`` is a caller-supplied vault API
         # path that may embed user-influenced data (secret ids, key names), so it
@@ -228,7 +228,7 @@ class VaultService:
         # otherwise a crafted path could reach an unintended endpoint (e.g.
         # ``sys/seal``) or inject a scheme/host/credentials into the request URL.
         if ".." in path or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", path):
-            raise VaultError(_("vault.invalid_path", "Invalid vault path"))
+            raise VaultError(_("Invalid vault path"))
 
         url = f"{self.base_url}/v1/{path}"
 
@@ -257,7 +257,7 @@ class VaultService:
                 return {}  # Not found is often expected in vault operations
             elif response.status_code == 403:
                 raise VaultError(
-                    _("vault.permission_denied", "Permission denied"),
+                    _("Permission denied"),
                     status_code=403,
                     transient=False,
                 )
@@ -279,19 +279,15 @@ class VaultService:
 
         except requests.exceptions.ConnectionError as exc:
             raise VaultError(
-                _("vault.connection_error", "Cannot connect to vault server"),
+                _("Cannot connect to vault server"),
                 transient=True,
             ) from exc
         except requests.exceptions.Timeout as exc:
-            raise VaultError(
-                _("vault.timeout", "Vault request timed out"), transient=True
-            ) from exc
+            raise VaultError(_("Vault request timed out"), transient=True) from exc
         except requests.exceptions.RequestException as e:
             raise VaultError(f"Vault request failed: {str(e)}", transient=True) from e
         except json.JSONDecodeError as exc:
-            raise VaultError(
-                _("vault.invalid_response", "Invalid response from vault")
-            ) from exc
+            raise VaultError(_("Invalid response from vault")) from exc
 
     def store_secret(  # NOSONAR
         self,
@@ -424,14 +420,12 @@ class VaultService:
             response = self._make_request("GET", vault_path)
 
             if not response or "data" not in response:
-                raise VaultError(_("vault.secret_not_found", "Secret not found"))
+                raise VaultError(_("Secret not found"))
 
             # Extract secret data (KV v2 format)
             secret_data = response["data"].get("data", {})
             if not secret_data:
-                raise VaultError(
-                    _("vault.invalid_secret_format", "Invalid secret format")
-                )
+                raise VaultError(_("Invalid secret format"))
 
             return secret_data
 

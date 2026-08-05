@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.feature_gate import require_module_loaded
 from backend.licensing.features import ModuleCode
 from backend.persistence import models
@@ -42,8 +42,8 @@ _MAX_TREE_DEPTH = 10
 
 # Reused 404 detail strings — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
-_ERR_ACCESS_GROUP_NOT_FOUND = "Access group not found"
-_ERR_REGISTRATION_KEY_NOT_FOUND = "Registration key not found"
+_ERR_ACCESS_GROUP_NOT_FOUND = N_("Access group not found")
+_ERR_REGISTRATION_KEY_NOT_FOUND = N_("Registration key not found")
 
 
 # Phase 12.4: both routers below are gated behind the federation

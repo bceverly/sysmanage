@@ -383,7 +383,11 @@ def cmd_validate(seed: bool) -> int:
             file=sys.stderr,
         )
         return 1
-    print("\nOK: every code-referenced key exists in every locale", file=sys.stderr)
+    # stdout, deliberately.  Failures go to stderr, but a SUCCESS report on
+    # stderr makes "passing" and "produced no output at all" look identical
+    # — that is how `make i18n-validate` got mistaken for a dead target
+    # (2026-08-05).  Aligned across all four repos.
+    print("\nOK: every code-referenced key exists in every locale")
     return 0
 
 

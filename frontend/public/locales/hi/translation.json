@@ -343,7 +343,7 @@
     "shellBash": "बश",
     "shellBourne": "बोर्न शेल",
     "shellCsh": "क्सह",
-    "shellFalse": "कालून",
+    "shellFalse": "गलत",
     "shellFish": "फिश",
     "shellKsh": "Ksh",
     "shellNoLogin": "लॉगिन नहीं",
@@ -852,7 +852,7 @@
     "clickRequestData": "एजेंट से डीगनोस्टिक इनफ़ॉर्मेशन का मानक प्राप्त करने के लिए \"होस्ट डेटा रिक्वेस्ट\" क्लिक करें।",
     "deleteChildHostMessage": "क्या आप हीरो \"{{name}}\" को हटाने में निश्चित हैं?",
     "geoLocation": "जैग्रहिक स्थान",
-    "publicIp": "공용 IP",
+    "publicIp": "सार्वजनिक IP",
     "selectedServices": "{{count}} सेवा(सेवाएँ) चुनी गई",
     "deviceNumber": "डिवाइस {{number}}",
     "errorUpdatingServices": "सेवा अद्ययन करने में त्रुटि",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "विशेषाधिकार के बिना चल रहा है",
     "scriptsDisabledTooltip": "इस होस्ट के लिए स्क्रिप्ट अक्षम हैं",
     "scriptsEnabledTooltip": "इस होस्ट के लिए स्क्रिप्ट सक्षम हैं",
-    "up": "Up",
+    "up": "अप",
     "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
     "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
@@ -1074,7 +1074,7 @@
       "engineMissing": "आवश्यक Pro+ इंजन लोड नहीं है; लाइसेंस जांचें।",
       "repository": "वायु-अलग संस्थान"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "एयर-गैप रिपोजिटरी",
     "map": "मानचित्र",
     "sites": "साइटें",
     "airgapCollections": "वायु-गेप कॉलेक्शन्स",
@@ -1242,14 +1242,14 @@
       "firewall": "बारिएर",
       "hosts": "होस्ट्स",
       "network": "संचार",
-      "opensource": "オープンソース",
+      "opensource": ".opensource",
       "organization": "प्रस्तुति",
       "permissions": "परमिशन्स",
       "rbac": "RBAC",
       "roles": "प्रवेश कwalities",
       "security": "सुरक्षा",
       "systemInfo": "सिस्टम जानकारी",
-      "tags": "tags",
+      "tags": "टैग",
       "tracking": "अनुसरण",
       "users": "उपयोगकर्ताओं"
     },
@@ -1368,7 +1368,7 @@
     "shellType": "शेल प्रकार",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "प्रति",
       "ksh": "Ksh",
       "powershell": "PowerShell",
       "sh": "Sh",
@@ -1575,7 +1575,7 @@
     "titleFailed": "सर्वर अनुपलब्ध",
     "attempts": "प्रयास: {{count}}",
     "lastConnected": "शहरी तारीख में पिछले संपर्क का समय: {{time}}",
-    "secondsRemaining": "{{seconds}}s",
+    "secondsRemaining": "{{seconds}}स",
     "timeRemaining": "{{minutes}} मिनट {{seconds}} सेकंड"
   },
   "tags": {
@@ -1699,7 +1699,7 @@
     "source": "स्रोत",
     "title": "शीर्षक",
     "type": "प्रकार",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "चयनित हटाएं ({{count}})",
     "disableSelected": "चयनित अक्षम करें ({{count}})",
     "enableSelected": "चयनित सक्षम करें ({{count}})",
@@ -2171,11 +2171,11 @@
       "samlGroupAttr": "ग्रुप विशेषता",
       "samlIdpCert": "IdP साइनिंग कैर्टिफिकेट (X.509)",
       "samlIdpCertHelp": "सार्बिक PEM/बेस-64 कैर्टिफिकेट जो प्रतिवर्धन संकेतों की मानदण्डीकरण के लिए उपयोग किया जाता है",
-      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpEntityId": "IdP इन्टिटी ID",
       "samlIdpSso": "IdP SSO URL",
       "samlSpAcs": "SP ACS URL",
       "samlSpAcsHelp": "IdP POSTs प्रतिबंध करने के लिए, उदाहरण के लिए https://host/api/auth/saml/<id>/acs",
-      "samlSpEntityId": "SP Entity ID",
+      "samlSpEntityId": "SP इंटीडी",
       "samlSpKey": "SP गुप्त कुंजी (वॉल्ट सेक्रेट आईडी, वैकल्पिक)",
       "samlSpKeyHelp": "वॉल्ट:सेक्रेट/पाथ या लिटरल:प्लेटफ़ाइन में संदर्भ जैसे",
       "samlWantSigned": "सकारण होने की सर्वोत्तम सुझाव है (सकारण)",
@@ -2258,9 +2258,9 @@
       "name": "नाम",
       "osVersion": "OS / संस्करण",
       "upstream": "अपस्ट्रीम",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "सिंक",
+      "statusSnapshot": "स्नैपशट",
+      "statusRestore": "पुनरावृत्ति"
     },
     "configureTitle": "{{platform}} मिरर कॉन्फ़िगर करें",
     "create": "बनाएं",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "पहले इस प्लेटफ़ॉर्म के तहत {{n}} मिरर हटाएँ।",
     "noEligibleHosts": "कोई पंजीकृत {{family}} होस्ट उपलब्ध नहीं — एक पंजीकृत करें और ताज़ा करें।",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} से {{at}} को चल रहा है",
+      "failedNoText": "असफल; कोई त्रुटि पाठ नहीं दिया गया।",
+      "failed": "असफल",
+      "ok": "ठीक",
       "label": {
-        "sync": "sync",
+        "sync": "संग्रहण करें",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "पुनर्जीवित करें"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "संपीडित लोड नहीं किया जा सका।",
+      "restoreConfirm": "{{id}} के स्नैपशट से माइरोर ट्री को पुनरावृत्त करें? जीवंत ट्री अद्यतनित होगा।",
+      "restoreError": "पुनर्जीवन डिपार्ट की सफलता मिली नहीं।",
+      "title": "{{name}} के लिए स्नैपशट",
+      "empty": "अभी तक कोई स्नैपशट नहीं है। एक लेने के लिए कैमरा आइकन पर क्लिक करें।",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "स्नैपशट",
+        "taken": "लेने का समय",
+        "size": "आकार",
+        "files": "फ़ाइलें",
+        "actions": "क्रियाएँ"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "इस स्नैपशट में लाइव ट्री को पुनरावलोकित करें"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "संपीडित को छिपाएं",
+      "expand": "स्नैपशॉट दिखाओ"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "अनुरूप माइरोर टूलिंग को इसमें संस्थापित करने के लिए आवश्यक होता है। माइरोर ऑपरेशन अनुक्रमणिका प्रबंधक रिपोर्ट करने तक बंद रहता है।",
+      "preConfigure": "इस होस्ट पर आवश्यक माइरोर टूलिंग संस्थापित करें, फिर प्लेटफ़ॉर्म की संस्थापना करें। बनाएं बटन अक्सर देर होता है जब तक नहीं रिपोर्ट करता है।"
     },
     "snap": {
       "action": {
@@ -2443,7 +2443,7 @@
     "selectPort": "पोर्ट चुनें",
     "startPort": "प्रारंभ पोर्ट",
     "subtitle": "उपशीर्षक",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "शीर्षक",
     "udp": "Udp",
     "updateSuccess": "अपडेट सफल"
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} वर्तमान"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "इन फिक्सेज़ आपके स्थानीय दर्पण पर अभी तक नहीं हैं। गेप को बंद करने में एक और संग्रहकार → मीडिया → रिपोज़िट्री ट्रांसफर साइकल की आवश्यकता है।",
+        "not_applied": "इन फिक्सेज़ पहले से ही आपके स्थानीय दर्पण पर हैं। नए मीडिया ट्रांसफर की कोई जरूरत नहीं — होस्ट अभी तक अपने पैकेज मैनेजर को चलाने से बचा है।",
+        "current": "होस्ट पैकेज माइरोर के सबसे हल्के अवस्था के सामने मेल खाते हैं और विभागीय CVE को दिखाने के बाद प्रकट नहीं होता।"
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "एयर-गैप रिपोजिटरी",
+      "subtitle": "इस गैर-पब्लिक साइड माइरोर के प्रति-प्रविधि विश्लेषण और समग्र ताजगी।",
+      "notApplicable": "यह डैशबोर्ड केवल रिपोज़िट्री-रोल इनस्टॉल में महत्त्वपूर्ण है।",
+      "loadError": "रिपोजिटरी लोड करने में विफल:",
+      "endpointMissing": "बैकएंड list-all-repositories एंडपॉइंट नहीं उपलब्ध है; डैशबोर्ड प्रतिबद्ध करना नहीं सकता।",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "संग्रहण करें",
+        "totalRepos": "कुल रिपोज़िट्री",
+        "totalPackages": "कुल पैकेज",
+        "oldestFreshness": "सबसे पुरानी तازगी",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} दिन पहले",
+        "staleRepos": "पुराने रिपोज़िट्री (> {{days}} दिन)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "डिस्ट्रो",
+        "version": "संस्करण",
+        "packageCount": "पैकेजज",
+        "lastIngest": "अंतिम सफल इनजेस्ट",
+        "freshness": "ताजगी",
+        "signerFingerprint": "कंपाउन्डर फिंगरप्रिनट",
+        "empty": "अभी तक कोई रिपोज़िटरी संप्रेषित नहीं हुई।",
+        "neverIngested": "न ever",
+        "freshnessNever": "कभी इनजेस्ट किया नहीं गया",
+        "freshnessDays": "{{days}} दिन",
         "noFingerprint": "—"
       }
     }
@@ -2524,7 +2524,7 @@
     "errorLoad": "फेडरेशन ऑडिट लॉग को लोड करने में विफल हुए।",
     "filters": {
       "actor": "कैसियन",
-      "apply": "应用",
+      "apply": "लागू करें",
       "clear": "सफेद करें",
       "operation": "क्रिया",
       "siteId": "साइट आईडी"
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "मीडिया का आकार (एमबी)",
       "submit": "कार्यक्रम चलाओ",
       "title": "नई संकलन चलानी",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "कम से कम एक माइरोर लक्षण की आवश्यकता है।",
+      "hostMismatch": "सभी चुने हुए माइरोर्स को समान होस्ट पर रखना होता है।",
+      "mirrorsTitle": "दर्पण",
+      "mirrorsHelper": "एक या एक से अधिक निर्दिष्ट माइरोर का चयन करें। पैकेज की बंडल रन उत्पादन के समय प्रत्येक माइरोर ट्री की एक ताज़ा स्नैपशट से बनाई गई होती है। सभी चयन एक होस्ट को साझा करें मुझे दिखाते हैं।",
+      "noMirrors": "किसी भी सक्रिय माइरोर की कन्फगरेशन नहीं है। सेटिंग्स → रिपोज़िटरी माइरोरिंग पर जाकर एक जोड़े, फिर फिर से कोशिश करें।",
+      "mirrorPicker": "दर्पण चुनें",
+      "hostMismatchWarning": "आपके दर्पण जोड़े कई होस्ट्स को शामिल करते हैं। संग्रह योजना एक ही होस्ट पर भेजती है, इसलिए सभी चयन एकमेव शामिल होने के लिए मुख्य हैं।",
+      "burnDevice": "प्रकाशीय बर्न डिवाइस (वैकल्पिक)",
+      "burnDeviceHelper": "खाली छोड़ें यदि केवल डाउनलोड करने योग्य ISO फाइल बनाना है। एक उपकरण सेटिंग करने पर ISO_BUILT के बाद BURNING स्टेज जोड़ा जाता है।"
     },
     "downloadError": "ISO डाउनलोड करने में विफल हुए",
     "empty": "अभी तक कोई संकलन चलानी नहीं है। \\\"नई संकलन चलानी\\\" दबाकर शुरू करें।",
@@ -2804,36 +2804,36 @@
     "refresh": "अद्यतन करें",
     "subtitle": "एक बारी के लिए संग्रहण चलाने का त्रुटि, संस्थापित प्रतिष्ठानों को मिडर करने के लिए बनाया हुआ अपनी ISO और वहीं लैंडलॉक साइड पर आगमन के लिए एक मैनिफेस्ट लिखने का त्रुटि।",
     "title": "वायु-गेप कलेक्शन चलने",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "डिस्क पर अभी तक कोई ISO फाइल नहीं मिली — कुछ सेकंड बाद फिर से चेक करें।",
+    "multiDiscInfo": "इस चलाने से {{count}} डिस्क प्राप्त हुए। जिसको डाउनलोड करें।",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "डिस्क चुनें",
+      "row": "डिस्क {{n}} — {{size}}",
+      "cancel": "रद्द करें"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "वर्तमान सर्वर भूमिका को लोड नहीं किया जा सका।",
+    "saveError": "सर्वर भूमिका को बचाने में असफलता हुई।",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "स्टैंडर्ड (एयर गेप का अभाव में)",
+      "description": "डिफ़ॉल्ट। यह सर्वर नेटवर्क पर सीधे होस्ट्स को प्रबंधित करता है, जिनमें एयर गेप का अनुकूलन नहीं है। किसी भी सामान्य इनस्टॉल में इसे चुनें — यह हर सर्वर पर दोहरा जाता है, अगर आप किसी एयर गेप जोड़े के एक छोटे भाग की वास्तविकता में जरूरत नहीं है।"
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "एयर-गैप कल्ले (ऑनलाइन ओर)",
+      "description": "इंटरनेट-संलग्न एयर गेप जोड़े का आधा भाग। यह अपवर्तक पैकेज रिपोज़िट्री मिडिया, सुरक्षा और पारितनीतिक फीड का दर्पण बनाता है और इसे एक अंकित ISO छवि में घुमाता है, जो आप वायरलेस गेप के पार भीतर ले जा सकते हैं। इसे उन सर्वरों पर चुनें, जिनमें इंटरनेट एक्सेस मौजूद है और मीडिया को बनाते हैं।"
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "एयर-गैप रिपोजिटरी (डिसकनेक्टेड ओर)",
+      "description": "एयर गेप जोड़े का अलग-अलग भाग, जिसमें इंटरनेट एक्सेस मौजूद नहीं है। यह संग्रहकार द्वारा बनाई गई ISO मीडिया को प्रवेश कराता है, इसके अंकन की पुष्टि करता है, और संगीठिकारित नेटवर्क पर मैनेजड होस्ट्स को पैकेज देता है ताकि वे आमतौर पर अपडेट कर सकें। इंटरनेट-लगामी एन्फ़्लोज़ में यह सर्वर पर चुनें।"
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "यह SysManage सर्वर के लिए एयर-गैप इम्पलेमेंटेशन में कैसे भाग लेना चाहिए का चुनाव करें। सबसे अधिक सर्वरों को Standard पर रहना चाहिए। यह दृश्य आगे बढ़ता है जब नेक्स्ट सर्वर रीस्टार्ट के बाद होता है।",
+    "currentTag": "(वर्तमान)",
+    "saving": "सहेजा जा रहा है...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "SysManage सर्वर को बचाने के बाद पुनः सตาร्ट करें ताकि नई भूमिका पूरी तरह से प्रभावी हो जाए।",
+    "saved": "सर्वर भूमिका सहेजी गई। इसके पुरे प्रभाव को देखने के लिए सर्वर को फिर से रंग दें।",
     "menuTitle": "सर्वर भूमिका"
   },
   "airgapDevices": {
@@ -2841,7 +2841,7 @@
     "help": "देव्याल \\u0938जार/पाद गो भुविन साबे पादोज्देके सोजे पादोज्देके सेयास पोलान. \\u0926ुव्बे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।. \\u0915्र\\u092cे देव्याल \\u0938जार/पाद गो भुविन \\u0938ाबे पादोज्देके \\u0938ेयास पोलान ।.",
     "label": "ब्लॉक डिवाइस",
     "loadError": "ड्राइव को गिनने में विफलता",
-    "none": "(none)",
+    "none": "(कोई नहीं)",
     "rescan": "ड्राइव फिर से स्कैन करें",
     "saveError": "डिवाइस सेभ करने में असफलता हुई।",
     "title": "ड्राइव आयम्प트",
@@ -2882,7 +2882,7 @@
     "copyFingerprint": "फ़िंगरप्रिंट कॉपी करें",
     "fingerprint": "फिंगरप्रिन्ट",
     "trusted": {
-      "badKey": "(unreadable key)",
+      "badKey": "(अपठनीय कुंजी)",
       "count": "{{n}} संबोधन",
       "empty": "कोई ट्रस्टेड कलेक्टर कुंजी नहीं है।",
       "help": "प्रत्येक एयर-गैप कलेक्टर (Air-Gap Collector) से जिनमें इस गिट हब (repository) को मीडिया (media) पहुंचाना चाहिए, उनके लिए बाहरी सक्रियता के साथ पब्लिक की (public key) को इम्पोर्ट करें। असंबद्ध कुंजी द्वारा हस्ताक्षरित मीडिया (media signed by an untrusted key) को आयनग (ingest) के समय नकारात्मक जब्त किए जाते हैं।",
@@ -2891,7 +2891,7 @@
       "imported": "प्रविष्ट की गई सकारात्मक {{fp}}",
       "loadError": "विश्वसनीय कुंजी को लोड नहीं कर सका।",
       "nameLabel": "कोलेक्टर नाम",
-      "pemLabel": "公然鍵 (PEM)",
+      "pemLabel": "सार्वजनिक कुंजी (PEM)",
       "removeError": "कुंजी हटा नहीं पाई।",
       "required": "नाम और सार्वजनिक कुंजी दोनों आवश्यक हैं।",
       "title": "\\u0926\\u094b\\u0932\\u094d\\u092f\\u0947 \\u0915\\u094b Collector Keys"
@@ -2924,7 +2924,7 @@
     "emptyFiltered": "फ़िल्टर में मैच नहीं हुए कोई होस्ट।",
     "errorLoad": "क्रॉस-साइट होस्ट्स लोड करने में विफल हुए।",
     "filters": {
-      "apply": "应用",
+      "apply": "लागू करें",
       "clear": "सफेद करें",
       "osFamily": "ओएस परिवार",
       "search": "योगा१ (অকেিন /\nIP)",
@@ -3043,7 +3043,7 @@
     "save": "फेडरेशन रोल सहेजें",
     "saveError": "फ़ेडरेशन रोल सेभ करने में असफलता हुई।",
     "saved": "फेडरेशन रोल सहेजा गया है। सर्वर को पुनः सुरु करें ताकि इसे पूरी तरह से प्रभावित करें।",
-    "saving": "保存中...",
+    "saving": "बचा रहा है…",
     "site": {
       "description": "एक उप-सर्वर जो स्वतंत्र रूप से काम करता है और एक समन्वयक तक अपडेट भेजता है। यह इस प्रकार संचालित होता है कि यदि समन्वयक अपहरण हो गया हो, तो भी आत्म-नियंत्रित प्रवर्द्धित मेंसेज के रूप में संचित डेटा को फिर से पुनरावलोकित करता है।",
       "title": "फेडरेशन साइट"
@@ -3159,10 +3159,10 @@
     "resendError": "आमंत्रण पुन: भेजने में विफल रहा"
   },
   "processes": {
-    "pid": "PID",
+    "pid": "पीआईडी",
     "name": "नाम",
     "user": "उपयोगकर्ता",
-    "cpu": "CPU %",
+    "cpu": "CPU प्रतिशत",
     "memory": "मेम %",
     "rss": "RSS",
     "status": "स्थिति",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "कोई मेल खाने वाला परिणाम नहीं है।",
     "placeholder": "पेज खोज…  (Esc के दबाएँ बंद करने के लिए)"
+  },
+  "agentMirrors": {
+    "add": "जोड़ें",
+    "colActions": "क्रियाएं",
+    "colChannel": "चैनल",
+    "colUrl": "माईरों URL",
+    "deleteFailed": "माईरों को हटाने में विफलता हुई।",
+    "loadFailed": "सेट की गई एजेंट माईरों को लोड करने में विफलता हुई।",
+    "noEngine": "यह सर्वर पर प्रोवाइज़निंग इंजीन लाइसेंस नहीं है, तो सेट करने के लिए कोई चैनल नहीं है।",
+    "refresh": "फ़्रीश",
+    "remove": "माईरों को हटाओ",
+    "removed": "माईरों हटा दिए गए; उस चैनल से पब्लिक स्रोत से इनस्तॉल किया जाएगा।",
+    "saveFailed": "माईरों को सहेजने में विफलता हुई।",
+    "saved": "माईरों सहेजे गए।",
+    "subtitle": "प्राइवेट माईरों का प्रतिस्थापन करें जो एजेंट के स्वयं के इनस्तॉल करने के लिए हैं। इसके बिना, एयर-गैप साइट में प्रोवाइज़न की गई मशीनें पब्लिक PPA, COPR, OBS, winget या Homebrew tap को नहीं पहुंच सकतीं, तो वे कभी एजेंट इनस्टॉल नहीं करतीं और कभी भी रजिस्ट्रेशन नहीं कर सकतीं।",
+    "title": "एजेन्ट इनस्तॉल माईरों"
   }
 }

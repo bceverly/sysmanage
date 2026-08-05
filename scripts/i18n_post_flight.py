@@ -88,7 +88,6 @@ def report_json_repo(label, dir_path, en_filename="en/translation.json"):
             if isinstance(en[k], str)
             and isinstance(data.get(k), str)
             and en[k] == data[k]
-            and len(en[k]) > 4
         )
         spec_mismatch = sum(
             1

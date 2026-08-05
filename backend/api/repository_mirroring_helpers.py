@@ -18,7 +18,7 @@ from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 
@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 # module constants both deduplicates the strings (Sonar S1192) and
 # keeps the translation catalog source consistent — every call site
 # produces the same locale lookup key.
-_MIRROR_NOT_FOUND = "Mirror not found"
-_PLATFORM_CONFIG_NOT_FOUND = "Platform config not found"
+_MIRROR_NOT_FOUND = N_("Mirror not found")
+_PLATFORM_CONFIG_NOT_FOUND = N_("Platform config not found")
 
 # A mirror that fails this many syncs in a row is auto-disabled by the
 # tick so it stops re-dispatching every cron cycle — a mirror too large

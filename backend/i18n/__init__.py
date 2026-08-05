@@ -46,9 +46,43 @@ def get_translation(language: Optional[str] = None) -> gettext.GNUTranslations:
 
 
 def _(message: str, language: Optional[str] = None) -> str:
-    """Translate a message."""
+    """Translate a message.
+
+    NOTE: ``language`` is the SECOND positional argument.  This is NOT the
+    i18next ``t(key, englishDefault)`` signature the frontend uses — passing
+    English there asks gettext for a locale by that name, which falls back to
+    ``NullTranslations`` and returns the msgid verbatim.  ``make lint`` gates
+    against it (``scripts/i18n_check_msgid_style.py``).
+    """
     translation = get_translation(language)
     return translation.gettext(message)
+
+
+def N_(message: str) -> str:  # pylint: disable=invalid-name
+    """Mark a string for extraction WITHOUT translating it yet.
+
+    The standard gettext idiom for deferred translation.  ``xgettext`` only
+    ever sees string *literals*, so a message held in a module constant::
+
+        _MIRROR_NOT_FOUND = "Mirror not found"
+        ...
+        raise HTTPException(404, detail=_(_MIRROR_NOT_FOUND))
+
+    is never extracted, never lands in a catalog, and therefore renders English
+    in all 13 locales forever — silently, because no gate can miss a msgid that
+    was never extracted.  A 2026-08-05 audit found 15 such constants feeding 48
+    call sites.
+
+    Wrapping the DEFINITION in ``N_`` puts the text in the .pot (xgettext is
+    passed ``--keyword=N_``) while leaving the value an ordinary string; the
+    ``_()`` at the call site then resolves it against the request's locale::
+
+        _MIRROR_NOT_FOUND = N_("Mirror not found")
+
+    Translating at definition time instead would bind the module-import
+    locale, which is exactly wrong for a per-request server.
+    """
+    return message
 
 
 def ngettext(

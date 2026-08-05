@@ -50,6 +50,15 @@ from backend.persistence.models.core import GUID
 # Extracted so the FK target string is written once (Sonar S1192), matching
 # the convention in repository_mirroring.py.
 _HOST_ID_FK = "host.id"
+_TEMPLATE_ID_FK = "provisioning_template.id"
+
+# ON DELETE behaviours, named for the same reason.  The distinction is
+# deliberate and worth keeping legible: a template going away must NOT delete
+# the job or assignment that referenced it (SET NULL — the record stays, it just
+# loses its optional template), whereas a child row whose owner is deleted has
+# no meaning on its own (CASCADE).
+_ON_DELETE_SET_NULL = "SET NULL"
+_ON_DELETE_CASCADE = "CASCADE"
 
 # Compute-provider kinds the engine can drive (kept in sync with the engine's
 # PROVIDER_REGISTRY).  Stored as a plain string so adding a provider is a
@@ -190,13 +199,13 @@ class ProvisioningJob(Base):
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     compute_resource_id = Column(
         GUID(),
-        ForeignKey("compute_resource.id", ondelete="CASCADE"),
+        ForeignKey("compute_resource.id", ondelete=_ON_DELETE_CASCADE),
         nullable=False,
         index=True,
     )
     template_id = Column(
         GUID(),
-        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        ForeignKey(_TEMPLATE_ID_FK, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
     target_name = Column(String(255), nullable=False)
@@ -251,7 +260,7 @@ class ProvisioningReadiness(Base):
     __tablename__ = "provisioning_readiness"
 
     host_id = Column(
-        GUID(), ForeignKey(_HOST_ID_FK, ondelete="CASCADE"), primary_key=True
+        GUID(), ForeignKey(_HOST_ID_FK, ondelete=_ON_DELETE_CASCADE), primary_key=True
     )
     # {tool_name: "present" | "missing"} — commands AND boot-loader files.
     tools = Column(JSON, nullable=False, default=dict)
@@ -493,18 +502,18 @@ class HostInstallAssignment(Base):
     mac_address = Column(String(17), nullable=False, unique=True, index=True)
     install_source_id = Column(
         GUID(),
-        ForeignKey("install_source.id", ondelete="CASCADE"),
+        ForeignKey("install_source.id", ondelete=_ON_DELETE_CASCADE),
         nullable=False,
         index=True,
     )
     partition_template_id = Column(
         GUID(),
-        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        ForeignKey(_TEMPLATE_ID_FK, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
     finish_template_id = Column(
         GUID(),
-        ForeignKey("provisioning_template.id", ondelete="SET NULL"),
+        ForeignKey(_TEMPLATE_ID_FK, ondelete=_ON_DELETE_SET_NULL),
         nullable=True,
     )
     # What the installed machine should call itself.

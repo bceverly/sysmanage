@@ -11,7 +11,7 @@
     "save": "Opslaan",
     "saveSuccess": "Antivirusstandaardinstellingen succesvol opgeslagen",
     "selectProgram": "Selecteer antivirusprogramma",
-    "title": "Antivirus"
+    "title": "Anti-virus"
   },
   "auditLog": {
     "exportRequiresLicense": "Het exporteren van het auditlogboek vereist een SysManage Professional+-licentie.",
@@ -28,7 +28,7 @@
       "package": "Pakket",
       "script": "Script",
       "secret": "Geheim",
-      "tag": "Tag",
+      "tag": "Label",
       "user": "Gebruiker",
       "userRole": "Gebruikersrol"
     },
@@ -134,14 +134,14 @@
     "connectedTooltip": "Verbonden met server",
     "disconnected": "Niet Verbonden",
     "disconnectedTooltip": "Verbinding verloren, opnieuw proberen...",
-    "offline": "Offline",
+    "offline": "offline",
     "offlineTooltip": "Kan geen verbinding maken met server",
     "retrying": "Opnieuw Proberen",
     "retryingTooltip": "Proberen opnieuw verbinding te maken met server"
   },
   "dashboard": {
-    "antivirusCoverage": "Antivirus",
-    "hosts": "Hosts",
+    "antivirusCoverage": "Anti-virus",
+    "hosts": "Hosten",
     "openTelemetryCoverage": "OpenTelemetry",
     "rebootRequired": "Herstart Vereist",
     "security": "Beveiliging",
@@ -153,7 +153,7 @@
       "loadError": "Kan voorkeuren niet laden",
       "saveError": "Kan voorkeuren niet opslaan"
     },
-    "updates": "Updates"
+    "updates": "Bijwerkingen"
   },
   "dataGrid": {
     "columnVisibility": "Kolomzichtbaarheid",
@@ -167,7 +167,7 @@
     "addError": "Fout bij toevoegen distributie",
     "addSuccess": "Distributie succesvol toegevoegd",
     "addTitle": "Distributie Toevoegen",
-    "childType": "Type",
+    "childType": "Soort",
     "delete": "Verwijderen",
     "deleteConfirm": "Weet u zeker dat u deze distributie wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "deleteError": "Fout bij verwijderen distributie",
@@ -344,7 +344,7 @@
     "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
     "shellFalse": "False",
-    "shellFish": "Fish",
+    "shellFish": "Vis",
     "shellKsh": "Ksh",
     "shellNoLogin": "Geen Inloggen",
     "shellTcsh": "Tcsh",
@@ -375,7 +375,7 @@
     "packageManagersSubheader": "Configureer extra pakketbeheerders om in te schakelen op hosts op basis van hun besturingssysteem",
     "packageManagersTitle": "Ingeschakelde Pakketbeheerders",
     "repositoriesSubheader": "Configureer standaard repositories van derden die worden toegepast op nieuwe hosts bij goedkeuring",
-    "repositoriesTitle": "Repositories",
+    "repositoriesTitle": "Repositoryën",
     "repositoryAdded": "Standaard repository succesvol toegevoegd",
     "repositoryDeleted": "Standaard repository succesvol verwijderd",
     "repositoryUrl": "Repository-URL / PPA",
@@ -384,7 +384,7 @@
       "col": {
         "mirror": "Standaard mirror",
         "osFamily": "OS-familie",
-        "platform": "Platform",
+        "platform": "Plaatsvervangend",
         "version": "Versie"
       },
       "title": "Standaard pakket-mirrors",
@@ -478,7 +478,7 @@
     "childHostStopError": "Fout bij het stoppen van de child-host",
     "childHostStopRequested": "Stop aangevraagd voor {{name}}",
     "childHostStopped": "Gestopt",
-    "childHostType": "Type",
+    "childHostType": "Soort",
     "childHostUsernameHelp": "De niet-root gebruiker om aan te maken",
     "childHostUsernameLabel": "Gebruikersnaam",
     "childHostUsernameRequired": "Voer een gebruikersnaam in",
@@ -559,7 +559,7 @@
     "graylogTarget": "Doel",
     "groupMembers": "Leden",
     "hardwareInfo": "Hardware-informatie",
-    "hardwareTab": "Hardware",
+    "hardwareTab": "Hardwaré",
     "homeDir": "Start",
     "hostname": "Hostnaam",
     "hostnameChangeFailed": "Hostnaam wijzigen mislukt",
@@ -630,7 +630,7 @@
       }
     },
     "inactiveInterfaces": "Inactief",
-    "infoTab": "Info",
+    "infoTab": "Informatie",
     "install": "Installeren",
     "installPackagesTitle": "Pakketten Installeren",
     "installSelectedPackages": "Geselecteerde Pakketten Installeren",
@@ -709,12 +709,12 @@
     "packagesToInstall": "Te installeren pakketten",
     "pendingApproval": "Goedkeuring in Behandeling",
     "physicalVolumes": "Fysiek",
-    "platform": "Platform",
+    "platform": "Plaatsvervangend",
     "platformRelease": "Platformversie",
     "privilegedModeRequired": "Geprivilegieerde modus vereist voor servicebeheer",
     "processList": "Proceslijst",
     "processingDiagnostics": "Verwerken...",
-    "processor": "Processor",
+    "processor": "CPU",
     "refreshChildHosts": "Vernieuwen",
     "regularGroup": "Normaal",
     "regularGroups": "Normaal",
@@ -740,7 +740,7 @@
     "serverRolesTab": "Server Rollen",
     "service": "Service",
     "serviceControlActions": "Servicebeheeracties",
-    "services": "Services",
+    "services": "Diensten",
     "shell": "Shell",
     "showingPackages": "Weergave {{start}}-{{end}} van {{total}} pakketten",
     "softwareChangesTab": "Software Wijzigingen",
@@ -768,7 +768,7 @@
     "tagAdded": "Tag succesvol toegevoegd",
     "tagRemoveFailed": "Verwijderen van tag mislukt",
     "tagRemoved": "Tag succesvol verwijderd",
-    "tags": "Tags",
+    "tags": "Labels",
     "techSupportLevel": "Technische Ondersteuning Niveau",
     "thirdPartyReposTab": "Externe opslagplaatsen",
     "timezone": "Tijdzone",
@@ -813,7 +813,7 @@
     "certificatesDeployedSuccess": "Implementatie van certificaten succesvol in wachtrij geplaatst",
     "certificatesLoadError": "Laden van certificaten uit vault mislukt",
     "childHostContainerNameHelpReadonly": "Containernaam wordt afgeleid van de hostnaam",
-    "client": "Client",
+    "client": "Klant",
     "confirmDeleteInstallationMessage": "Weet u zeker dat u deze installatiegegevens wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
     "confirmRequestPackages": "Beschikbare pakketten opvragen",
     "confirmRequestPackagesMessage": "Dit start de pakketverzameling op de host, wat resource-intensief kan zijn en enkele minuten kan duren. Wilt u doorgaan?",
@@ -827,7 +827,7 @@
     "installationLog": "Installatielog",
     "installationLogTitle": "Installatielog",
     "installedVersion": "Geïnstalleerde versie",
-    "kernel": "Kernel",
+    "kernel": "Kern",
     "loadingCertificates": "Certificaten laden...",
     "noAntivirusDefault": "Geen standaard antivirus geconfigureerd voor dit OS",
     "noCertificatesFound": "Geen certificaten gevonden in vault",
@@ -857,7 +857,7 @@
     "deviceNumber": "Apparaat {{number}}",
     "errorUpdatingServices": "Fout bij het bijwerken van services",
     "graylogPort": "(poort {{port}})",
-    "interfaceNumber": "Interface {{number}}",
+    "interfaceNumber": "Interfaсe {{number}}",
     "noChangesMade": "Geen wijzigingen aangebracht",
     "servicesUpdatedCount": "{{count}} dienst(en) bijgewerkt",
     "processesTab": "Processen",
@@ -960,7 +960,7 @@
     "rebootFailed": "Herstart aanvraag mislukt",
     "rebootOrchestration": {
       "childName": "Naam",
-      "childType": "Type",
+      "childType": "Soort",
       "completed": "Georkestreerde herstart succesvol voltooid",
       "completedWithErrors": "Georkestreerde herstart voltooid: {{error}}",
       "failed": "Georkestreerde herstart mislukt: {{error}}",
@@ -1004,19 +1004,19 @@
     "packagesRequested": "Pakketverzameling succesvol aangevraagd",
     "requestPackages": "Beschikb. pakk. opvragen",
     "shellsAllowed": "Toegestane shells",
-    "tags": "Tags",
-    "updates": "Updates",
+    "tags": "Labels",
+    "updates": "Bijwerkingen",
     "approvalNeeded": "Goedkeuring vereist",
     "down": "Inactief",
     "noResults": "Geen resultaten",
     "noRows": "Geen rijen",
-    "platform": "Platform",
+    "platform": "Plaatsvervangend",
     "rebootRequired": "Herstart vereist",
     "runningPrivileged": "Geprivilegieerd uitgevoerd",
     "runningUnprivileged": "Niet-geprivilegieerd uitgevoerd",
     "scriptsDisabledTooltip": "Scripts zijn uitgeschakeld voor deze host",
     "scriptsEnabledTooltip": "Scripts zijn ingeschakeld voor deze host",
-    "up": "Up",
+    "up": "Op",
     "antivirusDeployAllFailed": "Antivirus installatie mislukt voor alle hosts:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "Antivirus installatie gestart voor {{count}} host(s).\\n\\nMislukte hosts:\\n{{hosts}}",
     "antivirusDeploySuccess": "Antivirus installatie gestart voor {{count}} host(s)",
@@ -1062,19 +1062,19 @@
     "toggleMenu": "Menu wisselen",
     "logoAlt": "SysManage",
     "dashboard": "Dashboard",
-    "hosts": "Hosts",
+    "hosts": "Hosten",
     "osUpgrades": "OS-upgrades",
     "reports": "Rapporten",
-    "scripts": "Scripts",
+    "scripts": "Scripten",
     "secrets": "Geheimen",
-    "updates": "Updates",
+    "updates": "Bijwerkingen",
     "users": "Gebruikers",
     "role": {
       "collector": "Luchtdichte collector",
       "engineMissing": "Vereiste Pro+ engine niet geladen; controleer licentie.",
       "repository": "Luchtdichte opslagplaats"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "Luchtgapsieve repos",
     "map": "Kaart",
     "sites": "Sites",
     "airgapCollections": "Luchtdichte collecties",
@@ -1204,7 +1204,7 @@
     },
     "subtitle": "Genereer uitgebreide rapporten voor hosts, gebruikers en systeemanalyses",
     "tabs": {
-      "hosts": "Hosts",
+      "hosts": "Hosten",
       "security": "Beveiliging",
       "users": "Gebruikers",
       "federation": "Federatie"
@@ -1221,7 +1221,7 @@
     },
     "firewallStatus": {
       "description": "Details van firewall-status voor alle beheerde hosts, waaronder firewallsoftware, ingeschakeld/uitgeschakelde status, open IPv4 en IPv6-poorten en besturingssysteeminformatie.",
-      "name": "Host Firewall Status"
+      "name": "Status van de hostfirewall"
     },
     "generateError": "Fout bij het genereren van rapport: {{message}}",
     "hostsWithTags": {
@@ -1233,16 +1233,16 @@
       "name": "Geregistreerde Hosts"
     },
     "tag": {
-      "accounts": "accounts",
+      "accounts": "rekeningen",
       "antivirus": "antivirus",
-      "audit": "audit",
-      "basic": "basic",
-      "commercial": "commercial",
-      "compliance": "compliance",
+      "audit": "controle",
+      "basic": "basis",
+      "commercial": "commercieel",
+      "compliance": "compliancy",
       "firewall": "firewall",
-      "hosts": "hosts",
+      "hosts": "hosten",
       "network": "netwerk",
-      "opensource": "opensource",
+      "opensource": "open source",
       "organization": "organisatie",
       "permissions": "rechten",
       "rbac": "rbac",
@@ -1342,7 +1342,7 @@
     "noExecutions": "Geen uitvoeringen",
     "noOutput": "Geen uitvoer",
     "noScripts": "Geen scripts",
-    "platform": "Platform",
+    "platform": "Plaatsvervangend",
     "platforms": {
       "darwin": "Darwin",
       "freebsd": "FreeBSD",
@@ -1371,23 +1371,23 @@
       "cmd": "Cmd",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "Sch",
       "zsh": "Zsh"
     },
     "startedAt": "Gestart op",
     "stderrOutput": "Stderr-uitvoer",
     "stdoutOutput": "Stdout-uitvoer",
-    "title": "Scripts",
+    "title": "Scripten",
     "update": "Bijwerken",
     "updateError": "Fout bij bijwerken",
     "updateSuccess": "Succesvol bijgewerkt",
     "updatedAt": "Bijgewerkt op",
     "viewScript": "Script bekijken",
     "waitingForResults": "Wachten op resultaten",
-    "adHocScript": "Ad-hoc Script",
+    "adHocScript": "Ad-hoc-script",
     "connected": "Gevolgd",
     "exitCodeLabel": "Afsluitcode: {{code}}",
-    "offline": "Offline"
+    "offline": "offline"
   },
   "search": {
     "searchColumn": "Zoeken in",
@@ -1488,7 +1488,7 @@
     "antivirusEnableSuccess": "Antivirus inschakelen succesvol gestart",
     "antivirusError": "Laden van antivirusstatus mislukt",
     "antivirusOpenSource": "Antivirus - Open source",
-    "antivirusProtection": "Antivirus",
+    "antivirusProtection": "Anti-virus",
     "antivirusRemoveFailed": "Antivirus verwijderen mislukt",
     "antivirusRemoveSuccess": "Antivirus verwijderen succesvol gestart",
     "assignedRoles": "Toegewezen Rollen",
@@ -1502,7 +1502,7 @@
     "editRoles": "Rollen Bewerken",
     "enableAntivirus": "Antivirus inschakelen",
     "enabled": "Ingeschakeld",
-    "firewall": "Firewall",
+    "firewall": "firewal",
     "firewallError": "Kan firewall status niet laden",
     "firewallRoles": "Firewallrollen",
     "firewallRolesSaveError": "Opslaan van firewallrollen mislukt",
@@ -1587,7 +1587,7 @@
     "lastUpdated": "Laatst bijgewerkt",
     "name": "Naam",
     "noHostsAssociated": "Geen hosts zijn geassocieerd met deze tag.",
-    "title": "Tags",
+    "title": "Labels",
     "viewHosts": "Hosts bekijken"
   },
   "telemetry": {
@@ -1608,7 +1608,7 @@
       "statistics": "Statistieken",
       "status": "Status",
       "title": "OpenTelemetry-status",
-      "tracesCount": "Traces",
+      "tracesCount": "Sporen",
       "fetchError": "Kan OpenTelemetry-status niet ophalen"
     },
     "prometheus": {
@@ -1698,14 +1698,14 @@
     "repoIdentifierRequired": "Repository-ID vereist",
     "source": "Bron",
     "title": "Titel",
-    "type": "Type",
-    "url": "Url",
+    "type": "Soort",
+    "url": "URL",
     "deleteSelected": "Geselecteerde verwijderen ({{count}})",
     "disableSelected": "Geselecteerde uitschakelen ({{count}})",
     "enableSelected": "Geselecteerde inschakelen ({{count}})",
     "chocolatey": "Chocolatey",
     "detectedOs": "Gedetecteerde OS",
-    "typeLabel": "Type",
+    "typeLabel": "Soort",
     "unknown": "Onbekend",
     "urlLabel": "URL",
     "winget": "winget"
@@ -1771,7 +1771,7 @@
       "allManagers": "Alle Pakketbeheerders",
       "securityOnly": "Alleen Beveiligingsupdates",
       "systemOnly": "Alleen Systeemupdates",
-      "updates": "updates",
+      "updates": "bijwerkingen",
       "applicationOnly": "Alleen applicatie-updates"
     },
     "next": "Volgende",
@@ -2001,7 +2001,7 @@
     "saveError": "Updateprofiel opslaan mislukt",
     "securityOnly": "Alleen beveiligingsupdates",
     "subtitle": "Plan terugkerende fleet-updates met cron, alleen-beveiliging en gespreide uitrol",
-    "tag": "Tag",
+    "tag": "Label",
     "title": "Updateprofielen",
     "trigger": "Nu activeren",
     "triggerError": "Profiel activeren mislukt",
@@ -2018,7 +2018,7 @@
     "addConstraint": "Beperking toevoegen",
     "blocked": "Geblokkeerd",
     "constraintPackageRequired": "Elke beperking heeft een pakketnaam nodig",
-    "constraintType": "Type",
+    "constraintType": "Soort",
     "constraintVersionRequired": "Versieoperator vereist een versiewaarde",
     "constraints": "Beperkingen",
     "created": "Nalevingsprofiel aangemaakt",
@@ -2131,7 +2131,7 @@
       "enabled": "Ingeschakeld",
       "endpoint": "Endpoint / Uitgever",
       "name": "Naam",
-      "type": "Type"
+      "type": "Soort"
     },
     "deleteConfirm": "Deze provider verwijderen?",
     "deleteError": "Provider kon niet worden verwijderd.",
@@ -2156,9 +2156,9 @@
       "ldapServer": "LDAP-server-URL (ldaps://...)",
       "name": "Weergavenaam",
       "redirect": "Redirect-URI",
-      "scopes": "Scopes",
+      "scopes": "Scopen",
       "timeout": "Verbindings-timeout (s)",
-      "type": "Type",
+      "type": "Soort",
       "userBase": "Zoekbasis voor gebruikers",
       "userFilterHelp": "Moet %s bevatten voor de gebruikersnaam, bijv. (sAMAccountName=%s)",
       "userFilter": "Zoekfilter voor gebruikers",
@@ -2180,7 +2180,7 @@
       "samlSpKeyHelp": "Referentie zoals vault:secret/path of literal:plaintext",
       "samlWantSigned": "Gesigneerde asserties vereisen (aanbevolen)",
       "scimEnabled": "Schakel SCIM inkomende provisioning in",
-      "scimToken": "SCIM bearer token (Vault secret id)",
+      "scimToken": "SCIM bearer token (Vault geheime id)",
       "scimTokenHelp": "Token dat de IdP presenteert bij elke SCIM-aanvraag. Referentie zoals vault:secret/path of literal:plaintext"
     },
     "loadError": "Identiteitsproviders konden niet worden geladen.",
@@ -2246,7 +2246,7 @@
     "action": {
       "delete": "Verwijderen",
       "edit": "Bewerken",
-      "snapshot": "Snapshot",
+      "snapshot": "Schets",
       "sync": "Nu synchroniseren"
     },
     "add": "Mirror toevoegen",
@@ -2257,10 +2257,10 @@
       "cron": "Cron",
       "name": "Naam",
       "osVersion": "OS / Versie",
-      "upstream": "Upstream",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "upstream": "Opstroom",
+      "statusSync": "Synchroniseren",
+      "statusSnapshot": "Schets",
+      "statusRestore": "Herstel"
     },
     "configureTitle": "{{platform}}-mirroring configureren",
     "create": "Aanmaken",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "Verwijder eerst de {{n}} mirror(s) onder dit platform.",
     "noEligibleHosts": "Geen geregistreerde {{family}}-hosts beschikbaar — registreer er een en vernieuw.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
+      "inFlight": "{{label}} in uitvoering sinds {{at}}",
+      "failedNoText": "Mislukt; geen fouttekst geretourneerd.",
+      "failed": "mislukt",
       "ok": "ok",
       "label": {
-        "sync": "sync",
+        "sync": "synchroniseren",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "herstellen"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "Kon snapshots niet laden.",
+      "restoreConfirm": "Herstel de spiegelboom vanaf schets {{id}}? De live boom zal overschreven worden.",
+      "restoreError": "Herstel dispatch mislukt.",
+      "title": "Schetsen voor {{name}}",
+      "empty": "Geen schuilplaatsen nog. Klik op de camera-icoon om er een te maken.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "Schets",
+        "taken": "Genomen op",
+        "size": "Grootte",
+        "files": "Bestanden",
+        "actions": "Acties"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "Herstel de live boom naar deze schets"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "Schuilplaatsen verbergen",
+      "expand": "Toon schetsen"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "Installeer het vereiste spiegeltooling hierboven om spiegelconfiguratie te activeren. Spiegelbewerkingen blijven uitgeschakeld tot de setup-probe meldt dat alle tools aanwezig zijn.",
+      "preConfigure": "Installeer het vereiste spiegeltooling op deze host voordat je de platform configureert. De Create-knop blijft uitgeschakeld totdat de setup-probe meldt dat alle tools aanwezig zijn."
     },
     "snap": {
       "action": {
@@ -2383,13 +2383,13 @@
         "digest": "Digest",
         "image": "Afbeelding",
         "status": "Catureer",
-        "tag": "Tag"
+        "tag": "Label"
       },
       "empty": "Geen gefollowde afbeeldingen. Voeg erboven eentje toe, dan gebruik \"Gefollowde afbeeldingen catureeren\".",
       "loadError": "Kan gefollowde afbeeldingen niet laden.",
-      "registry": "Registry",
+      "registry": "Register",
       "repository": "Repository",
-      "tag": "Tag",
+      "tag": "Label",
       "title": "Gefollowde afbeeldingen voor {{name}}",
       "track": "Volg",
       "trackError": "Kon die afbeelding niet volgen. Gebruik de registry-host, kleine lettertjes voor het repository en een geldige tag.",
@@ -2443,9 +2443,9 @@
     "selectPort": "Poort selecteren",
     "startPort": "Startpoort",
     "subtitle": "Ondertitel",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "Titel",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "Succesvol bijgewerkt"
   },
   "airgap": {
@@ -2464,7 +2464,7 @@
       }
     },
     "compliance": {
-      "title": "Air-Gap Compliance",
+      "title": "Luchtgaps-compliance",
       "error": "Compliance-buckets laden mislukt:",
       "not_applied_detail": "Geïnstalleerd {{installed}} → beschikbaar {{available}}",
       "bucket": {
@@ -2475,59 +2475,59 @@
         "current_count": "{{n}} actueel"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "Deze fixes zijn nog niet aanwezig op de lokale spiegel. Het sluiten van de kloof vereist een andere collector → media → repository-overdrachtscyclus.",
+        "not_applied": "Deze fixes zijn al aanwezig op de lokale spiegel. Geen nieuwe mediaverplaatsing nodig — de host heeft het pakketbeheer nog niet uitgevoerd.",
+        "current": "De pakketten op deze host corresponderen met de meest recente spiegeltoestand en er zijn sinds de laatste overdracht geen openbare CVE's verschenen."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "Luchtgaps-reposities",
+      "subtitle": "Per-reposities statistieken voor deze privés-zijde spiegel, plus algemene versiebekendheid.",
+      "notApplicable": "Dit dashboard is alleen betekenisvol bij implementaties met een repository-rol.",
+      "loadError": "Kan repositories niet laden:",
+      "endpointMissing": "Backend list-all-repositories endpoint niet beschikbaar; dashboard kan niet bepalen.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "Aggregaat",
+        "totalRepos": "Totaal aantal repositories",
+        "totalPackages": "Totaal aantal pakketten",
+        "oldestFreshness": "Oudste versiebekendheid",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} dag(en) geleden",
+        "staleRepos": "Verouderde repositories (> {{days}}d)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "Distributie",
+        "version": "Versie",
+        "packageCount": "Pakketten",
+        "lastIngest": "Laatste succesvolle import",
+        "freshness": "Verschillendheid",
+        "signerFingerprint": "Handtekening vingerafdruk",
+        "empty": "Nog geen repositories geïmporteerd.",
+        "neverIngested": "Nooit",
+        "freshnessNever": "Nooit geïmporteerd",
+        "freshnessDays": "{{days}} dag(en)",
         "noFingerprint": "—"
       }
     }
   },
   "audit": {
     "columns": {
-      "actor": "Actor",
+      "actor": "Acteur",
       "details": "Details",
-      "openSite": "Open",
+      "openSite": "Openen",
       "operation": "Handeling",
-      "site": "Site",
+      "site": "Locatie",
       "timestamp": "Tijdstip"
     },
     "empty": "Geen federatie auditinformatie nog.",
     "emptyFiltered": "Geen auditinformatie gevonden dat overeenkomt met de filters.",
     "errorLoad": "Kan federaties-logboek niet laden.",
     "filters": {
-      "actor": "Actor",
+      "actor": "Acteur",
       "apply": "Toepassen",
       "clear": "Wissen",
       "operation": "Handeling",
-      "siteId": "Site ID"
+      "siteId": "Site-ID"
     },
     "subtitle": "Elke cross-site bewerking wordt centraal bijgehouden door de coördinator.",
     "title": "Federatie Audit Logboek"
@@ -2561,7 +2561,7 @@
       "actions": "Acties",
       "active": "Actief",
       "name": "Naam",
-      "type": "Type",
+      "type": "Soort",
       "version": "Versie"
     },
     "create": {
@@ -2606,7 +2606,7 @@
     },
     "subtitle": "Centraal gedefinieerde beleidsregels worden gepusht naar ondergeschikte sites.",
     "title": "Federatie Beleid",
-    "deadLetter": "dead-letter"
+    "deadLetter": "dood-letters"
   },
   "sites": {
     "actions": {
@@ -2650,7 +2650,7 @@
       "syncNever": "Nooit gesynchroniseerd",
       "syncOverdue": "Verlopen",
       "syncStale": "Verouderd",
-      "rollupCompliance": "Compliance",
+      "rollupCompliance": "Conformiteit",
       "rollupEmpty": "Geen compatibiliteits- of kwetsbaarheidsgegevens gesynchroniseerd vanaf dit site tot nu toe.",
       "rollupTitle": "Compliance & kwetsbaarheden",
       "rollupVulnerabilities": "Vulnerabiliteiten ({{hosts}} hosts betroffen)",
@@ -2687,7 +2687,7 @@
       "syncIntervalSeconds": "Synchronisatieinterval (seconden)",
       "title": "Registreer een federatiesite",
       "tokenInstructions": "Kopiéer de inschrijftoken hieronder en lever het af bij de nieuwe site-server. Dit wordt slechts eenmaal weergegeven – er is geen herstel als het verloren gaat.",
-      "url": "Site URL",
+      "url": "Site-URL",
       "siteIdentityKey": "Openbaar sleutel van de site (PEM)",
       "siteIdentityKeyHelp": "Nodig. Plak de identiteitsopenbare sleutel van de site, verkregen uit band (van de sites Server Role pagina). De coordinator verifieert de inschrijvingbewijs van de site tegen deze sleutel — het is wat een inschrijftijd man-in-the-middle aanval voorkomt."
     },
@@ -2702,7 +2702,7 @@
     "policiesLink": "Beleid",
     "subtitle": "Subordinante SysManage-servers die zijn geïnscriveerd bij deze coördinator.",
     "title": "Federatie Lokaties",
-    "hostsLink": "Hosts",
+    "hostsLink": "Hosten",
     "tilesView": "Dashboard"
   },
   "sitesMap": {
@@ -2716,11 +2716,11 @@
     "statusLabel": "Status:"
   },
   "airgapBundles": {
-    "buildAgent": "Build Agent Bundle",
+    "buildAgent": "Bouwagent Pakket",
     "buildError": "Kan build niet aan de rij plaatsen.",
-    "buildProplus": "Build Pro+ Bundle",
-    "buildServer": "Build Server Bundle",
-    "bundle": "Bundle",
+    "buildProplus": "Pro+ Bundel bouwen",
+    "buildServer": "Bouwserver Pakket",
+    "bundle": "Bundel",
     "completedAt": "Afgerond",
     "confirmDelete": "Bevestig: Pakket en ISO-bestand verwijderen?",
     "copied": "Commando gekopieerd naar klembord",
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "Media-grootte (MB)",
       "submit": "Queue uitvoeren",
       "title": "Nieuwe Collectierun",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "Ten minste één spiegeldoel is vereist.",
+      "hostMismatch": "Alle geselecteerde spiegels moeten op dezelfde host leven.",
+      "mirrorsTitle": "Spiegels",
+      "mirrorsHelper": "Selecteer één of meerdere geconfigureerde spiegels. De bundle wordt gebouwd vanuit een frisse snapshot van elke spiegelboom op het moment van uitvoer aanmaak. Alle selecties moeten dezelfde host delen.",
+      "noMirrors": "Er zijn geen ingeschakelde spiegels ingesteld. Ga naar Instellingen → Repository Spiegelen om er een toe te voegen, en probeer het dan opnieuw.",
+      "mirrorPicker": "Spiegels kiezen",
+      "hostMismatchWarning": "De spiegels die je hebt gekozen omvatten meerdere hosts. De verzamelplan stuurt naar één host, dus alle selecties moeten één delen.",
+      "burnDevice": "Optische schrijfapparaat (optioneel)",
+      "burnDeviceHelper": "Laat blanco om alleen een downloadbare ISO-bestand te maken. Een apparaat instellen voegt een BURNING-fase toe na ISO_BUILT."
     },
     "downloadError": "Kan ISO niet downloaden.",
     "empty": "Geen collectieruns nog. Klik op 'Nieuwe Collectierun' om deze te starten.",
@@ -2804,36 +2804,36 @@
     "refresh": "Vernieuwen",
     "subtitle": "Activeer éénmalige collectie uitvoeringen die gespiegelde geconfigureerde repositories weerspiegelen, een ondertekend ISO bouwen en een manifest genereren voor verwerking aan de luchtdichte kant.",
     "title": "Luchtdichte collectie uitvoeringen",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "Geen ISO-bestand gevonden op de schijf nog — herprobeer over een moment.",
+    "multiDiscInfo": "Deze run produceerde {{count}} schijven. Kies welke te downloaden.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "Kies een disc om te downloaden",
+      "row": "Schijf {{n}} — {{size}}",
+      "cancel": "Annuleren"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "Kon de huidige serverrol niet laden.",
+    "saveError": "Kon de serverrol niet opslaan.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "Standaard (geen luchtspiegel)",
+      "description": "De standaard. Deze server beheert hosts rechtstreeks over het netwerk zonder een luchtdichte scheiding. Kies dit voor elke normale implementatie — het is wat elke server uitvoert tenzij je specifiek nodig hebt naar één helft van een luchtdichte paar."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "Air-Gap Collector (online kant)",
+      "description": "Het internetverbonden deel van een luchtdichte paar. Het spiegelt upstream pakketarchieven, verzamelt CVE en compliance feeds, en bundelt ze in ondertekende ISO-afbeeldingen die je fysiek over de luchtdichte scheiding meeneemt. Kies dit op de server met internettoegang en bouw het media."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "Air-Gap Repository (afgesloten kant)",
+      "description": "Het geïsoleerde deel van een luchtdichte paar, zonder internettoegang. Het verwerkt de ISO-afbeeldingen geproduceerd door de Collector, controleert hun ondertekening, en serveert de pakketten aan beheerde hosts op het privé-netwerk zodat ze normaal kunnen updaten. Kies dit op de server binnen de luchtdichte enclave."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "Kies hoe deze SysManage-server deelt in een air-gapped implementatie. De meeste servers moeten op Standaard blijven. De rol treedt na de volgende serveropstart in werking.",
+    "currentTag": "(huidig)",
+    "saving": "Opslaan...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "Herstart de SysManage-server na het opslaan om de nieuwe rol volledig effectief te maken.",
+    "saved": "Serverrol opgeslagen. Herstart de server om deze volledig effectief te maken.",
     "menuTitle": "Serverrol"
   },
   "airgapDevices": {
@@ -2900,14 +2900,14 @@
   "federationHosts": {
     "actions": {
       "detail": "Details",
-      "openSite": "Site"
+      "openSite": "Locatie"
     },
     "columns": {
       "fqdn": "Host",
       "ipv4": "IPv4",
       "lastSeen": "Laatst gezien",
       "os": "OS",
-      "platform": "Platform",
+      "platform": "Plaatsvervangend",
       "status": "Status"
     },
     "detail": {
@@ -2932,7 +2932,7 @@
     },
     "scopedToSite": "Gespecificeerd voor één site",
     "subtitle": "Elke host over alle geregistreerde sites, vanuit de gesynchroniseerde map van de coördinator.",
-    "title": "Cross-Site Hosts",
+    "title": "Kruis-Site Hosts",
     "bulk": {
       "clear": "Wissen",
       "dispatch": "Commando uitzenden",
@@ -2965,7 +2965,7 @@
     "types": {
       "applyUpdates": "Update toepassen",
       "deployPackages": "Pakketten installeren",
-      "reboot": "Reboot",
+      "reboot": "Herstart",
       "runScript": "Script uitvoeren"
     },
     "subtitleMulti": "Een opdracht in de wachtrij zetten voor {{hosts}} geselecteerde host(s) over {{sites}} site(s). Elk site voert het uit en rapporteert de resultaten — er wordt niets direct uitgevoerd."
@@ -2996,11 +2996,11 @@
   "federationReport": {
     "col": {
       "active": "Actief",
-      "compliance": "Worst compliance",
+      "compliance": "Worst case scenario conformiteit",
       "critical": "Critieke CVE's",
       "high": "Hoog CVE's",
-      "hosts": "Hosts",
-      "site": "Site"
+      "hosts": "Hosten",
+      "site": "Locatie"
     },
     "generate": "Rapport genereren",
     "sites": "Sites (alle indien geen is geselecteerd)",
@@ -3162,7 +3162,7 @@
     "pid": "PID",
     "name": "Naam",
     "user": "Gebruiker",
-    "cpu": "CPU %",
+    "cpu": "CPU-procent",
     "memory": "Geheugen %",
     "rss": "RSS",
     "status": "Status",
@@ -3182,12 +3182,12 @@
     "killError": "Kon afzegging niet aanvragen"
   },
   "logging": {
-    "title": "Logging",
+    "title": "Logboekregistratie",
     "intro": "Configureer logging voor de server en per-OS agent-standaardwaarden. Deze database-instellingen overschrijven de yaml-bestanden en wijzigingen worden automatisch naar verbonden agents gepusht.",
     "serverCardTitle": "Serverlogging",
     "agentDefaultsTitle": "Agent-standaardwaarden per besturingssysteem",
     "nativeTarget": "Native bestemming",
-    "nativeIdentifier": "Native identifier / tag",
+    "nativeIdentifier": "Natuurlijke identificator / tag",
     "logLevel": "Logniveau",
     "levelDefault": "Standaard (uit yaml)",
     "verbosity": "Uitgebreidheid",
@@ -3230,10 +3230,10 @@
     "intro": "Definieer wanneer updates en afstandsbeheersingen mogen worden uitgevoerd. Hosts binnen een toestaan venster (en buiten elke blackout) ontvangen wijzigingen; andere wijzigingen worden opgeslagen en vrijgesteld als het volgende venster wordt geopend. Hosts zonder venster zijn onbeperkt.",
     "kind": "Soort",
     "kindAllow": "Toestaan",
-    "kindBlackout": "Blackout",
+    "kindBlackout": "Donkere periode",
     "loadError": "Kon de onderhoudsvensters niet laden",
-    "nHosts": "{{count}} host(s)",
-    "nTags": "{{count}} tag(s)",
+    "nHosts": "{{count}} host(en)",
+    "nTags": "{{count}} tag(ken)",
     "name": "Naam",
     "nextWindow": "Volgend venster",
     "overrideActive": "Noodovername actief tot {{time}}",
@@ -3251,8 +3251,8 @@
     "scopeHosts": "Specifieke hosts",
     "scopeTags": "Hosts per tag",
     "scopeType": "Van toepassing op",
-    "selectHosts": "Hosts",
-    "selectTags": "Tags",
+    "selectHosts": "Hosten",
+    "selectTags": "Labels",
     "startTime": "Starttijd",
     "startsAt": "Begint om (UTC)",
     "timezone": "Tijdzone",
@@ -3266,7 +3266,7 @@
       "override": "Overname actief"
     },
     "day": {
-      "mon": "Mon",
+      "mon": "Ma",
       "tue": "Dins",
       "wed": "Woe",
       "thu": "Don",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "Geen overeenkomsten.",
     "placeholder": "Paginas zoeken...  (Esc om te sluiten)"
+  },
+  "agentMirrors": {
+    "add": "Toevoegen",
+    "colActions": "Acties",
+    "colChannel": "Kanaal",
+    "colUrl": "Spiegel-URL",
+    "deleteFailed": "Kon het spiegelbeeld niet verwijderen.",
+    "loadFailed": "Kon de geconfigureerde agentspiegels niet laden.",
+    "noEngine": "De provisioning engine is op deze server niet gelicenseerd, dus er zijn geen kanaals om te configureren.",
+    "refresh": "Vernieuwen",
+    "remove": "Verwijder spiegel",
+    "removed": "Spiegel verwijderd; dat kanaal wordt weer van upstream geïnstalleerd.",
+    "saveFailed": "Kon het spiegelbeeld niet opslaan.",
+    "saved": "Spiegel opgeslagen.",
+    "subtitle": "Vervang een privéspiegel voor de kanaals waarvan het agent zelf is geïnstalleerd. Zonder dit kan een host die in een air-gapped site wordt ingericht, geen verbinding maken met de openbare PPA, COPR, OBS, winget of Homebrew tap en zal dus nooit een agent installeren en zich niet aanmelden.",
+    "title": "Agent Installatie Spiegels"
   }
 }

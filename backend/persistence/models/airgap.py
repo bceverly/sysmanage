@@ -428,3 +428,53 @@ class AirgapLocalRepository(Base):
             ),
             "package_count": self.package_count,
         }
+
+
+class AirgapAgentChannelMirror(Base):
+    """Private mirror substituted for one upstream agent-install channel.
+
+    Phase 11.1 mirrors OS packages and repoints hosts that are ALREADY
+    managed.  This table closes the bootstrap end: it tells provisioning
+    where to install the agent itself from, so a host coming up in an
+    air-gapped site — which cannot reach the Launchpad PPA, COPR, OBS,
+    winget or the Homebrew tap — still gets an agent and enrolls.
+
+    Keyed by CHANNEL rather than distro on purpose: one ``copr`` row
+    covers Fedora/RHEL/Rocky/Alma at once, and a new RHEL-family distro
+    inherits the mirror without another row.  The authoritative list of
+    configurable channels comes from the provisioning engine
+    (``agent_mirror_channels()``); ``aur`` is deliberately absent since
+    an Arch package is built on the target and there is nothing to
+    mirror.
+    """
+
+    __tablename__ = "airgap_agent_channel_mirror"
+
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    channel = Column(String(40), nullable=False)
+    mirror_url = Column(String(500), nullable=False)
+    enabled = Column(Boolean, nullable=False, default=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    __table_args__ = (
+        UniqueConstraint("channel", name="uq_airgap_agent_channel_mirror_channel"),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "channel": self.channel,
+            "mirror_url": self.mirror_url,
+            "enabled": bool(self.enabled),
+            "notes": self.notes,
+            "updated_at": (self.updated_at.isoformat() if self.updated_at else None),
+        }

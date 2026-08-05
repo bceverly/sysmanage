@@ -51,8 +51,10 @@ import json
 import os
 import re
 import subprocess
+import unicodedata
+from collections import Counter
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import httpx
 from fastapi import FastAPI, HTTPException
@@ -205,6 +207,16 @@ class TranslateRequest(BaseModel):
         None,
         description="Subset of locale codes to translate into. Defaults to all 13.",
     )
+    require_change: bool = Field(
+        False,
+        description=(
+            "Treat output identical to the input as a FAILURE, not a result. "
+            "Callers that already filter intentionally-English strings through "
+            "their own allow-list know that anything they still send MUST "
+            "change; setting this lets the service retry those against the "
+            "model instead of returning the English and having it written."
+        ),
+    )
 
 
 class BatchTranslateRequest(BaseModel):
@@ -212,6 +224,16 @@ class BatchTranslateRequest(BaseModel):
     targets: Optional[List[str]] = Field(
         None,
         description="Subset of locale codes to translate into. Defaults to all 13.",
+    )
+    require_change: bool = Field(
+        False,
+        description=(
+            "Treat output identical to the input as a FAILURE, not a result. "
+            "Callers that already filter intentionally-English strings through "
+            "their own allow-list know that anything they still send MUST "
+            "change; setting this lets the service retry those against the "
+            "model instead of returning the English and having it written."
+        ),
     )
 
 
@@ -248,6 +270,12 @@ def _chunks(items: List[str], size: int) -> List[List[str]]:
 # start positions (CodeQL py/polynomial-redos).  Bounding the repeats caps the
 # per-position work to a constant; the bounds are far larger than any real
 # placeholder / tag / HTML entity, so extraction is unchanged in practice.
+# How many CORRECTIVE retries a bad translation gets before the English source
+# is kept.  Each one is told what the previous attempt got wrong; two is enough
+# because the failure kind usually changes between them (fix the markup, expose
+# an untranslated reply) and a third rarely converged in testing.
+MAX_CORRECTIONS = 2
+
 _PLACEHOLDER_RE = re.compile(
     r"\{\{[^{}]{0,200}\}\}"  # {{ name }}  (i18next / handlebars)
     r"|\$\{[^}]{1,200}\}"  # ${VAR}
@@ -262,9 +290,95 @@ _PLACEHOLDER_RE = re.compile(
 
 
 def _placeholders_ok(src: str, translated: str) -> bool:
-    """True iff every placeholder/tag/entity in ``src`` survived into
-    ``translated`` (substring check, order-independent)."""
-    return all(tok in translated for tok in _PLACEHOLDER_RE.findall(src))
+    """True iff ``translated`` carries EXACTLY the placeholders/tags/entities
+    of ``src`` — none dropped and none invented.
+
+    The check used to be one-directional ("did every source token survive?"),
+    which let an INVENTED placeholder through: the model returned
+    ``'{{days}} الدرة إون ال{{at}}'`` for ``'{{days}} day(s) ago'``, the
+    required ``{{days}}`` was present, so the guard passed and a bogus
+    ``{{at}}`` reached the locale file — surfacing hours later as a
+    ``make i18n-placeholders`` failure. Counted as a multiset so a token
+    duplicated in the translation is caught too (the same bug appeared in the
+    .po catalogs as a doubled ``%s``, which raises TypeError at runtime).
+    """
+    return Counter(_PLACEHOLDER_RE.findall(src)) == Counter(
+        _PLACEHOLDER_RE.findall(translated)
+    )
+
+
+# Locales whose output must be written in a specific Unicode script.  The model
+# is prompted with the target language but sometimes answers in a DIFFERENT one
+# — and nothing here noticed, so it was returned and written to the locale file.
+# Real damage, found 2026-08-05: the Arabic locale held Chinese in 52 places in
+# the frontend, 21 more in the backend catalogs and 363 in the docs; Hindi held
+# Korean and Japanese. Every wrong language observed was one of our own 13
+# targets, i.e. the model drifting between them rather than emitting noise.
+_EXPECTED_SCRIPT = {
+    "ar": ("ARABIC",),
+    "hi": ("DEVANAGARI",),
+    "ru": ("CYRILLIC",),
+    "ja": ("CJK", "HIRAGANA", "KATAKANA"),
+    "ko": ("HANGUL", "CJK"),
+    "zh_CN": ("CJK",),
+    "zh_TW": ("CJK",),
+}
+_SCRIPT_TAGS = (
+    "ARABIC",
+    "DEVANAGARI",
+    "CYRILLIC",
+    "HANGUL",
+    "HIRAGANA",
+    "KATAKANA",
+    "CJK",
+    "LATIN",
+)
+
+
+# Advertised on /health so a deploy is verifiable.  Add a name here whenever a
+# new output guard lands, so `curl .../health` distinguishes builds.
+# "untranslated" is opt-in per request (require_change) — advertised so a
+# deploy is verifiable, same as the other two.
+SERVICE_GUARDS = ("placeholders", "language", "untranslated")
+
+
+def _scripts_used(text: str) -> set:
+    """Unicode scripts present in ``text``, ignoring Latin.
+
+    Latin is excluded because a correct translation legitimately carries
+    product names, CLI snippets and acronyms in Latin script.
+    """
+    found = set()
+    for ch in text:
+        if not ch.isalpha():
+            continue
+        try:
+            name = unicodedata.name(ch)
+        except ValueError:
+            continue
+        for tag in _SCRIPT_TAGS:
+            if name.startswith(tag) or tag in name.split()[0:2]:
+                found.add(tag)
+                break
+    return found - {"LATIN"}
+
+
+def _language_ok(lang_code: str, translated: str) -> bool:
+    """True unless the model answered in a script this locale never uses.
+
+    Deliberately permissive in two ways.  A locale with no script expectation
+    (all the Latin-script targets) always passes — telling French from Spanish
+    needs real language ID, which is not worth a dependency here.  And a
+    translation with NO non-Latin script passes: that is either a legitimate
+    all-Latin string (a product name, a path) or plain untranslated English,
+    and the English case is caught downstream by the strict gate rather than
+    being worth a model round-trip here.
+    """
+    expected = _EXPECTED_SCRIPT.get(lang_code)
+    if not expected:
+        return True
+    used = _scripts_used(translated)
+    return not used or bool(used & set(expected))
 
 
 # Lone/unpaired UTF-16 surrogate code points (U+D800–U+DFFF).  The LLM
@@ -281,17 +395,167 @@ def _strip_surrogates(text: str) -> str:
     return _SURROGATE_RE.sub("", text) if text else text
 
 
+def _correction_note(reason: str, src: str, lang_code: str) -> str:
+    """A specific instruction for the retry, naming what went wrong.
+
+    Sampling runs at ``temperature: 0``, so re-sending the SAME prompt is
+    deterministic — the retry reproduced the identical bad answer by
+    construction and every failure burned a second GPU call for nothing.
+    Changing the prompt is what makes the second attempt a real attempt.
+    """
+    language = LANGUAGES[lang_code]
+    if reason == "markers":
+        count = len(_PLACEHOLDER_RE.findall(src))
+        return (
+            "Your previous answer contained a ⟦n⟧ marker that was not in the "
+            f"input. The input has exactly {count} marker(s), numbered ⟦0⟧ to "
+            f"⟦{max(count - 1, 0)}⟧. Reproduce those and only those — do not "
+            "renumber them and do not add new ones."
+        )
+    if reason == "placeholders":
+        want = Counter(_PLACEHOLDER_RE.findall(src))
+        tokens = ", ".join(
+            f"{tok!r}" + (f" (x{n})" if n > 1 else "")
+            for tok, n in sorted(want.items())
+        )
+        return (
+            "Your previous answer did not reproduce the non-translatable tokens "
+            "correctly. The translation MUST contain exactly these tokens, "
+            f"byte-for-byte, no more and no fewer: {tokens}. Translate only the "
+            "prose around them; copy every tag, entity and placeholder verbatim."
+        )
+    if reason == "language":
+        scripts = " or ".join(_EXPECTED_SCRIPT.get(lang_code, ("the target script",)))
+        return (
+            f"Your previous answer was NOT in {language}. Answer in {language}, "
+            f"written in the {scripts} script. Do not answer in any other language."
+        )
+    if reason == "untranslated":
+        return (
+            "Your previous answer was identical to the English input. The caller "
+            "has already filtered out the strings that are meant to stay English, "
+            f"so this one IS translatable — give the {language} translation."
+        )
+    return ""
+
+
+# Markup masking.  The model is asked to reproduce every tag, entity and
+# placeholder byte-for-byte, and on a long, tag-dense docs paragraph it reliably
+# fails: it translates the text inside <code>, drops an </em>, or re-orders
+# attributes, and the placeholder guard then rejects an otherwise good
+# translation.  Masking replaces each token with a short opaque marker BEFORE
+# the model sees it and restores the exact original afterwards, so tag fidelity
+# stops depending on the model at all — it only has to carry a marker through,
+# which it is far better at.
+#
+# The marker uses mathematical white square brackets: not present in any source
+# string, not a word in any target language, and visually distinct enough that a
+# model does not try to translate or "correct" it.
+_MASK_RE = re.compile(r"⟦\s*(\d{1,3})\s*⟧")
+
+
+def _mask_markup(text: str) -> Tuple[str, List[str]]:
+    """``(masked_text, originals)`` — every placeholder/tag replaced by ⟦n⟧."""
+    originals: List[str] = []
+
+    def swap(match: re.Match) -> str:
+        originals.append(match.group(0))
+        return f"⟦{len(originals) - 1}⟧"
+
+    return _PLACEHOLDER_RE.sub(swap, text), originals
+
+
+def _unmask_markup(text: str, originals: List[str]) -> str:
+    """Restore ⟦n⟧ markers to their exact original tokens.
+
+    An out-of-range index is left as-is; it then fails the placeholder guard,
+    which is the correct outcome — the model invented a marker.
+    """
+
+    def swap(match: re.Match) -> str:
+        idx = int(match.group(1))
+        return originals[idx] if 0 <= idx < len(originals) else match.group(0)
+
+    return _MASK_RE.sub(swap, text)
+
+
+# Sentence segmentation, the last resort before keeping English.
+#
+# Masking fixed markup fidelity for almost everything, but the longest docs
+# paragraphs (370-960 chars, 6-10 tags) still failed: over that much text the
+# model reworks clause order and a marker pair ends up dropped or misplaced, so
+# the placeholder guard rejects the whole paragraph.  Translating one sentence
+# at a time gives the model a short span with two or three markers instead of a
+# page with ten, and the results are re-joined with the ORIGINAL separators so
+# the reconstruction is exact.
+#
+# Splits only after . ! ? followed by whitespace and something that starts a new
+# sentence (capital, a tag, or a marker).  "license.phone_home_url" and
+# "3.11" have no space after the period, so they never split.
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])(\s+)(?=[A-Z<⟦])")
+
+
+# Abbreviations whose trailing period is NOT a sentence end.  Without this,
+# "Use e.g. Docker." is cut into "Use e.g." + "Docker." and the model is asked
+# to translate a two-word fragment with no subject — grammatical gender and
+# verb form then come out wrong in the Romance and Slavic targets.
+_ABBREV_END = re.compile(
+    r"(?:^|[\s(])(?:e\.g|i\.e|etc|vs|cf|approx|incl|Dr|Mr|Mrs|Ms|St|Fig|No|Inc|Ltd)\.$"
+)
+
+
+def _segments(text: str) -> Tuple[List[str], List[str]]:
+    """``(sentences, separators)`` such that re-joining reproduces ``text``."""
+    parts = _SENTENCE_SPLIT.split(text)
+    segments, separators = parts[0::2], parts[1::2]
+    merged_segments: List[str] = []
+    merged_separators: List[str] = []
+    idx = 0
+    while idx < len(segments):
+        current = segments[idx]
+        # Glue the next sentence back on while this "end" is an abbreviation.
+        while idx < len(separators) and _ABBREV_END.search(current):
+            current += separators[idx] + segments[idx + 1]
+            idx += 1
+        merged_segments.append(current)
+        if idx < len(separators):
+            merged_separators.append(separators[idx])
+        idx += 1
+    return merged_segments, merged_separators
+
+
+def _rejoin(segments: List[str], separators: List[str]) -> str:
+    """Inverse of :func:`_segments` — exact, separator-for-separator."""
+    out: List[str] = []
+    for idx, seg in enumerate(segments):
+        out.append(seg)
+        if idx < len(separators):
+            out.append(separators[idx])
+    return "".join(out)
+
+
 async def _raw_chunk(
-    client: httpx.AsyncClient, lang_code: str, sources: List[str]
+    client: httpx.AsyncClient,
+    lang_code: str,
+    sources: List[str],
+    correction: Optional[str] = None,
 ) -> List[str]:
     """One Ollama call for a chunk -> length-aligned translations.
 
-    On any failure or length mismatch the items are retried one-at-a-time, and
-    anything still failing falls back to the English source, so the result is
-    always complete and aligned (never a crash mid-pass).  Placeholder integrity
-    is enforced by ``_ollama_translate_chunk`` on top of this.
+    Placeholders and markup are masked out before the call and restored after,
+    so the model never has to reproduce a tag.  On any failure or length
+    mismatch the items are retried one-at-a-time, and anything still failing
+    falls back to the English source, so the result is always complete and
+    aligned (never a crash mid-pass).  Placeholder integrity is enforced by
+    ``_ollama_translate_chunk`` on top of this.
     """
     language = LANGUAGES[lang_code]
+    masked_sources: List[str] = []
+    masks: List[List[str]] = []
+    for src in sources:
+        masked, originals = _mask_markup(src)
+        masked_sources.append(masked)
+        masks.append(originals)
     payload = {
         "model": TRANSLATION_MODEL,
         "format": "json",
@@ -303,9 +567,30 @@ async def _raw_chunk(
                 "role": "system",
                 "content": SYSTEM_PROMPT.replace("{language}", language),
             },
-            {"role": "user", "content": json.dumps(sources, ensure_ascii=False)},
+            {
+                "role": "user",
+                "content": json.dumps(masked_sources, ensure_ascii=False),
+            },
         ],
     }
+    if any(masks):
+        payload["messages"].insert(
+            1,
+            {
+                "role": "system",
+                "content": (
+                    "Some inputs contain markers of the form ⟦0⟧, ⟦1⟧, ⟦2⟧ … "
+                    "Each stands for a piece of markup or an interpolation "
+                    "placeholder that has been removed. Copy every marker into "
+                    "your translation EXACTLY as written, keeping the same "
+                    "number of them, and place each one where the corresponding "
+                    "content belongs in the target language. Never translate, "
+                    "renumber, merge, drop or invent a marker."
+                ),
+            },
+        )
+    if correction:
+        payload["messages"].insert(1, {"role": "system", "content": correction})
     try:
         # OLLAMA_URL is operator config (env/default localhost), NOT request
         # input — not attacker-controllable, so this is not SSRF.
@@ -317,9 +602,13 @@ async def _raw_chunk(
         parsed = json.loads(content)
         out = parsed["translations"] if isinstance(parsed, dict) else parsed
         if isinstance(out, list) and len(out) == len(sources):
-            # Strip lone surrogates the model may emit — they'd be valid here but
-            # crash JSON serialization of the HTTP response.
-            return [_strip_surrogates(str(x)) for x in out]
+            # Restore the masked markup, then strip lone surrogates the model may
+            # emit — they'd be valid here but crash JSON serialization of the
+            # HTTP response.
+            return [
+                _strip_surrogates(_unmask_markup(str(x), originals))
+                for x, originals in zip(out, masks)
+            ]
     except (httpx.HTTPError, KeyError, ValueError, TypeError):
         # Transport/parse error or shape mismatch: fall through to the
         # one-at-a-time retry below rather than failing the whole chunk.
@@ -337,24 +626,102 @@ async def _raw_chunk(
 
 
 async def _ollama_translate_chunk(
-    client: httpx.AsyncClient, lang_code: str, sources: List[str]
-) -> List[str]:
-    """Translate a chunk AND guarantee placeholder integrity.
+    client: httpx.AsyncClient,
+    lang_code: str,
+    sources: List[str],
+    require_change: bool = False,
+) -> List[Tuple[str, str]]:
+    """Translate a chunk AND guarantee placeholder + language integrity.
 
-    Any translation that dropped a required placeholder/tag is retried once on
-    its own; if it is still broken the English source is kept.  A missing
-    translation a later pass can retry beats a placeholder-corrupted string that
-    would break interpolation at runtime.
+    A translation that mangled its placeholders, or came back in the wrong
+    language entirely, is retried once on its own; if it is still bad the
+    English source is kept.  Returning English is the right failure mode for
+    both: a later pass can retry it, and the strict gate reports it — whereas
+    shipping a placeholder-corrupted string breaks interpolation at runtime,
+    and shipping Korean text to Arabic users is worse than shipping English.
     """
+
+    def why_bad(src: str, txt: str) -> Optional[str]:
+        if _MASK_RE.search(txt):
+            # A mask marker survived restoration, so the model invented one
+            # (an index we never issued) or mangled its digits.  Unmasking
+            # leaves those literal, and _placeholders_ok would NOT catch it —
+            # ⟦9⟧ is not a placeholder — so a stray marker would land in the
+            # locale file and render to users verbatim.
+            return "markers"
+        if not _placeholders_ok(src, txt):
+            return "placeholders"
+        if not _language_ok(lang_code, txt):
+            return "language"
+        if require_change and txt.strip() == src.strip():
+            # The caller filters its intentionally-English strings out before
+            # sending, so anything that arrives here MUST change.  Without this
+            # the language guard passes an all-Latin reply (it cannot tell a
+            # product name from the model giving up), the client writes the
+            # English, and the string is silently never translated.
+            return "untranslated"
+        return None
+
     out = await _raw_chunk(client, lang_code, sources)
-    repaired: List[str] = []
+    repaired: List[Tuple[str, str]] = []
     for src, txt in zip(sources, out):
-        if _placeholders_ok(src, txt):
-            repaired.append(txt)
+        reason = why_bad(src, txt)
+        if reason is None:
+            repaired.append((txt, "ok"))
             continue
-        retry = await _raw_chunk(client, lang_code, [src])
-        cand = retry[0] if retry else src
-        repaired.append(cand if _placeholders_ok(src, cand) else src)
+        # Retry this one string alone, HERE on the GPU box.  Doing it here
+        # rather than letting the caller re-POST is the whole point: the
+        # client cannot tell "the model legitimately kept this as-is" from
+        # "we gave up and returned the English", so it used to re-send over
+        # the network and guess — which looped forever on strings whose
+        # correct answer IS the English.
+        #
+        # The retry carries a CORRECTION naming the specific failure.  Sampling
+        # is temperature 0, so an identical prompt returns an identical answer:
+        # the old blind retry could not possibly succeed where the first call
+        # failed, which is why markup-heavy docs strings sat at
+        # "fallback:placeholders" run after run.
+        # Up to MAX_CORRECTIONS attempts, each told what the LAST one got wrong.
+        # A second pass is worth it because the failures change kind: fixing the
+        # markup often exposes an untranslated reply, and vice versa.
+        cand = src
+        for _ in range(MAX_CORRECTIONS):
+            note = _correction_note(reason, src, lang_code)
+            retry = await _raw_chunk(client, lang_code, [src], correction=note)
+            cand = retry[0] if retry else src
+            reason = why_bad(src, cand)
+            if reason is None:
+                break
+        if reason is None:
+            repaired.append((cand, "ok"))
+            continue
+
+        # Last resort: translate sentence by sentence and re-join.  A long
+        # paragraph the model cannot carry markers across in one piece is
+        # usually fine in three-sentence bites.
+        segments, separators = _segments(src)
+        if len(segments) > 1:
+            translated = await _raw_chunk(client, lang_code, segments)
+            stitched = _rejoin(translated, separators)
+            # _raw_chunk falls back to English PER SEGMENT, so a paragraph can
+            # come back with one untranslated sentence embedded in it.  The
+            # stitched result would then differ from the English source, so
+            # neither the require_change check here nor the strict gate
+            # downstream would notice — a silent half-translation.  Demand that
+            # every segment carrying letters actually moved.
+            stalled = [
+                seg
+                for seg, out in zip(segments, translated)
+                if _HAS_LETTER.search(seg) and out.strip() == seg.strip()
+            ]
+            if not stalled and why_bad(src, stitched) is None:
+                # Plain "ok", NOT "ok:segmented": every client tests
+                # ``status == "ok"`` exactly, so a decorated success value would
+                # be read as a failure and this translation thrown away.
+                repaired.append((stitched, "ok"))
+                continue
+
+        repaired.append((src, f"fallback:{reason}"))
     return repaired
 
 
@@ -363,18 +730,25 @@ async def _translate_one_language(
     sem: asyncio.Semaphore,
     lang_code: str,
     translatable: List[str],
-) -> List[str]:
+    require_change: bool = False,
+) -> List[Tuple[str, str]]:
     async with sem:
-        out: List[str] = []
+        out: List[Tuple[str, str]] = []
         for chunk in _chunks(translatable, MAX_BATCH):
-            out.extend(await _ollama_translate_chunk(client, lang_code, chunk))
+            out.extend(
+                await _ollama_translate_chunk(client, lang_code, chunk, require_change)
+            )
         return out
 
 
-async def _translate(texts: List[str], targets: List[str]) -> List[Dict[str, str]]:
+async def _translate(
+    texts: List[str], targets: List[str], require_change: bool = False
+) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     """Translate ``texts`` into every code in ``targets``.
 
-    Returns one dict per input string: ``{lang_code: translation, ...}``.
+    Returns ``(translations, statuses)`` — one dict per input string each.
+    ``statuses[i][lang]`` is ``"ok"`` or ``"fallback:<reason>"``, so the client
+    never has to infer failure from "the output equals the input".
     Pure-placeholder/empty strings are passed through unchanged for every
     language without hitting the model.
     """
@@ -387,7 +761,9 @@ async def _translate(texts: List[str], targets: List[str]) -> List[Dict[str, str
         sem = asyncio.Semaphore(LANG_CONCURRENCY)
         async with httpx.AsyncClient() as client:
             tasks = {
-                code: _translate_one_language(client, sem, code, translatable)
+                code: _translate_one_language(
+                    client, sem, code, translatable, require_change
+                )
                 for code in targets
             }
             done = await asyncio.gather(*tasks.values())
@@ -395,16 +771,22 @@ async def _translate(texts: List[str], targets: List[str]) -> List[Dict[str, str
 
     # Reassemble aligned to the original input order, restoring pass-throughs.
     results: List[Dict[str, str]] = []
+    statuses: List[Dict[str, str]] = []
     back = {orig_i: j for j, orig_i in enumerate(needs_idx)}
     for i, src in enumerate(texts):
         row: Dict[str, str] = {}
+        srow: Dict[str, str] = {}
         for code in targets:
             if i in back:
-                row[code] = per_lang[code][back[i]]
+                row[code], srow[code] = per_lang[code][back[i]]
             else:
-                row[code] = src  # pure placeholder/empty: unchanged
+                # Pure placeholder/empty: never sent to the model, and the
+                # source IS the correct output — report it as ok so the client
+                # writes it instead of treating "unchanged" as a failure.
+                row[code], srow[code] = src, "ok"
         results.append(row)
-    return results
+        statuses.append(srow)
+    return results, statuses
 
 
 # ---------------------------------------------------------------------------
@@ -567,14 +949,19 @@ async def health() -> dict:
         "model_pulled": model_pulled,
         "available_models": models,
         "target_languages": list(LANGUAGES.keys()),
+        # Which output guards this build enforces.  Deployment is a manual scp
+        # to the GPU box, so without this there is no way to tell a restarted
+        # service from one still running the previous file — and the guards are
+        # invisible when working (they only ever suppress bad output).
+        "guards": sorted(SERVICE_GUARDS),
     }
 
 
 @app.post("/translate")
 async def translate(req: TranslateRequest) -> dict:
     targets = _resolve_targets(req.targets)
-    rows = await _translate([req.text], targets)
-    return {"source": req.text, "translations": rows[0]}
+    rows, statuses = await _translate([req.text], targets, req.require_change)
+    return {"source": req.text, "translations": rows[0], "status": statuses[0]}
 
 
 @app.post("/translate/batch")
@@ -582,12 +969,17 @@ async def translate_batch(req: BatchTranslateRequest) -> dict:
     if not req.texts:
         return {"count": 0, "targets": _resolve_targets(req.targets), "results": []}
     targets = _resolve_targets(req.targets)
-    rows = await _translate(req.texts, targets)
+    rows, statuses = await _translate(req.texts, targets, req.require_change)
     return {
         "count": len(req.texts),
         "targets": targets,
+        # ``status`` is per-language, alongside ``translations``: "ok" or
+        # "fallback:<reason>".  Clients MUST branch on it rather than compare
+        # the output to the input — comparing is what made strings whose
+        # correct translation IS the English retry forever.
         "results": [
-            {"source": src, "translations": row} for src, row in zip(req.texts, rows)
+            {"source": src, "translations": row, "status": st}
+            for src, row, st in zip(req.texts, rows, statuses)
         ],
     }
 

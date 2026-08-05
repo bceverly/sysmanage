@@ -29,7 +29,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
@@ -50,8 +50,8 @@ router = APIRouter(
 )
 
 
-_ERR_NOT_FOUND = "Air-gap collection schedule not found"
-_ERR_INVALID_SCHEDULE_UUID = "Invalid UUID for schedule_id: %s"
+_ERR_NOT_FOUND = N_("Air-gap collection schedule not found")
+_ERR_INVALID_SCHEDULE_UUID = N_("Invalid UUID for schedule_id: %s")
 
 
 def _check_collector_module():

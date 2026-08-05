@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-29 11:35-0400\n"
+"POT-Creation-Date: 2026-08-05 13:36-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -33,6 +33,22 @@ msgstr "توقيع غير صحيح"
 msgid "Decryption failed"
 msgstr "فشل التشفير"
 
+#: backend/security/login_security.py:51
+msgid "IP temporarily blocked due to too many failed attempts"
+msgstr "تم حظر IP مؤقتًا بسبب عدد كبير من المحاولات الفاشلة"
+
+#: backend/security/login_security.py:56
+msgid "Too many login attempts, please try again later"
+msgstr "عدد محاولات تسجيل الدخول كبير، يرجى试翻译是否符合要求，中文部分可以忽略："
+
+#: backend/security/login_security.py:63
+msgid "Too many failed attempts for this user"
+msgstr " demasiاء محاولات فاشلة لهذا المستخدم"
+
+#: backend/security/login_security.py:65
+msgid "Login attempt allowed"
+msgstr "محاولة تسجيل الدخول مسموح بها"
+
 #: backend/auth/auth_bearer.py:41
 msgid "Invalid authentication scheme."
 msgstr "مخطط مصادقة غير صحيح."
@@ -53,7 +69,7 @@ msgstr "لا يمكن التحقق من بيانات الاعتماد"
 msgid "User not found."
 msgstr "المستخدم غير موجود."
 
-#: backend/auth/auth_bearer.py:192 backend/api/auth.py:662
+#: backend/auth/auth_bearer.py:192 backend/api/auth.py:666
 msgid "You do not have access to the selected account."
 msgstr "ليس لديك إذن لوصول الحساب المحدد."
 
@@ -166,7 +182,8 @@ msgstr "المضيف غير معتمد"
 #: backend/api/opentelemetry/deployment.py:220
 #: backend/api/opentelemetry/eligibility.py:62
 #: backend/api/opentelemetry/grafana_connection.py:58
-#: backend/api/opentelemetry/grafana_connection.py:201 backend/api/scim.py:218
+#: backend/api/opentelemetry/grafana_connection.py:201
+#: backend/api/cve_refresh_settings.py:66 backend/api/scim.py:218
 #: backend/api/scim.py:228 backend/api/packages_operations.py:68
 #: backend/api/packages_operations.py:247
 #: backend/api/license_management.py:116
@@ -415,6 +432,10 @@ msgstr "لم يتم العثور على طلب التثبيت: %s"
 msgid "Failed to record installation completion: %s"
 msgstr "فشل في تسجيل انتهاء التثبيت: %s"
 
+#: backend/api/report_templates.py:50
+msgid "Report template not found"
+msgstr "لم يتم العثور على قالب التقرير"
+
 #: backend/api/report_templates.py:177 backend/api/package_compliance.py:141
 #: backend/api/external_idp.py:76 backend/api/dynamic_secrets.py:110
 #: backend/api/upgrade_profiles.py:128
@@ -627,6 +648,15 @@ msgstr "إنشاء PDF غير متوفر. يرجى تثبيت حزمة reportlab
 msgid "Report"
 msgstr "تقرير"
 
+#: backend/api/airgap_collection_schedule.py:53
+msgid "Air-gap collection schedule not found"
+msgstr "جدول جمع المعزولة غير موجود"
+
+#: backend/api/airgap_collection_schedule.py:54
+#, python-format
+msgid "Invalid UUID for schedule_id: %s"
+msgstr "UUID غير صالح لـ schedule_id: %s"
+
 #: backend/api/airgap_collection_schedule.py:63
 msgid ""
 "Air-gap collection schedules require a SysManage Professional+ license with "
@@ -741,101 +771,121 @@ msgstr "فشل الاتصال - قد يكون خادم Graylog معطلاً أو
 msgid "Unexpected error checking Graylog health"
 msgstr "خطأ غير متوقع في فحص صحة Graylog"
 
-#: backend/api/openbao.py:63
-msgid "openbao.invalid_pid"
-msgstr "openbao.invalid_pid"
+#: backend/api/openbao.py:61
+msgid "Invalid PID file"
+msgstr "ملف PID غير صالح"
 
-#: backend/api/openbao.py:104
-msgid "openbao.process_not_found"
-msgstr "openbao.process_not_found"
+#: backend/api/openbao.py:102
+msgid "OpenBAO process not found"
+msgstr "لم يتم العثور على عملية OpenBAO"
 
-#: backend/api/openbao.py:191
-msgid "openbao.running"
-msgstr "openbao.running"
+#: backend/api/openbao.py:189
+msgid "OpenBAO is running"
+msgstr "OpenBAO يعمل"
 
-#: backend/api/openbao.py:249
-msgid "openbao.already_running"
-msgstr "openbao.already_running"
+#: backend/api/openbao.py:247
+msgid "OpenBAO is already running"
+msgstr "OpenBAO يعمل بالفعل"
 
-#: backend/api/openbao.py:275 backend/api/openbao.py:466
-msgid "openbao.script_not_found"
-msgstr "openbao.script_not_found"
+#: backend/api/openbao.py:273
+msgid "OpenBAO start script not found"
+msgstr "لم يتم العثور على سكريبت بدء OpenBAO"
 
-#: backend/api/openbao.py:370 backend/api/openbao.py:427
-msgid "openbao.start_error"
-msgstr "خطأ بدء openbao"
+#: backend/api/openbao.py:368
+msgid "Internal error occurred while starting OpenBAO"
+msgstr "Occurred خطأ داخلي أثناء بدء OpenBAO"
 
-#: backend/api/openbao.py:405
-msgid "openbao.started"
-msgstr "بدأ openbao"
+#: backend/api/openbao.py:402
+msgid "OpenBAO started successfully"
+msgstr "بدأ OpenBAO بنجاح"
 
-#: backend/api/openbao.py:412 backend/api/openbao.py:770
-msgid "openbao.start_failed"
-msgstr "فشل بدء openbao"
+#: backend/api/openbao.py:409 backend/api/openbao.py:757
+msgid "Failed to start OpenBAO"
+msgstr "فشل في بدء OpenBAO"
 
-#: backend/api/openbao.py:419
-msgid "openbao.start_timeout"
-msgstr "انتهاء وقت انتظار بدء openbao"
+#: backend/api/openbao.py:416
+msgid "OpenBAO start timed out"
+msgstr "انتهت عمليات بدء OpenBAO بوقت انتهاء"
 
-#: backend/api/openbao.py:521
-msgid "openbao.stopped"
-msgstr "أوقف openbao"
+#: backend/api/openbao.py:423 backend/api/openbao.py:765
+msgid "An error occurred while starting OpenBAO"
+msgstr "Occurred خطأ أثناء بدء OpenBAO"
 
-#: backend/api/openbao.py:528 backend/api/openbao.py:796
-msgid "openbao.stop_failed"
-msgstr "فشل إيقاف openbao"
+#: backend/api/openbao.py:461
+msgid "OpenBAO stop script not found"
+msgstr "لم يتم العثور على سكريبت إيقاف OpenBAO"
 
-#: backend/api/openbao.py:535
-msgid "openbao.stop_timeout"
-msgstr "انتهاء وقت انتظار إيقاف openbao"
+#: backend/api/openbao.py:516
+msgid "OpenBAO stopped successfully"
+msgstr "تم إيقاف OpenBAO بنجاح"
 
-#: backend/api/openbao.py:568
-msgid "openbao.already_sealed"
-msgstr "openbao.already_sealed"
+#: backend/api/openbao.py:523 backend/api/openbao.py:779
+msgid "Failed to stop OpenBAO"
+msgstr "فشل في إيقاف OpenBAO"
 
-#: backend/api/openbao.py:578 backend/api/openbao.py:684
-msgid "openbao.binary_not_found"
-msgstr "openbao.binary_not_found"
+#: backend/api/openbao.py:530
+msgid "OpenBAO stop timed out"
+msgstr "انتهت عمليات إيقاف OpenBAO بوقت انتهاء"
 
-#: backend/api/openbao.py:614
-msgid "openbao.sealed"
-msgstr "openbao.sealed"
+#: backend/api/openbao.py:539 backend/api/openbao.py:787
+msgid "An error occurred while stopping OpenBAO"
+msgstr "Occurred خطأ أثناء توقف OpenBAO"
 
-#: backend/api/openbao.py:621 backend/api/openbao.py:843
-msgid "openbao.seal_failed"
-msgstr "openbao.seal_failed"
+#: backend/api/openbao.py:561
+msgid "OpenBAO is already sealed"
+msgstr "OpenBAO مغلق بالفعل"
 
-#: backend/api/openbao.py:629
-msgid "openbao.seal_timeout"
-msgstr "openbao.seal_timeout"
+#: backend/api/openbao.py:571 backend/api/openbao.py:674
+msgid "OpenBAO binary not found"
+msgstr "لم يتم العثور على ملف OpenBAO الثنائي"
 
-#: backend/api/openbao.py:638
-msgid "openbao.seal_error"
-msgstr "openbao.seal_error"
+#: backend/api/openbao.py:607
+msgid "OpenBAO sealed successfully"
+msgstr "تم إغلاق OpenBAO بنجاح"
 
-#: backend/api/openbao.py:661
-msgid "openbao.already_unsealed"
-msgstr "openbao.already_unsealed"
+#: backend/api/openbao.py:614 backend/api/openbao.py:822
+msgid "Failed to seal OpenBAO"
+msgstr "فشل في إغلاق OpenBAO"
 
-#: backend/api/openbao.py:672
-msgid "openbao.unseal_prod_mode"
-msgstr "فك تشفير openbao في وضع الإنتاج"
+#: backend/api/openbao.py:622
+msgid "OpenBAO seal operation timed out"
+msgstr "انتهت عمليات إغلاق OpenBAO بوقت انتهاء"
 
-#: backend/api/openbao.py:722
-msgid "openbao.unsealed"
-msgstr "فك تشفير openbao"
+#: backend/api/openbao.py:631
+msgid "Error sealing OpenBAO"
+msgstr "خطأ أثناء إغلاق OpenBAO"
 
-#: backend/api/openbao.py:729 backend/api/openbao.py:869
-msgid "openbao.unseal_failed"
-msgstr "فشل فك تشفير openbao"
+#: backend/api/openbao.py:654
+msgid "OpenBAO is already unsealed"
+msgstr "OpenBAO فتح بالفعل"
 
-#: backend/api/openbao.py:738
-msgid "openbao.unseal_timeout"
-msgstr "انتهاء وقت انتظار فك تشفير openbao"
+#: backend/api/openbao.py:664
+msgid "Automatic unseal is only supported in development mode"
+msgstr "يتم دعم فتح التشفير تلقائيًا فقط في وضع التطوير"
 
-#: backend/api/openbao.py:746
-msgid "openbao.unseal_error"
-msgstr "خطأ فك التشفير openbao"
+#: backend/api/openbao.py:712
+msgid "OpenBAO unsealed successfully"
+msgstr "فتح OpenBAO بنجاح"
+
+#: backend/api/openbao.py:719 backend/api/openbao.py:844
+msgid "Failed to unseal OpenBAO"
+msgstr "فشل في فتح OpenBAO"
+
+#: backend/api/openbao.py:727
+msgid "OpenBAO unseal operation timed out"
+msgstr "انتهت عمليات فتح OpenBAO بوقت انتهاء"
+
+#: backend/api/openbao.py:734
+msgid "Error unsealing OpenBAO"
+msgstr "خطأ أثناء فتح OpenBAO"
+
+#: backend/api/openbao.py:830
+msgid "An error occurred while sealing OpenBAO"
+msgstr "Occurred خطأ أثناء تغليف OpenBAO"
+
+#: backend/api/openbao.py:852
+msgid "An error occurred while unsealing OpenBAO"
+msgstr "Occurred خطأ أثناء فك التشفير لـ OpenBAO"
 
 #: backend/api/user_preferences.py:43
 msgid "Grid identifier is required"
@@ -877,6 +927,11 @@ msgstr "فشل في استرداد تفضيلات بطاقة لوحة التحك
 #, python-format
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "فشل في تحديث تفضيلات بطاقة لوحة التحكم: %s"
+
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
+#: backend/api/child_host_crud.py:363
+msgid "Child host not found"
+msgstr "لم يتم العثور على المضيف الفرعي"
 
 #: backend/api/child_host_control.py:50
 msgid ""
@@ -1089,7 +1144,7 @@ msgstr " رفض الوصول: يتطلب دور ATTACH_UBUNTU_PRO"
 
 #: backend/api/host_ubuntu_pro.py:69
 msgid "Ubuntu Pro token is required"
-msgstr " требуется токен Ubuntu Pro"
+msgstr "ت требуется токен Ubuntu Pro"
 
 #: backend/api/host_ubuntu_pro.py:104
 msgid "Ubuntu Pro attach requested"
@@ -1329,6 +1384,24 @@ msgstr ""
 msgid "Unknown (platform, version, os_family) tuple"
 msgstr "عدم معرفة (نظام، إصدار، عائلة النظام) الثلاثي"
 
+#: backend/api/airgap_collector_runs.py:71
+msgid "Air-gap collection run not found"
+msgstr "لا توجد عملية جمع مقطوعة الهواء"
+
+#: backend/api/airgap_collector_runs.py:72
+msgid "Air-gap media manifest not found"
+msgstr "لم يتم العثور على وثيقة وسائط الفجوة الهوائية"
+
+#: backend/api/airgap_collector_runs.py:73
+#, python-format
+msgid "Invalid UUID for run_id: %s"
+msgstr "UUID غير صالح لـ run_id: %s"
+
+#: backend/api/airgap_collector_runs.py:74
+#, python-format
+msgid "Invalid UUID for manifest_id: %s"
+msgstr "UUID غير صحيح لـ manifest_id: %s"
+
 #: backend/api/airgap_collector_runs.py:83
 msgid ""
 "Air-gap collection runs require a SysManage Professional+ license with the "
@@ -1462,13 +1535,17 @@ msgstr "لا يزال التشغيل غير مكتمل (الحالة: %s)"
 msgid "ISO file is no longer on disk: %s"
 msgstr "ملف ISO غير موجود على القرص: %s"
 
+#: backend/api/package_compliance.py:59
+msgid "Package profile not found"
+msgstr "لم يتم العثور على ملف تعريف الحزمة"
+
 #: backend/api/package_compliance.py:76
 msgid ""
 "Package compliance profiles require a SysManage Professional license. Please"
 " upgrade to access this feature."
 msgstr ""
-"Package compliance profiles require a SysManage Professional license. Please"
-" upgrade to access this feature."
+"تستلزم ملفات الحزم المطابقة ترخيص SysManage Pro. يرجى الترقية للوصول إلى هذه"
+" الميزة."
 
 #: backend/api/package_compliance.py:203
 #, python-format
@@ -1514,6 +1591,14 @@ msgstr "ไม удалось تحميل أو إنشاء شهادة TLS للات
 #: backend/api/federation_identity.py:147
 msgid "Could not load or generate the federation identity key."
 msgstr "ไม่ يمكن تحميل أو إنشاء مفتاح الهوية الفيدرالية."
+
+#: backend/api/access_groups.py:45
+msgid "Access group not found"
+msgstr "مجموعة الوصول غير موجودة"
+
+#: backend/api/access_groups.py:46
+msgid "Registration key not found"
+msgstr "مفتاح التسجيل غير موجود"
 
 #: backend/api/access_groups.py:157
 msgid "A group cannot be its own parent"
@@ -1605,7 +1690,7 @@ msgstr "تم حذف مزود IdP"
 
 #: backend/api/external_idp.py:339
 msgid "A default-for-unmapped mapping already exists for this provider."
-msgstr "存在着与此提供程序相关的未映射默认映射。"
+msgstr "يوجد بالفعل تعيين افتراضي للعناصر غير المعيَّنة لهذا المزوّد."
 
 #: backend/api/external_idp.py:373
 msgid "Role mapping not found"
@@ -1621,11 +1706,11 @@ msgstr "الProveedor ليس مزود OIDC."
 
 #: backend/api/external_idp.py:430
 msgid "OIDC provider is disabled."
-msgstr "OIDC提供程序已禁用。"
+msgstr "مزوّد OIDC معطل."
 
 #: backend/api/external_idp.py:461
 msgid "Missing code or state in callback."
-msgstr "не указан код или состояние в ответе обратного вызова."
+msgstr " thiếu كود أو حالة في الدالة回调函数中缺少代码或状态。"
 
 #: backend/api/external_idp.py:465
 msgid "Invalid OIDC state."
@@ -1638,7 +1723,7 @@ msgstr "لا يمكن حل سرシーOIDC客户端密钥。"
 #: backend/api/external_idp.py:481
 #, python-format
 msgid "OIDC sign-in failed: %s"
-msgstr "OIDC登录失败：%s"
+msgstr "فشل تسجيل الدخول OIDC: %s"
 
 #: backend/api/external_idp.py:501 backend/api/external_idp.py:701
 msgid ""
@@ -1728,6 +1813,14 @@ msgstr "فشل الاتصال - خادم Grafana قد يكون غير متاح �
 #: backend/api/grafana_integration.py:593
 msgid "Unexpected error checking Grafana health"
 msgstr "خطأ غير متوقع أثناء التحقق من صحة Grafana"
+
+#: backend/api/proplus_routes_stubs.py:75
+msgid ""
+"Host provisioning requires a SysManage Professional+ license with the "
+"provisioning engine. Please upgrade to access this feature."
+msgstr ""
+"توفير المضيف يتطلب رخصة SysManage Professional+ مع محرك توفير. يرجى الترقية "
+"لاستخدام هذه الوظيفة."
 
 #: backend/api/opentelemetry/status.py:63
 #: backend/api/opentelemetry/deployment.py:97
@@ -1819,6 +1912,14 @@ msgstr " نظام التشغيل غير مدعوم (OpenBSD/NetBSD)"
 #, python-format
 msgid "Failed to check OpenTelemetry eligibility: %s"
 msgstr "فشل في فحص صلاحية OpenTelemetry: %s"
+
+#: backend/api/opentelemetry/service_control.py:40
+msgid ""
+"OpenTelemetry service control requires the Pro+ observability_engine to be "
+"loaded on the server."
+msgstr ""
+"يحتاج التحكم في خدمة OpenTelemetry إلى تحميلobservability_engine من نوع Pro+"
+" على الخادم."
 
 #: backend/api/opentelemetry/service_control.py:81
 msgid "Permission denied: START_OPENTELEMETRY_SERVICE role required"
@@ -1933,20 +2034,19 @@ msgstr "يجب أن تظل بيئة المكتبة في الأعلى دائمً�
 
 #: backend/api/content_lifecycle.py:289
 msgid "Content view name is required"
-msgstr "имя представления контента обязательно для указания"
+msgstr "اسم وجهة العرض مطلوب"
 
 #: backend/api/content_lifecycle.py:291
 msgid "Content view name is too long"
-msgstr "имя представления контента слишком длинное"
+msgstr "اسم وجهة النظر المحتوى طويل جداً"
 
 #: backend/api/content_lifecycle.py:309
 msgid "Content view not found"
-msgstr "представление контента не найдено"
+msgstr "لم يتم العثور على عرض المحتوى"
 
 #: backend/api/content_lifecycle.py:320
 msgid "Each content-view member needs a mirror or component CV"
-msgstr ""
-"каждый элемент представления контента должен иметь зеркало или компонент CV"
+msgstr "يحتاج كل عضو في منظور المحتوى إلى مرآة أو منظور مكون"
 
 #: backend/api/content_lifecycle.py:365
 #, python-format
@@ -1970,42 +2070,38 @@ msgstr "필터 ''%s'' يحتاج إلى معلمة 'تاريخ' (YYYY-MM-DD)"
 
 #: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
-msgstr "уже существует представление с таким именем"
+msgstr "يوجد بالفعل عرض محتوى بهذا الاسم"
 
 #: backend/api/content_lifecycle.py:638
 msgid "Mirror settings are not configured"
-msgstr "не настроены параметры зеркал"
+msgstr "لم يتم تكوين إعدادات المرآة"
 
 #: backend/api/content_lifecycle.py:652
 msgid "Composite content views cannot be published yet"
-msgstr "композитные представления контента еще не могут быть опубликованы"
+msgstr "لا يمكن نشر عرض المحتوى المركب حاليا"
 
 #: backend/api/content_lifecycle.py:657
 msgid "Content view has no repositories to publish"
-msgstr "в представлении контента нет репозиториев для публикации"
+msgstr "لا توجد مخازن لعرض المحتوى"
 
 #: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
-msgstr ""
-"существующее зеркало, на которое ссылается представление, было удалено"
+msgstr "مرآة مرجعية不再存在"
 
 #: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
 msgid "Mirror '%s' has no host assigned"
-msgstr "зеркалу '%s' не назначена хост-система"
+msgstr "المرآة '%s' ليس لها مستضيئ م_assigned"
 
 #: backend/api/content_lifecycle.py:684 backend/api/content_lifecycle.py:726
 msgid "All mirrors in a content view must share one host in this release"
 msgstr ""
-"все зеркала в представлении контента должны использовать одну хост-систему в"
-" этой версии"
+"جميع المرآت في رؤية المحتوى يجب أن تشارك في مستضيئ واحد في هذه الإصدار"
 
 #: backend/api/content_lifecycle.py:697
 #, python-format
 msgid "Mirror '%s' has no snapshot yet; snapshot it before publishing"
-msgstr ""
-"для публикации необходимо создать снимок для зеркала '%s'; создайте его "
-"перед публикацией"
+msgstr "المرآة '%s' لا تمتلك صورة شاشة بعد؛ قم بإنشاء صورة الشاشة قبل النشر"
 
 #: backend/api/content_lifecycle.py:773
 msgid "Content view has no repositories"
@@ -2033,9 +2129,13 @@ msgstr ""
 "تتطلب إدارة موجزات CVE ترخيص SysManage Professional+. يرجى الترقية للوصول "
 "إلى هذه الميزة."
 
+#: backend/api/cve_refresh_settings.py:67
+msgid "Permission denied: Administrator role required"
+msgstr "الحقوق مDenied: требуется роль администратора"
+
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
-msgstr "Refresh interval must be at least 1 hour"
+msgstr "يجب أن تكون فترة التجديد على الأقل ساعة واحدة"
 
 #: backend/api/cve_refresh_settings.py:124
 msgid "Refresh interval cannot exceed 168 hours (1 week)"
@@ -2203,10 +2303,6 @@ msgid ""
 msgstr ""
 "تتطلب إدارة الحاويات/الأجهزة الافتراضية ترخيص SysManage Professional+. يرجى "
 "الترقية للوصول إلى هذه الميزة."
-
-#: backend/api/child_host_crud.py:189 backend/api/child_host_crud.py:363
-msgid "Child host not found"
-msgstr "لم يتم العثور على المضيف الفرعي"
 
 #: backend/api/child_host_crud.py:411
 #, python-format
@@ -2545,6 +2641,10 @@ msgstr "فشل إرسال البريد الإلكتروني التجريبي. ي
 #, python-brace-format
 msgid "Error sending test email: {error}"
 msgstr "خطأ في إرسال البريد الإلكتروني التجريبي: {error}"
+
+#: backend/api/airgap_bundles.py:132
+msgid "Bundle not found"
+msgstr "الحزمة غير موجودة"
 
 #: backend/api/airgap_bundles.py:469
 msgid "product must be one of: "
@@ -2989,23 +3089,23 @@ msgstr " ключ API غير موجود."
 msgid "Failed to process update results"
 msgstr "فشل في معالجة نتائج التحديث"
 
-#: backend/api/provisioning_bundle.py:73 backend/api/provisioning_bundle.py:82
+#: backend/api/provisioning_bundle.py:77 backend/api/provisioning_bundle.py:86
 msgid "Provisioning requires a SysManage Enterprise license."
 msgstr "يحتاج التجهيز إلى رخصة SysManage Enterprise."
 
-#: backend/api/provisioning_bundle.py:88
+#: backend/api/provisioning_bundle.py:92
 msgid "The provisioning module is not currently available."
 msgstr "وحدة التجهيز غير متوفرة حاليًا."
 
-#: backend/api/provisioning_bundle.py:99
+#: backend/api/provisioning_bundle.py:103
 msgid "expires_in_days must be 3650 (10 years) or fewer."
 msgstr "يجب أن يكون expires_in_days 3650 (10 سنوات) أو أقل."
 
-#: backend/api/provisioning_bundle.py:120
+#: backend/api/provisioning_bundle.py:124
 msgid "Enrollment tokens require multi-tenancy to be enabled."
 msgstr "تتطلب ورقة التسجيل تمكين متعددة المستأجرين."
 
-#: backend/api/provisioning_bundle.py:148
+#: backend/api/provisioning_bundle.py:152
 msgid "Could not mint an enrollment token for that tenant."
 msgstr "لم يتم تشكيل ورقة تسجيل ل那個租戶。"
 
@@ -3013,11 +3113,11 @@ msgstr "لم يتم تشكيل ورقة تسجيل ل那個租戶。"
 msgid "Invalid username or password"
 msgstr "اسم المستخدم أو كلمة المرور غير صحيحة"
 
-#: backend/api/auth.py:281
+#: backend/api/auth.py:285
 msgid "Account is locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:370
+#: backend/api/auth.py:374
 msgid ""
 "Multi-factor authentication is required for this account. Please enrol from "
 "your profile page before signing in."
@@ -3025,19 +3125,19 @@ msgstr ""
 "يجب استخدام التحقق المتعدد العوامل لهذا الحساب. يرجى تسجيل الدخول من صفحة "
 "الملف الشخصي الخاصة بك."
 
-#: backend/api/auth.py:459
+#: backend/api/auth.py:463
 msgid "Account locked due to too many failed login attempts"
 msgstr "الحساب مقفل بسبب محاولات تسجيل دخول فاشلة كثيرة"
 
-#: backend/api/auth.py:485
+#: backend/api/auth.py:489
 msgid "Invalid or missing refresh token"
 msgstr "رمز التجديد غير صالح أو مفقود"
 
-#: backend/api/auth.py:595 backend/api/auth.py:644
+#: backend/api/auth.py:599 backend/api/auth.py:648
 msgid "Multi-tenancy is not enabled."
 msgstr "لم يتم تمكين متعددة المستخدمين."
 
-#: backend/api/auth.py:719
+#: backend/api/auth.py:723
 msgid "Logout successful"
 msgstr "تسجيل الخروج ناجح"
 
@@ -3296,7 +3396,7 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
-msgstr "Agent must be running with root privileges to enable KVM modules"
+msgstr "يجب أن يكون وكيل يعمل ب권한 root لتمكين الوحدات الخاصة بكVM"
 
 #: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
@@ -3402,8 +3502,9 @@ msgid "Updates check requested"
 msgstr "تم طلب فحص التحديثات"
 
 #: backend/api/secrets/crud.py:35 backend/api/error_constants.py:166
+#: backend/services/vault_service.py:423
 msgid "Secret not found"
-msgstr "السر غير موجود"
+msgstr "لم يتم العثور على السر"
 
 #: backend/api/secrets/crud.py:46
 msgid ""
@@ -3450,6 +3551,33 @@ msgstr "استخدم /api/v1/secrets/deploy-ssh-keys مع ترخيص Pro+"
 msgid "Use /api/v1/secrets/deploy-certificates with Pro+ license"
 msgstr "استخدم /api/v1/secrets/deploy-certificates مع ترخيص Pro+"
 
+#: backend/api/secrets/permissions.py:50
+#, python-format
+msgid "Permission denied: %s role required"
+msgstr "الحقوق الممنوحة ملغاة: требуется роль %s"
+
+#: backend/api/airgap_agent_mirrors.py:94
+msgid "Provisioning engine is not licensed on this server."
+msgstr "محرك توفير غير مرخص على هذا الخادم."
+
+#: backend/api/airgap_agent_mirrors.py:99
+#, python-brace-format
+msgid "Channel '{channel}' cannot be mirrored."
+msgstr "لا يمكن تجسيد القناة '{channel}'."
+
+#: backend/api/airgap_agent_mirrors.py:105
+msgid ""
+"Mirror URL must be an http/https/ftp/file URL with no spaces, quotes or "
+"shell metacharacters."
+msgstr ""
+"يجب أن يكون عنوان URL المرآة URL http/https/ftp/file بدون فراغات أو علامات "
+"اقتباس أو أحرف خاصة بالملقم."
+
+#: backend/api/airgap_agent_mirrors.py:138
+#, python-brace-format
+msgid "No mirror configured for channel '{channel}'."
+msgstr "لم يتم تكوين أي مرآة للقناة '{channel}'."
+
 # Reboot orchestration messages (Phase 2.5 - Safe Parent Host Reboot)
 #: backend/api/reboot_orchestration.py:43
 msgid ""
@@ -3474,6 +3602,10 @@ msgstr "تم بدء إعادة التشغيل المنسقة مع %d مضيف(م
 #: backend/api/reboot_orchestration.py:250
 msgid "Reboot orchestration not found"
 msgstr "لم يتم العثور على تنسيق إعادة التشغيل"
+
+#: backend/api/upgrade_profiles.py:58
+msgid "Upgrade profile not found"
+msgstr "لم يتم العثور على ملف التعديل"
 
 #: backend/api/upgrade_profiles.py:74
 msgid ""
@@ -3598,9 +3730,9 @@ msgstr "تم حذف التقرير التشخيصي"
 msgid "Missing collection_id"
 msgstr "لم يتم تحديد معرف مجموعة البيانات (collection_id)"
 
-#: backend/api/error_constants.py:27
+#: backend/api/error_constants.py:27 backend/services/vault_service.py:260
 msgid "Permission denied"
-msgstr " رفض الوصول"
+msgstr "الحقوق ممنوعة"
 
 #: backend/api/error_constants.py:54
 msgid "Distribution not found"
@@ -4007,6 +4139,14 @@ msgstr "إدارة دورة حياة النظام التشغيلي يتطلب ت
 msgid "The OS lifecycle module is not currently available."
 msgstr "لا يتوفر وحدة إدارة دورة حياة النظام التشغيلي حاليًا."
 
+#: backend/api/repository_mirroring_helpers.py:31
+msgid "Mirror not found"
+msgstr "зерور لا يوجد"
+
+#: backend/api/repository_mirroring_helpers.py:32
+msgid "Platform config not found"
+msgstr "لم يتم العثور على تكوين المنصة"
+
 #: backend/api/repository_mirroring_helpers.py:52
 msgid ""
 "Repository mirroring requires a SysManage Professional+ license. Please "
@@ -4040,12 +4180,16 @@ msgstr "المنصة غير صالحة: %s"
 #: backend/api/repository_mirroring_setup.py:214
 #, python-format
 msgid "A platform config for %s on this host already exists"
-msgstr "存在着与此主机上的%s相关的平台配置"
+msgstr "يوجد بالفعل تكوين منصة لـ %s على هذا المضيف"
 
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
 msgid "Platform config still owns %d mirror(s); delete those first"
 msgstr "التكوين الخاص بالمنصة لا يزال يمتلك %d مرآة (ات); قم بإزالتها أولاً"
+
+#: backend/api/audit_log.py:41
+msgid "Permission denied: VIEW_AUDIT_LOG role required"
+msgstr "الحقوق مDenied: требуется роль VIEW_AUDIT_LOG"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
@@ -4319,7 +4463,7 @@ msgstr " رفض الوصول: يتطلب دور ADD_SCRIPT"
 #: backend/api/scripts/routes_saved_scripts.py:135
 #: backend/api/scripts/routes_saved_scripts.py:297
 msgid "A script with this name already exists"
-msgstr "存在着一个具有相同名称的脚本"
+msgstr "يوجد بالفعل برنامج نصي بهذا الاسم"
 
 #: backend/api/scripts/routes_saved_scripts.py:197
 msgid "Failed to create saved script"
@@ -4714,40 +4858,32 @@ msgid "Deleted {entity_type} '{entity_name}'"
 msgstr "حُذِفَت الكيان من نوع ‘{entity_type}’ باسم ‘{entity_name}’"
 
 #: backend/services/vault_service.py:219
-msgid "vault.not_enabled"
-msgstr "غير ممكن vault"
+msgid "Vault is not enabled"
+msgstr "غير ممكن الوصول إلى vault"
 
 #: backend/services/vault_service.py:222
-msgid "vault.no_token"
-msgstr "لا يوجد توكن في vault"
+msgid "Vault token not configured"
+msgstr "لم يتم تكوين وحدة التحكم في vault"
 
 #: backend/services/vault_service.py:231
-msgid "vault.invalid_path"
-msgstr "vault.invalid_path"
-
-#: backend/services/vault_service.py:260
-msgid "vault.permission_denied"
-msgstr "ختم الوصول ممنوع"
+msgid "Invalid vault path"
+msgstr "مسار vault غير صحيح"
 
 #: backend/services/vault_service.py:282
-msgid "vault.connection_error"
-msgstr "خطأ الاتصال بـ vault"
+msgid "Cannot connect to vault server"
+msgstr "لا يمكن الاتصال بخادم vault"
 
-#: backend/services/vault_service.py:287
-msgid "vault.timeout"
-msgstr "انتهاء الوقت"
+#: backend/services/vault_service.py:286
+msgid "Vault request timed out"
+msgstr "انتهت طلبات vault بوقت انتهاء"
 
-#: backend/services/vault_service.py:293
-msgid "vault.invalid_response"
-msgstr "استجابة غير صالحة من vault"
+#: backend/services/vault_service.py:290
+msgid "Invalid response from vault"
+msgstr "استجابة vault غير صالحة"
 
-#: backend/services/vault_service.py:427
-msgid "vault.secret_not_found"
-msgstr "السر غير موجود"
-
-#: backend/services/vault_service.py:433
-msgid "vault.invalid_secret_format"
-msgstr "تنسيق السر غير صالح في vault"
+#: backend/services/vault_service.py:428
+msgid "Invalid secret format"
+msgstr " định dạng bí mật không hợp lệ"
 
 #, python-format
 #~ msgid "Cannot repoint mirror '%s': %s"
@@ -5430,9 +5566,3 @@ msgstr "تنسيق السر غير صالح في vault"
 
 #~ msgid "Executing command sequence"
 #~ msgstr "تنفيذ تسلسل الأوامر"
-
-#~ msgid "Air-gap collection schedule not found"
-#~ msgstr "جدول جمع المعزولة غير موجود"
-
-#~ msgid "Invalid UUID for schedule_id: %s"
-#~ msgstr "UUID غير صالح لـ schedule_id: %s"

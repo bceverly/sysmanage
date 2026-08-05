@@ -349,6 +349,14 @@ def _provisioning_enrollment_token_fn(
     if not tenant_id:
         # Loud: with multi-tenancy ON, an assignment we cannot attribute to a
         # tenant would enroll into the wrong place, so decline instead.
+        #
+        # False positive: the rule matches the word "token" in the message text.
+        # Only the hostname is logged. The minted plaintext token is returned to
+        # the caller and never reaches a logger — see the two generate_token
+        # calls below, whose result goes straight into the return value.
+        # (The suppression must sit on the line IMMEDIATELY above the finding —
+        # semgrep ignores it if explanatory comments come between.)
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         logger.error(
             "provisioning: cannot mint an enrollment token for host %s — the "
             "install assignment is not attributable to a tenant",

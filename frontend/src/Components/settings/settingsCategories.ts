@@ -27,7 +27,8 @@ export const SETTINGS_TAB_CATEGORY = new Map<string, string>([
   ['integrations', 'integrations'], ['logging', 'integrations'], ['ubuntu-pro', 'integrations'], ['alerting', 'integrations'],
   ['report-branding', 'reporting'], ['report-templates', 'reporting'],
   ['dynamic-secrets', 'secrets'],
-  ['airgap-bundles', 'airgap'], ['repository-mirroring', 'airgap'],
+  ['airgap-bundles', 'airgap'], ['agent-mirrors', 'airgap'],
+  ['repository-mirroring', 'airgap'],
   ['server-role', 'system'], ['queues', 'system'], ['license', 'system'],
 ]);
 
@@ -92,8 +93,11 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
     moduleRequired: 'firewall_orchestration_engine',
   },
   { id: 'distributions', labelKey: 'distributions.title', labelDefault: 'Distributions' },
-  // Dynamic Secrets: visibility deferred until its Pro+ fold-in
-  // lands.  Stays visible (and OSS-functional) until then.
+  // Dynamic Secrets has no entry here on purpose: the fold-in landed, so Pro+
+  // contributes it at runtime from ``plugin-src/entries/secrets-entry.ts`` with
+  // ``moduleRequired: 'secrets_engine'``.  Only its CATEGORY placement lives in
+  // this file (see SETTINGS_TAB_CATEGORY above) — adding a tab def here would
+  // render it twice, once ungated.
   //
   // Access Groups + Registration Keys (Phase 12.4): contributed at
   // runtime via the federation controller plugin bundle (see
@@ -142,6 +146,15 @@ export const SETTINGS_TAB_DEFS: SettingsTabDef[] = [
     // that engine so the tab hides on Community AND Professional — a bare
     // ``requiresLicense`` leaked it onto Professional, which has no air-gap.
     moduleRequired: 'airgap_collector_engine',
+  },
+  {
+    id: 'agent-mirrors',
+    labelKey: 'agentMirrors.tabLabel',
+    labelDefault: 'Agent Install Mirrors',
+    // Phase 12 — the channels the AGENT itself installs from.  Gated on the
+    // provisioning engine because that engine both owns the channel list and
+    // renders the install commands; without it there is nothing to configure.
+    moduleRequired: 'provisioning_engine',
   },
   {
     id: 'repository-mirroring',

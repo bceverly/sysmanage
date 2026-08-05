@@ -269,8 +269,8 @@
     },
     "mechanism": {
       "gelfTcp": "GELF TCP",
-      "syslogTcp": "Syslog TCP",
-      "syslogUdp": "Syslog UDP",
+      "syslogTcp": "TCP Syslog",
+      "syslogUdp": "UDP Syslog",
       "windowsSidecar": "Windows Sidecar"
     },
     "noServers": "Серверы Graylog не найдены",
@@ -344,7 +344,7 @@
     "shellBourne": "Шелл Борна",
     "shellCsh": "Csh",
     "shellFalse": "Ложь",
-    "shellFish": "Fish",
+    "shellFish": "Рыба",
     "shellKsh": "Ksh",
     "shellNoLogin": "Нет входа",
     "shellTcsh": "Tcsh",
@@ -872,7 +872,7 @@
       "apply": "Применить",
       "applyError": "Не удалось применить изображение",
       "applySuccess": "Запрошено применение изображения (хост перезагрузится)",
-      "backend": "Backend",
+      "backend": "Бэкэнд",
       "badge": "Режим изображения",
       "bootedImage": "Загруженное изображение",
       "confirmApplyMessage": "Это применяет подготовленное изображение и перезагружает хост. Продолжить?",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "Запущен без привилегий",
     "scriptsDisabledTooltip": "Скрипты отключены для этого хоста",
     "scriptsEnabledTooltip": "Скрипты включены для этого хоста",
-    "up": "Up",
+    "up": "Активно",
     "antivirusDeployAllFailed": "Не удалось развернуть антивирусное ПО на всех хостах:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "Запущено развертывание антивирусного ПО на {{count}} хосте(ах).\\n\\nНеудачные попытки:\\n{{hosts}}",
     "antivirusDeploySuccess": "Запущено развертывание антивирусного ПО на {{count}} хосте(ах)",
@@ -1074,7 +1074,7 @@
       "engineMissing": "Требуемый движок Pro+ не загружен; проверьте лицензию.",
       "repository": "Репозиторий в изолированном режиме"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "Изолированные репозитории",
     "map": "Карта",
     "sites": "Сайты",
     "airgapCollections": "Коллекции в изолированном режиме",
@@ -1245,7 +1245,7 @@
       "opensource": "открытый исходный код",
       "organization": "организация",
       "permissions": "разрешения",
-      "rbac": "rbac",
+      "rbac": "RBAC",
       "roles": "роли",
       "security": "безопасность",
       "systemInfo": "системная информация",
@@ -1371,7 +1371,7 @@
       "cmd": "Cmd",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "Ш",
       "zsh": "Zsh"
     },
     "startedAt": "Запущено",
@@ -1422,7 +1422,7 @@
     "createdDatetime": "Дата Создания",
     "databaseEngine": "Движок Базы Данных",
     "database_engine": {
-      "mysql": "mysql",
+      "mysql": "MySQL",
       "oracle": "Oracle",
       "postgresql": "PostgreSQL",
       "sqlite": "sqlite3",
@@ -1699,7 +1699,7 @@
     "source": "Источник",
     "title": "Заголовок",
     "type": "Тип",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "Удалить выбранные ({{count}})",
     "disableSelected": "Отключить выбранные ({{count}})",
     "enableSelected": "Включить выбранные ({{count}})",
@@ -2171,11 +2171,11 @@
       "samlGroupAttr": "Атрибут группы",
       "samlIdpCert": "Подписывающий сертификат IdP (X.509)",
       "samlIdpCertHelp": "Открытый сертификат PEM/base64, используемый для проверки подписей утверждений",
-      "samlIdpEntityId": "IdP Entity ID",
+      "samlIdpEntityId": "Идентификатор сущности IdP",
       "samlIdpSso": "URL одноразовой аутентификации IdP",
       "samlSpAcs": "URL ACS SP",
       "samlSpAcsHelp": "Место для отправки утверждений IdP, например https://host/api/auth/saml/<id>/acs",
-      "samlSpEntityId": "SP Entity ID",
+      "samlSpEntityId": "ID сущности SP",
       "samlSpKey": "Приватный ключ SP (Vault secret id, необязательно)",
       "samlSpKeyHelp": "Ссылка вида vault:secret/path или текстовое значение literal:plaintext",
       "samlWantSigned": "Требовать подписанные утверждения (рекомендуется)",
@@ -2258,9 +2258,9 @@
       "name": "Имя",
       "osVersion": "ОС / Версия",
       "upstream": "Вышестоящий",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "Синхронизация",
+      "statusSnapshot": "Снимок",
+      "statusRestore": "Восстановление"
     },
     "configureTitle": "Настройка зеркалирования {{platform}}",
     "create": "Создать",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "Сначала удалите {{n}} зеркал(а) под этой платформой.",
     "noEligibleHosts": "Нет зарегистрированных хостов {{family}} — зарегистрируйте и обновите.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} в состете с {{at}}",
+      "failedNoText": "Ошибка; текст ошибки не возвращен.",
+      "failed": "потечно",
+      "ok": "ок",
       "label": {
-        "sync": "sync",
+        "sync": "синчес",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "возвызов"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "Не удалось загрузить снимки.",
+      "restoreConfirm": "Восстановить зеркальное дерево из снимка {{id}}? Рабочее дерево будет перезаписано.",
+      "restoreError": "Не удалось восстановить отправку.",
+      "title": "Снимки для {{name}}",
+      "empty": "Снимков пока нет. Нажмите значок камеры, чтобы сделать один.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "Снимок",
+        "taken": "Время сбора данных",
+        "size": "Размер",
+        "files": "Файлы",
+        "actions": "Действия"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "Восстановить рабочее дерево до этого снимка"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "Скрыть снимки",
+      "expand": "Показать снимки"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "Установите необходимые инструменты для зеркального отображения выше, чтобы включить настройку зеркал. Операции зеркального отображения остаются выключенными до тех пор, пока анализ установки не сообщит о наличии всех инструментов.",
+      "preConfigure": "Установите необходимые инструменты для зеркального отображения на этом хосте перед конфигурацией платформы. Кнопка Создать остается выключенной до тех пор, пока анализ установки не сообщит о наличии всех инструментов."
     },
     "snap": {
       "action": {
@@ -2443,9 +2443,9 @@
     "selectPort": "Выбрать порт",
     "startPort": "Начальный порт",
     "subtitle": "Подзаголовок",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "Заголовок",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "Успешно обновлено"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} актуально"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "Эти исправления еще не есть на локальном зеркале. Закрытие воздушного зазора требует дополнительный цикл сборки → медиа → репозитория.",
+        "not_applied": "Эти исправления уже есть на локальном зеркале. Не требуется новый трансфер медиа — хост просто еще не запустил менеджер пакетов.",
+        "current": "Пакеты хоста соответствуют самому последнему состоянию зеркала, и с тех пор ни одна публичная уязвимость не была обнаружена."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "Изолированные репозитории",
+      "subtitle": "Статистика по каждому репозиторию для этого частного зеркала, а также сводная свежесть.",
+      "notApplicable": "Эта панель управления имеет смысл только для развертываний с ролью репозитория.",
+      "loadError": "Не удалось загрузить репозитории:",
+      "endpointMissing": "Эндпоинт list-all-repositories бэкэнда недоступен; панель управления не может заполнить данные.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
-        "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "title": "Агрегировать",
+        "totalRepos": "Общее количество репозиториев",
+        "totalPackages": "Общее количество пакетов",
+        "oldestFreshness": "Самый старый снимок свежести",
+        "noIngest": "Н/Д",
+        "daysAgo": "{{days}} деняй назо",
+        "staleRepos": "Устаревшие репозитории (> {{days}}д)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "Распространение",
+        "version": "Версия",
+        "packageCount": "Пакеты",
+        "lastIngest": "Последняя успешная загрузка",
+        "freshness": "Свежесть",
+        "signerFingerprint": "Отпечаток подписи",
+        "empty": "Репозитории еще не были загружены.",
+        "neverIngested": "Никогда",
+        "freshnessNever": "Не было загружено ни разу",
+        "freshnessDays": "{{days}} день(ев)",
         "noFingerprint": "—"
       }
     }
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "Размер носителя (МБ)",
       "submit": "Добавить в очередь",
       "title": "Новый запуск сбора данных",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "Необходимо хотя бы одно целевое зеркало.",
+      "hostMismatch": "Все выбранные зеркала должны находиться на одном хосте.",
+      "mirrorsTitle": "Зеркала",
+      "mirrorsHelper": "Выберите одно или несколько настроенных зеркал. Комплект собирается из свежего снимка каждого дерева зеркал, сделанного при создании запуска. Все выбранные должны иметь одинаковый хост.",
+      "noMirrors": "Нет активных зеркал. Перейдите в Настройки → Зеркальное отображение репозиториев, чтобы добавить одно, затем повторите попытку.",
+      "mirrorPicker": "Выберите зеркала",
+      "hostMismatchWarning": "Зеркала, которые вы выбрали охватывают несколько хостов. План сборки отправляется на один хост, поэтому все выбранные зеркала должны совместно использовать один.",
+      "burnDevice": "Устройство для оптической записи (необязательно)",
+      "burnDeviceHelper": "Оставьте поле пустым, чтобы создать только файл ISO для загрузки. Указание устройства добавляет этап ГРАНИЧИНА после ISO_BUILT."
     },
     "downloadError": "Не удалось скачать ISO-образ.",
     "empty": "Запусков сбора данных еще не было. Нажмите \"Новый запуск сбора данных\", чтобы начать.",
@@ -2804,36 +2804,36 @@
     "refresh": "Обновить",
     "subtitle": "Вызвать одноразовые сборки, которые зеркалируют конфигурированные репозитории, создают подписанную ISO и записывают манифест для загрузки в изолированной среде.",
     "title": "Сбор данных в изолированном режиме",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "На диске еще нет файла ISO — попробуйте снова через минуту.",
+    "multiDiscInfo": "Эта проверка выдала {{count}} дисков. Выберите, какие скачать.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "Выберите диск для загрузки",
+      "row": "Диск {{n}} — {{size}}",
+      "cancel": "Отмена"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "Не удалось загрузить текущую роль сервера.",
+    "saveError": "Не удалось сохранить роль сервера.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "Стандарт (без воздушного зазора)",
+      "description": "По умолчанию. Этот сервер управляет хостами напрямую через сеть без воздушного зазора. Выберите это для любой обычной установки — так работает каждый сервер, если вы не нуждаетесь в половине пары с воздушным зазором."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "Коллектор в изолированной среде (онлайн сторона)",
+      "description": "Интернет-соединенная половина пары с воздушным зазором. Она отражает репозитории пакетов из верхнего уровня, собирает CVE и данные о соответствиям требованиям безопасности, и упаковывает их в подписанное ISO-изображение, которое вы физически переносите через воздушный зазор. Выберите это на сервере с доступом к интернету для сборки медиа."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "Изолированный репозиторий (отключенная сторона)",
+      "description": "Изолированная половина пары с воздушным зазором без доступа к интернету. Она принимает ISO-медиа, произведенное Collectorem, проверяет его подпись и предоставляет пакеты управляемым хостам на частной сети для нормального обновления. Выберите это на сервере внутри изолированного узла."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "Выберите, как этот сервер SysManage участвует в изолированной развертке. Большинству серверов следует оставаться на стандартном уровне. Роль вступает в силу после перезапуска сервера.",
+    "currentTag": "(текущий)",
+    "saving": "Сохранение…",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "Перезапустите сервер SysManage после сохранения для полной активации новой роли.",
+    "saved": "Роль сервера сохранена. Перезапустите сервер для полной активации новой роли.",
     "menuTitle": "Роль сервера"
   },
   "airgapDevices": {
@@ -3104,7 +3104,7 @@
     "revokeError": "Не удалось аннулировать API ключ.",
     "revoked": "Аннулировано",
     "status": "Статус",
-    "title": "API Keys"
+    "title": "API-ключи"
   },
   "acceptInvitation": {
     "noToken": "Токен приглашения не предоставлен",
@@ -3162,8 +3162,8 @@
     "pid": "PID",
     "name": "Имя",
     "user": "Пользователь",
-    "cpu": "CPU %",
-    "memory": "Mem %",
+    "cpu": "Процент использования CPU",
+    "memory": "Память %",
     "rss": "RSS",
     "status": "Статус",
     "command": "Команда",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "Нет совпадений.",
     "placeholder": "Искать страницы…  (Esc для закрытия)"
+  },
+  "agentMirrors": {
+    "add": "Добавить",
+    "colActions": "Действия",
+    "colChannel": "Канал",
+    "colUrl": "URL зеркала",
+    "deleteFailed": "Не удалось удалить зеркало.",
+    "loadFailed": "Не удалось загрузить настроенные зеркала агентов.",
+    "noEngine": "Модуль автоматизации настройки лицензирован не был на этом сервере, поэтому нет каналов для конфигурации.",
+    "refresh": "Обновить",
+    "remove": "Удалить зеркало",
+    "removed": "Зеркало удалено; для этого канала будет использоваться исходное зеркало снова.",
+    "saveFailed": "Не удалось сохранить зеркало.",
+    "saved": "Зеркало сохранено.",
+    "subtitle": "Подставить приватное зеркало вместо каналов, с которых сам агент устанавливается. Без этого хост, настроенный в изолированной сети, не сможет достучаться до публичного PPA, COPR, OBS, winget или Homebrew tap и никогда не установит агента и не завершит регистрацию.",
+    "title": "Зеркала для установки агента"
   }
 }

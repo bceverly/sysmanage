@@ -1,0 +1,153 @@
+# i18n "intentionally English" allow-list — the escape hatch for the strict
+# gate in scripts/i18n_strict.py (mirrors sysmanage-docs/assets/locales/
+# no-translate.txt, which predates it).
+#
+# A value listed here may stay byte-identical to English in every locale
+# without failing `make lint`.  Use it for things that genuinely do not
+# translate: product and vendor names, CLI invocations, protocol tokens,
+# file paths, format strings that are pure interpolation.
+#
+# One rule per line:
+#   some.dotted.key        exact dotted key (JSON) or exact msgid (.po)
+#   settings.*.command     fnmatch glob on the key
+#   re:<regex>             regex matched against the ENGLISH value
+# Full-line comments start with '#'.
+#
+# Keep rules TIGHT.  A broad glob silently re-opens the hole this gate exists
+# to close — prefer three exact keys over one wildcard that also swallows the
+# prose next to them.  Anchor value regexes with ^ and $.
+
+# --- shell / package-manager invocations quoted verbatim in the UI ----------
+re:^(sudo )?(apt-get|dnf|yum|zypper|apk|pkg|pkg_add|pkgin|brew|winget|snap)
+re:^systemctl (start|stop|restart|enable|disable|status)
+
+# --- product, vendor and protocol names --------------------------------------
+re:^(SysManage|OpenBAO|Grafana|Graylog|OpenTelemetry|Prometheus)$
+re:^(Ubuntu Pro|Launchpad|COPR|openSUSE Build Service|Homebrew|winget)$
+re:^(bootc|rpm-ostree|osquery|Ansible|Velociraptor|Wazuh)$
+
+# --- identifier lists and unit abbreviations that carry no prose -------------
+# "DNF (Fedora/RHEL/CentOS 8+)" — package manager + distro names, all proper.
+re:^DNF \(Fedora/RHEL/CentOS 8\+\)$
+# "WSL: Ubuntu-24.04, LXD: ubuntu:24.04" — image identifiers, copied verbatim.
+re:^WSL: [\w.\-]+, LXD: [\w.:\-]+$
+# "{{minutes}}m {{seconds}}s" — interpolation plus conventional unit letters.
+re:^\{\{minutes\}\}m \{\{seconds\}\}s$
+# "{{target}} (Professional)" — the parenthetical is a licence tier name.
+re:^\{\{target\}\} \((Community|Professional|Enterprise)\)$
+
+# --- shells, hypervisors, protocols, package managers -----------------------
+# Whole-value matches only (fullmatch).  These are names, not words: no locale
+# renders "Zsh" or "bhyve" differently, and asking the translation service for
+# one just burns a round-trip and comes back identical.
+re:(Ba|K|Z|Tc|C|Fi)sh
+re:(Bourne|Korn|Bourne Again|Friendly Interactive) Shell
+re:(bhyve|KVM|QEMU|KVM/QEMU|LXD|LXC|WSL|VMM|vmd|VMM/vmd|libvirt|Xen|Hyper-V)
+re:(syslog|journald|GELF|GELF TCP|GELF UDP|Syslog TCP|Syslog UDP|rsyslog)
+re:(APT|DNF|YUM|Zypper|Pacman|Snap|Flatpak|Homebrew|Chocolatey|Scoop|winget|pkg|pkgin|pkg_add)
+re:(APT|DNF|YUM|Zypper|Snap|Flatpak) \([A-Za-z0-9/ .+-]+\)
+re:(Ubuntu|Debian|Ubuntu/Debian|Fedora|RHEL|CentOS|Rocky|AlmaLinux|openSUSE|SLES|Alpine|Arch|Gentoo|NixOS)
+re:(FreeBSD|OpenBSD|NetBSD|DragonFly|macOS|Windows|Linux|Unix|BSD)
+re:(PostgreSQL|SQLite|MySQL|MariaDB|Redis|Microsoft SQL Server|Oracle)
+re:N/A
+
+# --- cognates: identical in these locales, must still translate elsewhere ---
+# Scoped deliberately.  "Status" IS the German and Dutch word; Spanish must
+# say "Estado".  An unscoped rule here would bless the English everywhere.
+de,nl: re:Status
+de,nl,fr,it,pt,es: re:Version
+de,nl,fr,it,pt,es,ru: re:URL
+de: re:Name
+nl: re:Naam
+
+# --- placeholder-dominant strings where identical IS the translation --------
+# These looped forever in `make translate`: the backfill's _accept() holds back
+# any result that comes back identical AND contains a placeholder, treating it
+# as the service's English fallback.  For these the English IS correct — the
+# non-placeholder part is either nothing, a unit letter, or a term borrowed
+# unchanged ("Interface" in French, "hosts" in es/nl/pt, "Host" in German).
+re:\{\{\w+\}\}s
+re:\{\{\w+\}\} hosts?
+re:Host \{\{\w+\}\}
+re:Interface \{\{\w+\}\}
+re:Violations — \{\{\w+\}\}
+
+# === residue triage, 2026-08-05 ==============================================
+# Only names and identifiers below.  Ordinary words that happen to be cognates
+# ("Status", "Server", "Details") are deliberately NOT here — those are real
+# translation gaps in the locales where they came back English, and hiding
+# them behind a rule would defeat the gate.
+
+# --- i18n message KEYS leaking into the UI as display text ------------------
+# These are dotted identifiers, not prose.  Worth fixing at the source (the
+# code is rendering a key where it means to render a message) — until then
+# they cannot be translated because they are not language.
+re:openbao\.[a-z_]+
+re:vault\.[a-z_]+
+
+# --- product / vendor / framework names -------------------------------------
+re:(FastAPI|SQLAlchemy|Salesforce|Darwin|OpenBAO Vault|Windows Sidecar)
+re:(Grafana|Graylog) URL
+
+# --- package managers with their platform in parentheses --------------------
+re:(APT|DNF|YUM|Zypper|Snap|Flatpak|Chocolatey|Homebrew|PKG|Pacman|Winget|pkgin) \([A-Za-z0-9/ .+-]+\)
+
+# --- acronyms and protocol tokens -------------------------------------------
+re:(CPU|FQDN|ID|IPv4|IPv6|OS|PID|RSS|URL|Url|Tcp|Udp|OIDC|SCIM|RBAC)
+re:(CPU|Mem) %
+re:(IdP Entity ID|IdP SSO URL|SP ACS URL|SP Entity ID|SAML 2\.0|LDAP / Active Directory)
+
+# --- distro pairings and tool names ------------------------------------------
+re:(openSUSE/SLES|RHEL/Fedora)
+re:(Cmd|Sh|Cron|fwupd|mysql|sqlite3)
+re:(rbac|opensource|dead-letter)
+
+# === cognate/loanword triage, 2026-08-05 ====================================
+# Each rule is scoped to the locales where the English form IS the correct
+# word, verified per language.  Anything I could not vouch for is deliberately
+# absent and still fails the gate — see the "known misses" note at the end.
+
+# --- IT loanwords used unchanged across Western European locales -------------
+de,es,fr,it,nl,pt,zh_CN,zh_TW: re:Shell
+de,es,fr,it,nl,pt: re:(Backend|Op)
+de,es,it,nl,pt: re:(Hardware|Host|Kernel|Software|hosts)
+de,es,fr,it,nl: re:[Aa]ntivirus
+es,fr,it,nl,pt: re:Scripts?
+de,fr,it,nl: re:(Client|Digest|Info)
+de,it,nl,pt: re:(Firewall|Offline)
+de,es,it,nl: re:Hosts
+de,fr,nl,pt: re:Threads
+de,es,nl,pt: re:Upstream
+es,it,nl,pt: re:firewall
+fr,it,nl,pt,zh_CN: re:ok
+de,fr,it,nl: re:audit
+de,fr,nl: re:(Agent|Distro)
+de,it,nl: re:(Dashboard|Repository|Server)
+fr,nl,pt: re:Sites?
+de,nl,pt: re:Status:
+de,nl: re:(Blackout|Bundle|Build (Agent|Pro\+|Server) Bundle|Details)
+it,nl: re:(Database|SCIM bearer token \(Vault secret id\))
+de,fr: re:(Distribution|Port|Tag)
+fr,nl: re:(Services?|Type)
+es,nl: re:Actor
+de,it: re:API Keys
+fr,it: re:Email
+es,it: re:No
+es,pt: re:Regular
+de,pt: re:Tags
+it,pt: re:Timestamp
+pt: re:Status
+
+# --- single-locale cognates --------------------------------------------------
+fr: re:(Actions?|Application|Architecture|Configuration|Description|Diagnostics|Direction|Image|Instrumentation|Invitations|Notes|Production|Secrets?|Source|Violations|permissions|commercial)
+nl: re:(Ad-hoc Script|Air-Gap (Compliance|Repos|Repositories)|Compliance|Cross-Site Hosts|Filters|Host Firewall Status|Logging|Metadata|Open-Source Antivirus Status|Platform|Processor|Protocol|Registry|Repositories|Site (ID|URL)|Traces|Updates|accounts|compliance|tags|updates)
+de: re:(Definition \(JSON\)|Hostname|Manager|Operation|System|sync)
+it: re:(Home|Password|Report|Snapshot|Timeout)
+es: re:(Error|roles)
+
+# --- shell program names (rendered next to their path, e.g. "(/bin/false)") --
+# hostAccount.shellFalse labels /bin/false and sits alongside Bash/Csh/Ksh/Zsh,
+# all left untranslated.  11 of 13 locales had rendered it as the BOOLEAN
+# ("Falsch", "Faux", "Ложь") — and the Arabic file held Chinese text — which is
+# a mistranslation of a program name, corrected 2026-08-05.
+re:False

@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.api.error_constants import error_user_not_found
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
 from backend.persistence import models
@@ -38,7 +38,7 @@ router = APIRouter(prefix="/audit-log", tags=["audit-log"])
 
 # Reused 403 detail string — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
-_ERR_VIEW_AUDIT_LOG_DENIED = "Permission denied: VIEW_AUDIT_LOG role required"
+_ERR_VIEW_AUDIT_LOG_DENIED = N_("Permission denied: VIEW_AUDIT_LOG role required")
 
 
 class AuditLogEntryResponse(BaseModel):

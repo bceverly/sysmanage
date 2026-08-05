@@ -150,8 +150,8 @@
       "checkNone": "إلغاء تحديد الكل",
       "description": "اختر البطاقات التي تريد عرضها على لوحة المعلومات",
       "title": "إعدادات لوحة المعلومات",
-      "loadError": "无法加载偏好设置",
-      "saveError": "保存偏好设置失败"
+      "loadError": "فشل في تحميل التفضيلات",
+      "saveError": "فشل في حفظ التفضيلات"
     },
     "updates": "التحديثات"
   },
@@ -244,9 +244,9 @@
     "useManagedServer": {
       "label": "استخدام الخادم المُدار"
     },
-    "healthCheckFailed": "健康检查失败",
-    "loadError": "无法加载Grafana配置",
-    "saveError": "保存设置失败"
+    "healthCheckFailed": "فشل فحص الصحة",
+    "loadError": "فشل في تحميل конфигuration لـ Grafana",
+    "saveError": "فشل في حفظ الإعدادات"
   },
   "graylog": {
     "apiToken": {
@@ -343,8 +343,8 @@
     "shellBash": "Bash",
     "shellBourne": "Shell Bourne",
     "shellCsh": "Csh",
-    "shellFalse": "错误",
-    "shellFish": "Fish",
+    "shellFalse": "خطأ",
+    "shellFish": "سمك",
     "shellKsh": "Ksh",
     "shellNoLogin": "لا تسجيل دخول",
     "shellTcsh": "Tcsh",
@@ -854,8 +854,8 @@
     "geoLocation": "الموقع الجغرافي",
     "publicIp": "عنوان IP العام",
     "selectedServices": "{{count}} خدمة(س) محددة",
-    "deviceNumber": "设备 {{number}}",
-    "errorUpdatingServices": "更新服务失败",
+    "deviceNumber": "الجهاز {{number}}",
+    "errorUpdatingServices": "خطأ في تحديث الخدمات",
     "graylogPort": "(منفذ {{port}})",
     "interfaceNumber": "واجهة {{number}}",
     "noChangesMade": "لم يتم إجراء أي تغييرات",
@@ -1016,14 +1016,14 @@
     "runningUnprivileged": "تشغيل بدون صلاحيات",
     "scriptsDisabledTooltip": "السكريبتات معطلة لهذا المضيف",
     "scriptsEnabledTooltip": "السكريبتات ممكنة لهذا المضيف",
-    "up": "Up",
+    "up": "متاح",
     "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\\n\\nالعُقد التي فشلت:\\n{{hosts}}",
     "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقدة(ات)",
     "approveSelected": "افتح الم 선택",
     "opentelemetryDeploySuccess": "تم ترتيب نشر OpenTelemetry لـ {{count}} مستضياف (س)",
-    "diagnosticsRequestFailed": "请求收集诊断数据失败。请重试。",
-    "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请访问主机详情页面查看结果（如有）。",
+    "diagnosticsRequestFailed": "فشل في طلب جمع التشخيصات. يرجى试一下再试。",
+    "diagnosticsRequested": "تم طلب جمع التشخيصات لخادم {{hostId}}. تحقق من صفحة تفاصيل الخادم لمراجعة النتائج عند توافرها.",
     "unknown": "غير معروف"
   },
   "login": {
@@ -1074,7 +1074,7 @@
       "engineMissing": "محرك Pro+ المطلوب غير محمل؛ تحقق من الترخيص.",
       "repository": "المخزن المغلق"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "مخازن محصورة جواً",
     "map": "الخريطة",
     "sites": "المواقع",
     "airgapCollections": "جمعات الفجوة الهوائية",
@@ -1220,16 +1220,16 @@
       "name": "حالة برنامج مكافحة الفيروسات المفتوح المصدر"
     },
     "firewallStatus": {
-      "description": "所有托管主机的详细防火墙状态，包括防火墙软件、启用/禁用状态、开放的IPv4和IPv6端口以及操作系统信息。",
-      "name": "主机防火墙状态"
+      "description": "حالة حائط الحماية التفصيلية لكافة المضيفات المدارة بما في ذلك برامج حائط الحماية، حالة التشغيل/التعطيل، المنافذ المفتوحة لـ IPv4 و IPv6، ومعلومات نظام التشغيل.",
+      "name": "حالة حائط الحماية للخادم"
     },
-    "generateError": "生成报告时出错：{{message}}",
+    "generateError": "خطأ في إنشاء التقرير: {{message}}",
     "hostsWithTags": {
       "description": "يعرض جميع المضيفات المسجلة مع العلامات المرتبطة بها لتسهيل الفرز والتصنيف. مفيد لتجميع المضيفات حسب البيئة أو الغرض أو القسم.",
       "name": "المضيفات ذات العلامات"
     },
     "registeredHosts": {
-      "description": "所有已注册主机的完整列表，显示基本信息和操作系统详细信息，包括主机名、IP地址、操作系统版本和状态。",
+      "description": "قائمة كاملة لجميع المضيفين المسجلين تظهر معلومات أساسية وتفاصيل نظام التشغيل بما في ذلك اسم المضيف، العناوين الايبية، نسخة النظام الأساسي، والوضع.",
       "name": "المضيفات المسجلة"
     },
     "tag": {
@@ -1255,11 +1255,11 @@
     },
     "unknownError": "خطأ غير معروف",
     "userRbac": {
-      "description": "所有用户的完整视图及其分配的安全角色按角色组组织。展示了基于角色访问控制系统的细粒度权限结构。",
+      "description": "عرض شامل لكافة المستخدمين مع الأدوار الأمنية المُنَصَّبة لهم منظماً حسب مجموعات الأدوار. يظهر بنية إذن دقيقة لتحكم الوصول القائم على الأدوار عبر النظام.",
       "name": "أدوار الأمان للمستخدمين (RBAC)"
     },
     "usersList": {
-      "description": "SysManage用户综合名单，展示其个人资料、角色、权限和账户状态。包含用户创建日期和上次登录时间。",
+      "description": "قائمة شاملة لجميع مستخدمي SysManage تظهر ملفات التعريف وال ролات والأذونات وحالة الحساب. تتضمن مواعيد إنشاء المستخدمين وأوقات تسجيل الدخول الأخيرة.",
       "name": "مستخدمي SysManage"
     },
     "auditLogReport": {
@@ -1368,10 +1368,10 @@
     "shellType": "نوع الشيل",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": " lệnh",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "ش",
       "zsh": "Zsh"
     },
     "startedAt": "بدأ في",
@@ -1385,8 +1385,8 @@
     "viewScript": "عرض السكريبت",
     "waitingForResults": "في انتظار النتائج",
     "adHocScript": "دُرج سكربت عشوائي",
-    "connected": "已连接",
-    "exitCodeLabel": "退出代码：{{code}}",
+    "connected": "متصل",
+    "exitCodeLabel": "كود الخروج: {{code}}",
     "offline": "غير متصل"
   },
   "search": {
@@ -1480,7 +1480,7 @@
       "totalHosts": "إجمالي الأجهزة",
       "unprotected": "غير محمي",
       "warningMessage": "{{count}} جهاز (أجهزة) ليس لديها حماية من الفيروسات مفعلة.",
-      "fetchError": "无法获取防病毒覆盖范围"
+      "fetchError": "فشل في الحصول على تغطية برنامج مكافحة الفيروسات"
     },
     "antivirusDisableFailed": "فشل تعطيل برنامج مكافحة الفيروسات",
     "antivirusDisableSuccess": "تم بدء تعطيل برنامج مكافحة الفيروسات بنجاح",
@@ -1609,7 +1609,7 @@
       "status": "الحالة",
       "title": "حالة OpenTelemetry",
       "tracesCount": "التتبعات",
-      "fetchError": "无法获取OpenTelemetry状态"
+      "fetchError": "فشل في الحصول على حالة OpenTelemetry"
     },
     "prometheus": {
       "information": "المعلومات",
@@ -1699,12 +1699,12 @@
     "source": "المصدر",
     "title": "العنوان",
     "type": "النوع",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "حذف المحدد ({{count}})",
     "disableSelected": "تعطيل المحدد ({{count}})",
     "enableSelected": "تفعيل المحدد ({{count}})",
     "chocolatey": "Chocolatey",
-    "detectedOs": "检测到的操作系统",
+    "detectedOs": "-detected-است",
     "typeLabel": "نوع",
     "unknown": "غير معروف",
     "urlLabel": "URL",
@@ -1729,7 +1729,7 @@
       "title": "تسجيل Ubuntu Pro",
       "useMasterKey": "استخدام المفتاح الرئيسي المكون",
       "customKeyHelp": "مفتاح Ubuntu Pro القائم على العقد يبدأ بـ \"C\"",
-      "errorLabel": "错误",
+      "errorLabel": "خطأ",
       "hostFallback": "مُضْمِن {{id}}"
     },
     "errors": {
@@ -1805,12 +1805,12 @@
     "managers": {
       "apt": "APT (Debian/Ubuntu)",
       "chocolatey": "Chocolatey (Windows)",
-      "dnf": "DNF (Fedora/RHEL/CentOS 8+)",
+      "dnf": "DNF (فيدورا/ريليه/ CentOS 8+)",
       "flatpak": "Flatpak",
       "fwupd": "fwupd",
       "homebrew": "Homebrew (macOS)",
       "pacman": "Pacman (Arch Linux)",
-      "pkg": "PKG (FreeBSD)",
+      "pkg": "حزمة (FreeBSD)",
       "pkgin": "pkgin (NetBSD)",
       "snap": "Snap",
       "winget": "Winget (Windows)",
@@ -1974,8 +1974,8 @@
   },
   "reportViewer": {
     "iframeTitle": "محتوى التقرير",
-    "loadError": "无法加载报告",
-    "pdfError": "生成PDF时出错：{{message}}",
+    "loadError": "فشل في تحميل التقرير",
+    "pdfError": "خطأ في إنشاء PDF: {{message}}",
     "unknownError": "خطأ غير معروف"
   },
   "upgradeProfiles": {
@@ -2258,9 +2258,9 @@
       "name": "الاسم",
       "osVersion": "نظام التشغيل / الإصدار",
       "upstream": "المنبع",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "تزامن",
+      "statusSnapshot": "صورة",
+      "statusRestore": "استعادة"
     },
     "configureTitle": "تكوين النسخ المرآة لـ {{platform}}",
     "create": "إنشاء",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "احذف {{n}} مرآة (مرايا) ضمن هذه المنصة أولاً.",
     "noEligibleHosts": "لا توجد مضيفات {{family}} مسجلة — قم بتسجيل واحدة وقم بالتحديث.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} حزجيف الدوم {{at}}",
+      "failedNoText": "فشل؛ بدون نص خطأ عائد.",
+      "failed": "فشل",
+      "ok": "ممتاز",
       "label": {
-        "sync": "sync",
+        "sync": "سون",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "رنان"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "ไม่ يمكن تحميل النسخ الاحتياطية.",
+      "restoreConfirm": "هل تريد استعادة شجرة المرآة من الصورة {{id}}؟ سيتم الكتابة على الشجرة الحية.",
+      "restoreError": "فشل إعادة توزيع الاستعادة.",
+      "title": "صور {{name}}",
+      "empty": "لا توجد صور بعد. انقر على رمز الكاميرا لأخذ صورة.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "صورة",
+        "taken": "تم التقاطها في",
+        "size": "الحجم",
+        "files": "ملفات",
+        "actions": "إجراءات"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "استعادة شجرة التشغيل إلى هذه الصورة"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "إخفاء النسخ الاحتياطية",
+      "expand": "عرض الصور"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "قم بتثبيت الأدوات المطلوبة أعلاه لتمكين التكوين الخاص بالمرآة. ستظل عمليات المرآة غير مفعلة حتى ي.report أن جميع الأدوات موجودة.",
+      "preConfigure": "قم بتثبيت الأدوات المطلوبة على هذا الخادم قبل تكوين المنصة. سيظل زر إنشاء غير نشط حتى ي.report أن جميع الأدوات موجودة."
     },
     "snap": {
       "action": {
@@ -2365,13 +2365,13 @@
         "status": "التقاط"
       },
       "empty": "لا توجد أي صور متابعة بعد. أضف واحدة فوق، ثم استخدم \"التقاط الصور\".",
-      "loadError": "не удалось загрузить отслеживаемые снимки.",
+      "loadError": "ไม่ يمكن تحميل الـ snaps المتابعة",
       "name": "اسم الصورة",
       "title": "الصور المتابعة لـ {{name}}",
       "track": "تتبع",
-      "trackError": "не удалось отслеживать этот снимок. Имена должны содержать только строчные буквы, цифры и дефисы.",
+      "trackError": "لا يمكن تتبع هذا النسخة. الأسماء يجب أن تكون حروفًا صغيرة، أرقامًا، ومسات تحت",
       "untrack": "إيقاف تتبع هذه الصورة",
-      "untrackError": "не удалось прекратить отслеживание этого снимка."
+      "untrackError": "ไม่ يمكن إلغاء تتبع ذلك النسخة (snap)."
     },
     "image": {
       "action": {
@@ -2443,9 +2443,9 @@
     "selectPort": "اختر المنفذ",
     "startPort": "منفذ البدء",
     "subtitle": "العنوان الفرعي",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "العنوان",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "تم التحديث بنجاح"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} حالي"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "لا توجد هذه التصحيحات بعد على المرآة المحلية. لإغلاق الفجوة، يتطلب الأمر دورة أخرى من جمع → وسائط → مستودع.",
+        "not_applied": "هناك تصحيحات لهذه المشكلات بالفعل على المرآة المحلية. لا يحتاج الأمر إلى نقل وسائط جديد - فقط لم يتم تشغيل مدير الحزم بعد على الخادم.",
+        "current": "تطابق حزم الخادم مع حالة المرآة الأخيرة ولا يوجد أي تهديدات أمنية عامة قد ظهرت منذ آخر نقل."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "مخازن محصورة جواً",
+      "subtitle": "إحصائيات المستودع لكل مرآة خاصة، بالإضافة إلى الطازجة المجمعة.",
+      "notApplicable": "هذا لوحة المعلومات ذات معنى فقط في عمليات نشر دور المستودع.",
+      "loadError": "فشل في تحميل المخازن:",
+      "endpointMissing": ".endpoint الخاص بالقائمة بكل المستودعات في الخلفية غير متوفر؛ لا يمكن لللوحة تعبئة البيانات.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
-        "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "title": "تجميع",
+        "totalRepos": "المجموع الكلي للمستودعات",
+        "totalPackages": "المجموع الكلي للحزم",
+        "oldestFreshness": "الحد الأدنى من الطازجة",
+        "noIngest": "ن/أ",
+        "daysAgo": "{{days}} يومًا مضى",
+        "staleRepos": "المستودعات القديمة (> {{days}}d)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "التوزيع",
+        "version": "الإصدار",
+        "packageCount": "حزم البرامج",
+        "lastIngest": "آخر استيعاب ناجح",
+        "freshness": "ความสดใหม่",
+        "signerFingerprint": "بصمة الموقّع",
+        "empty": "لم يتم تحميل أي مستودعات حتى الآن.",
+        "neverIngested": "لم يسبق",
+        "freshnessNever": "لم يتم تحميله من قبل",
+        "freshnessDays": "{{days}} الدرة",
         "noFingerprint": "—"
       }
     }
@@ -2517,7 +2517,7 @@
       "openSite": "مفتوح",
       "operation": "عملية",
       "site": "الموقع",
-      "timestamp": " метка времени"
+      "timestamp": " метا"
     },
     "empty": "لا يوجد سجلات مراجعة تعدد المواقع حتى الآن.",
     "emptyFiltered": "لا تطابق أي سجلات مراجعة.",
@@ -2751,7 +2751,7 @@
     "title": "حزمة التثبيت في وضع الفراغ",
     "version": "الإصدار",
     "recheckResources": "إعادة الفحص للموارد",
-    "resourcesInsufficient": "此服务器没有足够的空闲内存或磁盘空间来构建Server或Agent包——这些按钮将被禁用，直到释放资源（添加交换分区或将虚拟机扩容）。",
+    "resourcesInsufficient": "لا يوجد لدى هذا الخادم ذاكرة وصول عشوائي أو قرص كافيين لبناء حزمة خادم أو وكيل — سيظل هذه الأزرار غير نشطة حتى يتم توفير الموارد (أضف تبديل الذاكرة أو توسع VM).",
     "resourcesLow": "موارد قليلة - يمكن تشغيل البناء ولكن سيتم الاعتماد على التبادل وقد يكون بطيئاً."
   },
   "airgapCollections": {
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "حجم الوسائط (ميجابايت)",
       "submit": "تشغيل في الانتظار",
       "title": "تشغيل جمع جديد",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "يجب وجود至少包含一个镜像目标。",
+      "hostMismatch": "يجب أن تعيش جميع المرآات المختارة على نفس المستضيفة.",
+      "mirrorsTitle": "المرآة",
+      "mirrorsHelper": "اختر واحدة أو أكثر من المرآات المحددة. يتم بناء الحزمة من نسخة جديدة من شجرة كل مرآة تم التقاطها عند إنشاء التشغيل. يجب أن يشارك جميع الاختيارات في نفس المستضيفة.",
+      "noMirrors": "لا يوجد مرآات مفعلة. انتقل إلى الإعدادات → معادلة المستودعات لإضافة واحدة، ثم حاول مرة أخرى.",
+      "mirrorPicker": "اختر المرآات",
+      "hostMismatchWarning": "المرآات التي قمت باختيارها تغطي عدة خوادم. يتم إرسال خطة التجميع إلى خادم واحد، لذا يجب أن يشارك جميع الاختيارات في واحد.",
+      "burnDevice": "جهاز الحرق البصري (اختياري)",
+      "burnDeviceHelper": "اترك الحقل فارغاً لبناء ملف ISO قابل للتنزيل فقط. تحديد جهاز يضيف مرحلة حرق بعد بناء ISO."
     },
     "downloadError": "فشل في تنزيل ISO.",
     "empty": "لم يتم تنفيذ عمليات جمع حتى الآن. انقر فوق \"تشغيل جمع جديد\" لبدء واحدة.",
@@ -2800,40 +2800,40 @@
     "loadError": "فشل في تحميل التشغيلات.",
     "newRun": "تشغيل جمع جديد",
     "noManifestFound": "لا يوجد مانيفست بعد لتشغيل هذا — حاول مرة أخرى عندما يكون الحالة COMPLETE.",
-    "notApplicable": "此页面仅在收集器角色部署中具有意义。",
+    "notApplicable": "هذه الصفحة ذات معنى فقط في توزيعات الدور المجمع.",
     "refresh": "تحديث",
     "subtitle": " kích hoạt các دورة جمع فورية تشبه المستودعات المحددة، وبناء ISO ký hiệu và viết một biểu đồ cho việc tiếp nhận trên phía không kết nối.",
     "title": "تشغيل جمع الفجوة الهوائية",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "لم يتم العثور على ملف ISO على القرص بعد — حاول مرة أخرى لاحقاً.",
+    "multiDiscInfo": "أنتجت هذه العملية {{count}} أقراص. حدد أيها تريد تحميلها.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "اختر القرص للتنزيل",
+      "row": "قرص {{n}} — {{size}}",
+      "cancel": "إلغاء"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "ไม่ يمكن تحميل دور الخادم الحالي.",
+    "saveError": "ไม่ удалось حفظ دور المخدم.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "المعيار (بدون فجوة هوائية)",
+      "description": "الافتراضي. يدير هذا الخادم الأجهزة مباشرة عبر الشبكة بدون فصل هوائي. اختر هذا لأي نشر عادي - إنه ما يعمل عليه كل خادم حتى لو كنت بحاجة إلى نصف زوج مفصّل."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "محصورة جواً (الجانب المتصل بالإنترنت)",
+      "description": "النصف المتصل بالإنترنت من زوج air-gap. يقوم بتقليد مستودعات الحزم الواردة، جمع رسائل CVE والتوافقية، وتعبئة كل ذلك في صور ISO موقعة يمكنك نقلها عبر الفجوة الهوائية. اختر هذا على الخادم الذي لديه إمكانية الوصول إلى الإنترنت ويقوم ببناء الوسائط."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "مخزن محصور جواً (الجانب المقاطع)",
+      "description": "النصف المعزول من زوج air-gap بدون إمكانية الوصول إلى الإنترنت. يقوم بتلقي الصور ISO التي تم إنتاجها بواسطة المجموعة، التحقق من توقيعها، وتقديم الحزم للخوادم المدارة في الشبكة الخاصة حتى يمكن لها تحديث نفسها بشكل طبيعي. اختر هذا على الخادم داخل المنطقة المعزولة."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "اختر كيف يشارك هذا خادم SysManage في نشر مغلق. يجب أن يستمر معظم الخوادم في البقاء على المعيار. يتم تفعيل الدور بعد إعادة تشغيل الخادم التالي.",
+    "currentTag": "(حالي)",
+    "saving": "جاري الحفظ...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "قم بإعادة تشغيل خادم SysManage بعد الحفظ لتطبيق الدور الجديد بشكل كامل.",
+    "saved": "تم حفظ الدور الخاص بالخادم. قم بإعادة تشغيل الخادم لتطبيق التغييرات بشكل كامل.",
     "menuTitle": "دور الخادم"
   },
   "airgapDevices": {
@@ -2841,7 +2841,7 @@
     "help": "اختر القرص الضوئي/USB الذي يحتوي على وسائط المجموعة. يتم تفعيل زر استيراد على صفحة مخازن الهواء الفاصلة عندما يكون في هذا القرص قرص ISO قابل للقراءة. يتم التحقق من توقيع الوسائط أثناء الاستيراد.",
     "label": "جهاز موصول بالشبكة",
     "loadError": "لم يتم تعداد الأقراص.",
-    "none": "(none)",
+    "none": "(لا شيء)",
     "rescan": "إعادة فحص الأقراص",
     "saveError": "لا يمكن حفظ الجهاز.",
     "title": "استيرادDrv",
@@ -2882,7 +2882,7 @@
     "copyFingerprint": "نسخ البصمة",
     "fingerprint": "بصمة",
     "trusted": {
-      "badKey": "(unreadable key)",
+      "badKey": "(مفتاح غير قابل لقراءة)",
       "count": "{{n}} معتمدة",
       "empty": "لا يوجد مفاتيح جمع موثوقة حتى الآن.",
       "help": "أدخل المفتاح العام من كل جامع مغلق (Air-Gap Collector) الذي يجب أن يقبله هذا المستودع. يتم رفض الوسائط الموقعة بواسطة مفتاح غير موثوق به أثناء عملية الاستيراد.",
@@ -2972,7 +2972,7 @@
   },
   "sitesTiles": {
     "coordinator": "المنسق",
-    "coordinatorThisServer": "此服务器",
+    "coordinatorThisServer": "هذا الخادم",
     "countEnrolled": "{{n}} مسجلة",
     "countHosts": "{{n}} مضيفات",
     "countPending": "{{n}} قيد الانتظار",
@@ -3104,7 +3104,7 @@
     "revokeError": "فشل في سحب مفتاح API.",
     "revoked": "تم سحبه",
     "status": "الحالة",
-    "title": "API Keys"
+    "title": "مفاتيح API"
   },
   "acceptInvitation": {
     "noToken": "لم يتم تقديم رمز الدعوة",
@@ -3229,7 +3229,7 @@
     "inBlackout": "في الحظر: {{name}}",
     "intro": "حدد متى يمكن تنفيذ التحديثات والتعليمات النائية. المضيفون داخل نافذة السماح (وخارج أي حظر) يتلقون التعديلات؛ يتم الاحتفاظ بالتعديلات الأخرى حتى تفتح النافذة التالية. المضيفون بدون نافذة غير مقيدون.",
     "kind": "نوع",
-    "kindAllow": "允许",
+    "kindAllow": "السماح",
     "kindBlackout": "حظر",
     "loadError": "فشل في تحميل نوافد الصيانة",
     "nHosts": "{{count}} خادم(s)",
@@ -3250,7 +3250,7 @@
     "scopeAll": "جميع المضيفات",
     "scopeHosts": "الخوادم المحددة",
     "scopeTags": "المضيفون بواسطة العلامة",
-    "scopeType": "适用于",
+    "scopeType": " примениم ل",
     "selectHosts": "المضيفون",
     "selectTags": "العلامات",
     "startTime": "وقت البدء",
@@ -3260,7 +3260,7 @@
     "unrestrictedHint": "لا تطبق أي نافذة صيانة - التعديلات تنفذ فوراً.",
     "updated": "تم تحديث نافذة الصيانة",
     "state": {
-      "unrestricted": "ไม่ม有限制",
+      "unrestricted": "غير محدود",
       "in_window": "في النافذة",
       "blocked": "مغلق",
       "override": "التجاوز فعال"
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "لا توجد نتائج.",
     "placeholder": "ابحث في الصفحات…  (Esc لإغلاق)"
+  },
+  "agentMirrors": {
+    "add": "إضافة",
+    "colActions": "إجراءات",
+    "colChannel": "قناة",
+    "colUrl": "URL المرآة",
+    "deleteFailed": "لم يتم إزالة المرآة.",
+    "loadFailed": "لم يتم تحميل المرايا المحددة للآغنت.",
+    "noEngine": "لم يتم ترخيص محرك التزود على هذا الخادم، لذا لا توجد قنوات لتكون قابلة للتكوين.",
+    "refresh": "تحديث",
+    "remove": "إزالة المرآة",
+    "removed": "تم إزالة المرآة؛ سيتم تثبيت القناة مرة أخرى من المصدر الرئيسي.",
+    "saveFailed": "لم يتم حفظ المرآة.",
+    "saved": "تم حفظ المرآة.",
+    "subtitle": "استبدال مرآة خاصة بالقنوات التي يتم تثبيتها منها الآغنت. بدون ذلك، لا يمكن للمضيف المعد في موقع مغلق الوصول إلى PPA العام أو COPR أو OBS أو winget أو Homebrew tap، وبالتالي لن يتم تثبيت آغنت ولا ينضم.",
+    "title": "آغنت إنستال مرايا"
   }
 }

@@ -23,7 +23,7 @@ from backend.api.child_host_utils import (
     verify_host_active,
 )
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import N_, _
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db
 from backend.persistence.models import HostChild
@@ -33,7 +33,7 @@ from backend.utils.verbosity_logger import sanitize_log
 
 router = APIRouter()
 
-MSG_CHILD_HOST_NOT_FOUND = "Child host not found"
+MSG_CHILD_HOST_NOT_FOUND = N_("Child host not found")
 
 # Per-action timeout (seconds) for the engine apply_deployment_plan envelope.
 # The plan itself carries per-command timeouts; this is the outer ceiling.

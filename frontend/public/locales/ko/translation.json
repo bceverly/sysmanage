@@ -343,8 +343,8 @@
     "shellBash": "Bash",
     "shellBourne": "Bourne 쉘",
     "shellCsh": "Csh",
-    "shellFalse": "거짓",
-    "shellFish": "Fish",
+    "shellFalse": "False",
+    "shellFish": "물고기",
     "shellKsh": "Ksh",
     "shellNoLogin": "로그인 없음",
     "shellTcsh": "Tcsh",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "권한 없이 실행 중",
     "scriptsDisabledTooltip": "이 호스트에서 스크립트가 비활성화되어 있습니다",
     "scriptsEnabledTooltip": "이 호스트에서 스크립트가 활성화되어 있습니다",
-    "up": "Up",
+    "up": "활성화됨",
     "antivirusDeployAllFailed": "모든 호스트에서 백신 배포가 실패했습니다:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "{{count}} 대상에 대한 백신 배포가 시작되었습니다.\\n\\n실패한 호스트:\\n{{hosts}}",
     "antivirusDeploySuccess": "{{count}} 대상에 대한 백신 배포가 시작되었습니다.",
@@ -1074,7 +1074,7 @@
       "engineMissing": "필요한 Pro+ 엔진이 로드되지 않았습니다. 라이선스를 확인하세요.",
       "repository": "공기 격리 저장소"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "공기 격리 저장소",
     "map": "지도",
     "sites": "사이트",
     "airgapCollections": "공기 격리 수집",
@@ -1234,7 +1234,7 @@
     },
     "tag": {
       "accounts": "계정",
-      "antivirus": "antivirus",
+      "antivirus": "_ANTIVIRUS_",
       "audit": "감사",
       "basic": "기본",
       "commercial": "상업적",
@@ -1245,7 +1245,7 @@
       "opensource": "오픈소스",
       "organization": "조직",
       "permissions": "권한",
-      "rbac": "rbac",
+      "rbac": "RBAC",
       "roles": "역할",
       "security": "보안",
       "systemInfo": "시스템 정보",
@@ -1368,10 +1368,10 @@
     "shellType": "셸 유형",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "명령어",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "시",
       "zsh": "Zsh"
     },
     "startedAt": "시작 시각",
@@ -1699,7 +1699,7 @@
     "source": "소스",
     "title": "제목",
     "type": "유형",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "선택 항목 삭제 ({{count}})",
     "disableSelected": "선택 항목 비활성화 ({{count}})",
     "enableSelected": "선택 항목 활성화 ({{count}})",
@@ -2258,9 +2258,9 @@
       "name": "이름",
       "osVersion": "OS / 버전",
       "upstream": "업스트림",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "동기화",
+      "statusSnapshot": "스냅샷",
+      "statusRestore": "복원"
     },
     "configureTitle": "{{platform}} 미러링 구성",
     "create": "생성",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "먼저 이 플랫폼 아래의 {{n}}개 미러를 삭제하세요.",
     "noEligibleHosts": "등록된 {{family}} 호스트가 없습니다 — 하나를 등록하고 새로고침하세요.",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}}가 {{at}}부터 진행 중",
+      "failedNoText": "실패; 오류 텍스트가 반환되지 않았습니다.",
+      "failed": "실패",
+      "ok": "성공",
       "label": {
-        "sync": "sync",
+        "sync": "동기화",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "_복구_"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "스냅샷을 불러오는데 실패했습니다.",
+      "restoreConfirm": "{{id}} 스냅샷에서 미러 트리를 복원하시겠습니까? 현재 트리가 덮어쓰られます。",
+      "restoreError": "복구 배치가 실패했습니다.",
+      "title": "{{name}}의 스냅샷",
+      "empty": "아직 스냅샷이 없습니다. 하나를 찍으려면 카메라 아이콘을 클릭하세요.",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "스냅샷",
+        "taken": "생성 시간",
+        "size": "크기",
+        "files": "파일",
+        "actions": "액션"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "이 스냅샷으로 라이브 트리 복원"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "스냅샷 숨기기",
+      "expand": "스냅샷 표시"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "필수 미러 도구를 설치하여 미러 구성 활성화. 미러 작업은 설정 프로브가 모든 도구가 존재함을 보고할 때까지 비활성 상태입니다.",
+      "preConfigure": "플랫폼을 구성하기 전에 이 호스트에서 필수 미러 도구를 설치합니다. Create 버튼은 설정 프로브가 모든 도구가 존재함을 보고할 때까지 비활성화됩니다."
     },
     "snap": {
       "action": {
@@ -2443,9 +2443,9 @@
     "selectPort": "포트 선택",
     "startPort": "시작 포트",
     "subtitle": "부제목",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "제목",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "업데이트 성공"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}}개 최신"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "이 고치기는 아직 로컬 미러에 없습니다. 격리를 닫으려면 컬렉터 → 미디어 → 리포지토리 전송 사이클이 다시 필요합니다.",
+        "not_applied": "이 고치기는 이미 로컬 미러에 존재합니다. 새로운 미디어 전송이 필요하지 않습니다 — 호스트가 패키지 매니저를 실행하지 않았을 뿐입니다.",
+        "current": "호스트 패키지가 가장 최근의 미러 상태와 일치하고 마지막 전송 이후 공개 CVE가 표면화되지 않았습니다."
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "공기 격리 리포지토리",
+      "subtitle": "이 프라이빗 사이드 미러의 각 저장소 통계 및 집계 신선도.",
+      "notApplicable": "이 대시보드는 리포지토리 역할 배포에서만 의미가 있습니다.",
+      "loadError": "리포지토리를 로드하는데 실패했습니다:",
+      "endpointMissing": "백엔드 list-all-repositories 엔드포인트가 사용할 수 없음; 대시보드를 채울 수 없습니다.",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "집계",
+        "totalRepos": "총 리포지토리 수",
+        "totalPackages": "총 패키지 수",
+        "oldestFreshness": "가장 오래된 신선도",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} 일 전",
+        "staleRepos": "과기된 리포지토리 (> {{days}}일)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "배포형식",
+        "version": "버전",
+        "packageCount": "패키지",
+        "lastIngest": "최근 성공적인 인GEST",
+        "freshness": "신선도",
+        "signerFingerprint": "서명자 지문",
+        "empty": "아직 인식된 레포지토리가 없습니다.",
+        "neverIngested": "영원히",
+        "freshnessNever": "从来未摄取",
+        "freshnessDays": "{{days}} 일",
         "noFingerprint": "—"
       }
     }
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "매체 크기 (MB)",
       "submit": "큐 실행",
       "title": "새 수집 실행",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "최소 한 개 이상의 미러 대상이 필요합니다.",
+      "hostMismatch": "모든 선택된 미러는 동일한 호스트에 있어야 합니다.",
+      "mirrorsTitle": "거울",
+      "mirrorsHelper": "하나 이상의 구성된 미러를 선택하세요. 빌드는 각 미러 트리에서 실행 생성 시점에 새로 캡처한 스냅샷을 기반으로 이루어집니다. 모든 선택은 호스트를 공유해야 합니다.",
+      "noMirrors": "등록된 미러가 없습니다. 설정 → 리포지토리 미러링으로 하나를 추가한 후 다시 시도하세요.",
+      "mirrorPicker": "미러 선택",
+      "hostMismatchWarning": "선택한 미러들이 여러 호스트에 걸쳐 있습니다. 수집 계획은 단일 호스트로 배포되므로 모든 선택 항목이 하나의 호스트를 공유해야 합니다.",
+      "burnDevice": "광학 드라이브 (선택사항)",
+      "burnDeviceHelper": "다운로드 가능한 ISO 파일만 생성하려면 빈 상태로 두십시오. 장치를 설정하면 ISO_BUILT 이후에 BURNING 단계가 추가됩니다."
     },
     "downloadError": "ISO 다운로드에 실패했습니다",
     "empty": "아직 수집 실행 내역이 없습니다. '새 수집 실행'을 클릭하여 시작하세요.",
@@ -2804,36 +2804,36 @@
     "refresh": "새로고침",
     "subtitle": "구성된 저장소를 미러링하고, 서명된 ISO를 생성하며, 공기 격리 측에서 사용할 수 있도록 매니페스트를 작성하여 단발성 수집 작업을 트리거합니다.",
     "title": "공기 격리 수집 실행",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "디스크에 아직 ISO 파일이 없습니다 — 잠시 후 다시 확인하세요.",
+    "multiDiscInfo": "이 실행은 {{count}}개의 디스크를 생성했습니다. 다운로드하려는 것을 선택하세요.",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "다운로드할 디스크 선택",
+      "row": "디스크 {{n}} — {{size}}",
+      "cancel": "취소"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "현재 서버 역할을 불러오는데 실패했습니다.",
+    "saveError": "서버 역할 저장에 실패했습니다.",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "표준 (공기 격리 없음)",
+      "description": "기본 설정입니다. 이 서버는 네트워크를 통해 호스트를 직접 관리하며 공기 격리가 없습니다. 보통의 배포에서는 이를 선택하세요 — 모든 서버가 기본적으로 이렇게 동작합니다."
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "공기 격리 수집기 (온라인 측)",
+      "description": "인터넷에 연결된 공기 격리 쌍의 한쪽입니다. 이 서버는 상류 패키지 리포지토리를 미러링하고 CVE 및 규정 준수 피드를 수집하여 서명된 ISO 이미지를 생성합니다. 이를 물리적으로 공기 격리 구간으로 가져와야 합니다."
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "공기 격리 리포지토리 (연결되지 않은 측)",
+      "description": "인터넷에 연결되지 않은 공기 격리 쌍의 다른 한쪽입니다. 이 서버는 컬렉터가 생성한 ISO 미디어를 인식하고 서명을 검증하여 패키지를 사내 네트워크에서 호스트에게 제공합니다."
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "이 SysManage 서버가 공기 격리 배포에 어떻게 참여할지 선택합니다. 대부분의 서버는 표준 상태로 유지해야 합니다. 역할은 다음 서버 재시작 후 적용됩니다.",
+    "currentTag": "(현재)",
+    "saving": "저장 중...",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "SysManage 서버를 저장한 후 재시작하여 새로운 역할이 완전히 적용되도록 하세요.",
+    "saved": "서버 역할이 저장되었습니다. 변경 사항을 완전히 적용하려면 서버를 다시 시작하세요.",
     "menuTitle": "서버 역할"
   },
   "airgapDevices": {
@@ -3104,7 +3104,7 @@
     "revokeError": "API 키 회수 실패.",
     "revoked": "회수됨",
     "status": "상태",
-    "title": "API Keys"
+    "title": "API 키"
   },
   "acceptInvitation": {
     "noToken": "토큰 정보 제공되지 않음",
@@ -3162,7 +3162,7 @@
     "pid": "프로세스 ID(PID)",
     "name": "이름",
     "user": "사용자",
-    "cpu": "CPU %",
+    "cpu": "자료 %",
     "memory": "메모리 %",
     "rss": "RSS",
     "status": "상태",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "일치하는 항목이 없습니다.",
     "placeholder": "페이지 검색…  (Esc로 닫기)"
+  },
+  "agentMirrors": {
+    "add": "추가",
+    "colActions": "액션",
+    "colChannel": "채널",
+    "colUrl": "미러 URL",
+    "deleteFailed": "미러 제거에 실패했습니다.",
+    "loadFailed": "구성된 애전 미러를 불러올 수 없습니다.",
+    "noEngine": "이 서버에서는 프로비저닝 엔진 라이선싱이 되어 있지 않아서 구성할 채널이 없습니다.",
+    "refresh": "새로 고침",
+    "remove": "미러 제거",
+    "removed": "미러가 제거되었습니다; 해당 채널은 다시 공식 소스에서 설치됩니다.",
+    "saveFailed": "미러 저장에 실패했습니다.",
+    "saved": "미러가 저장되었습니다.",
+    "subtitle": "공개 PPA, COPR, OBS, winget 또는 Homebrew 탭을 대체하여 프라이빗 미러를 사용합니다. 이를 설정하지 않으면 에어_GAPPED 사이트에서 호스트를 구성하면 공식 소스에 접근할 수 없으므로 애전이 설치되지 않고 등록되지 않습니다.",
+    "title": "Agent 설치 미러"
   }
 }

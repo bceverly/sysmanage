@@ -271,7 +271,7 @@
       "gelfTcp": "GELF TCP",
       "syslogTcp": "Syslog TCP",
       "syslogUdp": "Syslog UDP",
-      "windowsSidecar": "Windows Sidecar"
+      "windowsSidecar": "Windows 侧车"
     },
     "noServers": "未找到 Graylog 服务器",
     "selectServer": {
@@ -343,8 +343,8 @@
     "shellBash": "Bash",
     "shellBourne": "Bourne Shell",
     "shellCsh": "Csh",
-    "shellFalse": "假的",
-    "shellFish": "Fish",
+    "shellFalse": "假",
+    "shellFish": "鱼",
     "shellKsh": "Ksh",
     "shellNoLogin": "无登录",
     "shellTcsh": "Tcsh",
@@ -936,7 +936,7 @@
     "deployAntivirus": "部署防病毒",
     "deployOpenTelemetry": "部署 OpenTelemetry",
     "filterByTags": "按标签筛选",
-    "fqdn": "FQDN",
+    "fqdn": "完全限定域名",
     "getDiagnostics": "获取诊断信息",
     "healthGrade": "健康",
     "healthScore": "健康评分: {{score}}",
@@ -1016,7 +1016,7 @@
     "runningUnprivileged": "非特权运行中",
     "scriptsDisabledTooltip": "此主机的脚本已禁用",
     "scriptsEnabledTooltip": "此主机的脚本已启用",
-    "up": "Up",
+    "up": "在线",
     "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\\n\\n{{hosts}}",
     "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\\n\\n失败的主机：\\n{{hosts}}",
     "antivirusDeploySuccess": "防病毒部署已启动，涉及{{count}}个主机",
@@ -1074,7 +1074,7 @@
       "engineMissing": "未加载所需的Pro+引擎；请检查许可证。",
       "repository": "离网仓库"
     },
-    "airgapRepositories": "Air-Gap Repos",
+    "airgapRepositories": "空气隔断仓库",
     "map": "地图",
     "sites": "站点",
     "airgapCollections": "空气隙收集",
@@ -1245,7 +1245,7 @@
       "opensource": "开源",
       "organization": "组织",
       "permissions": "权限",
-      "rbac": "rbac",
+      "rbac": "RBAC",
       "roles": "角色",
       "security": "安全",
       "systemInfo": "系统信息",
@@ -1368,10 +1368,10 @@
     "shellType": "Shell 类型",
     "shells": {
       "bash": "Bash",
-      "cmd": "Cmd",
+      "cmd": "命令",
       "ksh": "Ksh",
       "powershell": "PowerShell",
-      "sh": "Sh",
+      "sh": "夏",
       "zsh": "Zsh"
     },
     "startedAt": "开始于",
@@ -1422,10 +1422,10 @@
     "createdDatetime": "创建日期时间",
     "databaseEngine": "数据库引擎",
     "database_engine": {
-      "mysql": "mysql",
+      "mysql": "MySQL",
       "oracle": "Oracle",
       "postgresql": "PostgreSQL",
-      "sqlite": "sqlite3",
+      "sqlite": "SQLite",
       "sqlserver": "Microsoft SQL Server"
     },
     "deleteError": "机密删除失败",
@@ -1699,7 +1699,7 @@
     "source": "源",
     "title": "标题",
     "type": "类型",
-    "url": "Url",
+    "url": "URL",
     "deleteSelected": "删除所选 ({{count}})",
     "disableSelected": "禁用所选 ({{count}})",
     "enableSelected": "启用所选 ({{count}})",
@@ -1809,13 +1809,13 @@
       "flatpak": "Flatpak",
       "fwupd": "fwupd",
       "homebrew": "Homebrew (macOS)",
-      "pacman": "Pacman (Arch Linux)",
-      "pkg": "PKG (FreeBSD)",
+      "pacman": "Pacman（Arch Linux）",
+      "pkg": "PKG（FreeBSD）",
       "pkgin": "pkgin (NetBSD)",
       "snap": "Snap",
       "winget": "Winget (Windows)",
       "yum": "YUM (RHEL/CentOS 7)",
-      "zypper": "Zypper (openSUSE/SUSE)"
+      "zypper": "Zypper (openSUSE/SLES)"
     }
   },
   "userDetail": {
@@ -2172,7 +2172,7 @@
       "samlIdpCert": "IdP 签名证书（X.509）",
       "samlIdpCertHelp": "用于验证断言签名的公共 PEM/base64 证书",
       "samlIdpEntityId": "IdP 实体 ID",
-      "samlIdpSso": "IdP SSO URL",
+      "samlIdpSso": "身份提供者单点登录URL",
       "samlSpAcs": "SP ACS URL",
       "samlSpAcsHelp": "IdP POST 断言的位置，例如 https://host/api/auth/saml/<id>/acs",
       "samlSpEntityId": "SP 实体 ID",
@@ -2258,9 +2258,9 @@
       "name": "名称",
       "osVersion": "操作系统 / 版本",
       "upstream": "上游",
-      "statusSync": "Sync",
-      "statusSnapshot": "Snapshot",
-      "statusRestore": "Restore"
+      "statusSync": "同步",
+      "statusSnapshot": "快照",
+      "statusRestore": "恢复"
     },
     "configureTitle": "配置 {{platform}} 镜像",
     "create": "创建",
@@ -2319,38 +2319,38 @@
     "deleteConfigInUse": "请先删除此平台下的 {{n}} 个镜像。",
     "noEligibleHosts": "没有已注册的 {{family}} 主机可用 — 请注册一个并刷新。",
     "chip": {
-      "inFlight": "{{label}} in progress since {{at}}",
-      "failedNoText": "Failed; no error text returned.",
-      "failed": "failed",
-      "ok": "ok",
+      "inFlight": "{{label}} 于 {{at}} 开始程序推进",
+      "failedNoText": "失败；没有返回错误文本。",
+      "failed": "失败",
+      "ok": "好的",
       "label": {
-        "sync": "sync",
+        "sync": "将数据功能同步",
         "snapshot": "snap",
-        "restore": "restore"
+        "restore": "操作柮回"
       }
     },
     "snapshots": {
-      "loadError": "Could not load snapshots.",
-      "restoreConfirm": "Restore the mirror tree from snapshot {{id}}? The live tree will be overwritten.",
-      "restoreError": "Restore dispatch failed.",
-      "title": "Snapshots for {{name}}",
-      "empty": "No snapshots yet. Click the camera icon to take one.",
+      "loadError": "无法加载快照。",
+      "restoreConfirm": "从快照{{id}}恢复镜像树？实时树将会被覆盖。",
+      "restoreError": "恢复分发失败。",
+      "title": "{{name}}的快照",
+      "empty": "尚无快照。点击相机图标进行拍摄。",
       "col": {
-        "id": "Snapshot",
-        "taken": "Taken at",
-        "size": "Size",
-        "files": "Files",
-        "actions": "Actions"
+        "id": "快照",
+        "taken": "采集于",
+        "size": "大小",
+        "files": "文件",
+        "actions": "操作"
       },
-      "restore": "Restore live tree to this snapshot"
+      "restore": "将实时树恢复到此快照"
     },
     "expand": {
-      "collapse": "Hide snapshots",
-      "expand": "Show snapshots"
+      "collapse": "隐藏快照",
+      "expand": "显示快照"
     },
     "setupGate": {
-      "message": "Install the required mirror tooling above to enable mirror configuration. Mirror operations stay disabled until the setup probe reports all tools present.",
-      "preConfigure": "Install the required mirror tooling on this host before configuring the platform. The Create button stays disabled until the setup probe reports all tools present."
+      "message": "安装上述所需的镜像工具以启用镜像配置。在设置探测报告所有工具都存在之前，镜像操作将保持禁用状态。",
+      "preConfigure": "在配置平台之前，请在此主机上安装所需的镜像工具。创建按钮将在设置探测报告所有工具都存在之前保持禁用状态。"
     },
     "snap": {
       "action": {
@@ -2443,9 +2443,9 @@
     "selectPort": "选择端口",
     "startPort": "起始端口",
     "subtitle": "副标题",
-    "tcp": "Tcp",
+    "tcp": "TCP",
     "title": "标题",
-    "udp": "Udp",
+    "udp": "UDP",
     "updateSuccess": "更新成功"
   },
   "airgap": {
@@ -2475,37 +2475,37 @@
         "current_count": "{{n}} 项最新"
       },
       "tooltip": {
-        "not_transferred": "These fixes are not yet on the local mirror. Closing the gap requires another collector → media → repository transfer cycle.",
-        "not_applied": "These fixes are already on the local mirror. No new media transfer needed — the host just has not run its package manager yet.",
-        "current": "Host packages match the most recent mirror state and no public CVE has surfaced since the last transfer."
+        "not_transferred": "这些修复程序尚不在本地镜像中。关闭差距需要另一个采集器 → 媒体 → 仓库传输周期。",
+        "not_applied": "这些修复程序已经在本地镜像中。无需新的媒体传输 — 主机尚未运行其软件包管理器。",
+        "current": "主机包与最新的镜像状态匹配，并且自从上次传输以来没有公开的CVE出现。"
       }
     },
     "repositories": {
-      "title": "Air-Gap Repositories",
-      "subtitle": "Per-repository statistics for this private-side mirror, plus aggregate freshness.",
-      "notApplicable": "This dashboard is only meaningful on repository-role deployments.",
-      "loadError": "Failed to load repositories:",
-      "endpointMissing": "Backend list-all-repositories endpoint not available; dashboard cannot populate.",
+      "title": "空气隔断的仓库",
+      "subtitle": "此私有侧镜像的每个仓库统计信息，以及聚合新鲜度。",
+      "notApplicable": "此仪表板仅在仓库角色部署中有意义。",
+      "loadError": "加载存储库时失败：",
+      "endpointMissing": "后端的列表所有仓库端点不可用；仪表板无法填充。",
       "aggregate": {
-        "title": "Aggregate",
-        "totalRepos": "Total repositories",
-        "totalPackages": "Total packages",
-        "oldestFreshness": "Oldest freshness",
+        "title": "聚合",
+        "totalRepos": "总计仓库数量",
+        "totalPackages": "总计软件包数量",
+        "oldestFreshness": "最旧的新鲜度",
         "noIngest": "N/A",
-        "daysAgo": "{{days}} day(s) ago",
-        "staleRepos": "Stale repos (> {{days}}d)"
+        "daysAgo": "{{days}} 天前",
+        "staleRepos": "过期的仓库 (> {{days}}天)"
       },
       "table": {
-        "distro": "Distro",
-        "version": "Version",
-        "packageCount": "Packages",
-        "lastIngest": "Last successful ingest",
-        "freshness": "Freshness",
-        "signerFingerprint": "Signer fingerprint",
-        "empty": "No repositories ingested yet.",
-        "neverIngested": "Never",
-        "freshnessNever": "Never ingested",
-        "freshnessDays": "{{days}} day(s)",
+        "distro": "发行版",
+        "version": "版本",
+        "packageCount": "软件包",
+        "lastIngest": "上次成功的导入",
+        "freshness": "新鲜度",
+        "signerFingerprint": "签名指纹",
+        "empty": "还没有导入任何仓库。",
+        "neverIngested": "从不",
+        "freshnessNever": "从未导入过",
+        "freshnessDays": "{{days}} 天(天)",
         "noFingerprint": "—"
       }
     }
@@ -2784,15 +2784,15 @@
       "mediaSizeMb": "介质大小（MB）",
       "submit": "加入队列运行",
       "title": "新建集合运行",
-      "mirrorsRequired": "At least one mirror target is required.",
-      "hostMismatch": "All picked mirrors must live on the same host.",
-      "mirrorsTitle": "Mirrors",
-      "mirrorsHelper": "Pick one or more configured mirrors. The bundle is built from a fresh snapshot of each mirror tree taken at run creation. All picks must share a host.",
-      "noMirrors": "No enabled mirrors configured. Go to Settings → Repository Mirroring to add one, then try again.",
-      "mirrorPicker": "Pick mirrors",
-      "hostMismatchWarning": "The mirrors you picked span multiple hosts. The collection plan dispatches to a single host, so all picks must share one.",
-      "burnDevice": "Optical burn device (optional)",
-      "burnDeviceHelper": "Leave blank to build a downloadable ISO file only. Setting a device adds a BURNING stage after ISO_BUILT."
+      "mirrorsRequired": "至少需要一个镜像目标。",
+      "hostMismatch": "所有选中的镜像必须位于同一主机上。",
+      "mirrorsTitle": "镜像站点",
+      "mirrorsHelper": "选择一个或多个已配置的镜像站点。捆绑包将从在创建时拍摄的新鲜快照中构建。所有选择必须共享同一主机。",
+      "noMirrors": "没有启用的镜像配置。前往设置 → 仓库镜像以添加一个，然后重试。",
+      "mirrorPicker": "选择镜像站点",
+      "hostMismatchWarning": "您选择的镜像跨越多个主机。收集计划仅调度到一个主机，因此所有选择必须共享一个主机。",
+      "burnDevice": "光盘刻录设备（可选）",
+      "burnDeviceHelper": "留空以仅构建可下载的ISO文件。设置设备会在ISO_BUILT之后添加BURNING阶段。"
     },
     "downloadError": "下载ISO文件失败。",
     "empty": "还没有集合运行。点击“新建集合运行”开始一个新的。",
@@ -2804,36 +2804,36 @@
     "refresh": "刷新",
     "subtitle": "启动一次性收集运行，以镜像配置的存储库，构建签名ISO，并为隔离网络侧生成一个清单文件。",
     "title": "空气隙收集运行",
-    "noIsoOnDisk": "No ISO file found on disk yet — re-poll in a moment.",
-    "multiDiscInfo": "This run produced {{count}} discs. Pick which to download.",
+    "noIsoOnDisk": "尚未在磁盘上找到ISO文件 — 请稍后再试。",
+    "multiDiscInfo": "此次运行生成了 {{count}} 张光盘。请选择要下载的光盘。",
     "discPicker": {
-      "title": "Pick a disc to download",
-      "row": "Disc {{n}} — {{size}}",
-      "cancel": "Cancel"
+      "title": "选择要下载的磁盘",
+      "row": "磁盘 {{n}} — {{size}}",
+      "cancel": "取消"
     }
   },
   "serverRole": {
-    "loadError": "Could not load the current server role.",
-    "saveError": "Could not save the server role.",
+    "loadError": "无法加载当前服务器角色。",
+    "saveError": "无法保存服务器角色。",
     "standard": {
-      "title": "Standard (no air gap)",
-      "description": "The default. This server manages hosts directly over the network with no air-gap separation. Choose this for any ordinary deployment — it is what every server runs as unless you specifically need one half of an air-gapped pair."
+      "title": "标准（无空气间隙）",
+      "description": "默认。此服务器通过网络直接管理主机，没有空气间隙隔离。对于任何普通部署，请选择此项 — 这是每个服务器的标准配置，除非您需要空气隔断对的一半。"
     },
     "collector": {
-      "title": "Air-Gap Collector (online side)",
-      "description": "The internet-connected half of an air-gap pair. It mirrors upstream package repositories, gathers CVE and compliance feeds, and bundles them into signed ISO images that you physically carry across the air gap. Choose this on the server that has internet access and builds the media."
+      "title": "空气隙收集器（在线侧）",
+      "description": "互联网连接的空气隔断对的一半。它镜像上游软件包仓库，收集CVE和合规性信息，并将它们打包成签名ISO映像，以便物理携带跨越空气间隙。请在具有互联网访问权限并构建媒体的服务器上选择此项。"
     },
     "repository": {
-      "title": "Air-Gap Repository (disconnected side)",
-      "description": "The isolated half of an air-gap pair, with no internet access. It ingests the ISO media produced by the Collector, verifies its signature, and serves the packages to managed hosts on the private network so they can update normally. Choose this on the server inside the air-gapped enclave."
+      "title": "离网仓库（断开侧）",
+      "description": "隔离的空气隔断对的一半，无互联网访问权限。它接收由采集器生成的ISO介质，验证其签名，并向私有网络上的托管主机提供软件包以进行正常更新。请在空气隔断区域内的服务器上选择此项。"
     },
     "heading": "Server Role",
-    "intro": "Choose how this SysManage server participates in an air-gapped deployment. Most servers should stay on Standard. The role takes effect after the next server restart.",
-    "currentTag": "(current)",
-    "saving": "Saving…",
+    "intro": "选择此SysManage服务器如何参与离网部署。大多数服务器应保持在标准模式。角色将在下次服务器重启后生效。",
+    "currentTag": "(当前)",
+    "saving": "正在保存……",
     "save": "Save Role",
-    "restartHint": "Restart the SysManage server after saving for the new role to take full effect.",
-    "saved": "Server role saved. Restart the server for it to take full effect.",
+    "restartHint": "保存后重启SysManage服务器以使新角色生效。",
+    "saved": "服务器角色已保存。重启服务器以使更改生效。",
     "menuTitle": "服务器角色"
   },
   "airgapDevices": {
@@ -2841,7 +2841,7 @@
     "help": "选择持有收集器介质的光盘/USB驱动器。在Air-Gap存储库页面上的导入按钮会在插入可读取的ISO时可用，并且在此过程中会验证介质签名。",
     "label": "块设备",
     "loadError": "无法枚举驱动器。",
-    "none": "(none)",
+    "none": "(无)",
     "rescan": "重新扫描磁盘",
     "saveError": "无法保存设备。",
     "title": "导入磁盘",
@@ -3159,7 +3159,7 @@
     "resendError": "重新发送邀请失败"
   },
   "processes": {
-    "pid": "PID",
+    "pid": "进程ID",
     "name": "名称",
     "user": "用户",
     "cpu": "CPU %%",
@@ -3278,5 +3278,21 @@
   "commandPalette": {
     "noResults": "没有匹配项。",
     "placeholder": "搜索页面…… (按 Esc 关闭)"
+  },
+  "agentMirrors": {
+    "add": "添加",
+    "colActions": "操作",
+    "colChannel": "通道",
+    "colUrl": "镜像源 URL",
+    "deleteFailed": "无法移除该镜像源。",
+    "loadFailed": "无法加载配置的代理镜像源。",
+    "noEngine": "该服务器上没有对配置通道进行许可的供应引擎。",
+    "refresh": "刷新",
+    "remove": "移除镜像源",
+    "removed": "已移除镜像源；该通道将再次从上游安装。",
+    "saveFailed": "无法保存该镜像源。",
+    "saved": "已保存镜像源。",
+    "subtitle": "用私有镜像源替换代理自身安装的通道。如果没有这一步，一个在隔离网络中配置的主机无法访问公共 PPA、COPR、OBS、winget 或 Homebrew tap，因此它将不会安装代理也不会注册。",
+    "title": "代理安装镜像源"
   }
 }

@@ -17,6 +17,7 @@ from backend.api import (
     agent,
     airgap_bundles,
     airgap_collection_schedule,
+    airgap_agent_mirrors,
     airgap_collector_runs,
     airgap_devices,
     airgap_keys,
@@ -255,6 +256,11 @@ def register_routes(app: FastAPI):
     # AirgapRepositories dashboard and RepositoryFreshnessCard.
     app.include_router(airgap_repository_list.router)
     logger.debug("Air-gap repository list router added")
+
+    # Phase 12 — per-channel private mirrors for the AGENT's own install
+    # channels, so an air-gapped host can bootstrap its agent at all.
+    app.include_router(airgap_agent_mirrors.router)
+    logger.debug("Air-gap agent channel mirrors router added")
 
     # Collector public-key display + repository trusted-key import,
     # wired into Settings → Server Role.

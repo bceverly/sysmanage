@@ -21,6 +21,7 @@ from backend.config.config import (
     get_config,
     get_max_failed_logins,
 )
+from backend.i18n import N_
 from backend.persistence.models import User
 from backend.utils.verbosity_logger import sanitize_log
 
@@ -47,21 +48,21 @@ class LoginSecurityValidator:
         # Check if IP is temporarily blocked
         if self.is_ip_blocked(client_ip):
             logger.warning("Login attempt from blocked IP: %s", client_ip)
-            return False, "IP temporarily blocked due to too many failed attempts"
+            return False, N_("IP temporarily blocked due to too many failed attempts")
 
         # Check rate limiting for this IP
         if self.is_rate_limited(client_ip):
             logger.warning("Rate limited login attempt from IP: %s", client_ip)
-            return False, "Too many login attempts, please try again later"
+            return False, N_("Too many login attempts, please try again later")
 
         # Check user-specific rate limiting
         if self.is_user_rate_limited(username):
             logger.warning(
                 "Rate limited login attempt for user: %s", sanitize_log(username)
             )
-            return False, "Too many failed attempts for this user"
+            return False, N_("Too many failed attempts for this user")
 
-        return True, "Login attempt allowed"
+        return True, N_("Login attempt allowed")
 
     def record_failed_login(
         self, username: str, client_ip: str, user_agent: str = ""

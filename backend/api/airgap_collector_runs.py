@@ -36,7 +36,7 @@ from backend.auth.auth_handler import (
     decode_airgap_download_token,
     sign_airgap_download_token,
 )
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.db import get_db
@@ -68,10 +68,10 @@ download_router = APIRouter(
 )
 
 
-_ERR_RUN_NOT_FOUND = "Air-gap collection run not found"
-_ERR_MANIFEST_NOT_FOUND = "Air-gap media manifest not found"
-_ERR_INVALID_RUN_UUID = "Invalid UUID for run_id: %s"
-_ERR_INVALID_MANIFEST_UUID = "Invalid UUID for manifest_id: %s"
+_ERR_RUN_NOT_FOUND = N_("Air-gap collection run not found")
+_ERR_MANIFEST_NOT_FOUND = N_("Air-gap media manifest not found")
+_ERR_INVALID_RUN_UUID = N_("Invalid UUID for run_id: %s")
+_ERR_INVALID_MANIFEST_UUID = N_("Invalid UUID for manifest_id: %s")
 
 
 def _check_collector_module():

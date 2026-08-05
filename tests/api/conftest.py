@@ -87,6 +87,7 @@ def test_db():
     from tests.api._orm_mirror_b import (  # noqa: F401  pylint: disable=unused-import
         AccessGroup,
         AirGapBundle,
+        AirgapAgentChannelMirror,
         AirgapCollectionRun,
         AirgapCollectionSchedule,
         AirgapCollectionTarget,

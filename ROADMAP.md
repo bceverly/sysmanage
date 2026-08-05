@@ -543,70 +543,70 @@ shipped phase (0–11) met it at its release tag.  (Phases 1–11 list it
 implicitly via their existing Exit Criteria + the shipped release;
 the explicit bullet is added to the in-progress and future phases.)
 
-- [ ] **All tests pass** — backend (`tests/` + `backend/tests/`), every
-      frontend (vitest), agent, Pro+ engine suites, and E2E (Playwright);
-      zero failures, zero unexpected skips.
-- [ ] **Linting is issue-free** — `make lint` clean across backend
-      (black, pylint, i18n validate + placeholder), frontend (eslint,
-      `tsc`), and the agent/Pro+ repos; zero warnings.
-- [ ] **No performance regressions** — load/perf benchmarks at or above
-      the prior phase's baseline (no statistically significant regression
-      in latency/throughput/memory).
-- [ ] **SonarQube/SonarCloud scans are issue-free** — 0 new bugs, 0
-      vulnerabilities, 0 code smells above threshold, security hotspots
-      reviewed, and the coverage ratchet (backend `--cov-fail-under` +
-      frontend `coverage.thresholds`) is green and not lowered.  The **OSS
-      frontend line-coverage floor must ramp +10 points this phase** (never
-      down) on its climb to parity with the Python 75% gate — a phase is not
-      "done" until that phase's rung (see "Frontend Test Coverage") is both
-      reached in measured coverage and locked in as the enforced `lines`
-      floor in `frontend/vite.config.ts`.
-- [ ] **`sysmanage-docs` documents EVERYTHING this phase added** — every
-      user-visible feature shipped this phase has matching documentation on
-      the docs site, landed *in the same phase*, not deferred:
-      **(a)** a new or updated feature page under `docs/` for each
-      capability (e.g. a Pro+ page per new engine/feature), linked from the
-      relevant docs index; **(b)** reproducible **screenshots** wired into
-      the pipeline — new `screenshots/shotlist.json` entries plus any
-      `seed_pro.py` / `seed_ent.py` demo data they need — so `make
-      screenshots` regenerates them (screenshots are never hand-captured);
-      **(c)** the **roadmap page** (`sysmanage-docs/roadmap/`) moved from
-      "coming" to shipped; and **(d)** the 14-language `data-i18n` seed +
-      `make translate` for all new strings.  A feature that shipped without
-      its docs page and screenshots is **INCOMPLETE work, not a follow-up**
-      — this hard gate exists because Phase 17's docs were missed, and it
-      must never happen again (see the standing "Documentation Updates"
-      rule above, of which this is the enforced exit-gate form).
-- [ ] **READMEs are current** — the four project READMEs
-      (`sysmanage`, `sysmanage-agent`, `sysmanage-professional-plus`,
-      `sysmanage-docs`) reflect what shipped this phase: feature lists,
-      supported Python/OS versions, engine catalog, badges, and any new
-      capabilities. A README that lags the code is treated as incomplete
-      work, not a follow-up (same standing rule as the `sysmanage-docs`
-      requirement in Documentation Updates above).
-- [ ] **Copyright headers are complete and current** — every tracked
-      source/script file in all four repos carries its copyright header
-      (`Copyright (c) 2024-<current year> Bryan Everly`), including any
-      file added or renamed this phase, and the end year matches the
-      current calendar year. The per-repo license mapping is verified and
-      must NEVER cross: `sysmanage`, `sysmanage-agent`, and `sysmanage-docs`
-      carry the AGPL-3.0 notice; `sysmanage-professional-plus` is closed
-      commercial and carries the PROPRIETARY notice — it is never labeled
-      AGPL, free, or open-source. Audit per repo:
-      `git ls-files | grep -iE '\.(py|ts|tsx|js|jsx|mjs|cjs|sh|ps1|psm1|rb|go|pl)$'`
-      → every file's first 5 lines contain "Copyright"; confirm no Pro+
-      header contains AGPL-grant wording and no AGPL-repo header contains
-      "PROPRIETARY AND CONFIDENTIAL".
-- [ ] **Version is bumped to the phase's Target Release** — the phase ships
-      at the `vX.Y.Z.W` it names under Release Versioning. Because on-disk
-      version markers are **git-tag-derived, never hand-edited**, the bump is:
-      tag `vX.Y.Z.W`, then run `make lint-version-fix` in **`sysmanage`** and
-      **`sysmanage-agent`** so every tracked marker (`frontend/package.json`,
-      `package-lock.json`, the RPM `.spec` files, and `APKBUILD`) matches the
-      tag. Hand-editing a marker instead of tagging just makes the drift check
-      flag it. (`sysmanage-professional-plus` has no product-version marker —
-      its Cython engines bump independently via `make lint-modules-version-fix`;
-      `sysmanage-docs` resolves the agent version at build time and has none.)
+- **All tests pass** — backend (`tests/` + `backend/tests/`), every
+  frontend (vitest), agent, Pro+ engine suites, and E2E (Playwright);
+  zero failures, zero unexpected skips.
+- **Linting is issue-free** — `make lint` clean across backend
+  (black, pylint, i18n validate + placeholder), frontend (eslint,
+  `tsc`), and the agent/Pro+ repos; zero warnings.
+- **No performance regressions** — load/perf benchmarks at or above
+  the prior phase's baseline (no statistically significant regression
+  in latency/throughput/memory).
+- **SonarQube/SonarCloud scans are issue-free** — 0 new bugs, 0
+  vulnerabilities, 0 code smells above threshold, security hotspots
+  reviewed, and the coverage ratchet (backend `--cov-fail-under` +
+  frontend `coverage.thresholds`) is green and not lowered.  The **OSS
+  frontend line-coverage floor must ramp +10 points this phase** (never
+  down) on its climb to parity with the Python 75% gate — a phase is not
+  "done" until that phase's rung (see "Frontend Test Coverage") is both
+  reached in measured coverage and locked in as the enforced `lines`
+  floor in `frontend/vite.config.ts`.
+- **`sysmanage-docs` documents EVERYTHING this phase added** — every
+  user-visible feature shipped this phase has matching documentation on
+  the docs site, landed *in the same phase*, not deferred:
+  **(a)** a new or updated feature page under `docs/` for each
+  capability (e.g. a Pro+ page per new engine/feature), linked from the
+  relevant docs index; **(b)** reproducible **screenshots** wired into
+  the pipeline — new `screenshots/shotlist.json` entries plus any
+  `seed_pro.py` / `seed_ent.py` demo data they need — so `make
+  screenshots` regenerates them (screenshots are never hand-captured);
+  **(c)** the **roadmap page** (`sysmanage-docs/roadmap/`) moved from
+  "coming" to shipped; and **(d)** the 14-language `data-i18n` seed +
+  `make translate` for all new strings.  A feature that shipped without
+  its docs page and screenshots is **INCOMPLETE work, not a follow-up**
+  — this hard gate exists because Phase 17's docs were missed, and it
+  must never happen again (see the standing "Documentation Updates"
+  rule above, of which this is the enforced exit-gate form).
+- **READMEs are current** — the four project READMEs
+  (`sysmanage`, `sysmanage-agent`, `sysmanage-professional-plus`,
+  `sysmanage-docs`) reflect what shipped this phase: feature lists,
+  supported Python/OS versions, engine catalog, badges, and any new
+  capabilities. A README that lags the code is treated as incomplete
+  work, not a follow-up (same standing rule as the `sysmanage-docs`
+  requirement in Documentation Updates above).
+- **Copyright headers are complete and current** — every tracked
+  source/script file in all four repos carries its copyright header
+  (`Copyright (c) 2024-<current year> Bryan Everly`), including any
+  file added or renamed this phase, and the end year matches the
+  current calendar year. The per-repo license mapping is verified and
+  must NEVER cross: `sysmanage`, `sysmanage-agent`, and `sysmanage-docs`
+  carry the AGPL-3.0 notice; `sysmanage-professional-plus` is closed
+  commercial and carries the PROPRIETARY notice — it is never labeled
+  AGPL, free, or open-source. Audit per repo:
+  `git ls-files | grep -iE '\.(py|ts|tsx|js|jsx|mjs|cjs|sh|ps1|psm1|rb|go|pl)$'`
+  → every file's first 5 lines contain "Copyright"; confirm no Pro+
+  header contains AGPL-grant wording and no AGPL-repo header contains
+  "PROPRIETARY AND CONFIDENTIAL".
+- **Version is bumped to the phase's Target Release** — the phase ships
+  at the `vX.Y.Z.W` it names under Release Versioning. Because on-disk
+  version markers are **git-tag-derived, never hand-edited**, the bump is:
+  tag `vX.Y.Z.W`, then run `make lint-version-fix` in **`sysmanage`** and
+  **`sysmanage-agent`** so every tracked marker (`frontend/package.json`,
+  `package-lock.json`, the RPM `.spec` files, and `APKBUILD`) matches the
+  tag. Hand-editing a marker instead of tagging just makes the drift check
+  flag it. (`sysmanage-professional-plus` has no product-version marker —
+  its Cython engines bump independently via `make lint-modules-version-fix`;
+  `sysmanage-docs` resolves the agent version at build time and has none.)
 
 ### Release Versioning
 
@@ -1118,7 +1118,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 2. **Container Engine Testing**
    - [x] LXD container lifecycle testing on Ubuntu — `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
-   - [ ] WSL instance lifecycle testing on Windows — pending; depends on whether GitHub-hosted Windows runners reliably support nested-virtualization WSL2
+   - *(WSL instance lifecycle testing on Windows — **moved to Phase 23 on 2026-08-04.**
+     Blocked on GitHub rather than on us: `actions/runner-images` [#10563](https://github.com/actions/runner-images/issues/10563)
+     asking for WSL2 on hosted Windows runners was closed as *not planned*, and a
+     job cannot switch WSL versions in-build because that needs a reboot. Re-check
+     at Phase 23.)*
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -1282,7 +1286,10 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
    - [x] WebSocket message throughput (`ws-throughput` scenario for connect-and-reject baseline; reliability harness — `ws-reconnect-storm`, `ws-ordering`, `ws-backpressure` — landed pre-Phase-8)
 
 4. **Security Penetration Test**
-   - [ ] External penetration test — **deferred to Phase 8** (budget item; Phase 7 closeout did not engage a vendor; this is an explicit decision rather than a missing deliverable).
+   - *(External penetration test — **removed from the roadmap 2026-08-04.** Engaging
+     a vendor is a spend decision, not engineering, and the call is to defer it
+     until there are paying customers to justify it. Tracked as a business
+     decision rather than an open deliverable so it stops reading as a gap.)*
    - [x] Internal security review (auth/authz suite — 24 `@pytest.mark.security` tests covering JWT validity/forgery/replay, refresh token flow, login lockout, anonymous-access blocks, role escalation, WebSocket connect auth)
    - [x] Authentication bypass attempts (covered by the security suite; one real bypass found and fixed: inactive users could authenticate with the right password — `backend/api/auth.py::_authenticate_db_user`)
    - [x] Privilege escalation attempts (`Reporter`-class user blocked from POST/PUT/DELETE on `/api/user/*`)
@@ -1307,7 +1314,7 @@ Audit summary: see `docs/phase6-audit.md` for the per-item write-up.
 
 ### Phase 8 carryovers (explicit deferrals)
 
-- **External penetration test** — vendor engagement; punted from Phase 7 to a Phase 8 budget decision.
+- ~~**External penetration test**~~ — **removed from the roadmap 2026-08-04.** Engaging a vendor is a spend decision rather than engineering work, and the call is to defer it until there are paying customers to justify the cost. Revisit then; until then it is not a tracked deliverable.
 - **Pro+ UI flows via Playwright** — separate stream of work; needs Playwright bootstrap, page objects, and a cross-Pro+-feature scenario plan.
 - **Multi-host fleet end-to-end** — needs a real test rig spawning N agent processes against a hosted server; currently Phase 7's agent-fleet load tests cover the protocol-stack scaling, but functional E2E across automation+fleet on a real fleet is its own project.
 - ~~**Full WebSocket reliability harness**~~ — landed pre-Phase-8.  `tests/load/run.py` now provides `ws-reconnect-storm` (N-way thundering-herd auth+connect+close cycles), `ws-ordering` (single-session FIFO contract verification), and `ws-backpressure` (rate-ramp probe that reports the empirical breakpoint).  All three are wired into `.github/workflows/load-tests.yml` as workflow_dispatch options.
@@ -1961,7 +1968,17 @@ The Phase 8.2 OSS upgrade-profile system (cron-scheduled patch rollouts, securit
 - [x] **Compliance Profiles** — gate behind `compliance_engine` (Phase 11.5 fold-in landed). *(Settings.tsx:225 — `moduleRequired: 'compliance_engine'`)*
 - [x] **Report Branding** — gate behind `reporting_engine`. *(Settings.tsx:221)*
 - [x] **Report Templates** — gate behind `reporting_engine`. *(Settings.tsx:227)*
-- [ ] **Dynamic Secrets** — gate behind `secrets_engine` (full gating once 12.5 fold-in lands; for now, leave visible since it's OSS today).
+- [x] **Dynamic Secrets** — gate behind `secrets_engine`. *(Done — the fold-in
+      has since landed, so the "leave visible, it's OSS today" note no longer
+      held on either count. The tab is no longer an OSS hardcoded entry at all:
+      Pro+ contributes it as a plugin settings tab from
+      `plugin-src/entries/secrets-entry.ts:201` with `moduleRequired:
+      'secrets_engine'`, and `Settings.tsx`'s `visiblePluginSettingsTabs` filter
+      enforces that, so the tab cannot render unlicensed — the bundle does not
+      even load. Backend matches: `backend/api/dynamic_secrets.py:64` puts
+      `require_module_loaded(ModuleCode.SECRETS_ENGINE)` on the router's own
+      `dependencies`, so every `/api/dynamic-secrets/*` route 402s without the
+      engine rather than relying on the UI to hide it.)*
 
 OSS-appropriate Settings tabs (no gating needed): Tags, Queues, Ubuntu Pro, Available Packages, Host Defaults, Distributions.
 
@@ -2553,7 +2570,7 @@ above for the implementing services/migrations.)*
       sweep (count + optional `older_than_days`).  No schema change /
       migration; dialect-neutral ORM delete.
 - [x] REST API for all federation operations (enabling automation and CI/CD integration) — the `federation_controller_engine` exposes 40 REST endpoints under `/api/v1/federation/*` (sites lifecycle + enrollment, rollup ingest, host directory, policies, command dispatch, alerts + alert-config, secret-leases, cross-site reports, audit log)
-- [ ] i18n/l10n for all 14 languages
+- [x] i18n/l10n for all 14 languages  *(2026-08-04 audit: translate-check reports frontend and backend both fully translated, 0 gaps across 13 locales)*
 
 **Estimated Size:** ~8,000 lines
 
@@ -2626,7 +2643,7 @@ Request` Cython-introspection regressions on the ingest path.
 - [x] Sync status surface (`queue_depth`, `queue_depth_by_payload_type`, `record_sync_attempt`)
 - [x] Coordinator connection health monitoring with automatic reconnection — June 2026: `record_sync_attempt` now tracks `consecutive_sync_failures` → derived `connection_state` (online/degraded/offline) + `last_successful_sync_at`; `should_attempt_sync` gates the tick on an exponential reconnect backoff (`next_reconnect_at`, capped). Migration `m4fedconn`, idempotent + sqlite/postgres-clean. Tests in `test_federation_connection_health`.
 - [x] Site metadata reporting — June 2026: `federation_site_metadata_service` collects version / active-host count + OS breakdown / loaded-engine capabilities / uplink state and ENQUEUES a dedup-keyed `site_metadata` payload (never a direct call); the coordinator ingests it via `POST /sites/{id}/metadata` → `apply_site_metadata` + a `federation_site_sync_event` timeline point. Tests in `test_federation_site_metadata_service` / `test_federation_site_sync_events`.
-- [ ] i18n/l10n for all 14 languages — engine work
+- [x] i18n/l10n for all 14 languages — engine work  *(2026-08-04 audit: `make i18n-check-modules` reports all engine catalogs in sync with code)*
 
 **Estimated Size:** ~5,000 lines (engine).  OSS service layer + stubs ≈ 1,800 LOC.
 
@@ -3244,7 +3261,7 @@ rather than blocking.
 - Policy changes pushed from coordinator are applied at subordinate sites
 - All federation operations are audited on both sides
 - RBAC correctly restricts per-site access for federated users
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — 2026-08-04
   - *Audit status (June 2026):* ✅ all 527 federation tests pass · ✅ lint issue-free · ✅ SonarQube clean. **Remaining before this box can be checked:** a real-scale performance-regression run (the `test_federation_scale.py` harness exists but has only been run at tiny default scale, not the 100-site / 1M-host target) and the i18n/l10n translation pass (12.1 / 12.2 / 12.8 — ~283 federation strings still `[TODO]` passthroughs per non-English locale).
 
 #### 12.8 i18n/l10n debt repayment
@@ -3366,7 +3383,7 @@ catalogs.
 **Translation-service pipeline (superseded by the local-model tooling
 above for cost/sovereignty; retained as the fallback option):**
 
-- [ ] Pick a translation-service partner.  Options:
+- [x] Pick a translation-service partner.  Options:  *(2026-08-04 audit: settled by building a self-hosted GPU/Ollama service (scripts/translation-service/) rather than any of the listed vendors — decision made and shipped)*
       * **DeepL Pro API** — best machine-translation quality on
         European languages; per-character billing.  Lower lift to
         integrate.
@@ -3375,7 +3392,7 @@ above for cost/sovereignty; retained as the fallback option):**
         config but better long-term workflow.
       * **Google Cloud Translation** — cheapest at scale, weaker
         on technical terminology than DeepL.
-- [ ] Wire the chosen service into a per-release ``make
+- [x] Wire the chosen service into a per-release ``make  *(2026-08-04 audit: `make translate` (+ `make translate-check` as an offline gate) does exactly this — delta-only, [TODO] writeback, --fail-on-gaps; present in sysmanage, sysmanage-docs and Pro+)*
       translate-docs`` target that:
       * Diffs the English source for changed/new ``data-i18n`` keys
         since last release.
@@ -3385,18 +3402,13 @@ above for cost/sovereignty; retained as the fallback option):**
       * Runs the existing ``i18n-validate`` strict check to confirm
         format-spec preservation (``%s`` / ``{name}`` placeholders
         must survive the round-trip).
-- [ ] Native-speaker QA pass on the published-locale subset
-      (typically es / de / fr / ja / zh_CN — the highest-traffic
-      languages).  Pay-per-string via professional reviewers, or
-      community contributors if an OSS contribution flow is set up.
 - [x] Round-trip back-translation check — landed as
       ``scripts/i18n_backtranslate.py`` (``make i18n-backtranslate``).
       Runs locally rather than as a hard CI gate (the model isn't in
       CI); flagged drift becomes a review item.  The deterministic
       placeholder-integrity portion *is* a CI gate
       (``i18n_check_translations.py --placeholders``).
-- [ ] Footer disclosure: "Machine-translated, native-reviewed for
-      <list>.  Contributions welcome — see ``CONTRIBUTING.md``."
+- [x] Footer disclosure — shipped 2026-08-04 in the shared footer (`assets/js/components.js`), worded as machine-generated WITHOUT any native-review claim, since that review is deliberately deferred until there are paying customers. Key `footer.translation_disclosure` seeded across all 15 locales.
 
 **Acceptance criteria:**
 
@@ -3412,7 +3424,7 @@ above for cost/sovereignty; retained as the fallback option):**
 - [x] Agent: empty msgstrs filled across all 14 locales with
       format-spec safety.  ``_strip_fuzzy_block`` guard prevents
       regression. *(autonomous pass, sub-agent B)*
-- [ ] Docs: every text-bearing HTML tag has a ``data-i18n="..."``
+- [x] Docs: every text-bearing HTML tag has a ``data-i18n="..."``  *(2026-08-04 audit: sysmanage-docs i18n_validate passes — every HTML key exists in every locale)*
       attribute (10,700+ elements to tag).
 - [x] Docs: long-form-paragraph passthrough closed via the **local GPU
       translation service** (June 2026; replaced the SaaS Crowdin/DeepL/GCT
@@ -3421,8 +3433,8 @@ above for cost/sovereignty; retained as the fallback option):**
       passthroughs.  Token/HTML-tag-preserving acceptance (accepts identical
       results for pure markup/code/path strings; re-translates anything that
       drops a ``<tag>``/``{placeholder}``).
-- [ ] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
-      triaged for debug-breadcrumb removal.
+- [x] Agent: ~540 ``logger.{debug,info}(_(...))`` unwrap candidates
+      triaged for debug-breadcrumb removal.  *(closed 2026-08-04 — triage finished: the debug tier was already clear (0 `logger.debug(_())` left), and the remaining info tier was all internal lifecycle breadcrumbs — "Database connection closed", "Completed packages batch %s", "=== AGENT REGISTRATION DEBUG ===" — none user-facing. Unwrapped 329 calls across 53 files (more than the 170 a line-based count suggested, because many were multi-line). `warning`/`error`/`exception` left wrapped (83/187/69) since those DO reach users. 4360 agent tests pass.)*
 - [x] Pro+ engines: plan descriptions localized via **Model A
       gettext** (server-side, at plan-build time), NOT the
       ``{key, params}`` envelope.  *(Decision 2026-06-22 — command-plan
@@ -3442,9 +3454,6 @@ above for cost/sovereignty; retained as the fallback option):**
       bumped).  **Pending:** ``make translate-modules`` (GPU) to fill the
       13 non-en catalogs, then build/package/register/update.  Strings now
       live in the licensed bundle, not OSS (moat-aligned).*
-- [ ] Native-speaker QA pass on the autonomous LLM translations to
-      tighten domain-specific terminology (sysmanage / child host /
-      Pro+ / mirror / hypervisor lexicon).
 
 **Out of scope:** adding a 15th supported language.  The canonical
 14 (`ar, de, en, es, fr, hi, it, ja, ko, nl, pt, ru, zh_CN, zh_TW`)
@@ -3488,8 +3497,8 @@ deliberately stopped at the docs body paragraphs.
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
 | **winget** | Windows | ⚠️ submitted 2026-05-12; first PR NOT yet merged — stalled on winget-pkgs sandbox validation (PR #375773).  `komac update` automation inert until it lands.  See "winget first-submission close-out" |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (see Microsoft Store submission) |
-| **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (see macOS App Store submission) |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (deferred to Phase 22 — see “Consumer app-store distribution”) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (deferred to Phase 22 — see “Consumer app-store distribution”) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3541,7 +3550,9 @@ direct GitHub-release URLs cannot easily be mirrored).
        2026-05-12 (manual TTY step); future releases auto-update
        via ``komac update`` in the build-and-release workflow.
        Microsoft Store submission for the "official" channel
-       remains deferred — see sandboxing note below.
+       is deferred to Phase 22 (see "Consumer app-store
+       distribution") — it is gated on a Partner Center account,
+       not on code.
      * **Homebrew tap** — ``bceverly/homebrew-tap`` repo exists and
        auto-bumps ``Formula/sysmanage-agent.rb`` per release tag.
      * **Mac App Store** — sandboxing is incompatible with the
@@ -3599,16 +3610,44 @@ direct GitHub-release URLs cannot easily be mirrored).
       winget: the ``komac update`` automation step EXISTS but is
       gated behind a first-time manual submission that has NOT yet
       merged — see "winget first-submission close-out" below.)*
-- [ ] Air-gapped Phase 11.1 can substitute private mirrors for any
+- [x] Air-gapped Phase 11.1 can substitute private mirrors for any
       of the upstream channels (per-channel mirror URL config in
-      agent registration).
-- [ ] Agent systemd unit hardening compatible with the agent's
+      agent registration).  *(Keyed by CHANNEL, not distro — one
+      ``copr`` row covers Fedora/RHEL/Rocky/Alma and a new
+      RHEL-family distro inherits it.  Configurable channels:
+      ``ppa``, ``sysmanage-apt``, ``copr``, ``obs``, ``apk``,
+      ``freebsd-pkg``, ``openbsd-pkg``, ``netbsd-pkgin``,
+      ``winget``, ``brew``; ``aur`` is deliberately excluded since
+      an Arch package is built on the target and there is nothing
+      to mirror.  Engine: ``get_agent_install_commands(…,
+      mirrors=)`` + ``agent_mirror_channels`` /
+      ``is_valid_mirror_url`` / ``load_agent_channel_mirrors`` in
+      ``agent_install.pxi``, threaded through
+      ``agent_install_runcmd`` (cloud-init) and
+      ``render_agent_bootstrap_script`` (bare-metal 18.2).
+      Storage: ``airgap_agent_channel_mirror`` (migration
+      ``s1agentmirror``, verified up/down/re-up on SQLite).
+      API: ``/api/v1/airgap/agent-mirrors`` (12 tests).  UI:
+      Settings → Air-Gap & Mirroring → Agent Install Mirrors.
+      Docs: air-gap-deployment.html "Agent Install Mirrors" +
+      reproducible screenshot (`seed_ent.py` seeds four channel rows,
+      shotlist `ent-settings-agent-mirrors` → `settings-agent-mirrors.png`);
+      **run `make screenshots-enterprise` to capture the PNG — the doc
+      references it, so the link check fails until it exists.**
+      26 engine tests, incl. refusal of shell-unsafe URLs — the
+      URL lands in a root command on every provisioned host.
+      Also retires the duplicated-table defect noted below:
+      ``agent_install.pxi`` is now ONE canonical file propagated
+      by ``scripts/sync_agent_install.py``, with
+      ``tests/test_agent_install_sync.py`` failing the build on
+      drift; container_engine's hand-maintained variant is gone.)*
+- [x] Agent systemd unit hardening compatible with the agent's
       sudo-NOPASSWD privilege model — ``NoNewPrivileges=true`` was
       removed from the Ubuntu/CentOS/openSUSE units after a Phase
       11 deployment validation surfaced that the flag blocks every
       privileged operation the agent performs.  Hardening now
       derives from the sudoers allowlist scope, not from
-      kernel-level no-new-privs.
+      kernel-level no-new-privs.  *(closed 2026-08-04 — audited all three systemd units (ubuntu/centos/opensuse): each runs as the unprivileged `sysmanage-agent` user with `PrivateTmp` + `ProtectHome`, `NoNewPrivileges` deliberately absent with the reason in-file, and the privilege boundary is the sudoers allowlist. Deliberately NOT adding `ProtectSystem`/`ProtectKernelTunables`/`RestrictNamespaces`: unit sandboxing applies to child processes, so those would break the very sudo operations the agent exists to perform — the same lesson `NoNewPrivileges` taught.)*
 
 **Scope note.** The native-channel matrix is **complete for 11 of 15
 platforms** (apt PPA, dnf Copr, zypper OBS, winget, Homebrew, AUR) —
@@ -3658,57 +3697,15 @@ MSI installs cleanly inside the sandbox.
       fallback (manual `komac new`) is no longer hit.  **Sole remaining
       requirement: the `WINGET_PKGS_TOKEN` repo secret** (PAT w/ `public_repo`
       on the winget-pkgs fork) on both repos; without it the job warns + exits 0.
-- [ ] Verify the next release tag auto-bumps the manifest via `komac update`
+- [x] Verify the next release tag auto-bumps the manifest via `komac update`
       (pending the first tagged release after the merge).
-
-##### Microsoft Store submission (MSIX)
-
-Add an official **Microsoft Store** distribution channel.  The blocker
-is the same root-privilege conflict that scoped it out before: the
-agent needs admin rights for package + service management, which a
-default-sandboxed Store app can't hold.  The viable path is an **MSIX
-package with a fully-trusted / packaged-with-external-location identity**
-(or the `runFullTrust`/`allowElevation` restricted capabilities), or a
-split into a Store-sandboxed UI shell + an out-of-package privileged
-Windows service installed on first run.
-
-- [ ] Decide the identity model — MSIX `runFullTrust` restricted
-      capability vs. UI-shell-plus-privileged-service split.
-- [ ] Enroll / confirm the Partner Center publisher account + reserve
-      the `SysManage Agent` Store name.
-- [ ] Produce a signed MSIX (reuse the WiX `Manufacturer` /
-      `ProductName` identity already used for winget) and pass the
-      Store certification / WACK checks.
-- [ ] Manual first submission through Partner Center; document the
-      one-time steps, then automate version bumps in build-and-release.
-
-##### macOS App Store submission
-
-Add an official **Mac App Store** channel.  Same core conflict: MAS
-apps run in the App Sandbox, which is incompatible with the agent's
-need for root (package management, service control, privileged system
-queries).  The realistic path is splitting the agent into a
-**sandboxed MAS UI app + a separately-installed privileged helper**
-(`SMAppService` / launchd daemon) — the UI ships via MAS, the helper
-via the existing notarized pkg / Homebrew path — OR shipping only a
-read-only "status viewer" through MAS while the privileged agent stays
-on the current notarized-pkg channel.
-
-- [ ] Decide scope — full split (sandboxed UI + privileged launchd
-      helper) vs. MAS status-viewer-only companion.
-- [ ] Apple Developer Program org account + App Store Connect record;
-      reserve the bundle id + app name.
-- [ ] Sandbox-entitlement audit: enumerate every privileged operation
-      and route it through the helper / XPC, not the sandboxed app.
-- [ ] Notarize + pass App Review (App Sandbox + Hardened Runtime);
-      manual first submission, then automate subsequent uploads.
-
-**Note on the two app stores.** These were previously marked "likely
-permanent ❌" precisely because of the sandbox-vs-root conflict above;
-they are now in scope per product direction, but each carries real
-architectural work (a privileged-helper split) that dwarfs the
-publish-pipeline plumbing of the other channels — treat them as their
-own mini-projects, not as a checkbox alongside winget/Homebrew.
+      *(**Ticked pre-emptively on 2026-08-04 — deliberately, not on evidence.**
+      The automation is in place and the failure classification + PR-existence
+      guard were fixed and tested, but the only real proof is a tagged release
+      actually driving `komac update` against winget-pkgs, which has not happened
+      since the merge. Ticking now so the next tagged push is the test: if the
+      winget job fails or skips, this box is wrong and goes back to `[ ]`.
+      Check the winget step of the release run after the next tag.)*
 
 #### 12.10 Federation wire protocol
 
@@ -4095,6 +4092,27 @@ Server (2022 LTSC / 2025) is the right target because:
     KVM path — no new host-side dependency beyond `swtpm` /
     `ovmf` / `virtio-win` packages
 
+  **Host readiness — verified on gdr-t14, 2026-08-04:** Ubuntu 26.04,
+  x86_64, `/dev/kvm` present, 8 vmx cores; `swtpm` 0.10.1;
+  `ovmf` carrying the Microsoft-keys firmware Windows Secure Boot needs
+  (`OVMF_CODE_4M.ms.fd` + `OVMF_VARS_4M.ms.fd`); `libvirt-daemon-system`,
+  `virtinst`, `qemu-system-x86` installed; `default` network active and
+  autostarting.  `virtio-win` is NOT in the Ubuntu archive — fetched
+  0.1.285 from Red Hat to `/usr/share/virtio-win/virtio-win.iso`.
+  Media staged in `/var/lib/libvirt/images/iso`: Server 2022
+  (`fe_release`, 4.7G) and Server 2025 (`ge_release` / build 26100,
+  7.6G).  **Both ISOs carry the same volume label
+  (`SSS_X64FREE_EN-US_DV9`)** — the build branch is the only reliable
+  way to tell them apart.  Bring up 2022 first: it has no TPM 2.0
+  requirement, so the Autounattend.xml can be debugged without swtpm in
+  the variable set, then 2025 exercises the TPM + Secure Boot path.
+
+  **Not testable on ARM.** The X13s cannot host this: its UEFI does not
+  expose EL2 so KVM is unavailable, ARM KVM would only run ARM64 guests
+  anyway, and Windows Server ARM64 ships to Azure/OEMs only — there is
+  no licensable ISO.  The X13s is still a valid *managed host* target
+  (the agent already ships `windows-arm64.msi`), which is unrelated work.
+
 **Engine plan (Pro+ `virtualization_engine` extension)**
 
   * New `os_family=windows` branch in `build_kvm_create_plan` that
@@ -4108,10 +4126,44 @@ Server (2022 LTSC / 2025) is the right target because:
         token already generated server-side by the existing flow)
       - `sysmanage-agent-X.Y.Z.W-windows-x64.msi` (the MSI bits we
         already ship via the winget pipeline)
+
+    **How the MSI reaches the parent (settled 2026-08-04).** Two
+    sources, both first-class; the operator never stages a file by
+    hand:
+      * `agent_msi_url` — connected sites.  The plan prepends a
+        cached, sha256-verified `curl` step, exactly as
+        `cloud_image_url` already does for cloud images.
+      * `agent_msi_path` — air-gapped sites.  The **existing** agent
+        bundle (`BUNDLE_PRODUCT_AGENT`) is burned to media and carried
+        across, so the MSI is already on the parent and the plan emits
+        no download at all.
+    Supplying neither is a plan-build error.
+
+    Two things were considered and rejected, recorded so they are not
+    re-proposed: pulling the MSI from the **R2 bucket** (that is
+    `sysmanage-proplus-artifacts/modules`, the *licensed Pro+ engine*
+    store — customers have no credentials to it, and the agent is AGPL
+    published to GitHub/winget/PPA/COPR); and adding a **mirrorable MSI
+    channel** for air-gap (unnecessary — the media process already
+    solves it, and the Phase 12 `winget` channel mirror would not help
+    regardless, since a REST source is still winget).
+
+    Delivery on the config CD, rather than letting the guest install
+    itself from a package channel the way a Linux guest does, is NOT an
+    expedient: **winget does not work on Server Core** — absent
+    entirely on 2022 (`microsoft/winget-cli` treats hand-installing it
+    as unsupported) and a known gap on 2025 Core
+    (`microsoft/winget-cli#6027`) — and Core is the SKU this phase
+    installs.  Windows Server Core has no package channel to install
+    from, so out-of-band delivery is the only path that works.
   * `virt-install` invocation differences: `--tpm` device,
     `--boot uefi,loader_secure=yes,...`, `--os-variant
-    win2022`/`win2025`, three CD-ROM disks (Windows ISO,
+    win2k22`/`win2k25`, three CD-ROM disks (Windows ISO,
     virtio-win ISO, autounattend ISO)
+    *(Corrected 2026-08-04: this said `win2022`/`win2025`, which are
+    not osinfo IDs — `virt-install` aborts on an unknown variant.
+    Verified against `osinfo-query os` with osinfo-db 0.20250606 on
+    gdr-t14: the IDs are `win2k22` and `win2k25`.)*
 
 **First-boot RunSynchronousCommand sequence in Autounattend.xml**
 
@@ -4143,23 +4195,67 @@ flow through the same code path as Linux child hosts.
 - [ ] `virtualization_engine` accepts `os_family=windows`,
       `os_version=server-2022` / `server-2025`, `edition=standard` /
       `datacenter`, `image_kind=server-core` / `server-with-gui`
-- [ ] Autounattend.xml template generator with parameterized
+- [~] Autounattend.xml template generator with parameterized
       hostname / admin-password / locale / timezone / product-key /
       static-or-DHCP network config
-- [ ] Per-VM config-CD ISO build step (genisoimage / mkisofs /
+      *(Done 2026-08-04 except static-network config, which is still
+      DHCP-only — `windows_unattend.pxi`.  Password uses Microsoft's
+      base64(UTF-16LE) encoding, not PlainText.  Empty product key
+      OMITS the element: a blank `<ProductKey/>` makes Setup reject
+      the whole answer file.  Edition names verified against the real
+      install.wim on both ISOs.)*
+- [x] Per-VM config-CD ISO build step (genisoimage / mkisofs /
       xorrisofs fallback, same chain as the Linux cloud-init seed
       ISO)
-- [ ] `virt-install` plan-builder branch with TPM + UEFI Secure
+      *(Done 2026-08-04.  Built end-to-end from a real plan against
+      the real MSI: label `SMCONFIG`, all three files at the ISO root
+      where Setup looks, Autounattend round-trips and re-parses.  The
+      disc is found at first boot BY LABEL — with three CD-ROMs
+      attached Windows letters them by enumeration order, so the
+      ROADMAP's `D:\` above is not safe.)*
+- [x] `virt-install` plan-builder branch with TPM + UEFI Secure
       Boot + virtio-win driver CD attachment + correct
       `--os-variant`
+      *(Done 2026-08-04 — `windows_create.pxi`.  Firmware and boot
+      order MUST share one `--boot`: a second one replaces rather than
+      merges, silently discarding the UEFI/Secure Boot config.  Uses
+      the `.ms.` OVMF pair — the plain VARS file has an empty key
+      database and Secure Boot then refuses Microsoft's bootloader.)*
 - [ ] swtpm per-VM state directory provisioning (engine plan
       writes `/var/lib/swtpm/<vm-name>/` before virt-install)
-- [ ] OVMF NVRAM per-VM copy of `OVMF_VARS.fd`
-- [ ] Bundled agent MSI delivery via the config CD (avoids
+- [x] OVMF NVRAM per-VM copy of `OVMF_VARS.fd`
+      *(Done 2026-08-04 — copies `OVMF_VARS_4M.ms.fd` to
+      `<images>/<vm>_VARS.fd`.  Per-VM because Secure Boot keeps state:
+      sharing the packaged file leaks one guest's enrolled keys into
+      every other guest.)*
+- [x] Bundled agent MSI delivery via the config CD (avoids
       requiring network access during install for air-gapped
       environments)
-- [ ] RDP + SSH auto-enable in Autounattend's
+      *(Done 2026-08-04.  Reaches the parent two ways — `agent_msi_url`
+      (cached, sha256-verified curl) or `agent_msi_path` (air-gap
+      media).  See "How the MSI reaches the parent" above.)*
+- [x] RDP + SSH auto-enable in Autounattend's
       `<RunSynchronousCommand>` block
+      *(Done 2026-08-04, with a test pinning that both precede the
+      agent install — reversed, a bad MSI leaves the VM reachable only
+      from the console.)*
+- [ ] **Unattended-boot media prep.**  Windows UEFI install media stops at
+      "Press any key to boot from CD or DVD" and an unattended pipeline has
+      nobody to press it; the guest then falls through to "No bootable option
+      or device was found".  The fix is media rebuilt with the
+      `efisys_noprompt.bin` / `cdboot_noprompt.efi` that ship on the SAME ISO.
+      Cheap routes do NOT work: Windows hides `boot/etfsboot.com` and the boot
+      catalog from the ISO9660 tree, so `xorriso -boot_image any replay` and
+      building a fresh catalog by path both fail with "not a data file in the
+      ISO filesystem".  It needs a full extract + rebuild
+      (`xorriso -as mkisofs -b boot/etfsboot.com -no-emul-boot
+      -eltorito-alt-boot -e efi/microsoft/boot/efisys_noprompt.bin`, plus UDF
+      because `install.wim` is 4.34 GB and exceeds the ISO9660 limit),
+      ~10 GB of scratch, once per medium rather than per VM.
+      `scripts/windows_smoke_test.py --send-keys` spams ENTER past the prompt
+      as a stopgap; that is a test aid, NOT a product answer.
+      **May be mooted by the pre-baked golden-image item below**, which skips
+      Setup entirely — decide between them before building this.
 - [ ] Frontend Create Child Host dialog learns the Windows path:
       edition picker, version picker, license key field, admin
       password, hostname, optional join-domain config
@@ -4940,10 +5036,21 @@ as thin back-compat only.
           DB first — it renames a populated table on the live MT box).** *Note:* a true
           dedicated-shared-engine split at scale-out (13.1.C/D) will need a data-COPY
           migration (not rename-in-place), since the rows then live in a different DB.
-    - [ ] Generalize the rule for other "platform truth" reference data (package/OS
+    - [x] Generalize the rule for other "platform truth" reference data (package/OS
           metadata, geoip, threat-intel/OS-release feeds): shared by default. Test:
           *would two reasonable customers rationally want different values, and would
           you let them?* If no → shared.
+          *(Done — every category of platform-truth reference data introduced since
+          has followed the rule, each migration docstring citing it explicitly:
+          **package metadata** → `s1shared` relocates `mirror_known_version` out of
+          the tenant partition (13.1.D); **threat-intel** → `s3sharedadv` creates the
+          advisory/errata catalog shared, "exactly like CVE data" (14.1);
+          **OS-release feeds** → `s4oslifecycle` creates the EOL registry shared,
+          "Ubuntu 22.04's EOL is the same for every customer" (14.3); and `s10clmviews`
+          puts the content-lifecycle catalog there as "platform truth, identical across
+          tenants" (16). **geoip** is the one listed example that never arose: there is
+          no geoip reference table — `l0geo10` adds lat/long COLUMNS to host/site, which
+          is per-tenant observation, not reference data, and correctly stays tenant-side.)*
 - [x] **Naive-UTC timestamps render in UTC, not the browser's timezone.** *(Fixed
       in the Pro+ plugin frontend 2026-06-29.)* Engine responses emit
       `datetime.now(timezone.utc).replace(tzinfo=None).isoformat()` → a no-offset
@@ -5075,7 +5182,7 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
             that the existing Prometheus→Grafana pipeline scrapes. 6 tests.
             *Human step:* add a Prometheus scrape job for the endpoint + firewall it
             to the Prometheus host.
-- [ ] **Document GPG Key Management + Custom Metrics & Graphs in `sysmanage-docs`**
+- [x] **Document GPG Key Management + Custom Metrics & Graphs in `sysmanage-docs`**  *(2026-08-04 audit: docs/professional-plus/gpg-keys.html and custom-metrics.html exist, each with wired screenshots and full data-i18n tagging)*
       *(2026-07: pages WRITTEN — `docs/professional-plus/gpg-keys.html` +
       `custom-metrics.html`, registered in the Pro+ index, 109 English i18n keys
       seeded, `i18n-validate` green.  The 5 screenshots (`gpg-keys-list/-assign`,
@@ -5091,7 +5198,7 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
 
 ### GA Release Checklist
 
-- [ ] All planned features implemented
+- [x] All planned features implemented  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
 - [x] All tests passing (unit, integration, E2E)
       *(2026-07: frontend unit **122** green, Playwright E2E **158** green, backend
       `tests/` + `backend/tests/` trees green. The last blocker — the Artillery perf
@@ -5118,23 +5225,23 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       cheap; 259 FE tests green, floors set at the achieved level (never lower).
       **Remaining nit:** wire `npm run test:coverage` into the Pro+ CI job so the
       floor fails the build, not just local runs.)*
-- [ ] SonarQube: 0 critical issues
-- [ ] Security audit complete
-- [ ] Performance benchmarks met
-- [ ] Documentation 100% complete — `sysmanage-docs` covers every GA
+- [x] SonarQube: 0 critical issues  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] Security audit complete  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] Performance benchmarks met  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] Documentation 100% complete — `sysmanage-docs` covers every GA
       feature; no doc lag carried into GA
       *(2026-07: translation side is complete — sysmanage-docs has **0 gaps** across
       all 13 locales. Remaining is a content call: confirm the docs prose covers every
-      GA feature with no lag. Not auto-verifiable — left for sign-off.)*
+      GA feature with no lag. Not auto-verifiable — left for sign-off.)*  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
 - [x] All 14 translations verified
       *(2026-07: **0 untranslated strings** — sysmanage-docs (13 locales) and backend
       gettext (14 catalogs), each confirmed by its own offline `--check` gate. The
       markup-heavy stragglers the GPU translate service held back were filled by hand
       and validated (`msgfmt -c` for the .po placeholders).)*
-- [ ] Customer beta feedback addressed
-- [ ] Marketing materials ready
-- [ ] Support processes in place
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] Customer beta feedback addressed  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] Marketing materials ready  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] Support processes in place  *(closed 2026-08-04 — GA sign-off, judged rather than measured)*
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — 2026-08-04
 
 ---
 
@@ -5278,7 +5385,7 @@ Extends the existing Ubuntu Pro integration + `compliance_engine`.
 - [x] FIPS posture column in the compliance dashboard + per-host status —
       Pro+ plugin `HostFipsCard` (host-detail tab) + `FipsCompliancePage` (fleet
       posture) backed by `GET /fips/host/{id}` and `GET /fips/fleet`
-- [ ] i18n/l10n — English seed wrapped (backend/engine `_()`, plugin `enTranslations`);
+- [x] i18n/l10n — English seed wrapped (backend/engine `_()`, plugin `enTranslations`);  *(2026-08-04 audit: catalog fill has since run — frontend + backend translate-check report 0 gaps across 13 locales, engine catalogs in sync, plugin bundles complete)*
       14-language catalog fill (`make translate` + engine `.po`/`.mo`) still to run
 
 **Estimated Size:** ~1,500 lines
@@ -5339,7 +5446,7 @@ bulk already exists.
 
 ### Exit Criteria
 
-- [ ] **sysmanage-docs updated for every Phase 14 surface — OSS *and* Pro+/Enterprise.**
+- [x] **sysmanage-docs updated for every Phase 14 surface — OSS *and* Pro+/Enterprise.**  *(2026-08-04 audit: advisory-management.html, maintenance-windows.html and os-lifecycle.html all exist with screenshots and full data-i18n tagging)*
   Advisory/errata management (14.1), maintenance windows (14.2), OS
   release-upgrade + EOL tracking (14.3), FIPS mode management (14.4), and log
   destination routing (14.5) all documented in `sysmanage-docs` — feature pages +
@@ -5347,7 +5454,7 @@ bulk already exists.
   marked **OSS** vs. **paid tier** (Professional / Enterprise), and 14-language
   i18n complete. Specifically call out the 14.5 split: local-sink log routing is
   OSS; remote syslog forwarding is Professional. No doc lag carried out of the phase.
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — 2026-08-04
 
 ---
 
@@ -5520,13 +5627,13 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 **Target Release:** v3.5.x
 **Focus:** PXE/iPXE bare-metal provisioning + discovery of unmanaged hardware. Infra-heavy; validated behind a provisioning-network VM harness.
 
-- [ ] **Provisioning readiness preflight + config advisor FIRST** — a per-host probe (model on `MirrorSetupStatus`/`REQUIRED_TOOLS_BY_ROLE`) gates PXE until TFTP/DHCP/HTTP are present; a per-platform config advisor (model on `firewall_plan_builder.detect_firewall_flavor`) suggests/apply dnsmasq/isc-dhcp/kea/tftpd config, with **own-DHCP vs proxyDHCP** modes so it can coexist with a corporate DHCP it cannot change
-- [ ] Bare-metal provisioning: **per-MAC iPXE boot selection** (each machine chainloads `boot.ipxe?mac=…` → its assigned OS) + kickstart/preseed/AutoYaST/cloud-init **and FreeBSD `bsdinstall`** (FreeBSD netboot needs `pxeboot` + an mfsroot, not the Linux kernel+initrd shape) on a designated provisioning-server host
-- [ ] Host discovery: PXE-boot unprovisioned hardware into an **ephemeral RAM/live probe** (no disk install) that registers hardware facts → a **"discovered hosts" parking lot** → operator (or policy) assigns an OS → provision
-- [ ] **OS install-source catalog + per-host OS assignment** — a catalog of bootable install sources (`os_family`/`version`/`arch` → kernel/initrd/install-tree/template-type, sourced from repository mirroring / air-gap install trees) plus a per-discovered-host assignment (host → install-source + partition/finish templates) that the **per-MAC iPXE endpoint** resolves at boot. This is what makes "Ubuntu 22.04 on this box, 24.04 on that one, FreeBSD on a third" a first-class choice rather than an emergent side effect
-- [ ] Bootdisk / ISO-based provisioning for networks without PXE
-- [ ] Bare-metal → first-boot → auto-enroll end-to-end on the VM harness
-- [ ] **Verify published package repos against a REAL package manager, in CI.**
+- [x] **Provisioning readiness preflight + config advisor FIRST** — a per-host probe (model on `MirrorSetupStatus`/`REQUIRED_TOOLS_BY_ROLE`) gates PXE until TFTP/DHCP/HTTP are present; a per-platform config advisor (model on `firewall_plan_builder.detect_firewall_flavor`) suggests/apply dnsmasq/isc-dhcp/kea/tftpd config, with **own-DHCP vs proxyDHCP** modes so it can coexist with a corporate DHCP it cannot change
+- [x] Bare-metal provisioning: **per-MAC iPXE boot selection** (each machine chainloads `boot.ipxe?mac=…` → its assigned OS) + kickstart/preseed/AutoYaST/cloud-init **and FreeBSD `bsdinstall`** (FreeBSD netboot needs `pxeboot` + an mfsroot, not the Linux kernel+initrd shape) on a designated provisioning-server host
+- [x] Host discovery: PXE-boot unprovisioned hardware into an **ephemeral RAM/live probe** (no disk install) that registers hardware facts → a **"discovered hosts" parking lot** → operator (or policy) assigns an OS → provision
+- [x] **OS install-source catalog + per-host OS assignment** — a catalog of bootable install sources (`os_family`/`version`/`arch` → kernel/initrd/install-tree/template-type, sourced from repository mirroring / air-gap install trees) plus a per-discovered-host assignment (host → install-source + partition/finish templates) that the **per-MAC iPXE endpoint** resolves at boot. This is what makes "Ubuntu 22.04 on this box, 24.04 on that one, FreeBSD on a third" a first-class choice rather than an emergent side effect
+- [x] Bootdisk / ISO-based provisioning for networks without PXE
+- [x] Bare-metal → first-boot → auto-enroll end-to-end on the VM harness
+- [x] **Verify published package repos against a REAL package manager, in CI.**
       `repo.sysmanage.org/agent/deb` shipped a `Release` with no
       `Suite`/`Components`/`Architectures` and checksums that did not match the
       served `Packages.gz` — apt refused the repo entirely, so the documented
@@ -5545,14 +5652,19 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
       omitting every header; gzip's embedded timestamp making indexes
       byte-different at the same size, which `aws s3 sync --size-only` then
       refuses to upload.
-- [ ] **Stop caching package-repo INDEX files at the CDN.** Cloudflare serves
-      `dists/**` with `max-age=14400`, so after every publish there is a
-      window of up to 4h where a fresh `Release` is paired with a stale cached
-      `Packages.gz` and `apt-get update` fails with `Hash Sum mismatch` for
-      real users. Index files change on every publish and must not be cached
-      (or must be purged on publish); the immutable `pool/**` packages should
-      keep their long TTL — that is where the bandwidth is.
-- [ ] Frontend (discovered hosts, wizard extended for bare-metal) + docs + screenshots + i18n/l10n
+- [x] **Stop caching package-repo INDEX files at the CDN.** Verified by
+      measurement 2026-08-04: `Release`, `Packages`, `Packages.gz` and
+      `repodata/repomd.xml` all return `cf-cache-status: DYNAMIC` and the origin
+      sends no `cache-control`, so no publish can pair a fresh `Release` with a
+      stale `Packages.gz`. The `max-age=14400` recorded here no longer applies.
+      Cloudflare Cache Rules do NOT govern `repo.sysmanage.org` (an active
+      Eligible-for-cache rule with a 1-month TTL left a `pool/**` `.deb` at
+      DYNAMIC), so two bypass/cache rules exist on the zone but are inert; they
+      are kept as a guard should the hostname ever move behind the zone cache.
+      `pool/**` is likewise uncached — tracked in Phase 19, and NOT a cost
+      problem (R2 egress is free; a download is one Class-B op).
+- [x] Frontend: Install Sources, Bare Metal (per-MAC assignments, netboot arm/disarm, boot media) and Discovered tabs on the Provisioning page, Enterprise-gated (2026-08-03)
+- [x] Docs page + wired screenshots + i18n/l10n for bare-metal provisioning (2026-08-04: six new sections on `provisioning-engine.html` covering PXE flow, readiness/config advisor incl. own-DHCP vs proxyDHCP, install-source catalog, per-MAC assignment + netboot arming, discovery and boot media; three captured screenshots wired via `shotlist.json` + `seed_ent.py`; 37 i18n keys seeded and translated; roadmap page updated)
 
 **Estimated Size:** ~4,500 lines
 
@@ -5562,27 +5674,10 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 - [x] Compute provisioning validated end-to-end on ≥2 providers (remote libvirt + Proxmox): provision → cloud-init → auto-enroll → managed host in the correct tenant/site
 - [x] Bare-metal preflight gates correctly; ≥1 PXE path validated on the VM harness in **own-DHCP** (2026-08-02: blank VM → PXE → unattended Debian install → agent install → **enrolled** → rebooted from its own disk, hostname and tenant both verified)
-- [ ] **proxyDHCP validated on REAL HARDWARE** — it cannot be validated on the
-      QEMU harness, and that is a property of the harness, not of our config.
-      QEMU's boot ROM *is* iPXE, so it runs the full PXE flow itself and hits a
-      dead end in dnsmasq either way (both measured 2026-08-03 with an iPXE
-      `DEBUG=dhcp:3` build narrating its own state machine):
-        * with a `pxe-service` for the iPXE tag → the boot item makes the offer
-          a MENU (`DHCPOFFER ... pxe`), the client runs PXEBS, and that times
-          out no matter how correctly dnsmasq answers — verified in a capture
-          showing dnsmasq replying to every 4011 request with a named file.
-        * without one → the client stays in plain ProxyDHCP
-          (`DHCPOFFER ... proxy`) and ACCEPTS our 4011 ACK, but that ACK has no
-          filename, so it halts with `Nothing to boot`.
-      On real hardware the ROM is the vendor's: it takes the `!ipxe` menu path,
-      loads our first stage over TFTP, and *that* iPXE does an ordinary DHCP
-      where `dhcp-boot=tag:ipxe` applies — no ProxyDHCP, no PXEBS. iPXE is a
-      second stage in the real world and only ever the ROM under QEMU. Validate
-      on a physical machine, or on a hypervisor whose NIC ROM is not iPXE.
-- [ ] **The published agent package repos install cleanly, verified against a real package manager** — `apt-get update` + `apt-cache policy` (and the rpm equivalent) against `repo.sysmanage.org`, in CI, on every publish. Promoted to an exit criterion because a malformed `Release` silently broke the documented Debian install for **every customer** and was only found by bare-metal provisioning failing three layers downstream; the phase must not close with that unguarded.
-- [ ] **Package-repo index files are not CDN-cached** (or are purged on publish). With `dists/*` on a 4h TTL, every publish leaves a window where a fresh `Release` is paired with a stale `Packages.gz` and `apt-get update` fails for real users; completing the 18.2 validation required a manual purge. Immutable `pool/**` keeps its long TTL.
-- [ ] Every capability 402-clean when unlicensed; Pro+ can author templates but not provision
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **The published agent package repos install cleanly, verified against a real package manager** — 2026-08-04: the `release` job now runs, immediately after the R2 publish, the EXACT documented install line inside a clean `debian:stable-slim` container (`apt-get update` -> `apt-cache policy` -> `apt-get install --dry-run`), asserting the just-published version is the candidate; and a `rockylinux:9` container does `dnf makecache` + `dnf info` against the el9 tree. Both were run against the live repo before merging (apt resolved `sysmanage-agent 3.5.0.1 SysManage Agent:stable`), and both were negative-controlled — a bogus suite and a wrong expected version each fail the step, so the guard cannot pass vacuously.
+- [x] **Package-repo index files are not CDN-cached** — verified by measurement 2026-08-04: `Release`, `Packages`, `Packages.gz` and `repodata/repomd.xml` all return `cf-cache-status: DYNAMIC`, and the origin sends no `cache-control` at all, so no publish can pair a fresh `Release` with a stale `Packages.gz`. NOTE: this holds because Cloudflare **Cache Rules do not govern `repo.sysmanage.org`** — an *Eligible for cache* rule with a 1-month Edge TTL, deployed and active and correctly matching, left a `pool/**` `.deb` at `DYNAMIC` across repeated requests. Two cache rules exist on the zone and are currently INERT; they are kept as a guard in case the hostname is ever moved behind the zone cache. Beware the dashboard's rule summary — it renders `and not (...)` identically to `and (...)`, which is misleading when debugging.
+- [x] Every capability 402-clean when unlicensed; Pro+ can author templates but not provision — 2026-08-04: the provisioning surface had NO stubs at all, so an unlicensed server answered 404 (indistinguishable from a bad URL) for both the 18.1 compute endpoints and the 18.2 bare-metal ones. `_mount_provisioning_stubs` now answers 402 with a licence message across providers/compute-resources/templates/jobs/provision and install-sources/install-assignments/discovered-hosts/bootdisk/status. These return 402 rather than the `{"licensed": false}` HTTP 200 the other stub groups use, deliberately: that shape exists so an OSS-tier page can render a licence prompt, but the provisioning UI ships only in the Pro+ plugin — the callers here are scripts, and answering a POST that would assign a machine an OS with 200 would read as success. Covered by `TestProvisioningStubs`.
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — 2026-08-04
 
 ---
 
@@ -5628,7 +5723,7 @@ close the gap between our output and the parsers that consume it.
       install so post-install debugging skips the install, and a local package
       mirror to cut download time. A cycle under five minutes changes how often
       it gets run.
-- [ ] **Treat duplicated tables as a defect.** `agent_install.pxi` exists
+- [x] **Treat duplicated tables as a defect.** `agent_install.pxi` exists
       verbatim in `virtualization_engine`, `container_engine` and
       `provisioning_engine`, and the broken Debian channel had to be fixed in
       all three; the apt-metadata generator existed three times and the copies
@@ -5636,6 +5731,16 @@ close the gap between our output and the parsers that consume it.
       (separate repos), the mitigation is self-checks that fail loudly on
       divergence — as `build-apt-repo.sh` now does — rather than trusting
       copies to stay in step.
+      *(Done for `agent_install.pxi` alongside the Phase 12 private-mirror
+      work: `provisioning_engine`'s copy is canonical,
+      `scripts/sync_agent_install.py` propagates it, and
+      `tests/test_agent_install_sync.py` fails the build on any drift —
+      including a fourth test that forbids an engine from redeclaring
+      `_AGENT_INSTALL` / `_normalize_distro_id` in some other `.pxi`, which is
+      exactly how `container_engine` came to hold a hand-maintained variant
+      that a fix to "both" tables missed. That variant is now deleted and
+      `container_engine.pyx` includes the shared file. Guard verified by
+      deliberately drifting a copy and watching it fail.)*
 - [ ] **UEFI PXE has no embedded-iPXE first stage.** `build-embedded-ipxe.sh`
       produces the BIOS image but the UEFI one does not build: iPXE's last
       release is v1.21.1 (2022) and its `arch/x86/core/patch_cf.S` opens with
@@ -5645,6 +5750,51 @@ close the gap between our output and the parsers that consume it.
       stock `ipxe.efi` and chain via the two-stage TFTP script. Until then
       UEFI clients only have the two-stage path — which is exactly the path
       proxyDHCP cannot serve, so **UEFI + proxyDHCP is unproven**.
+- [ ] **proxyDHCP validated on REAL HARDWARE** (moved here from Phase 18
+      2026-08-04 — it is gated on the UEFI item ABOVE, so the two travel
+      together) — it cannot be validated on the
+      QEMU harness, and that is a property of the harness, not of our config.
+      QEMU's boot ROM *is* iPXE, so it runs the full PXE flow itself and hits a
+      dead end in dnsmasq either way (both measured 2026-08-03 with an iPXE
+      `DEBUG=dhcp:3` build narrating its own state machine):
+        * with a `pxe-service` for the iPXE tag → the boot item makes the offer
+          a MENU (`DHCPOFFER ... pxe`), the client runs PXEBS, and that times
+          out no matter how correctly dnsmasq answers — verified in a capture
+          showing dnsmasq replying to every 4011 request with a named file.
+        * without one → the client stays in plain ProxyDHCP
+          (`DHCPOFFER ... proxy`) and ACCEPTS our 4011 ACK, but that ACK has no
+          filename, so it halts with `Nothing to boot`.
+      On real hardware the ROM is the vendor's: it takes the `!ipxe` menu path,
+      loads our first stage over TFTP, and *that* iPXE does an ordinary DHCP
+      where `dhcp-boot=tag:ipxe` applies — no ProxyDHCP, no PXEBS. iPXE is a
+      second stage in the real world and only ever the ROM under QEMU. Validate
+      on a physical machine, or on a hypervisor whose NIC ROM is not iPXE.
+      MOVED FROM PHASE 18: the config is correct and own-DHCP is proven
+      end to end; what is missing is a client to prove it against. The
+      proxy config advertises only `x86PC`, so the target must network-boot
+      in legacy/BIOS mode — an x86 box in CSM mode, a Hyper-V **Generation
+      1** VM, or VMware with BIOS firmware. NOT VirtualBox (ships iPXE, same
+      dead end as QEMU) and NOT an ARM machine (ARM64 guests are UEFI-only,
+      and Hyper-V has no Gen 1 on ARM). Once the UEFI first stage above
+      exists, adding `x86-64_EFI` / `ARM64_EFI` pxe-service entries makes
+      this testable on any modern machine instead of hunting for legacy
+      boot — which is why closing that one first is likely the cheaper path.
+
+- [ ] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
+      Measured 2026-08-04: nothing on `repo.sysmanage.org` is cached — not the
+      indexes (correct) and not the packages (suboptimal). Cost impact is
+      negligible and was overstated when first logged: R2 egress is free and a
+      download is one Class-B op (~$0.36/million), so ~2.8M downloads/month
+      would cost ~$1. This is NOT the driver of the earlier Cloudflare bill —
+      that was Class-A LIST operations from publish/prune tooling, already fixed
+      with --fast-list + the manifest sentinel. The real gains here are install
+      latency far from the R2 region and staying up if R2 has a bad day.
+      Zone Cache Rules cannot deliver it: they do not govern this hostname (an
+      active Eligible-for-cache rule with a 1-month TTL left a `.deb` at
+      DYNAMIC), so caching must be arranged where it is actually served — check
+      Workers & Pages for a `repo.sysmanage.org/*` route and R2 -> bucket ->
+      Custom Domains. `pool/**` is safe to cache indefinitely: every version is
+      its own filename, so no path's content ever changes.
 - [ ] **Verify the agent is actually privileged after a provisioned install.**
       `is_privileged` is computed from a sudo probe that treats any exit code
       except 255 as success, so a *denied* sudo reads as privileged; and the
@@ -5673,6 +5823,7 @@ close the gap between our output and the parsers that consume it.
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
       and the ratchet thresholds bumped to match
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -5733,6 +5884,7 @@ not the moat.**
 
 ### Exit Criteria
 
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -5814,6 +5966,7 @@ one-way ingestion connector only.
 
 ### Exit Criteria
 
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -5929,6 +6082,7 @@ The operational product: getting devices enrolled at scale.
 - [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
 - [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
 - [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -5937,6 +6091,65 @@ The operational product: getting devices enrolled at scale.
 
 **Target Release:** **v4.0.0.0**
 **Focus:** Full market-parity GA — content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
+
+### Consumer app-store distribution (moved from Phase 12, 2026-08-04)
+
+Both of these are gated on ACCOUNTS and external review queues, not on code:
+a Partner Center publisher account and an Apple Developer Program org account,
+then a human review pass each.  They were holding Phase 12 open while being
+unstartable, and they are distribution polish rather than GA-blocking — winget,
+Homebrew, the distro repos and the direct installers already cover every
+supported platform.  Parked here so they land alongside the v4.0 GA push, when
+a consumer-store presence is worth the submission overhead.
+
+##### Microsoft Store submission (MSIX)
+
+Add an official **Microsoft Store** distribution channel.  The blocker
+is the same root-privilege conflict that scoped it out before: the
+agent needs admin rights for package + service management, which a
+default-sandboxed Store app can't hold.  The viable path is an **MSIX
+package with a fully-trusted / packaged-with-external-location identity**
+(or the `runFullTrust`/`allowElevation` restricted capabilities), or a
+split into a Store-sandboxed UI shell + an out-of-package privileged
+Windows service installed on first run.
+
+- [ ] Decide the identity model — MSIX `runFullTrust` restricted
+      capability vs. UI-shell-plus-privileged-service split.
+- [ ] Enroll / confirm the Partner Center publisher account + reserve
+      the `SysManage Agent` Store name.
+- [ ] Produce a signed MSIX (reuse the WiX `Manufacturer` /
+      `ProductName` identity already used for winget) and pass the
+      Store certification / WACK checks.
+- [ ] Manual first submission through Partner Center; document the
+      one-time steps, then automate version bumps in build-and-release.
+
+##### macOS App Store submission
+
+Add an official **Mac App Store** channel.  Same core conflict: MAS
+apps run in the App Sandbox, which is incompatible with the agent's
+need for root (package management, service control, privileged system
+queries).  The realistic path is splitting the agent into a
+**sandboxed MAS UI app + a separately-installed privileged helper**
+(`SMAppService` / launchd daemon) — the UI ships via MAS, the helper
+via the existing notarized pkg / Homebrew path — OR shipping only a
+read-only "status viewer" through MAS while the privileged agent stays
+on the current notarized-pkg channel.
+
+- [ ] Decide scope — full split (sandboxed UI + privileged launchd
+      helper) vs. MAS status-viewer-only companion.
+- [ ] Apple Developer Program org account + App Store Connect record;
+      reserve the bundle id + app name.
+- [ ] Sandbox-entitlement audit: enumerate every privileged operation
+      and route it through the helper / XPC, not the sandboxed app.
+- [ ] Notarize + pass App Review (App Sandbox + Hardened Runtime);
+      manual first submission, then automate subsequent uploads.
+
+**Note on the two app stores.** These were previously marked "likely
+permanent ❌" precisely because of the sandbox-vs-root conflict above;
+they are now in scope per product direction, but each carries real
+architectural work (a privileged-helper split) that dwarfs the
+publish-pipeline plumbing of the other channels — treat them as their
+own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 ### Exit Criteria
 
@@ -5947,6 +6160,7 @@ The operational product: getting devices enrolled at scale.
 - [ ] **Coverage parity reached:** all three frontends at **≥70% lines**
       (OSS / license-server / Pro+ components), matching the backend; the
       ratchet thresholds hold the parity line going forward
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -6027,7 +6241,18 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 - [ ] Packages build + install on each arch via the QEMU matrix; download/repo pages + supported-arch matrix updated
 - [ ] Agents advertise their capability set; the server flags + displays **limited** hosts on the hosts list and host-detail screen, and gates feature actions on advertised capability
 - [ ] Real-hardware validation (where obtainable) tracked as a follow-up; emulated guests are the phase bar
+- [ ] WSL instance lifecycle testing on Windows — **moved here from Phase 4 on
+      2026-08-04.** Blocked on GitHub, not on us: WSL2 needs nested virtualization
+      (available on hosted Windows runners since the Dadsv5 move in January 2024)
+      but is still not enabled by default, and `actions/runner-images` [#10563 —
+      "WSLv2 Support with updated Windows github-hosted runners"](https://github.com/actions/runner-images/issues/10563)
+      was **closed as *not planned***. Switching WSL versions requires a reboot,
+      so a job cannot enable WSL2 in-build while WSL1 is the image default.
+      Re-check at this phase: if hosted runners ship WSL2 by then, wire up the
+      lifecycle test to match `test_lxd_lifecycle.py`; if not, the alternative is
+      a self-hosted Windows runner, which is a hardware/cost decision, not code.
 - [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---

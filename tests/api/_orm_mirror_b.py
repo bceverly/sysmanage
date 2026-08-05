@@ -768,3 +768,17 @@ class ProvisioningReadiness(TestBase):
     last_apply_error = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
+
+
+class AirgapAgentChannelMirror(TestBase):
+    """Phase 12 — private mirror substituted for one upstream agent-install
+    channel (ppa / copr / obs / apk / pkg / winget / brew)."""
+
+    __tablename__ = "airgap_agent_channel_mirror"
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    channel = Column(String(40), nullable=False, unique=True)
+    mirror_url = Column(String(500), nullable=False)
+    enabled = Column(Boolean, nullable=False, default=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, nullable=True)

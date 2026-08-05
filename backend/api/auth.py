@@ -127,6 +127,10 @@ async def login(login_data: UserLogin, request: Request, response: Response):  #
         login_security.record_failed_login(
             str(login_data.userid), client_ip, user_agent
         )
+        # `reason` is one of the rate-limit messages returned by
+        # LoginSecurityValidator.validate_login_attempt(); each is marked N_()
+        # at its definition there, so the text IS in the catalog.
+        # i18n: dynamic — resolved from N_()-marked constants in login_security
         raise HTTPException(status_code=429, detail=_(reason))
 
     the_config = config.get_config()

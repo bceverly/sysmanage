@@ -44,5 +44,8 @@ def check_user_permission(current_user: str, required_role: SecurityRoles):
         if not user.has_role(required_role):
             raise HTTPException(
                 status_code=403,
-                detail=_(f"Permission denied: {required_role.name} role required"),
+                # The role name is DATA, not part of the sentence: interpolating it
+                # into the msgid would make every role a separate untranslatable
+                # string.  Translate the template, then substitute.
+                detail=_("Permission denied: %s role required") % required_role.name,
             )

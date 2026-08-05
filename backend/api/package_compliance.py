@@ -28,7 +28,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, require_authenticated_user
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.models.package_compliance import (
@@ -56,7 +56,7 @@ router = APIRouter(
 
 # Reused 404 detail string — extracted so the wording can't drift
 # between handlers and so SonarQube's duplication scanner is happy.
-_ERR_PACKAGE_PROFILE_NOT_FOUND = "Package profile not found"
+_ERR_PACKAGE_PROFILE_NOT_FOUND = N_("Package profile not found")
 
 
 def _check_compliance_module():

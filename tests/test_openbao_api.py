@@ -433,7 +433,10 @@ class TestStopOpenbao:
         ):
             result = ob.stop_openbao()
         assert result["success"] is False
-        assert "timeout" in result["message"].lower()
+        # "timed out", not "timeout": the message is real English prose now.
+        # This assertion used to pass only because the endpoint returned the
+        # raw msgid "openbao.start_timeout" — the i18n bug it was masking.
+        assert "timed out" in result["message"].lower()
 
 
 # ---------------------------------------------------------------------------
@@ -498,7 +501,10 @@ class TestStartOpenbaoHappyPath:
         ):
             result = ob.start_openbao()
         assert result["success"] is False
-        assert "timeout" in result["message"].lower()
+        # "timed out", not "timeout": the message is real English prose now.
+        # This assertion used to pass only because the endpoint returned the
+        # raw msgid "openbao.start_timeout" — the i18n bug it was masking.
+        assert "timed out" in result["message"].lower()
 
     def test_linux_unexpected_exception_returns_generic_failure(self):
         with patch(

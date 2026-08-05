@@ -25,7 +25,7 @@ from pydantic import BaseModel, validator
 from sqlalchemy.orm import Session
 
 from backend.auth.auth_bearer import JWTBearer, get_current_user
-from backend.i18n import _
+from backend.i18n import _, N_
 from backend.licensing.module_loader import module_loader
 from backend.persistence import models
 from backend.persistence.partitions import get_shared_db
@@ -63,8 +63,8 @@ def _check_vuln_engine_module():
 
 
 # Error message constants
-ERROR_USER_NOT_FOUND = "User not found"
-ERROR_ADMIN_REQUIRED = "Permission denied: Administrator role required"
+ERROR_USER_NOT_FOUND = N_("User not found")
+ERROR_ADMIN_REQUIRED = N_("Permission denied: Administrator role required")
 
 
 # Response Models

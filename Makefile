@@ -1129,7 +1129,7 @@ else
 endif
 
 # Combined linting
-lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-complete lint-version check-migrations
+lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-strict i18n-complete lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the
@@ -1161,6 +1161,16 @@ i18n-extract: $(VENV_ACTIVATE)
 # ``[TODO]`` values still carry the source tokens, so this passes today
 # and is part of the default ``lint`` target — it catches a machine
 # translator mangling a placeholder, which would be a runtime bug.
+# Strict gate: a translation that is byte-identical to its English source, or
+# that has gone stale because the English was edited after it was translated.
+# Neither is visible to i18n-validate (key present) or i18n-complete (not
+# [TODO]) — a 2026-08 audit found 2,733 English-passthrough values across the
+# four repos with every gate green.  Escape hatch: i18n-allow.txt.
+i18n-strict: $(VENV_ACTIVATE)
+	@echo "=== i18n strict (English-identical + stale) ==="
+	@$(PYTHON) scripts/i18n_strict.py
+	@echo "[OK] i18n strict gate passed"
+
 i18n-placeholders: $(VENV_ACTIVATE)
 	@echo "=== i18n placeholder integrity ==="
 	@$(PYTHON) scripts/i18n_check_translations.py --placeholders
@@ -1226,12 +1236,12 @@ else
 	@# GNU gettext >= 0.19; NetBSD's base xgettext is older and rejects them.  They
 	@# don't affect the extracted msgids, so pass them only when supported.
 	@if xgettext --help 2>/dev/null | grep -q -- '--package-name'; then \
-		xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		xgettext --language=Python --keyword=_ --keyword=N_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 			--package-name=SysManage --msgid-bugs-address=" " \
 			-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC); \
 	else \
 		echo "[INFO] xgettext too old for --package-name (e.g. NetBSD base gettext) - extracting without .pot header metadata"; \
-		xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+		xgettext --language=Python --keyword=_ --keyword=N_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 			-o $(BACKEND_I18N)/messages.pot $(BACKEND_I18N_SRC); \
 	fi
 	@# --no-fuzzy-matching: never guess a translation onto a changed string.
@@ -1286,12 +1296,21 @@ ifeq ($(OS),Windows_NT)
 	@echo [skip] i18n-check-backend needs GNU gettext (xgettext/msgcmp); enforced on Linux/CI.
 else
 	@command -v xgettext >/dev/null 2>&1 && command -v msgcmp >/dev/null 2>&1 || { echo "[skip] i18n-check-backend: GNU gettext not installed (apt install gettext) — skipped"; exit 0; }
-	@xgettext --language=Python --keyword=_ --keyword=ngettext:1,2 --from-code=UTF-8 \
+	@xgettext --language=Python --keyword=_ --keyword=N_ --keyword=ngettext:1,2 --from-code=UTF-8 \
 		-o /tmp/sysmanage-backend-i18n.pot $(BACKEND_I18N_SRC) 2>/dev/null
 	@msgcmp --use-untranslated $(BACKEND_I18N)/en/LC_MESSAGES/messages.po /tmp/sysmanage-backend-i18n.pot >/dev/null 2>&1 \
 		|| { echo "FAIL: backend code has _() strings missing from the catalog — run 'make i18n-extract-backend'"; exit 1; }
 	@echo "[OK] backend catalog is in sync with code."
 endif
+
+# Gate the SHAPE of backend gettext msgids.  i18n-check-backend (msgcmp) can
+# only compare msgids that xgettext actually extracted, so it is blind to the
+# two ways a string never gets extracted at all: a lookup key used as the
+# msgid, and a msgid that is not a string literal.  Both render untranslated —
+# or worse, leak the raw key — in every locale, with every other gate green.
+i18n-check-msgid-style: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_check_msgid_style.py \
+		--source-root backend --locales $(BACKEND_I18N)
 
 # Comprehensive security analysis (default)
 security: security-full
