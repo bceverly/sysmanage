@@ -372,6 +372,15 @@ def _add_windows_params(params, request) -> None:
         params["windows_product_key"] = request.windows_product_key
     if request.windows_iso_path:
         params["windows_iso_path"] = request.windows_iso_path
+    # Static networking travels as a group: an address with no gateway is
+    # refused by the engine at plan time, so sending half of it would only
+    # move the failure later.
+    if request.windows_static_ip:
+        params["windows_static_ip"] = request.windows_static_ip
+        if request.windows_gateway:
+            params["windows_gateway"] = request.windows_gateway
+        if request.windows_dns_servers:
+            params["windows_dns_servers"] = request.windows_dns_servers
     # Domain join: opt-in, and the whole group only travels when a domain is
     # named.  Forwarding a user/password with no domain would put credentials
     # on the config ISO for a join that is never attempted.

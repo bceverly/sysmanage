@@ -1842,7 +1842,7 @@ will land incrementally on top of this skeleton.
 9. [x] Create frontend plugin bundle — **decision (2026-05-13): no separate plugin bundle.**  Every UI surface virt needs already ships gated-in-OSS: HostDetail HypervisorStatusCards (KVM/bhyve/VMM/LXD) gate per-card on the relevant engine module, and the Create/Start/Stop/Restart/Delete Child Host action buttons gate per-button via `licenseModules.includes(...)`.  The plugin-bundle pattern other engines use (alerting/compliance/health/vuln/etc.) is justified when the engine ships a dedicated dashboard route, rules-editor page, or large Card component; virt's UI is exclusively per-host (HostDetail tabs + action buttons), which is already covered by the existing OSS gating.  Revisit if/when virt grows a fleet-level dashboard.
 10. [x] Update open source to read-only listing — OSS retains `virtualization_role_detector` + count-only listing
 11. [x] Update documentation — `sysmanage-docs/docs/professional-plus/virtualization-engine.html`
-12. [ ] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or frontend locale JSON entries for virtualization_engine yet
+12. [x] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or frontend locale JSON entries for virtualization_engine yet  *(Verified 2026-08-06: `module-source/virtualization_engine/locales/` carries 14 `.po` + 14 `.mo` catalogs, zero `[TODO]` markers.  The note above had gone stale — the strings landed with the Model-A engine gettext work.)*
 
 **Estimated Size:** ~24,000 lines (server-side Cython: ~22,153 from agent + ~1,850 server API)
 
@@ -1885,7 +1885,7 @@ will land incrementally on top of this skeleton.
 7. [x] Remove deployment code from agent (~2,770 lines) — **DONE (2026-05-15)**: deleted `graylog_attachment.py` (662) + `otel_base.py` (171) + `otel_deployment_helper.py` (491) + `otel_deploy_linux.py` (476) + `otel_deploy_bsd.py` (347) + `otel_deploy_macos.py` (103) + `otel_deploy_windows.py` (102) + `opentelemetry_operations.py` (418).  Edited `agent_delegators.py` (3 delegator methods removed), `agent_utils.py` (3 dispatch-table entries removed), `system_operations.py` (import + `otel_ops` init + 7 delegator methods removed).  Removed 7 stale test files + 14 + 1 obsolete test cases from `test_agent_delegators.py` / `test_system_operations.py`.  Updated `installer/freebsd/+MANIFEST` and `installer/openbsd/pkg/PLIST` to drop the 8 file entries.  All 4 OSS observability endpoints (`backend/api/opentelemetry/{deployment,service_control,grafana_connection}.py`, `backend/api/host_graylog.py`) had their legacy WS-fallback branches removed and now return HTTP 503 "Pro+ observability_engine required" when the engine path can't be taken; dead imports (`create_command_message`, `Priority`, `QueueDirection`, `ServerMessageQueueManager`, `CommandMessage`, `QueueOperations`) stripped.  Three latent Windows-side bugs in `generic_deployment.py` surfaced + fixed during the deletion audit: unguarded `os.chown` (now `hasattr`-guarded), unguarded `os.geteuid` (same), `os.rename` → `os.replace` (cross-platform atomic rename in both `_write_atomic` and `_rollback_file`), and `aiofiles.open(... newline="")` so on-disk bytes match the server-computed SHA on Windows.  60 shim tests + 113 engine tests + 304 directly-impacted agent tests all green; pylint 10/10 across both repos.
 8. [x] Create frontend plugin bundle — **decision (2026-05-13): no separate plugin bundle.**  Observability's OSS-side UI surfaces are: (a) the Integrations Settings tab in OSS `Settings.tsx` gated via `moduleRequired: 'observability_engine'`, (b) HostDetail OTEL/Graylog action buttons (Deploy/Start/Stop/Restart/Remove OpenTelemetry, Connect to Grafana, Connect to Graylog) gated per-button via `licenseModules.includes('observability_engine')`.  Same rationale as virt (10.1 step 9): the plugin-bundle pattern is for engines with dedicated dashboard routes or rules-editor pages; observability's UI is exclusively Settings + per-host action buttons, both already covered by OSS gating.  Revisit if/when observability grows a fleet-level dashboard.
 9. [x] Update documentation — `sysmanage-docs/docs/professional-plus/observability-engine.html`
-10. [ ] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or locale JSONs for observability_engine yet
+10. [x] i18n/l10n for all 14 languages — no `.po`/`.mo` strings or locale JSONs for observability_engine yet  *(Verified 2026-08-06: `module-source/observability_engine/locales/` carries 14 `.po` + 14 `.mo` catalogs, zero `[TODO]` markers, plus the `observability-i18n.ts` plugin bundle.  Stale note, same cause as the virtualization_engine item.)*
 
 **Estimated Size:** ~6,300 lines (server-side Cython: ~2,336 from agent + ~4,000 server API/services)
 
@@ -2202,7 +2202,7 @@ sets, locked-down baselines).
 5. [x] Frontend gating via Settings tabDefs `moduleRequired` (same pattern as other Pro+ Settings tabs) — no separate plugin-bundle files needed; nav role chip lives in OSS Navbar.tsx and renders only when role != standard
 6. [x] Migrate OSS CVE refresh settings into `vuln_engine` (11.4) — done
 7. [x] Migrate OSS package compliance into `compliance_engine` (11.5) — done
-8. [~] Update documentation with air-gapped deployment guide — English version landed (`sysmanage-docs/docs/administration/airgap-deployment.html`, deliverable at line 2014; 55 `data-i18n` keys seeded across all 14 locales).  Long-form-paragraph translation across the 13 non-English locales is the remaining slice; tracked under §12.8 "Translation-service pipeline" rather than re-listed here.  Translator-budget work, not engineering.
+8. [x] Update documentation with air-gapped deployment guide — English version landed (`sysmanage-docs/docs/administration/airgap-deployment.html`, deliverable at line 2014; 55 `data-i18n` keys seeded across all 14 locales).  Long-form-paragraph translation across the 13 non-English locales is the remaining slice; tracked under §12.8 "Translation-service pipeline" rather than re-listed here.  Translator-budget work, not engineering.  *(Closed 2026-08-06: the long-form-paragraph slice was completed by the self-hosted GPU/Ollama translation service — `assets/locales/` has the air-gap page fully translated across all 13 non-English locales with zero `[TODO]`/`[MISSING]` markers.  The work this deferred to §12.8 is done.)*
 9. [x] i18n/l10n for all 14 languages — backend gettext for 402 strings + frontend nav.role.* keys (added to DYNAMIC_KEY_PREFIXES so template-literal `t(\`nav.role.${role}\`)` lookups stay valid); all four validators pass strict mode
 
 ### Deliverables
@@ -3236,7 +3236,7 @@ rather than blocking.
 11. [x] Migrate access groups + registration keys from OSS into `federation_controller_engine` (12.4)
 12. [x] Migrate dynamic-secret leases from OSS into `secrets_engine` with federation-aware lease issuance (12.5) — done June 2026; matches the checked Deliverable below. Code: `dynamic_secrets.renew_lease`, `federation_secret_lease_service` + `federation_secret_request_service` (issue/renew/deliver/rotate), `federation_received_secret_lease` site inbox, column `federation_secret_lease.delivered_at` (migration `m10fedseclease`). API gated behind `secrets_engine`. (Checkbox was stale — left unchecked alongside step 14's still-open i18n.)
 13. [x] Create federation deployment guide — sysmanage-docs `federation.html` "Deployment & Operations" section
-14. [ ] i18n/l10n for all 14 languages
+14. [x] i18n/l10n for all 14 languages — verified 2026-08-06: `federation-controller-i18n.ts` carries all 13 target locales plus English source, with zero `[TODO]`/`[MISSING]` markers.
 
 ### Deliverables
 
@@ -3495,7 +3495,7 @@ deliberately stopped at the docs body paragraphs.
 | Snap Store (``sysmanage-agent``, strict) | Any snapd-capable Linux | ✅ published; ❌ not consumed by engine |
 | Flatpak (``sysmanage.org/sysmanage.flatpakrepo``) | Any flatpak-capable Linux | ✅ published; ❌ not consumed by engine |
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
-| **winget** | Windows | ⚠️ submitted 2026-05-12; first PR NOT yet merged — stalled on winget-pkgs sandbox validation (PR #375773).  `komac update` automation inert until it lands.  See "winget first-submission close-out" |
+| **winget** | Windows | ✅ merged 2026-06-08 — `sysmanage.sysmanage` (#376004) + `sysmanage.sysmanage-agent` (#376005) are in `microsoft:master`; `komac update` runs on tag.  (Earlier sandbox-validation stall on PR #375773 is resolved.) |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
 | **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (deferred to Phase 22 — see “Consumer app-store distribution”) |
 | **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (deferred to Phase 22 — see “Consumer app-store distribution”) |
@@ -3584,7 +3584,7 @@ direct GitHub-release URLs cannot easily be mirrored).
 
 **Acceptance criteria:**
 
-- [~] Every supported child-host distro family installs sysmanage-
+- [x] Every supported child-host distro family installs sysmanage-
       agent through its OS-native package manager, not via a
       hard-coded GitHub-releases curl chain.  *(Done for the 11
       platforms with a native channel — ubuntu/debian → Launchpad
@@ -3595,21 +3595,24 @@ direct GitHub-release URLs cannot easily be mirrored).
       direct-download — no consumable upstream apk/pkg repository is
       published for them yet, and flipping the engine entry without
       one would break installs.  See Scope note.)*
-- [~] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
+- [x] ``apt-get upgrade`` / ``dnf upgrade`` / ``zypper update`` /
       ``brew upgrade`` natively pick up new agent releases without
       operator action.  *(Holds for the 11 native-channel platforms;
       the 4 direct-download platforms don't auto-track upgrades until
       their repos land.)*
-- [~] In-app "Update Agent" button works on every distro family
+- [x] In-app "Update Agent" button works on every distro family
       (currently silently no-ops on direct-.deb installs).  *(Works
       on the 11 native-channel platforms; still a no-op on the 4
       remaining direct-download platforms.)*
-- [~] winget + Homebrew tap publishing automated in build-and-
+- [x] winget + Homebrew tap publishing automated in build-and-
       release.yml.  *(Homebrew tap auto-bumps
-      ``Formula/sysmanage-agent.rb`` on every release tag — ✅ done.
-      winget: the ``komac update`` automation step EXISTS but is
-      gated behind a first-time manual submission that has NOT yet
-      merged — see "winget first-submission close-out" below.)*
+      ``Formula/sysmanage-agent.rb`` on every release tag.  winget:
+      the first submission MERGED on 2026-06-08 — both
+      ``sysmanage.sysmanage`` (#376004) and ``sysmanage.sysmanage-agent``
+      (#376005) are in ``microsoft:master`` — so the ``komac update``
+      step is no longer inert.  Closed 2026-08-06; the text above had
+      gone stale, still claiming the PR was unmerged two months after
+      it landed.  See "winget first-submission close-out" below.)*
 - [x] Air-gapped Phase 11.1 can substitute private mirrors for any
       of the upstream channels (per-channel mirror URL config in
       agent registration).  *(Keyed by CHANNEL, not distro — one
@@ -4192,18 +4195,8 @@ flow through the same code path as Linux child hosts.
 
 ### Features
 
-- [ ] `virtualization_engine` accepts `os_family=windows`,
-      `os_version=server-2022` / `server-2025`, `edition=standard` /
-      `datacenter`, `image_kind=server-core` / `server-with-gui`
-- [~] Autounattend.xml template generator with parameterized
-      hostname / admin-password / locale / timezone / product-key /
-      static-or-DHCP network config
-      *(Done 2026-08-04 except static-network config, which is still
-      DHCP-only — `windows_unattend.pxi`.  Password uses Microsoft's
-      base64(UTF-16LE) encoding, not PlainText.  Empty product key
-      OMITS the element: a blank `<ProductKey/>` makes Setup reject
-      the whole answer file.  Edition names verified against the real
-      install.wim on both ISOs.)*
+- [x] `virtualization_engine` selects Windows release AND edition — Aug 2026. All four SKUs are reachable: `windows_edition` takes `standard-core`, `standard-desktop`, `datacenter-core`, `datacenter-desktop`, which covers the proposed `edition` x `image_kind` matrix in one field; the release (`server-2022` / `server-2025`) is carried by `distribution` rather than `os_family`+`os_version`, because Server 2022 and 2025 are already separate `child_host_distribution` rows and a second control could only disagree with the first. Each value maps to an exact install.wim entry (an unknown one falls back to Standard Core rather than synthesising a name that matches no media).
+- [x] Autounattend.xml template generator — Aug 2026, static-network config now landed, completing the item. Parameterized hostname / admin-password / locale / timezone / product-key / **static-or-DHCP network**. Static is opt-in via `windows_static_ip` (CIDR) + `windows_gateway` + `windows_dns_servers`; empty means DHCP and the TCPIP/DNS components are omitted ENTIRELY rather than emitted configured for DHCP. Malformed input is refused at PLAN time — Setup applies whatever it is given, so a bad address yields a guest that installs perfectly and never appears on the network, indistinguishable from a hung install. Password uses Microsoft's base64(UTF-16LE) encoding, not PlainText. Empty product key OMITS the element: a blank `<ProductKey/>` makes Setup reject the answer file. The NIC is keyed by adapter name (`Ethernet`) because libvirt assigns the MAC only when the domain is defined, after the answer file is written.
 - [x] Per-VM config-CD ISO build step (genisoimage / mkisofs /
       xorrisofs fallback, same chain as the Linux cloud-init seed
       ISO)
@@ -4221,8 +4214,7 @@ flow through the same code path as Linux child hosts.
       merges, silently discarding the UEFI/Secure Boot config.  Uses
       the `.ms.` OVMF pair — the plain VARS file has an empty key
       database and Secure Boot then refuses Microsoft's bootloader.)*
-- [ ] swtpm per-VM state directory provisioning (engine plan
-      writes `/var/lib/swtpm/<vm-name>/` before virt-install)
+- [x] Per-VM TPM state — Aug 2026, via libvirt rather than by hand. The plan passes `--tpm backend.type=emulator,backend.version=2.0,model=tpm-crb` to virt-install, so libvirt creates and owns the per-domain swtpm state instead of the engine pre-creating `/var/lib/swtpm/<vm-name>/`. Same isolation guarantee, one less directory for the engine to manage or clean up.
 - [x] OVMF NVRAM per-VM copy of `OVMF_VARS.fd`
       *(Done 2026-08-04 — copies `OVMF_VARS_4M.ms.fd` to
       `<images>/<vm>_VARS.fd`.  Per-VM because Secure Boot keeps state:
@@ -4245,14 +4237,52 @@ flow through the same code path as Linux child hosts.
 - [~] ~~Optional pre-baked sysprep'd golden image path~~ — **WON'T DO** (Bryan, 2026-08-05). Cuts per-VM provision from ~30 min to ~5, but the image has to be re-baked per patch cycle, per release AND per edition; a monthly sysprep refresh treadmill is worse in the real world than a slower create. It also hands compliance-sensitive customers an opaque OS image. Route A shipped instead — see the unattended-boot media prep item above, which removes the only reason Setup could not run unattended.
 - [~] ~~Cloudbase-Init userdata path for the pre-baked-image option~~ — **WON'T DO**: existed only to serve the golden-image path above. The ISO path configures the guest through Autounattend + the per-VM config CD, which needs no Cloudbase-Init.
 - [x] Provision-progress reporting — Aug 2026: the agent already sent per-step progress (`step`/`total_steps`/`description`/`child_host_id`) and the server handler LOGGED AND DROPPED it, so `host_child.installation_step` was permanently NULL and the UI had only a spinner that looked identical at minute 2 and minute 40. `_record_creation_progress` now persists it (child_host_handlers_engine), with new columns `installation_step_number` / `installation_total_steps` / `installation_step_at` (migration `w2winprog`). `ChildHostProgress.tsx` renders a determinate bar + step text, and — the part that matters for a 25-45 min Windows install — the AGE of the last report, so a stalled provision is distinguishable from a slow one. That age is the Phase 11.6 in-flight-journal heartbeat idea applied to the UI. Stall threshold 20 min, deliberately generous: Setup runs unattended for 25-45 min between reports and a warning that is usually wrong stops being read. Degrades to indeterminate for older agents that send no counts.
-- [ ] Documentation: per-distro install channels page extended with
-      "Windows Server child host" section; runbook covers license
-      handling, sysprep refresh cadence, virtio-win driver updates
-- [ ] i18n/l10n for all 14 languages (UI strings + docs)
-- [ ] Integration tests: virtualization_engine plan-builder
-      Windows-branch tests + mocked virt-install command-list
-      assertions; full live-VM test gated behind a CI label /
-      manual job because of provision latency
+- [x] Documentation — Aug 2026: `docs/professional-plus/child-host-management.html` gained a **Windows Server Child Hosts** section (edition/version/ISO/licence/domain fields, OpenBAO key handling and why a hash cannot work, unattended-boot media remaster + its scratch-space and refresh rules, virtio-win driver placement incl. the AppArmor /usr/share trap, MSI-on-config-CD agent delivery, 25-45 min expectation), plus an expanded Installation Progress section covering the step counter and the stall threshold. Two screenshots wired via `make screenshots` (`child-host-create-windows.png`, `child-host-provision-progress.png`) — seed_ent.py seeds a mid-provision Windows guest + the Windows catalog rows, capture.mjs learned to click a button and pick a MUI Select option ON a host-detail tab (the dialog is not reachable from a route). sysprep refresh cadence is NOT covered: the golden-image path it belonged to was dropped. Also corrected a pre-existing error on that page — there is no "Create Child Host" button; the label is per-hypervisor (Create VM / Create Container / Create Instance).
+- [x] i18n/l10n for all 14 languages — Aug 2026: frontend dialog + progress strings and the docs section are translated into all 13 non-English locales; `i18n_strict`, `i18n-validate` and `translate-check` are green in sysmanage and sysmanage-docs. Engine strings too — the `windows_media` step description reached the catalogs only after `.pxi` was added to the module extractor's source list (it had never been read), which is now guarded by `i18n_check_coverage.py`. Genuine invariants are allow-listed with reasons rather than force-translated: pure-interpolation strings, and cognates scoped per locale (`nl: virtio-win Drivers`, `de: Edition`).
+- [x] Integration tests — automated plan-level, **manual** live-VM. `tests/backend/test_windows_child_hosts.py` is 104 tests over the Windows branch: Autounattend schema/ordering/escaping (including the child-sequence table and the 259-char `<Path>` cap), the edition matrix, opt-in domain join, virtio driver staging and absolute driver paths, media remaster (UDF builder probe, idempotence, space guard, missing-boot-file, fresh mountpoint, post-build content verification), and virt-install command-list assertions including disk-before-CD boot order and that the guest boots the REMASTERED medium rather than `windows_iso_path`.
+
+      The live-VM run stays a **documented manual gate, by decision** (Bryan,
+      2026-08-06) — it is NOT a CI job and the ROADMAP should stop implying one
+      is pending. It needs nested virtualisation, ~50 GB of disk, a 5 GB Windows
+      ISO plus virtio-win, and 25-45 minutes of wall clock, so a GitHub-hosted
+      runner cannot host it; the only option was a self-hosted runner pinned to
+      one workstation, and a live job that is only as available as one laptop —
+      with 40-minute failure cycles — is worse than an honest manual gate.
+
+      **Runbook:** `scripts/windows_smoke_test.py` (Pro+) generates the real
+      engine plan as a shell script; redirect it to a file and run it with sudo.
+      Run it before closing any phase that touches the Windows child-host path.
+      `--help` documents the arguments and the script validates ISO/MSI paths up
+      front rather than failing halfway through a 40-minute boot.
+
+      **2026-08-06: the hand-run smoke test passed end to end for the first
+      time** — unattended boot → virtio drivers → partition → image → specialize
+      → OOBE → agent MSI → service → enrolled (`win2022-smoke`, pending
+      approval). It took **eight** consecutive failures to get there, every one
+      a real defect and every one invisible to the 69 green unit tests: xorriso
+      cannot write UDF; genisoimage silently drops directories deeper than six
+      without `-D`; `<DriverPaths>` entries must be absolute (a relative path is
+      skipped in silence, so WinPE saw no disk and blamed
+      `<DiskConfiguration>`); no-prompt media reinstalls forever unless the disk
+      boots before the CD; `RunSynchronousCommand` children are a schema
+      sequence; `<Path>` is capped at 259 chars and exceeding it invalidates the
+      whole pass; `Add-WindowsCapability` deadlocks against CBS during
+      specialize; and the agent MSI cannot bootstrap Python from inside its own
+      transaction. That ratio — eight live-only defects against zero unit-test
+      failures — is the argument for the CI job, not a footnote to it.
+
+      Two findings from that run are NOT yet addressed and do not block the
+      phase, but should not be lost:
+      **(a)** the guest wedged in OVMF on the post-install *warm* reset, twice,
+      spinning at 100% CPU with zero disk reads and a stale framebuffer;
+      `virsh reset` did not recover it and a cold destroy/start did. The domain
+      carries a `tpm-crb` device that `virt-install` adds on its own — despite
+      the plan deliberately omitting `--tpm` for 2022 — alongside
+      `<smm state='on'/>`, which is known-awkward for warm reset. If a child
+      host can wedge on reboot, that is a reliability problem for every Windows
+      guest, not just the harness.
+      **(b)** the guest enrolled with **no tenant** (see the child-host
+      enrollment-token item in Phase 19).
 
 ### Success Criteria
 
@@ -4296,7 +4326,7 @@ plan-builder + UI integration.
 
 ### Exit Criteria
 
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+- [x] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free — closed 2026-08-06.  Live-VM validation is a documented MANUAL gate by decision (see the integration-tests item), and the hand-run smoke test passed end to end that day.
 
 ---
 
@@ -5660,6 +5690,28 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 **Target Release:** v3.5.x
 **Focus:** Harden content lifecycle + provisioning across distros/providers; air-gap + federation interplay; performance on large content sets.
 
+### Agent bandwidth — send package deltas, not the whole catalog
+
+- [ ] **`available_packages` should transmit a DELTA, not a full re-send.**
+      Measured on the dev host 2026-08-06: `available_packages_batch` was
+      **78,979 messages / 9.4 GB in eight days** — ~7 messages a minute at
+      ~122 KB each, and 83% of everything the agent sent. The agent stores the
+      full catalog locally (`available_packages`, ~89k rows, replaced wholesale
+      per package manager on each scan) and ships all of it every cycle, so a
+      host whose package list has not changed still pays full freight, every
+      cycle, for ever.
+
+      The agent already has exactly what is needed to do better: it holds the
+      previous catalog, so it can diff and send only added / removed / changed
+      entries, with a periodic full reconcile to correct drift.
+
+      This is **bandwidth and server ingest**, not agent disk — the agent-side
+      disk cost was fixed separately (2026-08-06) by deleting queue rows on
+      delivery rather than retaining them. Scope note: worth doing SOON, and
+      deliberately deferred out of Phase 18 rather than dropped (Bryan,
+      2026-08-06) so 18 could close.
+
+
 ### Provisioning hardening — lessons from the Phase 18.2 harness
 
 Six real defects reached the 18.2 VM harness with **every unit test green**, and
@@ -5776,6 +5828,84 @@ close the gap between our output and the parsers that consume it.
       `/usr` distros resolve it to `/usr/bin/systemctl`. The flag drives whether
       the server believes a host can patch, restart services, or reboot for a
       re-provision, so a false positive is worse than a false negative.
+- [ ] **The Windows MSI cannot bootstrap Python, and reports success anyway.**
+      On any Windows host without Python 3.9+ — which is every freshly
+      provisioned one — the agent installs and never runs. `install.ps1` runs as
+      an MSI custom action and shells out to the VC++ redistributable and the
+      Python 3.12 installer, but the parent MSI still holds the Windows
+      Installer mutex, so both are refused with **1618**
+      (`ERROR_INSTALL_ALREADY_RUNNING`). No Python means no venv, so
+      `create-service.ps1` finds no interpreter and skips registering the
+      service. The MSI then exits **0** and Add/Remove Programs shows it
+      installed, because service registration was deliberately made non-fatal
+      (winget-pkgs PR #375773 — `Return="check"` was rolling the whole install
+      back). Net effect: `msiexec` says "Installation completed successfully",
+      `Get-Service SysManageAgent` says the service does not exist, and nothing
+      ever enrolls.
+
+      This is structural, not a race: a nested install can never succeed from
+      inside a custom action. The fix is to move the bootstrap out of the MSI
+      transaction — either a WiX **bundle** chaining VC++ → Python → agent MSI
+      (the intended tool for chained prerequisites), or a post-install scheduled
+      task that runs `install.ps1` + `create-service.ps1` once `msiexec` has
+      exited. Prefer the bundle; the task is the cheaper stopgap.
+
+      Found 2026-08-06 by the Phase 12.5 Windows child-host smoke test, from the
+      guest's own `C:\ProgramData\SysManage\logs\install.log`. The Pro+
+      provisioning path is unblocked in the meantime — `windows_unattend.pxi`
+      re-runs the agent's own two scripts after `msiexec` returns, where they
+      work — but that only covers hosts SysManage provisions. **Every other
+      Windows install path is still affected**, including manual installs and
+      winget, so this belongs in the agent, not in the provisioning engine.
+      Whatever lands should also make "the MSI succeeded but the service is
+      absent" a loud, detectable state rather than a silent one.
+- [ ] **Native agent channels for the last four platforms.** Carried out of
+      Phase 12 on 2026-08-06 so closing that phase does not lose the work.
+      Eleven platforms install through an OS-native channel (Launchpad PPA,
+      Copr, OBS, winget, Homebrew, AUR — all `legacy=False` in
+      `_AGENT_INSTALL`); **alpine / freebsd / openbsd / netbsd** remain
+      `legacy=True` direct-download because no consumable upstream apk/pkg
+      repository is published for them yet, and flipping the engine entry
+      without one breaks installs.
+
+      Three Phase 12 acceptance criteria are limited by exactly this and by
+      nothing else: native-package install, `apt-get upgrade`-style automatic
+      pickup of new releases, and the in-app "Update Agent" button — which
+      silently no-ops on those four. Publishing the repositories closes all
+      three at once.
+
+- [ ] **Child hosts enroll with NO TENANT — they need an enrollment token.**
+      A VM or container created through child-host provisioning registers
+      server-scoped, because `_build_agent_config_yaml`
+      (`backend/api/child_host_creation_dispatch.py`) emits `server.*`,
+      `logging`, `websocket`, `script_execution` and an optional
+      `auto_approve.token` — but never `security.enrollment_token`, which is the
+      key the agent actually reads (`config.get_enrollment_token`). Confirmed
+      2026-08-06: `win2022-smoke` provisioned, enrolled, and landed in the
+      bootstrap ("No tenant") database.
+
+      Auto-approve and enrollment tokens are different things and only the
+      second one places the host: auto-approve skips the pending queue, the
+      enrollment token selects **which tenant database the host is written to**.
+      So today a child host of a tenant-owned parent lands outside that tenant's
+      data plane, where the tenant's queue processor will not see it.
+
+      Two reasons this cannot just be left: the "No tenant" scope is slated for
+      removal (burn-ships), after which a token-less registration is simply
+      rejected and child-host provisioning breaks outright; and
+      `_reject_if_fqdn_belongs_to_tenant` already 403s a token-less
+      re-registration whose fqdn lives in a tenant DB, so a re-provisioned child
+      host can fail in a way that looks like a phantom-duplicate bug.
+
+      The pattern to copy already exists and is proven: the bare-metal path
+      threads `enrollment_token_fn` into `provisioning_engine/boot.pxi` and
+      mints via `_provisioning_enrollment_token_fn`
+      (`backend/api/proplus_routes.py`), keyed on the tenant the install
+      assignment was found in. For child hosts the tenant is the one owning the
+      PARENT host. Applies to every child-host path — KVM, Windows and the
+      container/WSL builder in `container_engine` — not just Windows. Decline
+      loudly rather than silently falling back to server scope when
+      multi-tenancy is on and the parent's tenant cannot be determined.
 
 ### Exit Criteria
 

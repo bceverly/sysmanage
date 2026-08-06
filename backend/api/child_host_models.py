@@ -55,6 +55,10 @@ class CreateWslChildHostRequest(BaseModel):
     windows_timezone: Optional[str] = "UTC"
     windows_locale: Optional[str] = "en-US"
     windows_iso_path: Optional[str] = None
+    # Static networking is opt-in; empty means DHCP.
+    windows_static_ip: Optional[str] = None
+    windows_gateway: Optional[str] = None
+    windows_dns_servers: Optional[str] = None
     # Domain join is opt-in; empty domain means a workgroup machine.
     windows_join_domain: Optional[str] = None
     windows_domain_ou: Optional[str] = None
