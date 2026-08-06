@@ -87,11 +87,26 @@ class HostChild(Base):
     # When this token is present and matches, the child host is automatically approved
     auto_approve_token = Column(String(36), nullable=True, index=True)
 
+    # Windows Server child hosts (Phase 12.5): the licence key lives in OpenBAO,
+    # never in this table.  Only the Secret row's id is kept, so a rebuild can
+    # fetch the key back without it ever being readable from the database.
+    # NULL for every non-Windows child and for Windows guests installed from
+    # evaluation media (which needs no key at all).
+    windows_key_secret_id = Column(GUID(), nullable=True)
+
     # State tracking
     status = Column(
         String(50), nullable=False, default="pending"
     )  # pending, creating, installing, running, stopped, error, uninstalling
     installation_step = Column(String(100), nullable=True)
+    # Provision progress (Phase 12.5).  A Windows Server install runs 25-45
+    # minutes, so "no news" is ambiguous — it means either working or wedged.
+    # These three make the difference visible: the step counter shows movement,
+    # and the timestamp lets the UI say "nothing for 12 minutes" instead of
+    # spinning forever.  Mirrors the Phase 11.6 in-flight journal's heartbeat.
+    installation_step_number = Column(Integer, nullable=True)
+    installation_total_steps = Column(Integer, nullable=True)
+    installation_step_at = Column(DateTime, nullable=True)
     error_message = Column(Text, nullable=True)
 
     # Timestamps

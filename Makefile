@@ -1129,7 +1129,7 @@ else
 endif
 
 # Combined linting
-lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-strict i18n-complete lint-version check-migrations
+lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the
@@ -1308,6 +1308,12 @@ endif
 # two ways a string never gets extracted at all: a lookup key used as the
 # msgid, and a msgid that is not a string literal.  Both render untranslated —
 # or worse, leak the raw key — in every locale, with every other gate green.
+# The extractor must SEE every file with translatable text.  Every other i18n
+# gate compares the catalog to the extractor's own output, so none of them can
+# notice a file the extractor never read.
+i18n-check-coverage: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_check_coverage.py
+
 i18n-check-msgid-style: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/i18n_check_msgid_style.py \
 		--source-root backend --locales $(BACKEND_I18N)

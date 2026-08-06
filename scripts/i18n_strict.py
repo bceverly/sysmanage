@@ -113,8 +113,14 @@ _EXPECTED_SCRIPT = {
     "zh_TW": ("CJK",),
 }
 _SCRIPT_TAGS = (
-    "ARABIC", "DEVANAGARI", "CYRILLIC", "HANGUL",
-    "HIRAGANA", "KATAKANA", "CJK", "LATIN",
+    "ARABIC",
+    "DEVANAGARI",
+    "CYRILLIC",
+    "HANGUL",
+    "HIRAGANA",
+    "KATAKANA",
+    "CJK",
+    "LATIN",
 )
 
 
@@ -330,10 +336,17 @@ def po_files(surface):
 
 
 def check_json(surface, allow, hashes):
-    """(english, stale) violation lists for one JSON surface."""
+    """(english, stale, wrong) violation lists for one JSON surface.
+
+    All three returns are 3-tuples.  This one used to return a 2-tuple, which
+    was not a style nit: ``gather`` unpacks three, so any JSON surface without
+    an ``en`` locale crashed the whole gate with a ValueError instead of being
+    skipped.  (``check_po`` returns TWO by design — a .po msgid IS the English,
+    so a .po translation cannot go stale.)
+    """
     locales = json_locales(surface)
     if EN not in locales:
-        return [], []
+        return [], [], []
     _, en = locales[EN]
     english, stale, wrong = [], [], []
     for lang, (path, loc) in sorted(locales.items()):
@@ -463,7 +476,9 @@ def do_requeue(english, stale):
                         d2 = _PO_DIRECTIVE.match(lines[i].strip())
                         if d2 and d2.group(1) == "msgstr":
                             k = i + 1
-                            while k < len(lines) and _PO_CONTINUATION.match(lines[k].strip()):
+                            while k < len(lines) and _PO_CONTINUATION.match(
+                                lines[k].strip()
+                            ):
                                 k += 1
                             out.append('msgstr ""')
                             seen.add(msgid)
@@ -529,7 +544,9 @@ def main() -> int:
         return 0
 
     for label, rows in (
-        ("WRONG LANGUAGE", wrong), ("ENGLISH", english), ("STALE", stale)
+        ("WRONG LANGUAGE", wrong),
+        ("ENGLISH", english),
+        ("STALE", stale),
     ):
         if not rows:
             continue

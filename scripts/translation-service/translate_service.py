@@ -492,7 +492,14 @@ def _unmask_markup(text: str, originals: List[str]) -> str:
 # Splits only after . ! ? followed by whitespace and something that starts a new
 # sentence (capital, a tag, or a marker).  "license.phone_home_url" and
 # "3.11" have no space after the period, so they never split.
-_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])(\s+)(?=[A-Z<⟦])")
+# The whitespace run is BOUNDED, not `\s+`.  Unbounded, this is a polynomial
+# ReDoS on request-controlled text (CodeQL): for a long run of whitespace whose
+# lookahead fails, the engine retries a shrinking `\s+` from every position
+# inside the run — O(n^2) for a payload like ". " + " " * 100000.  Eight covers
+# every real sentence separator (" ", "  ", "\n", "\n\n", CRLF); a longer run
+# simply is not treated as a sentence boundary, which is harmless because the
+# text is re-joined with the ORIGINAL separators either way.
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])(\s{1,8})(?=[A-Z<⟦])")
 
 
 # Abbreviations whose trailing period is NOT a sentence end.  Without this,

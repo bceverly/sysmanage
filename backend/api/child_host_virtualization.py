@@ -38,6 +38,7 @@ from backend.persistence import db, models
 from backend.persistence.models import ChildHostDistribution
 from backend.persistence.partitions import request_sessionmaker
 from backend.security.roles import SecurityRoles
+from backend.services.vault_service import VaultService
 from backend.utils.password_hash import hash_password_for_os
 
 # Main router that includes sub-routers
@@ -48,6 +49,10 @@ router.include_router(status_router)
 
 # Include enable/initialize endpoints router
 router.include_router(enable_router)
+
+
+# Secret type label for Windows licence keys, so they group in the Secrets UI.
+WINDOWS_LICENSE_KEY_TYPE = "windows_license"  # nosec B105  # label, not a password
 
 
 def _check_container_module():
@@ -340,6 +345,79 @@ def _add_cloud_vm_params(params, request, distribution, mem, disk, cpus):
     _populate_autoinstall_params(params, request, distribution)
 
 
+def _is_windows_distribution(install_identifier) -> bool:
+    """True for the Windows Server catalog entries.
+
+    Mirrors ``virtualization_engine.is_windows_distribution``.  The check lives
+    here too rather than calling the engine because the OSS server must decide
+    which fields to forward even when the Pro+ engine is not loaded — otherwise
+    a Windows request silently degrades into a Linux one.
+    """
+    return (install_identifier or "").strip().lower().startswith("windows-server")
+
+
+def _add_windows_params(params, request) -> None:
+    """Forward the Windows Server fields to the engine.
+
+    Only the fields the operator actually set are forwarded; the engine already
+    carries sane defaults, and sending an explicit empty string would override
+    them (an empty edition is not "use the default", it is "no edition").
+    """
+    params["windows_edition"] = request.windows_edition or "standard-core"
+    params["windows_timezone"] = request.windows_timezone or "UTC"
+    params["windows_locale"] = request.windows_locale or "en-US"
+    if request.windows_admin_password:
+        params["windows_admin_password"] = request.windows_admin_password
+    if request.windows_product_key:
+        params["windows_product_key"] = request.windows_product_key
+    if request.windows_iso_path:
+        params["windows_iso_path"] = request.windows_iso_path
+    # Domain join: opt-in, and the whole group only travels when a domain is
+    # named.  Forwarding a user/password with no domain would put credentials
+    # on the config ISO for a join that is never attempted.
+    if request.windows_join_domain:
+        params["windows_join_domain"] = request.windows_join_domain
+        if request.windows_domain_ou:
+            params["windows_domain_ou"] = request.windows_domain_ou
+        if request.windows_domain_user:
+            params["windows_domain_user"] = request.windows_domain_user
+        if request.windows_domain_password:
+            params["windows_domain_password"] = request.windows_domain_password
+
+
+def _store_windows_product_key(session, request, child_name):
+    """Put the licence key in OpenBAO and return the Secret row's id.
+
+    The key is NEVER written to ``host_child`` — only this id is, so the key
+    cannot be read out of the database.  It goes through the same Secret table
+    as every other managed secret, which means it shows up in the Secrets
+    screen and can be rotated or revoked there like anything else.
+
+    Returns ``None`` when there is no key, which is the normal path: evaluation
+    media installs without one.
+    """
+    key = (request.windows_product_key or "").strip()
+    if not key:
+        return None
+    vault_service = VaultService()
+    stored = vault_service.store_secret(
+        secret_name=f"windows-key-{child_name}",  # nosec B106  # name, not a password
+        secret_data=key,
+        secret_type=WINDOWS_LICENSE_KEY_TYPE,  # nosec B106  # type label
+        secret_subtype="windows_product_key",  # nosec B106  # subtype label
+    )
+    secret = models.Secret(
+        name=f"windows-key-{child_name}",  # nosec B106  # name, not a password
+        secret_type=WINDOWS_LICENSE_KEY_TYPE,  # nosec B106  # type label
+        secret_subtype="windows_product_key",  # nosec B106  # subtype label
+        vault_token=stored["vault_token"],
+        vault_path=stored["vault_path"],
+    )
+    session.add(secret)
+    session.flush()
+    return secret.id
+
+
 def _build_command_params(
     request,
     password_hash,
@@ -371,6 +449,11 @@ def _build_command_params(
         _add_vmm_params(params, request)
     elif request.child_type == "kvm":
         _add_cloud_vm_params(params, request, distribution, "2G", "20G", 2)
+        # Windows installs from its retail/eval ISO rather than a cloud image,
+        # so the cloud-init fields above are inert on this path and the engine
+        # branches on the distribution.  Both sets are sent; the engine picks.
+        if _is_windows_distribution(request.distribution):
+            _add_windows_params(params, request)
     elif request.child_type == "bhyve":
         _add_cloud_vm_params(params, request, distribution, "1G", "20G", 1)
 
@@ -488,6 +571,15 @@ async def create_child_host_request(
         )
         session.add(new_child)
         session.flush()
+
+        # Licence key -> OpenBAO.  Done after the flush so the Secret can be
+        # named for the child, and inside the same transaction so a failure
+        # here rolls the child row back rather than leaving an orphan whose
+        # key was never stored.
+        if _is_windows_distribution(request.distribution):
+            new_child.windows_key_secret_id = _store_windows_product_key(
+                session, request, child_name
+            )
 
         password_hash = _hash_child_password(request)
         command_params = _build_command_params(

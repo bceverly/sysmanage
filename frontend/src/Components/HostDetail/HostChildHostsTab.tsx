@@ -33,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import HypervisorStatusCard from '../HypervisorStatusCard';
 import { hasPermissionSync, SecurityRoles } from '../../Services/permissions';
 import { SysManageHost } from '../../Services/hosts';
+import ChildHostProgress from './ChildHostProgress';
 import { ChildHost, VirtualizationStatus } from './hostDetailTypes';
 
 interface HostChildHostsTabProps {
@@ -329,6 +330,7 @@ const HostChildHostsTab: React.FC<HostChildHostsTabProps> = ({
                                                             {child.agent_version || '-'}
                                                         </TableCell>
                                                         <TableCell>
+                                                            <ChildHostProgress child={child} />
                                                             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
                                                                 {(() => {
                                                                     let statusLabel: string;

@@ -4239,38 +4239,12 @@ flow through the same code path as Linux child hosts.
       *(Done 2026-08-04, with a test pinning that both precede the
       agent install — reversed, a bad MSI leaves the VM reachable only
       from the console.)*
-- [ ] **Unattended-boot media prep.**  Windows UEFI install media stops at
-      "Press any key to boot from CD or DVD" and an unattended pipeline has
-      nobody to press it; the guest then falls through to "No bootable option
-      or device was found".  The fix is media rebuilt with the
-      `efisys_noprompt.bin` / `cdboot_noprompt.efi` that ship on the SAME ISO.
-      Cheap routes do NOT work: Windows hides `boot/etfsboot.com` and the boot
-      catalog from the ISO9660 tree, so `xorriso -boot_image any replay` and
-      building a fresh catalog by path both fail with "not a data file in the
-      ISO filesystem".  It needs a full extract + rebuild
-      (`xorriso -as mkisofs -b boot/etfsboot.com -no-emul-boot
-      -eltorito-alt-boot -e efi/microsoft/boot/efisys_noprompt.bin`, plus UDF
-      because `install.wim` is 4.34 GB and exceeds the ISO9660 limit),
-      ~10 GB of scratch, once per medium rather than per VM.
-      `scripts/windows_smoke_test.py --send-keys` spams ENTER past the prompt
-      as a stopgap; that is a test aid, NOT a product answer.
-      **May be mooted by the pre-baked golden-image item below**, which skips
-      Setup entirely — decide between them before building this.
-- [ ] Frontend Create Child Host dialog learns the Windows path:
-      edition picker, version picker, license key field, admin
-      password, hostname, optional join-domain config
-- [ ] License-key handling: support generic AVMA / MAK / KMS keys;
-      UI field is secret-typed and stored hashed
-- [ ] Optional pre-baked sysprep'd golden image path: operator
-      workflow for baking a Server 2022 image with Cloudbase-Init
-      installed, sysprep'd, stored as a host-local qcow2 — drops
-      per-VM provision time from ~30 min to ~5 min
-- [ ] Cloudbase-Init userdata path for the pre-baked-image option
-      (Linux-style cloud-init userdata works via Cloudbase-Init's
-      NoCloud datasource)
-- [ ] Provision-progress reporting: long-running install needs UI
-      feedback consistent with the in-flight journal pattern from
-      Phase 11.6
+- [x] **Unattended-boot media prep** — Aug 2026: `windows_media.pxi`. The create plan now remasters the medium with the `efisys_noprompt.bin` that ships on the same ISO (full extract + `xorriso -as mkisofs -iso-level 3 -udf`, since Windows hides the boot catalog from the ISO9660 tree and install.wim exceeds 4 GB), caches the result per medium under /var/lib/libvirt/windows/media, and boots THAT — not `windows_iso_path`. Idempotent (skips when cached and not stale), space-guarded, atomic publish via `.partial`, fresh `mktemp` mountpoint per run, and it fails loudly when a medium has no noprompt image rather than silently building bootable-but-prompting media. `windows_smoke_test.py --send-keys` now defaults OFF. Chose this over the pre-baked golden image (Bryan, 2026-08-05): no per-patch re-bake burden, reuses the whole Autounattend path, and does not hand compliance-sensitive customers an opaque OS image. Validated end-to-end against stubbed mount/xorriso across cold / warm-cache / stale-cache / missing-boot-file.
+- [x] Frontend Create Child Host dialog learns the Windows path — Aug 2026: `WindowsChildHostFields.tsx` gated on `isWindowsDistribution()`; edition picker (the 4 SKUs the engine can deploy), ISO path, licence key, timezone/locale, opt-in AD join (domain/OU/account). The VERSION picker is the existing distribution selector — Server 2022/2025 are separate `child_host_distribution` rows (migration `w1winchild`), so a second control could only disagree with it. Windows hides the username field (the built-in Administrator is configured) and relabels the password pair. Engine gained `windows_edition` + `<Identification>`; backend forwards via `_add_windows_params`.
+- [x] License-key handling — Aug 2026: secret-typed field, generic AVMA/MAK/KMS. Stored in **OpenBAO** rather than hashed (Bryan's call, 2026-08-05): a hash cannot be used to install Windows, and the key must reach Autounattend intact. It goes through the normal `Secret` table so it appears in the Secrets screen; `host_child.windows_key_secret_id` holds only the row id, so the key is never readable from the database. Blank is valid — evaluation media installs without one.
+- [~] ~~Optional pre-baked sysprep'd golden image path~~ — **WON'T DO** (Bryan, 2026-08-05). Cuts per-VM provision from ~30 min to ~5, but the image has to be re-baked per patch cycle, per release AND per edition; a monthly sysprep refresh treadmill is worse in the real world than a slower create. It also hands compliance-sensitive customers an opaque OS image. Route A shipped instead — see the unattended-boot media prep item above, which removes the only reason Setup could not run unattended.
+- [~] ~~Cloudbase-Init userdata path for the pre-baked-image option~~ — **WON'T DO**: existed only to serve the golden-image path above. The ISO path configures the guest through Autounattend + the per-VM config CD, which needs no Cloudbase-Init.
+- [x] Provision-progress reporting — Aug 2026: the agent already sent per-step progress (`step`/`total_steps`/`description`/`child_host_id`) and the server handler LOGGED AND DROPPED it, so `host_child.installation_step` was permanently NULL and the UI had only a spinner that looked identical at minute 2 and minute 40. `_record_creation_progress` now persists it (child_host_handlers_engine), with new columns `installation_step_number` / `installation_total_steps` / `installation_step_at` (migration `w2winprog`). `ChildHostProgress.tsx` renders a determinate bar + step text, and — the part that matters for a 25-45 min Windows install — the AGE of the last report, so a stalled provision is distinguishable from a slow one. That age is the Phase 11.6 in-flight-journal heartbeat idea applied to the UI. Stall threshold 20 min, deliberately generous: Setup runs unattended for 25-45 min between reports and a warning that is usually wrong stops being read. Degrades to indeterminate for older agents that send no counts.
 - [ ] Documentation: per-distro install channels page extended with
       "Windows Server child host" section; runbook covers license
       handling, sysprep refresh cadence, virtio-win driver updates

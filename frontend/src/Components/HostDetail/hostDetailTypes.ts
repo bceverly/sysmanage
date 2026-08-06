@@ -50,6 +50,11 @@ export interface ChildHost {
     hostname: string | null;
     status: string;
     installation_step: string | null;
+    // Provision progress (Phase 12.5).  installation_step_at is what
+    // distinguishes a slow provision from a dead one.
+    installation_step_number?: number | null;
+    installation_total_steps?: number | null;
+    installation_step_at?: string | null;
     error_message: string | null;
     created_at: string | null;
     installed_at: string | null;
@@ -134,7 +139,29 @@ export interface ChildHostFormData {
     rootPassword: string;
     confirmRootPassword: string;
     autoApprove: boolean;
+    // Windows Server child hosts (Phase 12.5).  Only read when the selected
+    // distribution is a Windows one; ignored for every other guest.
+    windowsEdition: string;
+    windowsProductKey: string;
+    windowsIsoPath: string;
+    windowsTimezone: string;
+    windowsLocale: string;
+    // Domain join is opt-in — an empty domain means a workgroup machine.
+    windowsJoinDomain: string;
+    windowsDomainOu: string;
+    windowsDomainUser: string;
+    windowsDomainPassword: string;
 }
+
+// The install.wim editions virtualization_engine knows how to deploy.  The
+// values are the engine's own keys, NOT display text: an unknown value falls
+// back to standard-core there, so a typo here silently installs the wrong SKU.
+export const WINDOWS_EDITIONS = [
+    { value: 'standard-core', labelKey: 'hostDetail.windowsEditionStandardCore', label: 'Standard (Core, no GUI)' },
+    { value: 'standard-desktop', labelKey: 'hostDetail.windowsEditionStandardDesktop', label: 'Standard (Desktop Experience)' },
+    { value: 'datacenter-core', labelKey: 'hostDetail.windowsEditionDatacenterCore', label: 'Datacenter (Core, no GUI)' },
+    { value: 'datacenter-desktop', labelKey: 'hostDetail.windowsEditionDatacenterDesktop', label: 'Datacenter (Desktop Experience)' },
+] as const;
 
 export interface AvailableDistribution {
     id: string;

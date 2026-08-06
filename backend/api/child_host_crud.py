@@ -116,6 +116,13 @@ async def list_child_hosts(
                 hostname=child.hostname,
                 status=_effective_child_status(child),
                 installation_step=child.installation_step,
+                installation_step_number=child.installation_step_number,
+                installation_total_steps=child.installation_total_steps,
+                installation_step_at=(
+                    child.installation_step_at.isoformat()
+                    if child.installation_step_at
+                    else None
+                ),
                 error_message=child.error_message,
                 created_at=child.created_at.isoformat() if child.created_at else None,
                 installed_at=(
@@ -199,6 +206,13 @@ async def get_child_host(
             hostname=child.hostname,
             status=_effective_child_status(child),
             installation_step=child.installation_step,
+            installation_step_number=child.installation_step_number,
+            installation_total_steps=child.installation_total_steps,
+            installation_step_at=(
+                child.installation_step_at.isoformat()
+                if child.installation_step_at
+                else None
+            ),
             error_message=child.error_message,
             created_at=child.created_at.isoformat() if child.created_at else None,
             installed_at=child.installed_at.isoformat() if child.installed_at else None,

@@ -120,6 +120,12 @@ def mock_child_host():
     child.hostname = "test-vm.local"
     child.status = "running"
     child.installation_step = None
+    # Explicit, like created_at/installed_at below: a MagicMock attribute
+    # would return a mock from .isoformat() and fail ChildHostResponse
+    # validation, which is a fixture artefact rather than a real defect.
+    child.installation_step_number = None
+    child.installation_total_steps = None
+    child.installation_step_at = None
     child.error_message = None
     child.created_at = datetime.now(timezone.utc).replace(tzinfo=None)
     child.installed_at = datetime.now(timezone.utc).replace(tzinfo=None)

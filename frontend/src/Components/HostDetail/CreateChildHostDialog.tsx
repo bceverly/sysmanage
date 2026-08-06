@@ -26,6 +26,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import { useTranslation } from 'react-i18next';
 import { ChildHostFormData, AvailableDistribution } from './hostDetailTypes';
+import { isWindowsDistribution } from './hostDetailHelpers';
+import WindowsChildHostFields from './WindowsChildHostFields';
 
 interface CreateChildHostDialogProps {
     createChildHostOpen: boolean;
@@ -57,6 +59,10 @@ const CreateChildHostDialog: React.FC<CreateChildHostDialogProps> = ({
     handleCreateChildHost,
 }) => {
     const { t } = useTranslation();
+    // Windows Server guests are provisioned from an ISO with an Autounattend
+    // answer file rather than a cloud image, so the dialog swaps in a whole
+    // extra section and drops the fields that do not apply.
+    const isWindows = isWindowsDistribution(childHostFormData.distribution);
     return (
             <Dialog
                 open={createChildHostOpen}
@@ -191,6 +197,15 @@ const CreateChildHostDialog: React.FC<CreateChildHostDialogProps> = ({
                             />
                         )}
 
+                        {isWindows && (
+                            <WindowsChildHostFields
+                                formData={childHostFormData}
+                                setFormData={setChildHostFormData}
+                                disabled={createChildHostLoading}
+                                validated={childHostFormValidated}
+                            />
+                        )}
+
                         {/* Container name field for LXD - read-only, derived from hostname */}
                         {childHostFormData.childType === 'lxd' && (
                             <TextField
@@ -247,6 +262,7 @@ const CreateChildHostDialog: React.FC<CreateChildHostDialogProps> = ({
                             </>
                         )}
 
+                        {!isWindows && (
                         <TextField
                             fullWidth
                             label={t('hostDetail.childHostUsernameLabel', 'Username')}
@@ -259,11 +275,14 @@ const CreateChildHostDialog: React.FC<CreateChildHostDialogProps> = ({
                             sx={{ mb: 2 }}
                             helperText={t('hostDetail.childHostUsernameHelp', 'The non-root user to create')}
                         />
+                        )}
 
                         <TextField
                             fullWidth
                             type="password"
-                            label={t('hostDetail.childHostPasswordLabel', 'Password')}
+                            label={isWindows
+                                ? t('hostDetail.windowsAdminPasswordLabel', 'Administrator Password')
+                                : t('hostDetail.childHostPasswordLabel', 'Password')}
                             value={childHostFormData.password}
                             onChange={(e) => setChildHostFormData({
                                 ...childHostFormData,
@@ -276,7 +295,9 @@ const CreateChildHostDialog: React.FC<CreateChildHostDialogProps> = ({
                         <TextField
                             fullWidth
                             type="password"
-                            label={t('hostDetail.childHostConfirmPasswordLabel', 'Confirm Password')}
+                            label={isWindows
+                                ? t('hostDetail.windowsConfirmAdminPasswordLabel', 'Confirm Administrator Password')
+                                : t('hostDetail.childHostConfirmPasswordLabel', 'Confirm Password')}
                             value={childHostFormData.confirmPassword}
                             onChange={(e) => setChildHostFormData({
                                 ...childHostFormData,

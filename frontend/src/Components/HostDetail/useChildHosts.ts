@@ -13,92 +13,12 @@ import axiosInstance from '../../Services/api';
 import { distributionService } from '../../Services/childHostDistributions';
 import { SysManageHost } from '../../Services/hosts';
 import { ChildHost, VirtualizationStatus, ChildHostFormData, AvailableDistribution } from './hostDetailTypes';
+import { buildCreateChildRequest, validateChildHostForm } from './childHostFormLogic';
 import type { SnackbarSeverity } from './useHostSnackbar';
 
 // Validation for the create-child-host form. Returns a translated error message
 // for the first failed check, or null when the form is valid.  Extracted to
 // module scope (takes ``t``) to keep the handleCreateChildHost callback simple.
-const validateChildHostForm = (
-    t: TFunction,
-    formData: ChildHostFormData,
-    computedFqdn: string,
-): string | null => {
-    if (!formData.distribution) {
-        // Error is shown inline on the field (no snackbar).
-        return null;
-    }
-    if (!formData.hostname || !computedFqdn) {
-        return t('hostDetail.childHostHostnameRequired', 'Please enter a hostname');
-    }
-    if (!formData.username) {
-        return t('hostDetail.childHostUsernameRequired', 'Please enter a username');
-    }
-    if (!formData.password) {
-        return t('hostDetail.childHostPasswordRequired', 'Please enter a password');
-    }
-    if (formData.password !== formData.confirmPassword) {
-        return t('hostDetail.childHostPasswordMismatch', 'Passwords do not match');
-    }
-    const needsVmName =
-        formData.childType === 'vmm' ||
-        formData.childType === 'kvm' ||
-        formData.childType === 'bhyve';
-    if (needsVmName && !formData.vmName) {
-        return t('hostDetail.childHostVmNameRequired', 'Please enter a VM name');
-    }
-    // For VMM specifically, require root password (KVM uses cloud-init with user password).
-    if (formData.childType === 'vmm') {
-        if (!formData.rootPassword) {
-            return t('hostDetail.childHostRootPasswordRequired', 'Please enter a root password');
-        }
-        if (formData.rootPassword !== formData.confirmRootPassword) {
-            return t('hostDetail.childHostRootPasswordMismatch', 'Root passwords do not match');
-        }
-    }
-    return null;
-};
-
-// Pure builder for the create-child request payload. Mirrors the per-type
-// branching that used to live inline in handleCreateChildHost.
-const buildCreateChildRequest = (
-    formData: ChildHostFormData,
-    computedFqdn: string,
-): Record<string, string | boolean> => {
-    const requestData: Record<string, string | boolean> = {
-        child_type: formData.childType,
-        distribution: formData.distribution,
-        hostname: computedFqdn, // Always send the computed FQDN
-        username: formData.username,
-        password: formData.password,
-        auto_approve: formData.autoApprove,
-    };
-
-    // For LXD, also send container name.
-    if (formData.childType === 'lxd' && formData.containerName) {
-        requestData.container_name = formData.containerName;
-    }
-
-    // For VMM, send vm_name, iso_url, and root_password.
-    if (formData.childType === 'vmm') {
-        requestData.vm_name = formData.vmName || formData.hostname;
-        // For VMM, the install_identifier contains the ISO URL.
-        if (formData.distribution) {
-            requestData.iso_url = formData.distribution;
-        }
-        requestData.root_password = formData.rootPassword;
-    }
-
-    // For KVM and bhyve, send vm_name and cloud_image_url.
-    if (formData.childType === 'kvm' || formData.childType === 'bhyve') {
-        requestData.vm_name = formData.vmName || formData.hostname;
-        if (formData.distribution) {
-            requestData.cloud_image_url = formData.distribution;
-        }
-    }
-
-    return requestData;
-};
-
 interface UseChildHostsArgs {
     hostId: string | undefined;
     host: SysManageHost | null;
@@ -157,6 +77,15 @@ export const useChildHosts = ({
         rootPassword: '',  // For VMM: separate root password
         confirmRootPassword: '',  // For VMM: confirm root password
         autoApprove: false,  // Automatically approve when the child host connects
+        windowsEdition: 'standard-core',
+        windowsProductKey: '',
+        windowsIsoPath: '',
+        windowsTimezone: 'UTC',
+        windowsLocale: 'en-US',
+        windowsJoinDomain: '',
+        windowsDomainOu: '',
+        windowsDomainUser: '',
+        windowsDomainPassword: '',
     });
     const [childHostCreationProgress, setChildHostCreationProgress] = useState<string>('');
     const [childHostFormValidated, setChildHostFormValidated] = useState<boolean>(false);
@@ -744,6 +673,18 @@ export const useChildHosts = ({
                         rootPassword: '',
                         confirmRootPassword: '',
                         autoApprove: false,
+                        // Cleared deliberately, not carried over: these hold a
+                        // licence key and domain credentials, and the dialog
+                        // stays open for the next create.
+                        windowsEdition: 'standard-core',
+                        windowsProductKey: '',
+                        windowsIsoPath: '',
+                        windowsTimezone: 'UTC',
+                        windowsLocale: 'en-US',
+                        windowsJoinDomain: '',
+                        windowsDomainOu: '',
+                        windowsDomainUser: '',
+                        windowsDomainPassword: '',
                     });
                     // Refresh child hosts list
                     setTimeout(() => {

@@ -151,3 +151,13 @@ es: re:(Error|roles)
 # ("Falsch", "Faux", "Ложь") — and the Arabic file held Chinese text — which is
 # a mistranslation of a program name, corrected 2026-08-05.
 re:False
+
+# "Edition" is the German word too — Microsoft's own German Windows UI uses it
+# for exactly this control.  Scoped to de: Spanish wants "Edición", French
+# "Édition", so an unscoped rule would bless the English in all 13.
+de: re:^Edition$
+
+# Pure interpolation: two placeholders, a separator, and a third placeholder.
+# There is no prose here to translate — the description it carries is already
+# localized by the engine that produced it.
+re:^\{\{step\}\}/\{\{total\}\} · \{\{description\}\}$

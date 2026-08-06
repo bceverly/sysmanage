@@ -40,6 +40,26 @@ class CreateWslChildHostRequest(BaseModel):
     memory: Optional[str] = "2G"  # Memory allocation (e.g., "2G", "4096M")
     disk_size: Optional[str] = "20G"  # Disk size (e.g., "20G", "50G")
     cpus: Optional[int] = 2  # Number of vCPUs
+    # Windows Server child hosts (Phase 12.5).  Only read when the selected
+    # distribution is a Windows one; ignored entirely for Linux/BSD guests.
+    #
+    # NOTE these carry PLAINTEXT secrets, unlike ``password`` which is hashed
+    # before it leaves here.  That is forced by the platform, not a shortcut:
+    # Autounattend consumes Microsoft's base64 obfuscation of the plaintext (or
+    # the plaintext itself), and a product key must be the literal key.  They
+    # are never persisted in the child_host row — the key goes to OpenBAO and
+    # the passwords are transient (see child_host_virtualization).
+    windows_edition: Optional[str] = "standard-core"
+    windows_admin_password: Optional[str] = None
+    windows_product_key: Optional[str] = None
+    windows_timezone: Optional[str] = "UTC"
+    windows_locale: Optional[str] = "en-US"
+    windows_iso_path: Optional[str] = None
+    # Domain join is opt-in; empty domain means a workgroup machine.
+    windows_join_domain: Optional[str] = None
+    windows_domain_ou: Optional[str] = None
+    windows_domain_user: Optional[str] = None
+    windows_domain_password: Optional[str] = None
 
 
 class EnableWslRequest(BaseModel):
@@ -61,6 +81,11 @@ class ChildHostResponse(BaseModel):
     hostname: Optional[str] = None
     status: str
     installation_step: Optional[str] = None
+    # Progress telemetry (Phase 12.5).  step_at is what lets the UI say
+    # "nothing for 12 minutes" instead of spinning indefinitely.
+    installation_step_number: Optional[int] = None
+    installation_total_steps: Optional[int] = None
+    installation_step_at: Optional[str] = None
     error_message: Optional[str] = None
     created_at: str
     installed_at: Optional[str] = None

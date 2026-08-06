@@ -42,6 +42,11 @@ DYNAMIC_KEY_PREFIXES = (
     "airgap.freshness.label.",  # Phase 11 B4 — t(`airgap.freshness.label.${label}`)
     "engine.",  # Phase 11 B7 — engine plan-description envelope: t(cmd.description_key, params)
     "hostDetail.hypervisor.state.",
+    # Phase 12.5 — the Windows edition picker maps over WINDOWS_EDITIONS and
+    # calls t(edition.labelKey, edition.label), so the keys never appear as
+    # literals.  The list is the engine's own edition keys; see
+    # hostDetailTypes.WINDOWS_EDITIONS.
+    "hostDetail.windowsEdition",
     "maintenanceWindows.day.",  # Phase 14.2 — t(`maintenanceWindows.day.${d}`)
     "maintenanceWindows.state.",  # Phase 14.2 — t(`maintenanceWindows.state.${status.state}`)
     "nav.role.",  # Phase 11 — role chip uses t(`nav.role.${serverRole}`)

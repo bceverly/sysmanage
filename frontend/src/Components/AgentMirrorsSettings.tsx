@@ -253,14 +253,17 @@ const AgentMirrorsSettings: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : (
-          <DataGrid
-            rows={mirrors}
-            columns={columns}
-            getRowId={row => row.id}
-            autoHeight
-            hideFooter={mirrors.length <= 10}
-            disableRowSelectionOnClick
-          />
+          // autoHeight is deprecated in MUI DataGrid; the rest of the codebase
+          // sizes grids with a Box wrapper (PackageProfilesSettings, HostCompliancePanel).
+          <Box sx={{ height: 400 }}>
+            <DataGrid
+              rows={mirrors}
+              columns={columns}
+              getRowId={row => row.id}
+              hideFooter={mirrors.length <= 10}
+              disableRowSelectionOnClick
+            />
+          </Box>
         )}
       </CardContent>
 
