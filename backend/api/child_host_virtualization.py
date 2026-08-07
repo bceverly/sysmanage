@@ -356,42 +356,59 @@ def _is_windows_distribution(install_identifier) -> bool:
     return (install_identifier or "").strip().lower().startswith("windows-server")
 
 
+# Always sent, with a fallback: an empty edition is not "use the default", it
+# is "no edition", so a blank must not reach the engine.
+_WINDOWS_DEFAULTED = (
+    ("windows_edition", "standard-core"),
+    ("windows_timezone", "UTC"),
+    ("windows_locale", "en-US"),
+)
+
+# Sent only when the operator set them — the engine carries its own defaults.
+_WINDOWS_OPTIONAL = (
+    "windows_admin_password",
+    "windows_product_key",
+    "windows_iso_path",
+)
+
+# (leader, dependents): the dependents travel ONLY when the leader is set.
+#
+# Static networking is a group because an address with no gateway is refused by
+# the engine at plan time, so sending half of it would only move the failure
+# later.  Domain join is a group because forwarding a user/password with no
+# domain would put credentials on the config ISO for a join never attempted.
+_WINDOWS_GROUPS = (
+    ("windows_static_ip", ("windows_gateway", "windows_dns_servers")),
+    (
+        "windows_join_domain",
+        ("windows_domain_ou", "windows_domain_user", "windows_domain_password"),
+    ),
+)
+
+
+def _copy_when_set(params, request, names) -> None:
+    """Copy each named field across, skipping the ones left blank."""
+    for name in names:
+        # No getattr default: a field missing from the request model is a bug we
+        # want to hear about, not something to silently skip.
+        value = getattr(request, name)
+        if value:
+            params[name] = value
+
+
 def _add_windows_params(params, request) -> None:
     """Forward the Windows Server fields to the engine.
 
-    Only the fields the operator actually set are forwarded; the engine already
-    carries sane defaults, and sending an explicit empty string would override
-    them (an empty edition is not "use the default", it is "no edition").
+    Table-driven rather than a chain of ifs: the five groups below were five
+    near-identical branches, which pushed cognitive complexity to 18 against a
+    limit of 15 while making it easy to add a field to the wrong group.
     """
-    params["windows_edition"] = request.windows_edition or "standard-core"
-    params["windows_timezone"] = request.windows_timezone or "UTC"
-    params["windows_locale"] = request.windows_locale or "en-US"
-    if request.windows_admin_password:
-        params["windows_admin_password"] = request.windows_admin_password
-    if request.windows_product_key:
-        params["windows_product_key"] = request.windows_product_key
-    if request.windows_iso_path:
-        params["windows_iso_path"] = request.windows_iso_path
-    # Static networking travels as a group: an address with no gateway is
-    # refused by the engine at plan time, so sending half of it would only
-    # move the failure later.
-    if request.windows_static_ip:
-        params["windows_static_ip"] = request.windows_static_ip
-        if request.windows_gateway:
-            params["windows_gateway"] = request.windows_gateway
-        if request.windows_dns_servers:
-            params["windows_dns_servers"] = request.windows_dns_servers
-    # Domain join: opt-in, and the whole group only travels when a domain is
-    # named.  Forwarding a user/password with no domain would put credentials
-    # on the config ISO for a join that is never attempted.
-    if request.windows_join_domain:
-        params["windows_join_domain"] = request.windows_join_domain
-        if request.windows_domain_ou:
-            params["windows_domain_ou"] = request.windows_domain_ou
-        if request.windows_domain_user:
-            params["windows_domain_user"] = request.windows_domain_user
-        if request.windows_domain_password:
-            params["windows_domain_password"] = request.windows_domain_password
+    for name, default in _WINDOWS_DEFAULTED:
+        params[name] = getattr(request, name) or default
+    _copy_when_set(params, request, _WINDOWS_OPTIONAL)
+    for leader, dependents in _WINDOWS_GROUPS:
+        if getattr(request, leader):
+            _copy_when_set(params, request, (leader,) + dependents)
 
 
 def _store_windows_product_key(session, request, child_name):

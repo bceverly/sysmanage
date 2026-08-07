@@ -1456,7 +1456,13 @@ jobs:
           # Regenerate the apt Packages/Release index over the full pool.
           cd repo/server/deb
           dpkg-scanpackages pool/ /dev/null > dists/stable/main/binary-amd64/Packages
-          gzip -9c dists/stable/main/binary-amd64/Packages > dists/stable/main/binary-amd64/Packages.gz
+          # -n omits gzip's timestamp+name header.  Without it the .gz is
+          # byte-different on EVERY regeneration even when the content is
+          # identical, while staying the same size — which the sync below then
+          # has to notice.  Deterministic output also makes the repo
+          # reproducible.  (Mirrors scripts/build-apt-repo.sh in the agent repo,
+          # where the same omission caused a permanent "Hash Sum mismatch".)
+          gzip -9nc dists/stable/main/binary-amd64/Packages > dists/stable/main/binary-amd64/Packages.gz
           cd dists/stable
           {
             echo "Date: $(date -R -u)"
@@ -1481,7 +1487,24 @@ jobs:
           cd "${{ github.workspace }}"
 
           # Publish to R2 (additive — never deletes; retention is `make prune-repo`).
-          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --size-only --only-show-errors
+          #
+          # NOT --size-only.  An apt `Release` is fixed-width — same headers,
+          # fixed-length hex digests — so a regenerated one is almost always
+          # EXACTLY the same size as the one it replaces (2000 bytes today).
+          # `aws s3 sync --size-only` compares size alone, decides it is
+          # unchanged, and never uploads it, leaving a STALE Release describing
+          # indexes that have since been replaced.  That broke the AGENT repo on
+          # 2026-08-07 ("File has unexpected size (700 != 701)") and did not
+          # clear on retry; this repo had the identical exposure.  Default sync
+          # compares size AND mtime, which is what we want.
+          #
+          # Release files go LAST: apt reads Release, then fetches the indexes it
+          # names, so those must already be live when a client sees the new one.
+          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
+            --exclude "*/dists/*/Release" \
+            --exclude "*/dists/*/Release.gpg" \
+            --exclude "*/dists/*/InRelease"
+          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors
           echo "Published SysManage Server v$VERSION to https://repo.sysmanage.org/server/"
 
       - name: Trigger R2 retention prune (keep latest 5)
