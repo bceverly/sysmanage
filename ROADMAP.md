@@ -3703,17 +3703,35 @@ MSI installs cleanly inside the sandbox.
       `komac update --submit … sysmanage.sysmanage-agent`.  No workflow change
       needed now that the package exists in the catalog — the new→update
       fallback (manual `komac new`) is no longer hit.  **Sole remaining
-      requirement: the `WINGET_PKGS_TOKEN` repo secret** (PAT w/ `public_repo`
-      on the winget-pkgs fork) on both repos; without it the job warns + exits 0.
-- [x] Verify the next release tag auto-bumps the manifest via `komac update`
-      (pending the first tagged release after the merge).
-      *(**Ticked pre-emptively on 2026-08-04 — deliberately, not on evidence.**
-      The automation is in place and the failure classification + PR-existence
-      guard were fixed and tested, but the only real proof is a tagged release
-      actually driving `komac update` against winget-pkgs, which has not happened
-      since the merge. Ticking now so the next tagged push is the test: if the
-      winget job fails or skips, this box is wrong and goes back to `[ ]`.
-      Check the winget step of the release run after the next tag.)*
+      requirement: the `WINGET_PKGS_TOKEN` repo secret** (classic PAT with
+      `public_repo` **and** `workflow` — see the item below for why `workflow`
+      is mandatory) on both repos; without it the job warns + exits 0.
+- [ ] Verify the next release tag auto-bumps the manifest via `komac update`.
+      *(**Root cause found and fixed 2026-08-07; awaiting proof from CI.**
+      Tag v3.5.1.5 failed with "bceverly does not have the correct permissions
+      to execute `CreateRef`". The token was NOT expired and NOT under-scoped for
+      the operation it appeared to be doing — it could create refs on the fork
+      over both REST and GraphQL when tested directly.
+
+      The real cause: `microsoft/winget-pkgs` contains Actions **workflow
+      files**, komac bases its branch on upstream HEAD, and GitHub refuses a
+      classic PAT lacking the **`workflow`** scope any push that introduces or
+      updates one. It surfaces that as a `CreateRef` permission error naming
+      neither the scope nor the file. Upstream had recently added
+      `.github/workflows/manifest-validation-diagnosis.lock.yml`, which the fork
+      did not have — so this began failing with no change on our side, which is
+      why the June submissions worked.
+
+      Giveaway: syncing the fork states it outright — *"refusing to allow a
+      Personal Access Token to create or update workflow ... without `workflow`
+      scope"*. A token with `repo, workflow` then drove komac to exit 0 and
+      opened the PR for 3.5.1.5.
+
+      Fixed: both repos' workflows now say `public_repo` AND `workflow`, and both
+      gained a **preflight that checks the token's scopes before running komac**,
+      so a missing scope fails in one line instead of after a full release.
+      This box stays open until CI — not a local run — drives `komac update` to
+      a PR on a tagged release.)*
 
 #### 12.10 Federation wire protocol
 

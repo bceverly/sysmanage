@@ -2923,12 +2923,13 @@ jobs:
   homebrew-tap:
     name: Homebrew tap (Casks/sysmanage.rb)
     runs-on: ubuntu-latest
-    # Publish failures (transient network, upstream outage, missing
-    # secrets, first-time submission gates, etc.) must NOT mark the
-    # release workflow red or cancel sibling publish jobs.  The
-    # release page itself is created by the ``release`` job earlier
-    # in the chain; downstream publish jobs are best-effort fan-out.
-    continue-on-error: true
+    # NO continue-on-error — see winget-manifest for the full rationale.
+    # A publish channel that fails silently is one nobody notices is broken:
+    # on 2026-08-07 an entire release shipped GREEN with winget broken, the
+    # only clue a red X inside an apparently successful job.  Expected
+    # non-failures (unset optional secret, dry-run mode) already `exit 0`
+    # inside the steps, and nothing `needs:` these jobs, so failing one
+    # cancels no siblings.
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
 
@@ -3046,7 +3047,13 @@ jobs:
   winget-manifest:
     name: winget-pkgs manifest (komac)
     runs-on: ubuntu-latest
-    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    # NO continue-on-error — deliberately unlike the sibling publish jobs.
+    # On 2026-08-07 the agent repo's winget submission failed for an entire
+    # release while the run showed GREEN; the only clue was a red X on a step
+    # inside an apparently successful job.  A publish channel that fails
+    # silently is one nobody notices is broken.  Nothing `needs:` this job, so
+    # failing it cancels no siblings, and the expected non-failures (dry-run,
+    # unset token, first-submission gate) already `exit 0` inside the step.
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
 
@@ -3156,12 +3163,37 @@ jobs:
             echo "::warning::  1. Fork https://github.com/microsoft/winget-pkgs"
             echo "::warning::     (the fork must be on the same account whose"
             echo "::warning::     PAT you create below)."
-            echo "::warning::  2. Create a classic GitHub PAT with 'public_repo'"
-            echo "::warning::     scope (or fine-grained PAT with PR write on"
-            echo "::warning::     the fork)."
+            echo "::warning::  2. Create a classic GitHub PAT with BOTH the"
+            echo "::warning::     'public_repo' AND 'workflow' scopes.  'workflow'"
+            echo "::warning::     is NOT optional: winget-pkgs contains Actions"
+            echo "::warning::     workflow files and GitHub refuses a PAT without"
+            echo "::warning::     it any push that touches them — reported as a"
+            echo "::warning::     confusing CreateRef permission error."
+            echo "::warning::     (Fine-grained: Contents R+W AND Pull requests R+W.)"
             echo "::warning::  3. Paste the PAT into this repo's secrets as"
             echo "::warning::     WINGET_PKGS_TOKEN."
             exit 0
+          fi
+
+          # Same preflight as sysmanage-agent: catch a missing 'workflow' scope
+          # here, in one line, instead of after a full release run.  Diagnosed
+          # 2026-08-07 — the token was valid and could create refs directly, and
+          # komac still failed with a permissions error that named neither the
+          # scope nor the workflow file responsible.
+          scopes=$(curl -sSI -H "Authorization: Bearer ${WINGET_PKGS_TOKEN}" \
+                     https://api.github.com/user 2>/dev/null \
+                   | grep -i '^x-oauth-scopes:' | cut -d' ' -f2- | tr -d '\r')
+          if [ -n "$scopes" ]; then
+            echo "WINGET_PKGS_TOKEN scopes: $scopes"
+            case ",${scopes// /}," in
+              *,workflow,*) : ;;
+              *) echo "::error::WINGET_PKGS_TOKEN is missing the 'workflow' scope."
+                 echo "::error::Fix: https://github.com/settings/tokens/new with"
+                 echo "::error::     [x] public_repo  and  [x] workflow"
+                 exit 1 ;;
+            esac
+          else
+            echo "::warning::Could not read x-oauth-scopes (fine-grained PAT?)."
           fi
 
           # Resolve the komac release asset for Linux x86_64.  komac
@@ -3274,7 +3306,13 @@ jobs:
   aur:
     name: AUR (sysmanage)
     runs-on: ubuntu-latest
-    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    # NO continue-on-error — see winget-manifest for the full rationale.
+    # A publish channel that fails silently is one nobody notices is broken:
+    # on 2026-08-07 an entire release shipped GREEN with winget broken, the
+    # only clue a red X inside an apparently successful job.  Expected
+    # non-failures (unset optional secret, dry-run mode) already `exit 0`
+    # inside the steps, and nothing `needs:` these jobs, so failing one
+    # cancels no siblings.
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
 
@@ -3413,7 +3451,13 @@ jobs:
   freebsd-ports:
     name: FreeBSD ports tree (artifact)
     runs-on: ubuntu-latest
-    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    # NO continue-on-error — see winget-manifest for the full rationale.
+    # A publish channel that fails silently is one nobody notices is broken:
+    # on 2026-08-07 an entire release shipped GREEN with winget broken, the
+    # only clue a red X inside an apparently successful job.  Expected
+    # non-failures (unset optional secret, dry-run mode) already `exit 0`
+    # inside the steps, and nothing `needs:` these jobs, so failing one
+    # cancels no siblings.
     needs: [release]
     if: |
       (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
@@ -3508,7 +3552,13 @@ jobs:
   openbsd-ports:
     name: OpenBSD ports tree (artifact)
     runs-on: ubuntu-latest
-    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    # NO continue-on-error — see winget-manifest for the full rationale.
+    # A publish channel that fails silently is one nobody notices is broken:
+    # on 2026-08-07 an entire release shipped GREEN with winget broken, the
+    # only clue a red X inside an apparently successful job.  Expected
+    # non-failures (unset optional secret, dry-run mode) already `exit 0`
+    # inside the steps, and nothing `needs:` these jobs, so failing one
+    # cancels no siblings.
     needs: [release]
     if: |
       (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
@@ -3601,7 +3651,13 @@ jobs:
   netbsd-pkgsrc:
     name: NetBSD pkgsrc tree (artifact)
     runs-on: ubuntu-latest
-    continue-on-error: true  # Best-effort publish — see homebrew-tap rationale.
+    # NO continue-on-error — see winget-manifest for the full rationale.
+    # A publish channel that fails silently is one nobody notices is broken:
+    # on 2026-08-07 an entire release shipped GREEN with winget broken, the
+    # only clue a red X inside an apparently successful job.  Expected
+    # non-failures (unset optional secret, dry-run mode) already `exit 0`
+    # inside the steps, and nothing `needs:` these jobs, so failing one
+    # cancels no siblings.
     needs: [release]
     if: |
       (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') &&
