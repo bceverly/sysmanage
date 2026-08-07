@@ -41,14 +41,19 @@ This document provides a detailed roadmap for realizing all features in both ope
 30. [Phase 15: Stabilization](#phase-15-stabilization)
 31. [Phase 16: Content Lifecycle Management (Enterprise)](#phase-16-content-lifecycle-management-enterprise)
 32. [Phase 17: Content Distribution & Image-Mode Hosts (Enterprise)](#phase-17-content-distribution--image-mode-hosts-enterprise)
-33. [Phase 18: Provisioning & Discovery (Enterprise)](#phase-18-provisioning--discovery-enterprise)
+33. [Phase 18: Provisioning & Discovery](#phase-18-provisioning--discovery)
 34. [Phase 19: Stabilization](#phase-19-stabilization)
 35. [Phase 20: Configuration Management & Drift (Enterprise)](#phase-20-configuration-management--drift-enterprise)
-36. [Phase 21: Proactive Operations & Advisor (Enterprise)](#phase-21-proactive-operations--advisor-enterprise)
-37. [Phase 21.5: Mobile Device Management (Community / Pro+ / Enterprise)](#phase-215-mobile-device-management-community--pro--enterprise)
-38. [Phase 22: Stabilization & v4.0 GA](#phase-22-stabilization--v40-ga)
-38. [Release Schedule Summary](#release-schedule-summary)
-39. [Module Migration Plan](#module-migration-plan)
+36. [Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)](#phase-21-endpoint-facts--proactive-advisor-enterprise)
+37. [Phase 22: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)](#phase-22-mobile-fleet-visibility--uem-ingestion-community--pro--enterprise)
+38. [Phase 23: Mobile Companion App & Compliance (Pro+ / Enterprise)](#phase-23-mobile-companion-app--compliance-pro--enterprise)
+39. [Phase 24: Stabilization & v5.0 GA](#phase-24-stabilization--v50-ga)
+40. [Phase 25: Expanded Agent Architecture & Packaging (Community / OSS)](#phase-25-expanded-agent-architecture--packaging-community--oss)
+41. [Phase 26: Security Tooling Coexistence (Enterprise)](#phase-26-security-tooling-coexistence-enterprise)
+42. [Phase 27: Apple Native MDM (Enterprise)](#phase-27-apple-native-mdm-enterprise)
+43. [Phase 28: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)](#phase-28-android-native-mdm--zero-touch-enrollment-pro--enterprise)
+44. [Release Schedule Summary](#release-schedule-summary)
+45. [Module Migration Plan](#module-migration-plan)
 
 ---
 
@@ -487,7 +492,7 @@ the ladder front-loads gains then tapers:
 | **Phase 13 (Enterprise GA)** — install the ratchet | ≥12% floor ✅ | ≥25% target → **~50% achieved, floor ≥48** ✅ | ≥25% target → **~54% achieved, floor ≥53** ✅ |
 | **Phase 15 (Stabilization)** | 30% ✅ (measured ~34%) | 40% ✅ (already met) | 30% ✅ (already met) |
 | **Phase 19 (Stabilization)** | 50% | 55% | 50% ✅ (already met) |
-| **Phase 22 (Stabilization & v4.0 GA)** | **70%** | **70%** | **70%** |
+| **Phase 24 (Stabilization & v5.0 GA)** | **70%** | **70%** | **70%** |
 
 **OSS frontend line-coverage ramp to Python parity (revised):** rather than
 the coarse table rungs above, the OSS frontend now climbs its enforced **line**
@@ -1118,11 +1123,11 @@ shipped, the generic handlers should be implemented early as a Phase 3 prerequis
 
 2. **Container Engine Testing**
    - [x] LXD container lifecycle testing on Ubuntu — `sysmanage-agent/tests/integration/test_lxd_lifecycle.py` (7 tests) drives `LxdOperations` through stop → start → restart → delete against a real Alpine container created via `lxc launch` as test setup; observable state verified via `lxc list` between transitions; auto-skips when LXD daemon isn't available
-   - *(WSL instance lifecycle testing on Windows — **moved to Phase 23 on 2026-08-04.**
+   - *(WSL instance lifecycle testing on Windows — **moved to Phase 25 on 2026-08-04.**
      Blocked on GitHub rather than on us: `actions/runner-images` [#10563](https://github.com/actions/runner-images/issues/10563)
      asking for WSL2 on hosted Windows runners was closed as *not planned*, and a
      job cannot switch WSL versions in-build because that needs a reboot. Re-check
-     at Phase 23.)*
+     at Phase 25.)*
    - [x] Verify read-only mode for unlicensed users
 
 3. **Security Engine Testing**
@@ -3497,8 +3502,8 @@ deliberately stopped at the docs body paragraphs.
 | OpenBSD ports (workflow builds; not yet upstream-submitted) | OpenBSD | ⚠️ tarball-published only |
 | **winget** | Windows | ✅ merged 2026-06-08 — `sysmanage.sysmanage` (#376004) + `sysmanage.sysmanage-agent` (#376005) are in `microsoft:master`; `komac update` runs on tag.  (Earlier sandbox-validation stall on PR #375773 is resolved.) |
 | **Homebrew tap (``bceverly/tap/sysmanage-agent``)** | macOS, Linux via Linuxbrew | ✅ auto-published on every release tag |
-| **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (deferred to Phase 22 — see “Consumer app-store distribution”) |
-| **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (deferred to Phase 22 — see “Consumer app-store distribution”) |
+| **Microsoft Store (MSIX)** | Windows | 🔜 in scope — needs `runFullTrust`/privileged-helper identity (deferred to Phase 24 — see “Consumer app-store distribution”) |
+| **Mac App Store** | macOS (sandboxed) | 🔜 in scope — needs sandboxed-UI + privileged-helper split (deferred to Phase 24 — see “Consumer app-store distribution”) |
 | FreeBSD ports | FreeBSD | ❌ not published, not consumed (direct .pkg today) |
 | NetBSD pkgsrc | NetBSD | ❌ not published, not consumed |
 | AUR (``sysmanage-agent``) | Arch | ✅ auto-published on every release tag |
@@ -3550,7 +3555,7 @@ direct GitHub-release URLs cannot easily be mirrored).
        2026-05-12 (manual TTY step); future releases auto-update
        via ``komac update`` in the build-and-release workflow.
        Microsoft Store submission for the "official" channel
-       is deferred to Phase 22 (see "Consumer app-store
+       is deferred to Phase 24 (see "Consumer app-store
        distribution") — it is gated on a Partner Center account,
        not on code.
      * **Homebrew tap** — ``bceverly/homebrew-tap`` repo exists and
@@ -5687,7 +5692,7 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ## Phase 19: Stabilization
 
-**Target Release:** v3.5.x
+**Target Release:** v3.6.0.0
 **Focus:** Harden content lifecycle + provisioning across distros/providers; air-gap + federation interplay; performance on large content sets.
 
 ### Agent bandwidth — send package deltas, not the whole catalog
@@ -5859,21 +5864,6 @@ close the gap between our output and the parsers that consume it.
       winget, so this belongs in the agent, not in the provisioning engine.
       Whatever lands should also make "the MSI succeeded but the service is
       absent" a loud, detectable state rather than a silent one.
-- [ ] **Native agent channels for the last four platforms.** Carried out of
-      Phase 12 on 2026-08-06 so closing that phase does not lose the work.
-      Eleven platforms install through an OS-native channel (Launchpad PPA,
-      Copr, OBS, winget, Homebrew, AUR — all `legacy=False` in
-      `_AGENT_INSTALL`); **alpine / freebsd / openbsd / netbsd** remain
-      `legacy=True` direct-download because no consumable upstream apk/pkg
-      repository is published for them yet, and flipping the engine entry
-      without one breaks installs.
-
-      Three Phase 12 acceptance criteria are limited by exactly this and by
-      nothing else: native-package install, `apt-get upgrade`-style automatic
-      pickup of new releases, and the in-app "Update Agent" button — which
-      silently no-ops on those four. Publishing the repositories closes all
-      three at once.
-
 - [ ] **Child hosts enroll with NO TENANT — they need an enrollment token.**
       A VM or container created through child-host provisioning registers
       server-scoped, because `_build_agent_config_yaml`
@@ -5907,6 +5897,28 @@ close the gap between our output and the parsers that consume it.
       loudly rather than silently falling back to server scope when
       multi-tenancy is on and the parent's tenant cannot be determined.
 
+### Agent capability advertisement (moved out of the architecture phase, 2026-08-07)
+
+Not architecture work: it is about agent HETEROGENEITY, and it is needed
+now.  alpine/freebsd/openbsd/netbsd already run reduced-capability agents,
+and the server will happily dispatch a command they cannot run.  It also
+underpins the mobile companion app (Phase 22), where a device reports
+inventory but executes nothing — the limiting case of a limited agent.
+
+Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
+
+- [ ] Agent exposes a queryable **capability API** (a local endpoint plus a field carried in the enrollment / `SYSTEM_INFO` payload) that lists the capabilities the running build actually supports — its collectors, action handlers, and feature groups (e.g. package management, hardware inventory, AV/firewall actuation, virtualization, container ops, script execution, image-mode, secrets, etc.) — on this OS/arch
+- [ ] **Baseline population:** existing agents/versions advertise the FULL capability set (nothing regresses); the capability schema is versioned so new capabilities can be added without breaking older agents, and unknown capabilities from a newer agent degrade gracefully server-side
+- [ ] **Reduced-capability builds:** an agent lacking a feature (missing native library for an arch, unsupported old OS) advertises only the subset it supports — the mechanism to build/ship such trimmed agents is the enabling piece this phase sets up
+- [ ] Server **stores + normalizes** each host's capability set (persisted on the host record, refreshed on re-enroll / `SYSTEM_INFO`); a host whose set is a strict subset of the current baseline is flagged **limited**
+- [ ] **Host-detail** screen shows the host's capability list (supported vs. unavailable, with the reason where known — e.g. "no build for riscv64", "OS too old")
+- [ ] **Hosts list** surfaces a **"limited"** badge/column so a fleet with mixed-capability agents is visible at a glance; filterable/sortable by it
+- [ ] **Gate actions on advertised capability** — don't dispatch a command a host can't run; surface a clear "not supported on this agent" instead of a runtime failure
+- [ ] Docs + i18n/l10n
+
+**Estimated Size:** ~2,000 lines (agent capability API + server model/migration + host-detail & hosts-list UI + action gating)
+
+
 ### Exit Criteria
 
 - [ ] Content View publish/promote validated on apt + dnf + snap + container content
@@ -5934,7 +5946,7 @@ close the gap between our output and the parsers that consume it.
 
 ## Phase 20: Configuration Management & Drift (Enterprise)
 
-**Target Release:** v3.6.0.0
+**Target Release:** v3.7.0.0
 **Focus:** Move from ad-hoc script execution to desired-state config + drift detection.
 
 **Market gap addressed:** Satellite Ansible/Puppet config management; Insights configuration drift.
@@ -5958,7 +5970,31 @@ close the gap between our output and the parsers that consume it.
 
 **Estimated Size:** ~3,000 lines
 
-#### 20.3 Endpoint Fact Substrate — osquery (Community substrate · Professional management)
+### Exit Criteria
+
+- [ ] **Coverage ladder rung: OSS frontend `lines` floor to 60.** Added 2026-08-07
+      to fix a contradiction — the ladder climbs +10 per stabilization phase, but
+      only 19 and 22 remained before GA while 22 demanded ≥70, a 20-point jump
+      that skipped a defined rung.  Rungs now sit in 19 (50), 20 (60) and 21 (70),
+      so 22's criterion becomes a verification rather than a cliff.
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 21: Endpoint Facts & Proactive Advisor (Enterprise)
+
+**Target Release:** v3.8.0.0
+**Focus:** Insights-style proactive recommendations + malware detection — from reactive reporting to prescriptive guidance.
+
+**Market gap addressed:** Red Hat Insights advisor / recommendations + malware detection.
+
+#### 21.1 Endpoint Fact Substrate — osquery (Community substrate · Professional management)
+
+*Moved from 20.3 on 2026-08-07: this is the fact substrate the advisor,
+`compliance_engine` and `vuln_engine` consume, so it belongs with its consumers
+rather than as a third pillar of a config-management phase.  It must land before
+21.2 — the advisor reasons over these facts.*
 
 osquery embedded as the agent-side fact/state collection substrate — **the one
 EDR-adjacent tool we embed rather than integrate** (Apache-2.0, so it's clean to
@@ -5986,21 +6022,8 @@ not the moat.**
 
 **Estimated Size:** ~3,500 lines
 
-### Exit Criteria
 
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
-- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
-
----
-
-## Phase 21: Proactive Operations & Advisor (Enterprise)
-
-**Target Release:** v3.7.0.0
-**Focus:** Insights-style proactive recommendations + malware detection — from reactive reporting to prescriptive guidance.
-
-**Market gap addressed:** Red Hat Insights advisor / recommendations + malware detection.
-
-#### 21.1 advisor_engine (Enterprise)
+#### 21.2 advisor_engine (Enterprise)
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3).** **Shipped/curated rule
 > packs are global reference data** → the `shared` partition, one copy
@@ -6018,7 +6041,7 @@ not the moat.**
 
 **Estimated Size:** ~5,000 lines
 
-#### 21.2 Malware Detection (Enterprise)
+#### 21.3 Malware Detection (Enterprise)
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3).** The malware
 > signature/YARA **feed is global reference data** — identical for every customer —
@@ -6033,64 +6056,30 @@ not the moat.**
 
 **Estimated Size:** ~2,500 lines
 
-#### 21.3 Incident Response & Threat Hunting — Velociraptor integration (Enterprise)
-
-The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
-`alerting_engine` findings. SysManage stays the management/orchestration plane;
-Velociraptor provides the DFIR/live-hunt capability it does not. **Integrate over
-its API — do NOT embed** (AGPLv3, and API integration avoids the second-agent burden
-being ours).
-
-- [ ] Orchestrate Velociraptor hunts / artifact collections from a SysManage finding
-      via `automation_engine`, gated behind operator approval + maintenance windows
-- [ ] Surface hunt/collection results in the host-detail UI + alert feed
-- [ ] Customer-run Velociraptor server (connection + credentials managed per tenant);
-      air-gap-compatible
-- [ ] i18n/l10n
-
-**Estimated Size:** ~2,500 lines
-
-#### 21.4 Security Tooling Coexistence — Wazuh ingestion (Enterprise)
-
-Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
-alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
-feed — a "coexist with your incumbent HIDS/SIEM, no rip-and-replace" play. We do
-**not** build detection on Wazuh (it overlaps `vuln_engine` / `compliance_engine` /
-`av_management_engine`, is GPLv2, and is a heavy Elastic-based stack) — it is a
-one-way ingestion connector only.
-
-- [ ] Ingest Wazuh alerts / FIM events / SCA (CIS) results via the Wazuh API/indexer;
-      map to SysManage hosts (host→tenant index)
-- [ ] Feed ingested signals into `advisor_engine` correlation + `alerting_engine`;
-      surface in host detail
-- [ ] Per-tenant Wazuh endpoint config; air-gap-compatible
-- [ ] i18n/l10n
-
-**Estimated Size:** ~2,000 lines
-
 ### Exit Criteria
 
+- [ ] **Coverage ladder rung: OSS frontend `lines` floor to 70** — the last rung before GA verifies it (added 2026-08-07 with the 20/21 rungs).
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
 
-## Phase 21.5: Mobile Device Management (Community / Pro+ / Enterprise)
+## Phase 22: Mobile Fleet Visibility & UEM Ingestion (Community / Pro+ / Enterprise)
 
-**Target Release:** v3.8.0.0
+**Target Release:** **v4.0.0.0**
 **Focus:** Extend the managed fleet beyond servers and desktops to enterprise phones & tablets — inventory + OS/patch compliance across tiers, up to full native MDM control at Enterprise — so the v4.0 "manage everything" promise covers every endpoint class.
 
 **Market gap addressed:** Microsoft Intune / Jamf Pro / VMware Workspace ONE / Kandji / Google Android Enterprise — the UEM/MDM slice, folded into the *same* single pane of glass (OS-lifecycle, compliance, advisory, alerting) as the rest of the fleet rather than a bolt-on.
 
-**Why here (and why 21.5):** phases 16–21 deepen *server/desktop* management toward Red Hat Satellite/Insights parity. Mobile is an orthogonal *device-class* expansion, so it slots in as a decimal phase (à la 12.5) right before the GA — where it makes v4.0's "manage everything" literally true (servers + desktops + BSD + mobile) without interrupting the parity arc, and without renumbering Phase 22 or anything above it.
+**Why here (and why it is v4.0):** phases 16–21 deepen *server/desktop* management toward Red Hat Satellite/Insights parity. Mobile is an orthogonal *device-class* expansion, and admitting a new device class — with its own schema, enrollment model and lifecycle — is a change in what the product *is*, not an increment on managing servers. That is what earns the **major** bump: from this release "manage everything" is literally true (servers + desktops + BSD + mobile). It lands before the GA so the parity release ships with mobile already in the fold, without interrupting the parity arc itself.
 
 **Design note — this is NOT a ported agent.** iOS and Android forbid a persistent privileged daemon (sandboxing + background-execution limits), so there is no `sysmanage-agent` port. Management runs over vendor MDM/UEM channels and is mostly *server-side*; the only device-side pieces are an optional small companion app and/or an OS-native enrollment profile — separate codebases (Swift/Apple MDM, Android Enterprise) from the agent.
 
-> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (21.5.3) and the self-hosted companion app (21.5.2), both of which reach only the customer's own infra. Called out per sub-phase.
+> **⚠️ Self-hosted / air-gap caveat.** Native mobile management needs outbound cloud reachability the rest of SysManage does not: **Apple MDM requires Apple's APNs** and the **Android Management API is Google-cloud-hosted**, so the native-MDM tiers are **not air-gappable**. The air-gap-friendly options are ingest-from-an-existing-UEM (22.3) and the self-hosted companion app (22.2), both of which reach only the customer's own infra. Called out per sub-phase.
 
 > **⚠️ Multi-tenancy storage (same rule as 14.1/14.3/21.1).** Mobile **device inventory + compliance findings are per-host/tenant data** → `tenant` partition, soft-referencing shared ids (no cross-partition FK). The **mobile OS release / EOL reference feed is global** → reuse the `shared` partition from 14.3 (one copy, offline-updatable), never per tenant.
 
-#### 21.5.1 Mobile device model + fleet visibility (Community / OSS)
+#### 22.1 Mobile device model + fleet visibility (Community / OSS)
 
 The OSS floor: mobile is a first-class, *visible* endpoint class — no automated management, but you can see what you know about.
 
@@ -6102,19 +6091,7 @@ The OSS floor: mobile is a first-class, *visible* endpoint class — no automate
 
 **Estimated Size:** ~2,500 lines
 
-#### 21.5.2 Companion inventory app — BYOD self-report (Pro+)
-
-A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in — **visibility only, never enforcement.**
-
-- [ ] Minimal iOS + Android app: report OS version/build + Android `Build.VERSION.SECURITY_PATCH` + model on a schedule / push wake
-- [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
-- [ ] Air-gap-friendly (talks only to the customer's SysManage server)
-- [ ] i18n/l10n
-- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 21.5.1 one.
-
-**Estimated Size:** ~3,500 lines (app + server)
-
-#### 21.5.3 UEM/MDM ingestion — single pane of glass (Pro+) ⭐
+#### 22.2 UEM/MDM ingestion — single pane of glass (Pro+) ⭐
 
 Highest value, lowest effort: don't *be* the MDM — **ingest from the one they already run.** Makes SysManage the single pane of glass across servers + desktops + mobile.
 
@@ -6126,30 +6103,53 @@ Highest value, lowest effort: don't *be* the MDM — **ingest from the one they 
 
 **Estimated Size:** ~5,000 lines
 
-#### 21.5.4 Android native MDM — Android Management API (Pro+ inventory → Enterprise policy)
+### Licensing summary
 
-Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
+- **Community / OSS:** device model + fleet visibility + manual/self-report registration (22.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
+- **Pro+ (Professional):** aggregate **visibility & compliance** — companion app (22.2), ingest-from-existing-UEM (22.3 ⭐), Android inventory (22.4 read), and mobile EOL/patch compliance + alerting (22.4). The "single pane of glass over the mobile you already manage" tier — no device control.
+- **Enterprise:** compliance *enforcement* + alerting on ingested devices (22.4).  **Being** the MDM — native iOS/Android and zero-touch enrollment orchestration / zero-touch (22.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
 
-- [ ] `android_management_engine`: enterprise registration, enrollment tokens, device-state read (OS version, `securityPatchLevel`, compliance, apps) — **inventory/read is Pro+**
-- [ ] Policies (password/compliance rules, app allow/deny, managed config), remote lock / reset-password, work-profile vs fully-managed, OS-update controls — **Enterprise**
-- [ ] Cloud dependency (Google) — **not air-gappable**
+### Exit Criteria
+
+- [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector
+      (22.3) — the native Android/Apple paths moved to Phase 26 with the split,
+      so this phase is validated on ingestion alone
+- [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
+- [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
+- [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 23: Mobile Companion App & Compliance (Pro+ / Enterprise)
+
+**Target Release:** v4.1.0.0
+**Focus:** Our own inventory path for devices no UEM covers, and the assessment
+layer that turns mobile inventory into findings — EOL/patch compliance, alerts
+and enforcement.
+
+**Why split from Phase 22 (2026-08-07):** the mobile work totalled ~14,000
+estimated lines, second-largest in the roadmap. The seam is *where the data comes
+from and what you do with it*: Phase 22 populates the fleet from systems the
+customer already runs (ingestion), while this phase adds a first-party reporting
+path and the compliance/alerting layer on top. Phase 22 must land first — this
+phase assesses devices it cannot itself enrol.
+
+#### 23.1 Companion inventory app — BYOD self-report (Pro+)
+
+A thin, customer-deployable iOS/Android app for visibility where full MDM is overkill (BYOD). Honest about its limits: uninstallable, sandbox-limited, best-effort background check-in — **visibility only, never enforcement.**
+
+- [ ] Minimal iOS + Android app: report OS version/build + Android `Build.VERSION.SECURITY_PATCH` + model on a schedule / push wake
+- [ ] Token/QR enrollment against a tenant; check-ins land in `mobile_device` (tenant partition)
+- [ ] Air-gap-friendly (talks only to the customer's SysManage server)
 - [ ] i18n/l10n
+- **Tier note:** the app + richer reporting/compliance is Pro+; the raw self-report endpoint it uses is the OSS 22.1 one.
 
-**Estimated Size:** ~4,500 lines
+**Estimated Size:** ~3,500 lines (app + server)
 
-#### 21.5.5 iOS/iPadOS native MDM — Apple MDM protocol (Enterprise)
-
-Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
-
-- [ ] `mdm_engine`: Apple MDM server — APNs push, signed enrollment profiles, device queries (DeviceInformation, InstalledApplicationList, OS version, AvailableOSUpdates)
-- [ ] Enrollment: Automated Device Enrollment (ABM/ASM/DEP) for corporate + user-enrollment for BYOD
-- [ ] Restriction/compliance/configuration profiles; remote lock / wipe / clear-passcode; force OS update (supervised)
-- [ ] Apple MDM **push-certificate** dependency + APNs reachability — **not air-gappable**
-- [ ] i18n/l10n
-
-**Estimated Size:** ~10,000 lines
-
-#### 21.5.6 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
+#### 23.2 Mobile compliance, lifecycle & alerting (Pro+ / Enterprise)
 
 Make the inventory *actionable* — reuse existing engines rather than rebuild.
 
@@ -6161,39 +6161,29 @@ Make the inventory *actionable* — reuse existing engines rather than rebuild.
 
 **Estimated Size:** ~3,000 lines
 
-#### 21.5.7 Enrollment orchestration & zero-touch (Enterprise)
-
-The operational product: getting devices enrolled at scale.
-
-- [ ] Apple ABM/ASM (ADE) + Android Enterprise zero-touch bulk enrollment; BYOD work-profile / user-enrollment flows
-- [ ] Ownership (corporate vs BYOD), tenant / site / access-group assignment on enrollment; bulk token issuance
-- [ ] Federation-aware (enroll centrally, devices belong to a site) where applicable
-- [ ] i18n/l10n
-
-**Estimated Size:** ~4,000 lines
-
-### Licensing summary
-
-- **Community / OSS:** device model + fleet visibility + manual/self-report registration (21.5.1). You can *see* devices you or a companion app report; no automated management, no curated EOL/compliance.
-- **Pro+ (Professional):** aggregate **visibility & compliance** — companion app (21.5.2), ingest-from-existing-UEM (21.5.3 ⭐), Android inventory (21.5.4 read), and mobile EOL/patch compliance + alerting (21.5.6). The "single pane of glass over the mobile you already manage" tier — no device control.
-- **Enterprise:** **be the MDM** — native iOS (21.5.5) + Android policy (21.5.4 control), enrollment orchestration / zero-touch (21.5.7), and compliance *enforcement* + remote actions (lock/wipe/force-update).
-
 ### Exit Criteria
 
-- [ ] Mobile device inventory validated end-to-end via ≥1 ingestion connector (21.5.3) **and** the native Android path (21.5.4)
-- [ ] iOS enroll + inventory validated on ≥1 supervised device via `mdm_engine` (21.5.5)
-- [ ] Mobile OS EOL + security-patch compliance surfaces + alerts, reusing the 14.3 / advisory / alerting substrate
-- [ ] Every tier 402-clean when unlicensed; Community shows devices but gates ingestion / native-MDM / enforcement
-- [ ] Air-gap caveat documented; ingestion + companion-app paths verified reachable-only-to-customer-infra
+- [ ] Companion app reports OS version/build + patch level on ≥1 iOS and ≥1
+      Android device, landing in the tenant partition
+- [ ] Mobile OS EOL + security-patch compliance surfaces and alerts, reusing the
+      14.3 lifecycle registry and the advisory/alerting engines
+- [ ] Compliance enforcement action fires on ≥1 non-compliant device
+- [ ] Every tier 402-clean when unlicensed
+- [ ] Air-gap compatible — companion app and compliance talk only to the
+      customer's own server
 - [ ] Docs + 14-language i18n complete
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
 
-## Phase 22: Stabilization & v4.0 GA
+## Phase 24: Stabilization & v5.0 GA
 
-**Target Release:** **v4.0.0.0**
+**Target Release:** **v5.0.0.0**
 **Focus:** Full market-parity GA — content lifecycle + provisioning + config management + advisor hardened together; performance, security, docs, i18n.
 
 ### Consumer app-store distribution (moved from Phase 12, 2026-08-04)
@@ -6203,7 +6193,7 @@ a Partner Center publisher account and an Apple Developer Program org account,
 then a human review pass each.  They were holding Phase 12 open while being
 unstartable, and they are distribution polish rather than GA-blocking — winget,
 Homebrew, the distro repos and the direct installers already cover every
-supported platform.  Parked here so they land alongside the v4.0 GA push, when
+supported platform.  Parked here so they land alongside the v5.0 GA push, when
 a consumer-store presence is worth the submission overhead.
 
 ##### Microsoft Store submission (MSIX)
@@ -6269,20 +6259,20 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 ---
 
-## Phase 23: Expanded Agent Architecture Support (Community / OSS)
+## Phase 25: Expanded Agent Architecture & Packaging (Community / OSS)
 
-**Target Release:** v4.1.0.0
+**Target Release:** v5.1.0.0
 **Focus:** Run the `sysmanage-agent` on CPU architectures beyond x86-64 and arm64 — **IBM Power (ppc64le)**, **IBM Z (s390x)**, and **RISC-V (riscv64)** — so SysManage manages the enterprise iron and emerging silicon our competitors reach but we currently don't. The agent is AGPL, so this lands entirely in Community/OSS; no new Pro+ engine — it's portability, packaging, and build-matrix work.
 
 **Market gap addressed:** Red Hat Satellite / Canonical Landscape / IBM BigFix manage ppc64le + s390x fleets (RHEL, SLES, Ubuntu on Power/Z) — mainframe & Power shops are exactly the regulated enterprises we target. RISC-V is the forward bet on emerging server/edge silicon.
 
-**Why post-GA (Phase 23):** the parity arc (14–22) is about *features*; this is a *reach* expansion of an existing capability. It slots after the v4.0 GA as v4.1 without disturbing any phase numbering, and it builds directly on the arm64/QEMU cross-arch work already in place.
+**Why post-GA (Phase 25):** the parity arc (14–23) is about *features*; this is a *reach* expansion of an existing capability — the same agent on more silicon, not a new capability class, so it is a minor (**v5.1.0.0**) rather than a major. It follows the v5.0 GA and builds directly on the arm64/QEMU cross-arch work already in place.
 
 > **⚠️ Endianness — s390x is big-endian.** x86-64, arm64, ppc64le, and riscv64 are all little-endian; **s390x is big-endian** — the one place latent byte-order bugs surface. Every `struct.pack`/`ctypes`/binary-protocol/hash-of-packed-bytes assumption in the agent (and the store-and-forward queue serialization) must be endian-audited, not assumed. JSON/text paths are safe; raw-binary paths are the risk. It gets its own slice so it isn't hand-waved.
 
 > **⚠️ Native-dependency wheels.** The agent's compiled deps (notably `cryptography`'s Rust core, `psutil`) don't always ship manylinux wheels for ppc64le/s390x/riscv64 — so these arches may need a source-build toolchain (Rust + dev headers) in the package build, or vendored/pinned floors. That's the real effort, not the Python. Must preserve the Py3.9-floor and no-eager-asyncio agent constraints.
 
-#### 23.1 Portability foundation — endian audit + CI matrix (OSS)
+#### 25.1 Portability foundation — endian audit + CI matrix (OSS)
 
 - [ ] Endianness/portability audit of the agent + store-and-forward serialization; make any binary byte order explicit (no implicit native order); add a big-endian regression test leg
 - [ ] Extend `make build-all-architectures` QEMU cross-arch matrix to ppc64le / s390x / riscv64 (binfmt/QEMU already used for arm64)
@@ -6291,7 +6281,7 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 **Estimated Size:** ~2,500 lines (build/CI + audit fixes)
 
-#### 23.2 IBM Power — ppc64le packaging (OSS)
+#### 25.2 IBM Power — ppc64le packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu ppc64el) + rpm (RHEL/Fedora el9 ppc64le, SLES) + Alpine (ppc64le) agent packages; `control`/spec arch toggles like the arm64 work
 - [ ] Launchpad PPA + COPR ppc64le arch enablement
@@ -6299,7 +6289,7 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 **Estimated Size:** ~1,500 lines
 
-#### 23.3 IBM Z — s390x packaging + big-endian correctness (OSS)
+#### 25.3 IBM Z — s390x packaging + big-endian correctness (OSS)
 
 - [ ] deb (Debian/Ubuntu s390x) + rpm (RHEL/SLES s390x) agent packages
 - [ ] Big-endian correctness (23.1 audit) validated green on an emulated s390x guest: enroll → inventory → command dispatch, plus a store-and-forward round-trip across a simulated outage
@@ -6307,7 +6297,7 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 **Estimated Size:** ~1,500 lines
 
-#### 23.4 RISC-V — riscv64 packaging (OSS)
+#### 25.4 RISC-V — riscv64 packaging (OSS)
 
 - [ ] deb (Debian/Ubuntu riscv64) + Alpine (riscv64) + Fedora riscv64 (as available) agent packages
 - [ ] Handle the still-maturing wheel/toolchain story (source-build `cryptography` where no wheel exists)
@@ -6315,7 +6305,7 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 **Estimated Size:** ~1,500 lines
 
-#### 23.5 Server-side arch awareness + docs (OSS)
+#### 25.5 Server-side arch awareness + docs (OSS)
 
 - [ ] Server recognizes / normalizes / displays the new `machine_architecture` values (fleet, host detail, reports); package/repo + OS-lifecycle/EOL selection keyed by arch where relevant
 - [ ] Install docs + a supported-architecture matrix updated; agent download / repo pages list the new arches
@@ -6323,20 +6313,27 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 
 **Estimated Size:** ~1,000 lines
 
-#### 23.6 Agent capability advertisement + limited-capability surfacing (OSS)
+#### 25.6 Native agent channels for the remaining platforms (OSS)
 
-Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
+*Moved from Phase 19 on 2026-08-07 to concentrate agent packaging in one
+phase: this is the same competency as the per-arch deb/rpm/Alpine work and
+the Launchpad/COPR enablement above — repo publishing, signing, and
+first-submission gates.*
 
-- [ ] Agent exposes a queryable **capability API** (a local endpoint plus a field carried in the enrollment / `SYSTEM_INFO` payload) that lists the capabilities the running build actually supports — its collectors, action handlers, and feature groups (e.g. package management, hardware inventory, AV/firewall actuation, virtualization, container ops, script execution, image-mode, secrets, etc.) — on this OS/arch
-- [ ] **Baseline population:** existing agents/versions advertise the FULL capability set (nothing regresses); the capability schema is versioned so new capabilities can be added without breaking older agents, and unknown capabilities from a newer agent degrade gracefully server-side
-- [ ] **Reduced-capability builds:** an agent lacking a feature (missing native library for an arch, unsupported old OS) advertises only the subset it supports — the mechanism to build/ship such trimmed agents is the enabling piece this phase sets up
-- [ ] Server **stores + normalizes** each host's capability set (persisted on the host record, refreshed on re-enroll / `SYSTEM_INFO`); a host whose set is a strict subset of the current baseline is flagged **limited**
-- [ ] **Host-detail** screen shows the host's capability list (supported vs. unavailable, with the reason where known — e.g. "no build for riscv64", "OS too old")
-- [ ] **Hosts list** surfaces a **"limited"** badge/column so a fleet with mixed-capability agents is visible at a glance; filterable/sortable by it
-- [ ] **Gate actions on advertised capability** — don't dispatch a command a host can't run; surface a clear "not supported on this agent" instead of a runtime failure
-- [ ] Docs + i18n/l10n
+- [ ] **Native agent channels for the last four platforms.** Carried out of
+      Phase 12 on 2026-08-06 so closing that phase does not lose the work.
+      Eleven platforms install through an OS-native channel (Launchpad PPA,
+      Copr, OBS, winget, Homebrew, AUR — all `legacy=False` in
+      `_AGENT_INSTALL`); **alpine / freebsd / openbsd / netbsd** remain
+      `legacy=True` direct-download because no consumable upstream apk/pkg
+      repository is published for them yet, and flipping the engine entry
+      without one breaks installs.
 
-**Estimated Size:** ~2,000 lines (agent capability API + server model/migration + host-detail & hosts-list UI + action gating)
+      Three Phase 12 acceptance criteria are limited by exactly this and by
+      nothing else: native-package install, `apt-get upgrade`-style automatic
+      pickup of new releases, and the in-app "Update Agent" button — which
+      silently no-ops on those four. Publishing the repositories closes all
+      three at once.
 
 ### Exit Criteria
 
@@ -6357,6 +6354,172 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       a self-hosted Windows runner, which is a hardware/cost decision, not code.
 - [ ] Docs + 14-language i18n complete
 - [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 26: Security Tooling Coexistence (Enterprise)
+
+**Target Release:** v5.2.0.0
+**Focus:** Integrate with the security tooling customers already run, rather than
+replacing it — orchestrate Velociraptor hunts and ingest Wazuh signals into the
+advisor + alerting engines.
+
+**Why it is its own phase (split out 2026-08-07):** these were 21.3/21.4 inside
+"Proactive Operations & Advisor", which made that phase two unrelated bodies of
+work — *our* recommendation engine, and *third-party* integrations carrying
+external dependencies, per-tenant endpoint/credential config, and a completely
+different failure surface. Splitting lets the advisor ship on its own schedule
+and keeps integration risk (someone else's API, someone else's release cadence)
+out of a phase that gates GA.
+
+#### 26.1 Incident Response & Threat Hunting — Velociraptor integration (Enterprise)
+
+The **response/triage arm** for advisor (21.1), malware (21.2), `vuln_engine`, and
+`alerting_engine` findings. SysManage stays the management/orchestration plane;
+Velociraptor provides the DFIR/live-hunt capability it does not. **Integrate over
+its API — do NOT embed** (AGPLv3, and API integration avoids the second-agent burden
+being ours).
+
+- [ ] Orchestrate Velociraptor hunts / artifact collections from a SysManage finding
+      via `automation_engine`, gated behind operator approval + maintenance windows
+- [ ] Surface hunt/collection results in the host-detail UI + alert feed
+- [ ] Customer-run Velociraptor server (connection + credentials managed per tenant);
+      air-gap-compatible
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,500 lines
+
+#### 26.2 Security Tooling Coexistence — Wazuh ingestion (Enterprise)
+
+Meet customers who already run Wazuh where they are: **ingest, don't rebuild.** Wazuh
+alerts / FIM / SCA become additional inputs to `advisor_engine` (21.1) and the alert
+feed — a "coexist with your incumbent HIDS/SIEM, no rip-and-replace" play. We do
+**not** build detection on Wazuh (it overlaps `vuln_engine` / `compliance_engine` /
+`av_management_engine`, is GPLv2, and is a heavy Elastic-based stack) — it is a
+one-way ingestion connector only.
+
+- [ ] Ingest Wazuh alerts / FIM events / SCA (CIS) results via the Wazuh API/indexer;
+      map to SysManage hosts (host→tenant index)
+- [ ] Feed ingested signals into `advisor_engine` correlation + `alerting_engine`;
+      surface in host detail
+- [ ] Per-tenant Wazuh endpoint config; air-gap-compatible
+- [ ] i18n/l10n
+
+**Estimated Size:** ~2,000 lines
+
+### Exit Criteria
+
+- [ ] Velociraptor hunt dispatched from a SysManage finding and its results
+      surfaced in host detail, against a customer-run Velociraptor server
+- [ ] Wazuh alerts / FIM / SCA ingested and correlated into `advisor_engine` +
+      `alerting_engine`, with per-tenant endpoint config
+- [ ] Both integrations 402-clean when unlicensed, and documented as
+      reachable-only-to-the-customer's-own-server for air-gap
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 27: Apple Native MDM (Enterprise)
+
+**Target Release:** v6.0.0.0
+**Focus:** Be the MDM authority for iOS/iPadOS — the Apple MDM protocol itself:
+APNs push, signed enrollment profiles, device queries, restriction/configuration
+profiles, and remote lock/wipe.
+
+**Why its own phase (split 2026-08-07):** at ~10,000 estimated lines this single
+slice was larger than all of Phase 26, and it dominated a combined native-MDM
+phase of ~18,500 lines — the largest in the roadmap. It is also the most
+self-contained: a protocol implementation against Apple's spec, gated on an Apple
+push certificate and APNs reachability, sharing little with the Android path.
+
+**Not air-gappable.** APNs reachability is mandatory; Phase 22 remains the
+air-gap-compatible mobile story.
+
+#### 27.1 iOS/iPadOS native MDM — Apple MDM protocol (Enterprise)
+
+Be the MDM for Apple devices. Heaviest sub-phase (protocol + APNs + enrollment), Enterprise-only.
+
+- [ ] `mdm_engine`: Apple MDM server — APNs push, signed enrollment profiles, device queries (DeviceInformation, InstalledApplicationList, OS version, AvailableOSUpdates)
+- [ ] Enrollment: Automated Device Enrollment (ABM/ASM/DEP) for corporate + user-enrollment for BYOD
+- [ ] Restriction/compliance/configuration profiles; remote lock / wipe / clear-passcode; force OS update (supervised)
+- [ ] Apple MDM **push-certificate** dependency + APNs reachability — **not air-gappable**
+- [ ] i18n/l10n
+
+**Estimated Size:** ~10,000 lines
+
+### Exit Criteria
+
+- [ ] iOS enroll + inventory validated on ≥1 supervised device via `mdm_engine`
+- [ ] Restriction/configuration profile applied and verified on-device
+- [ ] Remote lock / wipe / clear-passcode validated
+- [ ] 402-clean when unlicensed
+- [ ] **Air-gap limitation documented prominently** — requires Apple push
+      certificate + APNs reachability
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
+- [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
+
+---
+
+## Phase 28: Android Native MDM & Zero-Touch Enrollment (Pro+ / Enterprise)
+
+**Target Release:** v6.1.0.0
+**Focus:** Android Management API enrollment and policy, plus bulk/zero-touch
+enrollment orchestration across BOTH platforms.
+
+**Why enrollment orchestration sits here:** Apple ADE/ABM and Android zero-touch
+are one feature with two back ends, and it needs both MDM implementations to
+exist — so it follows Phase 27 rather than shipping half-built alongside it.
+
+**Not air-gappable.** Google cloud reachability is mandatory.
+
+#### 28.1 Android native MDM — Android Management API (Pro+ inventory → Enterprise policy)
+
+Google hosts the heavy lifting; we integrate the API. Split by tier: **read = Pro+, control = Enterprise.**
+
+- [ ] `android_management_engine`: enterprise registration, enrollment tokens, device-state read (OS version, `securityPatchLevel`, compliance, apps) — **inventory/read is Pro+**
+- [ ] Policies (password/compliance rules, app allow/deny, managed config), remote lock / reset-password, work-profile vs fully-managed, OS-update controls — **Enterprise**
+- [ ] Cloud dependency (Google) — **not air-gappable**
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,500 lines
+
+#### 28.2 Enrollment orchestration & zero-touch (Enterprise)
+
+The operational product: getting devices enrolled at scale.
+
+- [ ] Apple ABM/ASM (ADE) + Android Enterprise zero-touch bulk enrollment; BYOD work-profile / user-enrollment flows
+- [ ] Ownership (corporate vs BYOD), tenant / site / access-group assignment on enrollment; bulk token issuance
+- [ ] Federation-aware (enroll centrally, devices belong to a site) where applicable
+- [ ] i18n/l10n
+
+**Estimated Size:** ~4,000 lines
+
+### Exit Criteria
+
+- [ ] Android enroll + policy push validated via the Android Management API
+- [ ] Zero-touch / ADE bulk enrollment validated on ≥1 platform per vendor
+- [ ] Ownership (corporate vs BYOD) + tenant/site/access-group assignment applied
+      at enrollment
+- [ ] Every tier 402-clean when unlicensed
+- [ ] **Air-gap limitation documented prominently**
+- [ ] Docs + 14-language i18n complete
+- [ ] **Audit ALL previous phases for stale open items.** Same rule as every
+      phase: walk each earlier phase, check every unticked box against the
+      actual codebase, tick what is genuinely done, and for what is not say
+      plainly whether it is real work, blocked externally, or should move or
+      be dropped.
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---
@@ -6385,12 +6548,16 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 | 17 | v3.4.0.0 | Content Distribution & Image-Mode | Snap proxy, container image content views, bootc/OSTree hosts |
 | 18.1 | v3.5.0.0 | Compute Provisioning & Auto-Enroll | Pluggable compute-provider model (remote libvirt, Proxmox), templates, first-boot auto-enroll |
 | 18.2 | v3.5.x | Bare-Metal PXE & Discovery | Readiness preflight + config advisor, PXE/kickstart, host discovery, ISO provisioning |
-| 19 | v3.5.x | Stabilization | Content lifecycle + provisioning hardening |
-| 20 | v3.6.0.0 | Configuration Management & Drift | Ansible desired-state config, drift detection + remediation, osquery fact substrate |
-| 21 | v3.7.0.0 | Proactive Operations & Advisor | Insights-style recommendations, malware detection, Velociraptor IR + Wazuh ingestion |
-| 21.5 | v3.8.0.0 | Mobile Device Management | iOS/Android: ingest-from-UEM + native Apple/Android MDM; mobile OS/patch compliance across Community/Pro+/Enterprise |
-| 22 | **v4.0.0.0** | Market-Parity GA | All gap features hardened; v4.0 GA |
-| 23 | v4.1.0.0 | Expanded Agent Architectures | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI (Community/OSS) |
+| 19 | v3.6.0.0 | Stabilization | Content lifecycle + provisioning hardening; agent capability advertisement |
+| 20 | v3.7.0.0 | Configuration Management & Drift | Ansible desired-state config, config profiles, drift detection + remediate-to-baseline |
+| 21 | v3.8.0.0 | Endpoint Facts & Proactive Advisor | osquery fact substrate, Insights-style recommendations, malware detection |
+| 22 | **v4.0.0.0** | Mobile Fleet Visibility & UEM Ingestion | **MAJOR — a new device class enters the product.** Device model, manual/API registration, ingest-from-UEM — **air-gap compatible** |
+| 23 | v4.1.0.0 | Mobile Companion App & Compliance | First-party BYOD self-report app; mobile EOL/patch compliance, alerting + enforcement |
+| 24 | **v5.0.0.0** | Market-Parity GA | **MAJOR — market parity reached.** All gap features hardened; v5.0 GA |
+| 25 | v5.1.0.0 | Expanded Agent Architecture & Packaging | ppc64le + s390x (big-endian) + riscv64 agent packaging/CI; native channels for alpine/BSD (Community/OSS) |
+| 26 | v5.2.0.0 | Security Tooling Coexistence | Velociraptor IR/hunting + Wazuh ingestion (Enterprise) |
+| 27 | **v6.0.0.0** | Apple Native MDM | **MAJOR — SysManage becomes the device authority**, not just an observer: Apple MDM protocol, APNs, profiles, remote lock/wipe — **not air-gappable** |
+| 28 | v6.1.0.0 | Android Native MDM & Zero-Touch | Android Management API policy + bulk/zero-touch enrollment across both vendors — **not air-gappable** |
 
 ---
 
