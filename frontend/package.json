@@ -126,7 +126,7 @@
     "@inquirer/figures": "^1.0.14",
     "resolve": "^1.22.11",
     "caniuse-lite": "^1.0.30001767",
-    "dompurify": "^3.3.1",
+    "dompurify": "^3.4.13",
     "@eslint/object-schema": "^2.1.7",
     "@eslint/plugin-kit": "^0.4.1",
     "@eslint/config-array": "^0.21.1",
@@ -134,7 +134,7 @@
     "@mui/styled-engine": "^7.3.6",
     "ast-v8-to-istanbul": "^0.3.8",
     "brace-expansion": "^5.0.7",
-    "js-yaml": "^4.3.0",
+    "js-yaml": "^4.3.1",
     "lodash": "^4.17.23",
     "minimatch": "^10.2.1",
     "@oozcitak/dom": {
