@@ -2961,13 +2961,17 @@ jobs:
           # Pull the .pkg to compute sha256.  Homebrew refuses to install
           # a cask whose sha256 doesn't match the downloaded artifact, so
           # this MUST be the exact bytes the release attached.
+          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # substituting zeros ships a manifest that looks complete and fails
+          # checksum verification for every user.  `curl -f -o` also CREATES the
+          # file on failure, so `[ -f ]` could hash an empty file: a plausible
+          # checksum that is simply wrong.  `[ -s ]` is the honest guard.
           curl -sSfL -o /tmp/sysmanage.pkg "$PKG_URL" || {
-            echo "::warning::Could not download macOS .pkg from $PKG_URL"
-            SHA="0000000000000000000000000000000000000000000000000000000000000000"
+            echo "::error::Could not download /tmp/sysmanage.pkg from $PKG_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage.pkg ]; then
-            SHA=$(sha256sum /tmp/sysmanage.pkg | awk '{print $1}')
-          fi
+          [ -s /tmp/sysmanage.pkg ] || { echo "::error::/tmp/sysmanage.pkg is empty — refusing to render a bogus checksum"; exit 1; }
+          SHA=$(sha256sum /tmp/sysmanage.pkg | awk '{print $1}')
 
           # The cask stub uses Ruby ``#{version}`` interpolation in the
           # URL, so we only need to bump version + sha256 per release.
@@ -3084,20 +3088,28 @@ jobs:
           MSI_ARM64_URL="https://github.com/bceverly/sysmanage/releases/download/v${VERSION}/sysmanage-${VERSION}-windows-arm64.msi"
 
           # Compute sha256 for each MSI — winget-pkgs validates both.
+          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # substituting zeros ships a manifest that looks complete and fails
+          # checksum verification for every user.  `curl -f -o` also CREATES the
+          # file on failure, so `[ -f ]` could hash an empty file: a plausible
+          # checksum that is simply wrong.  `[ -s ]` is the honest guard.
           curl -sSfL -o /tmp/sysmanage-x64.msi "$MSI_X64_URL" || {
-            echo "::warning::Could not download x64 MSI from $MSI_X64_URL"
-            SHA_X64="0000000000000000000000000000000000000000000000000000000000000000"
+            echo "::error::Could not download /tmp/sysmanage-x64.msi from $MSI_X64_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage-x64.msi ]; then
-            SHA_X64=$(sha256sum /tmp/sysmanage-x64.msi | awk '{print toupper($1)}')
-          fi
+          [ -s /tmp/sysmanage-x64.msi ] || { echo "::error::/tmp/sysmanage-x64.msi is empty — refusing to render a bogus checksum"; exit 1; }
+          SHA_X64=$(sha256sum /tmp/sysmanage-x64.msi | awk '{print toupper($1)}')
+          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # substituting zeros ships a manifest that looks complete and fails
+          # checksum verification for every user.  `curl -f -o` also CREATES the
+          # file on failure, so `[ -f ]` could hash an empty file: a plausible
+          # checksum that is simply wrong.  `[ -s ]` is the honest guard.
           curl -sSfL -o /tmp/sysmanage-arm64.msi "$MSI_ARM64_URL" || {
-            echo "::warning::Could not download arm64 MSI from $MSI_ARM64_URL"
-            SHA_ARM64="0000000000000000000000000000000000000000000000000000000000000000"
+            echo "::error::Could not download /tmp/sysmanage-arm64.msi from $MSI_ARM64_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage-arm64.msi ]; then
-            SHA_ARM64=$(sha256sum /tmp/sysmanage-arm64.msi | awk '{print toupper($1)}')
-          fi
+          [ -s /tmp/sysmanage-arm64.msi ] || { echo "::error::/tmp/sysmanage-arm64.msi is empty — refusing to render a bogus checksum"; exit 1; }
+          SHA_ARM64=$(sha256sum /tmp/sysmanage-arm64.msi | awk '{print toupper($1)}')
 
           # Render the singleton manifest for the dry-run preview.  In
           # publish mode we hand the MSI URLs to ``komac``, which builds
@@ -3343,13 +3355,17 @@ jobs:
 
           # Compute sha256 against the GitHub source tarball.  AUR users'
           # makepkg will refuse to build if this doesn't match.
+          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # substituting zeros ships a manifest that looks complete and fails
+          # checksum verification for every user.  `curl -f -o` also CREATES the
+          # file on failure, so `[ -f ]` could hash an empty file: a plausible
+          # checksum that is simply wrong.  `[ -s ]` is the honest guard.
           curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
-            echo "::warning::Could not download source tarball from $TARBALL_URL"
-            SHA="SKIP"
+            echo "::error::Could not download /tmp/sysmanage-src.tar.gz from $TARBALL_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage-src.tar.gz ]; then
-            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
-          fi
+          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty — refusing to render a bogus checksum"; exit 1; }
+          SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
 
           mkdir -p /tmp/aur-out
           cp packaging/aur/PKGBUILD /tmp/aur-out/PKGBUILD
@@ -3456,7 +3472,16 @@ jobs:
               # One line on purpose: a multi-line heredoc/script here falls
               # outside this block scalar's indentation and silently truncates
               # the YAML.
-              published=$(curl -sS -g --max-time 20 "https://aur.archlinux.org/rpc/v5/info?arg[]=sysmanage" 2>/dev/null | python3 -c "import json,sys;print(((json.load(sys.stdin).get('results') or [{}])[0]).get('Version','unknown'))" 2>/dev/null || echo unknown)
+              # Fetch to a FILE, then parse it — do not pipe curl into an
+              # interpreter.  Semgrep flags `curl ... | python3 -c` as the
+              # "curl | bash" install pattern (gha-curl-pipe-shell).  Here the
+              # remote body is data for json.load and is never executed, so the
+              # alert was a false positive in substance — but the rule's advice
+              # (download first, then process) is the better shape regardless,
+              # and it removes a finding from a queue people actually read.
+              curl -sS -g --max-time 20 -o /tmp/aur-info.json \
+                "https://aur.archlinux.org/rpc/v5/info?arg[]=sysmanage" 2>/dev/null || true
+              published=$(python3 -c "import json;print(((json.load(open('/tmp/aur-info.json')).get('results') or [{}])[0]).get('Version','unknown'))" 2>/dev/null || echo unknown)
               {
                 echo "### ⚠️ AUR publish SKIPPED — upstream maintenance"
                 echo ""
@@ -3757,17 +3782,19 @@ jobs:
           set -euo pipefail
           TARBALL_URL="https://github.com/bceverly/sysmanage/archive/refs/tags/v${VERSION}.tar.gz"
 
+          # HARD FAIL — see the FreeBSD distinfo fix (2026-08-08).  Warning and
+          # substituting zeros ships a pkgsrc distinfo that looks complete and
+          # fails checksum verification for every user.  `curl -f -o` also
+          # CREATES the file on failure, so `[ -f ]` could hash an empty file:
+          # a plausible checksum that is simply wrong.  `[ -s ]` is honest.
           curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
-            echo "::warning::Could not download source tarball from $TARBALL_URL"
-            BLAKE2S="0000000000000000000000000000000000000000000000000000000000000000"
-            SHA512="00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-            SIZE=0
+            echo "::error::Could not download source tarball from $TARBALL_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage-src.tar.gz ]; then
-            BLAKE2S=$(python3 -c "import hashlib,sys;h=hashlib.blake2s();h.update(open('/tmp/sysmanage-src.tar.gz','rb').read());print(h.hexdigest())")
-            SHA512=$(sha512sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
-            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
-          fi
+          [ -s /tmp/sysmanage-src.tar.gz ] || { echo "::error::/tmp/sysmanage-src.tar.gz is empty — refusing to render a bogus checksum"; exit 1; }
+          BLAKE2S=$(python3 -c "import hashlib,sys;h=hashlib.blake2s();h.update(open('/tmp/sysmanage-src.tar.gz','rb').read());print(h.hexdigest())")
+          SHA512=$(sha512sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+          SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
 
           STAGE=/tmp/netbsd-stage
           mkdir -p "$STAGE/sysutils/sysmanage"

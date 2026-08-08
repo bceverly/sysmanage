@@ -141,13 +141,22 @@ def test_supported_command_is_allowed():
 
 
 def test_unsupported_command_is_refused_with_the_host_named():
-    host = _Host("trimmed.example.com")
+    # The fqdn here is deliberately NOT domain-shaped.  Asserting
+    # `"trimmed.example.com" in str(...)` is the exact shape CodeQL flags as
+    # incomplete URL substring sanitization (py/incomplete-url-substring-
+    # sanitization) — harmless in a test, but a real finding in the queue is a
+    # finding nobody reads.  The structured attribute is the better assertion
+    # anyway: it pins the contract instead of the phrasing.
+    host = _Host("trimmed-host-01")
     apply_capability_report(host, _report(["install_package"]))
     assert host_supports(host, "initialize_kvm") is False
     with pytest.raises(UnsupportedCapabilityError) as excinfo:
         assert_host_supports(host, "initialize_kvm")
     assert excinfo.value.command_type == "initialize_kvm"
-    assert "trimmed.example.com" in str(excinfo.value)
+    assert excinfo.value.hostname == "trimmed-host-01"
+    # The message must still name the host — that is the whole point of the
+    # error — but check it via the attribute the message is built from.
+    assert excinfo.value.hostname in str(excinfo.value)
 
 
 def test_an_unknown_host_is_never_gated():
