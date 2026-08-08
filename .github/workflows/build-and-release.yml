@@ -3542,15 +3542,18 @@ jobs:
 
           # FreeBSD distinfo expects SHA256 + SIZE.  TIMESTAMP is the
           # epoch the port was last refreshed; we use ``date +%s``.
+          #
+          # HARD FAIL on a download problem.  This used to warn and write a
+          # distinfo of zeros, which is worse than no artifact at all: the
+          # port tarball looks complete, ships, and then fails checksum
+          # verification on every user's machine with nothing pointing back
+          # to the release that produced it.
           curl -sSfL -o /tmp/sysmanage-src.tar.gz "$TARBALL_URL" || {
-            echo "::warning::Could not download source tarball from $TARBALL_URL"
-            SHA="0000000000000000000000000000000000000000000000000000000000000000"
-            SIZE=0
+            echo "::error::Could not download source tarball from $TARBALL_URL"
+            exit 1
           }
-          if [ -f /tmp/sysmanage-src.tar.gz ]; then
-            SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
-            SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
-          fi
+          SHA=$(sha256sum /tmp/sysmanage-src.tar.gz | awk '{print $1}')
+          SIZE=$(stat -c%s /tmp/sysmanage-src.tar.gz)
           TS=$(date +%s)
 
           STAGE=/tmp/freebsd-stage
@@ -3560,10 +3563,18 @@ jobs:
           sed -i "s/^DISTVERSION=.*/DISTVERSION=\t${VERSION}/" \
             "$STAGE/sysutils/sysmanage/Makefile"
 
+          # The distinfo KEY must be the filename the ports framework derives,
+          # not the URL we fetched from.  With USE_GITHUB and no DIST_SUBDIR
+          # that is ${GH_ACCOUNT}-${GH_PROJECT}-${DISTVERSION}-${GH_TAGNAME}_GH0.tar.gz.
+          # We shipped ``sysmanage/v${VERSION}.tar.gz`` instead, so the
+          # framework looked up a key that was not in the file and every fetch
+          # failed checksum verification.  Confirmed against `make makesum` on
+          # a real ports tree, 2026-08-08 — the SHA and SIZE were always right,
+          # only the key was wrong, which is why nothing here ever complained.
           cat > "$STAGE/sysutils/sysmanage/distinfo" <<EOF
           TIMESTAMP = ${TS}
-          SHA256 (sysmanage/v${VERSION}.tar.gz) = ${SHA}
-          SIZE (sysmanage/v${VERSION}.tar.gz) = ${SIZE}
+          SHA256 (bceverly-sysmanage-${VERSION}-v${VERSION}_GH0.tar.gz) = ${SHA}
+          SIZE (bceverly-sysmanage-${VERSION}-v${VERSION}_GH0.tar.gz) = ${SIZE}
           EOF
 
           tar -czf "/tmp/sysmanage-v${VERSION}-freebsd-port.tar.gz" -C "$STAGE" sysutils
