@@ -1129,7 +1129,18 @@ else
 endif
 
 # Combined linting
-lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations
+# The FreeBSD port skeleton is never built by CI — it is rendered and
+# tarballed — so defects sat in it unnoticed until a 2026-08-07 review ahead of
+# a ports-tree submission: pre-2021 $FreeBSD$/Created-by keywords,
+# USE_PYTHON=autoplist on a NO_BUILD hand-install port, a 3-line pkg-plist
+# against whole staged trees, and MASTER_SITES set alongside USE_GITHUB.  This
+# catches that class on Linux.  NOT a substitute for portlint -AC /
+# poudriere testport on a real FreeBSD host before submitting upstream.
+lint-freebsd-port:
+	@$(PYTHON) scripts/check_freebsd_port.py
+
+
+lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the

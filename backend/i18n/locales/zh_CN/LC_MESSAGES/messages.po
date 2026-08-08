@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -915,8 +915,8 @@ msgstr "无法检索仪表板卡片偏好设置：%s"
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "更新仪表板卡片偏好设置失败：%s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "未找到子主机"
 
@@ -2227,7 +2227,7 @@ msgstr "删除默认存储库失败：%s"
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2235,26 +2235,26 @@ msgid ""
 "upgrade to access this feature."
 msgstr "容器/虚拟机管理需要 SysManage Professional+ 许可证。请升级以访问此功能。"
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "已请求删除子主机: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "已请求删除子主机"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "已请求刷新子主机"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr "类型 '%(child_type)s' 已存在发行版 '%(name)s %(version)s'"
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "发行版已删除"
 
@@ -2328,55 +2328,55 @@ msgid "Unknown OS family: %s"
 msgstr "未知的操作系统系列：%s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL 只在 Windows 主机上受支持"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM仅在Linux主机上受支持"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "LXD 容器需要容器名称"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM虚拟机需要VM名称"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "KVM虚拟机需要VM名称"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "bhyve 虚拟机需要指定 VM 名称"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr "代理必须以管理员权限运行才能创建子主机"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "此主机上已存在名为 '%s' 的子主机"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr "请求创建子主机：%(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr "请求创建子主机。当该主机连接时，它将自动获得批准。"
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr "请求创建子主机。这可能需要几分钟时间。"
 
@@ -4534,7 +4534,7 @@ msgstr "获取失败的消息失败：%s"
 msgid "Host ID {host_id} not found"
 msgstr "未找到主机 ID {host_id}"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4544,75 +4544,75 @@ msgstr ""
 "主机ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "将消息标记为正在处理：%s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "标记消息 %(message_id)s 为正在处理失败：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "将消息标记为已完成：%s"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "标记消息 %(message_id)s 为已完成失败：%(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "消息已标记为已发送（等待确认）：%s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "标记消息 %(message_id)s 为已发送失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "无法确认未知消息：%s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "消息 %(message_id)s 不处于已发送状态（当前状态：%(status)s），跳过确认"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "代理已确认消息：%s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "标记消息 %(message_id)s 为已确认失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "在 %d 秒内未收到确认"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "已安排 %d 条未确认消息进行重试"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "重试未确认消息时出错：%s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4620,19 +4620,19 @@ msgid ""
 msgstr ""
 "消息 %(message_id)s 失败（尝试次数 %(attempt)d/%(max_retries)d），将在 %(backoff)d 秒后重试"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "消息 %(message_id)s 在经过 %(attempts)d 次尝试后永久失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "标记消息 %(message_id)s 为已失败失败：%(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "反序列化消息 %(message_id)s 失败：%(error)s"
@@ -4661,6 +4661,17 @@ msgstr "服务器消息队列管理器已初始化"
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "超出速率限制。请稍后再试。"
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "此主机"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr "在{host}上的代理不支持'{command}'。它声明了减少的功能集，因此该命令未被发送。"
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -917,8 +917,8 @@ msgstr "다시보기 카드 선호도를 가져오는데 실패했습니다: %s"
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "대시보드 카드 선호도를 업데이트하는 데 실패했습니다: %s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "하위 호스트를 찾을 수 없습니다"
 
@@ -2250,7 +2250,7 @@ msgstr "디폴트 저장소 지우기 실패: %s"
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2259,26 +2259,26 @@ msgid ""
 msgstr ""
 "컨테이너/VM 관리에는 SysManage Professional+ 라이선스가 필요합니다. 이 기능에 액세스하려면 업그레이드하세요."
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "자식 호스트 삭제가 요청되었습니다: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "자식 호스트 삭제가 요청되었습니다"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "하위 호스트 새로고침이 요청되었습니다"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr "분류 '%(name)s %(version)s'가 이미 '%(child_type)s' 유형에 존재합니다."
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "배포판이 삭제되었습니다"
 
@@ -2352,55 +2352,55 @@ msgid "Unknown OS family: %s"
 msgstr "알 수 없는 OS 제품군: %s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL은 Windows 호스트에서만 지원됩니다"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM은 Linux 호스트에서만 지원됩니다"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "LXD 컨테이너의 경우 컨테이너 이름이 필요합니다."
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM 가상 머신에는 VM 이름이 필요합니다"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "KVM 가상 머신에는 VM 이름이 필요합니다"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "bhyve 가상 머신의 VM 이름은 필수입니다"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr "агент은 자식 호스트를 생성하기 위해 관리자 권한으로 실행되어야 합니다"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "이 호스트에 '%s'라는 이름의 자식 호스트가 이미 존재합니다"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr "자식 호스트 생성 요청: %(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr "자식 호스트 생성 요청됨. 연결 시 자동으로 승인이 됩니다."
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr "자식 호스트 생성 요청됨. 이 작업은 몇 분이 걸릴 수 있습니다."
 
@@ -4573,7 +4573,7 @@ msgstr "실패한 메시지 목록 가져오기 실패: %s"
 msgid "Host ID {host_id} not found"
 msgstr "호스트 ID {host_id}를 찾을 수 없습니다"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4583,75 +4583,75 @@ msgstr ""
 "host_id=%(host_id)s를 대기열에 추가함"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "메시지를 처리 중으로 변경했습니다: %s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "메시지 %(message_id)s를 처리 중으로 표시하는 데 실패함: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "메시지를 완료 상태로 변경했습니다: %s"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "메시지 %(message_id)s를 완료됨으로 표시하는 데 실패함: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "메시지를 전송됨으로 표시 (확인 대기 중): %s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "메시지 %(message_id)s를 전송됨으로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "알 수 없는 메시지를 확인할 수 없습니다: %s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
 msgstr "메시지 %(message_id)s가 SENT 상태가 아님 (현재 상태: %(status)s)으로 확인 무시됨"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "에이전트가 메시지를 확인함: %s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "메시지 %(message_id)s를 확인됨으로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d초 이내에 확인을 받지 못함"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d개의 확인되지 않은 메시지를 재시도 예약함"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "확인되지 않은 메시지 재시도 오류: %s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4660,19 +4660,19 @@ msgstr ""
 "메시지 %(message_id)s가 실패 (재시도 횟수: %(attempt)d/%(max_retries)d), %(backoff)d 초 "
 "후 재시도 예정"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
 "%(error)s"
 msgstr "%(attempts)d 회 시도 끝에 메시지 %(message_id)s 영구 실패: %(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "메시지 %(message_id)s를 실패로 표시하는 데 실패함: %(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "메시지 %(message_id)s 역직렬화 실패: %(error)s"
@@ -4701,6 +4701,18 @@ msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "이 호스트"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr ""
+"{host}의 에이전트는 '{command}'을 지원하지 않습니다. 축소된 기능 집합을 광고하기 때문에 명령은 전송되지 않았습니다."
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

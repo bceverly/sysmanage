@@ -3426,7 +3426,59 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $KEYFILE -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null"
 
           WORK=$(mktemp -d)
-          git clone ssh://aur@aur.archlinux.org/sysmanage.git "$WORK/aur"
+
+          # aur.archlinux.org goes down for maintenance periodically.  That is
+          # an UPSTREAM outage, not a packaging failure — v3.5.1.7 hit exactly
+          # this on 2026-08-07 ("The AUR is down due to maintenance") and failed
+          # a release whose artifacts were all fine.  Retry for a blip, then
+          # classify: an outage warns and skips, anything else (bad key, missing
+          # repo, rejected push) still fails the run, because those are ours to
+          # fix and hiding them is what the continue-on-error removal was for.
+          # Mirrors the sysmanage-agent repo's AUR job.
+          n=0
+          until [ "$n" -ge 3 ]; do
+            if git clone ssh://aur@aur.archlinux.org/sysmanage.git "$WORK/aur" \
+                 2>/tmp/aur-clone.err; then
+              break
+            fi
+            n=$((n+1))
+            echo "AUR clone attempt $n failed; retrying in 30s..."
+            sleep 30
+          done
+          if [ ! -d "$WORK/aur/.git" ]; then
+            sed 's/^/  /' /tmp/aur-clone.err || true
+            if grep -qi "down due to maintenance\|AUR is down\|temporarily unavailable\|Connection timed out\|Connection refused" /tmp/aur-clone.err; then
+              # A skip must not be able to hide forever.  aur.archlinux.org has
+              # been refusing git writes since ~2026-07-30 while its web/API
+              # stayed up, so three releases silently fell behind before anyone
+              # noticed.  Report HOW FAR behind, on the run summary page, so the
+              # drift is visible without clicking into the job.
+              # One line on purpose: a multi-line heredoc/script here falls
+              # outside this block scalar's indentation and silently truncates
+              # the YAML.
+              published=$(curl -sS -g --max-time 20 "https://aur.archlinux.org/rpc/v5/info?arg[]=sysmanage" 2>/dev/null | python3 -c "import json,sys;print(((json.load(sys.stdin).get('results') or [{}])[0]).get('Version','unknown'))" 2>/dev/null || echo unknown)
+              {
+                echo "### ⚠️ AUR publish SKIPPED — upstream maintenance"
+                echo ""
+                echo "| | |"
+                echo "|---|---|"
+                echo "| This release | \`${VERSION}\` |"
+                echo "| Currently on AUR | \`${published}\` |"
+                echo ""
+                echo "aur.archlinux.org is refusing git operations while its web"
+                echo "and API stay up. Nothing to fix on our side — re-run this job"
+                echo "once it is back. If the versions above keep diverging over"
+                echo "several releases, the outage is no longer transient."
+              } >> "$GITHUB_STEP_SUMMARY"
+              echo "::warning::AUR is DOWN for maintenance. AUR has ${published};"
+              echo "::warning::this release is ${VERSION}. Skipping the AUR publish."
+              exit 0
+            fi
+            echo "::error::AUR clone failed and it is NOT an upstream outage."
+            echo "::error::Check that AUR_SSH_KEY is registered on aur.archlinux.org"
+            echo "::error::and that the sysmanage repo exists there."
+            exit 1
+          fi
           cp /tmp/aur-out/PKGBUILD "$WORK/aur/PKGBUILD"
           cp /tmp/aur-out/.SRCINFO "$WORK/aur/.SRCINFO"
 

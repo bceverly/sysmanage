@@ -15,6 +15,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    false,
     Boolean,
     Column,
     DateTime,
@@ -131,6 +132,20 @@ class Host(TestBase):
     enabled_shells = Column(
         String, nullable=True
     )  # Using String instead of Text for SQLite
+
+    # Phase 19 agent capability advertisement.  This mirror is hand-maintained
+    # against backend/persistence/models/core.py — a column added there and NOT
+    # here makes the api tests fail with "no column named ...", so the two move
+    # together.
+    agent_capabilities = Column(String, nullable=True)
+    # server_default as well as default: rows inserted with RAW SQL (some
+    # tests, and any hand-written migration/backfill) bypass the ORM default
+    # entirely, and a NOT NULL column with no DB-level default then fails the
+    # insert.  Caught by test_get_client_certificate_host_not_approved.
+    agent_capabilities_limited = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    agent_capabilities_updated_at = Column(DateTime, nullable=True)
 
     # Virtualization capability fields
     virtualization_types = Column(

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -928,8 +928,8 @@ msgstr "فشل في استرداد تفضيلات بطاقة لوحة التحك
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "فشل في تحديث تفضيلات بطاقة لوحة التحكم: %s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "لم يتم العثور على المضيف الفرعي"
 
@@ -2294,7 +2294,7 @@ msgstr "فشل في حذف المستودع الافتراضي: %s"
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2304,26 +2304,26 @@ msgstr ""
 "تتطلب إدارة الحاويات/الأجهزة الافتراضية ترخيص SysManage Professional+. يرجى "
 "الترقية للوصول إلى هذه الميزة."
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "تم طلب حذف المضيف الفرعي: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "تم طلب حذف المضيف الفرعي"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "تم طلب تحديث المضيف الفرعي"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr "'%(name)s %(version)s' من نوع '%(child_type)s' موجود بالفعل"
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "تم حذف التوزيعة"
 
@@ -2397,55 +2397,55 @@ msgid "Unknown OS family: %s"
 msgstr "عائلة نظام تشغيل غير معروفة: %s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "يقتصر دعم WSL على أجهزة Windows فقط"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "يُدعم KVM فقط على مضيفي Linux"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "اسم الحاوية مطلوب للحاويات لدكس"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "اسم الجهاز الافتراضي مطلوب لأجهزة VMM الافتراضية"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "اسم الجهاز الافتراضي مطلوب لأجهزة KVM الافتراضية"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "يجب توفير اسم الماكنة الافتراضية لماكنات bhyve"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr "يجب أن يكون وكيل النظام يعمل ب권한 المسؤول لإنشاء مستضRIESف子孙主机"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "يوجد بالفعل مضيف فرعي باسم '%s' على هذا المضيف"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr "طلب إنشاء مستضياف فرعي: %(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
 msgstr "تم طلب إنشاء مضيف فرعي. قد يستغرق هذا几分钟。连接时会自动批准该主机。"
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr "تم طلب إنشاء مستضيفة فرعية. قد يستغرق هذا几分钟到几十分钟。"
 
@@ -4684,7 +4684,7 @@ msgstr "فشل في الحصول على الرسائل الفاشلة: %s"
 msgid "Host ID {host_id} not found"
 msgstr "لم يتم العثور على رقم المضيف {host_id}"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4694,44 +4694,44 @@ msgstr ""
 "الاتجاه=%(direction)s, مستضياف=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "أعلنت الرسالة بأنها تحت التجهيز: %s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كجارية: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "أعلنت الرسالة بأنها مكتملة: %s"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمنجزة: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "تم تعليم الرسالة كمرسلة (في انتظار التأكيد): %s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمرسلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "لا يمكن تأكيد رسالة غير معروفة: %s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -4739,32 +4739,32 @@ msgstr ""
 "الرسالة %(message_id)s ليست في حالة المرسل، تم تخطي التأكيد (حاليًا "
 "%(status)s)"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "تم تأكيد الرسالة بواسطة الوكيل: %s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كمقبولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "لم يتم استلام أي تأكيد خلال %d ثانية"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "تمت جدولة %d رسالة غير مؤكدة لإعادة المحاولة"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "خطأ في إعادة محاولة الرسائل غير المؤكدة: %s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4773,7 +4773,7 @@ msgstr ""
 "رسالة %(message_id)s فشلت في المحاولة (%(attempt)d/%(max_retries)d)، مجدولة "
 "لإعادة المحاولة بعد %(backoff)d ثانية"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -4781,12 +4781,12 @@ msgid ""
 msgstr ""
 "رسالة %(message_id)s فشلت بشكل دائم بعد %(attempts)d محاولة: %(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "فشل في وضع علامة على الرسالة %(message_id)s كفاشلة: %(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "فشل في فك ترميز الرسالة %(message_id)s: %(error)s"
@@ -4815,6 +4815,19 @@ msgstr "تم تمهيد مدير صفوف الرسائل للخادم بنجاح
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr " تم تجاوز حد التكرار. يرجى المحاولة لاحقاً."
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "هذا المستضِغف"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr ""
+"الوكيل على {host} لا يدعم '{command}'. إنه يعلن عن مجموعة قدرات محدودة، لذا "
+"لم يتم إرسал الأمر."
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

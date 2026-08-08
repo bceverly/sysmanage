@@ -106,6 +106,22 @@ class QueueOperations:
                         _("Host ID {host_id} not found").format(host_id=host_id)
                     )
 
+            # Phase 19: refuse a command the agent has told us it cannot route.
+            # Gated HERE rather than at the ~53 call sites of
+            # ``create_command_message`` because this is the one place a target
+            # host and a command type are both in hand — so a new endpoint
+            # cannot forget the check, and none of the existing ones change.
+            if (
+                message_type == "command"
+                and direction == QueueDirection.OUTBOUND
+                and host_id is not None
+            ):
+                from backend.services.agent_capability_service import (  # noqa: PLC0415
+                    assert_host_supports,
+                )
+
+                assert_host_supports(host, message_data.get("command_type"))
+
             # Check for duplicate script execution commands to prevent multiple queuing
             if (
                 message_type == "command"

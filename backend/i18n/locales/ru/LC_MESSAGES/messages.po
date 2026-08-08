@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: ru\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -931,8 +931,8 @@ msgstr "Не удалось получить предпочтения для к�
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "Не удалось обновить предпочтения карточки дашборда: %s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "Дочерний хост не найден"
 
@@ -2330,7 +2330,7 @@ msgstr "Не удалось удалить стандартный репозит
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2340,20 +2340,20 @@ msgstr ""
 "Управление контейнерами/ВМ требует лицензии SysManage Professional+. "
 "Обновите для доступа к этой функции."
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "Запрошено удаление дочернего хоста: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "Запрошено удаление дочернего хоста"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "Запрошено обновление дочернего хоста"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
@@ -2361,7 +2361,7 @@ msgstr ""
 "Распределение '%(name)s %(version)s' уже существует для типа "
 "'%(child_type)s'"
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "Дистрибутив удалён"
 
@@ -2440,51 +2440,51 @@ msgid "Unknown OS family: %s"
 msgstr "Неизвестное семейство ОС: %s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL поддерживается только на хостах Windows"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM поддерживается только на хостах Linux"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "Для контейнеров LXD необходимо указать имя контейнера"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "Имя ВМ обязательно для виртуальных машин VMM"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "Имя ВМ обязательно для виртуальных машин KVM"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "Необходимо указать имя для виртуальной машины bhyve"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr ""
 "Агент должен работать с привилегиями администратора для создания дочерних "
 "хостов"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "Дочерний хост с именем '%s' уже существует на этом хосте"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr "Запрошен создание дочернего узла: %(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
@@ -2492,7 +2492,7 @@ msgstr ""
 "Запрошенное создание дочернего узла. Узел будет автоматически одобрен при "
 "подключении."
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr ""
 "Запрошенная создание дочернего узла. Это может занять несколько минут."
@@ -4779,7 +4779,7 @@ msgstr "Не удалось получить сообщения об ошибк�
 msgid "Host ID {host_id} not found"
 msgstr "ID узла {host_id} не найден"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4789,47 +4789,47 @@ msgstr ""
 "направление=%(direction)s, host_id=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "Отметил сообщение как обрабатываемое: %s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr ""
 "Не удалось пометить сообщение %(message_id)s как обрабатываемое: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "Отметил сообщение как завершенное: %s"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr ""
 "Не удалось пометить сообщение %(message_id)s как завершенное: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "Сообщение помечено как отправленное (ожидание подтверждения): %s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr ""
 "Не удалось пометить сообщение %(message_id)s как отправленное: %(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "Невозможно подтвердить неизвестное сообщение: %s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -4837,33 +4837,33 @@ msgstr ""
 "Сообщение %(message_id)s не в статусе SENT (является %(status)s), пропущено "
 "подтверждение"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "Сообщение подтверждено агентом: %s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr ""
 "Не удалось пометить сообщение %(message_id)s как обработанное: %(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "Подтверждение не получено в течение %d секунд"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "Запланировано %d неподтвержденных сообщений для повторной отправки"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "Ошибка при повторной отправке неподтвержденных сообщений: %s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4872,7 +4872,7 @@ msgstr ""
 "Сообщение %(message_id)s не удалось (попытка %(attempt)d/%(max_retries)d), "
 "запланировано повторное выполнение через %(backoff)d секунд"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -4881,12 +4881,12 @@ msgstr ""
 "Сообщение %(message_id)s окончательно не удалось после %(attempts)d попыток:"
 " %(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "Не удалось пометить сообщение %(message_id)s как неудачное: %(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "Не удалось десериализовать сообщение %(message_id)s: %(error)s"
@@ -4915,6 +4915,19 @@ msgstr "Инициализация менеджера очереди сообщ�
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Превышен лимит запросов. Пожалуйста, повторите попытку позже."
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "этой машине"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr ""
+"Агент на {host} не поддерживает '{command}'. Он объявляет уменьшенный набор "
+"возможностей, поэтому команда не была отправлена."
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

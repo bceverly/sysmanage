@@ -1,6 +1,3 @@
-# Created by: Bryan Everly <bryan@theeverlys.com>
-# $FreeBSD$
-#
 # Phase 11.8 stub — sysmanage (server).  ``DISTVERSION`` is sed-replaced
 # from ``0.0.0`` to the release tag value by the ``freebsd-ports`` job
 # in .github/workflows/build-and-release.yml.  Do not hand-edit on
@@ -10,9 +7,9 @@
 PORTNAME=	sysmanage
 DISTVERSION=	0.0.0
 CATEGORIES=	sysutils python
-MASTER_SITES=	https://github.com/bceverly/sysmanage/archive/refs/tags/
-DISTFILES=	v${DISTVERSION}${EXTRACT_SUFX}
-DIST_SUBDIR=	sysmanage
+# No MASTER_SITES / DISTFILES / DIST_SUBDIR here on purpose: USE_GITHUB below
+# derives all three from GH_ACCOUNT/GH_PROJECT/GH_TAGNAME.  Setting both is
+# redundant, portlint flags it, and the two can disagree about what is fetched.
 
 MAINTAINER=	bryan@theeverlys.com
 COMMENT=	Centralized system management server with web-based interface
@@ -37,16 +34,19 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>=3.13.5:www/py-aiohttp@${PY_FLAVOR} 
 		${PYTHON_PKGNAMEPREFIX}psutil>0:sysutils/py-psutil@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}psycopg>=3.2:databases/py-psycopg@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}pydantic>0:devel/py-pydantic@${PY_FLAVOR} \
-		${PYTHON_PKGNAMEPREFIX}yaml>0:devel/py-yaml@${PY_FLAVOR} \
+		${PYTHON_PKGNAMEPREFIX}pyyaml>0:devel/py-pyyaml@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}sqlalchemy20>=2.0.43:databases/py-sqlalchemy20@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}starlette>0:www/py-starlette@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}uvicorn>0:www/py-uvicorn@${PY_FLAVOR} \
-		${PYTHON_PKGNAMEPREFIX}websockets>=15.0.1:www/py-websockets@${PY_FLAVOR} \
+		${PYTHON_PKGNAMEPREFIX}websockets>=15.0.1:devel/py-websockets@${PY_FLAVOR} \
 		postgresql15-server>0:databases/postgresql15-server \
 		nginx>0:www/nginx
 
-USES=		python:3.9+ shebangfix
-USE_PYTHON=	autoplist
+# python:...,run — NO_BUILD means python is only needed at RUN time.
+# Deliberately NO ``USE_PYTHON=autoplist``: autoplist generates the packing
+# list for setuptools-installed modules, and this port has no setup.py — it
+# stages source trees by hand below.  Together they produce a wrong plist.
+USES=		python:3.9+,run shebangfix
 USE_GITHUB=	yes
 GH_ACCOUNT=	bceverly
 GH_PROJECT=	sysmanage
@@ -70,5 +70,15 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
 	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage-nginx.conf \
 		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
+
+# ``backend`` and ``alembic`` are hundreds of files that change every release,
+# so they cannot be enumerated by hand in pkg-plist — an unlisted staged file
+# fails stage-qa, which the 3-line plist would have done on the first real
+# build.  Appending the staged trees to ${TMPPLIST} is the in-tree idiom for a
+# generated file set.  pkg-plist keeps the fixed entries.
+post-install:
+	@${FIND} -s ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend \
+		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/alembic -type f \
+		| ${SED} -e 's,^${STAGEDIR}${PREFIX}/,,' >> ${TMPPLIST}
 
 .include <bsd.port.mk>

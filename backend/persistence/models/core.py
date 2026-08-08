@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    false,
     BigInteger,
     Boolean,
     Column,
@@ -192,6 +193,32 @@ class Host(Base):
 
     # Available shells on the host (JSON)
     enabled_shells = Column(Text, nullable=True)
+
+    # Phase 19 agent capability advertisement (JSON).  ``agent_capabilities``
+    # is the whole report the agent sent — schema_version, the supported
+    # capability GROUPS the UI shows, the exact command types the dispatch gate
+    # reads, and any unavailable/partial groups with a machine-readable reason.
+    # Stored verbatim (sorted keys) rather than shredded into columns so a newer
+    # agent can add capabilities without a server migration; the server ignores
+    # groups it does not recognise.  Mirrors how a federated site's
+    # ``capabilities_json`` is ingested.
+    #
+    # NULL means "never told us" — an older agent, or one whose report could not
+    # be built.  That is deliberately NOT the same as "limited": a host we know
+    # nothing about must not be flagged as reduced, and must not have its
+    # commands gated.
+    agent_capabilities = Column(Text, nullable=True)
+    # True when the advertised command set is a strict SUBSET of the baseline.
+    # Denormalised from the JSON above so the hosts list can filter/sort on it
+    # without parsing every row.
+    # server_default as well as default: rows inserted with RAW SQL (some
+    # tests, and any hand-written migration/backfill) bypass the ORM default
+    # entirely, and a NOT NULL column with no DB-level default then fails the
+    # insert.  Caught by test_get_client_certificate_host_not_approved.
+    agent_capabilities_limited = Column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    agent_capabilities_updated_at = Column(DateTime, nullable=True)
 
     # Virtualization capabilities (JSON - list of supported types like ["wsl", "hyperv"])
     virtualization_types = Column(Text, nullable=True)

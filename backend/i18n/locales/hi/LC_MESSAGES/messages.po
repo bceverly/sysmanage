@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -937,8 +937,8 @@ msgstr "परिचालन बोर्ड कार्ड पसंदीद
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "डैशबोर्ड कार्ड प्रियतम सेटिंग्स का अपडेट वापरे में विफल: %s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "चाइल्ड होस्ट नहीं मिला"
 
@@ -2334,7 +2334,7 @@ msgstr "डिफ़ॉल्ट रिपोजिटरी को हटान
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2344,20 +2344,20 @@ msgstr ""
 "कंटेनर/VM प्रबंधन के लिए SysManage Professional+ लाइसेंस आवश्यक है। इस "
 "सुविधा तक पहुँचने के लिए कृपया अपग्रेड करें।"
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "चाइल्ड होस्ट हटाने का अनुरोध किया गया: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "चाइल्ड होस्ट हटाने का अनुरोध किया गया"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "चाइल्ड होस्ट रिफ्रेश का अनुरोध किया गया"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
@@ -2365,7 +2365,7 @@ msgstr ""
 "'बेस्य को 'पमीमारी ॥॰ नाज्य' %(name)s %(version)s 'चरत्देक को मेस्य 'पमीमारी"
 " ॥॰ नाज्य' %(child_type)s ॥॰ पकरनान"
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "वितरण हटाया गया"
 
@@ -2443,52 +2443,52 @@ msgid "Unknown OS family: %s"
 msgstr "अज्ञात OS परिवार: %s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL केवल Windows होस्ट पर संरचित है"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM केवल Linux होस्ट पर समर्थित है"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "एलएक्ड मेंस के लिए कंटेनर नाम आवश्यक है"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "VMM वर्चुअल मशीनों के लिए VM नाम आवश्यक है"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "KVM वर्चुअल मशीनों के लिए VM नाम आवश्यक है"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "bhyve के लिए VM नाम आवश्यक है"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr ""
 "एजेंट को बच्चे होस्ट्स बनाने के लिए प्रबंधक प्रивिलेज मैं चला हुआ होना "
 "आवश्यक है"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "'%s' नाम का एक चाइल्ड होस्ट इस होस्ट पर पहले से मौजूद है"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr ""
 "बच्चा होस्ट निर्माण की प्रति-अर्जन की गई: %(child_name)s (%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
@@ -2496,7 +2496,7 @@ msgstr ""
 "बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता "
 "है. जब यह जोड़ा जाता है, तो यह स्वचालित रूप से प्रमाणित कर दिया जाएगा."
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr ""
 "बच्चे मेंस का बनाना मांगा जा रहा है. इसकी संभावना है कि यह कई मिनट ले सकता "
@@ -4796,7 +4796,7 @@ msgstr "फेलिउर मैसेज्स प्राप्त करन
 msgid "Host ID {host_id} not found"
 msgstr "होस्ट ID {host_id} नहीं मिला"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4806,44 +4806,44 @@ msgstr ""
 "दिशा=%(direction)s, होस्ट ID=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "संदेश को प्रसंस्करण के रूप में चिह्नित किया: %s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "%(message_id)s को प्रसंस्करण में घोषित करने में विफल: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "%s को पूरा मार्क किया"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "%(message_id)s को पूरा मार्क करने में विफल हुए: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "संदेश को भेजा गया के रूप में चिह्नित (पुष्टि की प्रतीक्षा): %s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "%(message_id)s को भेजे गए मार्क करने में विफल हुए: %(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "अज्ञात संदेश की पुष्टि नहीं कर सकते: %s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -4851,32 +4851,32 @@ msgstr ""
 "%(message_id)s के संदेश भेजे गए (SENT) स्थिति में नहीं है (संदेश की सबसे "
 "बड़ी स्थिति %(status)s है), पुष्टि के लिए छोड़ दिया जाएगा"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "एजेंट द्वारा संदेश की पुष्टि की गई: %s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "%(message_id)s को पहचानित मान्यता देने में विफल: %(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "%d सेकंड के भीतर कोई पुष्टि प्राप्त नहीं हुई"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d अपुष्ट संदेशों को पुन: प्रयास के लिए शेड्यूल किया गया"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "अपुष्ट संदेशों का पुन: प्रयास करने में त्रुटि: %s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4885,7 +4885,7 @@ msgstr ""
 "%(message_id)s के संदेश विफल हो गए (प्रयास %(attempt)d/%(max_retries)d), "
 "%(backoff)d सेकंड्स में पुनराचयन की योजना के अनुसार"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -4894,12 +4894,12 @@ msgstr ""
 "%(message_id)s की संदेश प्रतिक्रिया %(attempts)d बार प्रयास करने के बाद "
 "अन्तिम रूप से विफल हो गई: %(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "%(message_id)s को फ़ैलड मार्क करने में विफल रहा: %(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "%(message_id)s के मेसेज डीसरियलाइज़ करने में विफल रहा: %(error)s"
@@ -4928,6 +4928,19 @@ msgstr "सर्वर मेसेज क्वो निरीक्षक �
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "रेट लिमिट अतिक्रांत हो गया। कृपया बाद में पुन: प्रयास करें।"
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "इस होस्ट"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr ""
+"{host} पर एजेंट '{command}' का समर्थन नहीं करता है। यह घोषित करता है कि कम "
+"सक्षमताओं का सेट है, इसलिए कमांड प्रस्तुत नहीं किया गया।"
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

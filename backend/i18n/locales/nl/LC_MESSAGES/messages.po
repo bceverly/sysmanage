@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 13:36-0400\n"
+"POT-Creation-Date: 2026-08-07 14:01-0400\n"
 "Language: nl\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -929,8 +929,8 @@ msgstr "Mislukt om dashboardkaartvoorkeuren op te halen: %s"
 msgid "Failed to update dashboard card preferences: %s"
 msgstr "Mislukt om de dashboardkaartvoorkeuren bij te werken: %s"
 
-#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:189
-#: backend/api/child_host_crud.py:363
+#: backend/api/child_host_control.py:36 backend/api/child_host_crud.py:196
+#: backend/api/child_host_crud.py:377
 msgid "Child host not found"
 msgstr "Kind-host niet gevonden"
 
@@ -2320,7 +2320,7 @@ msgstr "Mislukt om de standaardrepository te verwijderen: %s"
 
 # Pro+ feature gate messages
 #: backend/api/child_host_crud.py:70
-#: backend/api/child_host_virtualization.py:60
+#: backend/api/child_host_virtualization.py:65
 #: backend/api/child_host_virtualization_status.py:38
 #: backend/api/child_host_virtualization_enable.py:40
 msgid ""
@@ -2330,27 +2330,27 @@ msgstr ""
 "Container/VM-beheer vereist een SysManage Professional+-licentie. Upgrade om"
 " toegang te krijgen tot deze functie."
 
-#: backend/api/child_host_crud.py:411
+#: backend/api/child_host_crud.py:425
 #, python-format
 msgid "Child host deletion requested: %s"
 msgstr "Verwijdering van kindhost aangevraagd: %s"
 
-#: backend/api/child_host_crud.py:418
+#: backend/api/child_host_crud.py:432
 msgid "Child host deletion requested"
 msgstr "Verwijdering van kindhost aangevraagd"
 
-#: backend/api/child_host_crud.py:477
+#: backend/api/child_host_crud.py:491
 msgid "Child host refresh requested"
 msgstr "Vernieuwing van kind-host aangevraagd"
 
-#: backend/api/child_host_crud.py:669
+#: backend/api/child_host_crud.py:683
 #, python-format
 msgid ""
 "Distribution '%(name)s %(version)s' already exists for type '%(child_type)s'"
 msgstr ""
 "Distributie '%(name)s %(version)s' bestaat al voor type '%(child_type)s'"
 
-#: backend/api/child_host_crud.py:821
+#: backend/api/child_host_crud.py:835
 msgid "Distribution deleted"
 msgstr "Distributie verwijderd"
 
@@ -2424,52 +2424,52 @@ msgid "Unknown OS family: %s"
 msgstr "Onbekende besturingssysteemfamilie: %s"
 
 # LXD Container Management strings
-#: backend/api/child_host_virtualization.py:167
+#: backend/api/child_host_virtualization.py:172
 #: backend/api/child_host_virtualization_enable.py:150
 msgid "WSL is only supported on Windows hosts"
 msgstr "WSL wordt alleen ondersteund op Windows-hosts"
 
 # KVM/libvirt Virtual Machine Management strings
-#: backend/api/child_host_virtualization.py:173
+#: backend/api/child_host_virtualization.py:178
 #: backend/api/error_constants.py:97
 msgid "KVM is only supported on Linux hosts"
 msgstr "KVM wordt alleen ondersteund op Linux-hosts"
 
-#: backend/api/child_host_virtualization.py:182
+#: backend/api/child_host_virtualization.py:187
 msgid "Container name is required for LXD containers"
 msgstr "Containernaam is vereist voor LXD-containers"
 
-#: backend/api/child_host_virtualization.py:186
+#: backend/api/child_host_virtualization.py:191
 msgid "VM name is required for VMM virtual machines"
 msgstr "VM-naam is vereist voor VMM virtuele machines"
 
-#: backend/api/child_host_virtualization.py:190
+#: backend/api/child_host_virtualization.py:195
 msgid "VM name is required for KVM virtual machines"
 msgstr "VM-naam is vereist voor KVM virtuele machines"
 
-#: backend/api/child_host_virtualization.py:194
+#: backend/api/child_host_virtualization.py:199
 msgid "VM name is required for bhyve virtual machines"
 msgstr "VM-naam is vereist voor bhyve virtuele machines"
 
-#: backend/api/child_host_virtualization.py:418
+#: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr ""
 "De agent moet met administratorrechten draaien om kindhosts te creëren"
 
-#: backend/api/child_host_virtualization.py:440
+#: backend/api/child_host_virtualization.py:549
 #, python-format
 msgid "A child host named '%s' already exists on this host"
 msgstr "Een onderliggend host met de naam '%s' bestaat al op deze host"
 
-#: backend/api/child_host_virtualization.py:514
+#: backend/api/child_host_virtualization.py:632
 #, python-format
 msgid "Child host creation requested: %(child_name)s (%(distribution)s)"
 msgstr ""
 "Aanvraag ontvangen voor het creëren van kind-host: %(child_name)s "
 "(%(distribution)s)"
 
-#: backend/api/child_host_virtualization.py:537
+#: backend/api/child_host_virtualization.py:655
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
@@ -2477,7 +2477,7 @@ msgstr ""
 "Een sub-host creëren wordt gevraagd. De host zal automatisch goedgekeurd "
 "worden wanneer hij zich verbindt."
 
-#: backend/api/child_host_virtualization.py:542
+#: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
 msgstr "Een sub-host creëren wordt gevraagd. Dit kan enkele minuten duren."
 
@@ -4758,7 +4758,7 @@ msgstr "Mislukt om mislukte berichten op te halen: %s"
 msgid "Host ID {host_id} not found"
 msgstr "Host ID {host_id} niet gevonden"
 
-#: backend/websocket/queue_operations.py:301
+#: backend/websocket/queue_operations.py:317
 #, python-format
 msgid ""
 "Enqueued message: id=%(message_id)s, type=%(message_type)s, "
@@ -4768,44 +4768,44 @@ msgstr ""
 "richting=%(direction)s, host_id=%(host_id)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:483
+#: backend/websocket/queue_operations.py:499
 #, python-format
 msgid "Marked message as processing: %s"
 msgstr "Bericht als verwerkt gemarkeerd: %s"
 
-#: backend/websocket/queue_operations.py:490
+#: backend/websocket/queue_operations.py:506
 #, python-format
 msgid "Failed to mark message %(message_id)s as processing: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als verwerkt: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:525
+#: backend/websocket/queue_operations.py:541
 #, python-format
 msgid "Marked message as completed: %s"
 msgstr "Bericht als voltooid gemarkeerd: %s"
 
-#: backend/websocket/queue_operations.py:532
+#: backend/websocket/queue_operations.py:548
 #, python-format
 msgid "Failed to mark message %(message_id)s as completed: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als voltooid: %(error)s"
 
 # Message acknowledgment strings
-#: backend/websocket/queue_operations.py:570
+#: backend/websocket/queue_operations.py:586
 #, python-format
 msgid "Marked message as sent (awaiting ack): %s"
 msgstr "Bericht gemarkeerd als verzonden (wacht op bevestiging): %s"
 
-#: backend/websocket/queue_operations.py:577
+#: backend/websocket/queue_operations.py:593
 #, python-format
 msgid "Failed to mark message %(message_id)s as sent: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als verzonden: %(error)s"
 
-#: backend/websocket/queue_operations.py:606
+#: backend/websocket/queue_operations.py:622
 #, python-format
 msgid "Cannot acknowledge unknown message: %s"
 msgstr "Kan onbekend bericht niet bevestigen: %s"
 
-#: backend/websocket/queue_operations.py:613
+#: backend/websocket/queue_operations.py:629
 #, python-format
 msgid ""
 "Message %(message_id)s not in SENT status (is %(status)s), skipping ack"
@@ -4813,32 +4813,32 @@ msgstr ""
 "Bericht %(message_id)s niet in SENT-status (is %(status)s), bevestiging "
 "wordt genegeerd"
 
-#: backend/websocket/queue_operations.py:626
+#: backend/websocket/queue_operations.py:642
 #, python-format
 msgid "Message acknowledged by agent: %s"
 msgstr "Bericht bevestigd door agent: %s"
 
-#: backend/websocket/queue_operations.py:633
+#: backend/websocket/queue_operations.py:649
 #, python-format
 msgid "Failed to mark message %(message_id)s as acknowledged: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als bevestigd: %(error)s"
 
-#: backend/websocket/queue_operations.py:717
+#: backend/websocket/queue_operations.py:733
 #, python-format
 msgid "No acknowledgment received within %d seconds"
 msgstr "Geen bevestiging ontvangen binnen %d seconden"
 
-#: backend/websocket/queue_operations.py:729
+#: backend/websocket/queue_operations.py:745
 #, python-format
 msgid "Scheduled %d unacknowledged messages for retry"
 msgstr "%d niet-bevestigde berichten gepland voor nieuwe poging"
 
-#: backend/websocket/queue_operations.py:737
+#: backend/websocket/queue_operations.py:753
 #, python-format
 msgid "Error retrying unacknowledged messages: %s"
 msgstr "Fout bij opnieuw proberen van niet-bevestigde berichten: %s"
 
-#: backend/websocket/queue_operations.py:792
+#: backend/websocket/queue_operations.py:808
 #, python-format
 msgid ""
 "Message %(message_id)s failed (attempt %(attempt)d/%(max_retries)d), "
@@ -4847,7 +4847,7 @@ msgstr ""
 "Bericht %(message_id)s mislukt (poging %(attempt)d/%(max_retries)d), opnieuw"
 " proberen over %(backoff)d seconden"
 
-#: backend/websocket/queue_operations.py:808
+#: backend/websocket/queue_operations.py:824
 #, python-format
 msgid ""
 "Message %(message_id)s permanently failed after %(attempts)d attempts: "
@@ -4855,12 +4855,12 @@ msgid ""
 msgstr ""
 "Bericht %(message_id)s permanent mislukt na %(attempts)d pogingen: %(error)s"
 
-#: backend/websocket/queue_operations.py:826
+#: backend/websocket/queue_operations.py:842
 #, python-format
 msgid "Failed to mark message %(message_id)s as failed: %(error)s"
 msgstr "Kan bericht %(message_id)s niet markeren als mislukt: %(error)s"
 
-#: backend/websocket/queue_operations.py:848
+#: backend/websocket/queue_operations.py:864
 #, python-format
 msgid "Failed to deserialize message %(message_id)s: %(error)s"
 msgstr "Kan bericht %(message_id)s niet deserialiseren: %(error)s"
@@ -4889,6 +4889,19 @@ msgstr "Serverberichtwachtrijbeheer geïnitialiseerd"
 #: backend/startup/rate_limit_middleware.py:98
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Rate limit overschreden. Probeer het later opnieuw."
+
+#: backend/services/agent_capability_service.py:170
+msgid "this host"
+msgstr "dit host"
+
+#: backend/services/agent_capability_service.py:173
+#, python-brace-format
+msgid ""
+"The agent on {host} does not support '{command}'. It advertises a reduced "
+"capability set, so the command was not sent."
+msgstr ""
+"De agent op {host} ondersteunt niet \"{command}\". Hij adverteert een "
+"beperkte functionaliteitsset, dus de opdracht is niet verzonden."
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

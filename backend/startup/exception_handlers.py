@@ -13,6 +13,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from backend.services.agent_capability_service import UnsupportedCapabilityError
 from backend.utils.verbosity_logger import get_logger
 
 logger = get_logger("backend.startup.exceptions")
@@ -30,6 +31,41 @@ def register_exception_handlers(app: FastAPI, origins: list):
         origins: List of allowed CORS origins
     """
     logger.info("=== REGISTERING EXCEPTION HANDLERS ===")
+
+    @app.exception_handler(UnsupportedCapabilityError)
+    async def unsupported_capability_handler(
+        request: Request, exc: UnsupportedCapabilityError
+    ):
+        """Phase 19: the target agent advertises it cannot run this command.
+
+        409 rather than 400 or 501: the request is well-formed and the command
+        is one this server supports — it conflicts with the STATE of that
+        particular host.  A 4xx also matters because this is not a bug to
+        retry; the answer will be the same until the agent is replaced with a
+        fuller build.
+        """
+        logger.info(
+            "Refused '%s' for %s — agent advertises a reduced capability set",
+            exc.command_type,
+            exc.hostname or "unknown host",
+        )
+        response = JSONResponse(
+            status_code=409,
+            content={
+                "detail": str(exc),
+                "command_type": exc.command_type,
+                "reason": "unsupported_capability",
+            },
+        )
+        # Same manual CORS treatment as the other error handlers — a browser
+        # cannot read the explanation without it, which would turn a clear
+        # "not supported on this agent" into an opaque network error.
+        request_origin = request.headers.get("origin")
+        if request_origin and request_origin in origins:
+            response.headers["Access-Control-Allow-Origin"] = request_origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Expose-Headers"] = "Authorization"
+        return response
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):

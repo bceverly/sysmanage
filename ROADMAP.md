@@ -5882,6 +5882,46 @@ close the gap between our output and the parsers that consume it.
       winget, so this belongs in the agent, not in the provisioning engine.
       Whatever lands should also make "the MSI succeeded but the service is
       absent" a loud, detectable state rather than a silent one.
+- [x] **FreeBSD port made submission-ready, and statically gated.** *(Pulled
+      forward from Phase 25 on 2026-08-07, at Bryan's request, while assessing
+      whether the BSD ports could be submitted upstream.)*
+
+      Reviewing the skeleton found three defects a ports committer would have
+      bounced on sight, none of which any test could catch because CI only
+      RENDERS the port and tarballs it — it has never been built by a ports
+      tree:
+
+      * `# $FreeBSD$` and `# Created by:` — both removed when FreeBSD moved to
+        git in 2021.
+      * `USE_PYTHON=autoplist` on a `NO_BUILD` port with a hand-written
+        `do-install`. autoplist generates the packing list for
+        setuptools-installed modules and this port has no `setup.py` at all,
+        so the two mechanisms together produce a wrong plist.
+      * `pkg-plist` listed **3** files while `do-install` staged **~290**
+        (`COPYTREE_SHARE src`). Every unlisted staged file fails stage-qa.
+
+      All three fixed; the file tree is now appended to `${TMPPLIST}` in
+      `post-install`, which is the in-tree idiom for a generated file set.
+      `scripts/check_freebsd_port.py` gates the class and runs in `make lint`,
+      verified against a deliberately-broken fixture per defect — which is how
+      two flaws in the CHECKER itself were found: a comment mentioning
+      `${TMPPLIST}` satisfied the plist check, and a regex demanding whitespace
+      after `COPYTREE_SHARE` never matched `${COPYTREE_SHARE}`, leaving the
+      check inert.
+
+- [ ] **Submit the FreeBSD port upstream** — the remaining work is a REAL
+      build, which no static check substitutes for: `make makesum` against a
+      published tarball (`distinfo` still carries the release-time zero
+      placeholder), then `portlint -AC` and `poudriere testport` on a FreeBSD
+      host, then a Bugzilla PR. A CI job for that needs `vmactions/freebsd-vm`
+      SHA-pinned like every other third-party action in these workflows; it was
+      deliberately NOT added unpinned.
+
+      Do FreeBSD alone first and treat it as the pilot — three simultaneous
+      submissions to three communities with three conventions, none ever built,
+      invites three reviewers finding the same class of problem. OpenBSD
+      (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 25.
+
 - [ ] **Child hosts enroll with NO TENANT — they need an enrollment token.**
       A VM or container created through child-host provisioning registers
       server-scoped, because `_build_agent_config_yaml`
@@ -6332,6 +6372,10 @@ own mini-projects, not as a checkbox alongside winget/Homebrew.
 **Estimated Size:** ~1,000 lines
 
 #### 25.6 Native agent channels for the remaining platforms (OSS)
+
+*Scope note (2026-08-07): the FreeBSD port cleanup + its static gate were
+pulled forward into Phase 19; the upstream SUBMISSION of the FreeBSD port is
+tracked there too. OpenBSD and NetBSD ports-tree submission remain here.*
 
 *Moved from Phase 19 on 2026-08-07 to concentrate agent packaging in one
 phase: this is the same competency as the per-arch deb/rpm/Alpine work and
