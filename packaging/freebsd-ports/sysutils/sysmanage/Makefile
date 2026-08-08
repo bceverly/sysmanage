@@ -66,14 +66,21 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}websockets>0:devel/py-websockets@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}zope.event>0:devel/py-zope.event@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}zope.interface>0:devel/py-zope.interface@${PY_FLAVOR} \
-		postgresql15-server>0:databases/postgresql15-server \
 		nginx>0:www/nginx
 
 # python:...,run — NO_BUILD means python is only needed at RUN time.
 # Deliberately NO ``USE_PYTHON=autoplist``: autoplist generates the packing
 # list for setuptools-installed modules, and this port has no setup.py — it
 # stages source trees by hand below.  Together they produce a wrong plist.
-USES=		python:3.9+,run shebangfix
+# pgsql:15+ NOT a hardcoded databases/postgresql15-server RUN_DEPENDS.
+# Pinning major 15 conflicts with the rest of the dependency tree: py-psycopg
+# pulls the tree's DEFAULT PostgreSQL client (18 as of 2026-08), and
+# postgresql15-client cannot coexist with postgresql18-client.  Installing
+# both in one transaction silently deinstalled whichever landed first, so the
+# port would have forced users onto an old major or failed outright.  USES
+# takes the default version that satisfies 15+, matching psycopg.
+USES=		pgsql:15+ python:3.9+,run shebangfix
+WANT_PGSQL=	server
 USE_GITHUB=	yes
 GH_ACCOUNT=	bceverly
 GH_PROJECT=	sysmanage
