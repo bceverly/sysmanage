@@ -97,6 +97,14 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}
 	cd ${WRKSRC} && ${COPYTREE_SHARE} backend ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}
 	cd ${WRKSRC} && ${COPYTREE_SHARE} alembic ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}
+# The test suite is 4 MB and has no business in a runtime package: it is the
+# only thing under backend/ that imports pytest, and shipping it would make
+# pytest look like a runtime dependency to anyone auditing the port.  Pruning
+# after the copytree rather than filtering inside it keeps the exclusion
+# explicit and obvious; post-install builds the plist from what is actually
+# staged, so the packing list follows automatically.
+	@${RM} -r ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/tests \
+		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/benchmarks
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage.yaml.example \
