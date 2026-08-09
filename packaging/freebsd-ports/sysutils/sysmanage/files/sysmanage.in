@@ -1,6 +1,5 @@
 #!/bin/sh
 #
-# $FreeBSD$
 #
 # PROVIDE: sysmanage
 # REQUIRE: NETWORKING SERVERS DAEMON postgresql
@@ -27,6 +26,14 @@ load_rc_config $name
 
 pidfile="/var/run/${name}.pid"
 command="/usr/sbin/daemon"
+# ``sysmanage_config`` was declared but never reached the process, so the
+# server used its built-in default of /etc/sysmanage.yaml while this port
+# installs the sample at %%PREFIX%%/etc — it started and could not find its
+# configuration.  ``SYSMANAGE_CONFIG_PATH`` is the override backend/config
+# already honours; set it from the rcvar so an admin overriding the rcvar gets
+# what they expect.
+export SYSMANAGE_CONFIG_PATH="${sysmanage_config}"
+
 command_args="-c -p ${pidfile} -u ${sysmanage_user} \
     %%PYTHON_CMD%% -m uvicorn backend.main:app \
     --host 0.0.0.0 --port 8080 \
