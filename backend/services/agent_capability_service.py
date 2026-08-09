@@ -102,6 +102,44 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
     }
 
 
+def limited_flag(host) -> Optional[bool]:
+    """Three-valued 'is this agent limited?' for API responses.
+
+    ``True`` limited, ``False`` full, ``None`` NEVER ADVERTISED.  The third is
+    the one that needs saying out loud: ``bool(host.agent_capabilities_limited)``
+    collapses a NULL column to ``False``, which presents every agent that has
+    not upgraded as full-capability — a claim the server cannot make.  That bug
+    was written and caught during Phase 19; this exists so the conversion has
+    ONE definition rather than a copy in each serializer.
+    """
+    if not getattr(host, "agent_capabilities", None):
+        return None
+    return bool(getattr(host, "agent_capabilities_limited", False))
+
+
+def capability_update_values(report: Any) -> Dict[str, Any]:
+    """The ``Host`` column updates for an advertisement, as a plain dict.
+
+    The SYSTEM_INFO handler builds an UPDATE payload rather than mutating an ORM
+    object, so it needs the same decision in dict form.  Both shapes go through
+    here so the "limited" rule has exactly one definition — deriving it twice is
+    how the two would drift.
+
+    Returns ``{}`` when the report is unusable, which callers can ``update()``
+    unconditionally: an empty dict leaves any previous advertisement intact.
+    """
+    normalized = normalize_report(report)
+    if normalized is None:
+        return {}
+    return {
+        "agent_capabilities": json.dumps(normalized, sort_keys=True),
+        "agent_capabilities_limited": bool(
+            normalized["unavailable"] or normalized["partial"]
+        ),
+        "agent_capabilities_updated_at": _utcnow_naive(),
+    }
+
+
 def apply_capability_report(host, report: Any) -> bool:
     """Persist a capability advertisement onto ``host``.
 
@@ -109,15 +147,11 @@ def apply_capability_report(host, report: Any) -> bool:
     PREVIOUS advertisement in place: a bad message should not erase what we
     already knew, which would flip a host to unknown and silently un-gate it.
     """
-    normalized = normalize_report(report)
-    if normalized is None:
+    values = capability_update_values(report)
+    if not values:
         return False
-
-    host.agent_capabilities = json.dumps(normalized, sort_keys=True)
-    host.agent_capabilities_limited = bool(
-        normalized["unavailable"] or normalized["partial"]
-    )
-    host.agent_capabilities_updated_at = _utcnow_naive()
+    for column, value in values.items():
+        setattr(host, column, value)
     return True
 
 

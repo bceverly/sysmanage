@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry-Deployment für {{count}} Host(s) in der Warteschlange",
     "diagnosticsRequestFailed": "Fehler beim Anfordern der Diagnosekennung. Bitte versuchen Sie es erneut.",
     "diagnosticsRequested": "Diagnosekennung angefordert für Host {{hostId}}. Bitte überprüfen Sie die Hostdetails-Seite, um die Ergebnisse anzuzeigen, sobald diese verfügbar sind.",
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "capabilities": "Funktionalitäten",
+    "capabilitiesFull": "Vollständig",
+    "capabilitiesFullTooltip": "Dieser Agent meldet die vollständige Funktionsausstattung",
+    "capabilitiesLimited": "Eingeschränkt",
+    "capabilitiesLimitedTooltip": "Dieser Agent meldet, dass einige Befehle nicht ausgeführt werden können"
   },
   "login": {
     "loggingIn": "Anmeldung läuft...",
@@ -3323,5 +3328,18 @@
     "saved": "Spiegelbild gespeichert.",
     "subtitle": "Ersetzen Sie einen privaten Spiegel durch die Kanäle, aus denen der Agent selbst installiert wird. Ohne dies kann ein in einer isolierten Umgebung bereitgestellter Host nicht auf das offene PPA, COPR, OBS, winget oder Homebrew tap zugreifen und installiert daher keinen Agenten und meldet sich nicht an.",
     "title": "Agent-Installations-Spiegel"
+  },
+  "hostCapabilities": {
+    "full": "Vollständig",
+    "limited": "Eingeschränkt",
+    "partial": "Teilweise unterstützt",
+    "reasonNoHandler": "Nicht in diesem Agenten integriert",
+    "reasonUnsupportedArch": "Keine Buildfunktion für diese Architektur",
+    "reasonUnsupportedOs": "Nicht auf dieser OS-Plattform unterstützt",
+    "supported": "Unterstützt",
+    "title": "Agent-Funktionalitäten",
+    "unavailable": "Nicht verfügbar",
+    "unknown": "Dieser Agent hat seine Funktionalitäten nicht gemeldet. Ältere Agenten melden sie nicht; der Host ist nicht eingeschränkt.",
+    "updated": "Gemeldet"
   }
 }

@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "La implementación de OpenTelemetry está en cola para {{count}} host(s)",
     "diagnosticsRequestFailed": "No se pudo solicitar la recopilación de diagnósticos. Por favor, inténtelo nuevamente.",
     "diagnosticsRequested": "Se ha solicitado la recopilación de diagnósticos para el host {{hostId}}. Consulte la página de detalles del host para ver los resultados cuando estén disponibles.",
-    "unknown": "Desconocido"
+    "unknown": "Desconocido",
+    "capabilities": "Habilidades",
+    "capabilitiesFull": "Completo",
+    "capabilitiesFullTooltip": "Este agente anuncia el conjunto completo de habilidades",
+    "capabilitiesLimited": "Limitado",
+    "capabilitiesLimitedTooltip": "Este agente informa que no puede ejecutar algunos comandos"
   },
   "login": {
     "loggingIn": "Iniciando sesión...",
@@ -3323,5 +3328,18 @@
     "saved": "El espejo ha sido guardado.",
     "subtitle": "Sustituir un espejo privado por los canales a partir de los cuales se instala el agente mismo. Sin esto, una maquina provisionada en un sitio sin acceso a Internet no puede alcanzar la PPA pública, COPR, OBS, winget o Homebrew tap, así que nunca instalará un agente y nunca se inscribirá.",
     "title": "Espejos de instalación del agente"
+  },
+  "hostCapabilities": {
+    "full": "Completo",
+    "limited": "Limitado",
+    "partial": "Parcialmente soportado",
+    "reasonNoHandler": "No integrado en este agente",
+    "reasonUnsupportedArch": "No hay compilación para esta arquitectura",
+    "reasonUnsupportedOs": "No soportado en este SO",
+    "supported": "Soportado",
+    "title": "Habilidades del Agente",
+    "unavailable": "No disponible",
+    "unknown": "Este agente no ha anunciado sus habilidades. Los agentes antiguos no las reportan; la host no está restringida.",
+    "updated": "Reportado"
   }
 }

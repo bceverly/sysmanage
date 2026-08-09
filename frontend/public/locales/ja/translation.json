@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetryデプロイメントが{{count}}ホスト(s)でキューに追加されました",
     "diagnosticsRequestFailed": "診断収集要求に失敗しました。再度お試しください。",
     "diagnosticsRequested": "ホスト {{hostId}} の診断収集が要求されました。結果を確認するには、ホスト詳細ページをご覧ください。",
-    "unknown": "不明"
+    "unknown": "不明",
+    "capabilities": "機能",
+    "capabilitiesFull": "完全",
+    "capabilitiesFullTooltip": "このエージェントは機能セットを完全に公開しています",
+    "capabilitiesLimited": "制限付き",
+    "capabilitiesLimitedTooltip": "このエージェントは一部のコマンドを実行できないと報告しています"
   },
   "login": {
     "loggingIn": "ログイン中...",
@@ -3323,5 +3328,18 @@
     "saved": "ミラーが保存されました。",
     "subtitle": "プライベートミラーをエージェント自体がインストールされるチャンネルに置き換えます。これがないと、エアギャップサイトでプロビジョニングされたホストはパブリックPPA、COPR、OBS、wingetまたはHomebrewタップにアクセスできず、エージェントをインストールせず、登録もされません。",
     "title": "エージェントインストールミラー"
+  },
+  "hostCapabilities": {
+    "full": "完全",
+    "limited": "制限付き",
+    "partial": "部分的にサポートされています",
+    "reasonNoHandler": "このエージェントには組み込まれていません",
+    "reasonUnsupportedArch": "このアーキテクチャ用のビルドなし",
+    "reasonUnsupportedOs": "このOSではサポート外",
+    "supported": "サポートされています",
+    "title": "エージェントの機能",
+    "unavailable": "利用できません",
+    "unknown": "このエージェントは機能を公開していません。古いエージェントは機能を報告しません; ホストには制限はありません。",
+    "updated": "報告済み"
   }
 }

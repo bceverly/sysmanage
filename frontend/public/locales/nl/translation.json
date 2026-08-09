@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry-deployments in de wachtrij voor {{count}} host(s)",
     "diagnosticsRequestFailed": "Kan verzameling diagnostics niet aanvragen. Probeer het later opnieuw.",
     "diagnosticsRequested": "Diagnostics verzameling gevraagd voor host {{hostId}}. Controleer de hostdetailspagina om resultaten te bekijken wanneer beschikbaar.",
-    "unknown": "Onbekend"
+    "unknown": "Onbekend",
+    "capabilities": "Capaciteiten",
+    "capabilitiesFull": "Volledig",
+    "capabilitiesFullTooltip": "Deze agent adverteert de volledige set van capaciteiten",
+    "capabilitiesLimited": "Beperkt",
+    "capabilitiesLimitedTooltip": "Deze agent meldt dat hij enkele commandoôn niet kan uitvoeren"
   },
   "login": {
     "loggingIn": "Aanmelden...",
@@ -3323,5 +3328,18 @@
     "saved": "Spiegel opgeslagen.",
     "subtitle": "Vervang een privéspiegel voor de kanaals waarvan het agent zelf is geïnstalleerd. Zonder dit kan een host die in een air-gapped site wordt ingericht, geen verbinding maken met de openbare PPA, COPR, OBS, winget of Homebrew tap en zal dus nooit een agent installeren en zich niet aanmelden.",
     "title": "Agent Installatie Spiegels"
+  },
+  "hostCapabilities": {
+    "full": "Volledig",
+    "limited": "Beperkt",
+    "partial": "Gedeeltelijk ondersteund",
+    "reasonNoHandler": "Niet gebouwd in deze agent",
+    "reasonUnsupportedArch": "Geen build voor deze architectuur",
+    "reasonUnsupportedOs": "Niet ondersteund op dit OS",
+    "supported": "Ondersteund",
+    "title": "Agent Capaciteiten",
+    "unavailable": "Niet beschikbaar",
+    "unknown": "Deze agent heeft zijn capaciteiten niet gemeld. Oudere agents melden ze niet; de host is hierdoor niet beperkt.",
+    "updated": "Gemeld"
   }
 }

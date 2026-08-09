@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry 部署已排隊 {{count}} 主機",
     "diagnosticsRequestFailed": "無法請求診斷收集。請稍後再試。",
     "diagnosticsRequested": "已為主機 {{hostId}} 請求診斷收集。請在主機詳細頁面查看結果。",
-    "unknown": "未知"
+    "unknown": "未知",
+    "capabilities": "功能",
+    "capabilitiesFull": "完整",
+    "capabilitiesFullTooltip": "此代理程式宣佈其完整的功能集",
+    "capabilitiesLimited": "有限",
+    "capabilitiesLimitedTooltip": "此代理程式報告無法執行某些命令"
   },
   "login": {
     "loggingIn": "正在登入...",
@@ -3323,5 +3328,18 @@
     "saved": "鏡像已保存。",
     "subtitle": "用私有鏡像替換代理本身安裝的頻道。沒有這個，空氣隔離環境中的主機無法訪問公共 PPA、COPR、OBS、winget 或 Homebrew 橋接，因此它永遠不會安裝代理，也永遠不會入網。",
     "title": "代理安裝鏡像"
+  },
+  "hostCapabilities": {
+    "full": "完整",
+    "limited": "有限",
+    "partial": "部分支援",
+    "reasonNoHandler": "此代理程式未包含該功能",
+    "reasonUnsupportedArch": "此架構無建置版本",
+    "reasonUnsupportedOs": "在此作業系統上不支援",
+    "supported": "受支援",
+    "title": "代理功能",
+    "unavailable": "不可用",
+    "unknown": "此代理程式尚未宣佈其功能。舊版代理程式不會報告它們；主機不受限制。",
+    "updated": "已報告"
   }
 }

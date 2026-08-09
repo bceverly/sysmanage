@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry部署已排队，等待在{{count}}个主机上执行",
     "diagnosticsRequestFailed": "请求诊断数据收集失败。请重试。",
     "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请在主机详情页面查看结果。",
-    "unknown": "未知"
+    "unknown": "未知",
+    "capabilities": "功能",
+    "capabilitiesFull": "完整",
+    "capabilitiesFullTooltip": "此代理声明了完整的功能集",
+    "capabilitiesLimited": "有限",
+    "capabilitiesLimitedTooltip": "此代理报告无法运行某些命令"
   },
   "login": {
     "loggingIn": "正在登录...",
@@ -3323,5 +3328,18 @@
     "saved": "已保存镜像源。",
     "subtitle": "用私有镜像源替换代理自身安装的通道。如果没有这一步，一个在隔离网络中配置的主机无法访问公共 PPA、COPR、OBS、winget 或 Homebrew tap，因此它将不会安装代理也不会注册。",
     "title": "代理安装镜像源"
+  },
+  "hostCapabilities": {
+    "full": "完整",
+    "limited": "有限",
+    "partial": "部分支持",
+    "reasonNoHandler": "此代理中未包含该功能",
+    "reasonUnsupportedArch": "此架构没有构建版本",
+    "reasonUnsupportedOs": "不受支持的操作系统",
+    "supported": "受支持",
+    "title": "代理功能",
+    "unavailable": "不可用",
+    "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
+    "updated": "已报告"
   }
 }

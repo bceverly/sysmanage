@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "La déploiement OpenTelemetry est en attente pour {{count}} hôte(s)",
     "diagnosticsRequestFailed": "Impossible de demander la collecte des diagnostics. Veuillez réessayer.",
     "diagnosticsRequested": "Collecte de diagnostics demandée pour l'hôte {{hostId}}. Veuillez consulter la page des dêtails de l'hôte pour visualiser les résultats lorsque ceux-ci seront disponibles.",
-    "unknown": "Inconnu"
+    "unknown": "Inconnu",
+    "capabilities": "Capacités",
+    "capabilitiesFull": "Complète",
+    "capabilitiesFullTooltip": "Cet agent annonce l'ensemble complet des capacités",
+    "capabilitiesLimited": "Limitée",
+    "capabilitiesLimitedTooltip": "Cet agent signale qu'il ne peut exécuter certaines commandes"
   },
   "login": {
     "loggingIn": "Connexion en cours...",
@@ -3323,5 +3328,18 @@
     "saved": "Miroir enregistré.",
     "subtitle": "Remplacer un miroir privé pour les canaux depuis lesquels l’agent lui-même est installé. Sans cela, une machine provisionnée dans un site hors connexion ne peut pas atteindre le PPA public, COPR, OBS, winget ou tap Homebrew, donc elle n’installe jamais d’agent et ne s’inscrit jamais.",
     "title": "Miroirs d’installation de l’agent"
+  },
+  "hostCapabilities": {
+    "full": "Complète",
+    "limited": "Limitée",
+    "partial": "Partiellement pris en charge",
+    "reasonNoHandler": "Non inclus dans cet agent",
+    "reasonUnsupportedArch": "Aucune construction pour cette architecture",
+    "reasonUnsupportedOs": "Non pris en charge sur ce système d'exploitation",
+    "supported": "Prise en charge",
+    "title": "Capacités de l'agent",
+    "unavailable": "Indisponible",
+    "unknown": "Cet agent n'a pas annoncé ses capacités. Les agents plus anciens ne les signalent pas ; l'hôte n'est pas restreint.",
+    "updated": "Signalée"
   }
 }

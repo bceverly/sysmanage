@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry deployment queued for {{count}} host(s)",
     "diagnosticsRequestFailed": "Failed to request diagnostics collection. Please try again.",
     "diagnosticsRequested": "Diagnostics collection requested for host {{hostId}}. Check the host details page to view results when available.",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "capabilities": "Capabilities",
+    "capabilitiesLimited": "Limited",
+    "capabilitiesFull": "Full",
+    "capabilitiesLimitedTooltip": "This agent reports it cannot run some commands",
+    "capabilitiesFullTooltip": "This agent advertises the full capability set"
   },
   "login": {
     "loggingIn": "Logging in...",
@@ -3323,5 +3328,18 @@
   "commandPalette": {
     "noResults": "No matches.",
     "placeholder": "Search pages…  (Esc to close)"
+  },
+  "hostCapabilities": {
+    "title": "Agent Capabilities",
+    "full": "Full",
+    "limited": "Limited",
+    "updated": "Reported",
+    "supported": "Supported",
+    "unavailable": "Unavailable",
+    "partial": "Partially supported",
+    "unknown": "This agent has not advertised its capabilities. Older agents do not report them; the host is not restricted.",
+    "reasonNoHandler": "Not built into this agent",
+    "reasonUnsupportedOs": "Not supported on this OS",
+    "reasonUnsupportedArch": "No build for this architecture"
   }
 }

@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "OpenTelemetry डिप्लोइमेंट की पंजीकृत {{count}} होस्ट(स) के लिए",
     "diagnosticsRequestFailed": "सेटिंग्स सेवा अद्ययन करने में विफल हुए",
     "diagnosticsRequested": "डायएगनोसिक कलेक्शन के लिए होस्ट {{hostId}} प्राप्त करना। जब उपलब्ध हों, होस्ट विवरण पृष्ठ पर परिणाम देखें।",
-    "unknown": "अज्ञात"
+    "unknown": "अज्ञात",
+    "capabilities": "कैपABILITY",
+    "capabilitiesFull": "पूरा",
+    "capabilitiesFullTooltip": "इस एजेंट ने पूरी कैपABILITY सेट को घोषित की है",
+    "capabilitiesLimited": "सीमित",
+    "capabilitiesLimitedTooltip": "इस एजेंट ने यह बताया है कि वे कुछ कमांड्स चलाने में असमर्थ हैं"
   },
   "login": {
     "loggingIn": "लॉग इन हो रहा है...",
@@ -3323,5 +3328,18 @@
     "saved": "माईरों सहेजे गए।",
     "subtitle": "प्राइवेट माईरों का प्रतिस्थापन करें जो एजेंट के स्वयं के इनस्तॉल करने के लिए हैं। इसके बिना, एयर-गैप साइट में प्रोवाइज़न की गई मशीनें पब्लिक PPA, COPR, OBS, winget या Homebrew tap को नहीं पहुंच सकतीं, तो वे कभी एजेंट इनस्टॉल नहीं करतीं और कभी भी रजिस्ट्रेशन नहीं कर सकतीं।",
     "title": "एजेन्ट इनस्तॉल माईरों"
+  },
+  "hostCapabilities": {
+    "full": "पूरा",
+    "limited": "सीमित",
+    "partial": "थोड़ा-सा समर्थित",
+    "reasonNoHandler": "यह एजेंट में इन्हें बनाया नहीं गया है",
+    "reasonUnsupportedArch": "यह आर्किटेक्चर के लिए बनाया नहीं गया है",
+    "reasonUnsupportedOs": "इस OS पर समर्थित नहीं है",
+    "supported": "समर्थित",
+    "title": "एजेंट कैपABILITY",
+    "unavailable": "उपलब्ध नहीं",
+    "unknown": "इस एजेंट ने अपनी कैपABILITY को घोषित नहीं किया है। पुराने एजेंट इन्हें रिपोर्ट नहीं करते; मेज़ पर सीमित नहीं है।",
+    "updated": "प्रतिवेदित किया गया है"
   }
 }

@@ -395,6 +395,19 @@ def _build_system_info_update_values(message_data, connection, host, platform):
     if agent_version:
         update_values["agent_version"] = agent_version
 
+    # Phase 19: ingest the agent's capability advertisement.  Without this the
+    # whole feature is inert — the agent sends `agent_capabilities`, the column
+    # stays NULL, host_supports() answers "unknown" for every host, and the
+    # dispatch gate in queue_operations can never fire.  An unusable report
+    # yields {} and leaves any previous advertisement in place.
+    from backend.services.agent_capability_service import (  # noqa: PLC0415
+        capability_update_values,
+    )
+
+    update_values.update(
+        capability_update_values(message_data.get("agent_capabilities"))
+    )
+
     # Always update last_access (for both approved and unapproved hosts), but
     # never for mock connections (tests).
     if (
@@ -700,6 +713,17 @@ async def handle_heartbeat(db: Session, connection, message_data: dict):  # NOSO
                         is_agent_privileged=is_privileged,
                         script_execution_enabled=script_execution_enabled,
                         enabled_shells=enabled_shells_json,
+                    )
+                    # Phase 19: a host auto-created here would otherwise carry no
+                    # capability advertisement until its NEXT SYSTEM_INFO, so a
+                    # freshly enrolled limited agent would look full-capability
+                    # for one cycle.  Same rule, applied at birth.
+                    from backend.services.agent_capability_service import (  # noqa: PLC0415
+                        apply_capability_report,
+                    )
+
+                    apply_capability_report(
+                        host, message_data.get("agent_capabilities")
                     )
                     db.add(host)
                     db.commit()

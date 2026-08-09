@@ -115,6 +115,30 @@ class HostRegistrationLegacy(BaseModel):
     os_info: Optional[Dict[str, Any]] = None
 
 
+def _limited_flag(host):
+    """Three-valued limited flag — see agent_capability_service.limited_flag."""
+    from backend.services.agent_capability_service import (  # noqa: PLC0415
+        limited_flag,
+    )
+
+    return limited_flag(host)
+
+
+def _capability_report(host):
+    """The host's parsed capability advertisement, or None if it never sent one.
+
+    Kept as a helper rather than inlined three times: the detail and by-fqdn
+    serializers must agree with each other, and the list endpoint deliberately
+    ships only the boolean (a fleet-wide query should not carry a command list
+    per host).
+    """
+    from backend.services.agent_capability_service import (  # noqa: PLC0415
+        get_capability_report,
+    )
+
+    return get_capability_report(host)
+
+
 class Host(BaseModel):
     """
     This class represents the JSON payload to the /host POST/PUT requests.
@@ -272,6 +296,14 @@ async def get_host(host_id: str, current_user: str = Depends(get_current_user)):
             "reboot_required": host.reboot_required,
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
+            # Phase 19 agent capability advertisement.
+            "agent_capabilities_limited": _limited_flag(host),
+            "agent_capabilities": _capability_report(host),
+            "agent_capabilities_updated_at": (
+                host.agent_capabilities_updated_at.isoformat()
+                if host.agent_capabilities_updated_at
+                else None
+            ),
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
             ),
@@ -367,6 +399,14 @@ async def get_host_by_fqdn_endpoint(fqdn: str):
             "reboot_required": host.reboot_required,
             "is_agent_privileged": host.is_agent_privileged,
             "agent_version": host.agent_version,
+            # Phase 19 agent capability advertisement.
+            "agent_capabilities_limited": _limited_flag(host),
+            "agent_capabilities": _capability_report(host),
+            "agent_capabilities_updated_at": (
+                host.agent_capabilities_updated_at.isoformat()
+                if host.agent_capabilities_updated_at
+                else None
+            ),
             "script_execution_enabled": getattr(
                 host, "script_execution_enabled", False
             ),
@@ -469,6 +509,8 @@ def _get_all_hosts_sync(tenant_id=None):
                 "reboot_required": host.reboot_required,
                 "is_agent_privileged": host.is_agent_privileged,
                 "agent_version": host.agent_version,
+                # Phase 19 agent capability advertisement.
+                "agent_capabilities_limited": _limited_flag(host),
                 "script_execution_enabled": getattr(
                     host, "script_execution_enabled", False
                 ),

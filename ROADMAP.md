@@ -5909,7 +5909,20 @@ close the gap between our output and the parsers that consume it.
       after `COPYTREE_SHARE` never matched `${COPYTREE_SHARE}`, leaving the
       check inert.
 
-- [ ] **Submit the FreeBSD port upstream** — the remaining work is a REAL
+- [x] **Submit the FreeBSD port upstream** *(bugs 297372 + 297373 filed
+        2026-08-08 at v3.5.1.8; both ports pass portlint -AC, check-plist,
+        DEVELOPER-mode stage-qa, package build AND `poudriere testport` exit 0
+        in a clean 14.4-RELEASE amd64 jail.  The real build found what no
+        static check could: 5 wrong dependency origins, 20 unsatisfiable
+        version floors, `devel/py-pydantic` being pydantic 1.x, a hardcoded
+        PostgreSQL major that evicted py-psycopg's client, 21 under-declared
+        RUN_DEPENDS — two of which (email-validator, python-multipart) are
+        lazily imported by pydantic/FastAPI and invisible to static analysis —
+        and a release-CI `distinfo` key that made every published port artifact
+        fail checksum verification.  The SHA-pinned `vmactions/freebsd-vm` CI
+        job is still NOT added; validation is currently a documented manual
+        procedure in ~/freebsd-port-submission-steps.txt.)*
+        ORIGINAL SCOPE: — the remaining work is a REAL
       build, which no static check substitutes for: `make makesum` against a
       published tarball (`distinfo` still carries the release-time zero
       placeholder), then `portlint -AC` and `poudriere testport` on a FreeBSD
@@ -5966,12 +5979,12 @@ inventory but executes nothing — the limiting case of a limited agent.
 Some platforms this phase reaches can't run the *full* agent: a native library may have no build for a given arch, or a very old target OS may lack a prerequisite. Rather than silently degrade, the agent should **declare what it can do**, and the server should make any shortfall visible so operators aren't surprised when a feature is unavailable on a host. Baseline agents report everything; the value shows up later when a trimmed agent has to be shipped for a constrained target.
 
 - [ ] Agent exposes a queryable **capability API** (a local endpoint plus a field carried in the enrollment / `SYSTEM_INFO` payload) that lists the capabilities the running build actually supports — its collectors, action handlers, and feature groups (e.g. package management, hardware inventory, AV/firewall actuation, virtualization, container ops, script execution, image-mode, secrets, etc.) — on this OS/arch
-- [ ] **Baseline population:** existing agents/versions advertise the FULL capability set (nothing regresses); the capability schema is versioned so new capabilities can be added without breaking older agents, and unknown capabilities from a newer agent degrade gracefully server-side
+- [x] **Baseline population:** existing agents/versions advertise the FULL capability set (nothing regresses); the capability schema is versioned so new capabilities can be added without breaking older agents, and unknown capabilities from a newer agent degrade gracefully server-side
 - [ ] **Reduced-capability builds:** an agent lacking a feature (missing native library for an arch, unsupported old OS) advertises only the subset it supports — the mechanism to build/ship such trimmed agents is the enabling piece this phase sets up
-- [ ] Server **stores + normalizes** each host's capability set (persisted on the host record, refreshed on re-enroll / `SYSTEM_INFO`); a host whose set is a strict subset of the current baseline is flagged **limited**
-- [ ] **Host-detail** screen shows the host's capability list (supported vs. unavailable, with the reason where known — e.g. "no build for riscv64", "OS too old")
-- [ ] **Hosts list** surfaces a **"limited"** badge/column so a fleet with mixed-capability agents is visible at a glance; filterable/sortable by it
-- [ ] **Gate actions on advertised capability** — don't dispatch a command a host can't run; surface a clear "not supported on this agent" instead of a runtime failure
+- [x] Server **stores + normalizes** each host's capability set (persisted on the host record, refreshed on re-enroll / `SYSTEM_INFO`); a host whose set is a strict subset of the current baseline is flagged **limited**
+- [x] **Host-detail** screen shows the host's capability list (supported vs. unavailable, with the reason where known — e.g. "no build for riscv64", "OS too old")
+- [x] **Hosts list** surfaces a **"limited"** badge/column so a fleet with mixed-capability agents is visible at a glance; filterable/sortable by it
+- [x] **Gate actions on advertised capability** — don't dispatch a command a host can't run; surface a clear "not supported on this agent" instead of a runtime failure
 - [ ] Docs + i18n/l10n
 
 **Estimated Size:** ~2,000 lines (agent capability API + server model/migration + host-detail & hosts-list UI + action gating)

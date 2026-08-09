@@ -30,6 +30,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import { useTranslation } from 'react-i18next';
 import MaintenanceWindowCard from '../MaintenanceWindowCard';
+import HostCapabilitiesCard from './HostCapabilitiesCard';
 import { hasPermissionSync, SecurityRoles } from '../../Services/permissions';
 import { SysManageHost } from '../../Services/hosts';
 import { OpenTelemetryStatus } from './hostDetailTypes';
@@ -678,6 +679,15 @@ const HostInfoTab: React.FC<HostInfoTabProps> = ({
                 <Grid size={{ xs: 12, md: 6 }}>
                     <MaintenanceWindowCard hostId={hostId || ''} />
                 </Grid>
+                {/* Agent capability advertisement (Phase 19) */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <HostCapabilitiesCard
+                        report={host.agent_capabilities}
+                        limited={host.agent_capabilities_limited}
+                        updatedAt={host.agent_capabilities_updated_at}
+                    />
+                </Grid>
+
                 {/* Basic Information */}
                 <HostBasicInfoCard host={host} enabledShells={enabledShells} />
 

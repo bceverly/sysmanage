@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "تم ترتيب نشر OpenTelemetry لـ {{count}} مستضياف (س)",
     "diagnosticsRequestFailed": "فشل في طلب جمع التشخيصات. يرجى试一下再试。",
     "diagnosticsRequested": "تم طلب جمع التشخيصات لخادم {{hostId}}. تحقق من صفحة تفاصيل الخادم لمراجعة النتائج عند توافرها.",
-    "unknown": "غير معروف"
+    "unknown": "غير معروف",
+    "capabilities": "القدرات",
+    "capabilitiesFull": "كاملة",
+    "capabilitiesFullTooltip": "هذا الوكيل يعلن عن مجموعة القدرات الكاملة",
+    "capabilitiesLimited": "محدودة",
+    "capabilitiesLimitedTooltip": "أبلغ الوكيل أنه لا يمكن تنفيذ بعض الأوامر"
   },
   "login": {
     "loggingIn": "جاري تسجيل الدخول...",
@@ -3323,5 +3328,18 @@
     "saved": "تم حفظ المرآة.",
     "subtitle": "استبدال مرآة خاصة بالقنوات التي يتم تثبيتها منها الآغنت. بدون ذلك، لا يمكن للمضيف المعد في موقع مغلق الوصول إلى PPA العام أو COPR أو OBS أو winget أو Homebrew tap، وبالتالي لن يتم تثبيت آغنت ولا ينضم.",
     "title": "آغنت إنستال مرايا"
+  },
+  "hostCapabilities": {
+    "full": "كاملة",
+    "limited": "محدودة",
+    "partial": "معتدل الدعم",
+    "reasonNoHandler": "غير مدمج في هذا الوكيل",
+    "reasonUnsupportedArch": "لا يوجد بناء لهذا الأرثيكتور",
+    "reasonUnsupportedOs": "غير مدعوم على هذه النظام التشغيلي",
+    "supported": "مدعوم",
+    "title": "قدرات الوكيل",
+    "unavailable": "غير متاح",
+    "unknown": "لم يتم إعلان الوكيل لقدراته. الوكلاء القديمة لا تبلغ عنها؛ لا يوجد قيود على المضيف.",
+    "updated": "تم الإبلاغ عنه"
   }
 }

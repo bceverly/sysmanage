@@ -1,3 +1,4 @@
+import type { AgentCapabilityReport } from '../Components/HostDetail/HostCapabilitiesCard';
 // Copyright (c) 2024-2026 Bryan Everly
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
@@ -97,6 +98,11 @@ type SysManageHost = {
     is_agent_privileged?: boolean;
     // Agent version
     agent_version?: string;
+    // Phase 19 agent capability advertisement.  `limited` is THREE-valued:
+    // null means the agent never advertised, which is not the same as full.
+    agent_capabilities?: AgentCapabilityReport | null;
+    agent_capabilities_limited?: boolean | null;
+    agent_capabilities_updated_at?: string | null;
     // Script execution status
     script_execution_enabled?: boolean;
     // Enabled shells for script execution

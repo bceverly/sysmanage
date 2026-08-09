@@ -1053,7 +1053,12 @@
     "opentelemetryDeploySuccess": "La distribuzione OpenTelemetry è in coda per {{count}} host(s)",
     "diagnosticsRequestFailed": "Impossibile richiedere la raccolta diagnostica. Riprova.",
     "diagnosticsRequested": "Raccolta diagnostica richiesta per l'host {{hostId}}. Controlla la pagina dei dettagli dell'host per visualizzare i risultati quando disponibili.",
-    "unknown": "Sconosciuto"
+    "unknown": "Sconosciuto",
+    "capabilities": "Capacità",
+    "capabilitiesFull": "Completo",
+    "capabilitiesFullTooltip": "Questo agente annuncia l'intero set di capacità",
+    "capabilitiesLimited": "Limitato",
+    "capabilitiesLimitedTooltip": "Questo agente segnala che non può eseguire alcuni comandi"
   },
   "login": {
     "loggingIn": "Accesso in corso...",
@@ -3323,5 +3328,18 @@
     "saved": "Specchia salvato.",
     "subtitle": "Sostituisci una specchia privata per i canali dall'agente stesso installato. Senza questo, un host provveduto in un sito senza connessione non può raggiungere la PPA pubblica, COPR, OBS, winget o Homebrew tap, quindi non installerà mai l'agente e non si iscriverà mai.",
     "title": "Specchia di installazione dell'agente"
+  },
+  "hostCapabilities": {
+    "full": "Completo",
+    "limited": "Limitato",
+    "partial": "Parzialmente supportato",
+    "reasonNoHandler": "Non incorporato in questo agente",
+    "reasonUnsupportedArch": "Nessuna compilazione per questa architettura",
+    "reasonUnsupportedOs": "Non supportato su questo OS",
+    "supported": "Supportato",
+    "title": "Capacità dell'agente",
+    "unavailable": "Non disponibile",
+    "unknown": "Questo agente non ha annunciato le sue capacità. Gli agenti più vecchi non ne fanno rapporto; il host non è limitato.",
+    "updated": "Rilevato"
   }
 }

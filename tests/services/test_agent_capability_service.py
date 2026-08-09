@@ -24,6 +24,7 @@ from backend.services.agent_capability_service import (
     UnsupportedCapabilityError,
     apply_capability_report,
     assert_host_supports,
+    capability_update_values,
     get_capability_report,
     host_supports,
     normalize_report,
@@ -182,3 +183,37 @@ def test_corrupt_stored_json_reads_as_unknown_not_unsupported():
     assert get_capability_report(host) is None
     assert host_supports(host, "install_package") is None
     assert_host_supports(host, "install_package")  # must not raise
+
+
+# ------------------------------------------------- the UPDATE-payload shape
+
+
+def test_update_values_carry_the_same_decision_as_apply():
+    """The dict and object forms must agree.  They are used by different call
+    sites (SYSTEM_INFO builds an UPDATE payload; host creation mutates an ORM
+    object), and deriving 'limited' twice is how the two would drift."""
+    report = _report(["install_package"], unavailable={"virtualization": "no_handler"})
+    values = capability_update_values(report)
+    host = _Host()
+    apply_capability_report(host, report)
+    assert values["agent_capabilities"] == host.agent_capabilities
+    assert (
+        values["agent_capabilities_limited"] == host.agent_capabilities_limited is True
+    )
+
+
+def test_update_values_are_empty_for_an_unusable_report():
+    """Empty means callers can update() unconditionally without erasing a
+    previous advertisement — the SYSTEM_INFO handler relies on that."""
+    assert capability_update_values(None) == {}
+    assert capability_update_values({"garbage": True}) == {}
+    assert capability_update_values(_report([])) == {}
+
+
+def test_update_values_name_only_real_host_columns():
+    """A typo here would silently do nothing on an UPDATE, or blow up the
+    handler — neither is visible from the service's own tests."""
+    from backend.persistence.models.core import Host
+
+    for column in capability_update_values(_report(["install_package"])):
+        assert hasattr(Host, column), f"Host has no column {column}"

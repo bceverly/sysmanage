@@ -142,6 +142,36 @@ export function buildHostColumns({
             }
         },
         {
+            // Phase 19: agent capability advertisement.  THREE states, not two —
+            // null means the agent never advertised (an older build), which is
+            // NOT the same as "full capability".  Rendering unknown as "Full"
+            // would be a claim the server cannot make, and rendering it as
+            // "Limited" would light up the whole fleet during a rollout.
+            field: 'agent_capabilities_limited',
+            headerName: t('hosts.capabilities', 'Capabilities'),
+            width: 120,
+            renderCell: (params) => {
+                if (params.row.status === 'down') {
+                    return null;
+                }
+                const limited = params.value;
+                if (limited === undefined || limited === null) {
+                    return <span style={{ color: '#666', fontStyle: 'italic' }}>{t('hosts.unknown', 'Unknown')}</span>;
+                }
+                return (
+                    <Chip
+                        label={limited ? t('hosts.capabilitiesLimited', 'Limited') : t('hosts.capabilitiesFull', 'Full')}
+                        color={limited ? 'warning' : 'success'}
+                        size="small"
+                        variant="filled"
+                        title={limited
+                            ? t('hosts.capabilitiesLimitedTooltip', 'This agent reports it cannot run some commands')
+                            : t('hosts.capabilitiesFullTooltip', 'This agent advertises the full capability set')}
+                    />
+                );
+            }
+        },
+        {
             field: 'is_agent_privileged',
             headerName: t('hosts.privileged'),
             width: 100,
