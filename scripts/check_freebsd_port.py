@@ -146,6 +146,38 @@ def _rc_script_problems(path: Path, body: str, makefile: str) -> list[str]:
     return found
 
 
+def _pkgjsons_drift(port_dir: Path) -> list[str]:
+    """USES=npm builds from the lockfile COPY inside the port skeleton.
+
+    ``PKGJSONSDIR`` (files/packagejsons/) is what the framework runs ``npm ci``
+    against during the fetch phase -- not the repository's own frontend/.  A
+    stale copy therefore builds a DIFFERENT dependency set than the application
+    was developed and tested with, and nothing anywhere reports it: the port
+    builds, packages and installs perfectly, just against last release's
+    dependencies.  Compare byte-for-byte.
+    """
+    found: list[str] = []
+    jsons = port_dir / "files" / "packagejsons"
+    if not jsons.is_dir():
+        return found
+    for copy in sorted(jsons.rglob("*.json")):
+        rel = copy.relative_to(jsons)
+        origin = Path(*rel.parts)
+        if not origin.is_file():
+            found.append(
+                f"files/packagejsons/{rel}: no matching {origin} in the repo — "
+                "PKGJSONSDIR must mirror the real source tree"
+            )
+            continue
+        if copy.read_bytes() != origin.read_bytes():
+            found.append(
+                f"files/packagejsons/{rel} differs from {origin}; USES=npm "
+                "builds from the COPY, so the port would vendor a different "
+                "dependency set than the application uses (re-copy it)"
+            )
+    return found
+
+
 def _problems(port_dir: Path) -> list[str]:
     found: list[str] = []
     makefile = port_dir / "Makefile"
@@ -299,6 +331,7 @@ def _problems(port_dir: Path) -> list[str]:
     else:
         found.append("pkg-plist: missing")
 
+    found.extend(_pkgjsons_drift(port_dir))
     return found
 
 

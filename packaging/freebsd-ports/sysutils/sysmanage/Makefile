@@ -7,11 +7,12 @@
 PORTNAME=	sysmanage
 DISTVERSION=	0.0.0
 CATEGORIES=	sysutils python
-# No MASTER_SITES / DISTFILES / DIST_SUBDIR assignment here on purpose (the
-# vendored-npm distfile is APPENDED with += and a :npm group further down, which
-# adds to what USE_GITHUB derives rather than replacing it): USE_GITHUB below
-# derives all three from GH_ACCOUNT/GH_PROJECT/GH_TAGNAME.  Setting both is
-# redundant, portlint flags it, and the two can disagree about what is fetched.
+# No MASTER_SITES / DISTFILES / DIST_SUBDIR ASSIGNMENT here on purpose: USE_GITHUB
+# below derives all three from GH_ACCOUNT/GH_PROJECT/GH_TAGNAME, and a plain "="
+# would redefine what it derived — portlint flags that, and the two can disagree
+# about what is fetched.  Further down, MASTER_SITES is APPENDED (+=) with a
+# :prefetch group for the node-modules distfile USES=npm generates; += adds to
+# what USE_GITHUB derived rather than replacing it.
 
 MAINTAINER=	bryan@theeverlys.com
 COMMENT=	Centralized system management server with web-based interface
@@ -87,7 +88,7 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # the port install against a 3.9 default and fail at first import, which no
 # build-time check catches.  (The AGENT is genuinely 3.9-compatible — it has a
 # 3.9 CI leg — so the two ports differ here on purpose.)
-USES=		pgsql:15+ python:3.10+,run shebangfix
+USES=		npm:npm,build pgsql:15+ python:3.10+,run shebangfix
 
 # shebangfix does nothing without SHEBANG_FILES: it rewrites only the files
 # named here.  sysmanage_migrate.py starts with "#!/usr/bin/env python3",
@@ -101,22 +102,26 @@ GH_PROJECT=	sysmanage
 GH_TAGNAME=	v${DISTVERSION}
 
 # The web UI is BUILT HERE, from the source in the GitHub tarball -- this port
-# runs ``vite build`` itself and installs its own output.  It does not consume
-# anyone's pre-built HTML.
+# runs ``vite build`` itself.  It does not install anyone's pre-built HTML.
 #
-# What it cannot do is resolve npm dependencies during the build: ports have no
-# network after the fetch phase (poudriere enforces this), and frontend/
-# declares 916 locked packages.  So the dependency tree arrives the only way a
-# port is allowed to receive build inputs -- as a checksummed distfile, the
-# same shape as a vendored Cargo registry or Go module cache.
+# Dependency handling is the ports framework's, not ours.  USES=npm drives it:
+# during the FETCH phase (targets npm-fetch-node-modules / npm-archive-node-
+# modules) it runs ``npm ci`` against the lockfile stored in PKGJSONSDIR and
+# archives the result into ONE distfile,
+#     ${PORTNAME}-${DISTVERSION}-node-modules${EXTRACT_SUFX}
+# in the :prefetch group, which it also adds to DISTFILES itself.  Everything
+# after fetch is offline, which is what the package cluster requires.
 #
-# It MUST be assembled on FreeBSD.  esbuild and rollup ship per-platform native
-# binaries as optional dependencies (@esbuild/freebsd-x64, freebsd-arm64), and
-# npm prunes those to the build host's platform -- a tree vendored on Linux
-# contains @esbuild/linux-x64 and vite dies immediately on FreeBSD.  The CI job
-# builds it in a FreeBSD VM for exactly this reason.
-MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/:npm
-DISTFILES+=	sysmanage-npm-modules-${DISTVERSION}${EXTRACT_SUFX}:npm
+# ``build`` is passed EXPLICITLY and must stay.  npm.mk's no-argument default
+# branch reads ``!defied(_NPM_EXTRACT_DEP)`` -- a typo for !defined -- so
+# omitting the stage argument takes a branch that does not evaluate.  (Reported
+# upstream; zero ports in the tree currently use USES=npm, which is consistent
+# with that path never having been exercised.)
+#
+# PKGJSONSDIR keeps directory hierarchy, so files/packagejsons/frontend/
+# lands node_modules at ${WRKSRC}/frontend/node_modules exactly where vite
+# expects it -- no NPM_EXTRACT_WRKSRC override needed.
+MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/:prefetch
 
 # The rc.d script runs the server as this user, and the port must CREATE it —
 # nothing else will.  Without this the service starts and dies with
@@ -171,29 +176,16 @@ NO_ARCH=	yes
 #                       downloading on a developer's networked machine and then
 #                       failing only on the cluster
 #   audit/fund=false -> both are pure network calls with no build value
-BUILD_DEPENDS=	npm:www/npm
+# npm writes a cache into $HOME and phones home for update notices; inside the
+# package cluster's jail there is neither a writable home nor a network, and
+# either failure reads as a dependency problem rather than an environment one.
+# USES=npm already passes the equivalent flags to its own fetch command; this
+# covers the ``npm run build`` invocation in do-build.
 MAKE_ENV+=	HOME=${WRKDIR} \
 		npm_config_cache=${WRKDIR}/.npm \
-		npm_config_offline=true \
-		npm_config_audit=false \
-		npm_config_fund=false \
 		npm_config_update_notifier=false
 
 PLIST_SUB+=	PORTNAME=${PORTNAME} VERSION=${DISTVERSION}
-
-# The dependency distfile extracts to its OWN top directory
-# (${WRKDIR}/sysmanage-npm-modules-${DISTVERSION}/node_modules) — not to
-# ${WRKDIR}/node_modules — and vite needs it beside the sources it builds.
-# Guarded because a silent miss here surfaces much later as an inscrutable
-# "cannot find module vite" from do-build.
-NPM_MODULES_WRKSRC=	${WRKDIR}/sysmanage-npm-modules-${DISTVERSION}
-
-post-extract:
-	@${TEST} -d ${NPM_MODULES_WRKSRC}/node_modules || { \
-		${ECHO_MSG} "ERROR: ${NPM_MODULES_WRKSRC}/node_modules is missing —" ; \
-		${ECHO_MSG} "the vendored npm dependency distfile did not extract." ; \
-		exit 1 ; }
-	@${MV} ${NPM_MODULES_WRKSRC}/node_modules ${WRKSRC}/frontend/node_modules
 
 # Build the web UI from source.  ``vite build`` is what package.json's build
 # script runs, and it is invoked through npm so the port does not encode vite's
