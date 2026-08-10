@@ -146,6 +146,32 @@ def _rc_script_problems(path: Path, body: str, makefile: str) -> list[str]:
     return found
 
 
+def _subfiles_exist(port_dir: Path, makefile: str) -> list[str]:
+    """Every name in SUB_FILES / USE_RC_SUBR needs a files/<name>.in.
+
+    The framework errors out at the CONFIGURE stage with "Missing
+    files/<name>.in", i.e. after fetch, extract and patch have all run --
+    minutes into a build, and only on a real ports tree.  It is a one-line
+    mistake to make (delete the file, forget the variable) and this checker
+    could not see it: on 2026-08-10 a deleted sysmanage-secure-installation.in
+    left its SUB_FILES entry behind and portlint caught it, not us.
+    """
+    found: list[str] = []
+    names: list[str] = []
+    for var in ("SUB_FILES", "USE_RC_SUBR"):
+        for chunk in re.findall(rf"^{var}\s*[+?]?=\s*(.*)$", makefile, re.M):
+            names.extend(chunk.split())
+    for name in names:
+        if name in ("\\",):
+            continue
+        if not (port_dir / "files" / f"{name}.in").is_file():
+            found.append(
+                f"Makefile: '{name}' is listed in SUB_FILES/USE_RC_SUBR but "
+                f"files/{name}.in does not exist — the build dies at configure"
+            )
+    return found
+
+
 def _pkgjsons_drift(port_dir: Path) -> list[str]:
     """USES=npm builds from the lockfile COPY inside the port skeleton.
 
@@ -331,6 +357,7 @@ def _problems(port_dir: Path) -> list[str]:
     else:
         found.append("pkg-plist: missing")
 
+    found.extend(_subfiles_exist(port_dir, text))
     found.extend(_pkgjsons_drift(port_dir))
     return found
 

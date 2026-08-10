@@ -121,6 +121,16 @@ GH_TAGNAME=	v${DISTVERSION}
 # PKGJSONSDIR keeps directory hierarchy, so files/packagejsons/frontend/
 # lands node_modules at ${WRKSRC}/frontend/node_modules exactly where vite
 # expects it -- no NPM_EXTRACT_WRKSRC override needed.
+# NPM_PKGFILE is not cosmetic.  npm.mk enables the whole prefetch mechanism on
+# ``exists(${PKGJSONSDIR}/${NPM_PKGFILE})``, which defaults to
+# files/packagejsons/package.json -- a path we do not have, because this
+# application keeps its frontend in a subdirectory.  With the default the probe
+# fails, NPM_PREFETCH turns itself off, no node-modules distfile is generated
+# or checksummed, and the port sails through makesum looking healthy right up
+# until do-build cannot find vite.  Found 2026-08-10: distinfo came back with
+# only the GitHub tarball in it.
+NPM_PKGFILE=	frontend/package.json
+
 MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/:prefetch
 
 # The rc.d script runs the server as this user, and the port must CREATE it —
@@ -154,7 +164,7 @@ SUB_LIST+=	PYTHON_CMD=${PYTHON_CMD}
 
 # The bootstrap wrapper and the package message both need substitution.
 # USE_RC_SUBR handles the rc script; SUB_FILES covers the rest.
-SUB_FILES=	pkg-message sysmanage-secure-installation
+SUB_FILES=	pkg-message
 
 # NO_ARCH stays: the PACKAGE is architecture-independent (Python source plus
 # the static JS/CSS vite emits).  The BUILD is not — it runs node — but that is
