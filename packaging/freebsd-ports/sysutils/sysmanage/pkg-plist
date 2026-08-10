@@ -1,21 +1,6 @@
 libexec/sysmanage/alembic.ini
 @sample etc/sysmanage.yaml.sample
 @sample etc/nginx/sysmanage-nginx.conf.sample
-# Writable state, owned by the service user.  The server runs unprivileged and
-# GENERATES its mTLS CA and server certificate on first start; with nowhere to
-# write it aborts in the FastAPI lifespan and the service never comes up.  The
-# Linux packaging grants exactly this set —
-#     ReadWritePaths=/var/lib/sysmanage /var/log/sysmanage /etc/sysmanage
-# in all three systemd units — and the port shipped none of it.
-#
-# /var/db is hier(7)'s home for generated state on FreeBSD, so the certificates
-# live there rather than under /etc: they are produced by the program, not
-# edited by the admin.  The rc script points SYSMANAGE_CERT_PATH and
-# SYSMANAGE_LOG_DIR at these, so nothing depends on the code's built-in
-# defaults (/etc/sysmanage/certs, which an unprivileged process cannot create).
-#
-# 0750 not 0700: ca.crt has to be readable by whatever serves it to agents.
-# The private keys are chmod 0600 by the application itself.
 @dir(sysmanage,sysmanage,0750) /var/db/sysmanage/certs
 @dir(sysmanage,sysmanage,0750) /var/db/sysmanage
 @dir(sysmanage,sysmanage,0750) /var/log/sysmanage

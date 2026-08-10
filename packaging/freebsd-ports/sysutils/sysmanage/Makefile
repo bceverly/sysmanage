@@ -146,9 +146,23 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
 	${INSTALL_DATA} ${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
 		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
-# Writable state directories.  Ownership and mode come from the @dir() lines in
-# pkg-plist; these only have to exist in the stage so check-plist can match
-# them.  See pkg-plist for why the server cannot start without these.
+# Writable state.  The server runs unprivileged and GENERATES its mTLS CA and
+# server certificate on first start; with nowhere to write it aborts in the
+# FastAPI lifespan and the service never comes up.  The Linux packaging grants
+# exactly this set — ReadWritePaths=/var/lib/sysmanage /var/log/sysmanage
+# /etc/sysmanage in all three systemd units — and this port shipped none of it.
+#
+# /var/db is hier(7)'s home for generated state on FreeBSD, so the certificates
+# live there rather than under /etc: they are produced by the program, not
+# edited by the admin.  The rc script points SYSMANAGE_CERT_PATH and
+# SYSMANAGE_LOG_DIR at these, so nothing depends on the code's built-in
+# defaults (/etc/sysmanage/certs, which an unprivileged process cannot create).
+#
+# Ownership and mode come from the @dir() lines in pkg-plist — 0750, not 0700,
+# because ca.crt must be readable by whatever serves it to agents; the private
+# keys are chmod 0600 by the application itself.  Staging them here only lets
+# check-plist match.  NOTE: pkg-plist has NO comment syntax — every line there
+# is an entry, so this rationale has to live in the Makefile.
 	${MKDIR} ${STAGEDIR}/var/db/${PORTNAME}/certs \
 		${STAGEDIR}/var/log/${PORTNAME}
 
