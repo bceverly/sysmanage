@@ -86,6 +86,22 @@ GH_ACCOUNT=	bceverly
 GH_PROJECT=	sysmanage
 GH_TAGNAME=	v${DISTVERSION}
 
+# The rc.d script runs the server as this user, and the port must CREATE it —
+# nothing else will.  Without this the service starts and dies with
+# "su: unknown login: sysmanage", which no build-time check catches: the
+# package is perfectly well-formed, it just cannot run.  Found 2026-08-09
+# by installing the package and starting the service.
+#
+# The matching entries go in ports/UIDs and ports/GIDs and travel WITH this
+# port in the submission diff.  253 was free in both as of 2026-08-09;
+# portmgr may reassign it, which is routine.
+#
+# The AGENT deliberately does NOT do this — it runs as root, because it
+# manages the system and this port ships no sudoers.  The server is a web
+# app and DB client, so least privilege applies here.
+USERS=		sysmanage
+GROUPS=		sysmanage
+
 USE_RC_SUBR=	sysmanage
 
 NO_ARCH=	yes
