@@ -133,10 +133,18 @@ do-install:
 		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/benchmarks
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc
-	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage.yaml.example \
+# The ROOT sysmanage.yaml.example, not installer/opensuse's.  Every
+# installer/*/sysmanage.yaml.example except ubuntu's is missing the
+# ``api:`` and ``webui:`` sections that backend/config/config.py reads
+# unguarded at import, so shipping one of those gives a package that
+# installs and then dies with KeyError: 'api'.  The root example is the
+# one the code actually matches.  (The stale installer examples are an
+# upstream bug affecting centos/opensuse/macos/windows/netbsd/freebsd
+# too — tracked separately; this port sidesteps it.)
+	${INSTALL_DATA} ${WRKSRC}/sysmanage.yaml.example \
 		${STAGEDIR}${PREFIX}/etc/sysmanage.yaml.sample
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
-	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage-nginx.conf \
+	${INSTALL_DATA} ${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
 		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
 
 # ``backend`` and ``alembic`` are hundreds of files that change every release,
