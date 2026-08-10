@@ -24,7 +24,21 @@ load_rc_config $name
 : ${sysmanage_user:="sysmanage"}
 : ${sysmanage_config:="%%PREFIX%%/etc/sysmanage.yaml"}
 
-pidfile="/var/run/${name}.pid"
+# Pidfile lives in a per-service DIRECTORY, not directly in /var/run.
+# ``daemon -u sysmanage`` drops privileges before creating the pidfile, and
+# /var/run is root-owned 0755, so the unprivileged service cannot write
+# there: "daemon: pidfile '/var/run/sysmanage.pid': Permission denied".
+# The agent does not hit this only because it runs as root.  /var/run is
+# volatile, so the directory cannot ship in the package — it is created at
+# start time by the precmd below.
+pidfile="/var/run/${name}/${name}.pid"
+start_precmd="sysmanage_precmd"
+
+sysmanage_precmd()
+{
+	/usr/bin/install -d -o "${sysmanage_user}" -g "${sysmanage_user}" \
+	    -m 0755 "/var/run/${name}"
+}
 command="/usr/sbin/daemon"
 # procname MUST be the interpreter, not $command.  rc.subr's check_process
 # matches the pid in $pidfile against a process named $procname, which
