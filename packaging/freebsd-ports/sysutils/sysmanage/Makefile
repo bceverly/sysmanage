@@ -88,7 +88,15 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # the port install against a 3.9 default and fail at first import, which no
 # build-time check catches.  (The AGENT is genuinely 3.9-compatible — it has a
 # 3.9 CI leg — so the two ports differ here on purpose.)
-USES=		npm:npm,build pgsql:15+ python:3.10+,run shebangfix
+# nodejs:build MUST come with an explicit ``build`` argument.  npm.mk includes
+# nodejs.mk itself, and nodejs.mk's own default registers node as a RUN
+# dependency -- so USES=npm alone put www/node24 in RUN_DEPENDS, making every
+# user of the binary package install a ~100 MB Node runtime that is never
+# executed (the port runs node once, at build time, to compile the web UI).
+# Confirmed 2026-08-10 with ``make run-depends-list | grep node``; nothing in
+# the build, poudriere, check-plist or stage-qa notices, because a superfluous
+# runtime dependency is not an error -- just a cost paid by everyone.
+USES=		nodejs:build npm:npm,build pgsql:15+ python:3.10+,run shebangfix
 
 # shebangfix does nothing without SHEBANG_FILES: it rewrites only the files
 # named here.  sysmanage_migrate.py starts with "#!/usr/bin/env python3",
