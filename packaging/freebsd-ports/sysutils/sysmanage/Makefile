@@ -146,6 +146,11 @@ do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
 	${INSTALL_DATA} ${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
 		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
+# Writable state directories.  Ownership and mode come from the @dir() lines in
+# pkg-plist; these only have to exist in the stage so check-plist can match
+# them.  See pkg-plist for why the server cannot start without these.
+	${MKDIR} ${STAGEDIR}/var/db/${PORTNAME}/certs \
+		${STAGEDIR}/var/log/${PORTNAME}
 
 # ``backend`` and ``alembic`` are hundreds of files that change every release,
 # so they cannot be enumerated by hand in pkg-plist — an unlisted staged file

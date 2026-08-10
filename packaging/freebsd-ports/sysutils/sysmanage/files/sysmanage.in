@@ -12,6 +12,9 @@
 #               Set it to YES to enable sysmanage.
 # sysmanage_user (str):        Set to "sysmanage" by default.
 # sysmanage_config (str):      Set to "%%PREFIX%%/etc/sysmanage.yaml" by default.
+# sysmanage_certdir (str):     Set to "/var/db/sysmanage/certs" by default.
+#               Where the server generates its mTLS CA and server certificate.
+# sysmanage_logdir (str):      Set to "/var/log/sysmanage" by default.
 
 . /etc/rc.subr
 
@@ -23,6 +26,8 @@ load_rc_config $name
 : ${sysmanage_enable:="NO"}
 : ${sysmanage_user:="sysmanage"}
 : ${sysmanage_config:="%%PREFIX%%/etc/sysmanage.yaml"}
+: ${sysmanage_certdir:="/var/db/sysmanage/certs"}
+: ${sysmanage_logdir:="/var/log/sysmanage"}
 
 # Pidfile lives in a per-service DIRECTORY, not directly in /var/run.
 # ``daemon -u sysmanage`` drops privileges before creating the pidfile, and
@@ -55,8 +60,29 @@ procname="%%PYTHON_CMD%%"
 # already honours; set it from the rcvar so an admin overriding the rcvar gets
 # what they expect.
 export SYSMANAGE_CONFIG_PATH="${sysmanage_config}"
+# The server GENERATES its mTLS CA and server certificate during FastAPI
+# startup.  Its built-in default is /etc/sysmanage/certs, which an unprivileged
+# process cannot create; the code then falls back to a dot-directory INSIDE the
+# installed application tree, which in a package is root-owned and read-only.
+# Both fail, the lifespan raises, and uvicorn exits with "Application startup
+# failed" — the service simply never appears.  Found 2026-08-10 by running the
+# command from the rc script by hand as the service user; ``service onestart``
+# reported nothing at all.  Both variables are overrides the code already
+# honours, set from rcvars so an admin who relocates them gets what they expect.
+export SYSMANAGE_CERT_PATH="${sysmanage_certdir}"
+export SYSMANAGE_LOG_DIR="${sysmanage_logdir}"
 
-command_args="-c -p ${pidfile} -u ${sysmanage_user} \
+# NO ``-u ${sysmanage_user}`` here.  ``sysmanage_user`` is ${name}_user, which
+# is an rc.subr knob, not just ours: when it is set, run_rc_command wraps the
+# whole command in ``su -m ${sysmanage_user} -c ...``, so /usr/sbin/daemon is
+# ALREADY running unprivileged by the time it starts.  ``daemon -u`` then calls
+# initgroups(), which requires root, and the service dies before exec with
+#     daemon[85969]: initgroups(sysmanage,253): Operation not permitted
+# Two privilege-drop mechanisms stacked; rc.subr's runs first and wins.  Found
+# 2026-08-10 in /var/log/messages after ``service sysmanage onestart`` reported
+# only "failed to start".  The agent's rc script has the same shape and is not
+# affected only because its default user is root, where both drops are no-ops.
+command_args="-c -p ${pidfile} \
     %%PYTHON_CMD%% -m uvicorn backend.main:app \
     --host 0.0.0.0 --port 8080 \
     --app-dir %%PREFIX%%/libexec/sysmanage"
