@@ -15,6 +15,10 @@
 # sysmanage_certdir (str):     Set to "/var/db/sysmanage/certs" by default.
 #               Where the server generates its mTLS CA and server certificate.
 # sysmanage_logdir (str):      Set to "/var/log/sysmanage" by default.
+# sysmanage_listen (str):      Set to "127.0.0.1" by default.  uvicorn binds
+#               THIS, not api.host from sysmanage.yaml.  Use "0.0.0.0" to serve
+#               the API directly instead of behind the bundled nginx config.
+# sysmanage_port (int):        Set to 8080 by default.
 
 . /etc/rc.subr
 
@@ -28,6 +32,15 @@ load_rc_config $name
 : ${sysmanage_config:="%%PREFIX%%/etc/sysmanage.yaml"}
 : ${sysmanage_certdir:="/var/db/sysmanage/certs"}
 : ${sysmanage_logdir:="/var/log/sysmanage"}
+# uvicorn takes its listen address on the COMMAND LINE, so it does not read
+# api.host / api.port from sysmanage.yaml.  This used to be hardcoded to
+# 0.0.0.0, which meant an admin who set api.host: "localhost" — the value the
+# shipped sample carries — still got a socket on every interface, with nothing
+# anywhere to say so.  Default to the loopback the bundled nginx sample already
+# proxies to (proxy_pass http://127.0.0.1:8080); set sysmanage_listen="0.0.0.0"
+# to expose the API directly instead of through nginx.
+: ${sysmanage_listen:="127.0.0.1"}
+: ${sysmanage_port:="8080"}
 
 # Pidfile lives in a per-service DIRECTORY, not directly in /var/run.
 # ``daemon -u sysmanage`` drops privileges before creating the pidfile, and
@@ -84,7 +97,7 @@ export SYSMANAGE_LOG_DIR="${sysmanage_logdir}"
 # affected only because its default user is root, where both drops are no-ops.
 command_args="-c -p ${pidfile} \
     %%PYTHON_CMD%% -m uvicorn backend.main:app \
-    --host 0.0.0.0 --port 8080 \
+    --host ${sysmanage_listen} --port ${sysmanage_port} \
     --app-dir %%PREFIX%%/libexec/sysmanage"
 
 run_rc_command "$1"

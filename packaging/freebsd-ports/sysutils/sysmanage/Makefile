@@ -7,7 +7,9 @@
 PORTNAME=	sysmanage
 DISTVERSION=	0.0.0
 CATEGORIES=	sysutils python
-# No MASTER_SITES / DISTFILES / DIST_SUBDIR here on purpose: USE_GITHUB below
+# No MASTER_SITES / DISTFILES / DIST_SUBDIR assignment here on purpose (the
+# vendored-npm distfile is APPENDED with += and a :npm group further down, which
+# adds to what USE_GITHUB derives rather than replacing it): USE_GITHUB below
 # derives all three from GH_ACCOUNT/GH_PROJECT/GH_TAGNAME.  Setting both is
 # redundant, portlint flags it, and the two can disagree about what is fetched.
 
@@ -68,7 +70,8 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 		${PYTHON_PKGNAMEPREFIX}zope.interface>0:devel/py-zope.interface@${PY_FLAVOR} \
 		nginx>0:www/nginx
 
-# python:...,run — NO_BUILD means python is only needed at RUN time.
+# python:...,run — the build compiles the web UI with node, not python, so
+# python is a RUN dependency only even though this port does build.
 # Deliberately NO ``USE_PYTHON=autoplist``: autoplist generates the packing
 # list for setuptools-installed modules, and this port has no setup.py — it
 # stages source trees by hand below.  Together they produce a wrong plist.
@@ -79,12 +82,41 @@ RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}aiohttp>0:www/py-aiohttp@${PY_FLAVOR} \
 # both in one transaction silently deinstalled whichever landed first, so the
 # port would have forced users onto an old major or failed outright.  USES
 # takes the default version that satisfies 15+, matching psycopg.
-USES=		pgsql:15+ python:3.9+,run shebangfix
+# python:3.10+, NOT 3.9+.  The Debian control file requires python3 (>= 3.10)
+# and the backend uses syntax that 3.9 cannot parse; declaring 3.9+ would let
+# the port install against a 3.9 default and fail at first import, which no
+# build-time check catches.  (The AGENT is genuinely 3.9-compatible — it has a
+# 3.9 CI leg — so the two ports differ here on purpose.)
+USES=		pgsql:15+ python:3.10+,run shebangfix
+
+# shebangfix does nothing without SHEBANG_FILES: it rewrites only the files
+# named here.  sysmanage_migrate.py starts with "#!/usr/bin/env python3",
+# which stage-qa flags and which would resolve to whatever python3 happens to
+# be first in PATH rather than the interpreter this port depends on.
+SHEBANG_FILES=	scripts/sysmanage_migrate.py
 WANT_PGSQL=	server
 USE_GITHUB=	yes
 GH_ACCOUNT=	bceverly
 GH_PROJECT=	sysmanage
 GH_TAGNAME=	v${DISTVERSION}
+
+# The web UI is BUILT HERE, from the source in the GitHub tarball -- this port
+# runs ``vite build`` itself and installs its own output.  It does not consume
+# anyone's pre-built HTML.
+#
+# What it cannot do is resolve npm dependencies during the build: ports have no
+# network after the fetch phase (poudriere enforces this), and frontend/
+# declares 916 locked packages.  So the dependency tree arrives the only way a
+# port is allowed to receive build inputs -- as a checksummed distfile, the
+# same shape as a vendored Cargo registry or Go module cache.
+#
+# It MUST be assembled on FreeBSD.  esbuild and rollup ship per-platform native
+# binaries as optional dependencies (@esbuild/freebsd-x64, freebsd-arm64), and
+# npm prunes those to the build host's platform -- a tree vendored on Linux
+# contains @esbuild/linux-x64 and vite dies immediately on FreeBSD.  The CI job
+# builds it in a FreeBSD VM for exactly this reason.
+MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/:npm
+DISTFILES+=	sysmanage-npm-modules-${DISTVERSION}${EXTRACT_SUFX}:npm
 
 # The rc.d script runs the server as this user, and the port must CREATE it —
 # nothing else will.  Without this the service starts and dies with
@@ -96,9 +128,10 @@ GH_TAGNAME=	v${DISTVERSION}
 # port in the submission diff.  253 was free in both as of 2026-08-09;
 # portmgr may reassign it, which is routine.
 #
-# The AGENT deliberately does NOT do this — it runs as root, because it
-# manages the system and this port ships no sudoers.  The server is a web
-# app and DB client, so least privilege applies here.
+# The AGENT creates a SEPARATE account (sysmanage-agent, uid 255) and must
+# keep it separate: its sudoers policy is root-equivalent, and sharing one
+# account would let a compromise of this web application inherit those
+# grants.  The two ports must never converge on one user.
 USERS=		sysmanage
 GROUPS=		sysmanage
 
@@ -114,10 +147,66 @@ USE_RC_SUBR=	sysmanage
 # via `sh -x` on the installed rc script.
 SUB_LIST+=	PYTHON_CMD=${PYTHON_CMD}
 
+# The bootstrap wrapper and the package message both need substitution.
+# USE_RC_SUBR handles the rc script; SUB_FILES covers the rest.
+SUB_FILES=	pkg-message sysmanage-secure-installation
+
+# NO_ARCH stays: the PACKAGE is architecture-independent (Python source plus
+# the static JS/CSS vite emits).  The BUILD is not — it runs node — but that is
+# a build-time property and does not make the package arch-specific.
 NO_ARCH=	yes
-NO_BUILD=	yes
+
+# NO_BUILD is deliberately GONE.  The port compiles the web UI itself in
+# do-build below.
+#
+# Everything here exists so the build works on the FreeBSD package cluster,
+# where poudriere gives the build jail NO network and NO writable home.  npm
+# will, unasked, try to reach the registry for audit/funding metadata and will
+# write a cache into $HOME; either one fails the build in the jail, and the
+# failure reads as a dependency problem rather than an environment one.
+#   HOME             -> WRKDIR, so nothing is written outside the work area
+#   npm_config_cache -> WRKDIR, same reason
+#   offline=true     -> refuse to hit the network at all, so a missing vendored
+#                       package fails LOUDLY here instead of silently
+#                       downloading on a developer's networked machine and then
+#                       failing only on the cluster
+#   audit/fund=false -> both are pure network calls with no build value
+BUILD_DEPENDS=	npm:www/npm
+MAKE_ENV+=	HOME=${WRKDIR} \
+		npm_config_cache=${WRKDIR}/.npm \
+		npm_config_offline=true \
+		npm_config_audit=false \
+		npm_config_fund=false \
+		npm_config_update_notifier=false
 
 PLIST_SUB+=	PORTNAME=${PORTNAME} VERSION=${DISTVERSION}
+
+# The dependency distfile extracts to its OWN top directory
+# (${WRKDIR}/sysmanage-npm-modules-${DISTVERSION}/node_modules) — not to
+# ${WRKDIR}/node_modules — and vite needs it beside the sources it builds.
+# Guarded because a silent miss here surfaces much later as an inscrutable
+# "cannot find module vite" from do-build.
+NPM_MODULES_WRKSRC=	${WRKDIR}/sysmanage-npm-modules-${DISTVERSION}
+
+post-extract:
+	@${TEST} -d ${NPM_MODULES_WRKSRC}/node_modules || { \
+		${ECHO_MSG} "ERROR: ${NPM_MODULES_WRKSRC}/node_modules is missing —" ; \
+		${ECHO_MSG} "the vendored npm dependency distfile did not extract." ; \
+		exit 1 ; }
+	@${MV} ${NPM_MODULES_WRKSRC}/node_modules ${WRKSRC}/frontend/node_modules
+
+# Build the web UI from source.  ``vite build`` is what package.json's build
+# script runs, and it is invoked through npm so the port does not encode vite's
+# internal entry point.
+#
+# The explicit test afterwards matters: vite can exit 0 having emitted nothing
+# useful, and an empty dist/ produces a package that installs cleanly and
+# serves a blank page.  Fail here instead.
+do-build:
+	cd ${WRKSRC}/frontend && ${SETENV} ${MAKE_ENV} ${LOCALBASE}/bin/npm run build
+	@${TEST} -s ${WRKSRC}/frontend/dist/index.html || { \
+		${ECHO_MSG} "ERROR: vite produced no frontend/dist/index.html." ; \
+		exit 1 ; }
 
 do-install:
 	${MKDIR} ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}
@@ -132,6 +221,21 @@ do-install:
 	@${RM} -r ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/tests \
 		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend/benchmarks
 	${INSTALL_DATA} ${WRKSRC}/alembic.ini ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/
+# The schema tool.  Nothing runs alembic at startup, so without this the
+# database stays empty and the server has no tables — it is the step the Debian
+# postinst prints as "3. Database Migration".
+#
+# Only THIS script, not all of scripts/.  The Debian package ships the whole
+# directory (debian/install: "scripts/* opt/sysmanage/scripts/"), but that is
+# 1.8 MB and 87 entries of development tooling — i18n checkers, CI gates,
+# CodeQL dumpers, test-network builders — none of which belongs in a runtime
+# package, and most of which carries bash shebangs that would drag
+# shells/bash in as a dependency for no runtime benefit.  It resolves its
+# project root as the PARENT of its own directory, so the scripts/ level must
+# be preserved for backend/ and alembic/ to be importable.
+	${MKDIR} ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/scripts
+	${INSTALL_SCRIPT} ${WRKSRC}/scripts/sysmanage_migrate.py \
+		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/scripts/
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 # The ROOT sysmanage.yaml.example, not installer/opensuse's.  Every
 # installer/*/sysmanage.yaml.example except ubuntu's is missing the
@@ -144,8 +248,30 @@ do-install:
 	${INSTALL_DATA} ${WRKSRC}/sysmanage.yaml.example \
 		${STAGEDIR}${PREFIX}/etc/sysmanage.yaml.sample
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc/nginx
-	${INSTALL_DATA} ${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
-		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
+# The shipped conf serves the web UI from /opt/sysmanage/frontend/dist, a Linux
+# install path that does not exist on FreeBSD and that nothing here creates, so
+# the sample would look configured while returning 404 for every page.  Rewrite
+# it to a hier(7)-correct location.  NOTE: this port does NOT ship the frontend
+# -- frontend/dist is gitignored, so it is absent from the release tarball, and
+# a port cannot run npm at build time (no network).  The directory is therefore
+# empty unless an admin deploys a build into it; pkg-message says so plainly.
+	${SED} -e 's|%%PREFIX%%|${PREFIX}|g' \
+		${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
+		> ${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
+# Where the admin puts the TLS keypair nginx serves.  Created empty and
+# root-only: nginx reads certificates as root before dropping privileges, so
+# the private key never needs to be readable by the www user, and 0700 keeps a
+# mistake from exposing it.  The port does NOT generate a certificate -- see
+# the nginx sample for why.
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc/sysmanage/tls
+# The built web UI, from the :frontend distfile.  Fail LOUDLY if it is absent
+# rather than quietly producing a package with no user interface — that is the
+# defect this whole distfile exists to prevent, and a silent empty directory
+# looks identical to a working install until someone opens a browser.  The
+# OpenBSD port guards the same way for the same reason.
+	${MKDIR} ${STAGEDIR}${PREFIX}/www/${PORTNAME}
+	cd ${WRKSRC}/frontend/dist && \
+		${COPYTREE_SHARE} . ${STAGEDIR}${PREFIX}/www/${PORTNAME}
 # Writable state.  The server runs unprivileged and GENERATES its mTLS CA and
 # server certificate on first start; with nowhere to write it aborts in the
 # FastAPI lifespan and the service never comes up.  The Linux packaging grants
@@ -173,7 +299,8 @@ do-install:
 # generated file set.  pkg-plist keeps the fixed entries.
 post-install:
 	@${FIND} -s ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/backend \
-		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/alembic -type f \
+		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/alembic \
+		${STAGEDIR}${PREFIX}/www/${PORTNAME} -type f \
 		| ${SED} -e 's,^${STAGEDIR}${PREFIX}/,,' >> ${TMPPLIST}
 
 .include <bsd.port.mk>

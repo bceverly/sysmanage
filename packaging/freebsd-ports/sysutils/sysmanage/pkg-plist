@@ -1,6 +1,15 @@
+libexec/sysmanage/scripts/sysmanage_migrate.py
 libexec/sysmanage/alembic.ini
+@owner root
+@group sysmanage
+@mode 0640
 @sample etc/sysmanage.yaml.sample
+@mode
+@group
+@owner
 @sample etc/nginx/sysmanage-nginx.conf.sample
+@dir(root,wheel,0700) etc/sysmanage/tls
+@dir(root,wheel,0755) etc/sysmanage
 @dir(sysmanage,sysmanage,0750) /var/db/sysmanage/certs
 @dir(sysmanage,sysmanage,0750) /var/db/sysmanage
 @dir(sysmanage,sysmanage,0750) /var/log/sysmanage

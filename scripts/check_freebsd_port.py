@@ -84,8 +84,16 @@ def _rc_script_problems(path: Path, body: str, makefile: str) -> list[str]:
     signature that would have caught it.
     """
     found: list[str] = []
-    if not path.name.endswith(".in") or ". /etc/rc.subr" not in body:
+    if not path.name.endswith(".in"):
         return found
+
+    # The %%TOKEN%% rule applies to EVERY substituted file, not just rc
+    # scripts.  It was originally gated on ". /etc/rc.subr", so a
+    # %%PORTVERSION%% in files/pkg-message.in — PORTVERSION is not a default
+    # SUB_LIST member — sailed straight through on 2026-08-10.  An
+    # unsubstituted token in a package message is merely embarrassing; in the
+    # bootstrap wrapper it would be a command that cannot run.
+    is_rc = ". /etc/rc.subr" in body
 
     # Scan the CODE, not the prose.  The comment explaining why -u must not be
     # there necessarily quotes ``-u ${name}_user``, so matching raw text reports
@@ -96,7 +104,7 @@ def _rc_script_problems(path: Path, body: str, makefile: str) -> list[str]:
         line for line in body.splitlines() if not line.lstrip().startswith("#")
     )
 
-    name_match = re.search(r"^name=(\S+)", code, re.M)
+    name_match = re.search(r"^name=(\S+)", code, re.M) if is_rc else None
 
     # ``${name}_user`` belongs to rc.subr, not to the port.  Setting it makes
     # run_rc_command wrap the command in ``su -m <user> -c ...``, so a
@@ -220,11 +228,18 @@ def _problems(port_dir: Path) -> list[str]:
     # about what actually gets fetched.
     if re.search(r"^USE_GITHUB\s*=\s*yes", text, re.M):
         for var in ("MASTER_SITES", "DISTFILES", "DIST_SUBDIR"):
-            if re.search(rf"^{var}\s*[?+]?=", text, re.M):
+            # ``+=`` is NOT the hazard.  Appending a second distfile with a
+            # group tag (``DISTFILES+= foo.tar.gz:frontend``) is the standard
+            # way to fetch a pre-built artifact alongside the GitHub source,
+            # and this port needs exactly that for the web UI.  Only a plain
+            # ``=`` or ``?=`` REDEFINES what USE_GITHUB derived, which is the
+            # case where the two can disagree about what is fetched.
+            if re.search(rf"^{var}\s*\??=", text, re.M):
                 found.append(
                     f"Makefile: {var}= is set alongside USE_GITHUB=yes, which "
                     "derives it — remove one or they can disagree about the "
-                    "fetched distfile"
+                    "fetched distfile (use += with a :group tag to ADD a "
+                    "distfile)"
                 )
 
     # A dependency version FLOOR is a trap in a port.  FreeBSD ships exactly ONE

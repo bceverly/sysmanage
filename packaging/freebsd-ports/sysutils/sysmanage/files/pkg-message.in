@@ -1,0 +1,80 @@
+[
+{ type: install
+  message: <<EOM
+SysManage server is installed but NOT configured.  Five steps, in order.
+
+Architecture: nginx is the front door and terminates TLS.  The application
+itself runs behind it on 127.0.0.1:8080 and is not reachable from the network
+-- uvicorn is an implementation detail, not a public listener.  Do not expose
+port 8080.
+
+1. PostgreSQL
+   ----------
+     service postgresql initdb          # first time only
+     sysrc postgresql_enable=YES
+     service postgresql start
+     su -m postgres -c 'createuser sysmanage'
+     su -m postgres -c 'createdb sysmanage -O sysmanage'
+     su -m postgres -c "psql -c \"ALTER USER sysmanage PASSWORD 'secret';\""
+
+2. Configuration -- %%PREFIX%%/etc/sysmanage.yaml
+   ---------------------------------------------
+   Set the database credentials from step 1, then under "security:":
+
+     admin_userid MUST BE AN EMAIL ADDRESS.  The login endpoint validates it
+     as one, so the shipped default of "admin" is rejected with HTTP 422
+     before the password is ever checked.  Use e.g. admin@example.com.
+
+   Replace password_salt and jwt_secret -- both ship as CHANGE_ME
+   placeholders.  The file is mode 0640, group sysmanage, because it holds
+   the database password; keep it that way.
+
+   That bootstrap login is a recovery credential, not an account.  Use it
+   once, create a real administrator in the UI, and the interface will keep
+   warning you until you do.
+
+3. Database schema
+   ---------------
+     su -m sysmanage -c '%%PYTHON_CMD%% \
+       %%PREFIX%%/libexec/sysmanage/scripts/sysmanage_migrate.py --status'
+     su -m sysmanage -c '%%PYTHON_CMD%% \
+       %%PREFIX%%/libexec/sysmanage/scripts/sysmanage_migrate.py'
+
+4. TLS + nginx
+   -----------
+   Install a certificate and key -- this port does not generate them, because
+   a certificate a package manufactured for you is one no client should
+   trust.  Use security/acme.sh, security/py-certbot, or your own CA:
+
+     %%PREFIX%%/etc/sysmanage/tls/server.crt
+     %%PREFIX%%/etc/sysmanage/tls/server.key
+
+   Then include the shipped config and start nginx:
+
+     cp %%PREFIX%%/etc/nginx/sysmanage-nginx.conf.sample \
+        %%PREFIX%%/etc/nginx/sysmanage-nginx.conf
+     # add to the http { } block of %%PREFIX%%/etc/nginx/nginx.conf:
+     #     include %%PREFIX%%/etc/nginx/sysmanage-nginx.conf;
+     nginx -t
+     sysrc nginx_enable=YES
+     service nginx start
+
+   nginx will refuse to start until the certificate exists.  That is
+   deliberate: a management console must not come up in cleartext because a
+   file was missing.
+
+5. Start the server
+   ----------------
+     sysrc sysmanage_enable=YES
+     service sysmanage start
+
+   Then browse to https://<this-host>/
+
+The service runs as the unprivileged "sysmanage" user, generates its agent
+mTLS CA into /var/db/sysmanage/certs on first start (separate from the web
+certificate above), and logs to /var/log/sysmanage.  That account is
+deliberately NOT the one used by sysutils/sysmanage-agent, which holds
+root-equivalent sudo grants.
+EOM
+}
+]
