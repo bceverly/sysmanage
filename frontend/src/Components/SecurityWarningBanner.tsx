@@ -2,7 +2,7 @@
 // Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 // See the LICENSE file in the project root for the full terms.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Alert, AlertTitle, Box } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +34,7 @@ interface SecurityStatus {
 const SecurityWarningBanner: React.FC = () => {
   const { t } = useTranslation();
   const [securityStatus, setSecurityStatus] = useState<SecurityStatus | null>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Set CSS custom property for banner height to push navbar down
@@ -55,37 +56,16 @@ const SecurityWarningBanner: React.FC = () => {
         const status = response.data;
         setSecurityStatus(status);
         
-        // Set banner height based on security warnings
-        if (status && (status.hasDefaultCredentials || status.securityWarnings.length > 0)) {
-          // Calculate height based on content - be more dynamic
-          const hasCredentials = status.hasDefaultCredentials;
-          const warningCount = status.securityWarnings.length;
-          
-          // Base height for padding and icon
-          let calculatedHeight = 80;
-          
-          // Add height for credentials warning
-          if (hasCredentials) {
-            // Check if user is logged in as default (needs step-by-step instructions)
-            const currentUserId = localStorage.getItem('userid');
-            const isLoggedInAsDefault = currentUserId === status.defaultUserId;
-
-            if (isLoggedInAsDefault) {
-              calculatedHeight += 280; // For detailed step-by-step instructions
-            } else {
-              calculatedHeight += 90; // For basic credentials warning
-            }
-          }
-          
-          // Add height for each security warning (JWT, salt, etc.)
-          for (let i = 0; i < warningCount; i++) {
-            calculatedHeight += 85; // Each warning with command text and styling needs more space
-          }
-          
-          setBannerHeight(`${calculatedHeight}px`);
-        } else {
-          setBannerHeight('0px'); // No banner when no warnings
-        }
+        // Height is MEASURED after render (see the layout effect below), not
+        // computed here.  This used to add up hardcoded pixel guesses --
+        // 80 base, +280 for the step-by-step block, +85 per warning -- and the
+        // navbar sits at top: var(--security-banner-height).  Any content that
+        // rendered taller than the guess left the navbar underneath the banner,
+        // where the alert silently swallowed clicks on the nav.  That is what
+        // happened on 2026-08-11 when the remediation commands became longer:
+        // the E2E menubar test failed with "subtree intercepts pointer events".
+        // A guess about rendered height cannot survive a text change, a
+        // translation, or a narrower viewport.
       } catch (error) {
         console.error('Failed to check security status:', error);
         // Don't show banner if we can't determine status
@@ -101,6 +81,26 @@ const SecurityWarningBanner: React.FC = () => {
     return () => globalThis.clearInterval(interval);
   }, []);
 
+  // Measure the rendered banner and publish its real height, so the navbar
+  // (top: var(--security-banner-height)) and .main-content padding always
+  // clear it exactly.  ResizeObserver keeps it correct across wrapping changes
+  // from window resizes and translated strings.
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const el = bannerRef.current;
+    if (!el) {
+      root.style.setProperty('--security-banner-height', '0px');
+      return;
+    }
+    const apply = () =>
+      root.style.setProperty('--security-banner-height', `${el.offsetHeight}px`);
+    apply();
+    if (typeof ResizeObserver === 'undefined') return; // jsdom
+    const observer = new ResizeObserver(apply);
+    observer.observe(el);
+    return () => observer.disconnect();
+  });
+
   if (!securityStatus || (!securityStatus.hasDefaultCredentials && securityStatus.securityWarnings.length === 0)) {
     return null;
   }
@@ -114,7 +114,7 @@ const SecurityWarningBanner: React.FC = () => {
   const hasCriticalWarning = criticalWarnings.length > 0 || hasCredentialsWarning;
 
   return (
-    <Box sx={{ 
+    <Box ref={bannerRef} sx={{ 
       width: '100%', 
       position: 'fixed',
       top: 0,
