@@ -102,7 +102,8 @@ USES=		nodejs:build npm:npm,build pgsql:15+ python:3.10+,run shebangfix
 # named here.  sysmanage_migrate.py starts with "#!/usr/bin/env python3",
 # which stage-qa flags and which would resolve to whatever python3 happens to
 # be first in PATH rather than the interpreter this port depends on.
-SHEBANG_FILES=	scripts/sysmanage_migrate.py
+SHEBANG_FILES=	scripts/sysmanage_migrate.py \
+		scripts/migrate-security-config.py
 WANT_PGSQL=	server
 USE_GITHUB=	yes
 GH_ACCOUNT=	bceverly
@@ -245,6 +246,12 @@ do-install:
 # be preserved for backend/ and alembic/ to be importable.
 	${MKDIR} ${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/scripts
 	${INSTALL_SCRIPT} ${WRKSRC}/scripts/sysmanage_migrate.py \
+		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/scripts/
+# migrate-security-config.py rotates jwt_secret and password_salt.  The web UI
+# tells the administrator to run it -- naming an absolute path it derives from
+# sys.executable and the install root -- so if the port does not ship it, the
+# interface prints an instruction that cannot be followed.
+	${INSTALL_SCRIPT} ${WRKSRC}/scripts/migrate-security-config.py \
 		${STAGEDIR}${PREFIX}/libexec/${PORTNAME}/scripts/
 	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 # The ROOT sysmanage.yaml.example, not installer/opensuse's.  Every

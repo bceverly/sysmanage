@@ -7,7 +7,10 @@ Security API endpoints for checking system security status and configurations.
 """
 
 import logging
+import os
 import platform
+import sys
+from pathlib import Path
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends
@@ -31,19 +34,56 @@ DEFAULT_PASSWORD_SALTS = {
 logger = logging.getLogger(__name__)
 
 
+def _install_root() -> Path:
+    """Directory holding backend/ and scripts/ for THIS install."""
+    # backend/api/security.py -> backend/api -> backend -> <root>
+    return Path(__file__).resolve().parents[2]
+
+
 def _get_platform_command(script_args=""):
-    """Generate cross-platform command for running the migration script."""
+    """The command that actually works ON THIS HOST, absolute and runnable.
+
+    This used to emit a bare ``python3 scripts/migrate-security-config.py``,
+    which is only correct when the reader happens to be sitting in a source
+    checkout with the right interpreter first on PATH.  A packaged install has
+    neither: the interpreter is a specific ports/venv binary and the script
+    lives under the install prefix.  ``sys.executable`` is by definition the
+    interpreter running this server, and the script sits beside the backend
+    package, so both are derived rather than guessed.
+
+    ``--config`` is passed explicitly.  The script's own autodetection prefers
+    /etc/sysmanage.yaml, so on a host that also has a development config there,
+    it would rewrite that file instead of the one this server is using and
+    report success.
+    """
+    script_path = _install_root() / "scripts" / "migrate-security-config.py"
+    config_path = os.environ.get("SYSMANAGE_CONFIG_PATH")
+    parts = [sys.executable, str(script_path)]
+    if config_path:
+        parts += ["--config", config_path]
+    if script_args:
+        parts.append(script_args)
+    # Editing the config requires root everywhere except Windows, which has no
+    # sudo and elevates differently.
+    if platform.system().lower() != "windows":
+        parts.insert(0, "sudo")
+    return " ".join(parts)
+
+
+def _get_restart_command() -> str:
+    """How to restart the service on this platform.
+
+    The UI used to say "Restart the server with ./run.sh", which is the
+    developer workflow and does not exist in any package.
+    """
     system = platform.system().lower()
-
     if system == "windows":
-        # Windows: Try py launcher first, then python
-        base_commands = ["py -3", "python"]
-    else:
-        # Unix-like (Linux, macOS, BSD): Try python3 first, then python
-        base_commands = ["python3", "python"]
-
-    script_path = "scripts/migrate-security-config.py"
-    return f"{base_commands[0]} {script_path} {script_args}".strip()
+        return "Restart-Service sysmanage"
+    if system in ("freebsd", "netbsd", "openbsd"):
+        return "sudo service sysmanage restart"
+    if system == "darwin":
+        return "sudo brew services restart sysmanage"
+    return "sudo systemctl restart sysmanage"
 
 
 class SecurityWarning(BaseModel):
@@ -64,6 +104,12 @@ class SecurityStatusResponse(BaseModel):
     securityWarnings: List[SecurityWarning]
     hasDefaultJwtSecret: bool
     hasDefaultPasswordSalt: bool
+    # Commands resolved on the SERVER, for the UI to display verbatim.  The
+    # banner previously hardcoded /opt/sysmanage/.venv/bin/python, which is one
+    # Linux packaging layout and wrong for the ports, Homebrew and Windows.
+    jwtCommand: str = ""
+    saltCommand: str = ""
+    restartCommand: str = ""
 
 
 router = APIRouter(prefix="/security", tags=["security"])
@@ -238,4 +284,7 @@ async def get_default_credentials_status(current_user=Depends(get_current_user))
         securityWarnings=security_warnings,
         hasDefaultJwtSecret=has_default_jwt,
         hasDefaultPasswordSalt=has_default_salt,
+        jwtCommand=_get_platform_command("--jwt-only"),
+        saltCommand=_get_platform_command("--salt-only"),
+        restartCommand=_get_restart_command(),
     )

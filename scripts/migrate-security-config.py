@@ -165,8 +165,32 @@ def generate_temporary_password():
 
 
 
-def get_config_file_path():
-    """Get the actual config file path being used (respects priority and cross-platform paths)."""
+def get_config_file_path(explicit=None):
+    """Get the actual config file path being used (respects priority and cross-platform paths).
+
+    Order: --config, then SYSMANAGE_CONFIG_PATH, then the platform defaults.
+
+    The overrides are not optional niceties.  A packaged install keeps its
+    config under ${PREFIX}/etc, but this function preferred /etc/sysmanage.yaml
+    unconditionally -- so on a host that also has a development config at /etc
+    (any machine where SysManage was ever run from a source tree) the script
+    rewrote the WRONG file and reported success.  SYSMANAGE_CONFIG_PATH is the
+    variable backend/config and the rc.d scripts already honour, so a service
+    manager that sets it gets consistent behaviour from this script too.
+    """
+    if explicit:
+        if not os.path.exists(explicit):
+            print(f"[ERROR] --config {explicit} does not exist")
+            sys.exit(1)
+        return explicit
+
+    from_env = os.environ.get("SYSMANAGE_CONFIG_PATH")
+    if from_env:
+        if not os.path.exists(from_env):
+            print(f"[ERROR] SYSMANAGE_CONFIG_PATH={from_env} does not exist")
+            sys.exit(1)
+        return from_env
+
     # Platform-specific system config locations
     system_config_paths = []
 
@@ -468,6 +492,8 @@ def main():
     parser.add_argument('--salt-only', action='store_true', help='Only update password salt')
     parser.add_argument('--dry-run', action='store_true', help='Show changes without applying them')
     parser.add_argument('--debug', action='store_true', help='Enable debug output')
+    parser.add_argument('--config', metavar='PATH',
+                        help='Configuration file to migrate (overrides autodetection \n                              and SYSMANAGE_CONFIG_PATH)')
 
     args = parser.parse_args()
 
@@ -484,7 +510,7 @@ def main():
         print(f"[DEBUG] DEBUG: Current working directory: {os.getcwd()}")
 
     # Get the config file path (respects /etc priority)
-    config_path = get_config_file_path()
+    config_path = get_config_file_path(args.config)
     print(f"[FILE] Using configuration file: {config_path}")
 
     if debug:

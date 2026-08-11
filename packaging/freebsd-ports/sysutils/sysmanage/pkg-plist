@@ -1,3 +1,4 @@
+libexec/sysmanage/scripts/migrate-security-config.py
 libexec/sysmanage/scripts/sysmanage_migrate.py
 libexec/sysmanage/alembic.ini
 @owner root

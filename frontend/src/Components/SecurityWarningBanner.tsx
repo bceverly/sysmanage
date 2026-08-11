@@ -22,6 +22,13 @@ interface SecurityStatus {
   securityWarnings: SecurityWarning[];
   hasDefaultJwtSecret: boolean;
   hasDefaultPasswordSalt: boolean;
+  // Resolved by the SERVER for the host it is running on -- interpreter path,
+  // script path and service manager all differ between the Linux packages,
+  // the BSD ports, Homebrew and Windows.  Optional so an older backend that
+  // does not send them degrades to blank rather than throwing.
+  jwtCommand?: string;
+  saltCommand?: string;
+  restartCommand?: string;
 }
 
 const SecurityWarningBanner: React.FC = () => {
@@ -181,9 +188,8 @@ const SecurityWarningBanner: React.FC = () => {
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         padding: '2px 6px',
                         borderRadius: '3px'
-                      // eslint-disable-next-line i18next/no-literal-string -- shell command is not translatable
                       }}>
-                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --jwt-only
+                        {securityStatus.jwtCommand}
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>
@@ -193,9 +199,8 @@ const SecurityWarningBanner: React.FC = () => {
                         backgroundColor: 'rgba(255,255,255,0.2)',
                         padding: '2px 6px',
                         borderRadius: '3px'
-                      // eslint-disable-next-line i18next/no-literal-string -- shell command is not translatable
                       }}>
-                        sudo /opt/sysmanage/.venv/bin/python /opt/sysmanage/scripts/migrate-security-config.py --salt-only
+                        {securityStatus.saltCommand}
                       </Box>
                     </Box>
                     <Box sx={{ mb: 1 }}>
@@ -208,7 +213,15 @@ const SecurityWarningBanner: React.FC = () => {
                       5. {t('security.step5RemoveCredentials', 'Remove admin_userid and admin_password from your YAML configuration file')}
                     </Box>
                     <Box>
-                      6. {t('security.step6RestartServer', 'Restart the server with ./run.sh')}
+                      6. {t('security.step6RestartServerCmd', 'Restart the server:')}{' '}
+                      <Box component="span" sx={{
+                        fontFamily: 'monospace',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        padding: '2px 6px',
+                        borderRadius: '3px'
+                      }}>
+                        {securityStatus.restartCommand}
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
