@@ -82,6 +82,14 @@ class HostRegistration(BaseModel):
     is_privileged: Optional[bool] = None
     enabled_shells: Optional[List[str]] = None
     agent_version: Optional[str] = None
+    # Phase 19: the agent advertises what it can do at REGISTRATION as well as
+    # in SYSTEM_INFO.  The ingest was wired only into the SYSTEM_INFO path, so
+    # with extra="forbid" every agent that sends it was rejected outright:
+    #     422 extra_forbidden: body.agent_capabilities
+    # i.e. an agent and server of the SAME version could not talk to each
+    # other.  Found 2026-08-11 by pointing a real agent at a real server; no
+    # test covered agent<->server registration across the two repos.
+    agent_capabilities: Optional[dict] = None
     auto_approve_token: Optional[str] = None
     # Phase 8.1: optional pre-shared registration key.  When supplied
     # and valid, the server enrolls the host into the key's
@@ -798,6 +806,17 @@ async def register_host(registration_data: HostRegistration):
         # NOTE: Script execution capability defaults to False for new hosts
         # This should only be enabled through explicit admin configuration after registration
         host.script_execution_enabled = False
+
+        # Phase 19: record the advertised capabilities immediately.  Waiting for
+        # the first SYSTEM_INFO would leave the host with an unknown capability
+        # set for a full collection interval, during which the dispatch gate
+        # cannot tell "does not support" from "not yet reported".
+        from backend.services.agent_capability_service import (  # noqa: PLC0415
+            apply_capability_report,
+        )
+
+        apply_capability_report(host, registration_data.agent_capabilities)
+
         session.add(host)
         session.flush()  # need host.id for join-table inserts below
 

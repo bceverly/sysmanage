@@ -33,6 +33,18 @@ def _refresh_existing_host(session, existing_host, registration_data) -> "models
         existing_host.ipv4 = registration_data.ipv4
         existing_host.ipv6 = registration_data.ipv6
         existing_host.last_access = datetime.now(timezone.utc).replace(tzinfo=None)
+        # Phase 19: refresh the capability advertisement on re-registration too.
+        # An agent that gains or loses a capability (a package installed, an
+        # OS upgrade) re-registers long before its next SYSTEM_INFO, and a
+        # stale advertisement makes the dispatch gate refuse work the agent can
+        # now do.  A payload without capabilities leaves the stored set alone.
+        from backend.services.agent_capability_service import (  # noqa: PLC0415
+            apply_capability_report,
+        )
+
+        apply_capability_report(
+            existing_host, getattr(registration_data, "agent_capabilities", None)
+        )
         print(
             f"Before commit - FQDN: {existing_host.fqdn}, Active: {existing_host.active}"
         )
