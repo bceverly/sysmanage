@@ -390,6 +390,89 @@ jobs:
             distinfo
           if-no-files-found: error
 
+  # Generate the vendored npm dependency distfile that sysutils/sysmanage needs
+  # and publish it alongside the release, so a committer (or FreeBSD's distfile
+  # mirrors) can fetch what the port's distinfo pins.  Until now this was made
+  # by hand on the maintainer's FreeBSD box and uploaded manually -- fine once,
+  # not a release process.
+  #
+  # It is built by the PORTS FRAMEWORK, not by a tar command here.  USES=npm's
+  # prefetch target archives node_modules via Mk/Scripts/npm-create-mtree.sh
+  # with 'gzip:!timestamp'; that is what makes the output reproducible (three
+  # independent regenerations across 3.5.1.9 and 3.5.1.10 all hashed to
+  # ffe5eb05...).  Re-implementing the archive step here would drift from the
+  # framework and produce a file whose checksum does not match the distinfo in
+  # the submitted port -- which fails for everyone except whoever built it.
+  build-freebsd-npm-distfile:
+    name: Build FreeBSD npm distfile
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: wait-for-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      # Same action and pin the bsd-tests workflow uses for its FreeBSD leg.
+      - name: Start FreeBSD VM
+        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        with:
+          operating_system: freebsd
+          version: '14.3'
+          environment_variables: RELEASE_VERSION
+
+      - name: Generate the distfile with the ports framework
+        shell: cpa.sh {0}
+        run: |
+          set -ex
+          VERSION="${RELEASE_VERSION#v}"
+          sudo pkg install -y git npm-node24 node24
+
+          # A blobless, sparse clone: the framework (Mk/) is all that is needed
+          # to run "make makesum" on one port, and a full ports tree is ~1 GB
+          # of checkout time we would pay on every release.
+          sudo git clone --depth 1 --filter=blob:none --sparse \
+            https://git.FreeBSD.org/ports.git /usr/ports
+          sudo git -C /usr/ports sparse-checkout set Mk Templates Keywords
+
+          PORTDIR=/usr/ports/sysutils/sysmanage
+          sudo mkdir -p "$PORTDIR"
+          sudo cp -R packaging/freebsd-ports/sysutils/sysmanage/. "$PORTDIR/"
+          sudo sed -i '' "s|^DISTVERSION=.*|DISTVERSION=	${VERSION}|" "$PORTDIR/Makefile"
+
+          # makesum runs the USES=npm prefetch (npm ci from the lockfile in
+          # files/packagejsons) and archives it into DISTDIR, then checksums
+          # both distfiles.
+          sudo make -C "$PORTDIR" makesum
+          sudo cat "$PORTDIR/distinfo"
+
+          DISTDIR=$(make -C "$PORTDIR" -V DISTDIR)
+          FILE="sysmanage-${VERSION}-node-modules.tar.gz"
+          [ -s "${DISTDIR}/${FILE}" ] || { echo "ERROR: ${FILE} was not generated"; exit 1; }
+          cp "${DISTDIR}/${FILE}" "$GITHUB_WORKSPACE/${FILE}"
+          sha256 -q "$GITHUB_WORKSPACE/${FILE}" > "$GITHUB_WORKSPACE/${FILE}.sha256"
+
+          # Print both so a mismatch against the port's committed distinfo is
+          # diagnosable from the log alone.
+          echo "distfile sha256: $(cat "$GITHUB_WORKSPACE/${FILE}.sha256")"
+          ls -lh "$GITHUB_WORKSPACE/${FILE}"
+
+      - name: Upload npm distfile
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: sysmanage-freebsd-npm-distfile
+          path: |
+            sysmanage-*-node-modules.tar.gz
+            sysmanage-*-node-modules.tar.gz.sha256
+          if-no-files-found: error
+
   # OpenBSD Binary Package Build (.tgz) for the supported releases (7.8, 7.9).
   # These are pre-built packages users `pkg_add` directly.  Built FULLY OFFLINE
   # from the libs distfile above (no pip/npm/compiler at port-build time);
@@ -1343,7 +1426,7 @@ jobs:
   release:
     name: Create Release and Publish to R2
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-openbsd-port, build-openbsd-libs, build-openbsd-packages, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
+    needs: [build-ubuntu, build-openbsd-port, build-openbsd-libs, build-freebsd-npm-distfile, build-openbsd-packages, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
       - name: Checkout code
@@ -1438,6 +1521,12 @@ jobs:
           # server/openbsd/<file> to match the port's MASTER_SITES; the version
           # is in the filename (sysmanage-<ver>-openbsd.tar.gz).
           cp $RF/sysmanage-*-openbsd.tar.gz "repo/server/openbsd/" 2>/dev/null || true
+          # The port fetches this from server/freebsd/<version>/ -- see
+          # MASTER_SITES in packaging/freebsd-ports/sysutils/sysmanage/Makefile.
+          # NOT fail-open: without it the port cannot be fetched by anyone but
+          # the maintainer, and the failure only surfaces on someone else's box.
+          cp $RF/sysmanage-*-node-modules.tar.gz "repo/server/freebsd/$VERSION/"
+          cp $RF/sysmanage-*-node-modules.tar.gz.sha256 "repo/server/freebsd/$VERSION/"
           cp $RF/sysmanage-*.pkg "repo/server/freebsd/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*.pkg.sha256 "repo/server/freebsd/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-macos.pkg "repo/server/macos/$VERSION/" 2>/dev/null || true
