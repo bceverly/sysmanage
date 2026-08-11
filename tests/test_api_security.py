@@ -11,76 +11,125 @@ from unittest.mock import MagicMock, patch
 
 
 class TestGetPlatformCommand:
-    """Tests for _get_platform_command function."""
+    """Tests for _get_platform_command.
 
-    def test_windows_platform(self):
-        """Test command generation for Windows platform."""
+    The contract changed on 2026-08-11.  It used to emit a bare
+    ``python3 scripts/migrate-security-config.py`` -- correct only for a reader
+    sitting in a source checkout with the right interpreter first on PATH.  A
+    packaged install has neither, and the web UI prints this command verbatim
+    for the administrator to run, so on the BSD ports / Homebrew / Windows it
+    was instructing people to run something that could not work.
+
+    It now derives an absolute, runnable command from ``sys.executable`` (by
+    definition the interpreter running this server) and the install root.  What
+    ``platform.system()`` still decides is the sudo prefix: editing the config
+    needs root everywhere except Windows, which has no sudo.
+    """
+
+    def test_windows_has_no_sudo_prefix(self):
+        """Windows elevates differently; prefixing sudo would be nonsense."""
         from backend.api.security import _get_platform_command
 
         with patch("backend.api.security.platform.system", return_value="Windows"):
             result = _get_platform_command()
 
-        assert "py -3" in result
+        assert not result.startswith("sudo")
         assert "migrate-security-config.py" in result
 
-    def test_linux_platform(self):
-        """Test command generation for Linux platform."""
+    def test_posix_platforms_prefix_sudo(self):
+        """Linux, macOS and the BSDs all need root to rewrite the config."""
+        from backend.api.security import _get_platform_command
+
+        for system in ("Linux", "Darwin", "FreeBSD", "NetBSD", "OpenBSD"):
+            with patch("backend.api.security.platform.system", return_value=system):
+                result = _get_platform_command()
+            assert result.startswith("sudo "), system
+
+    def test_command_is_absolute_and_runnable(self):
+        """Both the interpreter and the script must be absolute paths.
+
+        This is the whole point of the change: a relative path is only valid
+        from one working directory, and "python3" is only valid if the right
+        interpreter happens to be first on PATH.
+        """
+        import os
+        import sys
+
         from backend.api.security import _get_platform_command
 
         with patch("backend.api.security.platform.system", return_value="Linux"):
             result = _get_platform_command()
 
-        assert "python3" in result
-        assert "migrate-security-config.py" in result
+        parts = result.split()
+        assert parts[0] == "sudo"
+        assert parts[1] == sys.executable
+        assert os.path.isabs(parts[2])
+        assert parts[2].endswith("scripts/migrate-security-config.py")
 
-    def test_darwin_platform(self):
-        """Test command generation for macOS platform."""
-        from backend.api.security import _get_platform_command
-
-        with patch("backend.api.security.platform.system", return_value="Darwin"):
-            result = _get_platform_command()
-
-        assert "python3" in result
-        assert "migrate-security-config.py" in result
-
-    def test_freebsd_platform(self):
-        """Test command generation for FreeBSD platform."""
-        from backend.api.security import _get_platform_command
-
-        with patch("backend.api.security.platform.system", return_value="FreeBSD"):
-            result = _get_platform_command()
-
-        assert "python3" in result
-        assert "migrate-security-config.py" in result
-
-    def test_with_script_args(self):
-        """Test command generation with script arguments."""
+    def test_script_args_are_appended(self):
+        """--jwt-only / --salt-only reach the command line."""
         from backend.api.security import _get_platform_command
 
         with patch("backend.api.security.platform.system", return_value="Linux"):
-            result = _get_platform_command("--jwt-only")
+            assert _get_platform_command("--jwt-only").endswith("--jwt-only")
+            assert _get_platform_command("--salt-only").endswith("--salt-only")
 
-        assert "--jwt-only" in result
-        assert "python3" in result
-
-    def test_with_salt_only_arg(self):
-        """Test command generation with --salt-only argument."""
-        from backend.api.security import _get_platform_command
-
-        with patch("backend.api.security.platform.system", return_value="Linux"):
-            result = _get_platform_command("--salt-only")
-
-        assert "--salt-only" in result
-
-    def test_empty_script_args(self):
-        """Test command generation with empty script arguments."""
+    def test_empty_script_args_leave_no_trailing_space(self):
+        """No args must not produce a dangling separator."""
         from backend.api.security import _get_platform_command
 
         with patch("backend.api.security.platform.system", return_value="Linux"):
             result = _get_platform_command("")
 
         assert result.endswith(".py")
-        assert "  " not in result  # No double spaces
+        assert "  " not in result
+
+    def test_config_path_is_pinned_when_known(self):
+        """SYSMANAGE_CONFIG_PATH must be passed through as --config.
+
+        The script's own autodetection prefers /etc/sysmanage.yaml, so on a
+        host that also has a development config there it would rewrite the
+        wrong file and report success.
+        """
+        import os
+
+        from backend.api.security import _get_platform_command
+
+        with patch("backend.api.security.platform.system", return_value="Linux"):
+            with patch.dict(
+                os.environ, {"SYSMANAGE_CONFIG_PATH": "/usr/local/etc/sysmanage.yaml"}
+            ):
+                result = _get_platform_command("--jwt-only")
+
+        assert "--config /usr/local/etc/sysmanage.yaml" in result
+        assert result.endswith("--jwt-only")
+
+
+class TestGetRestartCommand:
+    """The UI used to tell every platform to run ``./run.sh``."""
+
+    def test_each_platform_gets_its_own_service_manager(self):
+        from backend.api.security import _get_restart_command
+
+        expected = {
+            "FreeBSD": "service sysmanage restart",
+            "NetBSD": "service sysmanage restart",
+            "OpenBSD": "service sysmanage restart",
+            "Linux": "systemctl restart sysmanage",
+            "Darwin": "brew services restart sysmanage",
+            "Windows": "Restart-Service sysmanage",
+        }
+        for system, fragment in expected.items():
+            with patch("backend.api.security.platform.system", return_value=system):
+                assert fragment in _get_restart_command(), system
+
+    def test_no_platform_is_told_to_run_run_sh(self):
+        """``./run.sh`` is a developer command that exists in no package."""
+        from backend.api.security import _get_restart_command
+
+        for system in ("Linux", "Darwin", "FreeBSD", "NetBSD", "OpenBSD", "Windows"):
+            with patch("backend.api.security.platform.system", return_value=system):
+                assert "run.sh" not in _get_restart_command(), system
 
 
 class TestSecurityWarning:

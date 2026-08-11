@@ -76,50 +76,98 @@ class TestSecurityStatusResponse:
 
 
 class TestGetPlatformCommand:
-    """Tests for _get_platform_command function."""
+    """Tests for _get_platform_command.
 
-    @patch("backend.api.security.platform")
-    def test_linux_command(self, mock_platform):
-        """Test command generation for Linux."""
+    The contract changed on 2026-08-11.  It used to emit a bare
+    ``python3 scripts/migrate-security-config.py`` -- correct only for a reader
+    sitting in a source checkout with the right interpreter first on PATH.  A
+    packaged install has neither, and the web UI prints this command verbatim
+    for the administrator to run, so on the BSD ports / Homebrew / Windows it
+    was instructing people to run something that could not work.
+
+    It now derives an absolute, runnable command from ``sys.executable`` (by
+    definition the interpreter running this server) and the install root.  What
+    ``platform.system()`` still decides is the sudo prefix: editing the config
+    needs root everywhere except Windows, which has no sudo.
+    """
+
+    def test_windows_has_no_sudo_prefix(self):
+        """Windows elevates differently; prefixing sudo would be nonsense."""
         from backend.api.security import _get_platform_command
 
-        mock_platform.system.return_value = "Linux"
+        with patch("backend.api.security.platform.system", return_value="Windows"):
+            result = _get_platform_command()
 
-        result = _get_platform_command()
-        assert "python3" in result
+        assert not result.startswith("sudo")
         assert "migrate-security-config.py" in result
 
-    @patch("backend.api.security.platform")
-    def test_linux_command_with_args(self, mock_platform):
-        """Test command generation for Linux with arguments."""
+    def test_posix_platforms_prefix_sudo(self):
+        """Linux, macOS and the BSDs all need root to rewrite the config."""
         from backend.api.security import _get_platform_command
 
-        mock_platform.system.return_value = "Linux"
+        for system in ("Linux", "Darwin", "FreeBSD", "NetBSD", "OpenBSD"):
+            with patch("backend.api.security.platform.system", return_value=system):
+                result = _get_platform_command()
+            assert result.startswith("sudo "), system
 
-        result = _get_platform_command("--jwt-only")
-        assert "python3" in result
-        assert "--jwt-only" in result
+    def test_command_is_absolute_and_runnable(self):
+        """Both the interpreter and the script must be absolute paths.
 
-    @patch("backend.api.security.platform")
-    def test_windows_command(self, mock_platform):
-        """Test command generation for Windows."""
+        This is the whole point of the change: a relative path is only valid
+        from one working directory, and "python3" is only valid if the right
+        interpreter happens to be first on PATH.
+        """
+        import os
+        import sys
+
         from backend.api.security import _get_platform_command
 
-        mock_platform.system.return_value = "Windows"
+        with patch("backend.api.security.platform.system", return_value="Linux"):
+            result = _get_platform_command()
 
-        result = _get_platform_command()
-        assert "py -3" in result
-        assert "migrate-security-config.py" in result
+        parts = result.split()
+        assert parts[0] == "sudo"
+        assert parts[1] == sys.executable
+        assert os.path.isabs(parts[2])
+        assert parts[2].endswith("scripts/migrate-security-config.py")
 
-    @patch("backend.api.security.platform")
-    def test_macos_command(self, mock_platform):
-        """Test command generation for macOS."""
+    def test_script_args_are_appended(self):
+        """--jwt-only / --salt-only reach the command line."""
         from backend.api.security import _get_platform_command
 
-        mock_platform.system.return_value = "Darwin"
+        with patch("backend.api.security.platform.system", return_value="Linux"):
+            assert _get_platform_command("--jwt-only").endswith("--jwt-only")
+            assert _get_platform_command("--salt-only").endswith("--salt-only")
 
-        result = _get_platform_command()
-        assert "python3" in result
+    def test_empty_script_args_leave_no_trailing_space(self):
+        """No args must not produce a dangling separator."""
+        from backend.api.security import _get_platform_command
+
+        with patch("backend.api.security.platform.system", return_value="Linux"):
+            result = _get_platform_command("")
+
+        assert result.endswith(".py")
+        assert "  " not in result
+
+    def test_config_path_is_pinned_when_known(self):
+        """SYSMANAGE_CONFIG_PATH must be passed through as --config.
+
+        The script's own autodetection prefers /etc/sysmanage.yaml, so on a
+        host that also has a development config there it would rewrite the
+        wrong file and report success.
+        """
+        import os
+
+        from backend.api.security import _get_platform_command
+
+        with patch("backend.api.security.platform.system", return_value="Linux"):
+            with patch.dict(
+                os.environ, {"SYSMANAGE_CONFIG_PATH": "/usr/local/etc/sysmanage.yaml"}
+            ):
+                result = _get_platform_command("--jwt-only")
+
+        assert "--config /usr/local/etc/sysmanage.yaml" in result
+        assert result.endswith("--jwt-only")
 
 
 class TestGetDatabaseUserCount:
