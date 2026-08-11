@@ -64,7 +64,11 @@ class TestGetPlatformCommand:
         assert parts[0] == "sudo"
         assert parts[1] == sys.executable
         assert os.path.isabs(parts[2])
-        assert parts[2].endswith("scripts/migrate-security-config.py")
+        # Compare path COMPONENTS, not a substring with a hardcoded separator:
+        # on Windows this is D:\\a\\...\\scripts\\migrate-security-config.py
+        # and an endswith("scripts/...") check fails there.
+        assert os.path.basename(parts[2]) == "migrate-security-config.py"
+        assert os.path.basename(os.path.dirname(parts[2])) == "scripts"
 
     def test_script_args_are_appended(self):
         """--jwt-only / --salt-only reach the command line."""
