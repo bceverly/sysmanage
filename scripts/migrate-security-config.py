@@ -29,6 +29,7 @@ Options:
 import argparse
 import base64
 import os
+import platform
 import secrets
 import shutil
 import subprocess
@@ -301,12 +302,17 @@ def create_password_reset_token(user_id, session):
     expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
 
     # Create token record
+    # No is_used= here: the model (backend/persistence/models/operations.py)
+    # records consumption as a nullable ``used_at`` timestamp, not a boolean.
+    # Passing is_used raised "'is_used' is an invalid keyword argument for
+    # PasswordResetToken" and aborted the salt migration outright -- after the
+    # config backup was taken but before the config was rewritten, so the
+    # install was left consistent by luck of the ordering rather than design.
     reset_token = models.PasswordResetToken(
         user_id=user_id,
         token=token,
         created_at=datetime.now(timezone.utc),
         expires_at=expires_at,
-        is_used=False
     )
 
     session.add(reset_token)
@@ -486,6 +492,18 @@ def migrate_user_passwords(old_salt, new_salt, dry_run=False):
     return migrations
 
 
+def _restart_hint():
+    """Platform-appropriate service restart command."""
+    system = platform.system().lower()
+    if system == "windows":
+        return "Restart-Service sysmanage"
+    if system in ("freebsd", "netbsd", "openbsd"):
+        return "sudo service sysmanage restart"
+    if system == "darwin":
+        return "sudo brew services restart sysmanage"
+    return "sudo systemctl restart sysmanage"
+
+
 def main():
     parser = argparse.ArgumentParser(description='Migrate SysManage security configuration')
     parser.add_argument('--jwt-only', action='store_true', help='Only update JWT secret')
@@ -643,15 +661,11 @@ def main():
 
     print("\n[OK] Security migration completed successfully!")
     print("\n📋 Next steps:")
-    # Detect packaged install (/opt/sysmanage) vs dev tree and print the
-    # correct restart hint.  In a dev checkout you re-run ./run.sh; in a
-    # PPA-installed deployment the service is managed by systemd.
-    if os.path.exists("/opt/sysmanage/.venv") and os.path.exists(
-        "/usr/lib/systemd/system/sysmanage.service"
-    ):
-        print("   1. Restart the SysManage server: sudo systemctl restart sysmanage")
-    else:
-        print("   1. Restart the SysManage server: ./run.sh")
+    # Restart hint by PLATFORM, not by probing for one Linux packaging layout.
+    # The previous test required both /opt/sysmanage/.venv and a systemd unit,
+    # so every other install -- the BSD ports, Homebrew, Windows -- fell through
+    # to "./run.sh", a developer command that exists in no package.
+    print(f"   1. Restart the SysManage server: {_restart_hint()}")
     if update_salt and migrations_needed:
         print("   2. Share temporary passwords with affected users (shown above)")
         print("   3. Ensure users change their temporary passwords immediately")
