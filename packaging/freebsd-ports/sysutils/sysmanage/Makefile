@@ -172,7 +172,7 @@ SUB_LIST+=	PYTHON_CMD=${PYTHON_CMD}
 
 # The bootstrap wrapper and the package message both need substitution.
 # USE_RC_SUBR handles the rc script; SUB_FILES covers the rest.
-SUB_FILES=	pkg-message
+SUB_FILES=	pkg-message sysmanage-nginx.conf
 
 # NO_ARCH stays: the PACKAGE is architecture-independent (Python source plus
 # the static JS/CSS vite emits).  The BUILD is not — it runs node — but that is
@@ -265,9 +265,9 @@ do-install:
 # -- frontend/dist is gitignored, so it is absent from the release tarball, and
 # a port cannot run npm at build time (no network).  The directory is therefore
 # empty unless an admin deploys a build into it; pkg-message says so plainly.
-	${SED} -e 's|%%PREFIX%%|${PREFIX}|g' \
-		${WRKSRC}/installer/freebsd/sysmanage-nginx.conf \
-		> ${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
+# From files/, NOT from the tarball -- see the header of that file.
+	${INSTALL_DATA} ${WRKDIR}/sysmanage-nginx.conf \
+		${STAGEDIR}${PREFIX}/etc/nginx/sysmanage-nginx.conf.sample
 # Where the admin puts the TLS keypair nginx serves.  Created empty and
 # root-only: nginx reads certificates as root before dropping privileges, so
 # the private key never needs to be readable by the www user, and 0700 keeps a
