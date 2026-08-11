@@ -1593,7 +1593,6 @@
     "step3CreateUser": "Maak een nieuwe admin-gebruiker aan via de Gebruikers-pagina in deze interface",
     "step4LoginNewUser": "Meld u af en aan met uw nieuwe admin-account",
     "step5RemoveCredentials": "Verwijder admin_userid en admin_password uit uw YAML-configuratiebestand",
-    "step6RestartServer": "Herstart de server met ./run.sh",
     "removeCredentialsHint": "Verwijder admin_userid en admin_password uit uw configuratiebestand en start de server opnieuw op",
     "step6RestartServerCmd": "Herstart de server:"
   },

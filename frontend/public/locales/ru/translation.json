@@ -1593,7 +1593,6 @@
     "step3CreateUser": "Создайте нового администратора на странице Пользователи этого интерфейса",
     "step4LoginNewUser": "Выйдите из системы и войдите с новой учётной записью администратора",
     "step5RemoveCredentials": "Удалите admin_userid и admin_password из вашего YAML-файла конфигурации",
-    "step6RestartServer": "Перезапустите сервер с помощью ./run.sh",
     "removeCredentialsHint": "Удалите admin_userid и admin_password из файла конфигурации и перезапустите сервер",
     "step6RestartServerCmd": "Перезапустите сервер:"
   },

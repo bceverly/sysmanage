@@ -1593,7 +1593,6 @@
     "step3CreateUser": "Cree un nuevo usuario administrador desde la página Usuarios de esta interfaz",
     "step4LoginNewUser": "Cierre sesión e inicie sesión con su nueva cuenta de administrador",
     "step5RemoveCredentials": "Elimine admin_userid y admin_password de su archivo de configuración YAML",
-    "step6RestartServer": "Reinicie el servidor con ./run.sh",
     "removeCredentialsHint": "Elimine admin_userid y admin_password de su archivo de configuración e inicie el servidor nuevamente",
     "step6RestartServerCmd": "Reiniciar el servidor:"
   },

@@ -1593,7 +1593,6 @@
     "step3CreateUser": "透過此介面中的「使用者」頁面建立新的管理員使用者",
     "step4LoginNewUser": "登出並使用您的新管理員帳戶登入",
     "step5RemoveCredentials": "從您的 YAML 組態檔中移除 admin_userid 和 admin_password",
-    "step6RestartServer": "使用 ./run.sh 重新啟動伺服器",
     "removeCredentialsHint": "從您的配置文件中移除 admin_userid 和 admin_password，然後重新啟動伺服器",
     "step6RestartServerCmd": "重新啟動伺服器："
   },
