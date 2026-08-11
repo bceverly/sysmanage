@@ -140,7 +140,12 @@ GH_TAGNAME=	v${DISTVERSION}
 # only the GitHub tarball in it.
 NPM_PKGFILE=	frontend/package.json
 
-MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/:prefetch
+# Per-version subdirectory, matching the layout of the rest of
+# server/freebsd/ (which holds one directory per release).  The distfile
+# name already carries the version, so a flat layout would also work --
+# this keeps ~96 MB per release from accumulating loose beside the
+# package directories.
+MASTER_SITES+=	https://repo.sysmanage.org/server/freebsd/${DISTVERSION}/:prefetch
 
 # The rc.d script runs the server as this user, and the port must CREATE it —
 # nothing else will.  Without this the service starts and dies with
