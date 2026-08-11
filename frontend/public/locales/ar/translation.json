@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "سجل الخروج وسجل الدخول بحساب المسؤول الجديد",
     "step5RemoveCredentials": "أزل admin_userid و admin_password من ملف تكوين YAML الخاص بك",
     "step6RestartServer": "أعد تشغيل الخادم باستخدام ./run.sh",
-    "removeCredentialsHint": "قم بإزالة admin_userid و admin_password من ملف التكوين الخاص بك وإعادة تشغيل الخادم"
+    "removeCredentialsHint": "قم بإزالة admin_userid و admin_password من ملف التكوين الخاص بك وإعادة تشغيل الخادم",
+    "step6RestartServerCmd": "أعد تشغيل伺服器："
   },
   "serverDown": {
     "details": "تفاصيل الاتصال:",

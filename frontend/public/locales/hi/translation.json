@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "लॉग आउट करें और अपने नए एडमिन खाते से लॉग इन करें",
     "step5RemoveCredentials": "अपनी YAML कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएँ",
     "step6RestartServer": "./run.sh के साथ सर्वर पुनः आरंभ करें",
-    "removeCredentialsHint": "अपने कॉन्फ़िगरेशन फाइल से admin_userid और admin_password को हटा दें और सर्वर को पुन: रिस्टार्ट करें"
+    "removeCredentialsHint": "अपने कॉन्फ़िगरेशन फाइल से admin_userid और admin_password को हटा दें और सर्वर को पुन: रिस्टार्ट करें",
+    "step6RestartServerCmd": "सर्वर को फिर से रंग करें:"
   },
   "serverDown": {
     "details": "कनेक्शन विवरण:",

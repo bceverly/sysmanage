@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "Log out and log in with your new admin account",
     "step5RemoveCredentials": "Remove admin_userid and admin_password from your YAML configuration file",
     "step6RestartServer": "Restart the server with ./run.sh",
-    "removeCredentialsHint": "Remove admin_userid and admin_password from your configuration file and restart the server"
+    "removeCredentialsHint": "Remove admin_userid and admin_password from your configuration file and restart the server",
+    "step6RestartServerCmd": "Restart the server:"
   },
   "serverDown": {
     "details": "Connection Details:",

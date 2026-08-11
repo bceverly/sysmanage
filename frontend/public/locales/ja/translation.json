@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "ログアウトして新しい管理者アカウントでログインしてください",
     "step5RemoveCredentials": "YAML設定ファイルからadmin_useridとadmin_passwordを削除してください",
     "step6RestartServer": "./run.shでサーバーを再起動してください",
-    "removeCredentialsHint": "admin_userid と admin_password を設定ファイルから削除し、サーバを再起動してください"
+    "removeCredentialsHint": "admin_userid と admin_password を設定ファイルから削除し、サーバを再起動してください",
+    "step6RestartServerCmd": "サーバを再起動："
   },
   "serverDown": {
     "details": "接続詳細:",

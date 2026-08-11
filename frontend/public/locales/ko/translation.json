@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "로그아웃한 후 새 관리자 계정으로 로그인하세요",
     "step5RemoveCredentials": "YAML 구성 파일에서 admin_userid 및 admin_password를 제거하세요",
     "step6RestartServer": "./run.sh로 서버를 다시 시작하세요",
-    "removeCredentialsHint": "admin_userid 및 admin_password를 구성 파일에서 제거하고 서버를 다시 시작하세요"
+    "removeCredentialsHint": "admin_userid 및 admin_password를 구성 파일에서 제거하고 서버를 다시 시작하세요",
+    "step6RestartServerCmd": "서버를 다시 시작하세요:"
   },
   "serverDown": {
     "details": "연결 세부정보:",

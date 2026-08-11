@@ -1594,7 +1594,8 @@
     "step4LoginNewUser": "注销并使用新的管理员账户登录",
     "step5RemoveCredentials": "从您的 YAML 配置文件中删除 admin_userid 和 admin_password",
     "step6RestartServer": "使用 ./run.sh 重启服务器",
-    "removeCredentialsHint": "从配置文件中移除 admin_userid 和 admin_password 并重启服务端"
+    "removeCredentialsHint": "从配置文件中移除 admin_userid 和 admin_password 并重启服务端",
+    "step6RestartServerCmd": "重启服务器："
   },
   "serverDown": {
     "details": "连接详情：",
