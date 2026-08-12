@@ -477,10 +477,18 @@ jobs:
           # makesum runs the USES=npm prefetch (npm ci from the lockfile in
           # files/packagejsons) and archives it into DISTDIR, then checksums
           # both distfiles.
-          sudo make -C "$PORTDIR" makesum
+          # ALLOW_UNSUPPORTED_SYSTEM: the runner image is FreeBSD 14.3, which the
+          # current ports tree considers past EOL, and bsd.port.mk refuses to do
+          # anything on such a host.  That guard exists to stop people COMPILING
+          # software on an unsupported release; this job compiles nothing for
+          # FreeBSD.  It runs "npm ci" and tar, and the artifact is JavaScript
+          # plus esbuild/rollup binaries that depend on the platform (freebsd)
+          # but not on the point release.  Revisit if cross-platform-actions
+          # ever offers a supported image.
+          sudo make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 makesum
           sudo cat "$PORTDIR/distinfo"
 
-          DISTDIR=$(make -C "$PORTDIR" -V DISTDIR)
+          DISTDIR=$(make -C "$PORTDIR" ALLOW_UNSUPPORTED_SYSTEM=1 -V DISTDIR)
           FILE="sysmanage-${VERSION}-node-modules.tar.gz"
           [ -s "${DISTDIR}/${FILE}" ] || { echo "ERROR: ${FILE} was not generated"; exit 1; }
           cp "${DISTDIR}/${FILE}" "$GITHUB_WORKSPACE/${FILE}"
