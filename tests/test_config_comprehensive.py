@@ -160,7 +160,27 @@ class TestConfigLoadingDefaults:
         mock_exists.return_value = True
 
         # Minimal config with just required sections
-        minimal_config = {"api": {}, "webui": {}, "security": {}}
+        minimal_config = {
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
+            "api": {},
+            "webui": {},
+            "security": {},
+            # The loader now refuses a config with no connection at all rather
+            # than dying on a KeyError deep in db.py, so the fixture needs one.
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
+        }
         mock_yaml.return_value = minimal_config
 
         # Import the module to trigger config loading
@@ -175,7 +195,9 @@ class TestConfigLoadingDefaults:
         assert "host" in loaded_config["api"]
         assert loaded_config["api"]["host"] == "localhost"
         assert "port" in loaded_config["api"]
-        assert loaded_config["api"]["port"] == 8443
+        # 8080/3000 are the defaults now: they match every shipped example, the
+        # nginx sample and the rc.d script.  8443/8080 agreed with nothing.
+        assert loaded_config["api"]["port"] == 8080
 
     @patch("backend.config.config.yaml.safe_load")
     @patch("backend.config.config.open", new_callable=mock_open)
@@ -188,6 +210,13 @@ class TestConfigLoadingDefaults:
 
         # Config with some values already set
         existing_config = {
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
             "api": {"host": "custom.example.com", "port": 9443},
             "webui": {
                 "host": "ui.example.com"
@@ -247,7 +276,13 @@ class TestConfigLoadingDefaults:
 
     def test_config_path_unix(self):
         """Test config path selection on Unix-like systems."""
-        mock_config = """api:
+        mock_config = """registry:
+  host: localhost
+  port: 5432
+  name: sysmanage
+  user: sysmanage
+  password: test
+api:
   host: localhost
   port: 8443
 webui:
@@ -273,7 +308,12 @@ security:
     @patch(
         "backend.config.config.open",
         new_callable=mock_open,
-        read_data="api:\n  host: localhost\n  port: 8443\nwebui:\n  host: localhost\n  port: 8080\nsecurity:\n  max_failed_logins: 5\n",
+        read_data=(
+            "registry:\n  host: localhost\n  port: 5432\n  name: sysmanage\n"
+            "  user: sysmanage\n  password: test\n"
+            "api:\n  host: localhost\n  port: 8443\nwebui:\n  host: localhost\n"
+            "  port: 8080\nsecurity:\n  max_failed_logins: 5\n"
+        ),
     )
     @patch("backend.config.config.yaml.safe_load")
     @patch("backend.config.config.os.path.exists")
@@ -293,6 +333,13 @@ security:
 
         # Mock yaml.safe_load to return a valid config
         mock_yaml.return_value = {
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
             "api": {"host": "localhost", "port": 8443},
             "webui": {"host": "localhost", "port": 8080},
             "security": {"max_failed_logins": 5},
@@ -315,7 +362,18 @@ security:
         mock_exists.return_value = True
 
         # Completely empty config except required sections
-        empty_config = {"api": {}, "webui": {}, "security": {}}
+        empty_config = {
+            "api": {},
+            "webui": {},
+            "security": {},
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
+        }
         mock_yaml.return_value = empty_config
 
         import importlib
@@ -326,13 +384,16 @@ security:
 
         loaded_config = mock_yaml.return_value
 
-        # API defaults
+        # API defaults.  8080/3000, matching every shipped example, the nginx
+        # sample and the rc.d script; the old 8443/8080 defaults agreed with
+        # nothing else in the tree and only ever applied when a key was
+        # omitted from a section that itself had to exist.
         assert loaded_config["api"]["host"] == "localhost"
-        assert loaded_config["api"]["port"] == 8443
+        assert loaded_config["api"]["port"] == 8080
 
         # WebUI defaults
         assert loaded_config["webui"]["host"] == "localhost"
-        assert loaded_config["webui"]["port"] == 8080
+        assert loaded_config["webui"]["port"] == 3000
 
         # Monitoring defaults
         assert "monitoring" in loaded_config
@@ -425,6 +486,13 @@ security:
 
         # Config with minimal nested structure
         minimal_config = {
+            "registry": {
+                "host": "localhost",
+                "port": 5432,
+                "name": "sysmanage",
+                "user": "sysmanage",
+                "password": "test",
+            },
             "api": {},
             "webui": {},
             "security": {},

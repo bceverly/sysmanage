@@ -38,7 +38,11 @@ database:
 # deprecation warning. jwt_algorithm is the one non-secret kept here long-term.
 security:
   password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"
-  admin_userid: "admin"
+  # MUST be an email address: the login endpoint declares userid as
+  # pydantic EmailStr, so a bare "admin" is rejected with HTTP 422
+  # before the password is ever checked.  The old default could never
+  # log in on any platform.
+  admin_userid: "admin@example.com"
   admin_password: "admin"
   jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"
   jwt_algorithm: "HS256"

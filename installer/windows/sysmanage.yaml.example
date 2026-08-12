@@ -1,59 +1,116 @@
---- 
-#
+---
 # sysmanage.yaml
 #
-# This is the SysManage server (https://sysmanage.org)  configuration file.
-# It allows the user to specify key configuration items for the sysmanage
-# service such as:
+# This is the SysManage server (https://sysmanage.org) configuration file.
+# This file contains working defaults that allow the server to start.
+# You should customize these settings for production use.
 #
-# api:
-#   host: "FQDN"
-#   port: 443
-#   certFile: "/path_to_file"
-#   chainFile: "/path_to_file"
-#   keyFile: "/path_to_file"
-#
-# database:
-#   user: "db_user"
-#   password: "db_password"
-#   host: "db_fqdn"
-#   port: db_service_port
-#   name: "db_database_name"
-#
-# security:
-#   password_salt: "the salt value"
-#   admin_userid: "hardcoded_admin_login"
-#   admin_password: "password_for_above"
-#   jwt_secret: "secret_for_jwt_tokens"
-#   jwt_algorithm: "HS256"
-#   jwt_auth_timeout: 600
-#   jwt_refresh_timeout: 60000
-#
-# webui:
-#   host: "FQDN"
-#   port: 443
-#   certFile: "/path_to_file"
-#   chainFile: "/path_to_file"
-#   keyFile: "/path_to_file"
-#
-# logging:
-#   # Log levels to include: DEBUG, INFO, WARNING, ERROR, CRITICAL
-#   # Can combine multiple levels with pipe: "INFO|WARNING|ERROR|CRITICAL"
-#   # Examples: "DEBUG" (debug only), "INFO|ERROR" (info and errors only), 
-#   #          "WARNING|ERROR|CRITICAL" (warnings and above)
-#   level: "INFO|WARNING|ERROR|CRITICAL"
-#   
-#   # Log to file (default is logs/* in service directory)
-#   # file: "/var/log/sysmanage.log"
-#   
-#   # Log format - customize the log message appearance
-#   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-#
-# multitenancy:
-#   # Multi-tenancy (Phase 13.1) is OPT-IN. Leave disabled for single-tenant /
-#   # homelab installs (the default). Enable only to run a SaaS control plane
-#   # hosting isolated tenants. See the canonical sysmanage.yaml.example for the
-#   # accompanying registry: and backup: blocks.
-#   enabled: false
-#   self_service_provisioning: false
-#
+# As of v3.0, sysmanage.yaml is a MINIMAL BOOTSTRAP POINTER. The recommended
+# production path is to run `sudo scripts/sysmanage_secure_installation`, which
+# generates the secrets into OpenBAO, seeds the admin user + default settings in
+# the database, and writes a pointer-only YAML — you do NOT hand-edit secrets
+# here. The fields below are still honored from YAML during migration (with a
+# one-release deprecation warning) so existing installs keep working:
+#   * Secrets (jwt_secret, password_salt, admin/db/SMTP passwords, license keys)
+#     -> generated into and read from OpenBAO.
+#   * Operational settings (JWT timeouts, login/session, message-queue tuning)
+#     and email (server, credentials, templates) -> Settings -> Configuration in
+#     the UI after first login; email is per-tenant when multi-tenancy is on.
+# See docs/planning/config-classification.md for the full classification.
+
+api:
+  host: "localhost"
+  port: 8080
+
+database:
+  user: "sysmanage"
+  # The DB password is the one bootstrap credential the server needs before it
+  # can reach OpenBAO; secure-installation also stores it in OpenBAO.
+  password: "CHANGE_ME_IN_PRODUCTION"
+  host: "localhost"
+  port: 5432
+  name: "sysmanage"
+
+# Bootstrap fallback only (v3.0). secure-installation generates jwt_secret /
+# password_salt into OpenBAO and seeds the admin user in the database; the JWT
+# timeouts move to Settings -> Configuration. Everything below is read from YAML
+# only when the corresponding OpenBAO secret / DB setting is absent, and emits a
+# deprecation warning. jwt_algorithm is the one non-secret kept here long-term.
+security:
+  password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"
+  # MUST be an email address: the login endpoint declares userid as
+  # pydantic EmailStr, so a bare "admin" is rejected with HTTP 422
+  # before the password is ever checked.  The old default could never
+  # log in on any platform.
+  admin_userid: "admin@example.com"
+  admin_password: "admin"
+  jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"
+  jwt_algorithm: "HS256"
+  jwt_auth_timeout: 600
+  jwt_refresh_timeout: 60000
+
+webui:
+  host: "localhost"
+  port: 3000
+
+logging:
+  level: "INFO|WARNING|ERROR|CRITICAL"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  # Platform-native logging: also emit to the OS log sink (in addition to the
+  # rotating backend.log) so the server shows up in journalctl / syslog / Event
+  # Viewer — handy under systemd/launchd or when shipping to a log aggregator.
+  # native: false                 # set true to enable
+  # native_target: "auto"         # auto | journald | syslog | eventlog | none
+  #                               # auto = journald (Linux) / Event Log (Windows)
+  #                               #        / syslog (macOS, BSD)
+  # native_identifier: "sysmanage"   # tag/identifier for native log entries
+
+# Multi-tenancy (Phase 13.1) — OPT-IN. Leave disabled for homelab / on-prem /
+# single-tenant installs: that is the default (one implicit tenant, no behaviour
+# change). Enable ONLY to run SysManage as a SaaS control plane that hosts
+# isolated tenants (one database per tenant). Federated and air-gapped
+# deployments are unaffected by this setting and are mutually exclusive with
+# multi-tenancy.
+multitenancy:
+  enabled: false
+  # When enabled, allow operators to provision tenant databases from the UI via a
+  # least-privilege provisioner identity. Off by default even in SaaS mode.
+  self_service_provisioning: false
+
+# Control-plane registry (Phase 13.1) — only meaningful when multitenancy.enabled
+# is true. The registry records which tenants exist, who may reach them, and
+# where each tenant database lives. Tenant database placements are stored in the
+# registry, NEVER in this file. If omitted, the registry falls back to the
+# `database` block above (the single-box default); point it at a dedicated
+# database only when scaling the control plane out to its own server.
+# registry:
+#   user: "sysmanage_registry"
+#   password: "CHANGE_ME_IN_PRODUCTION"
+#   host: "localhost"
+#   port: 5432
+#   name: "sysmanage_registry"
+
+# Per-tenant backup / RPO orchestration (Phase 13.1.F) — OPT-IN, multi-tenant
+# only. SysManage runs `command` on each tenant's RPO cadence; it does NOT store
+# the backup bytes — your backup tool does (pgBackRest / wal-g / a pg_dump
+# wrapper). Templated placeholders: {tenant_id} {slug} {host} {port} {dbname}
+# {region}. Leave `command` empty (or omit this block) to disable orchestration.
+# backup:
+#   command: "pgbackrest --stanza={slug} backup"
+#   verify_command: "pgbackrest --stanza={slug} verify"
+#   full_restore_command: ""              # scheduled full restore-verify (optional)
+#   default_rpo_seconds: 86400            # 24h target RPO when a tenant sets none
+#   full_verify_interval_seconds: 604800  # 7d between full restore-verifies
+#   tick_interval_seconds: 300            # orchestrator poll cadence
+
+# Pro+ License Configuration (optional)
+# Obtain a license key from https://sysmanage.io/pro-plus
+license:
+  # Pro+ license key (leave empty for Community Edition)
+  key: ""
+  # License server URL for phone-home validation
+  phone_home_url: "https://license.sysmanage.io"
+  # How often to validate license with server (hours)
+  phone_home_interval_hours: 24
+  # Directory for storing downloaded Pro+ modules
+  modules_path: "/var/lib/sysmanage/modules"

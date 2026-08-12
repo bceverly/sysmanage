@@ -28,30 +28,57 @@ fi
 USERID="$1"
 NEWPW="$2"
 
-VENV_PY=/opt/sysmanage/.venv/bin/python
-CONFIG=/etc/sysmanage.yaml
+# Interpreter and config are DISCOVERED, not hardcoded.  This used to insist on
+# /opt/sysmanage/.venv/bin/python and /etc/sysmanage.yaml -- one Linux packaging
+# layout -- so it could not run at all on the BSD ports, Homebrew or Windows,
+# and on a host that had both a packaged install and a leftover dev config at
+# /etc it would edit the wrong database.  SYSMANAGE_CONFIG_PATH is the variable
+# backend/config and the rc.d scripts already honour.
+PYTHON_BIN="${PYTHON_BIN:-}"
+if [ -z "$PYTHON_BIN" ]; then
+  for candidate in \
+    /opt/sysmanage/.venv/bin/python \
+    /usr/local/libexec/sysmanage/.venv/bin/python \
+    "$(command -v python3 2>/dev/null)" \
+    "$(command -v python3.12 2>/dev/null)" \
+    "$(command -v python3.11 2>/dev/null)"
+  do
+    [ -n "$candidate" ] && [ -x "$candidate" ] && PYTHON_BIN="$candidate" && break
+  done
+fi
+if [ -z "$PYTHON_BIN" ]; then
+  echo "error: no usable python found; set PYTHON_BIN=/path/to/python" >&2
+  exit 1
+fi
 
-if [ ! -x "$VENV_PY" ]; then
-  echo "error: $VENV_PY not found.  Is sysmanage installed?" >&2
+CONFIG="${SYSMANAGE_CONFIG_PATH:-}"
+if [ -z "$CONFIG" ]; then
+  for candidate in /etc/sysmanage.yaml /usr/local/etc/sysmanage.yaml; do
+    [ -r "$candidate" ] && CONFIG="$candidate" && break
+  done
+fi
+if [ -z "$CONFIG" ] || [ ! -r "$CONFIG" ]; then
+  echo "error: cannot read a sysmanage.yaml (tried SYSMANAGE_CONFIG_PATH," >&2
+  echo "/etc/sysmanage.yaml, /usr/local/etc/sysmanage.yaml).  Run with sudo," >&2
+  echo "or set SYSMANAGE_CONFIG_PATH=/path/to/sysmanage.yaml" >&2
   exit 1
 fi
-if [ ! -r "$CONFIG" ]; then
-  echo "error: cannot read $CONFIG (run with sudo?)" >&2
-  exit 1
-fi
+echo "using python : $PYTHON_BIN"
+echo "using config : $CONFIG"
 
 export FORCE_USERID="$USERID"
 export FORCE_NEWPW="$NEWPW"
 export FORCE_CONFIG="$CONFIG"
 
-"$VENV_PY" <<'PY'
+"$PYTHON_BIN" <<'PY'
 import os, sys, yaml, psycopg
 from argon2 import PasswordHasher
 
 with open(os.environ["FORCE_CONFIG"]) as f:
     cfg = yaml.safe_load(f)
 
-db = cfg["database"]
+# v3.0 renamed database: -> registry:; honour whichever is present.
+db = cfg.get("database") or cfg["registry"]
 dsn = (
     f"host={db['host']} port={db.get('port', 5432)} "
     f"dbname={db['name']} user={db['user']} password={db['password']}"

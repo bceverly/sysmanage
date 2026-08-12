@@ -28,7 +28,11 @@ database:
 # Authentication and JWT signing.
 security:
   password_salt: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING"   # ⚠ change this
-  admin_userid: "admin"
+  # MUST be an email address: the login endpoint declares userid as
+  # pydantic EmailStr, so a bare "admin" is rejected with HTTP 422
+  # before the password is ever checked.  The old default could never
+  # log in on any platform.
+  admin_userid: "admin@example.com"
   admin_password: "admin"   # ⚠ change this on first login
   jwt_secret: "CHANGE_ME_IN_PRODUCTION_USE_RANDOM_SECRET"   # ⚠ change this
   jwt_algorithm: "HS256"

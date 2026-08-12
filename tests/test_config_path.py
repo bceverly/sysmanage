@@ -31,6 +31,12 @@ def _restore_config_singleton():
 
 # Sample config data to mock file reading
 MOCK_CONFIG_DATA = """
+registry:
+  host: localhost
+  port: 5432
+  name: sysmanage
+  user: sysmanage
+  password: test
 api:
   host: localhost
   port: 8443
