@@ -406,7 +406,9 @@ jobs:
   build-freebsd-npm-distfile:
     name: Build FreeBSD npm distfile
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # A full shallow ports clone inside a VM plus npm ci for ~900 packages;
+    # 60 was tight once the sparse checkout was abandoned.
+    timeout-minutes: 90
     needs: wait-for-tests
     steps:
       - name: Checkout code
@@ -414,33 +416,58 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF: ${{ github.ref }}
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          set -eu
+          # workflow_dispatch runs from a branch, so GITHUB_REF is not a tag --
+          # take the explicit input there, exactly as the freebsd-ports job does.
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            VERSION="${INPUT_VERSION#v}"
+          else
+            VERSION="${REF#refs/tags/v}"
+          fi
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$REF" ]; then
+            echo "ERROR: could not derive a version (event=$EVENT_NAME ref=$REF" \
+                 "input=$INPUT_VERSION)" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # Also written to the WORKSPACE, which cross-platform-actions rsyncs
+          # into the VM.  environment_variables forwarding arrived empty on the
+          # first real run -- and an empty version is worse than a failure: the
+          # sed below happily wrote "DISTVERSION=" and the job continued until
+          # something unrelated broke.  A file we can assert on is deterministic.
+          printf '%s' "$VERSION" > RELEASE_VERSION.txt
+          cat RELEASE_VERSION.txt
 
       # Same action and pin the bsd-tests workflow uses for its FreeBSD leg.
       - name: Start FreeBSD VM
         uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         with:
           operating_system: freebsd
           version: '14.3'
-          environment_variables: RELEASE_VERSION
 
       - name: Generate the distfile with the ports framework
         shell: cpa.sh {0}
         run: |
           set -ex
-          VERSION="${RELEASE_VERSION#v}"
+          VERSION="$(cat RELEASE_VERSION.txt)"
+          # Assert before using it.  An empty version silently produces
+          # "DISTVERSION=" and a Makefile that builds the wrong thing.
+          [ -n "$VERSION" ] || { echo "ERROR: RELEASE_VERSION.txt is empty"; exit 1; }
+          echo "building distfile for version: $VERSION"
           sudo pkg install -y git npm-node24 node24
 
-          # A blobless, sparse clone: the framework (Mk/) is all that is needed
-          # to run "make makesum" on one port, and a full ports tree is ~1 GB
-          # of checkout time we would pay on every release.
-          sudo git clone --depth 1 --filter=blob:none --sparse \
-            https://git.FreeBSD.org/ports.git /usr/ports
-          sudo git -C /usr/ports sparse-checkout set Mk Templates Keywords
+          # A FULL shallow clone.  A sparse checkout of Mk/Templates/Keywords is
+          # not enough: USES=python reads lang/python312/Makefile.version, and
+          # pgsql/nodejs reach into their own ports the same way, so the sparse
+          # tree failed with "Cannot open /usr/ports/lang/python312/
+          # Makefile.version".  Chasing the exact set is a moving target across
+          # releases; a shallow clone costs a few minutes and cannot drift.
+          sudo git clone --depth 1 https://git.FreeBSD.org/ports.git /usr/ports
 
           PORTDIR=/usr/ports/sysutils/sysmanage
           sudo mkdir -p "$PORTDIR"
