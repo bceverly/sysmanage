@@ -3340,6 +3340,9 @@
     "title": "代理功能",
     "unavailable": "不可用",
     "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
-    "updated": "已报告"
+    "updated": "已报告",
+    "reasonBuildExcluded": "从该代理构建中省略",
+    "reasonMissingTool": "此主机上未安装必需的工具",
+    "reasonWrongPlatform": "不适用于此操作系统"
   }
 }

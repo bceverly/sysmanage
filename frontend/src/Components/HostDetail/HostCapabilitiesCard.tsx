@@ -47,6 +47,11 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
             no_handler: t('hostCapabilities.reasonNoHandler', 'Not built into this agent'),
             unsupported_os: t('hostCapabilities.reasonUnsupportedOs', 'Not supported on this OS'),
             unsupported_arch: t('hostCapabilities.reasonUnsupportedArch', 'No build for this architecture'),
+            // Emitted by the agent's runtime probes (capability_probes.py):
+            // the code shipped, but this host cannot deliver it.
+            missing_tool: t('hostCapabilities.reasonMissingTool', 'A required tool is not installed on this host'),
+            wrong_platform: t('hostCapabilities.reasonWrongPlatform', 'Not applicable to this operating system'),
+            build_excluded: t('hostCapabilities.reasonBuildExcluded', 'Omitted from this agent build'),
         };
         // An unknown code from a newer agent still tells the operator something,
         // so show it rather than swallowing it.

@@ -229,6 +229,12 @@ class ModuleCode(str, Enum):
     FEDERATION_CONTROLLER_ENGINE = "federation_controller_engine"
     FEDERATION_SITE_ENGINE = "federation_site_engine"
 
+    # Phase 12.5 — Child-host (KVM/LXD/bhyve/vmm/WSL) websocket result handlers.
+    # The OSS server keeps only thin dispatch shims (backend/api/handlers/
+    # child_host/) that delegate here when the engine is loaded; without it
+    # child-host management answers "requires a Professional+ license".
+    CHILD_HOST_HANDLERS_ENGINE = "child_host_handlers_engine"
+
     # Phase 13 — Multi-Tenant SaaS.  Multi-tenancy is a commercial-only
     # capability: the OSS build ships the schema (registry/shared/tenant tables
     # + migrations) and an inert seam, while this engine supplies the licensed
@@ -458,6 +464,9 @@ TIER_MODULES = {
         # sysmanage.yaml picks which one this server loads)
         ModuleCode.FEDERATION_CONTROLLER_ENGINE,
         ModuleCode.FEDERATION_SITE_ENGINE,
+        # Phase 12.5 — Child-host result handlers (tier per the engine's own
+        # metadata.json: "enterprise")
+        ModuleCode.CHILD_HOST_HANDLERS_ENGINE,
         # Phase 16 — Content Lifecycle Management
         ModuleCode.CONTENT_LIFECYCLE_ENGINE,
         # Phase 17 — Content Distribution & Image-Mode Hosts

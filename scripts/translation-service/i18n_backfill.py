@@ -232,6 +232,11 @@ def _allow():
 _STRICT = _allow()  # the i18n_strict module itself
 _ALLOW = _STRICT.Allow(_STRICT.ALLOW_FILE)
 
+# Anchored on __file__, not cwd, so `make translate` works from anywhere.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+# pylint: disable=wrong-import-position  # import must follow the sys.path insert
+from i18n_hashes import record_translated  # noqa: E402
+
 
 def _needs_translation(key: str, en_src: str, value, lang: str) -> bool:
     """True if this leaf still needs the service.
@@ -295,6 +300,13 @@ def run_json(
         sys.exit(f"ERROR: source file not found: {en_path}")
     en_flat = _flatten(json.loads(en_path.read_text(encoding="utf-8")))
 
+    # Staleness-sidecar bookkeeping.  Collected across ALL locales because the
+    # sidecar is per KEY, not per key-per-language: recording a key after
+    # translating only some locales would hide the untranslated ones from the
+    # stale check.  See i18n_hashes for the full rule.
+    translated_keys: set = set()
+    locale_flats: Dict[str, Dict[str, str]] = {}
+
     for lang in langs:
         path = base / template.format(lang=lang)
         if not path.exists():
@@ -348,13 +360,24 @@ def run_json(
             cand = translations.get(en_src)
             if cand is not None:
                 _set_dotted(doc, key, cand)
+                translated_keys.add(key)
                 wrote += 1
             else:
                 skipped += 1
         path.write_text(
             json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
+        locale_flats[lang] = _flatten(doc)
         print(f"  {lang}: wrote {wrote}, left {skipped} gap(s) for retry", flush=True)
+
+    # Record the English these translations were made FROM, so i18n_strict can
+    # tell a later English edit from a current translation.  Doing it here --
+    # as a byproduct of translating -- is what stops the requeue/translate/
+    # still-stale loop and stops new keys shipping unprotected.  Only keys
+    # written above, and only where no locale still has a gap.
+    recorded = record_translated(base, en_flat, locale_flats, translated_keys)
+    if recorded:
+        print(f"  recorded {recorded} source hash(es) for staleness", flush=True)
 
 
 # ---------------------------------------------------------------------------

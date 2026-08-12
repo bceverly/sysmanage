@@ -3340,6 +3340,9 @@
     "title": "Habilidades del Agente",
     "unavailable": "No disponible",
     "unknown": "Este agente no ha anunciado sus habilidades. Los agentes antiguos no las reportan; la host no está restringida.",
-    "updated": "Reportado"
+    "updated": "Reportado",
+    "reasonBuildExcluded": "Omite de esta compilación del agente",
+    "reasonMissingTool": "Una herramienta requerida no está instalada en este host",
+    "reasonWrongPlatform": "No aplicable a este sistema operativo"
   }
 }

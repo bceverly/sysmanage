@@ -3340,6 +3340,9 @@
     "title": "Capacità dell'agente",
     "unavailable": "Non disponibile",
     "unknown": "Questo agente non ha annunciato le sue capacità. Gli agenti più vecchi non ne fanno rapporto; il host non è limitato.",
-    "updated": "Rilevato"
+    "updated": "Rilevato",
+    "reasonBuildExcluded": "Omesso dalla compilazione di questo agente",
+    "reasonMissingTool": "Uno strumento necessario non è installato su questo host",
+    "reasonWrongPlatform": "Non applicabile a questo sistema operativo"
   }
 }

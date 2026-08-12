@@ -3340,6 +3340,9 @@
     "title": "Agent-Funktionalitäten",
     "unavailable": "Nicht verfügbar",
     "unknown": "Dieser Agent hat seine Funktionalitäten nicht gemeldet. Ältere Agenten melden sie nicht; der Host ist nicht eingeschränkt.",
-    "updated": "Gemeldet"
+    "updated": "Gemeldet",
+    "reasonBuildExcluded": "Von dieser Agentenversion ausgeschlossen",
+    "reasonMissingTool": "Ein erforderliches Tool ist auf diesem Host nicht installiert",
+    "reasonWrongPlatform": "Nicht für dieses Betriebssystem gültig"
   }
 }

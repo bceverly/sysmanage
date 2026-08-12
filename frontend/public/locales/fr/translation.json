@@ -3340,6 +3340,9 @@
     "title": "Capacités de l'agent",
     "unavailable": "Indisponible",
     "unknown": "Cet agent n'a pas annoncé ses capacités. Les agents plus anciens ne les signalent pas ; l'hôte n'est pas restreint.",
-    "updated": "Signalée"
+    "updated": "Signalée",
+    "reasonBuildExcluded": "Omis dans cette version de l'agent",
+    "reasonMissingTool": "Un outil requis n'est pas installé sur cet hôte",
+    "reasonWrongPlatform": "Non applicable pour ce système d'exploitation"
   }
 }

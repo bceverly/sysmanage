@@ -1140,7 +1140,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript check-engine-codes i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: migrations must be expand-contract (backward-compatible across the
@@ -1295,7 +1295,7 @@ endif
 # committed).  Declared as an EXTRA prerequisite on each installer (Make merges
 # prerequisites across rules; the recipes live at their definitions below), so a
 # single line protects every packaging path without touching their bodies.
-.PHONY: i18n-extract-backend i18n-compile-backend i18n-check-backend
+.PHONY: i18n-extract-backend i18n-compile-backend i18n-check-backend i18n-fix
 installer installer-deb installer-rpm-centos installer-rpm-opensuse installer-alpine installer-openbsd installer-freebsd installer-macos installer-netbsd installer-msi-x64 installer-msi-arm64: i18n-compile-backend
 
 # CI gate: every _() string in the code must already be in the catalog.  If a
@@ -4690,3 +4690,36 @@ release-local:
 	echo "Next steps:"; \
 	echo "  - Run 'make release-local' on other machines for additional platforms"; \
 	echo "  - When all platforms are done, commit and push sysmanage-docs"
+
+# One command to FIX a failing i18n gate, in the order that actually works.
+# The check side is already composed by `make lint`; this is the other half,
+# and the ordering used to live only in someone's head.  --requeue is the step
+# that was missing from every written instruction: `make translate` only acts
+# on "[TODO] " values, so a STALE or English-identical value has to be re-marked
+# BEFORE translating or the run has nothing to do and the gate stays red.
+# Source hashes are recorded by the translate run itself, so there is no
+# separate baseline step (see scripts/i18n_hashes.py).
+i18n-fix: $(VENV_ACTIVATE)
+	@echo "=== i18n fix: seed -> requeue -> translate -> verify ==="
+	@$(MAKE) --no-print-directory i18n-seed
+	@$(PYTHON) scripts/i18n_strict.py --requeue
+	@$(MAKE) --no-print-directory translate SERVICE=$(SERVICE)
+	@$(MAKE) --no-print-directory i18n-strict
+	@echo "[OK] i18n gate green"
+
+# The four repos each carry a copy of the shared i18n gate; only the SURFACES
+# block and the licence header may differ.  Skips siblings that are not checked
+# out, so it is safe in single-repo CI.
+i18n-sync-check:
+	@$(PYTHON) scripts/sync_i18n_tooling.py --check
+
+i18n-sync:
+	@$(PYTHON) scripts/sync_i18n_tooling.py
+
+# Gate: every Pro+ engine code this repo dispatches to must exist in ModuleCode
+# AND appear in a tier.  An unregistered engine can never be licensed, so the
+# shim answers "requires a Professional+ license" forever with nothing logged.
+check-engine-codes:
+	@$(PYTHON) scripts/check_engine_codes.py
+
+.PHONY: check-engine-codes

@@ -3340,6 +3340,9 @@
     "title": "Agent 기능",
     "unavailable": "사용 불가능",
     "unknown": "이 에이전트가 기능을 광고하지 않았습니다. 오래된 에이전트는 이를 보고하지 않으며 호스트에는 제한이 없습니다.",
-    "updated": "보고됨"
+    "updated": "보고됨",
+    "reasonBuildExcluded": "이 에이전트 빌드에서 누락되었습니다.",
+    "reasonMissingTool": "이 호스트에 필요한 도구가 설치되어 있지 않습니다.",
+    "reasonWrongPlatform": "이 운영 체제에는 적용되지 않습니다."
   }
 }

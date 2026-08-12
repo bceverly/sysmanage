@@ -3340,6 +3340,9 @@
     "title": "Agent Capaciteiten",
     "unavailable": "Niet beschikbaar",
     "unknown": "Deze agent heeft zijn capaciteiten niet gemeld. Oudere agents melden ze niet; de host is hierdoor niet beperkt.",
-    "updated": "Gemeld"
+    "updated": "Gemeld",
+    "reasonBuildExcluded": "Wegens deze agentbuild overschreven",
+    "reasonMissingTool": "Een vereiste hulpprogramma is niet geïnstalleerd op deze host",
+    "reasonWrongPlatform": "Niet van toepassing voor dit besturingssysteem"
   }
 }

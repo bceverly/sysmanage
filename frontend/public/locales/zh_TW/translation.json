@@ -3340,6 +3340,9 @@
     "title": "代理功能",
     "unavailable": "不可用",
     "unknown": "此代理程式尚未宣佈其功能。舊版代理程式不會報告它們；主機不受限制。",
-    "updated": "已報告"
+    "updated": "已報告",
+    "reasonBuildExcluded": "從此代理程式版本中省略",
+    "reasonMissingTool": "此主機上未安裝必要的工具",
+    "reasonWrongPlatform": "不適用於此作業系統"
   }
 }
