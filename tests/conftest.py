@@ -95,7 +95,7 @@ TEST_CONFIG = {
 }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def engine():
     """Create a test database engine with a fresh schema for each test.
 
@@ -131,7 +131,7 @@ def engine():
     exit_test_mode()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def db_session(engine):
     """Create a test database session.
 
@@ -149,20 +149,20 @@ def db_session(engine):
         session.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def mock_config():
     """Mock the configuration system to use test config."""
     with patch("backend.config.config.get_config", return_value=TEST_CONFIG):
         yield TEST_CONFIG
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def session(db_session):
     """Alias for db_session to match test expectations."""
     return db_session
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def client(engine, db_session, mock_config):
     """Create a test client with test database and mocked config."""
     from backend.auth.auth_bearer import get_current_user
@@ -374,7 +374,7 @@ def client(engine, db_session, mock_config):
         app.router.lifespan_context = original_lifespan
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def authenticated_client(db_session, mock_config):
     """Create a test client with test database and mocked JWT auth."""
     from unittest.mock import patch

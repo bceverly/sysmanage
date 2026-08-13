@@ -34,6 +34,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from backend.i18n import _
+from backend.utils.log_sanitize import scrub
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,11 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
         logger.warning(
             "agent advertises capability schema v%s but this server implements "
             "v%s — ignoring the report; upgrade the server to consume it",
-            version,
+            # Scrubbed because it came out of the agent's report: the isinstance
+            # guard above already proves it is an int, but the rule is "every
+            # value off the wire goes through scrub" and an exception to that
+            # rule is what makes the next one easy to miss.
+            scrub(version),
             MAX_SUPPORTED_SCHEMA_VERSION,
         )
         return None

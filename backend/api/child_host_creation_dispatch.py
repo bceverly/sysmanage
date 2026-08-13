@@ -27,6 +27,7 @@ from typing import List, Optional
 from backend.licensing.module_loader import module_loader
 from backend.persistence import db as db_module
 from backend.persistence import models
+from backend.utils.log_sanitize import scrub
 from backend.utils.verbosity_logger import sanitize_log
 
 
@@ -205,15 +206,23 @@ def _child_enrollment_token(parent_host_id) -> Optional[str]:
             logging.getLogger(__name__).warning(
                 "No tenant resolved for parent host %s; child host will enroll "
                 "without a placement token",
-                parent_host_id,
+                scrub(parent_host_id),
             )
             return None
         return _provisioning_enrollment_token_fn(tenant_id=tenant_id)
     except Exception as exc:  # pylint: disable=broad-except
+        # False positive: the rule matches the word "token" in the message text.
+        # Only the parent host id and the exception are logged.  The minted
+        # plaintext token is a RETURN VALUE of _provisioning_enrollment_token_fn
+        # (proplus_routes.py) and never reaches a logger or an exception message
+        # -- the same reasoning documented at its own suppression there.
+        # (The suppression must sit on the line IMMEDIATELY above the finding --
+        # semgrep ignores it if explanatory comments come between.)
+        # nosemgrep: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
         logging.getLogger(__name__).warning(
             "Could not mint an enrollment token for a child of host %s: %s",
-            parent_host_id,
-            exc,
+            scrub(parent_host_id),
+            scrub(exc),
         )
         return None
 

@@ -31,6 +31,23 @@ server {
     listen 80;
     listen [::]:80;
     server_name _;
+
+    # The redirect below interpolates the client's own Host header, so a
+    # request carrying a forged one is bounced to that name.  Accepted
+    # deliberately: this is a catch-all sample and the package cannot know your
+    # FQDN, so the alternative would redirect to the literal "_".  An attacker
+    # can only redirect THEMSELVES this way -- the redirect is not stored and no
+    # session or credential rides on it.
+    #
+    # It stops being harmless behind a CACHING reverse proxy, which can store
+    # the 301 keyed on path alone and then serve an attacker's destination to
+    # everyone else.  If anything caches in front of this server, name this
+    # vhost explicitly and let the request header play no part:
+    #
+    #     server_name console.example.com;
+    #     return 301 https://$server_name$request_uri;
+    #
+    # nosemgrep: generic.nginx.security.request-host-used.request-host-used
     return 301 https://$host$request_uri;
 }
 

@@ -161,6 +161,8 @@ class TestConfigLoadingDefaults:
 
         # Minimal config with just required sections
         minimal_config = {
+            # The loader now refuses a config with no connection at all rather
+            # than dying on a KeyError deep in db.py, so the fixture needs one.
             "registry": {
                 "host": "localhost",
                 "port": 5432,
@@ -171,15 +173,6 @@ class TestConfigLoadingDefaults:
             "api": {},
             "webui": {},
             "security": {},
-            # The loader now refuses a config with no connection at all rather
-            # than dying on a KeyError deep in db.py, so the fixture needs one.
-            "registry": {
-                "host": "localhost",
-                "port": 5432,
-                "name": "sysmanage",
-                "user": "sysmanage",
-                "password": "test",
-            },
         }
         mock_yaml.return_value = minimal_config
 
