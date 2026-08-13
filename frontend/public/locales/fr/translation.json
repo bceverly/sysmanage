@@ -75,7 +75,10 @@
     "title": "Paquets Disponibles",
     "totalPackages": "Total des Paquets",
     "version": "Version",
-    "loading": "Chargement des données de paquets..."
+    "loading": "Chargement des données de paquets...",
+    "anyHost": "Tout hôte (combiné)",
+    "filterByHost": "Hôte",
+    "unionWarning": "Ces résultats regroupent chaque hôte dans le champ d'action. Les machines exécutant la même version peuvent avoir des répertoires différents, donc un package listé ici ne peut pas être installé sur un hôte particulier. Choisissez un hôte pour voir exactement ce qu'il peut installer."
   },
   "common": {
     "actions": "Actions",

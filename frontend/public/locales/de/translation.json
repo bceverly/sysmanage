@@ -75,7 +75,10 @@
     "title": "Verfügbare Pakete",
     "totalPackages": "Pakete Gesamt",
     "version": "Version",
-    "loading": "Paketdaten werden geladen..."
+    "loading": "Paketdaten werden geladen...",
+    "anyHost": "Jeder Host (kombiniert)",
+    "filterByHost": "Host",
+    "unionWarning": "Diese Ergebnisse kombinieren jeden Host im Umfang. Maschinen, die denselben Release ausführen, können unterschiedliche Repositories haben, sodass ein hier aufgelistetes Paket nicht auf einem bestimmten Host installierbar sein kann. Wählen Sie einen Host aus, um genau zu sehen, was er installieren kann."
   },
   "common": {
     "actions": "Aktionen",

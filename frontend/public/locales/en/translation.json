@@ -75,7 +75,10 @@
     "title": "Available Packages",
     "totalPackages": "Total Packages",
     "version": "Version",
-    "loading": "Loading package data..."
+    "loading": "Loading package data...",
+    "anyHost": "Any host (combined)",
+    "filterByHost": "Host",
+    "unionWarning": "These results combine every host in scope. Machines running the same release can have different repositories, so a package listed here may not be installable on a particular host. Choose a host to see exactly what it can install."
   },
   "common": {
     "actions": "Actions",

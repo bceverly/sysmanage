@@ -288,9 +288,13 @@ async def request_packages(
     if not host:
         raise HTTPException(status_code=404, detail=error_host_not_found())
 
-    # Create command message for package collection
+    # Create command message for package collection.  Hand back the fingerprint
+    # of the catalog we already hold so the agent can skip transmitting ~89k
+    # packages (~11 MB) unchanged -- and send a small delta when only a few
+    # entries moved.  Without it EVERY manual refresh costs a full catalog.
     command_message = create_command_message(
-        command_type="collect_available_packages", parameters={}
+        command_type="collect_available_packages",
+        parameters={"known_fingerprint": host.available_packages_fingerprint},
     )
 
     # Send command to agent via message queue (tenant-scoped)

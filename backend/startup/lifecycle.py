@@ -47,6 +47,7 @@ def _track_background_task(task) -> None:
 # Guard against double-starting the OSS custom-metric retention loop (e.g. if
 # the lifespan runs twice under a test harness or a reload).
 _custom_metric_retention_started = False
+_package_catalog_refresh_started = False
 
 
 @asynccontextmanager
@@ -636,6 +637,30 @@ async def lifespan(_fastapi_app: FastAPI):  # NOSONAR
             except Exception as cmr_e:  # pylint: disable=broad-exception-caught
                 logger.warning(
                     "Failed to start custom-metric retention loop: %s", cmr_e
+                )
+
+        # Startup: refresh every host's available-package catalog daily.
+        #
+        # Nothing did this before: a host was asked for its packages once, when
+        # it had no rows, and never again -- so the catalog froze at enrolment.
+        # A bug was accidentally covering the gap by re-requesting forever; the
+        # fix removed the accidental refresh along with the 9.4 GB of traffic.
+        global _package_catalog_refresh_started  # pylint: disable=global-statement
+        if not _package_catalog_refresh_started:
+            logger.info("=== PACKAGE CATALOG REFRESH STARTUP ===")
+            try:
+                from backend.services.package_catalog_refresh import (  # noqa: PLC0415
+                    run_package_catalog_refresh_loop,
+                )
+
+                _track_background_task(
+                    asyncio.create_task(run_package_catalog_refresh_loop())
+                )
+                _package_catalog_refresh_started = True
+                logger.info("Package-catalog refresh loop started")
+            except Exception as pcr_e:  # pylint: disable=broad-exception-caught
+                logger.warning(
+                    "Failed to start package-catalog refresh loop: %s", pcr_e
                 )
 
         # Startup: Start the Graylog health monitor service

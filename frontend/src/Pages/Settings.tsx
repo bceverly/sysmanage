@@ -42,7 +42,7 @@ import AuthenticationProvidersSettings from '../Components/AuthenticationProvide
 import ServerRoleSettings from '../Components/ServerRoleSettings';
 import LoggingSettings from '../Components/LoggingSettings';
 import axiosInstance from '../Services/api';
-import { formatUTCTimestamp, formatUTCDate } from '../utils/dateUtils';
+import { formatUTCDate } from '../utils/dateUtils';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import { refreshLicenseCache } from '../Services/license';
 import { usePlugins } from '../plugins';
@@ -58,7 +58,6 @@ import {
   PackageInfo,
   OSPackageSummary,
   Host,
-  QueueMessage,
 } from '../Components/settings/settingsTypes';
 import {
   SETTINGS_CATEGORY_ORDER,
@@ -68,6 +67,7 @@ import {
 } from '../Components/settings/settingsCategories';
 import AvailablePackagesTab from '../Components/settings/AvailablePackagesTab';
 import IntegrationsTab from '../Components/settings/IntegrationsTab';
+import QueuesTab from '../Components/settings/QueuesTab';
 import UbuntuProTab from '../Components/settings/UbuntuProTab';
 import SettingsDialogs from '../Components/settings/SettingsDialogs';
 
@@ -215,10 +215,6 @@ const Settings: React.FC = () => {
       globalThis.location.hash = newTabId;
     }
 
-    // Load queue messages when switching to queue tab
-    if (newTabId === 'queues') {
-      loadQueueMessages();
-    }
     // Load package data when switching to Available Packages tab
     if (newTabId === 'available-packages') {
       loadPackageSummary();
@@ -263,17 +259,17 @@ const Settings: React.FC = () => {
     }
   }, [tabNames]);
   
-  // Queue management state
-  const [queueMessages, setQueueMessages] = useState<QueueMessage[]>([]);
-  const [selectedMessages, setSelectedMessages] = useState<GridRowSelectionModel>([]);
-  const [queueLoading, setQueueLoading] = useState<boolean>(true);
-  const [messageDetailOpen, setMessageDetailOpen] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<QueueMessage | null>(null);
-
   // Package management state
   const [packageSummary, setPackageSummary] = useState<OSPackageSummary[]>([]);
   const [selectedOS, setSelectedOS] = useState<string>('');
   const [selectedManager, setSelectedManager] = useState<string>('');
+  // Scoping a search to ONE host answers the only actionable question — "can I
+  // install this HERE?".  Unscoped results are a UNION across every host of the
+  // OS, and two machines on the same release legitimately differ (a PPA here,
+  // an internal mirror there), so the union can offer packages a given machine
+  // cannot install.
+  const [selectedPackageHost, setSelectedPackageHost] = useState<string>('');
+  const [packageHosts, setPackageHosts] = useState<Host[]>([]);
   const [packages, setPackages] = useState<PackageInfo[]>([]);
   const [packageLoading, setPackageLoading] = useState(false);
   const [packageSearchTerm, setPackageSearchTerm] = useState('');
@@ -281,9 +277,6 @@ const Settings: React.FC = () => {
   const [packageRefreshInterval, setPackageRefreshInterval] = useState<number | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [packageSummaryLoading, setPackageSummaryLoading] = useState(false);
-
-  // Permission states
-  const [canDeleteQueueMessage, setCanDeleteQueueMessage] = useState<boolean>(false);
 
   // Permission state
   const [canEditTags, setCanEditTags] = useState<boolean>(false);
@@ -294,24 +287,19 @@ const Settings: React.FC = () => {
 
   // Controlled pagination state for DataGrids
   const [tagsPaginationModel, setTagsPaginationModel] = useState({ page: 0, pageSize: 10 });
-  const [queuePaginationModel, setQueuePaginationModel] = useState({ page: 0, pageSize: 10 });
 
   // Update pagination when pageSize from hook changes
   useEffect(() => {
     setTagsPaginationModel(prev => ({ ...prev, pageSize }));
-    setQueuePaginationModel(prev => ({ ...prev, pageSize }));
   }, [pageSize]);
 
   // Ensure current page size is always in options to avoid MUI warning
   const safePageSizeOptions = useMemo(() => {
-    const currentPageSizeTags = tagsPaginationModel.pageSize;
-    const currentPageSizeQueue = queuePaginationModel.pageSize;
-    const maxPageSize = Math.max(currentPageSizeTags, currentPageSizeQueue);
-    if (!pageSizeOptions.includes(maxPageSize)) {
-      return [...pageSizeOptions, maxPageSize].sort((a, b) => a - b);
+    if (!pageSizeOptions.includes(tagsPaginationModel.pageSize)) {
+      return [...pageSizeOptions, tagsPaginationModel.pageSize].sort((a, b) => a - b);
     }
     return pageSizeOptions;
-  }, [pageSizeOptions, tagsPaginationModel.pageSize, queuePaginationModel.pageSize]);
+  }, [pageSizeOptions, tagsPaginationModel.pageSize]);
 
   // Column visibility preferences for Tags grid
   const {
@@ -321,23 +309,10 @@ const Settings: React.FC = () => {
     getColumnVisibilityModel: getTagsColumnVisibilityModel,
   } = useColumnVisibility('settings-tags-grid');
 
-  // Column visibility preferences for Queue Management grid
-  const {
-    hiddenColumns: hiddenQueueColumns,
-    setHiddenColumns: setHiddenQueueColumns,
-    resetPreferences: resetQueuePreferences,
-    getColumnVisibilityModel: getQueueColumnVisibilityModel,
-  } = useColumnVisibility('settings-queue-grid');
-
   // Check permissions
   useEffect(() => {
     const checkPermission = async () => {
-      const [editTags, deleteQueueMessage] = await Promise.all([
-        hasPermission(SecurityRoles.EDIT_TAGS),
-        hasPermission(SecurityRoles.DELETE_QUEUE_MESSAGE)
-      ]);
-      setCanEditTags(editTags);
-      setCanDeleteQueueMessage(deleteQueueMessage);
+      setCanEditTags(await hasPermission(SecurityRoles.EDIT_TAGS));
     };
     checkPermission();
   }, []);
@@ -478,52 +453,24 @@ const Settings: React.FC = () => {
     setEditDialogOpen(true);
   };
 
-  // Load queue messages from API
-  const loadQueueMessages = useCallback(async () => {
-    setQueueLoading(true);
-    try {
-      const response = await axiosInstance.get('/api/v1/queue/failed');
-      setQueueMessages(response.data);
-    } catch (error) {
-      console.error('Error fetching queue messages:', error);
-    } finally {
-      setQueueLoading(false);
-    }
-  }, []);
-
-  // Handle delete selected messages
-  const handleDeleteMessages = async () => {
-    if (selectedMessages.length === 0) return;
-    
-    try {
-      await axiosInstance.delete('/api/v1/queue/failed', {
-        data: selectedMessages
-      });
-      
-      await loadQueueMessages();
-      setSelectedMessages([]);
-    } catch (error) {
-      console.error('Error deleting messages:', error);
-    }
-  };
-
-  // Handle view message details
-  const handleViewMessage = async (messageId: string) => {
-    try {
-      const response = await axiosInstance.get(`/api/v1/queue/failed/${messageId}`);
-      setSelectedMessage(response.data);
-      setMessageDetailOpen(true);
-    } catch (error) {
-      console.error('Error fetching message details:', error);
-    }
-  };
-
   // Package management functions
   const loadPackageSummary = useCallback(async () => {
     setPackageSummaryLoading(true);
     try {
       const response = await axiosInstance.get('/api/v1/packages/summary');
       setPackageSummary(response.data);
+      // The host list powers the per-host scope.  Best-effort: losing it must
+      // not take the summary down — the search still works unscoped.
+      try {
+        const hostsResponse = await axiosInstance.get('/api/v1/hosts');
+        setPackageHosts(
+          (hostsResponse.data as Host[])
+            .filter((h) => h.active && h.approval_status === 'approved')
+            .sort((a, b) => (a.fqdn || '').localeCompare(b.fqdn || '')),
+        );
+      } catch (hostErr) {
+        console.error('Error fetching hosts for package scoping:', hostErr);
+      }
     } catch (error) {
       console.error('Error fetching package summary:', error);
     } finally {
@@ -550,6 +497,7 @@ const Settings: React.FC = () => {
         os_name?: string;
         os_version?: string;
         package_manager?: string;
+        host_id?: string;
       } = {
         query: packageSearchTerm,
       };
@@ -558,6 +506,10 @@ const Settings: React.FC = () => {
         const [osName, osVersion] = selectedOS.split(':');
         params.os_name = osName;
         params.os_version = osVersion;
+      }
+
+      if (selectedPackageHost) {
+        params.host_id = selectedPackageHost;
       }
 
       if (selectedManager) {
@@ -584,7 +536,7 @@ const Settings: React.FC = () => {
     } finally {
       setPackageLoading(false);
     }
-  }, [packageSearchTerm, selectedOS, selectedManager]);
+  }, [packageSearchTerm, selectedOS, selectedManager, selectedPackageHost]);
 
   // Refresh packages for a specific OS/version
   const refreshPackagesForOS = useCallback(async (osName: string, osVersion: string) => {
@@ -699,41 +651,6 @@ const Settings: React.FC = () => {
     },
   ];
 
-  // Queue Messages DataGrid columns
-  const queueColumns: GridColDef[] = [
-    { field: 'type', headerName: t('queues.messageType', 'Message Type'), width: 150 },
-    { field: 'direction', headerName: t('queues.direction', 'Direction'), width: 120 },
-    {
-      field: 'timestamp',
-      headerName: t('queues.expired', 'Expired At'),
-      width: 180,
-      renderCell: (params) => formatUTCTimestamp(params.value)
-    },
-    {
-      field: 'created_at',
-      headerName: t('queues.created', 'Created At'),
-      width: 180,
-      renderCell: (params) => formatUTCTimestamp(params.value)
-    },
-    { field: 'host_id', headerName: t('queues.hostId', 'Host ID'), width: 100 },
-    { field: 'priority', headerName: t('queues.priority', 'Priority'), width: 100 },
-    {
-      field: 'actions',
-      headerName: t('common.actions', 'Actions'),
-      width: 100,
-      sortable: false,
-      renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() => handleViewMessage(params.row.id)}
-          title={t('queues.viewDetails', 'View Details')}
-        >
-          <VisibilityIcon sx={{ color: 'primary.main' }} />
-        </IconButton>
-      ),
-    },
-  ];
-
   // Render Tags tab content
   const renderTagsTab = () => (
     <Box sx={{
@@ -809,68 +726,6 @@ const Settings: React.FC = () => {
     </Box>
   );
 
-  // Render Queues tab content
-  const renderQueuesTab = () => (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: 'calc(100vh - 280px)',
-      gap: 2
-    }}>
-      <Box>
-        <Typography variant="h5" sx={{ mb: 1 }}>
-          {t('queues.title', 'Queue Management')}
-        </Typography>
-
-        <Typography variant="body1">
-          {t('queues.description', 'View and manage expired/failed messages from the message queue.')}
-        </Typography>
-      </Box>
-
-      {/* Column Visibility Button */}
-      <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
-        <ColumnVisibilityButton
-          columns={queueColumns
-            .filter(col => col.field !== 'actions')
-            .map(col => ({ field: col.field, headerName: col.headerName || col.field }))}
-          hiddenColumns={hiddenQueueColumns}
-          onColumnsChange={setHiddenQueueColumns}
-          onReset={resetQueuePreferences}
-        />
-      </Box>
-
-      {/* Data Grid - flexGrow to fill available space */}
-      <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-        <DataGrid
-          rows={queueMessages}
-          columns={queueColumns}
-          loading={queueLoading}
-          checkboxSelection
-          onRowSelectionModelChange={setSelectedMessages}
-          rowSelectionModel={selectedMessages}
-          columnVisibilityModel={getQueueColumnVisibilityModel()}
-          paginationModel={queuePaginationModel}
-          onPaginationModelChange={setQueuePaginationModel}
-          pageSizeOptions={safePageSizeOptions}
-        />
-      </Box>
-
-      {/* Action Buttons - flexShrink: 0 to stay at bottom */}
-      <Stack direction="row" spacing={2} sx={{ flexShrink: 0 }}>
-        {canDeleteQueueMessage && (
-          <Button
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            onClick={handleDeleteMessages}
-            disabled={selectedMessages.length === 0}
-          >
-            {t('common.delete', 'Delete')} ({selectedMessages.length})
-          </Button>
-        )}
-      </Stack>
-    </Box>
-  );
-
   // Render Integrations tab content
   return (
     <Box sx={{
@@ -920,7 +775,7 @@ const Settings: React.FC = () => {
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto' }}>
         {tabNames[activeTab] === 'configuration' && <ConfigurationSettings />}
         {tabNames[activeTab] === 'tags' && renderTagsTab()}
-        {tabNames[activeTab] === 'queues' && renderQueuesTab()}
+        {tabNames[activeTab] === 'queues' && <QueuesTab />}
         {tabNames[activeTab] === 'server-role' && <ServerRoleSettings />}
         {tabNames[activeTab] === 'logging' && <LoggingSettings />}
         {tabNames[activeTab] === 'integrations' && <IntegrationsTab />}
@@ -932,6 +787,9 @@ const Settings: React.FC = () => {
             packages={packages}
             selectedOS={selectedOS}
             setSelectedOS={setSelectedOS}
+            selectedPackageHost={selectedPackageHost}
+            setSelectedPackageHost={setSelectedPackageHost}
+            packageHosts={packageHosts}
             selectedManager={selectedManager}
             setSelectedManager={setSelectedManager}
             packageSearchTerm={packageSearchTerm}
@@ -980,9 +838,6 @@ const Settings: React.FC = () => {
         viewHostsDialogOpen={viewHostsDialogOpen}
         onViewHostsClose={() => setViewHostsDialogOpen(false)}
         viewingTag={viewingTag}
-        messageDetailOpen={messageDetailOpen}
-        onMessageDetailClose={() => setMessageDetailOpen(false)}
-        selectedMessage={selectedMessage}
       />
     </Box>
   );

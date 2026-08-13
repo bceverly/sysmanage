@@ -75,7 +75,10 @@
     "title": "Pacotes Disponíveis",
     "totalPackages": "Total de Pacotes",
     "version": "Versão",
-    "loading": "Carregando dados de pacotes..."
+    "loading": "Carregando dados de pacotes...",
+    "anyHost": "Qualquer hospedeiro (combinado)",
+    "filterByHost": "Host",
+    "unionWarning": "Estes resultados combinam todos os hospedeiros em escopo. Máquinas executando a mesma versão podem ter repositórios diferentes, portanto um pacote listado aqui pode não estar instalável em um determinado hospedeiro. Escolha um hospedeiro para ver exatamente o que ele pode instalar."
   },
   "common": {
     "actions": "Ações",

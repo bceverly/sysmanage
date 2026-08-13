@@ -16,7 +16,7 @@ from sqlalchemy import distinct
 from sqlalchemy.orm import Session
 
 from backend.api.error_constants import FILTER_BY_OS_NAME, FILTER_BY_OS_VERSION
-from backend.api.package_host_selector import find_hosts_for_os, select_best_host
+from backend.api.package_host_selector import find_hosts_for_os
 from backend.api.packages_helpers import (
     get_packages_summary_sync,
     search_packages_count_sync,
@@ -119,6 +119,10 @@ async def search_packages_count(
     package_manager: Optional[str] = Query(
         None, description="Filter by package manager"
     ),
+    host_id: Optional[str] = Query(
+        None,
+        description="Scope results to ONE host's own catalog. Without it results are a UNION across every host of the OS, which may include packages a given machine cannot install.",
+    ),
 ):
     """
     Get count of packages matching search criteria.
@@ -140,6 +144,7 @@ async def search_packages_count(
         os_version,
         package_manager,
         tenant_id,
+        host_id,
     )
 
 
@@ -151,6 +156,10 @@ async def search_packages(
     os_version: Optional[str] = Query(None, description=FILTER_BY_OS_VERSION),
     package_manager: Optional[str] = Query(
         None, description="Filter by package manager"
+    ),
+    host_id: Optional[str] = Query(
+        None,
+        description="Scope results to ONE host's own catalog. Without it results are a UNION across every host of the OS, which may include packages a given machine cannot install.",
     ),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
@@ -178,6 +187,7 @@ async def search_packages(
         limit,
         offset,
         tenant_id,
+        host_id,
     )
     return [PackageInfo(**pkg) for pkg in package_dicts]
 
@@ -301,30 +311,37 @@ async def refresh_packages_for_os_version(
                 % {"os_name": os_name, "os_version": os_version},
             )
 
-        # Select best host with bias towards those with more package managers
-        selected_host = select_best_host(hosts)
-
-        # Create command message to collect packages
-        command_message = create_command_message(
-            command_type="collect_available_packages", parameters={}
-        )
-
-        # Queue the command to the selected host
-        server_queue_manager.enqueue_message(
-            message_type="command",
-            message_data=command_message,
-            direction=QueueDirection.OUTBOUND,
-            host_id=selected_host.id,
-            priority=Priority.NORMAL,
-            db=db,
-        )
+        # Ask EVERY host of this OS, not one representative.
+        #
+        # There is no canonical package list for an OS.  Two Ubuntu 26.04 boxes
+        # legitimately differ: one has a PPA, another points at an internal
+        # mirror, a third has universe disabled.  Refreshing from a single
+        # "best" host and storing the result as the OS's catalog would publish
+        # that host's repositories as everyone's -- offering packages the other
+        # machines cannot install, and silently dropping ones they can.
+        #
+        # Fanning out is cheap now: each agent is handed the fingerprint of the
+        # catalog we already hold for IT, so an unchanged host transmits
+        # nothing and a changed one sends a delta.
+        for target in hosts:
+            command_message = create_command_message(
+                command_type="collect_available_packages",
+                parameters={"known_fingerprint": target.available_packages_fingerprint},
+            )
+            server_queue_manager.enqueue_message(
+                message_type="command",
+                message_data=command_message,
+                direction=QueueDirection.OUTBOUND,
+                host_id=target.id,
+                priority=Priority.NORMAL,
+                db=db,
+            )
 
         return {
             "success": True,
-            "message": _("Package collection requested from host %s")
-            % selected_host.fqdn,
-            "host_id": selected_host.id,
-            "host_fqdn": selected_host.fqdn,
+            "message": _("Package collection requested from %(count)d host(s)")
+            % {"count": len(hosts)},
+            "hosts_requested": len(hosts),
         }
 
     except HTTPException:

@@ -160,12 +160,13 @@ def _add_host_os_versions(session, os_summary: dict) -> None:
             }
 
 
-def search_packages_count_sync(
+def search_packages_count_sync(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     query: str,
     os_name: Optional[str],
     os_version: Optional[str],
     package_manager: Optional[str],
     tenant_id=None,
+    host_id: Optional[str] = None,
 ) -> dict:
     """
     Synchronous helper function to count packages matching search criteria.
@@ -193,6 +194,15 @@ def search_packages_count_sync(
                     AvailablePackage.package_manager == package_manager
                 )
 
+            # Scoping to ONE host answers the only question that is actually
+            # actionable: "can I install this HERE?".  Without it the result is
+            # a union across every host of the OS, and two machines running the
+            # same release legitimately differ -- a PPA here, an internal
+            # mirror there, universe disabled on a third.  A union offers
+            # packages some hosts cannot install.
+            if host_id:
+                db_query = db_query.filter(AvailablePackage.host_id == str(host_id))
+
             # DISTINCT because the catalog is stored PER HOST: ten hosts running
             # the same OS each hold their own row for "curl 8.5.0", and the UI
             # asks an OS-level question ("what can I install on Ubuntu 26.04?"),
@@ -214,7 +224,7 @@ def search_packages_count_sync(
             ) from e
 
 
-def search_packages_sync(
+def search_packages_sync(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     query: str,
     os_name: Optional[str],
     os_version: Optional[str],
@@ -222,6 +232,7 @@ def search_packages_sync(
     limit: int,
     offset: int,
     tenant_id=None,
+    host_id: Optional[str] = None,
 ) -> List[dict]:
     """
     Synchronous helper function to search for packages.
@@ -248,6 +259,15 @@ def search_packages_sync(
                 db_query = db_query.filter(
                     AvailablePackage.package_manager == package_manager
                 )
+
+            # Scoping to ONE host answers the only question that is actually
+            # actionable: "can I install this HERE?".  Without it the result is
+            # a union across every host of the OS, and two machines running the
+            # same release legitimately differ -- a PPA here, an internal
+            # mirror there, universe disabled on a third.  A union offers
+            # packages some hosts cannot install.
+            if host_id:
+                db_query = db_query.filter(AvailablePackage.host_id == str(host_id))
 
             # DISTINCT for the same reason as count_packages_sync: rows are
             # per-host, the question is per-OS.  Without it a fleet of ten

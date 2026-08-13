@@ -15,8 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { formatUTCTimestamp } from '../../utils/dateUtils';
-import { QueueMessage, TagWithHosts } from './settingsTypes';
+import { TagWithHosts } from './settingsTypes';
 
 interface SettingsDialogsProps {
   // Add Tag dialog
@@ -36,10 +35,6 @@ interface SettingsDialogsProps {
   viewHostsDialogOpen: boolean;
   onViewHostsClose: () => void;
   viewingTag: TagWithHosts | null;
-  // Message Details dialog
-  messageDetailOpen: boolean;
-  onMessageDetailClose: () => void;
-  selectedMessage: QueueMessage | null;
 }
 
 const SettingsDialogs: React.FC<SettingsDialogsProps> = ({
@@ -56,9 +51,6 @@ const SettingsDialogs: React.FC<SettingsDialogsProps> = ({
   viewHostsDialogOpen,
   onViewHostsClose,
   viewingTag,
-  messageDetailOpen,
-  onMessageDetailClose,
-  selectedMessage,
 }) => {
   const { t } = useTranslation();
 
@@ -153,60 +145,6 @@ const SettingsDialogs: React.FC<SettingsDialogsProps> = ({
         </DialogActions>
       </Dialog>
 
-      {/* Message Details Dialog */}
-      <Dialog open={messageDetailOpen} onClose={onMessageDetailClose} maxWidth="lg" fullWidth>
-        <DialogTitle>
-          {t('queues.messageDetails', 'Message Details')}
-        </DialogTitle>
-        <DialogContent>
-          {selectedMessage && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.messageId', 'Message ID')}:</strong> {selectedMessage.id}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.messageType', 'Type')}:</strong> {selectedMessage.type}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.direction', 'Direction')}:</strong> {selectedMessage.direction}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.priority', 'Priority')}:</strong> {selectedMessage.priority}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.hostId', 'Host ID')}:</strong> {selectedMessage.host_id || t('common.notAvailable', 'N/A')}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>{t('queues.created', 'Created At')}:</strong> {formatUTCTimestamp(selectedMessage.created_at, t('common.notAvailable', 'N/A'))}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>{t('queues.expired', 'Expired At')}:</strong> {formatUTCTimestamp(selectedMessage.timestamp, t('common.notAvailable', 'N/A'))}
-              </Typography>
-
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('queues.messageContent', 'Message Content')}:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  backgroundColor: '#2d2d2d',
-                  color: '#ffffff',
-                  p: 2,
-                  borderRadius: 1,
-                  overflow: 'auto',
-                  fontSize: '0.875rem',
-                  fontFamily: 'monospace'
-                }}
-              >
-                {JSON.stringify(selectedMessage.data, null, 2)}
-              </Box>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onMessageDetailClose}>{t('common.close', 'Close')}</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };

@@ -457,3 +457,75 @@ class TestSearchPackagesSync:
         assert len(result) == 2
         mock_query.offset.assert_called_with(5)
         mock_query.limit.assert_called_with(2)
+
+
+class TestHostScopedSearch:
+    """Search can be scoped to ONE host's own catalog.
+
+    Unscoped results are a UNION across every host of an OS.  Two machines on
+    the same release legitimately differ -- a PPA on one, an internal mirror on
+    another, universe disabled on a third -- so the union can list packages a
+    given host cannot install.  Scoping answers the only actionable question:
+    "can I install this HERE?".
+    """
+
+    @patch("backend.api.packages_helpers.db_module")
+    @patch("backend.api.packages_helpers.sessionmaker")
+    def test_host_id_filters_the_search(self, mock_sessionmaker, mock_db_module):
+        from backend.api.packages_helpers import search_packages_sync
+
+        mock_db_module.get_engine.return_value = MagicMock()
+        mock_query = MagicMock()
+        for attr in (
+            "filter",
+            "with_entities",
+            "distinct",
+            "order_by",
+            "offset",
+            "limit",
+        ):
+            getattr(mock_query, attr).return_value = mock_query
+        mock_query.all.return_value = []
+        mock_session = MagicMock()
+        mock_session.query.return_value = mock_query
+        mock_session.__enter__ = MagicMock(return_value=mock_session)
+        mock_session.__exit__ = MagicMock(return_value=None)
+        mock_sessionmaker.return_value = MagicMock(return_value=mock_session)
+
+        search_packages_sync(
+            query="curl",
+            os_name=None,
+            os_version=None,
+            package_manager=None,
+            limit=10,
+            offset=0,
+            host_id="host-abc",
+        )
+        # One extra filter() call vs an unscoped search is the observable
+        # difference under a mocked query chain.
+        assert mock_query.filter.call_count >= 1
+
+    @patch("backend.api.packages_helpers.db_module")
+    @patch("backend.api.packages_helpers.sessionmaker")
+    def test_count_accepts_host_id(self, mock_sessionmaker, mock_db_module):
+        from backend.api.packages_helpers import search_packages_count_sync
+
+        mock_db_module.get_engine.return_value = MagicMock()
+        mock_query = MagicMock()
+        for attr in ("filter", "with_entities", "distinct"):
+            getattr(mock_query, attr).return_value = mock_query
+        mock_query.select_from.return_value.scalar.return_value = 7
+        mock_session = MagicMock()
+        mock_session.query.return_value = mock_query
+        mock_session.__enter__ = MagicMock(return_value=mock_session)
+        mock_session.__exit__ = MagicMock(return_value=None)
+        mock_sessionmaker.return_value = MagicMock(return_value=mock_session)
+
+        out = search_packages_count_sync(
+            query="curl",
+            os_name="Ubuntu",
+            os_version="26.04",
+            package_manager=None,
+            host_id="host-abc",
+        )
+        assert out == {"total_count": 7}

@@ -33,6 +33,12 @@ interface AvailablePackagesTabProps {
   packages: PackageInfo[];
   selectedOS: string;
   setSelectedOS: (value: string) => void;
+  /* Scoping to one host is what makes a result actionable: unscoped results
+     are a UNION across every host of the OS, and machines on the same release
+     legitimately differ (a PPA here, an internal mirror there). */
+  selectedPackageHost: string;
+  setSelectedPackageHost: (value: string) => void;
+  packageHosts: { id: string; fqdn: string }[];
   selectedManager: string;
   setSelectedManager: (value: string) => void;
   packageSearchTerm: string;
@@ -51,6 +57,9 @@ const AvailablePackagesTab: React.FC<AvailablePackagesTabProps> = ({
   packages,
   selectedOS,
   setSelectedOS,
+  selectedPackageHost,
+  setSelectedPackageHost,
+  packageHosts,
   selectedManager,
   setSelectedManager,
   packageSearchTerm,
@@ -174,6 +183,25 @@ const AvailablePackagesTab: React.FC<AvailablePackagesTabProps> = ({
           </Grid>
           <Grid size={{ xs: 12, md: 3 }}>
             <FormControl fullWidth>
+              <InputLabel>{t('availablePackages.filterByHost', 'Host')}</InputLabel>
+              <Select
+                value={selectedPackageHost}
+                label={t('availablePackages.filterByHost', 'Host')}
+                onChange={(e) => setSelectedPackageHost(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>{t('availablePackages.anyHost', 'Any host (combined)')}</em>
+                </MenuItem>
+                {packageHosts.map((host) => (
+                  <MenuItem key={host.id} value={host.id}>
+                    {host.fqdn}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, md: 3 }}>
+            <FormControl fullWidth>
               <InputLabel>{t('availablePackages.filterByManager', 'Package Manager')}</InputLabel>
               <Select
                 value={selectedManager}
@@ -223,6 +251,17 @@ const AvailablePackagesTab: React.FC<AvailablePackagesTabProps> = ({
             {/* eslint-disable-next-line i18next/no-literal-string -- result count summary uses interpolated values */}
             ({packageTotalCount.toLocaleString()} total, showing {packages.length})
           </Typography>
+          {/* Say plainly when the list is a union.  Without a host, results
+              come from every machine of the OS, and a package present on one
+              host's PPA is NOT installable on a host that lacks it. */}
+          {!selectedPackageHost && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {t(
+                'availablePackages.unionWarning',
+                'These results combine every host in scope. Machines running the same release can have different repositories, so a package listed here may not be installable on a particular host. Choose a host to see exactly what it can install.',
+              )}
+            </Alert>
+          )}
           <div style={{ height: 400 }}>
             <DataGrid
               rows={packages.map((pkg, index) => ({ id: index, ...pkg }))}

@@ -75,7 +75,10 @@
     "title": "Beschikbare Pakketten",
     "totalPackages": "Totaal Pakketten",
     "version": "Versie",
-    "loading": "Pakketgegevens laden..."
+    "loading": "Pakketgegevens laden...",
+    "anyHost": "Elke host (gecombineerd)",
+    "filterByHost": "Host",
+    "unionWarning": "Deze resultaten combineren elke host in het bereik. Machines die dezelfde release uitvoeren kunnen verschillende repositories hebben, dus een pakket dat hier wordt vermeld kan niet op een specifieke host installabel zijn. Kies een host om te zien wat deze precies kan installeren."
   },
   "common": {
     "actions": "Acties",
