@@ -214,10 +214,25 @@ if [ ! -f /etc/sysmanage.yaml ]; then
 fi
 
 # Configure nginx
-if command -v nginx >/dev/null 2>&1; then
-    # Test nginx configuration
-    nginx -t >/dev/null 2>&1 && systemctl reload nginx >/dev/null 2>&1 || echo "[!] nginx configuration may need manual review"
+# BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py
+if [ ! -f '/etc/sysmanage/tls/server.crt' ] || [ ! -f '/etc/sysmanage/tls/server.key' ]; then
+    echo ''
+    echo '[!] TLS certificate NOT FOUND - nginx will refuse to start.'
+    echo '    expected: /etc/sysmanage/tls/server.crt'
+    echo '              /etc/sysmanage/tls/server.key'
+    echo '    Install them (see the TLS section above), then run:'
+    echo '        nginx -t && systemctl reload nginx'
+    echo '    nginx was left alone, so anything already serving keeps serving.'
+elif ! command -v nginx >/dev/null 2>&1; then
+    echo '[!] nginx is not installed; SysManage serves the console through it.'
+elif nginx -t >/dev/null 2>&1; then
+    systemctl reload nginx >/dev/null 2>&1 || true
+    echo '[OK] nginx configuration is valid; reloaded.'
+else
+    echo '[!] nginx REJECTED the configuration:'
+    nginx -t 2>&1 | sed 's/^/      /'
 fi
+# END GENERATED TLS PREFLIGHT
 
 # ---------------------------------------------------------------
 # OpenBAO (secrets broker) — install + start + initialize/unseal.
@@ -301,6 +316,39 @@ echo "   Run database migrations (control-plane chains + every tenant database):
 echo "     cd /opt/sysmanage"
 echo "     sudo -u sysmanage .venv/bin/python scripts/sysmanage_migrate.py"
 echo ""
+# BEGIN GENERATED TLS MESSAGE - edit scripts/render_nginx_configs.py
+echo '====================================================================='
+echo 'TLS CERTIFICATE - REQUIRED BEFORE THE SERVER WILL SERVE ANYTHING'
+echo '====================================================================='
+echo 'SysManage serves everything on port 443, and nginx will REFUSE TO START'
+echo 'until a certificate is in place.  That is deliberate: a management console'
+echo 'must not come up in cleartext because a certificate was missing, and a'
+echo 'certificate a package generated for you is one no agent would trust anyway'
+echo '(agents verify by default).'
+echo ''
+echo 'Install your certificate and private key at:'
+echo '  /etc/sysmanage/tls/server.crt'
+echo '  /etc/sysmanage/tls/server.key'
+echo ''
+echo 'Or point nginx somewhere else by editing these two lines in:'
+echo '  /etc/nginx/conf.d/sysmanage-nginx.conf'
+echo ''
+echo '  ssl_certificate     /etc/sysmanage/tls/server.crt;'
+echo '  ssl_certificate_key /etc/sysmanage/tls/server.key;'
+echo ''
+echo 'Getting a certificate:'
+echo '  certbot certonly --standalone -d your-server.example.com'
+echo '  (then point the two lines above at /etc/letsencrypt/live/<name>/'
+echo '   fullchain.pem and privkey.pem)'
+echo ''
+echo 'Check it before starting:'
+echo '  nginx -t'
+echo ''
+echo 'Agents then need outbound 443 to this host and nothing else.  If you are'
+echo 'only developing, set `dev_mode: true` in the server configuration instead:'
+echo 'that skips nginx entirely and serves the UI and API directly.'
+# END GENERATED TLS MESSAGE
+echo ''
 echo "4. Start the Services"
 echo "   ------------------"
 echo "     sudo systemctl start sysmanage"
@@ -308,8 +356,10 @@ echo "     sudo systemctl enable sysmanage"
 echo ""
 echo "5. Access the Web Interface"
 echo "   ------------------------"
-echo "   Frontend: http://your-server:3000"
-echo "   Backend API: http://your-server:8080"
+echo "   https://your-server/"
+echo ""
+echo "   The API and the agent WebSocket share this same origin under /api,"
+echo "   so 443 is the only port to open. The backend on 8080 is loopback-only."
 echo ""
 echo "   nginx is configured to serve the frontend on port 3000"
 echo "   and proxy API requests to the backend on port 8080"

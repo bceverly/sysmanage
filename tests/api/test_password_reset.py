@@ -901,7 +901,13 @@ class TestEmailTemplateGeneration:
         call_args = mock_send_email.call_args[1]
         assert call_args["subject"] == "Welcome to SysManage"
         assert "setup-token" in call_args["body"]
-        assert "http://" in call_args["body"]  # Should use HTTP when no cert
+        # https, NOT http. This used to assert the opposite, on the reasoning
+        # that an empty api.certFile meant plaintext -- but nginx terminates TLS
+        # in every shipped configuration, so the backend never holds a
+        # certificate on a correct install. Deriving the scheme from certFile
+        # therefore put http:// links to an HTTPS-only console into the one
+        # email a new user has to be able to open.
+        assert "https://" in call_args["body"]
 
     @patch("backend.api.password_reset.email_service.is_enabled")
     def test_email_disabled_fallback(self, mock_enabled):

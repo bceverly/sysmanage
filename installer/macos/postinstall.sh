@@ -112,6 +112,58 @@ fi
 echo "4. Copy and configure: cp /etc/sysmanage.yaml.example /etc/sysmanage.yaml"
 echo "5. Run migrations (chains + per-tenant): cd /usr/local/lib/sysmanage && \\"
 echo "     .venv/bin/python scripts/sysmanage_migrate.py"
+# BEGIN GENERATED TLS MESSAGE - edit scripts/render_nginx_configs.py
+echo '====================================================================='
+echo 'TLS CERTIFICATE - REQUIRED BEFORE THE SERVER WILL SERVE ANYTHING'
+echo '====================================================================='
+echo 'SysManage serves everything on port 443, and nginx will REFUSE TO START'
+echo 'until a certificate is in place.  That is deliberate: a management console'
+echo 'must not come up in cleartext because a certificate was missing, and a'
+echo 'certificate a package generated for you is one no agent would trust anyway'
+echo '(agents verify by default).'
+echo ''
+echo 'Install your certificate and private key at:'
+echo '  /usr/local/etc/sysmanage/tls/server.crt'
+echo '  /usr/local/etc/sysmanage/tls/server.key'
+echo ''
+echo 'Or point nginx somewhere else by editing these two lines in:'
+echo '  /usr/local/etc/nginx/servers/sysmanage-nginx.conf'
+echo ''
+echo '  ssl_certificate     /usr/local/etc/sysmanage/tls/server.crt;'
+echo '  ssl_certificate_key /usr/local/etc/sysmanage/tls/server.key;'
+echo ''
+echo 'Getting a certificate:'
+echo '  certbot certonly --standalone -d your-server.example.com'
+echo '  (then point the two lines above at /etc/letsencrypt/live/<name>/'
+echo '   fullchain.pem and privkey.pem)'
+echo ''
+echo 'Check it before starting:'
+echo '  nginx -t'
+echo ''
+echo 'Agents then need outbound 443 to this host and nothing else.  If you are'
+echo 'only developing, set `dev_mode: true` in the server configuration instead:'
+echo 'that skips nginx entirely and serves the UI and API directly.'
+# END GENERATED TLS MESSAGE
+# BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py
+if [ ! -f '/usr/local/etc/sysmanage/tls/server.crt' ] || [ ! -f '/usr/local/etc/sysmanage/tls/server.key' ]; then
+    echo ''
+    echo '[!] TLS certificate NOT FOUND - nginx will refuse to start.'
+    echo '    expected: /usr/local/etc/sysmanage/tls/server.crt'
+    echo '              /usr/local/etc/sysmanage/tls/server.key'
+    echo '    Install them (see the TLS section above), then run:'
+    echo '        nginx -t && nginx -s reload'
+    echo '    nginx was left alone, so anything already serving keeps serving.'
+elif ! command -v nginx >/dev/null 2>&1; then
+    echo '[!] nginx is not installed; SysManage serves the console through it.'
+elif nginx -t >/dev/null 2>&1; then
+    nginx -s reload >/dev/null 2>&1 || true
+    echo '[OK] nginx configuration is valid; reloaded.'
+else
+    echo '[!] nginx REJECTED the configuration:'
+    nginx -t 2>&1 | sed 's/^/      /'
+fi
+# END GENERATED TLS PREFLIGHT
+echo ''
 echo "6. Load LaunchDaemon: sudo launchctl load /Library/LaunchDaemons/com.sysmanage.server.plist"
 if ! command -v nginx >/dev/null 2>&1; then
 	echo "7. Install nginx: brew install nginx"

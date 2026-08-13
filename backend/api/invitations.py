@@ -33,6 +33,7 @@ from backend.security.roles import SecurityRoles
 from backend.services import invitation_service
 from backend.services.email_service import email_service
 from backend.services.tenant_directory import resolve_tenant_for_email
+from backend.config.public_url import build_public_base_url
 
 router = APIRouter(prefix="/invitations", tags=["invitations"])
 
@@ -131,13 +132,8 @@ def send_invitation_email(email: str, token: str, _request: Request) -> bool:
         return False
 
     the_config = config.get_config()
-    is_secure = bool(the_config.get("api", {}).get("certFile"))
-    protocol = "https" if is_secure else "http"
-    hostname = get_dynamic_hostname()
-    frontend_port = the_config.get("webui", {}).get("port", 3000)
-    accept_url = (
-        f"{protocol}://{hostname}:{frontend_port}/accept-invitation?token={token}"
-    )
+    base_url = build_public_base_url(the_config, get_dynamic_hostname)
+    accept_url = f"{base_url}/accept-invitation?token={token}"
 
     templates = the_config.get("email", {}).get("templates", {})
     tmpl = templates.get("invitation", {})

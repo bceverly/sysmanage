@@ -5833,6 +5833,51 @@ close the gap between our output and the parsers that consume it.
       this testable on any modern machine instead of hunting for legacy
       boot — which is why closing that one first is likely the cheaper path.
 
+- [ ] **One port to rule them all: agent↔server needs 443 only.** A customer
+      standing up SysManage — or subscribing to a hosted multi-tenant one —
+      should not have to open anything. Today they do: the shipped agent config
+      template points at `port: 8080` (installer/windows/config.yaml.example and
+      friends), and `sysmanage.yaml.example` declares `api.port 8080` plus
+      `webui.port 3000`. The nginx sample ALREADY terminates 80/443 and proxies
+      both `/api/` and `/ws` to `127.0.0.1:8080`, so the plumbing exists and it
+      is the DEFAULTS that bypass it (verified 2026-08-13).
+
+      Target: every agent→server byte crosses 443, with 80 used only to redirect
+      to it. No API port, no separate WebSocket port, no enrollment port, no
+      package-mirror port. The API lives under `/api` on the same origin as the
+      UI, and what a request WANTS is decided by content negotiation
+      (`Accept: application/json` vs `text/html`), not by which socket it
+      arrived on. Enrollment, the store-and-forward message queue, capability
+      reports and package deltas all ride that one origin.
+
+      It has to survive hostile-but-normal corporate networks, because "just
+      works" is the whole point:
+        * **TLS-inspecting proxies.** Estates that re-sign traffic with a
+          private CA must work by trusting that CA, not by disabling
+          verification. Verification stays on by default and the escape hatch is
+          "here is my corporate root", never "don't check".
+        * **HTTP CONNECT proxies**, including authenticated ones — honour the
+          system proxy where the OS has one, plus an explicit agent setting.
+        * **WebSocket through both of the above**, which is the part that
+          usually breaks; needs a documented fallback (long-poll or SSE over the
+          same 443) for proxies that will not pass an Upgrade.
+
+      Dev mode must keep working, where the UI is a Vite server on 3000 and the
+      backend is on 8080. That argues for the agent and the docs config builder
+      expressing ONE base URL rather than host+port pairs, with dev overriding
+      the mapping rather than every consumer knowing about ports.
+
+      Prefer solving it in the app (routing + content negotiation) over more
+      nginx cleverness — an extra proxy hop is extra attack surface and another
+      thing to get wrong — but nginx staying as the TLS terminator is fine,
+      since it already is.
+
+      Deliverables: config-schema change with a migration for existing agents
+      (they must not be stranded on 8080), agent proxy/CA support, the
+      **sysmanage-docs config builder** updated to emit the single-origin shape,
+      documentation of the exact firewall requirement ("outbound 443 to your
+      SysManage host — nothing else"), and i18n for anything user-facing.
+      Requested by Bryan 2026-08-13, with hosted multi-tenant SaaS in mind.
 - [ ] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
       Measured 2026-08-04: nothing on `repo.sysmanage.org` is cached — not the
       indexes (correct) and not the packages (suboptimal). Cost impact is
@@ -5856,7 +5901,41 @@ close the gap between our output and the parsers that consume it.
       `/usr` distros resolve it to `/usr/bin/systemctl`. The flag drives whether
       the server believes a host can patch, restart services, or reboot for a
       re-provision, so a false positive is worse than a false negative.
-- [ ] **The Windows MSI cannot bootstrap Python, and reports success anyway.**
+- [x] **The Windows MSI cannot bootstrap Python, and reports success anyway.**
+      *(DONE 2026-08-13 — fixed BOTH ways, because a bundle alone would have left
+      winget, `msiexec /i` and the Pro+ provisioning path untouched. (1) A WiX
+      **bundle** (`sysmanage-agent-bundle.wxs`) chains VC++ -> Python -> the agent
+      MSI, each in its own transaction; prerequisites are EMBEDDED, not downloaded,
+      so it works air-gapped and behind proxies, and both payloads are
+      Authenticode-verified at build time. (2) The **MSI now stands alone**:
+      `check-python.ps1 -DeferToTask` only DETECTS inside the transaction and hands
+      the work to a SYSTEM scheduled task that runs once msiexec releases the
+      installer mutex; its no-argument behaviour is unchanged so
+      `windows_unattend.pxi` still works. (3) "Succeeded but no service" is no
+      longer silent — `HKLM:\SOFTWARE\SysManage\Agent` carries
+      Pending/Running/Complete/Failed plus a detail string naming the retry command,
+      mirrored to the Application event log.
+
+      VALIDATED on a purpose-built clean Windows Server 2022 VM (no Python, no VC++,
+      no agent), because the smoke VM already had Python and could not show it:
+      pre-fix MSI reproduced the bug exactly (exit 0, ARP entry present, service
+      absent, 1618 for both prerequisites); fixed MSI reached Complete with the
+      service Running; bundle had the service Running the moment it returned, with
+      no 1618 anywhere; uninstall removed service, task, state key and directory.
+
+      TWO defects only the real boot could find. My first deferred-wait polled for
+      `Get-Process msiexec` to empty — but msiexec's SERVICE process stays resident
+      ~10 minutes after an install (measured: still there 300 s later, mutex long
+      released), so the bootstrap slept until its timeout. Now waits on
+      `Global\_MSIExecute`, the mutex that actually issues the 1618. And the CI
+      size-guard I wrote against x64 (51.9 MB) would have failed every arm64 build
+      (37.9 MB) — caught by actually building arm64.
+
+      Also: 13 authoring tests (mutation-checked), branded .ico regenerable from its
+      vendored SVG via `scripts/build_windows_icon.py --check`, bundle wired into
+      build-and-release.yml for both arches, 59.4 MB of `.venv`/`src` leftovers now
+      removed on uninstall, and docs + 14-language i18n shipped. winget deliberately
+      stays on the MSI, which now finishes itself.)*
       On any Windows host without Python 3.9+ — which is every freshly
       provisioned one — the agent installs and never runs. `install.ps1` runs as
       an MSI custom action and shells out to the VC++ redistributable and the

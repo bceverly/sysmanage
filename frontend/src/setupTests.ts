@@ -9,6 +9,22 @@
 import '@testing-library/jest-dom';
 import './__tests__/setup';
 
+// Testing Library's findBy*/waitFor default to a 1000ms timeout, which is a
+// race against how loaded the machine is rather than against anything the code
+// does.  It lost that race on 2026-08-13: FirewallRolesSettings' first test
+// failed in a full 161s run (139s of it setup) while passing in 2.5s on its
+// own, and the four heavier tests in the same file passed alongside it.  The
+// failure rendered the empty state, i.e. the mocked GET simply had not resolved
+// yet.
+//
+// 5s costs nothing on a passing test -- a longer ceiling is only ever reached
+// when something is genuinely slow -- and it removes a whole class of
+// load-dependent flake across the suite as it grows.  vitest's own testTimeout
+// (30s, in vite.config.ts) still bounds a truly hung test.
+import { configure } from '@testing-library/dom';
+
+configure({ asyncUtilTimeout: 5000 });
+
 // Declare process.env for TypeScript
 declare const process: { env: { CI?: string } } | undefined;
 

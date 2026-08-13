@@ -24,6 +24,7 @@ from backend.persistence import db, models
 from backend.security.roles import SecurityRoles
 from backend.services.email_service import email_service
 from backend.services.tenant_directory import resolve_tenant_for_email
+from backend.config.public_url import build_public_base_url
 
 router = APIRouter()  # Public routes (no authentication)
 admin_router = APIRouter()  # Admin routes (require authentication)
@@ -128,17 +129,9 @@ def send_password_reset_email(
 
     # Build reset URL - use dynamic hostname detection and configuration
     # Check if we have TLS configured to determine protocol
-    is_secure = (
-        the_config.get("api", {}).get("certFile") is not None
-        and len(the_config.get("api", {}).get("certFile", "")) > 0
-    )
-    protocol = "https" if is_secure else "http"
-
-    # Use dynamic hostname detection instead of config
-    hostname = get_dynamic_hostname()
-    frontend_port = the_config.get("webui", {}).get("port", 3000)
-
-    base_url = f"{protocol}://{hostname}:{frontend_port}"
+    # One builder for every externally-visible link: see
+    # backend/config/public_url.py for why three hand-rolled copies were wrong.
+    base_url = build_public_base_url(the_config, get_dynamic_hostname)
     reset_url = f"{base_url}/reset-password?token={reset_token}"
 
     # Get email templates from configuration with fallbacks
@@ -218,17 +211,7 @@ def send_initial_setup_email(
 
     # Build setup URL - use dynamic hostname detection and configuration
     # Check if we have TLS configured to determine protocol
-    is_secure = (
-        the_config.get("api", {}).get("certFile") is not None
-        and len(the_config.get("api", {}).get("certFile", "")) > 0
-    )
-    protocol = "https" if is_secure else "http"
-
-    # Use dynamic hostname detection instead of config
-    hostname = get_dynamic_hostname()
-    frontend_port = the_config.get("webui", {}).get("port", 3000)
-
-    base_url = f"{protocol}://{hostname}:{frontend_port}"
+    base_url = build_public_base_url(the_config, get_dynamic_hostname)
     setup_url = f"{base_url}/reset-password?token={setup_token}"
 
     # Get email templates from configuration with fallbacks

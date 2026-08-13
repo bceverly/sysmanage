@@ -12,7 +12,38 @@
 # this socket.  Keep host=localhost — every backend route now lives under
 # /api so external clients reach the backend only through nginx; there's
 # no reason to expose the raw uvicorn port.
+# Development mode.
+#
+# ABSENT OR FALSE = production, which is the safe default: nginx terminates TLS
+# on 443 (port 80 only redirects to it), and links in invitation and
+# password-reset emails are https://<host> with no port.
+#
+# TRUE = a development box with no reverse proxy and no certificate: the UI is
+# the Vite server on webui.port, the backend is on api.port, and emailed links
+# become http://<host>:<webui.port>.
+#
+# Left out on purpose in every shipped template. A missing or misspelt flag
+# must fail towards TLS -- the worst case there is a link that redirects,
+# whereas defaulting the other way would let a forgotten line downgrade a real
+# deployment to plaintext.
+#
+# dev_mode: true
+
 api:
+  # Bind LOOPBACK only. nginx terminates TLS on 443 and reaches the API here,
+  # so this port never needs to face the network: the whole external surface is
+  # 80/443, which is also all an agent needs (outbound 443, nothing inbound).
+  #
+  # A wildcard such as 0.0.0.0 publishes the API directly, bypassing nginx and
+  # therefore its TLS, security headers and upgrade validation. Agent
+  # registration is unauthenticated by design, so that exposes an open
+  # enrollment endpoint in cleartext. The server warns loudly at startup if you
+  # do this.
+  #
+  # Legitimate exceptions exist (development without a reverse proxy, a
+  # container publishing its own port, TLS terminated elsewhere). Set
+  # allow_public_bind to record that the decision was deliberate:
+  #   allow_public_bind: true
   host: "localhost"
   port: 8080
 

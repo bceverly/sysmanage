@@ -78,12 +78,64 @@ echo "To enable and start the services:"
 echo "  rc-update add postgresql default"
 echo "  rc-update add nginx default"
 echo "  rc-update add sysmanage default"
+# BEGIN GENERATED TLS MESSAGE - edit scripts/render_nginx_configs.py
+echo '====================================================================='
+echo 'TLS CERTIFICATE - REQUIRED BEFORE THE SERVER WILL SERVE ANYTHING'
+echo '====================================================================='
+echo 'SysManage serves everything on port 443, and nginx will REFUSE TO START'
+echo 'until a certificate is in place.  That is deliberate: a management console'
+echo 'must not come up in cleartext because a certificate was missing, and a'
+echo 'certificate a package generated for you is one no agent would trust anyway'
+echo '(agents verify by default).'
+echo ''
+echo 'Install your certificate and private key at:'
+echo '  /etc/sysmanage/tls/server.crt'
+echo '  /etc/sysmanage/tls/server.key'
+echo ''
+echo 'Or point nginx somewhere else by editing these two lines in:'
+echo '  /etc/nginx/http.d/sysmanage-nginx.conf'
+echo ''
+echo '  ssl_certificate     /etc/sysmanage/tls/server.crt;'
+echo '  ssl_certificate_key /etc/sysmanage/tls/server.key;'
+echo ''
+echo 'Getting a certificate:'
+echo '  certbot certonly --standalone -d your-server.example.com'
+echo '  (then point the two lines above at /etc/letsencrypt/live/<name>/'
+echo '   fullchain.pem and privkey.pem)'
+echo ''
+echo 'Check it before starting:'
+echo '  nginx -t'
+echo ''
+echo 'Agents then need outbound 443 to this host and nothing else.  If you are'
+echo 'only developing, set `dev_mode: true` in the server configuration instead:'
+echo 'that skips nginx entirely and serves the UI and API directly.'
+# END GENERATED TLS MESSAGE
+# BEGIN GENERATED TLS PREFLIGHT - edit scripts/render_nginx_configs.py
+if [ ! -f '/etc/sysmanage/tls/server.crt' ] || [ ! -f '/etc/sysmanage/tls/server.key' ]; then
+    echo ''
+    echo '[!] TLS certificate NOT FOUND - nginx will refuse to start.'
+    echo '    expected: /etc/sysmanage/tls/server.crt'
+    echo '              /etc/sysmanage/tls/server.key'
+    echo '    Install them (see the TLS section above), then run:'
+    echo '        nginx -t && rc-service nginx reload'
+    echo '    nginx was left alone, so anything already serving keeps serving.'
+elif ! command -v nginx >/dev/null 2>&1; then
+    echo '[!] nginx is not installed; SysManage serves the console through it.'
+elif nginx -t >/dev/null 2>&1; then
+    rc-service nginx reload >/dev/null 2>&1 || true
+    echo '[OK] nginx configuration is valid; reloaded.'
+else
+    echo '[!] nginx REJECTED the configuration:'
+    nginx -t 2>&1 | sed 's/^/      /'
+fi
+# END GENERATED TLS PREFLIGHT
+echo ''
 echo "  rc-service postgresql start"
 echo "  rc-service nginx start"
 echo "  rc-service sysmanage start"
 echo ""
 echo "The web interface will be available at:"
-echo "  http://localhost:3000"
+echo "  https://your-server/   (443; the API shares this origin under /api)"
 echo ""
 echo "Note: nginx serves the frontend on port 3000 and proxies"
 echo "      API requests to the backend on port 8080."

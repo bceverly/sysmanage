@@ -132,6 +132,7 @@ startup_logger.info("Active-tenant middleware added")
 # Request rate limiting (Phase 13.2).  Opt-in (disabled by default); added
 # inside CORS so CORS preflight is handled first and never counted.
 from backend.startup.rate_limit_middleware import RateLimitMiddleware  # noqa: E402
+from backend.config.bind_policy import check_api_bind, resolve_api_bind_host
 
 app.add_middleware(RateLimitMiddleware)
 startup_logger.info("Rate-limit middleware added")
@@ -212,8 +213,16 @@ if __name__ == "__main__":
     startup_logger.info("Uvicorn logging configuration complete")
 
     # Prepare uvicorn configuration
-    host = app_config["api"]["host"]
+    # Dev mode binds every interface so agents on this machine AND elsewhere on
+    # the LAN can reach the API with no extra configuration; production keeps
+    # the configured loopback address, which is all nginx needs.
+    host = resolve_api_bind_host(app_config)
     port = app_config["api"]["port"]
+
+    # A wildcard bind publishes the API directly, bypassing nginx -- and agent
+    # registration is unauthenticated by design.  Warn loudly rather than refuse:
+    # see backend/config/bind_policy.py for why.
+    check_api_bind(app_config, startup_logger)
     ws_ping_interval = 60.0  # pylint: disable=invalid-name
     ws_ping_timeout = 60.0  # pylint: disable=invalid-name
     ws_max_size = 100 * 1024 * 1024  # 100MB max message size for software inventory

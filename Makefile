@@ -1140,8 +1140,16 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript check-engine-codes i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
+
+# Guard: the per-platform nginx configs are GENERATED from one template.
+# They had already drifted into six platforms serving the console over plaintext
+# HTTP on 3000 while FreeBSD served TLS on 443 -- nobody chose that, it is just
+# what happens when one file is maintained in eight places.
+check-nginx-configs: $(VENV_ACTIVATE)
+	@echo "=== nginx config drift check ==="
+	@$(PYTHON) scripts/render_nginx_configs.py --check
 
 # Guard: migrations must be expand-contract (backward-compatible across the
 # incremental fleet migration). See docs/migration-expand-contract.md.
@@ -1177,6 +1185,16 @@ i18n-extract: $(VENV_ACTIVATE)
 # Neither is visible to i18n-validate (key present) or i18n-complete (not
 # [TODO]) — a 2026-08 audit found 2,733 English-passthrough values across the
 # four repos with every gate green.  Escape hatch: i18n-allow.txt.
+# Guard: the ENGLISH catalogue must translate English to itself.
+# On 2026-08-13, 347 entries in the agent's en.po had msgstrs belonging to other
+# msgids -- "Error detecting antivirus" rendered as "Error detecting partitions"
+# -- and because `make translate` translates the English msgstr, all 13 locales
+# inherited the wrong message. Every existing gate asks "is anything missing?";
+# the file was 100%% complete. Completeness was never the problem.
+i18n-check-english:
+	@echo "=== i18n English identity check ==="
+	@$(PYTHON) scripts/i18n_check_english_identity.py
+
 i18n-strict: $(VENV_ACTIVATE)
 	@echo "=== i18n strict (English-identical + stale) ==="
 	@$(PYTHON) scripts/i18n_strict.py
@@ -1667,6 +1685,12 @@ endif
 # xdist worker crashes).  The --cov-fail-under ratchet on the final run
 # gates the COMBINED total so coverage can't silently decline; bump it
 # when the real number rises.
+# tests/ui/ is EXCLUDED here on purpose: it is the Selenium browser suite, and it
+# only runs on the BSDs, via `make test-ui`, because Playwright ships no BSD
+# build. Everywhere else `make test-e2e` (Playwright) is the browser coverage.
+# Without this note the bare --ignore reads like neglect -- it was misread that
+# way on 2026-08-13 and nearly deleted, which would have left OpenBSD, FreeBSD
+# and NetBSD with no browser tests at all.
 ifeq ($(OS),Windows_NT)
 	@set OTEL_ENABLED=false && $(PYTHON) -m pytest tests/ --ignore=tests/ui/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-report=
 	@set OTEL_ENABLED=false && $(PYTHON) -m pytest backend/tests/ -v --tb=short -n auto --dist=loadfile --cov=backend --cov-append --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=75
@@ -1958,7 +1982,11 @@ check-test-models:
 
 # Combined testing
 # Note: test-ui only runs on BSD systems (Selenium fallback). On other platforms, test-e2e handles UI tests.
-test: test-python test-typescript test-e2e test-performance
+# test-ui self-skips off the BSDs and test-e2e self-skips ON them, so both
+# belong in the chain: whichever browser suite the platform can actually run
+# is the one that runs. Before this, `make test` on a BSD ran NO browser
+# tests -- test-e2e skipped and nothing invoked the Selenium fallback.
+test: test-python test-typescript test-e2e test-ui test-performance
 	@echo "[OK] All tests completed successfully!"
 
 # Build frontend for production

@@ -18,6 +18,23 @@
 #     the UI after first login; email is per-tenant when multi-tenancy is on.
 # See docs/planning/config-classification.md for the full classification.
 
+# Development mode.
+#
+# ABSENT OR FALSE = production, which is the safe default: nginx terminates TLS
+# on 443 (port 80 only redirects to it), and links in invitation and
+# password-reset emails are https://<host> with no port.
+#
+# TRUE = a development box with no reverse proxy and no certificate: the UI is
+# the Vite server on webui.port, the backend is on api.port, and emailed links
+# become http://<host>:<webui.port>.
+#
+# Left out on purpose in every shipped template. A missing or misspelt flag
+# must fail towards TLS -- the worst case there is a link that redirects,
+# whereas defaulting the other way would let a forgotten line downgrade a real
+# deployment to plaintext.
+#
+# dev_mode: true
+
 api:
   host: "localhost"
   port: 8080

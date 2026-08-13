@@ -1,0 +1,30 @@
+=====================================================================
+TLS CERTIFICATE - REQUIRED BEFORE THE SERVER WILL SERVE ANYTHING
+=====================================================================
+SysManage serves everything on port 443, and nginx will REFUSE TO START
+until a certificate is in place.  That is deliberate: a management console
+must not come up in cleartext because a certificate was missing, and a
+certificate a package generated for you is one no agent would trust anyway
+(agents verify by default).
+
+Install your certificate and private key at:
+  %%PREFIX%%/etc/sysmanage/tls/server.crt
+  %%PREFIX%%/etc/sysmanage/tls/server.key
+
+Or point nginx somewhere else by editing these two lines in:
+  %%PREFIX%%/etc/nginx/sysmanage-nginx.conf
+
+  ssl_certificate     %%PREFIX%%/etc/sysmanage/tls/server.crt;
+  ssl_certificate_key %%PREFIX%%/etc/sysmanage/tls/server.key;
+
+Getting a certificate:
+  certbot certonly --standalone -d your-server.example.com
+  (then point the two lines above at /etc/letsencrypt/live/<name>/
+   fullchain.pem and privkey.pem)
+
+Check it before starting:
+  nginx -t
+
+Agents then need outbound 443 to this host and nothing else.  If you are
+only developing, set `dev_mode: true` in the server configuration instead:
+that skips nginx entirely and serves the UI and API directly.
