@@ -131,6 +131,15 @@ class Host(Base):
     os_details = Column(Text, nullable=True)
     os_version_updated_at = Column(DateTime, nullable=True)
 
+    # Fingerprint of the available-packages catalog this host last delivered
+    # (sha256 of manager/name/version, computed agent-side).  The server hands
+    # it back in the `collect_available_packages` command so the agent can skip
+    # transmitting a catalog the server already holds -- ~89k packages, ~11 MB,
+    # per cycle per host, almost never changed.  NULL means "we have nothing
+    # from this host", which makes the agent send unconditionally.
+    available_packages_fingerprint = Column(String(64), nullable=True)
+    available_packages_fingerprint_at = Column(DateTime, nullable=True)
+
     # FIPS compliance mode (Phase 14.4). Detection ("is FIPS on?") is reported
     # by every agent (OSS); enable/disable is Enterprise-gated (FIPS_MODE).
     # fips_status: "enabled" | "available" | "disabled" | "not_applicable".

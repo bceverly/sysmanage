@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 14:01-0400\n"
+"POT-Creation-Date: 2026-08-12 19:48-0400\n"
 "Language: hi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,8 +150,9 @@ msgstr "अमान्य होस्ट ID फॉर्मेट"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
+#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
 #: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
@@ -359,27 +360,27 @@ msgstr "रोल डेटा अपडेट प्रक्रिया म�
 msgid "Child host management requires a Professional+ license."
 msgstr "बच्चे मेंस प्रबंधन के लिए एक प्रोफेशनल+ लाइसेंस की आवश्यकता है."
 
-#: backend/api/handlers/os_hardware_handlers.py:120
+#: backend/api/handlers/os_hardware_handlers.py:131
 msgid "No host identification available"
 msgstr "होस्ट पहचान उपलब्ध नहीं है"
 
-#: backend/api/handlers/os_hardware_handlers.py:325
+#: backend/api/handlers/os_hardware_handlers.py:343
 msgid "os_version_updated"
 msgstr "ओएस संस्करण अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:331
+#: backend/api/handlers/os_hardware_handlers.py:349
 msgid "No OS information provided"
 msgstr "कोई OS जानकारी नहीं प्रदान की गई"
 
-#: backend/api/handlers/os_hardware_handlers.py:341
+#: backend/api/handlers/os_hardware_handlers.py:359
 msgid "Failed to update OS version"
 msgstr "OS भविष्यवाणी का अपडेट वापरे में विफल"
 
-#: backend/api/handlers/os_hardware_handlers.py:525
+#: backend/api/handlers/os_hardware_handlers.py:543
 msgid "hardware_updated"
 msgstr "हार्डवेयर अपडेट किया गया"
 
-#: backend/api/handlers/os_hardware_handlers.py:534
+#: backend/api/handlers/os_hardware_handlers.py:552
 msgid "Failed to update hardware information"
 msgstr "हार्डवेयर सूचना का अपडेट वापरे में विफल"
 
@@ -719,15 +720,15 @@ msgstr ""
 "Pro+ लाइसेंस में automation_engine शामिल होने तक अनुसूचियाँ केवल वर्तमान टिक"
 " विंडो में सक्रिय होंगी।"
 
-#: backend/api/host_registration.py:65
+#: backend/api/host_registration.py:77
 msgid "Invalid or expired registration key"
 msgstr "अमान्य या सक्रिय की संरेखित रजिस्ट्रेशन कुंजी"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:116
 msgid "Invalid or expired enrollment token"
 msgstr "अमान्य या सक्रिय की संपत्ति टोकन"
 
-#: backend/api/host_registration.py:170
+#: backend/api/host_registration.py:182
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1242,11 +1243,11 @@ msgstr ""
 " '%(action)s' \\u0938\\u0947\\u0902 \\u0939\\u0948 %(delivered)d "
 "\\u0939\\u092e\\u0938\\u094d\\u0924 (filter=%(filter)s, %(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:70
+#: backend/api/package_handlers.py:71
 msgid "Missing batch_id"
 msgstr "बैच ID नहीं पाया गया"
 
-#: backend/api/package_handlers.py:84
+#: backend/api/package_handlers.py:96
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1258,28 +1259,37 @@ msgstr ""
 "\\u0e1b\\u0e49\\u0e25\\u0e47\\u0e0a\\u0e36\\u0e2d\\u0e1c\\u0e48\\u0e2d\\u0e21"
 " \\u0e2b\\u0e19\\u0e48\\u0e35\\u0e1a %(os_name)s %(os_version)s"
 
-#: backend/api/package_handlers.py:147
+#: backend/api/package_handlers.py:177
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "पैकेज बात्च सुरु करने में विफल: %s"
 
-#: backend/api/package_handlers.py:180 backend/api/package_handlers.py:304
+#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
 msgid "Invalid or expired batch_id"
 msgstr "अमान्य या समाप्त हो गया batch_id"
 
-#: backend/api/package_handlers.py:191 backend/api/package_handlers.py:315
+#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
 msgid "Batch belongs to different host"
 msgstr "बैच अलग मेंस के लिए है"
 
-#: backend/api/package_handlers.py:271
+#: backend/api/package_handlers.py:302
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "पैकेज बात्च प्रोसेस करने में विफल हुए: %s"
 
-#: backend/api/package_handlers.py:349
+#: backend/api/package_handlers.py:395
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "पैकेज बात्च को समाप्त करने में विफल: %s"
+
+#: backend/api/package_handlers.py:465
+msgid "Delta base does not match the stored catalog"
+msgstr "डेल्टा बेस मॉचिन कैटलोग संग्रहित है"
+
+#: backend/api/package_handlers.py:564
+#, python-format
+msgid "Failed to apply package delta: %s"
+msgstr "पैकेज डेल्टा लागू करने में विफल: %s"
 
 #: backend/api/queue.py:128
 msgid "Permission denied: DELETE_QUEUE_MESSAGE role required"
@@ -2396,11 +2406,11 @@ msgstr ""
 "HostException: बच्चा होस्ट निर्माण के माध्यम से होस्ट कॉर्ट अपवीक्षित किया "
 "गया"
 
-#: backend/api/message_handlers_core.py:442
+#: backend/api/message_handlers_core.py:455
 msgid "Agent registered and connected successfully"
 msgstr "एजेंट की पंजीकरण और संपर्क सफलतापूर्वक हुआ"
 
-#: backend/api/message_handlers_core.py:747
+#: backend/api/message_handlers_core.py:771
 msgid "Failed to process heartbeat"
 msgstr "हैर्टबीट प्रोसेस करने में विफल हुए"
 
@@ -2780,12 +2790,12 @@ msgstr "होस्ट से टैग हटाने में असफल:
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "होस्ट टैग प्राप्त करने में असफल: %(error)s"
 
-#: backend/api/security.py:104
+#: backend/api/security.py:150
 msgid "Email integration must be configured before creating new users"
 msgstr ""
 "नए उपयोगकर्ताओं को बनाने से पहले ईमेल एकीकरण को कॉन्फ़िगर किया जाना चाहिए"
 
-#: backend/api/security.py:107
+#: backend/api/security.py:153
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -2795,11 +2805,11 @@ msgstr ""
 "करें। ईमेल एकीकरण के बिना, नए उपयोगकर्ता पासवर्ड सेटअप निर्देश प्राप्त नहीं "
 "कर सकते हैं और लॉग इन करने में असमर्थ होंगे।"
 
-#: backend/api/security.py:125
+#: backend/api/security.py:171
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "डिफ़ॉल्ट व्यवस्थापक क्रेडेंशियल आपकी YAML फ़ाइल में कॉन्फ़िगर हैं"
 
-#: backend/api/security.py:127
+#: backend/api/security.py:173
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -2807,29 +2817,29 @@ msgstr ""
 "अपनी कॉन्फ़िगरेशन फ़ाइल से admin_userid और admin_password हटाएं और सर्वर को "
 "पुनरारंभ करें"
 
-#: backend/api/security.py:142
+#: backend/api/security.py:188
 msgid "Default JWT secret is being used"
 msgstr "डिफ़ॉल्ट JWT रहस्य का उपयोग किया जा रहा है"
 
-#: backend/api/security.py:143 backend/api/security.py:173
+#: backend/api/security.py:189 backend/api/security.py:219
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "चलाएँ: {command}"
 
-#: backend/api/security.py:161 backend/api/security.py:172
+#: backend/api/security.py:207 backend/api/security.py:218
 msgid "Default password salt is being used"
 msgstr "डिफ़ॉल्ट पासवर्ड सॉल्ट का उपयोग किया जा रहा है"
 
-#: backend/api/security.py:162
+#: backend/api/security.py:208
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "चलाएँ: {command} ({count} उपयोगकर्ताओं को माइग्रेट किया जाएगा)"
 
-#: backend/api/security.py:186 backend/api/security.py:200
+#: backend/api/security.py:232 backend/api/security.py:246
 msgid "Inconsistent security configuration detected"
 msgstr "असंगत सुरक्षा कॉन्फ़िगरेशन का पता चला"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:234
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -2838,7 +2848,7 @@ msgstr ""
 "JWT रहस्य डिफ़ॉल्ट मान का उपयोग करता है लेकिन पासवर्ड सॉल्ट बदल दिया गया है।"
 " चलाएँ: {command}"
 
-#: backend/api/security.py:202
+#: backend/api/security.py:248
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -2926,38 +2936,38 @@ msgstr "प्रवेश कमांड भेजने में विफ�
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "Ubuntu Pro पंजीकरण शुरू करने में विफल: %s"
 
-#: backend/api/packages_helpers.py:85
+#: backend/api/packages_helpers.py:103
 #, python-format
 msgid "Failed to retrieve package summary: %s"
 msgstr "पैकेज सारांश प्राप्त करने में विफल: %s"
 
-#: backend/api/packages_helpers.py:183
+#: backend/api/packages_helpers.py:213
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "पैकेज गिने फ़ालतू हुई: %s"
 
-#: backend/api/packages_helpers.py:244
+#: backend/api/packages_helpers.py:278
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "पैकेज खोजने में विफल: %s"
 
-#: backend/api/host.py:154
+#: backend/api/host.py:186
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "प्रवेश नहीं: DELETE_HOST भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:218
+#: backend/api/host.py:250
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "प्रवेश नहीं: VIEW_HOST_DETAILS भूमिका की आवश्यकता है"
 
-#: backend/api/host.py:615
+#: backend/api/host.py:665
 msgid "Host already exists"
 msgstr "होस्ट पहले से मौजूद है"
 
-#: backend/api/host.py:724
+#: backend/api/host.py:774
 msgid "Registration absorbed: host was recently deleted"
 msgstr "रजिस्ट्रेशन अवशोषित: होस्ट पहले से ही हटा दिया गया था"
 
-#: backend/api/host.py:787
+#: backend/api/host.py:848
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
@@ -2969,7 +2979,7 @@ msgstr ""
 "\\u092c\\u0947\\u0938\\u094d\\u0930\\u094b\\u091f\\u093e\\u0935\\u0946\\u0902"
 " \\u092a\\u0947\\u0938\\u094d\\u092c\\u094b"
 
-#: backend/api/host.py:804
+#: backend/api/host.py:865
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -4606,12 +4616,12 @@ msgstr "सेविड एस्क्रिप्ट को हटाने �
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "कॉमर्शियल एंटीवायरस स्थिति प्राप्त करने में विफल: %s"
 
-#: backend/websocket/message_router.py:291
+#: backend/websocket/message_router.py:299
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "कोई अज्ञात संदेश प्रकार है: %s"
 
-#: backend/websocket/message_router.py:296
+#: backend/websocket/message_router.py:304
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "%(message_type)s के संदेश प्रकार को लूटने में त्रुटि: %(error)s"
@@ -4929,11 +4939,11 @@ msgstr "सर्वर मेसेज क्वो निरीक्षक �
 msgid "Rate limit exceeded. Please retry later."
 msgstr "रेट लिमिट अतिक्रांत हो गया। कृपया बाद में पुन: प्रयास करें।"
 
-#: backend/services/agent_capability_service.py:170
+#: backend/services/agent_capability_service.py:204
 msgid "this host"
 msgstr "इस होस्ट"
 
-#: backend/services/agent_capability_service.py:173
+#: backend/services/agent_capability_service.py:207
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

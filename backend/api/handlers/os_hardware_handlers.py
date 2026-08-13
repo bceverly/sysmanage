@@ -62,28 +62,39 @@ def _apply_image_mode_fields(host, os_info) -> None:
 
 
 async def is_new_os_version_combination(  # NOSONAR
-    db: Session, os_name: str, os_version: str
+    db: Session, os_name: str, os_version: str, host_id=None
 ) -> bool:
     """
-    Check if the given OS name and version combination represents a new combination
-    that hasn't been seen before in the available packages.
+    Should we ask this host for its package catalog?
 
-    Returns True if this is a new combination that should trigger automatic package collection.
+    True when we hold NO catalog for it yet.  Now that the catalog is stored per
+    host, the question is per host: "has THIS host reported?", not "has any host
+    running this OS reported?".  The OS-level form under-triggered -- a second
+    host of an already-known OS was never asked, so its own catalog (which can
+    legitimately differ: different enabled repositories) never arrived.
+
+    ``host_id`` is optional so callers that genuinely want the OS-level question
+    keep working; without it this falls back to the old behaviour.
+
+    CAUTION when changing this: the answer drives an automatic full-catalog
+    request, and the ingest deletes before it inserts.  A predicate that goes
+    True while a catalog is mid-flight (or that never goes False because the
+    catalog is being rejected) is a request loop -- that is exactly how 9.4 GB
+    of rejected traffic accumulated in eight days.
     """
     if not os_name or not os_version:
         return False
 
-    # Check if we have any available packages for this OS/version combination
-    existing_packages = (
-        db.query(AvailablePackage)
-        .filter(
+    query = db.query(AvailablePackage)
+    if host_id is not None:
+        query = query.filter(AvailablePackage.host_id == str(host_id))
+    else:
+        query = query.filter(
             AvailablePackage.os_name == os_name,
             AvailablePackage.os_version == os_version,
         )
-        .first()
-    )
 
-    return existing_packages is None
+    return query.first() is None
 
 
 async def handle_os_version_update(  # NOSONAR
@@ -269,7 +280,7 @@ async def handle_os_version_update(  # NOSONAR
 
                 if os_name and os_version:
                     is_new_combination = await is_new_os_version_combination(
-                        db, os_name, os_version
+                        db, os_name, os_version, host_id=host.id
                     )
                     if is_new_combination:
                         debug_logger.info(
@@ -281,9 +292,16 @@ async def handle_os_version_update(  # NOSONAR
                         # Import necessary module for creating command message
                         from backend.websocket.messages import create_command_message
 
-                        # Create command message to collect packages
+                        # Hand back the fingerprint of the catalog this host
+                        # last delivered.  If its freshly-scanned catalog still
+                        # hashes to this, it skips transmitting ~89k packages
+                        # (~11 MB) we already hold.  NULL/absent => send
+                        # unconditionally, which is the safe direction.
                         command_message = create_command_message(
-                            command_type="collect_available_packages", parameters={}
+                            command_type="collect_available_packages",
+                            parameters={
+                                "known_fingerprint": host.available_packages_fingerprint
+                            },
                         )
 
                         # Enqueue command to this host

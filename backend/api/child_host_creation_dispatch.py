@@ -170,7 +170,55 @@ def _first_param_or(params, keys, default):
 # ---------------------------------------------------------------------------
 
 
-def _build_agent_config_yaml(command_params):
+def _child_enrollment_token(parent_host_id) -> Optional[str]:
+    """Mint an enrollment token placing a child in its PARENT's tenant.
+
+    A child host inherits its parent's placement: a VM created on a
+    tenant-owned hypervisor belongs to that tenant.  Without a token the child
+    registers server-scoped -- it lands in the bootstrap ("No tenant") database
+    where the owning tenant's queue processor never sees it.
+
+    Auto-approve and enrollment tokens are DIFFERENT things and only the second
+    one places the host: auto-approve skips the pending queue, the enrollment
+    token selects which tenant database the host is written to.  Emitting only
+    the former (which is what this did) is why child hosts enrolled with no
+    tenant at all.
+
+    Returns None when multi-tenancy is off, or when the parent's tenant cannot
+    be resolved -- a token-less registration still works today, and inventing a
+    placement would be worse than declining to state one.
+    """
+    if not parent_host_id:
+        return None
+    try:
+        from backend.api.proplus_routes import (  # pylint: disable=import-outside-toplevel
+            _provisioning_enrollment_token_fn,
+        )
+        from backend.services.host_tenant_index import (  # pylint: disable=import-outside-toplevel
+            tenant_for_host,
+        )
+
+        tenant_id = tenant_for_host(parent_host_id)
+        if not tenant_id:
+            # Loud rather than silent: under multi-tenancy this means the child
+            # is about to enroll outside its parent's data plane.
+            logging.getLogger(__name__).warning(
+                "No tenant resolved for parent host %s; child host will enroll "
+                "without a placement token",
+                parent_host_id,
+            )
+            return None
+        return _provisioning_enrollment_token_fn(tenant_id=tenant_id)
+    except Exception as exc:  # pylint: disable=broad-except
+        logging.getLogger(__name__).warning(
+            "Could not mint an enrollment token for a child of host %s: %s",
+            parent_host_id,
+            exc,
+        )
+        return None
+
+
+def _build_agent_config_yaml(command_params, parent_host_id=None):
     """Generate /etc/sysmanage-agent.yaml content for a child KVM VM.
 
     Mirrors container_engine._generate_agent_config_yaml so the agent
@@ -182,6 +230,9 @@ def _build_agent_config_yaml(command_params):
     server_port = command_params.get("server_port") or 8443
     use_https = bool(command_params.get("use_https"))
     auto_approve_token = command_params.get("auto_approve_token")
+    enrollment_token = command_params.get(
+        "enrollment_token"
+    ) or _child_enrollment_token(parent_host_id)
 
     lines = [
         "# SysManage Agent Configuration (auto-generated)",
@@ -211,6 +262,18 @@ def _build_agent_config_yaml(command_params):
                 "",
                 "auto_approve:",
                 f'  token: "{auto_approve_token}"',
+            ]
+        )
+    if enrollment_token:
+        # security.enrollment_token is the key the agent actually reads
+        # (config.get_enrollment_token).  It is what binds the child to a
+        # tenant database; auto_approve.token above only skips the approval
+        # queue and places nothing.
+        lines.extend(
+            [
+                "",
+                "security:",
+                f'  enrollment_token: "{enrollment_token}"',
             ]
         )
     return "\n".join(lines)
@@ -308,7 +371,7 @@ def _build_kvm_create_request(
         command_params,
         "agent_config_yaml",
         None,
-    ) or _build_agent_config_yaml(command_params)
+    ) or _build_agent_config_yaml(command_params, host_id)
     vm_name = command_params["vm_name"]
 
     # DNS resolution: explicit param wins; otherwise inherit from parent.
@@ -737,7 +800,7 @@ def _try_wsl_plan_based_creation(command_params, host_id):
                 command_params, "agent_install_commands", []
             ),
             agent_config_yaml=_param_or(command_params, "agent_config_yaml", "")
-            or _build_agent_config_yaml(command_params),
+            or _build_agent_config_yaml(command_params, host_id),
         )
         plan = builder(req)
 
@@ -794,7 +857,7 @@ def _try_lxd_plan_based_creation(command_params, host_id):
                 command_params, "agent_install_commands", []
             ),
             agent_config_yaml=_param_or(command_params, "agent_config_yaml", "")
-            or _build_agent_config_yaml(command_params),
+            or _build_agent_config_yaml(command_params, host_id),
         )
         plan = builder(req)
 

@@ -65,6 +65,12 @@ class Host(TestBase):
     )  # Using String instead of Text for SQLite
     os_version_updated_at = Column(DateTime, nullable=True)
 
+    # Fingerprint of the available-packages catalog this host last delivered,
+    # so the server can hand it back and the agent can skip re-sending ~89k
+    # packages it already has (Phase 19).
+    available_packages_fingerprint = Column(String(64), nullable=True)
+    available_packages_fingerprint_at = Column(DateTime, nullable=True)
+
     # FIPS compliance-mode fields (Phase 14.4)
     fips_status = Column(String(20), nullable=True)
     fips_enabled = Column(Boolean, nullable=True)

@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, timezone
 
 from backend.persistence.models.provisioning import (
     INSTALL_ASSIGNMENT_STATES,
+    INSTALL_ASSIGNMENT_DISARMING_STATES,
     INSTALL_TEMPLATE_TYPES,
     HostInstallAssignment,
     InstallSource,
@@ -109,8 +110,34 @@ class TestNetbootArmed:
             "assigned",
             "building",
             "installed",
+            # "the bootstrap ran but the agent is not there" -- previously
+            # indistinguishable from success, because the script deliberately
+            # continues past failure so a late error still reports back.
+            "agent_missing",
             "failed",
         }
+
+    def test_agent_missing_disarms_like_installed(self):
+        """The install is OVER either way.
+
+        Leaving a machine armed because its agent failed would reinstall it on
+        the next reboot and wipe the OS it just laid down -- far worse than a
+        host with a broken agent.
+        """
+        assert _assignment(state="agent_missing").netboot_armed() is False
+
+    def test_every_disarming_state_actually_disarms(self):
+        """Guard for the next state someone adds.
+
+        A state listed as disarming that still leaves netboot armed is the
+        reinstall-forever bug, and it is silent: the machine looks like it is
+        simply "still installing".  Note ``failed`` is deliberately NOT in this
+        list -- it stays armed so the machine retries.
+        """
+        for state in INSTALL_ASSIGNMENT_DISARMING_STATES:
+            assert (
+                _assignment(state=state).netboot_armed() is False
+            ), f"terminal state {state!r} leaves the machine armed"
 
 
 class TestAssignmentToDict:
@@ -148,3 +175,36 @@ class TestAssignmentToDict:
             "last_boot_at",
         ):
             assert out[key] is None
+
+
+class TestInstallReportSerialisation:
+    """The reason must be READABLE, not merely stored.
+
+    Collecting why an install failed and then not serialising it leaves the
+    operator exactly where they started: the cause three layers away, on a
+    console nobody was watching.
+    """
+
+    def test_reason_and_log_are_serialised(self):
+        out = _assignment(
+            state="agent_missing",
+            install_detail="agent install failed",
+            install_log_tail="E: Unable to locate package sysmanage-agent",
+            install_reported_at=_now(),
+        ).to_dict()
+        assert out["state"] == "agent_missing"
+        assert out["install_detail"] == "agent install failed"
+        assert "Unable to locate package" in out["install_log_tail"]
+        assert out["install_reported_at"] is not None
+
+    def test_absent_report_serialises_as_none(self):
+        out = _assignment().to_dict()
+        assert out["install_detail"] is None
+        assert out["install_log_tail"] is None
+        assert out["install_reported_at"] is None
+
+    def test_the_boot_token_is_still_never_serialised(self):
+        """Adding fields must not have widened what leaks."""
+        out = _assignment(boot_token="super-secret-value", install_detail="x").to_dict()
+        assert "boot_token" not in out
+        assert "super-secret-value" not in str(out)

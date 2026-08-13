@@ -10,6 +10,7 @@ Synchronous database operations to be run in thread pools.
 from typing import List, Optional
 
 from fastapi import HTTPException
+from sqlalchemy import distinct, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.functions import count
 
@@ -17,6 +18,19 @@ from backend.i18n import _
 from backend.persistence import db as db_module
 from backend.persistence.models import AvailablePackage, Host
 from backend.persistence.partitions import get_request_engine
+
+# What makes two catalog rows "the same package" for an OS-level view.
+#
+# The table stores one row per HOST per package, so every OS-level query has to
+# collapse them.  Defined once and shared by the count and the listing: if the
+# two used different keys the reported total would not match the number of rows
+# the listing can actually produce, and pagination would run off the end.
+_PACKAGE_IDENTITY = (
+    AvailablePackage.package_name,
+    AvailablePackage.package_version,
+    AvailablePackage.package_description,
+    AvailablePackage.package_manager,
+)
 
 
 def get_packages_summary_sync(tenant_id=None) -> List[dict]:
@@ -32,12 +46,16 @@ def get_packages_summary_sync(tenant_id=None) -> List[dict]:
     with session_local() as session:
         try:
             # Query to get package counts grouped by OS, version, and package manager
+            # count(DISTINCT package_name), not count(id): rows are per-host, so
+            # counting them reports "89k packages" as "890k" on a ten-host fleet.
             results = (
                 session.query(
                     AvailablePackage.os_name,
                     AvailablePackage.os_version,
                     AvailablePackage.package_manager,
-                    count(AvailablePackage.id).label("package_count"),
+                    count(distinct(AvailablePackage.package_name)).label(
+                        "package_count"
+                    ),
                 )
                 .group_by(
                     AvailablePackage.os_name,
@@ -175,7 +193,19 @@ def search_packages_count_sync(
                     AvailablePackage.package_manager == package_manager
                 )
 
-            total_count = db_query.count()
+            # DISTINCT because the catalog is stored PER HOST: ten hosts running
+            # the same OS each hold their own row for "curl 8.5.0", and the UI
+            # asks an OS-level question ("what can I install on Ubuntu 26.04?"),
+            # not a per-host one.  Counting rows here would multiply every count
+            # by the number of hosts reporting that OS.  Uses the SAME key as
+            # search_packages_sync so the count and the listed rows agree --
+            # otherwise pagination runs off the end of the results.
+            distinct_rows = (
+                db_query.with_entities(*_PACKAGE_IDENTITY).distinct().subquery()
+            )
+            total_count = (
+                session.query(func.count()).select_from(distinct_rows).scalar()
+            )
             return {"total_count": total_count}
 
         except Exception as e:
@@ -219,9 +249,13 @@ def search_packages_sync(
                     AvailablePackage.package_manager == package_manager
                 )
 
-            # Apply pagination
+            # DISTINCT for the same reason as count_packages_sync: rows are
+            # per-host, the question is per-OS.  Without it a fleet of ten
+            # identical hosts shows every package ten times.
             packages = (
-                db_query.order_by(
+                db_query.with_entities(*_PACKAGE_IDENTITY)
+                .distinct()
+                .order_by(
                     AvailablePackage.package_name, AvailablePackage.package_manager
                 )
                 .offset(offset)

@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 14:01-0400\n"
+"POT-Creation-Date: 2026-08-12 19:48-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -149,8 +149,9 @@ msgstr "호스트 ID 형식이 잘못되었습니다"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
+#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
 #: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
@@ -347,27 +348,27 @@ msgstr "_ROLE_DATA_UPDATE_ 처리에 실패했습니다: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "자식 호스트 관리에는 프로페셔널+ 라이선스가 필요합니다."
 
-#: backend/api/handlers/os_hardware_handlers.py:120
+#: backend/api/handlers/os_hardware_handlers.py:131
 msgid "No host identification available"
 msgstr "호스트 식별 정보가 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:325
+#: backend/api/handlers/os_hardware_handlers.py:343
 msgid "os_version_updated"
 msgstr "OS 버전이 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:331
+#: backend/api/handlers/os_hardware_handlers.py:349
 msgid "No OS information provided"
 msgstr "OS 정보가 제공되지 않았습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:341
+#: backend/api/handlers/os_hardware_handlers.py:359
 msgid "Failed to update OS version"
 msgstr "OS 버전을 업데이트할 수 없습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:525
+#: backend/api/handlers/os_hardware_handlers.py:543
 msgid "hardware_updated"
 msgstr "하드웨어가 업데이트되었습니다"
 
-#: backend/api/handlers/os_hardware_handlers.py:534
+#: backend/api/handlers/os_hardware_handlers.py:552
 msgid "Failed to update hardware information"
 msgstr "하드웨어 정보를 업데이트하는 데 실패했습니다"
 
@@ -701,15 +702,15 @@ msgstr ""
 "automation_engine이 로드되지 않았습니다; next_run 타임스탬프가 진행되지 않습니다. Pro+ 라이선스에 "
 "automation_engine이 포함될 때까지 스케줄은 현재 틱 창에서만 실행됩니다."
 
-#: backend/api/host_registration.py:65
+#: backend/api/host_registration.py:77
 msgid "Invalid or expired registration key"
 msgstr "잘못된 또는 없는 등록 키"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:116
 msgid "Invalid or expired enrollment token"
 msgstr "잘못된 또는 만료된 등록 토큰"
 
-#: backend/api/host_registration.py:170
+#: backend/api/host_registration.py:182
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1218,11 +1219,11 @@ msgstr ""
 "브로드캐스트 '%(action)s'가 %(delivered)d 호스트에게 전달됨 (필터=%(filter)s, "
 "%(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:70
+#: backend/api/package_handlers.py:71
 msgid "Missing batch_id"
 msgstr "batch_id가 누락됨"
 
-#: backend/api/package_handlers.py:84
+#: backend/api/package_handlers.py:96
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1231,28 +1232,37 @@ msgstr ""
 "%(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 호스트가 %(os_name)s"
 " %(os_version)s 운영 체제의 패키지를 보고하려 시도함"
 
-#: backend/api/package_handlers.py:147
+#: backend/api/package_handlers.py:177
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "패키지 배치를 시작하는데 실패했습니다: %s"
 
-#: backend/api/package_handlers.py:180 backend/api/package_handlers.py:304
+#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
 msgid "Invalid or expired batch_id"
 msgstr "잘못된 또는 만료된 batch_id"
 
-#: backend/api/package_handlers.py:191 backend/api/package_handlers.py:315
+#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
 msgid "Batch belongs to different host"
 msgstr "배치가 다른 호스트에 속해 있습니다."
 
-#: backend/api/package_handlers.py:271
+#: backend/api/package_handlers.py:302
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "_PACKAGES_BATCH_ 처리에 실패했습니다: %s"
 
-#: backend/api/package_handlers.py:349
+#: backend/api/package_handlers.py:395
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "패키지 배치 종료 실패: %s"
+
+#: backend/api/package_handlers.py:465
+msgid "Delta base does not match the stored catalog"
+msgstr "델타 베이스가 저장된 카탈로그와 일치하지 않습니다"
+
+#: backend/api/package_handlers.py:564
+#, python-format
+msgid "Failed to apply package delta: %s"
+msgstr "패키지 델타 적용 실패: %s"
 
 #: backend/api/queue.py:128
 msgid "Permission denied: DELETE_QUEUE_MESSAGE role required"
@@ -2307,11 +2317,11 @@ msgstr "호스트 등록 승인 대기 중입니다."
 msgid "Host auto-approved via child host creation"
 msgstr "호스트 자동 승인됨(자식 호스트 생성 시)"
 
-#: backend/api/message_handlers_core.py:442
+#: backend/api/message_handlers_core.py:455
 msgid "Agent registered and connected successfully"
 msgstr "_AGENT이 성공적으로 등록되고 연결됨_"
 
-#: backend/api/message_handlers_core.py:747
+#: backend/api/message_handlers_core.py:771
 msgid "Failed to process heartbeat"
 msgstr "심장 박동 처리에 실패했습니다"
 
@@ -2671,11 +2681,11 @@ msgstr "호스트에서 태그 제거 실패: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "호스트 태그 가져오기 실패: %(error)s"
 
-#: backend/api/security.py:104
+#: backend/api/security.py:150
 msgid "Email integration must be configured before creating new users"
 msgstr "새 사용자를 만들기 전에 이메일 통합을 구성해야 합니다"
 
-#: backend/api/security.py:107
+#: backend/api/security.py:153
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -2684,46 +2694,46 @@ msgstr ""
 "YAML 구성 파일에서 이메일을 활성화하고 SMTP 설정을 구성하세요. 이메일 통합이 없으면 새 사용자가 비밀번호 설정 지침을 받을 수 "
 "없으며 로그인할 수 없습니다."
 
-#: backend/api/security.py:125
+#: backend/api/security.py:171
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "기본 관리자 자격 증명이 YAML 파일에 구성되어 있습니다"
 
-#: backend/api/security.py:127
+#: backend/api/security.py:173
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
 msgstr "구성 파일에서 admin_userid와 admin_password를 제거하고 서버를 다시 시작하세요"
 
-#: backend/api/security.py:142
+#: backend/api/security.py:188
 msgid "Default JWT secret is being used"
 msgstr "기본 JWT 시크릿이 사용되고 있습니다"
 
-#: backend/api/security.py:143 backend/api/security.py:173
+#: backend/api/security.py:189 backend/api/security.py:219
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "실행: {command}"
 
-#: backend/api/security.py:161 backend/api/security.py:172
+#: backend/api/security.py:207 backend/api/security.py:218
 msgid "Default password salt is being used"
 msgstr "기본 비밀번호 솔트가 사용되고 있습니다"
 
-#: backend/api/security.py:162
+#: backend/api/security.py:208
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "실행: {command} ({count}명의 사용자가 마이그레이션됩니다)"
 
-#: backend/api/security.py:186 backend/api/security.py:200
+#: backend/api/security.py:232 backend/api/security.py:246
 msgid "Inconsistent security configuration detected"
 msgstr "일관되지 않은 보안 구성이 감지되었습니다"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:234
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
 "{command}"
 msgstr "JWT 시크릿이 기본값을 사용하지만 비밀번호 솔트가 변경되었습니다. 실행: {command}"
 
-#: backend/api/security.py:202
+#: backend/api/security.py:248
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -2808,44 +2818,44 @@ msgstr "등록 명령을 전송하는데 실패했습니다: %s"
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "Ubuntu Pro 등록 시작 실패: %s"
 
-#: backend/api/packages_helpers.py:85
+#: backend/api/packages_helpers.py:103
 #, python-format
 msgid "Failed to retrieve package summary: %s"
 msgstr "패키지 요약 검색 실패: %s"
 
-#: backend/api/packages_helpers.py:183
+#: backend/api/packages_helpers.py:213
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "패키지 개수 세는 데 실패했습니다: %s"
 
-#: backend/api/packages_helpers.py:244
+#: backend/api/packages_helpers.py:278
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "패키지 검색 실패: %s"
 
-#: backend/api/host.py:154
+#: backend/api/host.py:186
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "퍼미션 denied: DELETE_HOST 역할 필요"
 
-#: backend/api/host.py:218
+#: backend/api/host.py:250
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "퍼미션 denied: VIEW_HOST_DETAILS 역할 필요"
 
-#: backend/api/host.py:615
+#: backend/api/host.py:665
 msgid "Host already exists"
 msgstr "호스트가 이미 존재합니다"
 
-#: backend/api/host.py:724
+#: backend/api/host.py:774
 msgid "Registration absorbed: host was recently deleted"
 msgstr "등록 흡수: 호스트가 최근에 삭제되었습니다"
 
-#: backend/api/host.py:787
+#: backend/api/host.py:848
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr "'%(fqdn)s' 호스트가 '%(tenant_id)s' 테넌트로 등록됨 (등록 토큰 사용)"
 
-#: backend/api/host.py:804
+#: backend/api/host.py:865
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -4401,12 +4411,12 @@ msgstr "저장된 스크립트 지우기 실패"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "상업용 ANTIVIRUS 상태를 가져오는데 실패했습니다: %s"
 
-#: backend/websocket/message_router.py:291
+#: backend/websocket/message_router.py:299
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "큐에 알 수 없는 메시지 유형: %s"
 
-#: backend/websocket/message_router.py:296
+#: backend/websocket/message_router.py:304
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "메시지 유형 %(message_type)s 라우팅 중 오류 발생: %(error)s"
@@ -4702,11 +4712,11 @@ msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
 
-#: backend/services/agent_capability_service.py:170
+#: backend/services/agent_capability_service.py:204
 msgid "this host"
 msgstr "이 호스트"
 
-#: backend/services/agent_capability_service.py:173
+#: backend/services/agent_capability_service.py:207
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

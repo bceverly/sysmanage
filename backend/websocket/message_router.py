@@ -48,6 +48,7 @@ from backend.api.message_handlers import (
 from backend.api.package_handlers import (
     handle_packages_batch,
     handle_packages_batch_end,
+    handle_packages_delta,
     handle_packages_batch_start,
 )
 from backend.api.update_handlers import handle_update_apply_result
@@ -127,6 +128,13 @@ async def route_inbound_message(  # NOSONAR
             await handle_packages_batch_end(db, mock_connection, message_data)
             success = True
             print("Successfully processed packages batch end", flush=True)
+
+        elif message_type == MessageType.AVAILABLE_PACKAGES_DELTA:
+            # Incremental catalog update.  Rejected server-side if its base
+            # fingerprint is not the catalog we hold; the agent responds by
+            # sending a full catalog, so a rejection costs size, never accuracy.
+            await handle_packages_delta(db, mock_connection, message_data)
+            success = True
 
         elif message_type == MessageType.SCRIPT_EXECUTION_RESULT:
             print("About to call handle_script_execution_result", flush=True)

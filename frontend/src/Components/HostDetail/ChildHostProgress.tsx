@@ -62,7 +62,9 @@ const ChildHostProgress: React.FC<ChildHostProgressProps> = ({ child }) => {
         <Box sx={{ width: '100%', mt: 0.5 }}>
             <LinearProgress
                 variant={determinate ? 'determinate' : 'indeterminate'}
-                value={determinate ? (step! / total!) * 100 : undefined}
+                // No non-null assertions: `determinate` is an aliased condition
+                // built from typeof guards, so TS narrows step/total to number here.
+                value={determinate ? (step / total) * 100 : undefined}
                 sx={{ height: 4, borderRadius: 2 }}
             />
             {child.installation_step && (

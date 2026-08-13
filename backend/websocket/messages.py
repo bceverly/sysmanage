@@ -34,6 +34,10 @@ class MessageType(str, Enum):
     AVAILABLE_PACKAGES_BATCH_START = "available_packages_batch_start"
     AVAILABLE_PACKAGES_BATCH = "available_packages_batch"
     AVAILABLE_PACKAGES_BATCH_END = "available_packages_batch_end"
+    # Incremental catalog update: puts (added/changed) and takes (removed),
+    # applied against a base identified by fingerprint.  See
+    # backend/api/package_handlers.handle_packages_delta.
+    AVAILABLE_PACKAGES_DELTA = "available_packages_delta"
     UPDATE_APPLY_RESULT = "update_apply_result"
     SCRIPT_EXECUTION_RESULT = "script_execution_result"
     REBOOT_STATUS_UPDATE = "reboot_status_update"

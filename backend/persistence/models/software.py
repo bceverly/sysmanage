@@ -159,13 +159,29 @@ class PackageUpdate(Base):
 
 class AvailablePackage(Base):
     """
-    This class holds the object mapping for the available_packages table in the
-    PostgreSQL database. It stores packages available for installation from
-    configured repositories on each host.
+    Packages a specific HOST reports as installable from its configured
+    repositories.
+
+    Rows are owned by ``host_id``: a host only ever deletes and rewrites its
+    own.  Before that scoping existed the table was one shared catalog per
+    (os_name, os_version), which meant every host of an OS transmitted an
+    identical ~89k-row catalog and -- worse -- the ingest deleted the whole OS's
+    rows before re-inserting, so two same-OS hosts reporting concurrently
+    clobbered each other and a host that failed mid-batch truncated the catalog
+    for every host of that OS.
+
+    ``os_name``/``os_version`` are retained because the UI answers an OS-level
+    question ("what can I install on Ubuntu 26.04?"); those views must therefore
+    aggregate DISTINCT across hosts rather than count rows.
+
+    ``host_id`` is a soft reference (no FK): SQLite cannot add one via ALTER, and
+    host links elsewhere in this schema are soft for the same reason.  NULL means
+    a legacy row written before scoping, owned by no host.
     """
 
     __tablename__ = "available_packages"
     id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    host_id = Column(String(36), nullable=True, index=True)
     package_name = Column(String(255), nullable=False, index=True)
     package_version = Column(String(100), nullable=False)
     package_description = Column(Text, nullable=True)
@@ -176,7 +192,7 @@ class AvailablePackage(Base):
     created_at = Column(DateTime(), nullable=False)
 
     def __repr__(self):
-        return f"<AvailablePackage(id={self.id}, package_name='{self.package_name}', version='{self.package_version}', os='{self.os_name} {self.os_version}')>"
+        return f"<AvailablePackage(id={self.id}, host_id={self.host_id}, package_name='{self.package_name}', version='{self.package_version}', os='{self.os_name} {self.os_version}')>"
 
 
 class SoftwareInstallationLog(Base):

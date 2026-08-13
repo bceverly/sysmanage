@@ -3706,8 +3706,8 @@ MSI installs cleanly inside the sandbox.
       requirement: the `WINGET_PKGS_TOKEN` repo secret** (classic PAT with
       `public_repo` **and** `workflow` — see the item below for why `workflow`
       is mandatory) on both repos; without it the job warns + exits 0.
-- [ ] Verify the next release tag auto-bumps the manifest via `komac update`.
-      *(**Root cause found and fixed 2026-08-07; awaiting proof from CI.**
+- [x] Verify the next release tag auto-bumps the manifest via `komac update`.
+      *(**VERIFIED 2026-08-12 on tag v3.5.1.11** — komac took the `update` path (3.5.1.8 -> 3.5.1.11) and opened microsoft/winget-pkgs#416454. The run log shows the preflights passing: `scopes: repo, workflow`, `identity: bceverly`, `fork bceverly/winget-pkgs writable: true`. Root cause had been found and fixed 2026-08-07;
       Tag v3.5.1.5 failed with "bceverly does not have the correct permissions
       to execute `CreateRef`". The token was NOT expired and NOT under-scoped for
       the operation it appeared to be doing — it could create refs on the fork
@@ -5715,7 +5715,8 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 ### Agent bandwidth — send package deltas, not the whole catalog
 
-- [ ] **`available_packages` should transmit a DELTA, not a full re-send.**
+- [x] **`available_packages` should transmit a DELTA, not a full re-send.**
+      *(DONE 2026-08-12 — but the measured 9.4 GB had a DIFFERENT root cause than assumed: `handle_packages_batch_start` compared the agent's DISTRIBUTION against the host's PLATFORM, so EVERY Linux batch was rejected with os_mismatch, the catalog never landed, and the "no rows for this OS" trigger re-requested it for ever. FreeBSD masked it (distribution == platform there). Fixed via `host_matches_os`; measured after: 1 accepted batch, 82k+ packages stored, ~11 MB once vs ~1.18 GB/day. THEN built the efficiency work on top: a fingerprint handshake (server hands back what it holds on the collect command; the agent sends nothing when it matches) and a true delta (puts/takes against `sent_package_snapshot`, only when both sides' fingerprints agree; falls back to a full send otherwise, when the diff exceeds 30%, or after 7 days).)*
       Measured on the dev host 2026-08-06: `available_packages_batch` was
       **78,979 messages / 9.4 GB in eight days** — ~7 messages a minute at
       ~122 KB each, and 83% of everything the agent sent. The agent stores the
@@ -5745,7 +5746,8 @@ test asserted the PPA command string — it was there; `ppa:` cannot work on
 Debian. That class of test can never fail for the right reason. These items
 close the gap between our output and the parsers that consume it.
 
-- [ ] **Report WHY a provisioned host failed, from the host.** A machine
+- [x] **Report WHY a provisioned host failed, from the host.** A machine
+      *(DONE 2026-08-12 — the bootstrap tees its output to /var/log/sysmanage-bootstrap.log, probes for the agent binary, and POSTs {state, detail, log_tail}. New `agent_missing` state distinguishes "the script ran" from "the agent is up"; it DISARMS netboot exactly like `installed`, because re-arming a machine whose OS is fine would erase a working system, while `failed` stays armed for a retry. Stored on the assignment, serialised by `to_dict`, and surfaced in Provisioning → Bare Metal with the reason inline and the log tail in a dialog. Docs + screenshot + 13-locale i18n shipped with it.)*
       installed, silently did not enroll, and the reason (a broken apt repo)
       was three layers away and only findable by inference. The install
       callback should carry a status payload plus the tail of the bootstrap
@@ -5755,7 +5757,8 @@ close the gap between our output and the parsers that consume it.
       distinguishable **without** weakening the netboot disarm, since the
       script deliberately continues past failure so a machine cannot reinstall
       itself forever.
-- [ ] **Validate generated artifacts with each tool's own validator, plus a
+- [x] **Validate generated artifacts with each tool's own validator, plus a
+      *(DONE 2026-08-12 — `dnsmasq --test -C` (verified against a negative control), `debconf-set-selections --checkonly`, `ksvalidator`, `xmllint`, and `sh -n` for bsdinstall, each skipped when its tool is absent. Plus per-dialect MUST_ANSWER checklists where every entry states what happens without it, enforced by a test. Two of the first three checklist failures were the CHECKLIST being wrong, not the renderers — `partman/confirm_write_new_label` is not a real d-i key, and bsdinstall legitimately uses PARTITIONS. One suspected real gap recorded as an xfail: the AutoYaST profile has no <users> section, so nothing sets a root password.)*
       must-answer checklist.** `dnsmasq --test -C <config>` and
       `debconf-set-selections --checkonly` both reject files we would otherwise
       publish. Neither catches semantics, so pair them with the d-i
@@ -5790,7 +5793,8 @@ close the gap between our output and the parsers that consume it.
       that a fix to "both" tables missed. That variant is now deleted and
       `container_engine.pyx` includes the shared file. Guard verified by
       deliberately drifting a copy and watching it fail.)*
-- [ ] **UEFI PXE has no embedded-iPXE first stage.** `build-embedded-ipxe.sh`
+- [x] **UEFI PXE has no embedded-iPXE first stage.** `build-embedded-ipxe.sh`
+      *(DONE 2026-08-12 — the diagnosis was incomplete: patch_cf.S is merely the FIRST file the build reaches. Reordering it (upstream's fix) got the build as far as arch/x86/core/stack.S, with five more behind that, and upstream fixed them TWO different ways (reorder where there is real 16-bit code, DELETE the directive where there is none). Carrying local patches would mean hand-porting an open-ended series of commits, so the pin moved to master at an immutable SHA (e6d0a97c05d238c17eeae5116cb6e9c0fc9fdb56) — as reproducible as a tag, and iPXE has not released since 2022. Verified on binutils 2.46 from a CLEAN clone: sysmanage-ipxe.efi (1,165,824 bytes) and sysmanage-ipxe.kpxe both built with the boot script embedded and linkage-checked. NOTE: this removes the premise behind "UEFI + proxyDHCP is unproven" — UEFI is no longer restricted to the two-stage path.)*
       produces the BIOS image but the UEFI one does not build: iPXE's last
       release is v1.21.1 (2022) and its `arch/x86/core/patch_cf.S` opens with
       `.arch i386`, which binutils >= 2.4x rejects under `as --64`
@@ -5844,7 +5848,8 @@ close the gap between our output and the parsers that consume it.
       Workers & Pages for a `repo.sysmanage.org/*` route and R2 -> bucket ->
       Custom Domains. `pool/**` is safe to cache indefinitely: every version is
       its own filename, so no path's content ever changes.
-- [ ] **Verify the agent is actually privileged after a provisioned install.**
+- [x] **Verify the agent is actually privileged after a provisioned install.**
+      *(Both DEFECTS fixed 2026-08-12; the VERIFY step still needs a provisioned host. The probe ran `sudo -n systemctl is-active` and accepted any exit but 255 — but `sudo -n` exits 1 when it DENIES, and systemctl exits 3 for an inactive unit, so "denied" and "worked" were indistinguishable and a host without sudo reported itself privileged. Now `sudo -n true`, which cannot fail on its own. Separately the sudoers granted systemctl only as /bin/systemctl, and sudoers matches the LITERAL path while /bin is a symlink to usr/bin on merged-/usr distros — so the rule never authorised the /usr/bin/systemctl the agent actually invokes. Fixed for ubuntu/centos/opensuse (Alpine and the BSDs have a real /bin), all still passing visudo -c.)*
       `is_privileged` is computed from a sudo probe that treats any exit code
       except 255 as success, so a *denied* sudo reads as privileged; and the
       shipped sudoers grants systemctl only as `/bin/systemctl` while merged-
@@ -5935,7 +5940,8 @@ close the gap between our output and the parsers that consume it.
       invites three reviewers finding the same class of problem. OpenBSD
       (`ports@`, strictest) and NetBSD (`pkgsrc-wip` first) stay in Phase 25.
 
-- [ ] **Child hosts enroll with NO TENANT — they need an enrollment token.**
+- [x] **Child hosts enroll with NO TENANT — they need an enrollment token.**
+      *(DONE 2026-08-12 — `_build_agent_config_yaml` now emits `security.enrollment_token`, minted against the PARENT's tenant via `tenant_for_host` + the existing provisioning mint, threaded through all three creation paths (KVM/WSL/LXD) with a test that counts the call sites so a new path cannot silently regress. Declines rather than guessing when the parent's tenant cannot be resolved — a token naming the wrong tenant would put the child in someone else's data plane.)*
       A VM or container created through child-host provisioning registers
       server-scoped, because `_build_agent_config_yaml`
       (`backend/api/child_host_creation_dispatch.py`) emits `server.*`,
@@ -6010,7 +6016,8 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
       and the ratchet thresholds bumped to match
-- [ ] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+- [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
+      *(DONE 2026-08-12 — walked every phase below 19. Phases 20-28 are future work, not stale ticks. Exactly one genuinely open box existed below 19: Phase 12's komac verification, now PROVEN on tag v3.5.1.11 (komac took the update path 3.5.1.8 → 3.5.1.11 and opened microsoft/winget-pkgs#416454) and ticked. All 20 phases below 19 are clean.)*
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free
 
 ---

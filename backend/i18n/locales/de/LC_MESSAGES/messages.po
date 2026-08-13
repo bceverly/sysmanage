@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 14:01-0400\n"
+"POT-Creation-Date: 2026-08-12 19:48-0400\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -150,8 +150,9 @@ msgstr "Ungültiges Host-ID-Format"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:60
-#: backend/api/package_compliance.py:319 backend/api/package_compliance.py:445
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
+#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
 #: backend/api/tag.py:653 backend/api/airgap_repository_buckets.py:65
@@ -353,27 +354,27 @@ msgstr "Fehler beim Verarbeiten der Rollendatenaktualisierung: %s"
 msgid "Child host management requires a Professional+ license."
 msgstr "Die Verwaltung von Kindhosts erfordert eine Professional+ Lizenz."
 
-#: backend/api/handlers/os_hardware_handlers.py:120
+#: backend/api/handlers/os_hardware_handlers.py:131
 msgid "No host identification available"
 msgstr "Keine Host-Identifikation verfügbar"
 
-#: backend/api/handlers/os_hardware_handlers.py:325
+#: backend/api/handlers/os_hardware_handlers.py:343
 msgid "os_version_updated"
 msgstr "Betriebssystem-Version aktualisiert"
 
-#: backend/api/handlers/os_hardware_handlers.py:331
+#: backend/api/handlers/os_hardware_handlers.py:349
 msgid "No OS information provided"
 msgstr "Keine Informationen zum Betriebssystem angegeben"
 
-#: backend/api/handlers/os_hardware_handlers.py:341
+#: backend/api/handlers/os_hardware_handlers.py:359
 msgid "Failed to update OS version"
 msgstr "OS-Version konnte nicht aktualisiert werden"
 
-#: backend/api/handlers/os_hardware_handlers.py:525
+#: backend/api/handlers/os_hardware_handlers.py:543
 msgid "hardware_updated"
 msgstr "Hardware aktualisiert"
 
-#: backend/api/handlers/os_hardware_handlers.py:534
+#: backend/api/handlers/os_hardware_handlers.py:552
 msgid "Failed to update hardware information"
 msgstr "Hardwareinformation konnte nicht aktualisiert werden"
 
@@ -723,15 +724,15 @@ msgstr ""
 "aktualisiert. Pläne werden nur im aktuellen Tick-Fenster ausgeführt, bis die"
 " Pro+ Lizenz automation_engine enthält."
 
-#: backend/api/host_registration.py:65
+#: backend/api/host_registration.py:77
 msgid "Invalid or expired registration key"
 msgstr "Ungültiger oder abgelaufener Registrierungsschlüssel"
 
-#: backend/api/host_registration.py:104
+#: backend/api/host_registration.py:116
 msgid "Invalid or expired enrollment token"
 msgstr "Ungültiger oder abgelaufener Anmelde-Token"
 
-#: backend/api/host_registration.py:170
+#: backend/api/host_registration.py:182
 msgid ""
 "This host already belongs to a tenant. Re-register with its enrollment token"
 " instead of registering server-scoped."
@@ -1255,11 +1256,11 @@ msgstr ""
 "Broadcast '%(action)s' geliefert an %(delivered)d Host(s) "
 "(Filter=%(filter)s, %(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:70
+#: backend/api/package_handlers.py:71
 msgid "Missing batch_id"
 msgstr "Fehlender batch_id"
 
-#: backend/api/package_handlers.py:84
+#: backend/api/package_handlers.py:96
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1268,28 +1269,37 @@ msgstr ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) hat "
 "versucht, Pakete für %(os_name)s %(os_version)s zu melden"
 
-#: backend/api/package_handlers.py:147
+#: backend/api/package_handlers.py:177
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "Fehler beim Starten der Paketbatchverarbeitung: %s"
 
-#: backend/api/package_handlers.py:180 backend/api/package_handlers.py:304
+#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
 msgid "Invalid or expired batch_id"
 msgstr "Ungültiger oder abgelaufener batch_id"
 
-#: backend/api/package_handlers.py:191 backend/api/package_handlers.py:315
+#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
 msgid "Batch belongs to different host"
 msgstr "Batch gehört zu einem anderen Host"
 
-#: backend/api/package_handlers.py:271
+#: backend/api/package_handlers.py:302
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "Fehler beim Verarbeiten des Paket-Batch: %s"
 
-#: backend/api/package_handlers.py:349
+#: backend/api/package_handlers.py:395
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "Fehler beim Beenden des Paketbatchs: %s"
+
+#: backend/api/package_handlers.py:465
+msgid "Delta base does not match the stored catalog"
+msgstr "Delta Basis stimmt nicht mit dem gespeicherten Katalog überein"
+
+#: backend/api/package_handlers.py:564
+#, python-format
+msgid "Failed to apply package delta: %s"
+msgstr "Fehler beim Anwenden des Paket-Deltas: %s"
 
 #: backend/api/queue.py:128
 msgid "Permission denied: DELETE_QUEUE_MESSAGE role required"
@@ -2432,11 +2442,11 @@ msgstr "Registrierung des Hosts wartet auf Genehmigung"
 msgid "Host auto-approved via child host creation"
 msgstr "Host wurde automatisch genehmigt durch Kind-Host-Erstellung"
 
-#: backend/api/message_handlers_core.py:442
+#: backend/api/message_handlers_core.py:455
 msgid "Agent registered and connected successfully"
 msgstr "Agent erfolgreich registriert und verbunden"
 
-#: backend/api/message_handlers_core.py:747
+#: backend/api/message_handlers_core.py:771
 msgid "Failed to process heartbeat"
 msgstr "Fehler beim Verarbeiten des Heartbeat"
 
@@ -2823,13 +2833,13 @@ msgstr "Fehler beim Entfernen des Tags vom Host: %(error)s"
 msgid "Failed to fetch host tags: %(error)s"
 msgstr "Fehler beim Abrufen der Host-Tags: %(error)s"
 
-#: backend/api/security.py:104
+#: backend/api/security.py:150
 msgid "Email integration must be configured before creating new users"
 msgstr ""
 "Die E-Mail-Integration muss vor dem Erstellen neuer Benutzer konfiguriert "
 "werden"
 
-#: backend/api/security.py:107
+#: backend/api/security.py:153
 msgid ""
 "Enable email in your YAML configuration file and configure SMTP settings. "
 "Without email integration, new users cannot receive password setup "
@@ -2839,11 +2849,11 @@ msgstr ""
 "Sie die SMTP-Einstellungen. Ohne E-Mail-Integration können neue Benutzer "
 "keine Anweisungen zur Passworteinrichtung erhalten und sich nicht anmelden."
 
-#: backend/api/security.py:125
+#: backend/api/security.py:171
 msgid "Default admin credentials are configured in your YAML file"
 msgstr "Standard-Admin-Anmeldedaten sind in Ihrer YAML-Datei konfiguriert"
 
-#: backend/api/security.py:127
+#: backend/api/security.py:173
 msgid ""
 "Remove admin_userid and admin_password from your configuration file and "
 "restart the server"
@@ -2851,29 +2861,29 @@ msgstr ""
 "Entfernen Sie admin_userid und admin_password aus Ihrer Konfigurationsdatei "
 "und starten Sie den Server neu"
 
-#: backend/api/security.py:142
+#: backend/api/security.py:188
 msgid "Default JWT secret is being used"
 msgstr "Standard-JWT-Geheimnis wird verwendet"
 
-#: backend/api/security.py:143 backend/api/security.py:173
+#: backend/api/security.py:189 backend/api/security.py:219
 #, python-brace-format
 msgid "Run: {command}"
 msgstr "Ausführen: {command}"
 
-#: backend/api/security.py:161 backend/api/security.py:172
+#: backend/api/security.py:207 backend/api/security.py:218
 msgid "Default password salt is being used"
 msgstr "Standard-Passwort-Salt wird verwendet"
 
-#: backend/api/security.py:162
+#: backend/api/security.py:208
 #, python-brace-format
 msgid "Run: {command} ({count} users will be migrated)"
 msgstr "Ausführen: {command} ({count} Benutzer werden migriert)"
 
-#: backend/api/security.py:186 backend/api/security.py:200
+#: backend/api/security.py:232 backend/api/security.py:246
 msgid "Inconsistent security configuration detected"
 msgstr "Inkonsistente Sicherheitskonfiguration erkannt"
 
-#: backend/api/security.py:188
+#: backend/api/security.py:234
 #, python-brace-format
 msgid ""
 "JWT secret uses default value but password salt has been changed. Run: "
@@ -2882,7 +2892,7 @@ msgstr ""
 "JWT-Geheimnis verwendet den Standardwert, aber Passwort-Salt wurde geändert."
 " Ausführen: {command}"
 
-#: backend/api/security.py:202
+#: backend/api/security.py:248
 #, python-brace-format
 msgid ""
 "Password salt uses default value but JWT secret has been changed. Run: "
@@ -2975,45 +2985,45 @@ msgstr "Fehler beim Senden des Anmeldebefehls: %s"
 msgid "Failed to initiate Ubuntu Pro enrollment: %s"
 msgstr "Fehler beim Initiieren der Ubuntu Pro-Registrierung: %s"
 
-#: backend/api/packages_helpers.py:85
+#: backend/api/packages_helpers.py:103
 #, python-format
 msgid "Failed to retrieve package summary: %s"
 msgstr "Fehler beim Abrufen der Paket-Zusammenfassung: %s"
 
-#: backend/api/packages_helpers.py:183
+#: backend/api/packages_helpers.py:213
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "Fehler beim Zählen der Pakete: %s"
 
-#: backend/api/packages_helpers.py:244
+#: backend/api/packages_helpers.py:278
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "Fehler beim Suchen von Paketen: %s"
 
-#: backend/api/host.py:154
+#: backend/api/host.py:186
 msgid "Permission denied: DELETE_HOST role required"
 msgstr "Zugriff verweigert: DELETE_HOST-Rolle erforderlich"
 
-#: backend/api/host.py:218
+#: backend/api/host.py:250
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
 msgstr "Berechtigung abgelehnt: VIEW_HOST_DETAILS Rolle erforderlich"
 
-#: backend/api/host.py:615
+#: backend/api/host.py:665
 msgid "Host already exists"
 msgstr "Host existiert bereits"
 
-#: backend/api/host.py:724
+#: backend/api/host.py:774
 msgid "Registration absorbed: host was recently deleted"
 msgstr "Registrierung absorbiert: Host wurde kürzlich gelöscht"
 
-#: backend/api/host.py:787
+#: backend/api/host.py:848
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled into tenant %(tenant_id)s via enrollment token"
 msgstr ""
 "Host '%(fqdn)s' wurde über Anmelde-Token in Tenant %(tenant_id)s angemeldet"
 
-#: backend/api/host.py:804
+#: backend/api/host.py:865
 #, python-format
 msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
@@ -4677,12 +4687,12 @@ msgstr "Fehler beim Entfernen des gespeicherten Skripts"
 msgid "Failed to retrieve commercial antivirus status: %s"
 msgstr "Fehler beim Abrufen des Status für kommerzielle Antivirensoftware: %s"
 
-#: backend/websocket/message_router.py:291
+#: backend/websocket/message_router.py:299
 #, python-format
 msgid "Unknown message type in queue: %s"
 msgstr "Unbekannter Nachrichtentyp in Warteschlange: %s"
 
-#: backend/websocket/message_router.py:296
+#: backend/websocket/message_router.py:304
 #, python-format
 msgid "Error routing message type %(message_type)s: %(error)s"
 msgstr "Fehler beim Routing der Nachrichtentyp %(message_type)s: %(error)s"
@@ -5012,11 +5022,11 @@ msgstr "Servernachrichtenwarteschlange erfolgreich initialisiert"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "Rate limit erreicht. Bitte später erneut versuchen."
 
-#: backend/services/agent_capability_service.py:170
+#: backend/services/agent_capability_service.py:204
 msgid "this host"
 msgstr "diesem Host"
 
-#: backend/services/agent_capability_service.py:173
+#: backend/services/agent_capability_service.py:207
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

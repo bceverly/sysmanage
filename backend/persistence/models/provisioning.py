@@ -102,7 +102,32 @@ DISCOVERED_HOST_STATES = ("discovered", "assigned", "ignored")
 #   building   -- the installer has fetched its answer file
 #   installed  -- finished; MUST fall through to local boot from here on
 #   failed     -- install reported failure; netboot stays armed for a retry
-INSTALL_ASSIGNMENT_STATES = ("assigned", "building", "installed", "failed")
+# ``installed`` means the AGENT IS UP, not merely that the bootstrap script
+# reached its end.  ``agent_missing`` is the difference: the OS installed and
+# the script ran, but the agent is not there -- historically indistinguishable
+# from success, because the script deliberately continues past failure.
+#
+# CRITICAL: every terminal state here must DISARM netboot.  The script's
+# refusal to `set -e` exists so a late failure still reports back; a state that
+# left the machine armed would make it reinstall itself on every reboot, wiping
+# the OS it just installed.  "Broken agent" is a far better outcome than that.
+INSTALL_ASSIGNMENT_STATES = (
+    "assigned",
+    "building",
+    "installed",
+    "agent_missing",
+    "failed",
+)
+
+# States that DISARM netboot: the install is over, stop serving this machine an
+# installer -- whether or not the agent came up.
+#
+# ``failed`` is deliberately NOT here.  A failed install stays ARMED so the
+# machine retries on its next boot, which is the whole point of recording it
+# separately from ``agent_missing``: "the OS did not install" wants another
+# attempt, "the OS installed but the agent did not" must never reinstall,
+# because that would wipe a working OS.
+INSTALL_ASSIGNMENT_DISARMING_STATES = ("installed", "agent_missing")
 
 
 class ComputeResource(Base):
@@ -534,6 +559,15 @@ class HostInstallAssignment(Base):
     boot_token_expires_at = Column(DateTime, nullable=True)
     last_boot_at = Column(DateTime, nullable=True)
 
+    # Why an install ended the way it did, reported BY THE MACHINE.  Without
+    # these, a host that installed and silently failed to enroll left the
+    # reason three layers away and findable only by inference -- the actual
+    # cause of one 18.2 harness cycle was a broken apt repo, visible only in
+    # the bootstrap output on a console nobody was watching.
+    install_detail = Column(String(500), nullable=True)
+    install_log_tail = Column(Text, nullable=True)
+    install_reported_at = Column(DateTime, nullable=True)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -582,6 +616,18 @@ class HostInstallAssignment(Base):
                 else None
             ),
             "netboot_armed": self.netboot_armed(),
+            # Why the install ended as it did, reported by the machine itself.
+            # Serialised because the whole point of collecting it is that an
+            # operator can READ it -- stored-but-unreachable would leave the
+            # reason exactly where it was before: three layers away, on a
+            # console nobody was watching.
+            "install_detail": self.install_detail,
+            "install_log_tail": self.install_log_tail,
+            "install_reported_at": (
+                self.install_reported_at.isoformat()
+                if self.install_reported_at
+                else None
+            ),
             "last_boot_at": (
                 self.last_boot_at.isoformat() if self.last_boot_at else None
             ),

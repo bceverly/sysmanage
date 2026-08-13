@@ -155,6 +155,9 @@ class TestSearchPackagesCountSync:
 
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.count.return_value = 42
+        mock_session.query.return_value.select_from.return_value.scalar.return_value = (
+            42
+        )
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=None)
 
@@ -180,6 +183,7 @@ class TestSearchPackagesCountSync:
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.count.return_value = 25
+        mock_query.select_from.return_value.scalar.return_value = 25
         mock_session.query.return_value = mock_query
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=None)
@@ -206,6 +210,7 @@ class TestSearchPackagesCountSync:
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
         mock_query.count.return_value = 10
+        mock_query.select_from.return_value.scalar.return_value = 10
         mock_session.query.return_value = mock_query
         mock_session.__enter__ = MagicMock(return_value=mock_session)
         mock_session.__exit__ = MagicMock(return_value=None)
@@ -266,6 +271,8 @@ class TestSearchPackagesSync:
         mock_session = MagicMock()
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
+        mock_query.with_entities.return_value = mock_query
+        mock_query.distinct.return_value = mock_query
         mock_query.order_by.return_value = mock_query
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
@@ -310,6 +317,8 @@ class TestSearchPackagesSync:
         mock_session = MagicMock()
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
+        mock_query.with_entities.return_value = mock_query
+        mock_query.distinct.return_value = mock_query
         mock_query.order_by.return_value = mock_query
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
@@ -345,6 +354,8 @@ class TestSearchPackagesSync:
         mock_session = MagicMock()
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
+        mock_query.with_entities.return_value = mock_query
+        mock_query.distinct.return_value = mock_query
         mock_query.order_by.return_value = mock_query
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
@@ -421,6 +432,8 @@ class TestSearchPackagesSync:
         mock_session = MagicMock()
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
+        mock_query.with_entities.return_value = mock_query
+        mock_query.distinct.return_value = mock_query
         mock_query.order_by.return_value = mock_query
         mock_query.offset.return_value = mock_query
         mock_query.limit.return_value = mock_query
