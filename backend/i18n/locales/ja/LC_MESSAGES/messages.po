@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 19:48-0400\n"
+"POT-Creation-Date: 2026-08-13 09:05-0400\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -149,8 +149,8 @@ msgstr "ホストIDの形式が無効です"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
-#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
 #: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
@@ -161,7 +161,7 @@ msgstr "ホストIDの形式が無効です"
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
-#: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
@@ -420,13 +420,13 @@ msgid "Missing request_id in installation_complete"
 msgstr "インストール完了リクエストに request_id が含まれていません"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:469
+#: backend/api/agent.py:747 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "インストール要求が見つかりません: %s"
 
 #: backend/api/handlers/software_package_handlers.py:996
-#: backend/api/packages.py:489
+#: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
 msgstr "インストール完了の記録に失敗しました: %s"
@@ -1219,11 +1219,11 @@ msgstr ""
 "ブロードキャスト '%(action)s' を %(delivered)d ホストに配信 (フィルター=%(filter)s, "
 "%(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:71
+#: backend/api/package_handlers.py:72
 msgid "Missing batch_id"
 msgstr "バッチIDが欠落しています"
 
-#: backend/api/package_handlers.py:96
+#: backend/api/package_handlers.py:97
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1232,34 +1232,34 @@ msgstr ""
 "%(host_fqdn)s (%(host_platform)s %(host_platform_release)s) が %(os_name)s "
 "%(os_version)s のパッケージを報告しようとしました"
 
-#: backend/api/package_handlers.py:177
+#: backend/api/package_handlers.py:178
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "パッケージバッチの起動に失敗しました: %s"
 
-#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
+#: backend/api/package_handlers.py:211 backend/api/package_handlers.py:336
 msgid "Invalid or expired batch_id"
 msgstr "無効または期限切れの batch_id"
 
-#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
+#: backend/api/package_handlers.py:222 backend/api/package_handlers.py:347
 msgid "Batch belongs to different host"
 msgstr "バッチは異なるホストに属しています"
 
-#: backend/api/package_handlers.py:302
+#: backend/api/package_handlers.py:303
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "パッケージバッチの処理に失敗しました: %s"
 
-#: backend/api/package_handlers.py:395
+#: backend/api/package_handlers.py:396
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "パッケージのバッチ終了に失敗しました: %s"
 
-#: backend/api/package_handlers.py:465
+#: backend/api/package_handlers.py:567
 msgid "Delta base does not match the stored catalog"
 msgstr "デルタベースが保存されたカタログと一致しません"
 
-#: backend/api/package_handlers.py:564
+#: backend/api/package_handlers.py:612
 #, python-format
 msgid "Failed to apply package delta: %s"
 msgstr "パッケージデルタの適用に失敗しました: %s"
@@ -2448,7 +2448,7 @@ msgstr "権限がありません：UPDATE_AGENTロールが必要です"
 msgid "Agent update requested"
 msgstr "エージェントの更新がリクエストされました"
 
-#: backend/api/host_operations.py:322
+#: backend/api/host_operations.py:326
 msgid "Package collection requested"
 msgstr "パッケージコレクションの要求"
 
@@ -2828,12 +2828,12 @@ msgstr "Ubuntu Pro の登録を開始できませんでした: %s"
 msgid "Failed to retrieve package summary: %s"
 msgstr "パッケージ概要の取得に失敗しました: %s"
 
-#: backend/api/packages_helpers.py:213
+#: backend/api/packages_helpers.py:223
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "パッケージのカウントに失敗しました: %s"
 
-#: backend/api/packages_helpers.py:278
+#: backend/api/packages_helpers.py:298
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "パッケージの検索に失敗しました: %s"
@@ -3637,7 +3637,7 @@ msgstr "認証ヘッダーが見つからないか、無効です"
 msgid "Invalid host authentication"
 msgstr "ホスト認証が無効です"
 
-#: backend/api/agent.py:775 backend/api/packages.py:481
+#: backend/api/agent.py:775 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "インストール完了が記録されました。"
 
@@ -3838,45 +3838,45 @@ msgstr "ISO出力ディレクトリが存在することを確認する"
 msgid "Failed to retrieve package managers: %s"
 msgstr "パッケージマネージャーの取得に失敗しました: %s"
 
-#: backend/api/packages.py:226
+#: backend/api/packages.py:236
 #, python-format
 msgid "Failed to retrieve OS versions: %s"
 msgstr "OSバージョンの取得に失敗しました: %s"
 
-#: backend/api/packages.py:277
+#: backend/api/packages.py:287
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
 msgstr "マネージャー %(manager_name)s に対するパッケージの取得に失敗しました: %(error)s"
 
-#: backend/api/packages.py:300
+#: backend/api/packages.py:310
 #, python-format
 msgid "No active hosts found for %(os_name)s %(os_version)s"
 msgstr "アクティブなホストが %(os_name)s %(os_version)s に対して見つかりませんでした"
 
-#: backend/api/packages.py:324
+#: backend/api/packages.py:342
 #, python-format
-msgid "Package collection requested from host %s"
-msgstr "ホスト %s からのパッケージコレクションの要求"
+msgid "Package collection requested from %(count)d host(s)"
+msgstr "パッケージコレクションが%(count)dホストから要求されました"
 
-#: backend/api/packages.py:334
+#: backend/api/packages.py:351
 #, python-format
 msgid "Failed to request package refresh: %s"
 msgstr "パッケージリフレッシュを要求するのに失敗しました: %s"
 
-#: backend/api/packages.py:441
+#: backend/api/packages.py:458
 #, python-format
 msgid "Failed to retrieve installation history: %s"
 msgstr "インストール履歴の取得に失敗しました: %s"
 
-#: backend/api/packages.py:516
+#: backend/api/packages.py:533
 msgid "Installation record not found"
 msgstr "インストール記録が見つかりません。"
 
-#: backend/api/packages.py:530
+#: backend/api/packages.py:547
 msgid "Installation record deleted successfully"
 msgstr "インストール記録を正常に削除しました。"
 
-#: backend/api/packages.py:539
+#: backend/api/packages.py:556
 #, python-format
 msgid "Failed to delete installation record: %s"
 msgstr "インストール記録を削除できませんでした: %s"
@@ -4812,6 +4812,10 @@ msgstr "vaultからの応答が無効です"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "シークレットフォーマットが無効です"
+
+#, python-format
+#~ msgid "Package collection requested from host %s"
+#~ msgstr "ホスト %s からのパッケージコレクションの要求"
 
 #, python-format
 #~ msgid "Cannot repoint mirror '%s': %s"

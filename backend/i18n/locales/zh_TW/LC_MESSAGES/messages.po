@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 19:48-0400\n"
+"POT-Creation-Date: 2026-08-13 09:05-0400\n"
 "Language: zh_TW\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -149,8 +149,8 @@ msgstr "主機ID格式無效"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
-#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
 #: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
@@ -161,7 +161,7 @@ msgstr "主機ID格式無效"
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
-#: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
@@ -420,13 +420,13 @@ msgid "Missing request_id in installation_complete"
 msgstr "缺少request_id在安裝完成中"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:469
+#: backend/api/agent.py:747 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "未找到安裝請求：%s"
 
 #: backend/api/handlers/software_package_handlers.py:996
-#: backend/api/packages.py:489
+#: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
 msgstr "無法記錄安裝完成：%s"
@@ -1215,11 +1215,11 @@ msgid ""
 msgstr ""
 "廣播 '%(action)s' 已發送到 %(delivered)d 主機 (過濾器=%(filter)s, %(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:71
+#: backend/api/package_handlers.py:72
 msgid "Missing batch_id"
 msgstr "缺少batch_id"
 
-#: backend/api/package_handlers.py:96
+#: backend/api/package_handlers.py:97
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1228,34 +1228,34 @@ msgstr ""
 "主機 %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) 將其報告的系統版本為 "
 "%(os_name)s %(os_version)s 的包嘗試報告"
 
-#: backend/api/package_handlers.py:177
+#: backend/api/package_handlers.py:178
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "無法啟動套件批次：%s"
 
-#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
+#: backend/api/package_handlers.py:211 backend/api/package_handlers.py:336
 msgid "Invalid or expired batch_id"
 msgstr "無效或已過期的batch_id"
 
-#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
+#: backend/api/package_handlers.py:222 backend/api/package_handlers.py:347
 msgid "Batch belongs to different host"
 msgstr "批次屬於不同的主機"
 
-#: backend/api/package_handlers.py:302
+#: backend/api/package_handlers.py:303
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "無法處理套件批次：%s"
 
-#: backend/api/package_handlers.py:395
+#: backend/api/package_handlers.py:396
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "結束套件批次時失敗：%s"
 
-#: backend/api/package_handlers.py:465
+#: backend/api/package_handlers.py:567
 msgid "Delta base does not match the stored catalog"
 msgstr "Delta 基礎與儲存的目錄不匹配"
 
-#: backend/api/package_handlers.py:564
+#: backend/api/package_handlers.py:612
 #, python-format
 msgid "Failed to apply package delta: %s"
 msgstr "應用包差異失敗：%s"
@@ -2421,7 +2421,7 @@ msgstr "權限被拒絕：需要 UPDATE_AGENT 角色"
 msgid "Agent update requested"
 msgstr "已請求代理更新"
 
-#: backend/api/host_operations.py:322
+#: backend/api/host_operations.py:326
 msgid "Package collection requested"
 msgstr "包集合請求"
 
@@ -2798,12 +2798,12 @@ msgstr "啟動 Ubuntu Pro 入駐時失敗：%s"
 msgid "Failed to retrieve package summary: %s"
 msgstr "無法擷取套件摘要：%s"
 
-#: backend/api/packages_helpers.py:213
+#: backend/api/packages_helpers.py:223
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "計算套件數量時失敗：%s"
 
-#: backend/api/packages_helpers.py:278
+#: backend/api/packages_helpers.py:298
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "無法搜尋套件：%s"
@@ -3596,7 +3596,7 @@ msgstr "缺少或無效的授權頭信息"
 msgid "Invalid host authentication"
 msgstr "主機驗證無效"
 
-#: backend/api/agent.py:775 backend/api/packages.py:481
+#: backend/api/agent.py:775 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "安裝完成記錄"
 
@@ -3795,45 +3795,45 @@ msgstr "確保 ISO 輸出目錄存在"
 msgid "Failed to retrieve package managers: %s"
 msgstr "無法擷取套件管理器：%s"
 
-#: backend/api/packages.py:226
+#: backend/api/packages.py:236
 #, python-format
 msgid "Failed to retrieve OS versions: %s"
 msgstr "無法擷取作業系統版本：%s"
 
-#: backend/api/packages.py:277
+#: backend/api/packages.py:287
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
 msgstr "無法為管理器 %(manager_name)s 獲取包：%(error)s"
 
-#: backend/api/packages.py:300
+#: backend/api/packages.py:310
 #, python-format
 msgid "No active hosts found for %(os_name)s %(os_version)s"
 msgstr "未找到 %(os_name)s %(os_version)s 的活動主機"
 
-#: backend/api/packages.py:324
+#: backend/api/packages.py:342
 #, python-format
-msgid "Package collection requested from host %s"
-msgstr "從主機 %s 請求包集合"
+msgid "Package collection requested from %(count)d host(s)"
+msgstr "從%(count)d台主機請求套件集合"
 
-#: backend/api/packages.py:334
+#: backend/api/packages.py:351
 #, python-format
 msgid "Failed to request package refresh: %s"
 msgstr "無法請求套件刷新：%s"
 
-#: backend/api/packages.py:441
+#: backend/api/packages.py:458
 #, python-format
 msgid "Failed to retrieve installation history: %s"
 msgstr "無法取得安裝歷史：%s"
 
-#: backend/api/packages.py:516
+#: backend/api/packages.py:533
 msgid "Installation record not found"
 msgstr "未找到安裝記錄"
 
-#: backend/api/packages.py:530
+#: backend/api/packages.py:547
 msgid "Installation record deleted successfully"
 msgstr "成功刪除安裝記錄"
 
-#: backend/api/packages.py:539
+#: backend/api/packages.py:556
 #, python-format
 msgid "Failed to delete installation record: %s"
 msgstr "刪除安裝記錄時失敗：%s"
@@ -4754,6 +4754,10 @@ msgstr "從 vault 收到的回應無效"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr "密鑰格式無效"
+
+#, python-format
+#~ msgid "Package collection requested from host %s"
+#~ msgstr "從主機 %s 請求包集合"
 
 #, python-format
 #~ msgid "Cannot repoint mirror '%s': %s"

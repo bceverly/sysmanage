@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-12 19:48-0400\n"
+"POT-Creation-Date: 2026-08-13 09:05-0400\n"
 "Language: ar\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -149,8 +149,8 @@ msgstr "تنسيق ID المضيف غير صحيح"
 
 #: backend/api/certificates.py:95 backend/api/certificates.py:165
 #: backend/api/fips_actions.py:84 backend/api/fips_actions.py:174
-#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:61
-#: backend/api/package_handlers.py:445 backend/api/package_compliance.py:319
+#: backend/api/graylog_integration.py:188 backend/api/package_handlers.py:62
+#: backend/api/package_handlers.py:547 backend/api/package_compliance.py:319
 #: backend/api/package_compliance.py:445
 #: backend/api/grafana_integration.py:330 backend/api/image_mode_actions.py:69
 #: backend/api/host_graylog.py:131 backend/api/tag.py:499
@@ -161,7 +161,7 @@ msgstr "تنسيق ID المضيف غير صحيح"
 #: backend/api/updates/execution_routes.py:268 backend/api/diagnostics.py:102
 #: backend/api/diagnostics.py:235 backend/api/error_constants.py:33
 #: backend/api/antivirus_status.py:225 backend/api/child_host_utils.py:84
-#: backend/api/packages.py:393 backend/api/lifecycle_actions.py:102
+#: backend/api/packages.py:410 backend/api/lifecycle_actions.py:102
 #: backend/api/repository_mirroring_setup.py:202
 #: backend/api/repository_mirroring_setup.py:263
 #: backend/api/scripts/routes_executions.py:78
@@ -422,13 +422,13 @@ msgid "Missing request_id in installation_complete"
 msgstr "لا يوجد معرف الطلب في استجابة الإكمال"
 
 #: backend/api/handlers/software_package_handlers.py:955
-#: backend/api/agent.py:747 backend/api/packages.py:469
+#: backend/api/agent.py:747 backend/api/packages.py:486
 #, python-format
 msgid "Installation request not found: %s"
 msgstr "لم يتم العثور على طلب التثبيت: %s"
 
 #: backend/api/handlers/software_package_handlers.py:996
-#: backend/api/packages.py:489
+#: backend/api/packages.py:506
 #, python-format
 msgid "Failed to record installation completion: %s"
 msgstr "فشل في تسجيل انتهاء التثبيت: %s"
@@ -1233,11 +1233,11 @@ msgstr ""
 "تم بث '%(action)s' إلى %(delivered)d مستضياف (الفلتر=%(filter)s, "
 "%(elapsed).0fms)"
 
-#: backend/api/package_handlers.py:71
+#: backend/api/package_handlers.py:72
 msgid "Missing batch_id"
 msgstr "لا يوجد رمز المجموعة (batch_id)"
 
-#: backend/api/package_handlers.py:96
+#: backend/api/package_handlers.py:97
 #, python-format
 msgid ""
 "Host %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) attempted "
@@ -1246,34 +1246,34 @@ msgstr ""
 "مستضياف %(host_fqdn)s (%(host_platform)s %(host_platform_release)s) حاول "
 "الإبلاغ عن الحزم لـ %(os_name)s %(os_version)s"
 
-#: backend/api/package_handlers.py:177
+#: backend/api/package_handlers.py:178
 #, python-format
 msgid "Failed to start packages batch: %s"
 msgstr "فشل في بدء حزمة الحزم: %s"
 
-#: backend/api/package_handlers.py:210 backend/api/package_handlers.py:335
+#: backend/api/package_handlers.py:211 backend/api/package_handlers.py:336
 msgid "Invalid or expired batch_id"
 msgstr "مفتاح المجموعة غير صالح أو منتهٍ الصلاحية"
 
-#: backend/api/package_handlers.py:221 backend/api/package_handlers.py:346
+#: backend/api/package_handlers.py:222 backend/api/package_handlers.py:347
 msgid "Batch belongs to different host"
 msgstr "الدفعة ت thuộc إلى مستضياف مختلف"
 
-#: backend/api/package_handlers.py:302
+#: backend/api/package_handlers.py:303
 #, python-format
 msgid "Failed to process packages batch: %s"
 msgstr "فشل في معالجة حزمة الحزم: %s"
 
-#: backend/api/package_handlers.py:395
+#: backend/api/package_handlers.py:396
 #, python-format
 msgid "Failed to end packages batch: %s"
 msgstr "فشل في إنهاء دفعة الحزم: %s"
 
-#: backend/api/package_handlers.py:465
+#: backend/api/package_handlers.py:567
 msgid "Delta base does not match the stored catalog"
 msgstr "لا يتطابق دلتا الأساس مع القائمة المخزّنة"
 
-#: backend/api/package_handlers.py:564
+#: backend/api/package_handlers.py:612
 #, python-format
 msgid "Failed to apply package delta: %s"
 msgstr "فشل في تطبيق حزمة الدلتا: %s"
@@ -2487,7 +2487,7 @@ msgstr "تم رفض الإذن: دور UPDATE_AGENT مطلوب"
 msgid "Agent update requested"
 msgstr "تم طلب تحديث الوكيل"
 
-#: backend/api/host_operations.py:322
+#: backend/api/host_operations.py:326
 msgid "Package collection requested"
 msgstr " طلب جمع الحزم المطلوبة"
 
@@ -2886,12 +2886,12 @@ msgstr "فشل في بدء تسجيل Ubuntu Pro: %s"
 msgid "Failed to retrieve package summary: %s"
 msgstr "فشل في استرداد ملخص الحزم: %s"
 
-#: backend/api/packages_helpers.py:213
+#: backend/api/packages_helpers.py:223
 #, python-format
 msgid "Failed to count packages: %s"
 msgstr "فشل في إحصاء الحزم: %s"
 
-#: backend/api/packages_helpers.py:278
+#: backend/api/packages_helpers.py:298
 #, python-format
 msgid "Failed to search packages: %s"
 msgstr "فشل في البحث عن الحزم: %s"
@@ -3720,7 +3720,7 @@ msgstr "لا يوجد رأس التحقق أو رأسه غير صالح"
 msgid "Invalid host authentication"
 msgstr "التحقق من المضيف غير صحيح"
 
-#: backend/api/agent.py:775 backend/api/packages.py:481
+#: backend/api/agent.py:775 backend/api/packages.py:498
 msgid "Installation completion recorded"
 msgstr "تم تسجيل انتهاء التثبيت"
 
@@ -3921,45 +3921,45 @@ msgstr " đảm bảo وجود دليل الإخراج ISO"
 msgid "Failed to retrieve package managers: %s"
 msgstr "فشل في استرداد مديري الحزم: %s"
 
-#: backend/api/packages.py:226
+#: backend/api/packages.py:236
 #, python-format
 msgid "Failed to retrieve OS versions: %s"
 msgstr "فشل في استرداد إصدارات نظام التشغيل: %s"
 
-#: backend/api/packages.py:277
+#: backend/api/packages.py:287
 #, python-format
 msgid "Failed to retrieve packages for manager %(manager_name)s: %(error)s"
 msgstr "فشل في استرداد الحزم لمسؤول (%(manager_name)s): %(error)s"
 
-#: backend/api/packages.py:300
+#: backend/api/packages.py:310
 #, python-format
 msgid "No active hosts found for %(os_name)s %(os_version)s"
 msgstr "لم يتم العثور على أي مستضيئات نشطة لـ %(os_name)s %(os_version)s"
 
-#: backend/api/packages.py:324
+#: backend/api/packages.py:342
 #, python-format
-msgid "Package collection requested from host %s"
-msgstr " طلب جمع الحزم المطلوبة من المستضِيف %s"
+msgid "Package collection requested from %(count)d host(s)"
+msgstr "طلب مجموعة الحزم من_hosts(s)%(count)d"
 
-#: backend/api/packages.py:334
+#: backend/api/packages.py:351
 #, python-format
 msgid "Failed to request package refresh: %s"
 msgstr "فشل في طلب تحديث الحزم: %s"
 
-#: backend/api/packages.py:441
+#: backend/api/packages.py:458
 #, python-format
 msgid "Failed to retrieve installation history: %s"
 msgstr "فشل في استرداد تاريخ التثبيت: %s"
 
-#: backend/api/packages.py:516
+#: backend/api/packages.py:533
 msgid "Installation record not found"
 msgstr "لم يتم العثور على سجل التثبيت"
 
-#: backend/api/packages.py:530
+#: backend/api/packages.py:547
 msgid "Installation record deleted successfully"
 msgstr "تم حذف سجل التثبيت بنجاح"
 
-#: backend/api/packages.py:539
+#: backend/api/packages.py:556
 #, python-format
 msgid "Failed to delete installation record: %s"
 msgstr "فشل في حذف سجل التثبيت: %s"
@@ -4907,6 +4907,10 @@ msgstr "استجابة vault غير صالحة"
 #: backend/services/vault_service.py:428
 msgid "Invalid secret format"
 msgstr " định dạng bí mật không hợp lệ"
+
+#, python-format
+#~ msgid "Package collection requested from host %s"
+#~ msgstr " طلب جمع الحزم المطلوبة من المستضِيف %s"
 
 #, python-format
 #~ msgid "Cannot repoint mirror '%s': %s"
