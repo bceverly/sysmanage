@@ -45,13 +45,7 @@ vi.mock("../../hooks/useColumnVisibility", () => ({
 // so stub it to a trivial renderer -- what is under test is the fetching and
 // the delete/detail wiring, not the grid internals.
 vi.mock("@mui/x-data-grid", () => ({
-  DataGrid: ({
-    rows,
-    columns,
-  }: {
-    rows: Array<{ id: string; type: string }>;
-    columns: Array<{ field: string; renderCell?: (p: unknown) => unknown }>;
-  }) => (
+  DataGrid: ({ rows, columns }: { rows: any[]; columns: any[] }) => (
     <div data-testid="grid">
       {rows.map((r) => (
         <div key={r.id}>
@@ -97,7 +91,7 @@ test("fetches the failed-message list on mount", async () => {
 
 test("an API failure leaves the tab usable rather than blank", async () => {
   vi.mocked(axiosInstance.get).mockRejectedValue(new Error("boom"));
-  const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+  const spy = vi.spyOn(window.console, "error").mockImplementation(() => {});
 
   render(<QueuesTab />);
 
