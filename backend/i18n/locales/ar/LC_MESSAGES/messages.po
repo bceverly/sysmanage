@@ -39,7 +39,7 @@ msgstr "تم حظر IP مؤقتًا بسبب عدد كبير من المحاول
 
 #: backend/security/login_security.py:56
 msgid "Too many login attempts, please try again later"
-msgstr "عدد محاولات تسجيل الدخول كبير، يرجى试翻译是否符合要求，中文部分可以忽略："
+msgstr "محاولات تسجيل الدخول المتعددة، يرجى المحاولة مرة أخرى لاحقاً"
 
 #: backend/security/login_security.py:63
 msgid "Too many failed attempts for this user"
@@ -197,7 +197,7 @@ msgstr "لم يتم العثور على المستخدم"
 
 #: backend/api/advisory_actions.py:68
 msgid "syspatch apply queued"
-msgstr "تطبيق syspatch الم搁置，接下来的翻译不符合要求，我将提供正确的翻译结果。{"
+msgstr "تطبيق التصحيحات النظامية المؤجلة"
 
 #: backend/api/advisory_actions.py:83
 msgid "Advisory management requires a SysManage Professional license."
@@ -239,7 +239,7 @@ msgstr "تنسيق UUID غير صالح: %s"
 #: backend/api/security_roles.py:230
 #, python-format
 msgid "Role with ID %s does not exist"
-msgstr "الدور بـ ID %s لا существует"
+msgstr "الدور برقم التعريف %s غير موجود"
 
 #: backend/api/handlers/hostname_handler.py:37
 msgid "Hostname changed message received without host_id"
@@ -569,7 +569,7 @@ msgstr "فشل في ترتيب حذف المستودع من قائمة الان�
 
 #: backend/api/third_party_repos.py:510
 msgid "Permission denied: ENABLE_THIRD_PARTY_REPOSITORY role required"
-msgstr "الصلاحية ممنوعة: требуется роль ENABLE_THIRD_PARTY_REPOSITORY"
+msgstr "تم رفض الإذن: يتطلب دور ENABLE_THIRD_PARTY_REPOSITORY"
 
 #: backend/api/third_party_repos.py:542 backend/api/third_party_repos.py:660
 msgid "No repositories specified"
@@ -586,7 +586,7 @@ msgstr "فشل في ترتيب تمكين المستودع في قائمة ال�
 
 #: backend/api/third_party_repos.py:628
 msgid "Permission denied: DISABLE_THIRD_PARTY_REPOSITORY role required"
-msgstr "الصلاحية ممنوعة: требуется роль DISABLE_THIRD_PARTY_REPOSITORY"
+msgstr "تم رفض الإذن: يتطلب تعطيل مستودع طرف ثالث"
 
 #: backend/api/third_party_repos.py:710
 msgid "Repository disable request queued successfully"
@@ -1011,7 +1011,7 @@ msgstr "مفتاح العام غير صحيح: %s"
 #: backend/api/airgap_keys.py:101 backend/api/federation_identity.py:174
 #, python-format
 msgid "Could not write key to keyring: %s"
-msgstr "ไม удалось كتابة المفتاح إلى مخزن المفاتيح: %s"
+msgstr "تعذر كتابة المفتاح إلى keyring: %s"
 
 #: backend/api/airgap_keys.py:110 backend/api/federation_identity.py:183
 msgid "Trusted key not found"
@@ -1031,15 +1031,15 @@ msgstr "المستخدم موجود بالفعل"
 
 #: backend/api/user.py:462
 msgid "Permission denied: EDIT_USER role required"
-msgstr "الصلاحية ممنوعة: требуется роль EDIT_USER"
+msgstr "غير مسموح بالوصول: يتطلب دور تحرير المستخدم"
 
 #: backend/api/user.py:551
 msgid "Permission denied: UNLOCK_USER role required"
-msgstr "الصلاحية ممنوعة: требуется роль UNLOCK_USER"
+msgstr "لا تملك الإذن: يتطلب دور UNLOCK_USER"
 
 #: backend/api/user.py:601
 msgid "Permission denied: LOCK_USER role required"
-msgstr "الصلاحية ممنوعة: требуется роль LOCK_USER"
+msgstr "غير مسموح بالوصول: يتطلب دور LOCK_USER"
 
 #: backend/api/user.py:639 backend/api/profile.py:288
 #: backend/api/report_branding.py:133
@@ -1068,7 +1068,7 @@ msgstr "تم حذف صورة الملف الشخصي بنجاح"
 
 #: backend/api/host_hostname.py:52
 msgid "Permission denied: EDIT_HOST_HOSTNAME role required"
-msgstr "الصلاحية ممنوعة: требуется роль EDIT_HOST_HOSTNAME"
+msgstr "تم رفض الإذن: يتطلب تحرير اسم المضيف"
 
 #: backend/api/host_hostname.py:75 backend/api/reboot_orchestration.py:119
 #: backend/api/error_constants.py:43 backend/api/child_host_utils.py:91
@@ -1127,7 +1127,7 @@ msgstr " يجب أن تكون كلمة المرور مكونة من 8 أحرف �
 
 #: backend/api/invitations.py:313
 msgid "Your account is ready. You can now log in."
-msgstr "حسابك جाहز. يمكنك الآن تسجيل الدخول."
+msgstr "حسابك جاهز. يمكنك الآن تسجيل الدخول."
 
 #: backend/api/server_info.py:249
 #, python-format
@@ -1145,7 +1145,7 @@ msgstr " رفض الوصول: يتطلب دور ATTACH_UBUNTU_PRO"
 
 #: backend/api/host_ubuntu_pro.py:69
 msgid "Ubuntu Pro token is required"
-msgstr "ت требуется токен Ubuntu Pro"
+msgstr "يُطلب رمز Ubuntu Pro"
 
 #: backend/api/host_ubuntu_pro.py:104
 msgid "Ubuntu Pro attach requested"
@@ -1158,7 +1158,7 @@ msgstr "فشل في طلب توصيل Ubuntu Pro: %s"
 
 #: backend/api/host_ubuntu_pro.py:131
 msgid "Permission denied: DETACH_UBUNTU_PRO role required"
-msgstr "الصلاحية ممنوعة: требуется роль DETACH_UBUNTU_PRO"
+msgstr "تم رفض الإذن: يتطلب دور DETACH_UBUNTU_PRO"
 
 #: backend/api/host_ubuntu_pro.py:167
 msgid "Ubuntu Pro detach requested"
@@ -1387,8 +1387,8 @@ msgid ""
 "Mirror %(mirror_name)s is for %(package_manager)s, can't assign to a "
 "%(platform)s default"
 msgstr ""
-"зерور %(mirror_name)s هو لـ %(package_manager)s، لا يمكن تعيينه ك mặc định "
-"للمنصة %(platform)s"
+"مرآة %(mirror_name)s مخصصة لـ %(package_manager)s، لا يمكن تعيينها إلى "
+"افتراضي %(platform)s"
 
 #: backend/api/repository_mirroring.py:696
 msgid "Unknown (platform, version, os_family) tuple"
@@ -1596,7 +1596,7 @@ msgstr ""
 
 #: backend/api/federation_identity.py:90
 msgid "Could not load or generate the federation TLS certificate."
-msgstr "ไม удалось تحميل أو إنشاء شهادة TLS للاتحاد."
+msgstr "تعذر تحميل أو توليد شهادة TLS للاتحاد."
 
 #: backend/api/federation_identity.py:147
 msgid "Could not load or generate the federation identity key."
@@ -1704,11 +1704,11 @@ msgstr "يوجد بالفعل تعيين افتراضي للعناصر غير ا
 
 #: backend/api/external_idp.py:373
 msgid "Role mapping not found"
-msgstr "لم يتم العثور على خ못ة الدور"
+msgstr "لم يتم العثور على خريطة الأدوار"
 
 #: backend/api/external_idp.py:376
 msgid "Role mapping deleted"
-msgstr "تم حذف خ못م التحديد"
+msgstr "تم حذف خريطة الأدوار"
 
 #: backend/api/external_idp.py:427
 msgid "Provider is not an OIDC provider."
@@ -1720,7 +1720,7 @@ msgstr "مزوّد OIDC معطل."
 
 #: backend/api/external_idp.py:461
 msgid "Missing code or state in callback."
-msgstr " thiếu كود أو حالة في الدالة回调函数中缺少代码或状态。"
+msgstr "ناقص رمز أو حالة في استدعاء الدالة."
 
 #: backend/api/external_idp.py:465
 msgid "Invalid OIDC state."
@@ -1728,7 +1728,7 @@ msgstr "حالة OIDC غير صالحة."
 
 #: backend/api/external_idp.py:474
 msgid "OIDC client secret could not be resolved."
-msgstr "لا يمكن حل سرシーOIDC客户端密钥。"
+msgstr "تعذر حل سر مفتاح عميل OIDC."
 
 #: backend/api/external_idp.py:481
 #, python-format
@@ -1780,7 +1780,7 @@ msgstr "فشل تسجيل الدخول باستخدام SAML: %s"
 
 #: backend/api/grafana_integration.py:320
 msgid "Permission denied: ENABLE_GRAFANA_INTEGRATION role required"
-msgstr "الصلاحية ممنوعة: требуется роль ENABLE_GRAFANA_INTEGRATION"
+msgstr "تم رفض الإذن: يتطلب دور ENABLE_GRAFANA_INTEGRATION"
 
 #: backend/api/grafana_integration.py:347
 msgid "Selected host does not have Grafana server role"
@@ -1912,7 +1912,7 @@ msgstr "OpenTelemetry مثبت بالفعل"
 
 #: backend/api/opentelemetry/eligibility.py:168
 msgid "Agent is not running in privileged mode"
-msgstr "الوكيل لا يعمل في режим الميزات"
+msgstr "لا يعمل الوكيل في وضع الامتيازات."
 
 #: backend/api/opentelemetry/eligibility.py:170
 msgid "Operating system not supported (OpenBSD/NetBSD)"
@@ -1933,7 +1933,7 @@ msgstr ""
 
 #: backend/api/opentelemetry/service_control.py:81
 msgid "Permission denied: START_OPENTELEMETRY_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль START_OPENTELEMETRY_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور `START_OPENTELEMETRY_SERVICE`"
 
 #: backend/api/opentelemetry/service_control.py:141
 msgid "OpenTelemetry start command queued successfully"
@@ -1946,7 +1946,7 @@ msgstr "فشل في بدء تشغيل OpenTelemetry: %s"
 
 #: backend/api/opentelemetry/service_control.py:190
 msgid "Permission denied: STOP_OPENTELEMETRY_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль STOP_OPENTELEMETRY_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور STOP_OPENTELEMETRY_SERVICE"
 
 #: backend/api/opentelemetry/service_control.py:247
 msgid "OpenTelemetry stop command queued successfully"
@@ -1961,7 +1961,7 @@ msgstr "فشل في وقف OpenTelemetry: %s"
 #: backend/api/opentelemetry/grafana_connection.py:67
 #: backend/api/opentelemetry/grafana_connection.py:210
 msgid "Permission denied: RESTART_OPENTELEMETRY_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль RESTART_OPENTELEMETRY_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور RESTART_OPENTELEMETRY_SERVICE"
 
 #: backend/api/opentelemetry/service_control.py:355
 msgid "OpenTelemetry restart command queued successfully"
@@ -2076,7 +2076,7 @@ msgstr "يحتاج فلتر ''%s'' إلى قائمة غير فارغة من 'ح�
 #: backend/api/content_lifecycle.py:391
 #, python-format
 msgid "The '%s' filter needs a 'date' (YYYY-MM-DD)"
-msgstr "필터 ''%s'' يحتاج إلى معلمة 'تاريخ' (YYYY-MM-DD)"
+msgstr "يحتاج مرشح '%s' إلى 'تاريخ' (سنة-شهر-يوم)"
 
 #: backend/api/content_lifecycle.py:453 backend/api/content_lifecycle.py:501
 msgid "A content view with that name already exists"
@@ -2096,7 +2096,7 @@ msgstr "لا توجد مخازن لعرض المحتوى"
 
 #: backend/api/content_lifecycle.py:671 backend/api/content_lifecycle.py:715
 msgid "A referenced mirror no longer exists"
-msgstr "مرآة مرجعية不再存在"
+msgstr "لا يوجد مرآة مرجعية أكثر."
 
 #: backend/api/content_lifecycle.py:676 backend/api/content_lifecycle.py:720
 #, python-format
@@ -2124,7 +2124,7 @@ msgstr "النظرة الشاملة للمحتوى لا تحتوي على نظر
 #: backend/api/content_lifecycle.py:810
 #, python-format
 msgid "Component '%s' has no published version yet"
-msgstr "المكون '%s' ليس لديه أي نسخ م公有部分结束，以下是去除了不相关部分的私有部分：版本 حتى الآن"
+msgstr "لا يوجد إصدار منشور للمكون '%s' حتى الآن"
 
 #: backend/api/content_lifecycle.py:829
 #, python-format
@@ -2141,7 +2141,7 @@ msgstr ""
 
 #: backend/api/cve_refresh_settings.py:67
 msgid "Permission denied: Administrator role required"
-msgstr "الحقوق مDenied: требуется роль администратора"
+msgstr "تم رفض الإذن: يتطلب دور المسؤول"
 
 #: backend/api/cve_refresh_settings.py:122
 msgid "Refresh interval must be at least 1 hour"
@@ -2264,7 +2264,7 @@ msgstr "يجب أن يكون رابط المخزن 1000 حرف أو أقل"
 #: backend/api/default_repositories.py:346
 #: backend/api/default_repositories.py:381
 msgid "Permission denied: VIEW_DEFAULT_REPOSITORIES role required"
-msgstr "الصلاحية ممنوعة: требуется роль VIEW_DEFAULT_REPOSITORIES"
+msgstr "تم رفض الإذن: يتطلب دور VIEW_DEFAULT_REPOSITORIES"
 
 #: backend/api/default_repositories.py:364
 #: backend/api/default_repositories.py:399
@@ -2283,7 +2283,7 @@ msgstr "فشل في إنشاء المستودع الافتراضي: %s"
 
 #: backend/api/default_repositories.py:499
 msgid "Permission denied: REMOVE_DEFAULT_REPOSITORY role required"
-msgstr "الصلاحية ممنوعة: требуется роль REMOVE_DEFAULT_REPOSITORY"
+msgstr "تم رفض الإذن: يتطلب دور REMOVE_DEFAULT_REPOSITORY"
 
 #: backend/api/default_repositories.py:514
 msgid "Invalid repository ID format"
@@ -2437,7 +2437,7 @@ msgstr "يجب توفير اسم الماكنة الافتراضية لماكن�
 #: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
-msgstr "يجب أن يكون وكيل النظام يعمل ب권한 المسؤول لإنشاء مستضRIESف子孙主机"
+msgstr "يجب تشغيل الوكيل بامتيازات المسؤول لإنشاء مضيفين فرعيين"
 
 #: backend/api/child_host_virtualization.py:549
 #, python-format
@@ -2453,11 +2453,12 @@ msgstr "طلب إنشاء مستضياف فرعي: %(child_name)s (%(distributio
 msgid ""
 "Child host creation requested. This may take several minutes. The host will "
 "be automatically approved when it connects."
-msgstr "تم طلب إنشاء مضيف فرعي. قد يستغرق هذا几分钟。连接时会自动批准该主机。"
+msgstr ""
+"تم طلب إنشاء مضيف فرعي. سيتم الموافقة على المضيف تلقائيًا عند الاتصال به."
 
 #: backend/api/child_host_virtualization.py:660
 msgid "Child host creation requested. This may take several minutes."
-msgstr "تم طلب إنشاء مستضيفة فرعية. قد يستغرق هذا几分钟到几十分钟。"
+msgstr "تم طلب إنشاء مضيف فرعي. قد يستغرق ذلك عدة دقائق."
 
 #: backend/api/host_operations.py:81
 msgid "Software inventory update requested"
@@ -2465,7 +2466,7 @@ msgstr "تم طلب تحديث مخزون البرمجيات"
 
 #: backend/api/host_operations.py:100
 msgid "Permission denied: REBOOT_HOST role required"
-msgstr "الصلاحية ممنوعة: требуется роль REBOOT_HOST"
+msgstr "لا تملك الإذن: يتطلب دور REBOOT_HOST"
 
 #: backend/api/host_operations.py:143
 msgid "System reboot requested"
@@ -2473,7 +2474,7 @@ msgstr "تم طلب إعادة تشغيل النظام"
 
 #: backend/api/host_operations.py:162
 msgid "Permission denied: SHUTDOWN_HOST role required"
-msgstr "الصلاحية ممنوعة: требуется роль SHUTDOWN_HOST"
+msgstr "تم رفض الإذن: يتطلب دور SHUTDOWN_HOST"
 
 #: backend/api/host_operations.py:205
 msgid "System shutdown requested"
@@ -2559,7 +2560,7 @@ msgstr "التوكن صالح"
 
 #: backend/api/password_reset.py:429
 msgid "Permission denied: RESET_USER_PASSWORD role required"
-msgstr "الصلاحية ممنوعة: требуется роль RESET_USER_PASSWORD"
+msgstr "تم رفض الإذن: يتطلب دور RESET_USER_PASSWORD"
 
 #: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
@@ -2597,7 +2598,7 @@ msgstr "فشل في استرداد الإعداد الافتراضي لمضاد 
 
 #: backend/api/antivirus_defaults.py:159 backend/api/antivirus_defaults.py:259
 msgid "Permission denied: MANAGE_ANTIVIRUS_DEFAULTS role required"
-msgstr "الصلاحية ممنوعة: требуется роль MANAGE_ANTIVIRUS_DEFAULTS"
+msgstr "تم رفض الإذن: يتطلب دور إدارة إعدادات مكافحة الفيروسات الافتراضية"
 
 #: backend/api/antivirus_defaults.py:240
 #, python-format
@@ -2671,10 +2672,7 @@ msgstr "الحزمة لم تعد جاهزة بعد (الحالة: %s)"
 
 #: backend/api/airgap_bundles.py:582
 msgid "Bundle file is no longer on disk"
-msgstr ""
-"لم يعد "
-"ملفバンドルファイルがディスク上に不再在磁盘上的包文件不再是有效的JSON格式的文件バンドルファイルが無効なJSON形式のファイル不再是有效的JSON格式的文件"
-" anymore"
+msgstr "ملف الحزمة لم يعد موجودًا على القرص"
 
 #: backend/api/airgap_bundles.py:629
 msgid "Invalid or expired download token"
@@ -2902,7 +2900,7 @@ msgstr " رفض الوصول: يتطلب دور DELETE_HOST"
 
 #: backend/api/host.py:250
 msgid "Permission denied: VIEW_HOST_DETAILS role required"
-msgstr "الصلاحية ممنوعة: требуется роль VIEW_HOST_DETAILS"
+msgstr "تم رفض الإذن: يتطلب دور `VIEW_HOST_DETAILS`"
 
 #: backend/api/host.py:665
 msgid "Host already exists"
@@ -3013,7 +3011,7 @@ msgstr "فشل في ترتيب إضافة الحزمة في قائمة الان�
 
 #: backend/api/packages_operations.py:255
 msgid "Permission denied: REMOVE_PACKAGE role required"
-msgstr "الصلاحية ممنوعة: требуется роль REMOVE_PACKAGE"
+msgstr "تم رفض الإذن: يتطلب دور REMOVE_PACKAGE"
 
 #: backend/api/packages_operations.py:283
 msgid "No packages specified for uninstallation"
@@ -3101,7 +3099,7 @@ msgstr " لا يمكن إدارة مفاتيح API باستخدام تحقق ا�
 
 #: backend/api/api_keys.py:186 backend/api/api_keys.py:215
 msgid "API key not found."
-msgstr " ключ API غير موجود."
+msgstr "لم يتم العثور على مفتاح API."
 
 #: backend/api/update_handlers.py:207
 msgid "Failed to process update results"
@@ -3125,7 +3123,7 @@ msgstr "تتطلب ورقة التسجيل تمكين متعددة المستأ�
 
 #: backend/api/provisioning_bundle.py:152
 msgid "Could not mint an enrollment token for that tenant."
-msgstr "لم يتم تشكيل ورقة تسجيل ل那個租戶。"
+msgstr "تعذر إصدار رمز تسجيل للعميل هذا."
 
 #: backend/api/auth.py:47
 msgid "Invalid username or password"
@@ -3382,7 +3380,7 @@ msgstr "يقتصر دعم bhyve على أجهزة FreeBSD فقط"
 
 #: backend/api/child_host_virtualization_enable.py:411
 msgid "Agent must be running with root privileges to initialize bhyve"
-msgstr "يجب أن يكون وكيلSysManage معداً للتشغيل ب권한ات gốc ل초기화 bhyve"
+msgstr "يجب تشغيل الوكيل بامتيازات الجذر لتهيئة bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:425
 msgid "bhyve initialization requested"
@@ -3398,7 +3396,7 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:474
 msgid "Agent must be running with root privileges to disable bhyve"
-msgstr "يجب أن يكون وكيلSysManage مُعداً للتشغيل ب권한.root لتعطيل bhyve"
+msgstr "يجب تشغيل الوكيل بامتيازات الجذر لتعطيل bhyve"
 
 #: backend/api/child_host_virtualization_enable.py:487
 msgid "bhyve disable requested"
@@ -3414,7 +3412,7 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:536
 msgid "Agent must be running with root privileges to enable KVM modules"
-msgstr "يجب أن يكون وكيل يعمل ب권한 root لتمكين الوحدات الخاصة بكVM"
+msgstr "يجب تشغيل الوكيل بامتيازات الجذر لتمكين وحدات KVM"
 
 #: backend/api/child_host_virtualization_enable.py:550
 msgid "KVM modules enable requested"
@@ -3430,8 +3428,7 @@ msgstr ""
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
-msgstr ""
-"يجب أن يكون وكيلSysManage مُعداً للتشغيل ب권한.root لتعطيل الوحدات الخاصة بكvm"
+msgstr "يجب تشغيل الوكيل بامتيازات الجذر لتعطيل وحدات KVM"
 
 #: backend/api/child_host_virtualization_enable.py:614
 msgid "KVM modules disable requested"
@@ -3484,11 +3481,11 @@ msgstr "رقم المنفذ يجب أن يكون بين 0 و65535 (يعني أي
 
 #: backend/api/firewall_roles_helpers.py:148
 msgid "At least one protocol (TCP or UDP) must be selected"
-msgstr "يجب اختيار至少有一个协议（TCP 或 UDP）必须被选中"
+msgstr "يجب تحديد بروتوكول واحد على الأقل (TCP أو UDP)"
 
 #: backend/api/firewall_roles_helpers.py:159
 msgid "At least one IP version (IPv4 or IPv6) must be selected"
-msgstr "يجب اختيار至少一个IP版本（IPv4或IPv6）"
+msgstr "يجب تحديد إصدار IP على الأقل (IPv4 أو IPv6)"
 
 #: backend/api/firewall_roles_helpers.py:176
 msgid "Firewall role name is required"
@@ -3501,7 +3498,7 @@ msgstr "يجب أن يكون اسم دور جدار الحماية 100 حرفا�
 
 #: backend/api/firewall_roles_helpers.py:195
 msgid "Firewall role name cannot be empty"
-msgstr "اسم دور جدار الحماية不能为空"
+msgstr "لا يمكن ترك اسم دور الجدار الناري فارغًا"
 
 #: backend/api/host_approval.py:54
 msgid "Permission denied: APPROVE_HOST_REGISTRATION role required"
@@ -3572,7 +3569,7 @@ msgstr "استخدم /api/v1/secrets/deploy-certificates مع ترخيص Pro+"
 #: backend/api/secrets/permissions.py:50
 #, python-format
 msgid "Permission denied: %s role required"
-msgstr "الحقوق الممنوحة ملغاة: требуется роль %s"
+msgstr "تم رفض الإذن: يتطلب دور %s"
 
 #: backend/api/airgap_agent_mirrors.py:94
 msgid "Provisioning engine is not licensed on this server."
@@ -3676,7 +3673,7 @@ msgstr "فشل في المصادقة: %s"
 #: backend/api/agent.py:150
 #, python-format
 msgid "Agent WebSocket connection attempted without token from %s"
-msgstr "محاولة الاتصالWebSocket للوكسيت بدونトーKen من %s"
+msgstr "تم محاولة إنشاء اتصال WebSocket للوكيل بدون رمز من %s"
 
 #: backend/api/agent.py:159
 msgid "Authentication token required"
@@ -3692,17 +3689,17 @@ msgstr "يجب أن تكون الرسالة بتنسيق JSON صحيح"
 
 #: backend/api/agent.py:522
 msgid "Agent message validation failed: missing hostname and host_id"
-msgstr "رسالة وكيل الفحص غير صالحة: ي缺失的“hostname”和“host_id”字段"
+msgstr "فشل التحقق من رسائل الوكيل: مفقود اسم المضيف و host_id"
 
 #: backend/api/agent.py:541
 #, python-brace-format
 msgid "Agent message from unregistered host: {hostname}"
-msgstr "رسالة وكيل من хост غير مسجل: {hostname}"
+msgstr "رسالة من الوكيل من مضيف غير مسجل: {hostname}"
 
 #: backend/api/agent.py:558
 #, python-brace-format
 msgid "Agent message from unapproved host: {hostname}"
-msgstr "رسالة وكيل من хост غير مصدق: {hostname}"
+msgstr "رسالة من الوكيل من مضيف غير معتمد: {hostname}"
 
 #: backend/api/agent.py:591
 msgid "Message must include hostname or host_id for host validation"
@@ -3766,7 +3763,7 @@ msgstr "دور جدار الحماية غير موجود"
 
 #: backend/api/error_constants.py:70
 msgid "Permission denied: VIEW_FIREWALL_ROLES role required"
-msgstr "الصلاحية ممنوعة: требуется роль VIEW_FIREWALL_ROLES"
+msgstr "تم رفض الإذن: يتطلب دور VIEW_FIREWALL_ROLES"
 
 #: backend/api/error_constants.py:76
 msgid "Invalid diagnostic ID format"
@@ -3786,15 +3783,15 @@ msgstr "تم تأجيل تمكين ميزات WSL"
 
 #: backend/api/error_constants.py:124
 msgid "Repository management requires privileged agent mode"
-msgstr "تطلب إدارة المخازن режим特权代理模式"
+msgstr "إدارة المستودعات تتطلب وضع الوكيل المميز"
 
 #: backend/api/error_constants.py:130
 msgid "Current user not found"
-msgstr "الユーザーが見つかりません"
+msgstr "لم يتم العثور على المستخدم الحالي"
 
 #: backend/api/error_constants.py:146
 msgid "Permission denied: EDIT_TAGS role required"
-msgstr "الصلاحية ممنوعة: требуется роль EDIT_TAGS"
+msgstr "تم رفض الإذن: يتطلب تحرير العلامات"
 
 #: backend/api/error_constants.py:152
 msgid "Script not found"
@@ -3867,11 +3864,11 @@ msgstr "فشل في استرداد نطاق مضاد الفيروسات: %s"
 
 #: backend/api/child_host_utils.py:25
 msgid "Child host engine could not dispatch this request."
-msgstr "لا يمكن للمحرك المستضِhf…فイルメーレジがこの要求をdispatchできませんでした。"
+msgstr "لم يتمكن محرك المضيف الفرعي من تنفيذ هذا الطلب."
 
 #: backend/api/child_host_utils.py:41
 msgid "Permission denied: {} role required"
-msgstr "الصلاحية ممنوعة: {} требуется роль"
+msgstr "غير مسموح بالوصول: يتطلب الدور {}"
 
 #: backend/api/host_monitoring.py:206
 msgid "Certificate collection requested"
@@ -3891,15 +3888,15 @@ msgstr "لم يتم تحديد أي خدمات"
 
 #: backend/api/host_monitoring.py:382
 msgid "Permission denied: START_HOST_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль START_HOST_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور `START_HOST_SERVICE`"
 
 #: backend/api/host_monitoring.py:388
 msgid "Permission denied: STOP_HOST_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль STOP_HOST_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور STOP_HOST_SERVICE"
 
 #: backend/api/host_monitoring.py:394
 msgid "Permission denied: RESTART_HOST_SERVICE role required"
-msgstr "الصلاحية ممنوعة: требуется роль RESTART_HOST_SERVICE"
+msgstr "تم رفض الإذن: يتطلب دور RESTART_HOST_SERVICE"
 
 #: backend/api/host_monitoring.py:420
 msgid "Host must be running in privileged mode for service control"
@@ -3913,7 +3910,9 @@ msgstr "تم طلب خدمة {} لـ {} خدمات"
 msgid ""
 "Air-gap media export requires the air-gap collector engine (Enterprise). "
 "Please upgrade to access this feature."
-msgstr "تطلب导出空气间隙媒体需要空气间隙收集器引擎（企业版）。请升级以访问此功能。"
+msgstr ""
+"يتطلب تصدير وسائط air-gap محرك جامع air-gap (المؤسسة). يرجى الترقية للوصول "
+"إلى هذه الميزة."
 
 #: backend/api/content_lifecycle_export.py:84
 #, python-format
@@ -4089,7 +4088,7 @@ msgstr "فشل في إنشاء دور حائط النيران: %s"
 
 #: backend/api/firewall_roles.py:266
 msgid "Permission denied: EDIT_FIREWALL_ROLE role required"
-msgstr "الصلاحية ممنوعة: требуется роль EDIT_FIREWALL_ROLE"
+msgstr "تم رفض الإذن: يتطلب تحرير دور الجدار الناري"
 
 #: backend/api/firewall_roles.py:366
 #, python-format
@@ -4159,7 +4158,7 @@ msgstr "لا يتوفر وحدة إدارة دورة حياة النظام ال�
 
 #: backend/api/repository_mirroring_helpers.py:31
 msgid "Mirror not found"
-msgstr "зерور لا يوجد"
+msgstr "لم يتم العثور على مرآة."
 
 #: backend/api/repository_mirroring_helpers.py:32
 msgid "Platform config not found"
@@ -4207,7 +4206,7 @@ msgstr "التكوين الخاص بالمنصة لا يزال يمتلك %d م�
 
 #: backend/api/audit_log.py:41
 msgid "Permission denied: VIEW_AUDIT_LOG role required"
-msgstr "الحقوق مDenied: требуется роль VIEW_AUDIT_LOG"
+msgstr "تم رفض الإذن: يتطلب دور `VIEW_AUDIT_LOG`"
 
 #: backend/api/audit_log.py:135
 msgid "Invalid user ID format"
@@ -4245,8 +4244,8 @@ msgid ""
 "%s export requires a SysManage Professional+ license. OSS tier supports CSV "
 "export."
 msgstr ""
-"يحتاج تص导 %s إلى ترخيص SysManage Professional+. يدعم المستوى المفتوح المصدر "
-"تصدير CSV فقط"
+"يتطلب التصدير %s ترخيصًا احترافيًا من SysManage. يدعم مستوى المصدر المفتوح "
+"تصدير ملفات CSV."
 
 #: backend/api/audit_log.py:306
 msgid "Use /api/v1/audit/export with Pro+ license"
@@ -4254,7 +4253,7 @@ msgstr "استخدم /api/v1/audit/export مع ترخيص Pro+"
 
 #: backend/api/audit_log.py:315
 msgid "Export format: csv, pdf (OSS); json/cef/leef (Pro+)"
-msgstr "تنسيق الت导出：csv、pdf（OSS）；json/cef/leef（Pro+）"
+msgstr "تنسيق التصدير: csv، pdf (OSS)؛ json/cef/leef (Pro+)"
 
 #: backend/api/audit_log.py:338
 #, python-format
@@ -4322,11 +4321,11 @@ msgstr "يجب تمكين معادلة المستودع لإعادة توجيه 
 
 #: backend/api/content_lifecycle_promotion.py:571
 msgid "Snap store proxy is required to repoint a host's snaps"
-msgstr " требуется متجر Snap للوكيل لإعادة توجيه خرائط العُقد"
+msgstr "يُطلب وسيط متجر Snap لإعادة توجيه Snaps لجهاز مضيف"
 
 #: backend/api/content_lifecycle_promotion.py:624
 msgid "Container image registry proxy is required to repoint images"
-msgstr " требуется كتلة مستودع الصور للسماكية إعادة توجيه الصور"
+msgstr "يتطلب تسجيل مصادقة صورة الحاوية وسيطًا."
 
 #: backend/api/content_lifecycle_promotion.py:632
 msgid "This content view has no captured images"
@@ -4334,7 +4333,7 @@ msgstr "هذه وجهة المحتوى ليس لديها صور ملتقطة"
 
 #: backend/api/enabled_package_managers.py:252
 msgid "Permission denied: VIEW_ENABLED_PACKAGE_MANAGERS role required"
-msgstr "الصلاحية ممنوعة: требуется роль VIEW_ENABLED_PACKAGE_MANAGERS"
+msgstr "تم رفض الإذن: يتطلب دور `VIEW_ENABLED_PACKAGE_MANAGERS`"
 
 #: backend/api/enabled_package_managers.py:270
 #, python-format
@@ -4361,7 +4360,7 @@ msgstr "فشل في إنشاء مدير الحزم المعتمد: %s"
 
 #: backend/api/enabled_package_managers.py:401
 msgid "Permission denied: REMOVE_ENABLED_PACKAGE_MANAGER role required"
-msgstr "الصلاحية ممنوعة: требуется роль REMOVE_ENABLED_PACKAGE_MANAGER"
+msgstr "تم رفض الإذن: يتطلب دور `REMOVE_ENABLED_PACKAGE_MANAGER`"
 
 # OS Version Upgrade related strings
 #: backend/api/enabled_package_managers.py:412
@@ -4404,7 +4403,7 @@ msgstr "จำเป็นต้องมี shell_type สำหรับสค
 
 #: backend/api/scripts/routes_executions.py:67
 msgid "Permission denied: RUN_SCRIPT role required"
-msgstr "الصلاحية ممنوعة: требуется роль RUN_SCRIPT"
+msgstr "تم رفض الإذن: يتطلب دور RUN_SCRIPT"
 
 #: backend/api/scripts/routes_executions.py:100
 msgid "Saved script not found"
@@ -4494,7 +4493,7 @@ msgstr "فشل في استلام نموذج السكريبت المحفوظ"
 
 #: backend/api/scripts/routes_saved_scripts.py:269
 msgid "Permission denied: EDIT_SCRIPT role required"
-msgstr "الصلاحية ممنوعة: требуется роль EDIT_SCRIPT"
+msgstr "تم رفض الإذن: يتطلب تحرير السكريبت"
 
 #: backend/api/scripts/routes_saved_scripts.py:354
 msgid "Failed to update saved script"
@@ -4669,8 +4668,7 @@ msgstr ""
 msgid ""
 "Successfully processed and completed message: %(message_id)s for host "
 "%(host)s"
-msgstr ""
-"معالجة الرسالة بنجاح و завершение الرسالة: %(message_id)s للمستضيء %(host)s"
+msgstr "تم معالجة الرسالة بنجاح وإكمالها: %(message_id)s للخادم: %(host)s"
 
 #: backend/websocket/inbound_processor.py:522
 #, python-format
@@ -4844,8 +4842,8 @@ msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "
 "capability set, so the command was not sent."
 msgstr ""
-"الوكيل على {host} لا يدعم '{command}'. إنه يعلن عن مجموعة قدرات محدودة، لذا "
-"لم يتم إرسал الأمر."
+"الوكيل في {host} لا يدعم '{command}'. يقوم بالإعلان عن مجموعة قدرات مخفضة، "
+"لذلك لم يتم إرسال الأمر."
 
 #: backend/services/reboot_orchestration_service.py:253
 #, python-format

@@ -1815,9 +1815,7 @@ msgstr "चयनित होस्ट को Grafana सर्वर भूम
 
 #: backend/api/grafana_integration.py:404
 msgid "Failed to securely store API key"
-msgstr ""
-"API कुंजी को सुरक्षित रूप से "
-"सह保存剩余部分的答案不变，因为根据规则需要保持产品名和其他技术名词不变，且输出格式有严格要求。此处省略直接展示非翻译项以符合指示：“...key"
+msgstr "API कुंजी सुरक्षित रूप से संग्रहीत करने में विफल रहा"
 
 #: backend/api/grafana_integration.py:455
 msgid "Grafana integration settings updated successfully"
@@ -2484,8 +2482,7 @@ msgstr "bhyve के लिए VM नाम आवश्यक है"
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
 msgstr ""
-"एजेंट को बच्चे होस्ट्स बनाने के लिए प्रबंधक प्रивिलेज मैं चला हुआ होना "
-"आवश्यक है"
+"एजेंट को चाइल्ड होस्ट बनाने के लिए प्रशासक अधिकारों के साथ चलाना चाहिए"
 
 #: backend/api/child_host_virtualization.py:549
 #, python-format
@@ -3025,7 +3022,7 @@ msgstr "कॉन्फ़िगरेशन स्वीकृति प्र�
 #: backend/api/message_handlers.py:318
 #, python-format
 msgid "Failed to process diagnostic result: %s"
-msgstr "डायगности रिजल्ट प्रोसेस करने में विफल हुए: %s"
+msgstr "डायग्नोस्टिक रिजल्ट को प्रोसेस करने में असफल हुआ: %s"
 
 #: backend/api/message_handlers.py:352
 msgid "Missing message_id in command acknowledgment"
@@ -3098,7 +3095,7 @@ msgstr "%d पैकेज्स को अनइंस्टल करने �
 #: backend/api/packages_operations.py:389
 #, python-format
 msgid "Failed to queue package uninstallation: %s"
-msgstr "पैकेज इनस्टल करने को कิュー करने में विफल हुए: %s"
+msgstr "पैकेज अनइंस्टॉल करने की कोशिश विफल रही: %s"
 
 #: backend/api/host_data_updates.py:128
 msgid "Hardware information updated successfully"
@@ -3140,12 +3137,12 @@ msgstr "इम्पोर्ट डिवाइस नहीं तैयार
 
 #: backend/api/license_management.py:121
 msgid "Administrator privileges required to install license"
-msgstr "प्रामुख्य प्रивिलेज की आवश्यकता है लाइसेंस स्थापित करने के लिए"
+msgstr "लाइसेंस इंस्टॉल करने के लिए एडमिनिस्ट्रेटर प्राइविलेज़ की आवश्यकता है"
 
 #: backend/api/license_management.py:131
 #, python-format
 msgid "License installation failed: %(error)s"
-msgstr "ライ선्स इनस्टॉलेशन फ़ैलिड: %(error)s"
+msgstr "लाइसेंस इंस्टॉलेशन में विफलता: %(error)s"
 
 #: backend/api/license_management.py:137
 msgid "License validation failed"
@@ -3459,8 +3456,7 @@ msgstr "bhyve केवल FreeBSD होस्ट पर संरचित ह
 #: backend/api/child_host_virtualization_enable.py:411
 msgid "Agent must be running with root privileges to initialize bhyve"
 msgstr ""
-"एजेंट को बहवीव (bhyve) की इनिशियलाइज़ेशन करने के लिए रूट प्रивिलेज्स के साथ "
-"चला होना आवश्यक है"
+"एजेंट को bhyve को इनिशियलाइज़ करने के लिए रूट प्रिविलेज में चलाना होगा"
 
 #: backend/api/child_host_virtualization_enable.py:425
 msgid "bhyve initialization requested"
@@ -4292,7 +4288,7 @@ msgstr "अमान्य प्लेटफ़ॉर्म: %s"
 #: backend/api/repository_mirroring_setup.py:214
 #, python-format
 msgid "A platform config for %s on this host already exists"
-msgstr "इस होस्ट पर %s के लिए पлатफॉर्म सेटTINGS अनुपस्थित हैं"
+msgstr "इस होस्ट पर इस प्लेटफॉर्म कॉन्फ़िगरेशन %s पहले से मौजूद है"
 
 #: backend/api/repository_mirroring_setup.py:306
 #, python-format
@@ -4573,7 +4569,7 @@ msgstr "स्क्रिप्ट एग्जेक्यूशन प्र�
 # Tag management messages
 #: backend/api/scripts/routes_saved_scripts.py:80
 msgid "Failed to fetch saved scripts"
-msgstr "बचाए गए स्क्रिप्ट즈 प्राप्त करने में विफल हुए"
+msgstr "संग्रहीत स्क्रिप्ट्स को प्राप्त करने में विफलता हुई"
 
 #: backend/api/scripts/routes_saved_scripts.py:123
 msgid "Permission denied: ADD_SCRIPT role required"

@@ -190,7 +190,7 @@ def scripts_used(text: str) -> set:
     return found - {"LATIN"}
 
 
-def wrong_script(lang: str, text: str) -> bool:
+def wrong_script(lang: str, text: str, source: str = None) -> bool:
     """True if ``text`` CONTAINS a script this locale never uses.
 
     Widened 2026-08-14.  It used to fire only when no expected script was
@@ -210,6 +210,15 @@ def wrong_script(lang: str, text: str) -> bool:
     entirely before, which is how German acquired 40 Chinese values.
     """
     expected = set(_EXPECTED_SCRIPT.get(lang) or ())
+    # A script the ENGLISH already contains is legitimate in every locale: a
+    # language picker renders "ko - 한국어" natively everywhere, and that is the
+    # case the allow-list was being used to protect.  Deriving it from the
+    # source instead is exact, and it closes the hole that protection opened --
+    # an allow-listed value was exempt from this check ENTIRELY, so the model
+    # rendering "fr - French" as "fr - 法语" in Arabic, or "401 Unauthorized" as
+    # "401未经授权", passed silently.  45 such values on 2026-08-14.
+    if source:
+        expected |= scripts_used(source)
     used = scripts_used(text)
     return bool(used - expected)
 
@@ -422,9 +431,14 @@ def check_json(surface, allow, hashes):
             # ahead of it there would be no way to say so.  The safety comes
             # from the rules being whole-value (fullmatch) and tight, not from
             # denying the escape hatch.
+            # Script check FIRST and source-aware: "may stay English" must not
+            # mean "may be in any language at all".
+            if wrong_script(lang, value, src):
+                wrong.append((surface["name"], lang, path, key, src))
+                continue
             if allow.allows(key, src, lang):
                 continue
-            if wrong_script(lang, value):
+            if wrong_script(lang, value, src):
                 wrong.append((surface["name"], lang, path, key, src))
                 continue
             if value == src and is_prose(src):
@@ -440,7 +454,7 @@ def check_po(surface, allow):
         for msgid, msgstr in read_po(path).items():
             if msgstr.startswith(TODO) or allow.allows(msgid, msgid, lang):
                 continue
-            if wrong_script(lang, msgstr):
+            if wrong_script(lang, msgstr, msgid):
                 wrong.append((surface["name"], lang, path, msgid, msgid))
                 continue
             if msgstr == msgid and is_prose(msgid):

@@ -860,7 +860,7 @@
     "deviceNumber": "Apparaat {{number}}",
     "errorUpdatingServices": "Fout bij het bijwerken van services",
     "graylogPort": "(poort {{port}})",
-    "interfaceNumber": "Interfaсe {{number}}",
+    "interfaceNumber": "Interface {{number}}",
     "noChangesMade": "Geen wijzigingen aangebracht",
     "servicesUpdatedCount": "{{count}} dienst(en) bijgewerkt",
     "processesTab": "Processen",

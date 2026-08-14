@@ -2581,7 +2581,7 @@
       "assign": "Zuweisen",
       "deactivate": "Deaktivieren",
       "edit": "Bearbeiten",
-      "push": "Jetzt推送"
+      "push": "Jetzt drücken"
     },
     "active": "aktiv",
     "assign": {
@@ -2699,7 +2699,7 @@
       "alertAcked": "Bestätigt",
       "alertsTitle": "Offene Warnungen",
       "autonomous": "Selbstständig betrieben",
-      "pushPolicies": "Policies推送",
+      "pushPolicies": "Schiebepoliken",
       "repushFailed": "Wiedersendung der Policy in die Warteschlange legen fehlgeschlagen.",
       "repushQueued": "{{n}} Policy-Push(e) in Warteschlange für erneute Lieferung.",
       "siteCapabilities": "Fähigkeiten",

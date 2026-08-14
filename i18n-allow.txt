@@ -59,6 +59,10 @@ de,nl,fr,it,pt,es: re:Version
 de,nl,fr,it,pt,es,ru: re:URL
 de: re:Name
 nl: re:Naam
+# "Interface" is the Dutch word too, so the correct nl value IS the English.
+# It previously carried a Cyrillic с homoglyph instead of a Latin c, which
+# looked translated to every check while being corrupted (found 2026-08-14).
+nl: re:Interface \{\{number\}\}
 
 # --- placeholder-dominant strings where identical IS the translation --------
 # These looped forever in `make translate`: the backfill's _accept() holds back

@@ -334,7 +334,7 @@ msgstr "호스트를 식별할 수 없습니다."
 #: backend/api/handlers/infrastructure_handlers.py:486
 #, python-format
 msgid "Failed to process certificates update: %s"
-msgstr "сертификат 업데이트 처리에 실패했습니다: %s"
+msgstr "인증서 업데이트 처리 실패: %s"
 
 #: backend/api/handlers/infrastructure_handlers.py:600
 #, python-format
@@ -1287,7 +1287,7 @@ msgstr "퍼미션 denied: ADD_HOST_ACCOUNT 역할 필요"
 
 #: backend/api/host_account_management.py:102
 msgid "Agent must be running in privileged mode to manage user accounts"
-msgstr "агент은 사용자 계정을 관리하려면 특권 모드에서 실행되어야 합니다"
+msgstr "사용자를 관리하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
 #: backend/api/host_account_management.py:176
 msgid ""
@@ -1301,7 +1301,7 @@ msgstr "퍼미션 denied: ADD_HOST_GROUP 역할 필요"
 
 #: backend/api/host_account_management.py:223
 msgid "Agent must be running in privileged mode to manage groups"
-msgstr "агент은 그룹을 관리하려면 특권 모드에서 실행되어야 합니다"
+msgstr "그룹을 관리하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
 #: backend/api/host_account_management.py:280
 msgid ""
@@ -1315,7 +1315,7 @@ msgstr "퍼미션 denied: DELETE_HOST_ACCOUNT 역할 필요"
 
 #: backend/api/host_account_management.py:331
 msgid "Agent must be running in privileged mode to delete user accounts"
-msgstr "агент은 사용자 계정을 삭제하려면 특권 모드에서 실행되어야 합니다"
+msgstr "사용자 계정을 삭제하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
 #: backend/api/host_account_management.py:384
 msgid ""
@@ -1329,7 +1329,7 @@ msgstr "퍼미션 denied: DELETE_HOST_GROUP 역할 필요"
 
 #: backend/api/host_account_management.py:433
 msgid "Agent must be running in privileged mode to delete groups"
-msgstr "агент은 그룹을 삭제하려면 특권 모드에서 실행되어야 합니다"
+msgstr "그룹을 삭제하려면 에이전트가 특권 모드에서 실행되어야 합니다."
 
 #: backend/api/host_account_management.py:483
 msgid ""
@@ -1410,8 +1410,8 @@ msgid ""
 " loaded — the collector reads each target's bundle from a snapshot of its "
 "mirror tree."
 msgstr ""
-"공기 격리 수집 실행은 repository_mirroring_engine 모듈이 로드되어야 합니다 — 수집기는 각 "
-"대상의バンドルをそのミラーツリーのスナップショットから読み取ります。"
+"에어갭 컬렉션을 실행하려면 repository_mirroring_engine 모듈이 로드되어야 합니다. 컬렉터는 각 타겟의 번들 파일을 "
+"미러 트리 스냅샷에서 읽습니다."
 
 #: backend/api/airgap_collector_runs.py:235
 msgid ""
@@ -1874,7 +1874,7 @@ msgstr "OpenTelemetry는 이미 설치되었습니다"
 
 #: backend/api/opentelemetry/eligibility.py:168
 msgid "Agent is not running in privileged mode"
-msgstr "агент이 특권 모드에서 실행되고 있지 않습니다"
+msgstr "에이전트는 특권 모드에서 실행되지 않습니다."
 
 #: backend/api/opentelemetry/eligibility.py:170
 msgid "Operating system not supported (OpenBSD/NetBSD)"
@@ -2392,7 +2392,7 @@ msgstr "bhyve 가상 머신의 VM 이름은 필수입니다"
 #: backend/api/child_host_virtualization.py:527
 msgid ""
 "Agent must be running with administrator privileges to create child hosts"
-msgstr "агент은 자식 호스트를 생성하기 위해 관리자 권한으로 실행되어야 합니다"
+msgstr "자식 호스트를 생성하려면 에이전트가 관리자 권한으로 실행되어야 합니다."
 
 #: backend/api/child_host_virtualization.py:549
 #, python-format
@@ -3235,7 +3235,7 @@ msgstr "동적 시크릿 리스 '%s' 가 취소되었습니다"
 
 #: backend/api/child_host_virtualization_enable.py:158
 msgid "Agent must be running with administrator privileges to enable WSL"
-msgstr "агент은 WSL을 활성화하려면 관리자 권한으로 실행되어야 합니다"
+msgstr "WSL을 활성화하려면 에이전트가 관리자 권한으로 실행되어야 합니다."
 
 #: backend/api/child_host_virtualization_enable.py:172
 msgid "WSL enablement requested"
@@ -3349,7 +3349,7 @@ msgstr "KVM 모듈 활성화 요청됨. 에이전트는 modprobe를 사용하여
 
 #: backend/api/child_host_virtualization_enable.py:600
 msgid "Agent must be running with root privileges to disable KVM modules"
-msgstr "агент은 KVM 모듈을 비활성화하려면 루트 권한으로 실행되어야 합니다"
+msgstr "KVM 모듈을 비활성화하려면 루트 권한이 필요합니다."
 
 #: backend/api/child_host_virtualization_enable.py:614
 msgid "KVM modules disable requested"
