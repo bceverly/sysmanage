@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-13 09:05-0400\n"
+"POT-Creation-Date: 2026-08-14 05:12-0400\n"
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1107,42 +1107,42 @@ msgstr "Formato de nombre de host no válido"
 msgid "Hostname change requested"
 msgstr "Solicitud de cambio de nombre del host"
 
-#: backend/api/invitations.py:123
+#: backend/api/invitations.py:124
 msgid "Permission denied: Add User role required"
 msgstr "Permiso denegado: se requiere el rol Agregar usuario"
 
-#: backend/api/invitations.py:242 backend/api/invitations.py:260
+#: backend/api/invitations.py:238 backend/api/invitations.py:256
 msgid "No pending invitation found"
 msgstr "No se encontró ninguna invitación pendiente"
 
-#: backend/api/invitations.py:245
+#: backend/api/invitations.py:241
 msgid "Invitation revoked"
 msgstr "Invitación revocada"
 
-#: backend/api/invitations.py:269
+#: backend/api/invitations.py:265
 msgid "Failed to send invitation email. Please check email configuration."
 msgstr ""
 "Error al enviar el correo de invitación. Comprueba la configuración de "
 "correo."
 
-#: backend/api/invitations.py:273
+#: backend/api/invitations.py:269
 #, python-brace-format
 msgid "Invitation re-sent to {email}"
 msgstr "Invitación reenviada a {email}"
 
-#: backend/api/invitations.py:287
+#: backend/api/invitations.py:283
 msgid "Invalid or expired invitation"
 msgstr "Invitación no válida o caducada"
 
-#: backend/api/invitations.py:296 backend/api/password_reset.py:351
+#: backend/api/invitations.py:292 backend/api/password_reset.py:334
 msgid "Passwords do not match"
 msgstr "Las contraseñas no coinciden"
 
-#: backend/api/invitations.py:300 backend/api/password_reset.py:356
+#: backend/api/invitations.py:296 backend/api/password_reset.py:339
 msgid "Password must be at least 8 characters long"
 msgstr "La contraseña debe tener al menos 8 caracteres"
 
-#: backend/api/invitations.py:317
+#: backend/api/invitations.py:313
 msgid "Your account is ready. You can now log in."
 msgstr "Tu cuenta está lista. Ya puedes iniciar sesión."
 
@@ -2597,18 +2597,18 @@ msgstr ""
 msgid "Graylog attachment command queued successfully"
 msgstr "Comando para adjuntar Graylog enviado a la cola con éxito"
 
-#: backend/api/password_reset.py:339
+#: backend/api/password_reset.py:322
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
 msgstr ""
 "Si existe una cuenta con esa dirección de correo, se ha enviado un enlace "
 "para restablecer la contraseña."
 
-#: backend/api/password_reset.py:369 backend/api/password_reset.py:410
+#: backend/api/password_reset.py:352 backend/api/password_reset.py:393
 msgid "Invalid or expired password reset token"
 msgstr "Token para restablecimiento de contraseña inválido o expirado"
 
-#: backend/api/password_reset.py:391
+#: backend/api/password_reset.py:374
 msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
@@ -2616,21 +2616,21 @@ msgstr ""
 "Tu contraseña se ha restablecido con éxito. Ahora puedes iniciar sesión con "
 "tu nueva contraseña."
 
-#: backend/api/password_reset.py:413
+#: backend/api/password_reset.py:396
 msgid "Token is valid"
 msgstr "El token es válido"
 
-#: backend/api/password_reset.py:446
+#: backend/api/password_reset.py:429
 msgid "Permission denied: RESET_USER_PASSWORD role required"
 msgstr "Permiso denegado: se requiere el rol RESET_USER_PASSWORD"
 
-#: backend/api/password_reset.py:464
+#: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
 msgstr ""
 "No se pudo enviar el correo electrònico para restablecer la contraseña. "
 "Verifique la configuración del correo."
 
-#: backend/api/password_reset.py:470
+#: backend/api/password_reset.py:453
 #, python-brace-format
 msgid "Password reset email has been sent to {email}"
 msgstr ""
@@ -3006,6 +3006,14 @@ msgid ""
 msgstr ""
 "El host '%(fqdn)s' se inscribió mediante clave de registro '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
+
+#: backend/api/agent_poll.py:110
+msgid "Missing agent connection token"
+msgstr "Falta el token de conexión del agente"
+
+#: backend/api/agent_poll.py:120
+msgid "Invalid or expired connection token"
+msgstr "Token de conexión inválido o expirado"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -4982,11 +4990,11 @@ msgstr ""
 "Se ha excedido el límite de velocidad. Por favor, vuelva a intentarlo más "
 "tarde."
 
-#: backend/services/agent_capability_service.py:204
+#: backend/services/agent_capability_service.py:209
 msgid "this host"
 msgstr "este host"
 
-#: backend/services/agent_capability_service.py:207
+#: backend/services/agent_capability_service.py:212
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

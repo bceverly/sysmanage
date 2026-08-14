@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-13 09:05-0400\n"
+"POT-Creation-Date: 2026-08-14 05:12-0400\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
@@ -1078,40 +1078,40 @@ msgstr "호스트 이름 형식이 잘못되었습니다"
 msgid "Hostname change requested"
 msgstr "호스트명 변경 요청됨"
 
-#: backend/api/invitations.py:123
+#: backend/api/invitations.py:124
 msgid "Permission denied: Add User role required"
 msgstr "권한 거부됨: 사용자 추가 역할이 필요합니다"
 
-#: backend/api/invitations.py:242 backend/api/invitations.py:260
+#: backend/api/invitations.py:238 backend/api/invitations.py:256
 msgid "No pending invitation found"
 msgstr "대기 중인 초대를 찾을 수 없습니다"
 
-#: backend/api/invitations.py:245
+#: backend/api/invitations.py:241
 msgid "Invitation revoked"
 msgstr "초대가 취소되었습니다"
 
-#: backend/api/invitations.py:269
+#: backend/api/invitations.py:265
 msgid "Failed to send invitation email. Please check email configuration."
 msgstr "초대 이메일 전송에 실패했습니다. 이메일 구성을 확인하세요."
 
-#: backend/api/invitations.py:273
+#: backend/api/invitations.py:269
 #, python-brace-format
 msgid "Invitation re-sent to {email}"
 msgstr "{email}(으)로 초대를 다시 보냈습니다"
 
-#: backend/api/invitations.py:287
+#: backend/api/invitations.py:283
 msgid "Invalid or expired invitation"
 msgstr "유효하지 않거나 만료된 초대입니다"
 
-#: backend/api/invitations.py:296 backend/api/password_reset.py:351
+#: backend/api/invitations.py:292 backend/api/password_reset.py:334
 msgid "Passwords do not match"
 msgstr "비밀번호가 일치하지 않습니다"
 
-#: backend/api/invitations.py:300 backend/api/password_reset.py:356
+#: backend/api/invitations.py:296 backend/api/password_reset.py:339
 msgid "Password must be at least 8 characters long"
 msgstr "비밀번호는 최소 8자 이상이어야 합니다"
 
-#: backend/api/invitations.py:317
+#: backend/api/invitations.py:313
 msgid "Your account is ready. You can now log in."
 msgstr "계정이 준비되었습니다. 이제 로그인할 수 있습니다."
 
@@ -2488,34 +2488,34 @@ msgstr "Graylog 연결은 서버에서 Pro+ observability_engine이 로드되어
 msgid "Graylog attachment command queued successfully"
 msgstr "Graylog 연결 명령을 성공적으로 대기열에 추가했습니다"
 
-#: backend/api/password_reset.py:339
+#: backend/api/password_reset.py:322
 msgid ""
 "If an account with that email exists, a password reset link has been sent."
 msgstr "해당 이메일을 가진 계정이 존재하면 비밀번호 재설정 링크가 발송되었습니다."
 
-#: backend/api/password_reset.py:369 backend/api/password_reset.py:410
+#: backend/api/password_reset.py:352 backend/api/password_reset.py:393
 msgid "Invalid or expired password reset token"
 msgstr "잘못된 또는 만료된 비밀번호 재설정 토큰"
 
-#: backend/api/password_reset.py:391
+#: backend/api/password_reset.py:374
 msgid ""
 "Your password has been successfully reset. You can now log in with your new "
 "password."
 msgstr "비밀번호가 성공적으로 재설정되었습니다. 새로운 비밀번호로 로그인할 수 있습니다."
 
-#: backend/api/password_reset.py:413
+#: backend/api/password_reset.py:396
 msgid "Token is valid"
 msgstr "토큰이 유효합니다"
 
-#: backend/api/password_reset.py:446
+#: backend/api/password_reset.py:429
 msgid "Permission denied: RESET_USER_PASSWORD role required"
 msgstr "퍼미션 denied: RESET_USER_PASSWORD 역할 필요"
 
-#: backend/api/password_reset.py:464
+#: backend/api/password_reset.py:447
 msgid "Failed to send password reset email. Please check email configuration."
 msgstr "비밀번호 재설정 이메일을 보내는데 실패했습니다. 이메일 설정을 확인해주세요."
 
-#: backend/api/password_reset.py:470
+#: backend/api/password_reset.py:453
 #, python-brace-format
 msgid "Password reset email has been sent to {email}"
 msgstr "비밀번호 재설정 이메일을 {email}로 발송했습니다"
@@ -2861,6 +2861,14 @@ msgid ""
 "Host '%(fqdn)s' enrolled via registration key '%(key_name)s' "
 "(auto_approve=%(auto_approve)s)"
 msgstr "'%(key_name)s' 등록 키를 통해 '%(fqdn)s' 호스트가 등록됨 (자동 승인=%(auto_approve)s)"
+
+#: backend/api/agent_poll.py:110
+msgid "Missing agent connection token"
+msgstr "연결 토큰 누락"
+
+#: backend/api/agent_poll.py:120
+msgid "Invalid or expired connection token"
+msgstr "유효하지 않거나 만료된 연결 토큰"
 
 #: backend/api/config_management.py:122
 msgid "Configuration pushed to all agents"
@@ -4712,11 +4720,11 @@ msgstr "서버 메시지 큐 관리자가 초기화되었습니다"
 msgid "Rate limit exceeded. Please retry later."
 msgstr "요청 제한이 초과되었습니다. 나중에 다시 시도해주세요."
 
-#: backend/services/agent_capability_service.py:204
+#: backend/services/agent_capability_service.py:209
 msgid "this host"
 msgstr "이 호스트"
 
-#: backend/services/agent_capability_service.py:207
+#: backend/services/agent_capability_service.py:212
 #, python-brace-format
 msgid ""
 "The agent on {host} does not support '{command}'. It advertises a reduced "

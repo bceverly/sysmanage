@@ -5833,7 +5833,56 @@ close the gap between our output and the parsers that consume it.
       this testable on any modern machine instead of hunting for legacy
       boot — which is why closing that one first is likely the cheaper path.
 
-- [ ] **One port to rule them all: agent↔server needs 443 only.** A customer
+- [x] **One port to rule them all: agent↔server needs 443 only.** A customer
+      *(DONE 2026-08-14 — the premise was half wrong, which changed the work.  The
+      API was ALREADY scoped under /api on both transports, so no re-routing was
+      needed; and the server was already single-origin **on FreeBSD only** — the
+      other seven nginx configs (Ubuntu, CentOS, openSUSE, Alpine, macOS, NetBSD,
+      and OpenBSD which had none) served the console and the API over PLAINTEXT
+      HTTP on port 3000.  Six platforms shipping an unencrypted management console
+      was not a decision anybody made; it is what happens when one file is
+      maintained in eight places.
+
+      AGENT: one `ServerEndpoint` replacing 8 hand-rolled URL builders (each with
+      its own 8000 default that matched no shipped template) and 5 duplicated TLS
+      contexts.  `server.url` single-origin config, legacy hostname/port/use_https
+      still honoured so no deployed agent is stranded.  `ca_bundle` for
+      TLS-inspecting proxies (verification stays ON — `verify_ssl: false` is
+      documented as the WRONG fix) and `proxy`, wired through every transport.
+
+      SERVER: all 8 nginx configs now 443+TLS with 80 redirecting, generated from
+      one template by `scripts/render_nginx_configs.py` with a `make lint` drift
+      guard, and validated by real nginx 1.28.3 with negative controls.  A cert
+      preflight replaces the old "nginx configuration may need manual review" with
+      the actual missing paths and the exact command to fix it.  `dev_mode: true`
+      — one flag, production by default, binds all interfaces so LAN agents work
+      with no extra config.  Pro+ provisioning/container/virtualization engines
+      emit `url:` too.
+
+      THE FALLBACK: some proxies refuse the Upgrade — measured against a real
+      CONNECT proxy, `InvalidProxyStatus: proxy rejected connection: HTTP 403`,
+      i.e. no connection at all.  `POST /api/agent/poll` drains the SAME queue the
+      WebSocket drains, so a polled message is indistinguishable downstream.  The
+      agent distinguishes structural refusal (switch transport) from a restarting
+      server (keep retrying), and re-tests every 15 minutes so a fixed proxy is
+      noticed.  Proven end to end: real client, real endpoint, two venvs, through a
+      real forward proxy which logged a POST rather than a CONNECT.
+
+      FOUR REAL BUGS found on the way: registration disabled certificate
+      verification UNCONDITIONALLY (the agent's first, unauthenticated contact —
+      anyone in the path could impersonate the server and enrol the host into their
+      own fleet); `wss://` silently downgraded to plaintext `ws://` because the
+      parser only accepted http/https while six templates ship `wss://`;
+      invitation and password-reset emails built `http://host:3000` from
+      `api.certFile` (unset when nginx holds the cert) and a port nginx no longer
+      serves — an unopenable link; and every shipped Linux template served the
+      console in cleartext.
+
+      Docs, the sysmanage-docs config builder, all 7 agent + 8 server templates,
+      and 14-language i18n shipped with it.  ~180 tests across both repos, every
+      guard mutation-verified.  NOT covered: an SSE/streaming variant (the POST
+      shape is deliberately the most proxy-tolerant), and no real corporate
+      TLS-inspecting proxy has been tested — only a local CONNECT proxy.)*
       standing up SysManage — or subscribing to a hosted multi-tenant one —
       should not have to open anything. Today they do: the shipped agent config
       template points at `port: 8080` (installer/windows/config.yaml.example and
