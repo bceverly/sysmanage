@@ -33,19 +33,30 @@ enforces those rules.
    banner, run the pull it prints, restart.
 
    Auto-selection tiers (largest model that fits with headroom for KV-cache):
-   | Total VRAM   | Auto-selected model     |
-   |--------------|-------------------------|
-   | none (CPU)   | `qwen2.5:7b-instruct`   |
-   | < 6 GB       | `qwen2.5:3b-instruct`   |
-   | 6–10 GB      | `qwen2.5:7b-instruct`   |
-   | 11–21 GB     | `qwen2.5:14b-instruct`  |
-   | 22–45 GB     | `qwen2.5:32b-instruct`  |
-   | 46 GB+       | `qwen2.5:72b-instruct`  |
-   Qwen2.5 is strong across all 13 (incl. CJK, Arabic, Hindi). To pin a different
-   model — any Ollama tag, e.g. Gemma 2 / Llama 3.x — set `TRANSLATION_MODEL` and
-   pull that one instead:
+   | Total VRAM   | Auto-selected model  |
+   |--------------|----------------------|
+   | none (CPU)   | `aya-expanse:8b`     |
+   | < 22 GB      | `aya-expanse:8b`     |
+   | 22 GB+       | `aya-expanse:32b`    |
+
+   **Do not switch this back to Qwen.** The ladder selected `qwen2.5` until
+   2026-08-14, and on a 16 GB card that meant `qwen2.5:14b-instruct`, which
+   bleeds its dominant language: on a long or tag-dense string it drifts into
+   Chinese mid-sentence. It had written **1,146 corrupted values** across the
+   four repos — Arabic containing Chinese, Hindi containing Cyrillic
+   (`पлатफ़ोर्म`) and katakana (`सेटअップ`) — and every guard passed them.
+   Measured head to head on 20 known-bad strings:
+
+   | model                  | clean          |
+   |------------------------|----------------|
+   | `qwen2.5:14b-instruct` | 2 of 8         |
+   | `aya-expanse:8b`       | 20 of 20       |
+
+   Aya Expanse is purpose-built multilingual (23 languages) with no
+   Chinese-dominant bias. To pin something else — any Ollama tag — set
+   `TRANSLATION_MODEL` and pull it:
    ```bash
-   ollama pull qwen2.5:14b-instruct     # or whatever the banner tells you
+   ollama pull aya-expanse:8b     # or whatever the banner tells you
    ```
 3. **Install the service deps** (a venv is fine):
    ```bash

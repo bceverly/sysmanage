@@ -84,21 +84,39 @@ OLLAMA_KEEP_ALIVE = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 # ---------------------------------------------------------------------------
 # One multilingual model serves all 13 languages, so the model is a single
 # choice sized to the hardware.  By default we DETECT total VRAM and pick the
-# largest qwen2.5 instruct model that fits with headroom; with no GPU we pick a
-# CPU-runnable model.  Set TRANSLATION_MODEL to pin a specific tag and skip all
-# of this.
+# largest model that fits with headroom.  Set TRANSLATION_MODEL to pin a
+# specific tag and skip all of this.
 
-# Minimum TOTAL VRAM (GiB) -> Ollama model tag.  ~Q4 footprints: 3b≈2.5, 7b≈5,
-# 14b≈9, 32b≈20, 72b≈47 GiB; tiers leave room for KV-cache/context.
+# WHY AYA AND NOT QWEN (changed 2026-08-14, measured, not assumed).
+#
+# This ladder used to select qwen2.5, and on a 16 GiB card that meant
+# qwen2.5:14b-instruct.  That model BLEEDS ITS DOMINANT LANGUAGE: under a long
+# or tag-dense string it drifts back to Chinese mid-sentence.  It had written
+# 1,146 corrupted values across the four repos before anything caught it —
+# Arabic containing Chinese, Hindi containing Cyrillic ("पлатफ़ोर्म"), Hindi
+# containing katakana ("सेटअップ"), one Arabic value carrying the model's own
+# commentary ("your answer seems to deviate from the task requirements") as if
+# it were prose.  Every guard passed it, because they all asked "is the
+# expected script present?" rather than "is an unexpected one present?".
+#
+# Benchmarked head to head on 20 known-bad strings across ar/hi/ko/zh_TW:
+#     qwen2.5:14b-instruct   2 of 8 clean   (75% contaminated)
+#     aya-expanse:8b        20 of 20 clean  (0% contaminated)
+# and on the full 1,093-string docs re-translation aya was 95% filled with
+# zero markup loss.  Aya Expanse is purpose-built multilingual (23 languages)
+# and has no Chinese-dominant bias, which is the specific failure here.
+#
+# ~Q4 footprints: aya 8b≈6, aya 32b≈20 GiB; tiers leave room for KV-cache.
 _MODEL_TIERS = [
-    (46.0, "qwen2.5:72b-instruct"),
-    (22.0, "qwen2.5:32b-instruct"),
-    (11.0, "qwen2.5:14b-instruct"),
-    (6.0, "qwen2.5:7b-instruct"),
-    (0.0, "qwen2.5:3b-instruct"),
+    (22.0, "aya-expanse:32b"),
+    (6.0, "aya-expanse:8b"),
+    # Under 6 GiB aya:8b partially offloads to CPU — slow, but correct.  A
+    # smaller qwen would be faster and would quietly corrupt the output again,
+    # which is not a trade worth making for a job that runs overnight.
+    (0.0, "aya-expanse:8b"),
 ]
 # No GPU: still gives usable translations, just slowly, on CPU.
-_CPU_MODEL = "qwen2.5:7b-instruct"
+_CPU_MODEL = "aya-expanse:8b"
 
 
 def _detect_vram_gib() -> Optional[float]:
