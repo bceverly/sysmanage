@@ -244,7 +244,15 @@ if __name__ == "__main__":
         test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         startup_logger.info("Testing bind to %s:%s", host, port)
-        test_sock.bind((host, port))
+        # `host` comes from configuration and resolves to loopback in
+        # production; only dev_mode widens it to every interface, deliberately,
+        # so agents on the LAN can reach a development server. check_api_bind()
+        # above warns loudly whenever the effective bind is a wildcard outside
+        # dev mode. This line merely PROVES the socket is available before
+        # uvicorn takes it -- binding here is the point of the check.
+        test_sock.bind(
+            (host, port)
+        )  # nosec B104  # lgtm[py/bind-socket-all-network-interfaces]
         test_sock.close()
         startup_logger.info("Network binding test successful")
     except Exception as e:

@@ -15,6 +15,7 @@ from backend.api import (
     access_groups,
     advisory_actions,
     agent,
+    agent_poll,
     airgap_bundles,
     airgap_collection_schedule,
     airgap_agent_mirrors,
@@ -316,6 +317,15 @@ def register_routes(app: FastAPI):
         agent.router, prefix="/api", tags=["agent"]
     )  # /api/agent/connect, /api/agent/installation-complete
     logger.debug("Agent authenticated router added")
+
+    # HTTP transport for agents behind a proxy that will not pass a WebSocket
+    # Upgrade. Same /api origin, same connection token -- only the transport
+    # differs. See backend/api/agent_poll.py.
+    logger.debug("Adding agent poll router with /api prefix")
+    app.include_router(
+        agent_poll.router, prefix="/api", tags=["agent"]
+    )  # /api/agent/poll
+    logger.debug("Agent poll router added")
 
     logger.debug("Adding host public router with /api prefix")
     app.include_router(

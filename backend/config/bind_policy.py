@@ -48,7 +48,9 @@ logger = logging.getLogger(__name__)
 # Values that mean "every interface".  The empty string is included because
 # some stacks treat a missing host as a wildcard, and "*" because people write
 # it expecting it to work.
-WILDCARD_HOSTS = frozenset({"0.0.0.0", "::", "[::]", "*", ""})
+WILDCARD_HOSTS = frozenset(
+    {"0.0.0.0", "::", "[::]", "*", ""}  # nosec B104 - compared against, never bound
+)
 
 # Hosts that are unambiguously local-only and never worth a warning.
 LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1", "[::1]"})
