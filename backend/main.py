@@ -10,7 +10,6 @@ routers for the system and then launches the application.
 """
 
 import os
-import socket
 import sys
 
 import uvicorn
@@ -238,29 +237,21 @@ if __name__ == "__main__":
     startup_logger.info("SSL enabled: %s", bool(ssl_config))
     startup_logger.info("Log level: INFO")
 
-    # Test network binding before starting
-    startup_logger.info("=== NETWORK BINDING TEST ===")
-    try:
-        test_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        test_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        startup_logger.info("Testing bind to %s:%s", host, port)
-        # `host` comes from configuration and resolves to loopback in
-        # production; only dev_mode widens it to every interface, deliberately,
-        # so agents on the LAN can reach a development server. check_api_bind()
-        # above warns loudly whenever the effective bind is a wildcard outside
-        # dev mode. This line merely PROVES the socket is available before
-        # uvicorn takes it -- binding here is the point of the check.
-        test_sock.bind(
-            (host, port)
-        )  # nosec B104  # lgtm[py/bind-socket-all-network-interfaces]
-        test_sock.close()
-        startup_logger.info("Network binding test successful")
-    except Exception as e:
-        startup_logger.exception("Network binding test FAILED: %s", e)
-        startup_logger.exception("This indicates the server will not be able to start!")
-        startup_logger.exception("Check if another process is using port %s", port)
-        raise
-
+    # There used to be a pre-flight bind here: a throwaway socket bound to
+    # (host, port) purely so a busy port produced a friendlier message than
+    # uvicorn's.  Removed 2026-08-14, and not only because it was the standing
+    # source of CodeQL py/bind-socket-all-network-interfaces.
+    #
+    # It never earned its keep.  uvicorn binds the same socket a moment later
+    # and says "[Errno 98] error while attempting to bind on address
+    # ('0.0.0.0', 443): address already in use" -- the address, the port and the
+    # reason.  And because the probe released the port before uvicorn claimed
+    # it, the check was a race: a "successful" result guaranteed nothing about
+    # the bind that actually mattered, which is the worst property a pre-flight
+    # check can have.
+    #
+    # The bind that IS worth policing -- a wildcard outside dev mode -- is
+    # policed above by check_api_bind(), which warns rather than probes.
     startup_logger.info("=== LAUNCHING UVICORN SERVER ===")
     startup_logger.info("About to call uvicorn.run()")
 

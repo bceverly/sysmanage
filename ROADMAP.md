@@ -5803,6 +5803,27 @@ close the gap between our output and the parsers that consume it.
       stock `ipxe.efi` and chain via the two-stage TFTP script. Until then
       UEFI clients only have the two-stage path — which is exactly the path
       proxyDHCP cannot serve, so **UEFI + proxyDHCP is unproven**.
+
+      *(ADDENDUM 2026-08-14 — the image was verified as BUILDABLE in a throwaway
+      clone and then never staged, so `storage/ipxe/` held the BIOS image alone
+      for eleven days while the harness copied the `.efi` only "if it happens to
+      exist" and said nothing.  Rebuilt and staged now: 1,165,824 bytes, exactly
+      matching the 2026-08-12 figure, which is the pin doing its job.
+
+      Rebuilding it surfaced a worse bug in `build-embedded-ipxe.sh`.  Its
+      cached source tree still carried a hand-applied patch from the original
+      UEFI investigation, so `git checkout` refused ("your local changes would
+      be overwritten"), the tree stayed on the OLD commit, and the build carried
+      on against source that was NOT the pin — succeeding, which is the worst
+      way to be wrong.  The script now discards local changes before checkout
+      and ASSERTS `HEAD == IPXE_REF` afterwards, refusing to build otherwise:
+      the pin is the entire reproducibility story, so it is worth checking
+      rather than hoping.  The stale in-script comment crediting a patch the
+      script no longer applies is gone too.
+
+      And the harness now says out loud when the UEFI stage is missing instead
+      of silently degrading to BIOS-only — a capability that is absent quietly
+      is worse than one that is absent loudly, because the run still passes.)*
 - [ ] **proxyDHCP validated on REAL HARDWARE** (moved here from Phase 18
       2026-08-04 — it is gated on the UEFI item ABOVE, so the two travel
       together) — it cannot be validated on the
@@ -5833,56 +5854,31 @@ close the gap between our output and the parsers that consume it.
       this testable on any modern machine instead of hunting for legacy
       boot — which is why closing that one first is likely the cheaper path.
 
+      *(UPDATE 2026-08-14 — the UEFI item above does NOT open a virtual path to
+      this, which was worth measuring rather than assuming, because the text
+      above predicted it would.  QEMU's UEFI network boot is ALSO iPXE:
+      `efi-virtio.rom` / `efi-e1000.rom` are iPXE compiled as EFI drivers, so a
+      UEFI guest has precisely the same ROM problem a BIOS guest has.
+      Suppressing the option ROM (`romfile=`) does not rescue it either — with
+      it gone the firmware's own `VirtioNetDxe` binds the NIC, but no available
+      OVMF build carries the EDK2 network stack above it.  Verified from INSIDE
+      the firmware, via the UEFI Shell's `drivers` table and `ifconfig -l`, on
+      three independent builds — Ubuntu ovmf-generic 2025.11, Debian
+      ovmf-legacy 2026.05, Fedora edk2-ovmf 20250812: `VirtioNetDxe` present and
+      bound in all three, `MnpDxe` / `Ip4Dxe` / `Dhcp4Dxe` / `UefiPxeBcDxe`
+      absent in all three, `ifconfig -l` empty, and no `UEFI PXEv4` boot option
+      ever written to NVRAM.  A SeaBIOS control on the same rig netbooted fine
+      via iPXE, so the harness was never the variable.
+
+      Conclusion: on QEMU/KVM, network boot IS iPXE, in either firmware mode.
+      There is no non-iPXE PXE client to be had, so this stays hardware-gated —
+      a physical x86 box in CSM mode, a Hyper-V Generation 1 VM, or VMware with
+      BIOS firmware, exactly as the text above says.  What DID change is that
+      the config is now ready for one: `sysmanage-ipxe.efi` is built and staged,
+      and the renderer emits `x86-64_EFI` / `BC_EFI` entries, so a UEFI client
+      gets served the moment there is one to serve.)*
+
 - [x] **One port to rule them all: agent↔server needs 443 only.** A customer
-      *(DONE 2026-08-14 — the premise was half wrong, which changed the work.  The
-      API was ALREADY scoped under /api on both transports, so no re-routing was
-      needed; and the server was already single-origin **on FreeBSD only** — the
-      other seven nginx configs (Ubuntu, CentOS, openSUSE, Alpine, macOS, NetBSD,
-      and OpenBSD which had none) served the console and the API over PLAINTEXT
-      HTTP on port 3000.  Six platforms shipping an unencrypted management console
-      was not a decision anybody made; it is what happens when one file is
-      maintained in eight places.
-
-      AGENT: one `ServerEndpoint` replacing 8 hand-rolled URL builders (each with
-      its own 8000 default that matched no shipped template) and 5 duplicated TLS
-      contexts.  `server.url` single-origin config, legacy hostname/port/use_https
-      still honoured so no deployed agent is stranded.  `ca_bundle` for
-      TLS-inspecting proxies (verification stays ON — `verify_ssl: false` is
-      documented as the WRONG fix) and `proxy`, wired through every transport.
-
-      SERVER: all 8 nginx configs now 443+TLS with 80 redirecting, generated from
-      one template by `scripts/render_nginx_configs.py` with a `make lint` drift
-      guard, and validated by real nginx 1.28.3 with negative controls.  A cert
-      preflight replaces the old "nginx configuration may need manual review" with
-      the actual missing paths and the exact command to fix it.  `dev_mode: true`
-      — one flag, production by default, binds all interfaces so LAN agents work
-      with no extra config.  Pro+ provisioning/container/virtualization engines
-      emit `url:` too.
-
-      THE FALLBACK: some proxies refuse the Upgrade — measured against a real
-      CONNECT proxy, `InvalidProxyStatus: proxy rejected connection: HTTP 403`,
-      i.e. no connection at all.  `POST /api/agent/poll` drains the SAME queue the
-      WebSocket drains, so a polled message is indistinguishable downstream.  The
-      agent distinguishes structural refusal (switch transport) from a restarting
-      server (keep retrying), and re-tests every 15 minutes so a fixed proxy is
-      noticed.  Proven end to end: real client, real endpoint, two venvs, through a
-      real forward proxy which logged a POST rather than a CONNECT.
-
-      FOUR REAL BUGS found on the way: registration disabled certificate
-      verification UNCONDITIONALLY (the agent's first, unauthenticated contact —
-      anyone in the path could impersonate the server and enrol the host into their
-      own fleet); `wss://` silently downgraded to plaintext `ws://` because the
-      parser only accepted http/https while six templates ship `wss://`;
-      invitation and password-reset emails built `http://host:3000` from
-      `api.certFile` (unset when nginx holds the cert) and a port nginx no longer
-      serves — an unopenable link; and every shipped Linux template served the
-      console in cleartext.
-
-      Docs, the sysmanage-docs config builder, all 7 agent + 8 server templates,
-      and 14-language i18n shipped with it.  ~180 tests across both repos, every
-      guard mutation-verified.  NOT covered: an SSE/streaming variant (the POST
-      shape is deliberately the most proxy-tolerant), and no real corporate
-      TLS-inspecting proxy has been tested — only a local CONNECT proxy.)*
       standing up SysManage — or subscribing to a hosted multi-tenant one —
       should not have to open anything. Today they do: the shipped agent config
       template points at `port: 8080` (installer/windows/config.yaml.example and
@@ -5927,6 +5923,58 @@ close the gap between our output and the parsers that consume it.
       documentation of the exact firewall requirement ("outbound 443 to your
       SysManage host — nothing else"), and i18n for anything user-facing.
       Requested by Bryan 2026-08-13, with hosted multi-tenant SaaS in mind.
+
+      *(DONE 2026-08-14 — the premise was half wrong, which changed the work.  The
+      API was ALREADY scoped under /api on both transports, so no re-routing was
+      needed; and the server was already single-origin **on FreeBSD only** — the
+      other seven nginx configs (Ubuntu, CentOS, openSUSE, Alpine, macOS, NetBSD,
+      and OpenBSD which had none) served the console and the API over PLAINTEXT
+      HTTP on port 3000.  Six platforms shipping an unencrypted management console
+      was not a decision anybody made; it is what happens when one file is
+      maintained in eight places.
+
+      AGENT: one `ServerEndpoint` replacing 8 hand-rolled URL builders (each with
+      its own 8000 default that matched no shipped template) and 5 duplicated TLS
+      contexts.  `server.url` single-origin config, legacy hostname/port/use_https
+      still honoured so no deployed agent is stranded.  `ca_bundle` for
+      TLS-inspecting proxies (verification stays ON — `verify_ssl: false` is
+      documented as the WRONG fix) and `proxy`, wired through every transport.
+
+      SERVER: all 8 nginx configs now 443+TLS with 80 redirecting, generated from
+      one template by `scripts/render_nginx_configs.py` with a `make lint` drift
+      guard, and validated by real nginx 1.28.3 with negative controls.  A cert
+      preflight replaces the old "nginx configuration may need manual review" with
+      the actual missing paths and the exact command to fix it.  `dev_mode: true`
+      — one flag, production by default, binds all interfaces so LAN agents work
+      with no extra config.  Pro+ provisioning/container/virtualization engines
+      emit `url:` too.
+
+      THE FALLBACK: some proxies refuse the Upgrade — measured against a real
+      CONNECT proxy, `InvalidProxyStatus: proxy rejected connection: HTTP 403`,
+      i.e. no connection at all.  `POST /api/agent/poll` drains the SAME queue the
+      WebSocket drains, so a polled message is indistinguishable downstream.  The
+      agent distinguishes structural refusal (switch transport) from a restarting
+      server (keep retrying), and re-tests every 15 minutes so a fixed proxy is
+      noticed.  Proven end to end: real client, real endpoint, two venvs, through a
+      real forward proxy which logged a POST rather than a CONNECT.
+
+      FOUR REAL BUGS found on the way: registration disabled certificate
+      verification UNCONDITIONALLY (the agent's first, unauthenticated contact —
+      anyone in the path could impersonate the server and enrol the host into their
+      own fleet); `wss://` silently downgraded to an unencrypted WebSocket
+      scheme because the parser only accepted http/https while six templates
+      ship `wss://`;
+      invitation and password-reset emails built `http://host:3000` from
+      `api.certFile` (unset when nginx holds the cert) and a port nginx no longer
+      serves — an unopenable link; and every shipped Linux template served the
+      console in cleartext.
+
+      Docs, the sysmanage-docs config builder, all 7 agent + 8 server templates,
+      and 14-language i18n shipped with it.  ~180 tests across both repos, every
+      guard mutation-verified.  NOT covered: an SSE/streaming variant (the POST
+      shape is deliberately the most proxy-tolerant), and no real corporate
+      TLS-inspecting proxy has been tested — only a local CONNECT proxy.)*
+
 - [ ] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
       Measured 2026-08-04: nothing on `repo.sysmanage.org` is cached — not the
       indexes (correct) and not the packages (suboptimal). Cost impact is

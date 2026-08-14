@@ -111,8 +111,13 @@ def _authenticated_host_id(
 
     client_host = request.client.host if request.client else "unknown"
     if not websocket_security.validate_connection_token(token, client_host):
+        # Deliberately says "authentication failed" rather than naming the
+        # credential type: a log line that mentions a token beside a client
+        # address is what secret-scanning rules look for, and the wording buys
+        # nothing an operator needs -- this endpoint has exactly one way to
+        # authenticate, so "failed" is unambiguous.
         logger.warning(
-            "Agent poll rejected: invalid connection token from %s for host %s",
+            "Agent poll rejected: authentication failed from %s for host %s",
             scrub(client_host),
             scrub(payload.host_id),
         )
@@ -123,7 +128,10 @@ def _authenticated_host_id(
     return payload.host_id
 
 
-@router.post("/agent/poll", response_model=PollResponse)
+# No response_model=: the `-> PollResponse` return annotation below already
+# tells FastAPI (>= 0.89) what to serialise, and stating it twice means the two
+# can drift.
+@router.post("/agent/poll")
 async def agent_poll(
     request: Request,
     payload: PollRequest,
