@@ -364,21 +364,33 @@ def _scripts_used(text: str) -> set:
 
 
 def _language_ok(lang_code: str, translated: str) -> bool:
-    """True unless the model answered in a script this locale never uses.
+    """True unless the answer contains a script this locale never uses.
 
-    Deliberately permissive in two ways.  A locale with no script expectation
-    (all the Latin-script targets) always passes — telling French from Spanish
-    needs real language ID, which is not worth a dependency here.  And a
-    translation with NO non-Latin script passes: that is either a legitimate
-    all-Latin string (a product name, a path) or plain untranslated English,
-    and the English case is caught downstream by the strict gate rather than
-    being worth a model round-trip here.
+    Rewritten 2026-08-14.  This used to ask "is ANY expected script present?"::
+
+        return not used or bool(used & set(expected))
+
+    which passes a MIXED answer — mostly-correct Arabic with Chinese spliced
+    into the middle intersects {ARABIC} and sails through.  That is precisely
+    what this model produces when it loses the thread on a long string, and 410
+    such values had accumulated in sysmanage-docs (ar 275, hi 50, de 40, ru 16,
+    es 13, fr 9, pt 4, nl 2, it 1) before anything noticed, including one
+    carrying the model's own commentary ("your answer seems to deviate from the
+    task requirements") as if it were prose.
+
+    So the question is now the opposite one: is any script present that this
+    locale never uses?  Latin is already excluded by _scripts_used, so product
+    names and paths still pass.
+
+    A locale with no expectation (the Latin-script targets) now means EXACTLY
+    that — no non-Latin script at all.  Those locales were previously exempt
+    from this guard entirely, which is how German picked up 40 Chinese values.
+    Telling French from Spanish still needs real language ID and is still out
+    of scope; this only catches a different alphabet, which is unambiguous.
     """
-    expected = _EXPECTED_SCRIPT.get(lang_code)
-    if not expected:
-        return True
+    expected = set(_EXPECTED_SCRIPT.get(lang_code) or ())
     used = _scripts_used(translated)
-    return not used or bool(used & set(expected))
+    return not (used - expected)
 
 
 # Lone/unpaired UTF-16 surrogate code points (U+D800–U+DFFF).  The LLM

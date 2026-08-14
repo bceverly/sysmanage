@@ -55,6 +55,10 @@ END = "# ===== end per-repo surfaces ==========================================\
 # not, and the code below handles both.
 SHARED = [
     ("scripts/i18n_strict.py", "scripts/i18n_strict.py"),
+    # No per-repo block at all: it imports SURFACES from i18n_strict rather
+    # than redeclaring the table, so the body is identical in all four repos
+    # and only the licence header differs.
+    ("scripts/i18n_check_markup.py", "scripts/i18n_check_markup.py"),
 ]
 
 # sysmanage keeps the translation backfill under scripts/translation-service/,

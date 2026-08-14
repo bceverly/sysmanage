@@ -1140,7 +1140,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.
@@ -1194,6 +1194,16 @@ i18n-extract: $(VENV_ACTIVATE)
 i18n-check-english:
 	@echo "=== i18n English identity check ==="
 	@$(PYTHON) scripts/i18n_check_english_identity.py
+
+# Structure gate. i18n-validate asks "is the key there?", the completeness gates
+# ask "is it non-empty?", i18n-strict asks "is it English or stale?" -- none of
+# them looks at the MARKUP, so a translation that dropped its <code>/<strong>
+# tags passes them all and renders wrongly only for readers of that language.
+# 660 such values were found in sysmanage-docs on 2026-08-14.
+i18n-markup: $(VENV_ACTIVATE)
+	@echo "=== i18n markup (tags preserved from English) ==="
+	@$(PYTHON) scripts/i18n_check_markup.py
+	@echo "[OK] i18n markup gate passed"
 
 i18n-strict: $(VENV_ACTIVATE)
 	@echo "=== i18n strict (English-identical + stale) ==="
@@ -4734,6 +4744,19 @@ i18n-fix: $(VENV_ACTIVATE)
 	@$(MAKE) --no-print-directory translate SERVICE=$(SERVICE)
 	@$(MAKE) --no-print-directory i18n-strict
 	@echo "[OK] i18n gate green"
+
+# Burn down the markup baseline: requeue the broken values, refill them from
+# the translation service, drop what is now clean, then re-verify.  NOT part of
+# `make lint` on purpose -- it needs the GPU service (so it cannot run in CI),
+# it REWRITES translations, and model output varies run to run.  Detection is
+# automatic; fixing is a deliberate act.
+i18n-markup-fix: $(VENV_ACTIVATE)
+	@echo "=== i18n markup fix: requeue -> translate -> prune -> verify ==="
+	@$(PYTHON) scripts/i18n_check_markup.py --requeue
+	@$(MAKE) --no-print-directory translate SERVICE=$(SERVICE)
+	@$(PYTHON) scripts/i18n_check_markup.py --prune
+	@$(MAKE) --no-print-directory i18n-markup
+	@echo "[OK] i18n markup gate green"
 
 # The four repos each carry a copy of the shared i18n gate; only the SURFACES
 # block and the licence header may differ.  Skips siblings that are not checked

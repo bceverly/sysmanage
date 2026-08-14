@@ -60,6 +60,49 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 ALLOW_FILE = REPO / "i18n-allow.txt"
+
+# Wrong-language RATCHET.  Widening wrong_script() to catch mixed-script values
+# surfaced 1,146 pre-existing ones in sysmanage-docs -- corruption the model has
+# been emitting for months (Chinese inside Arabic, Cyrillic inside Hindi).  They
+# cannot be fixed by re-running the service: measured 2026-08-14, 6 of 8 came
+# back contaminated again, because the fault is the 14b model bleeding its
+# dominant language, not the prompt.
+#
+# So they are recorded here and the gate fails only on NEW ones.  A ratchet, not
+# an amnesty: an entry that is now clean FAILS until pruned, so the list can
+# only shrink.  Same contract as .i18n-markup-baseline.json.
+LANG_BASELINE = REPO / ".i18n-language-baseline.json"
+
+
+def _lang_identity(row):
+    surface, lang, _path, key, _src = row
+    return (surface, lang, key)
+
+
+def load_lang_baseline() -> set:
+    if not LANG_BASELINE.exists():
+        return set()
+    data = json.loads(LANG_BASELINE.read_text(encoding="utf-8"))
+    return {(e["surface"], e["locale"], e["key"]) for e in data.get("known", [])}
+
+
+def save_lang_baseline(entries: set) -> None:
+    payload = {
+        "_comment": (
+            "Pre-existing wrong-language values, recorded so the gate fails on NEW "
+            "ones. A ratchet, not an amnesty: this list may only shrink. See "
+            "wrong_script() for why re-translating does not clear them."
+        ),
+        "known": [
+            {"surface": s, "locale": lang, "key": key}
+            for s, lang, key in sorted(entries)
+        ],
+    }
+    LANG_BASELINE.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 TODO = "[TODO] "
 
 # Surfaces this repo owns.  ``kind`` picks the reader; ``hashes`` is the
@@ -148,12 +191,27 @@ def scripts_used(text: str) -> set:
 
 
 def wrong_script(lang: str, text: str) -> bool:
-    """True if ``text`` is written in a script this locale never uses."""
-    expected = _EXPECTED_SCRIPT.get(lang)
-    if not expected:
-        return False
+    """True if ``text`` CONTAINS a script this locale never uses.
+
+    Widened 2026-08-14.  It used to fire only when no expected script was
+    present at all::
+
+        return bool(used) and not used & set(expected)
+
+    so a wholly-Chinese Arabic value was caught (52 of those, 2026-08-05) but a
+    MIXED one was not: mostly-correct Arabic with Chinese spliced into the
+    middle intersects {ARABIC} and passed.  410 such values were live in
+    sysmanage-docs when this was found — ar 275, hi 50, de 40, ru 16, es 13,
+    fr 9, pt 4, nl 2, it 1 — and `make i18n-strict` was green throughout.
+
+    Latin is already excluded by scripts_used, so product names, paths and CLI
+    snippets still pass.  A locale with no expectation (the Latin-script
+    targets) now means exactly that: no non-Latin script.  Those were skipped
+    entirely before, which is how German acquired 40 Chinese values.
+    """
+    expected = set(_EXPECTED_SCRIPT.get(lang) or ())
     used = scripts_used(text)
-    return bool(used) and not used & set(expected)
+    return bool(used - expected)
 
 
 def digest(text: str) -> str:
@@ -507,6 +565,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", action="store_true")
     parser.add_argument("--requeue", action="store_true")
+    parser.add_argument("--language-baseline", action="store_true")
+    parser.add_argument("--prune-language", action="store_true")
     parser.add_argument("--limit", type=int, default=8)
     args = parser.parse_args()
 
@@ -515,6 +575,30 @@ def main() -> int:
 
     allow = Allow(ALLOW_FILE)
     english, stale, wrong = gather(allow)
+
+    known_wrong = load_lang_baseline()
+    current_wrong = {_lang_identity(r) for r in wrong}
+    if args.language_baseline:
+        save_lang_baseline(current_wrong)
+        print(f"[OK] recorded {len(current_wrong)} known wrong-language value(s)")
+        return 0
+    fixed_wrong = known_wrong - current_wrong
+    if args.prune_language:
+        save_lang_baseline(known_wrong - fixed_wrong)
+        print(f"[OK] pruned {len(fixed_wrong)} entrie(s) that are now clean")
+        return 0
+    # --requeue deliberately works on the FULL list, baseline included: an
+    # explicit requeue is someone choosing to re-attempt them.
+    if not args.requeue:
+        wrong = [r for r in wrong if _lang_identity(r) not in known_wrong]
+        if fixed_wrong and not (english or stale or wrong):
+            print(
+                f"\nFAIL: {len(fixed_wrong)} wrong-language baseline entrie(s) are "
+                "now clean — the ratchet must tighten.\n"
+                "  Drop them:  python3 scripts/i18n_strict.py --prune-language\n",
+                file=sys.stderr,
+            )
+            return 1
 
     # Wrong-language content is requeued too: it is not a translation at all,
     # so the only fix is to ask the service again.
