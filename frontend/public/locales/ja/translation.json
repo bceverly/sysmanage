@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "左にスクロール",
     "scrollRight": "右にスクロール",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "メンテナンスウィンドウ",
     "search": "検索 (Ctrl+K)"
   },
   "notifications": {

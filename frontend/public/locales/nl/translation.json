@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "Scroll naar links",
     "scrollRight": "Scroll naar rechts",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "Onderhoudsvensters",
     "search": "Zoeken (Ctrl+K)"
   },
   "notifications": {

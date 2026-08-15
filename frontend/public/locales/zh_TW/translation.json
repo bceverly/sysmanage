@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "向左捲動",
     "scrollRight": "向右捲動",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "維護窗口",
     "search": "搜尋 (Ctrl+K)"
   },
   "notifications": {

@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "왼쪽으로 스크롤",
     "scrollRight": "오른쪽으로 스크롤",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "점검 창",
     "search": "검색 (Ctrl+K)"
   },
   "notifications": {

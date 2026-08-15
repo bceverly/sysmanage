@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "Scorri a sinistra",
     "scrollRight": "Scorri a destra",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "Finestre di Manutenzione",
     "search": "Ricerca (Ctrl+K)"
   },
   "notifications": {

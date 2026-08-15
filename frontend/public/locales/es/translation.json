@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "Desplazar hacia la izquierda",
     "scrollRight": "Desplazar hacia la derecha",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "Ventanas de Mantenimiento",
     "search": "Buscar (Ctrl+K)"
   },
   "notifications": {

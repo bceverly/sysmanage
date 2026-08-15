@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "向左滚动",
     "scrollRight": "向右滚动",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "维护窗口",
     "search": "搜索 (Ctrl+K)"
   },
   "notifications": {

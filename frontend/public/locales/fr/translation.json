@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "Faites défiler vers la gauche",
     "scrollRight": "Faites défiler vers la droite",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "Fenêtres de maintenance",
     "search": "Rechercher (Ctrl+K)"
   },
   "notifications": {

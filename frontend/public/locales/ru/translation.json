@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "Прокрутить влево",
     "scrollRight": "Прокрутить вправо",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "Периоды обслуживания",
     "search": "Поиск (Ctrl+K)"
   },
   "notifications": {

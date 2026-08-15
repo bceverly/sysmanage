@@ -1120,7 +1120,7 @@
     },
     "scrollLeft": "انقل يميناً",
     "scrollRight": "انقل يساراً",
-    "maintenanceWindows": "[MISSING:nav.maintenanceWindows]",
+    "maintenanceWindows": "نوافذ الصيانة",
     "search": "بحث (Ctrl+K)"
   },
   "notifications": {
