@@ -1514,6 +1514,10 @@ jobs:
         # --delete) so a release can never wipe R2; version retention is a
         # separate `make prune-repo` in sysmanage-docs.
         env:
+          APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}
+          APT_SIGNING_KEY_ID: ${{ secrets.APT_SIGNING_KEY_ID }}
+          APT_SIGNING_PASSPHRASE: ${{ secrets.APT_SIGNING_PASSPHRASE }}
+          APT_SIGN_REQUIRED: "1"
           VERSION: ${{ steps.version.outputs.version }}
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -1577,37 +1581,28 @@ jobs:
           cp $RF/sysmanage-*-alpine*.apk "repo/server/alpine/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-alpine*.apk.sha256 "repo/server/alpine/$VERSION/" 2>/dev/null || true
 
-          # Regenerate the apt Packages/Release index over the full pool.
-          cd repo/server/deb
-          dpkg-scanpackages pool/ /dev/null > dists/stable/main/binary-amd64/Packages
-          # -n omits gzip's timestamp+name header.  Without it the .gz is
-          # byte-different on EVERY regeneration even when the content is
-          # identical, while staying the same size — which the sync below then
-          # has to notice.  Deterministic output also makes the repo
-          # reproducible.  (Mirrors scripts/build-apt-repo.sh in the agent repo,
-          # where the same omission caused a permanent "Hash Sum mismatch".)
-          gzip -9nc dists/stable/main/binary-amd64/Packages > dists/stable/main/binary-amd64/Packages.gz
-          cd dists/stable
-          {
-            echo "Date: $(date -R -u)"
-            echo "MD5Sum:"
-            md5sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            md5sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            echo "SHA1:"
-            sha1sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            sha1sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            echo "SHA256:"
-            sha256sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            sha256sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            echo "SHA512:"
-            sha512sum main/binary-amd64/Packages | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-            sha512sum main/binary-amd64/Packages.gz | awk '{printf " %s %16d %s\n", $1, 0, $2}'
-          } > Release.tmp
-          SIZE_PACKAGES=$(stat -c%s main/binary-amd64/Packages)
-          SIZE_PACKAGES_GZ=$(stat -c%s main/binary-amd64/Packages.gz)
-          sed -i "s/ 0 main\/binary-amd64\/Packages$/ $SIZE_PACKAGES main\/binary-amd64\/Packages/" Release.tmp
-          sed -i "s/ 0 main\/binary-amd64\/Packages.gz$/ $SIZE_PACKAGES_GZ main\/binary-amd64\/Packages.gz/" Release.tmp
-          mv Release.tmp Release
+          # Import the archive signing subkey.  Only a signing SUBKEY lives in
+          # CI; the primary (which also certifies and authorises Launchpad
+          # uploads) stays offline.
+          if [ -n "${APT_SIGNING_KEY:-}" ]; then
+            export GNUPGHOME="$(mktemp -d)"; chmod 700 "$GNUPGHOME"
+            printf '%s' "$APT_SIGNING_KEY" | gpg --batch --import
+            echo "allow-loopback-pinentry" > "$GNUPGHOME/gpg-agent.conf"
+            gpgconf --kill gpg-agent || true
+            if [ -n "${APT_SIGNING_PASSPHRASE:-}" ]; then
+              printf '%s' "$APT_SIGNING_PASSPHRASE" > "$GNUPGHOME/pp"
+              chmod 600 "$GNUPGHOME/pp"
+              export APT_GPG_EXTRA="--pinentry-mode loopback --passphrase-file $GNUPGHOME/pp"
+            fi
+          fi
+
+          # Regenerate the apt metadata via the SHARED generator.  This was
+          # a third inline implementation of the same logic; sysmanage-agent
+          # and sysmanage-docs each had their own, and they drifted (69 lines
+          # by 2026-08-16).  Kept in step by
+          # sysmanage-agent/scripts/sync_repo_tooling.py.
+          echo "Regenerating apt repository metadata..."
+          "${{ github.workspace }}/scripts/build-apt-repo.sh" repo/server/deb
           cd "${{ github.workspace }}"
 
           # Publish to R2 (additive — never deletes; retention is `make prune-repo`).
