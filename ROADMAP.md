@@ -6593,6 +6593,51 @@ first-submission gates.*
       silently no-ops on those four. Publishing the repositories closes all
       three at once.
 
+- [ ] **Alpine: publish a real apk repository (`APKINDEX` + signing).**
+      Broken out of the item above on 2026-08-16 because the Alpine half was
+      measured and is the most concrete of the four. Findings:
+
+    * **No `APKINDEX` has ever been generated.** The release workflow copies
+      `.apk` files to `agent/alpine/packages/$VERSION/` as direct downloads
+      and stops there; `prune-package-repo.sh` regenerates an index only
+      where it already finds one (`find -name APKINDEX.tar.gz`), so it has
+      never had anything to regenerate.
+    * The install docs advertised
+      `https://repo.sysmanage.org/agent/alpine/v3.21/main` as an
+      `/etc/apk/repositories` entry. **That URL has never existed** and
+      returned 404 to every reader who followed it. Corrected on 2026-08-16
+      to document the direct downloads that do exist — so the docs are now
+      honest, but Alpine users still have no `apk upgrade` path.
+    * **apk signing is not the GPG work.** apk uses its own RSA scheme
+      (`abuild-sign`, `/etc/apk/keys/*.rsa.pub`), so the archive key added in
+      the 2026-08 signing pass does not carry over. Publishing unsigned would
+      force `--allow-untrusted`, which is the same hole `[trusted=yes]`
+      was — so a signing key + its distribution is part of this item, not a
+      follow-up.
+    * **The dispatched command cannot currently succeed.**
+      `_AGENT_INSTALL["alpine"]` is `apk add --allow-untrusted
+      sysmanage-agent` — a *package name*, which needs a configured
+      repository. `is_agent_install_legacy()` exists to gate exactly this,
+      but grep across all four repos finds callers only in tests: no
+      production path consults it, and `container_plans_lxd.pxi` /
+      `container_plans_wsl.pxi` call `get_agent_install_commands()`
+      unguarded. So provisioning an Alpine container dispatches an install
+      that fails with "no such package". The three BSD entries had the
+      identical defect. **Fixed 2026-08-16** for all four: each now fetches
+      the artifact it actually publishes (`.apk` / `.pkg` / `.tgz`) with the
+      base-system fetch tool and verifies its `.sha256` before installing.
+      The Alpine path was proven in containers; the BSD paths were validated
+      by stubbing the base tools against the live repository (URLs, version
+      and OS-release resolution, checksum match, tamper and missing-pointer
+      rejection) but have **not** been run on real FreeBSD/OpenBSD/NetBSD.
+      That confirmation is part of this item.
+    * Scope: generate `APKINDEX.tar.gz` per Alpine release at publish time,
+      sign it, publish the public key at a stable URL, teach the prune job to
+      keep the index consistent after `--delete`, then flip `alpine` to
+      `legacy=False` in `_AGENT_INSTALL`. Either wire
+      `is_agent_install_legacy()` into the dispatch path or delete it — an
+      unused predicate reads as protection that isn't there.
+
 ### Exit Criteria
 
 - [ ] Agent enroll → inventory → command dispatch validated on emulated ppc64le, s390x (big-endian), and riscv64 guests
