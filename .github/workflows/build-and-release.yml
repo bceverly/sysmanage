@@ -1581,6 +1581,32 @@ jobs:
           cp $RF/sysmanage-*-alpine*.apk "repo/server/alpine/$VERSION/" 2>/dev/null || true
           cp $RF/sysmanage-*-alpine*.apk.sha256 "repo/server/alpine/$VERSION/" 2>/dev/null || true
 
+          # Sign the server RPMs.  Same gap the agent had: rpmsign existed only
+          # in local `make` targets, so everything CI published was unsigned --
+          # and the documented dnf config therefore had to say gpgcheck=0.
+          if [ -n "${APT_SIGNING_KEY:-}" ]; then
+            sudo apt-get install -y -qq rpm >/dev/null 2>&1 || true
+            RPMS=$(find repo/server/rpm -name '*.rpm' 2>/dev/null || true)
+            if [ -n "$RPMS" ]; then
+              GNUPGHOME_RPM="$(mktemp -d)"; chmod 700 "$GNUPGHOME_RPM"
+              GNUPGHOME="$GNUPGHOME_RPM" gpg --batch --import <<<"$APT_SIGNING_KEY"
+              echo "allow-loopback-pinentry" > "$GNUPGHOME_RPM/gpg-agent.conf"
+              printf '%s' "${APT_SIGNING_PASSPHRASE:-}" > "$GNUPGHOME_RPM/pp"
+              chmod 600 "$GNUPGHOME_RPM/pp"
+              KEY_NOBANG="${APT_SIGNING_KEY_ID%!}"
+              echo "$RPMS" | while IFS= read -r r; do
+                [ -n "$r" ] || continue
+                GNUPGHOME="$GNUPGHOME_RPM" rpmsign --addsign \
+                  --define "_gpg_name $KEY_NOBANG" \
+                  --define "__gpg_sign_cmd %{__gpg} gpg --batch --no-verbose --no-armor --pinentry-mode loopback --passphrase-file $GNUPGHOME_RPM/pp --no-secmem-warning -u $KEY_NOBANG -sbo %{__signature_filename} %{__plaintext_filename}" \
+                  "$r" >/dev/null || { echo "::error::rpmsign failed for $r"; exit 1; }
+              done
+              GNUPGHOME="$GNUPGHOME_RPM" gpg --batch --armor --export "$KEY_NOBANG" \
+                > repo/server/rpm/RPM-GPG-KEY-sysmanage
+              echo "Signed $(echo "$RPMS" | grep -c .) server RPM(s)"
+            fi
+          fi
+
           # Import the archive signing subkey.  Only a signing SUBKEY lives in
           # CI; the primary (which also certifies and authorises Launchpad
           # uploads) stays offline.
@@ -1603,6 +1629,12 @@ jobs:
           # sysmanage-agent/scripts/sync_repo_tooling.py.
           echo "Regenerating apt repository metadata..."
           "${{ github.workspace }}/scripts/build-apt-repo.sh" repo/server/deb
+
+          # Publish the apt keyring beside the server repo, as the agent does.
+          if [ -n "${APT_SIGNING_KEY_ID:-}" ]; then
+            gpg --batch --export "${APT_SIGNING_KEY_ID%!}" \
+              > repo/server/sysmanage-archive-keyring.gpg
+          fi
           cd "${{ github.workspace }}"
 
           # Publish to R2 (additive — never deletes; retention is `make prune-repo`).
