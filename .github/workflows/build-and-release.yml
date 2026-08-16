@@ -1658,6 +1658,46 @@ jobs:
           s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors
           echo "Published SysManage Server v$VERSION to https://repo.sysmanage.org/server/"
 
+      # Cloudflare fronts R2 and caches NEGATIVE responses: a GET for a path
+      # that does not exist yet is answered 404, and that 404 is held with the
+      # zone's 4-hour edge TTL, so the edge serves it over the real object once
+      # published -- refreshed by every later request.  Measured 2026-08-16:
+      # server/sysmanage-archive-keyring.gpg returned 404 with
+      # cf-cache-status: HIT while the same URL plus a cache-busting query
+      # string returned the real keyring.  Only paths with a STABLE url can be
+      # affected; versioned artifact paths are new each release.
+      # Gated on the secret like APT_SIGNING_KEY -- warns rather than blocking.
+      - name: Purge the CDN cache for republished metadata
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ZONE_ID:-}" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN/CLOUDFLARE_ZONE_ID not set - not purging the CDN. A cached 404 from before first publish will keep being served over the real object."
+            exit 0
+          fi
+          BASE="https://repo.sysmanage.org"
+          FILES=$(printf '"%s",' \
+            "$BASE/server/sysmanage-archive-keyring.gpg" \
+            "$BASE/server/rpm/RPM-GPG-KEY-sysmanage" \
+            "$BASE/server/deb/dists/stable/InRelease" \
+            "$BASE/server/deb/dists/stable/Release" \
+            "$BASE/server/deb/dists/stable/Release.gpg" \
+            "$BASE/server/deb/dists/stable/main/binary-amd64/Packages" \
+            "$BASE/server/deb/dists/stable/main/binary-amd64/Packages.gz" \
+            | sed 's/,$//')
+          RESP=$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data "{\"files\":[${FILES}]}")
+          echo "$RESP"
+          echo "$RESP" | grep -q '"success":true' || {
+            echo "::error::Cloudflare purge failed - the edge may serve a stale 404 over freshly published files"
+            exit 1
+          }
+
       - name: Trigger R2 retention prune (keep latest 5)
         env:
           DOCS_REPO_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
