@@ -103,20 +103,24 @@ test("renders status, config details and running state", async () => {
   expect(m(openBAOService.getConfig)).toHaveBeenCalled();
 });
 
+// The card renders its "OpenBAO Vault" title in BOTH branches -- during the
+// loading spinner and after the async load resolves -- so awaiting the title
+// proves nothing about the buttons, which exist only in the loaded branch.
+// These two raced it and failed on the macOS leg with `getByText("Seal")`
+// throwing against a DOM still showing MuiCircularProgress.  Await the button
+// itself, the same fix the refresh test below already carries.
 test("stops the vault via the Stop button", async () => {
   render(<OpenBAOStatusCard />);
-  await screen.findByText("OpenBAO Vault");
 
-  fireEvent.click(screen.getByText("Stop"));
+  fireEvent.click(await screen.findByText("Stop"));
 
   await waitFor(() => expect(m(openBAOService.stop)).toHaveBeenCalled());
 });
 
 test("seals the vault via the Seal button", async () => {
   render(<OpenBAOStatusCard />);
-  await screen.findByText("OpenBAO Vault");
 
-  fireEvent.click(screen.getByText("Seal"));
+  fireEvent.click(await screen.findByText("Seal"));
 
   await waitFor(() => expect(m(openBAOService.seal)).toHaveBeenCalled());
 });
