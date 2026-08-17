@@ -324,3 +324,30 @@ def test_plugin_signature_from_untrusted_key_is_refused(signed_plugin, monkeypat
     _sign_plugin(signed_plugin, impostor)
     with pytest.raises(ms.ModuleSignatureError, match="signature does not verify"):
         ms.verify_plugin_bundle(str(signed_plugin), "demo_engine")
+
+
+def test_manifest_paths_compare_as_posix_on_windows(signed_module, monkeypatch):
+    """Manifest keys are tar arcnames, which always use "/".  ``os.path.relpath``
+    yields "\\" on Windows, so the unlisted-file sweep compared "locales\\de\\..."
+    against "locales/de/..." and REFUSED every bundle carrying a gettext
+    catalog -- i.e. most engines, on every Windows server.  Linux never saw it
+    because the two forms coincide there.
+
+    Simulating the separator is the only way to catch this from a POSIX CI leg.
+    """
+    import ntpath
+
+    monkeypatch.setattr(ms.os, "sep", "\\")
+    monkeypatch.setattr(ms.os.path, "relpath", ntpath.relpath)
+    _verify(signed_module)  # must not raise
+
+
+def test_windows_separators_still_reject_an_unlisted_file(signed_module, monkeypatch):
+    """The POSIX normalisation must not become a way to smuggle a file in."""
+    import ntpath
+
+    (signed_module / "locales" / "de" / "LC_MESSAGES" / "extra.mo").write_bytes(b"x")
+    monkeypatch.setattr(ms.os, "sep", "\\")
+    monkeypatch.setattr(ms.os.path, "relpath", ntpath.relpath)
+    with pytest.raises(ms.ModuleSignatureError, match="does not cover"):
+        _verify(signed_module)

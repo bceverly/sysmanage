@@ -222,7 +222,13 @@ def verify_module_dir(
 
     # The file we are about to dlopen must be one the manifest covers -- not
     # merely sitting in a directory where other files happen to verify.
-    so_name = os.path.relpath(os.path.realpath(so_path), os.path.realpath(module_dir))
+    # POSIX form, same reason as the sweep below: manifest keys are tar
+    # arcnames.  This one happens to work on Windows today only because the
+    # .so sits at the top level and has no separator in its relative path --
+    # it would break the moment a bundle nested it.
+    so_name = os.path.relpath(
+        os.path.realpath(so_path), os.path.realpath(module_dir)
+    ).replace(os.sep, "/")
     if so_name not in files:
         raise ModuleSignatureError(f"{so_name} is not covered by the signed manifest")
 
@@ -234,11 +240,20 @@ def verify_module_dir(
     # directory" has to mean the whole directory, or the next change to how a
     # module path is chosen silently reopens it.  Found by the adversarial
     # test, not by design.
+    #
+    # Compare in POSIX form.  Manifest keys are tar arcnames, which always use
+    # "/", while os.path.relpath yields "\" on Windows -- so every bundle with
+    # a locales/ subdirectory (most of them) failed this check on a Windows
+    # server, refusing engines that were perfectly valid.  Caught by the
+    # Windows test leg; on Linux the two forms happen to coincide, which is
+    # exactly why it passed everywhere it was originally written and tested.
     unexpected = []
     real_dir = os.path.realpath(module_dir)
     for root, _dirs, names in os.walk(real_dir):
         for name in names:
-            rel = os.path.relpath(os.path.join(root, name), real_dir)
+            rel = os.path.relpath(os.path.join(root, name), real_dir).replace(
+                os.sep, "/"
+            )
             if rel in (MANIFEST_NAME, SIGNATURE_NAME) or rel in files:
                 continue
             unexpected.append(rel)
