@@ -36,10 +36,12 @@ Using xgettext for the broad scan matters: it is the same lexer the real
 extractor uses, so this cannot disagree with it about what counts as a
 translatable call, and hand-rolled parsing cannot produce false positives.
 """
+
 from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -183,9 +185,15 @@ def check() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.parse_args()
-    if subprocess.run(  # nosec B603 B607
-        ["sh", "-c", "command -v xgettext"], capture_output=True, check=False
-    ).returncode:
+    # shutil.which, NOT `sh -c "command -v xgettext"`.  The shell form needs a
+    # POSIX shell to exist: on Windows there is none, so subprocess raised
+    # FileNotFoundError from CreateProcess and the run CRASHED at the exact
+    # point it was trying to decide whether to skip gracefully.  which() is
+    # portable, needs no subprocess at all, and honours PATHEXT on Windows --
+    # so if gettext IS installed there (choco/msys), the check now runs rather
+    # than being skipped for the wrong reason.  xgettext itself is already
+    # invoked without a shell, so nothing else here is Windows-hostile.
+    if shutil.which("xgettext") is None:
         print("[skip] i18n-check-coverage: GNU gettext not installed — skipped")
         return 0
     return check()
