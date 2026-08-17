@@ -26,6 +26,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
 from backend.licensing.module_loader_mixin import ModuleLoaderUpdatesMixin
+from backend.licensing.module_signature import ModuleSignatureError, verify_module_dir
 from backend.licensing.plugin_bundle_loader import PluginBundleLoader
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusModuleCache
@@ -160,7 +161,24 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             # Check cache first
             cached_path = self._get_cached_module_path(module_code, version)
             if cached_path and os.path.exists(cached_path):
-                module_ok = self._load_module_from_path(module_code, cached_path)
+                if self._cached_module_is_authentic(module_code, cached_path):
+                    module_ok = self._load_module_from_path(module_code, cached_path)
+                else:
+                    # Every install that predates module signing has an
+                    # unsigned bundle sitting in this cache.  Left alone it
+                    # would fail verification forever: the cache row stops a
+                    # re-download, so the engine would simply never come back.
+                    # Drop it and fetch a signed one -- once, because the
+                    # replacement is verified by the same gate.
+                    logger.warning(
+                        "Cached %s is unsigned or fails verification - "
+                        "discarding it and re-downloading",
+                        module_code,
+                    )
+                    self._remove_cached_module(module_code)
+                    module_ok = await self._download_and_cache_module(
+                        module_code, version
+                    )
             else:
                 # Download if not cached
                 module_ok = await self._download_and_cache_module(module_code, version)
@@ -202,6 +220,26 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
             except Exception as e:
                 logger.exception("Error querying module cache: %s", e)
                 return None
+
+    def _cached_module_is_authentic(self, module_code: str, file_path: str) -> bool:
+        """Whether a cached module still verifies, WITHOUT loading it.
+
+        Separate from ``_load_module_from_path``'s gate because the caller
+        needs to tell "not authentic, re-download" apart from the other
+        reasons a load fails (the migration-compatibility gate, say) -- those
+        must NOT trigger a re-download.
+        """
+        try:
+            verify_module_dir(
+                os.path.dirname(file_path),
+                module_code,
+                file_path,
+                self._get_platform_info(),
+            )
+            return True
+        except ModuleSignatureError as exc:
+            logger.warning("Cached %s failed verification: %s", module_code, exc)
+            return False
 
     def _log_failed_download_response(
         self,
@@ -245,6 +283,15 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
         self, temp_path: str, expected_hash: Optional[str]
     ) -> Optional[str]:
         """Compute the temp file's hash, comparing to ``expected_hash``.
+
+        NOT A SECURITY CONTROL.  ``expected_hash`` comes from the
+        ``X-Content-SHA512`` header of the very response that carried these
+        bytes, so it detects a truncated or corrupted transfer and nothing
+        more -- whoever supplies the payload supplies the digest.  It is also
+        skipped entirely when the header is absent.  Authenticity is enforced
+        by ``module_signature.verify_module_dir`` at load time, against a key
+        compiled into this build; this stays only as a cheap early-out that
+        avoids extracting an obviously broken download.
 
         Returns the computed hash on success, or ``None`` (after
         removing the temp file) when a provided hash does not match.
@@ -421,6 +468,23 @@ class ModuleLoader(ModuleLoaderUpdatesMixin):
 
     def _load_module_from_path(self, module_code: str, file_path: str) -> bool:
         """Dynamically load a module from a file path."""
+        # Authenticity gate, BEFORE the file is executed.  This is the only
+        # chokepoint both paths pass through -- a fresh download and a cache
+        # hit -- which is why it lives here rather than in the download path.
+        # The old code verified a server-supplied hash on download only (and
+        # skipped even that when the header was absent), so a cached engine
+        # was re-executed unconditionally on every start.
+        try:
+            verify_module_dir(
+                os.path.dirname(file_path),
+                module_code,
+                file_path,
+                self._get_platform_info(),
+            )
+        except ModuleSignatureError as exc:
+            logger.error("REFUSING to load %s from %s: %s", module_code, file_path, exc)
+            return False
+
         try:
             # Create module spec
             spec = importlib.util.spec_from_file_location(module_code, file_path)

@@ -445,7 +445,9 @@ class TestEnsurePluginAvailable:
         loader._initialized = True
 
         with patch.object(loader, "_get_modules_path", return_value="/test/path"):
-            with patch("os.path.exists", return_value=True):
+            with patch("os.path.exists", return_value=True), patch(
+                "backend.licensing.plugin_bundle_loader.verify_plugin_bundle"
+            ):
                 result = await loader.ensure_plugin_available("test_module")
 
         assert result is True
@@ -477,7 +479,9 @@ class TestEnsurePluginAvailable:
 
         with patch.object(loader, "initialize") as mock_init:
             with patch.object(loader, "_get_modules_path", return_value="/test/path"):
-                with patch("os.path.exists", return_value=True):
+                with patch("os.path.exists", return_value=True), patch(
+                    "backend.licensing.plugin_bundle_loader.verify_plugin_bundle"
+                ):
                     await loader.ensure_plugin_available("test_module")
 
         mock_init.assert_called_once()

@@ -418,13 +418,19 @@ class TestModuleLoaderCheckUpdates:
 class TestModuleLoaderLoadFromPath:
     """Tests for ModuleLoader._load_module_from_path method."""
 
+    # The signature gate runs BEFORE any of the import machinery, so these two
+    # must stub it out.  Without the stub they still return False -- but for
+    # the wrong reason (unsigned module), never reaching the spec handling they
+    # exist to cover, so they would pass while testing nothing.
     def test_load_module_from_path_no_spec(self):
         """Test _load_module_from_path handles missing spec."""
         from backend.licensing.module_loader import ModuleLoader
 
         loader = ModuleLoader()
 
-        with patch("importlib.util.spec_from_file_location", return_value=None):
+        with patch("backend.licensing.module_loader.verify_module_dir"), patch(
+            "importlib.util.spec_from_file_location", return_value=None
+        ):
             result = loader._load_module_from_path("test", "/path/to/module.so")
 
         assert result is False
@@ -435,13 +441,32 @@ class TestModuleLoaderLoadFromPath:
 
         loader = ModuleLoader()
 
-        with patch(
+        with patch("backend.licensing.module_loader.verify_module_dir"), patch(
             "importlib.util.spec_from_file_location",
             side_effect=Exception("Load error"),
         ):
             result = loader._load_module_from_path("test", "/path/to/module.so")
 
         assert result is False
+
+    def test_load_module_from_path_refuses_unverified_module(self):
+        """The gate itself: an unsigned/tampered module must never reach the
+        import machinery.  ``spec_from_file_location`` is asserted NOT called,
+        because "returned False" alone would also be true if the module had
+        loaded and failed later -- by which point the code has already run."""
+        from backend.licensing.module_loader import ModuleLoader
+        from backend.licensing.module_signature import ModuleSignatureError
+
+        loader = ModuleLoader()
+
+        with patch(
+            "backend.licensing.module_loader.verify_module_dir",
+            side_effect=ModuleSignatureError("unsigned module"),
+        ), patch("importlib.util.spec_from_file_location") as spec_mock:
+            result = loader._load_module_from_path("test", "/path/to/module.so")
+
+        assert result is False
+        spec_mock.assert_not_called()
 
 
 class TestModuleLoaderGlobal:

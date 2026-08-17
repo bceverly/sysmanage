@@ -21,6 +21,10 @@ import aiohttp
 from sqlalchemy.orm import sessionmaker
 
 from backend.config.config import get_config
+from backend.licensing.module_signature import (
+    ModuleSignatureError,
+    verify_plugin_bundle,
+)
 from backend.persistence import db as db_module
 from backend.persistence.models import ProPlusPluginCache
 from backend.utils.verbosity_logger import get_logger
@@ -185,6 +189,18 @@ class PluginBundleLoader:
             else:
                 actual_hash = self._compute_file_hash(temp_path)
 
+            # Authenticity, before this file is ever served to a browser.
+            # The hash check above is transport integrity only -- its digest
+            # came from the same response as the bytes -- and it is skipped
+            # entirely when the header is absent.  Verify the signature the
+            # bundle carries, against a key compiled into this build.
+            try:
+                verify_plugin_bundle(temp_path, module_code)
+            except ModuleSignatureError as exc:
+                logger.error("REFUSING plugin bundle for %s: %s", module_code, exc)
+                os.remove(temp_path)
+                return False
+
             # Move to final location
             os.rename(temp_path, final_path)
 
@@ -307,7 +323,23 @@ class PluginBundleLoader:
         plugin_path = os.path.join(modules_path, f"{module_code}-plugin.iife.js")
 
         if os.path.exists(plugin_path):
-            return True
+            # Existence was the entire check here: a cached bundle was served
+            # forever without re-verification, so anything that could write
+            # this file once owned every admin browser session thereafter.
+            try:
+                verify_plugin_bundle(plugin_path, module_code)
+                return True
+            except ModuleSignatureError as exc:
+                # Every install predating plugin signing has an unsigned
+                # bundle here; discarding and re-fetching is the upgrade path,
+                # and the replacement passes the same gate.
+                logger.warning(
+                    "Cached plugin for %s failed verification (%s) - "
+                    "discarding it and re-downloading",
+                    module_code,
+                    exc,
+                )
+                os.remove(plugin_path)
 
         return await self._download_plugin_bundle(module_code)
 

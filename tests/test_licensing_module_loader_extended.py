@@ -164,8 +164,13 @@ class TestEnsureModuleAvailable:
         cache_file = tmp_path / "engine.so"
         cache_file.write_bytes(b"x")
 
+        # The authenticity gate now decides whether the cached copy is used at
+        # all; stub it TRUE so this still tests "cache hit -> load from cache"
+        # rather than silently becoming a test of the re-download path.
         with patch.object(
             loader, "_get_cached_module_path", return_value=str(cache_file)
+        ), patch.object(
+            loader, "_cached_module_is_authentic", return_value=True
         ), patch.object(
             loader, "_load_module_from_path", return_value=True
         ) as load, patch.object(
@@ -497,7 +502,11 @@ class TestLoadModuleFromPathSuccess:
             f.write("VALUE = 42\n")
             module_path = f.name
         try:
-            ok = loader._load_module_from_path("synthetic_engine", module_path)
+            # Real import of a synthetic module: stub the authenticity gate,
+            # which would otherwise (correctly) refuse an unsigned temp file
+            # and turn this into a test of the gate rather than of loading.
+            with patch("backend.licensing.module_loader.verify_module_dir"):
+                ok = loader._load_module_from_path("synthetic_engine", module_path)
             assert ok is True
             assert "synthetic_engine" in loader._loaded_modules
             assert loader.get_module("synthetic_engine").VALUE == 42

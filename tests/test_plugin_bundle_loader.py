@@ -393,9 +393,46 @@ class TestPluginBundleLoaderEnsurePluginAvailable:
         mock_get_config.return_value = {"license": {"modules_path": str(modules_path)}}
 
         loader = PluginBundleLoader()
-        result = await loader.ensure_plugin_available("health_engine")
+        # A cached plugin is now re-verified on every use, not just assumed
+        # good because the file is present; this fixture writes plain JS with
+        # no signature, so stub the gate to keep testing the cache-hit path.
+        with patch("backend.licensing.plugin_bundle_loader.verify_plugin_bundle"):
+            result = await loader.ensure_plugin_available("health_engine")
 
         assert result is True
+
+    @pytest.mark.asyncio
+    @patch("backend.licensing.plugin_bundle_loader.get_config")
+    async def test_ensure_plugin_available_discards_unverifiable_cache(
+        self, mock_get_config, tmp_path
+    ):
+        """An unsigned cached bundle -- what every pre-signing install has --
+        must be deleted and re-fetched, not served.  Serving it was the old
+        behaviour: existence was the entire check."""
+        from backend.licensing.module_signature import ModuleSignatureError
+        from backend.licensing.plugin_bundle_loader import PluginBundleLoader
+
+        modules_path = tmp_path / "modules"
+        modules_path.mkdir()
+        plugin_file = modules_path / "health_engine-plugin.iife.js"
+        plugin_file.write_text("// unsigned legacy bundle")
+        mock_get_config.return_value = {"license": {"modules_path": str(modules_path)}}
+
+        loader = PluginBundleLoader()
+        with (
+            patch(
+                "backend.licensing.plugin_bundle_loader.verify_plugin_bundle",
+                side_effect=ModuleSignatureError("unsigned"),
+            ),
+            patch.object(
+                loader, "_download_plugin_bundle", new=AsyncMock(return_value=True)
+            ) as download,
+        ):
+            result = await loader.ensure_plugin_available("health_engine")
+
+        assert result is True
+        assert not plugin_file.exists()  # the unverified copy is gone
+        download.assert_awaited_once()
 
     @pytest.mark.asyncio
     @patch("backend.licensing.plugin_bundle_loader.get_config")
