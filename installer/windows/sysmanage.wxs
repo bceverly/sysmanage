@@ -91,11 +91,11 @@
            generated from the shared template by
            scripts/render_nginx_configs.py, so Windows stays inside the drift
            gate rather than becoming a hand-maintained ninth copy. -->
-      <Component Id="NginxInstallScript" Guid="B8C9D0E1-F2A3-4B5C-8D9E-0F1A2B3C4D5E">
+      <Component Id="NginxInstallScript" Guid="0BD43DA5-8DDD-44D9-9A80-8F6AB6AFDF3E">
         <File Id="InstallNginxPs1" Source="install-nginx.ps1" />
       </Component>
 
-      <Component Id="NginxServerBlock" Guid="C9D0E1F2-A3B4-4C5D-8E9F-0A1B2C3D4E5F">
+      <Component Id="NginxServerBlock" Guid="0997B4F5-E941-4399-80AD-8CE3B0684FF6">
         <File Id="SysmanageNginxConf" Source="sysmanage-nginx.conf" />
       </Component>
 

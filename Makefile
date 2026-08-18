@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -1140,7 +1140,7 @@ lint-freebsd-port:
 	@$(PYTHON) scripts/check_freebsd_port.py
 
 
-lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
+lint: lint-file-length lint-python lint-typescript check-engine-codes check-nginx-configs check-msi-guids i18n-validate i18n-placeholders i18n-check-backend i18n-check-msgid-style i18n-check-coverage i18n-check-english i18n-strict i18n-markup i18n-complete lint-version check-migrations lint-freebsd-port
 	@echo "[OK] All linting completed successfully!"
 
 # Guard: the per-platform nginx configs are GENERATED from one template.
@@ -1150,6 +1150,14 @@ lint: lint-file-length lint-python lint-typescript check-engine-codes check-ngin
 check-nginx-configs: $(VENV_ACTIVATE)
 	@echo "=== nginx config drift check ==="
 	@$(PYTHON) scripts/render_nginx_configs.py --check
+
+# WiX rejects duplicate component GUIDs, but only on Windows at MSI build time --
+# so a collision costs a full release cycle to discover.  The GUIDs are
+# hand-authored and follow a visual pattern, which makes "copy a neighbour and
+# advance it" the natural way to add one, and the natural way to collide.
+check-msi-guids: $(VENV_ACTIVATE)
+	@echo "=== MSI component GUID uniqueness ==="
+	@$(PYTHON) scripts/check_msi_guids.py
 
 # Guard: migrations must be expand-contract (backward-compatible across the
 # incremental fleet migration). See docs/migration-expand-contract.md.
