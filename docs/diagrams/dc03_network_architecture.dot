@@ -52,7 +52,7 @@ digraph DC03_Network_Architecture {
         fontsize = 12;
 
         fw_edge [label = "Edge Firewall / WAF\n(allow-list ingress)", fillcolor = "#F4D58A", shape = "octagon"];
-        rp      [label = "Reverse Proxy / TLS Term.\n(nginx — optional)\nTLS 1.2+ ciphers,\nHSTS, OCSP stapling", fillcolor = "#F4D58A"];
+        rp      [label = "Reverse Proxy / TLS Term.\n(nginx — REQUIRED)\nServes the web console,\nTLS 1.2+ ciphers,\nHSTS, OCSP stapling", fillcolor = "#F4D58A"];
 
         api_srv [label = "SysManage API Server\nFastAPI / Uvicorn\nINBOUND: TCP 6443 (HTTPS + WSS)", fillcolor = "#F4C97D"];
         web_srv [label = "SysManage WebUI\nINBOUND: TCP 8080 (HTTPS)", fillcolor = "#F4C97D"];

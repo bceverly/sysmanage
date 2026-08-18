@@ -1371,6 +1371,48 @@ _fetch_latest_release_asset() {
   curl -fsSL -o "$outpath" "$url"
 }
 
+# nginx for the Windows bundle.
+#
+# Windows is the only platform whose package manager cannot resolve nginx for
+# us: the Linux builders pull it in automatically because it is a declared
+# package dependency and they download full dependency closures, and the BSDs
+# resolve it from their own pkg repos on the target.  Windows has neither, and
+# nginx is NOT optional -- the backend serves no static files, so without it a
+# Windows install has no web console at all.
+#
+# So an air-gapped Windows install must carry nginx with it.  install-nginx.ps1
+# looks for nginx-<ver>.zip beside itself before reaching for the network, which
+# is exactly what this stages.  Version and hash are pinned to match that
+# script; if they drift the installer refuses the archive rather than extracting
+# something unverified.
+NGINX_WIN_VERSION="1.28.0"
+NGINX_WIN_SHA256="db8c7a529f84c819702bd1c50926b27d961a48b4f72fc7c46b30314fc2bbfd7c"
+
+_stage_nginx_windows() {
+  local outdir="$1"
+  local zip="$outdir/nginx-${NGINX_WIN_VERSION}.zip"
+  local url="https://nginx.org/download/nginx-${NGINX_WIN_VERSION}.zip"
+
+  log "[nginx] fetching nginx ${NGINX_WIN_VERSION} for windows"
+  if ! curl -fsSL -o "$zip" "$url"; then
+    warn "[nginx] download failed - the Windows bundle will need network at install time"
+    rm -f "$zip"
+    return
+  fi
+
+  # Verify HERE, not only in the installer: a corrupt or substituted archive
+  # baked into an air-gap bundle gets carried onto a disconnected network where
+  # nobody can check it against upstream.
+  local got
+  got=$(sha256sum "$zip" | cut -d' ' -f1)
+  if [ "$got" != "$NGINX_WIN_SHA256" ]; then
+    warn "[nginx] checksum MISMATCH (expected $NGINX_WIN_SHA256, got $got) - not bundling"
+    rm -f "$zip"
+    return
+  fi
+  log "[nginx] staged verified nginx-${NGINX_WIN_VERSION}.zip into $(basename "$outdir")"
+}
+
 build_windows() {
   local outdir="$STAGING_DIR/windows"
   mkdir -p "$outdir"
@@ -1384,6 +1426,7 @@ build_windows() {
   fi
   _fetch_latest_release_asset 'windows-arm64.*\.msi' '' "$outdir/${PKG_NAME}-arm64.msi" || true
   _stage_openbao "$outdir" binary-windows
+  _stage_nginx_windows "$outdir"
   # README — Windows install can't be scripted from POSIX sh; instruct user.
   cat > "$outdir/install.sh" <<EOF
 #!/bin/sh

@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import re
 import sys
 from pathlib import Path
 from typing import Dict
@@ -80,9 +81,15 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "TLS_KEY": "%%PREFIX%%/etc/sysmanage/tls/server.key",
     },
     "macos": {
+        # FRONTEND_ROOT tracks where the .pkg ACTUALLY puts the frontend --
+        # /usr/local/lib/sysmanage/frontend/dist (Makefile: installer-macos
+        # rsyncs frontend/dist there).  It said /opt/sysmanage/frontend/dist,
+        # a Linux path that exists on no macOS install, so the console 404'd
+        # even on Intel with nginx correctly installed.  postinstall.sh
+        # rewrites the /usr/local prefix to $(brew --prefix) on Apple Silicon.
         "RELOAD_CMD": "nginx -s reload",
         "CONF_PATH": "/usr/local/etc/nginx/servers/sysmanage-nginx.conf",
-        "FRONTEND_ROOT": "/opt/sysmanage/frontend/dist",
+        "FRONTEND_ROOT": "/usr/local/lib/sysmanage/frontend/dist",
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/usr/local/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/usr/local/etc/sysmanage/tls/server.key",
@@ -118,6 +125,25 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "AIRGAP_ROOT": "/var/lib/sysmanage/airgap-repo/",
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
+    },
+    # Windows renders from the SAME template as everything else, deliberately.
+    # It was the one platform with no nginx at all: the MSI laid down the built
+    # frontend and then nothing served it, while install.ps1 told the operator
+    # to open http://localhost:8080 -- which is the API.  So the console was
+    # unreachable, with no TLS, no security headers and no /airgap-repo/ route.
+    # Hand-writing a ninth config would have put Windows outside the drift gate
+    # that exists precisely because eight hand-maintained copies diverged.
+    #
+    # FORWARD SLASHES: nginx on Windows takes "/"-separated paths even for
+    # drive-letter roots ("C:/Program Files/..."), and a backslash would be read
+    # as an escape.  Quoted because the default install path contains a space.
+    "windows": {
+        "RELOAD_CMD": "nssm restart SysManageNginx",
+        "CONF_PATH": "C:/Program Files/SysManage Server/nginx/conf/sysmanage-nginx.conf",
+        "FRONTEND_ROOT": '"C:/Program Files/SysManage Server/frontend"',
+        "AIRGAP_ROOT": '"C:/ProgramData/SysManage/airgap-repo/"',
+        "TLS_CERT": '"C:/ProgramData/SysManage/tls/server.crt"',
+        "TLS_KEY": '"C:/ProgramData/SysManage/tls/server.key"',
     },
 }
 
@@ -365,6 +391,55 @@ PORT_HEADER = """# Installed by sysutils/sysmanage as %%PREFIX%%/etc/nginx/
 """
 
 
+# The Windows nginx version+hash is pinned in TWO files: the installer that
+# verifies the archive, and the air-gap bundler that stages it.  They must
+# agree -- a bundled archive whose hash the installer does not expect is
+# refused on a disconnected network, where nobody can go and check upstream.
+# Same duplicated-constant hazard the config drift check exists for, so it is
+# checked in the same place.
+WIN_INSTALLER = REPO / "installer" / "windows" / "install-nginx.ps1"
+WIN_BUNDLER = REPO / "scripts" / "buildAirGapBundle.sh"
+
+
+def check_windows_nginx_pin() -> list:
+    """Problems with the Windows nginx version/hash pin, or []."""
+    problems = []
+    if not (WIN_INSTALLER.is_file() and WIN_BUNDLER.is_file()):
+        return ["windows nginx pin: installer or bundler missing"]
+    inst = WIN_INSTALLER.read_text(encoding="utf-8")
+    bund = WIN_BUNDLER.read_text(encoding="utf-8")
+
+    def grab(text, pattern):
+        found = re.search(pattern, text)
+        return found.group(1) if found else None
+
+    iv = grab(inst, r'\$NginxVersion\s*=\s*"([0-9.]+)"')
+    ih = grab(inst, r'\$NginxSha256\s*=\s*"([a-f0-9]{64})"')
+    bv = grab(bund, r'NGINX_WIN_VERSION="([0-9.]+)"')
+    bh = grab(bund, r'NGINX_WIN_SHA256="([a-f0-9]{64})"')
+
+    for name, value in (
+        ("installer version", iv),
+        ("installer sha256", ih),
+        ("bundler version", bv),
+        ("bundler sha256", bh),
+    ):
+        if value is None:
+            problems.append(f"windows nginx pin: could not find {name}")
+    if problems:
+        return problems
+    if iv != bv:
+        problems.append(
+            f"windows nginx VERSION differs: installer {iv} vs bundler {bv}"
+        )
+    if ih != bh:
+        problems.append(
+            f"windows nginx SHA256 differs: installer {ih[:16]}... vs "
+            f"bundler {bh[:16]}..."
+        )
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -379,6 +454,11 @@ def main() -> int:
 
     problems = []
     written = []
+
+    # Checked in both modes: a drifted pin is wrong whether or not anything
+    # else needs rewriting, and this script cannot repair it (the correct hash
+    # depends on which nginx you intend to ship).
+    problems.extend(check_windows_nginx_pin())
 
     for platform in sorted(PLATFORMS):
         target = target_for(platform)

@@ -286,6 +286,38 @@ try {
         New-Item -ItemType Directory -Path $DbDir -Force | Out-Null
     }
 
+    # nginx - REQUIRED, not optional.  The backend has no static-file mount, so
+    # without nginx the frontend extracted above is never served and there is no
+    # console at all (this used to be exactly the Windows situation).  nginx also
+    # terminates TLS on 443 and adds the security headers every other platform
+    # gets.
+    $NginxScript = Join-Path $InstallDir "install-nginx.ps1"
+    if (Test-Path $NginxScript) {
+        Write-Log "Setting up nginx (required - it serves the web console)..."
+        try {
+            & powershell.exe -ExecutionPolicy Bypass -File $NginxScript -InstallDir $InstallDir 2>&1 |
+                Out-File -FilePath $LogFile -Append
+            if ($LASTEXITCODE -ne 0) { throw "install-nginx.ps1 exited $LASTEXITCODE" }
+            Write-Log "nginx configured"
+        } catch {
+            # Loud, and NOT silently swallowed: an install that skips this
+            # produces a server with no reachable console, which previously
+            # reported success and left the operator to discover it.
+            Write-Log ""
+            Write-Log "ERROR: nginx setup failed: $_"
+            Write-Log "  SysManage serves its web console THROUGH nginx - without it"
+            Write-Log "  the console is unreachable (the API on 8080 does not serve the UI)."
+            Write-Log "  Fix the error above and re-run:"
+            Write-Log "    powershell -ExecutionPolicy Bypass -File `"$NginxScript`""
+            Write-Log ""
+            throw
+        }
+    } else {
+        Write-Log "ERROR: install-nginx.ps1 not found at $NginxScript"
+        Write-Log "  The web console cannot be served without nginx."
+        throw "install-nginx.ps1 missing"
+    }
+
     # Mark installation as successful
     $InstallSuccess = $true
 
@@ -295,10 +327,14 @@ try {
     Write-Log "Next steps:"
     Write-Log "1. Install and configure PostgreSQL"
     Write-Log "2. Edit configuration: $ConfigFile"
-    Write-Log "3. Service will be created and started next"
+    Write-Log "3. Install a TLS certificate (see below) - nginx will not start without it"
+    Write-Log "4. Service will be created and started next"
     Write-Log ""
-    Write-Log "After service starts, access the web interface at:"
-    Write-Log "  http://localhost:8080"
+    Write-Log "The web console is served by nginx on port 443:"
+    Write-Log "  https://localhost/"
+    Write-Log ""
+    Write-Log "The API on 127.0.0.1:8080 is loopback-only and does NOT serve the"
+    Write-Log "console - nginx serves the UI and proxies /api/ and /ws to it."
     Write-Log ""
 
 } catch {

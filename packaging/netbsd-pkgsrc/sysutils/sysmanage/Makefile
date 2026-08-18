@@ -59,7 +59,12 @@ do-install:
 	${INSTALL_DATA_DIR} ${DESTDIR}${PREFIX}/share/examples/sysmanage
 	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage.yaml.example \
 		${DESTDIR}${PREFIX}/share/examples/sysmanage/sysmanage.yaml
-	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage-nginx.conf \
+# The NETBSD config, not openSUSE's.  The frontend root coincides, which is why
+# this was not obviously broken -- but the TLS certificate paths do not
+# (/usr/pkg/etc/sysmanage/tls vs /etc/sysmanage/tls), so nginx looked for
+# certificates the package never creates.  Both are generated from one template
+# by scripts/render_nginx_configs.py.
+	${INSTALL_DATA} ${WRKSRC}/installer/netbsd/sysmanage-nginx.conf \
 		${DESTDIR}${PREFIX}/share/examples/sysmanage/sysmanage-nginx.conf
 
 .include "../../lang/python/application.mk"

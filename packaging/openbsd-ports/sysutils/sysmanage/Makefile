@@ -61,7 +61,13 @@ do-install:
 	${INSTALL_DATA_DIR} ${PREFIX}/share/examples/sysmanage
 	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage.yaml.example \
 		${PREFIX}/share/examples/sysmanage/sysmanage.yaml
-	${INSTALL_DATA} ${WRKSRC}/installer/opensuse/sysmanage-nginx.conf \
+# The OPENBSD config, not openSUSE's.  This shipped installer/opensuse/'s copy,
+# whose document root is /opt/sysmanage/frontend/dist -- a path that does not
+# exist on OpenBSD (the frontend lives in /var/www/sysmanage), so the console
+# 404'd even after an admin copied the example into place.  Both files are
+# generated from one template by scripts/render_nginx_configs.py; this just
+# has to name the right one.
+	${INSTALL_DATA} ${WRKSRC}/installer/openbsd/sysmanage-nginx.conf \
 		${PREFIX}/share/examples/sysmanage/sysmanage-nginx.conf
 	${INSTALL_DATA_DIR} ${DESTDIR}/etc/rc.d
 	${INSTALL_SCRIPT} ${FILESDIR}/sysmanage.rc \

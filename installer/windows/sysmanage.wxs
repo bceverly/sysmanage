@@ -84,6 +84,21 @@
         <File Id="InstallPs1" Source="install.ps1" />
       </Component>
 
+      <!-- nginx setup script + the generated server block.  nginx is REQUIRED
+           on Windows exactly as on every other platform: the backend has no
+           static-file mount, so without it the frontend extracted by
+           install.ps1 is never served and there is no console.  The .conf is
+           generated from the shared template by
+           scripts/render_nginx_configs.py, so Windows stays inside the drift
+           gate rather than becoming a hand-maintained ninth copy. -->
+      <Component Id="NginxInstallScript" Guid="B8C9D0E1-F2A3-4B5C-8D9E-0F1A2B3C4D5E">
+        <File Id="InstallNginxPs1" Source="install-nginx.ps1" />
+      </Component>
+
+      <Component Id="NginxServerBlock" Guid="C9D0E1F2-A3B4-4C5D-8E9F-0A1B2C3D4E5F">
+        <File Id="SysmanageNginxConf" Source="sysmanage-nginx.conf" />
+      </Component>
+
       <!-- Python check script -->
       <Component Id="PythonCheckScript" Guid="E5F6A7B8-C9D0-4E5F-8A9B-0C1D2E3F4A5B">
         <File Id="CheckPythonPs1" Source="check-python.ps1" />

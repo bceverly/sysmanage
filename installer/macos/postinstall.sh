@@ -84,20 +84,57 @@ else
 	echo "[WARNING] OpenBAO ('bao') not installed; install it or set vault.enabled=false."
 fi
 
-echo "Checking for nginx..."
-if command -v nginx >/dev/null 2>&1; then
-	echo "✓ nginx found - configuring automatically"
-	NGINX_CONF_DIR="/usr/local/etc/nginx/servers"
-	if [ -d "$NGINX_CONF_DIR" ]; then
-		cp /usr/local/etc/sysmanage/sysmanage-nginx.conf "$NGINX_CONF_DIR/"
-		echo "✓ nginx configuration installed to $NGINX_CONF_DIR/"
-		echo "  Restart nginx to apply: brew services restart nginx"
-	else
-		echo "[WARNING] nginx servers directory not found at $NGINX_CONF_DIR"
-		echo "  Manual configuration needed - see /usr/local/etc/sysmanage/sysmanage-nginx.conf"
+# nginx is REQUIRED, not optional.  The backend serves no static files, so
+# without nginx there is no web console at all -- only a loopback API.  This
+# used to say "[INFO] nginx not installed - will need to be installed
+# separately" and carry on, which left a macOS install reporting success with an
+# unreachable console.
+#
+# The Homebrew prefix is DETECTED, not assumed: Apple Silicon uses
+# /opt/homebrew while Intel uses /usr/local.  Hardcoding /usr/local meant that
+# on every Apple Silicon Mac the config was written to a directory that does not
+# exist, the script printed a warning, and nothing served the console.
+echo "Setting up nginx (required - it serves the web console)..."
+
+BREW_PREFIX=""
+if command -v brew >/dev/null 2>&1; then
+	BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
+fi
+[ -n "$BREW_PREFIX" ] || BREW_PREFIX="/usr/local"
+
+if ! command -v nginx >/dev/null 2>&1; then
+	if command -v brew >/dev/null 2>&1; then
+		echo "  nginx not found - installing via Homebrew..."
+		brew install nginx >/dev/null 2>&1 || true
 	fi
+fi
+
+if command -v nginx >/dev/null 2>&1; then
+	echo "✓ nginx present - configuring"
+	# Only the nginx CONFIG DIRECTORY moves with the Homebrew prefix
+	# (/opt/homebrew on Apple Silicon, /usr/local on Intel).  The config's
+	# own paths are NOT rewritten: this .pkg installs to fixed absolute
+	# locations on both architectures -- the frontend is always
+	# /usr/local/lib/sysmanage/frontend/dist and the TLS material always
+	# /usr/local/etc/sysmanage/tls -- so rewriting them to $BREW_PREFIX would
+	# point nginx at directories that do not exist on Apple Silicon.
+	NGINX_CONF_DIR="${BREW_PREFIX}/etc/nginx/servers"
+	mkdir -p "$NGINX_CONF_DIR"
+	cp /usr/local/etc/sysmanage/sysmanage-nginx.conf \
+		"$NGINX_CONF_DIR/sysmanage-nginx.conf"
+	echo "✓ nginx configuration installed to $NGINX_CONF_DIR/"
+	echo "  Apply with: brew services restart nginx"
 else
-	echo "[INFO] nginx not installed - will need to be installed separately"
+	# Loud and specific.  Do NOT pretend the install succeeded: without nginx
+	# the console cannot be reached at all.
+	echo "[ERROR] nginx is REQUIRED and could not be installed automatically."
+	echo "        SysManage serves its web console THROUGH nginx - the API on"
+	echo "        127.0.0.1:8080 does not serve the UI."
+	echo "        Install it and re-run this step:"
+	echo "            brew install nginx"
+	echo "            sudo cp /usr/local/etc/sysmanage/sysmanage-nginx.conf \\"
+	echo "                 \"\$(brew --prefix)/etc/nginx/servers/\""
+	echo "            brew services restart nginx"
 fi
 
 echo ""

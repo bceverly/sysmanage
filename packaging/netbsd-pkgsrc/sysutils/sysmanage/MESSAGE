@@ -1,0 +1,50 @@
+===========================================================================
+$NetBSD$
+
+SysManage Server is installed, but it does NOT serve anything yet.
+
+nginx is the front door and is REQUIRED, not optional.  The application
+listens on loopback 127.0.0.1:8080 and serves the REST API and the agent
+WebSocket only -- it has no static-file handler, so the web console is served
+by nginx and by nothing else.  Until the steps below are done there is no
+console to reach.
+
+1. TLS certificate
+
+   Install a certificate and key.  This package does not generate them: a
+   certificate a package manufactured for you is one no client should trust.
+
+     ${PKG_SYSCONFDIR}/sysmanage/tls/server.crt
+     ${PKG_SYSCONFDIR}/sysmanage/tls/server.key
+
+2. nginx configuration
+
+   The shipped config is an EXAMPLE and is not read where it lands.  Copy it
+   into place and include it:
+
+     cp ${PREFIX}/share/examples/sysmanage/sysmanage-nginx.conf \
+        ${PKG_SYSCONFDIR}/nginx/conf.d/sysmanage-nginx.conf
+     # ensure ${PKG_SYSCONFDIR}/nginx/nginx.conf has, inside http { }:
+     #     include ${PKG_SYSCONFDIR}/nginx/conf.d/*.conf;
+     nginx -t
+     /etc/rc.d/nginx start
+
+   nginx will refuse to start until the certificate exists.  That is
+   deliberate: a management console must not come up in cleartext because a
+   file was missing.
+
+3. Configuration file
+
+     cp ${PREFIX}/share/examples/sysmanage/sysmanage.yaml \
+        ${PKG_SYSCONFDIR}/sysmanage.yaml
+
+   Then edit it -- at minimum the database connection.
+
+4. Start the server
+
+     /etc/rc.d/sysmanage start
+
+   The console is then at https://<this-host>/ -- port 443 only.  Nothing
+   needs to reach 8080 from outside this machine, and nothing should.
+
+===========================================================================
