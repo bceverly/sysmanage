@@ -5975,6 +5975,104 @@ close the gap between our output and the parsers that consume it.
       shape is deliberately the most proxy-tolerant), and no real corporate
       TLS-inspecting proxy has been tested — only a local CONNECT proxy.)*
 
+      *(ADDENDUM 2026-08-18 — this item said "all 8 nginx configs" and read as
+      though every platform had been unified.  **Windows was excluded entirely,
+      and the exclusion was invisible** because the count matched the number of
+      config files rather than the number of supported platforms.  The MSI
+      extracted the built frontend and then nothing served it, while
+      `install.ps1` finished by telling the operator to open
+      `http://localhost:8080` — the loopback API, which has no static-file
+      handler.  So a Windows install laid down the whole console, reported
+      success, and served nothing: no UI, no TLS, no security headers, no
+      `/airgap-repo/` route.
+
+      A deep audit prompted by that finding showed it was FOUR platforms, not
+      one.  OpenBSD and NetBSD shipped `installer/opensuse/sysmanage-nginx.conf`
+      — another platform's file — into `share/examples/` only; on OpenBSD its
+      document root (`/opt/sysmanage/frontend/dist`) does not exist, so the
+      console 404'd even after an admin copied it into place, and on NetBSD the
+      TLS paths named certificates the package never creates.  macOS treated
+      nginx as optional ("[INFO] nginx not installed - will need to be installed
+      separately", then carried on) and hardcoded the Intel Homebrew prefix, so
+      Apple Silicon silently got nothing; its config's document root was a Linux
+      path the `.pkg` never creates, so macOS would have 404'd even on Intel with
+      nginx correctly installed.
+
+      The drift guard was working exactly as designed and could not have caught
+      any of this: it verifies the generated configs match the template, not
+      that packaging ships the right one to a location nginx reads.  All four
+      failures lived in that gap.
+
+      FIXED: Windows renders from the same template (9 configs now, inside the
+      same drift guard) and the MSI installs nginx — pinned version, SHA-256
+      verified before extraction, registered under NSSM because nginx has no
+      native Windows service support.  Air-gap bundles carry nginx so an offline
+      install needs no network; a normal install fetches it.  That version+hash
+      is pinned in two files, so `make lint` now checks they agree.  OpenBSD and
+      NetBSD ship their own generated configs and gained the post-install MESSAGE
+      files they never had.  macOS installs nginx via Homebrew, detects the
+      prefix, and its document root now matches where the `.pkg` actually puts
+      the frontend.  FreeBSD deliberately unchanged — `.sample` is the ports
+      idiom and its pkg-message already documents the rename.  Docs and the
+      network-architecture diagram no longer call nginx "optional"; it is
+      REQUIRED, because the backend serves no static files.
+
+      NOT VERIFIED: none of the Windows nginx path has run on Windows, and the
+      BSD/macOS packaging changes have not been through a real port or `.pkg`
+      build.)*
+
+- [x] **Pro+ engines and plugins were distributed with NO authenticity check.**
+      *(DONE 2026-08-17/18.)*  `ModuleLoader` verified a downloaded engine
+      against an `X-Content-SHA512` **response header** — a digest supplied by
+      the same response as the payload it vouched for, so anything able to serve
+      that response supplied both.  The check also read `if expected_hash and
+      actual != expected:`, so **omitting the header skipped verification
+      entirely**: an attacker never needed to forge a digest, only to leave it
+      out.  And the cache path never verified at all — once an engine was on
+      disk, `_load_module_from_path` executed it unconditionally on every start.
+      Plugin bundles had the identical three defects.
+
+      These are native shared objects `dlopen`ed into the server process, and JS
+      executed in an authenticated administrator's browser.  It was the same
+      class of hole `[trusted=yes]` was for apt, on the code path with the worst
+      consequence.
+
+      FIXED with Ed25519 signatures (not GPG: the verifier is the OSS server on
+      Linux/BSD/macOS/Windows, `cryptography` is already a prod dependency there,
+      and requiring a `gpg` binary everywhere is not something we can guarantee).
+      Engines carry `MANIFEST.json` + `MANIFEST.sig` inside the tarball; plugins
+      carry the signature as a trailing JS comment, so the license-server API
+      needed no change and the signature survives caching — which is what allows
+      re-verification on every use instead of only at download.  The manifest
+      binds IDENTITY (code/version/platform/arch/pyver), not just content, so a
+      validly-signed bundle cannot be served in place of a different engine or an
+      old version replayed over a patched one.  Verification gates
+      `_load_module_from_path`, the single chokepoint both the download and cache
+      paths pass through.  Fail-closed, with no environment variable to disable
+      it.  Trust anchor compiled into the server: read from a file beside the
+      modules, whoever can replace a module could replace the key vouching for it.
+
+      FOUR bugs found by testing rather than by design — three of them mine:
+      comparing the manifest's `python_version` to the running interpreter
+      rejected every genuine `abi3` bundle (a total Pro+ outage dressed as a
+      security fix); an unsigned `.so` dropped beside signed files passed; a
+      manifest key built from a Windows `Path` produced
+      `locales/ar\LC_MESSAGES\x.mo` while tarfile stored forward slashes, making
+      **every Windows-built bundle unverifiable**; and `_is_signed` checked only
+      that a signature EXISTED, so those broken bundles counted as signed and the
+      repair sweep skipped them through rebuild after rebuild.
+
+      Verified against the shipped trust anchor: **232 / 232 current-version
+      bundles across all 8 platform/arch combinations**, plus 25 adversarial unit
+      tests.  Locally-built engines are signed by the same key, so development
+      needs no exemption.
+
+      NOT DONE: key rotation has never been exercised (the anchor list supports
+      overlap, and there is a test, but no real rotation has run), and the
+      private key must exist on every build machine — Linux, macOS, Windows and
+      each BSD — which is a real operational cost of signing at build time.
+
+
 - [ ] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
       Measured 2026-08-04: nothing on `repo.sysmanage.org` is cached — not the
       indexes (correct) and not the packages (suboptimal). Cost impact is
