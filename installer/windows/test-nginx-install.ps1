@@ -259,19 +259,49 @@ Step "Config test FAILS without a certificate (expected, by design)" {
 } | Out-Null
 
 # 8 -----------------------------------------------------------------------
+function Find-OpenSsl {
+    <#
+        openssl on PATH, else the copy Git for Windows installs.
+
+        Git ships openssl at usr\bin\openssl.exe but does not put that
+        directory on PATH -- so a machine that HAS openssl still looked like it
+        did not, and five checks skipped for no real reason.  Look where it
+        actually lives before giving up.
+    #>
+    $cmd = Get-Command openssl -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $candidates = @(
+        "$env:ProgramFiles\Git\usr\bin\openssl.exe",
+        "${env:ProgramFiles(x86)}\Git\usr\bin\openssl.exe",
+        "$env:LOCALAPPDATA\Programs\Git\usr\bin\openssl.exe"
+    )
+    # Also derive it from wherever git itself is, which covers a custom prefix.
+    $git = Get-Command git -ErrorAction SilentlyContinue
+    if ($git) {
+        $root = Split-Path (Split-Path $git.Source -Parent) -Parent
+        $candidates += (Join-Path $root "usr\bin\openssl.exe")
+    }
+    foreach ($c in $candidates) {
+        if ($c -and (Test-Path $c)) { return $c }
+    }
+    return $null
+}
+
+$script:OpenSsl = Find-OpenSsl
 $CanServe = $true
-if (-not (Get-Command openssl -ErrorAction SilentlyContinue)) {
+if (-not $script:OpenSsl) {
     $CanServe = $false
     foreach ($n in @("Self-signed certificate for the serving test",
                      "Config test PASSES with a certificate",
                      "Service starts and listens on 443",
-                     "HTTPS responds (404 expected - no frontend in this isolated test)",
+                     "HTTPS responds over TLS",
                      "HTTP 80 redirects to HTTPS")) {
-        Skip $n "openssl not on PATH (ships with Git for Windows) - cannot build a PEM keypair"
+        Skip $n "openssl not found (PATH, or Git for Windows usr\bin) - cannot build a PEM keypair"
     }
     Write-Host ""
     Write-Host "    Everything BEFORE this point is the install itself and is fully tested." -ForegroundColor DarkYellow
-    Write-Host "    Install openssl (or add Git's usr\bin to PATH) to also test serving." -ForegroundColor DarkYellow
+    Write-Host "    Install Git for Windows, or add an openssl to PATH, to also test serving." -ForegroundColor DarkYellow
 }
 
 if ($CanServe) {
@@ -286,10 +316,19 @@ Step "Self-signed certificate for the serving test" {
     $pw = ConvertTo-SecureString -String "test" -Force -AsPlainText
     Export-PfxCertificate -Cert $c -FilePath $pfx -Password $pw | Out-Null
     # nginx wants PEM.  openssl ships with Git for Windows; fall back cleanly.
-    $ossl = Get-Command openssl -ErrorAction SilentlyContinue
-    if (-not $ossl) { throw "openssl vanished between the check above and here" }
-    & openssl pkcs12 -in $pfx -clcerts -nokeys -out $crt -passin pass:test 2>&1 | Out-Null
-    & openssl pkcs12 -in $pfx -nocerts -nodes -out $key -passin pass:test 2>&1 | Out-Null
+    if (-not $script:OpenSsl) { throw "openssl vanished between the check above and here" }
+    # EAP relaxed: openssl writes progress to stderr, which "Stop" would
+    # promote to a terminating error -- the same trap that broke nssm and
+    # nginx -t.
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $script:OpenSsl pkcs12 -in $pfx -clcerts -nokeys -out $crt -passin pass:test 2>&1 | Out-Null
+        & $script:OpenSsl pkcs12 -in $pfx -nocerts -nodes -out $key -passin pass:test 2>&1 | Out-Null
+    } finally { $ErrorActionPreference = $prevEap }
+    if (-not (Test-Path $crt) -or -not (Test-Path $key)) {
+        throw "openssl produced no PEM files (see $LogFile)"
+    }
     Remove-Item $pfx -Force -ErrorAction SilentlyContinue
     Remove-Item "Cert:\LocalMachine\My\$($c.Thumbprint)" -Force -ErrorAction SilentlyContinue
     $script:MadeTls = $true
@@ -316,13 +355,28 @@ Step "Service starts and listens on 443" {
     "Running, listening on 443"
 } | Out-Null
 
-Step "HTTPS responds (404 expected - no frontend in this isolated test)" {
+Step "HTTPS responds over TLS" {
     $code = (& curl.exe -k -s -o NUL -w "%{http_code}" https://localhost/ 2>&1)
     if (-not $code) { throw "no HTTP response at all - TLS handshake or listener problem" }
     if ($code -eq "000") { throw "curl could not connect (code 000) - check the nginx error log below" }
-    if ($code -eq "404") { return "404 - nginx is serving; the document root is absent in this test, as expected" }
-    if ($code -eq "200") { return "200 - serving content (a real frontend is present)" }
-    "HTTP $code (unexpected but nginx responded)"
+
+    # What each code MEANS here, rather than accepting anything as success.
+    # The config is an SPA: `try_files $uri $uri/ /index.html`.  With no
+    # document root (this isolated test ships no frontend) the fallback
+    # /index.html is missing too, so nginx internally redirects to it, re-enters
+    # location /, detects the cycle and returns 500.  That is correct nginx
+    # behaviour and proves TLS + the server block are live -- which is what this
+    # step exists to prove.  A real install has index.html and returns 200.
+    switch ($code) {
+        "200" { return "200 - serving a real frontend" }
+        "500" { return "500 - expected: SPA fallback cycles because this test has no frontend (TLS + server block confirmed live)" }
+        "404" { return "404 - nginx serving, document root absent" }
+        default {
+            throw ("HTTP $code - nginx responded but with none of the outcomes this " +
+                   "configuration can legitimately produce (200 with a frontend, " +
+                   "500/404 without one). Check the nginx error log below.")
+        }
+    }
 } | Out-Null
 
 Step "HTTP 80 redirects to HTTPS" {
