@@ -51,6 +51,14 @@ on:
           - 'yes'
           - 'no'
 
+# Serialize, do NOT cancel.  This workflow publishes: killing it mid-flight
+# can leave a half-published release (R2 objects, GitHub assets, PPA/COPR/OBS
+# submissions) to clean up by hand.  Grouping still stops two releases from
+# building at once and starving the runner pool.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   contents: write  # Needed for creating releases and pushing to repos
 
@@ -168,18 +176,31 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
 
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
+
       - name: Install build dependencies
         run: |
-          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
-          sudo apt-get install -y \
-            debhelper \
-            dh-python \
-            python3-all \
-            python3-setuptools \
-            python3-pip \
-            build-essential \
-            devscripts \
-            lintian
+          # Skip apt entirely when every package is already present.  apt's
+          # Acquire::*::Timeout is an INACTIVITY timeout, not a total-transfer
+          # budget: a mirror that dribbles bytes slowly never trips it, which is
+          # how this step burned a whole 60-minute job timeout.  The cheapest fix
+          # is not to talk to the archive at all -- most of these ship on the
+          # runner image already.  dpkg-query (not `command -v`) because several
+          # of these packages install no binary of their own.
+          MISSING=""
+          for p in debhelper dh-python python3-all python3-setuptools python3-pip build-essential devscripts lintian; do
+            dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "ok installed" || MISSING="$MISSING $p"
+          done
+          if [ -z "$MISSING" ]; then
+            echo "apt: all packages already present, skipping update/install"
+          else
+            echo "apt: installing:$MISSING"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends $MISSING
+          fi
 
       - name: Install frontend dependencies
         run: |
@@ -649,6 +670,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building CentOS RPM for version: $VERSION"
 
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
+
       - name: Install RPM build tools
         # Conditional + fast failover.  A bare `apt-get update` here has stalled
         # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
@@ -661,8 +687,24 @@ jobs:
             echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
             exit 0
           fi
-          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
-          sudo apt-get install -y -o Acquire::Retries=3 rpm
+          # Skip apt entirely when every package is already present.  apt's
+          # Acquire::*::Timeout is an INACTIVITY timeout, not a total-transfer
+          # budget: a mirror that dribbles bytes slowly never trips it, which is
+          # how this step burned a whole 60-minute job timeout.  The cheapest fix
+          # is not to talk to the archive at all -- most of these ship on the
+          # runner image already.  dpkg-query (not `command -v`) because several
+          # of these packages install no binary of their own.
+          MISSING=""
+          for p in Acquire::Retries=3 rpm; do
+            dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "ok installed" || MISSING="$MISSING $p"
+          done
+          if [ -z "$MISSING" ]; then
+            echo "apt: all packages already present, skipping update/install"
+          else
+            echo "apt: installing:$MISSING"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends $MISSING
+          fi
 
       - name: Install frontend dependencies
         run: |
@@ -740,6 +782,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building EL9 RPM for version: $VERSION"
 
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
+
       - name: Install RPM build tools
         # Conditional + fast failover.  A bare `apt-get update` here has stalled
         # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
@@ -752,8 +799,24 @@ jobs:
             echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
             exit 0
           fi
-          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
-          sudo apt-get install -y -o Acquire::Retries=3 rpm
+          # Skip apt entirely when every package is already present.  apt's
+          # Acquire::*::Timeout is an INACTIVITY timeout, not a total-transfer
+          # budget: a mirror that dribbles bytes slowly never trips it, which is
+          # how this step burned a whole 60-minute job timeout.  The cheapest fix
+          # is not to talk to the archive at all -- most of these ship on the
+          # runner image already.  dpkg-query (not `command -v`) because several
+          # of these packages install no binary of their own.
+          MISSING=""
+          for p in Acquire::Retries=3 rpm; do
+            dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "ok installed" || MISSING="$MISSING $p"
+          done
+          if [ -z "$MISSING" ]; then
+            echo "apt: all packages already present, skipping update/install"
+          else
+            echo "apt: installing:$MISSING"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends $MISSING
+          fi
 
       - name: Install frontend dependencies
         run: |
@@ -825,6 +888,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building OpenSUSE RPM for version: $VERSION"
 
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
+
       - name: Install RPM build tools
         # Conditional + fast failover.  A bare `apt-get update` here has stalled
         # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
@@ -837,8 +905,24 @@ jobs:
             echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
             exit 0
           fi
-          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
-          sudo apt-get install -y -o Acquire::Retries=3 rpm
+          # Skip apt entirely when every package is already present.  apt's
+          # Acquire::*::Timeout is an INACTIVITY timeout, not a total-transfer
+          # budget: a mirror that dribbles bytes slowly never trips it, which is
+          # how this step burned a whole 60-minute job timeout.  The cheapest fix
+          # is not to talk to the archive at all -- most of these ship on the
+          # runner image already.  dpkg-query (not `command -v`) because several
+          # of these packages install no binary of their own.
+          MISSING=""
+          for p in Acquire::Retries=3 rpm; do
+            dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "ok installed" || MISSING="$MISSING $p"
+          done
+          if [ -z "$MISSING" ]; then
+            echo "apt: all packages already present, skipping update/install"
+          else
+            echo "apt: installing:$MISSING"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends $MISSING
+          fi
 
       - name: Install frontend dependencies
         run: |
@@ -925,6 +1009,11 @@ jobs:
           VERSION="${GITHUB_REF#refs/tags/v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building FreeBSD package for version: $VERSION"
+
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
 
       - name: Install FreeBSD packaging tools
         run: |
@@ -1560,6 +1649,11 @@ jobs:
 
           echo "Release files:"
           ls -la release-files/
+
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
 
       - name: Publish packages to Cloudflare R2
         # Publishes server packages straight to the R2 bucket (served at
@@ -2302,6 +2396,11 @@ jobs:
         with:
           node-version: '20'
 
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
+
       - name: Install packaging tools
         run: |
           n=0; ok=0
@@ -2551,6 +2650,11 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: '20'
+
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
 
       - name: Install OBS tools
         run: |
@@ -2839,6 +2943,11 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: '3.12'
+
+      # Configure apt before anything installs (ForceIPv4 + timeouts +
+      # drop the dead Azure mirror).  Covers apt calls made by tools we
+      # do not control, which inline -o flags cannot reach.
+      - uses: ./.github/actions/harden-apt
 
       - name: Install Copr CLI and build tools
         run: |

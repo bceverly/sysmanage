@@ -25,6 +25,14 @@ on:
         description: 'Version to build (must match an existing release tag, e.g. 1.3.0.0)'
         required: true
 
+# Serialize, do NOT cancel.  This workflow publishes: killing it mid-flight
+# can leave a half-published release (R2 objects, GitHub assets, PPA/COPR/OBS
+# submissions) to clean up by hand.  Grouping still stops two releases from
+# building at once and starving the runner pool.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
