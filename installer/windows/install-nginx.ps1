@@ -262,8 +262,20 @@ function Register-NginxService {
 function Test-NginxConfig {
     $exe = Join-Path $NginxDir "nginx.exe"
     if (-not (Test-Path $exe)) { return $false }
-    & $exe -p "$NginxDir" -t 2>&1 | Out-File -FilePath $LogFile -Append
-    return ($LASTEXITCODE -eq 0)
+    # EAP relaxed for the same reason as the nssm block: `nginx -t` reports a
+    # missing certificate on STDERR, and with "Stop" in force that becomes a
+    # TERMINATING error.  This function is explicitly allowed to return false --
+    # the certificate is expected to be absent right after an install -- but the
+    # promotion turned that designed-for outcome into an aborted install that
+    # had already completed every step correctly.
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $exe -p "$NginxDir" -t 2>&1 | Out-File -FilePath $LogFile -Append
+        return ($LASTEXITCODE -eq 0)
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
 }
 
 Write-Log "=== SysManage nginx setup ==="
@@ -284,7 +296,12 @@ try {
         Write-Log "nginx configuration test did not pass yet (expected before the TLS certificate is installed)"
     }
     Write-Log "=== nginx setup complete ==="
+    # Explicit success. Without this the script inherits $LASTEXITCODE from the
+    # last native command -- and that is `nginx -t`, which legitimately exits
+    # non-zero before a certificate exists.  A completed install then reported
+    # failure to its caller.
+    exit 0
 } catch {
     Write-Log "ERROR: $_"
-    throw
+    exit 1
 }
