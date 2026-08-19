@@ -30,7 +30,10 @@
 
 param(
     [string]$InstallDir = "C:\Program Files\SysManage Server",
-    [string]$LogFile = "$env:TEMP\sysmanage-nginx-install.log"
+    [string]$LogFile = "$env:TEMP\sysmanage-nginx-install.log",
+    # Overridable so the acceptance test can register an ISOLATED service
+    # instead of reusing (and its cleanup then destroying) a production one.
+    [string]$ServiceName = "SysManageNginx"
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,7 +46,6 @@ $NginxSha256 = "db8c7a529f84c819702bd1c50926b27d961a48b4f72fc7c46b30314fc2bbfd7c
 $NginxUrl = "https://nginx.org/download/nginx-$NginxVersion.zip"
 
 $NginxDir = Join-Path $InstallDir "nginx"
-$ServiceName = "SysManageNginx"
 
 function Write-Log {
     param([string]$Message)
