@@ -139,7 +139,8 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
     # %%SNAP%% / %%SNAP_DATA%% tokens and the wrapper substitutes them on start --
     # the same install-time token approach the FreeBSD port uses for %%PREFIX%%.
     # Substitution is token-targeted, NOT envsubst: the config is full of nginx
-    # runtime variables ($http_upgrade, $host, $uri) that must survive verbatim.
+    # runtime variables (the "$"-prefixed ones such as http_upgrade, uri and the
+    # request host) which must survive the substitution verbatim.
     "snap": {
         "RELOAD_CMD": "snap restart sysmanage",
         "CONF_PATH": "%%SNAP_DATA%%/nginx/sysmanage-nginx.conf",
@@ -202,8 +203,6 @@ def render(platform: str) -> str:
 
 def _has_placeholder(line: str) -> bool:
     """Is there an @NAME@ token left in this line?"""
-    import re  # noqa: PLC0415
-
     return bool(re.search(r"@[A-Z_]+@", line))
 
 

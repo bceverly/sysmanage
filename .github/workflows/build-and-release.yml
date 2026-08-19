@@ -167,7 +167,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          sudo apt-get update
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
           sudo apt-get install -y \
             debhelper \
             dh-python \
@@ -639,9 +639,19 @@ jobs:
           echo "Building CentOS RPM for version: $VERSION"
 
       - name: Install RPM build tools
+        # Conditional + fast failover.  A bare `apt-get update` here has stalled
+        # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
+        # walks every repo through a long connect timeout before failing over to
+        # archive.ubuntu.com.  Skip entirely when rpmbuild is already present,
+        # and cap the timeout when we do have to fetch.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y rpm
+          set -euo pipefail
+          if command -v rpmbuild >/dev/null 2>&1; then
+            echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
+            exit 0
+          fi
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
+          sudo apt-get install -y -o Acquire::Retries=3 rpm
 
       - name: Install frontend dependencies
         run: |
@@ -719,9 +729,19 @@ jobs:
           echo "Building EL9 RPM for version: $VERSION"
 
       - name: Install RPM build tools
+        # Conditional + fast failover.  A bare `apt-get update` here has stalled
+        # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
+        # walks every repo through a long connect timeout before failing over to
+        # archive.ubuntu.com.  Skip entirely when rpmbuild is already present,
+        # and cap the timeout when we do have to fetch.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y rpm
+          set -euo pipefail
+          if command -v rpmbuild >/dev/null 2>&1; then
+            echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
+            exit 0
+          fi
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
+          sudo apt-get install -y -o Acquire::Retries=3 rpm
 
       - name: Install frontend dependencies
         run: |
@@ -793,9 +813,19 @@ jobs:
           echo "Building OpenSUSE RPM for version: $VERSION"
 
       - name: Install RPM build tools
+        # Conditional + fast failover.  A bare `apt-get update` here has stalled
+        # jobs for many minutes whenever azure.archive.ubuntu.com is down: apt
+        # walks every repo through a long connect timeout before failing over to
+        # archive.ubuntu.com.  Skip entirely when rpmbuild is already present,
+        # and cap the timeout when we do have to fetch.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y rpm
+          set -euo pipefail
+          if command -v rpmbuild >/dev/null 2>&1; then
+            echo "rpmbuild already present ($(command -v rpmbuild)); skipping apt"
+            exit 0
+          fi
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
+          sudo apt-get install -y -o Acquire::Retries=3 rpm
 
       - name: Install frontend dependencies
         run: |
@@ -884,7 +914,7 @@ jobs:
 
       - name: Install FreeBSD packaging tools
         run: |
-          sudo apt-get update
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
           # Install libarchive-tools for bsdtar which is compatible with FreeBSD pkg format
           sudo apt-get install -y libarchive-tools
 
@@ -1025,11 +1055,15 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building NetBSD package for version: $VERSION"
 
-      - name: Install NetBSD package tools
-        run: |
-          # Install pkg_create and related tools
-          sudo apt-get update
-          sudo apt-get install -y pkg-config
+      # NOTE: there was an "Install NetBSD package tools" step here that ran
+      # apt-get update + installed pkg-config.  It was removed because it did
+      # nothing: pkg-config is a build-flag helper, NOT NetBSD's pkg_create;
+      # `make installer-netbsd` never invokes it; and it is already present in
+      # the runner image anyway.  Real pkg_create cannot be apt-installed at
+      # all, which is why the Makefile falls back to tar when it is absent.
+      # The step's only measurable effect was an apt-get update that could
+      # stall the whole job whenever the azure.archive.ubuntu.com mirror was
+      # unreachable.
 
       - name: Install frontend dependencies
         run: |
@@ -1531,7 +1565,7 @@ jobs:
           s3() { aws s3 "$@" --endpoint-url "$ENDPOINT" --region auto; }
           RF="${{ github.workspace }}/release-files"
 
-          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y dpkg-dev
 
           # The apt index must cover EVERY version in the pool, so pull the
           # current server/deb subtree from R2 first (small — just the pool).
@@ -2251,7 +2285,7 @@ jobs:
         run: |
           n=0; ok=0
           until [ "$n" -ge 3 ]; do
-            if sudo apt-get update && sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko; then ok=1; break; fi
+            if sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y devscripts debhelper dh-python python3-all python3-setuptools dput-ng gnupg openssh-client python3-paramiko; then ok=1; break; fi
             n=$((n+1)); echo "::warning::apt-get install (packaging tools) attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
           done
           [ "$ok" = 1 ] || { echo "::error::apt-get install (packaging tools) failed after 3 attempts"; exit 1; }
@@ -2500,7 +2534,7 @@ jobs:
         run: |
           n=0; ok=0
           until [ "$n" -ge 3 ]; do
-            if sudo apt-get update && sudo apt-get install -y osc; then ok=1; break; fi
+            if sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y osc; then ok=1; break; fi
             n=$((n+1)); echo "::warning::apt-get install osc attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
           done
           [ "$ok" = 1 ] || { echo "::error::apt-get install osc failed after 3 attempts"; exit 1; }
@@ -2787,7 +2821,7 @@ jobs:
         run: |
           n=0; ok=0
           until [ "$n" -ge 3 ]; do
-            if sudo apt-get update && sudo apt-get install -y python3-pip rpm; then ok=1; break; fi
+            if sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20 && sudo apt-get install -y python3-pip rpm; then ok=1; break; fi
             n=$((n+1)); echo "::warning::apt-get install (copr build tools) attempt $n/3 failed; retrying in $((n*20))s"; sleep $((n*20))
           done
           [ "$ok" = 1 ] || { echo "::error::apt-get install (copr build tools) failed after 3 attempts"; exit 1; }

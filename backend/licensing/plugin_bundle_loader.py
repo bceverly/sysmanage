@@ -127,6 +127,67 @@ class PluginBundleLoader:
                 logger.exception("Error querying cached plugin hash: %s", e)
                 return None
 
+    async def _fetch_bundle_to_temp(
+        self, url: str, license_key: str, temp_path: str
+    ) -> Optional[tuple]:
+        """Stream the bundle to ``temp_path``.
+
+        Returns ``(expected_hash, version)`` from the response headers, or
+        ``None`` if the server did not return the bundle.
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                url,
+                headers={"X-License-Key": license_key},
+                timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
+            ) as response:
+                if response.status != 200:
+                    logger.error(
+                        "Plugin download failed: %s returned %d",
+                        url,
+                        response.status,
+                    )
+                    return None
+
+                expected_hash = response.headers.get("X-Content-SHA512")
+                actual_version = response.headers.get("X-Module-Version")
+
+                async with aiofiles.open(temp_path, "wb") as f:
+                    async for chunk in response.content.iter_chunked(8192):
+                        await f.write(chunk)
+
+        return expected_hash, actual_version
+
+    def _verify_downloaded_bundle(
+        self, temp_path: str, module_code: str, expected_hash: Optional[str]
+    ) -> Optional[str]:
+        """Integrity then authenticity.  Returns the file hash, or ``None``.
+
+        ``None`` means the bundle was rejected and the caller must discard it.
+        """
+        actual_hash = self._compute_file_hash(temp_path)
+
+        if expected_hash and actual_hash.lower() != expected_hash.lower():
+            logger.error(
+                "Plugin hash mismatch: expected %s, got %s",
+                expected_hash,
+                actual_hash,
+            )
+            return None
+
+        # Authenticity, before this file is ever served to a browser.
+        # The hash check above is transport integrity only -- its digest
+        # came from the same response as the bytes -- and it is skipped
+        # entirely when the header is absent.  Verify the signature the
+        # bundle carries, against a key compiled into this build.
+        try:
+            verify_plugin_bundle(temp_path, module_code)
+        except ModuleSignatureError as exc:
+            logger.error("REFUSING plugin bundle for %s: %s", module_code, exc)
+            return None
+
+        return actual_hash
+
     async def _download_plugin_bundle(
         self, module_code: str, version: Optional[str] = None
     ) -> bool:
@@ -152,52 +213,18 @@ class PluginBundleLoader:
         final_path = os.path.join(modules_path, f"{module_code}-plugin.iife.js")
 
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    url,
-                    headers={"X-License-Key": license_key},
-                    timeout=aiohttp.ClientTimeout(total=DOWNLOAD_TIMEOUT),
-                ) as response:
-                    if response.status != 200:
-                        logger.error(
-                            "Plugin download failed: %s returned %d",
-                            url,
-                            response.status,
-                        )
-                        return False
+            fetched = await self._fetch_bundle_to_temp(url, license_key, temp_path)
+            if fetched is None:
+                return False
+            expected_hash, actual_version = fetched
+            # The helper cannot see version_str, so apply the same fallback the
+            # inline version used when the server omits X-Module-Version.
+            actual_version = actual_version or version_str
 
-                    expected_hash = response.headers.get("X-Content-SHA512")
-                    actual_version = response.headers.get(
-                        "X-Module-Version", version_str
-                    )
-
-                    async with aiofiles.open(temp_path, "wb") as f:
-                        async for chunk in response.content.iter_chunked(8192):
-                            await f.write(chunk)
-
-            # Verify hash if provided
-            if expected_hash:
-                actual_hash = self._compute_file_hash(temp_path)
-                if actual_hash.lower() != expected_hash.lower():
-                    logger.error(
-                        "Plugin hash mismatch: expected %s, got %s",
-                        expected_hash,
-                        actual_hash,
-                    )
-                    os.remove(temp_path)
-                    return False
-            else:
-                actual_hash = self._compute_file_hash(temp_path)
-
-            # Authenticity, before this file is ever served to a browser.
-            # The hash check above is transport integrity only -- its digest
-            # came from the same response as the bytes -- and it is skipped
-            # entirely when the header is absent.  Verify the signature the
-            # bundle carries, against a key compiled into this build.
-            try:
-                verify_plugin_bundle(temp_path, module_code)
-            except ModuleSignatureError as exc:
-                logger.error("REFUSING plugin bundle for %s: %s", module_code, exc)
+            actual_hash = self._verify_downloaded_bundle(
+                temp_path, module_code, expected_hash
+            )
+            if actual_hash is None:
                 os.remove(temp_path)
                 return False
 

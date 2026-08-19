@@ -106,7 +106,7 @@ jobs:
 
       - name: Install ClamAV (for av_management_engine integration tests)
         run: |
-          sudo apt-get update
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
           sudo apt-get install -y clamav clamav-daemon
           # Don't start clamd — tests should treat it as installable-but-not-running.
 
@@ -190,7 +190,11 @@ jobs:
     name: "Migration round-trip (Postgres)"
     if: ${{ (inputs.platforms || 'all') != 'linux+macos' && (inputs.platforms || 'all') != 'linux+windows' || (inputs.platforms || 'all') == 'all' || (inputs.platforms || 'all') == 'linux-only' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 15 was too tight: a full `pip install -r requirements.txt` plus an apt
+    # update against a flaky mirror can spend most of it before the round-trip
+    # even starts, and a timeout here is indistinguishable from a real
+    # migration failure in the log.  The actual work takes ~1 minute.
+    timeout-minutes: 30
 
     services:
       postgres:
@@ -222,9 +226,32 @@ jobs:
           pip install -r requirements.txt
 
       - name: Install postgres-client (for pg_dump)
+        # The runner image already ships postgresql-client, so apt is usually
+        # pure cost.  It is not free cost: this step has repeatedly burned the
+        # job's whole timeout when the azure.archive.ubuntu.com mirror is
+        # unreachable and apt cycles every repo through a long connect timeout
+        # before failing over to archive.ubuntu.com.  The job then dies with a
+        # bare "The operation was canceled" that reads like a migration failure
+        # but never ran a migration at all.
+        #
+        # So: only install when we actually have to.  pg_dump refuses to dump a
+        # server NEWER than itself, hence the version floor rather than a plain
+        # presence check -- an older preinstalled client must still be upgraded.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          set -euo pipefail
+          need=1
+          if command -v pg_dump >/dev/null 2>&1; then
+            have=$(pg_dump --version | grep -oE '[0-9]+' | head -1)
+            echo "found pg_dump ${have} ($(command -v pg_dump))"
+            if [ "${have}" -ge 15 ]; then need=0; fi
+          fi
+          if [ "${need}" -eq 0 ]; then
+            echo "pg_dump is new enough for the postgres:15 service; skipping apt"
+            exit 0
+          fi
+          echo "installing postgresql-client"
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=20
+          sudo apt-get install -y -o Acquire::Retries=3 postgresql-client
 
       - name: Run migration round-trip
         run: python scripts/migration_roundtrip.py

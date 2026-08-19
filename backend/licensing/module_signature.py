@@ -101,7 +101,7 @@ def _trusted_public_keys() -> List[Ed25519PublicKey]:
             # A malformed anchor is a build error, not a runtime condition.
             # Log and skip rather than raising: one bad entry must not disable
             # a good one sitting next to it during a rotation.
-            logger.error(
+            logger.exception(
                 "Ignoring unusable module signing key %r: %s", encoded[:12], exc
             )
     return keys
@@ -154,6 +154,98 @@ def _verify_signature(manifest: bytes, signature_b64: bytes) -> None:
     )
 
 
+def _parse_manifest(manifest_bytes: bytes, module_code: str) -> dict:
+    """Decode the manifest and confirm it describes ``module_code``."""
+    try:
+        manifest = json.loads(manifest_bytes)
+    except json.JSONDecodeError as exc:
+        raise ModuleSignatureError(f"manifest is not valid JSON: {exc}") from exc
+
+    if manifest.get("module_code") != module_code:
+        raise ModuleSignatureError(
+            f"manifest is for {manifest.get('module_code')!r}, not "
+            f"{module_code!r} - a signed bundle for a different engine"
+        )
+    return manifest
+
+
+def _check_platform(manifest: dict, platform_info: dict) -> None:
+    """Reject a correctly signed bundle built for a different target."""
+    for field in ("platform", "architecture"):
+        want = platform_info.get(field)
+        got = manifest.get(field)
+        if want and got and want != got:
+            raise ModuleSignatureError(
+                f"manifest {field} is {got!r}, this host needs {want!r}"
+            )
+    # python_version is NOT a plain equality check.  Engines build once
+    # under the limited API and are stored as ``abi3``, while
+    # ``_get_platform_info`` reports the running interpreter ("3.14") --
+    # comparing the two directly rejected every genuine bundle, which is
+    # how this nearly shipped as a total Pro+ outage rather than a
+    # security fix.  ``abi3`` is deliberately compatible with any
+    # supported CPython; anything else must match exactly.
+    want_py = platform_info.get("python_version")
+    got_py = manifest.get("python_version")
+    if want_py and got_py and got_py != "abi3" and want_py != got_py:
+        raise ModuleSignatureError(
+            f"manifest python_version is {got_py!r}, this host needs {want_py!r}"
+        )
+
+
+def _check_listed_files(module_dir: str, files: dict) -> None:
+    """Every file the manifest lists must still hash to the signed value.
+
+    Checking only the .so would leave the gettext catalogs unverified, and
+    those are read by the engine.
+    """
+    for arcname, expected in sorted(files.items()):
+        target = os.path.join(module_dir, arcname)
+        if not os.path.isfile(target):
+            raise ModuleSignatureError(f"manifest lists {arcname}, which is missing")
+        actual = _sha256_file(target)
+        if actual != expected:
+            raise ModuleSignatureError(
+                f"{arcname} does not match the signed manifest "
+                f"(expected {expected[:16]}..., got {actual[:16]}...)"
+            )
+
+
+def _check_no_extra_files(module_dir: str, files: dict) -> None:
+    """NOTHING beyond the manifest may be in the directory.
+
+    Checking only the listed files left an attacker free to drop an extra .so
+    alongside them: every manifest entry still verified, so the directory
+    passed.  Nothing loads that file today -- the path comes from the cache row
+    or from the single compiled file found at extraction -- but "the manifest
+    describes this directory" has to mean the whole directory, or the next
+    change to how a module path is chosen silently reopens it.  Found by the
+    adversarial test, not by design.
+
+    Compare in POSIX form.  Manifest keys are tar arcnames, which always use
+    "/", while os.path.relpath yields "\\" on Windows -- so every bundle with a
+    locales/ subdirectory (most of them) failed this check on a Windows server,
+    refusing engines that were perfectly valid.  Caught by the Windows test
+    leg; on Linux the two forms happen to coincide, which is exactly why it
+    passed everywhere it was originally written and tested.
+    """
+    unexpected = []
+    real_dir = os.path.realpath(module_dir)
+    for root, _dirs, names in os.walk(real_dir):
+        for name in names:
+            rel = os.path.relpath(os.path.join(root, name), real_dir).replace(
+                os.sep, "/"
+            )
+            if rel in (MANIFEST_NAME, SIGNATURE_NAME) or rel in files:
+                continue
+            unexpected.append(rel)
+    if unexpected:
+        raise ModuleSignatureError(
+            "directory holds file(s) the signed manifest does not cover: "
+            + ", ".join(sorted(unexpected)[:5])
+        )
+
+
 def verify_module_dir(
     module_dir: str,
     module_code: str,
@@ -170,98 +262,29 @@ def verify_module_dir(
     manifest_bytes, signature = _read_manifest(module_dir)
     _verify_signature(manifest_bytes, signature)
 
-    try:
-        manifest = json.loads(manifest_bytes)
-    except json.JSONDecodeError as exc:
-        raise ModuleSignatureError(f"manifest is not valid JSON: {exc}") from exc
-
-    if manifest.get("module_code") != module_code:
-        raise ModuleSignatureError(
-            f"manifest is for {manifest.get('module_code')!r}, not "
-            f"{module_code!r} - a signed bundle for a different engine"
-        )
+    manifest = _parse_manifest(manifest_bytes, module_code)
     if platform_info:
-        for field in ("platform", "architecture"):
-            want = platform_info.get(field)
-            got = manifest.get(field)
-            if want and got and want != got:
-                raise ModuleSignatureError(
-                    f"manifest {field} is {got!r}, this host needs {want!r}"
-                )
-        # python_version is NOT a plain equality check.  Engines build once
-        # under the limited API and are stored as ``abi3``, while
-        # ``_get_platform_info`` reports the running interpreter ("3.14") --
-        # comparing the two directly rejected every genuine bundle, which is
-        # how this nearly shipped as a total Pro+ outage rather than a
-        # security fix.  ``abi3`` is deliberately compatible with any
-        # supported CPython; anything else must match exactly.
-        want_py = platform_info.get("python_version")
-        got_py = manifest.get("python_version")
-        if want_py and got_py and got_py != "abi3" and want_py != got_py:
-            raise ModuleSignatureError(
-                f"manifest python_version is {got_py!r}, this host needs "
-                f"{want_py!r}"
-            )
+        _check_platform(manifest, platform_info)
 
     files = manifest.get("files") or {}
     if not isinstance(files, dict) or not files:
         raise ModuleSignatureError("manifest lists no files")
 
-    # Every listed file must still match.  Checking only the .so would leave
-    # the gettext catalogs unverified, and those are read by the engine.
-    for arcname, expected in sorted(files.items()):
-        target = os.path.join(module_dir, arcname)
-        if not os.path.isfile(target):
-            raise ModuleSignatureError(f"manifest lists {arcname}, which is missing")
-        actual = _sha256_file(target)
-        if actual != expected:
-            raise ModuleSignatureError(
-                f"{arcname} does not match the signed manifest "
-                f"(expected {expected[:16]}..., got {actual[:16]}...)"
-            )
+    _check_listed_files(module_dir, files)
 
     # The file we are about to dlopen must be one the manifest covers -- not
     # merely sitting in a directory where other files happen to verify.
-    # POSIX form, same reason as the sweep below: manifest keys are tar
-    # arcnames.  This one happens to work on Windows today only because the
-    # .so sits at the top level and has no separator in its relative path --
-    # it would break the moment a bundle nested it.
+    # POSIX form, same reason as the sweep in _check_no_extra_files: manifest
+    # keys are tar arcnames.  This one happens to work on Windows today only
+    # because the .so sits at the top level and has no separator in its
+    # relative path -- it would break the moment a bundle nested it.
     so_name = os.path.relpath(
         os.path.realpath(so_path), os.path.realpath(module_dir)
     ).replace(os.sep, "/")
     if so_name not in files:
         raise ModuleSignatureError(f"{so_name} is not covered by the signed manifest")
 
-    # ...and NOTHING ELSE may be in the directory.  Checking only the listed
-    # files left an attacker free to drop an extra .so alongside them: every
-    # manifest entry still verified, so the directory passed.  Nothing loads
-    # that file today -- the path comes from the cache row or from the single
-    # compiled file found at extraction -- but "the manifest describes this
-    # directory" has to mean the whole directory, or the next change to how a
-    # module path is chosen silently reopens it.  Found by the adversarial
-    # test, not by design.
-    #
-    # Compare in POSIX form.  Manifest keys are tar arcnames, which always use
-    # "/", while os.path.relpath yields "\" on Windows -- so every bundle with
-    # a locales/ subdirectory (most of them) failed this check on a Windows
-    # server, refusing engines that were perfectly valid.  Caught by the
-    # Windows test leg; on Linux the two forms happen to coincide, which is
-    # exactly why it passed everywhere it was originally written and tested.
-    unexpected = []
-    real_dir = os.path.realpath(module_dir)
-    for root, _dirs, names in os.walk(real_dir):
-        for name in names:
-            rel = os.path.relpath(os.path.join(root, name), real_dir).replace(
-                os.sep, "/"
-            )
-            if rel in (MANIFEST_NAME, SIGNATURE_NAME) or rel in files:
-                continue
-            unexpected.append(rel)
-    if unexpected:
-        raise ModuleSignatureError(
-            "directory holds file(s) the signed manifest does not cover: "
-            + ", ".join(sorted(unexpected)[:5])
-        )
+    _check_no_extra_files(module_dir, files)
 
 
 def verify_plugin_bundle(path: str, module_code: str) -> None:
