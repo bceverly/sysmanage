@@ -119,8 +119,15 @@ Step "Packaged config is byte-identical to the generated one" {
     $packaged = Join-Path $script:InstallRoot "sysmanage-nginx.conf"
     $source = Join-Path $ScriptDir "sysmanage-nginx.conf"
     if (-not (Test-Path $source)) { throw "no reference copy at $source (run this from a checkout)" }
-    $a = (Get-FileHash $packaged -Algorithm SHA256).Hash
-    $b = (Get-FileHash $source -Algorithm SHA256).Hash
+    # Compare CONTENT, not line endings.  git checks the repo out with CRLF on
+    # the Windows build agent, so a byte hash differs on every release for a
+    # reason that does not matter to nginx -- a gate that cries wolf every time
+    # gets ignored, which is worse than not having it.
+    $norm = { param($f) ((Get-Content $f -Raw) -replace "`r`n", "`n") }
+    $a = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash(
+            [Text.Encoding]::UTF8.GetBytes((& $norm $packaged)))).Replace("-","")
+    $b = [BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash(
+            [Text.Encoding]::UTF8.GetBytes((& $norm $source)))).Replace("-","")
     if ($a -ne $b) {
         throw ("packaged config DIFFERS from installer\windows\sysmanage-nginx.conf`n" +
                "        packaged $($a.Substring(0,16))...`n" +

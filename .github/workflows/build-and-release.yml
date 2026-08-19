@@ -3446,6 +3446,39 @@ jobs:
             exit 1
           fi
 
+          # SYNC THE FORK before komac runs.
+          #
+          # komac creates its working branch at the SHA of
+          # microsoft/winget-pkgs HEAD, in YOUR fork.  GitHub's CreateRef API
+          # requires that SHA to already exist in the target repo -- so a fork
+          # that has not been synced since the last submission fails with
+          #     Ref cannot be created.
+          #     failed to create branch sysmanage.sysmanage-<ver>-<hash>
+          # which names neither the fork nor staleness as the cause.  Observed
+          # 2026-08-19 on v3.5.1.16: scopes, identity and fork-writability all
+          # passed their preflights and this still failed, because the fork was
+          # last updated at v3.5.1.8.
+          #
+          # merge-upstream is the API behind the "Sync fork" button.  It is a
+          # fast-forward, so it cannot conflict on a fork with no local commits.
+          echo "Syncing $login/winget-pkgs with upstream..."
+          sync_body=$(curl -sS -X POST \
+            -H "Authorization: token $WINGET_PKGS_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$login/winget-pkgs/merge-upstream" \
+            -d '{"branch":"master"}')
+          sync_msg=$(printf '%s' "$sync_body" | jq -r '.message // empty')
+          if printf '%s' "$sync_body" | jq -e '.merge_type' >/dev/null 2>&1; then
+            echo "  fork synced: $(printf '%s' "$sync_body" | jq -r '.merge_type')"
+          else
+            # NOT fatal on its own: an already-current fork, or a differently
+            # named default branch, both land here and komac may still succeed.
+            # Say so plainly rather than failing a release on a best-effort step.
+            echo "::warning::fork sync did not report a merge (${sync_msg:-no message})."
+            echo "::warning::If komac then fails at CreateRef, sync the fork manually:"
+            echo "::warning::  https://github.com/$login/winget-pkgs -> Sync fork"
+          fi
+
           # Resolve the komac release asset for Linux x86_64.  komac
           # v2.16+ dropped the musl build — current Linux assets ship
           # as ``x86_64-unknown-linux-gnu.tar.gz`` (glibc) only.  Match
