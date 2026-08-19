@@ -61,6 +61,7 @@ jobs:
   i18n-gate:
     name: i18n Completeness Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -79,6 +80,7 @@ jobs:
   wait-for-tests:
     name: Wait for CI Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     needs: i18n-gate
     steps:
       # NOTE: the release runs on a TAG push, where only ``ci.yml`` runs (the
@@ -141,6 +143,7 @@ jobs:
   build-ubuntu:
     name: Build .deb Package
     runs-on: ubuntu-22.04
+    timeout-minutes: 45
     needs: wait-for-tests
 
     steps:
@@ -268,6 +271,7 @@ jobs:
   build-openbsd-port:
     name: Build OpenBSD Port Tarball
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: build-openbsd-libs
 
     steps:
@@ -445,7 +449,13 @@ jobs:
 
       # Same action and pin the bsd-tests workflow uses for its FreeBSD leg.
       - name: Start FreeBSD VM
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        # Bound the boot.  When a guest image fails to come up, the action
+        # retries "Waiting for VM to be ready..." -> ssh -> "Connection reset by
+        # peer" forever with no attempt cap, so a dead VM consumed the job's
+        # entire budget before failing.  It has no boot-timeout input of its own;
+        # a step-level timeout is the only lever.  A healthy VM boots in ~2-4 min.
+        timeout-minutes: 15
         with:
           operating_system: freebsd
           version: '14.3'
@@ -614,6 +624,7 @@ jobs:
   build-centos-rpm:
     name: Build CentOS/RHEL RPM
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: wait-for-tests
 
     steps:
@@ -705,6 +716,7 @@ jobs:
   build-el9-rpm:
     name: Build EL9 (RHEL/Rocky) RPM
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: wait-for-tests
 
     steps:
@@ -788,6 +800,7 @@ jobs:
   build-opensuse-rpm:
     name: Build OpenSUSE/SLES RPM
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: wait-for-tests
 
     steps:
@@ -888,6 +901,7 @@ jobs:
   build-freebsd-pkg:
     name: Build FreeBSD Package
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: wait-for-tests
 
     steps:
@@ -960,6 +974,7 @@ jobs:
   build-macos-pkg:
     name: Build macOS Package
     runs-on: macos-latest
+    timeout-minutes: 60
     needs: wait-for-tests
 
     steps:
@@ -1031,6 +1046,7 @@ jobs:
   build-netbsd-pkg:
     name: Build NetBSD Package
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: wait-for-tests
 
     steps:
@@ -1107,6 +1123,7 @@ jobs:
   build-windows-msi-x64:
     name: Build Windows MSI (x64)
     runs-on: windows-latest
+    timeout-minutes: 90
     needs: wait-for-tests
 
     steps:
@@ -1185,6 +1202,7 @@ jobs:
   build-windows-msi-arm64:
     name: Build Windows MSI (ARM64)
     runs-on: windows-latest
+    timeout-minutes: 90
     needs: wait-for-tests
 
     steps:
@@ -1299,6 +1317,7 @@ jobs:
   build-alpine:
     name: Build Alpine ${{ matrix.alpine-version }} Package
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     needs: wait-for-tests
 
     strategy:
@@ -1495,6 +1514,7 @@ jobs:
   release:
     name: Create Release and Publish to R2
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [build-ubuntu, build-openbsd-port, build-openbsd-libs, build-freebsd-npm-distfile, build-openbsd-packages, build-centos-rpm, build-el9-rpm, build-opensuse-rpm, build-freebsd-pkg, build-macos-pkg, build-netbsd-pkg, build-windows-msi-x64, build-windows-msi-arm64, build-alpine]
 
     steps:
@@ -2242,6 +2262,7 @@ jobs:
   deploy-launchpad:
     name: Deploy to Launchpad PPA (${{ matrix.release_name }})
     runs-on: ubuntu-22.04
+    timeout-minutes: 30
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
@@ -2503,6 +2524,7 @@ jobs:
   deploy-obs:
     name: Deploy to OBS
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -2789,6 +2811,7 @@ jobs:
   deploy-copr:
     name: Deploy to COPR
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -3069,6 +3092,7 @@ jobs:
   deploy-snap:
     name: Deploy to Snap Store
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     needs: [release]
     if: startsWith(github.ref, 'refs/tags/')
     env:
@@ -3166,6 +3190,7 @@ jobs:
   homebrew-tap:
     name: Homebrew tap (Casks/sysmanage.rb)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
@@ -3294,6 +3319,7 @@ jobs:
   winget-manifest:
     name: winget-pkgs manifest (komac)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — deliberately unlike the sibling publish jobs.
     # On 2026-08-07 the agent repo's winget submission failed for an entire
     # release while the run showed GREEN; the only clue was a red X on a step
@@ -3623,6 +3649,7 @@ jobs:
   aur:
     name: AUR (sysmanage)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
@@ -3833,6 +3860,7 @@ jobs:
   freebsd-ports:
     name: FreeBSD ports tree (artifact)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
@@ -3945,6 +3973,7 @@ jobs:
   openbsd-ports:
     name: OpenBSD ports tree (artifact)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the
@@ -4044,6 +4073,7 @@ jobs:
   netbsd-pkgsrc:
     name: NetBSD pkgsrc tree (artifact)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # NO continue-on-error — see winget-manifest for the full rationale.
     # A publish channel that fails silently is one nobody notices is broken:
     # on 2026-08-07 an entire release shipped GREEN with winget broken, the

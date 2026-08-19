@@ -20,6 +20,7 @@ jobs:
   bandit:
     name: Bandit (Python SAST)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -45,6 +46,7 @@ jobs:
   semgrep:
     name: Semgrep PRO Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     container:
       image: semgrep/semgrep
     permissions:
@@ -100,6 +102,7 @@ jobs:
   dependency-check:
     name: Dependency Vulnerability Check
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       security-events: write
@@ -216,6 +219,7 @@ jobs:
   snyk:
     name: Snyk Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       security-events: write
@@ -263,6 +267,7 @@ jobs:
   frontend-security-lint:
     name: Frontend Security Linting
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     
@@ -291,6 +296,7 @@ jobs:
   secrets-scan:
     name: Secrets Detection
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       security-events: write

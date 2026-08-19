@@ -93,7 +93,13 @@ jobs:
         # cross-platform-actions v1.3.0 deprecated the `run:` input: the action
         # now just starts the VM (which persists across steps) and commands run
         # in it via `shell: cpa.sh {0}` in the next step.
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        # Bound the boot.  When a guest image fails to come up, the action
+        # retries "Waiting for VM to be ready..." -> ssh -> "Connection reset by
+        # peer" forever with no attempt cap, so a dead VM consumed the job's
+        # entire budget before failing.  It has no boot-timeout input of its own;
+        # a step-level timeout is the only lever.  A healthy VM boots in ~2-4 min.
+        timeout-minutes: 15
         env:
           # Bind the user-controllable input to an env var that's forwarded into
           # the VM (environment_variables) so the script uses "$PYTEST_MARKER"
@@ -170,7 +176,13 @@ jobs:
       - name: Start OpenBSD VM
         # v1.3.0 deprecated `run:`; VM starts here, commands run via
         # `shell: cpa.sh {0}` in the next step.
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        # Bound the boot.  When a guest image fails to come up, the action
+        # retries "Waiting for VM to be ready..." -> ssh -> "Connection reset by
+        # peer" forever with no attempt cap, so a dead VM consumed the job's
+        # entire budget before failing.  It has no boot-timeout input of its own;
+        # a step-level timeout is the only lever.  A healthy VM boots in ~2-4 min.
+        timeout-minutes: 15
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:
@@ -233,7 +245,13 @@ jobs:
       - name: Start NetBSD VM
         # v1.3.0 deprecated `run:`; VM starts here, commands run via
         # `shell: cpa.sh {0}` in the next step.
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        # Bound the boot.  When a guest image fails to come up, the action
+        # retries "Waiting for VM to be ready..." -> ssh -> "Connection reset by
+        # peer" forever with no attempt cap, so a dead VM consumed the job's
+        # entire budget before failing.  It has no boot-timeout input of its own;
+        # a step-level timeout is the only lever.  A healthy VM boots in ~2-4 min.
+        timeout-minutes: 15
         env:
           PYTEST_MARKER: ${{ inputs.pytest_marker || 'integration' }}
         with:

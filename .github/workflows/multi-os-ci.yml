@@ -14,6 +14,7 @@ jobs:
   test-backend-postgres:
     name: Backend Tests (Linux + PostgreSQL)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
       pull-requests: write
@@ -115,6 +116,7 @@ jobs:
   test-backend:
     name: Backend Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     permissions:
       contents: write
       pull-requests: write
@@ -311,6 +313,7 @@ jobs:
   test-frontend:
     name: Frontend Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
@@ -458,6 +461,9 @@ jobs:
 
         pip install pytest pytest-asyncio pytest-timeout
       shell: bash
+
+    # No `if: runner.os == 'Linux'` needed: the action no-ops elsewhere.
+    - uses: ./.github/actions/harden-apt
 
     - name: Install frontend dependencies and Playwright browsers
       run: |
@@ -760,6 +766,7 @@ jobs:
   analyze-performance:
     name: Performance Regression Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [test-ui-performance]
     if: always()
 
@@ -819,6 +826,7 @@ jobs:
   ci-status:
     name: CI Status Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [test-backend, test-frontend, test-ui-performance, analyze-performance]
     if: always()
 

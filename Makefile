@@ -2661,8 +2661,25 @@ installer-rpm-opensuse:
 	VENDOR_DIR="$$(pwd)/vendor"; \
 	rm -rf "$$VENDOR_DIR"; \
 	mkdir -p "$$VENDOR_DIR"; \
-	pip3 download -r requirements.txt -d "$$VENDOR_DIR" --no-binary :all: 2>/dev/null || \
-	pip3 download -r requirements.txt -d "$$VENDOR_DIR"; \
+	: "requirements-PROD, not requirements.txt.  The spec installs with"; \
+	: "  pip install --no-index --find-links=vendor -r requirements-prod.txt"; \
+	: "so the 22 dev-only distributions this used to vendor (semgrep,"; \
+	: "playwright, selenium, pylint, black, bandit, safety, pytest-*, ...)"; \
+	: "were downloaded, had their PEP 517 metadata built, and were tarred"; \
+	: "into the RPM source -- then never installed.  With --no-binary that"; \
+	: "metadata build is the dominant cost of this target."; \
+	: ""; \
+	: "--no-binary :all: is DELIBERATE, do not remove it.  This runs on the"; \
+	: "build host's pip (3.12 on CI) while the spec builds its venv with"; \
+	: "python311 (BuildRequires: python311-devel).  Wheels would be tagged"; \
+	: "cp312 and the rpmbuild's --no-index install would resolve nothing for"; \
+	: "every compiled package.  sdists are interpreter-agnostic, which is"; \
+	: "what makes that mismatch work.  The faster fix is to fetch wheels FOR"; \
+	: "the target instead (--python-version 311 --platform manylinux... "; \
+	: "--only-binary=:all:, as deploy-obs already does) -- but that needs a"; \
+	: "real RPM build to validate, so it is not done here."; \
+	pip3 download -r requirements-prod.txt -d "$$VENDOR_DIR" --no-binary :all: 2>/dev/null || \
+	pip3 download -r requirements-prod.txt -d "$$VENDOR_DIR"; \
 	echo "✓ Vendor dependencies downloaded"; \
 	echo ""; \
 	echo "Setting up RPM build tree..."; \
