@@ -153,6 +153,23 @@ if (-not $vcRedistInstalled) {
 # 4. Check for Python 3.9+
 Write-Log "Checking Python..."
 
+# The MSI now ships its own relocatable CPython (python.zip), so there is nothing
+# to check or install: install.ps1 uses the bundled runtime and the bundled
+# wheels are compiled against that exact version.
+#
+# Skipping matters -- it does not just save time.  The logic below installs
+# Python 3.12 ONLY when no interpreter >= 3.9 is present, so a machine that
+# already had, say, 3.14 was declared fine and install.ps1 then built its venv
+# with 3.14 against cp312 wheels, which resolved nothing.  It would also modify
+# the operator's machine system-wide to satisfy a dependency we now carry
+# ourselves.
+# $PSScriptRoot is the install folder -- the MSI runs this script from there.
+$BundledPython = Join-Path $PSScriptRoot "python.zip"
+if (Test-Path $BundledPython) {
+    Write-Log "Bundled Python runtime present - skipping system Python check/install."
+    exit 0
+}
+
 $PythonExe = $null
 $PythonCommands = @("python", "python3", "py")
 

@@ -195,6 +195,36 @@ parts:
       mkdir -p $SNAP_DATA/nginx/tmp/fastcgi
       mkdir -p $SNAP_DATA/nginx/tmp/uwsgi
       mkdir -p $SNAP_DATA/nginx/tmp/scgi
+      mkdir -p $SNAP_DATA/tls
+      mkdir -p $SNAP_DATA/airgap-repo
+
+      # TLS certificate.  The shared config serves on 443 and nginx REFUSES TO
+      # START without a certificate -- deliberate, so a management console can
+      # never come up in cleartext because a cert was missing.  A snap has no
+      # packaging-time hook to generate one and no operator prompt, so mint a
+      # self-signed cert on first run.  Replace it with a real one via
+      #   snap run --shell sysmanage   (files live in $SNAP_DATA/tls)
+      if [ ! -f $SNAP_DATA/tls/server.crt ] || [ ! -f $SNAP_DATA/tls/server.key ]; then
+        echo "Generating a self-signed TLS certificate for first run..."
+        $SNAP/usr/bin/openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+          -keyout $SNAP_DATA/tls/server.key \
+          -out $SNAP_DATA/tls/server.crt \
+          -subj "/CN=$(hostname -f 2>/dev/null || hostname)" \
+          -addext "subjectAltName=DNS:$(hostname -f 2>/dev/null || hostname),DNS:localhost,IP:127.0.0.1" \
+          >/dev/null 2>&1 || echo "WARNING: could not generate a TLS certificate; nginx will not start"
+        chmod 600 $SNAP_DATA/tls/server.key 2>/dev/null || true
+        echo "Self-signed certificate written to $SNAP_DATA/tls/server.crt"
+        echo "Browsers will warn until you install a trusted certificate there."
+      fi
+
+      # Server block: rendered from the SHARED template at build time and shipped
+      # in the snap, so it cannot drift from the other platforms.  It carries
+      # %%SNAP%% / %%SNAP_DATA%% tokens because a snap's real paths are only known
+      # at runtime.  Substitute ONLY those tokens -- nginx's own $http_upgrade,
+      # $host and $uri must survive verbatim, which is why this is a targeted sed
+      # and not envsubst.
+      sed -e "s|%%SNAP_DATA%%|$SNAP_DATA|g" -e "s|%%SNAP%%|$SNAP|g" \
+        $SNAP/app/nginx/sysmanage-nginx.conf > $SNAP_DATA/nginx/sysmanage-nginx.conf
 
       # Create nginx config that uses snap paths
       cat > $SNAP_DATA/nginx/nginx.conf <<NGINXCONF
@@ -220,68 +250,13 @@ parts:
           uwsgi_temp_path $SNAP_DATA/nginx/tmp/uwsgi;
           scgi_temp_path $SNAP_DATA/nginx/tmp/scgi;
 
-          # Map to handle WebSocket upgrades securely
-          map \$http_upgrade \$connection_upgrade {
-              default upgrade;
-              '' close;
-              ~*^h2c$ '';
-              ~^websocket$ upgrade;
-          }
-
-          map \$http_upgrade \$upgrade_validated {
-              default 0;
-              '' 1;
-              ~^websocket$ 1;
-              ~*^h2c$ 0;
-          }
-
-          server {
-              listen 3000;
-              listen [::]:3000;
-
-              # Frontend static files
-              location / {
-                  root $SNAP/app/frontend/dist;
-                  try_files \$uri \$uri/ /index.html;
-
-                  location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)\$ {
-                      expires 1y;
-                      add_header Cache-Control "public, immutable";
-                  }
-              }
-
-              # Proxy API requests to backend
-              location /api/ {
-                  proxy_pass http://127.0.0.1:8080;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade \$http_upgrade;
-                  proxy_set_header Connection \$connection_upgrade;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Real-IP \$remote_addr;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto \$scheme;
-                  proxy_cache_bypass \$http_upgrade;
-                  proxy_read_timeout 86400;
-              }
-
-              # Proxy WebSocket connections
-              location /ws {
-                  if (\$upgrade_validated = 0) {
-                      return 400 "Invalid upgrade request";
-                  }
-
-                  proxy_pass http://127.0.0.1:8080;
-                  proxy_http_version 1.1;
-                  proxy_set_header Upgrade \$http_upgrade;
-                  proxy_set_header Connection \$connection_upgrade;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Real-IP \$remote_addr;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto \$scheme;
-                  proxy_read_timeout 86400;
-                  proxy_send_timeout 86400;
-              }
-          }
+          # Server blocks (TLS on 443, 80 -> 301 redirect, /api/, /ws,
+          # /airgap-repo/) plus the WebSocket upgrade maps come from the shared
+          # template, substituted into $SNAP_DATA above.  Do not inline them here
+          # again: a hand-written copy is exactly how this snap ended up serving
+          # the console over cleartext on port 3000 while every other platform
+          # had moved to TLS.
+          include $SNAP_DATA/nginx/sysmanage-nginx.conf;
 
       }
       NGINXCONF
@@ -367,8 +342,22 @@ parts:
     plugin: nil
     stage-packages:
       - nginx-light
+      # openssl is used by the wrapper to mint a self-signed certificate on first
+      # run.  The shared config serves on 443 and nginx refuses to start without
+      # one, and a confined snap has no packaging hook or operator prompt to
+      # supply it -- so the tool has to be inside the snap.
+      - openssl
     override-build: |
       craftctl default
       # Remove default nginx files we don't need
       rm -rf $CRAFT_PART_INSTALL/etc/nginx/sites-*
       rm -rf $CRAFT_PART_INSTALL/var
+
+      # Ship the server block rendered from the SHARED template (see
+      # scripts/render_nginx_configs.py, platform "snap").  The wrapper
+      # substitutes its %%SNAP%% / %%SNAP_DATA%% tokens at runtime.  Keeping this
+      # a real file staged from the repo -- rather than a heredoc in this
+      # YAML -- is what puts the snap inside the config drift gate.
+      mkdir -p $CRAFT_PART_INSTALL/app/nginx
+      cp "$CRAFT_PROJECT_DIR/installer/snap/sysmanage-nginx.conf" \
+         $CRAFT_PART_INSTALL/app/nginx/sysmanage-nginx.conf

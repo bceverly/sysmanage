@@ -160,6 +160,20 @@ Step "nssm.exe is packaged (nginx runs under it)" {
     "{0:N1} KB at {1}" -f ($p.Length / 1KB), $p.FullName.Replace($ExtractDir, "")
 }
 
+Step "Bundled Python runtime is packaged" {
+    # Without this the install falls back to hunting for a system Python, which
+    # is what shipped an install whose offline wheels no interpreter could satisfy.
+    $z = Get-ChildItem $script:InstallRoot -Recurse -Filter "python.zip" -EA SilentlyContinue | Select-Object -First 1
+    if (-not $z) { throw "python.zip missing - the MSI still depends on a system Python" }
+    "{0:N1} MB" -f ($z.Length / 1MB)
+}
+
+Step "Offline wheel set is packaged" {
+    $z = Get-ChildItem $script:InstallRoot -Recurse -Filter "wheels.zip" -EA SilentlyContinue | Select-Object -First 1
+    if (-not $z) { throw "wheels.zip missing - the install would need network to fetch dependencies" }
+    "{0:N1} MB" -f ($z.Length / 1MB)
+}
+
 Step "Frontend payload present (nginx has something to serve)" {
     $z = Get-ChildItem $script:InstallRoot -Recurse -Filter "frontend.zip" -EA SilentlyContinue | Select-Object -First 1
     if (-not $z) { throw "frontend.zip missing - nginx would serve an empty document root" }

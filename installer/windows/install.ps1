@@ -13,8 +13,18 @@
 # 0 so the MSI engine doesn't trigger Error 1722 + rollback.
 trap {
     Write-Host "WARNING: unhandled exception trapped at top level: $_"
-    Write-Host "Install step had errors but MSI install will still complete."
-    exit 0
+    # Honour the same soft/hard split as the exit policy at the bottom of this
+    # script.  The operator-fixable "no suitable Python" case is raised inside the
+    # main try/catch and never reaches here, so an exception that DOES reach this
+    # trap is unexpected -- fail hard rather than landing a broken install that
+    # reports success.  ($SoftFailure may not be initialised yet if something
+    # throws very early, hence the null-safe test.)
+    if ($script:SoftFailure -eq $true) {
+        Write-Host "Install step had errors but MSI install will still complete."
+        exit 0
+    }
+    Write-Host "INSTALLATION FAILED - rolling back."
+    exit 1
 }
 
 $ErrorActionPreference = "Continue"
@@ -45,6 +55,11 @@ function Write-Log {
 
 # Track if installation succeeded
 $InstallSuccess = $false
+
+# Distinguishes "this machine lacks a suitable Python" (operator-fixable, MSI is
+# allowed to land) from every other failure (hard, rolls the MSI back).  See the
+# exit policy at the bottom of this script.
+$script:SoftFailure = $false
 
 Write-Log "=== SysManage Server Installation ==="
 Write-Log "Installation Directory: $InstallDir"
@@ -107,29 +122,142 @@ try {
         throw "alembic.zip not found"
     }
 
-    # Find Python executable
-    Write-Log "Searching for Python 3.9+..."
+    # Bundled Python runtime.
+    #
+    # The MSI ships a relocatable CPython (python-build-standalone) that includes
+    # pip and venv, so the install depends on no system Python at all and the
+    # bundled wheels are guaranteed to match the interpreter installing them --
+    # they are built against this exact version at MSI build time.
     $PythonExe = $null
-    $PythonCommands = @("python", "python3", "py")
-
-    foreach ($cmd in $PythonCommands) {
-        try {
-            $testPath = (Get-Command $cmd -ErrorAction SilentlyContinue).Source
-            if ($testPath) {
-                $version = & $cmd --version 2>&1
-                if ($version -match "Python 3\.([0-9]+)") {
-                    $minor = [int]$Matches[1]
-                    if ($minor -ge 9) {
-                        $PythonExe = $cmd
-                        Write-Log "Found Python: $testPath (version: $version)"
-                        break
-                    }
-                }
-            }
-        } catch {
-            continue
+    $PythonZip = Join-Path $InstallDir "python.zip"
+    $PythonDir = Join-Path $InstallDir "python"
+    if (Test-Path $PythonZip) {
+        Write-Log "Extracting bundled Python runtime..."
+        if (Test-Path $PythonDir) { Remove-Item $PythonDir -Recurse -Force -ErrorAction SilentlyContinue }
+        $ProgressPreference = 'SilentlyContinue'
+        Expand-Archive -Path $PythonZip -DestinationPath $PythonDir -Force
+        $ProgressPreference = 'Continue'
+        $bundled = Join-Path $PythonDir "python.exe"
+        if (Test-Path $bundled) {
+            $PythonExe = $bundled
+            $bv = & $bundled --version 2>&1
+            Write-Log "Using bundled Python: $bundled ($bv)"
+        } else {
+            Write-Log "WARNING: python.zip extracted but python.exe is missing - falling back to a system Python"
         }
     }
+
+    # Fallback: no bundled runtime in this package (older MSI or a partial dev
+    # build).  Selection is pinned to the wheels' ABI tag -- see below.
+    if (-not $PythonExe) {
+    # Find Python executable.
+    #
+    # The bundled wheel set is installed with --no-index, and its compiled wheels
+    # (aiohttp, psycopg, cryptography, ...) carry a cpXY ABI tag that matches
+    # exactly ONE Python minor version.  Accepting "any Python >= 3.9" therefore
+    # picks an interpreter the wheels cannot satisfy whenever the box has a newer
+    # Python than the wheels were built against -- pip then fails on the first
+    # compiled package ("No matching distribution found for aiohttp") and the whole
+    # dependency install dies.  So: read the required tag out of the bundled wheels
+    # and select an interpreter that matches it.
+    $RequiredPyMinor = $null
+    $WheelsZipProbe = Join-Path $InstallDir "wheels.zip"
+    if (Test-Path $WheelsZipProbe) {
+        try {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($WheelsZipProbe)
+            try {
+                # Pure-python wheels are py3-none-any and constrain nothing; only
+                # the cpXY-tagged (compiled) ones pin the interpreter.
+                $tags = $zip.Entries.Name |
+                        Where-Object { $_ -match '-cp3(\d+)-' } |
+                        ForEach-Object { if ($_ -match '-cp3(\d+)-') { [int]$Matches[1] } } |
+                        Sort-Object -Unique
+            } finally { $zip.Dispose() }
+
+            if ($tags.Count -eq 1) {
+                $RequiredPyMinor = $tags[0]
+                Write-Log "Bundled wheels require Python 3.$RequiredPyMinor (from their cp3$RequiredPyMinor ABI tag)"
+            } elseif ($tags.Count -gt 1) {
+                Write-Log "WARNING: bundled wheels carry mixed ABI tags (3.$($tags -join ', 3.')) - not pinning"
+            } else {
+                Write-Log "Bundled wheels are all pure-python; any supported Python will do"
+            }
+        } catch {
+            Write-Log "WARNING: could not read ABI tags from $WheelsZipProbe ($_) - not pinning"
+        }
+    }
+
+    if ($RequiredPyMinor) {
+        Write-Log "Searching for Python 3.$RequiredPyMinor..."
+    } else {
+        Write-Log "Searching for Python 3.9+..."
+    }
+
+    # Enumerate every interpreter we can see, not just the first one on PATH:
+    # the required version is often installed alongside a newer default.
+    $Candidates = @()
+    foreach ($cmd in @("python", "python3", "py")) {
+        $src = (Get-Command $cmd -ErrorAction SilentlyContinue).Source
+        if ($src) { $Candidates += $src }
+    }
+    # The py launcher knows about installs that are not on PATH at all.
+    try {
+        $launcher = (Get-Command "py" -ErrorAction SilentlyContinue).Source
+        if ($launcher) {
+            & $launcher -0p 2>$null | ForEach-Object {
+                if ($_ -match '([A-Za-z]:\\[^\s].*python\.exe)') { $Candidates += $Matches[1] }
+            }
+        }
+    } catch { }
+    foreach ($root in @("C:\Python3*", "$env:LOCALAPPDATA\Programs\Python\Python3*", "$env:ProgramFiles\Python3*")) {
+        Get-ChildItem -Path $root -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $p = Join-Path $_.FullName "python.exe"
+            if (Test-Path $p) { $Candidates += $p }
+        }
+    }
+    $Candidates = $Candidates | Select-Object -Unique
+
+    $PythonExe = $null
+    $Seen = @()
+    foreach ($cand in $Candidates) {
+        try {
+            $version = & $cand --version 2>&1
+            if ($version -match "Python 3\.([0-9]+)") {
+                $minor = [int]$Matches[1]
+                $Seen += "3.$minor ($cand)"
+                $ok = if ($RequiredPyMinor) { $minor -eq $RequiredPyMinor } else { $minor -ge 9 }
+                if ($ok) {
+                    $PythonExe = $cand
+                    Write-Log "Found Python: $cand (version: $version)"
+                    break
+                }
+            }
+        } catch { continue }
+    }
+
+    if (-not $PythonExe -and $RequiredPyMinor) {
+        # Be specific about what is needed.  "Install Python 3.9+" is actively
+        # misleading here -- a 3.9+ Python is what the box already has.
+        Write-Log "ERROR: no Python 3.$RequiredPyMinor found."
+        Write-Log "  The bundled offline wheels are built for Python 3.$RequiredPyMinor and"
+        Write-Log "  cannot be installed under any other version."
+        if ($Seen.Count -gt 0) {
+            Write-Log "  Interpreters found on this machine: $($Seen -join '; ')"
+        } else {
+            Write-Log "  No Python interpreter was found on this machine at all."
+        }
+        Write-Log "  Install Python 3.$RequiredPyMinor from https://www.python.org/downloads/"
+        Write-Log "  then repair this installation to retry."
+        # Soft failure: "this machine has no suitable Python" is an environment
+        # problem the operator can fix and re-run, and it is exactly the condition
+        # a winget-pkgs validation sandbox hits.  Rolling the MSI back here is what
+        # burned PR #375773.  Everything ELSE is a hard failure (see the exit
+        # policy at the end of this script).
+        $script:SoftFailure = $true
+        throw "Python 3.$RequiredPyMinor is required by the bundled wheels but is not installed"
+    }
+    }  # end fallback: no bundled Python runtime in this package
 
     if ($PythonExe) {
         # Create virtual environment
@@ -362,19 +490,52 @@ if ($InstallSuccess) {
     exit 0
 }
 
-# NEVER exit non-zero -- the WiX CustomAction uses ``Return="check"``,
-# which rolls back the entire MSI on any non-zero return.  See the
-# matching block in sysmanage-agent/installer/windows/install.ps1 for
-# the full rationale (PR #375773 winget-pkgs validation burn,
-# 2026-05-17).  Any failure inside this script leaves the MSI landed;
-# operator can re-run the MSI after fixing whatever broke (typically:
-# install Python 3.9+ and re-run for MajorUpgrade to re-fire the CAs).
-if (-not $InstallSuccess) {
-    Write-Host ""
-    Write-Host "=====================================" -ForegroundColor Yellow
-    Write-Host "Install step had errors -- MSI install will still complete." -ForegroundColor Yellow
-    Write-Host "See log files for the failure and recovery steps." -ForegroundColor Yellow
-    Write-Host "=====================================" -ForegroundColor Yellow
-    Write-Host ""
+# Exit policy.  The WiX CustomAction uses ``Return="check"``, so a non-zero exit
+# rolls back the entire MSI.  There are two failure classes and they must not be
+# treated alike:
+#
+#   SOFT (exit 0, MSI lands) -- the machine lacks a suitable Python.  This is an
+#     environment problem the operator fixes and re-runs, and it is the condition
+#     a winget-pkgs validation sandbox hits.  Rolling back here burned PR #375773
+#     (2026-05-17); see the matching block in sysmanage-agent's install.ps1.
+#
+#   HARD (exit 1, MSI rolls back) -- anything else: the required Python was
+#     present and the install still broke (dependency install failed, payload
+#     extraction failed, nginx setup failed).  These previously exited 0 too,
+#     which is how a completely non-functional install came to report
+#     "Installation completed successfully" while its service restart-looped on
+#     "No module named uvicorn" and no web console was ever served.  A broken
+#     install that claims success is worse than a failed one: nothing tells the
+#     operator to look.
+if ($InstallSuccess) {
+    exit 0
 }
-exit 0
+
+if ($script:SoftFailure) {
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host "Install step could not complete -- MSI install will still land." -ForegroundColor Yellow
+    Write-Host "Install the required Python, then repair this installation." -ForegroundColor Yellow
+    Write-Host "See $LogFile for the failure and recovery steps." -ForegroundColor Yellow
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host ""
+    exit 0
+}
+
+# Hard failure: make it visible in the event log as well, because the MSI runs
+# this custom action with -WindowStyle Hidden and nobody sees stdout.
+try {
+    if (-not [System.Diagnostics.EventLog]::SourceExists("SysManage")) {
+        [System.Diagnostics.EventLog]::CreateEventSource("SysManage", "Application")
+    }
+    Write-EventLog -LogName Application -Source "SysManage" -EntryType Error -EventId 1000 `
+        -Message "SysManage Server installation failed. See $LogFile for details."
+} catch { }
+
+Write-Host ""
+Write-Host "=====================================" -ForegroundColor Red
+Write-Host "INSTALLATION FAILED - rolling back." -ForegroundColor Red
+Write-Host "See $LogFile for the failure and recovery steps." -ForegroundColor Red
+Write-Host "=====================================" -ForegroundColor Red
+Write-Host ""
+exit 1

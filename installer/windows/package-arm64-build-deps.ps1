@@ -77,6 +77,25 @@ if (Test-Path $Reqs) {
         Set-Content -NoNewline -Path (Join-Path $Out 'wheels-arm64.requirements.sha256')
 }
 
+# Record which Python the compiled wheels target.  This set is installed with
+# --no-index, so it satisfies exactly ONE Python minor version -- and nothing
+# used to record which.  On 2026-08-19 a box with Python 3.14 got a wheel set
+# built for an older minor, pip died on the first compiled package
+# ("No matching distribution found for aiohttp"), and the MSI still reported a
+# successful install.  install.ps1 now reads this tag straight out of the wheels
+# at install time; this file makes it visible at BUILD time too.
+$abiTags = @(Get-ChildItem "$Wheels\*.whl" -ErrorAction SilentlyContinue |
+             ForEach-Object { if ($_.Name -match '-cp3(\d+)-') { [int]$Matches[1] } } |
+             Sort-Object -Unique)
+if ($abiTags.Count -eq 1) {
+    "3.$($abiTags[0])" | Set-Content -NoNewline -Path (Join-Path $Out 'wheels-arm64.python-version')
+    Write-Host "[OK] Wheel set targets Python 3.$($abiTags[0])" -ForegroundColor Green
+} elseif ($abiTags.Count -gt 1) {
+    Write-Host "WARNING: wheels carry MIXED ABI tags (3.$($abiTags -join ', 3.')) - the offline install can only satisfy one Python." -ForegroundColor Yellow
+} else {
+    Write-Host "WARNING: no cp3xx-tagged wheels found - is this really the compiled ARM64 set?" -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "[OK] Packaged ARM64 build deps ($whlCount wheels) into:" -ForegroundColor Green
 Write-Host "     $Out"
@@ -87,4 +106,4 @@ Write-Host "  # first time only - create the release (a non-'v' tag, so it won't
 Write-Host "  gh release create $Tag --repo $Repo --title `"Windows ARM64 build deps`" --notes `"Prebuilt libpq DLLs + arm64 wheels for the ARM64 MSI CI job.`""
 Write-Host ""
 Write-Host "  # every time - upload/replace the assets:"
-Write-Host "  gh release upload $Tag --repo $Repo --clobber `"$Out\libpq-arm64.zip`" `"$Out\wheels-arm64.zip`" `"$Out\wheels-arm64.requirements.sha256`""
+Write-Host "  gh release upload $Tag --repo $Repo --clobber `"$Out\libpq-arm64.zip`" `"$Out\wheels-arm64.zip`" `"$Out\wheels-arm64.requirements.sha256`" `"$Out\wheels-arm64.python-version`""

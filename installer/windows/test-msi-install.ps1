@@ -151,21 +151,72 @@ Step "msiexec /i (this takes several minutes - venv + ~97 wheels)" {
     "exit $($p.ExitCode); verbose log at $msiLog"
 }
 
+Step "Bundled Python runtime is installed and usable" {
+    # The whole point of bundling: the install must not depend on, or be
+    # influenced by, whatever Python the operator happens to have.
+    $py = Join-Path $InstallRoot "python\python.exe"
+    if (-not (Test-Path $py)) {
+        throw "no bundled interpreter at $py - python.zip was not shipped or not extracted"
+    }
+    $v = (& $py --version 2>&1) -join " "
+    if ($v -notmatch "Python 3\.(\d+)") { throw "bundled python did not report a version: $v" }
+    "$v"
+}
+
+Step "Dependencies actually installed into the venv" {
+    # This is the check that would have caught the 3.14-vs-cp312 failure on the
+    # spot: the venv existed and the service was registered, but nothing was in
+    # it.  Assert on the import that the service actually needs.
+    $venvPy = Join-Path $InstallRoot ".venv\Scripts\python.exe"
+    if (-not (Test-Path $venvPy)) { throw "no venv at $venvPy" }
+    $out = (& $venvPy -c "import uvicorn, fastapi, aiohttp; print(uvicorn.__version__)" 2>&1) -join " "
+    if ($LASTEXITCODE -ne 0) {
+        throw "venv cannot import its own dependencies - the offline wheel install failed`n        $out"
+    }
+    "uvicorn $out importable in the venv"
+}
+
 Step "Installer log shows the nginx step ran" {
-    $logs = Get-ChildItem "$DataRoot\logs" -Filter "*install*.log" -EA SilentlyContinue |
-            Sort-Object LastWriteTime -Descending
-    if (-not $logs) { throw "no installer log under $DataRoot\logs" }
-    $text = Get-Content $logs[0].FullName -Raw
+    # install.ps1 writes TWO files here: install.log (its own Write-Log output) and
+    # install-transcript.log (a Start-Transcript capture).  Both match "*install*.log",
+    # and the transcript is normally the newer of the two because Stop-Transcript
+    # writes its footer last -- so a newest-wins wildcard reads the wrong file.
+    # Assert against install.log by name, and fall back to the transcript only if
+    # install.ps1 died before creating it.
+    $dir = "$DataRoot\logs"
+    $primary = Join-Path $dir "install.log"
+    $log = if (Test-Path $primary) { Get-Item $primary }
+           else {
+               Get-ChildItem $dir -Filter "*install*.log" -EA SilentlyContinue |
+                   Sort-Object LastWriteTime -Descending | Select-Object -First 1
+           }
+    if (-not $log) {
+        $seen = @(Get-ChildItem $dir -EA SilentlyContinue | ForEach-Object Name)
+        throw ("no installer log under $dir" +
+               "`n        directory contains: " + $(if ($seen) { $seen -join ", " } else { "(nothing)" }) +
+               "`n        install.ps1 never got far enough to write one.")
+    }
+
+    $text = Get-Content $log.FullName -Raw
+    # One shared failure reporter: whichever assertion trips, show the tail of the
+    # log so the cause travels back in the SAME round trip instead of the next one.
+    $bail = {
+        param($why)
+        $tail = (Get-Content $log.FullName -Tail 30) -join "`n        "
+        throw ("$why`n        log: $($log.FullName) (last written $($log.LastWriteTime))" +
+               "`n        --- last 30 lines ---`n        $tail")
+    }
+
     if ($text -notmatch "Setting up nginx") {
-        throw "installer log has no 'Setting up nginx' line - the nginx custom action did not run"
+        & $bail "installer log has no 'Setting up nginx' line - install.ps1 did not reach the nginx step"
     }
     if ($text -match "ERROR: nginx setup failed") {
-        throw "installer log reports 'nginx setup failed' - see $($logs[0].FullName)"
+        & $bail "installer log reports 'nginx setup failed'"
     }
     if ($text -notmatch "nginx configured") {
-        throw "nginx step started but never reported 'nginx configured' - see $($logs[0].FullName)"
+        & $bail "nginx step started but never reported 'nginx configured'"
     }
-    "nginx configured (per $($logs[0].Name))"
+    "nginx configured (per $($log.Name))"
 }
 
 # ------------------------------------------------- files in the RIGHT PLACE --
@@ -274,19 +325,32 @@ if ($TestServing) {
 } finally {
     Write-Host ""
     Write-Host "=== SUMMARY ===" -ForegroundColor White
-    $script:Results | Format-Table -AutoSize Status, Step, Detail | Out-String | Write-Host
+    # Status/Step only.  Detail is printed unwrapped below: Format-Table -AutoSize
+    # truncates long values with "...", which would swallow the diagnostic tail that
+    # is the entire reason a failure is worth reporting.
+    $script:Results | Format-Table -AutoSize Status, Step | Out-String | Write-Host
+
     if ($script:Failed -eq 0) {
         Write-Host "MSI INSTALL VERIFIED." -ForegroundColor Green
         Write-Host ""
         Write-Host "The install is LIVE on this machine.  To remove it:" -ForegroundColor White
         Write-Host "  powershell -ExecutionPolicy Bypass -File installer\windows\test-msi-install.ps1 -Uninstall"
     } else {
+        Write-Host "--- FAILURE DETAIL (untruncated) ---" -ForegroundColor Red
+        foreach ($r in $script:Results | Where-Object Status -eq "FAIL") {
+            Write-Host ""
+            Write-Host "FAIL: $($r.Step)" -ForegroundColor Red
+            Write-Host "      $($r.Detail)"
+        }
+        Write-Host ""
         Write-Host "$($script:Failed) CHECK(S) FAILED." -ForegroundColor Red
-        Write-Host "  MSI verbose log : C:\sysmanage-msi-install-verbose.log"
-        Write-Host "  installer log   : $DataRoot\logs\"
     }
     Write-Host ""
-    Write-Host "Full log: $LogFile"
+    Write-Host "=== SEND THIS FILE BACK: $LogFile ===" -ForegroundColor White
+    Write-Host "It contains the summary, the untruncated failure detail, and everything above."
+    if ($script:Failed -ne 0) {
+        Write-Host "Only if asked for more: C:\sysmanage-msi-install-verbose.log (raw msiexec), $DataRoot\logs\"
+    }
     if ($script:Transcribing) { try { Stop-Transcript | Out-Null } catch { } }
 }
 

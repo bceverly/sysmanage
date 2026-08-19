@@ -141,14 +141,22 @@
       <Component Id="AlembicZip" Guid="A3B4C5D6-E7F8-4A5B-8C9D-0E1F2A3B4C5D">
         <File Id="AlembicZipFile" Source="alembic.zip" />
       </Component>
-      <?if $(sys.BUILDARCH) = "arm64" ?>
-      <!-- ARM64: prebuilt wheel set (several deps have no arm64 wheels on PyPI).
-           install.ps1 installs from these offline so the target needs no toolchain.
+      <!-- Bundled CPython runtime (python-build-standalone, relocatable, includes
+           pip + venv).  The MSI no longer depends on a system Python at all: the
+           offline wheel set is compiled against exactly one Python minor, and
+           hunting for "3.9+, first found" picked interpreters those wheels could
+           not satisfy.  Downloaded, checksum-verified and zipped by
+           build-msi.ps1; extracted by install.ps1. -->
+      <Component Id="PythonZip" Guid="3CE9DD3B-BB4A-4307-93B2-6531C2B0A88A">
+        <File Id="PythonZipFile" Source="python.zip" />
+      </Component>
+      <!-- Prebuilt wheel set, BOTH arches, so the install is fully offline.
+           ARM64 is cross-built on separate hardware (several deps have no arm64
+           wheels on PyPI); x64 is fetched with the bundled interpreter itself.
            Staged/zipped by build-msi.ps1. -->
       <Component Id="WheelsZip" Guid="D8E1F2A3-B4C5-4D6E-9F0A-1B2C3D4E5F60">
         <File Id="WheelsZipFile" Source="wheels.zip" />
       </Component>
-      <?endif?>
     </ComponentGroup>
 
     <?if $(sys.BUILDARCH) = "arm64" ?>

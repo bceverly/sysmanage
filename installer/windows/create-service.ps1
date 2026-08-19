@@ -77,9 +77,21 @@ try {
 
     # Check if uvicorn is installed
     $VenvPip = Join-Path $InstallDir ".venv\Scripts\pip.exe"
+    # Actually verify, don't just log and assert success.  This previously piped
+    # the grep output to the log and then printed "Uvicorn verified"
+    # unconditionally -- so a venv with NO dependencies installed still reported
+    # verified, and we went on to register a service that restart-looped forever
+    # on "No module named uvicorn" while the MSI reported a successful install.
     Write-Log "Verifying uvicorn installation..."
-    & $VenvPip list 2>&1 | Select-String -Pattern "uvicorn" | Out-File -FilePath $LogFile -Append
-    Write-Log "Uvicorn verified"
+    $uvicornCheck = & $VenvPip list 2>&1 | Select-String -Pattern "^uvicorn\s"
+    if (-not $uvicornCheck) {
+        Write-Log "ERROR: uvicorn is NOT installed in the venv."
+        Write-Log "  The dependency install did not complete - see the earlier"
+        Write-Log "  'Failed to install dependencies' error in this log."
+        Write-Log "  Refusing to register a service that cannot start."
+        throw "uvicorn missing from venv - dependency installation failed"
+    }
+    Write-Log "Uvicorn verified: $($uvicornCheck.ToString().Trim())"
 
     # Check if service already exists
     $existingService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue

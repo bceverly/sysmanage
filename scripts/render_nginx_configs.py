@@ -126,6 +126,28 @@ PLATFORMS: Dict[str, Dict[str, str]] = {
         "TLS_CERT": "/etc/sysmanage/tls/server.crt",
         "TLS_KEY": "/etc/sysmanage/tls/server.key",
     },
+    # The snap bundles its OWN nginx (nginx-light stage-package), because strict
+    # confinement means it cannot use the host's.  That is correct.  What was not
+    # correct is that it also hand-wrote its server block in a shell heredoc
+    # inside snapcraft.yaml, which put it outside this drift gate -- so while the
+    # other nine configs moved to TLS on 443, the snap went on serving the web UI,
+    # /api/ AND /ws over cleartext HTTP on port 3000.  Same failure the FreeBSD
+    # port hit on 2026-08-11 (see PORT_HEADER below); this was the last copy.
+    #
+    # A snap's paths are only known at RUNTIME ($SNAP, $SNAP_DATA vary by
+    # revision), so they cannot be baked in here.  The rendered file keeps
+    # %%SNAP%% / %%SNAP_DATA%% tokens and the wrapper substitutes them on start --
+    # the same install-time token approach the FreeBSD port uses for %%PREFIX%%.
+    # Substitution is token-targeted, NOT envsubst: the config is full of nginx
+    # runtime variables ($http_upgrade, $host, $uri) that must survive verbatim.
+    "snap": {
+        "RELOAD_CMD": "snap restart sysmanage",
+        "CONF_PATH": "%%SNAP_DATA%%/nginx/sysmanage-nginx.conf",
+        "FRONTEND_ROOT": "%%SNAP%%/app/frontend/dist",
+        "AIRGAP_ROOT": "%%SNAP_DATA%%/airgap-repo/",
+        "TLS_CERT": "%%SNAP_DATA%%/tls/server.crt",
+        "TLS_KEY": "%%SNAP_DATA%%/tls/server.key",
+    },
     # Windows renders from the SAME template as everything else, deliberately.
     # It was the one platform with no nginx at all: the MSI laid down the built
     # frontend and then nothing served it, while install.ps1 told the operator

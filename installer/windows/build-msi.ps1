@@ -184,6 +184,90 @@ Write-Host "  Frontend: $($frontendSize | ForEach-Object { '{0:N2}' -f $_ }) MB"
 Write-Host "  Alembic:  $($alembicSize | ForEach-Object { '{0:N2}' -f $_ }) MB" -ForegroundColor Gray
 Write-Host ""
 
+# ---------------------------------------------------------------------------
+# Bundled Python runtime.
+#
+# The MSI used to hunt for a system Python ("3.9+, first one found").  That is
+# unfixable in general: the bundled offline wheels are compiled against exactly
+# ONE Python minor via their cpXY ABI tag, and we do not control what the
+# operator has installed.  On 2026-08-19 a box with 3.14 got a wheel set built
+# for an older minor, pip resolved nothing ("No matching distribution found for
+# aiohttp"), and the install still reported success.  Pinning the interpreter
+# selection made that failure legible; bundling the interpreter removes it.
+#
+# python-build-standalone "install_only" builds are relocatable full CPythons
+# that include pip and venv, published for both windows arches.  Downloaded at
+# BUILD time and shipped inside the MSI, so the install itself needs no network
+# and no system Python at all.
+#
+# Version + hashes are pinned.  Bump $PythonVersion/$PythonRelease and BOTH
+# hashes together, then rebuild the ARM64 wheel set against the new version
+# (installer\windows\package-arm64-build-deps.ps1).  The wheels and this
+# interpreter must stay in lockstep; the ARM64 branch below fails the build if
+# they drift, since that set is cross-built elsewhere and cannot be checked here
+# any other way.  x64 sidesteps the problem entirely by fetching its wheels with
+# this very interpreter.
+$PythonVersion = "3.12.14"
+$PythonRelease = "20260814"
+$PythonHashes = @{
+    "arm64" = "6a7e4b012dd74eeb674ca0591ad1e676fc8d37a650e71c7b2140c3c8ed632e30"
+    "x64"   = "7330282b47cd43a66b702d39078d2e5a88e580cee351d82f95045f21f5ee042a"
+}
+$PythonTriple = @{ "arm64" = "aarch64-pc-windows-msvc"; "x64" = "x86_64-pc-windows-msvc" }
+
+Write-Host "Staging bundled Python $PythonVersion ($Architecture)..." -ForegroundColor Cyan
+$PythonZip = Join-Path $CurrentDir "installer\windows\python.zip"
+if (Test-Path $PythonZip) { Remove-Item -Path $PythonZip -Force }
+
+$pyAsset = "cpython-$PythonVersion+$PythonRelease-$($PythonTriple[$Architecture])-install_only.tar.gz"
+$pyUrl = "https://github.com/astral-sh/python-build-standalone/releases/download/$PythonRelease/$pyAsset"
+$pyCache = Join-Path $CurrentDir "installer\windows\.python-cache"
+New-Item -ItemType Directory -Path $pyCache -Force | Out-Null
+$pyTarball = Join-Path $pyCache $pyAsset
+
+if (-not (Test-Path $pyTarball)) {
+    Write-Host "  Downloading $pyAsset..." -ForegroundColor Gray
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $pyUrl -OutFile $pyTarball -UseBasicParsing
+    $ProgressPreference = 'Continue'
+} else {
+    Write-Host "  Using cached $pyAsset" -ForegroundColor Gray
+}
+
+$pyActual = (Get-FileHash $pyTarball -Algorithm SHA256).Hash.ToLower()
+$pyExpected = $PythonHashes[$Architecture].ToLower()
+if ($pyActual -ne $pyExpected) {
+    Remove-Item $pyTarball -Force -ErrorAction SilentlyContinue
+    Write-Host "ERROR: Python runtime checksum mismatch for $Architecture" -ForegroundColor Red
+    Write-Host "  expected $pyExpected" -ForegroundColor Red
+    Write-Host "  actual   $pyActual" -ForegroundColor Red
+    exit 1
+}
+Write-Host "  Checksum verified" -ForegroundColor Gray
+
+# Repack tar.gz -> zip.  install.ps1 uses Expand-Archive for every other payload
+# and Windows PowerShell 5.1 cannot read tar.gz natively, so normalising here
+# keeps the install side uniform.  .pdb symbols are dropped: ~40% of the payload
+# for files an operator install never uses.
+$pyStage = Join-Path $pyCache "extract-$Architecture"
+if (Test-Path $pyStage) { Remove-Item -Recurse -Force $pyStage }
+New-Item -ItemType Directory -Path $pyStage -Force | Out-Null
+& tar -xzf $pyTarball -C $pyStage
+if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: failed to extract $pyAsset" -ForegroundColor Red; exit 1 }
+
+$pyRoot = Join-Path $pyStage "python"
+if (-not (Test-Path (Join-Path $pyRoot "python.exe"))) {
+    Write-Host "ERROR: python.exe not found in the extracted runtime ($pyRoot)" -ForegroundColor Red
+    exit 1
+}
+Get-ChildItem $pyRoot -Recurse -Filter *.pdb -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+
+$ProgressPreference = 'SilentlyContinue'
+Compress-Archive -Path "$pyRoot\*" -DestinationPath $PythonZip -Force
+$ProgressPreference = 'Continue'
+Write-Host ("[OK] Bundled Python packaged: {0:N2} MB" -f (([System.IO.FileInfo]$PythonZip).Length / 1MB)) -ForegroundColor Green
+Write-Host ""
+
 # ARM64: stage the libpq runtime DLLs the WiX references (installer\windows\libpq-arm64\).
 # Native ARM64 uses pure-Python psycopg, which needs an ARM64 libpq at runtime; x64
 # uses psycopg[binary] (libpq bundled in the wheel), so this is arm64-only.
@@ -255,12 +339,62 @@ if ($Architecture -eq "arm64") {
         & $venvPy -m pip wheel -r (Join-Path $CurrentDir "requirements-prod.txt") --find-links $WheelsDir -w $WheelsDir
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: ARM64 wheel build failed." -ForegroundColor Red; exit 1 }
     }
+    # The ARM64 wheel set is cross-built on separate hardware and cannot be
+    # rebuilt here, so it is the one place the interpreter and the wheels can
+    # drift apart.  Fail the BUILD rather than shipping an MSI whose offline
+    # install cannot resolve a single compiled package.
+    $pyMinor = ([version]$PythonVersion).Minor
+    $abiTags = @(Get-ChildItem "$WheelsDir\*.whl" -ErrorAction SilentlyContinue |
+                 ForEach-Object { if ($_.Name -match '-cp3(\d+)-') { [int]$Matches[1] } } |
+                 Sort-Object -Unique)
+    if ($abiTags.Count -eq 0) {
+        Write-Host "ERROR: no cp3xx-tagged wheels in $WheelsDir - that is not the compiled ARM64 set." -ForegroundColor Red
+        exit 1
+    }
+    if ($abiTags.Count -gt 1 -or $abiTags[0] -ne $pyMinor) {
+        Write-Host "ERROR: ARM64 wheels target Python 3.$($abiTags -join ', 3.') but the bundled runtime is $PythonVersion." -ForegroundColor Red
+        Write-Host "  The offline install would resolve nothing.  Rebuild the wheel set against" -ForegroundColor Red
+        Write-Host "  Python $PythonVersion, then re-run installer\windows\package-arm64-build-deps.ps1." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  ARM64 wheels match the bundled runtime (cp3$pyMinor)" -ForegroundColor Gray
+
     $WheelsZip = Join-Path $CurrentDir "installer\windows\wheels.zip"
     if (Test-Path $WheelsZip) { Remove-Item $WheelsZip -Force }
     $ProgressPreference = 'SilentlyContinue'
     Compress-Archive -Path "$WheelsDir\*" -DestinationPath $WheelsZip -Force
     $ProgressPreference = 'Continue'
     Write-Host "[OK] Bundled $(@(Get-ChildItem "$WheelsDir\*.whl").Count) ARM64 wheels into wheels.zip" -ForegroundColor Green
+    Write-Host ""
+}
+
+# x64: bundle wheels too, so BOTH arches install fully offline.  x64 previously
+# pip-installed from PyPI at install time, which needed network on the target and
+# silently resolved against whatever system Python was found.  Every dependency
+# has a win_amd64 wheel on PyPI, so unlike ARM64 there is no cross-build problem:
+# fetch them with the BUNDLED interpreter, which makes the ABI match structural
+# rather than something to verify after the fact.
+if ($Architecture -eq "x64") {
+    Write-Host "Bundling x64 wheels (offline install)..." -ForegroundColor Cyan
+    $WheelsDir = Join-Path $CurrentDir "installer\windows\wheels-x64"
+    if (Test-Path $WheelsDir) { Remove-Item -Recurse -Force $WheelsDir }
+    New-Item -ItemType Directory -Path $WheelsDir -Force | Out-Null
+
+    $bundledPy = Join-Path $pyRoot "python.exe"
+    & $bundledPy -m pip download -r (Join-Path $CurrentDir "requirements-prod.txt") `
+        --only-binary=:all: -d $WheelsDir --disable-pip-version-check
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: x64 wheel download failed." -ForegroundColor Red
+        Write-Host "  Every dependency must publish a win_amd64 wheel for Python $PythonVersion." -ForegroundColor Red
+        exit 1
+    }
+
+    $WheelsZip = Join-Path $CurrentDir "installer\windows\wheels.zip"
+    if (Test-Path $WheelsZip) { Remove-Item $WheelsZip -Force }
+    $ProgressPreference = 'SilentlyContinue'
+    Compress-Archive -Path "$WheelsDir\*" -DestinationPath $WheelsZip -Force
+    $ProgressPreference = 'Continue'
+    Write-Host "[OK] Bundled $(@(Get-ChildItem "$WheelsDir\*.whl").Count) x64 wheels into wheels.zip" -ForegroundColor Green
     Write-Host ""
 }
 
