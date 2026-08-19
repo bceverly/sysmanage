@@ -14,3 +14,8 @@ SysManage agents deployed across an infrastructure and provides:
 
 The server runs as a daemon backed by PostgreSQL and is fronted by
 nginx.
+
+Note: SAML 2.0 single sign-on is not available in this package. It
+requires the python3-saml/xmlsec bindings, which pkgsrc does not
+provide. The other external identity providers (OIDC and LDAP/AD) are
+unaffected and work normally.

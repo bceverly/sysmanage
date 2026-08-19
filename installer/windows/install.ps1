@@ -167,21 +167,26 @@ try {
             Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
             $zip = [System.IO.Compression.ZipFile]::OpenRead($WheelsZipProbe)
             try {
-                # Pure-python wheels are py3-none-any and constrain nothing; only
-                # the cpXY-tagged (compiled) ones pin the interpreter.
-                $tags = $zip.Entries.Name |
-                        Where-Object { $_ -match '-cp3(\d+)-' } |
-                        ForEach-Object { if ($_ -match '-cp3(\d+)-') { [int]$Matches[1] } } |
-                        Sort-Object -Unique
+                # Three kinds of wheel, and only one of them pins the interpreter:
+                #   py3-none-any    pure python  -- constrains nothing
+                #   -cp39-abi3-     stable ABI   -- a MINIMUM ("3.9 or newer")
+                #   -cp313-cp313-   version lock -- usable only on that minor
+                # Treating every "-cp3NN-" as a lock makes a healthy set look like
+                # it targets two versions at once (cryptography ships cp39-abi3
+                # alongside cp313-cp313 wheels) and pins to the wrong one.
+                $names = @($zip.Entries.Name)
+                $tags = @($names |
+                          ForEach-Object { if ($_ -match '-cp3(\d+)-cp3\d+[a-z]*-') { [int]$Matches[1] } } |
+                          Sort-Object -Unique)
             } finally { $zip.Dispose() }
 
             if ($tags.Count -eq 1) {
                 $RequiredPyMinor = $tags[0]
-                Write-Log "Bundled wheels require Python 3.$RequiredPyMinor (from their cp3$RequiredPyMinor ABI tag)"
+                Write-Log "Bundled wheels require Python 3.$RequiredPyMinor (version-locked cp3$RequiredPyMinor wheels)"
             } elseif ($tags.Count -gt 1) {
-                Write-Log "WARNING: bundled wheels carry mixed ABI tags (3.$($tags -join ', 3.')) - not pinning"
+                Write-Log "WARNING: bundled wheels are locked to multiple Python versions (3.$($tags -join ', 3.')) - not pinning"
             } else {
-                Write-Log "Bundled wheels are all pure-python; any supported Python will do"
+                Write-Log "No version-locked wheels; any supported Python will do"
             }
         } catch {
             Write-Log "WARNING: could not read ABI tags from $WheelsZipProbe ($_) - not pinning"

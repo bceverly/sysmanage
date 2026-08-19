@@ -22,3 +22,8 @@ infrastructure.
 The server requires PostgreSQL and serves both the API backend and the
 static frontend files. It communicates securely with agents using TLS-
 encrypted WebSocket connections.
+
+Note: SAML 2.0 single sign-on is not available in this port. It requires
+the python3-saml/xmlsec bindings, which OpenBSD does not package. The
+other external identity providers (OIDC and LDAP/AD) are unaffected and
+work normally.

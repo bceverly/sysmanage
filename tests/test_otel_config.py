@@ -115,3 +115,65 @@ class TestGetMeter:
         result = get_meter("test")
 
         assert result is None
+
+
+class TestOtlpExporterIsIndependentlyOptional:
+    """The OTLP exporters must be optional SEPARATELY from the rest of the stack.
+
+    opentelemetry-exporter-otlp pulls grpcio, a compiled package with no build on
+    some platforms; the OpenBSD port omits it deliberately (see
+    installer/openbsd/build-libs.sh).  These imports used to live in the same try
+    block as the API, SDK, instrumentation and Prometheus exporter, so that one
+    missing optional exporter silently disabled ALL telemetry -- Prometheus
+    metrics and every instrumentation went dark on a platform where those
+    packages were installed and working.  If someone merges the two try blocks
+    again, these tests fail.
+    """
+
+    def test_core_telemetry_survives_missing_otlp_exporter(self):
+        """Blocking opentelemetry.exporter.otlp must not disable telemetry."""
+        import importlib
+        import sys
+
+        blocked = "opentelemetry.exporter.otlp"
+
+        class _Blocker:
+            def find_spec(self, name, path=None, target=None):
+                if name.startswith(blocked):
+                    raise ImportError("simulated: %s not installed" % name)
+                return None
+
+        saved_modules = {
+            name: mod
+            for name, mod in sys.modules.items()
+            if name.startswith(blocked) or name.startswith("backend.telemetry")
+        }
+        blocker = _Blocker()
+        sys.meta_path.insert(0, blocker)
+        try:
+            for name in list(sys.modules):
+                if name.startswith(blocked) or name.startswith("backend.telemetry"):
+                    del sys.modules[name]
+            cfg = importlib.import_module("backend.telemetry.otel_config")
+
+            # The whole point: core telemetry stays up ...
+            assert cfg.TELEMETRY_AVAILABLE is True
+            # ... and only OTLP is marked unavailable.
+            assert cfg.OTLP_AVAILABLE is False
+            # The Prometheus exporter and instrumentation must still be usable.
+            assert cfg.PrometheusMetricReader is not None
+            assert cfg.FastAPIInstrumentor is not None
+            assert cfg.SQLAlchemyInstrumentor is not None
+        finally:
+            sys.meta_path.remove(blocker)
+            for name in list(sys.modules):
+                if name.startswith(blocked) or name.startswith("backend.telemetry"):
+                    del sys.modules[name]
+            sys.modules.update(saved_modules)
+            importlib.import_module("backend.telemetry.otel_config")
+
+    def test_otlp_available_when_exporter_present(self):
+        """Sanity check the flag is not just hardcoded False."""
+        from backend.telemetry import otel_config
+
+        assert otel_config.OTLP_AVAILABLE is True

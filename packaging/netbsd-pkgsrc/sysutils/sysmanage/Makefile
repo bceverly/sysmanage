@@ -45,6 +45,17 @@ DEPENDS+=	${PYPKGPREFIX}-sqlalchemy-[0-9]*:../../databases/py-sqlalchemy
 DEPENDS+=	${PYPKGPREFIX}-starlette-[0-9]*:../../www/py-starlette
 DEPENDS+=	${PYPKGPREFIX}-uvicorn-[0-9]*:../../www/py-uvicorn
 DEPENDS+=	${PYPKGPREFIX}-websockets-[0-9]*:../../net/py-websockets
+# Directly imported by the backend but previously undeclared.  pkgsrc has no pip
+# step, so an undeclared dependency is simply absent at runtime -- and the first
+# one here is fatal: backend/auth/auth_handler.py imports jwt, so without it
+# nobody can log in at all.  Package names verified against the live pkgsrc tree
+# (PyJWT is py-JWT in textproc, pyotp is py-otp in security).
+DEPENDS+=	${PYPKGPREFIX}-JWT-[0-9]*:../../textproc/py-JWT
+DEPENDS+=	${PYPKGPREFIX}-otp-[0-9]*:../../security/py-otp
+DEPENDS+=	${PYPKGPREFIX}-reportlab-[0-9]*:../../print/py-reportlab
+DEPENDS+=	${PYPKGPREFIX}-requests-[0-9]*:../../devel/py-requests
+DEPENDS+=	${PYPKGPREFIX}-urllib3-[0-9]*:../../www/py-urllib3
+DEPENDS+=	${PYPKGPREFIX}-packaging-[0-9]*:../../devel/py-packaging
 DEPENDS+=	postgresql15-server-[0-9]*:../../databases/postgresql15-server
 DEPENDS+=	nginx-[0-9]*:../../www/nginx
 

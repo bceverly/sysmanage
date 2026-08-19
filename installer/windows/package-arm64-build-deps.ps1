@@ -84,16 +84,19 @@ if (Test-Path $Reqs) {
 # ("No matching distribution found for aiohttp"), and the MSI still reported a
 # successful install.  install.ps1 now reads this tag straight out of the wheels
 # at install time; this file makes it visible at BUILD time too.
-$abiTags = @(Get-ChildItem "$Wheels\*.whl" -ErrorAction SilentlyContinue |
-             ForEach-Object { if ($_.Name -match '-cp3(\d+)-') { [int]$Matches[1] } } |
-             Sort-Object -Unique)
-if ($abiTags.Count -eq 1) {
-    "3.$($abiTags[0])" | Set-Content -NoNewline -Path (Join-Path $Out 'wheels-arm64.python-version')
-    Write-Host "[OK] Wheel set targets Python 3.$($abiTags[0])" -ForegroundColor Green
-} elseif ($abiTags.Count -gt 1) {
-    Write-Host "WARNING: wheels carry MIXED ABI tags (3.$($abiTags -join ', 3.')) - the offline install can only satisfy one Python." -ForegroundColor Yellow
+# Only VERSION-LOCKED wheels (-cp313-cp313-) pin the interpreter.  Stable-ABI
+# wheels (-cp39-abi3-, e.g. cryptography) state a minimum and run on anything
+# newer, so counting them as locks makes a consistent set look like it targets
+# two Pythons at once.
+$names = @(Get-ChildItem "$Wheels\*.whl" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+$locked = @($names | ForEach-Object { if ($_ -match '-cp3(\d+)-cp3\d+[a-z]*-') { [int]$Matches[1] } } | Sort-Object -Unique)
+if ($locked.Count -eq 1) {
+    "3.$($locked[0])" | Set-Content -NoNewline -Path (Join-Path $Out 'wheels-arm64.python-version')
+    Write-Host "[OK] Wheel set targets Python 3.$($locked[0])" -ForegroundColor Green
+} elseif ($locked.Count -gt 1) {
+    Write-Host "WARNING: wheels are locked to MULTIPLE Python versions (3.$($locked -join ', 3.')) - the offline install can only satisfy one." -ForegroundColor Yellow
 } else {
-    Write-Host "WARNING: no cp3xx-tagged wheels found - is this really the compiled ARM64 set?" -ForegroundColor Yellow
+    Write-Host "WARNING: no version-locked (cpXY-cpXY) wheels found - is this really the compiled ARM64 set?" -ForegroundColor Yellow
 }
 
 Write-Host ""

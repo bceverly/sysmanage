@@ -207,11 +207,16 @@ Write-Host ""
 # they drift, since that set is cross-built elsewhere and cannot be checked here
 # any other way.  x64 sidesteps the problem entirely by fetching its wheels with
 # this very interpreter.
-$PythonVersion = "3.12.14"
+#
+# 3.13 specifically: the cross-built ARM64 wheel set targets cp313, and that set
+# is expensive to rebuild (static OpenSSL for cryptography, a special-cased
+# grpcio build).  Matching the interpreter to the existing wheels is the cheap
+# direction.
+$PythonVersion = "3.13.15"
 $PythonRelease = "20260814"
 $PythonHashes = @{
-    "arm64" = "6a7e4b012dd74eeb674ca0591ad1e676fc8d37a650e71c7b2140c3c8ed632e30"
-    "x64"   = "7330282b47cd43a66b702d39078d2e5a88e580cee351d82f95045f21f5ee042a"
+    "arm64" = "b75b76d7d5ce6db7af426de8ea09d587fe6ac01d1f4238fb6fccda64bf01aee7"
+    "x64"   = "4ca61e4b09c2240cc50cc6910c90664051e93ab7caa2f48b3c6b3c070670c0bd"
 }
 $PythonTriple = @{ "arm64" = "aarch64-pc-windows-msvc"; "x64" = "x86_64-pc-windows-msvc" }
 
@@ -343,21 +348,37 @@ if ($Architecture -eq "arm64") {
     # rebuilt here, so it is the one place the interpreter and the wheels can
     # drift apart.  Fail the BUILD rather than shipping an MSI whose offline
     # install cannot resolve a single compiled package.
+    # Two kinds of compiled wheel, and conflating them is wrong:
+    #   -cp313-cp313-   version LOCKED: usable only on 3.13
+    #   -cp39-abi3-     stable ABI: a MINIMUM ("3.9 or newer"), e.g. cryptography
+    # Reading every "-cp3NN-" as a lock reports a healthy set as targeting
+    # "3.9, 3.13" and fails a build that should pass.
     $pyMinor = ([version]$PythonVersion).Minor
-    $abiTags = @(Get-ChildItem "$WheelsDir\*.whl" -ErrorAction SilentlyContinue |
-                 ForEach-Object { if ($_.Name -match '-cp3(\d+)-') { [int]$Matches[1] } } |
-                 Sort-Object -Unique)
-    if ($abiTags.Count -eq 0) {
-        Write-Host "ERROR: no cp3xx-tagged wheels in $WheelsDir - that is not the compiled ARM64 set." -ForegroundColor Red
+    $wheelNames = @(Get-ChildItem "$WheelsDir\*.whl" -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+    $locked = @($wheelNames | ForEach-Object { if ($_ -match '-cp3(\d+)-cp3\d+[a-z]*-') { [int]$Matches[1] } } | Sort-Object -Unique)
+    $abi3Min = @($wheelNames | ForEach-Object { if ($_ -match '-cp3(\d+)-abi3-') { [int]$Matches[1] } } | Sort-Object -Unique)
+
+    if ($locked.Count -eq 0) {
+        Write-Host "ERROR: no version-locked (cpXY-cpXY) wheels in $WheelsDir - that is not the compiled ARM64 set." -ForegroundColor Red
         exit 1
     }
-    if ($abiTags.Count -gt 1 -or $abiTags[0] -ne $pyMinor) {
-        Write-Host "ERROR: ARM64 wheels target Python 3.$($abiTags -join ', 3.') but the bundled runtime is $PythonVersion." -ForegroundColor Red
-        Write-Host "  The offline install would resolve nothing.  Rebuild the wheel set against" -ForegroundColor Red
-        Write-Host "  Python $PythonVersion, then re-run installer\windows\package-arm64-build-deps.ps1." -ForegroundColor Red
+    if ($locked.Count -gt 1) {
+        Write-Host "ERROR: ARM64 wheels are locked to MULTIPLE Python versions (3.$($locked -join ', 3.')) - the set is not internally consistent." -ForegroundColor Red
         exit 1
     }
-    Write-Host "  ARM64 wheels match the bundled runtime (cp3$pyMinor)" -ForegroundColor Gray
+    if ($locked[0] -ne $pyMinor) {
+        Write-Host "ERROR: ARM64 wheels target Python 3.$($locked[0]) but the bundled runtime is $PythonVersion." -ForegroundColor Red
+        Write-Host "  The offline install would resolve nothing.  Either set `$PythonVersion to a 3.$($locked[0]).x" -ForegroundColor Red
+        Write-Host "  release, or rebuild the wheel set against $PythonVersion and re-run" -ForegroundColor Red
+        Write-Host "  installer\windows\package-arm64-build-deps.ps1." -ForegroundColor Red
+        exit 1
+    }
+    $floor = if ($abi3Min.Count) { ($abi3Min | Measure-Object -Maximum).Maximum } else { 0 }
+    if ($pyMinor -lt $floor) {
+        Write-Host "ERROR: stable-ABI wheels require Python 3.$floor or newer, but the bundled runtime is $PythonVersion." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "  ARM64 wheels match the bundled runtime (locked cp3$pyMinor, abi3 floor 3.$floor)" -ForegroundColor Gray
 
     $WheelsZip = Join-Path $CurrentDir "installer\windows\wheels.zip"
     if (Test-Path $WheelsZip) { Remove-Item $WheelsZip -Force }

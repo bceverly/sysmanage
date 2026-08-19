@@ -51,9 +51,36 @@ cryptography gevent greenlet Jinja2 Mako MarkupSafe orjson Pillow pycparser \
 pydantic pydantic-core PyYAML reportlab SQLAlchemy websockets zope.event \
 zope.interface"
 
-# Deliberately NOT shipped (keep the bundle pure-Python; all degrade
-# gracefully — see the Makefile for the rationale).
-OMIT="opentelemetry-exporter-otlp geoip2 maxminddb httptools ujson watchfiles"
+# Deliberately NOT shipped.  The Makefile's "Offline build model" block explains
+# the INVARIANT these serve (the bundle must stay 100% pure-Python so one
+# distfile works on every OpenBSD/python combination); it does not, and did not,
+# carry a per-package rationale, so that lives here next to the list it explains.
+#
+#   opentelemetry-exporter-otlp  compiled (grpcio).  NOTE: otel_config.py imports
+#                                the whole OpenTelemetry stack in ONE try/except,
+#                                so dropping this also disables the Prometheus
+#                                exporter and all instrumentation, which ARE
+#                                bundled.  Guarded (TELEMETRY_AVAILABLE=False),
+#                                so no crash -- but it degrades further than
+#                                intended.
+#   geoip2 / maxminddb           compiled.  geolocation_service.py imports geoip2
+#                                lazily inside try/except and falls back to
+#                                ipapi.co.
+#   httptools / ujson / watchfiles  compiled uvicorn speedups; uvicorn falls back
+#                                to its pure-Python h11 parser and stat-based
+#                                reload.  Not imported by our code at all.
+#
+# python3-saml: pulls lxml AND xmlsec, both compiled.  OpenBSD packages the
+# xmlsec C library but NOT a py3-xmlsec binding (checked against the 7.9 package
+# index), so pip falls back to building from source and dies on the missing
+# libxml2/libxslt headers -- and even if it built, the resulting .so would trip
+# the pure-Python assertion below.  This is already the expected outcome: the
+# Pro+ external_idp_engine treats `onelogin` as an OPTIONAL dependency for
+# exactly this reason ("no OpenBSD/NetBSD build") and imports it lazily inside
+# the SAML call paths, so OIDC/LDAP external IdPs keep working here and only
+# SAML 2.0 is unavailable.
+OMIT="opentelemetry-exporter-otlp geoip2 maxminddb httptools ujson watchfiles \
+python3-saml"
 
 # The dep ports, pkg_add'd so the venv sees them satisfied.
 PKGS="py3-alembic py3-sqlalchemy py3-babel py3-gevent py3-pydantic py3-Pillow \

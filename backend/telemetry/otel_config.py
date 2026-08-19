@@ -14,13 +14,10 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# Check if OpenTelemetry packages are available and import dependencies
+# Core telemetry: the API, SDK, instrumentation and the Prometheus exporter.
+# These are all pure-Python and ship everywhere.
 try:
     from opentelemetry import metrics, trace
-    from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
-        OTLPMetricExporter,
-    )
-    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
     from opentelemetry.exporter.prometheus import PrometheusMetricReader
     from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
     from opentelemetry.instrumentation.logging import LoggingInstrumentor
@@ -36,14 +33,40 @@ try:
     TELEMETRY_AVAILABLE = True
 except ImportError as e:
     logger.warning(
-        "OpenTelemetry dependencies not available (grpcio issue?): %s. "
-        "Telemetry will be disabled.",
+        "OpenTelemetry dependencies not available: %s. Telemetry will be disabled.",
         e,
     )
     TELEMETRY_AVAILABLE = False
     # Define stub objects so the code doesn't break
     metrics = None  # type: ignore[assignment]
     trace = None  # type: ignore[assignment]
+
+# The OTLP exporters are a SEPARATE optional dependency, imported on their own.
+#
+# They come from opentelemetry-exporter-otlp, which pulls grpcio -- a compiled
+# package with no build on some platforms.  The OpenBSD port deliberately omits
+# it (see installer/openbsd/build-libs.sh).  Previously these two imports sat in
+# the same try block as everything above, so one missing optional exporter
+# disabled the ENTIRE telemetry stack: Prometheus metrics and all FastAPI /
+# SQLAlchemy / requests / logging instrumentation went dark too, even though
+# those packages were installed and working.  Splitting the import means losing
+# OTLP costs exactly OTLP.
+try:
+    from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
+        OTLPMetricExporter,
+    )
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+    OTLP_AVAILABLE = True
+except ImportError as e:
+    logger.info(
+        "OTLP exporters not available (%s). Prometheus metrics and instrumentation "
+        "are unaffected; only OTLP export is disabled.",
+        e,
+    )
+    OTLP_AVAILABLE = False
+    OTLPMetricExporter = None  # type: ignore[assignment,misc]
+    OTLPSpanExporter = None  # type: ignore[assignment,misc]
 
 # Global state for telemetry
 _telemetry_enabled = False
@@ -139,8 +162,14 @@ def setup_tracing(resource: Resource, otlp_endpoint: Optional[str] = None) -> No
     # Create tracer provider
     tracer_provider = TracerProvider(resource=resource)
 
-    # Add OTLP exporter if endpoint is provided
-    if otlp_endpoint:
+    # Add OTLP exporter if endpoint is provided and the exporter is installed
+    if otlp_endpoint and not OTLP_AVAILABLE:
+        logger.warning(
+            "OTLP endpoint %s configured but the OTLP exporter is not installed; "
+            "traces will not be exported. Tracing itself remains active.",
+            otlp_endpoint,
+        )
+    elif otlp_endpoint:
         try:
             otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True)
             span_processor = BatchSpanProcessor(otlp_exporter)
@@ -183,8 +212,15 @@ def setup_metrics(
     except Exception as e:  # pylint: disable=broad-except
         logger.warning("Failed to set up Prometheus exporter: %s", e)
 
-    # Add OTLP exporter if endpoint is provided
-    if otlp_endpoint:
+    # Add OTLP exporter if endpoint is provided and the exporter is installed
+    if otlp_endpoint and not OTLP_AVAILABLE:
+        logger.warning(
+            "OTLP endpoint %s configured but the OTLP exporter is not installed; "
+            "metrics will not be exported over OTLP. Prometheus metrics are "
+            "unaffected.",
+            otlp_endpoint,
+        )
+    elif otlp_endpoint:
         try:
             otlp_metric_exporter = OTLPMetricExporter(
                 endpoint=otlp_endpoint, insecure=True
