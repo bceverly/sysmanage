@@ -184,7 +184,15 @@ function Set-SysManageConfig {
     $idx = $text.LastIndexOf("}")
     if ($idx -lt 0) { throw "Could not parse $mainConf (no closing brace)" }
     $text = $text.Substring(0, $idx) + "$includeLine`r`n" + $text.Substring($idx)
-    Set-Content -Path $mainConf -Value $text -Encoding UTF8
+    # WriteAllText with an explicit BOM-less encoder, NOT Set-Content.
+    # In Windows PowerShell 5.1 "-Encoding UTF8" means UTF-8 *with* a BOM, and
+    # nginx does not skip it -- it tries to parse it as a configuration
+    # directive and refuses to start:
+    #     nginx: [emerg] unknown directive "<BOM>" in conf/nginx.conf:3
+    # UTF8Encoding($false) is the "no BOM" constructor and behaves the same on
+    # PowerShell 5.1 and 7.
+    [System.IO.File]::WriteAllText(
+        $mainConf, $text, (New-Object System.Text.UTF8Encoding($false)))
     Write-Log "Added include for sysmanage-nginx.conf to nginx.conf"
 }
 
@@ -207,8 +215,27 @@ function Register-NginxService {
     }
 
     $exe = Join-Path $NginxDir "nginx.exe"
-    & $nssm status $ServiceName 2>$null | Out-Null
-    if ($LASTEXITCODE -eq 0) {
+
+    # Get-Service, NOT `nssm status`.  nssm writes "Can't open service!" to
+    # STDERR when the service does not exist, and with
+    # $ErrorActionPreference = "Stop" PowerShell promotes any native stderr
+    # write to a TERMINATING error -- so the completely normal "nothing to
+    # replace" path aborted the whole install.  `2>$null` does not help: the
+    # promotion happens regardless of redirection.  Get-Service answers the
+    # same question without a subprocess.
+    # Native commands are run with ErrorActionPreference relaxed for this block
+    # only.  `nssm stop` on an already-stopped service, and `nssm set` on some
+    # options, write informational text to STDERR; with "Stop" in force that is
+    # promoted to a terminating error and aborts an install that is going
+    # perfectly well.  Success is judged by $LASTEXITCODE and by whether the
+    # service actually exists afterwards -- both of which are checked -- not by
+    # whether the tool said anything on stderr.
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+
+    $existing = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+    if ($existing) {
         Write-Log "Service $ServiceName exists - reinstalling to pick up changes"
         & $nssm stop $ServiceName confirm 2>&1 | Out-File -FilePath $LogFile -Append
         & $nssm remove $ServiceName confirm 2>&1 | Out-File -FilePath $LogFile -Append
@@ -220,6 +247,15 @@ function Register-NginxService {
     & $nssm set $ServiceName AppDirectory $NginxDir 2>&1 | Out-File -FilePath $LogFile -Append
     & $nssm set $ServiceName Start SERVICE_AUTO_START 2>&1 | Out-File -FilePath $LogFile -Append
     & $nssm set $ServiceName Description "nginx reverse proxy for SysManage Server (TLS termination, web console)" 2>&1 | Out-File -FilePath $LogFile -Append
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
+
+    # Verify rather than assume: nssm can exit 0 having done nothing useful,
+    # and a missing service here means no console after a reboot.
+    if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
+        throw "nssm did not register the service $ServiceName (see $LogFile)"
+    }
     Write-Log "Registered Windows service: $ServiceName"
 }
 
