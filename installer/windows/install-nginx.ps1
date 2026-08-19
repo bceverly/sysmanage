@@ -48,9 +48,27 @@ $NginxUrl = "https://nginx.org/download/nginx-$NginxVersion.zip"
 $NginxDir = Join-Path $InstallDir "nginx"
 
 function Write-Log {
+    <#
+        Write-Host + Add-Content, NOT Tee-Object.
+
+        Tee-Object writes to the file AND passes the line down the success
+        stream.  Inside a function every logged line therefore became part of
+        that function's RETURN VALUE: Get-NginxZip returned
+        @("...Downloading nginx...", "...checksum verified", "C:\...\nginx.zip")
+        and Expand-Archive received the whole array coerced to one string:
+
+          The path '2026-08-19 09:11:48  Downloading nginx 1.28.0 from
+          https://... C:\Users\...\nginx-1.28.0.zip' either does not exist
+
+        The download and the SHA-256 check had both SUCCEEDED; only the return
+        value was corrupt.  Write-Host does not touch the success stream, so a
+        function's return value is only what it actually returns.
+    #>
     param([string]$Message)
     $stamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    "$stamp  $Message" | Tee-Object -FilePath $LogFile -Append
+    $line = "$stamp  $Message"
+    Write-Host $line
+    try { Add-Content -Path $LogFile -Value $line -ErrorAction Stop } catch { }
 }
 
 function Get-NginxZip {
