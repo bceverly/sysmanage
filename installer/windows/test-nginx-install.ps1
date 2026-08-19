@@ -36,8 +36,43 @@ param(
     # Distinct from the production SysManageNginx for the same reason.
     [string]$ServiceName = "SysManageNginxTest",
     # Keep the tree and the service for manual poking.
-    [switch]$KeepArtifacts
+    [switch]$KeepArtifacts,
+    # Everything -- console output, diagnostics, the installer's own log -- is
+    # copied here.  Console-only output is useless when the person who has to
+    # read the failure is not the person at the keyboard.
+    # Deliberately C:\ and not %TEMP%: this file exists to be scp'd off the
+    # box, and a path under C:\Users\<name>\AppData\Local\Temp is a nuisance
+    # to type from a remote shell.
+    [string]$LogFile = "C:\sysmanage-nginx-test.log"
 )
+
+# Transcript rather than redirection: Write-Host goes to the information stream
+# and a plain "> file" misses it, which would produce an empty log at exactly
+# the moment it matters.
+# A stale transcript from an aborted run blocks a new one, so clear it first.
+try { Stop-Transcript | Out-Null } catch { }
+$script:Transcribing = $false
+try {
+    Start-Transcript -Path $LogFile -Force | Out-Null
+    $script:Transcribing = $true
+} catch {
+    # Transcription is unavailable in some hosts.  Fall back to a real tee so
+    # the log exists either way -- the whole point is handing this file to
+    # someone who is not at this keyboard.
+    Write-Host "WARN  transcript unavailable ($_) - using fallback tee" -ForegroundColor Yellow
+    try { "" | Out-File -FilePath $LogFile -Encoding utf8 -Force } catch { }
+}
+
+function Say {
+    <#  Console AND file, for the fallback path.  When the transcript is running
+        it already captures Write-Host, so writing again would duplicate every
+        line -- hence the guard.  #>
+    param([string]$Message, [string]$Color = "Gray")
+    Write-Host $Message -ForegroundColor $Color
+    if (-not $script:Transcribing) {
+        try { Add-Content -Path $LogFile -Value $Message -ErrorAction SilentlyContinue } catch { }
+    }
+}
 
 $ErrorActionPreference = "Continue"
 $script:Results = @()
@@ -63,16 +98,27 @@ function Step {
 
 function Warn { param([string]$m) Write-Host "    WARN  $m" -ForegroundColor Yellow }
 
+function Skip {
+    param([string]$Name, [string]$Why)
+    $script:Results += [pscustomobject]@{ Step = $Name; Status = "SKIP"; Detail = $Why }
+    Write-Host ""
+    Write-Host "--- $Name" -ForegroundColor Cyan
+    Write-Host "    SKIP  $Why" -ForegroundColor DarkYellow
+}
+
 # --------------------------------------------------------------------------
 Write-Host "=== SysManage Windows nginx acceptance test ===" -ForegroundColor White
 Write-Host "InstallDir : $InstallDir"
 Write-Host "Service    : $ServiceName"
+Write-Host "LOG FILE   : $LogFile   <-- scp this back" -ForegroundColor White
 
 $ScriptDir = $PSScriptRoot
 $NginxDir = Join-Path $InstallDir "nginx"
 $NginxExe = Join-Path $NginxDir "nginx.exe"
 $TlsDir = "C:\ProgramData\SysManage\tls"
 $MadeTls = $false
+
+try {
 
 # 0 -----------------------------------------------------------------------
 Step "Elevated (Administrator)" {
@@ -213,6 +259,22 @@ Step "Config test FAILS without a certificate (expected, by design)" {
 } | Out-Null
 
 # 8 -----------------------------------------------------------------------
+$CanServe = $true
+if (-not (Get-Command openssl -ErrorAction SilentlyContinue)) {
+    $CanServe = $false
+    foreach ($n in @("Self-signed certificate for the serving test",
+                     "Config test PASSES with a certificate",
+                     "Service starts and listens on 443",
+                     "HTTPS responds (404 expected - no frontend in this isolated test)",
+                     "HTTP 80 redirects to HTTPS")) {
+        Skip $n "openssl not on PATH (ships with Git for Windows) - cannot build a PEM keypair"
+    }
+    Write-Host ""
+    Write-Host "    Everything BEFORE this point is the install itself and is fully tested." -ForegroundColor DarkYellow
+    Write-Host "    Install openssl (or add Git's usr\bin to PATH) to also test serving." -ForegroundColor DarkYellow
+}
+
+if ($CanServe) {
 Step "Self-signed certificate for the serving test" {
     New-Item -ItemType Directory -Path $TlsDir -Force | Out-Null
     $crt = Join-Path $TlsDir "server.crt"
@@ -225,7 +287,7 @@ Step "Self-signed certificate for the serving test" {
     Export-PfxCertificate -Cert $c -FilePath $pfx -Password $pw | Out-Null
     # nginx wants PEM.  openssl ships with Git for Windows; fall back cleanly.
     $ossl = Get-Command openssl -ErrorAction SilentlyContinue
-    if (-not $ossl) { throw "openssl not on PATH (Git for Windows provides it) - cannot convert to PEM. Serving test skipped." }
+    if (-not $ossl) { throw "openssl vanished between the check above and here" }
     & openssl pkcs12 -in $pfx -clcerts -nokeys -out $crt -passin pass:test 2>&1 | Out-Null
     & openssl pkcs12 -in $pfx -nocerts -nodes -out $key -passin pass:test 2>&1 | Out-Null
     Remove-Item $pfx -Force -ErrorAction SilentlyContinue
@@ -268,25 +330,45 @@ Step "HTTP 80 redirects to HTTPS" {
     if ($code -match "30[12]") { return "HTTP $code redirect" }
     "HTTP $code (expected 301)"
 } | Out-Null
+}  # end if ($CanServe)
 
 # --------------------------------------------------------------------------
 # Diagnostics on failure -- printed only when something went wrong, so a green
 # run stays short.
 if ($script:Failed -gt 0) {
+  # Wrapped: ONE failing probe must not cost the summary.  A diagnostic that is
+  # unavailable (an absent cmdlet, a permission refusal) is a footnote; losing
+  # the PASS/FAIL table because of it means the operator learns nothing at all.
+  try {
     Write-Host ""
     Write-Host "=== DIAGNOSTICS ===" -ForegroundColor Yellow
 
-    $errLog = Join-Path $NginxDir "logs\error.log"
-    if (Test-Path $errLog) {
+    # Null-safe: if an earlier failure left these unset, the DIAGNOSTICS block
+    # must still run.  Diagnostics that themselves crash are worse than none --
+    # they replace the failure you needed to see with one you do not care about.
+    $errLog = if ($NginxDir) { Join-Path $NginxDir "logs\error.log" } else { $null }
+    if ($errLog -and (Test-Path $errLog)) {
         Write-Host "--- nginx error.log (last 25 lines)" -ForegroundColor Yellow
         Get-Content $errLog -Tail 25 | ForEach-Object { Write-Host "    $_" }
     } else { Write-Host "    (no nginx error.log at $errLog)" }
 
-    $instLog = Join-Path $env:TEMP "sysmanage-nginx-test.log"
-    if (Test-Path $instLog) {
-        Write-Host "--- install-nginx.ps1 log (last 30 lines)" -ForegroundColor Yellow
-        Get-Content $instLog -Tail 30 | ForEach-Object { Write-Host "    $_" }
+    $instLog = if ($env:TEMP) { Join-Path $env:TEMP "sysmanage-nginx-test.log" } else { $null }
+    if ($instLog -and (Test-Path $instLog)) {
+        Write-Host "--- install-nginx.ps1 log (FULL)" -ForegroundColor Yellow
+        Get-Content $instLog | ForEach-Object { Write-Host "    $_" }
+    } else {
+        Write-Host "--- install-nginx.ps1 log: NOT FOUND at $instLog" -ForegroundColor Yellow
+        Write-Host "    (the installer never started, or could not write its log)"
     }
+
+    Write-Host "--- environment" -ForegroundColor Yellow
+    Write-Host "    PSVersion       : $($PSVersionTable.PSVersion)"
+    Write-Host "    OS arch         : $env:PROCESSOR_ARCHITECTURE"
+    Write-Host "    ScriptDir       : $ScriptDir"
+    Write-Host "    InstallDir      : $InstallDir"
+    Write-Host "    ExecutionPolicy : $(Get-ExecutionPolicy)"
+    $nssmPath = Join-Path $ScriptDir "nssm\nssm.exe"
+    Write-Host "    nssm present    : $(Test-Path $nssmPath) ($nssmPath)"
 
     Write-Host "--- service" -ForegroundColor Yellow
     $svc = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
@@ -306,13 +388,20 @@ if ($script:Failed -gt 0) {
     } else { Write-Host "    nothing listening on 443" }
 
     Write-Host "--- tree" -ForegroundColor Yellow
-    if (Test-Path $NginxDir) {
+    if ($NginxDir -and (Test-Path $NginxDir)) {
         Get-ChildItem $NginxDir | ForEach-Object { Write-Host "    $($_.Name)" }
     } else { Write-Host "    $NginxDir does not exist" }
+  } catch {
+    Write-Host "    (diagnostics incomplete: $_)" -ForegroundColor Yellow
+  }
 }
 
 # --------------------------------------------------------------------------
 if (-not $KeepArtifacts) {
+  # Wrapped for the same reason as diagnostics: a cleanup that cannot complete
+  # (a locked nginx.exe, a service that will not stop) must not cost the
+  # PASS/FAIL summary, which is the entire output the operator needs.
+  try {
     Write-Host ""
     Write-Host "--- Cleanup" -ForegroundColor Cyan
     Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
@@ -325,6 +414,10 @@ if (-not $KeepArtifacts) {
         Write-Host "    removed the throwaway certificate"
     }
     Write-Host "    removed $InstallDir and the test service"
+  } catch {
+    Write-Host "    cleanup incomplete: $_" -ForegroundColor Yellow
+    Write-Host "    remove manually: $InstallDir  (service $ServiceName)" -ForegroundColor Yellow
+  }
 } else {
     Write-Host ""
     Write-Host "--- Artifacts KEPT at $InstallDir (service: $ServiceName)" -ForegroundColor Cyan
@@ -335,9 +428,31 @@ Write-Host ""
 Write-Host "=== SUMMARY ===" -ForegroundColor White
 $script:Results | Format-Table -AutoSize Status, Step, Detail | Out-String | Write-Host
 
+$skipped = @($script:Results | Where-Object { $_.Status -eq "SKIP" }).Count
 if ($script:Failed -eq 0) {
-    Write-Host "ALL CHECKS PASSED - the Windows nginx install works on this machine." -ForegroundColor Green
+    if ($skipped -gt 0) {
+        Write-Host "INSTALL VERIFIED; $skipped serving check(s) SKIPPED (see reason above)." -ForegroundColor Yellow
+    } else {
+        Write-Host "ALL CHECKS PASSED - the Windows nginx install works on this machine." -ForegroundColor Green
+    }
+    Write-Host "Full log written to: $LogFile"
     exit 0
 }
 Write-Host "$($script:Failed) CHECK(S) FAILED - see the detail column and the diagnostics above." -ForegroundColor Red
+Write-Host ""
+Write-Host "Full log written to: $LogFile" -ForegroundColor White
+Write-Host "Send that file back -- it has every step, the installer log, and the diagnostics."
 exit 1
+
+} finally {
+    # ALWAYS stop the transcript.  An unhandled error used to leave it running,
+    # so the file could be truncated or empty exactly when it was needed.
+    if ($script:Transcribing) { try { Stop-Transcript | Out-Null } catch { } }
+    if (Test-Path $LogFile) {
+        Write-Host ""
+        Write-Host "LOG: $LogFile ($([math]::Round((Get-Item $LogFile).Length / 1KB, 1)) KB)" -ForegroundColor White
+    } else {
+        Write-Host ""
+        Write-Host "WARNING: no log was written to $LogFile" -ForegroundColor Red
+    }
+}
