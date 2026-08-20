@@ -89,13 +89,32 @@ function Get-NginxZip {
             # Tls12 explicitly: older Windows PowerShell defaults to SSL3/TLS1,
             # which nginx.org refuses, and the resulting error names neither.
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-WebRequest -Uri $NginxUrl -OutFile $zip -UseBasicParsing
+            # Retry: this is the FIRST network call of the install, and it runs
+            # after the venv and ~94 wheels are already in place.  A single DNS
+            # blip here used to throw, which (since install.ps1 now fails hard on
+            # a real error) rolls the whole MSI back and discards several minutes
+            # of work.  On 2026-08-20 exactly that happened -- "The remote name
+            # could not be resolved: 'nginx.org'" on a host where nginx.org was
+            # perfectly resolvable moments later.
+            $attempts = 3
+            for ($i = 1; $i -le $attempts; $i++) {
+                try {
+                    Invoke-WebRequest -Uri $NginxUrl -OutFile $zip -UseBasicParsing
+                    break
+                } catch {
+                    if ($i -eq $attempts) { throw }
+                    Write-Log ("nginx download attempt $i/$attempts failed ({0}); retrying in {1}s..." -f $_.Exception.Message, ($i * 5))
+                    Start-Sleep -Seconds ($i * 5)
+                }
+            }
         } catch {
-            throw ("Could not download nginx from $NginxUrl : $_`n" +
+            throw ("Could not download nginx from $NginxUrl after 3 attempts : $_`n" +
                    "nginx is REQUIRED - the SysManage console is served by it, " +
                    "not by the API.`nOn a host without internet access, use an " +
                    "air-gap bundle (it ships nginx), or place " +
-                   "nginx-$NginxVersion.zip next to this script and re-run.")
+                   "nginx-$NginxVersion.zip next to this script and re-run it " +
+                   "directly - note the MSI itself will have rolled back, so " +
+                   "re-run the MSI, not just this script.")
         }
     }
 

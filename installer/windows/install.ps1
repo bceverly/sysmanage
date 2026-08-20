@@ -440,8 +440,14 @@ try {
             Write-Log "ERROR: nginx setup failed: $_"
             Write-Log "  SysManage serves its web console THROUGH nginx - without it"
             Write-Log "  the console is unreachable (the API on 8080 does not serve the UI)."
-            Write-Log "  Fix the error above and re-run:"
-            Write-Log "    powershell -ExecutionPolicy Bypass -File `"$NginxScript`""
+            # Be accurate about recovery.  This is a HARD failure, so the MSI
+            # rolls back and C:\Program Files\SysManage Server goes away --
+            # telling the operator to re-run install-nginx.ps1 pointed them at a
+            # path that no longer exists.
+            Write-Log "  This install has been ROLLED BACK - fix the error above,"
+            Write-Log "  then re-run the MSI (not this script; its directory is gone)."
+            Write-Log "  On a host with no internet access, use an air-gap bundle,"
+            Write-Log "  which ships nginx instead of downloading it."
             Write-Log ""
             throw
         }
