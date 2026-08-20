@@ -1376,65 +1376,52 @@ jobs:
           path: installer/windows/wheels-arm64
           key: wheels-arm64-cp313-${{ hashFiles('requirements-prod.txt') }}
 
-      - name: Stage prebuilt ARM64 build deps (libpq + wheels)
-        # ARM64 libpq + the cross-compiled wheels are built ONCE on the local ARM64
-        # box (installer\windows\package-arm64-build-deps.ps1) and uploaded to the
-        # 'windows-arm64-deps' release. Download them here so build-msi.ps1 finds
-        # them pre-staged and skips the 30-60 min in-CI cross-compile.
-        env:
-          GH_TOKEN: ${{ github.token }}
+      # libpq for the pure-Python psycopg adapter.  Built here with vcpkg
+      # rather than downloaded from a hand-maintained 'windows-arm64-deps'
+      # release asset: this job now runs on a NATIVE arm64 runner, so it can
+      # produce its own.  That release existed only because CI used to run on
+      # x64 and physically could not build arm64 binaries -- it is no longer
+      # needed, and neither is the manual upload step that fed it.
+      # Cached because the vcpkg build is slow and libpq changes rarely.
+      - name: Cache ARM64 libpq DLLs
+        uses: actions/cache@v4
+        with:
+          path: installer/windows/libpq-arm64
+          key: libpq-arm64-v1
+
+      - name: Build ARM64 libpq via vcpkg (only on cache miss)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = 'windows-arm64-deps'
-          New-Item -ItemType Directory -Force -Path deps-dl | Out-Null
-          gh release download $tag --repo "${{ github.repository }}" `
-            --pattern 'libpq-arm64.zip' --pattern 'wheels-arm64.zip' --pattern 'wheels-arm64.requirements.sha256' `
-            --dir deps-dl --clobber
-          New-Item -ItemType Directory -Force -Path installer\windows\libpq-arm64, installer\windows\wheels-arm64 | Out-Null
-          Expand-Archive -Path deps-dl\libpq-arm64.zip  -DestinationPath installer\windows\libpq-arm64  -Force
-          Expand-Archive -Path deps-dl\wheels-arm64.zip -DestinationPath installer\windows\wheels-arm64 -Force
-          $dlls = (Get-ChildItem installer\windows\libpq-arm64 -Filter *.dll).Count
-          $whls = (Get-ChildItem installer\windows\wheels-arm64 -Filter *.whl).Count
-          Write-Host "[OK] Staged $dlls libpq DLLs and $whls ARM64 wheels"
-          if ($dlls -lt 6 -or $whls -lt 1) {
-            throw "ARM64 build deps look incomplete (dlls=$dlls, whls=$whls) — rebuild + re-upload with package-arm64-build-deps.ps1"
-          }
-          # Staleness: the hash is a cheap HINT only.  It is not authoritative --
-          # a comment-only edit to requirements-prod.txt changes it without
-          # changing a single dependency -- so it warns.
-          $hashFile = 'deps-dl\wheels-arm64.requirements.sha256'
-          if (Test-Path $hashFile) {
-            $built = (Get-Content $hashFile -Raw).Trim().ToLower()
-            $cur   = (Get-FileHash requirements-prod.txt -Algorithm SHA256).Hash.ToLower()
-            if ($built -ne $cur) {
-              Write-Host "::warning::Prebuilt ARM64 wheels were built against a different requirements-prod.txt ($built vs $cur); resolving against them now to see if it actually matters."
+          $needed = @('libpq.dll','libcrypto-3-arm64.dll','libssl-3-arm64.dll','z.dll','lz4.dll','legacy.dll')
+          $stage  = 'installer\windows\libpq-arm64'
+          if (Test-Path $stage) {
+            $missing = @($needed | Where-Object { -not (Test-Path (Join-Path $stage $_)) })
+            if ($missing.Count -eq 0) {
+              Write-Host "[OK] libpq restored from cache ($($needed.Count) DLLs)"
+              exit 0
             }
+            Write-Host "cache incomplete (missing: $($missing -join ', ')) - rebuilding"
           }
 
-          # Authoritative check: can the staged wheels actually SATISFY
-          # requirements-prod.txt?  Resolve them exactly the way install.ps1 will
-          # on the target -- offline, win_arm64, cp313.
-          #
-          # --no-deps: this checks the TOP-LEVEL pins resolve, which is the drift
-          # that actually happens (a pin moves, the prebuilt set does not).
-          $pyTag = '313'
-          Write-Host "Verifying the staged wheels satisfy requirements-prod.txt (win_arm64, cp$pyTag)..."
-          python -m pip install --dry-run --ignore-installed --no-deps `
-            --no-index --find-links installer\windows\wheels-arm64 `
-            --only-binary=:all: --platform win_arm64 --python-version $pyTag `
-            --target "$env:RUNNER_TEMP\wheelcheck" `
-            -r requirements-prod.txt
-          if ($LASTEXITCODE -ne 0) {
-            # This runner is NATIVE arm64, so a stale prebuilt set is no longer a
-            # dead end: discard it and let build-msi.ps1 compile the wheels here.
-            # Failing the release on drift (the previous behaviour) was correct
-            # but still left a human in the loop for something CI can now do.
-            Write-Host "::warning::Prebuilt ARM64 wheels do not satisfy requirements-prod.txt - discarding them and building natively."
-            Remove-Item -Recurse -Force installer\windows\wheels-arm64 -ErrorAction SilentlyContinue
-          } else {
-            Write-Host "[OK] staged ARM64 wheels satisfy requirements-prod.txt"
+          $vcpkg = $env:VCPKG_INSTALLATION_ROOT
+          if (-not $vcpkg -or -not (Test-Path $vcpkg)) {
+            Write-Host "vcpkg not preinstalled on this image; cloning"
+            $vcpkg = Join-Path $env:RUNNER_TEMP 'vcpkg'
+            git clone --depth 1 https://github.com/microsoft/vcpkg.git $vcpkg
+            & "$vcpkg\bootstrap-vcpkg.bat" -disableMetrics
           }
+          & "$vcpkg\vcpkg.exe" install libpq:arm64-windows
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg install libpq:arm64-windows failed" }
+
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          $bin = Join-Path $vcpkg 'installed\arm64-windows\bin'
+          foreach ($d in $needed) {
+            $src = Join-Path $bin $d
+            if (-not (Test-Path $src)) { throw "vcpkg did not produce $d in $bin" }
+            Copy-Item $src (Join-Path $stage $d) -Force
+          }
+          Write-Host "[OK] built and staged $($needed.Count) libpq DLLs"
 
       - name: Prepare native arm64 build venv (only when wheels must be rebuilt)
         # build-msi.ps1's in-CI wheel-build path expects a .venv at the repo root

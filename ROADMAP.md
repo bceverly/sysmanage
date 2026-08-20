@@ -6017,9 +6017,21 @@ close the gap between our output and the parsers that consume it.
       network-architecture diagram no longer call nginx "optional"; it is
       REQUIRED, because the backend serves no static files.
 
-      NOT VERIFIED: none of the Windows nginx path has run on Windows, and the
-      BSD/macOS packaging changes have not been through a real port or `.pkg`
-      build.)*
+      VERIFIED ON HARDWARE 2026-08-20 (Lenovo X13S, Windows 11 ARM64): the MSI
+      installs, `install-nginx.ps1` downloads and SHA-256-verifies nginx,
+      registers it under NSSM, and `nginx -t` passes; the standalone nginx
+      acceptance test also ran 19/19 there on 2026-08-19, including proof that
+      the x86 nginx binary executes under ARM64 emulation.  Getting there took
+      more than the nginx work: the MSI had to stop hunting for a system Python
+      (it now bundles CPython 3.13 plus a cp313 wheel set, after a box with
+      3.14 resolved nothing offline), and a stale prebuilt ARM64 wheel set had
+      to be rebuilt — it still held `cryptography 49.0.0` against a
+      `==50.0.0` pin, so the offline install could not resolve at all.
+
+      STILL NOT VERIFIED: the x64 MSI has not been installed this cycle; no
+      CI-built MSI has been tested (the refreshed wheel set is uploaded
+      separately from a release); and the BSD/macOS packaging changes have not
+      been through a real port or `.pkg` build.)*
 
 - [x] **Pro+ engines and plugins were distributed with NO authenticity check.**
       *(DONE 2026-08-17/18.)*  `ModuleLoader` verified a downloaded engine
