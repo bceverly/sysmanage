@@ -273,6 +273,39 @@ $ProgressPreference = 'Continue'
 Write-Host ("[OK] Bundled Python packaged: {0:N2} MB" -f (([System.IO.FileInfo]$PythonZip).Length / 1MB)) -ForegroundColor Green
 Write-Host ""
 
+# vcpkg supplies both the ARM64 libpq DLLs and the static OpenSSL that the
+# cryptography wheel links against.  Its location is NOT fixed: on a dev box it
+# is ~\vcpkg, on a GitHub runner it is $env:VCPKG_INSTALLATION_ROOT when the
+# image ships it, or a clone under $env:RUNNER_TEMP when it does not.  Hardcoding
+# the dev-box path made CI fail with "vcpkg.exe is not recognized".
+function Resolve-VcpkgRoot {
+    param([switch]$Bootstrap)
+
+    $candidates = @()
+    if ($env:VCPKG_INSTALLATION_ROOT) { $candidates += $env:VCPKG_INSTALLATION_ROOT }
+    if ($env:USERPROFILE)             { $candidates += (Join-Path $env:USERPROFILE 'vcpkg') }
+    if ($env:RUNNER_TEMP)             { $candidates += (Join-Path $env:RUNNER_TEMP 'vcpkg') }
+    foreach ($c in $candidates) {
+        if (Test-Path (Join-Path $c 'vcpkg.exe')) { return $c }
+    }
+    $onPath = Get-Command vcpkg.exe -ErrorAction SilentlyContinue
+    if ($onPath) { return (Split-Path $onPath.Source -Parent) }
+
+    if (-not $Bootstrap) { return $null }
+
+    # Nothing usable: clone one.  Prefer RUNNER_TEMP so a CI clone is disposable
+    # and never pollutes a developer's home directory.
+    $target = if ($env:RUNNER_TEMP) { Join-Path $env:RUNNER_TEMP 'vcpkg' }
+              else { Join-Path $env:USERPROFILE 'vcpkg' }
+    Write-Host "  vcpkg not found; cloning to $target..." -ForegroundColor Yellow
+    git clone --depth 1 https://github.com/microsoft/vcpkg.git $target
+    if ($LASTEXITCODE -ne 0) { return $null }
+    & (Join-Path $target 'bootstrap-vcpkg.bat') -disableMetrics
+    if ($LASTEXITCODE -ne 0) { return $null }
+    if (Test-Path (Join-Path $target 'vcpkg.exe')) { return $target }
+    return $null
+}
+
 # ARM64: stage the libpq runtime DLLs the WiX references (installer\windows\libpq-arm64\).
 # Native ARM64 uses pure-Python psycopg, which needs an ARM64 libpq at runtime; x64
 # uses psycopg[binary] (libpq bundled in the wheel), so this is arm64-only.
@@ -282,8 +315,9 @@ if ($Architecture -eq "arm64") {
     $needed = @("libpq.dll","libcrypto-3-arm64.dll","libssl-3-arm64.dll","z.dll","lz4.dll","legacy.dll")
     $missing = @($needed | Where-Object { -not (Test-Path (Join-Path $LibpqStage $_)) })
     if ($missing.Count -gt 0) {
-        $vcpkgBin = Join-Path $env:USERPROFILE "vcpkg\installed\arm64-windows\bin"
-        if (Test-Path (Join-Path $vcpkgBin "libpq.dll")) {
+        $vcpkgRoot = Resolve-VcpkgRoot
+        $vcpkgBin = if ($vcpkgRoot) { Join-Path $vcpkgRoot "installed\arm64-windows\bin" } else { $null }
+        if ($vcpkgBin -and (Test-Path (Join-Path $vcpkgBin "libpq.dll"))) {
             New-Item -ItemType Directory -Path $LibpqStage -Force | Out-Null
             foreach ($d in $needed) {
                 $src = Join-Path $vcpkgBin $d
@@ -313,7 +347,13 @@ if ($Architecture -eq "arm64") {
             exit 1
         }
         New-Item -ItemType Directory -Path $WheelsDir -Force | Out-Null
-        $vcpkgRoot = Join-Path $env:USERPROFILE "vcpkg"
+        # -Bootstrap: this path NEEDS vcpkg (static OpenSSL), so clone one rather
+        # than failing when the runner image does not ship it.
+        $vcpkgRoot = Resolve-VcpkgRoot -Bootstrap
+        if (-not $vcpkgRoot) {
+            Write-Host "ERROR: vcpkg is required to build the cryptography wheel and could not be located or bootstrapped." -ForegroundColor Red
+            exit 1
+        }
         # cryptography has no win_arm64 wheel for the CVE-patched pin, so it is built
         # from source. Link it against a STATIC OpenSSL + static CRT so its _rust
         # extension carries no external OpenSSL/vcruntime deps — a dynamically-linked
