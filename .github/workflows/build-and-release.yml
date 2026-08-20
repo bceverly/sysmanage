@@ -1376,16 +1376,51 @@ jobs:
           if ($dlls -lt 6 -or $whls -lt 1) {
             throw "ARM64 build deps look incomplete (dlls=$dlls, whls=$whls) — rebuild + re-upload with package-arm64-build-deps.ps1"
           }
-          # Staleness guard: warn (don't fail) if the wheels were built against a
-          # different requirements-prod.txt than this release is packaging.
+          # Staleness: the hash is a cheap HINT only.  It is not authoritative --
+          # a comment-only edit to requirements-prod.txt changes it without
+          # changing a single dependency -- so it warns.
           $hashFile = 'deps-dl\wheels-arm64.requirements.sha256'
           if (Test-Path $hashFile) {
             $built = (Get-Content $hashFile -Raw).Trim().ToLower()
             $cur   = (Get-FileHash requirements-prod.txt -Algorithm SHA256).Hash.ToLower()
             if ($built -ne $cur) {
-              Write-Host "::warning::Prebuilt ARM64 wheels were built against a different requirements-prod.txt ($built vs $cur) — rebuild + re-upload via package-arm64-build-deps.ps1 or the MSI may ship stale deps."
+              Write-Host "::warning::Prebuilt ARM64 wheels were built against a different requirements-prod.txt ($built vs $cur); resolving against them now to see if it actually matters."
             }
           }
+
+          # Authoritative check: can the staged wheels actually SATISFY
+          # requirements-prod.txt?  Resolve them exactly the way install.ps1 will
+          # on the target -- offline, win_arm64, cp313.
+          #
+          # This is a hard failure, not a warning.  v3.5.1.21 shipped with the
+          # hash guard warning and CI green, and the MSI could not install at all:
+          # requirements-prod.txt had moved to cryptography==50.0.0 for the PKCS#7
+          # Bleichenbacher advisory while the prebuilt wheel set still held
+          # 49.0.0, so `pip install --no-index` resolved nothing on the target.
+          # A warning that ships a broken installer -- carrying the very version
+          # the CVE bump was escaping -- is not a warning.
+          #
+          # --no-deps deliberately: this checks the TOP-LEVEL pins resolve, which
+          # is the drift that actually happens (a pin moves, the prebuilt set
+          # does not).  A full-tree resolve would be stricter but risks failing
+          # the release on a cross-platform resolution quirk rather than a real
+          # problem, and a guard that blocks good releases gets disabled.
+          # Tighten to a full resolve once it has proven stable here.
+          $pyTag = '313'
+          Write-Host "Verifying the staged wheels satisfy requirements-prod.txt (win_arm64, cp$pyTag)..."
+          python -m pip install --dry-run --ignore-installed --no-deps `
+            --no-index --find-links installer\windows\wheels-arm64 `
+            --only-binary=:all: --platform win_arm64 --python-version $pyTag `
+            --target "$env:RUNNER_TEMP\wheelcheck" `
+            -r requirements-prod.txt
+          if ($LASTEXITCODE -ne 0) {
+            throw ("The prebuilt ARM64 wheel set does NOT satisfy requirements-prod.txt " +
+                   "(see the pip resolution error above).  Rebuild it against the current " +
+                   "pins on the ARM64 machine and re-upload:`n" +
+                   "    installer\windows\package-arm64-build-deps.ps1`n" +
+                   "Shipping anyway produces an MSI whose offline install fails on the target.")
+          }
+          Write-Host "[OK] staged ARM64 wheels satisfy requirements-prod.txt"
 
       - name: Build Windows MSI (ARM64)
         env:
