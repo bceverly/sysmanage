@@ -24,7 +24,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Version = "3.5.1.16",
+    [string]$Version = "3.5.1.21",
     [string]$Arch = "arm64",                 # arm64 | x64
     [string]$Msi,                            # skip the download, use this file
     [switch]$Uninstall,                      # remove a previous install and exit
@@ -62,6 +62,86 @@ function Note { param([string]$m)
     Write-Host "    INFO  $m" -ForegroundColor DarkCyan
 }
 
+# Find installed SysManage products.
+#
+# Deliberately NOT Get-CimInstance Win32_Product: enumerating that class makes
+# the Windows Installer RECONFIGURE every installed MSI on the machine as a side
+# effect.  It routinely takes minutes and writes a pile of 1035 events.  The
+# uninstall registry keys carry the same ProductCode with none of that.
+function Get-SysManageProducts {
+    $roots = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    Get-ItemProperty $roots -EA SilentlyContinue |
+        Where-Object { $_.DisplayName -like '*SysManage*' } |
+        ForEach-Object {
+            [pscustomobject]@{
+                Name        = $_.DisplayName
+                Version     = $_.DisplayVersion
+                ProductCode = $_.PSChildName
+            }
+        }
+}
+
+# Remove any prior install so a run always starts from a known state.  Returns a
+# description of what it did.
+function Remove-PriorInstall {
+    $did = @()
+
+    foreach ($prod in @(Get-SysManageProducts)) {
+        Write-Host "      removing $($prod.Name) $($prod.Version) ($($prod.ProductCode))"
+        $p = Start-Process msiexec.exe -Wait -PassThru -ArgumentList @(
+            "/x", $prod.ProductCode, "/qn", "/l*v", "C:\sysmanage-msi-uninstall.log")
+        $did += "uninstalled $($prod.Version) (msiexec exit $($p.ExitCode))"
+    }
+
+    # A failed install can leave services behind with no MSI record to remove
+    # them -- exactly what the 3.5.1.16 attempt did, leaving SysManageServer
+    # restart-looping on a venv with no dependencies.  Tear those down directly.
+    foreach ($svc in @("SysManageServer", "SysManageNginx", "SysManageOpenBAO")) {
+        $s = Get-Service -Name $svc -EA SilentlyContinue
+        if (-not $s) { continue }
+        Write-Host "      removing orphaned service $svc ($($s.Status))"
+        $prev = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+        try {
+            if ($s.Status -ne 'Stopped') { Stop-Service -Name $svc -Force -EA SilentlyContinue }
+            & sc.exe delete $svc 2>&1 | Out-Null
+        } finally { $ErrorActionPreference = $prev }
+        $did += "deleted orphaned service $svc"
+    }
+
+    # The program directory only ever holds installed payload, so clearing a
+    # remnant is safe.  ProgramData is NOT touched: it holds the operator's
+    # sysmanage.yaml, TLS material and logs.
+    if (Test-Path $InstallRoot) {
+        Start-Sleep -Seconds 2   # let service handles close after sc delete
+        Remove-Item -Recurse -Force $InstallRoot -EA SilentlyContinue
+        if (Test-Path $InstallRoot) { $did += "WARNING: $InstallRoot could not be fully removed" }
+        else { $did += "removed leftover $InstallRoot" }
+    }
+
+    # install.ps1 APPENDS to install.log, and ProgramData is deliberately kept,
+    # so a previous run's output would still be sitting there -- and the log
+    # assertions below would then be reading the wrong install.  Rotate rather
+    # than delete: the old log is the forensic record of why the last attempt
+    # failed.
+    $logDir = Join-Path $DataRoot "logs"
+    if (Test-Path $logDir) {
+        $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        foreach ($name in @("install.log", "install-transcript.log", "create-service-transcript.log")) {
+            $f = Join-Path $logDir $name
+            if (Test-Path $f) {
+                Move-Item $f "$f.$stamp.prev" -Force -EA SilentlyContinue
+                $did += "rotated $name"
+            }
+        }
+    }
+
+    if ($did.Count -eq 0) { return "nothing to remove - machine was already clean" }
+    return ($did -join "; ")
+}
+
 try {
 
 Write-Host "=== SysManage MSI install + verify ===" -ForegroundColor White
@@ -71,21 +151,10 @@ Write-Host "LOG FILE : $LogFile   <-- scp this back" -ForegroundColor White
 if ($Uninstall) {
     Write-Host ""
     Write-Host "--- Uninstall mode" -ForegroundColor Cyan
-    $p = Get-CimInstance Win32_Product -Filter "Name LIKE '%SysManage%'" -EA SilentlyContinue
-    if ($p) {
-        foreach ($prod in $p) {
-            Write-Host "    removing $($prod.Name) $($prod.Version)"
-            Start-Process msiexec.exe -Wait -ArgumentList @("/x", $prod.IdentifyingNumber, "/qn",
-                "/l*v", "C:\sysmanage-msi-uninstall.log")
-        }
-    } else {
-        Write-Host "    no SysManage product registered"
+    Write-Host "    $(Remove-PriorInstall)"
+    if (Test-Path $DataRoot) {
+        Write-Host "    NOTE: $DataRoot kept (config, TLS material, logs)" -ForegroundColor Yellow
     }
-    foreach ($svc in @("SysManageServer", "SysManageNginx", "SysManageOpenBAO")) {
-        $s = Get-Service -Name $svc -EA SilentlyContinue
-        if ($s) { Write-Host "    LEFTOVER SERVICE: $svc ($($s.Status))" -ForegroundColor Yellow }
-    }
-    if (Test-Path $InstallRoot) { Write-Host "    LEFTOVER DIR: $InstallRoot" -ForegroundColor Yellow }
     Write-Host ""
     Write-Host "Uninstall log: C:\sysmanage-msi-uninstall.log"
     exit 0
@@ -101,17 +170,32 @@ Step "Elevated (Administrator)" {
     "running as $($id.Name)"
 }
 
-Step "No conflicting install already present" {
-    $existing = Get-Service -Name "SysManageNginx" -EA SilentlyContinue
-    if ($existing) {
-        Note "SysManageNginx already exists ($($existing.Status)) - this run will upgrade over it"
+Step "Remove any prior SysManage install" {
+    # Always start clean rather than upgrading over whatever is there.  An
+    # upgrade-in-place can leave a stale venv, a stale bundled Python or an
+    # orphaned service from a previously FAILED install, and then the checks
+    # below pass or fail for reasons that have nothing to do with the MSI under
+    # test.  This is the whole point of the script, so it is a step, not a note.
+    $summary = Remove-PriorInstall
+    Write-Host "      $summary"
+
+    $leftover = @(Get-SysManageProducts)
+    if ($leftover.Count -gt 0) {
+        throw ("a SysManage product is STILL registered after removal: " +
+               ($leftover | ForEach-Object { "$($_.Name) $($_.Version)" }) -join ', ')
     }
+    foreach ($svc in @("SysManageServer", "SysManageNginx")) {
+        if (Get-Service -Name $svc -EA SilentlyContinue) {
+            throw "service $svc survived removal - reboot may be required before re-testing"
+        }
+    }
+
     # A leftover certificate would mask the 'correctly refuses without a cert'
     # check below, so say so rather than silently producing a misleading pass.
     if (Test-Path "$DataRoot\tls\server.crt") {
-        Note "a TLS certificate is already present - nginx -t will PASS rather than correctly refuse"
+        Note "a TLS certificate is already present in $DataRoot - nginx -t will PASS rather than correctly refuse"
     }
-    "checked"
+    $summary
 }
 
 # ------------------------------------------------------------------ download --
