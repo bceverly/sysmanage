@@ -1106,6 +1106,25 @@ lint-version:
 lint-version-fix:
 	@$(PYTHON) scripts/check_version_drift.py --fix
 
+# One command to cut a release, in the ONLY order that works: bump the version
+# markers, COMMIT, then TAG that commit, then push.  Cutting the tag first --
+# which the old ritual required, because check_version_drift.py resolved the
+# version from an already-existing tag -- leaves the tag on the commit BEFORE
+# the work, and CI faithfully rebuilds that older tree.
+#
+#   make release VERSION=3.5.1.26
+#   make release VERSION=3.5.1.26 MSG='Fixed OpenBSD and Flatpak'
+#   make release VERSION=3.5.1.26 DRY_RUN=1     # run every guard, change nothing
+#
+# Refuses, loudly and BEFORE touching anything, when VERSION is not four numeric
+# parts, when the tag already exists locally or on origin, when the version is
+# not strictly newer than the highest tag known, or when an untracked file sits
+# under the shipping source tree (git commit -a would silently skip it).
+# The logic lives in scripts/release.py so it behaves identically on Windows,
+# where make drives cmd.exe and test/grep/sed do not exist.
+release:
+	@$(PYTHON) scripts/release.py --version "$(VERSION)" $(if $(MSG),--message "$(MSG)") $(if $(DRY_RUN),--dry-run) $(if $(ALLOW_UNTRACKED),--allow-untracked)
+
 # File-length gate: no source file may exceed 1000 lines (scripts/ exempt).
 # Uniform across all SysManage repos; complements pylint max-module-lines and the
 # eslint max-lines rule, and also covers Cython (.pyx), which pylint cannot lint.
