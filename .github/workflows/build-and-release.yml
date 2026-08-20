@@ -1290,7 +1290,17 @@ jobs:
 
   build-windows-msi-arm64:
     name: Build Windows MSI (ARM64)
-    runs-on: windows-latest
+    # NATIVE arm64.  This used to run on windows-latest (x64), which is why the
+    # wheel set had to be cross-built by hand on a physical ARM64 box and
+    # uploaded to the 'windows-arm64-deps' release -- CI structurally could not
+    # produce it.  That manual step is how v3.5.1.21/.22 shipped an MSI pinning
+    # cryptography==50.0.0 against a July wheel set holding 49.0.0: the offline
+    # install could not resolve, and the pre-existing staleness guard only
+    # warned.  A native runner can build them itself, so the drift cannot recur.
+    #
+    # windows-11-arm is free for public repos (this repo is public, and the
+    # agent already uses ubuntu-24.04-arm).
+    runs-on: windows-11-arm
     timeout-minutes: 90
     needs: wait-for-tests
 
@@ -1303,10 +1313,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.13
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
-          python-version: '3.12'
+          # MUST match $PythonVersion in build-msi.ps1: if the wheels are
+          # rebuilt natively here they are tagged for THIS interpreter, and
+          # the ABI lockstep check rejects a cp312 set against a 3.13 bundle.
+          python-version: '3.13'
 
       - name: Determine version
         id: version
@@ -1352,6 +1365,17 @@ jobs:
           cd frontend
           npm run build
 
+      # Cache the compiled arm64 wheel set, keyed on the pins it was built from.
+      # Building cryptography for win_arm64 needs Rust plus a vcpkg static
+      # OpenSSL, and grpcio needs its own short-path build -- tens of minutes.
+      # Keyed this way it is paid ONCE per pin change, which is exactly when a
+      # rebuild is wanted, and skipped entirely otherwise.
+      - name: Cache ARM64 wheel set
+        uses: actions/cache@v4
+        with:
+          path: installer/windows/wheels-arm64
+          key: wheels-arm64-cp313-${{ hashFiles('requirements-prod.txt') }}
+
       - name: Stage prebuilt ARM64 build deps (libpq + wheels)
         # ARM64 libpq + the cross-compiled wheels are built ONCE on the local ARM64
         # box (installer\windows\package-arm64-build-deps.ps1) and uploaded to the
@@ -1392,20 +1416,8 @@ jobs:
           # requirements-prod.txt?  Resolve them exactly the way install.ps1 will
           # on the target -- offline, win_arm64, cp313.
           #
-          # This is a hard failure, not a warning.  v3.5.1.21 shipped with the
-          # hash guard warning and CI green, and the MSI could not install at all:
-          # requirements-prod.txt had moved to cryptography==50.0.0 for the PKCS#7
-          # Bleichenbacher advisory while the prebuilt wheel set still held
-          # 49.0.0, so `pip install --no-index` resolved nothing on the target.
-          # A warning that ships a broken installer -- carrying the very version
-          # the CVE bump was escaping -- is not a warning.
-          #
-          # --no-deps deliberately: this checks the TOP-LEVEL pins resolve, which
-          # is the drift that actually happens (a pin moves, the prebuilt set
-          # does not).  A full-tree resolve would be stricter but risks failing
-          # the release on a cross-platform resolution quirk rather than a real
-          # problem, and a guard that blocks good releases gets disabled.
-          # Tighten to a full resolve once it has proven stable here.
+          # --no-deps: this checks the TOP-LEVEL pins resolve, which is the drift
+          # that actually happens (a pin moves, the prebuilt set does not).
           $pyTag = '313'
           Write-Host "Verifying the staged wheels satisfy requirements-prod.txt (win_arm64, cp$pyTag)..."
           python -m pip install --dry-run --ignore-installed --no-deps `
@@ -1414,13 +1426,31 @@ jobs:
             --target "$env:RUNNER_TEMP\wheelcheck" `
             -r requirements-prod.txt
           if ($LASTEXITCODE -ne 0) {
-            throw ("The prebuilt ARM64 wheel set does NOT satisfy requirements-prod.txt " +
-                   "(see the pip resolution error above).  Rebuild it against the current " +
-                   "pins on the ARM64 machine and re-upload:`n" +
-                   "    installer\windows\package-arm64-build-deps.ps1`n" +
-                   "Shipping anyway produces an MSI whose offline install fails on the target.")
+            # This runner is NATIVE arm64, so a stale prebuilt set is no longer a
+            # dead end: discard it and let build-msi.ps1 compile the wheels here.
+            # Failing the release on drift (the previous behaviour) was correct
+            # but still left a human in the loop for something CI can now do.
+            Write-Host "::warning::Prebuilt ARM64 wheels do not satisfy requirements-prod.txt - discarding them and building natively."
+            Remove-Item -Recurse -Force installer\windows\wheels-arm64 -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "[OK] staged ARM64 wheels satisfy requirements-prod.txt"
           }
-          Write-Host "[OK] staged ARM64 wheels satisfy requirements-prod.txt"
+
+      - name: Prepare native arm64 build venv (only when wheels must be rebuilt)
+        # build-msi.ps1's in-CI wheel-build path expects a .venv at the repo root
+        # ("run 'make install-dev' first") -- which never exists on a fresh
+        # runner, so the fallback would exit 1 instead of rebuilding.  Create it
+        # only when the wheel set is absent, i.e. cache miss or discarded as stale.
+        shell: pwsh
+        run: |
+          if (Test-Path installer\windows\wheels-arm64) {
+            Write-Host "wheel set present - no native build needed, skipping venv"
+            exit 0
+          }
+          Write-Host "no wheel set - preparing .venv for the native arm64 build"
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip wheel setuptools
+          .\.venv\Scripts\python.exe --version
 
       - name: Build Windows MSI (ARM64)
         env:

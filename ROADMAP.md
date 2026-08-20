@@ -6597,6 +6597,36 @@ architectural work (a privileged-helper split) that dwarfs the
 publish-pipeline plumbing of the other channels — treat them as their
 own mini-projects, not as a checkbox alongside winget/Homebrew.
 
+### Windows ARM64: OTLP telemetry gap (deferred 2026-08-20)
+
+`opentelemetry-exporter-otlp` is **excluded on Windows ARM64** via an
+environment marker in `requirements.txt`. It pulls `grpcio`, which publishes
+**no `win_arm64` wheel** on PyPI, and building it from source there fails:
+grpcio hands MSVC both `/std:c++17` and `/std:c11` on every source and `cl`
+rejects that pair on a C++ file (`D8016`, hit building 1.81.1 against Python
+3.13 on the X13S). An earlier workaround,
+`scripts/build-grpcio-wheel-win-arm64.ps1`, solved a *different* grpcio problem
+(the deep `upb-gen` tree overflowing MAX_PATH at link time, LNK1181) and is
+left in the tree unused for whenever this becomes buildable again.
+
+**Impact is bounded and graceful:** OTLP *export* is unavailable on Windows
+ARM64 only. `backend/telemetry/otel_config.py` imports the OTLP exporters in
+their own `try/except`, so `OTLP_AVAILABLE` goes False while the Prometheus
+exporter and every FastAPI / SQLAlchemy / requests / logging instrumentation
+keep working. (That split was itself a fix: previously one missing optional
+exporter took the entire telemetry stack down.) No other platform is affected —
+Linux, macOS and Windows x64 install a prebuilt grpcio wheel; OpenBSD already
+omits the package to keep its pip bundle pure-Python.
+
+- [ ] Re-check whether PyPI publishes a `win_arm64` grpcio wheel (removes this
+      entirely — just drop the marker)
+- [ ] If not, evaluate patching grpcio's `setup.py` to stop passing both
+      `/std` flags; weigh against carrying a vendored patch across every bump
+- [ ] Decide whether OTLP export on Windows ARM64 is a requirement at all, or
+      whether Prometheus-only is the documented answer for that platform
+- [ ] If it stays excluded, document it on the Windows install page rather than
+      leaving it to be discovered from a log line
+
 ### Exit Criteria
 
 - [ ] All Phase 14–21 engines license-gated + 402-clean when unlicensed

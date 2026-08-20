@@ -334,13 +334,22 @@ if ($Architecture -eq "arm64") {
         $ErrorActionPreference = 'SilentlyContinue'
         & $venvPy -m pip cache remove cryptography | Out-Null
         $ErrorActionPreference = 'Stop'
-        # grpcio (opentelemetry-exporter-otlp dep) has no win_arm64 wheel either, and its
-        # deep upb-gen tree overflows MAX_PATH at link time under pip's own deep temp
-        # layout (LNK1181) -- so `pip wheel grpcio` / `pip wheel -r ...` both fail. Build it
-        # FIRST via the short-dir builder, then let the -r step reuse that wheel through
-        # --find-links instead of rebuilding it from the deep tree.
-        & (Join-Path $PSScriptRoot "..\..\scripts\build-grpcio-wheel-win-arm64.ps1") -Python $venvPy -OutputDir $WheelsDir
-        if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: grpcio wheel build failed." -ForegroundColor Red; exit 1 }
+        # grpcio is NO LONGER BUILT HERE.  It was only ever needed by
+        # opentelemetry-exporter-otlp, which requirements.txt now excludes on
+        # Windows ARM64 via an environment marker -- so `pip wheel -r` below
+        # never asks for it.
+        #
+        # It could not be built anyway: grpcio passes both /std:c++17 and
+        # /std:c11 to every source and MSVC rejects that pair on a C++ file
+        # (D8016, hit on 2026-08-20 building 1.81.1 against Python 3.13).  The
+        # earlier MAX_PATH/LNK1181 workaround in
+        # scripts/build-grpcio-wheel-win-arm64.ps1 got past the link-path
+        # problem but not this one.  That script is left in place for whenever
+        # grpcio is buildable again; nothing calls it now.
+        #
+        # Cost: OTLP export is unavailable on Windows ARM64.  Prometheus metrics
+        # and all instrumentation still work -- otel_config.py imports the OTLP
+        # exporters in their own try/except.
         & $venvPy -m pip wheel -r (Join-Path $CurrentDir "requirements-prod.txt") --find-links $WheelsDir -w $WheelsDir
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: ARM64 wheel build failed." -ForegroundColor Red; exit 1 }
     }

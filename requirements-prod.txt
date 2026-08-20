@@ -121,6 +121,28 @@ opentelemetry-instrumentation-logging>=0.48b0
 # built from source by scripts/build-grpcio-win-arm64.ps1 (run from `make install-dev`
 
 # before this install) — the same source-build approach the BSD platforms use.
-opentelemetry-exporter-otlp>=1.12.0
+
+# opentelemetry-exporter-otlp is EXCLUDED on Windows ARM64.  Its only reason to
+
+# exist here is OTLP export, and it drags in grpcio, which has no win_arm64 wheel
+
+# on PyPI.  Building grpcio from source there fails outright: it passes both
+
+# /std:c++17 and /std:c11 to every source, and MSVC rejects that pair on a C++
+
+# file (D8016).  Patching grpcio's setup.py to work around that is fragile.
+
+#
+
+# Dropping it costs OTLP export only.  backend/telemetry/otel_config.py imports
+
+# the OTLP exporters in their OWN try/except, so OTLP_AVAILABLE goes False while
+
+# the Prometheus exporter and every FastAPI/SQLAlchemy/requests/logging
+
+# instrumentation keep working.  The OpenBSD port omits this package for exactly
+
+# the same reason (installer/openbsd/build-libs.sh).
+opentelemetry-exporter-otlp>=1.12.0; platform_system != "Windows" or platform_machine != "ARM64"  # win_arm64: see note below
 opentelemetry-exporter-prometheus>=0.48b0
 
