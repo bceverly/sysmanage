@@ -1422,6 +1422,11 @@ jobs:
             Copy-Item $src (Join-Path $stage $d) -Force
           }
           Write-Host "[OK] built and staged $($needed.Count) libpq DLLs"
+          # Explicit: pwsh in Actions takes the step result from the LAST
+          # native exit code.  A step that handled a non-zero result in its
+          # own logic still fails unless the code is reset -- that is exactly
+          # how the old staging step "self-healed" and then failed the job.
+          exit 0
 
       - name: Prepare native arm64 build venv (only when wheels must be rebuilt)
         # build-msi.ps1's in-CI wheel-build path expects a .venv at the repo root
