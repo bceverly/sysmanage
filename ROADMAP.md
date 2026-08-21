@@ -5767,7 +5767,7 @@ close the gap between our output and the parsers that consume it.
       device, tasksel) — each entry cost a full boot cycle to discover, and the
       checklist is the durable artifact. Extend the same idea to kickstart /
       AutoYaST / bsdinstall, which have had no live validation at all.
-- [ ] **Make the bare-metal harness cheap enough to run casually.** Most of the
+- [x] **Make the bare-metal harness cheap enough to run casually.** Most of the
       18.2 cost was 15-minute cycles with a manual restart in the middle, not
       diagnosis. The stale-engine guard is in; still wanted:
       `PXE_DEBUG_PASSWORD` (the installed host locks root and creates no user,
@@ -5799,9 +5799,53 @@ close the gap between our output and the parsers that consume it.
       `--`, which XML forbids inside a comment, and every by-eye read had
       missed it.
 
-      STILL OPEN in this item: VM snapshot after install, and the local package
-      mirror.  Note the Hyper-V rig plan makes the snapshot half nearly free —
-      checkpoint the target VM after firmware config and roll back per attempt.)*
+      *(DONE 2026-08-21 — the remaining two halves landed as
+      `sysmanage-professional-plus/scripts/pxe_harness.py`, companion to the
+      `pxe_provision_spike.py` boot-chain proof.
+
+      `mirror` is a caching HTTP mirror in front of the distro install trees:
+      `http://<mirror>/<upstream-host>/<path>`, stdlib only, streaming (the
+      client and the cache file are written in the SAME pass, so a 100MB+
+      object is not downloaded before it is served).  It needs NO engine
+      change, which is the point — an install source already carries
+      `install_tree_url` and all five renderers derive their mirror from that
+      one field (`render_preseed` splits it into `mirror/http/hostname` +
+      `directory`, kickstart passes it to `url --url=`, and so on), so
+      repointing the install source repoints every dialect at once.
+
+      Cached objects NEVER expire by default.  For a harness that is the
+      feature: attempt #7 installs the same bytes as attempt #1, so a
+      behaviour change is yours and not the archive's; `--max-age` opts into
+      freshness.  `--offline` refuses to reach upstream at all, which is what
+      turns "the cache exists" into "the cache is sufficient" — a miss is a
+      loud 504, never a silent empty 200 that would surface as a corrupt
+      package three layers away.  Only a fully-read body becomes a cache entry
+      and it arrives by rename, so a truncated download cannot poison later
+      runs.  Upstreams are an allowlist (extend via `PXE_MIRROR_ALLOW`), and
+      path traversal is REFUSED rather than normalised.
+
+      `snapshot` / `rollback` wrap libvirt internal snapshots so post-install
+      debugging — where the six 18.2 defects were actually found — costs
+      seconds instead of a reinstall.  Taking a second snapshot over an
+      existing name is refused without `--replace`, because silently replacing
+      the known-good checkpoint destroys the thing you are rolling back TO.  A
+      raw-backed disk fails here for a reason no retry fixes, so that error
+      names qcow2 and prints the `domblklist` command.
+
+      Verified live, not asserted: a real Debian `Release` and a 13MB
+      `Packages.gz` fetched through the mirror are byte-identical to upstream
+      (`gzip -t` clean), the second fetch reports `X-Mirror-Cache: HIT`, and
+      with `--offline` the cached object still serves while an uncached one
+      504s.  Snapshot/rollback round-tripped on a live domain: snapshot while
+      running, `destroy` to "shut off", roll back, "running" again.  16 tests
+      cover the serving path offline against a pre-populated cache, so the
+      suite needs no network and cannot be fooled by an upstream that happens
+      to answer; the upstream-fetch path is deliberately NOT unit-tested
+      rather than quietly skipped.
+
+      `PXE_HARNESS_LIBVIRT_URI` exists because a workstation without
+      passwordless sudo can only drive `qemu:///session`, and a harness you
+      cannot run on your own laptop is not a cheap harness.)*
 - [x] **Treat duplicated tables as a defect.** `agent_install.pxi` exists
       verbatim in `virtualization_engine`, `container_engine` and
       `provisioning_engine`, and the broken Debian channel had to be fixed in
