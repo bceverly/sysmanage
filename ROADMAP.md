@@ -5895,7 +5895,11 @@ close the gap between our output and the parsers that consume it.
       And the harness now says out loud when the UEFI stage is missing instead
       of silently degrading to BIOS-only — a capability that is absent quietly
       is worse than one that is absent loudly, because the run still passes.)*
-- [ ] **proxyDHCP validated on REAL HARDWARE** (moved here from Phase 18
+- [ ] **proxyDHCP validated on REAL HARDWARE** — test plan written up at
+      `docs/planning/PROXYDHCP-HARDWARE-TEST.md` (2026-08-21): rig options, the
+      verified rendered config, pass criteria for both the BIOS and UEFI legs,
+      and a failure-mode table.  Read that before re-deriving any of this.
+      (moved here from Phase 18
       2026-08-04 — it is gated on the UEFI item ABOVE, so the two travel
       together) — it cannot be validated on the
       QEMU harness, and that is a property of the harness, not of our config.
