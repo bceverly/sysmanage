@@ -25,6 +25,13 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
+    // Catalogs are stored per BASE language (/locales/en/, /locales/fr/).  The
+    // default `load: 'all'` also requests the region code a browser reports --
+    // /locales/en-US/translation.json -- which serves index.html, fails to
+    // parse, and logs an error on every single boot for no benefit.  Note the
+    // zh_CN / zh_TW locales use an underscore, so they are untouched by this
+    // (i18next splits region codes on '-').
+    load: 'languageOnly',
     debug: false,
     showSupportNotice: false,
     
@@ -100,9 +107,17 @@ export const installCatalogGuard = (instance: typeof i18n) => {
     Object.keys(loaded || {}).forEach((lng) => delivered.add(lng));
   });
 
-  /** Fetch <lng>'s catalog if the backend never actually delivered it. */
-  const ensureCatalogFor = async (lng: string) => {
-    if (!lng || delivered.has(lng)) return;
+  /** Fetch <lng>'s catalog if the backend never actually delivered it.
+   *
+   * Catalogs are stored per BASE language (/locales/en/…, /locales/fr/…), but
+   * a browser reports a region code -- 'en-US'.  Asking for en-US fetches
+   * index.html and fails to parse, which is a wasted request and a console
+   * error on every boot, so resolve to the base and treat either form as
+   * already delivered. */
+  const ensureCatalogFor = async (full: string) => {
+    if (!full) return;
+    const lng = full.split('-')[0];
+    if (delivered.has(full) || delivered.has(lng)) return;
     // Record first: reloadResources emits 'loaded' again, and without this a
     // concurrent call would fetch the same catalog twice.
     delivered.add(lng);

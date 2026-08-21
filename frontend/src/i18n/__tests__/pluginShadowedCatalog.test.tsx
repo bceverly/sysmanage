@@ -77,3 +77,29 @@ describe('a plugin bundle must not shadow the real catalog', () => {
         expect(i18n.t('hosts.approveSelected')).toBe('Approuver la sélection');
     });
 });
+
+describe('region codes', () => {
+    it('does not chase /locales/en-US/ when en is already loaded', async () => {
+        // A browser reports 'en-US'; catalogs live under 'en'.  Requesting the
+        // region code fetches index.html, fails to parse, and logs a scary
+        // error on every boot for no benefit.
+        const asked: string[] = [];
+        const backend = {
+            type: 'backend' as const,
+            init: () => undefined,
+            // eslint-disable-next-line no-unused-vars
+            read(lng: string, _ns: string, cb: (e: unknown, d?: unknown) => void) {
+                asked.push(lng);
+                setTimeout(() => cb(null, { hosts: { approveSelected: 'Approve Selected' } }), 5);
+            },
+        };
+        const i18n = createInstance();
+        await i18n.use(backend).init({ lng: 'en', fallbackLng: 'en', load: 'languageOnly' });
+        installCatalogGuard(i18n as unknown as Parameters<typeof installCatalogGuard>[0]);
+
+        await i18n.changeLanguage('en-US');
+        await new Promise((r) => setTimeout(r, 40));
+
+        expect(asked).not.toContain('en-US');
+    });
+});
