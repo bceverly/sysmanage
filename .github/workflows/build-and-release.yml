@@ -1371,7 +1371,7 @@ jobs:
       # Keyed this way it is paid ONCE per pin change, which is exactly when a
       # rebuild is wanted, and skipped entirely otherwise.
       - name: Cache ARM64 wheel set
-        uses: actions/cache@v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: installer/windows/wheels-arm64
           key: wheels-arm64-cp313-${{ hashFiles('requirements-prod.txt') }}
@@ -1384,7 +1384,7 @@ jobs:
       # needed, and neither is the manual upload step that fed it.
       # Cached because the vcpkg build is slow and libpq changes rarely.
       - name: Cache ARM64 libpq DLLs
-        uses: actions/cache@v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: installer/windows/libpq-arm64
           key: libpq-arm64-v1

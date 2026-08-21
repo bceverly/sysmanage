@@ -104,6 +104,11 @@ def normalize_report(report: Any) -> Optional[Dict[str, Any]]:
         "commands": commands,
         "unavailable": _str_map(report.get("unavailable")),
         "partial": _str_map(report.get("partial")),
+        # Groups this host's OS cannot host at all (bhyve on Linux, Ubuntu Pro
+        # off Ubuntu).  Stored and displayed, but NOT part of the limited rule
+        # below: an agent is not degraded for lacking a facility its operating
+        # system does not have.  Absent from pre-Phase-19 agents, hence {}.
+        "not_applicable": _str_map(report.get("not_applicable")),
     }
 
 
@@ -138,6 +143,9 @@ def capability_update_values(report: Any) -> Dict[str, Any]:
         return {}
     return {
         "agent_capabilities": json.dumps(normalized, sort_keys=True),
+        # "not_applicable" is deliberately NOT consulted: a Linux host is not
+        # limited for lacking bhyve.  The agent has already excluded those
+        # groups from unavailable/partial, so this stays a two-term rule.
         "agent_capabilities_limited": bool(
             normalized["unavailable"] or normalized["partial"]
         ),

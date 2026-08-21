@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React from 'react';
-import Button from '@mui/material/Button';
-import { Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -15,7 +13,7 @@ import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
 import SecurityIcon from '@mui/icons-material/Security';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { useTranslation } from 'react-i18next';
-import ScrollableButtonBar from './ScrollableButtonBar';
+import SelectionActionBar, { SelectionAction } from './SelectionActionBar';
 
 interface HostsActionBarProps {
     canApproveHosts: boolean;
@@ -37,12 +35,18 @@ interface HostsActionBarProps {
     onShutdownSelected: () => void;
     onUpdateAgentSelected: () => void;
     onDelete: () => void;
+    onClearSelection?: () => void;
 }
 
 /**
- * The bottom action-button bar for the Hosts grid.  Purely
- * presentational: all gating flags and handlers are supplied by the
- * parent so the Hosts component keeps ownership of state and hooks.
+ * The action bar for the Hosts grid.  Purely presentational: all gating flags
+ * and handlers are supplied by the parent so the Hosts component keeps
+ * ownership of state and hooks.
+ *
+ * The four primaries are chosen by FREQUENCY, not importance -- the thing an
+ * operator clicks twenty times a day earns the pixels.  Everything else lives
+ * in the overflow menu, grouped, with the power operations kept away from the
+ * benign ones and Delete alone behind the final divider.
  */
 const HostsActionBar: React.FC<HostsActionBarProps> = ({
     canApproveHosts,
@@ -64,109 +68,137 @@ const HostsActionBar: React.FC<HostsActionBarProps> = ({
     onShutdownSelected,
     onUpdateAgentSelected,
     onDelete,
+    onClearSelection,
 }) => {
     const { t } = useTranslation();
 
+    const needsAny = t('common.requiresSelection', 'Select at least one row');
+    const needsOne = t('common.requiresSingleSelection', 'Select exactly one row');
+    const needsPending = t(
+        'hosts.requiresPendingHost',
+        'Select a host that is awaiting approval',
+    );
+    const needsPrivileged = t(
+        'hosts.requiresActivePrivileged',
+        'Select an active host running in privileged mode',
+    );
+
+    const groupDeploy = t('hosts.actionGroupDeploy', 'Deploy');
+    const groupPower = t('hosts.actionGroupPower', 'Power');
+
+    const actions: SelectionAction[] = [
+        {
+            id: 'approve',
+            label: t('hosts.approveSelected', { defaultValue: 'Approve Selected' }),
+            icon: <CheckIcon />,
+            color: 'success',
+            primary: true,
+            hidden: !canApproveHosts,
+            disabled: !hasPendingSelection,
+            disabledReason: needsPending,
+            onClick: onApprove,
+        },
+        {
+            id: 'refresh-data',
+            label: t('hosts.refreshAllData', 'Refresh All Data'),
+            icon: <SyncIcon />,
+            color: 'info',
+            primary: true,
+            disabled: selectionCount === 0,
+            disabledReason: needsAny,
+            onClick: onRefreshData,
+        },
+        {
+            id: 'update-agent',
+            label: t('hosts.updateAgentSelected', 'Update Agent on Selected'),
+            icon: <SystemUpdateAltIcon />,
+            color: 'info',
+            primary: true,
+            hidden: !canUpdateAgent,
+            disabled: !hasActivePrivilegedSelection,
+            disabledReason: needsPrivileged,
+            onClick: onUpdateAgentSelected,
+        },
+        {
+            id: 'diagnostics',
+            label: t('hosts.getDiagnostics', 'Get Diagnostics'),
+            icon: <MedicalServicesIcon />,
+            color: 'secondary',
+            primary: true,
+            disabled: selectionCount !== 1,
+            disabledReason: needsOne,
+            onClick: onGetDiagnostics,
+        },
+        {
+            id: 'broadcast-refresh',
+            label: t('broadcast.refresh', 'Broadcast Refresh'),
+            icon: <CampaignIcon />,
+            tooltip: t(
+                'broadcast.refreshTooltip',
+                'Send a refresh-inventory broadcast to every connected agent',
+            ),
+            onClick: onBroadcastRefresh,
+        },
+        {
+            id: 'deploy-otel',
+            label: t('hosts.deployOpenTelemetry', 'Deploy OpenTelemetry'),
+            icon: <SystemUpdateAltIcon />,
+            group: groupDeploy,
+            disabled: selectionCount === 0,
+            disabledReason: needsAny,
+            onClick: onDeployOpenTelemetry,
+        },
+        {
+            id: 'deploy-antivirus',
+            label: t('hosts.deployAntivirus', 'Deploy Antivirus'),
+            icon: <SecurityIcon />,
+            group: groupDeploy,
+            hidden: !canDeployAntivirus,
+            disabled: selectionCount === 0,
+            disabledReason: needsAny,
+            onClick: onDeployAntivirus,
+        },
+        {
+            id: 'reboot',
+            label: t('hosts.rebootSelected', 'Reboot Selected'),
+            icon: <RestartAltIcon />,
+            group: groupPower,
+            color: 'warning',
+            hidden: !canRebootHost,
+            disabled: !hasActivePrivilegedSelection,
+            disabledReason: needsPrivileged,
+            onClick: onRebootSelected,
+        },
+        {
+            id: 'shutdown',
+            label: t('hosts.shutdownSelected', 'Shutdown Selected'),
+            icon: <PowerSettingsNewIcon />,
+            group: groupPower,
+            color: 'error',
+            hidden: !canShutdownHost,
+            disabled: !hasActivePrivilegedSelection,
+            disabledReason: needsPrivileged,
+            onClick: onShutdownSelected,
+        },
+        {
+            id: 'delete',
+            label: `${t('common.delete')} ${t('common.selected', { defaultValue: 'Selected' })}`,
+            icon: <DeleteIcon />,
+            destructive: true,
+            hidden: !canDeleteHost,
+            disabled: selectionCount === 0,
+            disabledReason: needsAny,
+            onClick: onDelete,
+        },
+    ];
+
     return (
-        <ScrollableButtonBar sx={{ flexShrink: 0, pb: 2 }}>
-            {canApproveHosts && (
-                <Button
-                    variant="outlined"
-                    startIcon={<CheckIcon />}
-                    disabled={!hasPendingSelection}
-                    onClick={onApprove}
-                    color="success"
-                >
-                    {t('hosts.approveSelected', { defaultValue: 'Approve Selected' })}
-                </Button>
-            )}
-            <Button
-                variant="outlined"
-                startIcon={<SyncIcon />}
-                disabled={selectionCount === 0}
-                onClick={onRefreshData}
-                color="info"
-            >
-                {t('hosts.refreshAllData', 'Refresh All Data')}
-            </Button>
-            <Tooltip title={t('broadcast.refreshTooltip', 'Send a refresh-inventory broadcast to every connected agent')}>
-                <Button
-                    variant="outlined"
-                    startIcon={<CampaignIcon />}
-                    onClick={onBroadcastRefresh}
-                    color="info"
-                >
-                    {t('broadcast.refresh', 'Broadcast Refresh')}
-                </Button>
-            </Tooltip>
-            <Button
-                variant="outlined"
-                startIcon={<MedicalServicesIcon />}
-                disabled={selectionCount !== 1}
-                onClick={onGetDiagnostics}
-                color="secondary"
-            >
-                {t('hosts.getDiagnostics', 'Get Diagnostics')}
-            </Button>
-            <Button
-                variant="outlined"
-                startIcon={<SystemUpdateAltIcon />}
-                disabled={selectionCount === 0}
-                onClick={onDeployOpenTelemetry}
-                color="success"
-            >
-                {t('hosts.deployOpenTelemetry', 'Deploy OpenTelemetry')}
-            </Button>
-            {canDeployAntivirus && (
-                <Button
-                    variant="outlined"
-                    startIcon={<SecurityIcon />}
-                    disabled={selectionCount === 0}
-                    onClick={onDeployAntivirus}
-                    color="success"
-                >
-                    {t('hosts.deployAntivirus', 'Deploy Antivirus')}
-                </Button>
-            )}
-            {canRebootHost && (
-                <Button
-                    variant="outlined"
-                    startIcon={<RestartAltIcon />}
-                    disabled={!hasActivePrivilegedSelection}
-                    onClick={onRebootSelected}
-                    color="warning"
-                >
-                    {t('hosts.rebootSelected', 'Reboot Selected')}
-                </Button>
-            )}
-            {canShutdownHost && (
-                <Button
-                    variant="outlined"
-                    startIcon={<PowerSettingsNewIcon />}
-                    disabled={!hasActivePrivilegedSelection}
-                    onClick={onShutdownSelected}
-                    color="error"
-                >
-                    {t('hosts.shutdownSelected', 'Shutdown Selected')}
-                </Button>
-            )}
-            {canUpdateAgent && (
-                <Button
-                    variant="outlined"
-                    startIcon={<SystemUpdateAltIcon />}
-                    disabled={!hasActivePrivilegedSelection}
-                    onClick={onUpdateAgentSelected}
-                    color="info"
-                >
-                    {t('hosts.updateAgentSelected', 'Update Agent on Selected')}
-                </Button>
-            )}
-            {canDeleteHost && (
-                <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selectionCount === 0} onClick={onDelete}>
-                    {t('common.delete')} {t('common.selected', { defaultValue: 'Selected' })}
-                </Button>
-            )}
-        </ScrollableButtonBar>
+        <SelectionActionBar
+            actions={actions}
+            selectionCount={selectionCount}
+            onClearSelection={onClearSelection}
+            sx={{ flexShrink: 0, pb: 2 }}
+        />
     );
 };
 

@@ -84,53 +84,57 @@
     "actions": "الإجراءات",
     "active": "نشط",
     "add": "إضافة",
+    "all": "الكل",
+    "apply": "تطبيق",
     "back": "رجوع",
     "cancel": "إلغاء",
+    "clearSelection": "مسح التحديد",
     "close": "إغلاق",
+    "confirm": "تأكيد",
     "confirmAction": "تأكيد الإجراء",
+    "copied": "تم نسخ المفتاح",
+    "copy": "نسخ",
+    "create": "إنشاء",
     "delete": "حذف",
     "disabled": "معطل",
+    "done": "انتهى",
     "edit": "تحرير",
     "enabled": "ممكّن",
+    "exportCSV": "تصدير CSV",
+    "exportPDF": "تصدير PDF",
+    "id": "المعرّف",
     "inactive": "غير نشط",
     "invalidDate": "تاريخ غير صالح",
     "less": "أقل",
+    "loading": "جارٍ التحميل...",
+    "moreActions": "المزيد",
+    "na": "غير متاح",
     "no": "لا",
     "noDescription": "لا يوجد وصف",
+    "none": "لا شيء",
     "notAvailable": "غير متاح",
     "of": "من",
     "refresh": "تحديث",
+    "requiresSelection": "حدد صفًا واحدًا على الأقل",
+    "requiresSingleSelection": "حدد صفًا واحدًا فقط",
+    "reset": "إعادة تعيين المرشحات",
+    "retry": "إعادة المحاولة",
     "rowSelected": "صف محدد",
     "rowsPerPage": "الصفوف في الصفحة",
     "rowsSelected": "صفوف محددة",
     "running": "قيد التشغيل",
     "save": "حفظ",
+    "saving": "جاري الحفظ...",
     "search": "بحث",
+    "selected": "محدد",
     "status": "الحالة",
     "stopped": "متوقف",
-    "unassigned": "غير مخصص",
-    "yes": "نعم",
-    "none": "لا شيء",
-    "all": "الكل",
-    "apply": "تطبيق",
-    "exportCSV": "تصدير CSV",
-    "exportPDF": "تصدير PDF",
-    "id": "المعرّف",
-    "na": "غير متاح",
-    "reset": "إعادة تعيين المرشحات",
-    "retry": "إعادة المحاولة",
-    "saving": "جاري الحفظ...",
     "togglePasswordVisibility": "تبديل ظهور كلمة المرور",
+    "unassigned": "غير مخصص",
     "unknown": "غير معروف",
     "update": "تحديث",
-    "selected": "محدد",
     "view": "عرض",
-    "copied": "تم نسخ المفتاح",
-    "copy": "نسخ",
-    "create": "إنشاء",
-    "done": "انتهى",
-    "loading": "جارٍ التحميل...",
-    "confirm": "تأكيد"
+    "yes": "نعم"
   },
   "connectionStatus": {
     "connected": "متصل",
@@ -395,7 +399,8 @@
       "noEligible": "لا توجد مرايا متزامنة متاحة",
       "saveSuccess": "تم الحفظ. سيتم إعادة تكوين {{count}} مضيف(ين).",
       "subtitle": "لكل زوج (منصة، إصدار) مدعوم، اختر المرآة التي يستخدمها المضيفون الجدد والقائمون من تلك العائلة بشكل افتراضي. السحابة تعني أن المضيفين يصلون إلى upstream العام مباشرة. المرايا التي أكملت مزامنة ناجحة فقط مؤهلة."
-    }
+    },
+    "title": "افتراضات المضيف"
   },
   "hostDetail": {
     "accessTab": "الوصول",
@@ -927,7 +932,15 @@
     "windowsEditionDatacenterDesktop": "مركز بيانات (تجربة سطح المكتب)",
     "childHostProgressStalled": "لا يوجد تحديث {{when}} — قد يكون الخطوة الحالية طويلة، أو قد توقفت عملية التوفر.",
     "childHostProgressStep": "{{step}}/{{total}} · {{description}}",
-    "childHostProgressUpdated": "تم التحديث {{when}}"
+    "childHostProgressUpdated": "تم التحديث {{when}}",
+    "cat": {
+      "access": "الوصول",
+      "operations": "عمليات",
+      "overview": "نظرة عامة",
+      "security": "الأمان",
+      "software": "البرمجيات",
+      "virtualization": "الافتراضية"
+    }
   },
   "hostGroup": {
     "add": "إضافة",
@@ -952,9 +965,21 @@
     "confirmDelete": "هل أنت متأكد من أنك تريد حذف المجموعة \"{{groupName}}\"؟ لا يمكن إلغاء هذا الإجراء."
   },
   "hosts": {
+    "actionGroupDeploy": "النشر",
+    "actionGroupPower": "الطاقة",
     "agentVersion": "إصدار الوكيل",
     "allHosts": "الكل",
+    "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\\n\\n{{hosts}}",
     "antivirusDeployFailed": "فشل نشر برنامج مكافحة الفيروسات. يرجى المحاولة مرة أخرى.",
+    "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\\n\\nالعُقد التي فشلت:\\n{{hosts}}",
+    "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقدة(ات)",
+    "approvalNeeded": "يتطلب الموافقة",
+    "approveSelected": "وافق على المحدد",
+    "capabilities": "القدرات",
+    "capabilitiesFull": "كاملة",
+    "capabilitiesFullTooltip": "هذا الوكيل يعلن عن مجموعة القدرات الكاملة",
+    "capabilitiesLimited": "محدودة",
+    "capabilitiesLimitedTooltip": "أبلغ الوكيل أنه لا يمكن تنفيذ بعض الأوامر",
     "childHostFilter": "مرشح المضيف الفرعي",
     "childHostOf": "مضيف فرعي لـ {{parent}}",
     "childHostsOnly": "المضيفات الفرعية فقط",
@@ -967,6 +992,9 @@
     "delete": "حذف",
     "deployAntivirus": "نشر برنامج مكافحة الفيروسات",
     "deployOpenTelemetry": "نشر OpenTelemetry",
+    "diagnosticsRequestFailed": "فشل طلب جمع التشخيصات. يرجى المحاولة مرة أخرى.",
+    "diagnosticsRequested": "تم طلب جمع التشخيصات لخادم {{hostId}}. تحقق من صفحة تفاصيل الخادم لمراجعة النتائج عند توافرها.",
+    "down": "متوقف",
     "filterByTags": "تصفية بالعلامات",
     "fqdn": "اسم النطاق الكامل",
     "getDiagnostics": "الحصول على التشخيصات",
@@ -983,10 +1011,16 @@
     "minutesAgo": "{{minutes}} دقيقة مضت",
     "never": "أبداً",
     "noEligibleHostsForAntivirus": "لم يتم تحديد أي مضيفات مؤهلة. يجب أن تكون المضيفات نشطة وفي الوضع المميز لنشر برنامج مكافحة الفيروسات.",
+    "noResults": "لا توجد نتائج",
+    "noRows": "لا توجد صفوف",
     "opentelemetryDeployFailed": "فشل نشر OpenTelemetry. يرجى المحاولة مرة أخرى.",
+    "opentelemetryDeploySuccess": "تم ترتيب نشر OpenTelemetry لـ {{count}} مستضياف (س)",
     "osUpgrade": "ترقية نظام التشغيل",
     "osUpgradeAvailable": "ترقية نظام التشغيل متاحة لهذا المضيف",
+    "packagesRequestFailed": "فشل طلب جمع الحزم",
+    "packagesRequested": "تم طلب جمع الحزم بنجاح",
     "parentsOnly": "الرئيسية فقط",
+    "platform": "المنصة",
     "privileged": "مميز",
     "reboot": "إعادة التشغيل",
     "rebootFailed": "فشل طلب إعادة التشغيل",
@@ -1011,13 +1045,22 @@
       "proceedOrchestrated": "انقر فوق \"إعادة تشغيل منسقة\" لإعادة تشغيل {{hostname}} بأمان."
     },
     "rebootRequested": "تم طلب إعادة التشغيل بنجاح",
+    "rebootRequired": "إعادة التشغيل مطلوبة",
     "rebootSelected": "إعادة تشغيل المحدد",
     "refreshAllData": "طلب بيانات المضيف",
+    "requestPackages": "طلب الحزم المتاحة",
+    "requiresActivePrivileged": "حدد مضيفًا نشطًا يعمل في الوضع المميز",
+    "requiresPendingHost": "حدد مضيفًا في انتظار الموافقة",
+    "runningPrivileged": "تشغيل بصلاحيات",
+    "runningUnprivileged": "تشغيل بدون صلاحيات",
+    "scriptsDisabledTooltip": "السكريبتات معطلة لهذا المضيف",
     "scriptsEnabled": "البرامج النصية مفعّلة",
+    "scriptsEnabledTooltip": "السكريبتات ممكنة لهذا المضيف",
     "secondsAgo": "{{seconds}} ثانية مضت",
     "securityAndSystemUpdates": "{{security}} أمنية، {{system}} تحديثات نظام",
     "securityUpdatesOnly": "{{count}} تحديثات أمنية",
     "selectTags": "اختر العلامات",
+    "shellsAllowed": "الشيلات المسموح بها",
     "showAllHosts": "إظهار جميع المضيفات",
     "shutdown": "إيقاف التشغيل",
     "shutdownFailed": "فشل طلب إيقاف التشغيل",
@@ -1026,42 +1069,16 @@
     "status": "الحالة",
     "swUpdates": "تحديثات البرمجيات",
     "systemUpdatesOnly": "{{count}} تحديثات نظام",
+    "tags": "العلامات",
+    "unknown": "غير معروف",
+    "up": "متاح",
     "updateAgent": "تحديث الوكيل",
     "updateAgentFailed": "فشل في طلب تحديث الوكيل",
     "updateAgentRequested": "تم طلب تحديث الوكيل بنجاح",
     "updateAgentSelected": "تحديث الوكيل على المحدد",
     "updated": "محدث",
-    "viewParent": "عرض المضيف الرئيسي",
-    "packagesRequestFailed": "فشل طلب جمع الحزم",
-    "packagesRequested": "تم طلب جمع الحزم بنجاح",
-    "requestPackages": "طلب الحزم المتاحة",
-    "shellsAllowed": "الشيلات المسموح بها",
-    "tags": "العلامات",
     "updates": "التحديثات",
-    "approvalNeeded": "يتطلب الموافقة",
-    "down": "متوقف",
-    "noResults": "لا توجد نتائج",
-    "noRows": "لا توجد صفوف",
-    "platform": "المنصة",
-    "rebootRequired": "إعادة التشغيل مطلوبة",
-    "runningPrivileged": "تشغيل بصلاحيات",
-    "runningUnprivileged": "تشغيل بدون صلاحيات",
-    "scriptsDisabledTooltip": "السكريبتات معطلة لهذا المضيف",
-    "scriptsEnabledTooltip": "السكريبتات ممكنة لهذا المضيف",
-    "up": "متاح",
-    "antivirusDeployAllFailed": "فشل نشر برنامج مكافحة الفيروسات على جميع المضيفين:\\n\\n{{hosts}}",
-    "antivirusDeployPartialSuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقد(ة/ن).\\n\\nالعُقد التي فشلت:\\n{{hosts}}",
-    "antivirusDeploySuccess": "تم بدء نشر برنامج مكافحة الفيروسات لـ {{count}} عُقدة(ات)",
-    "approveSelected": "وافق على المحدد",
-    "opentelemetryDeploySuccess": "تم ترتيب نشر OpenTelemetry لـ {{count}} مستضياف (س)",
-    "diagnosticsRequestFailed": "فشل طلب جمع التشخيصات. يرجى المحاولة مرة أخرى.",
-    "diagnosticsRequested": "تم طلب جمع التشخيصات لخادم {{hostId}}. تحقق من صفحة تفاصيل الخادم لمراجعة النتائج عند توافرها.",
-    "unknown": "غير معروف",
-    "capabilities": "القدرات",
-    "capabilitiesFull": "كاملة",
-    "capabilitiesFullTooltip": "هذا الوكيل يعلن عن مجموعة القدرات الكاملة",
-    "capabilitiesLimited": "محدودة",
-    "capabilitiesLimitedTooltip": "أبلغ الوكيل أنه لا يمكن تنفيذ بعض الأوامر"
+    "viewParent": "عرض المضيف الرئيسي"
   },
   "login": {
     "loggingIn": "جاري تسجيل الدخول...",
@@ -1121,7 +1138,24 @@
     "scrollLeft": "انقل يميناً",
     "scrollRight": "انقل يساراً",
     "maintenanceWindows": "نوافذ الصيانة",
-    "search": "بحث (Ctrl+K)"
+    "search": "بحث (Ctrl+K)",
+    "advisories": "التحذيرات",
+    "alerts": "التحذيرات",
+    "cat": {
+      "admin": "الإدارة",
+      "automation": "التشغيل الآلي",
+      "fleet": "السرب",
+      "insights": "الرؤى",
+      "patching": "الإصلاح",
+      "security": "الأمان"
+    },
+    "compliance": "الامتثال",
+    "customMetrics": "المقاييس المخصصة",
+    "fips": "معايير الأمن الفيدرالي",
+    "gated": "[فقدان: التنقل. المدخلة]",
+    "osLifecycle": "دورة حياة نظام التشغيل",
+    "plain": "[فقدان: التنقل. بسيط]",
+    "vulnerabilities": "الثغرات الأمنية"
   },
   "notifications": {
     "applicationUpdates": "تحديثات التطبيقات",
@@ -1745,7 +1779,8 @@
     "typeLabel": "نوع",
     "unknown": "غير معروف",
     "urlLabel": "URL",
-    "winget": "winget"
+    "winget": "winget",
+    "requiresPrivileged": "يجب أن يعمل المضيف في وضع الامتيازات"
   },
   "ubuntuPro": {
     "actions": {
@@ -1978,7 +2013,10 @@
     "editInfo": "قم بتحرير المعلومات الخاصة بالمستخدم أدناه.",
     "emailNotification": "سيتم إرسال بريد إلكتروني إلى المستخدم يحتوي على رابط آمن لتعيين كلمة المرور الأولية.",
     "emailUnique": "يجب أن يكون عنوان البريد الإلكتروني فريدًا",
-    "enterInfo": "أدخل معلومات المستخدم الجديد أدناه."
+    "enterInfo": "أدخل معلومات المستخدم الجديد أدناه.",
+    "clearSelectionToAdd": "مسح الاختيار لإضافة مستخدم",
+    "requiresLockedSelection": "اختر على الأقل مستخدمًا واحدًا مقيدًا",
+    "requiresUnlockedSelection": "اختر على الأقل مستخدمًا واحدًا غير مقيد"
   },
   "emailConfig": {
     "title": "تكوين البريد الإلكتروني",
@@ -2048,7 +2086,8 @@
     "windowHelp": "نشر إرسال الوكلاء على مدى هذا العدد من الدقائق (0–720)",
     "windowRange": "يجب أن تكون النافذة المتدرجة بين 0 و 720 دقيقة",
     "confirmDelete": "هل تريد حذف ملف تعليمات التحديث \"{{name}}\"؟",
-    "confirmTrigger": " kích hoạt \"{{name}}\" الآن؟ سيتم إرسال التحديثات إلى المضيفين المناسبين."
+    "confirmTrigger": " kích hoạt \"{{name}}\" الآن؟ سيتم إرسال التحديثات إلى المضيفين المناسبين.",
+    "tabLabel": "تحديث ملفات التعريف"
   },
   "packageProfiles": {
     "add": "إضافة ملف امتثال",
@@ -2079,7 +2118,8 @@
     "version": "الإصدار",
     "versionOp": "عملية",
     "versionOpAny": "(أي)",
-    "confirmDelete": "هل تريد حذف ملف تعليمات الامتثال \"{{name}}\"؟"
+    "confirmDelete": "هل تريد حذف ملف تعليمات الامتثال \"{{name}}\"؟",
+    "tabLabel": "ملفات ملفات الامتثال"
   },
   "compliance": {
     "compliant": "متوافق",
@@ -2129,7 +2169,8 @@
     "title": "علامة التقارير",
     "uploadError": "فشل تحميل الشعار",
     "uploadLogo": "تحميل الشعار",
-    "headerTextHelp": "يظهر بجانب الشعار في عنوان التقرير (مثل \"مُعَلَّق - للاستخدام الداخلي فقط\")"
+    "headerTextHelp": "يظهر بجانب الشعار في عنوان التقرير (مثل \"مُعَلَّق - للاستخدام الداخلي فقط\")",
+    "tabLabel": "تخصيص التقارير"
   },
   "reportTemplates": {
     "add": "إضافة قالب",
@@ -2153,7 +2194,8 @@
     "subtitle": "تخطيطات مخصصة يطبقها المُولد على أنواع التقارير المضمنة",
     "title": "قوالب التقارير",
     "updated": "تم حفظ القالب",
-    "confirmDelete": "هل تريد حذف قالب التقرير \"{{name}}\"؟"
+    "confirmDelete": "هل تريد حذف قالب التقرير \"{{name}}\"؟",
+    "tabLabel": "قوالب التقرير"
   },
   "idp": {
     "action": {
@@ -2244,7 +2286,8 @@
       "ldap": "LDAP / Active Directory",
       "oidc": "OIDC",
       "saml": "SAML 2.0"
-    }
+    },
+    "tabLabel": "المصادقة"
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} رموز احتياطية متبقية",
@@ -2432,7 +2475,8 @@
       "trackError": "لا يمكن متابعة هذه الصورة. استخدم مستودع المستضافة، اسم المستودع بالحروف الصغيرة، وعلامة صالحة.",
       "untrack": "إيقاف متابعة هذه الصورة",
       "untrackError": "لا يمكن إيقاف متابعة هذه الصورة."
-    }
+    },
+    "tabLabel": "مرايا مستودع"
   },
   "integrations": {
     "description": "تكوين تكاملات وإعدادات الخدمات الخارجية.",
@@ -2789,7 +2833,8 @@
     "version": "الإصدار",
     "recheckResources": "إعادة الفحص للموارد",
     "resourcesInsufficient": "لا يوجد لدى هذا الخادم ذاكرة وصول عشوائي أو قرص كافيين لبناء حزمة خادم أو وكيل — سيظل هذه الأزرار غير نشطة حتى يتم توفير الموارد (أضف تبديل الذاكرة أو توسع VM).",
-    "resourcesLow": "موارد قليلة - يمكن تشغيل البناء ولكن سيتم الاعتماد على التبادل وقد يكون بطيئاً."
+    "resourcesLow": "موارد قليلة - يمكن تشغيل البناء ولكن سيتم الاعتماد على التبادل وقد يكون بطيئاً.",
+    "tabLabel": "حزم الفصل الجوي"
   },
   "airgapCollections": {
     "actions": {
@@ -3028,7 +3073,15 @@
     "saveFailed": "فشل في تحديث العتبات.",
     "saved": "تم حفظ عتبات التنبيه.",
     "subtitle": "اترك حقل فارغاً لاستخدام القيمة الافتراضية المدمجة.",
-    "title": "عتبات التنبيه"
+    "title": "عتبات التنبيه",
+    "complianceThreshold": "عتبة الامتثال (%)",
+    "complianceThresholdHelp": "تنبيه عند انخفاض درجة خط الأساس تحت هذا النسبة المئوية",
+    "criticalCveThreshold": "عتبة الثغرات الحرجة",
+    "criticalCveThresholdHelp": "تنبيه عند تجاوز عدد الثغرات الحرجة بشكل صارم هذا الرقم",
+    "minOfflineSeconds": "ثواني الحد الأدنى للعمل دون اتصال",
+    "minOfflineSecondsHelp": "السقف لتجنب تقلبات فترات التزامن السريعة جداً",
+    "offlineMultiplier": "ضربات العمل دون اتصال",
+    "offlineMultiplierHelp": "ضاعف فترة تزامن الموقع قبل أن يتم الإبلاغ عنه خارج الخدمة"
   },
   "federationReport": {
     "col": {
@@ -3115,12 +3168,18 @@
     "networkError": "خطأ الشبكة: لا يمكن الوصول إلى الخادم",
     "serverError": "خطأ الخادم: {{status}}"
   },
-  "scrollableButtonBar": {
-    "scrollLeft": "انقل يميناً",
-    "scrollRight": "انقل يساراً"
-  },
   "settings": {
-    "tabsAriaLabel": "صفحات الإعدادات"
+    "tabsAriaLabel": "صفحات الإعدادات",
+    "cat": {
+      "airgap": "الفصل الجوي و المرآة",
+      "general": "عام",
+      "integrations": "التكامل والتسجيل",
+      "patching": "الإصلاح",
+      "reporting": "التقارير",
+      "secrets": "الأسرار",
+      "security": "الأمان والوصول",
+      "system": "النظام"
+    }
   },
   "apiKeys": {
     "active": "مفعل",
@@ -3330,22 +3389,26 @@
     "saveFailed": "لم يتم حفظ المرآة.",
     "saved": "تم حفظ المرآة.",
     "subtitle": "استبدال مرآة خاصة بالقنوات التي يتم تثبيتها منها الآغنت. بدون ذلك، لا يمكن للمضيف المعد في موقع مغلق الوصول إلى PPA العام أو COPR أو OBS أو winget أو Homebrew tap، وبالتالي لن يتم تثبيت آغنت ولا ينضم.",
-    "title": "آغنت إنستال مرايا"
+    "title": "آغنت إنستال مرايا",
+    "tabLabel": "مرايا تثبيت الوكيل"
   },
   "hostCapabilities": {
     "full": "كاملة",
     "limited": "محدودة",
+    "notApplicable": "غير قابل للتطبيق على هذا النظام الأساسي",
     "partial": "معتدل الدعم",
+    "reasonBuildExcluded": "استبعد من هذه إصدار الوكيل",
+    "reasonMissingTool": "أداة مطلوبة لم تتم تثبيتها على هذا الجهاز",
     "reasonNoHandler": "غير مدمج في هذا الوكيل",
     "reasonUnsupportedArch": "لا يوجد بناء لهذا الأرثيكتور",
     "reasonUnsupportedOs": "غير مدعوم على هذه النظام التشغيلي",
+    "reasonWrongPlatform": "غير قابل للتطبيق على هذا النظام الأساسي",
     "supported": "مدعوم",
     "title": "قدرات الوكيل",
     "unavailable": "غير متاح",
     "unknown": "لم يتم إعلان الوكيل لقدراته. الوكلاء القديمة لا تبلغ عنها؛ لا يوجد قيود على المضيف.",
-    "updated": "تم الإبلاغ عنه",
-    "reasonBuildExcluded": "استبعد من هذه إصدار الوكيل",
-    "reasonMissingTool": "أداة مطلوبة لم تتم تثبيتها على هذا الجهاز",
-    "reasonWrongPlatform": "غير قابل للتطبيق على هذا النظام الأساسي"
-  }
+    "updated": "تم الإبلاغ عنه"
+  },
+  "greeting": "[فقدان: التحية]",
+  "pluginOnlyKey": "([مفقود: pluginOnlyKey)]"
 }

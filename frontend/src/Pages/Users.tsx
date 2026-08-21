@@ -33,6 +33,7 @@ import SearchBox from '../Components/SearchBox';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
 import { hasPermission, SecurityRoles } from '../Services/permissions';
 import InvitationsManager from '../Components/InvitationsManager';
+import SelectionActionBar from '../Components/SelectionActionBar';
 
 const Users = () => {
     const [tableData, setTableData] = useState<SysManageUser[]>([]);
@@ -457,45 +458,81 @@ const Users = () => {
                 />
             </Box>
 
-            {/* Action Buttons - flexShrink: 0 to stay at bottom */}
-            <Stack direction="row" spacing={2} sx={{ flexShrink: 0, pb: 2 }}>
-                {canAddUser && (
-                    <Button variant="outlined" startIcon={<AddIcon />} disabled={selection.length > 0} onClick={handleClickOpen}>
-                        {t('common.add')}
-                    </Button>
-                )}
-                {canAddUser && <InvitationsManager />}
-                {canEditUser && (
-                    <Button variant="outlined" startIcon={<EditIcon />} disabled={selection.length !== 1} onClick={handleEditClickOpen}>
-                        {t('common.edit')}
-                    </Button>
-                )}
-                {canLockUser && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<LockIcon />}
-                        disabled={selection.length === 0 || !getSelectedUsersUnlockStatus()}
-                        onClick={handleLock}
-                    >
-                        {t('users.lockSelected')}
-                    </Button>
-                )}
-                {canUnlockUser && (
-                    <Button
-                        variant="outlined"
-                        startIcon={<LockOpenIcon />}
-                        disabled={selection.length === 0 || !getSelectedUsersLockStatus()}
-                        onClick={handleUnlock}
-                    >
-                        {t('users.unlockSelected')}
-                    </Button>
-                )}
-                {canDeleteUser && (
-                    <Button variant="outlined" startIcon={<DeleteIcon />} disabled={selection.length === 0} onClick={handleDelete}>
-                        {t('common.delete')} {t('common.selected')}
-                    </Button>
-                )}
-            </Stack>
+            {/* Selection action bar: Add/Edit/Lock/Unlock stay visible;
+                Delete lives behind the overflow divider. */}
+            <SelectionActionBar
+                selectionCount={selection.length}
+                onClearSelection={() => setSelection([])}
+                extras={canAddUser ? <InvitationsManager /> : undefined}
+                sx={{ flexShrink: 0, pb: 2 }}
+                actions={[
+                    {
+                        id: 'add',
+                        label: t('common.add'),
+                        icon: <AddIcon />,
+                        primary: true,
+                        hidden: !canAddUser,
+                        disabled: selection.length > 0,
+                        disabledReason: t(
+                            'users.clearSelectionToAdd',
+                            'Clear the selection to add a user',
+                        ),
+                        onClick: handleClickOpen,
+                    },
+                    {
+                        id: 'edit',
+                        label: t('common.edit'),
+                        icon: <EditIcon />,
+                        primary: true,
+                        hidden: !canEditUser,
+                        disabled: selection.length !== 1,
+                        disabledReason: t(
+                            'common.requiresSingleSelection',
+                            'Select exactly one row',
+                        ),
+                        onClick: handleEditClickOpen,
+                    },
+                    {
+                        id: 'lock',
+                        label: t('users.lockSelected'),
+                        icon: <LockIcon />,
+                        primary: true,
+                        hidden: !canLockUser,
+                        disabled: selection.length === 0 || !getSelectedUsersUnlockStatus(),
+                        disabledReason: t(
+                            'users.requiresUnlockedSelection',
+                            'Select at least one unlocked user',
+                        ),
+                        onClick: handleLock,
+                    },
+                    {
+                        id: 'unlock',
+                        label: t('users.unlockSelected'),
+                        icon: <LockOpenIcon />,
+                        primary: true,
+                        hidden: !canUnlockUser,
+                        disabled: selection.length === 0 || !getSelectedUsersLockStatus(),
+                        disabledReason: t(
+                            'users.requiresLockedSelection',
+                            'Select at least one locked user',
+                        ),
+                        onClick: handleUnlock,
+                    },
+                    {
+                        id: 'delete',
+                        label: `${t('common.delete')} ${t('common.selected')}`,
+                        icon: <DeleteIcon />,
+                        destructive: true,
+                        hidden: !canDeleteUser,
+                        disabled: selection.length === 0,
+                        disabledReason: t(
+                            'common.requiresSelection',
+                            'Select at least one row',
+                        ),
+                        onClick: handleDelete,
+                    },
+                ]}
+            />
 
             {/* Dialogs */}
             <Dialog

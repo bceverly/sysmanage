@@ -5775,6 +5775,33 @@ close the gap between our output and the parsers that consume it.
       install so post-install debugging skips the install, and a local package
       mirror to cut download time. A cycle under five minutes changes how often
       it gets run.
+
+      *(PARTIAL 2026-08-20 — `PXE_DEBUG_PASSWORD` is DONE, in all five answer
+      dialects (`provisioning_engine` v1.0.20).  Set it on the host rendering
+      the answer file and every profile gains a root credential plus a banner;
+      unset, nothing changes and root stays locked, asserted in both
+      directions because the dangerous failure is a debug credential leaking
+      into a normal render.  The value is embedded in shell one-liners AND
+      XML, so rather than quote through four layers the charset is constrained
+      to `[A-Za-z0-9._@+-]{8,64}` and anything else is refused at render time.
+      Ubuntu needed `chpasswd` in `late-commands` rather than
+      `identity.password`, which wants a crypt(3) hash Python 3.13+ can no
+      longer produce (the `crypt` module is gone).
+
+      Doing it surfaced a REAL BUG that the xfail below had guessed at: the
+      AutoYaST profile carried no `<users>` section at all, so YaST prompted
+      for a root password and an "unattended" SUSE install would park on it
+      for ever — the same class of failure the preseed renderer hit twice.
+      Fixed for BOTH modes (throwaway + `passwd -l root` normally, known
+      password in debug), the xfail is now a real assertion, and `<users>` was
+      promoted into AUTOYAST_MUST_ANSWER.  A well-formedness test came with it,
+      which immediately earned its keep: the first debug banner contained
+      `--`, which XML forbids inside a comment, and every by-eye read had
+      missed it.
+
+      STILL OPEN in this item: VM snapshot after install, and the local package
+      mirror.  Note the Hyper-V rig plan makes the snapshot half nearly free —
+      checkpoint the target VM after firmware config and roll back per attempt.)*
 - [x] **Treat duplicated tables as a defect.** `agent_install.pxi` exists
       verbatim in `virtualization_engine`, `container_engine` and
       `provisioning_engine`, and the broken Debian channel had to be fixed in

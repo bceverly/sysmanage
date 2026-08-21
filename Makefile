@@ -67,6 +67,75 @@ help:
 	@echo "  Note: Telemetry services are automatically started/stopped with 'make start/stop'"
 	@echo "  Note: Telemetry stack is automatically installed with 'make install-dev'"
 	@echo ""
+	@echo ""
+	@echo "Release & versioning:"
+	@echo "  make release           - Cut a release: bump version markers, lint, commit, tag, push."
+	@echo "                           CI builds the installers from the pushed tag."
+	@echo "                           Auto-increments the last component (3.5.1.26 -> 3.5.1.27)."
+	@echo "                           New series: make release VERSION=3.6.0.0  (4 parts required)"
+	@echo "                           Refuses to run on a dirty tree or with untracked source."
+	@echo "                           Flags: DRY_RUN=1 YES=1 SKIP_LINT=1 MSG=... ALLOW_DIRTY=1 ALLOW_UNTRACKED=1"
+	@echo "  make lint-version      - Check every on-disk version marker against the latest release tag"
+	@echo "  make lint-version-fix  - Surgically update drifted version markers (leaves them unstaged)"
+	@echo "  make release-local     - Full LOCAL release pipeline (build + publish), interactive"
+	@echo ""
+	@echo "i18n / translation:"
+	@echo "  make i18n-fix          - THE fix-it command: seed, requeue, translate, compile, re-verify."
+	@echo "                           Needs the GPU service: make i18n-fix SERVICE=http://<host>:8765"
+	@echo "  make translate         - Fill empty translations from the GPU service (frontend + backend)"
+	@echo "  make translate-dry     - Same, but report what WOULD be sent; writes nothing"
+	@echo "  make translate-check   - Offline completeness gate: fail if any locale has gaps"
+	@echo "  make i18n-validate     - Every key referenced in code exists in every locale"
+	@echo "  make i18n-seed         - Add missing keys to locales, seeded with English"
+	@echo "  make i18n-strip-orphans - DESTRUCTIVE: delete locale keys no longer referenced in code"
+	@echo "  make i18n-complete     - Offline gate: every locale 100% translated (what CI runs)"
+	@echo "  make i18n-strict       - Catch English-identical, stale and wrong-language values"
+	@echo "  make i18n-markup       - Markup/structure gate (tags and entities must survive translation)"
+	@echo "  make i18n-markup-fix   - Requeue and refill values that fail the markup gate"
+	@echo "  make i18n-placeholders - Placeholder integrity: {{count}} et al must be preserved"
+	@echo "  make i18n-check-english - Deterministic, network-free placeholder-integrity gate"
+	@echo "  make i18n-check        - Completeness gate: fails while any [TODO] string remains"
+	@echo "  make i18n-extract      - Frontend: scan source for t() calls"
+	@echo "  make i18n-translate    - Machine-translate via the local model"
+	@echo "  make i18n-backtranslate - Round-trip QA: back-translate and flag semantic drift"
+	@echo "  make i18n-sync         - Copy the shared i18n gate scripts across the four repos"
+	@echo "  make i18n-sync-check   - Verify this repo's copy of the shared gate has not drifted"
+	@echo "  Backend gettext (.po/.mo):"
+	@echo "  make i18n-extract-backend - Scan backend _() strings into messages.pot"
+	@echo "  make i18n-compile-backend - Compile .po into the runtime .mo"
+	@echo "  make i18n-check-backend   - CI gate: every _() string is already in the catalog"
+	@echo "  make i18n-check-coverage  - Gate backend gettext coverage"
+	@echo "  make i18n-check-msgid-style - Gate the SHAPE of backend msgids"
+	@echo ""
+	@echo "Lint & guard targets (all run by 'make lint'):"
+	@echo "  make lint-file-length  - No source file over 1000 lines (scripts/ exempt)"
+	@echo "  make lint-freebsd-port - Lint the FreeBSD port skeleton, which CI never builds"
+	@echo "  make clean-whitespace  - Strip trailing whitespace from Python files"
+	@echo "  make format-python     - Reformat Python (black)"
+	@echo "  make check-nginx-configs - The per-platform nginx configs must match the template"
+	@echo "  make check-msi-guids   - WiX component GUIDs must be unique (a collision costs a release)"
+	@echo "  make check-migrations  - Migrations must be expand-contract for the rolling fleet"
+	@echo "  make check-engine-codes - Every dispatched Pro+ engine code is registered and licensable"
+	@echo "  make security-semgrep  - Run Semgrep locally, matching what the pre-push hook does"
+	@echo ""
+	@echo "Setup, dev servers and misc:"
+	@echo "  make setup-venv        - Create the .venv used by every other target"
+	@echo "  make install-hooks     - Point core.hooksPath at the in-repo .githooks/"
+	@echo "  make migrate-tenants   - Re-run ONLY the tenant-database fan-out"
+	@echo "  make provision-bootstrap - One-time multi-tenancy provisioning bootstrap"
+	@echo "  make start-telemetry / stop-telemetry - Telemetry stack (start/stop do this for you)"
+	@echo "  make test-typescript   - TypeScript/React tests"
+	@echo "  make test-playwright   - DEPRECATED, use make test-e2e"
+	@echo "  make run-dev / stop-dev - DEPRECATED, use make start / make stop"
+	@echo "  make build-grpcio-openbsd - Build grpcio from source on OpenBSD"
+	@echo ""
+	@echo "More packaging:"
+	@echo "  make installer-freebsd - Build the FreeBSD port tarball"
+	@echo "  make installer-macos   - Build the macOS package"
+	@echo "  make installer-netbsd  - Build the NetBSD package"
+	@echo "  make installer-msi     - Build a Windows .msi (needs Windows + WiX)"
+	@echo "  make installer-msi-x64 / installer-msi-arm64 / installer-msi-all - Windows MSI per arch"
+	@echo ""
 	@echo "BSD users: install-dev will check for C tracer dependencies"
 	@echo "  - OpenBSD: gcc-11.2.0p15, findutils (builds cffi, grpcio from source)"
 	@echo "  - NetBSD: gcc13, py312-cffi"
@@ -1123,7 +1192,7 @@ lint-version-fix:
 # The logic lives in scripts/release.py so it behaves identically on Windows,
 # where make drives cmd.exe and test/grep/sed do not exist.
 release:
-	@$(PYTHON) scripts/release.py --version "$(VERSION)" $(if $(MSG),--message "$(MSG)") $(if $(DRY_RUN),--dry-run) $(if $(ALLOW_UNTRACKED),--allow-untracked)
+	@$(PYTHON) scripts/release.py $(if $(VERSION),--version "$(VERSION)") $(if $(MSG),--message "$(MSG)") $(if $(DRY_RUN),--dry-run) $(if $(ALLOW_UNTRACKED),--allow-untracked) $(if $(ALLOW_DIRTY),--allow-dirty) $(if $(YES),--yes) $(if $(SKIP_LINT),--skip-lint)
 
 # File-length gate: no source file may exceed 1000 lines (scripts/ exempt).
 # Uniform across all SysManage repos; complements pylint max-module-lines and the
@@ -1136,6 +1205,7 @@ else
 	@bad=$$(git ls-files '*.py' '*.pyx' '*.pxi' '*.ts' '*.tsx' '*.js' '*.jsx' \
 		| grep -vE '(^|/)scripts/|-i18n\.ts$$' \
 		| while read f; do \
+			[ -f "$$f" ] || continue; \
 			n=$$(wc -l < "$$f"); \
 			if [ "$$n" -gt 1000 ]; then printf '  %6d  %s\n' "$$n" "$$f"; fi; \
 		done); \
@@ -1197,6 +1267,14 @@ i18n-seed: $(VENV_ACTIVATE)
 	@echo "=== i18n seeding ==="
 	@$(PYTHON) scripts/i18n_validate.py --seed
 	@echo "[OK] i18n seed completed"
+
+# Delete locale keys no longer referenced in code.  DESTRUCTIVE and deliberate:
+# a key looked up dynamically -- t(`foo.${x}`) -- looks orphaned to the scanner,
+# and stripping it silently deletes real translations.  If that is the case, add
+# the prefix to DYNAMIC_KEY_PREFIXES in scripts/i18n_validate.py instead.  Kept
+# OUT of i18n-fix for exactly that reason.
+i18n-strip-orphans: $(VENV_ACTIVATE)
+	@$(PYTHON) scripts/i18n_validate.py --strip-orphans
 
 i18n-extract: $(VENV_ACTIVATE)
 	@$(PYTHON) scripts/i18n_validate.py --extract
@@ -4781,11 +4859,17 @@ release-local:
 # BEFORE translating or the run has nothing to do and the gate stays red.
 # Source hashes are recorded by the translate run itself, so there is no
 # separate baseline step (see scripts/i18n_hashes.py).
+# THE one command to run when an i18n gate fails.  Mirrors sysmanage-agent's
+# target of the same name.  i18n-compile-backend is NOT optional: translate
+# rewrites backend .po, and without a recompile the runtime keeps serving the
+# previous .mo, so the gate goes green while the app still shows the old text.
 i18n-fix: $(VENV_ACTIVATE)
-	@echo "=== i18n fix: seed -> requeue -> translate -> verify ==="
+	@echo "=== i18n fix: seed -> requeue -> translate -> compile -> validate -> verify ==="
 	@$(MAKE) --no-print-directory i18n-seed
 	@$(PYTHON) scripts/i18n_strict.py --requeue
 	@$(MAKE) --no-print-directory translate SERVICE=$(SERVICE)
+	@$(MAKE) --no-print-directory i18n-compile-backend
+	@$(MAKE) --no-print-directory i18n-validate
 	@$(MAKE) --no-print-directory i18n-strict
 	@echo "[OK] i18n gate green"
 

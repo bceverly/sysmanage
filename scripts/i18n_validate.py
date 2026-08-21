@@ -83,6 +83,37 @@ T_CALL_WITH_FALLBACK = re.compile(
     rf"""\bt\(\s*['"]([\w.-]+)['"]\s*,\s*({_CONCAT_STRING})\s*[,)]""",
     re.MULTILINE,
 )
+# Keys handed to ``t()`` INDIRECTLY, through an object literal:
+#
+#     const CATEGORY_META = { fleet: { key: 'nav.cat.fleet', def: 'Fleet' } };
+#     ...  t(CATEGORY_META[id].key, CATEGORY_META[id].def)
+#
+# The call site has no string literal, so every matcher above misses it and the
+# key reads as an orphan -- or, far worse, is simply absent from every locale
+# and silently renders its English default in all 14 languages.  That is
+# exactly what happened to the whole top-level navigation, the Settings
+# categories, the host-detail tab categories and the command palette: 44 keys,
+# permanently English, with every gate green.
+#
+# Matching the DECLARATION rather than the call site catches the whole family
+# and, more importantly, catches the next one automatically.  The value must be
+# dotted and lower-camel to keep this from matching React's `key=` prop or an
+# arbitrary `key: 'some-id'`.
+KEY_PROP_REFERENCE = re.compile(
+    r"""\b(?:labelKey|helpKey|translationKey|tabKey|key)\s*:\s*"""
+    r"""['"]([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+)['"]""",
+)
+
+# The English value usually sits right next to it under a predictable name, so
+# the seeder can populate en.json instead of leaving a blank.
+KEY_PROP_WITH_DEFAULT = re.compile(
+    r"""\b(?:labelKey|helpKey|translationKey|tabKey|key)\s*:\s*"""
+    r"""['"]([a-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+)['"]\s*,\s*"""
+    r"""(?:def|label|labelDefault|labelFallback|helpFallback|fallback)\s*:\s*"""
+    rf"""({_STRING_LITERAL})""",
+    re.MULTILINE,
+)
+
 # Permissive reference-only matcher: catches the key from any ``t('key',
 # …)`` or ``t('key')`` call regardless of what the second argument looks
 # like.  Used to mark keys as "referenced" even when the strict fallback
@@ -212,6 +243,11 @@ def _extract_from_file(path: Path) -> dict[str, str]:
     for match in T_CALL_KEY_ONLY.finditer(text):
         key = match.group(1)
         found.setdefault(key, "")
+    # Indirect references via an object literal (see KEY_PROP_REFERENCE).
+    for match in KEY_PROP_WITH_DEFAULT.finditer(text):
+        found.setdefault(match.group(1), match.group(2)[1:-1])
+    for match in KEY_PROP_REFERENCE.finditer(text):
+        found.setdefault(match.group(1), "")
     return found
 
 
@@ -378,13 +414,16 @@ def cmd_validate(seed: bool) -> int:
         # reference.  There are exactly two legitimate causes — spell out both so
         # this failure is self-service:
         print(
-            "\nTo fix orphan keys, pick the cause:\n"
-            "  1. The key is genuinely unused  -> remove it: "
-            "python scripts/i18n_validate.py --strip-orphans\n"
-            "  2. The key is looked up dynamically, e.g. "
-            "t(`foo.bar.${x}`)  -> add its prefix ('foo.bar.') to "
-            "DYNAMIC_KEY_PREFIXES near the top of scripts/i18n_validate.py\n"
-            "(Missing keys, by contrast, are seeded with: make i18n-seed)",
+            "\nOrphan keys are NOT fixed by `make i18n-fix` -- deleting a\n"
+            "translation is a judgement call, so pick the cause:\n"
+            "  1. Genuinely unused (e.g. you deleted the component that used it)\n"
+            "       -> make i18n-strip-orphans\n"
+            "  2. Looked up dynamically, e.g. t(`foo.bar.${x}`), so the scanner\n"
+            "     cannot see it and stripping would DELETE a real translation\n"
+            "       -> add its prefix ('foo.bar.') to DYNAMIC_KEY_PREFIXES near\n"
+            "          the top of scripts/i18n_validate.py\n"
+            "\nMissing keys are different: those ARE fixed in one command with\n"
+            "  make i18n-fix SERVICE=http://<host>:8765",
             file=sys.stderr,
         )
         return 1

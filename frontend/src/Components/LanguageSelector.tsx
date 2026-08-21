@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ensureCatalog } from '../i18n/i18n';
 import { MenuItem, Select, FormControl, SelectChangeEvent } from '@mui/material';
 
 interface LanguageSelectorProps {
@@ -15,9 +16,13 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ theme = 'dark' }) =
   // Initialize with 'en' to prevent empty state rendering issues
   const [currentLanguage, setCurrentLanguage] = useState('en');
 
-  const handleLanguageChange = (event: SelectChangeEvent<string>) => {
+  const handleLanguageChange = async (event: SelectChangeEvent<string>) => {
     const language = event.target.value;
-    i18n.changeLanguage(language);
+    // Fetch the catalog BEFORE flipping the language.  Plugins shadow the
+    // store (see i18n/i18n.ts), so without this the switch renders one English
+    // frame and only corrects itself when the catalog lands a moment later.
+    await ensureCatalog(language);
+    await i18n.changeLanguage(language);
     setCurrentLanguage(language);
   };
 

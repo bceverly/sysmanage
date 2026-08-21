@@ -165,3 +165,17 @@ de: re:^Edition$
 # There is no prose here to translate — the description it carries is already
 # localized by the engine that produced it.
 re:^\{\{step\}\}/\{\{total\}\} · \{\{description\}\}$
+
+# --- nav / settings labels that are the SAME WORD in some target languages ---
+# Exact keys, not a glob on `nav.*` or `settings.cat.*`: the neighbouring
+# labels DO translate (fr Analyses, de Einblicke, de Verwaltung, fr Général)
+# and a wildcard here would stop the gate noticing if one of those regressed.
+#
+# FIPS is the acronym of a US federal standard and is written "FIPS" in every
+# Latin-script locale; ru/ar/hi/zh_CN carry transliterations instead, which
+# this rule permits but does not require.
+nav.fips
+# "General" is the Spanish word; fr Général and de Allgemein differ.
+settings.cat.general
+# "Administration" is the French word; de Verwaltung and es Administración differ.
+nav.cat.admin

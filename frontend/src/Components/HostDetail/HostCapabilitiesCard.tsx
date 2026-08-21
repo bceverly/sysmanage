@@ -29,6 +29,11 @@ export interface AgentCapabilityReport {
     commands?: string[];
     unavailable?: Record<string, string>;
     partial?: Record<string, string[]>;
+    // Groups this host's OS cannot host at all (bhyve on Linux, Ubuntu Pro
+    // off Ubuntu).  Shown for transparency but never counted as a gap --
+    // an agent is not degraded for lacking a facility its OS does not have.
+    // Optional: agents older than Phase 19 do not send it.
+    not_applicable?: Record<string, string>;
 }
 
 interface HostCapabilitiesCardProps {
@@ -81,9 +86,11 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
 
     const unavailable = report.unavailable || {};
     const partial = report.partial || {};
+    const notApplicable = report.not_applicable || {};
     const groups = report.capabilities || [];
     const unavailableKeys = Object.keys(unavailable);
     const partialKeys = Object.keys(partial);
+    const notApplicableKeys = Object.keys(notApplicable);
 
     return (
         <Card sx={{ mb: 2 }}>
@@ -161,6 +168,26 @@ const HostCapabilitiesCard: React.FC<HostCapabilitiesCardProps> = ({ report, lim
                                         color="warning"
                                         variant="outlined"
                                         label={`${group} (${(partial[group] || []).length})`}
+                                    />
+                                </Tooltip>
+                            ))}
+                        </Box>
+                    </>
+                )}
+
+                {notApplicableKeys.length > 0 && (
+                    <>
+                        <Divider sx={{ my: 2 }} />
+                        <Typography variant="subtitle2" gutterBottom>
+                            {t('hostCapabilities.notApplicable', 'Not applicable to this operating system')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {notApplicableKeys.map((group) => (
+                                <Tooltip key={group} title={reasonText(notApplicable[group])}>
+                                    <Chip
+                                        size="small"
+                                        variant="outlined"
+                                        label={group}
                                     />
                                 </Tooltip>
                             ))}

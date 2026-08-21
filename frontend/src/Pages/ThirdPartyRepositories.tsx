@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for the full terms.
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import ThirdPartyReposActionBar from '../Components/ThirdPartyReposActionBar';
 import {
     Box,
     Button,
@@ -17,11 +18,7 @@ import {
     Chip,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { useTranslation } from 'react-i18next';
 import { useColumnVisibility } from '../hooks/useColumnVisibility';
 import ColumnVisibilityButton from '../Components/ColumnVisibilityButton';
@@ -642,43 +639,20 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             )}
 
             {/* Action buttons at bottom */}
-            <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setAddDialogOpen(true)}
-                    disabled={!canAdd || !privilegedMode || loading}
-                >
-                    {t('thirdPartyRepos.addRepository')}
-                </Button>
-                <Button
-                    variant="contained"
-                    color="success"
-                    startIcon={<CheckCircleIcon />}
-                    onClick={handleEnableSelected}
-                    disabled={!canEnable || !privilegedMode || selectedRows.length === 0 || loading}
-                >
-                    {t('thirdPartyRepos.enableSelected', 'Enable Selected ({{count}})', { count: selectedRows.length })}
-                </Button>
-                <Button
-                    variant="contained"
-                    color="warning"
-                    startIcon={<CancelIcon />}
-                    onClick={handleDisableSelected}
-                    disabled={!canDisable || !privilegedMode || selectedRows.length === 0 || loading}
-                >
-                    {t('thirdPartyRepos.disableSelected', 'Disable Selected ({{count}})', { count: selectedRows.length })}
-                </Button>
-                <Button
-                    variant="contained"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={handleDeleteSelected}
-                    disabled={!canDelete || !privilegedMode || selectedRows.length === 0 || loading}
-                >
-                    {t('thirdPartyRepos.deleteSelected', 'Delete Selected ({{count}})', { count: selectedRows.length })}
-                </Button>
-            </Box>
+            <ThirdPartyReposActionBar
+                selectionCount={selectedRows.length}
+                onClearSelection={() => setSelectedRows([])}
+                privilegedMode={privilegedMode}
+                loading={loading}
+                canAdd={canAdd}
+                canEnable={canEnable}
+                canDisable={canDisable}
+                canDelete={canDelete}
+                onAdd={() => setAddDialogOpen(true)}
+                onEnable={handleEnableSelected}
+                onDisable={handleDisableSelected}
+                onDelete={handleDeleteSelected}
+            />
 
             {/* Add Repository Dialog */}
             <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>

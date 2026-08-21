@@ -84,53 +84,57 @@
     "actions": "操作",
     "active": "活跃",
     "add": "添加",
+    "all": "全部",
+    "apply": "应用",
     "back": "返回",
     "cancel": "取消",
+    "clearSelection": "清除选择",
     "close": "关闭",
+    "confirm": "确认",
     "confirmAction": "确认操作",
+    "copied": "已复制",
+    "copy": "复制",
+    "create": "创建",
     "delete": "删除",
     "disabled": "已禁用",
+    "done": "完成",
     "edit": "编辑",
     "enabled": "已启用",
+    "exportCSV": "导出 CSV",
+    "exportPDF": "导出 PDF",
     "id": "ID",
     "inactive": "不活跃",
     "invalidDate": "无效日期",
     "less": "更少",
+    "loading": "加载中...",
+    "moreActions": "更多",
+    "na": "不适用",
     "no": "否",
     "noDescription": "无描述",
+    "none": "无",
     "notAvailable": "不可用",
     "of": "共",
     "refresh": "刷新",
+    "requiresSelection": "请至少选择一行",
+    "requiresSingleSelection": "请只选择一行",
+    "reset": "重置筛选器",
+    "retry": "重试",
     "rowSelected": "行已选择",
     "rowsPerPage": "每页行数",
     "rowsSelected": "行已选择",
     "running": "运行中",
     "save": "保存",
+    "saving": "正在保存...",
     "search": "搜索",
+    "selected": "已选",
     "status": "状态",
     "stopped": "已停止",
-    "unassigned": "未分配",
-    "yes": "是",
-    "none": "无",
-    "all": "全部",
-    "apply": "应用",
-    "exportCSV": "导出 CSV",
-    "exportPDF": "导出 PDF",
-    "na": "不适用",
-    "reset": "重置筛选器",
-    "retry": "重试",
-    "saving": "正在保存...",
     "togglePasswordVisibility": "切换密码可见性",
+    "unassigned": "未分配",
     "unknown": "未知",
     "update": "更新",
-    "selected": "已选",
     "view": "查看",
-    "copied": "已复制",
-    "copy": "复制",
-    "create": "创建",
-    "done": "完成",
-    "loading": "加载中...",
-    "confirm": "确认"
+    "yes": "是"
   },
   "connectionStatus": {
     "connected": "已连接",
@@ -395,7 +399,8 @@
       "noEligible": "无已同步的镜像可用",
       "saveSuccess": "已保存。{{count}} 台主机将被重新配置。",
       "subtitle": "对于每个支持的 (平台、版本) 对,选择该系列的新主机和现有主机使用哪个镜像作为默认值。云端表示主机直接访问公共上游。只有完成了成功同步的镜像才符合条件。"
-    }
+    },
+    "title": "主机默认设置"
   },
   "hostDetail": {
     "accessTab": "访问",
@@ -927,7 +932,15 @@
     "windowsEditionDatacenterDesktop": "数据中心（桌面体验版）",
     "childHostProgressStalled": "无更新 {{when}} — 当前步骤可能需要很长时间，或者配置可能已停滞。",
     "childHostProgressStep": "{{step}}/{{total}} · {{description}}",
-    "childHostProgressUpdated": "已更新 {{when}}"
+    "childHostProgressUpdated": "已更新 {{when}}",
+    "cat": {
+      "access": "访问",
+      "operations": "操作",
+      "overview": "概述",
+      "security": "安全性",
+      "software": "软件",
+      "virtualization": "虚拟化"
+    }
   },
   "hostGroup": {
     "add": "添加",
@@ -952,9 +965,21 @@
     "confirmDelete": "您确定要删除组“{{groupName}}”吗？此操作无法撤销。"
   },
   "hosts": {
+    "actionGroupDeploy": "部署",
+    "actionGroupPower": "电源",
     "agentVersion": "代理版本",
     "allHosts": "全部",
+    "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\\n\\n{{hosts}}",
     "antivirusDeployFailed": "部署防病毒失败，请重试。",
+    "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\\n\\n失败的主机：\\n{{hosts}}",
+    "antivirusDeploySuccess": "防病毒部署已启动，涉及{{count}}个主机",
+    "approvalNeeded": "需要批准",
+    "approveSelected": "批准选中的",
+    "capabilities": "功能",
+    "capabilitiesFull": "完整",
+    "capabilitiesFullTooltip": "此代理声明了完整的功能集",
+    "capabilitiesLimited": "有限",
+    "capabilitiesLimitedTooltip": "此代理报告无法运行某些命令",
     "childHostFilter": "子主机筛选器",
     "childHostOf": "{{parent}}的子主机",
     "childHostsOnly": "仅子主机",
@@ -967,6 +992,9 @@
     "delete": "删除",
     "deployAntivirus": "部署防病毒",
     "deployOpenTelemetry": "部署 OpenTelemetry",
+    "diagnosticsRequestFailed": "请求诊断数据收集失败。请重试。",
+    "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请在主机详情页面查看结果。",
+    "down": "停机",
     "filterByTags": "按标签筛选",
     "fqdn": "完全限定域名",
     "getDiagnostics": "获取诊断信息",
@@ -983,10 +1011,16 @@
     "minutesAgo": "{{minutes}}分前",
     "never": "从未",
     "noEligibleHostsForAntivirus": "未选择符合条件的主机。主机必须处于活动状态且为特权模式才能部署防病毒。",
+    "noResults": "无结果",
+    "noRows": "无行",
     "opentelemetryDeployFailed": "部署 OpenTelemetry 失败，请重试。",
+    "opentelemetryDeploySuccess": "OpenTelemetry部署已排队，等待在{{count}}个主机上执行",
     "osUpgrade": "操作系统升级",
     "osUpgradeAvailable": "此主机可进行操作系统升级",
+    "packagesRequestFailed": "请求软件包收集失败",
+    "packagesRequested": "已成功请求软件包收集",
     "parentsOnly": "仅父级",
+    "platform": "平台",
     "privileged": "特权",
     "reboot": "重启",
     "rebootFailed": "重启请求失败",
@@ -1011,13 +1045,22 @@
       "proceedOrchestrated": "点击“有序重启”以安全地重启{{hostname}}。"
     },
     "rebootRequested": "重启请求成功",
+    "rebootRequired": "需要重启",
     "rebootSelected": "重启所选",
     "refreshAllData": "请求主机数据",
+    "requestPackages": "请求可用软件包",
+    "requiresActivePrivileged": "请选择以特权模式运行的活动主机",
+    "requiresPendingHost": "请选择一台等待审批的主机",
+    "runningPrivileged": "特权运行中",
+    "runningUnprivileged": "非特权运行中",
+    "scriptsDisabledTooltip": "此主机的脚本已禁用",
     "scriptsEnabled": "脚本已启用",
+    "scriptsEnabledTooltip": "此主机的脚本已启用",
     "secondsAgo": "{{seconds}}秒前",
     "securityAndSystemUpdates": "{{security}} 安全，{{system}} 系统更新",
     "securityUpdatesOnly": "{{count}} 安全更新",
     "selectTags": "选择标签",
+    "shellsAllowed": "允许的 Shell",
     "showAllHosts": "显示所有主机",
     "shutdown": "关机",
     "shutdownFailed": "关机请求失败",
@@ -1026,42 +1069,16 @@
     "status": "状态",
     "swUpdates": "软件更新",
     "systemUpdatesOnly": "{{count}} 系统更新",
+    "tags": "标签",
+    "unknown": "未知",
+    "up": "在线",
     "updateAgent": "更新代理",
     "updateAgentFailed": "请求代理更新失败",
     "updateAgentRequested": "代理更新请求成功",
     "updateAgentSelected": "更新所选主机上的代理",
     "updated": "已更新",
-    "viewParent": "查看父主机",
-    "packagesRequestFailed": "请求软件包收集失败",
-    "packagesRequested": "已成功请求软件包收集",
-    "requestPackages": "请求可用软件包",
-    "shellsAllowed": "允许的 Shell",
-    "tags": "标签",
     "updates": "更新",
-    "approvalNeeded": "需要批准",
-    "down": "停机",
-    "noResults": "无结果",
-    "noRows": "无行",
-    "platform": "平台",
-    "rebootRequired": "需要重启",
-    "runningPrivileged": "特权运行中",
-    "runningUnprivileged": "非特权运行中",
-    "scriptsDisabledTooltip": "此主机的脚本已禁用",
-    "scriptsEnabledTooltip": "此主机的脚本已启用",
-    "up": "在线",
-    "antivirusDeployAllFailed": "防病毒部署对所有主机失败:\\n\\n{{hosts}}",
-    "antivirusDeployPartialSuccess": "防病毒部署已启动，涉及 {{count}} 个主机。\\n\\n失败的主机：\\n{{hosts}}",
-    "antivirusDeploySuccess": "防病毒部署已启动，涉及{{count}}个主机",
-    "approveSelected": "批准选中的",
-    "opentelemetryDeploySuccess": "OpenTelemetry部署已排队，等待在{{count}}个主机上执行",
-    "diagnosticsRequestFailed": "请求诊断数据收集失败。请重试。",
-    "diagnosticsRequested": "请求收集诊断数据以供主机 {{hostId}} 查看。请在主机详情页面查看结果。",
-    "unknown": "未知",
-    "capabilities": "功能",
-    "capabilitiesFull": "完整",
-    "capabilitiesFullTooltip": "此代理声明了完整的功能集",
-    "capabilitiesLimited": "有限",
-    "capabilitiesLimitedTooltip": "此代理报告无法运行某些命令"
+    "viewParent": "查看父主机"
   },
   "login": {
     "loggingIn": "正在登录...",
@@ -1121,7 +1138,24 @@
     "scrollLeft": "向左滚动",
     "scrollRight": "向右滚动",
     "maintenanceWindows": "维护窗口",
-    "search": "搜索 (Ctrl+K)"
+    "search": "搜索 (Ctrl+K)",
+    "advisories": "预警",
+    "alerts": "警报",
+    "cat": {
+      "admin": "管理",
+      "automation": "自动化",
+      "fleet": "车队",
+      "insights": "洞察",
+      "patching": "补丁",
+      "security": "安全性"
+    },
+    "compliance": "合规性",
+    "customMetrics": "自定义指标",
+    "fips": "联邦信息处理标准",
+    "gated": "[缺失：导航。网关]",
+    "osLifecycle": "操作系统生命周期",
+    "plain": "[缺失：导航。纯文本]",
+    "vulnerabilities": "漏洞"
   },
   "notifications": {
     "applicationUpdates": "应用程序更新",
@@ -1745,7 +1779,8 @@
     "typeLabel": "类型",
     "unknown": "未知",
     "urlLabel": "URL",
-    "winget": "winget"
+    "winget": "winget",
+    "requiresPrivileged": "主机必须以特权模式运行"
   },
   "ubuntuPro": {
     "actions": {
@@ -1978,7 +2013,10 @@
     "editInfo": "请在下方编辑该用户的资料。",
     "emailNotification": "一封包含设置初始密码的安全链接的电子邮件将发送给用户。",
     "emailUnique": "电子邮件地址必须唯一",
-    "enterInfo": "请在下方输入新用户的资料。"
+    "enterInfo": "请在下方输入新用户的资料。",
+    "clearSelectionToAdd": "清除选择以添加用户",
+    "requiresLockedSelection": "选择至少一个锁定用户",
+    "requiresUnlockedSelection": "选择至少一个解锁用户"
   },
   "emailConfig": {
     "title": "电子邮件配置",
@@ -2048,7 +2086,8 @@
     "windowHelp": "将代理调度分散在这么多分钟内 (0–720)",
     "windowRange": "分阶段窗口必须在 0 至 720 分钟之间",
     "confirmDelete": "是否要删除更新配置文件“{{name}}”？",
-    "confirmTrigger": "触发“{{name}}”？更新将分发到匹配的主机。"
+    "confirmTrigger": "触发“{{name}}”？更新将分发到匹配的主机。",
+    "tabLabel": "更新配置文件"
   },
   "packageProfiles": {
     "add": "添加合规配置文件",
@@ -2079,7 +2118,8 @@
     "version": "版本",
     "versionOp": "运算符",
     "versionOpAny": "(任意)",
-    "confirmDelete": "是否要删除合规配置文件“{{name}}”？"
+    "confirmDelete": "是否要删除合规配置文件“{{name}}”？",
+    "tabLabel": "合规性配置文件"
   },
   "compliance": {
     "compliant": "合规",
@@ -2129,7 +2169,8 @@
     "title": "报告品牌",
     "uploadError": "徽标上传失败",
     "uploadLogo": "上传徽标",
-    "headerTextHelp": "与徽标一起出现在报告标题中（例如“机密——仅供内部使用”）。"
+    "headerTextHelp": "与徽标一起出现在报告标题中（例如“机密——仅供内部使用”）。",
+    "tabLabel": "报告品牌"
   },
   "reportTemplates": {
     "add": "添加模板",
@@ -2153,7 +2194,8 @@
     "subtitle": "渲染器在内置报告类型之上应用的自定义布局",
     "title": "报告模板",
     "updated": "模板已保存",
-    "confirmDelete": "是否要删除报告模板“{{name}}”？"
+    "confirmDelete": "是否要删除报告模板“{{name}}”？",
+    "tabLabel": "报告模板"
   },
   "idp": {
     "action": {
@@ -2244,7 +2286,8 @@
       "ldap": "LDAP / Active Directory",
       "oidc": "OIDC",
       "saml": "SAML 2.0"
-    }
+    },
+    "tabLabel": "身份验证"
   },
   "mfa": {
     "backupCodesRemaining": "剩余 {{count}} 个备用代码",
@@ -2432,7 +2475,8 @@
       "trackError": "无法跟踪该图像。请使用注册主机，小写仓库，并且有效的标签。",
       "untrack": "停止跟踪此镜像",
       "untrackError": "无法取消跟踪该图像。"
-    }
+    },
+    "tabLabel": "仓库镜像"
   },
   "integrations": {
     "description": "配置外部服务集成和设置。",
@@ -2789,7 +2833,8 @@
     "version": "版本",
     "recheckResources": "重新检查资源",
     "resourcesInsufficient": "此服务器没有足够的空闲内存或磁盘空间来构建 Server 或 Agent 包 — 直到释放资源（添加交换分区或扩大虚拟机）之前，这些按钮将被禁用。",
-    "resourcesLow": "资源不足 — 构建可以运行，但会依赖于交换空间，并且可能会变慢。"
+    "resourcesLow": "资源不足 — 构建可以运行，但会依赖于交换空间，并且可能会变慢。",
+    "tabLabel": "空隙包"
   },
   "airgapCollections": {
     "actions": {
@@ -3028,7 +3073,15 @@
     "saveFailed": "保存阈值失败。",
     "saved": "警报阈值已保存。",
     "subtitle": "留空以使用内置默认值。",
-    "title": "警报阈值"
+    "title": "警报阈值",
+    "complianceThreshold": "合规性阈值(%)",
+    "complianceThresholdHelp": "当基线分数下降到这个百分比以下时发出警报",
+    "criticalCveThreshold": "关键CVE阈值",
+    "criticalCveThresholdHelp": "当关键-CVE计数严格超过这个值时发出警报",
+    "minOfflineSeconds": "最小离线秒数",
+    "minOfflineSecondsHelp": "地板，防止快速同步间隔波动",
+    "offlineMultiplier": "离线乘数",
+    "offlineMultiplierHelp": "在网站同步间隔乘以之前将其标记为离线"
   },
   "federationReport": {
     "col": {
@@ -3115,12 +3168,18 @@
     "networkError": "网络错误：无法连接到服务器",
     "serverError": "服务器错误：{{status}}"
   },
-  "scrollableButtonBar": {
-    "scrollLeft": "向左滚动",
-    "scrollRight": "向右滚动"
-  },
   "settings": {
-    "tabsAriaLabel": "设置选项卡"
+    "tabsAriaLabel": "设置选项卡",
+    "cat": {
+      "airgap": "空隙&镜像",
+      "general": "一般",
+      "integrations": "集成与日志记录",
+      "patching": "补丁",
+      "reporting": "报告",
+      "secrets": "秘密",
+      "security": "安全与访问",
+      "system": "系统"
+    }
   },
   "apiKeys": {
     "active": "活动",
@@ -3330,22 +3389,26 @@
     "saveFailed": "无法保存该镜像源。",
     "saved": "已保存镜像源。",
     "subtitle": "用私有镜像源替换代理自身安装的通道。如果没有这一步，一个在隔离网络中配置的主机无法访问公共 PPA、COPR、OBS、winget 或 Homebrew tap，因此它将不会安装代理也不会注册。",
-    "title": "代理安装镜像源"
+    "title": "代理安装镜像源",
+    "tabLabel": "代理安装镜像"
   },
   "hostCapabilities": {
     "full": "完整",
     "limited": "有限",
+    "notApplicable": "不适用于此操作系统",
     "partial": "部分支持",
+    "reasonBuildExcluded": "从该代理构建中省略",
+    "reasonMissingTool": "此主机上未安装必需的工具",
     "reasonNoHandler": "此代理中未包含该功能",
     "reasonUnsupportedArch": "此架构没有构建版本",
     "reasonUnsupportedOs": "不受支持的操作系统",
+    "reasonWrongPlatform": "不适用于此操作系统",
     "supported": "受支持",
     "title": "代理功能",
     "unavailable": "不可用",
     "unknown": "此代理尚未声明其功能。旧版代理不会报告这些信息；主机不受限制。",
-    "updated": "已报告",
-    "reasonBuildExcluded": "从该代理构建中省略",
-    "reasonMissingTool": "此主机上未安装必需的工具",
-    "reasonWrongPlatform": "不适用于此操作系统"
-  }
+    "updated": "已报告"
+  },
+  "greeting": "[缺失：问候语]",
+  "pluginOnlyKey": "插件仅键缺失"
 }

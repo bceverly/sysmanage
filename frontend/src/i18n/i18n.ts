@@ -43,6 +43,97 @@ i18n
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
     },
+
+    react: {
+      // Hardening, not a proven fix -- said plainly because the difference
+      // matters.  Catalogs load over HTTP, and by default react-i18next
+      // re-renders on 'languageChanged' but IGNORES store events, so any
+      // bundle that arrives after that moment paints nothing.  In the
+      // measured case changeLanguage() already awaits the load, so this
+      // changes nothing today; it covers the namespace/bundle-arrives-later
+      // path, which is the documented reason http-backend users set it.
+      //
+      // The bug actually behind "the UI stays English" was different: 44 keys
+      // reached t() only through object literals (t(META[id].key, …)), were
+      // therefore invisible to the extractor, existed in NO locale, and
+      // rendered their English default in all 14 languages for ever.  See
+      // KEY_PROP_REFERENCE in scripts/i18n_validate.py.
+      bindI18nStore: 'added',
+    },
   });
+
+// A catalog that fails to fetch is otherwise SILENT: i18next falls back to
+// English and reports nothing, so the UI looks like a translation bug ("the
+// strings are English") when it is really a transport bug ("es/translation.json
+// never arrived").  Diagnosing that cost six rounds of guesswork; it should
+// cost one glance at the console.
+i18n.on('failedLoading', (lng, ns, msg) => {
+  // eslint-disable-next-line no-console
+  console.error(
+    `[i18n] FAILED to load ${lng}/${ns} from ` +
+      `${(i18n.options.backend as { loadPath?: string } | undefined)?.loadPath} — ` +
+      `every string in ${lng} will silently fall back to English. Cause: ${msg}`,
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Plugin bundles vs. the real catalog.
+//
+// As each Pro+ plugin mounts (PluginContext) it calls addResourceBundle(lng,
+// 'translation', ...) for EVERY language with its own handful of keys.  That
+// plants a `<lng>|translation` bundle in the store, and i18next's queueLoad
+// then treats the language as already loaded --
+//     if (!options.reload && this.store.hasResourceBundle(lng, ns)) ...
+// (i18next.js:1436) -- so the real /locales/<lng>/translation.json is NEVER
+// fetched: no request, no error, and every app string falls back to English
+// until a reload.  Booting in a language works only because i18next fetches
+// its catalog before the plugins mount.
+//
+// Fix: remember which languages the BACKEND actually delivered, and for any
+// language we switch to that isn't one of them, force a reload -- reloadResources
+// passes options.reload, which is exactly the flag that bypasses the check
+// above.  The fetched catalog merges over the plugin keys rather than
+// replacing them, so plugin strings keep working.
+export const installCatalogGuard = (instance: typeof i18n) => {
+  const delivered = new Set<string>();
+  instance.on('loaded', (loaded) => {
+    Object.keys(loaded || {}).forEach((lng) => delivered.add(lng));
+  });
+
+  /** Fetch <lng>'s catalog if the backend never actually delivered it. */
+  const ensureCatalogFor = async (lng: string) => {
+    if (!lng || delivered.has(lng)) return;
+    // Record first: reloadResources emits 'loaded' again, and without this a
+    // concurrent call would fetch the same catalog twice.
+    delivered.add(lng);
+    try {
+      await instance.reloadResources([lng], ['translation']);
+    } catch {
+      // Leave it to the failedLoading handler above to report; falling back to
+      // English is the pre-existing behaviour, not a new failure.
+      delivered.delete(lng);
+    }
+  };
+
+  // Backstop for language changes that do NOT go through ensureCatalog --
+  // the detector at boot, or any future caller of changeLanguage(). It repairs
+  // the language one paint late (a brief English flash), which is why the
+  // selector awaits ensureCatalog BEFORE flipping instead of relying on this.
+  instance.on('languageChanged', (lng) => {
+    void ensureCatalogFor(lng);
+  });
+
+  return ensureCatalogFor;
+};
+
+export const ensureCatalog = installCatalogGuard(i18n);
+
+// Dev-only handle so a language bug can be interrogated from the console
+// instead of guessed at:  i18n.language, i18n.hasResourceBundle('es',
+// 'translation'), i18n.getResourceBundle('es','translation'), i18n.t(key).
+// Stripped from production builds by the import.meta.env.DEV guard.
+if (import.meta.env.DEV) {
+  (globalThis as unknown as { i18n?: typeof i18n }).i18n = i18n;
+}
 
 export default i18n;

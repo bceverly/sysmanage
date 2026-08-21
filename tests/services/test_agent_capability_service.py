@@ -217,3 +217,38 @@ def test_update_values_name_only_real_host_columns():
 
     for column in capability_update_values(_report(["install_package"])):
         assert hasattr(Host, column), f"Host has no column {column}"
+
+
+# ----------------------------------------------------- OS applicability (P19)
+
+
+def test_not_applicable_is_stored_but_never_makes_a_host_limited():
+    """A Linux host is not degraded for lacking bhyve.
+
+    The agent excludes OS-inapplicable groups from unavailable/partial and
+    reports them separately; the limited rule must stay a TWO-term rule or the
+    exclusion is undone here.  This is the server half of the fix that stopped
+    every Linux host reading as partially-capable at virtualization.
+    """
+    report = _report(["install_package"])
+    report["not_applicable"] = {"ubuntu_pro": "wrong_platform"}
+
+    normalized = normalize_report(report)
+    assert normalized["not_applicable"] == {"ubuntu_pro": "wrong_platform"}
+
+    values = capability_update_values(report)
+    assert values["agent_capabilities_limited"] is False
+
+
+def test_not_applicable_does_not_mask_a_real_gap():
+    """Applicability must not become a blanket excuse: a genuine
+    unavailable/partial entry still flags the host."""
+    report = _report(["install_package"], unavailable={"packages": "missing_tool"})
+    report["not_applicable"] = {"ubuntu_pro": "wrong_platform"}
+    assert capability_update_values(report)["agent_capabilities_limited"] is True
+
+
+def test_a_report_without_not_applicable_still_normalizes():
+    """Agents older than Phase 19 never send the key."""
+    normalized = normalize_report(_report(["install_package"]))
+    assert normalized["not_applicable"] == {}

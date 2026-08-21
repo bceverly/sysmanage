@@ -84,53 +84,57 @@
     "actions": "क्रियाएं",
     "active": "सक्रिय",
     "add": "जोड़ें",
+    "all": "सभी",
+    "apply": "लागू करें",
     "back": "वापस",
     "cancel": "रद्द करें",
+    "clearSelection": "चयन साफ़ करें",
     "close": "बंद करें",
+    "confirm": "निश्चित करें",
     "confirmAction": "कार्रवाई की पुष्टि करें",
+    "copied": "कॉपी कर लिया",
+    "copy": "कॉपी",
+    "create": "बनाएं",
     "delete": "हटाएं",
     "disabled": "अक्षम",
+    "done": "किया गया",
     "edit": "संपादित करें",
     "enabled": "सक्षम",
+    "exportCSV": "CSV निर्यात करें",
+    "exportPDF": "PDF निर्यात करें",
+    "id": "ID",
     "inactive": "निष्क्रिय",
     "invalidDate": "अमान्य दिनांक",
     "less": "कम",
+    "loading": "लोड हो रहा है...",
+    "moreActions": "अधिक",
+    "na": "N/A",
     "no": "नहीं",
     "noDescription": "कोई विवरण नहीं",
+    "none": "कोई नहीं",
     "notAvailable": "उपलब्ध नहीं",
     "of": "का",
     "refresh": "रीफ़्रेश करें",
+    "requiresSelection": "कम से कम एक पंक्ति चुनें",
+    "requiresSingleSelection": "ठीक एक पंक्ति चुनें",
+    "reset": "फ़िल्टर रीसेट करें",
+    "retry": "पुनः प्रयास करें",
     "rowSelected": "पंक्ति चयनित",
     "rowsPerPage": "प्रति पृष्ठ पंक्तियां",
     "rowsSelected": "पंक्तियां चयनित",
     "running": "चल रहा है",
     "save": "सेव करें",
+    "saving": "सहेजा जा रहा है...",
     "search": "खोजें",
+    "selected": "चयनित",
     "status": "स्थिति",
     "stopped": "रुका हुआ",
-    "unassigned": "असाइन नहीं किया गया",
-    "yes": "हां",
-    "none": "कोई नहीं",
-    "all": "सभी",
-    "apply": "लागू करें",
-    "exportCSV": "CSV निर्यात करें",
-    "exportPDF": "PDF निर्यात करें",
-    "id": "ID",
-    "na": "N/A",
-    "reset": "फ़िल्टर रीसेट करें",
-    "retry": "पुनः प्रयास करें",
-    "saving": "सहेजा जा रहा है...",
     "togglePasswordVisibility": "पासवर्ड दृश्यता टॉगल करें",
+    "unassigned": "असाइन नहीं किया गया",
     "unknown": "अज्ञात",
     "update": "अपडेट करें",
-    "selected": "चयनित",
     "view": "देखें",
-    "copied": "कॉपी कर लिया",
-    "copy": "कॉपी",
-    "create": "बनाएं",
-    "done": "किया गया",
-    "loading": "लोड हो रहा है...",
-    "confirm": "निश्चित करें"
+    "yes": "हां"
   },
   "connectionStatus": {
     "connected": "कनेक्टेड",
@@ -395,7 +399,8 @@
       "noEligible": "कोई सिंक किया गया मिरर उपलब्ध नहीं",
       "saveSuccess": "सहेजा गया। {{count}} होस्ट का पुनर्संरचन किया जाएगा।",
       "subtitle": "प्रत्येक समर्थित (प्लेटफ़ॉर्म, संस्करण) जोड़ी के लिए, चुनें कि उस परिवार के नए और मौजूदा होस्ट किस मिरर का उपयोग डिफ़ॉल्ट के रूप में करते हैं। क्लाउड का अर्थ है कि होस्ट सीधे सार्वजनिक अपस्ट्रीम पर जाते हैं। केवल वे मिरर जिन्होंने सफल सिंक पूरा किया है, पात्र हैं।"
-    }
+    },
+    "title": "होस्ट डिफ़ॉल्ट्स"
   },
   "hostDetail": {
     "accessTab": "एक्सेस",
@@ -927,7 +932,15 @@
     "windowsEditionDatacenterDesktop": "डेटासेंटर (डेसकटॉप एक्सपीरियंस)",
     "childHostProgressStalled": "कोई अपडेट {{when}} — वर्तमान चरण लंबे समय तक चल सकता है, या प्रावधान ठप हो सकता है",
     "childHostProgressStep": "{{step}}/{{total}} · {{description}}",
-    "childHostProgressUpdated": "अपडेट किया गया {{when}}"
+    "childHostProgressUpdated": "अपडेट किया गया {{when}}",
+    "cat": {
+      "access": "प्रवेश",
+      "operations": "ऑपरेशन्स",
+      "overview": "ओवरव्यू",
+      "security": "सुरक्षा",
+      "software": "सॉफ़्टवेयर",
+      "virtualization": "वर्चुअलाइज़ेशन"
+    }
   },
   "hostGroup": {
     "add": "जोड़ें",
@@ -952,9 +965,21 @@
     "confirmDelete": "क्या आप हमेशा के लिए समूह \"{{groupName}}\" को हटाना चाहते हैं? इस क्रिया को पुनरावृत्ति नहीं किया जा सकता।"
   },
   "hosts": {
+    "actionGroupDeploy": "तैनात करें",
+    "actionGroupPower": "पावर",
     "agentVersion": "एजेंट संस्करण",
     "allHosts": "सभी",
+    "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\\n\\n{{hosts}}",
     "antivirusDeployFailed": "एंटीवायरस तैनात करने में विफल। कृपया पुनः प्रयास करें।",
+    "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
+    "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
+    "approvalNeeded": "अनुमोदन आवश्यक",
+    "approveSelected": "निवड़ित को पारदर्शी बनाएं",
+    "capabilities": "कैपABILITY",
+    "capabilitiesFull": "पूरा",
+    "capabilitiesFullTooltip": "इस एजेंट ने पूरी कैपABILITY सेट को घोषित की है",
+    "capabilitiesLimited": "सीमित",
+    "capabilitiesLimitedTooltip": "इस एजेंट ने यह बताया है कि वे कुछ कमांड्स चलाने में असमर्थ हैं",
     "childHostFilter": "चाइल्ड होस्ट फ़िल्टर",
     "childHostOf": "{{parent}} का चाइल्ड होस्ट",
     "childHostsOnly": "केवल चाइल्ड होस्ट",
@@ -967,6 +992,9 @@
     "delete": "हटाएं",
     "deployAntivirus": "एंटीवायरस तैनात करें",
     "deployOpenTelemetry": "OpenTelemetry तैनात करें",
+    "diagnosticsRequestFailed": "सेटिंग्स सेवा अद्ययन करने में विफल हुए",
+    "diagnosticsRequested": "डायएगनोसिक कलेक्शन के लिए होस्ट {{hostId}} प्राप्त करना। जब उपलब्ध हों, होस्ट विवरण पृष्ठ पर परिणाम देखें।",
+    "down": "बंद",
     "filterByTags": "टैग द्वारा फ़िल्टर करें",
     "fqdn": "एफक्यूडीएन",
     "getDiagnostics": "डायग्नोस्टिक्स प्राप्त करें",
@@ -983,10 +1011,16 @@
     "minutesAgo": "{{minutes}} मिनट पहले",
     "never": "कभी नहीं",
     "noEligibleHostsForAntivirus": "कोई योग्य होस्ट चयनित नहीं। एंटीवायरस तैनाती के लिए होस्ट सक्रिय और विशेषाधिकार प्राप्त मोड में होने चाहिए।",
+    "noResults": "कोई परिणाम नहीं",
+    "noRows": "कोई पंक्ति नहीं",
     "opentelemetryDeployFailed": "OpenTelemetry तैनात करने में विफल। कृपया पुनः प्रयास करें।",
+    "opentelemetryDeploySuccess": "OpenTelemetry डिप्लोइमेंट की पंजीकृत {{count}} होस्ट(स) के लिए",
     "osUpgrade": "OS अपग्रेड",
     "osUpgradeAvailable": "इस होस्ट के लिए OS अपग्रेड उपलब्ध है",
+    "packagesRequestFailed": "पैकेज संग्रह अनुरोध करने में विफल",
+    "packagesRequested": "पैकेज संग्रह सफलतापूर्वक अनुरोधित",
     "parentsOnly": "केवल पैरेंट",
+    "platform": "प्लेटफ़ॉर्म",
     "privileged": "विशेषाधिकार प्राप्त",
     "reboot": "पुनः प्रारंभ",
     "rebootFailed": "पुनः प्रारंभ अनुरोध विफल",
@@ -1011,13 +1045,22 @@
       "proceedOrchestrated": "सुरक्षित रूप से {{hostname}} को रिस्टार्ट करने के लिए \"ओर्केस्ट्रेटेड रिस्टार्ट\" क्लिक करें।"
     },
     "rebootRequested": "पुनः प्रारंभ अनुरोध सफल",
+    "rebootRequired": "रीबूट आवश्यक",
     "rebootSelected": "चयनित को पुनः आरंभ करें",
     "refreshAllData": "होस्ट डेटा का अनुरोध करें",
+    "requestPackages": "उपलब्ध पैकेज अनुरोध",
+    "requiresActivePrivileged": "विशेषाधिकार मोड में चल रहा सक्रिय होस्ट चुनें",
+    "requiresPendingHost": "अनुमोदन की प्रतीक्षा कर रहा होस्ट चुनें",
+    "runningPrivileged": "विशेषाधिकार के साथ चल रहा है",
+    "runningUnprivileged": "विशेषाधिकार के बिना चल रहा है",
+    "scriptsDisabledTooltip": "इस होस्ट के लिए स्क्रिप्ट अक्षम हैं",
     "scriptsEnabled": "स्क्रिप्ट सक्षम",
+    "scriptsEnabledTooltip": "इस होस्ट के लिए स्क्रिप्ट सक्षम हैं",
     "secondsAgo": "{{seconds}} सेकंड पहले",
     "securityAndSystemUpdates": "{{security}} सुरक्षा, {{system}} सिस्टम अपडेट",
     "securityUpdatesOnly": "{{count}} सुरक्षा अपडेट",
     "selectTags": "टैग चुनें",
+    "shellsAllowed": "अनुमत शेल",
     "showAllHosts": "सभी होस्ट दिखाएं",
     "shutdown": "बंद करें",
     "shutdownFailed": "बंद करने का अनुरोध विफल",
@@ -1026,42 +1069,16 @@
     "status": "स्थिति",
     "swUpdates": "SW अपडेट",
     "systemUpdatesOnly": "{{count}} सिस्टम अपडेट",
+    "tags": "टैग",
+    "unknown": "अज्ञात",
+    "up": "अप",
     "updateAgent": "एजेंट अपडेट करें",
     "updateAgentFailed": "एजेंट अपडेट का अनुरोध विफल",
     "updateAgentRequested": "एजेंट अपडेट सफलतापूर्वक अनुरोधित",
     "updateAgentSelected": "चयनित पर एजेंट अपडेट करें",
     "updated": "अपडेट किया गया",
-    "viewParent": "पैरेंट होस्ट देखें",
-    "packagesRequestFailed": "पैकेज संग्रह अनुरोध करने में विफल",
-    "packagesRequested": "पैकेज संग्रह सफलतापूर्वक अनुरोधित",
-    "requestPackages": "उपलब्ध पैकेज अनुरोध",
-    "shellsAllowed": "अनुमत शेल",
-    "tags": "टैग",
     "updates": "अपडेट",
-    "approvalNeeded": "अनुमोदन आवश्यक",
-    "down": "बंद",
-    "noResults": "कोई परिणाम नहीं",
-    "noRows": "कोई पंक्ति नहीं",
-    "platform": "प्लेटफ़ॉर्म",
-    "rebootRequired": "रीबूट आवश्यक",
-    "runningPrivileged": "विशेषाधिकार के साथ चल रहा है",
-    "runningUnprivileged": "विशेषाधिकार के बिना चल रहा है",
-    "scriptsDisabledTooltip": "इस होस्ट के लिए स्क्रिप्ट अक्षम हैं",
-    "scriptsEnabledTooltip": "इस होस्ट के लिए स्क्रिप्ट सक्षम हैं",
-    "up": "अप",
-    "antivirusDeployAllFailed": "ऐन्टीवायरस डिप्लोइमेंट सभी होस्ट्स के लिए विफल हुआ:\\n\\n{{hosts}}",
-    "antivirusDeployPartialSuccess": "ऐन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(s) पर शुरू की गई।\\n\\nअसफल होस्ट(s):\\n{{hosts}}",
-    "antivirusDeploySuccess": "एन्टीवायरस डिप्लोइमेंट सुरक्षा के लिए {{count}} होस्ट(स) पर शुरू हो गई",
-    "approveSelected": "निवड़ित को पारदर्शी बनाएं",
-    "opentelemetryDeploySuccess": "OpenTelemetry डिप्लोइमेंट की पंजीकृत {{count}} होस्ट(स) के लिए",
-    "diagnosticsRequestFailed": "सेटिंग्स सेवा अद्ययन करने में विफल हुए",
-    "diagnosticsRequested": "डायएगनोसिक कलेक्शन के लिए होस्ट {{hostId}} प्राप्त करना। जब उपलब्ध हों, होस्ट विवरण पृष्ठ पर परिणाम देखें।",
-    "unknown": "अज्ञात",
-    "capabilities": "कैपABILITY",
-    "capabilitiesFull": "पूरा",
-    "capabilitiesFullTooltip": "इस एजेंट ने पूरी कैपABILITY सेट को घोषित की है",
-    "capabilitiesLimited": "सीमित",
-    "capabilitiesLimitedTooltip": "इस एजेंट ने यह बताया है कि वे कुछ कमांड्स चलाने में असमर्थ हैं"
+    "viewParent": "पैरेंट होस्ट देखें"
   },
   "login": {
     "loggingIn": "लॉग इन हो रहा है...",
@@ -1121,7 +1138,24 @@
     "scrollLeft": "बाएं लॉन्ग",
     "scrollRight": "दाईं ओर लॉन्ग",
     "maintenanceWindows": "रेगुलर मेंटेनेंस विंडोज",
-    "search": "खोज (Ctrl+K)"
+    "search": "खोज (Ctrl+K)",
+    "advisories": "सुझाव",
+    "alerts": "अलर्ट्स",
+    "cat": {
+      "admin": "प्रशासन",
+      "automation": "स्वचालन",
+      "fleet": "फ़्लीट",
+      "insights": "इनसाइट्स",
+      "patching": "पैचिंग",
+      "security": "सुरक्षा"
+    },
+    "compliance": "अनुपालन",
+    "customMetrics": "कस्टम मेट्रिक्स",
+    "fips": "फ़िप्स",
+    "gated": "[गायब: नेविगेशन (गेटेड)]",
+    "osLifecycle": "ओएस लाइफ़साइकिल",
+    "plain": "[गायब: नेविगेशन (प्लेन)]",
+    "vulnerabilities": "कमज़ोरियाँ"
   },
   "notifications": {
     "applicationUpdates": "एप्लिकेशन अपडेट",
@@ -1745,7 +1779,8 @@
     "typeLabel": "प्रकार",
     "unknown": "अज्ञात",
     "urlLabel": "URL",
-    "winget": "winget"
+    "winget": "winget",
+    "requiresPrivileged": "होस्ट को प्रिविलेज्ड मोड में चलाना होगा"
   },
   "ubuntuPro": {
     "actions": {
@@ -1978,7 +2013,10 @@
     "editInfo": "उपयोगकर्ता के जानकारी को नीचे संपादित करें।",
     "emailNotification": "उपयोगकर्ते को एक सुरक्षित पासवर्ड सेट करने के लिंक वाली ईमेल भेजी जायेगी।",
     "emailUnique": "ईमेल पता अद्वितीय होना चाहिए",
-    "enterInfo": "निचे नए उपयोगकर्ता की सूचनाएँ दर्ज करें।"
+    "enterInfo": "निचे नए उपयोगकर्ता की सूचनाएँ दर्ज करें।",
+    "clearSelectionToAdd": "चयन को साफ़ करें और उपयोगकर्ता जोड़ें",
+    "requiresLockedSelection": "कम से कम एक लॉक किया हुआ उपयोगकर्ता चुनें",
+    "requiresUnlockedSelection": "कम से कम एक अनलॉक किया हुआ उपयोगकर्ता चुनें"
   },
   "emailConfig": {
     "title": "ईमेल कॉन्फ़िगरेशन",
@@ -2048,7 +2086,8 @@
     "windowHelp": "एजेंट डिस्पैच को इतने मिनटों में फैलाएं (0–720)",
     "windowRange": "चरणबद्ध विंडो 0 से 720 मिनट के बीच होनी चाहिए",
     "confirmDelete": "पड़फ़िल प्रोफाइल \"{{name}}\" को हटाएं?",
-    "confirmTrigger": "\\u092a\\u092c\\u0947\\u0902 {{name}} \\u0926\\u093e\\u0930? \\u0928\\u094d\\u0915\\u093f\\u0932\\u0947\\u0902 \\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915 \\u092e\\u0947\\u0902 \\u0938\\u0947\\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915."
+    "confirmTrigger": "\\u092a\\u092c\\u0947\\u0902 {{name}} \\u0926\\u093e\\u0930? \\u0928\\u094d\\u0915\\u093f\\u0932\\u0947\\u0902 \\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915 \\u092e\\u0947\\u0902 \\u0938\\u0947\\u091c\\u094b \\u0926\\u0940\\u091a\\u094d\\u0938\\u0947\\u0915.",
+    "tabLabel": "प्रोफाइल अपडेट करें"
   },
   "packageProfiles": {
     "add": "अनुपालन प्रोफ़ाइल जोड़ें",
@@ -2079,7 +2118,8 @@
     "version": "संस्करण",
     "versionOp": "ऑप",
     "versionOpAny": "(कोई भी)",
-    "confirmDelete": "प्रोफाइल \"{{name}}\" को हटाएं?"
+    "confirmDelete": "प्रोफाइल \"{{name}}\" को हटाएं?",
+    "tabLabel": "अनुपालन प्रोफाइल्स"
   },
   "compliance": {
     "compliant": "अनुपालन",
@@ -2129,7 +2169,8 @@
     "title": "रिपोर्ट ब्रांडिंग",
     "uploadError": "लोगो अपलोड विफल",
     "uploadLogo": "लोगो अपलोड करें",
-    "headerTextHelp": "रिपोर्ट हेडर में लॉगो के पास दिखाई देता है (जैसे, \\\"कन्फीडियल — इंटरनल यूज\\\")।"
+    "headerTextHelp": "रिपोर्ट हेडर में लॉगो के पास दिखाई देता है (जैसे, \\\"कन्फीडियल — इंटरनल यूज\\\")।",
+    "tabLabel": "रिपोर्ट ब्रांडिंग"
   },
   "reportTemplates": {
     "add": "टेम्पलेट जोड़ें",
@@ -2153,7 +2194,8 @@
     "subtitle": "कस्टम लेआउट जो रिपोर्ट रेंडरर बिल्ट-इन रिपोर्ट प्रकारों पर लागू करता है",
     "title": "रिपोर्ट टेम्पलेट",
     "updated": "टेम्पलेट सहेजा गया",
-    "confirmDelete": "डिपॉजिशन मॉल्डल \"{{name}}\" को हटाएं?"
+    "confirmDelete": "डिपॉजिशन मॉल्डल \"{{name}}\" को हटाएं?",
+    "tabLabel": "रिपोर्ट टेम्पलेट्स"
   },
   "idp": {
     "action": {
@@ -2244,7 +2286,8 @@
       "ldap": "LDAP / Active Directory",
       "oidc": "OIDC",
       "saml": "SAML 2.0"
-    }
+    },
+    "tabLabel": "प्रमाणीकरण"
   },
   "mfa": {
     "backupCodesRemaining": "{{count}} बैकअप कोड शेष",
@@ -2432,7 +2475,8 @@
       "trackError": "उस छवि को ट्रैक नहीं किया जा सकता। रजिस्त्री होस्ट, लाइटरेक्ट रिपोज़िटरी, और मान्य टैग का प्रयोग करें।",
       "untrack": "इस छवि का ट्रैकिंग बंद करें",
       "untrackError": "उस छवि को अट्रैक करने से बचाने में विफलता हुई।"
-    }
+    },
+    "tabLabel": "रिपॉजिटरी मिररिंग"
   },
   "integrations": {
     "description": "बाहरी सेवा एकीकरण और सेटिंग्स कॉन्फ़िगर करें।",
@@ -2789,7 +2833,8 @@
     "version": "\\u092a\\u0941\\u0935\\u0947",
     "recheckResources": "संसाधनों की पुनर्तत्कालिक जांच",
     "resourcesInsufficient": "यह सर्वर पर्याप्त मुक्त मेमोरी या डिस्क नहीं है जिससे सर्वर या एजेंट बंडल बनाया जा सके — वे बटन तब तक अक्षम रहेंगे जब तक संसाधनों को मुक्त नहीं किया जाता (स्वैप जोड़ें या VM का आकार बढ़ाएँ)।",
-    "resourcesLow": "कम संसाधन - बिल्ड चला सकता है लेकिन स्वैप पर भरोसा करेगा और धीमी गति से चल सकता है।"
+    "resourcesLow": "कम संसाधन - बिल्ड चला सकता है लेकिन स्वैप पर भरोसा करेगा और धीमी गति से चल सकता है।",
+    "tabLabel": "एयर-गैप बंडल्स"
   },
   "airgapCollections": {
     "actions": {
@@ -3028,7 +3073,15 @@
     "saveFailed": "सीमाओं को बचाने में विफल हुए।",
     "saved": "प्रतीक्षा सीमाएँ बचीं हैं।",
     "subtitle": "एक फील्ड खाली छोड़ें बिल्ट-इन प्रतिस्थापन का उपयोग करने के लिए।",
-    "title": "प्रत्यावर्तन सीमाएँ"
+    "title": "प्रत्यावर्तन सीमाएँ",
+    "complianceThreshold": "अनुपालन सीमा (%)",
+    "complianceThresholdHelp": "जब आधार स्कोर इस प्रतिशत से नीचे गिरता है तो अलर्ट करें",
+    "criticalCveThreshold": "महत्वपूर्ण CVE सीमा",
+    "criticalCveThresholdHelp": "जब महत्वपूर्ण-CVE गिनती इस सीमा से ज्यादा हो जाती है तो सख्ती से अलर्ट करें",
+    "minOfflineSeconds": "ऑफलाइन सेकंड्स की न्यूनतम संख्या",
+    "minOfflineSecondsHelp": "ताकि तेज़ सिंक इंटरवल्स फ्लैप न हों",
+    "offlineMultiplier": "ऑफलाइन मल्टीप्लायर",
+    "offlineMultiplierHelp": "साइट के सिंक इंटरवल को × करने से पहले जब यह ऑफ़लाइन झंडा दिखाता है"
   },
   "federationReport": {
     "col": {
@@ -3115,12 +3168,18 @@
     "networkError": "नेटवर्क त्रुटि: सर्वर को पहुंच नहीं पाया",
     "serverError": "सर्वर त्रुटि: {{status}}"
   },
-  "scrollableButtonBar": {
-    "scrollLeft": "बाएं लॉन्ग",
-    "scrollRight": "दाईं ओर लॉन्ग"
-  },
   "settings": {
-    "tabsAriaLabel": "सेटिंग्स टैब"
+    "tabsAriaLabel": "सेटिंग्स टैब",
+    "cat": {
+      "airgap": "एयर-गैप और मिररिंग",
+      "general": "सामान्य",
+      "integrations": "इंटीग्रेशन और लॉगिंग",
+      "patching": "पैचिंग",
+      "reporting": "रिपोर्टिंग",
+      "secrets": "सीक्रेट्स",
+      "security": "सुरक्षा और प्रवेश",
+      "system": "सिस्टम"
+    }
   },
   "apiKeys": {
     "active": "कार्यात्मक",
@@ -3330,22 +3389,26 @@
     "saveFailed": "माईरों को सहेजने में विफलता हुई।",
     "saved": "माईरों सहेजे गए।",
     "subtitle": "प्राइवेट माईरों का प्रतिस्थापन करें जो एजेंट के स्वयं के इनस्तॉल करने के लिए हैं। इसके बिना, एयर-गैप साइट में प्रोवाइज़न की गई मशीनें पब्लिक PPA, COPR, OBS, winget या Homebrew tap को नहीं पहुंच सकतीं, तो वे कभी एजेंट इनस्टॉल नहीं करतीं और कभी भी रजिस्ट्रेशन नहीं कर सकतीं।",
-    "title": "एजेन्ट इनस्तॉल माईरों"
+    "title": "एजेन्ट इनस्तॉल माईरों",
+    "tabLabel": "एजेंट इंस्टॉल मिरर्स"
   },
   "hostCapabilities": {
     "full": "पूरा",
     "limited": "सीमित",
+    "notApplicable": "इस ऑपरेटिंग सिस्टम के लिए लागू नहीं है",
     "partial": "थोड़ा-सा समर्थित",
+    "reasonBuildExcluded": "यह एजेंट बिल्ड में छोड़ा गया है",
+    "reasonMissingTool": "इस होस्ट पर एक आवश्यक टूल इंस्टॉल नहीं है",
     "reasonNoHandler": "यह एजेंट में इन्हें बनाया नहीं गया है",
     "reasonUnsupportedArch": "यह आर्किटेक्चर के लिए बनाया नहीं गया है",
     "reasonUnsupportedOs": "इस OS पर समर्थित नहीं है",
+    "reasonWrongPlatform": "इस ऑपरेटिंग सिस्टम के लिए लागू नहीं है",
     "supported": "समर्थित",
     "title": "एजेंट कैपABILITY",
     "unavailable": "उपलब्ध नहीं",
     "unknown": "इस एजेंट ने अपनी कैपABILITY को घोषित नहीं किया है। पुराने एजेंट इन्हें रिपोर्ट नहीं करते; मेज़ पर सीमित नहीं है।",
-    "updated": "प्रतिवेदित किया गया है",
-    "reasonBuildExcluded": "यह एजेंट बिल्ड में छोड़ा गया है",
-    "reasonMissingTool": "इस होस्ट पर एक आवश्यक टूल इंस्टॉल नहीं है",
-    "reasonWrongPlatform": "इस ऑपरेटिंग सिस्टम के लिए लागू नहीं है"
-  }
+    "updated": "प्रतिवेदित किया गया है"
+  },
+  "greeting": "[गायब: अभिवादन]",
+  "pluginOnlyKey": "प्लगइन केवल कुंजी गायब है"
 }
