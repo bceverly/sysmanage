@@ -136,12 +136,12 @@ print(eng.render_dnsmasq_config(r))
 Substitute your interface, subnet and server IP.
 
 > **Corrected 2026-08-24.** The block below originally carried a
-> `dhcp-option-pxe=tag:ipxe,67,<url>` line. **No such dnsmasq option exists** —
-> dnsmasq 2.90 rejects the whole file with `bad option at line 11`, so the
-> config this document called correct could not start dnsmasq at all. It was
-> written from a `dnsmasq(8)` quotation that is not in the man page. The line
-> is gone from the engine; `dhcp-boot=tag:ipxe` was always doing the work, and
-> the run below proves it on two real ROMs. See §10.
+> `dhcp-option-pxe=tag:ipxe,67,<url>` line. dnsmasq 2.90 rejects the whole file
+> with `bad option at line 11`, so the config this document called correct could
+> not start dnsmasq at all. The option is **real but newer than any supported
+> platform** — see §10.3. The line is gone from the engine;
+> `dhcp-boot=tag:ipxe` was always doing the work, and the run below proves it on
+> two real ROMs. See §10.
 
 That command produces this, which is what a correct run looks like:
 
@@ -336,12 +336,30 @@ The rendered proxy config **could not start dnsmasq at all**:
 dnsmasq: bad option at line 11 of sysmanage-provisioning.conf
 ```
 
-Line 11 was `dhcp-option-pxe=tag:ipxe,67,<url>`. That option does not exist —
-rejected by `dnsmasq --test` with and without the tag, absent from `--help`, and
-the sentence the engine quoted as `dnsmasq(8)` ("sent in reply to PXE clients …
-unlike other options") is nowhere in `dnsmasq.8.gz`. The only real member of the
-family is `--dhcp-option-force`. Anyone following the proxyDHCP config advisor
-got a dnsmasq that would not start.
+Line 11 was `dhcp-option-pxe=tag:ipxe,67,<url>`. Anyone following the proxyDHCP
+config advisor got a dnsmasq that would not start.
+
+**Re-diagnosed 2026-08-24**, because the first reading of this was wrong in a way
+that matters. The option is not imaginary — it is **too new**:
+
+| dnsmasq | ships in | `--dhcp-option-pxe` |
+| :------ | :------- | :------------------ |
+| 2.86 | Ubuntu 22.04 at release | **absent from the manual** |
+| 2.90 | Ubuntu 22.04 / 24.04 patched | rejected — `bad option` |
+| 2.92 | Ubuntu 26.04 | present in `--help` **and** the manual |
+
+Measured, not recalled: the 2.86 manual was extracted from
+`dnsmasq-base_2.86-1.1_amd64.deb` in the jammy pool and grepped; 2.92 was read
+on an Ubuntu 26.04 box, where the man text is almost verbatim the sentence the
+engine quoted — *"such options are sent in reply to PXE clients when dnsmasq is
+acting as a PXE proxy, unlike other options. A typical use-case is option 175,
+sent to iPXE."* The original author had read a real manual; just not one any
+customer would have.
+
+So the defect is a **compatibility** defect: an option newer than our supported
+baseline, emitted unconditionally with no version gate. The impact is unchanged
+— it entered dnsmasq after every Ubuntu LTS through 24.04, so every supported
+platform got a config that would not start.
 
 It survived to Phase 19 for a specific and repeatable reason:
 `test_generated_dnsmasq_config_passes_dnsmasq_test` already existed, already ran
@@ -359,6 +377,17 @@ Fixed in `sysmanage-professional-plus`:
   `dhcp-option-pxe` never returns
 * the `--test` check now **fails** on Linux instead of skipping
 * CI installs `dnsmasq-base` in the `build-modules` job
+* **a baseline guard**, added 2026-08-24 once the re-diagnosis showed why the
+  above is not enough on its own. `dnsmasq --test` only ever validates against
+  the version the *runner* happens to ship: `ubuntu-latest` is 24.04 (2.90)
+  today and rejects the bad line, but on 2.92 that same check prints
+  `syntax check OK` for it — measured. When the runner image rolls forward the
+  gate would quietly stop covering customers on an LTS.
+  `test_emitted_directives_exist_in_the_supported_dnsmasq_baseline` compares
+  every directive the renderer can emit against a list verified line-by-line
+  against the real 2.86 manual. It is static, so it runs on Windows, on a
+  laptop, and on any runner with no dnsmasq installed. Confirmed to flag
+  `dhcp-option-pxe` when replayed against the config that actually shipped.
 
 The final run above used the rebuilt engine's **unedited** output — the diagnostic
 run with the line hand-removed produced byte-identical config, and both passed.

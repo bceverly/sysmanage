@@ -5915,10 +5915,19 @@ close the gap between our output and the parsers that consume it.
       Evidence on `pxe-server` at `~/evidence-2026-08-24/`: 60-packet pcap,
       dnsmasq `--log-dhcp` logs, boot-server logs, both configs, artifact SHA-256s.*
       *(FOUND BY THIS TEST — the run's real value.  The rendered proxy config
-      could not start dnsmasq AT ALL: it carried `dhcp-option-pxe=tag:ipxe,67,<url>`
-      and no such dnsmasq option exists (2.90 rejects the file with "bad option",
-      it is absent from `--help`, and the sentence the code attributed to
-      `dnsmasq(8)` justifying it is nowhere in the man page).  Every customer
+      could not start dnsmasq AT ALL: it carried `dhcp-option-pxe=tag:ipxe,67,<url>`,
+      which dnsmasq 2.90 rejects with "bad option".  CORRECTED 2026-08-24 after
+      the fact: the option is not imaginary, it is simply TOO NEW.  On dnsmasq
+      2.92 (Ubuntu 26.04) `--dhcp-option-pxe` is in `--help` and in the man page,
+      and the man text is almost verbatim the sentence the removed code cited —
+      "such options are sent in reply to PXE clients when dnsmasq is acting as a
+      PXE proxy, unlike other options.  A typical use-case is option 175, sent to
+      iPXE."  Measured against the archive: ABSENT from 2.86's man page (Ubuntu
+      22.04 release), rejected by 2.90 (22.04/24.04 with updates), present in
+      2.92.  So it entered dnsmasq AFTER every Ubuntu LTS through 24.04.  The
+      real defect is therefore a COMPATIBILITY one — an option newer than our
+      supported baseline, emitted unconditionally with no version gate — and the
+      customer impact is unchanged: every customer
       who followed the proxyDHCP config advisor got a dnsmasq that would not
       start.  It survived to Phase 19 because
       `test_generated_dnsmasq_config_passes_dnsmasq_test` — which runs
@@ -5930,7 +5939,22 @@ close the gap between our output and the parsers that consume it.
       the tests that enshrined it rewritten, the `--test` check now FAILS rather
       than skips on Linux, and CI installs `dnsmasq-base`.  `dhcp-boot=tag:ipxe`
       alone drives the whole chain — proven above.  The final run used the
-      rebuilt engine's UNEDITED output.)*
+      rebuilt engine's UNEDITED output.
+
+      AND the guard as first built was accidentally strong, not designed strong:
+      `dnsmasq --test` validates against whatever version the RUNNER ships.
+      `ubuntu-latest` is 24.04 (2.90) today, which rejects the bad line — but on
+      2.92 the same check prints "syntax check OK" on that exact config, measured
+      on Ubuntu 26.04.  When the runner image rolls forward the gate would go
+      green on a config that still breaks every LTS customer, and nothing would
+      announce it.  Baseline decided 2026-08-24 (Bryan): **whatever ships in
+      Ubuntu 22.04 LTS** — dnsmasq 2.86 at release, 2.90 fully patched.  Enforced
+      by `test_emitted_directives_exist_in_the_supported_dnsmasq_baseline`, which
+      checks every directive the renderer can emit against an allowlist verified
+      line-by-line against the real 2.86 man page (extracted from
+      `dnsmasq-base_2.86-1.1_amd64.deb` in the jammy pool).  It runs everywhere,
+      including Windows, and needs no dnsmasq installed — the version-skew bug
+      class cannot come back the way this one did.)*
       (moved here from Phase 18
       2026-08-04 — it is gated on the UEFI item ABOVE, so the two travel
       together) — it cannot be validated on the
