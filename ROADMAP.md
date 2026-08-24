@@ -5895,10 +5895,42 @@ close the gap between our output and the parsers that consume it.
       And the harness now says out loud when the UEFI stage is missing instead
       of silently degrading to BIOS-only — a capability that is absent quietly
       is worse than one that is absent loudly, because the run still passes.)*
-- [ ] **proxyDHCP validated on REAL HARDWARE** — test plan written up at
+- [x] **proxyDHCP validated on REAL HARDWARE** — test plan written up at
       `docs/planning/PROXYDHCP-HARDWARE-TEST.md` (2026-08-21): rig options, the
       verified rendered config, pass criteria for both the BIOS and UEFI legs,
       and a failure-mode table.  Read that before re-deriving any of this.
+      *(DONE 2026-08-24 — BOTH legs pass, plus the negative control.  Rig: an
+      all-virtual Hyper-V build on an Internal vSwitch (10.99.0.0/24) rather
+      than the External-switch/home-router rig the doc recommends — a `pxe-router`
+      Linux VM plays the incumbent DHCP server, `pxe-server` runs dnsmasq 2.90
+      proxyDHCP + TFTP on Ubuntu 24.04.4.  Built by `scripts/Setup-ProxyDhcpTest.ps1`.
+      Leg A: Gen 1 + Legacy NIC, Microsoft PXE ROM, vendor class
+      `PXEClient:Arch:00000` -> TFTP `sysmanage-ipxe.kpxe` -> embedded iPXE ->
+      HTTP `boot.ipxe?mac=` -> assigned installer.  Leg B: Gen 2 UEFI, Secure
+      Boot off, arch `00007` -> `sysmanage-ipxe.efi` -> same chain; the UDP 4011
+      PXEBS round trip that ALWAYS timed out under QEMU completed against a real
+      vendor ROM, which settles the "harness, not our config" argument by
+      measurement instead of inference.  Negative control (MAC `...:99`, no
+      assignment) took an identical path and diverged only at the boot script.
+      Evidence on `pxe-server` at `~/evidence-2026-08-24/`: 60-packet pcap,
+      dnsmasq `--log-dhcp` logs, boot-server logs, both configs, artifact SHA-256s.*
+      *(FOUND BY THIS TEST — the run's real value.  The rendered proxy config
+      could not start dnsmasq AT ALL: it carried `dhcp-option-pxe=tag:ipxe,67,<url>`
+      and no such dnsmasq option exists (2.90 rejects the file with "bad option",
+      it is absent from `--help`, and the sentence the code attributed to
+      `dnsmasq(8)` justifying it is nowhere in the man page).  Every customer
+      who followed the proxyDHCP config advisor got a dnsmasq that would not
+      start.  It survived to Phase 19 because
+      `test_generated_dnsmasq_config_passes_dnsmasq_test` — which runs
+      `dnsmasq --test` on the rendered file and would have caught it instantly —
+      `pytest.skip`s when dnsmasq is absent: always on the Windows dev box, and
+      always in CI, which never installed it.  Every other test compared a
+      string we wrote to a string we wrote.  Fixed in Pro+: line removed from
+      `provisioning_engine/preflight.pxi` and `scripts/baremetal_provision_validate.py`,
+      the tests that enshrined it rewritten, the `--test` check now FAILS rather
+      than skips on Linux, and CI installs `dnsmasq-base`.  `dhcp-boot=tag:ipxe`
+      alone drives the whole chain — proven above.  The final run used the
+      rebuilt engine's UNEDITED output.)*
       (moved here from Phase 18
       2026-08-04 — it is gated on the UEFI item ABOVE, so the two travel
       together) — it cannot be validated on the
