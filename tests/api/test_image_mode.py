@@ -90,15 +90,22 @@ class _FakeImageEngine:
     def __init__(self):
         self.calls = []
 
-    def build_image_stage_plan(self, backend, target_ref=None):
+    # ``bypass_driver`` mirrors the real engine's signature (2026-08-24): the
+    # router must be able to pass the Zincati bypass through, and a fake that
+    # silently accepted **kwargs would hide a router that stopped sending it.
+    def build_image_stage_plan(self, backend, target_ref=None, bypass_driver=True):
         self.calls.append(("stage", backend, target_ref))
+        self.bypass = bypass_driver
         return self._plan("image_mode_stage", backend)
 
-    def build_image_apply_plan(self, backend):
+    def build_image_apply_plan(self, backend, bypass_driver=True):
         self.calls.append(("apply", backend, None))
+        self.bypass = bypass_driver
         return self._plan("image_mode_apply", backend)
 
     def build_image_rollback_plan(self, backend):
+        # No bypass parameter ON PURPOSE: rpm-ostree rollback rejects the flag,
+        # so a router that tried to pass one here must fail loudly.
         self.calls.append(("rollback", backend, None))
         return self._plan("image_mode_rollback", backend)
 
@@ -242,3 +249,42 @@ def test_rollback_dispatches_once(env):
     assert r.status_code == 200
     assert env.engine.calls == [("rollback", "bootc", None)]
     assert len(env.enqueued) == 1
+
+
+# ------------------------------------------------- update-driver bypass (S19)
+
+
+def test_stage_defaults_to_bypassing_the_host_update_driver(env):
+    """Default ON.  Fedora CoreOS hands updates to Zincati and rpm-ostree then
+    refuses -- "Updates and deployments are driven by Zincati", exit 1 --
+    measured on a live FCOS 44 host 2026-08-24.  Without the bypass SysManage
+    cannot update FCOS at all."""
+    hid = _seed_host(env, backend="rpm-ostree")
+    r = env.client.post(f"{_BASE}/{hid}/stage", json={})
+    assert r.status_code == 200
+    assert env.engine.bypass is True
+
+
+def test_apply_defaults_to_bypassing_the_host_update_driver(env):
+    hid = _seed_host(env, backend="rpm-ostree")
+    r = env.client.post(f"{_BASE}/{hid}/apply", json={})
+    assert r.status_code == 200
+    assert env.engine.bypass is True
+
+
+def test_bypass_can_be_turned_off_per_request(env):
+    """It is a setting, not a hardcode: an estate that wants its own update
+    driver left in charge can say so, and then owns the consequence."""
+    hid = _seed_host(env, backend="rpm-ostree")
+    r = env.client.post(f"{_BASE}/{hid}/stage", json={"bypass_update_driver": False})
+    assert r.status_code == 200
+    assert env.engine.bypass is False
+
+
+def test_apply_still_works_without_a_body(env):
+    """The new body is optional -- an existing client that posts nothing must
+    keep working, and get the default."""
+    hid = _seed_host(env, backend="rpm-ostree")
+    r = env.client.post(f"{_BASE}/{hid}/apply")
+    assert r.status_code == 200
+    assert env.engine.bypass is True

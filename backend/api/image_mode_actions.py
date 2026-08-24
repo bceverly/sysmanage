@@ -46,6 +46,23 @@ class StageImageRequest(BaseModel):
     image (bootc only); omit it to stage the newest of the current image."""
 
     target_ref: Optional[str] = None
+    bypass_update_driver: bool = True
+
+
+class ApplyImageRequest(BaseModel):
+    """Apply the staged deployment.
+
+    ``bypass_update_driver`` defaults to True because Fedora CoreOS hands
+    updates to Zincati, and rpm-ostree then REFUSES to act -- "Updates and
+    deployments are driven by Zincati", exit 1 -- so without the bypass
+    SysManage cannot update FCOS at all (measured on a real host 2026-08-24).
+    Set it False to leave the host's own update driver in charge; the request
+    then fails on such a host, which is the honest outcome rather than a
+    silent no-op.  Ignored on bootc, and never applied to rollback, which
+    does not accept the flag.
+    """
+
+    bypass_update_driver: bool = True
 
 
 def _image_mode_engine():
@@ -75,14 +92,25 @@ def _image_mode_host_or_400(tenant_db: Session, host_id: str):
     return host
 
 
-def _build_plan(engine, action: str, backend: str, target_ref: Optional[str]):
+def _build_plan(
+    engine,
+    action: str,
+    backend: str,
+    target_ref: Optional[str],
+    bypass_update_driver: bool = True,
+):
     """Build the stage/apply/rollback command plan for a backend, → 400 on bad input."""
     err = getattr(engine, "ImageModeError", Exception)
     try:
         if action == "stage":
-            return engine.build_image_stage_plan(backend, target_ref)
+            return engine.build_image_stage_plan(
+                backend, target_ref, bypass_update_driver
+            )
         if action == "apply":
-            return engine.build_image_apply_plan(backend)
+            return engine.build_image_apply_plan(backend, bypass_update_driver)
+        # Rollback takes no bypass flag: rpm-ostree rejects it outright
+        # ("Unknown option --bypass-driver"), so passing it would break the
+        # one image-mode path that already worked.
         return engine.build_image_rollback_plan(backend)
     except err as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -94,11 +122,14 @@ def _dispatch(
     tenant_db: Session,
     current_user,
     target_ref: Optional[str] = None,
+    bypass_update_driver: bool = True,
 ):
     """Shared stage/apply/rollback flow: gate → build plan → enqueue → audit."""
     engine = _image_mode_engine()
     host = _image_mode_host_or_400(tenant_db, host_id)
-    plan = _build_plan(engine, action, host.image_backend, target_ref)
+    plan = _build_plan(
+        engine, action, host.image_backend, target_ref, bypass_update_driver
+    )
 
     # Dispatch the plan through the generic apply_deployment_plan handler.
     command_message = create_command_message(
@@ -156,17 +187,32 @@ async def stage_host_image(
     current_user=Depends(get_current_user),
 ):
     """Fetch + stage a new image deployment WITHOUT rebooting."""
-    return _dispatch("stage", host_id, tenant_db, current_user, body.target_ref)
+    return _dispatch(
+        "stage",
+        host_id,
+        tenant_db,
+        current_user,
+        body.target_ref,
+        body.bypass_update_driver,
+    )
 
 
 @router.post("/image-mode/host/{host_id}/apply")
 async def apply_host_image(
     host_id: str,
+    body: ApplyImageRequest = ApplyImageRequest(),
     tenant_db: Session = Depends(get_tenant_db),
     current_user=Depends(get_current_user),
 ):
     """Apply the staged deployment — boot into the new image."""
-    return _dispatch("apply", host_id, tenant_db, current_user)
+    return _dispatch(
+        "apply",
+        host_id,
+        tenant_db,
+        current_user,
+        None,
+        body.bypass_update_driver,
+    )
 
 
 @router.post("/image-mode/host/{host_id}/rollback")

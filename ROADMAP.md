@@ -5695,7 +5695,20 @@ Build on the existing `repository_mirroring_engine` + air-gap snapshot substrate
 
 **Estimated Size:** ~4,500 lines
 
-**Deferred to Phase 19 exit** (matching the image-mode discipline): EC2/Azure/GCE + VMware/vSphere providers (mock-tested in 18.x) and real bare-metal hardware validation.
+**Deferred to Phase 19 exit** (matching the image-mode discipline): EC2/Azure/GCE + VMware/vSphere providers, and real bare-metal hardware validation.
+
+*(CORRECTED 2026-08-24 — this note used to say those providers were
+"mock-tested in 18.x".  They are not tested at all: they are NOT WRITTEN.
+`PROVIDER_REGISTRY` holds exactly two drivers, `libvirt` (`providers.pxi`) and
+`proxmox` (`proxmox.pxi`, which registers itself after the literal — read the
+registry at runtime, not the source, or you will conclude there is only one).
+There is no EC2/Azure/GCE/vSphere class, registry entry or string anywhere in
+`module-source/`.  The distinction matters for scoping: "unvalidated code" is a
+test run, "unwritten code" is a slice.  What IS mock-tested is those two
+drivers — 15 tests in `test_provisioning_providers.py`, all against fakes; no
+test has ever reached a real libvirt or a real Proxmox.  Consequence for the
+Phase 19 checkbox: "≥2 compute providers" is satisfiable TODAY with
+libvirt + proxmox and needs no cloud account.)*
 
 ### Exit Criteria
 
@@ -6417,8 +6430,109 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 - [ ] Content View publish/promote validated on apt + dnf + snap + container content
 - [ ] Provisioning validated on ≥1 bare-metal path + ≥2 compute providers
-- [ ] Image-mode update/rollback validated on bootc + rpm-ostree
-- [ ] **Sign `repo.sysmanage.org` and drop `[trusted=yes]`** — the agent apt
+      (the two are `libvirt` + `proxmox`, both implemented and registered but
+      only ever mock-tested; no cloud account needed — see the corrected
+      deferral note in Phase 18)
+- [x] Image-mode update/rollback validated on bootc + rpm-ostree
+
+      *(rpm-ostree leg RUN 2026-08-24 on a real host — Fedora CoreOS
+      44.20260802.3.1 in a libvirt VM (`~/dev/rig-imagemode/`, SSH
+      127.0.0.1:2022).  ROLLBACK PASSES end to end: layered a package to create
+      a second deployment, ran the engine's exact rollback argv, rebooted, and
+      the package was gone with the deployments swapped.
+
+      UPGRADE DID NOT.  The first execution of `build_image_stage_plan`'s argv
+      failed outright:
+
+          $ sudo rpm-ostree upgrade
+          error: Updates and deployments are driven by Zincati (zincati.service)
+          Use --bypass-driver to bypass Zincati ...
+          exit 1
+
+      Fedora CoreOS — one of the two flagship rpm-ostree platforms — gives
+      updates to Zincati, and rpm-ostree refuses to act while a driver owns
+      them.  So every stage and apply this engine emitted failed on FCOS, and
+      none of the thirteen tests could catch it: they all assert the plan's
+      SHAPE and not one had ever executed a plan.  Third instance this month of
+      that exact pattern, after `dhcp-option-pxe` and the preseed keys.
+
+      FIXED as a SETTING defaulting to bypass (Bryan's call): engine gains
+      `bypass_driver=True` on stage/apply, surfaced as `bypass_update_driver`
+      on the stage/apply API bodies (optional, so existing clients keep
+      working).  Default-on because an operator clicking Update has asked US to
+      update the host; turning it off is supported and then fails loudly on such
+      a host rather than silently doing nothing.
+
+      ROLLBACK DELIBERATELY NEVER GETS THE FLAG — `rpm-ostree rollback` rejects
+      it ("error: Unknown option --bypass-driver"), so a uniform application
+      would have BROKEN the one path that already worked.  Verified per
+      subcommand on the live host: upgrade/deploy/rebase accept it, rollback
+      does not.  That is only known because it was tested rather than assumed.
+
+      Re-run after the fix, with the rebuilt engine's unedited argv:
+      `sudo rpm-ostree upgrade --bypass-driver` → exit 0.  image_mode_engine
+      1.1.3 → 1.1.4; 32 engine tests + 14 OSS API tests pass.
+
+      bootc leg RUN 2026-08-24 on a REAL bootc host — CentOS Stream 9,
+      bootc 1.16.6, built with `bootc install to-disk --via-loopback`.
+
+      NOT on Fedora CoreOS, which was tried first and rejected as a target:
+      FCOS reports a proper `BootcHost` and carries bootc 1.16.4, but
+      `bootc upgrade` refuses ("containers-policy.json specifies a default of
+      `insecureAcceptAnything`") and `bootc rollback` refuses ("Rollback is not
+      container image based") — its deployments belong to the ostree/rpm-ostree
+      stack, so bootc is a compatibility shim there, not the mechanism.  A pass
+      on FCOS would have been a pass on the rig, not the product.
+
+      SECOND DEFECT FOUND: the rebase path emitted
+      `bootc switch --apply=false <ref>` and bootc REJECTS it —
+
+          Usage: bootc switch --apply <TARGET>
+          exit 2
+
+      `--apply` is a BARE boolean on both `switch` and `upgrade`; there is no
+      `=false` form.  The no-reboot stage is simply to OMIT it, confirmed on the
+      host: `bootc switch <ref>` returned "Queued for next boot", `status.staged`
+      populated, uptime unchanged.  So `build_image_stage_plan('bootc',
+      target_ref=...)` — the rebase path — could never have worked on any bootc
+      that parses flags this way, and the test asserted the broken string.
+      Fixed; `--apply=` is now forbidden across every bootc plan by
+      `test_no_bootc_argv_uses_a_valued_apply_flag`.
+
+      Full cycle then validated with the corrected argv: switch to c10s →
+      reboot → booted CentOS Stream **10** → `sudo bootc rollback` (exit 0,
+      "Next boot: rollback deployment") → reboot → back on **9**, image
+      `c9s`.  image_mode_engine 1.1.4 → 1.1.5; 33 engine + 14 OSS API tests
+      pass.
+
+      rpm-ostree UPDATE path closed 2026-08-24 with a real version change,
+      after the first pass could only show "No updates available".  Forced one
+      by deploying the previous stable BY DIGEST so the origin stayed `:stable`
+      and a later upgrade had somewhere to go — `rpm-ostree deploy <version>`
+      does NOT work on container-native FCOS (it builds `image@<arg>` and fails
+      with "invalid reference format"); the digest came from quay's tag API.
+      Then, with the engine's UNMODIFIED argv:
+
+          44.20260720.3.1  (older, booted)
+          sudo rpm-ostree upgrade --bypass-driver   -> 42 upgraded, staged,
+                                                       NO reboot (correct stage
+                                                       semantics), exit 0
+          reboot                                    -> booted 44.20260802.3.1
+          sudo rpm-ostree rollback                  -> exit 0
+          reboot                                    -> back on 44.20260720.3.1
+
+      So both backends are now proven across update AND rollback with a genuine
+      image/version change on each: bootc c9s -> c10s -> c9s, rpm-ostree
+      .20260720 -> .20260802 -> .20260720.
+
+      Rig note for whoever repeats this: on an Ubuntu build host
+      `bootc-image-builder` fails under AppArmor
+      (`mount: /run/osbuild/containers/storage: permission denied`, even
+      `--privileged`); `bootc install to-disk --via-loopback` works and is the
+      simpler path.  Use its `--root-ssh-authorized-keys` — libguestfs cannot
+      inspect an ostree image ("no operating systems were found"), so
+      `virt-customize --ssh-inject` is not available as a fallback.)*
+- [x] **Sign `repo.sysmanage.org` and drop `[trusted=yes]`** — the agent apt
       repo is currently consumed with signature verification DISABLED, both in
       the documented install line and in the agent-install commands the
       provisioning engines generate (Debian's channel, since the Launchpad PPA
@@ -6429,6 +6543,28 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       Touches `agent_install.pxi` in `virtualization_engine`,
       `container_engine` and `provisioning_engine` (three verbatim copies of
       the same table), plus the sysmanage-docs install instructions.
+
+      *(DONE — landed 2026-08-16, checkbox was simply stale; VERIFIED end to end
+      2026-08-24 rather than taken on trust:
+        * all three `agent_install.pxi` copies fetch the keyring over HTTPS and
+          emit `deb [signed-by=/usr/share/keyrings/sysmanage-archive-keyring.gpg]`
+          — `tests/test_agent_install_sync.py` passes, so the triplication cannot
+          have drifted;
+        * the keyring is published (HTTP 200, 2869 bytes) and `dists/stable/`
+          carries both `InRelease` and `Release.gpg`;
+        * `gpgv --keyring <published key> InRelease` returns **Good signature**
+          from "SysManage Package Signing", using signing subkey
+          `A307 9230 691A A2FB 02B6 112A 4B12 D2FD 5A46 E21E` under primary
+          `896E ED43 9F5E 9BB1 FCA6 69A5 E033 E691 377F 0AE3` — the fingerprint
+          the docs tell users to check.  Signature timestamped the morning of
+          2026-08-24, so publishing re-signs.
+      The remaining `trusted=yes` in the engines is the PRIVATE-MIRROR shape
+      (`_CHANNEL_MIRROR`), which is deliberate and documented: an air-gap media
+      set is signature-verified at ingestion and the local mirror is not
+      re-signed.  Not the public CDN path this item was about.
+      One genuine leftover found and fixed: `sysmanage-docs/README.md` still
+      documented the `[trusted=yes]` line — the user-facing
+      `docs/agent/installation.html` had been correct since 2026-08-16.)*
 - [ ] Docs + 14-language i18n complete
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**

@@ -1856,6 +1856,26 @@ jobs:
           #
           # Release files go LAST: apt reads Release, then fetches the indexes it
           # names, so those must already be live when a client sees the new one.
+          # pool/** FIRST, and with an explicit Cache-Control.  Two reasons:
+          #
+          #   1. CACHING.  Cloudflare caches by file EXTENSION by default and
+          #      ".deb" is not on that list, so with no Cache-Control from the
+          #      origin every package answered "cf-cache-status: DYNAMIC" --
+          #      measured 2026-08-24, on repeat requests, so it was not a cold
+          #      cache.  Every install pulled from R2 across the ocean.  A pool
+          #      object is immutable BY CONSTRUCTION (each version is its own
+          #      filename, and prune-r2 deletes rather than rewrites), so it can
+          #      say so and be cached for a year.
+          #   2. ORDERING.  Packages must be live before any index names them,
+          #      the same argument that puts Release last.
+          #
+          # Scoped to pool/ ON PURPOSE.  dists/** MUST stay uncached: those files
+          # are rewritten every release, and a stale Release is exactly the
+          # 2026-08-07 outage ("File has unexpected size").
+          s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
+            --exclude "*" --include "*/pool/*" \
+            --cache-control "public, max-age=31536000, immutable"
+
           s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors \
             --exclude "*/dists/*/Release" \
             --exclude "*/dists/*/Release.gpg" \
