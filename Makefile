@@ -1,7 +1,7 @@
 # SysManage Server Makefile
 # Provides testing and linting for Python backend and TypeScript frontend
 
-.PHONY: check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
+.PHONY: check-black check-msi-guids provision-bootstrap migrate-tenants check-migrations test test-python test-vite test-ui test-playwright test-e2e test-performance lint lint-python lint-typescript security security-full security-python security-frontend security-secrets security-semgrep security-upgrades sonarqube-scan install-sonar-scanner sonarqube-update-install clean build setup install-dev migrate help start stop start-openbao stop-openbao status-openbao start-telemetry stop-telemetry status-telemetry installer installer-deb installer-alpine installer-freebsd installer-macos installer-msi installer-msi-x64 installer-msi-arm64 installer-msi-all sbom snap snap-clean snap-install snap-uninstall deploy-check-deps checksums release-notes deploy-launchpad deploy-obs deploy-copr deploy-snap deploy-docs-repo release-local translate translate-dry translate-check
 
 # Default target
 help:
@@ -150,8 +150,23 @@ ifeq ($(OS),Windows_NT)
     # the cmd-batch recipes below.) The Unix branch keeps the default /bin/sh.
     SHELL := cmd.exe
     .SHELLFLAGS := /c
-    PYTHON := python
-    PIP := pip
+    # Point at the venv EXPLICITLY, the same way the Unix branch does.  These
+    # were a bare "python"/"pip", i.e. whatever happened to be on PATH -- so
+    # every recipe ran against the venv only when the dev had activated it, and
+    # against the system interpreter otherwise.  That is how ``make
+    # format-python`` reported "all files unchanged" using system black 26.5.1
+    # while the git hooks, which resolve .venv/Scripts/python.exe directly,
+    # found no black at all and failed (2026-08-24).  A pinned formatter in
+    # requirements.txt means nothing if the tool that runs it is chosen by PATH.
+    #
+    # NOTE the BACKSLASHES: cmd.exe cannot execute a path containing forward
+    # slashes -- ".venv/Scripts/python.exe" is parsed as a command named
+    # ".venv" and fails with "is not recognized".  Every other path in this
+    # file uses forward slashes because make itself accepts them; these two are
+    # handed to the shell as the program to run, so they cannot.
+    VENV_BIN := $(VENV)\Scripts
+    PYTHON := $(VENV_BIN)\python.exe
+    PIP := $(VENV_BIN)\pip.exe
     SEMGREP := semgrep
     VENV_ACTIVATE := $(VENV)/Scripts/activate
     # Native-ARM64 build-env prefix for pip: put Rust (cargo) on PATH and build
@@ -1117,7 +1132,34 @@ clean-whitespace: $(VENV_ACTIVATE)
 # target now closes that loop: black still runs (so ``make lint``
 # doubles as a fix-it command) but a pre-flight ``--check`` decides
 # whether to fail at the end.
-lint-python: $(VENV_ACTIVATE) clean-whitespace
+# Preflight: is black even installed?
+#
+# ``black --check`` exits non-zero for BOTH "these files need reformatting" and
+# "No module named black", and the recipes below discard its stderr -- so a
+# machine with no black in the venv was told "[FAIL] black reformatted files in
+# your working tree", which was not true and sent the dev hunting for
+# formatting drift that did not exist (2026-08-24).  Diagnose the two apart
+# BEFORE running the check that cannot.
+check-black:
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON) -c "import black" >nul 2>&1 || ( \
+		echo. & \
+		echo [FAIL] black is NOT INSTALLED in $(PYTHON). & \
+		echo        Nothing was reformatted - the formatter never ran. & \
+		echo        Fix: $(PYTHON) -m pip install -r requirements-dev.txt & \
+		echo. & \
+		exit /b 1 )
+else
+	@$(PYTHON) -c "import black" >/dev/null 2>&1 || { \
+		echo ""; \
+		echo "[FAIL] black is NOT INSTALLED in $(PYTHON)."; \
+		echo "       Nothing was reformatted - the formatter never ran."; \
+		echo "       Fix: $(PYTHON) -m pip install -r requirements-dev.txt"; \
+		echo ""; \
+		exit 1; }
+endif
+
+lint-python: $(VENV_ACTIVATE) clean-whitespace check-black
 	@echo "=== Python Linting ==="
 	@echo "Running black..."
 ifeq ($(OS),Windows_NT)

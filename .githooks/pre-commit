@@ -59,9 +59,33 @@ else
     PYTHON=python3
 fi
 
-if ! "${PYTHON}" -m black --check ${STAGED} > /dev/null 2>&1; then
+# Is black actually installed?  ``black --check`` exits non-zero both for real
+# formatting drift and for "No module named black", and this hook used to
+# discard its output -- so a venv without black produced "black would reformat
+# one or more staged Python files" on a tree black had never looked at
+# (2026-08-24).  Separate the two before reporting anything.
+if ! "${PYTHON}" -c "import black" > /dev/null 2>&1; then
+    echo ""
+    echo "[pre-commit] black is NOT INSTALLED in ${PYTHON}."
+    echo "             Your files are fine -- the formatter never ran."
+    echo ""
+    echo "                 ${PYTHON} -m pip install -r requirements-dev.txt"
+    echo ""
+    exit 1
+fi
+
+# ``set -e`` is on: capture the status explicitly, or a failing black would
+# abort the hook before it could report anything.
+set +e
+BLACK_OUT="$("${PYTHON}" -m black --check ${STAGED} 2>&1)"
+BLACK_RC=$?
+set -e
+
+if [ "${BLACK_RC}" -ne 0 ]; then
     echo ""
     echo "[pre-commit] black would reformat one or more staged Python files."
+    echo ""
+    echo "${BLACK_OUT}"
     echo "             Fix locally with:"
     echo ""
     echo "                 make format        # or: $(echo "${PYTHON}") -m black backend/ tests/"
