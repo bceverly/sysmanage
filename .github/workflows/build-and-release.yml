@@ -1881,6 +1881,33 @@ jobs:
             --exclude "*/dists/*/Release.gpg" \
             --exclude "*/dists/*/InRelease"
           s3 sync repo/server/ "s3://${R2_BUCKET}/server/" --only-show-errors
+
+          # PROVE the package landed.  Every step above is fail-open: the two
+          # `cp` lines end in `2>/dev/null || true`, and `s3 sync` says nothing
+          # on success, so a package that never reaches the bucket produces a
+          # completely green release.
+          #
+          # That is not hypothetical.  Versions 3.5.1.16 through .28 published a
+          # .deb.sha256 and NO .deb -- five releases -- while dpkg-scanpackages
+          # indexed the local file and the apt index advertised
+          # "Filename: pool/main/<v>/sysmanage_<v>_all.deb" pointing at a 404.
+          # An apt user got "package not found" from a repo that looked healthy,
+          # was correctly signed, and parsed cleanly.  Found 2026-08-25 only
+          # because an unrelated cache audit listed the bucket.
+          #
+          # Checking the BUCKET, not the local tree: the local file provably
+          # existed (the index was built from it), so only the remote answers
+          # the question that matters.
+          DEB_KEY="server/deb/pool/main/$VERSION-1/sysmanage_${VERSION}-1_all.deb"
+          if ! s3 ls "s3://${R2_BUCKET}/$DEB_KEY" >/dev/null 2>&1; then
+            echo "::error::published .deb missing from R2: $DEB_KEY"
+            echo "Local pool contents:"
+            ls -la "repo/server/deb/pool/main/$VERSION-1/" || true
+            echo "Bucket pool contents for this version:"
+            s3 ls "s3://${R2_BUCKET}/server/deb/pool/main/$VERSION-1/" || true
+            exit 1
+          fi
+          echo "verified in R2: $DEB_KEY"
           echo "Published SysManage Server v$VERSION to https://repo.sysmanage.org/server/"
 
       # Cloudflare fronts R2 and caches NEGATIVE responses: a GET for a path

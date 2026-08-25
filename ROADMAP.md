@@ -6229,7 +6229,7 @@ close the gap between our output and the parsers that consume it.
       each BSD — which is a real operational cost of signing at build time.
 
 
-- [ ] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
+- [x] **Cache `pool/**` at the CDN (latency/resilience — NOT a cost issue).**
       Measured 2026-08-04: nothing on `repo.sysmanage.org` is cached — not the
       indexes (correct) and not the packages (suboptimal). Cost impact is
       negligible and was overstated when first logged: R2 egress is free and a
@@ -6244,6 +6244,38 @@ close the gap between our output and the parsers that consume it.
       Workers & Pages for a `repo.sysmanage.org/*` route and R2 -> bucket ->
       Custom Domains. `pool/**` is safe to cache indefinitely: every version is
       its own filename, so no path's content ever changes.
+
+      *(DONE 2026-08-25 — and the paragraph above is WRONG, which is the useful
+      part of this entry.  Both the 2026-08-04 finding and a full re-diagnosis
+      on 08-25 were measured with `curl -sI`, i.e. HEAD.  Cloudflare reports
+      `cf-cache-status: DYNAMIC` for HEAD on this hostname no matter what is in
+      cache.  Every conclusion drawn from that — "nothing is cached", "the rules
+      do not govern this hostname", "a Worker must be intercepting" — was an
+      artifact of the probe.
+
+      The same objects measured with a real GET:
+
+          keyring    HIT, age 55855   (cached ~15.5h, before any change today)
+          pool .deb  MISS -> HIT, age 1
+          InRelease  DYNAMIC          (correctly NOT cached)
+
+      So the existing two Cache Rules were doing their job all along: #1
+      bypasses `/dists/`, `/repodata/`, `APKINDEX.tar.gz`; #2 makes everything
+      else eligible.  Workers & Pages is empty — there was never a Worker.  No
+      third rule is needed and one added during this investigation was removed.
+
+      What DID change, and is worth keeping: the release pipelines
+      (`sysmanage`, `sysmanage-agent`) now stamp
+      `Cache-Control: public, max-age=31536000, immutable` on `pool/**` as they
+      upload, and a one-shot `backfill-pool-cache-control.yml` in sysmanage-docs
+      applied it to what was already published.  That pins the edge TTL to a
+      year from the ORIGIN rather than leaning on a dashboard rule's default,
+      which is the correct semantic for objects that are immutable by
+      construction — but it was not the fix, because nothing was broken.
+
+      LESSON, and the reason this is written out: `curl -sI` is the wrong
+      instrument for a cache question.  Use a real GET.  A HEAD probe cost two
+      separate investigations and a bucket-wide metadata rewrite.)*
 - [x] **Verify the agent is actually privileged after a provisioned install.**
       *(Both DEFECTS fixed 2026-08-12; the VERIFY step still needs a provisioned host. The probe ran `sudo -n systemctl is-active` and accepted any exit but 255 — but `sudo -n` exits 1 when it DENIES, and systemctl exits 3 for an inactive unit, so "denied" and "worked" were indistinguishable and a host without sudo reported itself privileged. Now `sudo -n true`, which cannot fail on its own. Separately the sudoers granted systemctl only as /bin/systemctl, and sudoers matches the LITERAL path while /bin is a symlink to usr/bin on merged-/usr distros — so the rule never authorised the /usr/bin/systemctl the agent actually invokes. Fixed for ubuntu/centos/opensuse (Alpine and the BSDs have a real /bin), all still passing visudo -c.)*
       `is_privileged` is computed from a sudo probe that treats any exit code
