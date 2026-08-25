@@ -212,3 +212,28 @@ project's `i18n_autotag`/`i18n_validate`) or empty `msgstr` (gettext, via
 `xgettext`/`msgmerge`). So after adding English UI/doc/log strings, run the
 relevant `--project` backfill and the new strings get translated automatically —
 nothing else to wire up.
+
+#### Write strings the guard can actually pass
+
+The placeholder guard is strict by design, and how you AUTHOR a string decides
+whether it can pass. Two limits, measured against this service on 2026-08-25:
+
+- **No inline markup at all inside a translatable string.** Measured across 13
+  locales on 2026-08-25: four tags failed almost everywhere, and TWO tags still
+  failed in about a third of locales (13 of the 14 stubborn failures were
+  two-tag strings). Zero tags passed. Keep the `<code>`/`<strong>` — put it
+  outside the translated span.
+- **Use literal `—` / `’` / `“ ”`, not `&mdash;` / `&rsquo;` / `&ldquo;`.**
+  Entities are matched by `_PLACEHOLDER_RE` and must be reproduced exactly, so
+  each one is another way to fail — for nothing, since the catalogs store UTF-8.
+  Keep `&lt;`, `&gt;`, `&amp;`: those are structural.
+
+**Failures are deterministic per (string, locale).** The same string sent three
+times to the same target returns the identical verdict. A key that fails for
+`ko` may pass for `nl`, which looks like randomness across a run summary and
+tempts you into re-running until it clears — it never does. The idempotent
+client above exists so re-running is cheap after you CHANGE something, not as a
+way to wait out a bad string. If a key is still in the gap list, rewrite it.
+
+The docs repo's README has the long version with before/after examples:
+`sysmanage-docs/README.md` -> "Writing translatable strings".
