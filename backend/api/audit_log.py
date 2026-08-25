@@ -461,7 +461,11 @@ def _stream_audit_csv(entries):
 # operator-irrelevant to fit alongside the description.  Operators who
 # need the wider set should still use CSV.
 _PDF_COLUMNS = [
-    ("Timestamp", _fmt_iso, "timestamp"),
+    # Every getter here takes the ENTRY, not a column value.  This one read
+    # ``_fmt_iso`` directly, so it was called with the AuditLog row and raised
+    # AttributeError ("no attribute 'isoformat'") on the first data row -- any
+    # non-empty PDF export died.  Only the empty-log case ever worked.
+    ("Timestamp", lambda e: _fmt_iso(e.timestamp), "timestamp"),
     ("User", lambda e: e.username or "", "username"),
     ("Action", lambda e: e.action_type or "", "action_type"),
     ("Entity", lambda e: e.entity_type or "", "entity_type"),

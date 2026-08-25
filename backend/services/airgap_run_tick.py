@@ -476,7 +476,14 @@ def _advance_queued_to_mirroring(db, run, engine) -> None:
     try:
         req = _build_collection_request(run)
         source_snapshots = _snapshot_paths_for_targets(db, run)
-        if any(not v for v in source_snapshots.values()):
+        # An EMPTY map, not just an empty value, is the mirror_root_path case:
+        # _snapshot_paths_for_targets bails out wholesale before it maps any
+        # target.  ``any()`` over no values is False, so checking only the
+        # values let an unset root through to the engine with nothing to rsync
+        # from -- a plan that either blows up opaquely or stages nothing and
+        # produces a hollow ISO.  _resolve_dispatch_host has already proven
+        # run.targets is non-empty, so an empty map here has no other cause.
+        if not source_snapshots or any(not v for v in source_snapshots.values()):
             _mark_failed(
                 run,
                 "could not resolve snapshot path for one or more "

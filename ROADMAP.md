@@ -497,7 +497,8 @@ the ladder front-loads gains then tapers:
 **OSS frontend line-coverage ramp to Python parity (revised):** rather than
 the coarse table rungs above, the OSS frontend now climbs its enforced **line**
 floor **+10 percentage points per stabilization phase until it is in sync with
-the Python backend's 75% gate** (`--cov-fail-under=75`, a line-coverage number).
+the Python backend's gate** (`--cov-fail-under=83` as of 2026-08-25, a
+line-coverage number).
 The floor follows measured coverage — each rung is a test-writing push first,
 then the floor bump — so `make test` never goes red on the ratchet itself:
 
@@ -507,7 +508,7 @@ then the floor bump — so `make test` never goes red on the ratchet itself:
 | Next stabilization | 50% | push measured lines past ~52%, then raise floor to 50 |
 | +1 | 60% | |
 | +1 | 70% | |
-| **Parity phase** | **75%** | in sync with the Python `--cov-fail-under=75` gate |
+| **Parity phase** | **83%** | in sync with the Python `--cov-fail-under=83` gate |
 
 `statements` / `functions` / `branches` trail on their own tracks (as they do
 for the backend, whose gate is also line coverage) and are ratcheted to just
@@ -5234,9 +5235,11 @@ in the English-passthrough budget (run the GPU `make translate` to localize if w
       final consolidated `make test` re-run confirms it end-to-end.)*
 - [x] **Backend coverage ratchet enforced** — `--cov-fail-under` gate in
       CI/Makefile across both Python test trees (`tests/` + `backend/tests/`);
-      floor at the current measured number (≥70%). *(Done — `make test-python`
+      floor at the current measured number. *(Done — `make test-python`
       accumulates `tests/` then `backend/tests/` via `--cov-append` and gates the
-      final run with `--cov-fail-under=70`; `make test` runs `test-python`.)*
+      final run with `--cov-fail-under`; `make test` runs `test-python`.  The
+      floor has been ratcheted 70 -> 75 -> 80 -> **83** as measured coverage
+      rose; measured is 85.19% as of 2026-08-25.)*
 - [x] **Frontend coverage ratchet installed** — vitest
       `coverage.thresholds` set for all three scopes with floors at the
       measured values; see "Frontend Test Coverage"
@@ -6460,8 +6463,276 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
 ### Exit Criteria
 
-- [ ] Content View publish/promote validated on apt + dnf + snap + container content
-- [ ] Provisioning validated on ≥1 bare-metal path + ≥2 compute providers
+- [x] Content View publish/promote validated on apt + dnf + snap + container content
+
+      *(HALF DONE 2026-08-25 — apt + dnf VALIDATED; snap + container are NOT
+      WRITTEN.  New harness `scripts/content_lifecycle_validate.py`, 44/44
+      checks green.
+
+      What the Phase 16 spike actually covered was narrower than it looked: apt
+      only, publish only, and it SIMULATED the promotion with a hand-made
+      symlink instead of running the engine's plan.  The new harness drives the
+      real builders and closes both gaps.  Per content type it builds a
+      one-package mirror, snapshots it the repository_mirroring way, publishes
+      TWO immutable versions through `build_publish_materialize_plan`, verifies
+      the package + regenerated native metadata landed and the store is frozen
+      `a-w`, then promotes through `build_set_env_symlink_plan`: library -> v1
+      -> v2 -> BACK to v1 (the backward re-promote is what a naive `ln` without
+      -f gets wrong), plus a second environment promoted independently and a
+      check that it did not disturb the first.  RPM tooling is absent on a
+      Debian workstation, so any plan command whose binary is missing runs in a
+      pinned ubuntu:24.04 container with the work tree bind-mounted at the SAME
+      path — the engine's plan is never rewritten, only relocated.
+
+      CORRECTION, same day: an earlier version of this note claimed snap and
+      container were UNWRITTEN.  That was wrong, and wrong in an instructive
+      way.  It was concluded by calling
+      `content_lifecycle_engine.build_publish_materialize_plan` with
+      `package_manager="snap"` and watching it raise "unsupported
+      package_manager" — but that switch is only ever fed PACKAGE-REPO mirrors.
+      Snap and container content are not package managers and never travel
+      through it.
+
+      They are implemented, and wired: `snap_proxy_engine.build_snap_materialize_plan`
+      and `oci_proxy_engine.build_image_materialize_plan` copy captured blobs
+      into `{store_parent}/snaps` and `{store_parent}/images`, and
+      `backend/api/content_lifecycle.py::_build_regular_publish` appends both to
+      the SAME host plan right after the per-mirror repo materialize (via
+      `append_snap_materialize` / `append_image_materialize`), each a no-op
+      unless its engine is licensed and that content was captured.  The
+      `repo_mirror_result_handlers` comments about "a later content-view publish"
+      were accurate; my reading of the engine was not.
+
+      Lesson worth keeping: this is the same trap the 2026-08-24 provider note
+      called out — "read the registry at runtime, not the source".  One engine
+      function is not the feature; the orchestration lives in the OSS layer.
+
+      ALL FOUR CONTENT TYPES NOW VALIDATED — 67/67 checks, harness extended to
+      cover snap + container through the real engines.  For each: a captured
+      tree is staged the way its capture plan leaves it (snap = the .snap blob
+      AND its .assert assertion, since a blob without its assertion will not
+      install on a confined system; container = an OCI layout with oci-layout,
+      index.json and a blob under blobs/sha256/), materialized via
+      `build_snap_materialize_plan` / `build_image_materialize_plan` into
+      `{store_parent}/snaps` and `{store_parent}/images`, verified present and
+      frozen `a-w`, and then reached through the SAME promoted environment path
+      the packages use — the version store is one unit, which is what lets it
+      ride the air-gap ISO whole.  Negative paths too: an empty mirror list and
+      a `../` traversal in a mirror name are both refused by the engines.
+
+      The OSS glue was checked separately, since it is what decides whether the
+      content rides at all: `append_snap_materialize` / `append_image_materialize`
+      append exactly one materialize command when captured content + a licensed
+      engine + a store_parent are all present, and correctly no-op on each of
+      the three ways that can be false.
+
+      END-TO-END ATTEMPTED 2026-08-25 — and it found a BLOCKER that makes this
+      checkbox uncloseable as the code stands.
+
+      Rig: two libvirt guests (`cv-mirror`, `cv-client`) provisioned + auto-
+      enrolled into tenant e74f31a8 the way the provider validation does, both
+      approved with real certificates.  A structurally-real apt repo
+      (`dists/stable/{Release,main/binary-amd64/Packages}` + `pool/`) staged on
+      cv-mirror, registered through `POST /mirror-repositories`, snapshotted
+      through `POST /mirror-repositories/{id}/snapshot` — that all WORKED.  A
+      content view was created and `POST /content-views/{id}/publish` returned
+      200 and dispatched.
+
+      Then the agent refused it.  THE CONTENT-LIFECYCLE PLANS USE BINARIES THE
+      AGENT'S OWN SUDOERS DOES NOT GRANT.  Audited every plan the engines emit;
+      8 commands are denied, across 4 binaries:
+
+        sudo test    x5  publish (apt AND dnf), promote, snap materialize,
+                         image materialize — it is the FIRST command in each,
+                         so every one of those paths dies immediately
+        sudo sh      x1  apt metadata regen ("cd X && apt-ftparchive ... > ...")
+        sudo ln      x1  promote — i.e. the environment flip ITSELF
+        sudo nginx   x1  serving config validation
+
+      Measured, not inferred: `sudo apt-get`, `sudo mkdir`, `sudo chmod`,
+      `sudo rsync`, `sudo install` all returned 0 on the live agent; `sudo sh`
+      and `sudo test` returned "a terminal is required to read the password".
+      The mirror SNAPSHOT plan succeeded precisely because its three commands
+      (mkdir/rsync/chmod) happen to be permitted.
+
+      Note the asymmetry that gives the game away: the dnf path calls
+      `createrepo_c` directly and `createrepo_c` IS in the sudoers, so that
+      branch was written with the bare-binary policy in mind.  The apt branch
+      shells out for a redirect and was not.
+
+      This is exactly what the direct-plan harness could NOT catch — it strips
+      `sudo` and runs as the local user, so all 67 of its checks pass against
+      logic that cannot execute on a real agent.  It is also why this feature
+      had never been run end to end.
+
+      FIXED + RE-RUN 2026-08-25, and the full chain now passes end to end.
+
+      ENGINE: the apt metadata step no longer shells out as root.  It now
+      generates the index UNPRIVILEGED (`sh` with no sudo is unrestricted, and
+      the store is world-readable) into a temp file and places it with
+      `install`, which was already granted.  `_repo_metadata_command` returns a
+      LIST now; both call sites `extend()`.  A regression guard
+      (`TestNoRootShellAnywhere`) asserts no publish plan for any package
+      manager ever runs sudo sh/bash/zsh/env.  190 engine tests pass.
+
+      SUDOERS: `test`, `ln` and `nginx` added to ALL SIX shipped installers
+      (alpine, centos, freebsd, netbsd, opensuse, ubuntu), each `visudo -c`
+      clean, with BSD vs Linux paths handled separately.  Deliberately NO `sh`.
+      `test` is a pure predicate that cannot write or execute, and `find` — far
+      more disclosive — was already granted; `ln` IS the promotion itself;
+      `nginx` only validates the config it just wrote.
+
+      RE-RUN against the live rig with the REAL shipped sudoers installed (the
+      test-rig grant removed first):
+        publish v1        8/8 commands exit 0 on the agent
+        promote + serve   test / ln / nginx all exit 0
+        HTTP              dists/stable/Release, .../Packages, pool/*.deb all 200
+        client            apt-get update + install -> cvdemo 1.0 INSTALLED
+        publish v2 + promote library -> v2   10/10 exit 0
+        client (UNCHANGED sources.list, same URL) -> cvdemo 2.0 INSTALLED
+        promote BACK to v1 -> environment serves 1.0 again
+      That last pair is the discriminating test: the client followed the
+      environment with no client-side change at all, which is the difference
+      between a content view and a directory behind nginx.
+
+      TWO THINGS LEARNED ON THE WAY, neither a defect:
+        * `service_actions` (enable/start nginx) is refused unless the agent
+          runs in PRIVILEGED mode — "Service control requires privileged mode".
+          A real mirror host would be privileged; the rig agent was not, so
+          nginx was brought up with the already-granted `systemctl` verbs.
+        * The generated nginx site sets `server_name <fqdn>`, so fetching by IP
+          falls through to the default server and 404s.  Not a bug — but worth
+          knowing before debugging a "content view not serving" report.
+
+      SHIPPED + API-DRIVEN RUN GREEN 2026-08-25.  content_lifecycle_engine
+      v1.1.13 built, signed and published; the server now loads it and the
+      whole flow runs through the REAL API:
+        POST /mirror-repositories/{id}/snapshot   -> 200, agent snapshot OK
+        POST /content-views/{id}/publish          -> 200, agent ran 8/8 exit 0
+        POST /content-views/{id}/promote          -> 200, library -> production
+        client apt-get update + install from the PRODUCTION env URL -> cvdemo 2.0
+      Both environments serve concurrently over nginx off one version store.
+
+      ONE MORE DEFECT FOUND GETTING THERE, in the release tooling rather than
+      the product: `scripts/install-modules-local.sh` copied only `*.so` and
+      `metadata.json` out of the bundle and NOT `MANIFEST.json` / `MANIFEST.sig`.
+      Module verification is fail-closed, so a locally-refreshed engine ended up
+      as a NEW .so beside the PREVIOUS signature: it failed verification, was
+      discarded, and the loader silently re-downloaded whatever the license
+      server still had.  `make build` printed "content_lifecycle_engine
+      1.1.12 -> 1.1.13" and the next restart quietly ran 1.1.12 again -- twice,
+      before this was spotted.  Since module signing landed (2026-08-17/18)
+      that script has been a no-op on any signing-enabled server, which is
+      precisely the staleness the Makefile comment above it says it exists to
+      prevent.  Fixed: the manifest pair is now copied too, LAST, so the
+      intermediate state fails closed rather than pairing a stale .so with a
+      manifest that no longer describes it.
+
+      Note also that publishing is TWO hops: `make publish-modules` uploads to
+      R2, and the license server only serves it after its own `sudo make
+      update`.  A 404 for a version that was definitely just published means
+      the second hop has not run -- the artifact is in R2, not yet on the
+      license server.
+
+      Original finding, kept for the record — the fix was a decision, not a
+      typo, and it touched the security boundary:
+        * `sudo sh` must NOT be granted; it is arbitrary root execution and
+          defeats the entire point of the bare-binary policy.
+        * `sudo test` is trivially replaceable — `find <path> -maxdepth 0 -type d`
+          uses an already-permitted binary, or drop the guard and let the rsync
+          fail (worse error, no new grant).
+        * `sudo ln` and `sudo nginx` are plausible bare-binary additions,
+          consistent with how `createrepo_c` / `reposync` are already granted.
+        * the apt redirect needs either an `apt-ftparchive` grant plus a
+          redirect-capable plan primitive, or a rewrite that avoids the shell.
+
+      Everything downstream of execution is already covered by
+      `content_lifecycle_validate.py` (67/67), so what remains once the grants
+      are settled is a re-run of this rig: publish -> promote -> serve ->
+      repoint cv-client -> `apt-get install` -> flip the environment and prove
+      the same unchanged client follows it.)*
+- [x] Provisioning validated on ≥1 bare-metal path + ≥2 compute providers
+
+      *(COMPUTE PROVIDERS VALIDATED 2026-08-25 — both drivers exercised against
+      REAL infrastructure for the first time; the 2026-08-24 correction's "no
+      test has ever reached a real libvirt or a real Proxmox" no longer holds.
+      Neither harness was written for this: `scripts/libvirt_provider_validate.py`
+      and `scripts/proxmox_provider_validate.py` have existed since 2025-07-30
+      and had simply never been RUN.
+
+      LIBVIRT — real `qemu:///system`, pool `default`, NAT network `default`,
+      Ubuntu 22.04 cloud image already staged (so the cached-base path, not the
+      download path).  create -> domain running in 0.7s; the guest booted and
+      its own cloud-init reported `Datasource DataSourceNoCloud [seed=/dev/sr0]`
+      and finished in 18.6s, applying the hostname from the driver-staged seed
+      and running a marker `runcmd` — i.e. the seed this driver builds and
+      uploads is genuinely consumable by real cloud-init, not merely
+      well-formed.  status -> running; console -> correct virsh command; destroy
+      -> domain undefined, overlay + seed volumes deleted, cached base image
+      correctly PRESERVED.  A separate CirrOS run also exercised the
+      `_acquire_base_volume` download/convert/upload path end to end.
+      NOTE for anyone repeating this: CirrOS reports `datasource: None` even
+      with a valid `cidata` ISO attached — that is CirrOS's toy cloud-init, NOT
+      a seed defect.  The ISO was extracted and verified (label `cidata`,
+      `/meta-data` + `/user-data` correct) before concluding that.
+
+      PROXMOX — real Proxmox VE 8.4.0 node `pmx` (the pre-existing
+      `sysmanage-proxmox` libvirt VM, built 2025-07-31 and never used).  Token
+      auth -> version + nodes; full clone of template 9000 -> vmid 100 ->
+      started -> status running -> stopped + deleted.  Verified clean afterwards
+      (only the template remains) and the throwaway API token was removed.
+
+      ONE DEFECT FOUND AND FIXED, in BOTH drivers.  Connection failures leaked
+      the underlying library's exception instead of the engine's typed error:
+      libvirt gave `libvirtError: Cannot recv data: ssh: connect to host ...`
+      and Proxmox gave `ConnectError: [Errno 113] No route to host`.  The
+      service layer records `str(exc)` onto the job row, so an operator whose
+      node was unreachable — the single most common failure on a NEW compute
+      resource — got bare transport text naming neither the provider nor the
+      endpoint, while every other error in these drivers is carefully worded.
+      Both connect paths now raise `ProvisioningServiceError` naming the URI and
+      keeping the cause.  340 engine tests still pass; the real-box lifecycle
+      re-ran green after the change; both new strings extracted into all 14
+      catalogs (untranslated, so `make translate` still owes them).
+
+      AUTO-ENROLL CLOSED 2026-08-25, on BOTH providers.  Server started, a real
+      tenant enrollment token minted per run (sme_..., single-use).
+
+      libvirt: provision -> cloud-init (`DataSourceNoCloud [seed=/dev/sr0]`) ->
+      `sysmanage-agent 3.5.1.28+ppa1~jammy1` installed from the PPA -> service
+      started -> WebSocket registration -> heartbeating.  Host landed in EXACTLY
+      ONE database, the tenant matching the token, `approval_status=pending`
+      (the correct default for a new host).
+
+      Proxmox: clone -> enrollment cloud-init SCP'd to the node's snippet
+      storage -> `cicustom` set -> boot -> agent installed -> enrolled ~160s
+      later, again in exactly one database and the right tenant.
+
+      TWO FINDINGS, neither a driver defect but both worth knowing:
+      * The `ubuntu-2404-ci` template ships a 3.5 GB disk and the harness passes
+        `disk_gib=0` ("keep the template's size").  The agent's dependency chain
+        (libpython3-dev, librados2, the virt-manager stack) overruns that: the
+        first two attempts died mid-apt with "No space left on device" at 98%
+        full and never enrolled.  Diagnosed by stopping the VM and mounting its
+        LV read-only on the node — `/etc/sysmanage-agent.yaml` was present and
+        the runcmd had run, which is what ruled the driver out.  `disk_gib=12`
+        enrolled first try.  Either grow the template or stop hardcoding 0 in
+        the harness's cicustom branch.
+      * `cicustom: user=` REPLACES Proxmox's generated user-data, so `ciuser` /
+        `sshkeys` set via set_config are silently ignored and there is no login
+        into an enrolling guest.  Deliberate (the engine's renderer is
+        login-less by design) but it leaves the console as the only diagnostic
+        route — and this template boots without `console=ttyS0`, so even that is
+        empty.  Mounting the disk was the only way in.
+
+      ONE REAL GAP, NOT FIXED: the Proxmox `create()` does not roll back a
+      partial create.  A clone that succeeds followed by a `set_config` that
+      fails (mine 400'd on an un-URL-encoded `sshkeys`) leaves an ORPHAN VM on
+      the node — I had to `qm destroy` it by hand.  The libvirt driver does the
+      opposite, deliberately cleaning up staged volumes on any failure ("roll
+      back staged volumes so the pool isn't littered on failure").  Proxmox
+      should match.  Related: `request()` reports "-> 400" without the API's
+      error body, which is exactly the part that says WHY.)*
       (the two are `libvirt` + `proxmox`, both implemented and registered but
       only ever mock-tested; no cloud account needed — see the corrected
       deferral note in Phase 18)
@@ -6598,7 +6869,70 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       documented the `[trusted=yes]` line — the user-facing
       `docs/agent/installation.html` had been correct since 2026-08-16.)*
 - [ ] Docs + 14-language i18n complete
-- [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
+      *(PARTIAL 2026-08-25 — the one identified gap is closed.  Added a
+      "Host Update Drivers (Zincati)" section to
+      `sysmanage-docs/docs/professional-plus/image-mode-hosts.html`: why
+      rpm-ostree refuses to act while Zincati is driving, that SysManage passes
+      `--bypass-driver` BY DEFAULT (without it Stage/Apply fail outright on
+      FCOS), the trade-off that both drivers are then live and Zincati may
+      still reboot on its own schedule, that bootc has no driver to bypass and
+      Rollback deliberately never gets the flag, and how to turn it off
+      (`bypass_update_driver: false` on the Stage/Apply request — API-only
+      today, the Image Mode tab does not expose it).  Six new
+      `docs.proplus.imagemode.driver.*` keys in en.json, seeded to all 14
+      locales; `--validate` and `make i18n-strict` green.  Awaiting
+      `make translate`.
+      i18n itself is already complete everywhere: docs `--validate` OK and
+      `make i18n-strict` green in sysmanage, sysmanage-agent and Pro+.
+      SWEEP COMPLETED 2026-08-25 — all 28 shipped Phase 19 items walked and
+      checked against the docs.  Three further gaps found and closed, one
+      false alarm, the rest correctly internal:
+
+      * `docs/agent/configuration.html` — the **WebSocket-to-HTTP-polling
+        fallback** was entirely undocumented.  Proxies, `ca_bundle` and
+        `verify_ssl` were covered, but nothing said what happens when a proxy
+        refuses the Upgrade: the agent silently switches to `POST
+        /api/agent/poll`, commands then arrive up to a poll interval late (5s
+        normally / 15s while the server errors), and it re-tests the WebSocket
+        every 15 minutes so fixing the proxy self-heals.  Now documented
+        including the exact log line to grep for.
+      * `docs/professional-plus/provisioning-engine.html` — new "BIOS and
+        UEFI Clients" section.  Two operator-visible facts had no home
+        anywhere: **Secure Boot must be OFF** on UEFI clients (the iPXE image
+        is unsigned, firmware rejects it before anything of ours runs, so
+        there is no error to see — and Secure Boot is the factory default),
+        and **ARM64 UEFI is deliberately not served** (x86-64 image only;
+        advertising it would hand a machine a binary it cannot execute).
+      * `docs/professional-plus/index.html` — new "How Modules Are Verified"
+        section on the Ed25519 module/plugin signing: identity-bound (not just
+        content), fail-closed, cache path checked on every start, no way to
+        disable.  Nothing for an operator to do, but it is the answer to the
+        supply-chain question a security review will ask.
+
+      FALSE ALARM: provisioned-host failure reporting IS documented
+      (provisioning-engine.html covers `agent_missing`, the disarm split, the
+      one-line reason and the log tail) — an earlier grep pattern of mine was
+      wrong, not the docs.  Correctly undocumented as internal: the
+      `available_packages` delta (protocol optimisation, invisible to
+      operators), the artifact validators, the bare-metal harness, the
+      `agent_install.pxi` de-duplication, the CDN pool caching, and the
+      `is_privileged` probe fix (a correctness fix to an already-documented
+      flag, not new surface).
+
+      ALSO FIXED: all six documentation callout classes (`info-box`,
+      `note-box`, `warning-box`, `caution-box`, `highlight-box`,
+      `conclusion-box`) were used 55 times across ~30 pages and NONE had a CSS
+      rule — every callout rendered as an unstyled div indistinguishable from
+      body copy, including existing security warnings.  Styled as one family
+      in `assets/css/style.css`; every variant verified at WCAG AA or better
+      (warning heading 5.85:1, caution 4.81:1, rest 6.7–13.1:1) and each
+      carries a distinct border AND heading colour so the distinction survives
+      greyscale and colour blindness.
+
+      24 new en.json keys total, seeded to all 14 locales (312 placeholders);
+      `--validate` and `make i18n-strict` both green.  Awaiting
+      `make translate`.)*
+- [x] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
       and the ratchet thresholds bumped to match
 
@@ -6611,7 +6945,7 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 
       | scope | floor today | measured today | this item's target | gap |
       | :---- | ----------: | -------------: | -----------------: | --: |
-      | backend (sysmanage) | 75% (`--cov-fail-under=75`) | **79.94%** | ~85% | ~5 pts |
+      | backend (sysmanage) | **83%** (`--cov-fail-under=83`, raised) | **85.19%** | ~85% | **DONE** |
       | OSS frontend | **50%** (raised) | **52.02%** (stmts 51.05%, funcs 43.67%, branches 33.06%) | floor 50% | **DONE** |
       | Pro+ `src/**` | 87% | passes its 87% floor | 55% | already met |
       | Pro+ `plugin-src/**` | 56% | passes its 56% floor | 50% | already met |
@@ -6620,6 +6954,48 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
       enforce, so nothing is owed there; only the backend and the OSS frontend
       carry real work.  Suites are green: OSS 972 tests / 91 files, Pro+ 403
       tests / 66 files.
+
+      BACKEND TARGET MET 2026-08-25: 79.94% -> **85.19%** (+5.25 pts, 2,273
+      lines newly covered; 7,835 tests green).  Two passes.
+
+      Pass 2 took six more modules to 100%: `api/diagnostics.py` (was 30%),
+      `api/auth_mfa.py` (34%), `api/audit_log.py` (37%),
+      `api/host_account_management.py` (28%), `api/user_preferences.py` (32%),
+      `api/cve_refresh_settings.py` (42%).  One more real defect found and
+      fixed: `audit_log._PDF_COLUMNS` gave the Timestamp column `_fmt_iso`
+      directly as its getter, but every getter in that table is called with
+      the ENTRY -- so `entry.isoformat()` raised AttributeError on the first
+      data row and any non-empty PDF audit export died.  Only the empty-log
+      case had ever worked.
+
+      Also fixed while stabilizing: module-level `uuid.uuid4()` constants
+      feeding `@pytest.mark.parametrize` ids made xdist workers disagree at
+      collection ("Different tests were collected between gw4 and gw5").  The
+      new suites use fixed UUID literals; do the same in any future one.
+
+      Pass 1: 79.94% -> 83.64% (+3.70 pts, 1,603 lines)
+      by taking eight modules to 100%: `api/child_host_creation_dispatch.py`
+      (was 20%), `services/airgap_run_tick.py` (0%), `api/repository_mirroring.py`
+      (24%), `services/repo_mirror_result_handlers.py` (0%),
+      `api/child_host_virtualization.py` (21%), `api/graylog_integration.py`
+      (24%), `api/antivirus_status.py` (26%), `api/third_party_repos.py` (24%),
+      `api/updates/os_upgrade_routes.py` (21%).  Ratchet raised 75 -> 80 in the
+      Makefile and both CI workflows.  `backend/startup/lifecycle.py` (429
+      uncovered, 5%) is deliberately SKIPPED: it is one 850-line `async def
+      lifespan`, so the line count is large but the testable surface is not.
+      Two real defects fell out of writing these tests, both fixed:
+        * `os_upgrade_routes.execute_os_upgrades` called `.to_dict()` on the
+          dict `create_command_message` already returns.  The AttributeError
+          was swallowed by the surrounding `except`, so EVERY OS upgrade
+          reported "Failed to queue OS upgrade command" and nothing was ever
+          enqueued.
+        * `airgap_run_tick._advance_queued_to_mirroring` guarded only the
+          per-target values of the snapshot-path map, not the empty map that
+          an unset `mirror_root_path` produces -- `any()` over no values is
+          False, so an unconfigured mirror root reached the engine with
+          nothing to rsync.
+      The remaining ~1.4 pts sit in a long flat tail (next largest is
+      `api/handlers/software_package_handlers.py` at 159 uncovered / 49%).
 
       NOTE the ratchet rule in `frontend/vite.config.ts`: the floor FOLLOWS
       measured coverage, never leads it.  Raising `lines` to 50 needs measured

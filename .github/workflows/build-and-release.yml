@@ -3284,12 +3284,43 @@ jobs:
 
           # Upload and build. Copr's API has transient connectivity blips
           # ("Unable to connect to .../api_3/"), so retry before failing.
+          # --nowait: return as soon as the SRPM is UPLOADED.
+          #
+          # Without it copr-cli WATCHES the build to completion, and this
+          # project builds 8 chroots (Fedora 41/42 + EPEL 9/10, each x86_64 and
+          # aarch64).  The aarch64 ones are emulated and slow, so the watch
+          # routinely outlived this job's timeout-minutes and GitHub killed the
+          # step with "Error: The operation was canceled" -- a RED workflow for
+          # a build that was fine and still running on Copr.  Seen on 3.5.1.30
+          # in both repos.  The old watch also could not report the outcome
+          # reliably (it timed out first), so nothing was lost by dropping it,
+          # and the success text below already told the reader to watch the URL.
           ok=0; n=0
           until [ "$n" -ge 5 ]; do
-            if copr-cli build "$COPR_USERNAME/sysmanage" "$SRPM_PATH"; then ok=1; break; fi
+            if copr-cli build --nowait "$COPR_USERNAME/sysmanage" "$SRPM_PATH" | tee /tmp/copr-build.log; then ok=1; break; fi
             n=$((n+1)); echo "copr-cli build attempt $n failed; retrying in 20s..."; sleep 20
           done
           [ "$ok" = 1 ] || { echo "::error::copr-cli build failed after 5 attempts"; exit 1; }
+
+          # Catch the failures that happen FAST -- a malformed spec or a bad
+          # SRPM fails in srpm-build within a couple of minutes -- without
+          # waiting on the slow chroots.  Still 'running'/'pending' at the end
+          # of this budget is the normal case and NOT an error; a terminal
+          # failed/cancelled state is.
+          BUILD_ID=$(grep -oE 'Created builds: [0-9]+' /tmp/copr-build.log | grep -oE '[0-9]+' | head -1)
+          if [ -n "$BUILD_ID" ]; then
+            echo "Watching build $BUILD_ID for early failures (up to 5 minutes)..."
+            n=0
+            while [ "$n" -lt 10 ]; do
+              STATE=$(copr-cli status "$BUILD_ID" 2>/dev/null | tr -d '[:space:]')
+              echo "  build $BUILD_ID: ${STATE:-unknown}"
+              case "$STATE" in
+                failed|cancelled) echo "::error::Copr build $BUILD_ID entered state '$STATE'"; exit 1 ;;
+                succeeded) echo "Copr build $BUILD_ID already succeeded."; break ;;
+              esac
+              n=$((n+1)); sleep 30
+            done
+          fi
 
           echo ""
           echo "=========================================="

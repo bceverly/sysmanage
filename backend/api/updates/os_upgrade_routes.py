@@ -314,7 +314,13 @@ async def execute_os_upgrades(  # NOSONAR
                 try:
                     queue_ops.enqueue_message(
                         message_type="command",
-                        message_data=command_message.to_dict(),
+                        # create_command_message already returns the dict form
+                        # (it calls CommandMessage.to_dict() itself).  Calling
+                        # .to_dict() again raised AttributeError, which the
+                        # except below swallowed into success=False -- so this
+                        # endpoint reported "Failed to queue OS upgrade
+                        # command" for every host and never enqueued anything.
+                        message_data=command_message,
                         direction=QueueDirection.OUTBOUND,
                         host_id=str(host.id),
                         db=session,
