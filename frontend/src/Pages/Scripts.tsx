@@ -244,18 +244,27 @@ const Scripts: React.FC = () => {
   // Check permissions
   useEffect(() => {
     const checkPermissions = async () => {
-      const [addScript, editScript, deleteScript, runScript, deleteExecution] = await Promise.all([
-        hasPermission(SecurityRoles.ADD_SCRIPT),
-        hasPermission(SecurityRoles.EDIT_SCRIPT),
-        hasPermission(SecurityRoles.DELETE_SCRIPT),
-        hasPermission(SecurityRoles.RUN_SCRIPT),
-        hasPermission(SecurityRoles.DELETE_SCRIPT_EXECUTION)
-      ]);
-      setCanAddScript(addScript);
-      setCanEditScript(editScript);
-      setCanDeleteScript(deleteScript);
-      setCanRunScript(runScript);
-      setCanDeleteScriptExecution(deleteExecution);
+      try {
+        const [addScript, editScript, deleteScript, runScript, deleteExecution] = await Promise.all([
+          hasPermission(SecurityRoles.ADD_SCRIPT),
+          hasPermission(SecurityRoles.EDIT_SCRIPT),
+          hasPermission(SecurityRoles.DELETE_SCRIPT),
+          hasPermission(SecurityRoles.RUN_SCRIPT),
+          hasPermission(SecurityRoles.DELETE_SCRIPT_EXECUTION)
+        ]);
+        setCanAddScript(addScript);
+        setCanEditScript(editScript);
+        setCanDeleteScript(deleteScript);
+        setCanRunScript(runScript);
+        setCanDeleteScriptExecution(deleteExecution);
+      } catch (error) {
+        // An expired session or a network blip used to leave this promise
+        // REJECTED and unhandled: the browser logged it, every permission flag
+        // stayed false, and the operator got a page of disabled buttons with
+        // nothing explaining why.  Fail closed -- deliberately keeping the
+        // flags false -- but say so.
+        console.error('Failed to resolve script permissions:', error);
+      }
     };
     checkPermissions();
   }, []);

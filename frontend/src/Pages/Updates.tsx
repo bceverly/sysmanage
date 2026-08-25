@@ -91,8 +91,16 @@ const Updates: React.FC = () => {
   // Check permissions
   useEffect(() => {
     const checkPermission = async () => {
-      const applySoftwareUpdate = await hasPermission(SecurityRoles.APPLY_SOFTWARE_UPDATE);
-      setCanApplySoftwareUpdate(applySoftwareUpdate);
+      try {
+        const applySoftwareUpdate = await hasPermission(SecurityRoles.APPLY_SOFTWARE_UPDATE);
+        setCanApplySoftwareUpdate(applySoftwareUpdate);
+      } catch (error) {
+        // Fail CLOSED and say so.  Without this an expired session rejected
+        // into an unhandled promise: the Apply button stayed disabled with no
+        // explanation, and the only trace was a browser console error.  Same
+        // fix as Pages/Scripts.tsx.
+        console.error('Failed to resolve software-update permission:', error);
+      }
     };
     checkPermission();
   }, []);

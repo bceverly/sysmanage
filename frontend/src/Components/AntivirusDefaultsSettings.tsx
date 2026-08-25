@@ -121,7 +121,13 @@ const AntivirusDefaultsSettings: React.FC = () => {
       const canManage = await hasPermission(SecurityRoles.MANAGE_ANTIVIRUS_DEFAULTS);
       setCanManageAntivirusDefaults(canManage);
     };
-    checkPermission();
+    // Fail CLOSED and say so.  Unguarded, an expired session or a network
+    // blip rejected here into an UNHANDLED promise: the permission flags
+    // stayed false, the buttons stayed disabled, and nothing on screen
+    // explained why.  Nine call sites had this shape; see ROADMAP Phase 19.
+    checkPermission().catch((error: unknown) => {
+      console.error('Failed to resolve permissions:', error);
+    });
   }, []);
 
   // Load defaults on component mount

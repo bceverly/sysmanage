@@ -150,7 +150,13 @@ const HostDefaultsSettings: React.FC = () => { // NOSONAR
       setCanRemovePM(removePMPerm);
       setCanViewPM(viewPMPerm);
     };
-    checkPermissions();
+    // Fail CLOSED and say so.  Unguarded, an expired session or a network
+    // blip rejected here into an UNHANDLED promise: the permission flags
+    // stayed false, the buttons stayed disabled, and nothing on screen
+    // explained why.  See ROADMAP Phase 19 -- 16 call sites had this shape.
+    checkPermissions().catch((error: unknown) => {
+      console.error('Failed to resolve permissions:', error);
+    });
   }, []);
 
   // Load OS options

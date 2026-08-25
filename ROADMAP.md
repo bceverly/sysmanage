@@ -6601,6 +6601,134 @@ Some platforms this phase reaches can't run the *full* agent: a native library m
 - [ ] **Coverage push (+5% backend; frontend ladder milestone):** frontend
       floors raised to **OSS 50% / license-server 55% / Pro+ components 50%**
       and the ratchet thresholds bumped to match
+
+      *(MEASURED 2026-08-25 — two of the four sub-targets are ALREADY MET, and
+      the numbers in this item are behind reality.  Actual state:
+
+      All figures are PERCENTAGES of line coverage unless noted -- "lines" is
+      the metric name (v8 and coverage.py each report statements / branches /
+      functions / lines), not a count.
+
+      | scope | floor today | measured today | this item's target | gap |
+      | :---- | ----------: | -------------: | -----------------: | --: |
+      | backend (sysmanage) | 75% (`--cov-fail-under=75`) | **79.94%** | ~85% | ~5 pts |
+      | OSS frontend | **50%** (raised) | **52.02%** (stmts 51.05%, funcs 43.67%, branches 33.06%) | floor 50% | **DONE** |
+      | Pro+ `src/**` | 87% | passes its 87% floor | 55% | already met |
+      | Pro+ `plugin-src/**` | 56% | passes its 56% floor | 50% | already met |
+
+      The Pro+ targets were written below the floors those scopes already
+      enforce, so nothing is owed there; only the backend and the OSS frontend
+      carry real work.  Suites are green: OSS 972 tests / 91 files, Pro+ 403
+      tests / 66 files.
+
+      NOTE the ratchet rule in `frontend/vite.config.ts`: the floor FOLLOWS
+      measured coverage, never leads it.  Raising `lines` to 50 needs measured
+      past ~52 first (its own comment says so), i.e. ~7 points, not ~5.
+
+      Where the OSS gap actually is — largest files still near zero, which is
+      where a push would pay:
+      `Settings.tsx` 0.3%, `Scripts.tsx` 0.3%, `Secrets.tsx` 0.5%,
+      `OSUpgrades.tsx` 0.9%, `HostDetail.tsx` 1.2%, `Sites.tsx` 3.2%,
+      `MapView.tsx` 6.1%, `SitesMap.tsx` 6.8%, `TabPanel.tsx` 0%.
+      These are page components; the Phase 16 push that moved lines 34 -> 44
+      did it with HostDetail HOOKS, so the same shape of work applies.
+
+      STARTED 2026-08-25: lines 45.24% -> **47.11%** (+1.87 pts) from two new
+      suites, 972 -> 1041 tests, all green, eslint clean:
+        * `hostDetailHelpers.test.ts` (50 tests) — the pure helpers.  Worth the
+          first pick: no rendering, no mocks beyond a `t` stub, and it pins
+          behaviour that is easy to break silently, e.g. gid 0 must read as
+          "GID: 0" and not fall through a truthiness check to "not available",
+          storage percentages clamp to 0..100 because a filesystem can report
+          used > capacity, and an unrecognised service status shows the RAW
+          value rather than "Unknown" (an operator can act on "degraded").
+        * `useHostRolesAndCerts.test.tsx` (19 tests) — the hook.  Covers the
+          optional-fetch degradation (certificate/role errors must not fail the
+          page), the 3s deferred refetch after a collection request, select-all
+          skipping roles with no `service_name` (selecting one would arm a
+          button that can only fail), and the 30s auto-refresh starting ONLY on
+          the server-roles tab of an active host and stopping when you leave it.
+
+      Then the Scripts cluster, 509 uncovered statements in one place:
+        * `scriptsHelpers.test.ts` (41 tests) — shell/platform catalogs and the
+          compatibility rules.  Pins that `enabled_shells` failing to parse is
+          NOT compatible (guessing "probably has bash" would dispatch a script
+          to a host that cannot run it), that an unknown OS normalises to linux
+          rather than to a mismatch, and the BSD shebang paths — `/bin/bash`
+          does not exist on the BSDs, and `ksh` lives in `/bin` on OpenBSD
+          because it is the default shell there.
+        * `Scripts.test.tsx` (8 tests) — the page, with the tab bodies stubbed
+          the way the MaintenanceWindows test stubs DataGrid.  0.3% -> 35.1%.
+
+      DEFECT FOUND AND FIXED while writing that page test: `checkPermissions()`
+      awaited `Promise.all` of five `hasPermission` calls with NO catch, so an
+      expired session or a network blip produced an UNHANDLED REJECTION and
+      left all five flags `false` — a page of disabled buttons with nothing
+      explaining why.  Now fails closed deliberately and logs.  Found only
+      because the test rejected that call; vitest exits 1 on an unhandled
+      rejection, so this would also have started failing CI the moment anyone
+      wrote such a test.
+
+      Also pinned (NOT blessed): `buildDataGridLocaleText` renders
+      "1-10 of of 10" when the total is unknown (`count === -1`) — it builds
+      `of <to>` and then prepends `of` again.  MUI's convention is
+      "1-10 of more than 10".  Left as-is with the test annotated, since it is
+      a visible-string change rather than coverage work.
+
+      Then the two biggest remaining pages:
+        * `Updates.test.tsx` (8 tests) — 0.4% -> 47.1%.  Pins that the URL key
+          is `?host=` while the state field is `host_id`: getting that wrong
+          silently falls back to the FLEET-wide list, which still looks like a
+          working page.  Also that "All systems are up to date" and "no updates
+          match your filters" are different facts and must not be conflated.
+        * `Settings.test.tsx` (9 tests) — 0.3% -> 47.8%.  The valuable logic
+          here is the license gate, which is a product boundary: an unlicensed
+          install must see strictly fewer rail items, a plugin tab whose
+          `moduleRequired` is unlicensed is hidden, and — separately — one whose
+          `featureFlag` is unlicensed is hidden even when the customer DOES own
+          the surrounding module.  Uses the real engine codes from
+          `settingsCategories`; a made-up module name unlocks nothing and the
+          test would pass by accident.
+
+      SECOND INSTANCE of the permission defect: `Updates.tsx` had the same
+      uncaught `checkPermission()` as `Scripts.tsx` — expired session -> unhandled
+      rejection -> Apply button disabled with no explanation.  Both now fail
+      closed and log.  Worth grepping the other pages for the same shape.
+
+      Finished with the last two pages:
+        * `ThirdPartyRepositories.test.tsx` (7 tests) — pins that an
+          UNPRIVILEGED host is refused BEFORE the request, not just in the UI:
+          an unprivileged agent cannot act on repositories, so asking produces a
+          confusing server error for nothing.
+        * `Secrets.test.tsx` (7 tests) — pins that `{ licensed: false }` is
+          recognised as a shape rather than treated as a secret, and that an
+          empty/failed secret-type lookup falls back to defaults instead of
+          leaving the Add dialog with no types (which reads as broken, not
+          degraded).
+
+      THIRD defect, found by the TPR test: `setDefaultRepositories(response.data
+      || [])`.  `|| []` only catches null/undefined — a truthy NON-ARRAY lands
+      in state and the next render does `defaultRepositories.map(...)`, throwing
+      and blanking the page.  Now `Array.isArray(...) ? ... : []`, with a
+      regression test.
+
+      AND the permission sweep was WRONG THE FIRST TIME.  The initial scan keyed
+      on `await hasPermission` appearing on a line and reported "0 remaining",
+      but `Secrets`, `Hosts`, `Users`, `Reports`, `UserDetail`,
+      `FirewallRolesSettings`, `FirewallStatusCard`, `HostDefaultsSettings` and
+      `UbuntuProSettings` wrap the calls in `Promise.all`, so the await is on a
+      different line.  Corrected scan found 9 more: **16 sites total**, all now
+      `.catch()`-guarded and failing closed.
+
+      RESULT: lines **45.24% -> 52.02%** (+6.78 pts), 972 -> **1121 tests**, 99
+      files, all green, eslint + tsc clean.  Floors RAISED in
+      `frontend/vite.config.ts` and verified green: lines 40 -> **50**,
+      statements 40 -> 48, functions 35 -> 40, branches 24 -> 30 — each ~2-3pts
+      under measured, per the rule that the floor follows coverage rather than
+      leading it.  Next rung documented in that file: past ~62% measured, then
+      `lines` to 60.
+
+      This half of the item is DONE; what remains is the backend +5%.)*
 - [x] **Audit ALL previous phases for stale open items.** Walk every phase below this one and check each unticked box against the actual codebase: tick what is genuinely done, and for what is not, say plainly whether it is real work, blocked on something external, or should be moved or dropped. Added 2026-08-04 after an audit found 8 items sitting open that had shipped long before — including whole i18n workstreams — which made the backlog look far larger than it was and hid which gaps were real.
       *(DONE 2026-08-12 — walked every phase below 19. Phases 20-28 are future work, not stale ticks. Exactly one genuinely open box existed below 19: Phase 12's komac verification, now PROVEN on tag v3.5.1.11 (komac took the update path 3.5.1.8 → 3.5.1.11 and opened microsoft/winget-pkgs#416454) and ticked. All 20 phases below 19 are clean.)*
 - [ ] **Phase exit gate** (see [Phase Exit Gate](#phase-exit-gate-mandatory-final-item-for-every-phase)): all tests pass · lint issue-free · no performance regressions · SonarQube scans issue-free

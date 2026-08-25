@@ -96,7 +96,13 @@ const UbuntuProSettings: React.FC = () => {
       const changeMasterKey = await hasPermission(SecurityRoles.CHANGE_UBUNTU_PRO_MASTER_KEY);
       setCanChangeUbuntuProMasterKey(changeMasterKey);
     };
-    checkPermission();
+    // Fail CLOSED and say so.  Unguarded, an expired session or a network
+    // blip rejected here into an UNHANDLED promise: the permission flags
+    // stayed false, the buttons stayed disabled, and nothing on screen
+    // explained why.  See ROADMAP Phase 19 -- 16 call sites had this shape.
+    checkPermission().catch((error: unknown) => {
+      console.error('Failed to resolve permissions:', error);
+    });
   }, []);
 
   // Load settings on component mount

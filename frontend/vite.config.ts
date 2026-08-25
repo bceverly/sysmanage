@@ -327,17 +327,28 @@ export default defineConfig({
       // statements/functions/branches trail on their own tracks (like the backend,
       // whose gate is also lines) and are ratcheted to just under measured.
       //
-      // Phase 16 (current): line floor 40 REACHED.  A HostDetail-hooks test push
+      // Phase 16: line floor 40 REACHED.  A HostDetail-hooks test push
       // (useChildHosts, useHostObservability, useHostLifecycle,
       // useHostAccessManagement, useHostSoftware, useHostUbuntuPro) lifted measured
       // lines 34.0% -> 44.2% / statements 33.1% -> 43.2% / functions 31.7% -> 37.2%
       // / branches 21.3% -> 26.3%.  Floors locked ~2-4pts under measured (green).
-      // Next phase: push measured lines past ~52% then raise the `lines` floor to 50.
+      //
+      // Phase 19 (current): line floor 50 REACHED, which was that plan's stated
+      // trigger ("push measured lines past ~52% then raise the `lines` floor to
+      // 50").  Measured 2026-08-25 at lines 52.02% / statements 51.05% /
+      // functions 43.67% / branches 33.06% over 1121 tests, up from 45.24 /
+      // 44.25 / 38.25 / 27.69.  The lift came from pure helpers and hooks first
+      // (hostDetailHelpers, useHostRolesAndCerts, scriptsHelpers) and then the
+      // five biggest untested pages -- Scripts, Settings, Updates,
+      // ThirdPartyRepositories, Secrets -- each with its heavy children stubbed.
+      // Floors again locked ~2-3pts under measured, and they FOLLOW coverage,
+      // never lead it.
+      // Next rung: push measured lines past ~62% then raise `lines` to 60.
       thresholds: {
-        lines: 40,
-        statements: 40,
-        functions: 35,
-        branches: 24,
+        lines: 50,
+        statements: 48,
+        functions: 40,
+        branches: 30,
       },
       exclude: [
         'node_modules/',

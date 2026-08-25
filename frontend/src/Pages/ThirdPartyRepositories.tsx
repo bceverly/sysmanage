@@ -197,7 +197,13 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             setCanDisable(disablePerm);
             setCanViewDefaults(viewDefaultsPerm);
         };
-        loadPermissions();
+        // Fail CLOSED and say so.  Unguarded, an expired session or a network
+        // blip rejected here into an UNHANDLED promise: the permission flags
+        // stayed false, the buttons stayed disabled, and nothing on screen
+        // explained why.  Nine call sites had this shape; see ROADMAP Phase 19.
+        loadPermissions().catch((error: unknown) => {
+          console.error('Failed to resolve permissions:', error);
+        });
     }, []);
 
     // Extract OS name for API call (e.g., "Ubuntu" from "Ubuntu 25.04" or "Linux Ubuntu 25.04")
@@ -228,7 +234,12 @@ const ThirdPartyRepositories: React.FC<ThirdPartyRepositoriesProps> = ({
             const response = await axiosInstance.get(
                 `/api/v1/default-repositories/by-os/${encodeURIComponent(extractedOsName)}`
             );
-            setDefaultRepositories(response.data || []);
+            // `|| []` only catches null/undefined -- a non-array object is
+            // TRUTHY, lands in state, and then `defaultRepositories.map(...)`
+            // throws and takes the whole page down with a blank screen.  Any
+            // shape that is not an array is treated as "no defaults", which is
+            // what the catch below already does for a hard failure.
+            setDefaultRepositories(Array.isArray(response.data) ? response.data : []);
         } catch {
             // Silently fail - defaults are optional
             setDefaultRepositories([]);

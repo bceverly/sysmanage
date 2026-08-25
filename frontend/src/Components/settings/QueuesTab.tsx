@@ -76,7 +76,13 @@ const QueuesTab: React.FC = () => {
     const checkPermission = async () => {
       setCanDeleteQueueMessage(await hasPermission(SecurityRoles.DELETE_QUEUE_MESSAGE));
     };
-    checkPermission();
+    // Fail CLOSED and say so.  Unguarded, an expired session or a network
+    // blip rejected here into an UNHANDLED promise: the permission flags
+    // stayed false, the buttons stayed disabled, and nothing on screen
+    // explained why.  Nine call sites had this shape; see ROADMAP Phase 19.
+    checkPermission().catch((error: unknown) => {
+      console.error('Failed to resolve permissions:', error);
+    });
   }, []);
 
   const loadQueueMessages = useCallback(async () => {

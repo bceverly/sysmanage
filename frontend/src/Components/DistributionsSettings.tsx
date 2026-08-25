@@ -217,7 +217,13 @@ const DistributionsSettings: React.FC = () => {
             const canConfig = await hasPermission(SecurityRoles.CONFIGURE_CHILD_HOST);
             setCanConfigure(canConfig);
         };
-        checkPermissions();
+        // Fail CLOSED and say so.  Unguarded, an expired session or a network
+        // blip rejected here into an UNHANDLED promise: the permission flags
+        // stayed false, the buttons stayed disabled, and nothing on screen
+        // explained why.  Nine call sites had this shape; see ROADMAP Phase 19.
+        checkPermissions().catch((error: unknown) => {
+          console.error('Failed to resolve permissions:', error);
+        });
     }, []);
 
     // Resolve whether VM (virtualization_engine) distributions should be shown.

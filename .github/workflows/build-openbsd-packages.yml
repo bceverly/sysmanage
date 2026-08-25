@@ -85,7 +85,15 @@ jobs:
 
             # Fetch the 7.9 release ports tree (for the dep ports + the port
             # infrastructure that generates distinfo).
-            ftp -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/7.9/ports.tar.gz"
+            # -4 is LOAD-BEARING.  ftp.openbsd.org publishes both A
+            # (199.185.178.81) and AAAA (2620:3d:c000:178::81).  QEMU's
+            # user-mode network does not route IPv6, so ftp(1) resolving the
+            # AAAA first gets EHOSTUNREACH and prints exactly:
+            #     ftp: connect: No route to host
+            # which reads like the mirror is down rather than like the VM has no
+            # v6 route.  Forcing IPv4 skips the address that can never work.
+            # Broke the 7.8 and 7.9 release jobs on 2026-08-25.
+            ftp -4 -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/7.9/ports.tar.gz"
             tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
 
             # 1. Build the complete distfile from the synced source.
@@ -162,7 +170,7 @@ jobs:
             export FETCH_PACKAGES=
 
             # 7.x release ports tree.
-            ftp -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
+            ftp -4 -o /tmp/ports.tar.gz "https://ftp.openbsd.org/pub/OpenBSD/${OPENBSD_VERSION}/ports.tar.gz"
             tar xzf /tmp/ports.tar.gz -C /usr && rm /tmp/ports.tar.gz
 
             # Stage the port + the pre-built distinfo (do NOT regenerate it —
