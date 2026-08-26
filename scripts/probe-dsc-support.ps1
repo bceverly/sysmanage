@@ -138,19 +138,33 @@ Write-Output "dsc_v3_resource_list=$dscV3List"
 # --- DSC v3: does it actually APPLY state with WinRM off? --------------------
 # Listing resources only proves the engine loads.  This does the round trip.
 #
-# How input reaches dsc.exe is itself a finding: Windows PowerShell 5.1 does not
-# escape embedded double quotes when passing arguments to native executables, so
-# `--input '{"a":"b"}'` is unreliable.  Try stdin first, fall back to --input,
-# and REPORT which worked -- the executor has to pick one deliberately.
+# How input reaches dsc.exe is itself a finding.  `dsc resource get --help`
+# shows `-i/--input <INPUT>` and `-f/--file <FILE>`, where FILE of '-' means
+# STDIN.  Passing JSON as an --input ARGUMENT is unusable from Windows
+# PowerShell 5.1: it strips the embedded double quotes, dsc then falls back to
+# YAML and dies on the second colon ("found unexpected ':'").  Confirmed on
+# hardware 2026-08-26.
+#
+# So: `--file -` (stdin) first, temp file second.  Stdin is what the executor
+# should use -- config content can carry secrets, and writing those to a temp
+# file on disk is strictly worse than piping them.
+#
+# NOTE this is a POWERSHELL artifact, not a DSC one.  The real executor invokes
+# dsc.exe from Python via subprocess with an argv LIST, which never goes through
+# a shell and so cannot suffer this mangling.
 $script:DscInputMode = 'unknown'
 function Invoke-DscV3 { param([string]$Op, [string]$Resource, [string]$Json)
   if ($script:DscInputMode -eq 'unknown' -or $script:DscInputMode -eq 'stdin') {
-    $o = ($Json | & dsc.exe resource $Op --resource $Resource 2>&1 | Out-String)
+    $o = ($Json | & dsc.exe resource $Op --resource $Resource --file - 2>&1 | Out-String)
     if ($LASTEXITCODE -eq 0) { $script:DscInputMode = 'stdin'; return @{ ok = $true; out = $o } }
   }
-  $o = (& dsc.exe resource $Op --resource $Resource --input $Json 2>&1 | Out-String)
-  if ($LASTEXITCODE -eq 0) { $script:DscInputMode = '--input'; return @{ ok = $true; out = $o } }
-  return @{ ok = $false; out = $o }
+  $tf = Join-Path ([System.IO.Path]::GetTempPath()) ("sm-dsc-" + [guid]::NewGuid().ToString('N').Substring(0,8) + '.json')
+  try {
+    Set-Content -Path $tf -Value $Json -Encoding UTF8
+    $o = (& dsc.exe resource $Op --resource $Resource --file $tf 2>&1 | Out-String)
+    if ($LASTEXITCODE -eq 0) { $script:DscInputMode = 'tempfile'; return @{ ok = $true; out = $o } }
+    return @{ ok = $false; out = $o }
+  } finally { Remove-Item -Force $tf -ErrorAction SilentlyContinue }
 }
 
 $v3Echo = 'n/a'

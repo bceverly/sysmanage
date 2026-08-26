@@ -7326,6 +7326,22 @@ any engine code, and it moved two decisions:
     It also gives Windows the **same shape as POSIX**: the agent subprocesses a
     binary and reads JSON off stdout, so one result-ingestion path serves both.
 
+    **Input plumbing is a design constraint, not a detail.** `dsc` accepts
+    `-i/--input <JSON>` or `-f/--file <PATH>` (with `-` meaning stdin). Passing
+    JSON as an `--input` ARGUMENT is unusable from Windows PowerShell 5.1: it
+    strips the embedded double quotes, dsc falls back to YAML and dies on the
+    second colon. The executor therefore feeds dsc over **stdin** (`--file -`),
+    never as an argument and never via a temp file — config content can carry
+    secrets, and putting those on disk is strictly worse than piping them. The
+    agent is Python and invokes dsc with an argv list through `subprocess`, so
+    it never goes through a shell and cannot suffer the mangling that broke the
+    PowerShell probe.
+
+    Also: `Microsoft.Windows/Registry` advertises capabilities `gs--d--` — get,
+    set, delete, but **no test**. So the executor cannot assume a `test`
+    capability exists per resource and must fall back to get-compare-get for
+    idempotency, unlike Ansible where the `changed` flag is universal.
+
     Consequences to settle: (a) do we vendor `dsc.exe` in the MSI or require it
     as a prerequisite — vendoring keeps air-gap installs working, which argues
     for it; (b) PowerShell 7 is NOT present on that box (`pwsh=none`), so the
